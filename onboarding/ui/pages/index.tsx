@@ -6,6 +6,7 @@ import UserBoard from '../containers/UserBoard'
 
 interface Props {
   onboardingApiHost: string
+  etherscanUrl: string
 }
 
 const App: React.FC<Props> = (props: Props) => {
@@ -26,7 +27,7 @@ const App: React.FC<Props> = (props: Props) => {
   return (
     <Wrapper>
       <Header onboardingApiHost={props.onboardingApiHost} />
-      <UserBoard users={agreementMap} onboardingApiHost={props.onboardingApiHost} />
+      <UserBoard users={agreementMap} onboardingApiHost={props.onboardingApiHost} etherscanUrl={props.etherscanUrl} />
     </Wrapper>
   )
 }
@@ -35,6 +36,7 @@ export async function getStaticProps() {
   return {
     props: {
       onboardingApiHost: process.env.ONBOARDING_API_HOST,
+      etherscanUrl: process.env.ETHERSCAN_URL,
     },
   }
 }

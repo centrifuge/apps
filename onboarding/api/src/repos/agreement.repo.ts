@@ -55,13 +55,14 @@ export class AgreementRepo {
     return (agreements as unknown) as Agreement[]
   }
 
-  async getByUserIds(userIds: string[]): Promise<Agreement[]> {
+  async getByUserIds(userIds: string[], poolId: string): Promise<Agreement[]> {
     if (userIds.length === 0) return []
 
     const agreements = await this.db.sql`
       select *
       from agreements
       where agreements.user_id in (${userIds})
+      and agreements.pool_id = ${poolId}
     `
 
     return (agreements as unknown) as Agreement[]

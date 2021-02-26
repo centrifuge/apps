@@ -2429,6 +2429,7 @@ __metadata:
     next: ^10.0.0
     react: 17.0.1
     react-dom: 17.0.1
+    react-hotkeys-hook: ^3.1.0
     styled-components: ^5.2.1
     typescript: ^4.1.5
   languageName: unknown
@@ -16488,6 +16489,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"hotkeys-js@npm:3.8.2":
+  version: 3.8.2
+  resolution: "hotkeys-js@npm:3.8.2"
+  checksum: d0de84d96bfd303140340a31b4da70ac71243fae25af7cc834b1661341612afb00d3d93aaf697773c81f2955fd87d2d2ad6d51cd345cb7cbccec50e9191018d6
+  languageName: node
+  linkType: hard
+
 "hpack.js@npm:^2.1.6":
   version: 2.1.6
   resolution: "hpack.js@npm:2.1.6"
@@ -25110,6 +25118,18 @@ fsevents@^1.2.7:
   version: 2.0.4
   resolution: "react-fast-compare@npm:2.0.4"
   checksum: 4e4bfc3597414a36ee35977259012fff30c4f13a0e5dcabf958e91991bef8e9a3faee9dd666cfbdb0c2a0f0ddaf242ac2912054caa956a793c4cdff274dc5aec
+  languageName: node
+  linkType: hard
+
+"react-hotkeys-hook@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "react-hotkeys-hook@npm:3.1.0"
+  dependencies:
+    hotkeys-js: 3.8.2
+  peerDependencies:
+    react: ">=16.8.1"
+    react-dom: ">=16.8.1"
+  checksum: 30975993ff38df9ab39bf041890f7f8a2778a7d52b05bf3e636e4881982343e7ab88f46d6d60df017764df6b555127ce0fa79fd4bfb23bdee8b257ee79e8e076
   languageName: node
   linkType: hard
 

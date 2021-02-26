@@ -1,38 +1,35 @@
-import { AgreementMap } from '@centrifuge/onboarding-api/src/controllers/user.controller'
-import { Agreement } from '@centrifuge/onboarding-api/src/repos/agreement.repo'
-import { UserWithKyc } from '@centrifuge/onboarding-api/src/repos/user.repo'
+import { AgreementMap, UserWithRelations } from '@centrifuge/onboarding-api/src/controllers/user.controller'
 import { Box } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
 import UserModal from '../../components/UserModal'
-import { useKeyboardEvent } from '../../utils/hooks'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 interface Props {
   onboardingApiHost: string
+  etherscanUrl: string
   users: AgreementMap
 }
 
 const UserBoard: React.FC<Props> = (props: Props) => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
-  const [activeUser, setActiveUser] = React.useState(undefined as UserWithKyc | undefined)
-  const [activeAgreements, setActiveAgreements] = React.useState([] as Agreement[])
+  const [activeUser, setActiveUser] = React.useState(undefined as UserWithRelations | undefined)
 
-  const [focusedCol, setFocusedCol] = React.useState('Interested')
+  const [focusedCol, setFocusedCol] = React.useState(0)
   const [focusedIndex, setFocusedIndex] = React.useState(0)
 
-  const openModal = (user: UserWithKyc, agreements: Agreement[], col: string, index: number) => {
-    setFocusedCol(col)
+  const openModal = (user: UserWithRelations, colIndex: number, index: number) => {
+    setFocusedCol(colIndex)
     setFocusedIndex(index)
 
     setActiveUser(user)
-    setActiveAgreements(agreements)
     setModalIsOpen(true)
   }
   const closeModal = () => {
     setModalIsOpen(false)
   }
 
-  const sortInvestors = (col: string, investors: { agreements: Agreement[]; user: UserWithKyc }[]) => {
+  const sortInvestors = (col: string, investors: UserWithRelations[]) => {
     return investors.sort((a, b) => {
       if (col === 'Whitelisted')
         return new Date(b.agreements[0].counterSignedAt).getTime() - new Date(a.agreements[0].counterSignedAt).getTime()
@@ -44,40 +41,91 @@ const UserBoard: React.FC<Props> = (props: Props) => {
     })
   }
 
-  useKeyboardEvent('ArrowDown', () => {
-    console.log(`${focusedIndex} => ${focusedIndex + 1}`)
-    setFocusedIndex(focusedIndex + 1)
-  })
+  useHotkeys(
+    'enter',
+    () => {
+      if (!modalIsOpen) {
+        openModal(Object.values(props.users)[focusedCol][focusedIndex], focusedCol, focusedIndex)
+      }
+    },
+    [props.users, modalIsOpen, focusedIndex, focusedCol]
+  )
+
+  useHotkeys(
+    'up',
+    () => {
+      if (!modalIsOpen && focusedIndex > 0) {
+        setFocusedIndex(focusedIndex - 1)
+      }
+    },
+    [props.users, modalIsOpen, focusedIndex, focusedCol]
+  )
+
+  useHotkeys(
+    'down',
+    () => {
+      if (!modalIsOpen && focusedIndex < Object.values(props.users)[focusedCol].length - 1) {
+        setFocusedIndex(focusedIndex + 1)
+      }
+    },
+    [props.users, modalIsOpen, focusedIndex, focusedCol]
+  )
+
+  useHotkeys(
+    'left',
+    () => {
+      if (!modalIsOpen && focusedCol > 0) {
+        setFocusedCol(focusedCol - 1)
+      }
+    },
+    [props.users, modalIsOpen, focusedCol, focusedCol]
+  )
+
+  useHotkeys(
+    'right',
+    () => {
+      if (!modalIsOpen && focusedCol < Object.keys(props.users).length - 1) {
+        const newCol = focusedCol + 1
+        setFocusedCol(newCol)
+
+        if (focusedIndex > Object.values(props.users)[newCol].length - 1) {
+          setFocusedIndex(Object.values(props.users)[newCol].length - 1)
+        }
+      }
+    },
+    [props.users, modalIsOpen, focusedCol, focusedCol]
+  )
 
   return (
     <Content>
       <Columns>
-        {Object.keys(props.users).map((col: string) => (
+        {Object.keys(props.users).map((col: string, colIndex: number) => (
           <Column key={col}>
             <ColumnTitle>
               <div>{col}</div> <ColMetric>{props.users[col].length}</ColMetric>
             </ColumnTitle>
             <Cards>
-              {sortInvestors(col, props.users[col]).map(({ user, agreements }, index: number) => (
+              {sortInvestors(col, props.users[col]).map((user: UserWithRelations, index: number) => (
                 <Card
-                  key={user.id}
+                  key={user.user.id}
                   pad="small"
                   elevation="small"
                   round="xsmall"
                   margin={{ bottom: 'medium' }}
                   background="white"
-                  onClick={() => openModal(user, agreements, col, index)}
-                  focused={focusedCol === col && focusedIndex === index}
+                  onClick={() => openModal(user, colIndex, index)}
+                  focusIndicator={false}
+                  focused={focusedCol === colIndex && focusedIndex === index}
                 >
                   <Flag>
-                    <img src={`/flags/${user.countryCode}.svg`} />
+                    <img src={`/flags/${user.user.countryCode}.svg`} />
                   </Flag>
-                  <InvestorName>{user.entityName || user.fullName}</InvestorName>
+                  <InvestorName>{user.user.entityName || user.user.fullName}</InvestorName>
 
                   <TimeAgo>
-                    {col === 'Awaiting counter-signature' && timeAgo(agreements[0].signedAt)}
-                    {col === 'Whitelisted' && timeAgo(agreements[0].counterSignedAt)}
-                    {user.createdAt && col === 'Interested' && timeAgo(user.createdAt)}
+                    {col === 'Awaiting counter-signature' && timeAgo(user.agreements[0].signedAt)}
+                    {col === 'Whitelisted' && timeAgo(user.agreements[0].counterSignedAt)}
+                    {user.user.createdAt && col === 'Interested' && timeAgo(user.user.createdAt)}
                   </TimeAgo>
                 </Card>
               ))}
@@ -87,7 +135,7 @@ const UserBoard: React.FC<Props> = (props: Props) => {
       </Columns>
 
       {activeUser && (
-        <UserModal isOpen={modalIsOpen} close={closeModal} user={activeUser} agreements={activeAgreements} />
+        <UserModal isOpen={modalIsOpen} close={closeModal} user={activeUser} etherscanUrl={props.etherscanUrl} />
       )}
     </Content>
   )
@@ -142,6 +190,10 @@ const Card = styled(Box)<{ focused?: boolean }>`
   cursor: pointer;
   margin-bottom: 10px;
   box-shadow: ${(props) => (props.focused ? '0 0 2px 2px #2762ff' : '0')};
+
+  &:focus {
+    box-shadow: ${(props) => (props.focused ? '0 0 2px 2px #2762ff' : '0')};
+  }
 
   &:hover {
     transform: scale(1.01);
