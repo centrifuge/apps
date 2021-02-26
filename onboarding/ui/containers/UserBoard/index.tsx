@@ -192,7 +192,7 @@ const Card = styled(Box)<{ focused?: boolean }>`
   box-shadow: ${(props) => (props.focused ? '0 0 2px 2px #2762ff' : '0')};
 
   &:focus {
-    box-shadow: ${(props) => (props.focused ? '0 0 2px 2px #2762ff' : '0')};
+    box-shadow: ${(props) => (props.focused ? '0 0 2px 2px #2762ff' : '0')} !important;
   }
 
   &:hover {
