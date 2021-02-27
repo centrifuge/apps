@@ -31,7 +31,7 @@ create_contracts_npm () {
 PROXY_REGISTRY=$(create_contract tinlake-proxy ProxyRegistry master)
 POOLS_REGISTRY=$(create_contract tinlake-pools-cli PoolRegistry main)
 TINLAKE_CLAIM_RAD=$(create_contract tinlake-claim-rad TinlakeClaimRAD main)
-TINLAKE_ACTIONS=$(create_contract tinlake-actions Actions fix/rollback)
+ACTIONS=$(create_contract tinlake-actions Actions fix/rollback)
 
 # deploy contracts using truffle migrate
 create_contracts_npm centrifuge-ethereum-contracts parity
@@ -49,19 +49,19 @@ IDENTITY_FACTORY=$(jq -r '.networks."17".address' centrifuge-ethereum-contracts/
 # deploy nft registry contract using the address from centrifuge-ethereum-contract
 NFT_REGISTRY=$(create_contract privacy-enabled-erc721 NFT master \"Name\" \"SYM\" $ANCHOR $IDENTITY $IDENTITY_FACTORY)
 
+cd /app/tinlake-deploy
+
+# # deploy contents of tinlake-deploy using test scripts
+git submodule update --init --recursive >/dev/null 2>&1
+make build
+make test-config
+make deploy
+
 echo "PROXY_REGISTRY : " $PROXY_REGISTRY
 echo "POOLS_REGISTRY : " $POOLS_REGISTRY
 echo "TINLAKE_CLAIM_RAD : " $TINLAKE_CLAIM_RAD
-echo "TINLAKE_ACTIONS : " $TINLAKE_ACTIONS
+echo "ACTIONS : " $ACTIONS
 echo "ANCHOR : " $ANCHOR
 echo "IDENTITY_FACTORY : " $IDENTITY_FACTORY
 echo "IDENTITY : " $IDENTITY
 echo "NFT_REGISTRY : " $NFT_REGISTRY
-
-cd /app/tinlake-deploy
-
-# # deploy contents of tinlake-deploy using test scripts
-git submodule update --init --recursive
-make build
-make test-config
-make deploy
