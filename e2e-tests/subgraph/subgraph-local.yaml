@@ -7,7 +7,7 @@ dataSources:
     name: Block
     network: ${NETWORK_NAME}
     source:
-      address: "0x5e2C2b6E5EE94537Ca9D28C06e8536ceE56B6355"
+      address: "0x8BB0C7262268A3CeA5ac3906984728A78230a212"
       abi: Pile
       startBlock: 0
     mapping:
@@ -47,7 +47,7 @@ dataSources:
     name: ProxyRegistry
     network: ${NETWORK_NAME}
     source:
-      address: "0x1A04a08EF23226742687b3A28894A35386A96c2C"
+      address: "0x45de42e18F4688A82Fe01c76d305c14055F01EB9"
       abi: ProxyRegistry
       startBlock: 0
     mapping:
@@ -70,7 +70,7 @@ dataSources:
     name: PoolRegistry
     network: ${NETWORK_NAME}
     source:
-      address: "0xE5e9035A1bd25791bf119476217C433C1c80f059"
+      address: "0xCF396Ff8f2CcF74E88b4dF60AB5dc20902d91553"
       abi: PoolRegistry
       startBlock: 0
     mapping:
