@@ -2,7 +2,7 @@ import { TokenInput } from '@centrifuge/axis-token-input'
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
-import { Box, Button } from 'grommet'
+import { Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
@@ -98,10 +98,9 @@ const InvestCard: React.FC<Props> = (props: Props) => {
 
   return (
     <Box>
-      <Description margin={{ top: 'small' }}>
-        Please set the amount of DAI you want to invest into {token} on Tinlake. Your DAI will be locked until the end
-        of the epoch, at which point your order will be executed. You can collect your {token} in the next epoch.
-      </Description>
+      <Heading level="6" margin={{ top: 'medium', bottom: 'xsmall' }}>
+        Enter your investment amount below
+      </Heading>
       <TokenInput
         token="DAI"
         value={daiValue}

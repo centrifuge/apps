@@ -222,7 +222,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             {card === 'invest' && <InvestCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
             {card === 'redeem' && <RedeemCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
 
-            {trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
+            {card === 'home' && trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
               <AddWalletLink onClick={addToWallet}>Display {trancheData?.token} in your wallet</AddWalletLink>
             )}
           </>

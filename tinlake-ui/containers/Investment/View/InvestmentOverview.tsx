@@ -84,7 +84,13 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
         >
           <Heading level="4" margin={'0'} style={{ textAlign: 'center' }}>
             <LoadingValue done={poolData?.netAssetValue !== undefined}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))} DAI
+              {addThousandsSeparators(
+                toPrecision(
+                  baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18),
+                  0
+                )
+              )}{' '}
+              DAI
             </LoadingValue>
           </Heading>
           <Heading level="5" margin={{ top: '0', bottom: '0' }} style={{ textAlign: 'center' }}>
