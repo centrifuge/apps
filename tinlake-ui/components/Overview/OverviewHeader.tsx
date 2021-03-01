@@ -53,11 +53,11 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
         <Heading level="4">{minJuniorRatio && Math.round(minJuniorRatio * 10000) / 100} %</Heading>
         <Type>Risk Protection</Type>
       </HeaderBox>
-      <HeaderBox pad={{ top: '8px' }}>
+      <HeaderBox pad={{ top: '8px' }} style={{ borderRight: 'none' }}>
         <Heading level="4">60-90 days</Heading>
         <Type>Average Maturity</Type>
       </HeaderBox>
-      <HeaderBox pad={{ top: '20px', left: 'small' }}>
+      <HeaderBox pad={{ top: '20px', left: 'small' }} style={{ borderRight: 'none' }}>
         {'addresses' in props.selectedPool &&
         config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
           <>
@@ -92,11 +92,6 @@ const HeaderBox = styled(Box)<{ width?: string }>`
   padding-right: 20px;
   width: ${(props) => props.width || '200px'};
 
-  &:last-child,
-  &:nth-child(4) {
-    border-right: 0;
-  }
-
   h3,
   h4,
   h5,
@@ -106,8 +101,10 @@ const HeaderBox = styled(Box)<{ width?: string }>`
 `
 
 const Type = styled.div`
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 14px;
   color: #979797;
-  font-size: 12px;
 `
 
 const TokenLogo = styled.img`
