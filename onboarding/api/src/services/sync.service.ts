@@ -43,7 +43,9 @@ export class SyncService {
       )
 
       if (
-        (investor && investor.verificationStatus !== kyc.status) ||
+        (investor &&
+          investor.verificationStatus !== kyc.status &&
+          !(investor.verificationStatus === 'manual-review' && kyc.status === 'processing')) ||
         investor.domainInvestorDetails.isAccredited !== kyc.accredited
       ) {
         this.logger.debug(

@@ -73,6 +73,7 @@ export class SecuritizeService {
       const newDigest = await this.refreshAccessToken(digest.refreshToken)
       if (!newDigest) {
         this.logger.warn(`Failed to refresh access token for ${userId}`)
+        // TODO: remove digest from db and stop trying to retrieve this investor
         return undefined
       }
 

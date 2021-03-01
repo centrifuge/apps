@@ -15,7 +15,7 @@ export class PoolService {
   private readonly logger = new Logger(PoolService.name)
   private pools: { [key: string]: Pool } = {}
 
-  provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+  provider = new FastJsonRpcProvider(config.rpcUrl)
   signer = new ethers.Wallet(config.signerPrivateKey).connect(this.provider)
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
 
@@ -127,6 +127,13 @@ export class PoolService {
     } else {
       this.logger.log(`${address.address} is not a member of ${pool.metadata.name} - ${tranche}`)
     }
+  }
+}
+
+class FastJsonRpcProvider extends ethers.providers.JsonRpcProvider {
+  async getGasPrice() {
+    const gasPrice = await super.getGasPrice()
+    return gasPrice.add(gasPrice.div(2)) // add 50% to the gas price
   }
 }
 
