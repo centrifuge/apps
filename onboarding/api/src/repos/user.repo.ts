@@ -77,14 +77,14 @@ export class UserRepo {
   async update(
     userId: string,
     email: string,
-    countryCode: string,
+    countryCode?: string,
     fullName?: string,
     entityName?: string
   ): Promise<User | undefined> {
     const [updatedUser] = await this.db.sql`
       update users
       set email = ${email},
-      country_code = ${countryCode},
+      country_code = ${countryCode || ''},
       full_name = ${fullName || ''},
       entity_name = ${entityName || ''}
       where id = ${userId}

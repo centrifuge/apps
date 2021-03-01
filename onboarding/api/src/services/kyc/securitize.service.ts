@@ -119,7 +119,7 @@ export interface Investor {
   language: string
   email: string
   verificationStatus: 'none' | 'processing' | 'updates-required' | 'verified' | 'manual-review' | 'rejected' | 'expired'
-  details: {
+  details?: {
     firstName?: string
     middleName?: string
     lastName?: string

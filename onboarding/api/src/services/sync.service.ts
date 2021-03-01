@@ -37,7 +37,7 @@ export class SyncService {
       await this.userRepo.update(
         kyc.userId,
         investor.email,
-        investor.details.address.countryCode,
+        investor.details?.address?.countryCode,
         investor.domainInvestorDetails?.investorFullName,
         investor.domainInvestorDetails?.entityName
       )
