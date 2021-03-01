@@ -43,7 +43,6 @@ export class AddressController {
       let status: KycStatusLabel = kyc.status
 
       const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
-      console.log(JSON.stringify(investor))
       if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) {
         if (!investor) {
           return {

@@ -16,7 +16,7 @@ export class UserController {
   // TODO: add authentication to this endpoint
   @Get('users/:poolId')
   async getUsers(@Param() params) {
-    // return {}
+    return {}
 
     const pool = this.poolService.get(params.poolId)
     if (!pool) throw new NotFoundException(`Pool ${params.poolId} not found`)
