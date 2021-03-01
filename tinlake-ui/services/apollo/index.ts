@@ -408,13 +408,14 @@ class Apollo {
     return assetData
   }
 
+  // TODO: expand this to work beyond ~3 years (1000 days), if needed
   async getPoolsDailyData() {
     let result
     try {
       result = await this.client.query({
         query: gql`
           {
-            days(orderBy: id, orderDirection: desc, first: 90) {
+            days(orderBy: id, orderDirection: desc, first: 1000) {
               id
               assetValue
               reserve
@@ -432,12 +433,7 @@ class Apollo {
       .map((item: any) => {
         return {
           day: Number(item.id),
-          poolValue: parseFloat(
-            new BN(item.assetValue)
-              .add(new BN(item.reserve))
-              .div(UintBase)
-              .toString()
-          ),
+          poolValue: parseFloat(new BN(item.assetValue).add(new BN(item.reserve)).div(UintBase).toString()),
         }
       })
       .sort((a: PoolsDailyData, b: PoolsDailyData) => a.day - b.day)

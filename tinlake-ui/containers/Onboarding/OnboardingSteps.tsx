@@ -96,7 +96,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
               <>
                 {onboarding.data?.linkedAddresses && onboarding.data?.linkedAddresses.length > 0 && (
                   <ExplainerCard margin={{ bottom: 'medium' }}>
-                    This account is linked to {onboarding.data?.linkedAddresses.join(', ')}.
+                    Your Securitize account is linked to {onboarding.data?.linkedAddresses.join(', ')} and {address}.
                   </ExplainerCard>
                 )}
 
