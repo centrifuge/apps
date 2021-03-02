@@ -29,7 +29,7 @@ interface PoolMetadata {
 }
 
 export interface BasePool {
-  network: 'mainnet' | 'kovan'
+  network: 'mainnet' | 'kovan' | 'local'
   version: 2 | 3
   metadata: PoolMetadata
 }
@@ -83,7 +83,7 @@ interface Config {
   transactionTimeout: number
   tinlakeDataBackendUrl: string
   isDemo: boolean
-  network: 'Mainnet' | 'Kovan'
+  network: 'Mainnet' | 'Kovan' | 'Local'
   portisApiKey: string
   gasLimit: number
   onboardAPIHost: string
@@ -259,12 +259,10 @@ const config: Config = {
   rpcUrl: yup
     .string()
     .required('NEXT_PUBLIC_RPC_URL is required')
-    .url()
     .validateSync(process.env.NEXT_PUBLIC_RPC_URL),
   ipfsGateway: yup
     .string()
     .required('NEXT_PUBLIC_IPFS_GATEWAY is required')
-    .url()
     .validateSync(process.env.NEXT_PUBLIC_IPFS_GATEWAY),
   etherscanUrl: yup
     .string()
@@ -279,7 +277,6 @@ const config: Config = {
   tinlakeDataBackendUrl: yup
     .string()
     .required('NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL is required')
-    .url()
     .validateSync(process.env.NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL),
   isDemo:
     yup
@@ -287,9 +284,9 @@ const config: Config = {
       .required('NEXT_PUBLIC_ENV is required')
       .validateSync(process.env.NEXT_PUBLIC_ENV) === 'demo',
   network: yup
-    .mixed<'Mainnet' | 'Kovan'>()
+    .mixed<'Mainnet' | 'Kovan' | 'Local'>()
     .required('NEXT_PUBLIC_RPC_URL is required')
-    .oneOf(['Mainnet', 'Kovan'])
+    .oneOf(['Mainnet', 'Kovan', 'Local'])
     .validateSync(networkUrlToName(process.env.NEXT_PUBLIC_RPC_URL || '')),
   portisApiKey: yup
     .string()
