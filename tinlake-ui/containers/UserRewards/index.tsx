@@ -5,7 +5,6 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
-import Alert from '../../components/Alert'
 import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import PageTitle from '../../components/PageTitle'
@@ -14,7 +13,7 @@ import { AuthState, ensureAuthed } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { PortfolioState } from '../../ducks/portfolio'
 import { maybeLoadRewards, RewardsState } from '../../ducks/rewards'
-import { maybeLoadUserRewards, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
+import { maybeLoadUserRewards, UserRewardsData, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { shortAddr } from '../../utils/shortAddr'
@@ -150,43 +149,54 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               </>
             ))}
 
+          {debug && (
+            <Card margin={{ bottom: 'large' }} background="neutral-3">
+              <Box pad="medium">
+                <h3>Debug:</h3>
+                <ul>
+                  <li>Non-zero investment since: {data?.nonZeroInvestmentSince?.toString() || 'null'}</li>
+                  <li>
+                    Total earned rewards:{' '}
+                    {data ? `${toPrecision(baseToDisplay(data?.totalEarnedRewards, 18), 4)} RAD` : 'null'}
+                  </li>
+                  <li>
+                    Unlinked rewards:{' '}
+                    {data ? `${toPrecision(baseToDisplay(data?.unlinkedRewards, 18), 4)} RAD` : 'null'}
+                  </li>
+                  {data?.links.map((c, i) => (
+                    <li key={c.centAccountID}>
+                      Link {i + 1} {i === data.links.length - 1 && '(Active)'}
+                      <ul>
+                        <li>Centrifuge Chain Address: {accountIdToCentChainAddr(c.centAccountID)}</li>
+                        <li>Centrifuge Chain Account ID: {c.centAccountID}</li>
+                        <li>Earned (from Subgraph): {toPrecision(baseToDisplay(c.earned, 18), 4)} RAD</li>
+                        <li>
+                          Claimable (from GCP):{' '}
+                          {c.claimable ? `${toPrecision(baseToDisplay(c.claimable, 18), 4)} RAD` : `[loading...]`}
+                        </li>
+                        <li>
+                          Claimed (from Centrifuge Chain):{' '}
+                          {c.claimed ? `${toPrecision(baseToDisplay(c.claimed, 18), 4)} RAD` : `[loading...]`}
+                        </li>
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              </Box>
+            </Card>
+          )}
+
           {ethAddr && data?.links && data.links.length > 0 && (
             <Card>
               <Box direction="row" pad={{ horizontal: 'medium', top: 'medium', bottom: 'medium' }}>
                 <Box flex={true}>
                   <Head>Claim Your RAD Rewards</Head>
 
-                  {debug && (
-                    <Alert type="info">
-                      <h3>Debug:</h3>
-                      <ul>
-                        {data.links.map((c, i) => (
-                          <li key={c.centAccountID}>
-                            Link {i + 1} {i === data.links.length - 1 && '(Active)'}
-                            <ul>
-                              <li>Centrifuge Chain Address: {shortAddr(accountIdToCentChainAddr(c.centAccountID))}</li>
-                              <li>Centrifuge Chain Account ID: {shortAddr(c.centAccountID)}</li>
-                              <li>Earned (from Subgraph): {toPrecision(baseToDisplay(c.earned, 18), 4)} RAD</li>
-                              <li>
-                                Claimable (from GCP):{' '}
-                                {c.claimable ? `${toPrecision(baseToDisplay(c.claimable, 18), 4)} RAD` : `[loading...]`}
-                              </li>
-                              <li>
-                                Claimed (from Centrifuge Chain):{' '}
-                                {c.claimed ? `${toPrecision(baseToDisplay(c.claimed, 18), 4)} RAD` : `[loading...]`}
-                              </li>
-                            </ul>
-                          </li>
-                        ))}
-                      </ul>
-                    </Alert>
-                  )}
-
-                  {!data?.claimable && comebackDate(data?.nonZeroInvestmentSince)}
+                  {comebackDate(data?.nonZeroInvestmentSince)}
                 </Box>
                 <RewardRecipients recipients={data?.links} />
               </Box>
-              {data?.claimable && <ClaimRewards activeLink={data.links[data.links.length - 1]} />}
+              {showClaimStripe(data) && <ClaimRewards activeLink={data.links[data.links.length - 1]} />}
             </Card>
           )}
         </Box>
@@ -228,29 +238,67 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
 
 export default UserRewards
 
-const days = 24 * 60 * 60
+const day = 24 * 60 * 60
+const minNonZeroDays = 61
 
-function comebackDate(nonZero: BN | null | undefined) {
+function comebackDate(nonZero: BN | null | undefined): null | string {
   if (!nonZero || nonZero.isZero()) {
     return 'You can not yet claim your rewards, please come back after investing in a Tinlake pool and waiting for 60 days.'
   }
 
   const start = nonZero
   const startDate = new Date(start.toNumber() * 1000).toLocaleDateString()
-  const target = start.addn(61 * days)
+  const target = start.addn(minNonZeroDays * day)
   const targetDate = new Date(target.toNumber() * 1000).toLocaleDateString()
   const diff = target
     .sub(new BN(Date.now() / 1000))
-    .divn(1 * days)
+    .divn(1 * day)
     .addn(1)
-    .toString()
+
+  // if not in the future
+  if (diff.lten(0)) {
+    return null
+  }
 
   return (
     `You cannot claim your RAD rewards yet. RAD rewards can only be claimed after a minimum investment period of 60 ` +
     `days. Your first eligible investment was made ${startDate}. Please come back in ${
-      diff === '1' ? '1 day' : `${diff} days`
+      diff.eqn(1) ? '1 day' : `${diff.toString()} days`
     } on ${targetDate} to claim your RAD rewards.`
   )
+}
+
+function showClaimStripe(data: UserRewardsData | null): boolean {
+  if (data === null) {
+    return false
+  }
+
+  const { links } = data
+
+  // `false` if there are no links
+  if (links.length === 0) {
+    return false
+  }
+
+  const lastLink = links[links.length - 1]
+
+  // `true` if last link has positive total rewards. That might still imply that there are no unclaimed rewards, but the
+  // claim stripe handles that.
+  if (lastLink.earned.gtn(0)) {
+    return true
+  }
+
+  // `true` if last link has positive claimable rewards. Claimable could be positive even if earned is zero in cases where one Centrifuge Chain account receives rewards from multiple Ethereum accounts.
+  if (lastLink.claimable?.gtn(0)) {
+    return true
+  }
+
+  // `true` if last link has positive claimed rewards. Claimed could be positive even if earned is zero in cases where one Centrifuge Chain account receives rewards from multiple Ethereum accounts.
+  if (lastLink.claimed?.gtn(0)) {
+    return true
+  }
+
+  return false
 }
 
 const Card = ({ children, ...rest }: React.PropsWithChildren<any>) => (

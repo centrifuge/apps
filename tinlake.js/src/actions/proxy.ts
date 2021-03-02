@@ -142,6 +142,18 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       )
     }
 
+    proxyClose = async (proxyAddress: string, loanId: string) => {
+      const proxy = this.contract('PROXY', proxyAddress)
+      const encoded = this.contract('ACTIONS').interface.encodeFunctionData('close', [
+        this.contract('SHELF').address,
+        loanId,
+      ])
+
+      return this.pending(
+        proxy.execute(this.contract('ACTIONS').address, encoded, { ...this.overrides, gasLimit: 550000 })
+      )
+    }
+
     proxyRepayUnlockClose = async (proxyAddress: string, tokenId: string, loanId: string, registry: string) => {
       const proxy = this.contract('PROXY', proxyAddress)
       const encoded = this.contract('ACTIONS').interface.encodeFunctionData('repayUnlockClose', [
@@ -174,6 +186,7 @@ export type IProxyActions = {
   proxyTransferIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>
   proxyLockBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<PendingTransaction>
   proxyRepay(proxyAddress: string, loanId: string, amount: string): Promise<PendingTransaction>
+  proxyClose(proxyAddress: string, loanId: string): Promise<PendingTransaction>
   proxyRepayUnlockClose(
     proxyAddr: string,
     tokenId: string,
