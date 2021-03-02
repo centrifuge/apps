@@ -25,12 +25,12 @@ module.exports = [
             "RESERVE":"0x6711200f61B097FAF354d774dac45366C22818C3",
             "ACTIONS":"0x4fc1d999FD7F098F1FC96687bAD43a847118B6FB",
             "PROXY_REGISTRY":"0x45de42e18F4688A82Fe01c76d305c14055F01EB9",
-            "CLAIM_RAD":"0x17165426fd77728079624e4527a37975341F6703"
+            "CLAIM_RAD":"0xe0b00E9CA4192e3cb0c7418d380Db7B6F1875C5a"
         },
         "metadata":
         {
-            "name":"Kovan Revolving Pool 2",
-            "slug":"kovan-revolving-pool-2",
+            "name":"Local Revolving Pool",
+            "slug":"local-revolving-pool",
             "description":"This section displays information provided by the Asset Originator, such as a description of the business model.",
             "media":
             {
@@ -40,11 +40,11 @@ module.exports = [
             "email":"tinlake@centrifuge.io",
             "details":
             {
-                "Asset Originator":"Kovan Revolving Pool 2 LLC",
+                "Asset Originator":"Local Revolving Pool LLC",
                 "Collateral":"Simplified invoices",
                 "Average Invoice Size":"$1,000",
                 "Maturity Date":"30 day invoices",
-                "Issuer":"Kovan Revolving Pool 2 LLC"
+                "Issuer":"Local Revolving Pool LLC"
             },
             "discourseLink":"https://discourse.centrifuge.io/",
             "asset":"Invoice",
