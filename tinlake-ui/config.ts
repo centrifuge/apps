@@ -32,7 +32,7 @@ interface PoolMetadata {
 }
 
 export interface BasePool {
-  network: 'mainnet' | 'kovan' | 'local'
+  network: 'mainnet' | 'kovan' | 'localhost'
   version: 2 | 3
   metadata: PoolMetadata
 }
@@ -190,7 +190,7 @@ const metadataSchema = yup.object().shape({
 })
 
 const poolSchema = yup.object().shape({
-  network: yup.string().oneOf(['mainnet', 'kovan']).required('poolSchema.network is required'),
+  network: yup.string().oneOf(['mainnet', 'kovan', 'localhost']).required('poolSchema.network is required'),
   version: yup.number().oneOf([2, 3]).required('poolSchema.version is required'),
   addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
   contractConfig: contractConfigSchema.default(undefined),
@@ -198,7 +198,7 @@ const poolSchema = yup.object().shape({
 })
 
 const upcomingPoolSchema = yup.object().shape({
-  network: yup.string().oneOf(['mainnet', 'kovan']).required('poolSchema.network is required'),
+  network: yup.string().oneOf(['mainnet', 'kovan', 'localhost']).required('poolSchema.network is required'),
   version: yup.number().oneOf([2, 3]).required('poolSchema.version is required'),
   metadata: metadataSchema.required('poolSchema.metadata is required'),
   presetValues: yup.object().shape({
@@ -214,7 +214,7 @@ const upcomingPoolSchema = yup.object().shape({
 })
 
 const archivedPoolSchema = yup.object().shape({
-  network: yup.string().oneOf(['mainnet', 'kovan']).required('poolSchema.network is required'),
+  network: yup.string().oneOf(['mainnet', 'kovan', 'localhost']).required('poolSchema.network is required'),
   version: yup.number().oneOf([2, 3]).required('poolSchema.version is required'),
   metadata: metadataSchema.required('poolSchema.metadata is required'),
   archivedValues: yup.object().shape({
