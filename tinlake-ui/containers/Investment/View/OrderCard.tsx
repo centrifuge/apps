@@ -1,6 +1,5 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
-import BN from 'bn.js'
-import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import { Pool } from '../../../config'
@@ -8,7 +7,7 @@ import { PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
-import { toMaxPrecision, toPrecision } from '../../../utils/toPrecision'
+import { toPrecision } from '../../../utils/toPrecision'
 import { Description, Info, MinTimeRemaining, OrderSteps, Warning } from './styles'
 import { Card } from './TrancheOverview'
 
@@ -30,21 +29,6 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   const token = type === 'Invest' ? 'DAI' : props.tranche === 'senior' ? 'DROP' : 'TIN'
 
   const [confirmCancellation, setConfirmCancellation] = React.useState(false)
-
-  const lockedValue =
-    props.disbursements &&
-    !new BN(props.tokenPrice).isZero() &&
-    !(props.disbursements.remainingSupplyCurrency.isZero() && props.disbursements.remainingRedeemToken.isZero())
-      ? props.disbursements.remainingSupplyCurrency.isZero()
-        ? props.disbursements.remainingRedeemToken
-            .mul(new BN(props.tokenPrice))
-            .div(new BN(10).pow(new BN(27)))
-            .toString()
-        : props.disbursements.remainingSupplyCurrency
-            .mul(new BN(10).pow(new BN(9 + 18)))
-            .div(new BN(props.tokenPrice))
-            .toString()
-      : '0'
 
   const [status, , setTxId] = useTransactionState()
 
@@ -86,7 +70,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
           <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
             Locked{' '}
             {addThousandsSeparators(
-              toMaxPrecision(
+              toPrecision(
                 baseToDisplay(
                   props.disbursements.remainingRedeemToken.isZero()
                     ? props.disbursements.remainingSupplyCurrency
@@ -101,8 +85,8 @@ const OrderCard: React.FC<Props> = (props: Props) => {
           <Description>
             {!rolledOver && (
               <>
-                You have succesfully locked your {token} to {type.toLowerCase()} {type === 'Invest' ? 'in' : 'from'}.
-                This order will be executed at the end of the current epoch. Afterwards you can collect your{' '}
+                You have succesfully locked your {token} to {type.toLowerCase()}. This order will be executed at the end
+                of the current epoch. Afterwards you can collect your{' '}
                 {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'}.
               </>
             )}
@@ -127,7 +111,6 @@ const OrderCard: React.FC<Props> = (props: Props) => {
       {!epochData?.isBlockedState && !confirmCancellation && (
         <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
           <Button primary label="Cancel Order" onClick={() => setConfirmCancellation(true)} disabled={disabled} />
-          {/* <Button primary label="Update Order" /> */}
         </Box>
       )}
       {!confirmCancellation && epochData?.isBlockedState && (

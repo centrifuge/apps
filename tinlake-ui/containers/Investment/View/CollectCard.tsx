@@ -1,7 +1,6 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
-import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { Pool } from '../../../config'
@@ -27,31 +26,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
 
   const [status, , setTxId] = useTransactionState()
 
-  // const orderedAmount =
-  //   type === 'Invest'
-  //     ? props.disbursements.remainingSupplyCurrency
-  //         .div(new BN(props.tokenPrice).div(new BN(10).pow(new BN(9))))
-  //         .mul(new BN(10).pow(new BN(18)))
-  //         .toString()
-  //     : new BN(0)
-
-  // If it's a redeem order, then convert amount from DAI into DROP/TIN
-  const settledAmount =
-    type === 'Invest'
-      ? props.disbursements.payoutTokenAmount
-      : new BN(props.disbursements.payoutCurrencyAmount)
-          .div(new BN(props.tokenPrice).div(new BN(10).pow(new BN(9))))
-          .mul(new BN(10).pow(new BN(18)))
-          .toString()
-
-  // If it's an invest order, then convert amount from DROP/TIN into DAI
-  // const transactionValue =
-  //   type === 'Invest'
-  //     ? props.disbursements.payoutTokenAmount
-  //         .mul(new BN(props.tokenPrice))
-  //         .div(new BN(10).pow(new BN(27)))
-  //         .toString()
-  //     : props.disbursements.payoutCurrencyAmount.toString()
+  const amount = type === 'Invest' ? props.disbursements.payoutTokenAmount : props.disbursements.payoutCurrencyAmount
 
   const collect = async () => {
     const valueToDecimal = new Decimal(
@@ -79,7 +54,8 @@ const CollectCard: React.FC<Props> = (props: Props) => {
     <Box>
       <Info>
         <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
-          {token} available for collection
+          {addThousandsSeparators(toPrecision(baseToDisplay(amount, 18), 4))}{' '}
+          {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'} waiting for collection
         </Heading>
         <Description>
           Your order has been executed. To finalize your {type === 'Invest' ? 'investment' : 'redemption'}, please

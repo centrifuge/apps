@@ -322,7 +322,7 @@ export function loadPool(
     }
 
     // TODO: also get this using multicall
-    const epoch = await getEpoch(tinlake)
+    const epoch = await getEpoch(tinlake, address)
     dispatch({ epoch, type: RECEIVE_EPOCH })
   }
 }

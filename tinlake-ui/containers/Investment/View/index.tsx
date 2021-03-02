@@ -28,7 +28,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     dispatch(loadPool(props.tinlake))
-  }, [address])
+  }, [props.tinlake.signer, address])
 
   return (
     <Box margin={{ top: 'medium' }}>
