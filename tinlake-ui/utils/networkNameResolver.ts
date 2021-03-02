@@ -14,7 +14,7 @@ export function networkIdToName(id: number) {
       return 'Kovan'
     case 100:
       return 'XDai'
-    case 99:
+    case 17:
       return 'Local'
   }
   return null
@@ -37,7 +37,7 @@ export function networkNameToId(name: string) {
     case 'XDai':
       return 100
     case 'Local':
-      return 99
+      return 17
     default:
       return null
   }

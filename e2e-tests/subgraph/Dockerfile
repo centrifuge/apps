@@ -23,4 +23,8 @@ RUN ./node_modules/.bin/graph codegen ./subgraph.yaml
 
 RUN ./node_modules/.bin/graph build ./subgraph.yaml
 
+# files for pinning the pools metadata to ipfs
+COPY pinToIpfs.js .
+COPY pools-metadata.js .
+
 COPY deploy.sh .

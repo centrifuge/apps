@@ -36,6 +36,7 @@ services:
     container_name: ipfs
     ports:
       - "5001:5001"
+      - "8080:8080"
     volumes:
       - ipfs:/data/ipfs
 
@@ -50,7 +51,7 @@ services:
       - "8020:8020"
       - "8000:8000"
     environment:
-      - ethereum=${NETWORK_NAME}:http://parity:8545
+      - ethereum=${ETH_NETWORK}:http://parity:8545
       - ipfs=ipfs:5001
       - postgres_db=${POSTGRES_DB}
       - postgres_host=db:5432
@@ -76,7 +77,7 @@ services:
     build:
       context: subgraph
       args: 
-        NETWORK_NAME: ${NETWORK_NAME}
+        NETWORK_NAME: ${ETH_NETWORK}
     container_name: subgraph
     depends_on:
       - ipfs

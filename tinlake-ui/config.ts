@@ -29,7 +29,7 @@ interface PoolMetadata {
 }
 
 export interface BasePool {
-  network: 'mainnet' | 'kovan' | 'local'
+  network: 'mainnet' | 'kovan' | 'localhost'
   version: 2 | 3
   metadata: PoolMetadata
 }
@@ -153,7 +153,7 @@ const metadataSchema = yup.object().shape({
 const poolSchema = yup.object().shape({
   network: yup
     .string()
-    .oneOf(['mainnet', 'kovan'])
+    .oneOf(['mainnet', 'kovan', 'localhost'])
     .required('poolSchema.network is required'),
   version: yup
     .number()
@@ -167,7 +167,7 @@ const poolSchema = yup.object().shape({
 const upcomingPoolSchema = yup.object().shape({
   network: yup
     .string()
-    .oneOf(['mainnet', 'kovan'])
+    .oneOf(['mainnet', 'kovan', 'localhost'])
     .required('poolSchema.network is required'),
   version: yup
     .number()
@@ -189,7 +189,7 @@ const upcomingPoolSchema = yup.object().shape({
 const archivedPoolSchema = yup.object().shape({
   network: yup
     .string()
-    .oneOf(['mainnet', 'kovan'])
+    .oneOf(['mainnet', 'kovan', 'localhost'])
     .required('poolSchema.network is required'),
   version: yup
     .number()
