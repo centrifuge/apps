@@ -554,7 +554,9 @@ export async function repayFull(tinlake: ITinlake, loan: Loan): Promise<PendingT
 }
 
 export const close = async (tinlake: ITinlake, loan: Loan): Promise<PendingTransaction> => {
-  return tinlake.close(loan.loanId)
+  const { loanId } = loan
+  const proxy = loan.ownerOf
+  return tinlake.proxyClose(proxy.toString(), loanId)
 }
 
 export async function getInvestor(tinlake: ITinlake, address: string) {
