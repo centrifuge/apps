@@ -12,3 +12,7 @@ done
 
 ./node_modules/.bin/graph create --node ${GRAPH_HOST}:8020 centrifuge/${PROJECT}
 ./node_modules/.bin/graph deploy --node ${GRAPH_HOST}:8020 --ipfs ${IPFS_HOST} centrifuge/${PROJECT}
+
+npm install ipfs-http-client@35.0.0
+
+node pinToIpfs.js

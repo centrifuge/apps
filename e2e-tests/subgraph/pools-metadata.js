@@ -1,6 +1,6 @@
 module.exports = [
     {
-        "network":"development",
+        "network":"localhost",
         "version":3,
         "addresses":
         {
