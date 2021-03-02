@@ -8,7 +8,7 @@ import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { toPrecision } from '../../../utils/toPrecision'
-import { Description, OrderSteps } from './styles'
+import { Description, Info, OrderSteps } from './styles'
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {
@@ -77,58 +77,24 @@ const CollectCard: React.FC<Props> = (props: Props) => {
 
   return (
     <Box>
-      <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
-        {token} available for collection
-      </Heading>
-      <Description>
-        Your {props.tranche === 'senior' ? 'DROP' : 'TIN'} {type.toLowerCase()} order has been executed. Your{' '}
-        {props.tranche === 'senior' ? 'DROP' : 'TIN'} tokens are already earning yield. You need to collect your tokens
-        before you can submit new orders.
-      </Description>
+      <Info>
+        <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
+          {token} available for collection
+        </Heading>
+        <Description>
+          Your order has been executed. To finalize your {type === 'Invest' ? 'investment' : 'redemption'}, please
+          collect your {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'}. Upon collection, the{' '}
+          {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'} will be transferred to your
+          wallet.
+        </Description>
 
-      <OrderSteps
-        src={`/static/steps/collect-${type === 'Invest' ? 'dai' : props.tranche === 'senior' ? 'drop' : 'tin'}-${
-          type === 'Invest' ? (props.tranche === 'senior' ? 'drop' : 'tin') : 'dai'
-        }.svg`}
-        alt="Order steps"
-      />
-
-      <Table margin={{ top: 'medium' }}>
-        <TableBody>
-          <TableRow>
-            <TableCell scope="row">Type of transaction</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
-              {type} {props.tranche === 'senior' ? 'DROP' : 'TIN'}
-            </TableCell>
-          </TableRow>
-          {/* <TableRow>
-            <TableCell scope="row">Order amount</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(orderedAmount, 18), 2))}{' '}
-              {props.tranche === 'senior' ? 'DROP' : 'TIN'}
-            </TableCell>
-          </TableRow> */}
-          <TableRow>
-            <TableCell scope="row">Settled amount</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(settledAmount, 18), 4))}{' '}
-              {props.tranche === 'senior' ? 'DROP' : 'TIN'}
-            </TableCell>
-          </TableRow>
-          {/* <TableRow>
-            <TableCell scope="row">Settled token price</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(props.tokenPrice, 27), 2))}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell scope="row">Transaction value</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(transactionValue, 18), 2))} DAI
-            </TableCell>
-          </TableRow> */}
-        </TableBody>
-      </Table>
+        <OrderSteps
+          src={`/static/steps/collect-${type === 'Invest' ? 'dai' : props.tranche === 'senior' ? 'drop' : 'tin'}-${
+            type === 'Invest' ? (props.tranche === 'senior' ? 'drop' : 'tin') : 'dai'
+          }.svg`}
+          alt="Order steps"
+        />
+      </Info>
 
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
         <Button primary label="Collect" onClick={collect} disabled={disabled} />

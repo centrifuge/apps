@@ -81,84 +81,85 @@ const OrderCard: React.FC<Props> = (props: Props) => {
 
   return (
     <Box>
-      <Info>
-        <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
-          Locked{' '}
-          {addThousandsSeparators(
-            toMaxPrecision(
-              baseToDisplay(
-                props.disbursements.remainingRedeemToken.isZero()
-                  ? props.disbursements.remainingSupplyCurrency
-                  : props.disbursements.remainingRedeemToken,
-                18
-              ),
-              4
-            )
-          )}{' '}
-          {token} {type} Order
-        </Heading>
-        <Description>
-          {!rolledOver && (
-            <>
-              You have succesfully locked your {token} to {type.toLowerCase()} {type === 'Invest' ? 'in' : 'from'}. This
-              order will be executed at the end of the current epoch. Afterwards you can collect your{' '}
-              {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'}.
-            </>
-          )}
-          {rolledOver && (
-            <>
-              Your {type.toLowerCase()} order wasn’t fully executed. Your {token} remains locked for{' '}
-              {type === 'Invest' ? 'investment' : 'redemption'} for the next epoch. You can cancel this order until the
-              end of the current epoch.
-            </>
-          )}
-        </Description>
-
-        <OrderSteps
-          src={`/static/steps/locked-${type === 'Invest' ? 'dai' : props.tranche === 'senior' ? 'drop' : 'tin'}-${
-            type === 'Invest' ? (props.tranche === 'senior' ? 'drop' : 'tin') : 'dai'
-          }.svg`}
-          alt="Order steps"
-        />
-        {epochData?.isBlockedState && (
-          <Info>
-            <Heading level="6" margin={{ bottom: 'xsmall' }}>
-              Computing orders
-            </Heading>
-            The Epoch has just been closed and the order executions are currently being computed. Your executed order
-            will be available for collection soon.
-            {epochData?.minChallengePeriodEnd !== 0 && (
-              <MinTimeRemaining>
-                Minimum time remaining:{' '}
-                {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
-              </MinTimeRemaining>
+      {!confirmCancellation && (
+        <Info>
+          <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
+            Locked{' '}
+            {addThousandsSeparators(
+              toMaxPrecision(
+                baseToDisplay(
+                  props.disbursements.remainingRedeemToken.isZero()
+                    ? props.disbursements.remainingSupplyCurrency
+                    : props.disbursements.remainingRedeemToken,
+                  18
+                ),
+                4
+              )
+            )}{' '}
+            {token} {type} Order
+          </Heading>
+          <Description>
+            {!rolledOver && (
+              <>
+                You have succesfully locked your {token} to {type.toLowerCase()} {type === 'Invest' ? 'in' : 'from'}.
+                This order will be executed at the end of the current epoch. Afterwards you can collect your{' '}
+                {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'}.
+              </>
             )}
-          </Info>
-        )}
+            {rolledOver && (
+              <>
+                Your {type.toLowerCase()} order wasn’t fully executed. Your {token} remains locked for{' '}
+                {type === 'Invest' ? 'investment' : 'redemption'} for the next epoch. You can cancel this order until
+                the end of the current epoch.
+              </>
+            )}
+          </Description>
 
-        {confirmCancellation && (
-          <>
-            <Warning>
-              <Heading level="6" margin={{ bottom: 'xsmall' }}>
-                Cancel Pending {type} Order
-              </Heading>
-              Please confirm that you want to cancel your pending order. Your {token} will be unlocked and transferred
-              back to your wallet.
-            </Warning>
-
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-              <Button label="Back" onClick={() => setConfirmCancellation(false)} />
-              <Button primary label="Confirm Cancellation" onClick={cancel} disabled={disabled} />
-            </Box>
-          </>
-        )}
-      </Info>
+          <OrderSteps
+            src={`/static/steps/locked-${type === 'Invest' ? 'dai' : props.tranche === 'senior' ? 'drop' : 'tin'}-${
+              type === 'Invest' ? (props.tranche === 'senior' ? 'drop' : 'tin') : 'dai'
+            }.svg`}
+            alt="Order steps"
+          />
+        </Info>
+      )}
 
       {!epochData?.isBlockedState && !confirmCancellation && (
         <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
           <Button primary label="Cancel Order" onClick={() => setConfirmCancellation(true)} disabled={disabled} />
           {/* <Button primary label="Update Order" /> */}
         </Box>
+      )}
+      {!confirmCancellation && epochData?.isBlockedState && (
+        <Warning>
+          <Heading level="6" margin={{ bottom: 'xsmall' }}>
+            Computing orders
+          </Heading>
+          The Epoch has just been closed and the order executions are currently being computed. Your executed order will
+          be available for collection soon.
+          {epochData?.minChallengePeriodEnd !== 0 && (
+            <MinTimeRemaining>
+              Minimum time remaining: {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
+            </MinTimeRemaining>
+          )}
+        </Warning>
+      )}
+
+      {confirmCancellation && (
+        <>
+          <Warning>
+            <Heading level="6" margin={{ bottom: 'xsmall' }}>
+              Cancel Pending {type} Order
+            </Heading>
+            Please confirm that you want to cancel your pending order. Your {token} will be unlocked and transferred
+            back to your wallet.
+          </Warning>
+
+          <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+            <Button label="Back" onClick={() => setConfirmCancellation(false)} />
+            <Button primary label="Confirm Cancellation" onClick={cancel} disabled={disabled} />
+          </Box>
+        </>
       )}
     </Box>
   )
