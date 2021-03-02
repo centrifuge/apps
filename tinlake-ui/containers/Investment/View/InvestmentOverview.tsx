@@ -3,6 +3,7 @@ import BN from 'bn.js'
 import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import styled from 'styled-components'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { PoolLink } from '../../../components/PoolLink'
@@ -93,9 +94,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               DAI
             </LoadingValue>
           </Heading>
-          <Heading level="5" margin={{ top: '0', bottom: '0' }} style={{ textAlign: 'center' }}>
-            Pool Value
-          </Heading>
+          <Label>Pool Value</Label>
         </Box>
       </Box>
       <Box direction="row" justify="center" gap="large">
@@ -174,12 +173,16 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             background="white"
           >
             <Box direction="row" margin={{ top: '0', bottom: '0' }}>
-              <Heading level="5" margin={'0'}>
-                <TokenLogo src={`/static/DROP_final.svg`} />
-                <Tooltip id="dropValue">DROP Tranche</Tooltip>
-              </Heading>
+              <Box direction="column">
+                <Heading level="5" margin={{ bottom: 'xsmall', top: '0' }}>
+                  <TokenLogo src={`/static/DROP_final.svg`} />
+                  <Tooltip id="dropValue">DROP Tranche</Tooltip>
+                </Heading>
+                <TrancheNote>Senior tranche</TrancheNote>
+                <TrancheNote>Low risk, stable return</TrancheNote>
+              </Box>
               <Box margin={{ left: 'auto' }}>
-                <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+                <Heading level="5" margin={{ left: 'auto', top: '0', bottom: 'xsmall' }}>
                   <LoadingValue done={dropTotalValue !== undefined} height={22}>
                     {dropTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 0))}{' '}
                     DAI
@@ -195,6 +198,9 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     DAI
                   </LoadingValue>
                 </span>
+                <Box margin={{ left: 'auto' }} direction="row">
+                  {toPrecision(feeToInterestRate(dropRate || '0'), 2)}% APR
+                </Box>
               </Box>
             </Box>
           </Box>
@@ -223,12 +229,16 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             background="white"
           >
             <Box direction="row" margin={{ top: '0', bottom: '0' }}>
-              <Heading level="5" margin={'0'}>
-                <TokenLogo src={`/static/TIN_final.svg`} />
-                <Tooltip id="tinValue">TIN Tranche</Tooltip>
-              </Heading>
+              <Box direction="column">
+                <Heading level="5" margin={{ bottom: 'xsmall', top: '0' }}>
+                  <TokenLogo src={`/static/TIN_final.svg`} />
+                  <Tooltip id="tinValue">TIN Tranche</Tooltip>
+                </Heading>
+                <TrancheNote>Junior tranche</TrancheNote>
+                <TrancheNote>Higher risk, variable return</TrancheNote>
+              </Box>
               <Box margin={{ left: 'auto' }}>
-                <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+                <Heading level="5" margin={{ left: 'auto', top: '0', bottom: 'xsmall' }}>
                   <LoadingValue done={tinTotalValue !== undefined} height={22}>
                     {tinTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 0))} DAI
                   </LoadingValue>
@@ -249,3 +259,14 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 }
 
 export default InvestmentOverview
+
+const Label = styled.div`
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 14px;
+  color: #979797;
+`
+
+const TrancheNote = styled.div`
+  color: #777;
+`

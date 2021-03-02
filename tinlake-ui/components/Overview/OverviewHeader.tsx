@@ -1,24 +1,83 @@
-import { feeToInterestRate, toPrecision } from '@centrifuge/tinlake-js'
+import { feeToInterestRate, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button, Heading } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import config, { Pool, UpcomingPool } from '../../config'
+import { ensureAuthed } from '../../ducks/auth'
 import { PoolData, PoolState } from '../../ducks/pool'
 import InvestAction from '../InvestAction'
-import { PoolLink } from '../PoolLink'
 
 interface Props {
-  selectedPool: Pool | UpcomingPool
+  tinlake: ITinlake
+  selectedPool: Pool
+}
+
+const useOnConnect = () => {
+  const dispatch = useDispatch()
+  const address = useSelector<any, string | null>((state) => state.auth.address)
+  const [callback, setCallback] = React.useState(undefined as Function | undefined)
+
+  React.useEffect(() => {
+    if (callback !== undefined) {
+      callback(address)
+      setCallback(undefined)
+    }
+  }, [address])
+
+  return (cb: (address: string) => void) => {
+    if (address) {
+      cb(address)
+    }
+
+    setCallback(cb)
+    dispatch(ensureAuthed())
+  }
 }
 
 const OverviewHeader: React.FC<Props> = (props: Props) => {
+  const router = useRouter()
+  const onConnect = useOnConnect()
+
+  const address = useSelector<any, string | null>((state) => state.auth.address)
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
 
   const dropRate = poolData?.senior?.interestRate || undefined
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
+
+  const invest = () => {
+    if (address) {
+      if (poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) {
+        router.push(
+          `/pool/${props.selectedPool.addresses.ROOT_CONTRACT}/${props.selectedPool.metadata.slug}/investments`
+        )
+      } else {
+        router.push(
+          `/pool/${props.selectedPool.addresses.ROOT_CONTRACT}/${props.selectedPool.metadata.slug}/onboarding`
+        )
+      }
+    } else {
+      onConnect(async (addr: string) => {
+        console.log(props)
+        const inAMemberlist = (await props.tinlake.checkSeniorTokenMemberlist(addr))
+          ? true
+          : await props.tinlake.checkJuniorTokenMemberlist(addr)
+
+        if (inAMemberlist) {
+          router.push(
+            `/pool/${props.selectedPool.addresses.ROOT_CONTRACT}/${props.selectedPool.metadata.slug}/investments`
+          )
+        } else {
+          router.push(
+            `/pool/${props.selectedPool.addresses.ROOT_CONTRACT}/${props.selectedPool.metadata.slug}/onboarding`
+          )
+        }
+      })
+    }
+  }
 
   return (
     <Box
@@ -39,43 +98,38 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
         <Heading level="4">
           <TokenLogo src={`/static/DAI.svg`} />
           5.000
+          <Unit>DAI</Unit>
         </Heading>
         <Type>Minimum investment</Type>
       </HeaderBox>
       <HeaderBox pad={{ top: '8px' }}>
         <Heading level="4">
           <TokenLogo src={`/static/DROP_final.svg`} />
-          {toPrecision(feeToInterestRate(dropRate || '0'), 2)} %
+          {toPrecision(feeToInterestRate(dropRate || '0'), 2)}
+          <Unit>%</Unit>
         </Heading>
         <Type>DROP APR</Type>
       </HeaderBox>
       <HeaderBox pad={{ top: '8px' }}>
-        <Heading level="4">{minJuniorRatio && Math.round(minJuniorRatio * 10000) / 100} %</Heading>
+        <Heading level="4">
+          {minJuniorRatio && toPrecision((minJuniorRatio * 100).toString(), 2)}
+          <Unit>%</Unit>
+        </Heading>
         <Type>Risk Protection</Type>
       </HeaderBox>
       <HeaderBox pad={{ top: '8px' }} style={{ borderRight: 'none' }}>
-        <Heading level="4">60-90 days</Heading>
+        <Heading level="4">
+          60-90
+          <Unit>days</Unit>
+        </Heading>
         <Type>Average Maturity</Type>
       </HeaderBox>
-      <HeaderBox pad={{ top: '20px', left: 'small' }} style={{ borderRight: 'none' }}>
+      <HeaderBox pad={{ top: '10px', left: 'small' }} style={{ borderRight: 'none' }}>
         {'addresses' in props.selectedPool &&
         config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
-          <>
-            {(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
-              <PoolLink href={'/investments'}>
-                <Anchor>
-                  <Button label="Invest" primary />
-                </Anchor>
-              </PoolLink>
-            )}
-            {!(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
-              <PoolLink href={'/onboarding'}>
-                <Anchor>
-                  <Button label="Invest" primary />
-                </Anchor>
-              </PoolLink>
-            )}
-          </>
+          <Anchor>
+            <Button label="Invest" primary onClick={invest} />
+          </Anchor>
         ) : (
           <InvestAction pool={props.selectedPool} />
         )}
@@ -114,6 +168,14 @@ const TokenLogo = styled.img`
   height: 24px;
   position: relative;
   top: -2px;
+`
+
+const Unit = styled.span`
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 28px;
+  margin-left: 4px;
+  color: #333;
 `
 
 const parseRatio = (num: BN): number => {

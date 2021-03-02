@@ -8,6 +8,12 @@ import InvestmentOverview from '../../containers/Investment/View/InvestmentOverv
 import { PoolState } from '../../ducks/pool'
 import PageTitle from '../PageTitle'
 import OverviewHeader from './OverviewHeader'
+import styled from 'styled-components'
+import { Catalog, Chat, Link } from 'grommet-icons'
+import TrancheOverview from '../../containers/Investment/View/TrancheOverview'
+import EpochOverview from '../../containers/Investment/View/EpochOverview'
+import { Caret } from '../../containers/Investment/View/styles'
+import { FormDown } from 'grommet-icons'
 
 interface Props {
   pool?: PoolState
@@ -18,12 +24,26 @@ interface Props {
 const Overview: React.FC<Props> = (props: Props) => {
   const isUpcoming = props.selectedPool?.isUpcoming === true
 
+  const [open, setOpen] = React.useState(false)
+
   return (
     <Box margin={{ bottom: 'large', top: 'medium' }}>
       {!isUpcoming && (
         <>
           <PageTitle pool={props.selectedPool} page="Overview" />
-          <OverviewHeader selectedPool={props.selectedPool} />
+          <OverviewHeader selectedPool={props.selectedPool as Pool} tinlake={props.tinlake} />
+        </>
+      )}
+
+      {!props.selectedPool.isUpcoming && (
+        <>
+          <Heading level="4">Tokens</Heading>
+          <Box direction="row" justify="between" gap="medium" margin={{ bottom: 'medium' }}>
+            <TrancheOverview pool={props.selectedPool as Pool} tinlake={props.tinlake} tranche="senior" />
+            <TrancheOverview pool={props.selectedPool as Pool} tinlake={props.tinlake} tranche="junior" />
+          </Box>
+
+          <EpochOverview tinlake={props.tinlake} />
         </>
       )}
 
@@ -36,7 +56,7 @@ const Overview: React.FC<Props> = (props: Props) => {
         gap="medium"
         elevation="small"
         round="xsmall"
-        pad="medium"
+        pad={{ top: 'medium', left: 'medium', right: 'medium' }}
         margin={{ bottom: 'large' }}
         background="white"
       >
@@ -47,14 +67,23 @@ const Overview: React.FC<Props> = (props: Props) => {
 
           <p>{props.selectedPool.metadata.description}</p>
 
-          {props.selectedPool.metadata.discourseLink && (
-            <>
-              <h4 style={{ marginBottom: '0' }}>Learn more about this asset originator</h4>
-              <a href={props.selectedPool.metadata.discourseLink} target="_blank">
-                Join the discussion on Discourse
-              </a>
-            </>
-          )}
+          <div>
+            <AOButton>
+              <Anchor>
+                <ButtonWithIcon label="Executive Summary" icon={<Catalog />} size="small" />
+              </Anchor>
+            </AOButton>
+            <AOButton>
+              <Anchor>
+                <ButtonWithIcon label="Discussion on Discourse" icon={<Chat />} size="small" />
+              </Anchor>
+            </AOButton>
+            <AOButton>
+              <Anchor>
+                <ButtonWithIcon label="Website" icon={<Link />} size="small" />
+              </Anchor>
+            </AOButton>
+          </div>
         </Box>
         <Box width="420px">
           <Table>
@@ -70,7 +99,7 @@ const Overview: React.FC<Props> = (props: Props) => {
             </TableBody>
           </Table>
 
-          {!isUpcoming && (
+          {/* {!isUpcoming && (
             <Box margin={{ top: 'medium', left: 'auto' }}>
               <PoolLink href={'/assets'}>
                 <Anchor>
@@ -78,7 +107,7 @@ const Overview: React.FC<Props> = (props: Props) => {
                 </Anchor>
               </PoolLink>
             </Box>
-          )}
+          )} */}
 
           {isUpcoming && (
             <Box margin={{ top: 'medium' }}>
@@ -87,10 +116,39 @@ const Overview: React.FC<Props> = (props: Props) => {
           )}
         </Box>
       </Box>
-      <Heading level="4">Pool Balance</Heading>
-      <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
+
+      {!props.selectedPool.isUpcoming && (
+        <>
+          <Box
+            background="#eee"
+            pad={{ horizontal: '34px', bottom: 'xsmall' }}
+            round="xsmall"
+            margin={{ bottom: 'medium' }}
+          >
+            <Heading level="4" onClick={() => setOpen(!open)} style={{ cursor: 'pointer' }}>
+              Pool Balance
+              <Caret>
+                <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
+              </Caret>
+            </Heading>
+            {open && <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />}
+          </Box>
+        </>
+      )}
     </Box>
   )
 }
 
 export default Overview
+
+const AOButton = styled.div`
+  display: inline-block;
+  margin: 0 20px 20px 0;
+`
+
+const ButtonWithIcon = styled(Button)`
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+`

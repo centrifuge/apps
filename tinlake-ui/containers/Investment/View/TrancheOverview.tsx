@@ -167,7 +167,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             {card === 'home' && (
               <>
                 {epochData?.isBlockedState && (
-                  <Info>
+                  <Warning>
                     <Heading level="6" margin={{ bottom: 'xsmall' }}>
                       Computing orders
                     </Heading>
@@ -179,7 +179,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                         {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
                       </MinTimeRemaining>
                     )}
-                  </Info>
+                  </Warning>
                 )}
 
                 {!epochData?.isBlockedState && (

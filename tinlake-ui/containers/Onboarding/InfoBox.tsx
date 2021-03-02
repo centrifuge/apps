@@ -17,6 +17,10 @@ const InfoBox: React.FC<Props> = (props: Props) => {
       const req = await fetch(
         `${config.onboardAPIHost}pools/${props.activePool.addresses.ROOT_CONTRACT}/restricted-countries`
       )
+      if (!req.ok) {
+        console.error(`Failed to load list of restricted countries for ${props.activePool.addresses.ROOT_CONTRACT}`)
+        return
+      }
       const body = await req.json()
       setCountries(body)
     })()
@@ -54,8 +58,9 @@ const InfoBox: React.FC<Props> = (props: Props) => {
       <Anchor onClick={() => openModal()}>See list of excluded countries</Anchor>
       <Modal
         opened={modalIsOpen}
-        title={`List of excluded countries for ${props.activePool.metadata.shortName ||
-          props.activePool.metadata.name}.`}
+        title={`List of excluded countries for ${
+          props.activePool.metadata.shortName || props.activePool.metadata.name
+        }.`}
         headingProps={{ style: { maxWidth: '100%', display: 'flex' } }}
         titleIcon={<StatusInfoIcon />}
         onClose={closeModal}
