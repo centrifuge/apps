@@ -60,8 +60,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
     return <Box pad="medium">Loading claimable rewards...</Box>
   }
 
-  const unclaimed =
-    activeLink.claimable !== null && activeLink.claimed !== null ? activeLink.claimable.sub(activeLink.claimed) : null
+  const unclaimed = calcUnclaimed(activeLink)
 
   return (
     <>
@@ -168,3 +167,14 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
 }
 
 export default ClaimRewards
+
+function calcUnclaimed(link: UserRewardsLink): null | BN {
+  if (!link.claimable || !link.claimed) {
+    return null
+  }
+  const unclaimed = link.claimable.sub(link.claimed)
+  if (unclaimed.ltn(0)) {
+    return new BN(0)
+  }
+  return unclaimed
+}
