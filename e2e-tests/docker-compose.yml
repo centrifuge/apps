@@ -48,6 +48,7 @@ services:
       - parity
     ports:
       - "8020:8020"
+      - "8000:8000"
     environment:
       - ethereum=${NETWORK_NAME}:http://parity:8545
       - ipfs=ipfs:5001
