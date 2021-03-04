@@ -7,7 +7,7 @@ dataSources:
     name: Block
     network: ${NETWORK_NAME}
     source:
-      address: "0x8BB0C7262268A3CeA5ac3906984728A78230a212"
+      address: "0x65B13BAa43c6B6567389286ceF9c3525d0D9FbE0"
       abi: Pile
       startBlock: 0
     mapping:
@@ -96,7 +96,7 @@ dataSources:
     name: Claim
     network: ${NETWORK_NAME}
     source: 
-      address: "0x17165426fd77728079624e4527a37975341F6703"
+      address: "0xe0b00E9CA4192e3cb0c7418d380Db7B6F1875C5a"
       abi: TinlakeClaimRad
       startBlock: 0
     mapping:
