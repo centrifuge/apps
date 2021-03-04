@@ -57,6 +57,8 @@ services:
       - postgres_host=db:5432
       - postgres_pass=${POSTGRES_PASSWORD}
       - postgres_user=${POSTGRES_USER}
+      - GRAPH_ALLOW_NON_DETERMINISTIC_IPFS="true"
+      - GRAPH_ETH_CALL_BY_NUMBER="true"
 
   contracts:
     build:
