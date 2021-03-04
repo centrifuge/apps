@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
-import config, { Pool, UpcomingPool } from '../../config'
+import config, { Pool } from '../../config'
 import { ensureAuthed } from '../../ducks/auth'
 import { PoolData, PoolState } from '../../ducks/pool'
 import InvestAction from '../InvestAction'
@@ -108,21 +108,21 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           {toPrecision(feeToInterestRate(dropRate || '0'), 2)}
           <Unit>%</Unit>
         </Heading>
-        <Type>DROP APR</Type>
+        <Type>Stable return (APR)</Type>
       </HeaderBox>
       <HeaderBox pad={{ top: '8px' }}>
         <Heading level="4">
           {minJuniorRatio && toPrecision((minJuniorRatio * 100).toString(), 2)}
           <Unit>%</Unit>
         </Heading>
-        <Type>Risk Protection</Type>
+        <Type>Risk protection</Type>
       </HeaderBox>
       <HeaderBox pad={{ top: '8px' }} style={{ borderRight: 'none' }}>
         <Heading level="4">
           60-90
           <Unit>days</Unit>
         </Heading>
-        <Type>Average Maturity</Type>
+        <Type>Average maturity</Type>
       </HeaderBox>
       <HeaderBox pad={{ top: '10px', left: 'small' }} style={{ borderRight: 'none' }}>
         {'addresses' in props.selectedPool &&

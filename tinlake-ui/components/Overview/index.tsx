@@ -2,7 +2,6 @@ import { ITinlake } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import InvestAction from '../../components/InvestAction'
-import { PoolLink } from '../../components/PoolLink'
 import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { PoolState } from '../../ducks/pool'
@@ -10,10 +9,6 @@ import PageTitle from '../PageTitle'
 import OverviewHeader from './OverviewHeader'
 import styled from 'styled-components'
 import { Catalog, Chat, Link } from 'grommet-icons'
-import TrancheOverview from '../../containers/Investment/View/TrancheOverview'
-import EpochOverview from '../../containers/Investment/View/EpochOverview'
-import { Caret } from '../../containers/Investment/View/styles'
-import { FormDown } from 'grommet-icons'
 
 interface Props {
   pool?: PoolState
@@ -24,26 +19,12 @@ interface Props {
 const Overview: React.FC<Props> = (props: Props) => {
   const isUpcoming = props.selectedPool?.isUpcoming === true
 
-  const [open, setOpen] = React.useState(false)
-
   return (
     <Box margin={{ bottom: 'large', top: 'medium' }}>
       {!isUpcoming && (
         <>
           <PageTitle pool={props.selectedPool} page="Overview" />
           <OverviewHeader selectedPool={props.selectedPool as Pool} tinlake={props.tinlake} />
-        </>
-      )}
-
-      {!props.selectedPool.isUpcoming && (
-        <>
-          <Heading level="4">Tokens</Heading>
-          <Box direction="row" justify="between" gap="medium" margin={{ bottom: 'medium' }}>
-            <TrancheOverview pool={props.selectedPool as Pool} tinlake={props.tinlake} tranche="senior" />
-            <TrancheOverview pool={props.selectedPool as Pool} tinlake={props.tinlake} tranche="junior" />
-          </Box>
-
-          <EpochOverview tinlake={props.tinlake} />
         </>
       )}
 
@@ -116,25 +97,8 @@ const Overview: React.FC<Props> = (props: Props) => {
           )}
         </Box>
       </Box>
-
-      {!props.selectedPool.isUpcoming && (
-        <>
-          <Box
-            background="#eee"
-            pad={{ horizontal: '34px', bottom: 'xsmall' }}
-            round="xsmall"
-            margin={{ bottom: 'medium' }}
-          >
-            <Heading level="4" onClick={() => setOpen(!open)} style={{ cursor: 'pointer' }}>
-              Pool Balance
-              <Caret>
-                <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
-              </Caret>
-            </Heading>
-            {open && <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />}
-          </Box>
-        </>
-      )}
+      <Heading level="4">Pool Balance</Heading>
+      <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
     </Box>
   )
 }

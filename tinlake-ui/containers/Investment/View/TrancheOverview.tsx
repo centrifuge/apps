@@ -17,7 +17,7 @@ import CollectCard from './CollectCard'
 import InvestCard from './InvestCard'
 import OrderCard from './OrderCard'
 import RedeemCard from './RedeemCard'
-import { AddWalletLink, Info, MinTimeRemaining, TokenLogo } from './styles'
+import { AddWalletLink, Info, MinTimeRemaining, TokenLogo, Warning } from './styles'
 
 interface Props {
   pool: Pool
