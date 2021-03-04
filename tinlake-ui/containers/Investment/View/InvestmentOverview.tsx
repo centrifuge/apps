@@ -7,7 +7,7 @@ import styled from 'styled-components'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Tooltip } from '../../../components/Tooltip'
 import { Pool, UpcomingPool } from '../../../config'
-import { loadLoans, LoansState } from '../../../ducks/loans'
+import { loadLoans, LoansState, SortableLoan } from '../../../ducks/loans'
 import { PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { toPrecision } from '../../../utils/toPrecision'
@@ -17,6 +17,8 @@ interface Props {
   selectedPool: Pool | UpcomingPool
   tinlake: ITinlake
 }
+
+const SecondsInDay = 60 * 60 * 24
 
 const e18 = new BN(10).pow(new BN(18))
 
@@ -31,6 +33,38 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const outstandingLoans = loans?.loans
     ? loans?.loans.filter((loan) => loan.status && loan.status === 'ongoing').length
     : undefined
+
+  const financedAssets = loans?.loans
+    ? loans?.loans.filter(
+        (loan) =>
+          (loan.status && loan.status === 'ongoing') ||
+          (loan.status === 'closed' && loan.borrowsAggregatedAmount && loan.maturityDate && loan.financingDate)
+      )
+    : undefined
+  const avgAmount = financedAssets
+    ? financedAssets
+        .filter((loan) => loan.borrowsAggregatedAmount)
+        .reduce((sum: BN, loan: SortableLoan) => {
+          return sum.add(new BN(loan.borrowsAggregatedAmount!))
+        }, new BN(0))
+        .divn(financedAssets.length)
+    : undefined
+  const avgInterestRate = financedAssets
+    ? financedAssets
+        .filter((loan) => loan.interestRate)
+        .reduce((sum: BN, loan: SortableLoan) => {
+          return sum.add(new BN(loan.interestRate!))
+        }, new BN(0))
+        .divn(financedAssets.length)
+    : undefined
+  const avgMaturity = financedAssets
+    ? financedAssets
+        .filter((loan) => loan.maturityDate && loan.financingDate)
+        .reduce((sum: number, loan: SortableLoan) => {
+          return sum + (loan.maturityDate! - loan.financingDate!) / SecondsInDay
+        }, 0) / financedAssets.length
+    : undefined
+
   const dispatch = useDispatch()
   const poolData = pool?.data as PoolData | undefined
 
@@ -40,10 +74,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const tinTotalValue = poolData ? poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice) : undefined
 
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
-
-  const lockedInvestments = (poolData?.senior?.pendingInvestments || new BN(0)).add(
-    poolData?.junior?.pendingInvestments || new BN(0)
-  )
 
   const reserveRatio = poolData
     ? poolData.reserve
@@ -117,9 +147,27 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   </TableCell>
                 </TableRow>
                 <TableRow>
+                  <TableCell scope="row">Average Financing Amount</TableCell>
+                  <TableCell style={{ textAlign: 'end' }}>
+                    <LoadingValue done={avgAmount !== undefined}>
+                      {addThousandsSeparators(toPrecision(baseToDisplay(avgAmount, 18), 0))} DAI
+                    </LoadingValue>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
                   <TableCell scope="row">Average Financing Fee</TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={outstandingLoans !== undefined}>10.00%</LoadingValue>
+                    <LoadingValue done={avgInterestRate !== undefined}>
+                      {toPrecision(feeToInterestRate(avgInterestRate || new BN(0)), 2)}%
+                    </LoadingValue>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell scope="row" border={{ color: 'transparent' }}>
+                    Average Maturity
+                  </TableCell>
+                  <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+                    <LoadingValue done={avgMaturity !== undefined}>{Math.round(avgMaturity || 0)} days</LoadingValue>
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -139,20 +187,12 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             <Table>
               <TableBody>
                 <TableRow>
-                  <TableCell scope="row">Reserve Ratio</TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={reserveRatio !== undefined}>
-                      {parseFloat(reserveRatio.toString()) / 100} %
-                    </LoadingValue>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
                   <TableCell scope="row" border={{ color: 'transparent' }}>
-                    Locked Investments
+                    Reserve Ratio
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                    <LoadingValue done={lockedInvestments !== undefined}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(lockedInvestments, 18), 0))} DAI
+                    <LoadingValue done={reserveRatio !== undefined}>
+                      {parseFloat(reserveRatio.toString()) / 100} %
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
@@ -177,7 +217,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   <Tooltip id="dropValue">DROP Tranche Value</Tooltip>
                 </Heading>
                 <TrancheNote>Senior tranche</TrancheNote>
-                <TrancheNote>Low risk, stable return</TrancheNote>
+                <TrancheNote>Lower risk, stable return</TrancheNote>
               </Box>
               <Box margin={{ left: 'auto' }}>
                 <Heading level="5" margin={{ left: 'auto', top: '0', bottom: 'xsmall' }}>

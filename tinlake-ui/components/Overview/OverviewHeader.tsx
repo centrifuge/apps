@@ -108,14 +108,14 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           {toPrecision(feeToInterestRate(dropRate || '0'), 2)}
           <Unit>%</Unit>
         </Heading>
-        <Type>Stable return (APR)</Type>
+        <Type>DROP APR</Type>
       </HeaderBox>
       <HeaderBox pad={{ top: '8px' }}>
         <Heading level="4">
           {minJuniorRatio && toPrecision((minJuniorRatio * 100).toString(), 2)}
           <Unit>%</Unit>
         </Heading>
-        <Type>Risk protection</Type>
+        <Type>Min TIN risk buffer</Type>
       </HeaderBox>
       <HeaderBox pad={{ top: '8px' }} style={{ borderRight: 'none' }}>
         <Heading level="4">
@@ -164,8 +164,8 @@ const Type = styled.div`
 const TokenLogo = styled.img`
   vertical-align: middle;
   margin: 0 8px 0 0;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   position: relative;
   top: -2px;
 `

@@ -4,6 +4,7 @@ import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } f
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import styled from 'styled-components'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { PoolLink } from '../../../components/PoolLink'
@@ -130,15 +131,19 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
           <Heading level="5" margin={'0'}>
             <TokenLogo src={`/static/${token}_final.svg`} />
-            {trancheData?.inMemberlist === true ? `${token} Balance` : token}
+            {token} Balance
           </Heading>
           <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-            {trancheData?.inMemberlist === true && (
-              <LoadingValue done={balance !== undefined} height={22}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))}
-              </LoadingValue>
-            )}
+            <LoadingValue done={balance !== undefined} height={22}>
+              {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))}
+            </LoadingValue>
           </Heading>
+        </Box>
+        <Box direction="row" justify="between" margin={{ bottom: 'medium' }}>
+          <TrancheNote>{props.tranche === 'senior' ? 'Senior tranche' : 'Junior tranche'}</TrancheNote>
+          <TrancheNote>
+            {props.tranche === 'senior' ? 'Lower risk, stable return' : 'Higher risk, variable return'}
+          </TrancheNote>
         </Box>
         <Table>
           <TableBody>
@@ -283,3 +288,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 }
 
 export default TrancheOverview
+
+const TrancheNote = styled.div`
+  color: #777;
+`

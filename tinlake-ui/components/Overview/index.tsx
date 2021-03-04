@@ -111,8 +111,13 @@ const AOButton = styled.div`
 `
 
 const ButtonWithIcon = styled(Button)`
+  border-radius: 6px;
+  font-size: 13px;
+  padding: 6px 12px;
+  background: #eee;
+  border: none;
   svg {
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
   }
 `
