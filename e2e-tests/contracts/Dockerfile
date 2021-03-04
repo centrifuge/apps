@@ -8,6 +8,7 @@ RUN git clone https://github.com/centrifuge/tinlake-claim-rad
 RUN git clone https://github.com/centrifuge/privacy-enabled-erc721.git
 RUN git clone https://github.com/centrifuge/tinlake-actions.git
 RUN git clone https://github.com/centrifuge/centrifuge-ethereum-contracts.git
+RUN git clone https://github.com/makerdao/multicall.git
 
 # add the keys that were pre-funded in parity config
 RUN mkdir keystore

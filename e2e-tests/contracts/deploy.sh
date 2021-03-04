@@ -32,6 +32,7 @@ PROXY_REGISTRY=$(create_contract tinlake-proxy ProxyRegistry master)
 POOLS_REGISTRY=$(create_contract tinlake-pools-cli PoolRegistry main)
 TINLAKE_CLAIM_RAD=$(create_contract tinlake-claim-rad TinlakeClaimRAD main)
 ACTIONS=$(create_contract tinlake-actions Actions fix/rollback)
+MULTICALL=$(create_contract multicall Multicall master)
 
 # deploy contracts using truffle migrate
 create_contracts_npm centrifuge-ethereum-contracts parity
@@ -65,3 +66,4 @@ echo "ANCHOR : " $ANCHOR
 echo "IDENTITY_FACTORY : " $IDENTITY_FACTORY
 echo "IDENTITY : " $IDENTITY
 echo "NFT_REGISTRY : " $NFT_REGISTRY
+echo "MULTICALL : " $MULTICALL
