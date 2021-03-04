@@ -66,9 +66,11 @@ const InfoBox: React.FC<Props> = (props: Props) => {
         onClose={closeModal}
       >
         <ul>
-          {countries.map((country: { code: string; name: string }) => (
-            <li>{country.name}</li>
-          ))}
+          {countries
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((country: { code: string; name: string }) => (
+              <li>{country.name}</li>
+            ))}
         </ul>
 
         <Box direction="row" justify="end">

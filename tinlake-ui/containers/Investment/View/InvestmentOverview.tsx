@@ -11,7 +11,19 @@ import { loadLoans, LoansState, SortableLoan } from '../../../ducks/loans'
 import { PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { toPrecision } from '../../../utils/toPrecision'
-import { DividerBottom, DividerInner, DividerTop, PoolValueLineLeft, PoolValueLineRight, TokenLogo } from './styles'
+import {
+  DividerBottom,
+  DividerInner,
+  DividerTop,
+  PoolValueLineLeft,
+  PoolValueLineRight,
+  TokenLogo,
+  BalanceSheetDiagram,
+  BalanceSheetDiagramLeft,
+  BalanceSheetDiagramRight,
+  BalanceSheetFiller,
+  BalanceSheetMidLine,
+} from './styles'
 
 interface Props {
   selectedPool: Pool | UpcomingPool
@@ -73,6 +85,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const dropTotalValue = poolData?.senior ? poolData?.senior.totalSupply.mul(poolData.senior!.tokenPrice) : undefined
   const tinTotalValue = poolData ? poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice) : undefined
 
+  const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
   const reserveRatio = poolData
@@ -88,34 +101,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <Box direction="row" justify="center">
-        <PoolValueLineLeft />
-        <Box
-          width="240px"
-          pad="medium"
-          elevation="small"
-          round="xsmall"
-          margin={{ bottom: 'large' }}
-          background="white"
-          direction="column"
-          style={{ textAlign: 'center' }}
-        >
-          <Heading level="4" margin={'0'} style={{ textAlign: 'center' }}>
-            <LoadingValue done={poolData?.netAssetValue !== undefined}>
-              {addThousandsSeparators(
-                toPrecision(
-                  baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18),
-                  0
-                )
-              )}{' '}
-              DAI
-            </LoadingValue>
-          </Heading>
-          <Label>Pool Value</Label>
-        </Box>
-        <PoolValueLineRight />
-      </Box>
-      <Box direction="row" justify="center" gap="large">
+      <Box direction="row" justify="between">
         <Box
           direction="column"
           justify="start"
@@ -150,7 +136,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   <TableCell scope="row">Average Financing Amount</TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
                     <LoadingValue done={avgAmount !== undefined}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(avgAmount, 18), 0))} DAI
+                      {addThousandsSeparators(toPrecision(baseToDisplay(avgAmount || new BN(0), 18), 0))} DAI
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
@@ -167,7 +153,9 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     Average Maturity
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                    <LoadingValue done={avgMaturity !== undefined}>{Math.round(avgMaturity || 0)} days</LoadingValue>
+                    <LoadingValue done={avgMaturity !== undefined}>
+                      {Math.round((avgMaturity || 0) * 10) / 10} days
+                    </LoadingValue>
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -200,6 +188,13 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             </Table>
           </Box>
         </Box>
+        <BalanceSheetDiagram direction="row">
+          <BalanceSheetDiagramLeft>
+            <BalanceSheetMidLine>&nbsp;</BalanceSheetMidLine>
+            <BalanceSheetFiller>&nbsp;</BalanceSheetFiller>
+          </BalanceSheetDiagramLeft>
+          <BalanceSheetDiagramRight>&nbsp;</BalanceSheetDiagramRight>
+        </BalanceSheetDiagram>
 
         <Box direction="column" justify="between">
           <Box
@@ -248,10 +243,13 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           </DividerTop>
 
           <Box margin={{ top: 'small', bottom: 'medium' }} style={{ textAlign: 'center' }}>
-            DROP is currently protected by a{' '}
-            <span style={{ fontWeight: 'bold' }}>
-              {Math.round((currentJuniorRatio || 0) * 10000) / 100}% TIN buffer
-            </span>
+            <div>
+              DROP is currently protected by a<br />
+              <span style={{ fontWeight: 'bold' }}>
+                {Math.round((currentJuniorRatio || 0) * 10000) / 100}% TIN buffer
+              </span>{' '}
+              (min: {Math.round((minJuniorRatio || 0) * 10000) / 100}%)
+            </div>
           </Box>
 
           <DividerBottom>
@@ -307,4 +305,9 @@ const Label = styled.div`
 
 const TrancheNote = styled.div`
   color: #777;
+`
+
+const LargeTokenLogo = styled(TokenLogo)`
+  width: 24px;
+  height: 24px;
 `

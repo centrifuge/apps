@@ -147,8 +147,16 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         </Box>
         <Table>
           <TableBody>
+            {props.tranche === 'senior' && (
+              <TableRow>
+                <TableCell scope="row">Minimum investment</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  <LoadingValue done={value !== undefined}>5.000 DAI</LoadingValue>
+                </TableCell>
+              </TableRow>
+            )}
             <TableRow>
-              <TableCell scope="row">Current Price</TableCell>
+              <TableCell scope="row">Current price</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={tokenPrice !== undefined}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice || '0', 27), 4))}
@@ -157,7 +165,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </TableRow>
             <TableRow>
               <TableCell scope="row" border={{ color: 'transparent' }}>
-                Your {token} Value
+                Your {token} value
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={value !== undefined}>

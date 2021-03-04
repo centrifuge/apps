@@ -37,15 +37,35 @@ const Overview: React.FC<Props> = (props: Props) => {
         gap="medium"
         elevation="small"
         round="xsmall"
-        pad={{ top: 'medium', left: 'medium', right: 'medium' }}
+        pad="medium"
         margin={{ bottom: 'large' }}
+        width="100%"
         background="white"
       >
-        <Box basis="1/2">
+        <Box width="400px" style={{ textAlign: 'center' }} margin={{ right: 'medium', top: '20px' }}>
           <a href={props.selectedPool.metadata.website} target="_blank">
-            <img src={props.selectedPool.metadata.media?.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
+            <img src={props.selectedPool.metadata.media?.logo} style={{ maxHeight: '60px', maxWidth: '50%' }} />
           </a>
+          <Box pad={{ top: 'large', bottom: 'medium' }} style={{ borderBottom: '1px solid #d8d8d8' }}>
+            <Heading level="5" margin={'0'}>
+              Consol Freight LLC
+            </Heading>
+            <Type>Asset Originator</Type>
+          </Box>
+          <Box pad={{ top: 'medium', bottom: 'medium' }}>
+            <Heading level="5" margin={'0'}>
+              ConsolFreight Pilot LLC (Series 4)
+            </Heading>
+            <Type>Issuer</Type>
+          </Box>
 
+          {isUpcoming && (
+            <Box margin={{ top: 'medium' }}>
+              <InvestAction pool={props.selectedPool} />
+            </Box>
+          )}
+        </Box>
+        <Box basis="2/3">
           <p>{props.selectedPool.metadata.description}</p>
 
           <div>
@@ -65,36 +85,6 @@ const Overview: React.FC<Props> = (props: Props) => {
               </Anchor>
             </AOButton>
           </div>
-        </Box>
-        <Box width="420px">
-          <Table>
-            <TableBody>
-              {Object.keys(props.selectedPool.metadata.details).map((key: string) => (
-                <TableRow key={key}>
-                  <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
-                    {key}
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>{props.selectedPool.metadata.details[key]}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {/* {!isUpcoming && (
-            <Box margin={{ top: 'medium', left: 'auto' }}>
-              <PoolLink href={'/assets'}>
-                <Anchor>
-                  <Button label="View all assets" />
-                </Anchor>
-              </PoolLink>
-            </Box>
-          )} */}
-
-          {isUpcoming && (
-            <Box margin={{ top: 'medium' }}>
-              <InvestAction pool={props.selectedPool} />
-            </Box>
-          )}
         </Box>
       </Box>
       <Heading level="4">Pool Balance</Heading>
@@ -120,4 +110,11 @@ const ButtonWithIcon = styled(Button)`
     width: 14px;
     height: 14px;
   }
+`
+
+const Type = styled.div`
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 14px;
+  color: #979797;
 `

@@ -90,17 +90,16 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
       background="white"
       margin={{ bottom: 'large' }}
     >
-      <HeaderBox pad={{ top: '4px' }} width="260px">
+      <HeaderBox pad={{ top: '4px' }} width="340px">
         <Heading level="5">{props.selectedPool.metadata.asset}</Heading>
         <Type>Asset type</Type>
       </HeaderBox>
       <HeaderBox pad={{ top: '8px' }}>
         <Heading level="4">
-          <TokenLogo src={`/static/DAI.svg`} />
-          5.000
-          <Unit>DAI</Unit>
+          30 to 90
+          <Unit>days</Unit>
         </Heading>
-        <Type>Minimum investment</Type>
+        <Type>Asset maturity</Type>
       </HeaderBox>
       <HeaderBox pad={{ top: '8px' }}>
         <Heading level="4">
@@ -110,21 +109,15 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
         </Heading>
         <Type>DROP APR</Type>
       </HeaderBox>
-      <HeaderBox pad={{ top: '8px' }}>
-        <Heading level="4">
-          {minJuniorRatio && toPrecision((minJuniorRatio * 100).toString(), 2)}
-          <Unit>%</Unit>
-        </Heading>
-        <Type>Min TIN risk buffer</Type>
-      </HeaderBox>
       <HeaderBox pad={{ top: '8px' }} style={{ borderRight: 'none' }}>
         <Heading level="4">
-          60-90
-          <Unit>days</Unit>
+          <TokenLogo src={`/static/DAI.svg`} />
+          747,681
+          <Unit>DAI</Unit>
         </Heading>
-        <Type>Average maturity</Type>
+        <Type>Pool Value</Type>
       </HeaderBox>
-      <HeaderBox pad={{ top: '10px', left: 'small' }} style={{ borderRight: 'none' }}>
+      <HeaderBox pad={{ top: '15px' }} style={{ borderRight: 'none' }}>
         {'addresses' in props.selectedPool &&
         config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
           <Anchor>
