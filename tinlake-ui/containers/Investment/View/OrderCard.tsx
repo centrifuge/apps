@@ -68,7 +68,6 @@ const OrderCard: React.FC<Props> = (props: Props) => {
       {!confirmCancellation && (
         <Info>
           <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
-            Locked{' '}
             {addThousandsSeparators(
               toPrecision(
                 baseToDisplay(
@@ -80,13 +79,12 @@ const OrderCard: React.FC<Props> = (props: Props) => {
                 4
               )
             )}{' '}
-            {token} {type} Order
+            {token} locked for {type === 'Invest' ? 'investment' : 'redemption'}
           </Heading>
           <Description>
             {!rolledOver && (
               <>
-                You have succesfully locked your {token} to {type.toLowerCase()}. This order will be executed at the end
-                of the current epoch. Afterwards you can collect your{' '}
+                This order will be executed at the end of the current epoch. Afterwards you can collect your{' '}
                 {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'}.
               </>
             )}

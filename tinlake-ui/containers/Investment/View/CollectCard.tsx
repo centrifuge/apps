@@ -58,13 +58,11 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'} waiting for collection
         </Heading>
         <Description>
-          Your order has been executed.{' '}
+          Your {type === 'Invest' ? 'investment' : 'redemption'} order has been executed.{' '}
           {type === 'Invest' &&
             `Your ${props.tranche === 'senior' ? 'DROP' : 'TIN'} tokens are already earning yield and RAD rewards. `}
-          To finalize your {type === 'Invest' ? 'investment' : 'redemption'}, please collect your{' '}
-          {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'}. Upon collection, the{' '}
-          {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'} will be transferred to your
-          wallet.
+          Please collect your {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'} at your
+          convenience to transfer them to your ETH account.
         </Description>
 
         <OrderSteps
