@@ -15,8 +15,6 @@ import {
   DividerBottom,
   DividerInner,
   DividerTop,
-  PoolValueLineLeft,
-  PoolValueLineRight,
   TokenLogo,
   BalanceSheetDiagram,
   BalanceSheetDiagramLeft,
@@ -88,12 +86,13 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
-  const reserveRatio = poolData
-    ? poolData.reserve
-        .mul(e18)
-        .div(poolData.reserve.add(poolData.netAssetValue))
-        .div(new BN('10').pow(new BN('14')))
-    : new BN(0)
+  const reserveRatio =
+    poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
+      ? poolData.reserve
+          .mul(e18)
+          .div(poolData.reserve.add(poolData.netAssetValue))
+          .div(new BN('10').pow(new BN('14')))
+      : new BN(0)
 
   React.useEffect(() => {
     dispatch(loadLoans(props.tinlake))
@@ -296,18 +295,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
 export default InvestmentOverview
 
-const Label = styled.div`
-  font-weight: 500;
-  font-size: 13px;
-  line-height: 14px;
-  color: #979797;
-`
-
 const TrancheNote = styled.div`
   color: #777;
-`
-
-const LargeTokenLogo = styled(TokenLogo)`
-  width: 24px;
-  height: 24px;
 `

@@ -1,5 +1,5 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Anchor, Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import InvestAction from '../../components/InvestAction'
 import { Pool, UpcomingPool } from '../../config'

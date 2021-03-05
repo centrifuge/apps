@@ -1,40 +1,17 @@
 import { feeToInterestRate, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
-import BN from 'bn.js'
 import { Anchor, Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import config, { Pool } from '../../config'
-import { ensureAuthed } from '../../ducks/auth'
 import { PoolData, PoolState } from '../../ducks/pool'
+import { useOnConnect } from '../../utils/hooks'
 import InvestAction from '../InvestAction'
 
 interface Props {
   tinlake: ITinlake
   selectedPool: Pool
-}
-
-const useOnConnect = () => {
-  const dispatch = useDispatch()
-  const address = useSelector<any, string | null>((state) => state.auth.address)
-  const [callback, setCallback] = React.useState(undefined as Function | undefined)
-
-  React.useEffect(() => {
-    if (callback !== undefined) {
-      callback(address)
-      setCallback(undefined)
-    }
-  }, [address])
-
-  return (cb: (address: string) => void) => {
-    if (address) {
-      cb(address)
-    }
-
-    setCallback(cb)
-    dispatch(ensureAuthed())
-  }
 }
 
 const OverviewHeader: React.FC<Props> = (props: Props) => {
@@ -46,7 +23,6 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
   const poolData = pool?.data as PoolData | undefined
 
   const dropRate = poolData?.senior?.interestRate || undefined
-  const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
 
   const invest = () => {
     if (address) {
@@ -90,18 +66,18 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
       background="white"
       margin={{ bottom: 'large' }}
     >
-      <HeaderBox pad={{ top: '4px' }} width="340px">
+      <HeaderBox width="340px">
         <Heading level="5">{props.selectedPool.metadata.asset}</Heading>
         <Type>Asset type</Type>
       </HeaderBox>
-      <HeaderBox pad={{ top: '8px' }}>
+      <HeaderBox>
         <Heading level="4">
           30 to 90
           <Unit>days</Unit>
         </Heading>
         <Type>Asset maturity</Type>
       </HeaderBox>
-      <HeaderBox pad={{ top: '8px' }}>
+      <HeaderBox>
         <Heading level="4">
           <TokenLogo src={`/static/DROP_final.svg`} />
           {toPrecision(feeToInterestRate(dropRate || '0'), 2)}
@@ -109,7 +85,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
         </Heading>
         <Type>DROP APR</Type>
       </HeaderBox>
-      <HeaderBox pad={{ top: '8px' }} style={{ borderRight: 'none' }}>
+      <HeaderBox style={{ borderRight: 'none' }}>
         <Heading level="4">
           <TokenLogo src={`/static/DAI.svg`} />
           747,681
@@ -117,7 +93,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
         </Heading>
         <Type>Pool Value</Type>
       </HeaderBox>
-      <HeaderBox pad={{ top: '15px' }} style={{ borderRight: 'none' }}>
+      <HeaderBox style={{ borderRight: 'none' }}>
         {'addresses' in props.selectedPool &&
         config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
           <Anchor>
@@ -136,14 +112,17 @@ export default OverviewHeader
 const HeaderBox = styled(Box)<{ width?: string }>`
   text-align: center;
   border-right: 1px solid #dadada;
-  padding-right: 20px;
   width: ${(props) => props.width || '200px'};
+  flex-direction: column;
+  justify-content: center;
+  padding: 10px 20px 10px 0;
+  height: 80px;
 
   h3,
   h4,
   h5,
   h6 {
-    margin: 4px;
+    margin: 0 4px 4px 4px;
   }
 `
 
@@ -170,8 +149,3 @@ const Unit = styled.span`
   margin-left: 4px;
   color: #333;
 `
-
-const parseRatio = (num: BN): number => {
-  const base = new BN(10).pow(new BN(20))
-  return num.div(base).toNumber() / 10 ** 7
-}
