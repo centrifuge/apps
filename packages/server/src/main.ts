@@ -12,6 +12,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  app.enableCors({ origin: true, credentials: true })
+
   // set up the express session storage
   app.use(
     session({
