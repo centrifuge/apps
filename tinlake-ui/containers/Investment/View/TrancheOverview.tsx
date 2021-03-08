@@ -244,7 +244,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 <br />
                 Minimum investment amount: <b>5.000 DAI</b>
               </Info>
-              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+              <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
                 <PoolLink href={'/onboarding'}>
                   <Anchor>
                     <Button label="Invest" primary />

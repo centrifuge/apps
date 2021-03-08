@@ -6,7 +6,7 @@ import { connect } from 'react-redux'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { toPrecision } from '../../../utils/toPrecision'
+import { toMaxPrecision } from '../../../utils/toPrecision'
 import { Description, Info, OrderSteps } from './styles'
 import { Card } from './TrancheOverview'
 
@@ -54,7 +54,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
     <Box>
       <Info>
         <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
-          {addThousandsSeparators(toPrecision(baseToDisplay(amount, 18), 4))}{' '}
+          {addThousandsSeparators(toMaxPrecision(baseToDisplay(amount, 18), 4))}{' '}
           {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'} waiting for collection
         </Heading>
         <Description>

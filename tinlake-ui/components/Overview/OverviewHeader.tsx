@@ -1,4 +1,5 @@
-import { feeToInterestRate, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
+import { addThousandsSeparators, baseToDisplay, feeToInterestRate, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Anchor, Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
@@ -94,7 +95,12 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
         <HeaderBox style={{ borderRight: 'none' }}>
           <Heading level="4">
             <TokenLogo src={`/static/DAI.svg`} />
-            747,681
+            {addThousandsSeparators(
+              toPrecision(
+                baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18),
+                0
+              )
+            )}
             <Unit>DAI</Unit>
           </Heading>
           <Type>Pool Value</Type>

@@ -2660,6 +2660,7 @@ __metadata:
     react-number-format: 4.4.1
     react-redux: 7.2.0
     react-test-renderer: 16.13.1
+    react-twitter-embed: ^3.0.3
     recharts: ^1.8.5
     redux: 4.0.5
     redux-thunk: 2.3.0
@@ -13689,7 +13690,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enzyme-adapter-react-16@npm:^1.14.0":
+"enzyme-adapter-react-16@npm:^1.11.0, enzyme-adapter-react-16@npm:^1.14.0":
   version: 1.15.6
   resolution: "enzyme-adapter-react-16@npm:1.15.6"
   dependencies:
@@ -15176,6 +15177,13 @@ __metadata:
     signal-exit: ^3.0.2
     strip-final-newline: ^2.0.0
   checksum: 79bd736acd63aa7c0afb32cc99af21cfd70db696580686c7cd56c177857b93b78bc0b9bb2b4410f377f46c71c566c8e723987e71ef0bc9b23791bfbced02f75c
+  languageName: node
+  linkType: hard
+
+"exenv@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "exenv@npm:1.2.2"
+  checksum: 09fd080c0478739f0154916b73dea07f30f97972e1b3be3368d2b96d282d889b509f05e163d830e323c9ab1e94b0a293a9947b410651325df467c404f37f32f1
   languageName: node
   linkType: hard
 
@@ -26147,6 +26155,13 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"react-proptype-conditional-require@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "react-proptype-conditional-require@npm:1.0.4"
+  checksum: 6fdffb5f1a29b6d090cd4c25065a9e29425c2e7f6edfe96058b1eda59685162f724ab622c6d8054f3d9f2b1c45d1390b5d893298ad56bfe8fbce71aa707d6fed
+  languageName: node
+  linkType: hard
+
 "react-redux@npm:7.2.0":
   version: 7.2.0
   resolution: "react-redux@npm:7.2.0"
@@ -26348,6 +26363,22 @@ fsevents@~2.1.2:
     react: ">=15.0.0"
     react-dom: ">=15.0.0"
   checksum: eefed08c48a0d377b5fac3ac7fac54ed986d5dcdd4494f36075954c9d2d257072a9d18cc02c6d8e6698034722b1ff9419ad0c24ef068dea742edcff9f8ea4ba9
+  languageName: node
+  linkType: hard
+
+"react-twitter-embed@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "react-twitter-embed@npm:3.0.3"
+  dependencies:
+    enzyme-adapter-react-16: ^1.11.0
+    exenv: ^1.2.2
+    react-proptype-conditional-require: ^1.0.4
+    scriptjs: ^2.5.9
+  peerDependencies:
+    prop-types: ^15.5.4
+    react: ^15.0.0 || ^16.0.0
+    react-dom: ^15.0.0 || ^16.0.0
+  checksum: 646d7068133976e6fa8f61ba31c773d52ae3c310ea40bf9ebc9e2da06e0b0a4649f60e403da0a7bdf561ccf6468ed5a40d778639907c5d3e37b6ca164ff63cd8
   languageName: node
   linkType: hard
 
@@ -27802,6 +27833,13 @@ resolve@~1.17.0:
     ajv: ^6.12.5
     ajv-keywords: ^3.5.2
   checksum: a084f593f222560c412a4d8f40c92386c01c1c709f27c0672c2f02927a4d4d475f57f8b8e91198d0defb452add160476a03f07a05b26200a64b5124fa874e158
+  languageName: node
+  linkType: hard
+
+"scriptjs@npm:^2.5.9":
+  version: 2.5.9
+  resolution: "scriptjs@npm:2.5.9"
+  checksum: f0993ccbfc4a0b0a132edd2fe55aa18184be7bbd395df4841863dd5022c2a5c9154cc3a5d746f630e9be66b18b871997fb048e8973721fefb31152d903a3e8c4
   languageName: node
   linkType: hard
 

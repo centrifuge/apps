@@ -7,7 +7,7 @@ import { PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
-import { toPrecision } from '../../../utils/toPrecision'
+import { toMaxPrecision } from '../../../utils/toPrecision'
 import { Description, Info, MinTimeRemaining, OrderSteps, Warning } from './styles'
 import { Card } from './TrancheOverview'
 
@@ -69,7 +69,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
         <Info>
           <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
             {addThousandsSeparators(
-              toPrecision(
+              toMaxPrecision(
                 baseToDisplay(
                   props.disbursements.remainingRedeemToken.isZero()
                     ? props.disbursements.remainingSupplyCurrency
