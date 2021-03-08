@@ -8,6 +8,10 @@
     "description": "The asset value or NAV reflects the present value of the outstanding portfolio of financings. It is the sum of the present values of the risk-adjusted expected repayments of all outstanding financings.",
     "link": "https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-2-valuing-an-asset-portfolio-247d8f2f0d5"
   },
+  "assetMaturity": {
+    "title": "Asset Maturity",
+    "description": "This indicates the expected range of maturities of the pools underlying assets, i.e. the time period after which the financing of this assets matures and will be paid back. It does not limit the duration of investments - Tinlake pools are \"revolving\" pools - but gives an indication how often repayments of the issuer become available for redemption."
+  },
   "poolReserve": {
     "title": "Pool Reserve",
     "description": "Amount of currency currently held in the pool that is not currently deployed for financings by the asset originator. The reserve is available for financings by the asset originator and redemptions by investors."

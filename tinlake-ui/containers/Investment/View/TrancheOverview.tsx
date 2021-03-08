@@ -1,4 +1,4 @@
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import { useRouter } from 'next/router'
@@ -147,14 +147,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         </Box>
         <Table>
           <TableBody>
-            {props.tranche === 'senior' && (
-              <TableRow>
-                <TableCell scope="row">Minimum investment</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={value !== undefined}>5.000 DAI</LoadingValue>
-                </TableCell>
-              </TableRow>
-            )}
             <TableRow>
               <TableCell scope="row">Current price</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
@@ -246,13 +238,20 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           ('onboard' in router.query ||
             ('addresses' in props.pool &&
               config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))) && (
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <PoolLink href={'/onboarding'}>
-                <Anchor>
-                  <Button label="Invest" primary />
-                </Anchor>
-              </PoolLink>
-            </Box>
+            <>
+              <Info>
+                DROP APR: <b>{toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2)}%</b>
+                <br />
+                Minimum investment amount: <b>5.000 DAI</b>
+              </Info>
+              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                <PoolLink href={'/onboarding'}>
+                  <Anchor>
+                    <Button label="Invest" primary />
+                  </Anchor>
+                </PoolLink>
+              </Box>
+            </>
           )}
 
         {props.pool &&

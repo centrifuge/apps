@@ -8,6 +8,7 @@ import config, { Pool } from '../../config'
 import { PoolData, PoolState } from '../../ducks/pool'
 import { useOnConnect } from '../../utils/hooks'
 import InvestAction from '../InvestAction'
+import { Tooltip } from '../Tooltip'
 
 interface Props {
   tinlake: ITinlake
@@ -66,33 +67,39 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
       background="white"
       margin={{ bottom: 'large' }}
     >
-      <HeaderBox width="340px">
+      <HeaderBox width="400px">
         <Heading level="5">{props.selectedPool.metadata.asset}</Heading>
         <Type>Asset type</Type>
       </HeaderBox>
-      <HeaderBox>
-        <Heading level="4">
-          30 to 90
-          <Unit>days</Unit>
-        </Heading>
-        <Type>Asset maturity</Type>
-      </HeaderBox>
-      <HeaderBox>
-        <Heading level="4">
-          <TokenLogo src={`/static/DROP_final.svg`} />
-          {toPrecision(feeToInterestRate(dropRate || '0'), 2)}
-          <Unit>%</Unit>
-        </Heading>
-        <Type>DROP APR</Type>
-      </HeaderBox>
-      <HeaderBox style={{ borderRight: 'none' }}>
-        <Heading level="4">
-          <TokenLogo src={`/static/DAI.svg`} />
-          747,681
-          <Unit>DAI</Unit>
-        </Heading>
-        <Type>Pool Value</Type>
-      </HeaderBox>
+      <Tooltip id="assetMaturity">
+        <HeaderBox>
+          <Heading level="4">
+            30 to 90
+            <Unit>days</Unit>
+          </Heading>
+          <Type>Asset maturity</Type>
+        </HeaderBox>
+      </Tooltip>
+      <Tooltip id="dropAPR">
+        <HeaderBox>
+          <Heading level="4">
+            <TokenLogo src={`/static/DROP_final.svg`} />
+            {toPrecision(feeToInterestRate(dropRate || '0'), 2)}
+            <Unit>%</Unit>
+          </Heading>
+          <Type>DROP APR</Type>
+        </HeaderBox>
+      </Tooltip>
+      <Tooltip id="poolValue">
+        <HeaderBox style={{ borderRight: 'none' }}>
+          <Heading level="4">
+            <TokenLogo src={`/static/DAI.svg`} />
+            747,681
+            <Unit>DAI</Unit>
+          </Heading>
+          <Type>Pool Value</Type>
+        </HeaderBox>
+      </Tooltip>
       <HeaderBox style={{ borderRight: 'none' }}>
         {'addresses' in props.selectedPool &&
         config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
