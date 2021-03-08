@@ -31,10 +31,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
       }
 
       const solution = await tinlake.runSolver(epochState, orders)
-      const solutionSum = solution.dropInvest
-        .add(solution.dropRedeem)
-        .add(solution.tinInvest)
-        .add(solution.tinRedeem)
+      const solutionSum = solution.dropInvest.add(solution.dropRedeem).add(solution.tinInvest).add(solution.tinRedeem)
 
       const fulfillment = solutionSum
         .mul(e18)
@@ -62,9 +59,9 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
 
         const solveTx = await tinlake.solveEpoch()
         console.log(`Closing & solving ${name} with tx: ${solveTx.hash}`)
-        await tinlake.getTransactionReceipt(solveTx)
 
         pushNotificationToSlack(
+          pool,
           `I just closed epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${pool.metadata.slug}|${name}>*.`,
           [
             {
@@ -133,10 +130,12 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
         const tinRatio = e27.sub(epochState.seniorAsset.mul(e27).div(epochState.netAssetValue.add(epochState.reserve)))
         const minTinRatio = e27.sub(epochState.maxDropRatio)
         pushNotificationToSlack(
+          pool,
           `Epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${
             pool.metadata.slug
-          }|${name}>* has orders locked and can be manually closed. ${parseFloat(fulfillment.toString()) /
-            100}% of all orders could be fulfilled.`,
+          }|${name}>* has orders locked and can be manually closed. ${
+            parseFloat(fulfillment.toString()) / 100
+          }% of all orders could be fulfilled.`,
           [
             {
               type: 'section',
