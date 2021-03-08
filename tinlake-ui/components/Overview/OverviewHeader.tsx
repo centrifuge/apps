@@ -18,7 +18,7 @@ interface Props {
 
 const OverviewHeader: React.FC<Props> = (props: Props) => {
   const router = useRouter()
-  const onConnect = useOnConnect()
+  const onConnect = useOnConnect(props.tinlake)
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
   const pool = useSelector<any, PoolState>((state) => state.pool)
@@ -39,7 +39,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
       }
     } else {
       onConnect(async (addr: string) => {
-        console.log(props)
+        console.log(3)
         const inAMemberlist = (await props.tinlake.checkSeniorTokenMemberlist(addr))
           ? true
           : await props.tinlake.checkJuniorTokenMemberlist(addr)

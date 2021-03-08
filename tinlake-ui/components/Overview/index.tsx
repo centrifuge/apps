@@ -84,7 +84,12 @@ const Overview: React.FC<Props> = (props: Props) => {
           </Box>
         </Box>
         <Box basis="1/3">
-          <Heading level="4">Tweets by @NewSilverLend</Heading>
+          <Heading level="4">
+            Tweets by{' '}
+            <a href="" target="_blank" style={{ textDecoration: 'none', color: '#000' }}>
+              @NewSilverLend
+            </a>
+          </Heading>
           <Box
             elevation="small"
             round="xsmall"

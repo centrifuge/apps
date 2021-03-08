@@ -7,6 +7,8 @@ import { executePools } from './tasks/executePools'
 import { submitSolutions } from './tasks/submitSolutions'
 import CronExpression from './util/CronExpression'
 import { loadFromIPFS, PoolMap } from './util/ipfs'
+import { NonceManager } from '@ethersproject/experimental'
+import { writeoffAssets } from './tasks/writeoffAssets'
 
 const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
 let pools: PoolMap = {}
@@ -14,7 +16,13 @@ let pools: PoolMap = {}
 const run = async () => {
   console.log('Decrypting wallet')
   const signer = await ethers.Wallet.fromEncryptedJson(config.signerEncryptedJson, config.signerPassword)
-  const signerWithProvider = signer.connect(provider)
+
+  // Since the bot can submit multiple tx in quick succession, we need the experimental NonceManager to make sure they don't overlap.
+  // Source: https://github.com/ethers-io/ethers.js/issues/435#issuecomment-581734980
+  const signerWithProvider = new NonceManager(signer.connect(provider))
+
+  await submitSolutions(pools, provider, signerWithProvider)
+  await executePools(pools, provider, signerWithProvider)
 
   console.log(`Booting Dennis 2.0 as ${signer.address}`)
   pools = await loadFromIPFS(provider)
@@ -50,6 +58,12 @@ const run = async () => {
     await checkDueAssets(pools)
   })
   cronJobs.set('checkDueAssets', checkDueAssetsTask)
+
+  let writeoffAssetsTask = new CronJob('0 15 * * *', async () => {
+    // Check due assets every day at 4pm CET (3pm UTC)
+    await writeoffAssets(pools)
+  })
+  cronJobs.set('writeoffAssets', writeoffAssetsTask)
 
   cronJobs.forEach((task, _) => task.start())
 }

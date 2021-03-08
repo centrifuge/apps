@@ -1,3 +1,4 @@
+import { ITinlake } from '@centrifuge/tinlake-js'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { ensureAuthed } from '../ducks/auth'
@@ -21,24 +22,31 @@ export const useInterval = (callback: any, delay: number) => {
   }, [delay])
 }
 
-export const useOnConnect = () => {
+export const useOnConnect = (tinlake: ITinlake) => {
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)
-  const [callback, setCallback] = React.useState(undefined as Function | undefined)
+  const [savedCallback, setCallback] = React.useState(undefined as Function | undefined)
 
   React.useEffect(() => {
-    if (callback !== undefined) {
-      callback(address)
-      setCallback(undefined)
+    console.log(address)
+    if (savedCallback !== undefined && address !== null) {
+      console.log('/')
+      savedCallback(address)
+      setTimeout(() => {
+        setCallback(undefined)
+      }, 1)
     }
-  }, [address])
+  }, [savedCallback, address, tinlake])
 
   return (cb: (address: string) => void) => {
+    console.log(address)
     if (address) {
+      console.log(1)
       cb(address)
+    } else {
+      console.log(2)
+      setCallback(cb)
+      dispatch(ensureAuthed())
     }
-
-    setCallback(cb)
-    dispatch(ensureAuthed())
   }
 }
