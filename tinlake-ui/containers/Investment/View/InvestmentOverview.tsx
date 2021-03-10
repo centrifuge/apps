@@ -140,7 +140,9 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell scope="row">Average Financing Fee</TableCell>
+                  <TableCell scope="row">
+                    <Tooltip id="financingFee">Average Financing Fee</Tooltip>
+                  </TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
                     <LoadingValue done={avgInterestRate !== undefined}>
                       {toPrecision(feeToInterestRate(avgInterestRate || new BN(0)), 2)}%
@@ -177,7 +179,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               <TableBody>
                 <TableRow>
                   <TableCell scope="row" border={{ color: 'transparent' }}>
-                    Reserve Ratio
+                    <Tooltip id="reserveRatio">Reserve Ratio</Tooltip>
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                     <LoadingValue done={reserveRatio !== undefined}>
@@ -226,10 +228,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   <LoadingValue done={poolData?.senior !== undefined} height={21}>
                     Current token price:{' '}
                     {poolData?.senior &&
-                      addThousandsSeparators(
-                        toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 4)
-                      )}{' '}
-                    DAI
+                      addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 4))}
                   </LoadingValue>
                 </span>
                 <Box margin={{ left: 'auto' }} direction="row">
@@ -283,7 +282,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 <span>
                   <LoadingValue done={poolData?.junior !== undefined} height={21}>
                     Current token price:{' '}
-                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.tokenPrice || '0', 27), 4))} DAI
+                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.tokenPrice || '0', 27), 4))}
                   </LoadingValue>
                 </span>
               </Box>

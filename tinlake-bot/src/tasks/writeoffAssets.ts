@@ -4,6 +4,7 @@ import { PoolMap } from '../util/ipfs'
 export const writeoffAssets = async (pools: PoolMap) => {
   console.log('Checking if any assets should be written off')
   try {
+    // TODO: should be today eod or start of day
     const today = Date.now() / 1000
     const data = await fetchFromSubgraph(`
       query {
