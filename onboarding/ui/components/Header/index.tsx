@@ -2,10 +2,25 @@ import * as React from 'react'
 import { Box, Image } from 'grommet'
 import Link from 'next/link'
 import { PoolSelector } from '../PoolSelector'
+import { NavBar } from '@centrifuge/axis-nav-bar'
+import { useRouter } from 'next/router'
 
 interface Props {
   onboardingApiHost: string
 }
+
+interface MenuItem {
+  label: string
+  route: string
+  inPool: boolean
+  secondary?: boolean
+  env: string
+}
+
+const menuItems: MenuItem[] = [
+  { label: 'Leads', route: '/', inPool: true, env: '' },
+  { label: 'Investors', route: '/investors', inPool: true, env: '' },
+]
 
 const Header: React.FC<Props> = (props: Props) => {
   const [pools, setPools] = React.useState([])
@@ -19,6 +34,12 @@ const Header: React.FC<Props> = (props: Props) => {
 
     getPools()
   }, [])
+
+  const router = useRouter()
+
+  const onRouteClick = (item: MenuItem) => {
+    router.push(item.route)
+  }
 
   return (
     <Box
@@ -51,6 +72,18 @@ const Header: React.FC<Props> = (props: Props) => {
             </Link>
           </div>
           <PoolSelector title={'Fortunafi Series 1'} pools={pools} />
+          <Box flex="grow" basis="auto" style={{ height: 32, padding: '0 16px 0 32px' }}>
+            <NavBar
+              border={false}
+              itemGap="large"
+              menuItems={menuItems}
+              selectedRoute={router.route}
+              onRouteClick={onRouteClick}
+              pad={{ horizontal: 'none' }}
+              menuItemProps={{ style: { fontSize: 14 } }}
+              hamburgerBreakpoint={1000}
+            />
+          </Box>
         </Box>
       </Box>
     </Box>

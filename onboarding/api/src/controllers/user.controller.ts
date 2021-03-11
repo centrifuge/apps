@@ -16,7 +16,7 @@ export class UserController {
   // TODO: add authentication to this endpoint
   @Get('users/:poolId')
   async getUsers(@Param() params) {
-    return {}
+    // return {}
 
     const pool = this.poolService.get(params.poolId)
     if (!pool) throw new NotFoundException(`Pool ${params.poolId} not found`)
@@ -54,11 +54,11 @@ export class UserController {
       const addresses = user.id in addressesByUserId ? addressesByUserId[user.id] : []
       const userWithRelations = { user, agreements, addresses }
 
-      if (agreements.length === 0 && user.status !== 'none') groups['Submitted KYC'].push(userWithRelations)
-      else if (agreements.length === 0) groups['Interested'].push(userWithRelations)
-      else if ((user.status === 'verified' && agreements.length === 0) || !agreements[0].signedAt) {
+      if (user.status === 'verified' && (agreements.length === 0 || !agreements[0].signedAt)) {
         groups['Awaiting signature'].push(userWithRelations)
-      } else if (agreements[0].counterSignedAt && user.status !== 'verified')
+      } else if (agreements.length === 0 && user.status !== 'none') groups['Submitted KYC'].push(userWithRelations)
+      else if (agreements.length === 0) groups['Interested'].push(userWithRelations)
+      else if (agreements[0].counterSignedAt && user.status !== 'verified')
         groups['Signed, awaiting KYC'].push(userWithRelations)
       else if (agreements[0].counterSignedAt) groups['Ready to invest'].push(userWithRelations)
       else if (agreements[0].signedAt) groups['Awaiting counter-signature'].push(userWithRelations)

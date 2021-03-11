@@ -2100,6 +2100,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@centrifuge/axis-nav-bar@npm:^0.3.2-develop.47":
+  version: 0.3.2-develop.51
+  resolution: "@centrifuge/axis-nav-bar@npm:0.3.2-develop.51"
+  peerDependencies:
+    grommet: 2.7.x
+    react: ">= 16.6.1"
+    react-dom: ">= 16.6.1"
+    styled-components: ">= 4.x"
+  checksum: a6f7afb8ed63c30f924a8eae4a8a9f38d0fdf50382c765f6fa62d096d5d34635b35fd0562135dd863549aec41fa5d8aded2f06122ccdb9fa175c6856468bf0f2
+  languageName: node
+  linkType: hard
+
 "@centrifuge/axis-nav-bar@npm:^0.4.2-develop.a1231ee.147":
   version: 0.4.2-develop.fa0a71f.151
   resolution: "@centrifuge/axis-nav-bar@npm:0.4.2-develop.fa0a71f.151"
@@ -2425,7 +2437,7 @@ __metadata:
   resolution: "@centrifuge/onboarding-ui@workspace:onboarding/ui"
   dependencies:
     "@centrifuge/axis-modal": 0.1.1-develop.57
-    "@centrifuge/axis-nav-bar": 0.4.2-develop.109
+    "@centrifuge/axis-nav-bar": ^0.3.2-develop.47
     "@centrifuge/axis-theme": 0.4.2-develop.145
     "@centrifuge/axis-web3-wallet": 0.0.3-develop.a14b10c.151
     "@centrifuge/onboarding-api": "workspace:*"
