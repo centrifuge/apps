@@ -33,7 +33,7 @@ export interface UserRewardsState {
 /**
  * Process to earn and claim rewards:
  * 1. User earns rewards on Ethereum for any investments on that Ethereum account `totalEarnedRewards`
- * 2. After holding a non zero investements for 60 days, those rewards become claimable
+ * 2. After holding a non zero investements for 30 (formerly 60) days, those rewards become claimable
  * 3. To claim rewards, user needs to link a Cent Chain account to the Ethereum account. If there is none, any rewards
  *    are in `unlinkedRewards`. If there is a link, rewards will be fully assigned to the (last) linked Cent Chain
  *    account.
