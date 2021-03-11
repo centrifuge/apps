@@ -239,11 +239,11 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
 export default UserRewards
 
 const day = 24 * 60 * 60
-const minNonZeroDays = 61
+const minNonZeroDays = 31
 
 function comebackDate(nonZero: BN | null | undefined): null | string {
   if (!nonZero || nonZero.isZero()) {
-    return 'You can not yet claim your rewards, please come back after investing in a Tinlake pool and waiting for 60 days.'
+    return 'You can not yet claim your rewards, please come back after investing in a Tinlake pool and waiting for 30 days.'
   }
 
   const start = nonZero
@@ -261,7 +261,7 @@ function comebackDate(nonZero: BN | null | undefined): null | string {
   }
 
   return (
-    `You cannot claim your RAD rewards yet. RAD rewards can only be claimed after a minimum investment period of 60 ` +
+    `You cannot claim your RAD rewards yet. RAD rewards can only be claimed after a minimum investment period of 30 ` +
     `days. Your first eligible investment was made ${startDate}. Please come back in ${
       diff.eqn(1) ? '1 day' : `${diff.toString()} days`
     } on ${targetDate} to claim your RAD rewards.`
