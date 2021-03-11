@@ -1,6 +1,7 @@
 import { CronJob } from 'cron'
 import { ethers } from 'ethers'
 import config from './config'
+import { checkDueAssets } from './tasks/checkDueAssets'
 import { closePools } from './tasks/closePools'
 import { executePools } from './tasks/executePools'
 import { submitSolutions } from './tasks/submitSolutions'
@@ -26,8 +27,8 @@ const run = async () => {
   })
   cronJobs.set('retrievePools', retrievePoolsTask)
 
-  let closePoolsTask = new CronJob('0 14 * * *', async () => {
-    // Close pool epochs every day at 3pm CET (2pm UTC)
+  let closePoolsTask = new CronJob('0 9 * * *', async () => {
+    // Close pool epochs every day at 10am CET (9am UTC)
     await closePools(pools, provider, signerWithProvider)
   })
   cronJobs.set('closePools', closePoolsTask)
@@ -43,6 +44,12 @@ const run = async () => {
     await executePools(pools, provider, signerWithProvider)
   })
   cronJobs.set('executePools', executePoolsTask)
+
+  let checkDueAssetsTask = new CronJob('0 14 * * *', async () => {
+    // Check due assets every day at 3pm CET (2pm UTC)
+    await checkDueAssets(pools)
+  })
+  cronJobs.set('checkDueAssets', checkDueAssetsTask)
 
   cronJobs.forEach((task, _) => task.start())
 }
