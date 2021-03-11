@@ -6,7 +6,7 @@
     "start:prod": "nodemon",
     "pretest": "yarn workspace @centrifuge/gateway-lib run build ",
     "test": "cross-env CI=true yarn workspaces run test ",
-    "start": "yarn workspace @centrifuge/gateway-lib run start & yarn workspace @centrifuge/gateway-server run start & yarn workspace @centrifuge/gateway-ui run start",
+    "start": "concurrently \"yarn workspace @centrifuge/gateway-lib run start\" \"yarn workspace @centrifuge/gateway-server run start\" \"yarn workspace @centrifuge/gateway-ui run start\"",
     "build": "yarn workspaces run build",
     "postbuild": "yarn run move:assets",
     "move:assets": "yarn run move:email-templates && yarn run move:ui",
@@ -32,5 +32,8 @@
       "enzyme-to-json/serializer"
     ]
   },
-  "proxy": "http://localhost:3002"
+  "proxy": "http://localhost:3002",
+  "devDependencies": {
+    "concurrently": "^6.0.0"
+  }
 }
