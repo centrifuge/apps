@@ -2,7 +2,7 @@ FROM node:14.15.4-alpine3.10
 
 RUN apk add libsecret-dev git curl make g++
 
-RUN git clone --branch compile-errors https://github.com/ana0/tinlake-subgraph.git
+RUN git clone https://github.com/centrifuge/tinlake-subgraph.git
 
 WORKDIR tinlake-subgraph
 
@@ -25,6 +25,6 @@ RUN ./node_modules/.bin/graph build ./subgraph.yaml
 
 # files for pinning the pools metadata to ipfs
 COPY pinToIpfs.js .
-COPY pools-metadata.js .
+COPY pools-metadata.json .
 
 COPY deploy.sh .
