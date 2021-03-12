@@ -78,6 +78,7 @@ services:
       - ETH_PRIVATE_KEY=${ETH_ADMIN_PRIVATE_KEY}
       - POOL_ID=${POOL_ID}
       - IPFS_METADATA=${IPFS_METADATA}
+      - IPFS_ROOT=${IPFS_ROOT}
     command: ./deploy.sh
 
   subgraph:

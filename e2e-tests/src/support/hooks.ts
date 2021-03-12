@@ -3,11 +3,11 @@ import { After, Before, Status } from '@cucumber/cucumber'
 import { closeBrowser, openBrowser, takeScreenshot } from './browser-actions'
 import { CentrifugeWorld } from './world'
 
+// used for tests that do not require metamask (ie. dashboard)
 Before(async function(this: CentrifugeWorld) {
   this.clearContext()
 
   await openBrowser(this)
-  await this.metamaskInit()
 })
 
 After(async function(this: CentrifugeWorld, scenario) {
@@ -28,3 +28,11 @@ After(async function(this: CentrifugeWorld, scenario) {
 
   await closeBrowser(this)
 })
+
+// used for tests that require a metamask login
+Before({tags: "@metamask"}, async function () {
+  this.clearContext()
+
+  await openBrowser(this)
+  await this.metamaskInit()
+});

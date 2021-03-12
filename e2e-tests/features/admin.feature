@@ -1,3 +1,4 @@
+@metamask
 # Feature: Set min TIN ratio
 
 #   Only admins should be allowed to do this
