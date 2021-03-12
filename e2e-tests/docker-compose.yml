@@ -41,7 +41,7 @@ services:
       - ipfs:/data/ipfs
 
   graph:
-    image: graphprotocol/graph-node:v0.19.2
+    image: graphprotocol/graph-node:v0.21.0
     container_name: graph
     depends_on:
       - db
@@ -54,11 +54,14 @@ services:
       - ethereum=${ETH_NETWORK}:http://parity:8545
       - ipfs=ipfs:5001
       - postgres_db=${POSTGRES_DB}
-      - postgres_host=db:5432
+      - postgres_host=db
       - postgres_pass=${POSTGRES_PASSWORD}
       - postgres_user=${POSTGRES_USER}
+      - postgres_port=5432
       - GRAPH_ALLOW_NON_DETERMINISTIC_IPFS="true"
       - GRAPH_ETH_CALL_BY_NUMBER="true"
+      - GRAPH_LOG=info
+      - GRAPH_IPFS_TIMEOUT=12000
 
   contracts:
     build:
@@ -73,6 +76,8 @@ services:
       - ETH_FROM=${ETH_FROM}
       - ETH_GAS=${ETH_GAS}
       - ETH_PRIVATE_KEY=${ETH_ADMIN_PRIVATE_KEY}
+      - POOL_ID=${POOL_ID}
+      - IPFS_METADATA=${IPFS_METADATA}
     command: ./deploy.sh
 
   subgraph:
