@@ -157,7 +157,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     <LoadingValue done={avgMaturity !== undefined}>
                       {avgMaturity! > 90
                         ? `${Math.round(((avgMaturity || 0) / (365 / 12)) * 10) / 10} months`
-                        : `${Math.round(((avgMaturity || 0) / 7) * 10) / 10} weeks`}
+                        : `${Math.round((avgMaturity || 0) * 10) / 10} days`}
                     </LoadingValue>
                   </TableCell>
                 </TableRow>

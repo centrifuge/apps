@@ -28,6 +28,8 @@ interface PoolMetadata {
   asset: string
   discourseLink?: string
   securitize?: SecuritizeData
+  attributes?: { [key: string]: string | { [key: string]: string } }
+  assetMaturity?: string
 }
 
 export interface BasePool {
@@ -154,7 +156,9 @@ const metadataSchema = yup.object().shape({
   media: mediaSchema,
   website: yup.string(),
   details: yup.object(),
+  attributes: yup.object(),
   asset: yup.string().required('poolSchema.asset is required'),
+  assetMaturity: yup.string(),
   discourseLink: yup.string(),
   securitize: securitizeDataSchema,
 })

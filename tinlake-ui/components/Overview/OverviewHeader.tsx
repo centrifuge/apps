@@ -74,10 +74,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
       </HeaderBox>
       <Tooltip id="assetMaturity">
         <HeaderBox>
-          <Heading level="4">
-            30 to 90
-            <Unit>days</Unit>
-          </Heading>
+          <Heading level="4">{props.selectedPool.metadata.assetMaturity}</Heading>
           <Type>Asset maturity</Type>
         </HeaderBox>
       </Tooltip>
