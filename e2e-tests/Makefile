@@ -25,6 +25,10 @@ logs: ## Follow container logs
 clean: ## Remove volumes
 	docker volume prune --filter label=${PROJECT}
 
+.PHONY: test
+test: 
+	bash ./scripts/waitForTest.sh
+
 .PHONY: start
 ## Prune all volumes and start containers
 start: | clean up

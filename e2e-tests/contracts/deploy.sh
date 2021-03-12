@@ -58,6 +58,9 @@ make build
 make test-config
 make deploy
 
+# register the ipfs metadata hash with the pools registry
+seth send $POOLS_REGISTRY "file(address,bool,string,string)" $POOL_ID true \"Local_Revolving_Pool\" \"${IPFS_METADATA}\"
+
 echo "PROXY_REGISTRY : " $PROXY_REGISTRY
 echo "POOLS_REGISTRY : " $POOLS_REGISTRY
 echo "TINLAKE_CLAIM_RAD : " $TINLAKE_CLAIM_RAD
