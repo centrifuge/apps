@@ -1,3 +1,4 @@
+@metamask
 Feature: Mint NFT
 
   Kovan Staging only

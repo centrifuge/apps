@@ -1,7 +1,10 @@
 const mainnetPools = require('@centrifuge/tinlake-pools-mainnet')
 const kovanPools = require('@centrifuge/tinlake-pools-kovan')
-const localPools = require('../subgraph/pools-metadata.js')
+const localPool = require('../subgraph/pools-metadata.json')
 require('dotenv').config()
+
+const localPools = [localPool];
+//localPools[localPool.addresses.ROOT_CONTRACT] = localPool;
 
 export interface Config {
   gatewayUrl: string
