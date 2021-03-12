@@ -1,3 +1,4 @@
+@metamask
 Feature: Investment flow
 
     Only admins should be allowed to do this

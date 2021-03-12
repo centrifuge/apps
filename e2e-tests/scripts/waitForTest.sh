@@ -17,3 +17,5 @@ until [ -z `docker-compose ps -q contracts` ] || [ -z `docker ps -q --no-trunc |
 done
 
 echo "Finished contracts"
+
+yarn test -- features/dashboard.feature

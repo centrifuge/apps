@@ -59,6 +59,9 @@ make test-config
 make deploy
 
 # register the ipfs metadata hash with the pools registry
+# first we have to register the root, using the pools registry address itself as the key, then we can add the actual pool
+# the root and the pools files have different format
+seth send $POOLS_REGISTRY "file(address,bool,string,string)" $POOLS_REGISTRY false \"registry\" \"${IPFS_ROOT}\"
 seth send $POOLS_REGISTRY "file(address,bool,string,string)" $POOL_ID true \"Local_Revolving_Pool\" \"${IPFS_METADATA}\"
 
 echo "PROXY_REGISTRY : " $PROXY_REGISTRY
