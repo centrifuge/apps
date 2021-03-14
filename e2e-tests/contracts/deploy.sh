@@ -11,9 +11,9 @@ create_contract () {
 
     cd $REPO
     git fetch --all >/dev/null 2>&1
-    git checkout $COMMIT #>/dev/null 2>&1
+    git checkout $COMMIT >/dev/null 2>&1
     git submodule update --init --recursive >/dev/null 2>&1
-    dapp build >/dev/null
+    dapp build  >/dev/null 2>&1
     ADDRESS=$(dapp create "$CONTRACT" $ARGS)
     cd ..
     echo "$ADDRESS"
@@ -25,8 +25,8 @@ create_contracts_npm () {
     COMMIT=$3
 
     cd $REPO
-    git fetch --all
-    git checkout $COMMIT #>/dev/null 2>&1
+    git fetch --all >/dev/null 2>&1
+    git checkout $COMMIT >/dev/null 2>&1
     ./node_modules/.bin/truffle migrate --network $NETWORK --compile-all
     cd ..
 }
@@ -56,8 +56,8 @@ NFT_REGISTRY=$(create_contract privacy-enabled-erc721 NFT $GIT_COMMIT_PRIVACY_EN
 cd /app/tinlake-deploy
 
 # # deploy contents of tinlake-deploy using test scripts
-git fetch --all
-git checkout $GIT_COMMIT_TINLAKE_DEPLOY
+git fetch --all >/dev/null 2>&1
+git checkout $GIT_COMMIT_TINLAKE_DEPLOY >/dev/null 2>&1
 git submodule update --init --recursive >/dev/null 2>&1
 make build
 make test-config
