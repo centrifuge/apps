@@ -111,7 +111,7 @@ dataSources:
       eventHandlers:
         - event: Claimed(address,bytes32)
           handler: handleClaimed
-      file: ./src/mappings/TinlakeClaimRAD.ts
+      file: ./src/mappings/TinlakeClaimRad.ts
 
 templates:
   - kind: ethereum/contract

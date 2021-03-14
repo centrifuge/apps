@@ -4,7 +4,16 @@ RUN apk add libsecret-dev git curl make g++
 
 RUN git clone https://github.com/centrifuge/tinlake-subgraph.git
 
+# make the build args available as env vars
+ARG NETWORK_NAME
+ENV NETWORK_NAME $NETWORK_NAME
+ARG GIT_COMMIT_TINLAKE_SUBGRAPH
+ENV GIT_COMMIT_TINLAKE_SUBGRAPH $GIT_COMMIT_TINLAKE_SUBGRAPH
+
 WORKDIR tinlake-subgraph
+
+RUN git fetch --all
+RUN git checkout $GIT_COMMIT_TINLAKE_SUBGRAPH
 
 RUN npm i
 
@@ -12,10 +21,6 @@ RUN npm i
 RUN npm install keytar
 
 COPY subgraph-local.yaml .
-
-# make the build args available as env vars
-ARG NETWORK_NAME
-ENV NETWORK_NAME $NETWORK_NAME
 
 RUN cat subgraph-local.yaml | envsubst > subgraph.yaml
 
