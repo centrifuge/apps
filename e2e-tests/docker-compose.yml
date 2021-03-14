@@ -79,6 +79,14 @@ services:
       - POOL_ID=${POOL_ID}
       - IPFS_METADATA=${IPFS_METADATA}
       - IPFS_ROOT=${IPFS_ROOT}
+      - GIT_COMMIT_TINLAKE_PROXY=767ef0b
+      - GIT_COMMIT_TINLAKE_POOLS_CLI=9d6f7f6
+      - GIT_COMMIT_TINLAKE_CLAIM_RAD=6dc0fb8
+      - GIT_COMMIT_TINLAKE_ACTIONS=acf08fe
+      - GIT_COMMIT_MULTICALL=e0c7d9
+      - GIT_COMMIT_ETHEREUM_CONTRACTS=e595582
+      - GIT_COMMIT_PRIVACY_ENABLED_ERC721=7b20dcf
+      - GIT_COMMIT_TINLAKE_DEPLOY=4ef38c5
     command: ./deploy.sh
 
   subgraph:
@@ -86,6 +94,7 @@ services:
       context: subgraph
       args: 
         NETWORK_NAME: ${ETH_NETWORK}
+        GIT_COMMIT_TINLAKE_SUBGRAPH: e585cbc
     container_name: subgraph
     depends_on:
       - ipfs
