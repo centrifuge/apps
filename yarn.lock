@@ -2745,9 +2745,10 @@ __metadata:
     "@centrifuge/tinlake-pools-kovan": 0.0.1-develop.3
     "@centrifuge/tinlake-pools-mainnet": 0.0.1-develop.3
     "@cucumber/cucumber": ^7.0.0-rc.0
-    "@types/puppeteer": 5.4.0
-    dappeteer-test: 1.0.0-develop.2
-    puppeteer: 5.2.1
+    "@nodefactory/dappeteer": ^2.0.0
+    "@types/puppeteer": 5.4.3
+    puppeteer: 5.5.0
+    ts-node: ^9.1.1
   languageName: unknown
   linkType: soft
 
@@ -6174,6 +6175,17 @@ __metadata:
   dependencies:
     "@napi-rs/triples": ^1.0.3
   checksum: fd9a40320ed4b5dc8b7700d7e3d4c27a9fed1e218aa035fb72acf9c849443d4d7708cd3a21cbff3ac3ada1a10b31f26076810ab349448d5eba4ed8873f505c9e
+  languageName: node
+  linkType: hard
+
+"@nodefactory/dappeteer@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "@nodefactory/dappeteer@npm:2.0.1"
+  dependencies:
+    node-stream-zip: ^1.13.0
+  peerDependencies:
+    puppeteer: ">5"
+  checksum: 00aec1004a2767339ef58d9d77559ca148c4e4e62b9063c4d01a14184eab4c354dd4fd02a72874f89e8d6712f7d5dfcda63654d8ef8a319a7f609c71fd6324c4
   languageName: node
   linkType: hard
 
@@ -9789,9 +9801,9 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:*, @types/node@npm:>=6":
-  version: 16.11.1
-  resolution: "@types/node@npm:16.11.1"
-  checksum: b4b48f5ef35a98a7e2929f1198aef7b51b2662a9d1b4d4460136efc0f326c2c575837fd1c141c41bd02ab46d118414e10340e118a7b7e1a9e34508564a96848d
+  version: 16.10.9
+  resolution: "@types/node@npm:16.10.9"
+  checksum: 37b2bf928327b47427b8246006fcae0088515fcf74f070e1d74aee1e91870dd389872f30f8938fd405654fb53d1e10a5d00e28e2e6bb3b2a6365e6132877bb7f
   languageName: node
   linkType: hard
 
@@ -9817,9 +9829,9 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:^14.0.10, @types/node@npm:^14.14.10, @types/node@npm:^14.14.28":
-  version: 14.17.27
-  resolution: "@types/node@npm:14.17.27"
-  checksum: 22a2252ce98945d314890f688dc76b54d4a069e55b519ac66dddb5da27e126f5ff1a48777ccb9aa34aa47759de7561376b7a3b583391ca6899af4b11fcfc9bdd
+  version: 14.17.26
+  resolution: "@types/node@npm:14.17.26"
+  checksum: 8b453d80b9566e46b986897013d1d5cef4f2a4ed11c4436ce344047c916cd49e8a4c1c4dd19dc93a7df94b0342de31e46aed407cd174b26abe4ffec12ebc075d
   languageName: node
   linkType: hard
 
@@ -9949,12 +9961,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/puppeteer@npm:5.4.0":
-  version: 5.4.0
-  resolution: "@types/puppeteer@npm:5.4.0"
+"@types/puppeteer@npm:5.4.3":
+  version: 5.4.3
+  resolution: "@types/puppeteer@npm:5.4.3"
   dependencies:
     "@types/node": "*"
-  checksum: cb5df2692e0d214edddf71dda147d88ac10de9b77309cc4ed4edaea00c175a4e1ac3b92102244cef5dad890899e226596d6878d65767bf753a91aaa7edef14fe
+  checksum: 8b3aeeb686d71793ac55908cd6b63f71e8e8e447869137f5279f977bded877dc8a17cf84e167cea6841ea46ca9be76f2b3e80785208e0fb5981f0bff5ee7775a
   languageName: node
   linkType: hard
 
@@ -12974,8 +12986,8 @@ __metadata:
   linkType: hard
 
 "aws-sdk@npm:^2.840.0":
-  version: 2.1009.0
-  resolution: "aws-sdk@npm:2.1009.0"
+  version: 2.1007.0
+  resolution: "aws-sdk@npm:2.1007.0"
   dependencies:
     buffer: 4.9.2
     events: 1.1.1
@@ -12986,7 +12998,7 @@ __metadata:
     url: 0.10.3
     uuid: 3.3.2
     xml2js: 0.4.19
-  checksum: 55d4eecdd55843d42a501d5d8626d6cfd06ce309d0946de6c53ed18592bd6b9c3e3917e22c914735126716a3b6d885b5c9bb97377582b8fcb45e34410de46eb3
+  checksum: 44e3e0ada0d5dfd8ab86daa885c65fac16b2c272a47fc5bc6f83fd43624434f8e8d5d114be96118b34644b5458411aa43b498be204a2ddaba969610be5bbec5e
   languageName: node
   linkType: hard
 
@@ -15531,9 +15543,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.0, caniuse-lite@npm:^1.0.30000981, caniuse-lite@npm:^1.0.30001093, caniuse-lite@npm:^1.0.30001109, caniuse-lite@npm:^1.0.30001113, caniuse-lite@npm:^1.0.30001125, caniuse-lite@npm:^1.0.30001202, caniuse-lite@npm:^1.0.30001219, caniuse-lite@npm:^1.0.30001228, caniuse-lite@npm:^1.0.30001265":
-  version: 1.0.30001269
-  resolution: "caniuse-lite@npm:1.0.30001269"
-  checksum: e544bd20bf4186cc32ef24881ec45a8d61898e37ff4efc7736ad0f7419baf2ec2560de308ec28209f0aae637ec76baea9f1517eaa13cd06b35a14de86b25fc68
+  version: 1.0.30001267
+  resolution: "caniuse-lite@npm:1.0.30001267"
+  checksum: e5993209c363cc63dd314d013a94edb8adacccc065badc8d3c3d1458566ab178ca8cdbc8e9558b32ad0fb54dfb82d1fa56de2790a1e4cc5440a9124a98680acd
   languageName: node
   linkType: hard
 
@@ -18043,15 +18055,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dappeteer-test@npm:1.0.0-develop.2":
-  version: 1.0.0-develop.2
-  resolution: "dappeteer-test@npm:1.0.0-develop.2"
-  peerDependencies:
-    puppeteer: ^1.16.0
-  checksum: 12a7eb93e599935952b94022a9d92dc7db7c686411308a7aa64c73bc5b3518e15221a32791b8ef99286ba79f861caa421acb8e543f35d46ac7d61304ee951e08
-  languageName: node
-  linkType: hard
-
 "dash-ast@npm:^1.0.0":
   version: 1.0.0
   resolution: "dash-ast@npm:1.0.0"
@@ -18812,10 +18815,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"devtools-protocol@npm:0.0.781568":
-  version: 0.0.781568
-  resolution: "devtools-protocol@npm:0.0.781568"
-  checksum: 7cf1628149763416c23379ddb60772e742e645e6789576a41e8daa17c68008432db9c6ff0d66ac361a500ad3db937291fc3c91bff6e5b232bb7ae40b6b9e945e
+"devtools-protocol@npm:0.0.818844":
+  version: 0.0.818844
+  resolution: "devtools-protocol@npm:0.0.818844"
+  checksum: 6f3e5bc2a50fc99453c75787256eb27a5707ac8e575c6783acd7cf3e13edb8974ded83f93b2e31ef2c553299b13d2970c3bf267bc32e5c0788afc933d42f39c6
   languageName: node
   linkType: hard
 
@@ -19424,9 +19427,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.3.488, electron-to-chromium@npm:^1.3.564, electron-to-chromium@npm:^1.3.723, electron-to-chromium@npm:^1.3.867":
-  version: 1.3.871
-  resolution: "electron-to-chromium@npm:1.3.871"
-  checksum: 9226692a6b8291047f220a1706b527d6952e4de37b2f87ead9374a3f7eb70989cf98156d333316e3e7d5b1c6cc93c8dd276807c41a94ee0f434e5807f2a84b76
+  version: 1.3.868
+  resolution: "electron-to-chromium@npm:1.3.868"
+  checksum: 2e9a383b359eeb6da305d4a1842fad63cb4ec477cd94111548224abc4d5991f4ee58b1dae50e5c7f3464e89efa33d0a4875c605119968c5e64742b9bd9db2afe
   languageName: node
   linkType: hard
 
@@ -29808,7 +29811,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mime@npm:^2.0.3, mime@npm:^2.4.4, mime@npm:^2.4.6":
+"mime@npm:^2.4.4, mime@npm:^2.4.6":
   version: 2.5.2
   resolution: "mime@npm:2.5.2"
   bin:
@@ -31349,6 +31352,13 @@ __metadata:
   dependencies:
     "@babel/parser": ^7.0.0
   checksum: 6f720943ffea9e616f6ae26de73d065206bdedacd6cd60995c390d058bef61279ccd14ea5e83692771c50629e2a02242977cbf01fcc69d6e4eaf4c454a490549
+  languageName: node
+  linkType: hard
+
+"node-stream-zip@npm:^1.13.0":
+  version: 1.15.0
+  resolution: "node-stream-zip@npm:1.15.0"
+  checksum: 4a207c1f7ba8a4f237ee255aa13db62499e005baf574f73ad9f7c26fb42031efdc824813020aa20886748d74afb59044364addd9bbb042f219e3c075f27bf1fa
   languageName: node
   linkType: hard
 
@@ -34922,15 +34932,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer@npm:5.2.1":
-  version: 5.2.1
-  resolution: "puppeteer@npm:5.2.1"
+"puppeteer@npm:5.5.0":
+  version: 5.5.0
+  resolution: "puppeteer@npm:5.5.0"
   dependencies:
     debug: ^4.1.0
-    devtools-protocol: 0.0.781568
+    devtools-protocol: 0.0.818844
     extract-zip: ^2.0.0
     https-proxy-agent: ^4.0.0
-    mime: ^2.0.3
+    node-fetch: ^2.6.1
     pkg-dir: ^4.2.0
     progress: ^2.0.1
     proxy-from-env: ^1.0.0
@@ -34938,7 +34948,7 @@ __metadata:
     tar-fs: ^2.0.0
     unbzip2-stream: ^1.3.3
     ws: ^7.2.3
-  checksum: c0b65e431daf6bd738361e68f4706600721f7dc6a461a813a884c89dad629b029f72910e57e0155a33b86c530927a319c3d5678b3d97a2915e6e596cd4fd5b5c
+  checksum: 08ba8a7da56a4d09e959740e94ecfa5cda9429dc760001040eacb33c4185d9c59a71594697d10789e396e673aa7543caf4cbb48d4dab539760a44b7a2193d174
   languageName: node
   linkType: hard
 
@@ -40753,7 +40763,7 @@ resolve@1.18.1:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^9.0.0":
+"ts-node@npm:^9.0.0, ts-node@npm:^9.1.1":
   version: 9.1.1
   resolution: "ts-node@npm:9.1.1"
   dependencies:

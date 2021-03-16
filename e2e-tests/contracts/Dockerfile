@@ -1,4 +1,4 @@
-FROM isthisa/tinlake_contracts:v0.1.2
+FROM centrifugeio/docker-dapptools-base:latest
 
 # clone all needed contracts
 RUN git clone https://github.com/centrifuge/tinlake-deploy.git
