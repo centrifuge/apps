@@ -9,6 +9,7 @@ import { connect, useSelector } from 'react-redux'
 import config, { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { Description, Warning } from './styles'
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {
@@ -109,6 +110,13 @@ const InvestCard: React.FC<Props> = (props: Props) => {
         onChange={onChange}
         disabled={disabled}
       />
+      <Warning>
+        <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
+          Pool is currently oversubscribed
+        </Heading>
+        Your locked investment order may be pending until the pool opens again for investments. You will only earn RAD
+        rewards once your order has been executed.
+      </Warning>
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
         <Button primary label="Lock DAI" onClick={submit} disabled={error !== undefined || disabled} />

@@ -13,12 +13,12 @@ import { ensureAuthed } from '../../../ducks/auth'
 import { loadPool, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
-import { toPrecision } from '../../../utils/toPrecision'
+import { toMaxPrecision, toPrecision } from '../../../utils/toPrecision'
 import CollectCard from './CollectCard'
 import InvestCard from './InvestCard'
 import OrderCard from './OrderCard'
 import RedeemCard from './RedeemCard'
-import { AddWalletLink, Info, MinTimeRemaining, TokenLogo, Warning } from './styles'
+import { AddWalletLink, Info, MinTimeRemaining, Sidenote, TokenLogo, Warning } from './styles'
 
 interface Props {
   pool: Pool
@@ -125,28 +125,60 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     else setCard('home')
   }, [hasPendingCollection, hasPendingOrder])
 
+  const uncollected = disbursements
+    ? disbursements.payoutCurrencyAmount.isZero()
+      ? disbursements.payoutTokenAmount
+      : disbursements.payoutCurrencyAmount
+    : new BN(0)
+
   return (
     <Box>
       <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
         <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
           <Heading level="5" margin={'0'}>
             <TokenLogo src={`/static/${token}_final.svg`} />
-            {token} Balance
-          </Heading>
-          <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-            <LoadingValue done={balance !== undefined} height={22}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))}
-            </LoadingValue>
+            {token} Token
           </Heading>
         </Box>
-        <Box direction="row" justify="between" margin={{ bottom: 'medium' }}>
-          <TrancheNote>{props.tranche === 'senior' ? 'Senior tranche' : 'Junior tranche'}</TrancheNote>
+        <Box margin={{ bottom: 'medium' }}>
           <TrancheNote>
+            {props.tranche === 'senior' ? 'Senior tranche' : 'Junior tranche'} —{' '}
             {props.tranche === 'senior' ? 'Lower risk, stable return' : 'Higher risk, variable return'}
           </TrancheNote>
         </Box>
         <Table>
           <TableBody>
+            {uncollected.isZero() && (
+              <TableRow>
+                <TableCell scope="row">Your balance</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  <LoadingValue done={balance !== undefined}>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))} {token}
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+            )}
+            {!uncollected.isZero() && (
+              <TableRow>
+                <TableCell
+                  scope="row"
+                  style={{ alignItems: 'start', justifyContent: 'center' }}
+                  pad={{ vertical: '6px' }}
+                >
+                  <span>Your balance</span>
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                  <LoadingValue done={balance !== undefined} height={39}>
+                    <>
+                      {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))} {token}
+                      <Sidenote>
+                        Uncollected: {addThousandsSeparators(toMaxPrecision(baseToDisplay(uncollected, 18), 4))} {token}
+                      </Sidenote>
+                    </>
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+            )}
             <TableRow>
               <TableCell scope="row">Current price</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
@@ -157,7 +189,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </TableRow>
             <TableRow>
               <TableCell scope="row" border={{ color: 'transparent' }}>
-                Your {token} value
+                Current value
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={value !== undefined}>

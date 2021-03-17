@@ -82,5 +82,13 @@
   "reserveRatio": {
     "title": "Reserve Ratio",
     "description": "The Reserve Ratio expresses the reserve in relation to the pool value and gives an indication of the current liquidity of the pool. A high reserve ration indicates high liquidity of the pool which fosters immediate redemptions for investors but may also drag down effective returns."
+  },
+  "issuer": {
+    "title": "Issuer",
+    "description": "The legal entity holding the underlying assets to ensure investors have a legal claim to the underlying assets and the assets are held independently (“bankruptcy remote”) from the Asset Originator."
+  },
+  "oversubscribed": {
+    "title": "Oversubscribed pool",
+    "description": "This pool is currently oversubscribed and not open for investments. Locked investment orders may be pending until the pool opens again."
   }
 }

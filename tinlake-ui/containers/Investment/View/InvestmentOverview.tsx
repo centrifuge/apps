@@ -244,11 +244,13 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
           <Box margin={{ top: 'small', bottom: 'medium' }} style={{ textAlign: 'center' }}>
             <div>
-              DROP is currently protected by a<br />
-              <span style={{ fontWeight: 'bold' }}>
-                {Math.round((currentJuniorRatio || 0) * 10000) / 100}% TIN buffer
-              </span>{' '}
-              (min: {Math.round((minJuniorRatio || 0) * 10000) / 100}%)
+              <Tooltip id="tinRiskBuffer">
+                DROP is currently protected by a<br />
+                <span style={{ fontWeight: 'bold' }}>
+                  {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}% TIN buffer
+                </span>{' '}
+                (min: {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}%)
+              </Tooltip>
             </div>
           </Box>
 
