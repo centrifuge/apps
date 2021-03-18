@@ -125,12 +125,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     else setCard('home')
   }, [hasPendingCollection, hasPendingOrder])
 
-  const uncollected = disbursements
-    ? disbursements.payoutCurrencyAmount.isZero()
-      ? disbursements.payoutTokenAmount
-      : disbursements.payoutCurrencyAmount
-    : new BN(0)
-
   return (
     <Box>
       <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
@@ -148,7 +142,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         </Box>
         <Table>
           <TableBody>
-            {uncollected.isZero() && (
+            {(!disbursements?.payoutTokenAmount || disbursements?.payoutTokenAmount.isZero()) && (
               <TableRow>
                 <TableCell scope="row">Your balance</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
@@ -158,7 +152,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 </TableCell>
               </TableRow>
             )}
-            {!uncollected.isZero() && (
+            {disbursements?.payoutTokenAmount && !disbursements.payoutTokenAmount.isZero() && (
               <TableRow>
                 <TableCell
                   scope="row"
@@ -172,7 +166,11 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                     <>
                       {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))} {token}
                       <Sidenote>
-                        Uncollected: {addThousandsSeparators(toMaxPrecision(baseToDisplay(uncollected, 18), 4))} {token}
+                        Uncollected:{' '}
+                        {addThousandsSeparators(
+                          toMaxPrecision(baseToDisplay(disbursements?.payoutTokenAmount || new BN(0), 18), 4)
+                        )}{' '}
+                        {token}
                       </Sidenote>
                     </>
                   </LoadingValue>
