@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import config, { Pool } from '../../../config'
+import { PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { Warning } from './styles'
@@ -21,6 +22,7 @@ interface Props extends TransactionProps {
 }
 
 const MinInvestment = new BN(config.network === 'Mainnet' ? 5000 : 10).mul(new BN(10).pow(new BN(18))) // 5k DAI
+const OversubscribedBuffer = new BN(5000).mul(new BN(10).pow(new BN(18))) // 5k DAI
 
 const InvestCard: React.FC<Props> = (props: Props) => {
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
@@ -34,6 +36,10 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const address = useSelector<any, string | null>((state) => state.auth.address)
   const authProvider = useSelector<any, string | null>((state) => state.auth.providerName)
   const [hasInvested, setHasInvested] = React.useState<boolean | undefined>(undefined)
+
+  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const isOversubscribed =
+    (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve).add(OversubscribedBuffer))) || false
 
   const loadHasInvested = async () => {
     if (address) {
@@ -110,13 +116,15 @@ const InvestCard: React.FC<Props> = (props: Props) => {
         onChange={onChange}
         disabled={disabled}
       />
-      <Warning>
-        <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
-          Pool is currently oversubscribed
-        </Heading>
-        Your locked investment order may be pending until the pool opens again for investments. You will only earn RAD
-        rewards once your order has been executed.
-      </Warning>
+      {isOversubscribed && (
+        <Warning>
+          <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
+            Pool is currently oversubscribed
+          </Heading>
+          Your locked investment order may be pending until the pool opens again for investments. You will only earn RAD
+          rewards once your order has been executed.
+        </Warning>
+      )}
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
         <Button primary label="Lock DAI" onClick={submit} disabled={error !== undefined || disabled} />
