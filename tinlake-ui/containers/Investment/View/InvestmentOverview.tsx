@@ -114,7 +114,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           <Box>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                <Tooltip id="poolValue">Asset Value</Tooltip>
+                <Tooltip id="assetValue">Asset Value</Tooltip>
               </Heading>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
                 <LoadingValue done={poolData?.netAssetValue !== undefined}>

@@ -9,7 +9,7 @@ import { connect, useSelector } from 'react-redux'
 import config, { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { Description, Warning } from './styles'
+import { Warning } from './styles'
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {

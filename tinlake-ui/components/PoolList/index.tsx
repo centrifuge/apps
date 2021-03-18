@@ -93,10 +93,8 @@ class PoolList extends React.Component<Props> {
                 <Name>
                   {p.name}{' '}
                   {p.isUpcoming ||
-                  (p.seniorInterestRate &&
-                    p.seniorInterestRate.isZero() === false &&
-                    p.assetValue?.isZero() &&
-                    p.reserve?.isZero()) ? (
+                  (p.name !== undefined &&
+                    ((!p.assetValue && !p.reserve) || (p.assetValue?.isZero() && p.reserve?.isZero()))) ? (
                     <Label blue>Upcoming</Label>
                   ) : p.isArchived ? (
                     <Label>Archived</Label>
@@ -121,7 +119,7 @@ class PoolList extends React.Component<Props> {
               )}
 
               <DataCol>
-                <LoadingValue done={p.reserve !== undefined && p.assetValue !== undefined} height={28}>
+                <LoadingValue done={p.name !== undefined} height={28}>
                   <NumberDisplay
                     precision={0}
                     render={(v) =>
@@ -138,13 +136,17 @@ class PoolList extends React.Component<Props> {
                 </LoadingValue>
               </DataCol>
               <DataCol>
-                <LoadingValue done={p.seniorInterestRate !== undefined} height={28}>
+                <LoadingValue done={p.name !== undefined} height={28}>
                   <NumberDisplay
-                    render={(v) => (
-                      <>
-                        <Number>{v}</Number> <Unit>%</Unit>
-                      </>
-                    )}
+                    render={(v) =>
+                      v === '0.00' ? (
+                        <Dash>-</Dash>
+                      ) : (
+                        <>
+                          <Number>{v}</Number> <Unit>%</Unit>
+                        </>
+                      )
+                    }
                     value={feeToInterestRate(p.seniorInterestRate || new BN(0))}
                   />
                 </LoadingValue>
