@@ -3,11 +3,11 @@ import BN from 'bn.js'
 import { Anchor, Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import config, { Pool } from '../../config'
+import { ensureAuthed } from '../../ducks/auth'
 import { PoolData, PoolState } from '../../ducks/pool'
-import { useOnConnect } from '../../utils/hooks'
 import InvestAction from '../InvestAction'
 import { Tooltip } from '../Tooltip'
 
@@ -18,13 +18,37 @@ interface Props {
 
 const OverviewHeader: React.FC<Props> = (props: Props) => {
   const router = useRouter()
-  const onConnect = useOnConnect(props.tinlake)
+  const dispatch = useDispatch()
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
 
   const dropRate = poolData?.senior?.interestRate || undefined
+
+  const [awaitingConnect, setAwaitingConnect] = React.useState(false)
+
+  React.useEffect(() => {
+    if (address && awaitingConnect) {
+      ;(async () => {
+        const inAMemberlist = (await props.tinlake.checkSeniorTokenMemberlist(address))
+          ? true
+          : await props.tinlake.checkJuniorTokenMemberlist(address)
+
+        if (inAMemberlist) {
+          router.push(
+            `/pool/${props.selectedPool.addresses.ROOT_CONTRACT}/${props.selectedPool.metadata.slug}/investments`
+          )
+        } else {
+          router.push(
+            `/pool/${props.selectedPool.addresses.ROOT_CONTRACT}/${props.selectedPool.metadata.slug}/onboarding`
+          )
+        }
+      })()
+
+      setAwaitingConnect(false)
+    }
+  }, [address, props.tinlake])
 
   const invest = () => {
     if (address) {
@@ -38,22 +62,8 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
         )
       }
     } else {
-      onConnect(async (addr: string) => {
-        console.log(3)
-        const inAMemberlist = (await props.tinlake.checkSeniorTokenMemberlist(addr))
-          ? true
-          : await props.tinlake.checkJuniorTokenMemberlist(addr)
-
-        if (inAMemberlist) {
-          router.push(
-            `/pool/${props.selectedPool.addresses.ROOT_CONTRACT}/${props.selectedPool.metadata.slug}/investments`
-          )
-        } else {
-          router.push(
-            `/pool/${props.selectedPool.addresses.ROOT_CONTRACT}/${props.selectedPool.metadata.slug}/onboarding`
-          )
-        }
-      })
+      setAwaitingConnect(true)
+      dispatch(ensureAuthed())
     }
   }
 
