@@ -28,6 +28,8 @@ interface PoolMetadata {
   asset: string
   discourseLink?: string
   securitize?: SecuritizeData
+  attributes?: { [key: string]: string | { [key: string]: string } }
+  assetMaturity?: string
 }
 
 export interface BasePool {
@@ -98,6 +100,7 @@ interface Config {
   claimRADContractAddress: string
   rewardsTreeUrl: string
   multicallContractAddress: string
+  matomoSiteId: number | undefined
 }
 
 export interface IpfsPools {
@@ -153,7 +156,9 @@ const metadataSchema = yup.object().shape({
   media: mediaSchema,
   website: yup.string(),
   details: yup.object(),
+  attributes: yup.object(),
   asset: yup.string().required('poolSchema.asset is required'),
+  assetMaturity: yup.string(),
   discourseLink: yup.string(),
   securitize: securitizeDataSchema,
 })
@@ -336,6 +341,10 @@ const config: Config = {
     .string()
     .required('NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS is required')
     .validateSync(process.env.NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS),
+  matomoSiteId: yup
+    .number()
+    .optional()
+    .validateSync(process.env.NEXT_PUBLIC_MATOMO_SITE_ID),
 }
 
 function between1e23and1e27(s: string): boolean {

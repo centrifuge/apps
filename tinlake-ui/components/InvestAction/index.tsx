@@ -52,7 +52,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
       )}
       {props.pool && !(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
         <Box margin={{ left: 'auto' }}>
-          <Button primary label="Get started" fill={false} onClick={onOpen} />
+          <Button primary label="Invest" fill={false} onClick={onOpen} />
         </Box>
       )}
 

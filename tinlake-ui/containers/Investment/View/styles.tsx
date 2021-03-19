@@ -70,6 +70,22 @@ export const Warning = styled.div`
   }
 `
 
+export const PoolValueLineLeft = styled.div`
+  width: 145px;
+  border-top: 1px solid #d8d8d8;
+  border-left: 1px solid #d8d8d8;
+  border-top-left-radius: 6px;
+  margin-top: 40px;
+`
+
+export const PoolValueLineRight = styled.div`
+  width: 145px;
+  border-top: 1px solid #d8d8d8;
+  border-right: 1px solid #d8d8d8;
+  border-top-right-radius: 6px;
+  margin-top: 40px;
+`
+
 export const BalanceSheetDiagram = styled(Box)`
   flex: 1;
 `
@@ -96,9 +112,9 @@ export const BalanceSheetDiagramRight = styled(Box)`
   border-top-left-radius: 12px;
   border-top: 1px solid #d8d8d8;
   width: 50%;
-  height: 70%;
+  height: 68%;
   position: relative;
-  top: 15%;
+  top: 14%;
 `
 
 export const DividerTop = styled.div`

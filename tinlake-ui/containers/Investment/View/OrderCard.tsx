@@ -1,6 +1,5 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
-import BN from 'bn.js'
-import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import { Pool } from '../../../config'
@@ -8,7 +7,7 @@ import { PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
-import { toPrecision } from '../../../utils/toPrecision'
+import { toMaxPrecision } from '../../../utils/toPrecision'
 import { Description, Info, MinTimeRemaining, OrderSteps, Warning } from './styles'
 import { Card } from './TrancheOverview'
 
@@ -30,21 +29,6 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   const token = type === 'Invest' ? 'DAI' : props.tranche === 'senior' ? 'DROP' : 'TIN'
 
   const [confirmCancellation, setConfirmCancellation] = React.useState(false)
-
-  const lockedValue =
-    props.disbursements &&
-    !new BN(props.tokenPrice).isZero() &&
-    !(props.disbursements.remainingSupplyCurrency.isZero() && props.disbursements.remainingRedeemToken.isZero())
-      ? props.disbursements.remainingSupplyCurrency.isZero()
-        ? props.disbursements.remainingRedeemToken
-            .mul(new BN(props.tokenPrice))
-            .div(new BN(10).pow(new BN(27)))
-            .toString()
-        : props.disbursements.remainingSupplyCurrency
-            .mul(new BN(10).pow(new BN(9 + 18)))
-            .div(new BN(props.tokenPrice))
-            .toString()
-      : '0'
 
   const [status, , setTxId] = useTransactionState()
 
@@ -75,79 +59,60 @@ const OrderCard: React.FC<Props> = (props: Props) => {
     epochData &&
     epochData?.id &&
     !epochData?.isBlockedState &&
+    (props.tranche === 'senior' ? epochData?.seniorOrderedInEpoch : epochData?.juniorOrderedInEpoch) !== 0 &&
     epochData?.id !== (props.tranche === 'senior' ? epochData?.seniorOrderedInEpoch : epochData?.juniorOrderedInEpoch)
   const disabled = status === 'pending' || status === 'unconfirmed' || epochData?.isBlockedState
 
   return (
     <Box>
-      <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
-        Pending {type} Order
-      </Heading>
-      <Description>
-        {!rolledOver && (
-          <>
-            You have locked {token} to {type.toLowerCase()} {type === 'Invest' ? 'in' : 'from'} the pool for the next
-            epoch. You can cancel this order until the end of the current epoch.
-            {epochData?.minimumEpochTimeLeft !== 0 && (
-              <MinTimeRemaining>
-                Time remaining for current epoch: {secondsToHms(epochData?.minimumEpochTimeLeft || 0)}
-              </MinTimeRemaining>
-            )}
-          </>
-        )}
-        {rolledOver && (
-          <>
-            Your {type.toLowerCase()} order wasn’t fully executed. Your {token} remains locked for{' '}
-            {type === 'Invest' ? 'investment' : 'redemption'} for the next epoch. You can cancel this order until the
-            end of the current epoch.
-          </>
-        )}
-      </Description>
-
-      <OrderSteps
-        src={`/static/steps/locked-${type === 'Invest' ? 'dai' : props.tranche === 'senior' ? 'drop' : 'tin'}-${
-          type === 'Invest' ? (props.tranche === 'senior' ? 'drop' : 'tin') : 'dai'
-        }.svg`}
-        alt="Order steps"
-      />
-
-      <Table margin={{ top: 'medium' }}>
-        <TableBody>
-          <TableRow>
-            <TableCell scope="row">Type of transaction</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>{type}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell scope="row">Amount locked</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(
-                toPrecision(
-                  baseToDisplay(
-                    props.disbursements.remainingRedeemToken.isZero()
-                      ? props.disbursements.remainingSupplyCurrency
-                      : props.disbursements.remainingRedeemToken,
-                    18
-                  ),
-                  4
-                )
-              )}{' '}
-              {token}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell scope="row">
-              {type === 'Redeem' ? 'Locked value at current token price' : `Token amount at current token price`}
-            </TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
-              {addThousandsSeparators(toPrecision(baseToDisplay(lockedValue, 18), 4))}{' '}
-              {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'}
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-
-      {epochData?.isBlockedState && (
+      {!confirmCancellation && (
         <Info>
+          <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
+            {addThousandsSeparators(
+              toMaxPrecision(
+                baseToDisplay(
+                  props.disbursements.remainingRedeemToken.isZero()
+                    ? props.disbursements.remainingSupplyCurrency
+                    : props.disbursements.remainingRedeemToken,
+                  18
+                ),
+                4
+              )
+            )}{' '}
+            {token} locked for {type === 'Invest' ? 'investment' : 'redemption'}
+          </Heading>
+          <Description>
+            {!rolledOver && (
+              <>
+                This order will be executed at the end of the current epoch. Afterwards you can collect your{' '}
+                {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'}.
+              </>
+            )}
+            {rolledOver && (
+              <>
+                Your {type.toLowerCase()} order wasn’t fully executed. Your {token} remains locked for{' '}
+                {type === 'Invest' ? 'investment' : 'redemption'} for the next epoch. You can cancel this order until
+                the end of the current epoch.
+              </>
+            )}
+          </Description>
+
+          <OrderSteps
+            src={`/static/steps/locked-${type === 'Invest' ? 'dai' : props.tranche === 'senior' ? 'drop' : 'tin'}-${
+              type === 'Invest' ? (props.tranche === 'senior' ? 'drop' : 'tin') : 'dai'
+            }.svg`}
+            alt="Order steps"
+          />
+        </Info>
+      )}
+
+      {!epochData?.isBlockedState && !confirmCancellation && (
+        <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+          <Button primary label="Cancel Order" onClick={() => setConfirmCancellation(true)} disabled={disabled} />
+        </Box>
+      )}
+      {!confirmCancellation && epochData?.isBlockedState && (
+        <Warning>
           <Heading level="6" margin={{ bottom: 'xsmall' }}>
             Computing orders
           </Heading>
@@ -158,7 +123,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
               Minimum time remaining: {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
             </MinTimeRemaining>
           )}
-        </Info>
+        </Warning>
       )}
 
       {confirmCancellation && (
@@ -176,13 +141,6 @@ const OrderCard: React.FC<Props> = (props: Props) => {
             <Button primary label="Confirm Cancellation" onClick={cancel} disabled={disabled} />
           </Box>
         </>
-      )}
-
-      {!epochData?.isBlockedState && !confirmCancellation && (
-        <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-          <Button primary label="Cancel Order" onClick={() => setConfirmCancellation(true)} disabled={disabled} />
-          {/* <Button primary label="Update Order" /> */}
-        </Box>
       )}
     </Box>
   )

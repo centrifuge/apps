@@ -4,7 +4,7 @@ import { Box } from 'grommet'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Router, { withRouter } from 'next/router'
 import * as React from 'react'
-import { PoolData } from '../../ducks/pools'
+import { PoolData, PoolsData } from '../../ducks/pools'
 import { LoadingValue } from '../LoadingValue'
 import NumberDisplay from '../NumberDisplay'
 import {
@@ -25,7 +25,7 @@ import {
 } from './styles'
 
 interface Props extends WithRouterProps {
-  pools?: PoolData[]
+  poolsData?: PoolsData
 }
 
 class PoolList extends React.Component<Props> {
@@ -47,11 +47,13 @@ class PoolList extends React.Component<Props> {
 
   render() {
     const {
-      pools,
+      poolsData,
       router: {
         query: { showAll, showArchived },
       },
     } = this.props
+
+    const subgraphIsLoading = this.props.poolsData?.totalValue.isZero()
 
     return (
       <Box>
@@ -83,7 +85,7 @@ class PoolList extends React.Component<Props> {
             </>
           )}
         </Header>
-        {pools
+        {poolsData?.pools
           ?.filter((p) => showArchived || !p.isArchived)
           .sort((a, b) => b.order - a.order)
           .map((p) => (
@@ -93,10 +95,8 @@ class PoolList extends React.Component<Props> {
                 <Name>
                   {p.name}{' '}
                   {p.isUpcoming ||
-                  (p.seniorInterestRate &&
-                    p.seniorInterestRate.isZero() === false &&
-                    p.assetValue?.isZero() &&
-                    p.reserve?.isZero()) ? (
+                  (!subgraphIsLoading &&
+                    ((!p.assetValue && !p.reserve) || (p.assetValue?.isZero() && p.reserve?.isZero()))) ? (
                     <Label blue>Upcoming</Label>
                   ) : p.isArchived ? (
                     <Label>Archived</Label>
@@ -121,7 +121,7 @@ class PoolList extends React.Component<Props> {
               )}
 
               <DataCol>
-                <LoadingValue done={p.reserve !== undefined && p.assetValue !== undefined} height={28}>
+                <LoadingValue done={!subgraphIsLoading} height={28}>
                   <NumberDisplay
                     precision={0}
                     render={(v) =>
@@ -138,13 +138,17 @@ class PoolList extends React.Component<Props> {
                 </LoadingValue>
               </DataCol>
               <DataCol>
-                <LoadingValue done={p.seniorInterestRate !== undefined} height={28}>
+                <LoadingValue done={!subgraphIsLoading} height={28}>
                   <NumberDisplay
-                    render={(v) => (
-                      <>
-                        <Number>{v}</Number> <Unit>%</Unit>
-                      </>
-                    )}
+                    render={(v) =>
+                      v === '0.00' ? (
+                        <Dash>-</Dash>
+                      ) : (
+                        <>
+                          <Number>{v}</Number> <Unit>%</Unit>
+                        </>
+                      )
+                    }
                     value={feeToInterestRate(p.seniorInterestRate || new BN(0))}
                   />
                 </LoadingValue>

@@ -141,12 +141,14 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
               status === 'pending'
             }
           />
-          <Button
-            onClick={close}
-            secondary
-            label="Close"
-            disabled={props.loan.status !== 'NFT locked' || status === 'unconfirmed' || status === 'pending'}
-          />
+          {props.loan.status === 'NFT locked' && (
+            <Button
+              onClick={close}
+              secondary
+              label="Unlock NFT"
+              disabled={status === 'unconfirmed' || status === 'pending'}
+            />
+          )}
         </Box>
         {isBlockedState && (
           <Box margin={{ top: 'small' }}>

@@ -1,5 +1,6 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { baseToDisplay, feeToInterestRate, ITinlake, Loan } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Box, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
@@ -26,6 +27,8 @@ const DisplayFieldWrapper = styled.div`
 `
 
 const LoanData: React.FC<Props> = (props: Props) => {
+  const availableForFinancing = props.loan?.debt.isZero() ? props.loan?.principal || new BN(0) : new BN(0)
+
   return (
     <Box gap="medium" pad="medium" elevation="small" round="xsmall" background="white" width="80%">
       <Box direction="row">
@@ -54,7 +57,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
                 <TableCell scope="row">Available for Financing</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
                   <LoadingValue done={props.loan?.principal !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(props.loan?.principal || 0, 18), 2))} DAI
+                    {addThousandsSeparators(toPrecision(baseToDisplay(availableForFinancing, 18), 2))} DAI
                   </LoadingValue>
                 </TableCell>
               </TableRow>

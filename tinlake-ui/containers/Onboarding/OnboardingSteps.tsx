@@ -9,6 +9,7 @@ import PageTitle from '../../components/PageTitle'
 import { PoolLink } from '../../components/PoolLink'
 import config, { Pool } from '../../config'
 import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
+import { useInterval } from '../../utils/hooks'
 import { ExplainerCard } from '../Investment/View/styles'
 import AgreementStep from './AgreementStep'
 import ConnectStep from './ConnectStep'
@@ -49,9 +50,15 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const session = 'session' in router.query ? router.query.session : ''
 
+  useInterval(() => {
+    dispatch(loadOnboardingStatus(props.activePool))
+  }, 60000)
+
   React.useEffect(() => {
     dispatch(loadOnboardingStatus(props.activePool))
+  }, [address, props.activePool])
 
+  React.useEffect(() => {
     if (!address) setActiveSteps(1)
     else if (whitelistStatus === true) {
       setActiveSteps(5)
@@ -80,7 +87,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     } else {
       setActiveSteps(5)
     }
-  }, [address, props.activePool, kycStatus, agreementStatus])
+  }, [address, kycStatus, agreementStatus])
 
   const [activeSteps, setActiveSteps] = React.useState(0)
 
@@ -96,7 +103,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
               <>
                 {onboarding.data?.linkedAddresses && onboarding.data?.linkedAddresses.length > 0 && (
                   <ExplainerCard margin={{ bottom: 'medium' }}>
-                    This account is linked to {onboarding.data?.linkedAddresses.join(', ')}.
+                    Your Securitize account is linked to {onboarding.data?.linkedAddresses.join(', ')} and {address}.
                   </ExplainerCard>
                 )}
 

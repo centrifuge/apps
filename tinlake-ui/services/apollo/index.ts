@@ -13,6 +13,8 @@ import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
 
+const OversubscribedBuffer = new BN(5000).mul(new BN(10).pow(new BN(18))) // 5k DAI
+
 const { tinlakeDataBackendUrl } = config
 const cache = new InMemoryCache()
 const link = createHttpLink({
@@ -90,7 +92,8 @@ class Apollo {
         order: poolValueNum,
         isUpcoming: false,
         isArchived: false,
-        isOversubscribed: (pool && new BN(pool.maxReserve).lte(new BN(pool.reserve))) || false,
+        isOversubscribed:
+          (pool && new BN(pool.maxReserve).lte(new BN(pool.reserve).add(OversubscribedBuffer))) || false,
         id: poolId,
         name: poolConfig.metadata.name,
         slug: poolConfig.metadata.slug,
@@ -405,13 +408,14 @@ class Apollo {
     return assetData
   }
 
+  // TODO: expand this to work beyond ~3 years (1000 days), if needed
   async getPoolsDailyData() {
     let result
     try {
       result = await this.client.query({
         query: gql`
           {
-            days(orderBy: id, orderDirection: desc, first: 90) {
+            days(orderBy: id, orderDirection: desc, first: 1000) {
               id
               assetValue
               reserve

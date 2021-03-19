@@ -1,9 +1,10 @@
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import styled from 'styled-components'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { PoolLink } from '../../../components/PoolLink'
@@ -12,12 +13,12 @@ import { ensureAuthed } from '../../../ducks/auth'
 import { loadPool, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
-import { toPrecision } from '../../../utils/toPrecision'
+import { toMaxPrecision, toPrecision } from '../../../utils/toPrecision'
 import CollectCard from './CollectCard'
 import InvestCard from './InvestCard'
 import OrderCard from './OrderCard'
 import RedeemCard from './RedeemCard'
-import { AddWalletLink, Info, MinTimeRemaining, TokenLogo } from './styles'
+import { AddWalletLink, Info, MinTimeRemaining, Sidenote, TokenLogo, Warning } from './styles'
 
 interface Props {
   pool: Pool
@@ -130,20 +131,54 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
           <Heading level="5" margin={'0'}>
             <TokenLogo src={`/static/${token}_final.svg`} />
-            {trancheData?.inMemberlist === true ? `${token} Balance` : token}
+            {token} Token
           </Heading>
-          <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-            {trancheData?.inMemberlist === true && (
-              <LoadingValue done={balance !== undefined} height={22}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))}
-              </LoadingValue>
-            )}
-          </Heading>
+        </Box>
+        <Box margin={{ bottom: 'medium' }}>
+          <TrancheNote>
+            {props.tranche === 'senior' ? 'Senior tranche' : 'Junior tranche'} —{' '}
+            {props.tranche === 'senior' ? 'Lower risk, stable return' : 'Higher risk, variable return'}
+          </TrancheNote>
         </Box>
         <Table>
           <TableBody>
+            {(!disbursements?.payoutTokenAmount || disbursements?.payoutTokenAmount.isZero()) && (
+              <TableRow>
+                <TableCell scope="row">Your balance</TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  <LoadingValue done={balance !== undefined}>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))} {token}
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+            )}
+            {disbursements?.payoutTokenAmount && !disbursements.payoutTokenAmount.isZero() && (
+              <TableRow>
+                <TableCell
+                  scope="row"
+                  style={{ alignItems: 'start', justifyContent: 'center' }}
+                  pad={{ vertical: '6px' }}
+                >
+                  <span>Your balance</span>
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                  <LoadingValue done={balance !== undefined} height={39}>
+                    <>
+                      {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))} {token}
+                      <Sidenote>
+                        Uncollected:{' '}
+                        {addThousandsSeparators(
+                          toMaxPrecision(baseToDisplay(disbursements?.payoutTokenAmount || new BN(0), 18), 4)
+                        )}{' '}
+                        {token}
+                      </Sidenote>
+                    </>
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+            )}
             <TableRow>
-              <TableCell scope="row">Current Price</TableCell>
+              <TableCell scope="row">Current price</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
                 <LoadingValue done={tokenPrice !== undefined}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice || '0', 27), 4))}
@@ -152,7 +187,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </TableRow>
             <TableRow>
               <TableCell scope="row" border={{ color: 'transparent' }}>
-                Your {token} Value
+                Current value
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={value !== undefined}>
@@ -167,7 +202,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             {card === 'home' && (
               <>
                 {epochData?.isBlockedState && (
-                  <Info>
+                  <Warning>
                     <Heading level="6" margin={{ bottom: 'xsmall' }}>
                       Computing orders
                     </Heading>
@@ -179,7 +214,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                         {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
                       </MinTimeRemaining>
                     )}
-                  </Info>
+                  </Warning>
                 )}
 
                 {!epochData?.isBlockedState && (
@@ -222,7 +257,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             {card === 'invest' && <InvestCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
             {card === 'redeem' && <RedeemCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
 
-            {trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
+            {card === 'home' && trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
               <AddWalletLink onClick={addToWallet}>Display {trancheData?.token} in your wallet</AddWalletLink>
             )}
           </>
@@ -233,13 +268,20 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           ('onboard' in router.query ||
             ('addresses' in props.pool &&
               config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))) && (
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <PoolLink href={'/onboarding'}>
-                <Anchor>
-                  <Button label="Invest" primary />
-                </Anchor>
-              </PoolLink>
-            </Box>
+            <>
+              <Info>
+                DROP APR: <b>{toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2)}%</b>
+                <br />
+                Minimum investment amount: <b>5,000 DAI</b>
+              </Info>
+              <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+                <PoolLink href={'/onboarding'}>
+                  <Anchor>
+                    <Button label="Invest" primary />
+                  </Anchor>
+                </PoolLink>
+              </Box>
+            </>
           )}
 
         {props.pool &&
@@ -283,3 +325,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 }
 
 export default TrancheOverview
+
+const TrancheNote = styled.div`
+  color: #777;
+`

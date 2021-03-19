@@ -17,6 +17,10 @@ const InfoBox: React.FC<Props> = (props: Props) => {
       const req = await fetch(
         `${config.onboardAPIHost}pools/${props.activePool.addresses.ROOT_CONTRACT}/restricted-countries`
       )
+      if (!req.ok) {
+        console.error(`Failed to load list of restricted countries for ${props.activePool.addresses.ROOT_CONTRACT}`)
+        return
+      }
       const body = await req.json()
       setCountries(body)
     })()
@@ -61,9 +65,11 @@ const InfoBox: React.FC<Props> = (props: Props) => {
         onClose={closeModal}
       >
         <ul>
-          {countries.map((country: { code: string; name: string }) => (
-            <li>{country.name}</li>
-          ))}
+          {countries
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((country: { code: string; name: string }) => (
+              <li>{country.name}</li>
+            ))}
         </ul>
 
         <Box direction="row" justify="end">
