@@ -9,6 +9,9 @@ type Props = {
 export const PageError: FunctionComponent<Props> = ({ error }) => {
   let title = 'Error';
   let message = error.message || 'Something is terribly wrong';
+
+  console.error(error)
+
   if (error.hasOwnProperty('isAxiosError')) {
     const axiosError = error as AxiosError;
     title = axiosError!.response!.status ? axiosError!.response!.status.toString() : title;
