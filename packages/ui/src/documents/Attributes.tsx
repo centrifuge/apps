@@ -37,7 +37,7 @@ export const Attributes: FunctionComponent<Props> = (props: Props) => {
 
   return <>
     {sectionNames.map(name => {
-      return <AttributeSection name={name} attributes={sections[name]} columnGap={columnGap} size={size} columnNo={columnNo} isViewMode={isViewMode}/>
+      return <AttributeSection key={name} name={name} attributes={sections[name]} columnGap={columnGap} size={size} columnNo={columnNo} isViewMode={isViewMode}/>
     })}
   </>;
 
