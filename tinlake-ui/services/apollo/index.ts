@@ -433,7 +433,12 @@ class Apollo {
       .map((item: any) => {
         return {
           day: Number(item.id),
-          poolValue: parseFloat(new BN(item.assetValue).add(new BN(item.reserve)).div(UintBase).toString()),
+          poolValue: parseFloat(
+            new BN(item.assetValue)
+              .add(new BN(item.reserve))
+              .div(UintBase)
+              .toString()
+          ),
         }
       })
       .sort((a: PoolsDailyData, b: PoolsDailyData) => a.day - b.day)

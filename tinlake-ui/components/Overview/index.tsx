@@ -1,16 +1,14 @@
+import { Modal } from '@centrifuge/axis-modal'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Heading, Paragraph } from 'grommet'
+import { Catalog, Chat, Globe, StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import * as React from 'react'
+import styled from 'styled-components'
 import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { PoolState } from '../../ducks/pool'
 import PageTitle from '../PageTitle'
 import OverviewHeader from './OverviewHeader'
-import styled from 'styled-components'
-import { Catalog, Chat, Globe } from 'grommet-icons'
-import { Modal } from '@centrifuge/axis-modal'
-// import { TwitterTimelineEmbed } from 'react-twitter-embed'
-import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 
 interface Props {
   pool?: PoolState

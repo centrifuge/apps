@@ -4,7 +4,7 @@ import { Box } from 'grommet'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Router, { withRouter } from 'next/router'
 import * as React from 'react'
-import { PoolsData, PoolData } from '../../ducks/pools'
+import { PoolData, PoolsData } from '../../ducks/pools'
 import { LoadingValue } from '../LoadingValue'
 import NumberDisplay from '../NumberDisplay'
 import {

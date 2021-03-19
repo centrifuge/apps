@@ -12,15 +12,15 @@ import { PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { toPrecision } from '../../../utils/toPrecision'
 import {
-  DividerBottom,
-  DividerInner,
-  DividerTop,
-  TokenLogo,
   BalanceSheetDiagram,
   BalanceSheetDiagramLeft,
   BalanceSheetDiagramRight,
   BalanceSheetFiller,
   BalanceSheetMidLine,
+  DividerBottom,
+  DividerInner,
+  DividerTop,
+  TokenLogo,
 } from './styles'
 
 interface Props {
