@@ -3,7 +3,7 @@ import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts'
 import { PoolsDailyData, PoolsData } from '../../ducks/pools'
 import { maybeLoadRewards, RewardsState } from '../../ducks/rewards'
 import { dateToYMD } from '../../utils/date'
@@ -29,6 +29,13 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
   }, [])
 
   const totalRewardsEarned = baseToDisplay(rewards.data?.toDateRewardAggregateValue || '0', 18)
+
+  const maxPoolValue = Math.max.apply(
+    Math,
+    poolsDailyData.map((o) => {
+      return o.poolValue
+    })
+  )
 
   const goToRewards = () => router.push('/rewards')
 
@@ -100,6 +107,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
                 </linearGradient>
               </defs>
               <Tooltip content={<></>} />
+              <YAxis type="number" domain={[0, maxPoolValue]} hide />
               {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMD(val)} /> */}
               <Area
                 type="monotone"

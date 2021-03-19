@@ -24,7 +24,6 @@ export const submitSolutions = async (pools: PoolMap, provider: ethers.providers
       if (solutionScore.gt(bestScore)) {
         const solveTx = await tinlake.solveEpoch()
         console.log(`Solving ${name} with tx: ${solveTx.hash}`)
-        await tinlake.getTransactionReceipt(solveTx)
       } else {
         console.log(`${solutionScore.toString()} is not better than ${bestScore.toString()}`)
       }

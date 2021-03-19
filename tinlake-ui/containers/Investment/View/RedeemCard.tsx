@@ -2,13 +2,12 @@ import { TokenInput } from '@centrifuge/axis-token-input'
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
-import { Box, Button } from 'grommet'
+import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { Description } from './styles'
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {
@@ -79,11 +78,9 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
   }
   return (
     <Box>
-      <Description margin={{ top: 'small' }}>
-        Please set the amount of {token} you want to redeem from Tinlake. Your {token} will be locked until the end of
-        the epoch, at which point your order will be executed. You can withdraw your DAI in the next epoch.{' '}
-      </Description>
-
+      <Heading level="6" margin={{ top: 'medium', bottom: 'xsmall' }}>
+        Enter your redemption amount below
+      </Heading>
       <TokenInput
         token={token}
         value={tokenValue}

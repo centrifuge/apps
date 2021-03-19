@@ -237,7 +237,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
 
           <Box margin={{ top: 'medium', left: 'auto', right: 'auto' }}>
             <Link href="/">
-              <Button label="Explore more investment opportunities" secondary size="small" />
+              <Button label="Explore further investment opportunities" secondary size="small" />
             </Link>
           </Box>
         </>

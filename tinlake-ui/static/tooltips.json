@@ -1,12 +1,16 @@
 {
   "poolValue": {
     "title": "Pool Value",
-    "description": "Total pool value calculated as the sum of the asset value and the pool reserve."
+    "description": "Total pool value calculated as the sum of asset value and reserve on the asset side or the sum of DROP tranche and TIN tranche on the investment side."
   },
   "assetValue": {
     "title": "Asset Value",
     "description": "The asset value or NAV reflects the present value of the outstanding portfolio of financings. It is the sum of the present values of the risk-adjusted expected repayments of all outstanding financings.",
     "link": "https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-2-valuing-an-asset-portfolio-247d8f2f0d5"
+  },
+  "assetMaturity": {
+    "title": "Asset Maturity",
+    "description": "This indicates the expected range of maturities of the pools underlying assets, i.e. the time period after which the financing of this assets matures and will be paid back. It does not limit the duration of investments - Tinlake pools are \"revolving\" pools - but gives an indication how often repayments of the issuer become available for redemption."
   },
   "poolReserve": {
     "title": "Pool Reserve",
@@ -34,12 +38,14 @@
     "description": "Sum of current outstanding financings by the asset originator. This deviates from the asset value, which considers expected repayments and risk-adjustments."
   },
   "dropValue": {
-    "title": "DROP Value",
-    "description": "Total value of outstanding DROP tokens at the current DROP token price."
+    "title": "DROP Tranche Value",
+    "description": "Total value of outstanding DROP tokens at the current DROP token price. DROP is Tinlake's senior token with a fixed interest rate (\"DROP APR\") and stable returns. DROP is protected against defaults of the underlying assets by TIN which takes losses first.",
+    "link": "https://developer.centrifuge.io/tinlake/overview/tranches/"
   },
   "tinValue": {
-    "title": "TIN Value",
-    "description": "Total value of outstanding TIN tokens at the current TIN token price."
+    "title": "TIN Tranche Value",
+    "description": "Total value of outstanding TIN tokens at the current TIN token price. TIN is Tinlake's junior token. It protects DROP against defaults of the underlying assets by taking losses first. In return TIN has a higher, yet more volatile return than DROP.",
+    "link": "https://developer.centrifuge.io/tinlake/overview/tranches/"
   },
   "epochNumber": {
     "title": "Epoch #",
@@ -74,5 +80,17 @@
   "financingFee": {
     "title": "Financing Fee",
     "description": "Annual interest rate (APR) at which the interest for the outstanding financing is accrued with compounding per second."
+  },
+  "reserveRatio": {
+    "title": "Reserve Ratio",
+    "description": "The Reserve Ratio expresses the reserve in relation to the pool value and gives an indication of the current liquidity of the pool. A high reserve ration indicates high liquidity of the pool which fosters immediate redemptions for investors but may also drag down effective returns."
+  },
+  "issuer": {
+    "title": "Issuer",
+    "description": "The legal entity holding the underlying assets to ensure investors have a legal claim to the underlying assets and the assets are held independently (“bankruptcy remote”) from the Asset Originator."
+  },
+  "oversubscribed": {
+    "title": "Oversubscribed pool",
+    "description": "This pool is currently oversubscribed and not open for investments. Locked investment orders may be pending until the pool opens again."
   }
 }

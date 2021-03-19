@@ -454,8 +454,8 @@ export async function updateSeniorMemberList(
   return tinlake.updateSeniorMemberList(user, validUntil)
 }
 
-export async function getEpoch(tinlake: ITinlake): Promise<EpochData | undefined> {
-  const address = await tinlake.signer?.getAddress()
+export async function getEpoch(tinlake: ITinlake, address?: string): Promise<EpochData | undefined> {
+  const signerAddress = address || (await tinlake.signer?.getAddress())
   const state = await tinlake.getCurrentEpochState()
 
   const minimumEpochTime = await tinlake.getMinimumEpochTime()
@@ -472,8 +472,8 @@ export async function getEpoch(tinlake: ITinlake): Promise<EpochData | undefined
       state === 'in-submission-period' || state === 'in-challenge-period' || state === 'challenge-period-ended',
     minChallengePeriodEnd: await tinlake.getMinChallengePeriodEnd(),
     latestBlockTimestamp: await tinlake.getLatestBlockTimestamp(),
-    seniorOrderedInEpoch: address ? await tinlake.getSeniorOrderedInEpoch(address) : 0,
-    juniorOrderedInEpoch: address ? await tinlake.getJuniorOrderedInEpoch(address) : 0,
+    seniorOrderedInEpoch: signerAddress ? await tinlake.getSeniorOrderedInEpoch(signerAddress) : 0,
+    juniorOrderedInEpoch: signerAddress ? await tinlake.getJuniorOrderedInEpoch(signerAddress) : 0,
   }
 }
 

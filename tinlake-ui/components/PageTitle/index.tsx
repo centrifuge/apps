@@ -8,6 +8,7 @@ import { Pool, UpcomingPool } from '../../config'
 import { PoolState } from '../../ducks/pool'
 import { PoolLink } from '../PoolLink'
 import { Label } from '../PoolList/styles'
+import { Tooltip } from '../Tooltip'
 
 interface Props {
   pool?: Pool | UpcomingPool
@@ -18,11 +19,14 @@ interface Props {
   return?: boolean
 }
 
+const OversubscribedBuffer = new BN(5000).mul(new BN(10).pow(new BN(18))) // 5k DAI
+
 const PageTitle: React.FC<Props> = (props: Props) => {
   const router = useRouter()
 
   const pool = useSelector<any, PoolState>((state) => state.pool)
-  const isOversubscribed = (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve))) || false
+  const isOversubscribed =
+    (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve).add(OversubscribedBuffer))) || false
 
   // TODO: fix this somehow, otherwise the oversubscribed label isn't shown on pages which don't load the pool data
   // (but this requires injecting the tinlake prop everywhere we include the PoolTitle component)
@@ -54,7 +58,11 @@ const PageTitle: React.FC<Props> = (props: Props) => {
               {props.pool.isUpcoming || (pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero()) ? (
                 <Label blue>Upcoming</Label>
               ) : (
-                isOversubscribed && <Label orange>Oversubscribed</Label>
+                isOversubscribed && (
+                  <Tooltip id="oversubscribed">
+                    <Label orange>Oversubscribed</Label>
+                  </Tooltip>
+                )
               )}
             </PoolLabel>
           </PoolName>
