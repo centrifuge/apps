@@ -11,7 +11,7 @@ const runApplication = (preloadedState) => {
   ReactDOM.render(
     <Router history={customHistory}>
       <Route render={() => {
-        return <App loggedInUser={preloadedState.user!.auth!.loggedInUser}/>;
+        return <App loggedInUser={preloadedState?.user?.auth?.loggedInUser || null}/>;
       }}/>
     </Router>,
     document.getElementById('root'),
