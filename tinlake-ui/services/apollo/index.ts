@@ -104,6 +104,7 @@ class Apollo {
         juniorTokenPrice: (pool?.juniorTokenPrice && new BN(pool.juniorTokenPrice)) || null,
         seniorTokenPrice: (pool?.seniorTokenPrice && new BN(pool.seniorTokenPrice)) || null,
         icon: poolConfig.metadata.media?.icon || null,
+        currency: poolConfig.metadata.currencySymbol || 'DAI',
       }
 
       return { ...poolData, status: getPoolStatus(poolData) }
@@ -141,6 +142,7 @@ class Apollo {
       juniorYield14Days: null,
       seniorYield14Days: null,
       icon: p.metadata.media?.icon || null,
+      currency: p.metadata.currencySymbol || 'DAI',
     }))
   }
 
@@ -175,6 +177,7 @@ class Apollo {
       juniorYield14Days: null,
       seniorYield14Days: null,
       icon: p.metadata.media?.icon || null,
+      currency: p.metadata.currencySymbol || 'DAI',
     }))
   }
 
@@ -433,12 +436,7 @@ class Apollo {
       .map((item: any) => {
         return {
           day: Number(item.id),
-          poolValue: parseFloat(
-            new BN(item.assetValue)
-              .add(new BN(item.reserve))
-              .div(UintBase)
-              .toString()
-          ),
+          poolValue: parseFloat(new BN(item.assetValue).add(new BN(item.reserve)).div(UintBase).toString()),
         }
       })
       .sort((a: PoolsDailyData, b: PoolsDailyData) => a.day - b.day)

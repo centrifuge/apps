@@ -118,7 +118,8 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               </Heading>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
                 <LoadingValue done={poolData?.netAssetValue !== undefined}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))} DAI
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))}{' '}
+                  {props.selectedPool.metadata.currencySymbol}
                 </LoadingValue>
               </Heading>
             </Box>
@@ -135,7 +136,8 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   <TableCell scope="row">Average Financing Amount</TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
                     <LoadingValue done={avgAmount !== undefined}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(avgAmount || new BN(0), 18), 0))} DAI
+                      {addThousandsSeparators(toPrecision(baseToDisplay(avgAmount || new BN(0), 18), 0))}{' '}
+                      {props.selectedPool.metadata.currencySymbol}
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
@@ -170,7 +172,8 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               </Heading>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
                 <LoadingValue done={poolData?.reserve !== undefined}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))} DAI
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))}{' '}
+                  {props.selectedPool.metadata.currencySymbol}
                 </LoadingValue>
               </Heading>
             </Box>
@@ -221,7 +224,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 <Heading level="5" margin={{ left: 'auto', top: '0', bottom: 'xsmall' }}>
                   <LoadingValue done={dropTotalValue !== undefined} height={22}>
                     {dropTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 0))}{' '}
-                    DAI
+                    {props.selectedPool.metadata.currencySymbol}
                   </LoadingValue>
                 </Heading>
                 <span>
@@ -278,7 +281,8 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               <Box margin={{ left: 'auto' }}>
                 <Heading level="5" margin={{ left: 'auto', top: '0', bottom: 'xsmall' }}>
                   <LoadingValue done={tinTotalValue !== undefined} height={22}>
-                    {tinTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 0))} DAI
+                    {tinTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 0))}{' '}
+                    {props.selectedPool.metadata.currencySymbol}
                   </LoadingValue>
                 </Heading>
                 <span>

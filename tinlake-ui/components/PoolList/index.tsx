@@ -111,7 +111,7 @@ class PoolList extends React.Component<Props> {
                   <NumberDisplay
                     render={(v) => (
                       <>
-                        <Number>{v}</Number> <Unit>DAI</Unit>
+                        <Number>{v}</Number> <Unit>{p.currency}</Unit>
                       </>
                     )}
                     precision={0}
@@ -129,7 +129,7 @@ class PoolList extends React.Component<Props> {
                         <Dash>-</Dash>
                       ) : (
                         <>
-                          <Number>{v}</Number> <Unit>DAI</Unit>
+                          <Number>{v}</Number> <Unit>{p.currency}</Unit>
                         </>
                       )
                     }

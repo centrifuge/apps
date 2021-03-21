@@ -67,14 +67,14 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
       >
         <Box pad={{ top: '8px' }} width="200px">
           <Cont>
-            <TokenLogo src={`/static/dai.svg`} />
+            {/* <TokenLogo src={`/static/dai.svg`} /> */}
             <Value>
               <NumberDisplay
                 value={hoveredPoolValue?.toString() || baseToDisplay(props.pools.totalValue, 18)}
                 precision={0}
               />
             </Value>{' '}
-            <Unit>DAI</Unit>
+            <Unit>USD</Unit>
           </Cont>
           <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
         </Box>

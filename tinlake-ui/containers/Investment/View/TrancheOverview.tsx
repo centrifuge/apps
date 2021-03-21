@@ -191,7 +191,8 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={value !== undefined}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 4))} DAI
+                  {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 4))}{' '}
+                  {props.pool.metadata.currencySymbol}
                 </LoadingValue>
               </TableCell>
             </TableRow>
@@ -272,7 +273,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               <Info>
                 DROP APR: <b>{toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2)}%</b>
                 <br />
-                Minimum investment amount: <b>5,000 DAI</b>
+                Minimum investment amount: <b>5,000 {props.pool.metadata.currencySymbol}</b>
               </Info>
               <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
                 <PoolLink href={'/onboarding'}>
