@@ -21,7 +21,7 @@ interface Props {
   whitelistStatus: boolean
 }
 
-const KycStep: React.FC<Props> = (props: Props) => {
+const AgreementStep: React.FC<Props> = (props: Props) => {
   const [checked, setChecked] = React.useState(false)
   const [error, setError] = React.useState('')
 
@@ -29,8 +29,6 @@ const KycStep: React.FC<Props> = (props: Props) => {
   const session = 'session' in router.query ? router.query.session : '' // TODO: check this on the API and display message if it has expired
 
   const poolName = props.activePool.metadata.shortName || props.activePool.metadata.name
-
-  const awaitingWhitelisting = props.agreementStatus === 'countersigned' && props.whitelistStatus === false
 
   const [nonSolicitationModalIsOpen, setNonSolicitationModalIsOpen] = React.useState(false)
 
@@ -46,39 +44,34 @@ const KycStep: React.FC<Props> = (props: Props) => {
   return (
     <Step>
       <StepHeader>
-        {(props.agreementStatus === 'signed' || awaitingWhitelisting) && <StepIcon pending />}
-        {!(props.agreementStatus === 'signed' || awaitingWhitelisting) && (
+        {props.agreementStatus === 'signed' && <StepIcon pending />}
+        {props.agreementStatus !== 'signed' && (
           <StepIcon
             inactive={!props.active}
-            checked={props.agreementStatus === 'countersigned' && props.whitelistStatus === true}
+            checked={props.agreementStatus === 'countersigned'}
             failed={isRestricted}
           />
         )}
-        <StepTitle inactive={!props.active && !awaitingWhitelisting}>
+        <StepTitle inactive={!props.active}>
           {props.agreementStatus === 'none'
             ? `Sign the Subscription Agreement`
-            : props.agreementStatus === 'countersigned' && props.whitelistStatus === true
+            : props.agreementStatus === 'countersigned'
             ? `${props.agreement?.name} signed`
             : `${props.agreement?.name} status: awaiting Issuer signature`}
         </StepTitle>
       </StepHeader>
-      {props.active &&
-        !props.whitelistStatus &&
-        !isRestricted &&
-        props.agreementStatus === 'none' &&
-        props.agreement &&
-        !session && (
-          <StepBody>
-            <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
-              Start the final step of signing the {props.agreement.name} for {poolName} by signing in with your
-              Securitize iD.
-            </Paragraph>
-            <div>
-              <Button primary label={'Sign in with Securitize'} href={props.onboarding.data?.kyc?.url} fill={false} />
-            </div>
-            <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
-          </StepBody>
-        )}
+      {props.active && !isRestricted && props.agreementStatus === 'none' && props.agreement && !session && (
+        <StepBody>
+          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
+            Start the final step of signing the {props.agreement.name} for {poolName} by signing in with your Securitize
+            iD.
+          </Paragraph>
+          <div>
+            <Button primary label={'Sign in with Securitize'} href={props.onboarding.data?.kyc?.url} fill={false} />
+          </div>
+          <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
+        </StepBody>
+      )}
       {props.active && isRestricted && (
         <StepBody>
           {props.onboarding.data?.restrictedGlobal && (
@@ -109,74 +102,65 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {props.active &&
-        !props.whitelistStatus &&
-        !isRestricted &&
-        props.agreementStatus === 'none' &&
-        props.agreement &&
-        session && (
-          <StepBody>
-            <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
-              Finalize onboarding by signing the {props.agreement.name} for {poolName}. Note that the minimum investment
-              amount for this pool is 5.000 DAI.
-            </Paragraph>
-            {props.onboarding.data?.showNonSolicitationNotice && (
-              <Box margin={{ right: 'auto', bottom: 'medium' }}>
-                <FormFieldWithoutBorder error={error}>
-                  <CheckBox
-                    checked={checked}
-                    label={
-                      <div style={{ lineHeight: '24px' }}>
-                        I confirm that I am requesting the subscription agreement and further investment information
-                        without having being solicited or approached, directly or indirectly by the issuer of{' '}
-                        {props.activePool.metadata.shortName || props.activePool.metadata.name} or any affiliate.&nbsp;
-                        <Anchor
-                          onClick={(event: any) => {
-                            openNonSolicitationModal()
-                            event.preventDefault()
-                          }}
-                          style={{ display: 'inline' }}
-                          label="View more"
-                        />
-                        .
-                      </div>
-                    }
-                    onChange={(event) => setChecked(event.target.checked)}
-                  />
-                </FormFieldWithoutBorder>
-              </Box>
-            )}
-            <div>
-              <Button
-                primary
-                label={`Sign Subscription Agreement`}
-                href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
-                  props.agreement?.provider
-                }/${props.agreement?.providerTemplateId}/redirect?session=${session}`}
-                onClick={(event: any) => {
-                  if (props.onboarding.data?.showNonSolicitationNotice && !checked) {
-                    event.preventDefault()
-                    setError('This needs to be checked to proceed.')
+      {props.active && !isRestricted && props.agreementStatus === 'none' && props.agreement && session && (
+        <StepBody>
+          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
+            Finalize onboarding by signing the {props.agreement.name} for {poolName}. Note that the minimum investment
+            amount for this pool is 5.000 DAI.
+          </Paragraph>
+          {props.onboarding.data?.showNonSolicitationNotice && (
+            <Box margin={{ right: 'auto', bottom: 'medium' }}>
+              <FormFieldWithoutBorder error={error}>
+                <CheckBox
+                  checked={checked}
+                  label={
+                    <div style={{ lineHeight: '24px' }}>
+                      I confirm that I am requesting the subscription agreement and further investment information
+                      without having being solicited or approached, directly or indirectly by the issuer of{' '}
+                      {props.activePool.metadata.shortName || props.activePool.metadata.name} or any affiliate.&nbsp;
+                      <Anchor
+                        onClick={(event: any) => {
+                          openNonSolicitationModal()
+                          event.preventDefault()
+                        }}
+                        style={{ display: 'inline' }}
+                        label="View more"
+                      />
+                      .
+                    </div>
                   }
-                }}
-                fill={false}
-              />
-            </div>
-            <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
-          </StepBody>
-        )}
-      {props.active &&
-        !isRestricted &&
-        props.agreement &&
-        (props.agreementStatus === 'signed' || awaitingWhitelisting) && (
-          <StepBody>
-            <Box pad={{ vertical: 'medium' }}>
-              The Issuer will counter-sign your {props.agreement.name} for {poolName} soon. If KYC is verified, you will
-              be ready to invest in this pool upon their signature.
+                  onChange={(event) => setChecked(event.target.checked)}
+                />
+              </FormFieldWithoutBorder>
             </Box>
-          </StepBody>
-        )}
-      {/* TODO: or not whitelisted */}
+          )}
+          <div>
+            <Button
+              primary
+              label={`Sign Subscription Agreement`}
+              href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
+                props.agreement?.provider
+              }/${props.agreement?.providerTemplateId}/redirect?session=${session}`}
+              onClick={(event: any) => {
+                if (props.onboarding.data?.showNonSolicitationNotice && !checked) {
+                  event.preventDefault()
+                  setError('This needs to be checked to proceed.')
+                }
+              }}
+              fill={false}
+            />
+          </div>
+          <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
+        </StepBody>
+      )}
+      {props.active && !isRestricted && props.agreement && props.agreementStatus === 'signed' && (
+        <StepBody>
+          <Box pad={{ vertical: 'medium' }}>
+            The Issuer will counter-sign your {props.agreement.name} for {poolName} soon. If KYC is verified, you will
+            be ready to invest in this pool upon their signature.
+          </Box>
+        </StepBody>
+      )}
       {!props.active && <StepBody inactive>&nbsp;</StepBody>}
       {props.whitelistStatus === true && <StepBody>&nbsp;</StepBody>}
 
@@ -214,4 +198,4 @@ const KycStep: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default KycStep
+export default AgreementStep

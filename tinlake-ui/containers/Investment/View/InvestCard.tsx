@@ -14,7 +14,7 @@ import { Warning } from './styles'
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {
-  pool: Pool
+  selectedPool: Pool
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
   tinlake: ITinlake
@@ -108,7 +108,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
         Enter your investment amount below
       </Heading>
       <TokenInput
-        token="DAI"
+        token={props.selectedPool.metadata.currencySymbol}
         value={daiValue}
         error={error !== '' ? error : undefined}
         maxValue={limit}
@@ -127,7 +127,12 @@ const InvestCard: React.FC<Props> = (props: Props) => {
       )}
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
-        <Button primary label="Lock DAI" onClick={submit} disabled={error !== undefined || disabled} />
+        <Button
+          primary
+          label={`Lock ${props.selectedPool.metadata.currencySymbol}`}
+          onClick={submit}
+          disabled={error !== undefined || disabled}
+        />
       </Box>
     </Box>
   )

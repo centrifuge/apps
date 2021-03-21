@@ -255,7 +255,15 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 updateTrancheData={updateTrancheData}
               />
             )}
-            {card === 'invest' && <InvestCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
+            {card === 'invest' && (
+              <InvestCard
+                selectedPool={props.pool}
+                tranche={props.tranche}
+                tinlake={props.tinlake}
+                setCard={setCard}
+                updateTrancheData={updateTrancheData}
+              />
+            )}
             {card === 'redeem' && <RedeemCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
 
             {card === 'home' && trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
