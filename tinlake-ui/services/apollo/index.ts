@@ -4,6 +4,7 @@ import { ApolloClient, DefaultOptions } from 'apollo-client'
 import { createHttpLink } from 'apollo-link-http'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
+import { DocumentNode } from 'graphql'
 import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
@@ -534,6 +535,22 @@ class Apollo {
     }
 
     return result.data.proxies.length > 0 ? result.data.proxies[0] : null
+  }
+
+  async runCustomQuery(query: DocumentNode) {
+    let result
+    try {
+      result = await this.client.query({
+        query,
+      })
+    } catch (err) {
+      console.error(`error occured while running custom query ${err}`)
+      return {
+        data: [],
+      }
+    }
+
+    return result.data
   }
 }
 
