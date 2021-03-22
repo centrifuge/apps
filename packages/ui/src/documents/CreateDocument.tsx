@@ -110,12 +110,11 @@ export const CreateDocument: FunctionComponent<Props> = props => {
       }
       push(documentRoutes.index);
 
-      /**
-       * Update v2 replaces the entire document we make sure we do not lose
-       * any fields when adding the ASSET_IDENTIFIER
-       */
-      const toUpdate = {
-        ...createResult,
+      await httpClient.documents.commit(createResult._id!);
+
+      const result = await httpClient.documents.create({
+        document_id: createResult?.header!.document_id,
+        header: createResult.header,
         attributes: {
           ...createResult.attributes,
           [HARDCODED_FIELDS.ASSET_IDENTIFIER]: {
@@ -123,9 +122,8 @@ export const CreateDocument: FunctionComponent<Props> = props => {
             value: createResult.header!.document_id,
           } as any,
         },
-      };
-
-      await httpClient.documents.update(toUpdate);
+        template: createResult.template,
+      });
     } catch (e) {
       console.error(e);
 
