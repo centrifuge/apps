@@ -111,7 +111,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
         Enter your investment amount below
       </Heading>
       <TokenInput
-        token={props.selectedPool.metadata.currencySymbol}
+        token={props.selectedPool.metadata.currencySymbol || 'DAI'}
         value={daiValue}
         error={error !== '' ? error : undefined}
         maxValue={limit}
