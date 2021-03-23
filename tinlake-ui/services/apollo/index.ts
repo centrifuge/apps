@@ -91,7 +91,7 @@ class Apollo {
         weightedInterestRateNum,
         seniorInterestRateNum,
         order: poolValueNum,
-        isUpcoming: false,
+        isUpcoming: pool?.metadata?.isUpcoming || false,
         isArchived: false,
         isOversubscribed:
           (pool && new BN(pool.maxReserve).lte(new BN(pool.reserve).add(OversubscribedBuffer))) || false,
@@ -381,7 +381,7 @@ class Apollo {
       result = await this.client.query({
         query: gql`
         {
-          dailyPoolDatas(where:{ pool: "${root}" }) {
+          dailyPoolDatas(where:{ pool: "${root}" }, last: 1000) {
            day {
             id
           }
@@ -408,6 +408,10 @@ class Apollo {
         juniorTokenPrice: parseFloat(new BN(item.juniorTokenPrice).div(UintBase).toString()) / 10 ** 9,
       }
     })
+
+    if (assetData.length >= 1000) {
+      throw new Error('Subgraph query limit reached for the asset data query')
+    }
 
     return assetData
   }

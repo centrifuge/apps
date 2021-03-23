@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import DashboardMetric from '../../../components/DashboardMetric'
 import ERC20Display from '../../../components/ERC20Display'
 import LoanListData from '../../../components/Loan/List'
+import { Pool } from '../../../config'
 import { AuthState } from '../../../ducks/auth'
 import { loadLoans, LoansState } from '../../../ducks/loans'
 import { loadPool, PoolState } from '../../../ducks/pool'
@@ -18,6 +19,7 @@ interface Props {
   loadPool?: (tinlake: any) => Promise<void>
   auth?: AuthState
   pool?: PoolState
+  activePool?: Pool
 }
 
 class LoanList extends React.Component<Props> {
@@ -58,7 +60,11 @@ class LoanList extends React.Component<Props> {
             </Box>
           </Box>
         )}
-        <LoanListData loans={(loans && loans.loans) || []} userAddress={auth?.address || ''}>
+        <LoanListData
+          activePool={this.props.activePool}
+          loans={(loans && loans.loans) || []}
+          userAddress={auth?.address || ''}
+        >
           {' '}
         </LoanListData>
       </Box>

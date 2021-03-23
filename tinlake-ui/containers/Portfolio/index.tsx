@@ -122,7 +122,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             <Value>
               <NumberDisplay value={baseToDisplay(totalDropValue, 18)} precision={0} />
             </Value>{' '}
-            <Unit>DAI</Unit>
+            <Unit>USD</Unit>
           </Cont>
           <MetricLabel>Total DROP Value</MetricLabel>
         </Box>
@@ -139,7 +139,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             <Value>
               <NumberDisplay value={baseToDisplay(totalTinValue, 18)} precision={0} />
             </Value>{' '}
-            <Unit>DAI</Unit>
+            <Unit>USD</Unit>
           </Cont>
           <MetricLabel>Total TIN Value</MetricLabel>
         </Box>
@@ -225,7 +225,8 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                         <Dash>-</Dash>
                       ) : (
                         <>
-                          <Number>{v}</Number> <Unit>DAI</Unit>
+                          <Number>{v}</Number>{' '}
+                          <Unit>{getPool(tokenBalance)?.pool.metadata.currencySymbol || 'DAI'}</Unit>
                         </>
                       )
                     }

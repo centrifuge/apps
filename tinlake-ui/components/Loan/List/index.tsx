@@ -6,6 +6,7 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import styled from 'styled-components'
 import NumberDisplay from '../../../components/NumberDisplay'
+import { Pool } from '../../../config'
 import { SortableLoan } from '../../../ducks/loans'
 import { dateToYMD } from '../../../utils/date'
 import { hexToInt } from '../../../utils/etherscanLinkGenerator'
@@ -16,6 +17,7 @@ import LoanLabel from '../Label'
 interface Props {
   loans: SortableLoan[]
   userAddress: string
+  activePool?: Pool
 }
 
 const LoanList: React.FC<Props> = (props: Props) => {
@@ -82,7 +84,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
                 render: (l: SortableLoan) => (l.maturityDate && l.maturityDate > 0 ? dateToYMD(l.maturityDate) : '-'),
               },
               {
-                header: 'Amount (DAI)',
+                header: `Amount (${props.activePool?.metadata.currencySymbol || 'DAI'})`,
                 property: 'amountNum',
                 align: 'end',
                 render: (l: SortableLoan) => (

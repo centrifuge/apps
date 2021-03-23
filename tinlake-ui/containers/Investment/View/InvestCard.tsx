@@ -71,11 +71,11 @@ const InvestCard: React.FC<Props> = (props: Props) => {
 
     const method = props.tranche === 'senior' ? 'submitSeniorSupplyOrder' : 'submitJuniorSupplyOrder'
     const skipSigning = authProvider !== 'MetaMask' // Ledger & Portis don't support EIP-712
-    const txId = await props.createTransaction(`Lock ${formatted} DAI for ${token} investment`, method, [
-      props.tinlake,
-      daiValue,
-      skipSigning,
-    ])
+    const txId = await props.createTransaction(
+      `Lock ${formatted} ${props.selectedPool.metadata.currencySymbol || 'DAI'} for ${token} investment`,
+      method,
+      [props.tinlake, daiValue, skipSigning]
+    )
     setTxId(txId)
   }
 
@@ -92,7 +92,11 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const onChange = (newValue: string) => {
     setDaiValue(newValue)
     if (disableLimit === false && hasInvested === false && new BN(newValue).lt(MinInvestment)) {
-      setError(`Minimum investment: ${config.network === 'Mainnet' ? '5.000' : '10'} DAI`)
+      setError(
+        `Minimum investment: ${config.network === 'Mainnet' ? '5.000' : '10'} ${
+          props.selectedPool.metadata.currencySymbol || 'DAI'
+        }`
+      )
     } else if (limit && new BN(newValue).gt(new BN(limit))) {
       setError('Amount larger than balance')
     } else if (new BN(newValue).isZero()) {

@@ -26,7 +26,8 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   const epochData = pool?.epoch || undefined
 
   const type = props.disbursements.remainingSupplyCurrency.isZero() ? 'Redeem' : 'Invest'
-  const token = type === 'Invest' ? 'DAI' : props.tranche === 'senior' ? 'DROP' : 'TIN'
+  const token =
+    type === 'Invest' ? props.pool.metadata.currencySymbol || 'DAI' : props.tranche === 'senior' ? 'DROP' : 'TIN'
 
   const [confirmCancellation, setConfirmCancellation] = React.useState(false)
 
@@ -85,7 +86,12 @@ const OrderCard: React.FC<Props> = (props: Props) => {
             {!rolledOver && (
               <>
                 This order will be executed at the end of the current epoch. Afterwards you can collect your{' '}
-                {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'}.
+                {type === 'Invest'
+                  ? props.tranche === 'senior'
+                    ? 'DROP'
+                    : 'TIN'
+                  : props.pool.metadata.currencySymbol || 'DAI'}
+                .
               </>
             )}
             {rolledOver && (

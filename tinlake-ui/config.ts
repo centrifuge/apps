@@ -29,6 +29,7 @@ interface PoolMetadata {
   attributes?: { [key: string]: string | { [key: string]: string } }
   assetMaturity?: string
   currencySymbol?: string
+  closedForInvestments: boolean
 }
 
 export interface BasePool {
@@ -159,6 +160,7 @@ const metadataSchema = yup.object().shape({
   assetMaturity: yup.string(),
   securitize: securitizeDataSchema,
   currencySymbol: yup.string().default('DAI'),
+  closedForInvestments: yup.boolean().default(true),
 })
 
 const poolSchema = yup.object().shape({

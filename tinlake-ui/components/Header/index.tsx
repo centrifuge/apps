@@ -157,10 +157,10 @@ const Header: React.FC<Props> = (props: Props) => {
                 <Link href="/portfolio">
                   <Box>
                     <Box direction="row">
-                      <TokenLogo src={`/static/DAI.svg`} />
                       <Box>
                         <Holdings>
                           {addThousandsSeparators(toPrecision(baseToDisplay(portfolio.totalValue, 18), 0))}
+                          <Unit>USD</Unit>
                         </Holdings>
                         <Desc>Portfolio Value</Desc>
                       </Box>
@@ -210,6 +210,14 @@ const TokenLogo = styled.img`
 const Holdings = styled.div`
   font-weight: bold;
   font-size: 13px;
+`
+
+const Unit = styled.div`
+  font-weight: bold;
+  display: inline;
+  margin-left: 4px;
+  font-size: 11px;
+  color: #333;
 `
 
 const Desc = styled.div`

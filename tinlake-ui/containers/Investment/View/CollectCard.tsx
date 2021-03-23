@@ -22,7 +22,8 @@ interface Props extends TransactionProps {
 
 const CollectCard: React.FC<Props> = (props: Props) => {
   const type = props.disbursements.payoutCurrencyAmount.isZero() ? 'Invest' : 'Redeem'
-  const token = type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'
+  const token =
+    type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : props.pool.metadata.currencySymbol || 'DAI'
 
   const [status, , setTxId] = useTransactionState()
 
@@ -55,14 +56,24 @@ const CollectCard: React.FC<Props> = (props: Props) => {
       <Info>
         <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
           {addThousandsSeparators(toMaxPrecision(baseToDisplay(amount, 18), 4))}{' '}
-          {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'} waiting for collection
+          {type === 'Invest'
+            ? props.tranche === 'senior'
+              ? 'DROP'
+              : 'TIN'
+            : props.pool.metadata.currencySymbol || 'DAI'}{' '}
+          waiting for collection
         </Heading>
         <Description>
           Your {type === 'Invest' ? 'investment' : 'redemption'} order has been executed.{' '}
           {type === 'Invest' &&
             `Your ${props.tranche === 'senior' ? 'DROP' : 'TIN'} tokens are already earning yield and RAD rewards. `}
-          Please collect your {type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : 'DAI'} at your
-          convenience to transfer them to your ETH account.
+          Please collect your{' '}
+          {type === 'Invest'
+            ? props.tranche === 'senior'
+              ? 'DROP'
+              : 'TIN'
+            : props.pool.metadata.currencySymbol || 'DAI'}{' '}
+          at your convenience to transfer them to your ETH account.
         </Description>
 
         <OrderSteps
