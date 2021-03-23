@@ -1,8 +1,8 @@
 import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
-import queries from './queries'
 import Apollo from '../../services/apollo'
 import { downloadCSV } from '../../utils/export'
+import queries from './queries'
 
 interface Props {}
 
