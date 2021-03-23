@@ -122,7 +122,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             <Value>
               <NumberDisplay value={baseToDisplay(totalDropValue, 18)} precision={0} />
             </Value>{' '}
-            <Unit>USD</Unit>
+            <Unit>DAI</Unit>
           </Cont>
           <MetricLabel>Total DROP Value</MetricLabel>
         </Box>
@@ -139,7 +139,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             <Value>
               <NumberDisplay value={baseToDisplay(totalTinValue, 18)} precision={0} />
             </Value>{' '}
-            <Unit>USD</Unit>
+            <Unit>DAI</Unit>
           </Cont>
           <MetricLabel>Total TIN Value</MetricLabel>
         </Box>
