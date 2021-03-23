@@ -137,7 +137,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   <TableCell style={{ textAlign: 'end' }}>
                     <LoadingValue done={avgAmount !== undefined}>
                       {addThousandsSeparators(toPrecision(baseToDisplay(avgAmount || new BN(0), 18), 0))}{' '}
-                      {props.selectedPool.metadata.currencySymbol}
+                      {props.selectedPool.metadata.currencySymbol || 'DAI'}
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
