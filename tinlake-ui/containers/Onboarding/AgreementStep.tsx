@@ -11,7 +11,7 @@ import { OnboardingState } from '../../ducks/onboarding'
 import { FormFieldWithoutBorder, LegalCopy, Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
-  activePool: Pool
+  activePool?: Pool
   tinlake: ITinlake
   active: boolean
   tranche?: 'senior' | 'junior'
@@ -28,7 +28,7 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const session = 'session' in router.query ? router.query.session : '' // TODO: check this on the API and display message if it has expired
 
-  const poolName = props.activePool.metadata.shortName || props.activePool.metadata.name
+  const poolName = props.activePool?.metadata.shortName || props.activePool?.metadata.name
 
   const [nonSolicitationModalIsOpen, setNonSolicitationModalIsOpen] = React.useState(false)
 
@@ -106,7 +106,7 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             Finalize onboarding by signing the {props.agreement.name} for {poolName}. Note that the minimum investment
-            amount for this pool is 5.000 {props.activePool.metadata.currencySymbol || 'DAI'}.
+            amount for this pool is 5.000 {props.activePool?.metadata.currencySymbol || 'DAI'}.
           </Paragraph>
           {props.onboarding.data?.showNonSolicitationNotice && (
             <Box margin={{ right: 'auto', bottom: 'medium' }}>
@@ -117,7 +117,7 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
                     <div style={{ lineHeight: '24px' }}>
                       I confirm that I am requesting the subscription agreement and further investment information
                       without having being solicited or approached, directly or indirectly by the issuer of{' '}
-                      {props.activePool.metadata.shortName || props.activePool.metadata.name} or any affiliate.&nbsp;
+                      {props.activePool?.metadata.shortName || props.activePool?.metadata.name} or any affiliate.&nbsp;
                       <Anchor
                         onClick={(event: any) => {
                           openNonSolicitationModal()
@@ -177,13 +177,13 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
           <Paragraph margin={{ top: 'medium' }}>
             You are located in or are a resident of a country where the cross-border marketing of securities or
             investments is restricted. However, you can still register. If you are still interested in more information
-            about the issuer of {props.activePool.metadata.shortName || props.activePool.metadata.name} (Executive
+            about the issuer of {props.activePool?.metadata.shortName || props.activePool?.metadata.name} (Executive
             Summary, Subscription Documents, Contacts and other offering materials), tick the box and continue. By doing
             so, you are confirming that you are requesting this information without having been being solicited or
             approached, directly or indirectly by the issuer of{' '}
-            {props.activePool.metadata.shortName || props.activePool.metadata.name} or any affiliate of or other person
-            acting as agent or otherwise on behalf of the issuer of{' '}
-            {props.activePool.metadata.shortName || props.activePool.metadata.name} including but not limited to
+            {props.activePool?.metadata.shortName || props.activePool?.metadata.name} or any affiliate of or other
+            person acting as agent or otherwise on behalf of the issuer of{' '}
+            {props.activePool?.metadata.shortName || props.activePool?.metadata.name} including but not limited to
             Centrifuge.
           </Paragraph>
         </LegalCopy>

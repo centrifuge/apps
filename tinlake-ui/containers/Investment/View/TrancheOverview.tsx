@@ -239,6 +239,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             {card === 'order' && (
               <OrderCard
                 {...props}
+                selectedPool={props.pool}
                 tinlake={props.tinlake}
                 setCard={setCard}
                 disbursements={disbursements}
@@ -249,6 +250,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             {card === 'collect' && (
               <CollectCard
                 {...props}
+                selectedPool={props.pool}
                 setCard={setCard}
                 disbursements={disbursements}
                 tokenPrice={tokenPrice || '0'}
@@ -264,7 +266,14 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 updateTrancheData={updateTrancheData}
               />
             )}
-            {card === 'redeem' && <RedeemCard {...props} setCard={setCard} updateTrancheData={updateTrancheData} />}
+            {card === 'redeem' && (
+              <RedeemCard
+                {...props}
+                selectedPool={props.pool}
+                setCard={setCard}
+                updateTrancheData={updateTrancheData}
+              />
+            )}
 
             {card === 'home' && trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
               <AddWalletLink onClick={addToWallet}>Display {trancheData?.token} in your wallet</AddWalletLink>
