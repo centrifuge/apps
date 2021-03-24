@@ -25,7 +25,7 @@ import MaxReserveForm from './MaxReserveForm'
 import { Sidenote } from './styles'
 
 interface Props {
-  activePool?: Pool
+  selectedPool?: Pool
   tinlake: ITinlake
   auth?: AuthState
 }
@@ -88,7 +88,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
             reserve: parseFloat((poolData?.reserve || new BN(0)).div(UintBase).toString()),
             assetValue: parseFloat((poolData?.netAssetValue || new BN(0)).div(UintBase).toString()),
             day: Date.now() / 1000,
-            currency: props.activePool?.metadata.currencySymbol || 'DAI',
+            currency: props.selectedPool?.metadata.currencySymbol || 'DAI',
           },
         ]
       : []
@@ -114,7 +114,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
                     <LoadingValue done={poolData?.outstandingVolume !== undefined} height={22}>
                       {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))}{' '}
-                      {props.activePool?.metadata.currencySymbol || 'DAI'}
+                      {props.selectedPool?.metadata.currencySymbol || 'DAI'}
                     </LoadingValue>
                   </Heading>
                 </Box>
@@ -133,11 +133,11 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                         <LoadingValue done={poolData?.reserve !== undefined} height={39}>
                           <>
                             {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))}{' '}
-                            {props.activePool?.metadata.currencySymbol || 'DAI'}
+                            {props.selectedPool?.metadata.currencySymbol || 'DAI'}
                             <Sidenote>
                               Max:{' '}
                               {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 0))}{' '}
-                              {props.activePool?.metadata.currencySymbol || 'DAI'}
+                              {props.selectedPool?.metadata.currencySymbol || 'DAI'}
                             </Sidenote>
                           </>
                         </LoadingValue>
@@ -150,7 +150,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                       <TableCell style={{ textAlign: 'end' }}>
                         <LoadingValue done={poolData?.reserve !== undefined}>
                           {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 0))}{' '}
-                          {props.activePool?.metadata.currencySymbol || 'DAI'}
+                          {props.selectedPool?.metadata.currencySymbol || 'DAI'}
                         </LoadingValue>
                       </TableCell>
                     </TableRow>
@@ -174,7 +174,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                               0
                             )
                           )}{' '}
-                          {props.activePool?.metadata.currencySymbol || 'DAI'}
+                          {props.selectedPool?.metadata.currencySymbol || 'DAI'}
                         </LoadingValue>
                       </TableCell>
                     </TableRow>
@@ -189,7 +189,11 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
               </>
             )}
             {showMaxReserveForm && (
-              <MaxReserveForm tinlake={props.tinlake} setShowMaxReserveForm={setShowMaxReserveForm} />
+              <MaxReserveForm
+                tinlake={props.tinlake}
+                setShowMaxReserveForm={setShowMaxReserveForm}
+                selectedPool={props.selectedPool}
+              />
             )}
           </Box>
         </Box>
