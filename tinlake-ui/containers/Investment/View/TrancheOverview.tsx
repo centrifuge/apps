@@ -21,7 +21,7 @@ import RedeemCard from './RedeemCard'
 import { AddWalletLink, Info, MinTimeRemaining, Sidenote, TokenLogo, Warning } from './styles'
 
 interface Props {
-  pool: Pool
+  pool?: Pool
   tranche: 'senior' | 'junior'
   tinlake: ITinlake
 }
@@ -192,7 +192,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={value !== undefined}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 4))}{' '}
-                  {props.pool.metadata.currencySymbol}
+                  {props.pool?.metadata.currencySymbol}
                 </LoadingValue>
               </TableCell>
             </TableRow>
@@ -281,7 +281,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               <Info>
                 DROP APR: <b>{toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2)}%</b>
                 <br />
-                Minimum investment amount: <b>5,000 {props.pool.metadata.currencySymbol  || 'DAI'}</b>
+                Minimum investment amount: <b>5,000 {props.pool?.metadata.currencySymbol || 'DAI'}</b>
               </Info>
               <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
                 <PoolLink href={'/onboarding'}>

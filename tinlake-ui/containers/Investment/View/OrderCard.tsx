@@ -12,7 +12,7 @@ import { Description, Info, MinTimeRemaining, OrderSteps, Warning } from './styl
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {
-  pool: Pool
+  pool?: Pool
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
   disbursements: any
@@ -27,7 +27,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
 
   const type = props.disbursements.remainingSupplyCurrency.isZero() ? 'Redeem' : 'Invest'
   const token =
-    type === 'Invest' ? props.pool.metadata.currencySymbol || 'DAI' : props.tranche === 'senior' ? 'DROP' : 'TIN'
+    type === 'Invest' ? props.pool?.metadata.currencySymbol || 'DAI' : props.tranche === 'senior' ? 'DROP' : 'TIN'
 
   const [confirmCancellation, setConfirmCancellation] = React.useState(false)
 
@@ -90,7 +90,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
                   ? props.tranche === 'senior'
                     ? 'DROP'
                     : 'TIN'
-                  : props.pool.metadata.currencySymbol || 'DAI'}
+                  : props.pool?.metadata.currencySymbol || 'DAI'}
                 .
               </>
             )}

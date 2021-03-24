@@ -11,7 +11,7 @@ import { Description, Info, OrderSteps } from './styles'
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {
-  pool: Pool
+  pool?: Pool
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
   disbursements: any
@@ -23,7 +23,7 @@ interface Props extends TransactionProps {
 const CollectCard: React.FC<Props> = (props: Props) => {
   const type = props.disbursements.payoutCurrencyAmount.isZero() ? 'Invest' : 'Redeem'
   const token =
-    type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : props.pool.metadata.currencySymbol || 'DAI'
+    type === 'Invest' ? (props.tranche === 'senior' ? 'DROP' : 'TIN') : props.pool?.metadata.currencySymbol || 'DAI'
 
   const [status, , setTxId] = useTransactionState()
 
@@ -60,7 +60,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
             ? props.tranche === 'senior'
               ? 'DROP'
               : 'TIN'
-            : props.pool.metadata.currencySymbol || 'DAI'}{' '}
+            : props.pool?.metadata.currencySymbol || 'DAI'}{' '}
           waiting for collection
         </Heading>
         <Description>
@@ -72,7 +72,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
             ? props.tranche === 'senior'
               ? 'DROP'
               : 'TIN'
-            : props.pool.metadata.currencySymbol || 'DAI'}{' '}
+            : props.pool?.metadata.currencySymbol || 'DAI'}{' '}
           at your convenience to transfer them to your ETH account.
         </Description>
 

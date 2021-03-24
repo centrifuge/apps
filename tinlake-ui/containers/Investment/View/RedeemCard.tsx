@@ -11,7 +11,7 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {
-  pool: Pool
+  pool?: Pool
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
   tinlake: ITinlake
