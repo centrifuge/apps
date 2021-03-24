@@ -19,6 +19,7 @@ interface IResponse {
   _meta: {
     block: {
       hash: string
+      number: number
     }
   }
 }
@@ -50,7 +51,7 @@ const fetch = async (skip: number, first: number, blockHash: string | null): Pro
 
 export async function fortunaFiDailyInvestorBalances() {
   let start = 0
-  let limit = 1000
+  const limit = 1000
 
   let results: IDaily[] = []
   let blockHash: string | null = null
@@ -58,7 +59,7 @@ export async function fortunaFiDailyInvestorBalances() {
 
   // subgraph only returns 1000 entries, fetch until no more entries are returned
   while (true) {
-    const response = await fetch(start, limit, blockHash)
+    const response: IResponse = await fetch(start, limit, blockHash)
     if (blockHash === null) {
       blockHash = response._meta.block.hash
     }
