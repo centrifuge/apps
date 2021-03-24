@@ -132,7 +132,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
         <Button
           primary
-          label={`Lock ${props.selectedPool.metadata.currencySymbol  || 'DAI'}`}
+          label={`Lock ${props.selectedPool.metadata.currencySymbol || 'DAI'}`}
           onClick={submit}
           disabled={error !== undefined || disabled}
         />
