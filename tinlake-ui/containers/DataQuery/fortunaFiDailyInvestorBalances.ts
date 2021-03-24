@@ -53,7 +53,7 @@ export async function fortunaFiDailyInvestorBalances() {
   let start = 0
   const limit = 1000
 
-  let results: IDaily[] = []
+  const results: IDaily[] = []
   let blockHash: string | null = null
   let blockNumber: number | null = null
 
