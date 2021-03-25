@@ -110,7 +110,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
 
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
               <Button
-                primary
+                secondary
                 label="Remove"
                 onClick={() => {
                   remove('junior')
@@ -154,7 +154,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
 
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
               <Button
-                primary
+                secondary
                 label="Remove"
                 onClick={() => {
                   remove('senior')
