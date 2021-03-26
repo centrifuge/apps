@@ -11,6 +11,10 @@ interface Props extends TransactionProps {
   loadPool?: (tinlake: any) => Promise<void>
 }
 
+type Tranche = 'junior' | 'senior'
+
+const getActionName = (tranche: Tranche) => (tranche === 'senior' ? 'updateSeniorMemberList' : 'updateJuniorMemberList')
+
 const ManageMemberlist: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
 
@@ -20,7 +24,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
   const [juniorStatus, , setJuniorTxId] = useTransactionState()
   const [seniorStatus, , setSeniorTxId] = useTransactionState()
 
-  const save = async (tranche: 'senior' | 'junior') => {
+  const add = async (tranche: Tranche) => {
     const address = tranche === 'senior' ? seniorAddress : juniorAddress
 
     const validUntilDate = new Date()
@@ -28,11 +32,37 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
 
     const validUntil = Math.round(validUntilDate.getTime() / 1000)
 
-    const txId = await props.createTransaction(
-      `Add ${address.substring(0, 8)}... to ${tranche === 'senior' ? 'DROP' : 'TIN'}`,
-      tranche === 'senior' ? 'updateSeniorMemberList' : 'updateJuniorMemberList',
-      [props.tinlake, address, validUntil]
-    )
+    const description = `Add ${address.substring(0, 8)}... to ${tranche === 'senior' ? 'DROP' : 'TIN'}`
+
+    const txId = await props.createTransaction(description, getActionName(tranche), [
+      props.tinlake,
+      address,
+      validUntil,
+    ])
+
+    if (tranche === 'senior') setSeniorTxId(txId)
+    else setJuniorTxId(txId)
+  }
+
+  const remove = async (tranche: Tranche) => {
+    const address = tranche === 'senior' ? seniorAddress : juniorAddress
+
+    const date = new Date()
+    /*
+     * minimum delay is 7 days: https://github.com/centrifuge/tinlake/blob/v0.3.0/src/lender/token/memberlist.sol#L23
+     * so need to add 8 days from today
+     */
+    date.setDate(date.getDate() + 8)
+
+    const validUntil = Math.round(date.getTime() / 1000)
+
+    const description = `Remove ${address.substring(0, 8)}... from ${tranche === 'senior' ? 'DROP' : 'TIN'}`
+
+    const txId = await props.createTransaction(description, getActionName(tranche), [
+      props.tinlake,
+      address,
+      validUntil,
+    ])
 
     if (tranche === 'senior') setSeniorTxId(txId)
     else setJuniorTxId(txId)
@@ -64,7 +94,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
           >
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                Add TIN member
+                Add/Remove TIN member
               </Heading>
             </Box>
 
@@ -72,7 +102,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
               <TextInput
                 value={juniorAddress}
                 placeholder="0x..."
-                onChange={(event: any) => {
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setJuniorAddress(event.currentTarget.value)
                 }}
               />
@@ -80,10 +110,18 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
 
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
               <Button
+                secondary
+                label="Remove"
+                onClick={() => {
+                  remove('junior')
+                }}
+                disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
+              />
+              <Button
                 primary
                 label="Add"
                 onClick={() => {
-                  save('junior')
+                  add('junior')
                 }}
                 disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
               />
@@ -100,7 +138,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
           >
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                Add DROP member
+                Add/Remove DROP member
               </Heading>
             </Box>
 
@@ -108,7 +146,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
               <TextInput
                 value={seniorAddress}
                 placeholder="0x..."
-                onChange={(event: any) => {
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setSeniorAddress(event.currentTarget.value)
                 }}
               />
@@ -116,10 +154,18 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
 
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
               <Button
+                secondary
+                label="Remove"
+                onClick={() => {
+                  remove('senior')
+                }}
+                disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
+              />
+              <Button
                 primary
                 label="Add"
                 onClick={() => {
-                  save('senior')
+                  add('senior')
                 }}
                 disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
               />
