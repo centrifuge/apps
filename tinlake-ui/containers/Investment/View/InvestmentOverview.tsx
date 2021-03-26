@@ -224,7 +224,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 <Heading level="5" margin={{ left: 'auto', top: '0', bottom: 'xsmall' }}>
                   <LoadingValue done={dropTotalValue !== undefined} height={22}>
                     {dropTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 0))}{' '}
-                    {props.selectedPool.metadata.currencySymbol}
+                    {props.selectedPool.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </Heading>
                 <span>
