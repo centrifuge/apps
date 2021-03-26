@@ -192,7 +192,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={value !== undefined}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 4))}{' '}
-                  {props.pool?.metadata.currencySymbol}
+                  {props.pool?.metadata.currencySymbol || 'DAI'}
                 </LoadingValue>
               </TableCell>
             </TableRow>
