@@ -282,7 +282,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 <Heading level="5" margin={{ left: 'auto', top: '0', bottom: 'xsmall' }}>
                   <LoadingValue done={tinTotalValue !== undefined} height={22}>
                     {tinTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 0))}{' '}
-                    {props.selectedPool.metadata.currencySymbol}
+                    {props.selectedPool.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </Heading>
                 <span>
