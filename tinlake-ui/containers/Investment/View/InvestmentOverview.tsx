@@ -173,7 +173,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
                 <LoadingValue done={poolData?.reserve !== undefined}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))}{' '}
-                  {props.selectedPool.metadata.currencySymbol}
+                  {props.selectedPool.metadata.currencySymbol || 'DAI'}
                 </LoadingValue>
               </Heading>
             </Box>
