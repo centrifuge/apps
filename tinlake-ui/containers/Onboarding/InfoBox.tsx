@@ -49,7 +49,7 @@ const InfoBox: React.FC<Props> = (props: Props) => {
         <li>Sign a subscription agreement with the pools issuer.</li>
       </ol>
       Currently, the underlying legal structures may also impose some restrictions on investments. E.g. most pools
-      require a minimum investment amount of 5.000 DAI. Residents of some countries may also be excluded from investing.
+      require a minimum investment amount of 5000 DAI. Residents of some countries may also be excluded from investing.
       <br />
       <br />
       <Anchor href="https://centrifuge.hackmd.io/QXUCI0wRSLepfABBivNruw?view" target="_blank">
@@ -58,8 +58,9 @@ const InfoBox: React.FC<Props> = (props: Props) => {
       <Anchor onClick={() => openModal()}>See list of excluded countries</Anchor>
       <Modal
         opened={modalIsOpen}
-        title={`List of excluded countries for ${props.activePool.metadata.shortName ||
-          props.activePool.metadata.name}.`}
+        title={`List of excluded countries for ${
+          props.activePool.metadata.shortName || props.activePool.metadata.name
+        }.`}
         headingProps={{ style: { maxWidth: '100%', display: 'flex' } }}
         titleIcon={<StatusInfoIcon />}
         onClose={closeModal}
