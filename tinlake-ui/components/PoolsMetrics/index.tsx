@@ -134,11 +134,11 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
       >
         <Box>
           <Cont style={{ marginTop: '8px' }}>
-            <TokenLogo src={`/static/rad.svg`} />
+            <TokenLogo src={`/static/cfg.svg`} />
             <Value>
               <NumberDisplay value={totalRewardsEarned} precision={dynamicPrecision(totalRewardsEarned)} />
             </Value>{' '}
-            <Unit>RAD</Unit>
+            <Unit>CFG</Unit>
           </Cont>
           <Label>Total Rewards Earned</Label>
         </Box>

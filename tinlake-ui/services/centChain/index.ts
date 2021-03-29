@@ -54,8 +54,8 @@ export class CentChain {
     return await (await this.api()).query.system.account(accountId)
   }
 
-  public async claimedRADRewards(addr: string) {
-    const claimed = await (await this.api()).query.radClaims.accountBalances(centChainAddrToAccountId(addr))
+  public async claimedCFGRewards(addr: string) {
+    const claimed = await (await this.api()).query.cfgClaims.accountBalances(centChainAddrToAccountId(addr))
     return claimed
   }
 
@@ -66,10 +66,10 @@ export class CentChain {
    * @param proof proof for the given claimer and amount
    * @returns txHash string
    */
-  public claimRADRewards(claimerAccountID: string, amount: string, proof: Uint8Array[]): Promise<string> {
+  public claimCFGRewards(claimerAccountID: string, amount: string, proof: Uint8Array[]): Promise<string> {
     return new Promise(async (resolve, reject) => {
       const api = await this.api()
-      const extrinsic = api.tx.radClaims.claim(claimerAccountID, amount, proof)
+      const extrinsic = api.tx.cfgClaims.claim(claimerAccountID, amount, proof)
       await extrinsic
         .send(({ status, dispatchError }) => {
           // status would still be set, but in the case of error we can shortcut

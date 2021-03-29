@@ -575,8 +575,8 @@ export async function setMaxReserve(tinlake: ITinlake, ratio: string): Promise<P
   return tinlake.setMaximumReserve(ratio)
 }
 
-export async function updateClaimRADAccountID(tinlake: ITinlake, centAddress: string): Promise<PendingTransaction> {
-  return tinlake.updateClaimRADAccountID(centAddress)
+export async function updateClaimCFGAccountID(tinlake: ITinlake, centAddress: string): Promise<PendingTransaction> {
+  return tinlake.updateClaimCFGAccountID(centAddress)
 }
 
 function loggedError(error: any, message: string, id: string): PendingTransaction {

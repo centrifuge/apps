@@ -70,7 +70,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
         <Description>
           Your {type === 'Invest' ? 'investment' : 'redemption'} order has been executed.{' '}
           {type === 'Invest' &&
-            `Your ${props.tranche === 'senior' ? 'DROP' : 'TIN'} tokens are already earning yield and RAD rewards. `}
+            `Your ${props.tranche === 'senior' ? 'DROP' : 'TIN'} tokens are already earning yield and CFG rewards. `}
           Please collect your{' '}
           {type === 'Invest'
             ? props.tranche === 'senior'
@@ -79,7 +79,6 @@ const CollectCard: React.FC<Props> = (props: Props) => {
             : props.selectedPool?.metadata.currencySymbol || 'DAI'}{' '}
           at your convenience to transfer them to your ETH account.
         </Description>
-
         <OrderSteps
           src={`/static/steps/collect-${type === 'Invest' ? 'dai' : props.tranche === 'senior' ? 'drop' : 'tin'}-${
             type === 'Invest' ? (props.tranche === 'senior' ? 'drop' : 'tin') : 'dai'
