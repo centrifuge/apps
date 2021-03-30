@@ -79,24 +79,6 @@ const Archived: React.FC<Props> = (props: Props) => {
             </a>
 
             <p>{props.selectedPool.metadata.description}</p>
-
-            <p>
-              {Object.keys(props.selectedPool.metadata.details).map((key: string) => (
-                <React.Fragment key={key}>
-                  <strong>{key}:&nbsp;</strong> {props.selectedPool.metadata.details[key]}
-                  <br />
-                </React.Fragment>
-              ))}
-            </p>
-
-            {props.selectedPool.metadata.discourseLink && (
-              <>
-                <h4 style={{ marginBottom: '0' }}>Learn more about this asset originator</h4>
-                <a href={props.selectedPool.metadata.discourseLink} target="_blank">
-                  Join the discussion on Discourse
-                </a>
-              </>
-            )}
           </div>
         </Box>
       </Box>

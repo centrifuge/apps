@@ -101,14 +101,14 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
       <Tooltip id="poolValue">
         <HeaderBox style={{ borderRight: 'none' }}>
           <Heading level="4">
-            <TokenLogo src={`/static/DAI.svg`} />
+            <TokenLogo src={`/static/currencies/${props.selectedPool.metadata.currencySymbol}.svg`} />
             {addThousandsSeparators(
               toPrecision(
                 baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18),
                 0
               )
             )}
-            <Unit>DAI</Unit>
+            <Unit>{props.selectedPool.metadata.currencySymbol}</Unit>
           </Heading>
           <Type>Pool Value</Type>
         </HeaderBox>

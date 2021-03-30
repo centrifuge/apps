@@ -24,12 +24,11 @@ interface PoolMetadata {
   description?: string
   media?: PoolMedia
   website?: string
-  details?: any
   asset: string
-  discourseLink?: string
   securitize?: SecuritizeData
   attributes?: { [key: string]: string | { [key: string]: string } }
   assetMaturity?: string
+  currencySymbol?: string
 }
 
 export interface BasePool {
@@ -155,12 +154,11 @@ const metadataSchema = yup.object().shape({
   description: yup.string(),
   media: mediaSchema,
   website: yup.string(),
-  details: yup.object(),
   attributes: yup.object(),
   asset: yup.string().required('poolSchema.asset is required'),
   assetMaturity: yup.string(),
-  discourseLink: yup.string(),
   securitize: securitizeDataSchema,
+  currencySymbol: yup.string().default('DAI'),
 })
 
 const poolSchema = yup.object().shape({
@@ -259,7 +257,6 @@ export const loadPoolsFromIPFS = async () => {
   const upcoming = upcomingPoolsSchema
     .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
     .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
-
   ipfsPools = { active, upcoming, archived }
   return ipfsPools
 }

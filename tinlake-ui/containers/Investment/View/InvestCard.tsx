@@ -14,7 +14,7 @@ import { Warning } from './styles'
 import { Card } from './TrancheOverview'
 
 interface Props extends TransactionProps {
-  pool: Pool
+  selectedPool?: Pool
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
   tinlake: ITinlake
@@ -71,11 +71,11 @@ const InvestCard: React.FC<Props> = (props: Props) => {
 
     const method = props.tranche === 'senior' ? 'submitSeniorSupplyOrder' : 'submitJuniorSupplyOrder'
     const skipSigning = authProvider !== 'MetaMask' // Ledger & Portis don't support EIP-712
-    const txId = await props.createTransaction(`Lock ${formatted} DAI for ${token} investment`, method, [
-      props.tinlake,
-      daiValue,
-      skipSigning,
-    ])
+    const txId = await props.createTransaction(
+      `Lock ${formatted} ${props.selectedPool?.metadata.currencySymbol || 'DAI'} for ${token} investment`,
+      method,
+      [props.tinlake, daiValue, skipSigning]
+    )
     setTxId(txId)
   }
 
@@ -92,7 +92,10 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const onChange = (newValue: string) => {
     setDaiValue(newValue)
     if (disableLimit === false && hasInvested === false && new BN(newValue).lt(MinInvestment)) {
-      setError(`Minimum investment: ${config.network === 'Mainnet' ? '5.000' : '10'} DAI`)
+      setError(
+        `Minimum investment: ${config.network === 'Mainnet' ? '5.000' : '10'} ${props.selectedPool?.metadata
+          .currencySymbol || 'DAI'}`
+      )
     } else if (limit && new BN(newValue).gt(new BN(limit))) {
       setError('Amount larger than balance')
     } else if (new BN(newValue).isZero()) {
@@ -108,7 +111,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
         Enter your investment amount below
       </Heading>
       <TokenInput
-        token="DAI"
+        token={props.selectedPool?.metadata.currencySymbol || 'DAI'}
         value={daiValue}
         error={error !== '' ? error : undefined}
         maxValue={limit}
@@ -127,7 +130,12 @@ const InvestCard: React.FC<Props> = (props: Props) => {
       )}
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
-        <Button primary label="Lock DAI" onClick={submit} disabled={error !== undefined || disabled} />
+        <Button
+          primary
+          label={`Lock ${props.selectedPool?.metadata.currencySymbol || 'DAI'}`}
+          onClick={submit}
+          disabled={error !== undefined || disabled}
+        />
       </Box>
     </Box>
   )

@@ -5,6 +5,7 @@ import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadLoan } from '../../../ducks/loans'
 import { loadPool, PoolState } from '../../../ducks/pool'
@@ -14,6 +15,7 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 interface Props extends TransactionProps {
   loan: Loan
   tinlake: any
+  poolConfig: Pool
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
   loadPool?: (tinlake: any) => Promise<void>
   pool?: PoolState
@@ -36,11 +38,11 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
     const valueToDecimal = new Decimal(baseToDisplay(borrowAmount, 18)).toFixed(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
-    const txId = await props.createTransaction(`Finance Asset ${props.loan.loanId} (${formatted} DAI)`, 'borrow', [
-      props.tinlake,
-      props.loan,
-      borrowAmount,
-    ])
+    const txId = await props.createTransaction(
+      `Finance Asset ${props.loan.loanId} (${formatted} ${props.poolConfig.metadata.currencySymbol || 'DAI'})`,
+      'borrow',
+      [props.tinlake, props.loan, borrowAmount]
+    )
     setTxId(txId)
   }
 
@@ -113,7 +115,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
     <Box width="360px" gap="medium">
       <Box gap="medium" margin={{ right: 'small' }}>
         <TokenInput
-          token="DAI"
+          token={props.poolConfig.metadata.currencySymbol || 'DAI'}
           label="Financing amount"
           value={borrowAmount}
           error={error}

@@ -6,6 +6,7 @@ import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Tooltip } from '../../../components/Tooltip'
+import { Pool } from '../../../config'
 import { AuthState } from '../../../ducks/auth'
 import { EpochData, PoolData, PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -17,6 +18,7 @@ import { Caret, Sidenote, SignIcon } from './styles'
 interface Props extends TransactionProps {
   tinlake: ITinlake
   auth?: AuthState
+  activePool?: Pool
 }
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
@@ -75,7 +77,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                       {addThousandsSeparators(
                         toPrecision(baseToDisplay(poolData?.senior?.pendingInvestments || '0', 18), 0)
                       )}{' '}
-                      DAI
+                      {props.activePool?.metadata.currencySymbol || 'DAI'}
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
@@ -91,7 +93,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                       {addThousandsSeparators(
                         toPrecision(baseToDisplay(poolData?.junior?.pendingInvestments || '0', 18), 0)
                       )}{' '}
-                      DAI
+                      {props.activePool?.metadata.currencySymbol || 'DAI'}
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
@@ -104,7 +106,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                       {addThousandsSeparators(
                         toPrecision(baseToDisplay(poolData?.totalPendingInvestments || '0', 18), 0)
                       )}{' '}
-                      DAI
+                      {props.activePool?.metadata.currencySymbol || 'DAI'}
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
@@ -152,14 +154,16 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
-                    <Box direction="row">Estimated Total Pending Redemptions in DAI</Box>
+                    <Box direction="row">
+                      Estimated Total Pending Redemptions in {props.activePool?.metadata.currencySymbol || 'DAI'}
+                    </Box>
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
                     <LoadingValue done={poolData?.totalRedemptionsCurrency !== undefined}>
                       {addThousandsSeparators(
                         toPrecision(baseToDisplay(poolData?.totalRedemptionsCurrency || '0', 18), 0)
                       )}{' '}
-                      DAI
+                      {props.activePool?.metadata.currencySymbol || 'DAI'}
                     </LoadingValue>
                   </TableCell>
                 </TableRow>
@@ -247,7 +251,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                           0
                         )
                       )}{' '}
-                      DAI
+                      {props.activePool?.metadata.currencySymbol || 'DAI'}
                     </LoadingValue>
                   </TableCell>
                 </TableRow>

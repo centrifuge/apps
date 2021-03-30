@@ -49,7 +49,7 @@ class LoanView extends React.Component<Props> {
 
     return (
       <Box>
-        <LoanData loan={loan!} auth={this.props.auth} tinlake={tinlake} />
+        <LoanData loan={loan!} auth={this.props.auth} tinlake={tinlake} poolConfig={this.props.poolConfig} />
         {loan?.status !== 'closed' && (
           <Box>
             {hasBorrowerPermissions && (
@@ -67,8 +67,8 @@ class LoanView extends React.Component<Props> {
                   background="white"
                   direction="row"
                 >
-                  <LoanBorrow loan={loan!} tinlake={tinlake} />
-                  <LoanRepay loan={loan!} tinlake={tinlake} />
+                  <LoanBorrow loan={loan!} tinlake={tinlake} poolConfig={this.props.poolConfig} />
+                  <LoanRepay loan={loan!} tinlake={tinlake} poolConfig={this.props.poolConfig} />
                 </Box>
               </>
             )}

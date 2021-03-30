@@ -5,6 +5,7 @@ import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
+import { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadLoan } from '../../../ducks/loans'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -13,6 +14,7 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 interface Props extends TransactionProps {
   loan: Loan
   tinlake: ITinlake
+  poolConfig: Pool
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
   ensureAuthed?: () => Promise<void>
 }
@@ -33,17 +35,18 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
     let txId: string
     if (repayAmount === debt) {
       // full repay
-      txId = await props.createTransaction(`Repay Asset ${props.loan.loanId} (${formatted} DAI)`, 'repayFull', [
-        props.tinlake,
-        props.loan,
-      ])
+      txId = await props.createTransaction(
+        `Repay Asset ${props.loan.loanId} (${formatted} ${props.poolConfig.metadata.currencySymbol || 'DAI'})`,
+        'repayFull',
+        [props.tinlake, props.loan]
+      )
     } else {
       // partial repay
-      txId = await props.createTransaction(`Repay Asset ${props.loan.loanId} (${formatted} DAI)`, 'repay', [
-        props.tinlake,
-        props.loan,
-        repayAmount,
-      ])
+      txId = await props.createTransaction(
+        `Repay Asset ${props.loan.loanId} (${formatted} ${props.poolConfig.metadata.currencySymbol || 'DAI'})`,
+        'repay',
+        [props.tinlake, props.loan, repayAmount]
+      )
     }
 
     setTxId(txId)
@@ -104,7 +107,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
     <Box width="360px" gap="medium">
       <Box gap="medium" margin={{ right: 'small' }}>
         <TokenInput
-          token="DAI"
+          token={props.poolConfig.metadata.currencySymbol || 'DAI'}
           label="Repay amount"
           value={repayAmount}
           maxValue={useBalanceAsMax ? balance : debt}

@@ -88,7 +88,7 @@ class PoolList extends React.Component<Props> {
         {poolsData?.pools
           ?.filter((p) => showArchived || !p.isArchived)
           .sort((a, b) => b.order - a.order)
-          .map((p) => (
+          .map((p: PoolData) => (
             <PoolRow key={p.id} onClick={() => this.clickPool(p)}>
               <Icon src={p.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'} />
               <Desc>
@@ -111,7 +111,7 @@ class PoolList extends React.Component<Props> {
                   <NumberDisplay
                     render={(v) => (
                       <>
-                        <Number>{v}</Number> <Unit>DAI</Unit>
+                        <Number>{v}</Number> <Unit>{p.currency}</Unit>
                       </>
                     )}
                     precision={0}
@@ -129,7 +129,7 @@ class PoolList extends React.Component<Props> {
                         <Dash>-</Dash>
                       ) : (
                         <>
-                          <Number>{v}</Number> <Unit>DAI</Unit>
+                          <Number>{v}</Number> <Unit>{p.currency}</Unit>
                         </>
                       )
                     }

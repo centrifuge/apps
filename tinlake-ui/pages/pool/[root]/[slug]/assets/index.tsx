@@ -57,13 +57,13 @@ class LoanListPage extends React.Component<Props> {
                           </Box>
                         </Box>
 
-                        <LoanOverview tinlake={tinlake} auth={auth} activePool={this.props.pool} />
+                        <LoanOverview tinlake={tinlake} auth={auth} selectedPool={this.props.pool} />
                         <Box direction="row" justify="between">
                           <Heading level="4" margin={{ bottom: 'medium' }}>
                             Asset List
                           </Heading>
                         </Box>
-                        <LoanList tinlake={tinlake} auth={auth} hideMetrics={true} />
+                        <LoanList tinlake={tinlake} auth={auth} hideMetrics={true} activePool={this.props.pool} />
                       </Box>
                     )}
                   />

@@ -56,7 +56,7 @@ const HelpMenu: React.FC<{}> = () => {
         >
           <InnerMenu width="200px" elevation="small" round="xsmall" background="white">
             <Title>Need help?</Title>
-            <MenuItem href="https://t.me/CentrifugeSupport" target="_blank" icon="telegram">
+            <MenuItem href="https://t.me/centrifuge_chat" target="_blank" icon="telegram">
               <Name>Telegram</Name>
             </MenuItem>
             <MenuItem href="https://centrifuge.io/discord" target="_blank" icon="slack">
