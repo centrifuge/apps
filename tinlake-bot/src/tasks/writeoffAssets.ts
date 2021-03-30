@@ -21,14 +21,14 @@ export const writeoffAssets = async (pools: PoolMap) => {
       
     `)
 
-    if (!data.loans) {
+    if (!data?.loans) {
       console.error(`Failed to retrieve loans: ${data}`)
       return
     }
 
     console.log(`Overdue assets: ${JSON.stringify(data.loans)}`)
   } catch (e) {
-    console.error(`Error caught during pool closing task: ${e}`)
+    console.error(`Error caught during asset writeoff task: ${e}`)
   }
 }
 
