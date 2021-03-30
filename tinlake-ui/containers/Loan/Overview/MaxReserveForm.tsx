@@ -3,12 +3,14 @@ import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
+import { Pool } from '../../../config'
 import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { Description } from './styles'
 
 interface Props extends TransactionProps {
   tinlake: ITinlake
+  selectedPool?: Pool
   loadPool?: (tinlake: any) => Promise<void>
   setShowMaxReserveForm: (value: boolean) => void
 }
@@ -47,7 +49,7 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
       <Description margin={{ top: 'medium' }}>Please update the maximum reserve amount.</Description>
 
       <TokenInput
-        token="DAI"
+        token={props.selectedPool?.metadata.currencySymbol || 'DAI'}
         value={value === undefined ? poolData?.maxReserve.toString() || '0' : value}
         onChange={onChange}
         disabled={status === 'pending' || status === 'unconfirmed'}

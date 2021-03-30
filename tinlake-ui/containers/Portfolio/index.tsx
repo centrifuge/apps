@@ -225,7 +225,8 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                         <Dash>-</Dash>
                       ) : (
                         <>
-                          <Number>{v}</Number> <Unit>DAI</Unit>
+                          <Number>{v}</Number>{' '}
+                          <Unit>{getPool(tokenBalance)?.pool.metadata.currencySymbol || 'DAI'}</Unit>
                         </>
                       )
                     }

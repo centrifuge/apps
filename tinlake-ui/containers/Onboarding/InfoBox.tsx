@@ -49,7 +49,7 @@ const InfoBox: React.FC<Props> = (props: Props) => {
         <li>Sign a subscription agreement with the pools issuer.</li>
       </ol>
       Currently, the underlying legal structures may also impose some restrictions on investments. E.g. most pools
-      require a minimum investment amount of 5.000 DAI. Residents of some countries may also be excluded from investing.
+      require a minimum investment amount of 5000 DAI. Residents of some countries may also be excluded from investing.
       <br />
       <br />
       <Anchor href="https://centrifuge.hackmd.io/QXUCI0wRSLepfABBivNruw?view" target="_blank">

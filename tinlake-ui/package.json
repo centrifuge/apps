@@ -41,7 +41,7 @@
     "@centrifuge/axis-ratio-bar": "0.4.2-develop.137",
     "@centrifuge/axis-spinner": "0.4.2-develop.109",
     "@centrifuge/axis-theme": "0.4.2-develop.145",
-    "@centrifuge/axis-token-input": "0.4.1-develop.143",
+    "@centrifuge/axis-token-input": "0.4.1-develop.c79e643.146+c79e643",
     "@centrifuge/axis-tooltip": "0.4.2-develop.6d6e183.148",
     "@centrifuge/axis-utils": "0.4.2-develop.109",
     "@centrifuge/axis-web3-wallet": "0.0.3-develop.a14b10c.151",

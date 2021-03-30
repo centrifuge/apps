@@ -40,6 +40,7 @@ export interface PoolData {
   icon: string | null
   juniorTokenPrice?: BN | null
   seniorTokenPrice?: BN | null
+  currency: string
 }
 
 export interface PoolsData {

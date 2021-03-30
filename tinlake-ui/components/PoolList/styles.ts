@@ -103,5 +103,5 @@ export const Label = styled.div<{ blue?: true; orange?: true }>`
   color: white;
   padding: 0 12px;
   border-radius: 8px;
-  background-color: ${({ blue, orange }) => (blue ? '#0828be' : orange ? '#fcba59' : 'gray')};
+  background-color: ${({ blue, orange }) => (blue ? '#0828be' : orange ? '#fcba59' : '#aaa')};
 `

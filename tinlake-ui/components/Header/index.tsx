@@ -198,6 +198,11 @@ const Portfolio = styled(Box)`
   cursor: pointer;
 `
 
+const Holdings = styled.div`
+  font-weight: bold;
+  font-size: 13px;
+`
+
 const TokenLogo = styled.img`
   display: inline-block;
   margin: 0 8px 0 0;
@@ -205,11 +210,6 @@ const TokenLogo = styled.img`
   height: 16px;
   position: relative;
   top: 8px;
-`
-
-const Holdings = styled.div`
-  font-weight: bold;
-  font-size: 13px;
 `
 
 const Desc = styled.div`

@@ -39,7 +39,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
         <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="junior" />
       </Box>
 
-      <EpochOverview tinlake={props.tinlake} />
+      <EpochOverview tinlake={props.tinlake} activePool={props.activePool} />
 
       {canManagePermissions && (
         <>

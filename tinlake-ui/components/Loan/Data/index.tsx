@@ -4,6 +4,7 @@ import BN from 'bn.js'
 import { Box, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
+import { Pool } from '../../../config'
 import { AuthState } from '../../../ducks/auth'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { dateToYMD } from '../../../utils/date'
@@ -16,6 +17,7 @@ interface Props {
   loan: Loan
   tinlake: ITinlake
   auth?: AuthState
+  poolConfig: Pool
 }
 
 const DisplayFieldWrapper = styled.div`
@@ -57,7 +59,8 @@ const LoanData: React.FC<Props> = (props: Props) => {
                 <TableCell scope="row">Available for Financing</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
                   <LoadingValue done={props.loan?.principal !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(availableForFinancing, 18), 2))} DAI
+                    {addThousandsSeparators(toPrecision(baseToDisplay(availableForFinancing, 18), 2))}{' '}
+                    {props.poolConfig.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -65,7 +68,8 @@ const LoanData: React.FC<Props> = (props: Props) => {
                 <TableCell scope="row">Outstanding</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
                   <LoadingValue done={props.loan?.debt !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(props.loan?.debt || 0, 18), 2))} DAI
+                    {addThousandsSeparators(toPrecision(baseToDisplay(props.loan?.debt || 0, 18), 2))}{' '}
+                    {props.poolConfig.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </TableCell>
               </TableRow>
