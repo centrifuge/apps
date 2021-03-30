@@ -325,9 +325,9 @@ const Explainer = () => (
       <HelpIcon src="/static/help-circle.svg" />
       <h3 style={{ margin: 0 }}>How it works</h3>
     </Box>
-    Centrifuge (CFG) Rewards are earned on Ethereum based on your Tinlake investments but claimed on Centrifuge Chain.
-    To claim your rewards you need to link your Tinlake investment account to a Centrifuge Chain account receiving and
-    holding your CFG.
+    CFG rewards are earned on Ethereum based on your Tinlake investments but claimed on Centrifuge Chain. To claim your
+    rewards you need to link your Tinlake investment account to a Centrifuge Chain account receiving and holding your
+    CFG.
     <br />
     <br />
     <Anchor
