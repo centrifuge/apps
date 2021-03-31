@@ -1,5 +1,5 @@
 name: 'tinlake-ui'
-on: 
+on:
   push:
     branches:
       - main
@@ -39,7 +39,7 @@ jobs:
       # Run
       - run: yarn lint
       - run: yarn export
-            
+
   # test:
   #   runs-on: ubuntu-latest
 
@@ -66,7 +66,7 @@ jobs:
 
   #     # Run
   #     - run: yarn test
-          
+
 env:
   NEXT_PUBLIC_PORTIS_KEY: "bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f"
   NEXT_PUBLIC_ETHERSCAN_URL: "https://kovan.etherscan.io"
@@ -80,6 +80,6 @@ env:
   NEXT_PUBLIC_IPFS_GATEWAY: "https://cloudflare-ipfs.com/ipfs/"
   NEXT_PUBLIC_INFURA_KEY: ${{ secrets.NEXT_PUBLIC_INFURA_KEY }}
   NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL: "wss://fullnode.centrifuge.io"
-  NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS: "0x297237e17F327f8e5C8dEd78b15761A7D513353b"
+  NEXT_PUBLIC_CLAIM_CFG_CONTRACT_ADDRESS: "0x297237e17F327f8e5C8dEd78b15761A7D513353b"
   NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS: "0x2cc8688c5f75e365aaeeb4ea8d6a480405a48d2a"
   NEXT_PUBLIC_REWARDS_TREE_URL: "https://storage.googleapis.com/rad-rewards-trees/latest.json"

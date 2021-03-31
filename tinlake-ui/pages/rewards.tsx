@@ -18,7 +18,7 @@ const RewardsPage: React.FC<Props> = (props: Props) => {
   return (
     <WithFooter>
       <Head>
-        <title>RAD Rewards | Tinlake | Centrifuge</title>
+        <title>CFG Rewards | Tinlake | Centrifuge</title>
       </Head>
       <Header selectedRoute={''} menuItems={[]} ipfsPools={props.ipfsPools} />
       <Container style={{ backgroundColor: '#f9f9f9' }}>
@@ -26,7 +26,7 @@ const RewardsPage: React.FC<Props> = (props: Props) => {
           <Box width="xlarge">
             <WithTinlake
               addresses={{
-                CLAIM_RAD: config.claimRADContractAddress,
+                CLAIM_CFG: config.claimCFGContractAddress,
               }}
               render={(tinlake) => <Auth tinlake={tinlake} render={() => <UserRewards tinlake={tinlake} />} />}
             />

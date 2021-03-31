@@ -11,7 +11,7 @@ import { TransactionStatus } from '../../ducks/transactions'
 import { loadCentChain, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { centChainService } from '../../services/centChain'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
-import { createBufferProofFromClaim, createTree, newClaim } from '../../utils/radRewardProofs'
+import { createBufferProofFromClaim, createTree, newClaim } from '../../utils/cfgRewardProofs'
 import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
 import { RewardStripe, Small } from './styles'
 
@@ -46,7 +46,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
     const proof = createBufferProofFromClaim(tree, newClaim(claim))
 
     try {
-      const hash = await centChainService().claimRADRewards(claim.accountID, claim.balance, proof)
+      const hash = await centChainService().claimCFGRewards(claim.accountID, claim.balance, proof)
       setClaimExtHash(hash)
       await dispatch(loadCentChain())
       setStatus('succeeded')
@@ -68,8 +68,8 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
         {unclaimed && !unclaimed?.isZero() ? (
           (status === null || status === 'unconfirmed' || status === 'failed' || status === 'pending') && (
             <>
-              🎉 You can claim {addThousandsSeparators(toDynamicPrecision(baseToDisplay(unclaimed, 18)))} RAD rewards.
-              Claim now to stake RAD and participate in on-chain governance.
+              🎉 You can claim {addThousandsSeparators(toDynamicPrecision(baseToDisplay(unclaimed, 18)))} CFG rewards.
+              Claim now to stake CFG and participate in on-chain governance.
               {/* TODO re-enable once subscan has fixed the issue that unsigned extrinsics are not linkable */}
               {claimExtHash && false && (
                 <>
@@ -109,7 +109,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
                 )
               )
             )}{' '}
-            RAD in rewards.{' '}
+            CFG in rewards.{' '}
             {/* TODO re-enable once subscan has fixed the issue that unsigned extrinsics are not linkable */}
             {status === 'succeeded' && claimExtHash && false && (
               <>
@@ -129,7 +129,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
                   baseToDisplay(rewards.data?.rewardRate.mul(portfolioValue.toString()).toFixed(0), 18)
                 )
               )}{' '}
-            RAD daily.
+            CFG daily.
             {activeLink.claimed.gt(data?.totalEarnedRewards || new BN(0)) && (
               <>
                 <br />

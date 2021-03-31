@@ -6,7 +6,7 @@ import MerkleTree from 'merkletreejs'
 export interface Claim {
   // Hex String AccountID
   accountID: string
-  // BN - Balance should be represented compatibly with our RAD token on chain - 18 decimal points
+  // BN - Balance should be represented compatibly with our CFG token on chain - 18 decimal points
   balance: BN
 }
 
