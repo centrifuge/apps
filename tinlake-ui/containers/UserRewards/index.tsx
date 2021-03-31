@@ -55,7 +55,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      <PageTitle page="Claim Your RAD Rewards" return />
+      <PageTitle page="Claim Your CFG Rewards" return />
 
       <Box direction="row" align="start" justify="between">
         <Box flex>
@@ -83,14 +83,14 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                   18
                 )}
                 label="Your Daily Rewards"
-                token="RAD"
+                token="CFG"
                 borderRight
               />
               <Metric
                 loading={!data}
                 value={baseToDisplay(data?.totalEarnedRewards || '0', 18)}
                 label="Your Earned Rewards"
-                token="RAD"
+                token="CFG"
               />
             </Box>
           )}
@@ -99,7 +99,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             <Card>
               <Box pad="medium">
                 <Head>Connect your Ethereum Account</Head>
-                Please connect with the Ethereum Account holding your Tinlake investment to claim your RAD rewards.
+                Please connect with the Ethereum Account holding your Tinlake investment to claim your CFG rewards.
                 <Button primary label="Connect" margin={{ left: 'auto', top: 'large' }} onClick={connect} />
               </Box>
             </Card>
@@ -112,7 +112,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               <Card>
                 <Box pad="medium">
                   <Head>Start Investing to Earn Rewards</Head>
-                  You don’t have any active Tinlake investments. To start earning RAD rewards, start investing in
+                  You don’t have any active Tinlake investments. To start earning CFG rewards, start investing in
                   Tinlake now.
                   <br />
                   <br />
@@ -157,11 +157,11 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                   <li>Non-zero investment since: {data?.nonZeroInvestmentSince?.toString() || 'null'}</li>
                   <li>
                     Total earned rewards:{' '}
-                    {data ? `${toPrecision(baseToDisplay(data?.totalEarnedRewards, 18), 4)} RAD` : 'null'}
+                    {data ? `${toPrecision(baseToDisplay(data?.totalEarnedRewards, 18), 4)} CFG` : 'null'}
                   </li>
                   <li>
                     Unlinked rewards:{' '}
-                    {data ? `${toPrecision(baseToDisplay(data?.unlinkedRewards, 18), 4)} RAD` : 'null'}
+                    {data ? `${toPrecision(baseToDisplay(data?.unlinkedRewards, 18), 4)} CFG` : 'null'}
                   </li>
                   {data?.links.map((c, i) => (
                     <li key={c.centAccountID}>
@@ -169,14 +169,14 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                       <ul>
                         <li>Centrifuge Chain Address: {accountIdToCentChainAddr(c.centAccountID)}</li>
                         <li>Centrifuge Chain Account ID: {c.centAccountID}</li>
-                        <li>Earned (from Subgraph): {toPrecision(baseToDisplay(c.earned, 18), 4)} RAD</li>
+                        <li>Earned (from Subgraph): {toPrecision(baseToDisplay(c.earned, 18), 4)} CFG</li>
                         <li>
                           Claimable (from GCP):{' '}
-                          {c.claimable ? `${toPrecision(baseToDisplay(c.claimable, 18), 4)} RAD` : `[loading...]`}
+                          {c.claimable ? `${toPrecision(baseToDisplay(c.claimable, 18), 4)} CFG` : `[loading...]`}
                         </li>
                         <li>
                           Claimed (from Centrifuge Chain):{' '}
-                          {c.claimed ? `${toPrecision(baseToDisplay(c.claimed, 18), 4)} RAD` : `[loading...]`}
+                          {c.claimed ? `${toPrecision(baseToDisplay(c.claimed, 18), 4)} CFG` : `[loading...]`}
                         </li>
                       </ul>
                     </li>
@@ -190,7 +190,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             <Card>
               <Box direction="row" pad={{ horizontal: 'medium', top: 'medium', bottom: 'medium' }}>
                 <Box flex={true}>
-                  <Head>Claim Your RAD Rewards</Head>
+                  <Head>Claim Your CFG Rewards</Head>
 
                   {comebackDate(data?.nonZeroInvestmentSince)}
                 </Box>
@@ -203,21 +203,21 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
         <ColRight>
           <Card margin={{ bottom: 'large' }}>
             <Box direction="row" background="#FCBA59" style={{ borderRadius: '6px 6px 0 0' }} pad={'14px 24px'}>
-              <TokenLogoBig src="/static/rad-black.svg" />
+              <TokenLogoBig src="/static/cfg-black.svg" />
               <h3 style={{ margin: 0 }}>System-wide Rewards</h3>
             </Box>
             <MetricRow
               loading={!rewards.data}
               value={baseToDisplay(rewards.data?.todayReward || '0', 18)}
               label="Rewards Earned Today"
-              token="RAD"
+              token="CFG"
               borderBottom
             />
             <MetricRow
               loading={!rewards.data}
               value={rewards.data?.rewardRate.mul(10000).toFixed(0) || ''}
               label="Daily Reward Rate"
-              token="RAD"
+              token="CFG"
               suffix={<span style={{ fontSize: 10, color: '#777777' }}> / 10k DAI</span>}
               borderBottom
             />
@@ -225,7 +225,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               loading={!rewards.data}
               value={baseToDisplay(rewards.data?.toDateRewardAggregateValue || '0', 18)}
               label="Total Rewards Earned"
-              token="RAD"
+              token="CFG"
             />
           </Card>
 
@@ -261,10 +261,10 @@ function comebackDate(nonZero: BN | null | undefined): null | string {
   }
 
   return (
-    `You cannot claim your RAD rewards yet. RAD rewards can only be claimed after a minimum investment period of 30 ` +
+    `You cannot claim your CFG rewards yet. CFG rewards can only be claimed after a minimum investment period of 30 ` +
     `days. Your first eligible investment was made ${startDate}. Please come back in ${
       diff.eqn(1) ? '1 day' : `${diff.toString()} days`
-    } on ${targetDate} to claim your RAD rewards.`
+    } on ${targetDate} to claim your CFG rewards.`
   )
 }
 
@@ -325,16 +325,16 @@ const Explainer = () => (
       <HelpIcon src="/static/help-circle.svg" />
       <h3 style={{ margin: 0 }}>How it works</h3>
     </Box>
-    Radial (RAD) Rewards are earned on Ethereum based on your Tinlake investments but claimed on Centrifuge Chain. To
-    claim your rewards you need to link your Tinlake investment account to a Centrifuge Chain account receiving and
-    holding your RAD.
+    CFG rewards are earned on Ethereum based on your Tinlake investments but claimed on Centrifuge Chain. To claim your
+    rewards you need to link your Tinlake investment account to a Centrifuge Chain account receiving and holding your
+    CFG.
     <br />
     <br />
     <Anchor
       href="https://medium.com/centrifuge/start-earning-radial-rad-rewards-for-tinlake-cbd98fcd8330"
       target="_blank"
     >
-      How are RAD rewards calculated?
+      How are CFG rewards calculated?
     </Anchor>
     <Anchor href="https://centrifuge.io/products/chain/" target="_blank">
       What is Centrifuge Chain?
@@ -351,7 +351,7 @@ const RewardRecipients = ({ recipients }: { recipients: UserRewardsLink[] }) => 
           <Status active={i === recipients.length - 1}>
             {recipients.length > 1 && (i === recipients.length - 1 ? 'Active | ' : 'Inactive | ')}
             {r.claimed
-              ? `Claimed ${addThousandsSeparators(toDynamicPrecision(baseToDisplay(r.claimed, 18)))} RAD`
+              ? `Claimed ${addThousandsSeparators(toDynamicPrecision(baseToDisplay(r.claimed, 18)))} CFG`
               : 'loading...'}
           </Status>
         </Recipient>
@@ -395,7 +395,7 @@ const Metric = ({
   label,
   borderRight,
 }: {
-  token: 'DAI' | 'RAD'
+  token: 'DAI' | 'CFG'
   loading?: boolean
   value: string
   precision?: number
@@ -406,16 +406,16 @@ const Metric = ({
   return (
     <Box pad={{ horizontal: 'medium' }} style={{ borderRight: borderRight ? '1px solid #f2f2f2' : undefined }}>
       <Cont>
-        <TokenLogo src={{ DAI: `/static/dai.svg`, RAD: `/static/rad.svg` }[token]} />
+        <TokenLogo src={{ DAI: `/static/dai.svg`, CFG: `/static/cfg.svg` }[token]} />
         <Value>
           <LoadingValue
             done={!loading}
             render={() => (
-              <NumberDisplay value={value} precision={precision || (token === 'RAD' ? dynamicPrecision(value) : 0)} />
+              <NumberDisplay value={value} precision={precision || (token === 'CFG' ? dynamicPrecision(value) : 0)} />
             )}
           ></LoadingValue>
         </Value>{' '}
-        <Unit>{{ DAI: 'DAI', RAD: 'RAD' }[token]}</Unit>
+        <Unit>{{ DAI: 'DAI', CFG: 'CFG' }[token]}</Unit>
       </Cont>
       <Label>{label}</Label>
     </Box>
@@ -437,7 +437,7 @@ const MetricRow = ({
   borderBottom,
   suffix,
 }: {
-  token: 'DAI' | 'RAD'
+  token: 'DAI' | 'CFG'
   loading?: boolean
   value: string
   precision?: number
@@ -460,10 +460,10 @@ const MetricRow = ({
           maxWidth={60}
           alignRight
           render={() => (
-            <NumberDisplay value={value} precision={precision || (token === 'RAD' ? dynamicPrecision(value) : 0)} />
+            <NumberDisplay value={value} precision={precision || (token === 'CFG' ? dynamicPrecision(value) : 0)} />
           )}
         ></LoadingValue>{' '}
-        {{ DAI: 'DAI', RAD: 'RAD' }[token]}
+        {{ DAI: 'DAI', CFG: 'CFG' }[token]}
         {suffix}
       </div>
     </Box>

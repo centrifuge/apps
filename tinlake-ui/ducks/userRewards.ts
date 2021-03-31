@@ -99,7 +99,7 @@ export interface RewardClaim {
    */
   accountID: string
   /**
-   * From GCP, big integer RAD in base unit
+   * From GCP, big integer CFG in base unit
    */
   balance: string
 }
@@ -201,7 +201,7 @@ export function loadEthLink(
 ): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
   return async (dispatch) => {
     dispatch({ ethAddr, type: LOAD_ETH_LINK })
-    let link: null | string = await tinlake.getClaimRADAccountID(ethAddr)
+    let link: null | string = await tinlake.getClaimCFGAccountID(ethAddr)
     if (link === '0x0000000000000000000000000000000000000000000000000000000000000000') {
       link = null
     }
@@ -219,7 +219,7 @@ export function loadCentChain(): ThunkAction<Promise<void>, { userRewards: UserR
 
     dispatch({ type: LOAD_CENT_CHAIN })
     const data = await Promise.all(
-      userRewards.data.links.map((l) => centChainService().claimedRADRewards(l.centAccountID))
+      userRewards.data.links.map((l) => centChainService().claimedCFGRewards(l.centAccountID))
     )
     dispatch({ data, type: RECEIVE_CENT_CHAIN })
   }

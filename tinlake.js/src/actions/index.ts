@@ -1,7 +1,7 @@
 import Admin, { IAdminActions } from './admin'
 import Analytics, { IAnalyticsActions } from './analytics'
 import Borrower, { IBorrowerActions } from './borrower'
-import ClaimRAD, { IClaimRADActions } from './claimRAD'
+import ClaimCFG, { IClaimCFGActions } from './claimCFG'
 import Collateral, { ICollateralActions } from './collateral'
 import Coordinator, { ICoordinatorActions } from './coordinator'
 import Currency, { ICurrencyActions } from './currency'
@@ -19,7 +19,7 @@ export default {
   Governance,
   Proxy,
   Coordinator,
-  ClaimRAD,
+  ClaimCFG,
 }
 
 export type TinlakeActions = IAdminActions &
@@ -31,4 +31,4 @@ export type TinlakeActions = IAdminActions &
   IGovernanceActions &
   IProxyActions &
   ICoordinatorActions &
-  IClaimRADActions
+  IClaimCFGActions

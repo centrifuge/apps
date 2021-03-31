@@ -5,14 +5,14 @@ import {
   createTree,
   hashLeaf,
   verifyProof,
-} from './radRewardProofs'
+} from './cfgRewardProofs'
 const BN = require('bn.js')
 
 describe('Proofs', () => {
   it('should be able to create proofs correctly', () => {
     const claim0: Claim = {
       accountID: '0xe0505d9eb1fd7c06c1396c655bb78448e4b469812a9c2a2bfed1089bb21c5b47',
-      balance: new BN('100000000000000000000', 10), // 100 RAD
+      balance: new BN('100000000000000000000', 10), // 100 CFG
     }
     const claim1: Claim = {
       accountID: '0x085ef2a683e8b2bd4db4be08ba0617ed19989c38a6afd9265b4517944647b112',

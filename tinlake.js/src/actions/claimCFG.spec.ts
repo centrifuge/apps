@@ -10,7 +10,7 @@ let tinl: ITinlake
 
 const { FAUCET_AMOUNT } = testConfig
 
-describe('claim rad tests', async () => {
+describe('claim cfg tests', async () => {
   before(async () => {
     tinl = createTinlake(acc, testConfig)
     await testProvider.fundAccountWithETH(acc, FAUCET_AMOUNT)
@@ -23,14 +23,14 @@ describe('claim rad tests', async () => {
   describe('get empty, update, get', async () => {
     it('works', async () => {
       // get initial address, should be empty
-      const addr1 = await tinl.getClaimRADAccountID(acc.address)
+      const addr1 = await tinl.getClaimCFGAccountID(acc.address)
       assert.strictEqual(addr1, '0x0000000000000000000000000000000000000000000000000000000000000000')
 
       // update address, then get to verify
       const addr2 = randomHex(32)
-      const tx = await tinl.updateClaimRADAccountID(addr2)
+      const tx = await tinl.updateClaimCFGAccountID(addr2)
       await assertTxSuccess(tinl, tx)
-      const addr3 = await tinl.getClaimRADAccountID(acc.address)
+      const addr3 = await tinl.getClaimCFGAccountID(acc.address)
       assert.strictEqual(addr3, addr2)
     })
   })

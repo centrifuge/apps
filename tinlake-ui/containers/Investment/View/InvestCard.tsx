@@ -124,7 +124,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
           <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
             Pool is currently oversubscribed
           </Heading>
-          Your locked investment order may be pending until the pool opens again for investments. You will only earn RAD
+          Your locked investment order may be pending until the pool opens again for investments. You will only earn CFG
           rewards once your order has been executed.
         </Warning>
       )}

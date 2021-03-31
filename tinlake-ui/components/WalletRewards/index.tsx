@@ -25,16 +25,16 @@ export const WalletRewards = ({ address }: { address: string }) => {
 
   return (
     <Cont direction="row" pad={{ vertical: '10px', horizontal: '16px' }}>
-      <TokenLogo src="/static/rad-black.svg" />
+      <TokenLogo src="/static/cfg-black.svg" />
       <Box>
         <Label>Your rewards</Label>
         <Number>
           {addThousandsSeparators(toDynamicPrecision(baseToDisplay(userRewards.data?.totalEarnedRewards || '0', 18)))}{' '}
-          RAD
+          CFG
         </Number>
       </Box>
       {router.route !== '/rewards' && (
-        <Button secondary onClick={() => router.push('/rewards')} label="Claim RAD" margin={{ left: 'auto' }} />
+        <Button secondary onClick={() => router.push('/rewards')} label="Claim CFG" margin={{ left: 'auto' }} />
       )}
     </Cont>
   )

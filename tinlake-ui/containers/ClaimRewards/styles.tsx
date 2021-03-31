@@ -7,10 +7,10 @@ import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
 
 export const RewardStripe = ({ unclaimed, children }: React.PropsWithChildren<{ unclaimed: BN | null }>) => (
   <Cont direction="row" pad={{ vertical: 'small', horizontal: 'medium' }}>
-    <TokenLogo src="/static/rad-black.svg" />
+    <TokenLogo src="/static/cfg-black.svg" />
     <Box>
       <Label>Claimable rewards</Label>
-      <Number>{addThousandsSeparators(toDynamicPrecision(baseToDisplay(unclaimed || '0', 18)))} RAD</Number>
+      <Number>{addThousandsSeparators(toDynamicPrecision(baseToDisplay(unclaimed || '0', 18)))} CFG</Number>
     </Box>
     {children}
   </Cont>
