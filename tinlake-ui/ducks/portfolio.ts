@@ -1,8 +1,17 @@
+import { createWatcher } from '@makerdao/multicall'
 import BN from 'bn.js'
+import { BigNumber } from 'ethers'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
+import config, { IpfsPools } from '../config'
 import Apollo from '../services/apollo'
+
+const multicallConfig = {
+  rpcUrl: config.rpcUrl,
+  multicallAddress: config.multicallContractAddress,
+  interval: 60000,
+}
 
 // Actions
 const LOAD_PORTFOLIO = 'tinlake-ui/pools/LOAD_PORTFOLIO'
@@ -55,9 +64,64 @@ export default function reducer(
   }
 }
 
-export function loadPortfolio(address: string): ThunkAction<Promise<void>, PortfolioState, undefined, Action> {
+export function loadPortfolio(
+  address: string,
+  ipfsPools: IpfsPools
+): ThunkAction<Promise<void>, PortfolioState, undefined, Action> {
   return async (dispatch) => {
     const tokenBalances = await Apollo.getPortfolio(address)
-    dispatch({ data: tokenBalances, type: RECEIVE_PORTFOLIO })
+
+    const toBN = (val: BigNumber) => new BN(val.toString())
+
+    const watches = ipfsPools.active.flatMap((pool) => [
+      {
+        target: pool.addresses.ASSESSOR,
+        call: ['calcJuniorTokenPrice()(uint256)'],
+        returns: [[`${pool.addresses.JUNIOR_TOKEN}-price`, toBN]],
+      },
+      {
+        target: pool.addresses.ASSESSOR,
+        call: ['calcSeniorTokenPrice()(uint256)'],
+        returns: [[`${pool.addresses.SENIOR_TOKEN}-price`, toBN]],
+      },
+      {
+        target: pool.addresses.JUNIOR_TOKEN,
+        call: ['balanceOf(address)(uint256)', address],
+        returns: [[`${pool.addresses.JUNIOR_TOKEN}-balance`, toBN]],
+      },
+      {
+        target: pool.addresses.SENIOR_TOKEN,
+        call: ['balanceOf(address)(uint256)', address],
+        returns: [[`${pool.addresses.SENIOR_TOKEN}-balance`, toBN]],
+      },
+    ])
+
+    const watcher = createWatcher(watches, multicallConfig)
+
+    const findAmount = (updates: any[], balance: TokenBalance, infoType: 'price' | 'balance') => {
+      const updateBalance = updates.find((update) => {
+        const [tokenId, type] = update.type.split('-')
+        return tokenId.toLowerCase() === balance.token.id.toLowerCase() && type === infoType
+      })
+
+      if (updateBalance?.value) {
+        return updateBalance.value
+      }
+
+      return infoType === 'price' ? balance.value : balance.balance
+    }
+
+    // any[] type instead of ICall[] type until https://github.com/makerdao/multicall.js/pull/29 is merged
+    watcher.batch().subscribe((updates: any[]) => {
+      const newData = tokenBalances.map((balance: TokenBalance) => ({
+        ...balance,
+        value: findAmount(updates, balance, 'price'),
+        balance: findAmount(updates, balance, 'balance'),
+      }))
+
+      dispatch({ data: newData, type: RECEIVE_PORTFOLIO })
+    })
+
+    watcher.start()
   }
 }

@@ -44,11 +44,11 @@ const Portfolio: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     dispatch(loadPools(props.ipfsPools))
-    if (address) dispatch(loadPortfolio(address))
+    if (address) dispatch(loadPortfolio(address, props.ipfsPools))
   }, [])
 
   React.useEffect(() => {
-    if (address) dispatch(loadPortfolio(address))
+    if (address) dispatch(loadPortfolio(address, props.ipfsPools))
   }, [address])
 
   const getPool = (tokenBalance: TokenBalance) => {
@@ -120,7 +120,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           <Cont>
             <TokenLogo src={`/static/DROP_final.svg`} />
             <Value>
-              <NumberDisplay value={baseToDisplay(totalDropValue, 18)} precision={0} />
+              <NumberDisplay value={baseToDisplay(totalDropValue, 22)} precision={0} />
             </Value>{' '}
             <Unit>DAI</Unit>
           </Cont>
@@ -137,7 +137,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           <Cont>
             <TokenLogo src={`/static/TIN_final.svg`} />
             <Value>
-              <NumberDisplay value={baseToDisplay(totalTinValue, 18)} precision={0} />
+              <NumberDisplay value={baseToDisplay(totalTinValue, 22)} precision={0} />
             </Value>{' '}
             <Unit>DAI</Unit>
           </Cont>
@@ -207,16 +207,9 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                         </>
                       )
                     }
-                    value={baseToDisplay(
-                      tokenBalance.value
-                        .mul(new BN(10).pow(new BN(7)))
-                        .div(tokenBalance.balance)
-                        .mul(new BN(10).pow(new BN(20))),
-                      27
-                    )}
+                    value={baseToDisplay(tokenBalance.value, 27)}
                   />
                 </DataCol>
-
                 <DataCol>
                   <NumberDisplay
                     precision={0}
@@ -230,7 +223,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                         </>
                       )
                     }
-                    value={baseToDisplay(tokenBalance.value, 18)}
+                    value={baseToDisplay(tokenBalance.value.mul(tokenBalance.balance), 45)}
                   />
                 </DataCol>
               </PoolRow>
