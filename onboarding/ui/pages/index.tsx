@@ -1,67 +1,34 @@
-import { AgreementMap } from '@centrifuge/onboarding-api/src/controllers/user.controller'
-import { Box } from 'grommet'
 import * as React from 'react'
+import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import Header from '../components/Header'
-// import countryCodeToFlagEmoji from 'country-code-to-flag-emoji'
+import UserBoard from '../containers/UserBoard'
+import { UsersState } from '../ducks/users'
 
 interface Props {
   onboardingApiHost: string
+  etherscanUrl: string
 }
 
 const App: React.FC<Props> = (props: Props) => {
-  const [agreementMap, setAgreementMap] = React.useState({} as AgreementMap)
-
-  React.useEffect(() => {
-    async function fetchUsers() {
-      const res = await fetch(`${props.onboardingApiHost}users/0x4B6CA198d257D755A5275648D471FE09931b764A`)
-      const body = await res.json()
-      setAgreementMap(body)
-      console.log(body)
-    }
-
-    fetchUsers()
-  }, [])
+  const users = useSelector((state: { users: UsersState }) => state.users.data)
 
   return (
     <Wrapper>
-      <Header />
-
-      <Content>
-        <Columns>
-          {Object.keys(agreementMap).map((col: string) => (
-            <Column key={col}>
-              <ColumnTitle>{col}</ColumnTitle>
-              <Cards>
-                {agreementMap[col].map(({ user }) => (
-                  <Card
-                    key={user.id}
-                    pad="medium"
-                    elevation="small"
-                    round="xsmall"
-                    margin={{ bottom: 'medium' }}
-                    background="white"
-                  >
-                    <InvestorName>{user.entityName || user.fullName}</InvestorName>
-                    <Flag>
-                      <img src={`https://www.countryflags.io/${user.countryCode}/flat/24.png`} />
-                    </Flag>
-                  </Card>
-                ))}
-              </Cards>
-            </Column>
-          ))}
-        </Columns>
-      </Content>
+      <Header onboardingApiHost={props.onboardingApiHost} />
+      {users && (
+        <UserBoard onboardingApiHost={props.onboardingApiHost} etherscanUrl={props.etherscanUrl} users={users} />
+      )}
     </Wrapper>
   )
 }
 
-export async function getStaticProps(context: any) {
+export async function getStaticProps() {
   return {
     props: {
       onboardingApiHost: process.env.ONBOARDING_API_HOST,
-    }, // will be passed to the page component as props
+      etherscanUrl: process.env.ETHERSCAN_URL,
+    },
   }
 }
 
@@ -70,43 +37,6 @@ const Wrapper = styled.div`
   height: 100%;
   width: 100%;
   margin: 0;
-`
-
-const Content = styled.div`
-  margin: 40px;
-  text-align: center;
-`
-
-const Columns = styled.div`
-  display: inline-flex;
-  margin: 0 auto;
-`
-
-const Column = styled.div`
-  width: 260px;
-  margin: 0 20px 0 0;
-`
-
-const ColumnTitle = styled.div`
-  color: #777777;
-  margin: 0 0 20px 20px;
-  font-weight: bold;
-  font-size: 14px;
-  text-align: left;
-`
-
-const Cards = styled.div``
-
-const Card = styled(Box)`
-  display: flex;
-  flex-direction: row;
-  text-align: left;
-`
-
-const InvestorName = styled.div``
-
-const Flag = styled.div`
-  margin-left: 10px;
 `
 
 export default App

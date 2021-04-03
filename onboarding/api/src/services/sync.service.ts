@@ -29,16 +29,23 @@ export class SyncService {
     processingInvestors.forEach(async (kyc: KycEntity) => {
       const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
 
+      if (!investor) {
+        this.logger.warn(`Failed to retrieve investor ${kyc.userId}`)
+        return
+      }
+
       await this.userRepo.update(
         kyc.userId,
         investor.email,
-        investor.details.address.countryCode,
+        investor.details?.address?.countryCode,
         investor.domainInvestorDetails?.investorFullName,
         investor.domainInvestorDetails?.entityName
       )
 
       if (
-        (investor && investor.verificationStatus !== kyc.status) ||
+        (investor &&
+          investor.verificationStatus !== kyc.status &&
+          !(investor.verificationStatus === 'manual-review' && kyc.status === 'processing')) ||
         investor.domainInvestorDetails.isAccredited !== kyc.accredited
       ) {
         this.logger.debug(

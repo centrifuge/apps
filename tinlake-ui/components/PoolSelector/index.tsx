@@ -2,9 +2,7 @@ import { Drop, TextInput } from 'grommet'
 import { FormDown, FormSearch } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { IpfsPools } from '../../config'
-import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
+import { PoolData } from '../../ducks/pools'
 import {
   Button,
   Caret,
@@ -20,15 +18,12 @@ import {
 } from './styles'
 
 interface Props {
-  ipfsPools: IpfsPools
+  pools: PoolData[]
   title: string
 }
 
 export const PoolSelector: React.FC<Props> = (props: Props) => {
   const router = useRouter()
-
-  const pools = useSelector<any, PoolsState>((state: any) => state.pools)
-  const dispatch = useDispatch()
 
   const poolRef = React.useRef<HTMLDivElement>(null)
 
@@ -45,16 +40,12 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
     }
   }
 
-  React.useEffect(() => {
-    dispatch(loadPools(props.ipfsPools))
-  }, [router.query])
-
   const onChangeSearchQuery = (event: React.FormEvent<HTMLInputElement>) => {
     setSearchQuery(event.currentTarget.value)
   }
 
   const getLivePools = () => {
-    return pools.data?.pools.filter((p) => !p.isArchived).sort((a, b) => b.order - a.order) || []
+    return props.pools.filter((p) => !p.isArchived).sort((a, b) => b.order - a.order) || []
   }
 
   const filterPools = () => {

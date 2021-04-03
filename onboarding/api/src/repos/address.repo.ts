@@ -31,6 +31,18 @@ export class AddressRepo {
     return (data as unknown) as AddressEntity[]
   }
 
+  async getByUserIds(userIds: string[]): Promise<AddressEntity[]> {
+    if (userIds.length === 0) return []
+
+    const agreements = await this.db.sql`
+      select *
+      from addresses
+      where addresses.user_id in (${userIds})
+    `
+
+    return (agreements as unknown) as AddressEntity[]
+  }
+
   async findOrCreate(blockchain: Blockchain, network: Network, address: string): Promise<AddressEntity> {
     const [data] = await this.db.sql`
       select *
