@@ -122,13 +122,13 @@ export function loadPortfolio(
        * overwrites the values in tokenBalances that were retrieved from
        * the subgraph with the values from the multicall updates
        */
-      const tokenBalancesUpdates = tokenBalances.map((balance: TokenBalance) => ({
+      const updatedTokenBalances = tokenBalances.map((balance: TokenBalance) => ({
         ...balance,
         value: findAmount(updates, balance, 'price'),
         balance: findAmount(updates, balance, 'balance'),
       }))
 
-      dispatch({ data: tokenBalancesUpdates, type: RECEIVE_PORTFOLIO })
+      dispatch({ data: updatedTokenBalances, type: RECEIVE_PORTFOLIO })
     })
 
     watcher.start()
