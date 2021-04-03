@@ -98,6 +98,11 @@ export function loadPortfolio(
 
     const watcher = createWatcher(watches, multicallConfig)
 
+    /*
+     * matches the token id's in tokenBalance with the token id's
+     * from the multicall to find the correct value (price) and balance
+     * any[] type instead of ICall[] type until https://github.com/makerdao/multicall.js/pull/29 is merged
+     */
     const findAmount = (updates: any[], balance: TokenBalance, infoType: 'price' | 'balance') => {
       const updateBalance = updates.find((update) => {
         const [tokenId, type] = update.type.split('-')
@@ -113,13 +118,17 @@ export function loadPortfolio(
 
     // any[] type instead of ICall[] type until https://github.com/makerdao/multicall.js/pull/29 is merged
     watcher.batch().subscribe((updates: any[]) => {
-      const newData = tokenBalances.map((balance: TokenBalance) => ({
+      /*
+       * overwrites the values in tokenBalances that were retrieved from
+       * the subgraph with the values from the multicall updates
+       */
+      const tokenBalancesUpdates = tokenBalances.map((balance: TokenBalance) => ({
         ...balance,
         value: findAmount(updates, balance, 'price'),
         balance: findAmount(updates, balance, 'balance'),
       }))
 
-      dispatch({ data: newData, type: RECEIVE_PORTFOLIO })
+      dispatch({ data: tokenBalancesUpdates, type: RECEIVE_PORTFOLIO })
     })
 
     watcher.start()
