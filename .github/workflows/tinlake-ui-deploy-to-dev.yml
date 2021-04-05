@@ -1,0 +1,61 @@
+name: 'tinlake-ui Deploy to Dev'
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'tinlake-ui/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+
+      - name: Install Dependencies
+        run: cd tinlake-ui && yarn
+
+      - name: Lint
+        run: cd tinlake-ui && yarn lint
+
+      - name: Build
+        run: cd tinlake-ui && yarn export
+        env:
+          NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL: 'wss://fullnode.amber.centrifuge.io'
+          NEXT_PUBLIC_CLAIM_CFG_CONTRACT_ADDRESS: '0x297237e17F327f8e5C8dEd78b15761A7D513353b'
+          NEXT_PUBLIC_ENV: 'demo'
+          NEXT_PUBLIC_ETHERSCAN_URL: 'https://kovan.etherscan.io'
+          NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING: '0x1f4155D64D75555B9B36E4514C0FCC11313d5A54,0x25dF507570c8285E9c8E7FFabC87db7836850dCd'
+          NEXT_PUBLIC_INFURA_KEY: ${{ secrets.NEXT_PUBLIC_INFURA_KEY }}
+          NEXT_PUBLIC_IPFS_GATEWAY: 'https://cloudflare-ipfs.com/ipfs/'
+          NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS: '0x2cc8688c5f75e365aaeeb4ea8d6a480405a48d2a'
+          NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.amber.centrifuge.io/'
+          NEXT_PUBLIC_POOL_REGISTRY: '0x8FE85CeAe6157C1dfcDD1c5ec99361c9722d97de'
+          NEXT_PUBLIC_POOLS_CONFIG: 'kovanStaging'
+          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmYAgaJi8YGok3Q26RLBqEq7fhPtcLRBCAndVXJ6KWnQCg'
+          NEXT_PUBLIC_PORTIS_KEY: 'bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f'
+          NEXT_PUBLIC_REWARDS_TREE_URL: 'https://storage.googleapis.com/rad-rewards-trees-kovan-staging/latest.json'
+          NEXT_PUBLIC_RPC_URL: 'https://kovan.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5'
+          NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL: 'https://api.thegraph.com/subgraphs/name/jennypollack/tinlake-rewards-staging'
+          NEXT_PUBLIC_TRANSACTION_TIMEOUT: '3600'
+
+      - name: Deploy To Netlify
+        uses: nwtgck/actions-netlify@v1.1
+        with:
+          deploy-message: ${{ github.event.head_commit.message }}
+          enable-commit-comment: false
+          functions-dir: 'functions'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          netlify-config-path: ./netlify.toml
+          production-branch: main
+          publish-dir: 'out'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
+          NETLIFY_SITE_ID: ${{ secrets.TINLAKE_UI_DEV_NETLIFY_SITE_ID }}
