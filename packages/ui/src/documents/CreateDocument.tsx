@@ -113,7 +113,7 @@ export const CreateDocument: FunctionComponent<Props> = props => {
       await httpClient.documents.commit(createResult._id!);
 
       const result = await httpClient.documents.create({
-        document_id: createResult?.header!.document_id,
+        document_id: createResult.header!.document_id,
         header: createResult.header,
         attributes: {
           ...createResult.attributes,
@@ -124,6 +124,8 @@ export const CreateDocument: FunctionComponent<Props> = props => {
         },
         template: createResult.template,
       });
+
+      await httpClient.documents.commit(result.data._id!);
     } catch (e) {
       console.error(e);
 
@@ -133,7 +135,6 @@ export const CreateDocument: FunctionComponent<Props> = props => {
         message: (e as AxiosError)!.response?.data.message,
       });
     }
-    createResult && (await httpClient.documents.commit(createResult._id!));
   };
 
   const onCancel = () => {
