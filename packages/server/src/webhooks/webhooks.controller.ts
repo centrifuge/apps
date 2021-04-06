@@ -48,16 +48,25 @@ export class WebhooksController {
         }
 
         if (notification.document_type === DocumentTypes.GENERIC_DOCUMENT) {
+          console.log(
+            `received webhook notification for document_id ${notification.document_id}`,
+            notification,
+          );
           const result = await this.centrifugeService.documents.getDocument(
             user.account,
             notification.document_id!,
           );
 
+          console.log(
+            `found document for document_id ${notification.document_id}, organizationId: ${user.account}`,
+            result,
+          );
+
           const unflattenedAttributes = unflatten(result.attributes);
-          await this.databaseService.documents.update(
+          const updated = await this.databaseService.documents.update(
             {
               'header.document_id': notification.document_id,
-               organizationId: user.account,
+              organizationId: user.account,
             },
             {
               $set: {
@@ -70,8 +79,14 @@ export class WebhooksController {
                 fromId: notification.from_id,
               },
             },
-            { upsert: true },
+            { upsert: true, returnUpdatedDocs: true },
           );
+
+          if (typeof updated === 'number') {
+            console.log(`updated document with result ${updated}`);
+          } else {
+            console.log(`updated documents`, updated);
+          }
         } else {
           throw new Error(
             `Document type ${notification.document_type} not supported`,
