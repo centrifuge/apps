@@ -252,11 +252,10 @@ class Apollo {
   async getLoans(root: string) {
     let result
     try {
-      // TODO: root should be root.toLowerCase() once we add lowercasing to the subgraph code (after AssemblyScript is updated)
       result = await this.client.query({
         query: gql`
         {
-          pools (where : {id: "${root}"}){
+          pools (where : {id: "${root.toLowerCase()}"}){
             id
             loans {
               id
