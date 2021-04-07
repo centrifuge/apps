@@ -120,7 +120,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           <Cont>
             <TokenLogo src={`/static/DROP_final.svg`} />
             <Value>
-              <NumberDisplay value={baseToDisplay(totalDropValue, 22)} precision={0} />
+              <NumberDisplay value={baseToDisplay(totalDropValue, 18)} precision={0} />
             </Value>{' '}
             <Unit>DAI</Unit>
           </Cont>
@@ -137,7 +137,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           <Cont>
             <TokenLogo src={`/static/TIN_final.svg`} />
             <Value>
-              <NumberDisplay value={baseToDisplay(totalTinValue, 22)} precision={0} />
+              <NumberDisplay value={baseToDisplay(totalTinValue, 18)} precision={0} />
             </Value>{' '}
             <Unit>DAI</Unit>
           </Cont>
@@ -194,7 +194,6 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                     value={baseToDisplay(tokenBalance.balance, 18)}
                   />
                 </DataCol>
-
                 <DataCol>
                   <NumberDisplay
                     precision={4}
@@ -207,7 +206,13 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                         </>
                       )
                     }
-                    value={baseToDisplay(tokenBalance.value, 27)}
+                    value={baseToDisplay(
+                      tokenBalance.value
+                        .mul(new BN(10).pow(new BN(7)))
+                        .div(tokenBalance.balance)
+                        .mul(new BN(10).pow(new BN(20))),
+                      27
+                    )}
                   />
                 </DataCol>
                 <DataCol>
@@ -223,7 +228,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                         </>
                       )
                     }
-                    value={baseToDisplay(tokenBalance.value.mul(tokenBalance.balance), 45)}
+                    value={baseToDisplay(tokenBalance.value, 18)}
                   />
                 </DataCol>
               </PoolRow>

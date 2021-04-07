@@ -160,7 +160,7 @@ const Header: React.FC<Props> = (props: Props) => {
                       <TokenLogo src={`/static/DAI.svg`} />
                       <Box>
                         <Holdings>
-                          {addThousandsSeparators(toPrecision(baseToDisplay(portfolio.totalValue, 22), 0))}
+                          {addThousandsSeparators(toPrecision(baseToDisplay(portfolio.totalValue, 18), 0))}
                         </Holdings>
                         <Desc>Portfolio Value</Desc>
                       </Box>

@@ -103,17 +103,30 @@ export function loadPortfolio(
      * from the multicall to find the correct value (price) and balance
      * any[] type instead of ICall[] type until https://github.com/makerdao/multicall.js/pull/29 is merged
      */
-    const findAmount = (updates: any[], balance: TokenBalance, infoType: 'price' | 'balance') => {
-      const updateBalance = updates.find((update) => {
+    const getUpdatedPrice = (updates: any[], balance: TokenBalance) => {
+      const updatedAmount = updates.find((update) => {
         const [tokenId, type] = update.type.split('-')
-        return tokenId.toLowerCase() === balance.token.id.toLowerCase() && type === infoType
+        return tokenId.toLowerCase() === balance.token.id.toLowerCase() && type === 'price'
       })
 
-      if (updateBalance?.value) {
-        return updateBalance.value
+      if (updatedAmount?.value) {
+        return updatedAmount?.value
       }
 
-      return infoType === 'price' ? balance.value : balance.balance
+      return balance.value
+    }
+
+    const getUpdatedBalance = (updates: any[], balance: TokenBalance) => {
+      const updatedAmount = updates.find((update) => {
+        const [tokenId, type] = update.type.split('-')
+        return tokenId.toLowerCase() === balance.token.id.toLowerCase() && type === 'balance'
+      })
+
+      if (updatedAmount?.value) {
+        return updatedAmount?.value
+      }
+
+      return balance.balance
     }
 
     // any[] type instead of ICall[] type until https://github.com/makerdao/multicall.js/pull/29 is merged
@@ -122,11 +135,15 @@ export function loadPortfolio(
        * overwrites the values in tokenBalances that were retrieved from
        * the subgraph with the values from the multicall updates
        */
-      const updatedTokenBalances = tokenBalances.map((balance: TokenBalance) => ({
-        ...balance,
-        value: findAmount(updates, balance, 'price'),
-        balance: findAmount(updates, balance, 'balance'),
-      }))
+
+      const updatedTokenBalances = tokenBalances.map((balance: TokenBalance) => {
+        const updatedBalance = getUpdatedBalance(updates, balance)
+        return {
+          ...balance,
+          value: updatedBalance.mul(getUpdatedPrice(updates, balance)).div(new BN(10).pow(new BN(27))),
+          balance: updatedBalance,
+        }
+      })
 
       dispatch({ data: updatedTokenBalances, type: RECEIVE_PORTFOLIO })
     })
