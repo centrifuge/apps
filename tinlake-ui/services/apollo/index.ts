@@ -380,7 +380,7 @@ class Apollo {
       result = await this.client.query({
         query: gql`
         {
-          dailyPoolDatas(first: 1000, where:{ pool: "${root}" }) {
+          dailyPoolDatas(first: 1000, where:{ pool: "${root.toLowerCase()}" }) {
            day {
             id
           }
