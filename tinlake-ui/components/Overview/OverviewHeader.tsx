@@ -28,7 +28,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 
   const [awaitingConnect, setAwaitingConnect] = React.useState(false)
 
-  const isMakerIntegrated = true
+  const isMakerIntegrated = props.selectedPool.addresses.CLERK !== undefined
 
   React.useEffect(() => {
     if (address && awaitingConnect) {
@@ -136,15 +136,30 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
             This pool is directly integrated with Maker for liquidity. &nbsp;<a href="#">Learn more</a>
           </Box>
           <MakerMetric margin={{ left: 'auto' }} style={{ borderRight: '1px solid #fff' }}>
-            <h3>Provided by Maker</h3>
+            <h3>Remaining credit</h3>
             <h2>
-              1.3M <MakerUnit>DAI</MakerUnit>
+              {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.remainingCredit || new BN(0), 18), 0))}{' '}
+              <MakerUnit>DAI</MakerUnit>{' '}
+            </h2>
+          </MakerMetric>
+          <MakerMetric style={{ borderRight: '1px solid #fff' }}>
+            <h3>Current Debt</h3>
+            <h2>
+              {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.art || new BN(0), 18), 0))}{' '}
+              <MakerUnit>DAI</MakerUnit>{' '}
+            </h2>
+          </MakerMetric>
+          <MakerMetric style={{ borderRight: '1px solid #fff' }}>
+            <h3>Debt Ceiling</h3>
+            <h2>
+              {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.line || new BN(0), 45 + 6), 0))}M{' '}
+              <MakerUnit>DAI</MakerUnit>
             </h2>
           </MakerMetric>
           <MakerMetric>
-            <h3>Maker Debt Ceiling</h3>
+            <h3>Stability Fee</h3>
             <h2>
-              5.0M <MakerUnit>DAI</MakerUnit>
+              {toPrecision(feeToInterestRate(poolData?.maker?.duty || '0'), 2)} <MakerUnit>%</MakerUnit>
             </h2>
           </MakerMetric>
         </MakerBox>
@@ -216,7 +231,7 @@ const MakerLogo = styled.div`
 `
 
 const MakerMetric = styled(Box)`
-  padding: 0 12px 0 0;
+  padding: 0 24px 0 10px;
   h3 {
     margin: 0;
     font-size: 12px;
@@ -224,6 +239,10 @@ const MakerMetric = styled(Box)`
   h2 {
     margin: 0;
     font-size: 16px;
+  }
+
+  &:last-child {
+    padding-right: 0;
   }
 `
 

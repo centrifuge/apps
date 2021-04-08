@@ -1,7 +1,7 @@
 import { Tranche } from '@centrifuge/tinlake-js'
 import { createWatcher } from '@makerdao/multicall'
 import BN from 'bn.js'
-import { BigNumber } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
@@ -31,6 +31,7 @@ export interface PoolTranche extends Tranche {
 export interface PoolData {
   junior: PoolTranche
   senior?: PoolTranche
+  maker?: any
   availableFunds: BN
   minJuniorRatio: BN
   currentJuniorRatio: BN
@@ -269,12 +270,43 @@ export function loadPool(
       },
     ]
 
-    watcher.recreate([...addressWatchers, ...globalWatchers], multicallConfig)
+    const isMakerIntegrated = tinlake.contractAddresses.CLERK !== undefined
+
+    const makerWatchers = isMakerIntegrated
+      ? [
+          {
+            target: tinlake.contractAddresses.MCD_VAT,
+            call: [
+              'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
+              ethers.utils.formatBytes32String('NS2DRP-A'),
+            ],
+            returns: [[`maker.art`], [`maker.rate`], [`maker.spot`], [`maker.line`], [`maker.dust`]],
+          },
+          {
+            target: tinlake.contractAddresses.MCD_JUG,
+            call: ['ilks(bytes32)(uint256,uint256)', ethers.utils.formatBytes32String('NS2DRP-A')],
+            returns: [[`maker.duty`], [`maker.rho`]],
+          },
+          {
+            target: tinlake.contractAddresses.CLERK,
+            call: ['remainingCredit()(uint)'],
+            returns: [[`maker.remainingCredit`]],
+          },
+          {
+            target: tinlake.contractAddresses.CLERK,
+            call: ['creditline()(uint)'],
+            returns: [[`maker.creditline`]],
+          },
+        ]
+      : []
+
+    watcher.recreate([...addressWatchers, ...globalWatchers, ...makerWatchers], multicallConfig)
 
     try {
       const initial = {
         junior: { type: 'junior' },
         senior: { type: 'senior' },
+        maker: {},
       }
 
       const prev =
@@ -285,7 +317,7 @@ export function loadPool(
       watcher.batch().subscribe((updates: any[]) => {
         const data: Partial<PoolData> = updates.reduce((prev: any, update: any) => {
           const prefix = update.type.split('.')[0]
-          if (prefix === 'junior' || prefix === 'senior') {
+          if (prefix === 'junior' || prefix === 'senior' || prefix === 'maker') {
             const item = update.type.split('.')[1]
             prev[prefix][item] = update.value
           } else {

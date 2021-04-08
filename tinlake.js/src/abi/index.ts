@@ -10,6 +10,7 @@ import contractAbiMemberlist from './Memberlist.abi.json'
 import contractAbiNavFeed from './NAVFeed.abi.json'
 import contractAbiOperator from './Operator.abi.json'
 import contractAbiPile from './Pile.abi.json'
+import contractAbiPoolAdmin from './PoolAdmin.abi.json'
 import contractAbiPoolRegistry from './PoolRegistry.abi.json'
 import contractAbiProxy from './Proxy.abi.json'
 import contractAbiProxyRegistry from './ProxyRegistry.abi.json'
@@ -48,4 +49,5 @@ export default {
   SENIOR_TRANCHE: contractAbiTranche,
   POOL_REGISTRY: contractAbiPoolRegistry,
   CLAIM_RAD: contractAbiClaimRAD,
+  POOL_ADMIN: contractAbiPoolAdmin,
 } as ContractAbis

@@ -93,8 +93,15 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     setMaximumReserve = async (value: string) => {
-      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
       return this.pending(this.contract('ASSESSOR_ADMIN').setMaxReserve(value, this.overrides))
+    }
+
+    raiseCreditline = async (amount: string) => {
+      return this.pending(this.contract('POOL_ADMIN').raiseCreditline(amount, { ...this.overrides, gasLimit: 600000 }))
+    }
+
+    sinkCreditline = async (amount: string) => {
+      return this.pending(this.contract('POOL_ADMIN').sinkCreditline(amount, { ...this.overrides, gasLimit: 600000 }))
     }
 
     setSeniorTrancheInterest = async (value: string) => {
@@ -169,6 +176,8 @@ export type IAdminActions = {
   setMinimumJuniorRatio(amount: string): Promise<PendingTransaction>
   setMaximumJuniorRatio(amount: string): Promise<PendingTransaction>
   setMaximumReserve(amount: string): Promise<PendingTransaction>
+  raiseCreditline(amount: string): Promise<PendingTransaction>
+  sinkCreditline(amount: string): Promise<PendingTransaction>
   setSeniorTrancheInterest(amount: string): Promise<PendingTransaction>
   setDiscountRate(amount: string): Promise<PendingTransaction>
   setMaturityDate(nftId: string, timestampSecs: number): Promise<PendingTransaction>

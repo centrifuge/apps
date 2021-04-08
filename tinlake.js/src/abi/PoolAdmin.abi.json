@@ -1,0 +1,289 @@
+[
+  { "inputs": [], "payable": false, "stateMutability": "nonpayable", "type": "constructor" },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": true, "internalType": "address", "name": "usr", "type": "address" }],
+    "name": "DenyAdmin",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "bytes32", "name": "what", "type": "bytes32" },
+      { "indexed": true, "internalType": "bool", "name": "data", "type": "bool" }
+    ],
+    "name": "File",
+    "type": "event"
+  },
+  {
+    "anonymous": true,
+    "inputs": [
+      { "indexed": true, "internalType": "bytes4", "name": "sig", "type": "bytes4" },
+      { "indexed": true, "internalType": "address", "name": "guy", "type": "address" },
+      { "indexed": true, "internalType": "bytes32", "name": "foo", "type": "bytes32" },
+      { "indexed": true, "internalType": "bytes32", "name": "bar", "type": "bytes32" },
+      { "indexed": false, "internalType": "uint256", "name": "wad", "type": "uint256" },
+      { "indexed": false, "internalType": "bytes", "name": "fax", "type": "bytes" }
+    ],
+    "name": "LogNote",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }],
+    "name": "RaiseCreditline",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": true, "internalType": "address", "name": "usr", "type": "address" }],
+    "name": "RelyAdmin",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }],
+    "name": "SetMaxReserve",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }],
+    "name": "SinkCreditline",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "usr", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "validUntil", "type": "uint256" }
+    ],
+    "name": "UpdateJuniorMember",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address[]", "name": "users", "type": "address[]" },
+      { "indexed": false, "internalType": "uint256", "name": "validUntil", "type": "uint256" }
+    ],
+    "name": "UpdateJuniorMembers",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "usr", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "validUntil", "type": "uint256" }
+    ],
+    "name": "UpdateSeniorMember",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address[]", "name": "users", "type": "address[]" },
+      { "indexed": false, "internalType": "uint256", "name": "validUntil", "type": "uint256" }
+    ],
+    "name": "UpdateSeniorMembers",
+    "type": "event"
+  },
+  {
+    "constant": true,
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "admins",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "assessor",
+    "outputs": [{ "internalType": "contract AssessorLike", "name": "", "type": "address" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "address", "name": "usr", "type": "address" }],
+    "name": "deny",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "address", "name": "usr", "type": "address" }],
+    "name": "denyAdmin",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "bytes32", "name": "contractName", "type": "bytes32" },
+      { "internalType": "address", "name": "addr", "type": "address" }
+    ],
+    "name": "depend",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "bytes32", "name": "what", "type": "bytes32" },
+      { "internalType": "bool", "name": "data", "type": "bool" }
+    ],
+    "name": "file",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "juniorMemberlist",
+    "outputs": [{ "internalType": "contract MemberlistLike", "name": "", "type": "address" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "lending",
+    "outputs": [{ "internalType": "contract LendingAdapter", "name": "", "type": "address" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "live",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }],
+    "name": "raiseCreditline",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "address", "name": "usr", "type": "address" }],
+    "name": "rely",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "address", "name": "usr", "type": "address" }],
+    "name": "relyAdmin",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "seniorMemberlist",
+    "outputs": [{ "internalType": "contract MemberlistLike", "name": "", "type": "address" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "uint256", "name": "value", "type": "uint256" }],
+    "name": "setMaxReserve",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "uint256", "name": "amount", "type": "uint256" }],
+    "name": "sinkCreditline",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "address", "name": "usr", "type": "address" },
+      { "internalType": "uint256", "name": "validUntil", "type": "uint256" }
+    ],
+    "name": "updateJuniorMember",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "address[]", "name": "users", "type": "address[]" },
+      { "internalType": "uint256", "name": "validUntil", "type": "uint256" }
+    ],
+    "name": "updateJuniorMembers",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "address", "name": "usr", "type": "address" },
+      { "internalType": "uint256", "name": "validUntil", "type": "uint256" }
+    ],
+    "name": "updateSeniorMember",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "address[]", "name": "users", "type": "address[]" },
+      { "internalType": "uint256", "name": "validUntil", "type": "uint256" }
+    ],
+    "name": "updateSeniorMembers",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "wards",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

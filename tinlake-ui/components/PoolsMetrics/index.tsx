@@ -41,21 +41,6 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      {router.query.showAll && (
-        <Box
-          width="256px"
-          pad="medium"
-          elevation="small"
-          round="xsmall"
-          background="white"
-          margin={{ horizontal: '16px' }}
-        >
-          <Cont>
-            <Value>{props.pools.ongoingLoans}</Value>
-          </Cont>
-          <Label>Assets Locked</Label>
-        </Box>
-      )}
       <Box
         width="460px"
         elevation="small"

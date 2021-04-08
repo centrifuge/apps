@@ -183,7 +183,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
 
                 {isAdmin && (
                   <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                    <Button label="Set max reserve" onClick={() => setShowMaxReserveForm(true)} disabled={!poolData} />
+                    <Button label="Manage" onClick={() => setShowMaxReserveForm(true)} disabled={!poolData} />
                   </Box>
                 )}
               </>

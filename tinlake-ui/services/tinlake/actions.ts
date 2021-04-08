@@ -487,12 +487,13 @@ export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Pro
   const proxy = loan.ownerOf
 
   // make sure tranche has enough funds
-  const juniorReserve = await tinlake.getJuniorReserve()
-  const seniorReserve = await tinlake.getSeniorReserve()
-  const trancheReserve = juniorReserve.add(seniorReserve)
-  if (new BN(amount).cmp(trancheReserve) > 0) {
-    return loggedError({}, 'There is not enough available funds.', loanId)
-  }
+  // TODO: update for maker integration
+  // const juniorReserve = await tinlake.getJuniorReserve()
+  // const seniorReserve = await tinlake.getSeniorReserve()
+  // const trancheReserve = juniorReserve.add(seniorReserve)
+  // if (new BN(amount).cmp(trancheReserve) > 0) {
+  //   return loggedError({}, 'There is not enough available funds.', loanId)
+  // }
 
   // borrow with proxy
   return tinlake.proxyLockBorrowWithdraw(proxy.toString(), loanId, amount, address!)
@@ -573,6 +574,14 @@ export async function setMaxJuniorRatio(tinlake: ITinlake, ratio: string): Promi
 
 export async function setMaxReserve(tinlake: ITinlake, ratio: string): Promise<PendingTransaction> {
   return tinlake.setMaximumReserve(ratio)
+}
+
+export async function raiseCreditline(tinlake: ITinlake, amount: string): Promise<PendingTransaction> {
+  return tinlake.raiseCreditline(amount)
+}
+
+export async function sinkCreditline(tinlake: ITinlake, amount: string): Promise<PendingTransaction> {
+  return tinlake.sinkCreditline(amount)
 }
 
 export async function updateClaimRADAccountID(tinlake: ITinlake, centAddress: string): Promise<PendingTransaction> {

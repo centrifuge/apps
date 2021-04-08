@@ -42,8 +42,6 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
   const investmentCapacity = poolData ? poolData.maxReserve.sub(poolData.reserve) : undefined
 
-  const isAdmin = props.auth?.permissions?.canSetMinimumJuniorRatio
-
   const [open, setOpen] = React.useState(false)
 
   return (
@@ -258,7 +256,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               </TableBody>
             </Table>
 
-            {isAdmin && epochData && (
+            {epochData && (
               <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
                 {epochData?.state === 'can-be-closed' && (
                   <Button
@@ -271,7 +269,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     }
                   />
                 )}
-                {epochData?.state === 'in-submission-period' && <Button label={`Run solver`} primary onClick={solve} />}
+                {epochData?.state === 'in-submission-period' && (
+                  <Button label={`Submit a solution`} primary onClick={solve} />
+                )}
                 {epochData?.state === 'in-challenge-period' && (
                   <Button label={`Execute epoch ${epochData?.id}`} primary disabled={true} />
                 )}
