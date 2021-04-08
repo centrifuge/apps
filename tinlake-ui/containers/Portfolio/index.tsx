@@ -194,6 +194,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                     value={baseToDisplay(tokenBalance.balance, 18)}
                   />
                 </DataCol>
+
                 <DataCol>
                   <NumberDisplay
                     precision={4}
@@ -215,6 +216,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                     )}
                   />
                 </DataCol>
+
                 <DataCol>
                   <NumberDisplay
                     precision={0}
