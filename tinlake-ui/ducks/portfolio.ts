@@ -73,7 +73,7 @@ export function loadPortfolio(
 
     const toBN = (val: BigNumber) => new BN(val.toString())
 
-    const watches = ipfsPools.active.flatMap((pool) => [
+    const watchers = ipfsPools.active.flatMap((pool) => [
       {
         target: pool.addresses.ASSESSOR,
         call: ['calcJuniorTokenPrice()(uint256)'],
@@ -96,7 +96,7 @@ export function loadPortfolio(
       },
     ])
 
-    const watcher = createWatcher(watches, multicallConfig)
+    const watcher = createWatcher(watchers, multicallConfig)
 
     /*
      * matches the token id's in tokenBalance with the token id's
