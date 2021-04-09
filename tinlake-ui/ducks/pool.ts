@@ -280,22 +280,36 @@ export function loadPool(
               'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
               ethers.utils.formatBytes32String('NS2DRP-A'),
             ],
-            returns: [[`maker.art`], [`maker.rate`], [`maker.spot`], [`maker.line`], [`maker.dust`]],
+            returns: [
+              [`maker.art`, toBN],
+              [`maker.rate`, toBN],
+              [`maker.spot`, toBN],
+              [`maker.line`, toBN],
+              [`maker.dust`, toBN],
+            ],
           },
           {
             target: tinlake.contractAddresses.MCD_JUG,
             call: ['ilks(bytes32)(uint256,uint256)', ethers.utils.formatBytes32String('NS2DRP-A')],
-            returns: [[`maker.duty`], [`maker.rho`]],
+            returns: [
+              [`maker.duty`, toBN],
+              [`maker.rho`, toBN],
+            ],
           },
           {
             target: tinlake.contractAddresses.CLERK,
             call: ['remainingCredit()(uint)'],
-            returns: [[`maker.remainingCredit`]],
+            returns: [[`maker.remainingCredit`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.CLERK,
+            call: ['mat()(uint)'],
+            returns: [[`maker.mat`, toBN]],
           },
           {
             target: tinlake.contractAddresses.CLERK,
             call: ['creditline()(uint)'],
-            returns: [[`maker.creditline`]],
+            returns: [[`maker.creditline`, toBN]],
           },
         ]
       : []

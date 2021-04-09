@@ -1,5 +1,5 @@
 import { TokenInput } from '@centrifuge/axis-token-input'
-import { addThousandsSeparators, baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { addThousandsSeparators, baseToDisplay, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Box, Button, Heading } from 'grommet'
@@ -34,7 +34,7 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
   }
 
   const [status, , setTxId] = useTransactionState()
-  const [creditlineStatus, , setCreditlineTxId] = useTransactionState()
+  const [, , setCreditlineTxId] = useTransactionState()
 
   const save = async () => {
     if (value && value !== (poolData?.reserve || new BN(0)).toString()) {
@@ -77,6 +77,17 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
+  const mat = poolData?.maker ? poolData.maker.mat : new BN(0)
+  const tinSupply = poolData?.junior?.totalSupply || new BN(0)
+
+  const tinStakeRequired = creditlineValue
+    ? new BN(creditlineValue)
+        .mul(mat)
+        .div(new BN(10).pow(new BN(27))) // overcollateralization required (e.g 106%)
+        .sub(new BN(creditlineValue)) // TIN stake required (e.g. 6%)
+        .sub(tinSupply) // diff from whats already supplied
+    : new BN(0)
+
   return (
     <Box>
       <Heading level="5" margin={{ top: '0', bottom: '0' }}>
@@ -85,26 +96,26 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
       <Description margin={{ top: 'small' }}>
         This will determine how much can be invested into the reserve right now.
       </Description>
-
       <TokenInput
         token={props.selectedPool?.metadata.currencySymbol || 'DAI'}
         value={value === undefined ? poolData?.maxReserve.toString() || '0' : value}
         onChange={onChange}
         disabled={status === 'pending' || status === 'unconfirmed'}
       />
-
       <Heading level="5" margin={{ top: 'large', bottom: '0' }}>
         Set Maker creditline
       </Heading>
       <Description margin={{ top: 'small' }}>This will lock in the required TIN for overcollateralization.</Description>
-
       <TokenInput
         token={props.selectedPool?.metadata.currencySymbol || 'DAI'}
         value={creditlineValue === undefined ? poolData?.maker?.creditline?.toString() || '0' : creditlineValue}
         onChange={onChangeCreditline}
+        maxValue={poolData?.maker?.line.div(new BN(10).pow(new BN(45 - 18)))}
+        limitLabel="Debt Ceiling"
         disabled={status === 'pending' || status === 'unconfirmed'}
       />
-
+      This will require an additional{' '}
+      {addThousandsSeparators(toPrecision(baseToDisplay(tinStakeRequired || '0', 18), 4))} TIN.
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
         <Button
           label="Cancel"
