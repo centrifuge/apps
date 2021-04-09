@@ -82,7 +82,10 @@ export class DocumentsController {
     );
 
     const updatedDocs = await this.databaseService.documents.update(
-      { 'header.document_id': document.header.document_id },
+      {
+        'header.document_id': document.header.document_id,
+        organizationId: user.account.toLowerCase(),
+      },
       {
         $set: {
           document_status:
@@ -137,7 +140,10 @@ export class DocumentsController {
     );
 
     const updated = (await this.databaseService.documents.update(
-      { 'header.document_id': createResult.header.document_id },
+      {
+        'header.document_id': createResult.header.document_id,
+        organizationId: user.account.toLowerCase(),
+      },
       {
         ...createResult,
         attributes: unflatten(createResult.attributes),
@@ -293,7 +299,10 @@ export class DocumentsController {
        * and it can happen that the webhook is not called
        * */
       const docs: any = await this.databaseService.documents.update(
-        { 'header.document_id': docFromNode.header.document_id },
+        {
+          'header.document_id': docFromNode.header.document_id,
+          organizationId: request.user.account.toLowerCase(),
+        },
         {
           $set: {
             attributes: docFromNode.attributes,
