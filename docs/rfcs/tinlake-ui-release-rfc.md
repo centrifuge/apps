@@ -49,13 +49,10 @@ Below is a visual of the how the `git` flow would look in action. `main` is neve
 Below are the steps for a standard release:
 
 1. Create a branch off of `main` using the pattern `rc/tinlake-ui/release-*`
-
    - Example:
-
    ```sh
    $ git checkout -b tinlake-ui/release-3
    ```
-
 2. Smoke test the preview link
    - Example:
      <br />
