@@ -27,7 +27,7 @@ This process juggles two different permanent branches and must be constantly syn
 
 This process introduces ephemeral release branches and `git tag`'ing in order to manage releases.
 
-<img src="https://i.imgur.com/NfB2MUr.png" alt="proposed-process-diagram" width="575">
+<img src="https://i.imgur.com/fIk0q66.png" alt="proposed-process-diagram" width="575">
 
 Below is a visual of the how the `git` flow would look in action. `main` is never required to be frozen and there is no other permanent branch to sync with. This also allows for "horizontal" development for hot fixes or other immediately needed code changes.
 
