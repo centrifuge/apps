@@ -237,7 +237,10 @@ export async function submitSeniorSupplyOrder(
 
   const address = await tinlake.signer?.getAddress()
 
-  if (skipSigning || getAddressMemory(address)?.supportsPermits === false) {
+  // wCUSD doesnt support permit signing
+  const isWCUSD = tinlake.contractAddresses.TINLAKE_CURRENCY === '0xad3E3Fc59dff318BecEaAb7D00EB4F68b1EcF195'
+
+  if (isWCUSD || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
     return await tinlake.submitSeniorSupplyOrderWithAllowance(amount, address)
   }
 
@@ -286,7 +289,10 @@ export async function submitJuniorSupplyOrder(
 
   const address = await tinlake.signer?.getAddress()
 
-  if (skipSigning || getAddressMemory(address)?.supportsPermits === false) {
+  // wCUSD doesnt support permit signing
+  const isWCUSD = tinlake.contractAddresses.TINLAKE_CURRENCY === '0xad3E3Fc59dff318BecEaAb7D00EB4F68b1EcF195'
+
+  if (isWCUSD || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
     return await tinlake.submitJuniorSupplyOrderWithAllowance(amount, address)
   }
 
@@ -335,7 +341,10 @@ export async function submitSeniorRedeemOrder(
 
   const address = await tinlake.signer?.getAddress()
 
-  if (skipSigning || getAddressMemory(address)?.supportsPermits === false) {
+  // wCUSD doesnt support permit signing
+  const isWCUSD = tinlake.contractAddresses.TINLAKE_CURRENCY === '0xad3E3Fc59dff318BecEaAb7D00EB4F68b1EcF195'
+
+  if (isWCUSD || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
     return await tinlake.submitSeniorRedeemOrderWithAllowance(amount, address)
   }
 
@@ -384,7 +393,10 @@ export async function submitJuniorRedeemOrder(
 
   const address = await tinlake.signer?.getAddress()
 
-  if (skipSigning || getAddressMemory(address)?.supportsPermits === false) {
+  // wCUSD doesnt support permit signing
+  const isWCUSD = tinlake.contractAddresses.TINLAKE_CURRENCY === '0xad3E3Fc59dff318BecEaAb7D00EB4F68b1EcF195'
+
+  if (isWCUSD || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
     return await tinlake.submitJuniorRedeemOrderWithAllowance(amount, address)
   }
 
