@@ -44,11 +44,11 @@ const Portfolio: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     dispatch(loadPools(props.ipfsPools))
-    if (address) dispatch(loadPortfolio(address))
+    if (address) dispatch(loadPortfolio(address, props.ipfsPools))
   }, [])
 
   React.useEffect(() => {
-    if (address) dispatch(loadPortfolio(address))
+    if (address) dispatch(loadPortfolio(address, props.ipfsPools))
   }, [address])
 
   const getPool = (tokenBalance: TokenBalance) => {

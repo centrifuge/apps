@@ -66,6 +66,7 @@ export interface Pool extends BasePool {
     SENIOR_TOKEN: string
     JUNIOR_TOKEN: string
     CLERK?: string
+    ASSESSOR: string
   }
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
@@ -97,7 +98,7 @@ interface Config {
   featureFlagNewOnboardingPools: string[]
   enableErrorLogging: boolean
   centrifugeChainUrl: string
-  claimRADContractAddress: string
+  claimCFGContractAddress: string
   rewardsTreeUrl: string
   multicallContractAddress: string
   matomoSiteId: number | undefined
@@ -313,12 +314,12 @@ const config: Config = {
     .string()
     .required('NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL is required')
     .validateSync(process.env.NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL),
-  claimRADContractAddress: yup
+  claimCFGContractAddress: yup
     .string()
     .length(42)
     .matches(/0x[0-9a-fA-F]{40}/)
-    .required('NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS is required')
-    .validateSync(process.env.NEXT_PUBLIC_CLAIM_RAD_CONTRACT_ADDRESS),
+    .required('NEXT_PUBLIC_CLAIM_CFG_CONTRACT_ADDRESS is required')
+    .validateSync(process.env.NEXT_PUBLIC_CLAIM_CFG_CONTRACT_ADDRESS),
   rewardsTreeUrl: yup
     .string()
     .required('NEXT_PUBLIC_REWARDS_TREE_URL is required')

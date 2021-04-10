@@ -28,7 +28,7 @@ const CentChainWalletDialog: React.FC = () => {
   if (!polkadotExtensionInstalled) {
     return (
       <>
-        Your RAD Rewards are earned on Ethereum but claimed on Centrifuge Chain.
+        Your CFG Rewards are earned on Ethereum but claimed on Centrifuge Chain.
         <br />
         <br />
         Please first install the Polkadot Wallet extension to get started. Please reload this page after you have

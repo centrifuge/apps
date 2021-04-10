@@ -53,11 +53,11 @@ const Header: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
 
   React.useEffect(() => {
-    if (address) dispatch(loadPortfolio(address))
+    if (address) dispatch(loadPortfolio(address, props.ipfsPools))
   }, [])
 
   React.useEffect(() => {
-    if (address) dispatch(loadPortfolio(address))
+    if (address) dispatch(loadPortfolio(address, props.ipfsPools))
   }, [address])
 
   const connectAccount = async () => {
