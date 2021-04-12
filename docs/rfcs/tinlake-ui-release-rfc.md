@@ -2,7 +2,7 @@
 
 ## Summary
 
-The proposal is to shift to a `git` style workflow in order to handle hot fixes, immediately needed code changes, and to properly stamp releases. This is a multi-pronged approach that includes changing the `git` flow, moving builds from Netlify to Github Actions, and updating branch conventions.
+The proposal is to shift to a simpler version of the [Gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) workflow, using one eternal branch, in order to handle hot fixes, immediately needed code changes, and to properly stamp releases. This is a multi-pronged proposal that includes implementing the `Gitflow` workflow, moving builds from Netlify to Github Actions, and updating deployment environments.
 
 ## Motivation
 
