@@ -98,6 +98,8 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     if (!trancheData || !trancheData.address || !trancheData.token || !trancheData.decimals) return
 
     try {
+      const fallback = `https://tinlake.centrifuge.io/static/${token}_final.svg`
+
       await (window as any).ethereum.request({
         method: 'wallet_watchAsset',
         params: {
@@ -106,7 +108,10 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             address: trancheData.address,
             symbol: trancheData.token,
             decimals: trancheData.decimals,
-            image: `https://tinlake.centrifuge.io/static/${token}_final.svg`,
+            image:
+              token === 'DROP'
+                ? props.pool?.metadata.media?.drop || fallback
+                : props.pool?.metadata.media?.tin || fallback,
           },
         },
       })

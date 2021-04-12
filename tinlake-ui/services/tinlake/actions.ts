@@ -498,14 +498,11 @@ export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Pro
   const address = await tinlake.signer.getAddress()
   const proxy = loan.ownerOf
 
-  // make sure tranche has enough funds
-  // TODO: update for maker integration
-  // const juniorReserve = await tinlake.getJuniorReserve()
-  // const seniorReserve = await tinlake.getSeniorReserve()
-  // const trancheReserve = juniorReserve.add(seniorReserve)
-  // if (new BN(amount).cmp(trancheReserve) > 0) {
-  //   return loggedError({}, 'There is not enough available funds.', loanId)
-  // }
+  // make sure there are enough funds available
+  const availableFunds = await tinlake.getAvailableFunds()
+  if (new BN(amount).cmp(availableFunds) > 0) {
+    return loggedError({}, 'There is not enough available funds.', loanId)
+  }
 
   // borrow with proxy
   return tinlake.proxyLockBorrowWithdraw(proxy.toString(), loanId, amount, address!)

@@ -135,14 +135,14 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           <Box pad={{ top: '8px;' }} direction="row">
             This pool is directly integrated with Maker for liquidity. &nbsp;<a href="#">Learn more</a>
           </Box>
-          <MakerMetric margin={{ left: 'auto' }} style={{ borderRight: '1px solid #fff' }}>
+          {/* <MakerMetric style={{ borderRight: '1px solid #fff' }}>
             <h3>Remaining credit</h3>
             <h2>
               {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.remainingCredit || new BN(0), 18), 0))}{' '}
               <MakerUnit>DAI</MakerUnit>{' '}
             </h2>
-          </MakerMetric>
-          <MakerMetric style={{ borderRight: '1px solid #fff' }}>
+          </MakerMetric> */}
+          <MakerMetric margin={{ left: 'auto' }} style={{ borderRight: '1px solid #fff' }}>
             <h3>Current Debt</h3>
             <h2>
               {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.art || new BN(0), 18), 0))}{' '}

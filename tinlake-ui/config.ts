@@ -145,6 +145,11 @@ const contractAddressesSchema = yup.object().shape({
     .length(42)
     .matches(/0x[0-9a-fA-F]{40}/)
     .optional(),
+  ASSESSOR: yup
+    .string()
+    .length(42)
+    .matches(/0x[0-9a-fA-F]{40}/)
+    .required('contractAddressesSchema.JUNIOR_TOKEN is required'),
 })
 
 const contractConfigSchema = yup.object().shape({

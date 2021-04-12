@@ -26,6 +26,7 @@ export interface PoolTranche extends Tranche {
   decimals?: number
   address?: string
   inMemberlist?: boolean
+  effectiveBalance?: BN
 }
 
 export interface PoolData {
@@ -310,6 +311,11 @@ export function loadPool(
             target: tinlake.contractAddresses.CLERK,
             call: ['creditline()(uint)'],
             returns: [[`maker.creditline`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.ASSESSOR,
+            call: ['effectiveSeniorBalance()(uint)'],
+            returns: [[`senior.effectiveBalance`, toBN]],
           },
         ]
       : []

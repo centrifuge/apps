@@ -168,7 +168,9 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                           {addThousandsSeparators(
                             toPrecision(
                               baseToDisplay(
-                                (poolData?.reserve || new BN(0)).sub(poolData?.availableFunds || new BN(0)),
+                                (poolData?.reserve || new BN(0))
+                                  .add(poolData?.maker?.remainingCredit || new BN(0))
+                                  .sub(poolData?.availableFunds || new BN(0)),
                                 18
                               ),
                               0
