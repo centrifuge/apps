@@ -33,14 +33,17 @@ Below is a visual of the how the `git` flow would look in action. `main` is neve
 
 <img src="https://i.imgur.com/ZKWmP2M.png" alt="proposed-process-diagram">
 
-## Steps to Implement (One Time Actions)
+## Steps to Implement
+
+Below are the setup actions in order to implement this proposal:
 
 1. Switch away from the [Netlify Github app](https://github.com/apps/netlify) and instead use the [Netlify Github Action](https://github.com/marketplace/actions/netlify-actions)
 2. [Stop builds](https://docs.netlify.com/configure-builds/stop-or-activate-builds/#stop-builds) in Netlify for all `tinlake-ui` sites
 3. [Turn on auto publish](https://docs.netlify.com/site-deploys/manage-deploys/#unlock-a-locked-deploy) in Netlify for all `tinlake-ui` sites
 4. Set up a `dev.tinlake.centrifuge.io` site in Netlify
-5. Delete `production` branch and only use `main` branch going forward
-6. Remove `version` property from the [package.json](https://github.com/centrifuge/apps/blob/4547082ce44d99303af748aa503fec1f58501ee8/tinlake-ui/package.json#L4) in `tinlake-ui` directory
+5. Set up a `staging.tinlake.centrifuge.io` site in Netlify
+6. Delete `production` branch and only use `main` branch going forward
+7. Remove `version` property from the [package.json](https://github.com/centrifuge/apps/blob/4547082ce44d99303af748aa503fec1f58501ee8/tinlake-ui/package.json#L4) in `tinlake-ui` directory
 
 ## Updated Steps to Release
 
@@ -51,7 +54,7 @@ Below are the steps for a standard release:
 1. Create a branch off of `main` using the pattern `rc/tinlake-ui/release-*`
    - Example:
    ```sh
-   $ git checkout -b tinlake-ui/release-3
+   $ git checkout -b rc/tinlake-ui/release-3
    ```
 2. Smoke test the preview link
    - Example:
