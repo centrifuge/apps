@@ -133,7 +133,10 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
             <img src="/static/maker-logo.svg" />
           </MakerLogo>
           <Box pad={{ top: '8px;' }} direction="row">
-            This pool is directly integrated with Maker for liquidity. &nbsp;<a href="#">Learn more</a>
+            This pool is directly integrated with a Maker vault for liquidity. &nbsp;
+            <a href="https://medium.com/centrifuge/as-composable-as-it-gets-43b4dcc5db5a" target="_blank">
+              Learn more
+            </a>
           </Box>
           {/* <MakerMetric style={{ borderRight: '1px solid #fff' }}>
             <h3>Remaining credit</h3>

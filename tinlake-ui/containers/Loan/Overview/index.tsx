@@ -143,6 +143,34 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                         </LoadingValue>
                       </TableCell>
                     </TableRow>
+                    {poolData?.maker?.line && (
+                      <TableRow>
+                        <TableCell
+                          scope="row"
+                          style={{ alignItems: 'start', justifyContent: 'center' }}
+                          pad={{ vertical: '6px' }}
+                        >
+                          <span>Maker creditline</span>
+                        </TableCell>
+                        <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                          <LoadingValue done={poolData?.reserve !== undefined} height={39}>
+                            <>
+                              {addThousandsSeparators(
+                                toPrecision(baseToDisplay(poolData?.maker?.creditline || '0', 18), 0)
+                              )}{' '}
+                              {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                              <Sidenote>
+                                Remaining:{' '}
+                                {addThousandsSeparators(
+                                  toPrecision(baseToDisplay(poolData?.maker?.remainingCredit || '0', 18), 0)
+                                )}{' '}
+                                {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                              </Sidenote>
+                            </>
+                          </LoadingValue>
+                        </TableCell>
+                      </TableRow>
+                    )}
                     <TableRow>
                       <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
                         <span>Available funds for financing</span>

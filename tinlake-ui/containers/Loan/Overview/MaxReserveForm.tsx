@@ -77,7 +77,7 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
-  const debtCeiling = poolData?.maker?.line.div(new BN(10).pow(new BN(45 - 18)))
+  const debtCeiling = (poolData?.maker?.line || new BN('0')).div(new BN(10).pow(new BN(45 - 18)))
   const tinSupplyDAI = (poolData?.junior?.totalSupply || new BN(0))
     .mul(poolData?.junior?.tokenPrice || new BN(0))
     .div(new BN(10).pow(new BN(27)))
@@ -90,10 +90,13 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
     .div(poolData?.minJuniorRatio || new BN(0))
     .mul(new BN(10).pow(new BN(27)).sub(poolData?.minJuniorRatio || new BN(0)))
     .div(new BN(10).pow(new BN(27)))
-  const maxCreditline = maxDropDAI
-    .sub(effectiveDropBalanceDAI)
-    .mul(new BN(10).pow(new BN(27)))
-    .div(mat)
+  const maxCreditline =
+    mat && !mat.isZero()
+      ? maxDropDAI
+          .sub(effectiveDropBalanceDAI)
+          .mul(new BN(10).pow(new BN(27)))
+          .div(mat)
+      : new BN('0')
 
   return (
     <Box>
