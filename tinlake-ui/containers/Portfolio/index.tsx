@@ -80,12 +80,12 @@ const Portfolio: React.FC<Props> = (props: Props) => {
   }
   const totalDropValue =
     portfolio.data?.reduce((prev: BN, tokenBalance: TokenBalance) => {
-      return tokenBalance.token.symbol.substr(-3) === 'DRP' ? prev.add(tokenBalance.value) : prev
+      return tokenBalance.token.symbol.substr(-3) === 'DRP' ? prev.add(tokenBalance.totalValue) : prev
     }, new BN(0)) || new BN(0)
 
   const totalTinValue =
     portfolio.data?.reduce((prev: BN, tokenBalance: TokenBalance) => {
-      return tokenBalance.token.symbol.substr(-3) === 'TIN' ? prev.add(tokenBalance.value) : prev
+      return tokenBalance.token.symbol.substr(-3) === 'TIN' ? prev.add(tokenBalance.totalValue) : prev
     }, new BN(0)) || new BN(0)
 
   return (
@@ -145,7 +145,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
         </Box>
       </Box>
 
-      {portfolio.data?.filter((tokenBalance: TokenBalance) => !tokenBalance.balance.isZero()).length > 0 && (
+      {portfolio.data?.filter((tokenBalance: TokenBalance) => !tokenBalance.balanceAmount.isZero()).length > 0 && (
         <>
           <Header>
             <Desc>
@@ -164,8 +164,8 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             </HeaderCol>
           </Header>
           {portfolio.data
-            ?.filter((tokenBalance: TokenBalance) => !tokenBalance.balance.isZero())
-            .sort((a: TokenBalance, b: TokenBalance) => parseFloat(b.value.sub(a.value).toString()))
+            ?.filter((tokenBalance: TokenBalance) => !tokenBalance.balanceAmount.isZero())
+            .sort((a: TokenBalance, b: TokenBalance) => parseFloat(b.totalValue.sub(a.totalValue).toString()))
             .map((tokenBalance: TokenBalance) => (
               <PoolRow key={tokenBalance.token.id} onClick={() => clickToken(tokenBalance)}>
                 <Icon
@@ -191,7 +191,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                         </>
                       )
                     }
-                    value={baseToDisplay(tokenBalance.balance, 18)}
+                    value={baseToDisplay(tokenBalance.balanceAmount, 18)}
                   />
                 </DataCol>
 
@@ -208,9 +208,9 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                       )
                     }
                     value={baseToDisplay(
-                      tokenBalance.value
+                      tokenBalance.totalValue
                         .mul(new BN(10).pow(new BN(7)))
-                        .div(tokenBalance.balance)
+                        .div(tokenBalance.balanceAmount)
                         .mul(new BN(10).pow(new BN(20))),
                       27
                     )}
@@ -230,7 +230,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                         </>
                       )
                     }
-                    value={baseToDisplay(tokenBalance.value, 18)}
+                    value={baseToDisplay(tokenBalance.totalValue, 18)}
                   />
                 </DataCol>
               </PoolRow>
@@ -243,7 +243,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           </Box>
         </>
       )}
-      {portfolio.data?.filter((tokenBalance: TokenBalance) => !tokenBalance.balance.isZero()).length === 0 && (
+      {portfolio.data?.filter((tokenBalance: TokenBalance) => !tokenBalance.balanceAmount.isZero()).length === 0 && (
         <>
           <Box elevation="small" round="xsmall" pad={'medium'} background="white">
             No token holdings found.
