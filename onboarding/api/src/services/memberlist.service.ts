@@ -24,7 +24,10 @@ export class MemberlistService {
       return
     }
     const kyc = await this.kycRepo.find(userId)
-    if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) return
+    if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) {
+      console.error(`User ${userId} is not yet verified or accredited.`)
+      return
+    }
 
     // If tranche is supplied, whitelist just for that tranche. Otherwise, try to whitelist for both
     let tranches = []
@@ -50,6 +53,8 @@ export class MemberlistService {
         const done = agreements.every((agreement: Agreement) => agreement.signedAt && agreement.counterSignedAt)
         if (done) {
           this.poolService.addToMemberlist(userId, poolId, t)
+        } else {
+          console.error(`User ${userId}'s agreement for ${poolId} has not yet been signed or counter-signed.`)
         }
       })
     })

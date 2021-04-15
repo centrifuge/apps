@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
+import { AddressRepo } from '../repos/address.repo'
 import { AgreementRepo } from '../repos/agreement.repo'
 import { KycEntity, KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
@@ -17,6 +18,7 @@ export class SyncService {
     private readonly securitizeService: SecuritizeService,
     private readonly docusignService: DocusignService,
     private readonly memberlistService: MemberlistService,
+    private readonly addressRepo: AddressRepo,
     private readonly userRepo: UserRepo
   ) {}
 
@@ -78,11 +80,15 @@ export class SyncService {
     }
   }
 
-  // @Cron(CronExpression.EVERY_30_MINUTES) // TODO: change to e.g. every 5 min
-  // async syncWhitelistStatus() {
-  // TODO: get non whitelisted, kyced, accredited, agreement signed addresses
-  // TOOD: per tranche, check whitelist status
-  // }
+  @Cron(CronExpression.EVERY_HOUR)
+  async syncWhitelistStatus() {
+    const missedInvestors = await this.addressRepo.getMissingWhitelistedUsers()
+    console.log(`Whitelisting ${missedInvestors.length} missed investors.`)
+
+    missedInvestors.forEach((investor) => {
+      this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
+    })
+  }
 
   // @Cron(CronExpression.EVERY_HOUR)
   // async syncInvestorBalances() {}
