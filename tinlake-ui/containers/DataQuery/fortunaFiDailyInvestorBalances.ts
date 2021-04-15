@@ -27,7 +27,7 @@ interface IResponse {
 const fetch = async (skip: number, first: number, blockHash: string | null): Promise<IResponse> => {
   return await Apollo.runCustomQuery(gql`
       {
-        dailyInvestorTokenBalances(where:{pool:"0x4B6CA198d257D755A5275648D471FE09931b764A"}, first: ${first}, skip: ${skip} ${
+        dailyInvestorTokenBalances(where:{pool:"0x4b6ca198d257d755a5275648d471fe09931b764a"}, first: ${first}, skip: ${skip} ${
     blockHash ? `, block: { hash: "${blockHash}" }` : ''
   }) {
           account{
