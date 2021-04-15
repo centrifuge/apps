@@ -22,8 +22,8 @@ export interface TokenBalance {
     id: string
     symbol: string
   }
-  balance: BN
-  value: BN
+  balanceAmount: BN
+  totalValue: BN
   supplyAmount: BN
   pendingSupplyCurrency: BN
 }
@@ -56,7 +56,7 @@ export default function reducer(
         data: action.data,
         totalValue:
           action.data?.reduce((prev: BN, tokenBalance: TokenBalance) => {
-            return prev.add(tokenBalance.value)
+            return prev.add(tokenBalance.totalValue)
           }, new BN(0)) || new BN(0),
       }
     default:
@@ -113,7 +113,7 @@ export function loadPortfolio(
         return updatedAmount?.value
       }
 
-      return updateType === 'price' ? balance.value : balance.balance
+      return updateType === 'price' ? balance.totalValue : balance.balanceAmount
     }
 
     // any[] type instead of ICall[] type until https://github.com/makerdao/multicall.js/pull/29 is merged
