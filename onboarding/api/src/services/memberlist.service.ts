@@ -17,7 +17,7 @@ export class MemberlistService {
     private readonly poolService: PoolService
   ) {}
 
-  async update(userId, poolId?: string, tranche?: Tranche) {
+  async update(userId: string, poolId?: string, tranche?: Tranche) {
     const user = await this.userRepo.find(userId)
     if (config.globalRestrictedCountries.includes(user.countryCode)) {
       console.error(`User ${userId} is based in ${user.countryCode}, which is restricted globally.`)

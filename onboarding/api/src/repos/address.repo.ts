@@ -35,7 +35,7 @@ export class AddressRepo {
   // Gets the list of users which should have been whitelisted, but arent
   async getMissingWhitelistedUsers(): Promise<{ userId: string; poolId: string; tranche: Tranche }[]> {
     const data = await this.db.sql`
-      select users.id, agreements.pool_id, agreements.tranche
+      select users.id as user_id, agreements.pool_id, agreements.tranche
       from addresses
       right join users on users.id = addresses.user_id
       right join kyc on kyc.user_id = users.id
