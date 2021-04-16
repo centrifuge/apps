@@ -9,19 +9,19 @@ import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
 import contractAbiMemberlist from '../utils/Memberlist.abi'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
+import { NonceManager } from '@ethersproject/experimental'
 
 @Injectable()
 export class PoolService {
   private readonly logger = new Logger(PoolService.name)
   private pools: { [key: string]: Pool } = {}
 
-  provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
-  signer = new ethers.Wallet(config.signerPrivateKey).connect(this.provider)
+  provider = new FastJsonRpcProvider(config.rpcUrl)
+  signer = new NonceManager(new ethers.Wallet(config.signerPrivateKey).connect(this.provider))
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
 
   constructor(private readonly addressRepo: AddressRepo, private readonly investmentRepo: InvestmentRepo) {
     this.loadFromIPFS()
-    this.logger.log(`Using wallet at ${this.signer.address}`)
   }
 
   async get(poolId: string) {
@@ -149,5 +149,12 @@ export interface Profile {
     restrictedCountryCodes?: string[]
     minInvestmentCurrency?: string
     nonSolicitationNotice?: 'none' | 'non-us' | 'all'
+  }
+}
+
+class FastJsonRpcProvider extends ethers.providers.JsonRpcProvider {
+  async getGasPrice() {
+    const gasPrice = await super.getGasPrice()
+    return gasPrice.add(gasPrice.div(4)) // add 25% to the gas price to speed it up
   }
 }
