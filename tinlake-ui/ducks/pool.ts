@@ -279,7 +279,7 @@ export function loadPool(
             target: tinlake.contractAddresses.MCD_VAT,
             call: [
               'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
-              ethers.utils.formatBytes32String('NS2DRP-A'),
+              ethers.utils.formatBytes32String('RWA002-A'),
             ],
             returns: [
               [`maker.art`, toBN],
@@ -291,7 +291,7 @@ export function loadPool(
           },
           {
             target: tinlake.contractAddresses.MCD_JUG,
-            call: ['ilks(bytes32)(uint256,uint256)', ethers.utils.formatBytes32String('NS2DRP-A')],
+            call: ['ilks(bytes32)(uint256,uint256)', ethers.utils.formatBytes32String('RWA002-A')],
             returns: [
               [`maker.duty`, toBN],
               [`maker.rho`, toBN],
