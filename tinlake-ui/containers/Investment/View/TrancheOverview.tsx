@@ -203,89 +203,104 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </TableRow>
           </TableBody>
         </Table>
-        {address && trancheData?.inMemberlist === true && (
-          <>
-            {card === 'home' && (
-              <>
-                {epochData?.isBlockedState && (
-                  <Warning>
-                    <Heading level="6" margin={{ bottom: 'xsmall' }}>
-                      Computing orders
-                    </Heading>
-                    The Epoch has just been closed and the order executions are currently being computed. Until the next
-                    Epoch opens, you cannot submit new orders.
-                    {epochData?.minChallengePeriodEnd !== 0 && (
-                      <MinTimeRemaining>
-                        Minimum time remaining:{' '}
-                        {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
-                      </MinTimeRemaining>
-                    )}
-                  </Warning>
-                )}
-
-                {!epochData?.isBlockedState && (
-                  <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                    <Button
-                      primary
-                      label="Invest"
-                      onClick={() => setCard('invest')}
-                      disabled={epochData?.isBlockedState === true}
-                    />
-                    <Button
-                      primary
-                      label="Redeem"
-                      onClick={() => setCard('redeem')}
-                      disabled={balance === '0' || epochData?.isBlockedState === true}
-                    />
-                  </Box>
-                )}
-              </>
-            )}
-            {card === 'order' && (
-              <OrderCard
-                {...props}
-                selectedPool={props.pool}
-                tinlake={props.tinlake}
-                setCard={setCard}
-                disbursements={disbursements}
-                tokenPrice={tokenPrice || '0'}
-                updateTrancheData={updateTrancheData}
-              />
-            )}
-            {card === 'collect' && (
-              <CollectCard
-                {...props}
-                selectedPool={props.pool}
-                setCard={setCard}
-                disbursements={disbursements}
-                tokenPrice={tokenPrice || '0'}
-                updateTrancheData={updateTrancheData}
-              />
-            )}
-            {card === 'invest' && (
-              <InvestCard
-                selectedPool={props.pool}
-                tranche={props.tranche}
-                tinlake={props.tinlake}
-                setCard={setCard}
-                updateTrancheData={updateTrancheData}
-              />
-            )}
-            {card === 'redeem' && (
-              <RedeemCard
-                {...props}
-                selectedPool={props.pool}
-                setCard={setCard}
-                updateTrancheData={updateTrancheData}
-              />
-            )}
-
-            {card === 'home' && trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
-              <AddWalletLink onClick={addToWallet}>Display {trancheData?.token} in your wallet</AddWalletLink>
-            )}
-          </>
+        {props.pool && config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT) && (
+          <Warning>
+            <Heading level="6" margin={{ bottom: 'xsmall' }}>
+              Pool maintenance ongoing
+            </Heading>
+            Until this upgrade is finished, investments and redemptions are not possible for a short while. Please come
+            back soon.
+          </Warning>
         )}
+        {!(props.pool && config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT)) &&
+          address &&
+          trancheData?.inMemberlist === true && (
+            <>
+              {card === 'home' && (
+                <>
+                  {epochData?.isBlockedState && (
+                    <Warning>
+                      <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                        Computing orders
+                      </Heading>
+                      The Epoch has just been closed and the order executions are currently being computed. Until the
+                      next Epoch opens, you cannot submit new orders.
+                      {epochData?.minChallengePeriodEnd !== 0 && (
+                        <MinTimeRemaining>
+                          Minimum time remaining:{' '}
+                          {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
+                        </MinTimeRemaining>
+                      )}
+                    </Warning>
+                  )}
+
+                  {!epochData?.isBlockedState && (
+                    <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                      <Button
+                        primary
+                        label="Invest"
+                        onClick={() => setCard('invest')}
+                        disabled={epochData?.isBlockedState === true}
+                      />
+                      <Button
+                        primary
+                        label="Redeem"
+                        onClick={() => setCard('redeem')}
+                        disabled={balance === '0' || epochData?.isBlockedState === true}
+                      />
+                    </Box>
+                  )}
+                </>
+              )}
+              {card === 'order' && (
+                <OrderCard
+                  {...props}
+                  selectedPool={props.pool}
+                  tinlake={props.tinlake}
+                  setCard={setCard}
+                  disbursements={disbursements}
+                  tokenPrice={tokenPrice || '0'}
+                  updateTrancheData={updateTrancheData}
+                />
+              )}
+              {card === 'collect' && (
+                <CollectCard
+                  {...props}
+                  selectedPool={props.pool}
+                  setCard={setCard}
+                  disbursements={disbursements}
+                  tokenPrice={tokenPrice || '0'}
+                  updateTrancheData={updateTrancheData}
+                />
+              )}
+              {card === 'invest' && (
+                <InvestCard
+                  selectedPool={props.pool}
+                  tranche={props.tranche}
+                  tinlake={props.tinlake}
+                  setCard={setCard}
+                  updateTrancheData={updateTrancheData}
+                />
+              )}
+              {card === 'redeem' && (
+                <RedeemCard
+                  {...props}
+                  selectedPool={props.pool}
+                  setCard={setCard}
+                  updateTrancheData={updateTrancheData}
+                />
+              )}
+
+              {card === 'home' &&
+                trancheData?.token &&
+                trancheData.token.length > 0 &&
+                trancheData.token.length < 7 && (
+                  <AddWalletLink onClick={addToWallet}>Display {trancheData?.token} in your wallet</AddWalletLink>
+                )}
+            </>
+          )}
         {props.pool &&
+          !config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT) &&
           props.tranche === 'senior' &&
           !trancheData?.inMemberlist &&
           ('onboard' in router.query ||
@@ -308,6 +323,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           )}
 
         {props.pool &&
+          !config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT) &&
           !(
             'onboard' in router.query ||
             ('addresses' in props.pool &&

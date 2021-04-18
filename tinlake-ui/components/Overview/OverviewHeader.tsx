@@ -1,4 +1,11 @@
-import { addThousandsSeparators, baseToDisplay, feeToInterestRate, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
+import {
+  addThousandsSeparators,
+  baseToDisplay,
+  feeToInterestRate,
+  feeToInterestRateCompounding,
+  ITinlake,
+  toPrecision,
+} from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
@@ -162,7 +169,8 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           <MakerMetric>
             <h3>Stability Fee</h3>
             <h2>
-              {toPrecision(feeToInterestRate(poolData?.maker?.duty || '0'), 2)} <MakerUnit>%</MakerUnit>
+              {toPrecision(feeToInterestRateCompounding(poolData?.maker?.duty || '0'), 2)}{' '}
+              <MakerUnit>% (APY)</MakerUnit>
             </h2>
           </MakerMetric>
         </MakerBox>

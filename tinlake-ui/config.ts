@@ -96,6 +96,7 @@ interface Config {
   gasLimit: number
   onboardAPIHost: string
   featureFlagNewOnboardingPools: string[]
+  featureFlagMaintenanceMode: string[]
   enableErrorLogging: boolean
   centrifugeChainUrl: string
   claimCFGContractAddress: string
@@ -332,6 +333,7 @@ const config: Config = {
   enableErrorLogging: yup.boolean().validateSync(false),
   // Loading a comma-separated string as a string array using yup proved hard/impossible
   featureFlagNewOnboardingPools: process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING?.split(',') || [],
+  featureFlagMaintenanceMode: process.env.NEXT_PUBLIC_FEATURE_FLAG_MAINTENANCE_MODE?.split(',') || [],
   multicallContractAddress: yup
     .string()
     .required('NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS is required')
