@@ -43,6 +43,7 @@ export interface PoolData {
   outstandingVolume: BN
   totalPendingInvestments: BN
   totalRedemptionsCurrency: BN
+  isPoolAdmin?: boolean
 }
 
 export type PoolStatus = 'Upcoming' | 'Active' | 'Deployed' | 'Closed'
@@ -134,6 +135,11 @@ export function loadPool(
             target: tinlake.contractAddresses.JUNIOR_MEMBERLIST,
             call: ['hasMember(address)(bool)', address || '0'],
             returns: [[`junior.inMemberlist`]],
+          },
+          tinlake.contractAddresses.POOL_ADMIN && {
+            target: tinlake.contractAddresses.POOL_ADMIN,
+            call: ['admins(address)(uint256)', address || '0'],
+            returns: [[`isPoolAdmin`, (num: BigNumber) => toBN(num).toNumber() === 1]],
           },
         ]
       : []

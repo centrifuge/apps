@@ -128,7 +128,6 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
             limitLabel={maxCreditline.lt(debtCeiling) ? 'Max' : 'Debt Ceiling'}
             disabled={status === 'pending' || status === 'unconfirmed'}
           />
-          {effectiveDropBalanceDAI.toString()}
           {/* {tinStakeRequired.gtn(0) && (
             <Paragraph>
               This will require an additional{' '}
@@ -143,8 +142,16 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
           onClick={() => props.setShowMaxReserveForm(false)}
           disabled={status === 'pending' || status === 'unconfirmed'}
         />
-        {/* (mat && tinStakeRequired.gtn(0)) ||  */}
-        <Button primary label="Set" onClick={save} disabled={status === 'pending' || status === 'unconfirmed'} />
+        <Button
+          primary
+          label="Set"
+          onClick={save}
+          disabled={
+            status === 'pending' ||
+            status === 'unconfirmed' ||
+            (creditlineValue ? new BN(creditlineValue).gt(debtCeiling) : true)
+          }
+        />
       </Box>
     </Box>
   )

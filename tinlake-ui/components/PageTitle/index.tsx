@@ -26,7 +26,11 @@ const PageTitle: React.FC<Props> = (props: Props) => {
 
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const isOversubscribed =
-    (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve).add(OversubscribedBuffer))) || false
+    (pool?.data &&
+      new BN(pool?.data.maxReserve).lte(
+        new BN(pool?.data.reserve).add(pool?.data.maker?.remainingCredit || new BN(0)).add(OversubscribedBuffer)
+      )) ||
+    false
 
   // TODO: fix this somehow, otherwise the oversubscribed label isn't shown on pages which don't load the pool data
   // (but this requires injecting the tinlake prop everywhere we include the PoolTitle component)

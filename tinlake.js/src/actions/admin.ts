@@ -25,6 +25,11 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return await this.toBN(this.contract(contractName).wards(user))
     }
 
+    isPoolAdmin = async (user: string) => {
+      if (!this.contract('POOL_ADMIN')) return false
+      return (await this.toBN(this.contract('POOL_ADMIN').admins(user))).toNumber() === 1
+    }
+
     canUpdateNftFeed = async (user: string) => {
       if (!this.contract('FEED')?.wards) return false
       return (await this.toBN(this.contract('FEED').wards(user))).toNumber() === 1
@@ -162,6 +167,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
 export type IAdminActions = {
   isWard(user: string, contractName: ContractName): Promise<BN>
+  isPoolAdmin(user: string): Promise<boolean>
   canQueryPermissions(): boolean
   canUpdateNftFeed(user: string): Promise<boolean>
   canSetRiskScore(user: string): Promise<boolean>

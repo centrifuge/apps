@@ -39,7 +39,11 @@ const InvestCard: React.FC<Props> = (props: Props) => {
 
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const isOversubscribed =
-    (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve).add(OversubscribedBuffer))) || false
+    (pool?.data &&
+      new BN(pool?.data.maxReserve).lte(
+        new BN(pool?.data.reserve).add(pool?.data.maker?.remainingCredit || new BN(0)).add(OversubscribedBuffer)
+      )) ||
+    false
 
   const loadHasInvested = async () => {
     if (address) {
@@ -93,8 +97,9 @@ const InvestCard: React.FC<Props> = (props: Props) => {
     setDaiValue(newValue)
     if (disableLimit === false && hasInvested === false && new BN(newValue).lt(MinInvestment)) {
       setError(
-        `Minimum investment: ${config.network === 'Mainnet' ? '5.000' : '10'} ${props.selectedPool?.metadata
-          .currencySymbol || 'DAI'}`
+        `Minimum investment: ${config.network === 'Mainnet' ? '5.000' : '10'} ${
+          props.selectedPool?.metadata.currencySymbol || 'DAI'
+        }`
       )
     } else if (limit && new BN(newValue).gt(new BN(limit))) {
       setError('Amount larger than balance')

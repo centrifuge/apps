@@ -170,7 +170,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         throw new Error('Current epoch is still in the challenge period')
       }
 
-      return this.pending(coordinator.executeEpoch({ ...this.overrides, gasLimit: 500000 }))
+      return this.pending(coordinator.executeEpoch({ ...this.overrides, gasLimit: 2000000 }))
     }
 
     getCurrentEpochId = async () => {
