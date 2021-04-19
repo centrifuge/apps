@@ -34,25 +34,26 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
   }
 
   const [status, , setTxId] = useTransactionState()
-  const [, , setCreditlineTxId] = useTransactionState()
+  const [creditlineStatus, , setCreditlineTxId] = useTransactionState()
 
   const mat = poolData?.maker?.mat
 
+  const changedMaxReserve = value && value !== (poolData?.reserve || new BN(0)).toString()
+  const changedCreditline = creditlineValue && mat && creditlineValue !== poolData?.maker?.creditline?.toString()
+
   const save = async () => {
-    if (value && value !== (poolData?.reserve || new BN(0)).toString()) {
+    if (changedMaxReserve && value) {
       const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [props.tinlake, value.toString()])
       setTxId(txId)
     }
 
-    if (creditlineValue && mat && creditlineValue !== (mat || new BN(0)).toString()) {
+    if (changedCreditline && creditlineValue) {
       const currentCreditline = poolData?.maker?.creditline?.toString()
       const amount = new BN(creditlineValue).gt(new BN(currentCreditline))
         ? new BN(creditlineValue).sub(new BN(currentCreditline))
         : new BN(currentCreditline).sub(new BN(creditlineValue))
       const valueToDecimal = new Decimal(baseToDisplay(creditlineValue, 18)).toDecimalPlaces(4)
       const formatted = addThousandsSeparators(valueToDecimal.toString())
-
-      console.log(`${currentCreditline} => ${creditlineValue}`)
 
       if (new BN(creditlineValue).gt(new BN(currentCreditline))) {
         const txId = await props.createTransaction(`Increase creditline to ${formatted}`, 'raiseCreditline', [
@@ -77,6 +78,7 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
+  // TODO: fix and then refactor these
   const debtCeiling = (poolData?.maker?.line || new BN('0')).div(new BN(10).pow(new BN(45 - 18)))
   const tinSupplyDAI = (poolData?.junior?.totalSupply || new BN(0))
     .mul(poolData?.junior?.tokenPrice || new BN(0))
@@ -126,7 +128,7 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
             onChange={onChangeCreditline}
             maxValue={(maxCreditline.lt(debtCeiling) ? maxCreditline : debtCeiling).toString()}
             limitLabel={maxCreditline.lt(debtCeiling) ? 'Max' : 'Debt Ceiling'}
-            disabled={status === 'pending' || status === 'unconfirmed'}
+            disabled={creditlineStatus === 'pending' || creditlineStatus === 'unconfirmed'}
           />
         </>
       )}
@@ -134,16 +136,22 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
         <Button
           label="Cancel"
           onClick={() => props.setShowMaxReserveForm(false)}
-          disabled={status === 'pending' || status === 'unconfirmed'}
+          disabled={
+            (changedMaxReserve && (status === 'pending' || status === 'unconfirmed')) ||
+            (changedCreditline && (creditlineStatus === 'pending' || creditlineStatus === 'unconfirmed'))
+          }
         />
         <Button
           primary
           label="Set"
           onClick={save}
           disabled={
-            status === 'pending' ||
-            status === 'unconfirmed' ||
-            (creditlineValue ? new BN(creditlineValue).gt(debtCeiling) : true)
+            (!changedMaxReserve && !changedCreditline) ||
+            (changedMaxReserve && (status === 'pending' || status === 'unconfirmed')) ||
+            (changedCreditline &&
+              (creditlineStatus === 'pending' ||
+                creditlineStatus === 'unconfirmed' ||
+                (creditlineValue ? new BN(creditlineValue).gt(debtCeiling) : true)))
           }
         />
       </Box>
