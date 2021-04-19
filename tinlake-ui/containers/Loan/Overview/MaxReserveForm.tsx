@@ -128,12 +128,6 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
             limitLabel={maxCreditline.lt(debtCeiling) ? 'Max' : 'Debt Ceiling'}
             disabled={status === 'pending' || status === 'unconfirmed'}
           />
-          {/* {tinStakeRequired.gtn(0) && (
-            <Paragraph>
-              This will require an additional{' '}
-              {addThousandsSeparators(toPrecision(baseToDisplay(tinStakeRequired || '0', 18), 0))} TIN.
-            </Paragraph>
-          )} */}
         </>
       )}
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>

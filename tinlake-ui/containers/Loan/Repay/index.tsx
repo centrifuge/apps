@@ -35,7 +35,6 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
     let txId: string
     if (repayAmount === debt) {
       // full repay
-      console.log('full repay')
       txId = await props.createTransaction(
         `Repay Asset ${props.loan.loanId} (${formatted} ${props.poolConfig.metadata.currencySymbol || 'DAI'})`,
         'repayFull',
@@ -43,7 +42,6 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
       )
     } else {
       // partial repay
-      console.log('partial repay')
       txId = await props.createTransaction(
         `Repay Asset ${props.loan.loanId} (${formatted} ${props.poolConfig.metadata.currencySymbol || 'DAI'})`,
         'repay',
