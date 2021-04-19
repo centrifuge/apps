@@ -48,7 +48,7 @@ const run = async () => {
   cronJobs.set('submitSolutions', submitSolutionsTask)
 
   let executePoolsTask = new CronJob(CronExpression.EVERY_30_MINUTES, async () => {
-    // Execute pool epochs every 15 minutes
+    // Execute pool epochs every x minutes
     await executePools(pools, provider, signerWithProvider)
   })
   cronJobs.set('executePools', executePoolsTask)
