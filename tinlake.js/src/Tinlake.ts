@@ -28,6 +28,7 @@ const contractNames = [
   'SENIOR_TRANCHE',
   'COORDINATOR',
   'POOL_REGISTRY',
+  'POOL_ADMIN',
   'CLAIM_CFG',
 ] as const
 

@@ -65,6 +65,7 @@ export interface Pool extends BasePool {
     COLLATERAL_NFT: string
     SENIOR_TOKEN: string
     JUNIOR_TOKEN: string
+    CLERK?: string
     ASSESSOR: string
   }
   contractConfig?: {
@@ -95,6 +96,7 @@ interface Config {
   gasLimit: number
   onboardAPIHost: string
   featureFlagNewOnboardingPools: string[]
+  featureFlagMaintenanceMode: string[]
   enableErrorLogging: boolean
   centrifugeChainUrl: string
   claimCFGContractAddress: string
@@ -129,6 +131,26 @@ const contractAddressesSchema = yup.object().shape({
     .string()
     .length(42)
     .matches(/0x[0-9a-fA-F]{40}/),
+  SENIOR_TOKEN: yup
+    .string()
+    .length(42)
+    .matches(/0x[0-9a-fA-F]{40}/)
+    .required('contractAddressesSchema.SENIOR_TOKEN is required'),
+  JUNIOR_TOKEN: yup
+    .string()
+    .length(42)
+    .matches(/0x[0-9a-fA-F]{40}/)
+    .required('contractAddressesSchema.JUNIOR_TOKEN is required'),
+  CLERK: yup
+    .string()
+    .length(42)
+    .matches(/0x[0-9a-fA-F]{40}/)
+    .optional(),
+  ASSESSOR: yup
+    .string()
+    .length(42)
+    .matches(/0x[0-9a-fA-F]{40}/)
+    .required('contractAddressesSchema.JUNIOR_TOKEN is required'),
 })
 
 const contractConfigSchema = yup.object().shape({
@@ -148,6 +170,10 @@ const mediaSchema = yup.object().shape({
   icon: yup.string(),
 })
 
+const makerSchema = yup.object().shape({
+  ilk: yup.string().default(''),
+})
+
 const metadataSchema = yup.object().shape({
   name: yup.string().required('poolSchema.name is required'),
   shortName: yup.string(),
@@ -160,6 +186,7 @@ const metadataSchema = yup.object().shape({
   assetMaturity: yup.string(),
   securitize: securitizeDataSchema,
   currencySymbol: yup.string().default('DAI'),
+  maker: makerSchema.optional(),
 })
 
 const poolSchema = yup.object().shape({
@@ -335,6 +362,7 @@ const config: Config = {
   enableErrorLogging: yup.boolean().validateSync(false),
   // Loading a comma-separated string as a string array using yup proved hard/impossible
   featureFlagNewOnboardingPools: process.env.NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING?.split(',') || [],
+  featureFlagMaintenanceMode: process.env.NEXT_PUBLIC_FEATURE_FLAG_MAINTENANCE_MODE?.split(',') || [],
   multicallContractAddress: yup
     .string()
     .required('NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS is required')

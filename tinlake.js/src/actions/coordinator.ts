@@ -83,7 +83,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       if ((await coordinator.submissionPeriod()) === false) {
         // The epoch is can be closed, but is not closed yet
-        const closeTx = await coordinator.closeEpoch({ ...this.overrides, gasLimit: 2000000 })
+        const closeTx = await coordinator.closeEpoch({ ...this.overrides, gasLimit: 3000000 })
         const closeResult = await this.getTransactionReceipt(closeTx)
 
         if (closeResult.status === 0) {
@@ -170,7 +170,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         throw new Error('Current epoch is still in the challenge period')
       }
 
-      return this.pending(coordinator.executeEpoch({ ...this.overrides, gasLimit: 500000 }))
+      return this.pending(coordinator.executeEpoch({ ...this.overrides, gasLimit: 2000000 }))
     }
 
     getCurrentEpochId = async () => {

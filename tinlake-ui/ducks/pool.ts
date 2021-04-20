@@ -1,7 +1,7 @@
 import { Tranche } from '@centrifuge/tinlake-js'
 import { createWatcher } from '@makerdao/multicall'
 import BN from 'bn.js'
-import { BigNumber } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
@@ -26,11 +26,13 @@ export interface PoolTranche extends Tranche {
   decimals?: number
   address?: string
   inMemberlist?: boolean
+  effectiveBalance?: BN
 }
 
 export interface PoolData {
   junior: PoolTranche
   senior?: PoolTranche
+  maker?: any
   availableFunds: BN
   minJuniorRatio: BN
   currentJuniorRatio: BN
@@ -41,6 +43,7 @@ export interface PoolData {
   outstandingVolume: BN
   totalPendingInvestments: BN
   totalRedemptionsCurrency: BN
+  isPoolAdmin?: boolean
 }
 
 export type PoolStatus = 'Upcoming' | 'Active' | 'Deployed' | 'Closed'
@@ -132,6 +135,11 @@ export function loadPool(
             target: tinlake.contractAddresses.JUNIOR_MEMBERLIST,
             call: ['hasMember(address)(bool)', address || '0'],
             returns: [[`junior.inMemberlist`]],
+          },
+          tinlake.contractAddresses.POOL_ADMIN && {
+            target: tinlake.contractAddresses.POOL_ADMIN,
+            call: ['admins(address)(uint256)', address || '0'],
+            returns: [[`isPoolAdmin`, (num: BigNumber) => toBN(num).toNumber() === 1]],
           },
         ]
       : []
@@ -269,12 +277,62 @@ export function loadPool(
       },
     ]
 
-    watcher.recreate([...addressWatchers, ...globalWatchers], multicallConfig)
+    const isMakerIntegrated = tinlake.contractAddresses.CLERK !== undefined
+
+    const makerWatchers = isMakerIntegrated
+      ? [
+          {
+            target: tinlake.contractAddresses.MCD_VAT,
+            call: [
+              'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
+              ethers.utils.formatBytes32String('RWA002-A'),
+            ],
+            returns: [
+              [`maker.art`, toBN],
+              [`maker.rate`, toBN],
+              [`maker.spot`, toBN],
+              [`maker.line`, toBN],
+              [`maker.dust`, toBN],
+            ],
+          },
+          {
+            target: tinlake.contractAddresses.MCD_JUG,
+            call: ['ilks(bytes32)(uint256,uint256)', ethers.utils.formatBytes32String('RWA002-A')],
+            returns: [
+              [`maker.duty`, toBN],
+              [`maker.rho`, toBN],
+            ],
+          },
+          {
+            target: tinlake.contractAddresses.CLERK,
+            call: ['remainingCredit()(uint)'],
+            returns: [[`maker.remainingCredit`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.CLERK,
+            call: ['mat()(uint)'],
+            returns: [[`maker.mat`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.CLERK,
+            call: ['creditline()(uint)'],
+            returns: [[`maker.creditline`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.ASSESSOR,
+            call: ['effectiveSeniorBalance()(uint)'],
+            returns: [[`senior.effectiveBalance`, toBN]],
+          },
+        ]
+      : []
+
+    watcher.recreate([...addressWatchers, ...globalWatchers, ...makerWatchers], multicallConfig)
 
     try {
       const initial = {
         junior: { type: 'junior' },
         senior: { type: 'senior' },
+        maker: {},
       }
 
       const prev =
@@ -285,7 +343,7 @@ export function loadPool(
       watcher.batch().subscribe((updates: any[]) => {
         const data: Partial<PoolData> = updates.reduce((prev: any, update: any) => {
           const prefix = update.type.split('.')[0]
-          if (prefix === 'junior' || prefix === 'senior') {
+          if (prefix === 'junior' || prefix === 'senior' || prefix === 'maker') {
             const item = update.type.split('.')[1]
             prev[prefix][item] = update.value
           } else {

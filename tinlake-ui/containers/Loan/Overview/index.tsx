@@ -76,7 +76,8 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
     dispatch(loadAssetData(props.tinlake))
   }, [address])
 
-  const isAdmin = props.auth?.permissions && (props.auth?.permissions as PermissionsV3).canSetMaxReserve
+  const isAdmin =
+    poolData?.isPoolAdmin || (props.auth?.permissions && (props.auth?.permissions as PermissionsV3).canSetMaxReserve)
 
   const [showMaxReserveForm, setShowMaxReserveForm] = React.useState(false)
 
@@ -126,10 +127,15 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                         scope="row"
                         style={{ alignItems: 'start', justifyContent: 'center' }}
                         pad={{ vertical: '6px' }}
+                        border={isAdmin ? undefined : { color: 'transparent' }}
                       >
                         <span>Pool reserve</span>
                       </TableCell>
-                      <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                      <TableCell
+                        style={{ textAlign: 'end' }}
+                        pad={{ vertical: '6px' }}
+                        border={isAdmin ? undefined : { color: 'transparent' }}
+                      >
                         <LoadingValue done={poolData?.reserve !== undefined} height={39}>
                           <>
                             {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))}{' '}
@@ -143,48 +149,93 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                         </LoadingValue>
                       </TableCell>
                     </TableRow>
-                    <TableRow>
-                      <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
-                        <span>Available funds for financing</span>
-                      </TableCell>
-                      <TableCell style={{ textAlign: 'end' }}>
-                        <LoadingValue done={poolData?.reserve !== undefined}>
-                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 0))}{' '}
-                          {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                        </LoadingValue>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell
-                        scope="row"
-                        style={{ alignItems: 'start', justifyContent: 'center' }}
-                        border={{ color: 'transparent' }}
-                        pad={{ top: '15px' }}
-                      >
-                        <span>Repaid this epoch</span>
-                      </TableCell>
-                      <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }} pad={{ top: '15px' }}>
-                        <LoadingValue done={poolData?.reserve !== undefined}>
-                          {addThousandsSeparators(
-                            toPrecision(
-                              baseToDisplay(
-                                (poolData?.reserve || new BN(0)).sub(poolData?.availableFunds || new BN(0)),
-                                18
-                              ),
-                              0
-                            )
-                          )}{' '}
-                          {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                        </LoadingValue>
-                      </TableCell>
-                    </TableRow>
                   </TableBody>
                 </Table>
 
                 {isAdmin && (
-                  <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                    <Button label="Set max reserve" onClick={() => setShowMaxReserveForm(true)} disabled={!poolData} />
-                  </Box>
+                  <>
+                    <Table>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+                            <span>Available funds for Financing</span>
+                          </TableCell>
+                          <TableCell style={{ textAlign: 'end' }}>
+                            <LoadingValue done={poolData?.reserve !== undefined}>
+                              {addThousandsSeparators(
+                                toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 0)
+                              )}{' '}
+                              {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                            </LoadingValue>
+                          </TableCell>
+                        </TableRow>
+                        {poolData?.maker?.line && (
+                          <TableRow>
+                            <TableCell
+                              scope="row"
+                              style={{ alignItems: 'start', justifyContent: 'center' }}
+                              pad={{ vertical: '6px' }}
+                            >
+                              <span>Maker creditline</span>
+                            </TableCell>
+                            <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                              <LoadingValue done={poolData?.reserve !== undefined} height={39}>
+                                <>
+                                  {addThousandsSeparators(
+                                    toPrecision(baseToDisplay(poolData?.maker?.creditline || '0', 18), 0)
+                                  )}{' '}
+                                  {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                                  <Sidenote>
+                                    Remaining:{' '}
+                                    {addThousandsSeparators(
+                                      toPrecision(baseToDisplay(poolData?.maker?.remainingCredit || '0', 18), 0)
+                                    )}{' '}
+                                    {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                                  </Sidenote>
+                                </>
+                              </LoadingValue>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                        <TableRow>
+                          <TableCell
+                            scope="row"
+                            style={{ alignItems: 'start', justifyContent: 'center' }}
+                            border={{ color: 'transparent' }}
+                            pad={{ top: '15px' }}
+                          >
+                            <span>Repaid this epoch</span>
+                          </TableCell>
+                          <TableCell
+                            style={{ textAlign: 'end' }}
+                            border={{ color: 'transparent' }}
+                            pad={{ top: '15px' }}
+                          >
+                            <LoadingValue done={poolData?.reserve !== undefined}>
+                              {addThousandsSeparators(
+                                toPrecision(
+                                  baseToDisplay(
+                                    (poolData?.reserve || new BN(0))
+                                      .add(poolData?.maker?.remainingCredit || new BN(0))
+                                      .sub(poolData?.availableFunds || new BN(0)),
+                                    18
+                                  ),
+                                  0
+                                )
+                              )}{' '}
+                              {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                            </LoadingValue>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+
+                    {isAdmin && (
+                      <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                        <Button label="Manage" onClick={() => setShowMaxReserveForm(true)} disabled={!poolData} />
+                      </Box>
+                    )}
+                  </>
                 )}
               </>
             )}

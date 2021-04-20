@@ -29,7 +29,7 @@ const run = async () => {
 
   let cronJobs: Map<string, CronJob> = new Map<string, CronJob>()
 
-  let retrievePoolsTask = new CronJob(CronExpression.EVERY_30_MINUTES, async () => {
+  let retrievePoolsTask = new CronJob(CronExpression.EVERY_HOUR, async () => {
     // Update the list of pools every 30 minutes
     pools = await loadFromIPFS(provider)
   })
@@ -41,14 +41,14 @@ const run = async () => {
   })
   cronJobs.set('closePools', closePoolsTask)
 
-  let submitSolutionsTask = new CronJob(CronExpression.EVERY_10_MINUTES, async () => {
-    // Submit solutions every 10 minutes
+  let submitSolutionsTask = new CronJob(CronExpression.EVERY_30_MINUTES, async () => {
+    // Submit solutions every x minutes
     await submitSolutions(pools, provider, signerWithProvider)
   })
   cronJobs.set('submitSolutions', submitSolutionsTask)
 
-  let executePoolsTask = new CronJob(CronExpression.EVERY_5_MINUTES, async () => {
-    // Execute pool epochs every 5 minutes
+  let executePoolsTask = new CronJob(CronExpression.EVERY_30_MINUTES, async () => {
+    // Execute pool epochs every x minutes
     await executePools(pools, provider, signerWithProvider)
   })
   cronJobs.set('executePools', executePoolsTask)

@@ -39,7 +39,11 @@ const InvestCard: React.FC<Props> = (props: Props) => {
 
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const isOversubscribed =
-    (pool?.data && new BN(pool?.data.maxReserve).lte(new BN(pool?.data.reserve).add(OversubscribedBuffer))) || false
+    (pool?.data &&
+      new BN(pool?.data.maxReserve).lte(
+        new BN(pool?.data.reserve).add(pool?.data.maker?.remainingCredit || new BN(0)).add(OversubscribedBuffer)
+      )) ||
+    false
 
   const loadHasInvested = async () => {
     if (address) {
