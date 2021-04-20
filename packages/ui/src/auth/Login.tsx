@@ -15,12 +15,12 @@ type Props = {} & RouteComponentProps;
 const LoginPage: FunctionComponent<Props> = props => {
   const [error, setError] = useState<Error>();
   const [loginCandidate, setLoginCandidate] = useState<User>();
-  const { user } = useContext(AppContext);
+  const { user, setUser } = useContext(AppContext);
 
   const login = async (loginCandidate: User) => {
     try {
-      await httpClient.user.login(loginCandidate);
-      window.location.reload();
+      const user = await httpClient.user.login(loginCandidate);
+      setUser(user.data);
     } catch (e) {
       setError(e);
     }
@@ -28,10 +28,11 @@ const LoginPage: FunctionComponent<Props> = props => {
 
   const loginTentative = async (loginCandidate: User) => {
     try {
-      const result = (await httpClient.user.loginTentative(loginCandidate)).data;
+      const result = (await httpClient.user.loginTentative(loginCandidate))
+        .data;
       setLoginCandidate({
         ...result,
-        ...loginCandidate
+        ...loginCandidate,
       });
       setError(undefined);
     } catch (e) {
@@ -51,15 +52,13 @@ const LoginPage: FunctionComponent<Props> = props => {
     ) {
       return <Redirect to={routes.documents.index} />;
     }
-
   }
 
-  const getInfo = (loginCandidate) => {
+  const getInfo = loginCandidate => {
     return loginCandidate.twoFAType === TwoFaType.APP
       ? 'Open the Authenticator App on your mobile phone and enter in the generated security code for Gateway in the form below.'
       : 'We just sent you a message with your security code via email. Enter the code in the form below to verify your identity.';
-
-  }
+  };
 
   return (
     <Box align="center" justify="center">
@@ -70,11 +69,16 @@ const LoginPage: FunctionComponent<Props> = props => {
         margin="medium"
         pad="medium"
       >
-      {loginCandidate ? (
-        <TwoFAForm info={getInfo(loginCandidate)} user={loginCandidate} error={error} onSubmit={login} />
-      ) : (
-        <LoginForm error={error} onSubmit={loginTentative} />
-      )}
+        {loginCandidate ? (
+          <TwoFAForm
+            info={getInfo(loginCandidate)}
+            user={loginCandidate}
+            error={error}
+            onSubmit={login}
+          />
+        ) : (
+          <LoginForm error={error} onSubmit={loginTentative} />
+        )}
       </Box>
     </Box>
   );

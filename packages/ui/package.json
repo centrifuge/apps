@@ -80,5 +80,5 @@
       "enzyme-to-json/serializer"
     ]
   },
-  "proxy": "http://localhost:3001"
+  "proxy": "https://gateway.centrifuge.io"
 }

@@ -20,7 +20,7 @@ const runApplication = (preloadedState) => {
 
 // in dev mode we do not have the prerendering so we autologin a user
 // and set the __ETH_NETWORK__ to kovan
-if (process.env.NODE_ENV === 'development') {
+if (process.env.REACT_APP_AUTO_LOGIN === 'true') {
   // AUTO login the admin user
   fetch('/api/users/login', {
     method: 'POST',

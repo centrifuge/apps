@@ -74,6 +74,7 @@ describe('WebhooksController', () => {
               nfts: [{ owner: 'owner', token_id: 'token_id' }],
             },
             data: { currency: 'USD' },
+            document_status: 'Created',
             fromId: '0xRandomId',
             scheme: 'iUSDF2ax31e',
             attributes: {
@@ -90,9 +91,11 @@ describe('WebhooksController', () => {
                 value: 'insects',
               },
             },
+            read_access: ['0x111'],
+            write_access: ['0x222'],
           },
         },
-        { upsert: true, returnUpdatedDocs: true },
+        { multi: true, upsert: true, returnUpdatedDocs: true },
       );
     });
 

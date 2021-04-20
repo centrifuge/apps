@@ -63,17 +63,9 @@ export class DocumentsController {
       );
     }
 
-    console.log(
-      `will commit document with document_id ${document.header.document_id}, version_id ${document.header.version_id} and _id ${document._id}`,
-    );
-
     const commitResult = await this.centrifugeService.documents.commitDocumentV2(
       user.account,
       document.header.document_id,
-    );
-
-    console.log(
-      `committed document with document_id ${commitResult.header.document_id}, version_id ${commitResult.header.version_id}`,
     );
 
     const updated = await this.centrifugeService.pullForJobComplete(
@@ -99,8 +91,6 @@ export class DocumentsController {
         returnUpdatedDocs: true,
       },
     );
-
-    console.log(`after commit updated docs`, updatedDocs);
 
     return commitResult;
   }
@@ -135,10 +125,6 @@ export class DocumentsController {
       payload,
     );
 
-    console.log(
-      `created/updated document with document_id ${createResult.header.document_id}, version_id ${createResult.header.version_id} and _id ${createResult._id}, will insert into database`,
-    );
-
     const updated = (await this.databaseService.documents.update(
       {
         'header.document_id': createResult.header.document_id,
@@ -162,8 +148,6 @@ export class DocumentsController {
       },
     )) as Document;
 
-    console.log(`updated document`, updated);
-
     return updated;
   }
 
@@ -174,10 +158,6 @@ export class DocumentsController {
         scheme: SchemeEnum.Generic,
       },
       template,
-    );
-
-    console.log(
-      `cloned document with new document_id ${cloneResult.header.document_id}, version_id ${cloneResult.header.version_id} and _id ${cloneResult._id} from template ${template} from document_id ${document.header.document_id}, version_id ${document.header.version_id} and _id ${document._id}, will insert into database`,
     );
 
     /*
@@ -195,8 +175,6 @@ export class DocumentsController {
       nft_status: NftStatus.NoNft,
       organizationId: user.account.toLowerCase(),
     });
-
-    console.log(`inserted document`, inserted);
 
     return inserted;
   }

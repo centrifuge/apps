@@ -1,11 +1,16 @@
 # `ui`
 
-> TODO: description
+## Dev
 
-## Usage
+To run the UI only against the deployed gateway server, adjust the `proxy` in `packages/ui/package.json` to that endpoint. For the production gateway, you would set:
 
 ```
-const ui = require('ui');
+"proxy": "https://gateway.centrifuge.io"
+```
 
-// TODO: DEMONSTRATE API
+Then:
+
+```
+cd packages/ui
+NODE_ENV=production REACT_APP_AUTO_LOGIN=false yarn start
 ```

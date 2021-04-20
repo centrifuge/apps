@@ -4,6 +4,7 @@ import { NotificationMessage } from '@centrifuge/gateway-lib/centrifuge-node-cli
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes';
+import { DocumentStatus } from '@centrifuge/gateway-lib/models/document';
 
 // TODO add this in Common package
 export enum DocumentTypes {
@@ -33,7 +34,6 @@ export class WebhooksController {
   @Post()
   // TODO: refactor/rethink to remove code duplication in functionality
   async receiveMessage(@Body() notification: NotificationMessage) {
-    console.log('Receive Webhook', notification);
     try {
       if (notification.event_type === EventTypes.DOCUMENT) {
         // Search for the user in the database
@@ -48,45 +48,32 @@ export class WebhooksController {
         }
 
         if (notification.document_type === DocumentTypes.GENERIC_DOCUMENT) {
-          console.log(
-            `received webhook notification for document_id ${notification.document_id}`,
-            notification,
-          );
           const result = await this.centrifugeService.documents.getDocument(
             user.account,
             notification.document_id!,
-          );
-
-          console.log(
-            `found document for document_id ${notification.document_id}, organizationId: ${user.account}`,
-            result,
           );
 
           const unflattenedAttributes = unflatten(result.attributes);
           const updated = await this.databaseService.documents.update(
             {
               'header.document_id': notification.document_id,
-              organizationId: user.account,
+              organizationId: user.account.toLowerCase(),
             },
             {
               $set: {
+                ...result,
                 ownerId: user._id,
-                organizationId: user.account,
+                organizationId: user.account.toLowerCase(),
                 header: result.header,
                 data: result.data,
                 attributes: unflattenedAttributes,
                 scheme: result.scheme,
                 fromId: notification.from_id,
+                document_status: DocumentStatus.Created, // webhook always follows commit, so creation is guaranteed
               },
             },
-            { upsert: true, returnUpdatedDocs: true },
+            { multi: true, upsert: true, returnUpdatedDocs: true },
           );
-
-          if (typeof updated === 'number') {
-            console.log(`updated document with result ${updated}`);
-          } else {
-            console.log(`updated documents`, updated);
-          }
         } else {
           throw new Error(
             `Document type ${notification.document_type} not supported`,
