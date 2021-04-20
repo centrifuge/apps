@@ -167,10 +167,9 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
             </h2>
           </MakerMetric>
           <MakerMetric>
-            <h3>Stability Fee</h3>
+            <h3>Stability Fee (APY)</h3>
             <h2>
-              {toPrecision(feeToInterestRateCompounding(poolData?.maker?.duty || '0'), 2)}{' '}
-              <MakerUnit>% (APY)</MakerUnit>
+              {toPrecision(feeToInterestRateCompounding(poolData?.maker?.duty || '0'), 2)} <MakerUnit>%</MakerUnit>
             </h2>
           </MakerMetric>
         </MakerBox>
