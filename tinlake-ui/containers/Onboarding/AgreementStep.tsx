@@ -106,7 +106,7 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             Finalize onboarding by signing the {props.agreement.name} for {poolName}. Note that the minimum investment
-            amount for this pool is 5.000 {props.activePool?.metadata.currencySymbol || 'DAI'}.
+            amount for this pool is 5000 {props.activePool?.metadata.currencySymbol || 'DAI'}.
           </Paragraph>
           {props.onboarding.data?.showNonSolicitationNotice && (
             <Box margin={{ right: 'auto', bottom: 'medium' }}>

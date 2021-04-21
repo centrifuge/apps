@@ -48,3 +48,23 @@ export const feeToInterestRate = (fee: string | BN): string => {
 
   return interestRateString
 }
+
+export const feeToInterestRateCompounding = (fee: string | BN): string => {
+  let feeToConvert = fee
+  if (typeof feeToConvert !== 'string' && typeof feeToConvert !== 'number') {
+    feeToConvert = feeToConvert.toString()
+  }
+
+  if (feeToConvert.toString() === '0') {
+    return feeToConvert.toString()
+  }
+
+  const i = new Decimal(feeToConvert)
+    .div('1e27')
+    .pow(n)
+    .minus(1)
+
+  const interestRate = i.mul(100).toDecimalPlaces(1)
+
+  return interestRate.toString()
+}

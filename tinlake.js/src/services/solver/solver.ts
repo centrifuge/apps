@@ -4,7 +4,8 @@ import { CLP } from 'clp-wasm'
 export const calculateOptimalSolution = async (
   state: State,
   orders: Orders,
-  weights: SolverWeights
+  weights: SolverWeights,
+  calcInvestmentCapacity?: boolean
 ): Promise<SolverResult> => {
   return require('clp-wasm/clp-wasm.all').then((clp: CLP) => {
     const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
@@ -41,7 +42,7 @@ export const calculateOptimalSolution = async (
         maxTINRatioLb: ${linearExpression(maxTINRatioLbCoeffs)} >= ${maxTINRatioLb}
       Bounds
         0 <= tinInvest  <= ${orders.tinInvest}
-        0 <= dropInvest <= ${orders.dropInvest}
+        ${!calcInvestmentCapacity && `0 <= dropInvest <= ${orders.dropInvest}`}
         0 <= tinRedeem  <= ${orders.tinRedeem}
         0 <= dropRedeem <= ${orders.dropRedeem}
       End

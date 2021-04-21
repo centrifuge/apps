@@ -25,6 +25,11 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return await this.toBN(this.contract(contractName).wards(user))
     }
 
+    isPoolAdmin = async (user: string) => {
+      if (!this.contract('POOL_ADMIN')) return false
+      return (await this.toBN(this.contract('POOL_ADMIN').admins(user))).toNumber() === 1
+    }
+
     canUpdateNftFeed = async (user: string) => {
       if (!this.contract('FEED')?.wards) return false
       return (await this.toBN(this.contract('FEED').wards(user))).toNumber() === 1
@@ -93,8 +98,15 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     setMaximumReserve = async (value: string) => {
-      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
       return this.pending(this.contract('ASSESSOR_ADMIN').setMaxReserve(value, this.overrides))
+    }
+
+    raiseCreditline = async (amount: string) => {
+      return this.pending(this.contract('POOL_ADMIN').raiseCreditline(amount, { ...this.overrides, gasLimit: 600000 }))
+    }
+
+    sinkCreditline = async (amount: string) => {
+      return this.pending(this.contract('POOL_ADMIN').sinkCreditline(amount, { ...this.overrides, gasLimit: 600000 }))
     }
 
     setSeniorTrancheInterest = async (value: string) => {
@@ -155,6 +167,7 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
 export type IAdminActions = {
   isWard(user: string, contractName: ContractName): Promise<BN>
+  isPoolAdmin(user: string): Promise<boolean>
   canQueryPermissions(): boolean
   canUpdateNftFeed(user: string): Promise<boolean>
   canSetRiskScore(user: string): Promise<boolean>
@@ -169,6 +182,8 @@ export type IAdminActions = {
   setMinimumJuniorRatio(amount: string): Promise<PendingTransaction>
   setMaximumJuniorRatio(amount: string): Promise<PendingTransaction>
   setMaximumReserve(amount: string): Promise<PendingTransaction>
+  raiseCreditline(amount: string): Promise<PendingTransaction>
+  sinkCreditline(amount: string): Promise<PendingTransaction>
   setSeniorTrancheInterest(amount: string): Promise<PendingTransaction>
   setDiscountRate(amount: string): Promise<PendingTransaction>
   setMaturityDate(nftId: string, timestampSecs: number): Promise<PendingTransaction>
