@@ -332,6 +332,11 @@ export function loadPool(
             returns: [[`maker.creditline`, toBN]],
           },
           {
+            target: tinlake.contractAddresses.CLERK,
+            call: ['debt()(uint)'],
+            returns: [[`maker.debt`, toBN]],
+          },
+          {
             target: tinlake.contractAddresses.ASSESSOR,
             call: ['effectiveSeniorBalance()(uint)'],
             returns: [[`senior.effectiveBalance`, toBN]],
