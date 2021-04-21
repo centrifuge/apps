@@ -3,6 +3,7 @@ import { baseToDisplay, Loan } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { Pool } from '../../../config'
@@ -28,6 +29,9 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     props.loadPool && props.loadPool(props.tinlake)
   }, [])
+
+  const router = useRouter()
+  const allowMultipleBorrow = 'allowMultipleBorrow' in router.query
 
   const [status, , setTxId] = useTransactionState()
 
@@ -69,7 +73,8 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
 
   const ceilingSet = props.loan.principal.toString() !== '0'
   const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds.toString()) || '0'
-  const borrowedAlready = new BN(props.loan.debt).isZero() === false || props.loan.status !== 'NFT locked'
+  const borrowedAlready =
+    !allowMultipleBorrow && (new BN(props.loan.debt).isZero() === false || props.loan.status !== 'NFT locked')
 
   const isBlockedState = props.pool ? props.pool?.epoch?.isBlockedState : false
 
