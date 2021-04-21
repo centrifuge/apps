@@ -125,23 +125,36 @@ export function loadPool(
     const toBN = (val: BigNumber) => new BN(val.toString())
 
     const addressWatchers = address
-      ? [
-          {
-            target: tinlake.contractAddresses.SENIOR_MEMBERLIST,
-            call: ['hasMember(address)(bool)', address || '0'],
-            returns: [[`senior.inMemberlist`]],
-          },
-          {
-            target: tinlake.contractAddresses.JUNIOR_MEMBERLIST,
-            call: ['hasMember(address)(bool)', address || '0'],
-            returns: [[`junior.inMemberlist`]],
-          },
-          tinlake.contractAddresses.POOL_ADMIN && {
-            target: tinlake.contractAddresses.POOL_ADMIN,
-            call: ['admins(address)(uint256)', address || '0'],
-            returns: [[`isPoolAdmin`, (num: BigNumber) => toBN(num).toNumber() === 1]],
-          },
-        ]
+      ? tinlake.contractAddresses.POOL_ADMIN
+        ? [
+            {
+              target: tinlake.contractAddresses.SENIOR_MEMBERLIST,
+              call: ['hasMember(address)(bool)', address || '0'],
+              returns: [[`senior.inMemberlist`]],
+            },
+            {
+              target: tinlake.contractAddresses.JUNIOR_MEMBERLIST,
+              call: ['hasMember(address)(bool)', address || '0'],
+              returns: [[`junior.inMemberlist`]],
+            },
+            {
+              target: tinlake.contractAddresses.POOL_ADMIN,
+              call: ['admins(address)(uint256)', address || '0'],
+              returns: [[`isPoolAdmin`, (num: BigNumber) => toBN(num).toNumber() === 1]],
+            },
+          ]
+        : [
+            {
+              target: tinlake.contractAddresses.SENIOR_MEMBERLIST,
+              call: ['hasMember(address)(bool)', address || '0'],
+              returns: [[`senior.inMemberlist`]],
+            },
+            {
+              target: tinlake.contractAddresses.JUNIOR_MEMBERLIST,
+              call: ['hasMember(address)(bool)', address || '0'],
+              returns: [[`junior.inMemberlist`]],
+            },
+          ]
       : []
 
     const globalWatchers = [
