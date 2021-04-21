@@ -9,6 +9,7 @@ import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsDailyData, PoolsData } from '../../ducks/pools'
+import { TokenBalance } from '../../ducks/portfolio'
 import { RewardsData } from '../../ducks/rewards'
 import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
@@ -252,11 +253,10 @@ class Apollo {
   async getLoans(root: string) {
     let result
     try {
-      // TODO: root should be root.toLowerCase() once we add lowercasing to the subgraph code (after AssemblyScript is updated)
       result = await this.client.query({
         query: gql`
         {
-          pools (where : {id: "${root}"}){
+          pools (where : {id: "${root.toLowerCase()}"}){
             id
             loans {
               id
@@ -381,7 +381,7 @@ class Apollo {
       result = await this.client.query({
         query: gql`
         {
-          dailyPoolDatas(first: 1000, where:{ pool: "${root}" }) {
+          dailyPoolDatas(first: 1000, where:{ pool: "${root.toLowerCase()}" }) {
            day {
             id
           }
@@ -454,7 +454,7 @@ class Apollo {
     return poolsDailyData
   }
 
-  async getPortfolio(address: string) {
+  async getPortfolio(address: string): Promise<TokenBalance[]> {
     let result
     try {
       result = await this.client.query({
@@ -465,8 +465,8 @@ class Apollo {
               id
               symbol
             }
-            balance
-            value
+            balanceAmount
+            totalValue
             supplyAmount
             pendingSupplyCurrency
           }
@@ -475,9 +475,7 @@ class Apollo {
       })
     } catch (err) {
       console.error(`error occured while fetching portfolio data from apollo ${err}`)
-      return {
-        data: [],
-      }
+      return []
     }
 
     if (!result.data) return []
@@ -485,15 +483,15 @@ class Apollo {
     return result.data.tokenBalances.map(
       (tokenBalance: {
         token: any
-        value: string
-        balance: string
+        totalValue: string
+        balanceAmount: string
         supplyAmount: string
         pendingSupplyCurrency: string
       }) => {
         return {
           token: tokenBalance.token,
-          value: new BN(tokenBalance.value),
-          balance: new BN(tokenBalance.balance),
+          totalValue: new BN(tokenBalance.totalValue),
+          balanceAmount: new BN(tokenBalance.balanceAmount),
           supplyAmount: new BN(tokenBalance.supplyAmount),
           pendingSupplyCurrency: new BN(tokenBalance.pendingSupplyCurrency),
         }
