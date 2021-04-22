@@ -14,13 +14,18 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const coordinator = this.contract('COORDINATOR')
       const assessor = this.contract('ASSESSOR')
       const feed = this.contract('FEED')
+      const isMakerIntegrated = this.contract('CLERK') !== undefined
 
       const reserve = await this.toBN(
-        beforeClosing ? this.contract('RESERVE').totalBalance() : coordinator.epochReserve()
+        beforeClosing
+          ? isMakerIntegrated
+            ? this.contract('ASSESSOR').totalBalance()
+            : this.contract('RESERVE').totalBalance()
+          : coordinator.epochReserve()
       )
       const netAssetValue = await this.toBN(beforeClosing ? feed.approximatedNAV() : coordinator.epochNAV())
       const seniorAsset = beforeClosing
-        ? (await this.toBN(assessor.seniorDebt_())).add(await this.toBN(assessor.seniorBalance_()))
+        ? (await this.toBN(assessor.seniorDebt())).add(await this.toBN(assessor.seniorBalance()))
         : await this.toBN(coordinator.epochSeniorAsset())
 
       const minDropRatio = await this.toBN(assessor.minSeniorRatio())

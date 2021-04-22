@@ -37,6 +37,8 @@ export const checkDueAssets = async (pools: PoolMap) => {
       const loans = groupedLoans[poolId]
       console.log(`${name}: ${loans.length}`)
 
+      const currencySymbol = pool.metadata.currencySymbol || 'DAI'
+
       pushNotificationToSlack(
         pool,
         `There ${loans.length > 1 ? 'are' : 'is'} ${loans.length} ${
@@ -51,7 +53,7 @@ export const checkDueAssets = async (pools: PoolMap) => {
               type: 'mrkdwn',
               text: `*Asset ${loan.index}*\n${addThousandsSeparators(
                 toPrecision(baseToDisplay(loan.debt, 18), 0)
-              )} DAI is due on ${dateToYMD(loan.maturityDate)}.`,
+              )} ${currencySymbol}} is due on ${dateToYMD(loan.maturityDate)}.`,
             },
             accessory: {
               type: 'button',

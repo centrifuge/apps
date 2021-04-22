@@ -31,10 +31,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
       }
 
       const solution = await tinlake.runSolver(epochState, orders)
-      const solutionSum = solution.dropInvest
-        .add(solution.dropRedeem)
-        .add(solution.tinInvest)
-        .add(solution.tinRedeem)
+      const solutionSum = solution.dropInvest.add(solution.dropRedeem).add(solution.tinInvest).add(solution.tinRedeem)
 
       const fulfillment = solutionSum
         .mul(e18)
@@ -57,6 +54,8 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
         .div(newReserve.add(epochState.netAssetValue))
         .div(new BN('10').pow(new BN('14')))
 
+      const currencySymbol = pool.metadata.currencySymbol || 'DAI'
+
       if (solutionSum.eq(orderSum)) {
         // If 100% fulfillment is possible, close the epoch
 
@@ -74,7 +73,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                   type: 'mrkdwn',
                   text: `*DROP investments*\n${addThousandsSeparators(
                     toPrecision(baseToDisplay(solution.dropInvest, 18), 0)
-                  )} DAI`,
+                  )} ${currencySymbol}`,
                 },
                 {
                   type: 'mrkdwn',
@@ -86,7 +85,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                   type: 'mrkdwn',
                   text: `*TIN investments*\n${addThousandsSeparators(
                     toPrecision(baseToDisplay(solution.tinInvest, 18), 0)
-                  )} DAI`,
+                  )} ${currencySymbol}`,
                 },
                 {
                   type: 'mrkdwn',
@@ -103,15 +102,15 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                   type: 'mrkdwn',
                   text: `:cyclone: The new pool value is ${addThousandsSeparators(
                     toPrecision(baseToDisplay(newReserve.add(epochState.netAssetValue), 18), 0)
-                  )} DAI.`,
+                  )} ${currencySymbol}.`,
                 },
                 {
                   type: 'mrkdwn',
                   text: `:moneybag: The new reserve is ${addThousandsSeparators(
                     toPrecision(baseToDisplay(newReserve, 18), 0)
-                  )} DAI out of ${addThousandsSeparators(
+                  )} ${currencySymbol} out of ${addThousandsSeparators(
                     toPrecision(baseToDisplay(epochState.maxReserve, 18), 0)
-                  )} DAI max. The cash drag is ${parseFloat(cashdrag.toString()) / 100}%.`,
+                  )} ${currencySymbol} max. The cash drag is ${parseFloat(cashdrag.toString()) / 100}%.`,
                 },
                 {
                   type: 'mrkdwn',
@@ -136,8 +135,9 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
           pool,
           `Epoch ${id} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${
             pool.metadata.slug
-          }|${name}>* has orders locked and can be manually closed. ${parseFloat(fulfillment.toString()) /
-            100}% of all orders could be fulfilled.`,
+          }|${name}>* has orders locked and can be manually closed. ${
+            parseFloat(fulfillment.toString()) / 100
+          }% of all orders could be fulfilled.`,
           [
             {
               type: 'section',
@@ -146,7 +146,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                   type: 'mrkdwn',
                   text: `*DROP investments*\n${addThousandsSeparators(
                     toPrecision(baseToDisplay(orders.dropInvest, 18), 0)
-                  )} DAI`,
+                  )} ${currencySymbol}`,
                 },
                 {
                   type: 'mrkdwn',
@@ -158,7 +158,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                   type: 'mrkdwn',
                   text: `*TIN investments*\n${addThousandsSeparators(
                     toPrecision(baseToDisplay(orders.tinInvest, 18), 0)
-                  )} DAI`,
+                  )} ${currencySymbol}`,
                 },
                 {
                   type: 'mrkdwn',
@@ -175,15 +175,15 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
                   type: 'mrkdwn',
                   text: `:cyclone: The current pool value is ${addThousandsSeparators(
                     toPrecision(baseToDisplay(epochState.reserve.add(epochState.netAssetValue), 18), 0)
-                  )} DAI.`,
+                  )} ${currencySymbol}.`,
                 },
                 {
                   type: 'mrkdwn',
                   text: `:moneybag: The current reserve is ${addThousandsSeparators(
                     toPrecision(baseToDisplay(epochState.reserve, 18), 0)
-                  )} DAI out of ${addThousandsSeparators(
+                  )} ${currencySymbol} out of ${addThousandsSeparators(
                     toPrecision(baseToDisplay(epochState.maxReserve, 18), 0)
-                  )} DAI max. The cash drag is ${parseFloat(cashdrag.toString()) / 100}%.`,
+                  )} ${currencySymbol} max. The cash drag is ${parseFloat(cashdrag.toString()) / 100}%.`,
                 },
                 {
                   type: 'mrkdwn',
