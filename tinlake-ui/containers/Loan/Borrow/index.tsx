@@ -42,11 +42,20 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
     const valueToDecimal = new Decimal(baseToDisplay(borrowAmount, 18)).toFixed(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
-    const txId = await props.createTransaction(
-      `Finance Asset ${props.loan.loanId} (${formatted} ${props.poolConfig.metadata.currencySymbol || 'DAI'})`,
-      'borrow',
-      [props.tinlake, props.loan, borrowAmount]
-    )
+    let txId
+    if (new BN(props.loan.debt).isZero() === false || props.loan.status !== 'NFT locked') {
+      txId = await props.createTransaction(
+        `Finance Asset ${props.loan.loanId} (${formatted} ${props.poolConfig.metadata.currencySymbol || 'DAI'})`,
+        'borrowMultiple',
+        [props.tinlake, props.loan, borrowAmount]
+      )
+    } else {
+      txId = await props.createTransaction(
+        `Finance Asset ${props.loan.loanId} (${formatted} ${props.poolConfig.metadata.currencySymbol || 'DAI'})`,
+        'borrow',
+        [props.tinlake, props.loan, borrowAmount]
+      )
+    }
     setTxId(txId)
   }
 

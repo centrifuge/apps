@@ -508,6 +508,25 @@ export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Pro
   return tinlake.proxyLockBorrowWithdraw(proxy.toString(), loanId, amount, address!)
 }
 
+export async function borrowMultiple(tinlake: ITinlake, loan: Loan, amount: string): Promise<PendingTransaction> {
+  if (!tinlake.signer) {
+    throw new Error('Missing tinlake signer')
+  }
+
+  const { loanId } = loan
+  const address = await tinlake.signer.getAddress()
+  const proxy = loan.ownerOf
+
+  // make sure there are enough funds available
+  const availableFunds = await tinlake.getAvailableFunds()
+  if (new BN(amount).cmp(availableFunds) > 0) {
+    return loggedError({}, 'There is not enough available funds.', loanId)
+  }
+
+  // borrow with proxy
+  return tinlake.proxyBorrowWithdraw(proxy.toString(), loanId, amount, address!)
+}
+
 // repay partial loan debt
 export async function repay(tinlake: ITinlake, loan: Loan, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
