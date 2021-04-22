@@ -44,6 +44,8 @@ Below are the setup actions in order to implement this proposal:
 5. Set up a `staging.tinlake.centrifuge.io` site in Netlify
 6. Delete `production` branch and only use `main` branch going forward
 7. Remove `version` property from the [package.json](https://github.com/centrifuge/apps/blob/4547082ce44d99303af748aa503fec1f58501ee8/tinlake-ui/package.json#L4) in `tinlake-ui` directory
+8. Add corresponding site id's to Github secrets
+9. Remove Netlify Github App
 
 ## Updated Steps to Release
 
