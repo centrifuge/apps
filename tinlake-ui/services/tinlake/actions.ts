@@ -489,7 +489,7 @@ export async function getEpoch(tinlake: ITinlake, address?: string): Promise<Epo
   }
 }
 
-export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Promise<PendingTransaction> {
+export async function lockBorrowWithdraw(tinlake: ITinlake, loan: Loan, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -508,7 +508,7 @@ export async function borrow(tinlake: ITinlake, loan: Loan, amount: string): Pro
   return tinlake.proxyLockBorrowWithdraw(proxy.toString(), loanId, amount, address!)
 }
 
-export async function borrowMultiple(tinlake: ITinlake, loan: Loan, amount: string): Promise<PendingTransaction> {
+export async function borrowWithdraw(tinlake: ITinlake, loan: Loan, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
