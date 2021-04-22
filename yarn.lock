@@ -2537,10 +2537,12 @@ __metadata:
     "@types/glob": ^7
     "@types/mocha": ^5.2.7
     "@types/node": ^13.11.0
+    "@types/node-fetch": ^2
     "@types/web3-eth-abi": ^1.0.0
     bignumber.js: ^9.0.0
     buffer: ^6.0.3
     clp-wasm: ^0.0.15
+    csv-stringify: ^5.6.2
     decimal.js-light: 2.5.1
     declaration-bundler-webpack-plugin: ^1.0.3
     dotenv: ^8.2.0
@@ -2549,6 +2551,7 @@ __metadata:
     glpk.js: 3.1.2
     husky: ^4.2.3
     mocha: ^6.1.4
+    node-fetch: ^2.6.1
     nodemon: ^1.19.1
     prettier: 2.1.1
     rollup: ^1.16.3
@@ -12474,6 +12477,13 @@ __metadata:
   version: 3.0.6
   resolution: "csstype@npm:3.0.6"
   checksum: ebdca96d26e1af5604658e6876af29ac1e218750efb587684f2b2b13bb062a397b351586d285f911e6985e03112e56c2aee127d35ae7354cc7d25f3000e22556
+  languageName: node
+  linkType: hard
+
+"csv-stringify@npm:^5.6.2":
+  version: 5.6.2
+  resolution: "csv-stringify@npm:5.6.2"
+  checksum: e4a30ab9631b739b14130042f558700298856724f0674e50700198057b9d7cf0dd64097b933b6243d050139c085ba365977f80f392d863c64fe4800ce8e06023
   languageName: node
   linkType: hard
 

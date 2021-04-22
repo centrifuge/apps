@@ -12,7 +12,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
   console.log('Checking if any pools can be closed')
   for (let pool of Object.values(pools)) {
     try {
-      if (!pool.addresses) continue
+      if (!pool.addresses || !pool.metadata) continue
       const tinlake: any = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
       const id = await tinlake.getCurrentEpochId()
       const state = await tinlake.getCurrentEpochState()
