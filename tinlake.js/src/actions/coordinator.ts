@@ -15,17 +15,18 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const assessor = this.contract('ASSESSOR')
       const feed = this.contract('FEED')
       const isMakerIntegrated = this.contractAddresses['CLERK'] !== undefined
+      if (beforeClosing && isMakerIntegrated) {
+        console.error('TODO: getEpochState() doesnt work properly for Maker integrated pools')
+      }
 
+      // isMakerIntegrated ? this.contract('ASSESSOR').totalBalance() : this.contract('RESERVE').totalBalance()
       const reserve = await this.toBN(
-        beforeClosing
-          ? isMakerIntegrated
-            ? this.contract('ASSESSOR').totalBalance()
-            : this.contract('RESERVE').totalBalance()
-          : coordinator.epochReserve()
+        beforeClosing ? this.contract('RESERVE').totalBalance() : coordinator.epochReserve()
       )
       const netAssetValue = await this.toBN(beforeClosing ? feed.approximatedNAV() : coordinator.epochNAV())
+      // (await this.toBN(assessor.seniorDebt())).add(await this.toBN(assessor.seniorBalance()))
       const seniorAsset = beforeClosing
-        ? (await this.toBN(assessor.seniorDebt())).add(await this.toBN(assessor.seniorBalance()))
+        ? (await this.toBN(assessor.seniorDebt_())).add(await this.toBN(assessor.seniorBalance_()))
         : await this.toBN(coordinator.epochSeniorAsset())
 
       const minDropRatio = await this.toBN(assessor.minSeniorRatio())

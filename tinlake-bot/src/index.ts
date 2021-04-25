@@ -21,9 +21,6 @@ const run = async () => {
   // Source: https://github.com/ethers-io/ethers.js/issues/435#issuecomment-581734980
   const signerWithProvider = new NonceManager(signer.connect(provider))
 
-  await submitSolutions(pools, provider, signerWithProvider)
-  await executePools(pools, provider, signerWithProvider)
-
   console.log(`Booting Dennis 2.0 as ${signer.address}`)
   pools = await loadFromIPFS(provider)
 

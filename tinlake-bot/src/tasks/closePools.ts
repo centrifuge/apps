@@ -198,6 +198,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
       }
     } catch (e) {
       console.error(`Error caught during pool closing task: ${e}`)
+      console.trace()
     }
   }
 }
