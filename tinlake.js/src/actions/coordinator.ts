@@ -14,7 +14,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const coordinator = this.contract('COORDINATOR')
       const assessor = this.contract('ASSESSOR')
       const feed = this.contract('FEED')
-      const isMakerIntegrated = this.contract('CLERK') !== undefined
+      const isMakerIntegrated = this.contractAddresses['CLERK'] !== undefined
 
       const reserve = await this.toBN(
         beforeClosing
