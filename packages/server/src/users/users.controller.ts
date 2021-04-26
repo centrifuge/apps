@@ -4,7 +4,8 @@ import {
   Delete,
   MethodNotAllowedException,
   Get,
-  HttpCode, Param,
+  HttpCode,
+  Param,
   Post,
   Put,
   Request,
@@ -16,28 +17,37 @@ import * as speakeasy from 'speakeasy';
 import * as bcrypt from 'bcrypt';
 import { promisify } from 'util';
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
-import { TwoFaType, User, UserWithOrg } from '@centrifuge/gateway-lib/models/user';
+import {
+  LoggedInUser,
+  TwoFaType,
+  User,
+  UserWithOrg,
+} from '@centrifuge/gateway-lib/models/user';
 import { DatabaseService } from '../database/database.service';
 import config from '../config';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
-import { UserAuthGuard } from '../auth/admin.auth.guard';
+import { UserManagerAuthGuard } from '../auth/user-manager-auth.guard';
 import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators';
 import { Organization } from '@centrifuge/gateway-lib/models/organization';
 import { MailerService } from '@nestjs-modules/mailer';
+import { JwtService } from '@nestjs/jwt';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JWTPayload } from '../auth/jwt-payload.interface';
 
 @Controller()
 export class UsersController {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly centrifugeService: CentrifugeService,
+    private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
   ) {}
 
   @Post(ROUTES.USERS.loginTentative)
   @HttpCode(200)
-  async loginTentative(@Request() req): Promise<User> {
+  async loginTentative(@Request() req): Promise<LoggedInUser> {
     let { user } = req;
-    if(user.twoFAType !== TwoFaType.APP) {
+    if (user.twoFAType !== TwoFaType.APP) {
       if (!user.secret) {
         const secret = speakeasy.generateSecret();
         user = await this.upsertUser(
@@ -67,25 +77,46 @@ export class UsersController {
         console.log(e);
       }
     }
+
     return user;
   }
 
   @Post(ROUTES.USERS.login)
   @HttpCode(200)
-  async login(@Body() user: User, @Request() req): Promise<User> {
-    return req.user;
+  async login(@Request() req): Promise<LoggedInUser> {
+    const poolIds = await Promise.all(
+      req.user.schemas.map(async schema => {
+        const s = await this.databaseService.schemas.findOne({ name: schema });
+        // TODO: after migration, introduce check if poolId is ETH address format
+        return s.registries[0].tinlakePoolsMetadata?.poolId;
+      }),
+    );
+
+    const accessToken = await this.jwtService.signAsync(
+      {
+        sub: req.user.email,
+        poolIds,
+      } as JWTPayload,
+      { algorithm: 'RS256', secret: config.jwtPrivKey },
+    );
+    return {
+      user: req.user,
+      token: accessToken,
+    };
   }
 
-  @Get(ROUTES.USERS.logout)
-  async logout(@Request() req, @Response() res) {
-    req.logout();
-    return res.redirect('/');
+  @Get('/api/users/profile')
+  @UseGuards(JwtAuthGuard)
+  async profile(@Request() req): Promise<User> {
+    let { user } = req;
+    return user;
   }
 
   @Get(ROUTES.USERS.base)
-  @UseGuards(UserAuthGuard)
+  @UseGuards(JwtAuthGuard, UserManagerAuthGuard)
   async getAllUsers(@Request() request) {
-    return await this.databaseService.users.getCursor({})
+    return await this.databaseService.users
+      .getCursor({})
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -113,8 +144,10 @@ export class UsersController {
           },
           false,
         );
-      } else {
+      } else if (existingUser) {
         throw new MethodNotAllowedException('Email taken!');
+      } else {
+        throw new MethodNotAllowedException('Pending invite required!');
       }
     } else {
       if (existingUser) {
@@ -133,7 +166,7 @@ export class UsersController {
   }
 
   @Post(ROUTES.USERS.invite)
-  @UseGuards(UserAuthGuard)
+  @UseGuards(JwtAuthGuard, UserManagerAuthGuard)
   async invite(@Body() user: Partial<User>) {
     if (!config.inviteOnly) {
       throw new MethodNotAllowedException('Invite functionality not enabled!');
@@ -183,7 +216,7 @@ export class UsersController {
   }
 
   @Put(ROUTES.USERS.base)
-  @UseGuards(UserAuthGuard)
+  @UseGuards(JwtAuthGuard, UserManagerAuthGuard)
   async update(@Body() user): Promise<User> {
     const otherUserWithEmail: User = await this.databaseService.users.findOne({
       email: user.email.toLowerCase(),
@@ -200,8 +233,8 @@ export class UsersController {
   }
 
   @Delete(`${ROUTES.USERS.base}/:id`)
-  @UseGuards(UserAuthGuard)
-  async remove( @Param() params): Promise<number> {
+  @UseGuards(JwtAuthGuard, UserManagerAuthGuard)
+  async remove(@Param() params): Promise<number> {
     return await this.databaseService.users.remove({
       _id: params.id,
     });

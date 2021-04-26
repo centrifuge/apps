@@ -1,21 +1,28 @@
-import { Body, Controller, Post, Request } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
 import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { FundingRequest } from '@centrifuge/gateway-lib/models/funding-request';
-import { UserapiFundingRequest, UserapiFundingResponse } from '@centrifuge/gateway-lib/centrifuge-node-client';
+import {
+  UserapiFundingRequest,
+  UserapiFundingResponse,
+} from '@centrifuge/gateway-lib/centrifuge-node-client';
 import { FundingSignatureRequest } from '@centrifuge/gateway-lib/models/funding-request';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller()
+@UseGuards(JwtAuthGuard)
 export class FundingController {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly centrifugeService: CentrifugeService,
-  ) {
-  }
+  ) {}
 
   @Post(ROUTES.FUNDING.sign)
-  async sign(@Body() payload: FundingSignatureRequest, @Request() req): Promise<UserapiFundingResponse | null> {
+  async sign(
+    @Body() payload: FundingSignatureRequest,
+    @Request() req,
+  ): Promise<UserapiFundingResponse | null> {
     const signatureResponse = await this.centrifugeService.funding.signFundingAgreement(
       req.user.account,
       payload.document_id,
@@ -31,8 +38,10 @@ export class FundingController {
   }
 
   @Post(ROUTES.FUNDING.base)
-  async create(@Body() fundingRequest: FundingRequest, @Request() req): Promise<UserapiFundingResponse | null> {
-
+  async create(
+    @Body() fundingRequest: FundingRequest,
+    @Request() req,
+  ): Promise<UserapiFundingResponse | null> {
     const payload: UserapiFundingRequest = {
       data: {
         amount: fundingRequest.amount.toString(),
@@ -47,7 +56,8 @@ export class FundingController {
       },
     };
 
-    if (fundingRequest.nft_address) payload.data.nft_address = fundingRequest.nft_address;
+    if (fundingRequest.nft_address)
+      payload.data.nft_address = fundingRequest.nft_address;
 
     const fundingResponse = await this.centrifugeService.funding.createFundingAgreement(
       req.user.account,

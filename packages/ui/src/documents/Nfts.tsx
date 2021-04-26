@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useContext } from 'react';
 import { useMergeState } from '../hooks';
 import { httpClient } from '../http-client';
 import { Modal } from '@centrifuge/axis-modal';
@@ -16,6 +16,8 @@ import MintNftForm, { MintNftFormData } from './MintNftForm';
 import { Contact } from '@centrifuge/gateway-lib/src/models/contact';
 import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client';
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
+import { AuthContext } from '../auth/Auth';
+import { goToHomePage } from '../utils/goToHomePage';
 
 type Props = {
   onAsyncStart?: (message: string) => void;
@@ -55,6 +57,8 @@ export const Nfts: FunctionComponent<Props> = props => {
     ...props,
   };
 
+  const { token } = useContext(AuthContext);
+
   const mintNFT = async (id: string, data: MintNftFormData) => {
     closeModal();
 
@@ -62,14 +66,17 @@ export const Nfts: FunctionComponent<Props> = props => {
       onMintStart();
       onAsyncComplete(
         (
-          await httpClient.nfts.mint({
-            document_id: id,
-            deposit_address: data.deposit_address,
-            proof_fields: data.registry!.proofs,
-            registry_address: data.registry!.address,
-            asset_manager_address: data.registry!.asset_manager_address,
-            oracle_address: data.registry!.oracle_address,
-          })
+          await httpClient.nfts.mint(
+            {
+              document_id: id,
+              deposit_address: data.deposit_address,
+              proof_fields: data.registry!.proofs,
+              registry_address: data.registry!.address,
+              asset_manager_address: data.registry!.asset_manager_address,
+              oracle_address: data.registry!.oracle_address,
+            },
+            token!,
+          )
         ).data,
       );
     } catch (e) {
@@ -121,6 +128,10 @@ export const Nfts: FunctionComponent<Props> = props => {
       ? getAddressLink('0x44a0579754D6c94e7bB2c26bFA7394311Cc50Ccb')
       : getAddressLink('0x3ba4280217e78a0eaea612c1502fc2e92a7fe5d7');
   };
+
+  if (!token) {
+    goToHomePage();
+  }
 
   const mintActions = !viewMode
     ? [

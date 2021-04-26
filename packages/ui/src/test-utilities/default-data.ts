@@ -21,6 +21,8 @@ export const defaultUser: User = {
   schemas: ['first_schema', 'second_schema'],
 };
 
+export const defaultToken: string = 'test'
+
 export const defaultContacts: Contact[] = [
   {
     name: 'First Contact',

@@ -61,7 +61,13 @@ export default class MintNftForm extends React.Component<Props> {
     });
 
     const initialValues: MintNftFormData = {
-      registry: { label: registries[0].label, address: registries[0].address, asset_manager_address: registries[0].asset_manager_address, oracle_address: registries[0].oracle_address, proofs: registries[0].proofs },
+      registry: {
+        label: registries[0].label,
+        address: registries[0].address,
+        asset_manager_address: registries[0].asset_manager_address,
+        oracle_address: registries[0].oracle_address,
+        proofs: registries[0].proofs
+      },
       deposit_address: '',
     };
 

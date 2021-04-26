@@ -25,13 +25,13 @@ Gateway requires a Centrifuge Node to run. Either connect via VPN to a deployed 
 #### Connect with deployed Amber node
 
 ```
-NODE_ENV=production REACT_APP_AUTO_LOGIN=false ETH_NETWORK=kovan ETH_PROVIDER=https://kovan.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5 CENTRIFUGE_URL=http://34.89.251.225:8082 CENTRIFUGE_ADMIN_ACCOUNT=0x0A735602a357802f553113F5831FE2fbf2F0E2e0 yarn start
+NODE_ENV=development REACT_APP_DISABLE_2FA=true REACT_APP_ADMIN_USER=gateway@centrifuge.io REACT_APP_ADMIN_PASSWORD=admin ETH_NETWORK=kovan ETH_PROVIDER=https://kovan.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5 CENTRIFUGE_URL=http://34.89.251.225:8082 CENTRIFUGE_ADMIN_ACCOUNT=0x0A735602a357802f553113F5831FE2fbf2F0E2e0 yarn start
 ```
 
 #### Connect with local node
 
 ```
-REACT_APP_AUTO_LOGIN=true ETH_NETWORK=kovan ETH_PROVIDER=https://kovan.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5 CENTRIFUGE_URL=http://127.0.0.1:8082 CENTRIFUGE_ADMIN_ACCOUNT=0x0A735602a357802f553113F5831FE2fbf2F0E2e0 yarn start
+NODE_ENV=development REACT_APP_DISABLE_2FA=true REACT_APP_ADMIN_USER=gateway@centrifuge.io REACT_APP_ADMIN_PASSWORD=admin ETH_NETWORK=kovan ETH_PROVIDER=https://kovan.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5 CENTRIFUGE_URL=http://127.0.0.1:8082 CENTRIFUGE_ADMIN_ACCOUNT=0x0A735602a357802f553113F5831FE2fbf2F0E2e0 yarn start
 ```
 
 ## Using `Centrifuge Gateway`

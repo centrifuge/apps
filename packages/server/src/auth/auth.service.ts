@@ -10,6 +10,22 @@ export class AuthService {
   constructor(private readonly database: DatabaseService) {}
 
   /**
+   * Checks that a user/password pair exists in the database without verifying password
+   * @async
+   * @param {string} usernameValue
+   *
+   * @return {Promise<User|null>} promise - a promise with the validation results. If successful
+   * will return the user, otherwise it returns null.
+   */
+  async validateUserByEmail(email: string): Promise<User | null> {
+    const databaseUser: User = await this.database.users.findOne({
+      email,
+    });
+    if (!databaseUser || !databaseUser.enabled) return null;
+    return databaseUser;
+  }
+
+  /**
    * Checks that a user/password pair exists in the database
    * @async
    * @param {string} usernameValue
@@ -30,7 +46,6 @@ export class AuthService {
       passwordValue,
       databaseUser.password,
     );
-
     return passwordMatch ? databaseUser : null;
   }
 

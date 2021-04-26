@@ -24,12 +24,12 @@ import {
   NftStatus,
 } from '@centrifuge/gateway-lib/models/document';
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
-import { SessionGuard } from '../auth/SessionGuard';
 import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes';
 import { merge } from 'lodash';
 import { User } from '@centrifuge/gateway-lib/models/user';
 import TypeEnum = CoreapiAttributeResponse.TypeEnum;
 import SchemeEnum = CoreapiDocumentResponse.SchemeEnum;
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 export class CommitResp {
   commitResult: Document;
@@ -37,7 +37,7 @@ export class CommitResp {
 }
 
 @Controller(ROUTES.DOCUMENTS)
-@UseGuards(SessionGuard)
+@UseGuards(JwtAuthGuard)
 export class DocumentsController {
   constructor(
     private readonly databaseService: DatabaseService,

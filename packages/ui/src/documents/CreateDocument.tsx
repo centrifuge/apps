@@ -20,11 +20,12 @@ import {
   NOTIFICATION,
   NotificationContext,
 } from '../components/NotificationContext';
-import { AppContext } from '../App';
+import { AuthContext } from '../auth/Auth';
 import { useMergeState } from '../hooks';
 import { PageError } from '../components/PageError';
 import { AxiosError } from 'axios';
 import { HARDCODED_FIELDS } from '@centrifuge/gateway-lib/utils/constants';
+import { goToHomePage } from '../utils/goToHomePage';
 
 type Props = RouteComponentProps;
 
@@ -53,7 +54,7 @@ export const CreateDocument: FunctionComponent<Props> = props => {
   } = props;
 
   const notification = useContext(NotificationContext);
-  const { user } = useContext(AppContext);
+  const { user, token } = useContext(AuthContext);
 
   const displayPageError = useCallback(
     error => {
@@ -67,11 +68,14 @@ export const CreateDocument: FunctionComponent<Props> = props => {
   const loadData = useCallback(async () => {
     setState({});
     try {
-      const contacts = (await httpClient.contacts.list()).data;
+      const contacts = (await httpClient.contacts.list(token!)).data;
       const schemas = (
-        await httpClient.schemas.list({
-          archived: { $exists: false, $ne: true },
-        })
+        await httpClient.schemas.list(
+          {
+            archived: { $exists: false, $ne: true },
+          },
+          token!,
+        )
       ).data;
       setState({
         contacts,
@@ -80,7 +84,7 @@ export const CreateDocument: FunctionComponent<Props> = props => {
     } catch (e) {
       displayPageError(e);
     }
-  }, [setState, displayPageError]);
+  }, [setState, displayPageError, token]);
 
   useEffect(() => {
     loadData();
@@ -104,28 +108,33 @@ export const CreateDocument: FunctionComponent<Props> = props => {
       };
 
       if (document.template && document.template !== '') {
-        createResult = (await httpClient.documents.clone(document)).data;
+        createResult = (await httpClient.documents.clone(document, token!))
+          .data;
       } else {
-        createResult = (await httpClient.documents.create(document)).data;
+        createResult = (await httpClient.documents.create(document, token!))
+          .data;
       }
       push(documentRoutes.index);
 
-      await httpClient.documents.commit(createResult._id!);
+      await httpClient.documents.commit(createResult._id!, token!);
 
-      const result = await httpClient.documents.create({
-        document_id: createResult.header!.document_id,
-        header: createResult.header,
-        attributes: {
-          ...createResult.attributes,
-          [HARDCODED_FIELDS.ASSET_IDENTIFIER]: {
-            type: 'bytes',
-            value: createResult.header!.document_id,
-          } as any,
+      const result = await httpClient.documents.create(
+        {
+          document_id: createResult.header!.document_id,
+          header: createResult.header,
+          attributes: {
+            ...createResult.attributes,
+            [HARDCODED_FIELDS.ASSET_IDENTIFIER]: {
+              type: 'bytes',
+              value: createResult.header!.document_id,
+            } as any,
+          },
+          template: createResult.template,
         },
-        template: createResult.template,
-      });
+        token!,
+      );
 
-      await httpClient.documents.commit(result.data._id!);
+      await httpClient.documents.commit(result.data._id!, token!);
     } catch (e) {
       console.error(e);
 
@@ -144,6 +153,10 @@ export const CreateDocument: FunctionComponent<Props> = props => {
   if (error) return <PageError error={error} />;
 
   const availableSchemas = mapSchemaNames(user!.schemas, schemas);
+
+  if (!token) {
+    goToHomePage();
+  }
 
   return (
     <DocumentForm

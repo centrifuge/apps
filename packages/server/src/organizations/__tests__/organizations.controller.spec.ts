@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException } from '@nestjs/common';
 import { OrganizationsController } from '../organizations.controller';
-import { SessionGuard } from '../../auth/SessionGuard';
 import { databaseServiceProvider } from '../../database/database.providers';
 import { DatabaseService } from '../../database/database.service';
 import { Organization } from '@centrifuge/gateway-lib/models/organization';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
 // tslint:disable-next-line:no-var-requires
 const delay = require('util').promisify(setTimeout);
@@ -29,7 +29,7 @@ describe('OrganizationController', () => {
   beforeEach(async () => {
     organizationsModule = await Test.createTestingModule({
       controllers: [OrganizationsController],
-      providers: [SessionGuard, databaseServiceProvider],
+      providers: [JwtAuthGuard, databaseServiceProvider],
     }).compile();
 
     const databaseService = organizationsModule.get<DatabaseService>(

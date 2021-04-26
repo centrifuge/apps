@@ -5,7 +5,7 @@ import { Redirect, RouteComponentProps, withRouter } from 'react-router';
 import { TwoFaType, User } from '@centrifuge/gateway-lib/models/user';
 import routes from '../routes';
 import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants';
-import { AppContext } from '../App';
+import { AuthContext } from '../auth/Auth';
 import { httpClient } from '../http-client';
 import TwoFAForm from './TwoFAForm';
 import { Box } from 'grommet';
@@ -15,12 +15,17 @@ type Props = {} & RouteComponentProps;
 const LoginPage: FunctionComponent<Props> = props => {
   const [error, setError] = useState<Error>();
   const [loginCandidate, setLoginCandidate] = useState<User>();
-  const { user, setUser } = useContext(AppContext);
+  const { user, setUser, setToken } = useContext(AuthContext);
 
   const login = async (loginCandidate: User) => {
     try {
-      const user = await httpClient.user.login(loginCandidate);
-      setUser(user.data);
+      const data = await httpClient.user.login({
+        email: loginCandidate.email,
+        password: loginCandidate.password || '',
+        token: loginCandidate.token,
+      });
+      setUser(data.data.user);
+      setToken(data.data.token);
     } catch (e) {
       setError(e);
     }
@@ -28,8 +33,12 @@ const LoginPage: FunctionComponent<Props> = props => {
 
   const loginTentative = async (loginCandidate: User) => {
     try {
-      const result = (await httpClient.user.loginTentative(loginCandidate))
-        .data;
+      const result = (
+        await httpClient.user.loginTentative({
+          email: loginCandidate.email,
+          password: loginCandidate.password || '',
+        })
+      ).data.user;
       setLoginCandidate({
         ...result,
         ...loginCandidate,
@@ -77,7 +86,14 @@ const LoginPage: FunctionComponent<Props> = props => {
             onSubmit={login}
           />
         ) : (
-          <LoginForm error={error} onSubmit={loginTentative} />
+          <LoginForm
+            error={error}
+            onSubmit={
+              process.env.REACT_APP_DISABLE_2FA === 'true'
+                ? login
+                : loginTentative
+            }
+          />
         )}
       </Box>
     </Box>

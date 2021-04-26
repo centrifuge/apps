@@ -3,13 +3,15 @@ import { databaseServiceProvider } from '../../database/database.providers';
 import { User, UserWithOrg } from '../../../../lib/models/user';
 import config from '../../config';
 import { Test, TestingModule } from '@nestjs/testing';
-import { SessionGuard } from '../../auth/SessionGuard';
 import { DatabaseService } from '../../database/database.service';
 import { PERMISSIONS } from '../../../../lib/utils/constants';
 import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module';
 import { testingHelpers } from '../../mocks/centrifuge-client.mock';
 import { MailerService } from '@nestjs-modules/mailer';
 import { MailerServiceMock } from '../../mocks/mailer-service.mock';
+import { JwtService } from '@nestjs/jwt';
+import { JwtServiceMock } from '../../mocks/jwt-service.mock';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
 describe('Users controller', () => {
   let invitedUser: User;
@@ -20,9 +22,13 @@ describe('Users controller', () => {
     userModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [
-        SessionGuard,
+        JwtAuthGuard,
         centrifugeServiceProvider,
         databaseServiceProvider,
+        {
+          provide: JwtService,
+          useValue: new JwtServiceMock(),
+        },
         {
           provide: MailerService,
           useValue: new MailerServiceMock(),
@@ -68,23 +74,6 @@ describe('Users controller', () => {
       invited: false,
       schemas: ['some_schema'],
       permissions: [PERMISSIONS.CAN_MANAGE_DOCUMENTS],
-    });
-  });
-
-  describe('logout', () => {
-    it('should call request logout', async () => {
-      const usersController = userModule.get<UsersController>(UsersController);
-
-      const request = {
-        logout: jest.fn(),
-      };
-
-      const response = {
-        redirect: jest.fn(),
-      };
-      await usersController.logout(request, response);
-      expect(request.logout).toHaveBeenCalledTimes(1);
-      expect(response.redirect).toHaveBeenCalledWith('/');
     });
   });
 
@@ -217,7 +206,7 @@ describe('Users controller', () => {
           usersController.register(notInvitedUser),
         ).rejects.toMatchObject({
           message: {
-            message: 'Email taken!',
+            message: 'Pending invite required!',
           },
         });
       });
@@ -402,9 +391,7 @@ describe('Users controller', () => {
     };
 
     const insertedUser = await usersController.invite(newUser);
-    const result = await usersController.remove(
-      { id: insertedUser._id }
-    );
+    const result = await usersController.remove({ id: insertedUser._id });
     expect(result).toBe(1);
   });
 });

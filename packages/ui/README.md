@@ -14,3 +14,15 @@ Then:
 cd packages/ui
 NODE_ENV=production REACT_APP_AUTO_LOGIN=false yarn start
 ```
+
+## Skip/disable two factor authentication 2FA
+
+```
+REACT_APP_DISABLE_2FA=true yarn start
+```
+
+## Automatically log in user
+
+```
+REACT_APP_ADMIN_USER=gateway@centrifuge.io REACT_APP_ADMIN_PASSWORD=admin yarn start
+```

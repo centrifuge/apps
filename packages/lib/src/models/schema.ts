@@ -17,7 +17,12 @@ export interface Attribute {
 
 export interface Registry {
   label: string,
+  // TODO: replace this, assemble pool url from pool id and pool slug
   tinlakePool?: string,
+  tinlakePoolsMetadata?: {
+    poolId: string,
+    poolSlug: string,
+  }
   address: string,
   asset_manager_address: string
   proofs: Array<string>
@@ -145,6 +150,10 @@ export class Schema {
         {
           label: 'registry_name',
           tinlakePool: 'https://kovan.staging.tinlake.centrifuge.io/0xbb53072d054de55d56dbb4ee95840de3262e4097',
+          tinlakePoolsMetadata:{
+            poolId: '',
+            poolSlug: '',
+          },
           address: '0x0000000000000000000000000000000000000000',
           asset_manager_address: '0x0000000000000000000000000000000000000000',
           oracle_address:'0x0000000000000000000000000000000000000000',

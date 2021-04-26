@@ -71,7 +71,7 @@ dist
 .idea
 
 #database
-db
+# db
 
 #osx
 packages/*/.DS_Store

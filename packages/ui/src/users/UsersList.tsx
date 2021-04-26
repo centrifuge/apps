@@ -26,7 +26,8 @@ import {
 import { AxiosError } from 'axios';
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
 import { Organization } from '@centrifuge/gateway-lib/models/organization';
-import { AppContext } from '../App';
+import { AuthContext } from '../auth/Auth';
+import { goToHomePage } from '../utils/goToHomePage';
 
 type State = {
   loadingMessage: string | null;
@@ -64,7 +65,7 @@ const UsersList: FunctionComponent = () => {
   });
 
   const notification = useContext(NotificationContext);
-  const { user } = useContext(AppContext);
+  const { user, token } = useContext(AuthContext);
 
   const displayPageError = useCallback(
     error => {
@@ -81,8 +82,8 @@ const UsersList: FunctionComponent = () => {
       loadingMessage: 'Loading',
     });
     try {
-      const organizations = (await httpClient.organizations.list()).data;
-      const users = (await httpClient.user.list()).data.map(user => {
+      const organizations = (await httpClient.organizations.list(token!)).data;
+      const users = (await httpClient.user.list(token!)).data.map(user => {
         const org = organizations.find(
           o => o.account?.toLowerCase() === user.account?.toLowerCase(),
         );
@@ -94,9 +95,12 @@ const UsersList: FunctionComponent = () => {
       });
 
       const schemas = (
-        await httpClient.schemas.list({
-          archived: { $exists: false, $ne: true },
-        })
+        await httpClient.schemas.list(
+          {
+            archived: { $exists: false, $ne: true },
+          },
+          token!,
+        )
       ).data;
 
       setState({
@@ -109,7 +113,7 @@ const UsersList: FunctionComponent = () => {
     } catch (e) {
       displayPageError(e);
     }
-  }, [setState, displayPageError]);
+  }, [setState, displayPageError, token]);
 
   useEffect(() => {
     loadData();
@@ -152,7 +156,7 @@ const UsersList: FunctionComponent = () => {
       setState({
         loadingMessage: 'Deleting user',
       });
-      await httpClient.user.delete(user);
+      await httpClient.user.delete(user, token!);
       await loadData();
     } catch (e) {
       notification.alert({
@@ -184,7 +188,7 @@ const UsersList: FunctionComponent = () => {
         userFormOpened: false,
         loadingMessage: context.loadingMessage,
       });
-      await httpClient.user[context.method](user);
+      await httpClient.user[context.method](user, token!);
       await loadData();
     } catch (e) {
       notification.alert({
@@ -198,6 +202,10 @@ const UsersList: FunctionComponent = () => {
       });
     }
   };
+
+  if (!token) {
+    goToHomePage();
+  }
 
   const renderUsers = (data, schemas) => {
     return (
@@ -300,7 +308,10 @@ const UsersList: FunctionComponent = () => {
               <Box direction="row" gap="small">
                 <Anchor label={'Edit'} onClick={() => openUserForm(data)} />
                 {user?.email !== data.email && (
-                  <Anchor label={'Delete'} onClick={() => confirmUserDelete(data)} />
+                  <Anchor
+                    label={'Delete'}
+                    onClick={() => confirmUserDelete(data)}
+                  />
                 )}
               </Box>
             ),
@@ -342,14 +353,17 @@ const UsersList: FunctionComponent = () => {
         title={'Delete User'}
         onClose={closeDeleteConfirmation}
       >
-        <Box margin={{ vertical: 'medium' }} >
-          <p>Are you sure you want to delete user <strong>{selectedUser.name}</strong>?</p>
+        <Box margin={{ vertical: 'medium' }}>
+          <p>
+            Are you sure you want to delete user{' '}
+            <strong>{selectedUser.name}</strong>?
+          </p>
         </Box>
-        <Box  direction="row" justify={'between'} gap={'medium'}>
+        <Box direction="row" justify={'between'} gap={'medium'}>
           <Button label="Discard" onClick={closeDeleteConfirmation} />
           <Button
             type="submit"
-            onClick={() =>onUserDelete(selectedUser)}
+            onClick={() => onUserDelete(selectedUser)}
             primary
             label={'Delete user'}
           />

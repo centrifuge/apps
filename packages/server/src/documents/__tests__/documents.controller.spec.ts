@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Document } from '../../../../lib/models/document';
-import { SessionGuard } from '../../auth/SessionGuard';
 import { databaseServiceProvider } from '../../database/database.providers';
 import { DatabaseService } from '../../database/database.service';
 import { DocumentsController } from '../documents.controller';
@@ -12,6 +11,7 @@ import {
 } from '@centrifuge/gateway-lib/centrifuge-node-client';
 import TypeEnum = V2SignedAttributeRequest.TypeEnum;
 import { RegistriesErrors } from '@centrifuge/gateway-lib/models/schema';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
 describe('DocumentsController', () => {
   let documentsModule: TestingModule;
@@ -67,7 +67,7 @@ describe('DocumentsController', () => {
     documentsModule = await Test.createTestingModule({
       controllers: [DocumentsController],
       providers: [
-        SessionGuard,
+        JwtAuthGuard,
         centrifugeServiceProvider,
         databaseServiceProvider,
       ],

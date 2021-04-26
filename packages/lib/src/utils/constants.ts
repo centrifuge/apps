@@ -7,6 +7,7 @@ const userRoutes = {
   base: baseUsersRoute,
   login: `${baseUsersRoute}/login`,
   loginTentative: `${baseUsersRoute}/login-tentative`,
+  profile: `${baseUsersRoute}/profile`,
   logout: `${baseUsersRoute}/logout`,
   invite: `${baseUsersRoute}/invite`,
   register: `${baseUsersRoute}/register`,

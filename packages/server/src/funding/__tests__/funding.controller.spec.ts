@@ -1,12 +1,11 @@
 import { FundingController } from '../funding.controller';
 import { databaseServiceProvider } from '../../database/database.providers';
 import { Test, TestingModule } from '@nestjs/testing';
-import { SessionGuard } from '../../auth/SessionGuard';
 import { DatabaseService } from '../../database/database.service';
 import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
 describe('Funding controller', () => {
-
   const invoice: any = {
     sender: '0x111',
     recipient: '0x112',
@@ -23,12 +22,11 @@ describe('Funding controller', () => {
     fundingModule = await Test.createTestingModule({
       controllers: [FundingController],
       providers: [
-        SessionGuard,
+        JwtAuthGuard,
         centrifugeServiceProvider,
         databaseServiceProvider,
       ],
-    })
-      .compile();
+    }).compile();
 
     const databaseService = fundingModule.get<DatabaseService>(DatabaseService);
     insertedInvoice = await databaseService.documents.insert({
@@ -38,12 +36,10 @@ describe('Funding controller', () => {
       data: { ...invoice },
       ownerId: 'user_id',
     });
-
   });
 
   describe('create', () => {
     it('should return the created funding agreement', async () => {
-
       const fundingRequest = {
         document_id: '0x39393939',
         funder_id: 'funder',
@@ -63,10 +59,9 @@ describe('Funding controller', () => {
         FundingController,
       );
 
-      const result = await fundingController.create(
-        fundingRequest,
-        { user: { _id: 'user_id', account: '0xCentrifugeId' } },
-      );
+      const result = await fundingController.create(fundingRequest, {
+        user: { _id: 'user_id', account: '0xCentrifugeId' },
+      });
 
       expect(result).toEqual({
         header: {
@@ -84,14 +79,12 @@ describe('Funding controller', () => {
           },
           signatures: ['signature_data_1'],
         },
-
       });
     });
   });
 
   describe('sign', () => {
     it('should return the signed funding agreement', async () => {
-
       const fundingRequest = {
         document_id: '0x39393939',
         agreement_id: 'agreement_id',
@@ -101,10 +94,9 @@ describe('Funding controller', () => {
         FundingController,
       );
 
-      const result = await fundingController.sign(
-        fundingRequest,
-        { user: { _id: 'user_id', account: '0xCentrifugeId' } },
-      );
+      const result = await fundingController.sign(fundingRequest, {
+        user: { _id: 'user_id', account: '0xCentrifugeId' },
+      });
       expect(result).toEqual({
         header: {
           job_id: 'some_job_id',
