@@ -18,6 +18,9 @@ import { MemberlistService } from './services/memberlist.service'
 import { PoolService } from './services/pool.service'
 import { SessionService } from './services/session.service'
 import { SyncService } from './services/sync.service'
+import { SentryModule } from '@ntegral/nestjs-sentry'
+import { LogLevel } from '@sentry/types'
+import config from './config'
 
 // TODO: separate into modules
 const databaseProviders = [DatabaseService, UserRepo, AddressRepo, KycRepo, AgreementRepo, InvestmentRepo]
@@ -32,7 +35,18 @@ const serviceProviders = [
 const taskProviders = [SyncService]
 
 @Module({
-  imports: [ScheduleModule.forRoot()],
+  imports: config.sentryDsn
+    ? [
+        SentryModule.forRoot({
+          dsn: 'sentry_io_dsn',
+          debug: false,
+          environment: 'production',
+          release: null, // must create a release in sentry.io dashboard
+          logLevel: LogLevel.Debug, //based on sentry.io loglevel //
+        }),
+        ScheduleModule.forRoot(),
+      ]
+    : [ScheduleModule.forRoot()],
   controllers: [AppController, AddressController, KycController, AgreementController, UserController],
   providers: [...databaseProviders, ...serviceProviders, ...taskProviders],
 })

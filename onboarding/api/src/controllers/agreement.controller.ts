@@ -92,7 +92,9 @@ export class AgreementController {
   @Post('docusign/connect')
   async postDocusignConnect(@Body() content: DocusignConnectDto): Promise<string> {
     const envelopeId = content.envelopeId
-    console.log(`Received Docusign Connect message for envelope ID ${envelopeId}`)
+    console.log(`Received Docusign Connect message for envelope ID ${envelopeId}, status is ${content.status}`)
+
+    // TODO: if content.status is declined, agreementRepo.setDeclinedAt(agreementId)
 
     const agreement = await this.agreementRepo.findByProvider('docusign', envelopeId)
     if (!agreement) throw new NotFoundException(`Agreement for docusign envelope id ${envelopeId} not found`)

@@ -29,6 +29,11 @@ export class SyncService {
     processingInvestors.forEach(async (kyc: KycEntity) => {
       const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
 
+      if (!investor) {
+        console.log(`Failed to retrieve investor status for user ${kyc.userId}`)
+        return
+      }
+
       await this.userRepo.update(
         kyc.userId,
         investor.email,
@@ -37,8 +42,9 @@ export class SyncService {
         investor.domainInvestorDetails?.entityName
       )
 
+      // Skip manual-review because we are not saving that separately, so it will be the status processing
       if (
-        (investor && investor.verificationStatus !== kyc.status) ||
+        (investor && investor.verificationStatus !== kyc.status && investor.verificationStatus !== 'manual-review') ||
         investor.domainInvestorDetails.isAccredited !== kyc.accredited
       ) {
         this.logger.debug(
