@@ -150,59 +150,61 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
       {isMakerIntegrated && (
         <MakerBox round="xsmall" gap="small" elevation="small" background="#1AAB9B">
           <Box direction="row">
-            <MakerLogo>
-              <img src="/static/maker-logo.svg" />
-            </MakerLogo>
-            <Box pad={{ top: '8px;' }} direction="row">
-              This pool is directly integrated with a Maker vault for liquidity. &nbsp;
-              <Details onClick={() => setOpen(!open)} direction="row">
-                <h2>Show details</h2>
-                <Caret>
-                  <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
-                </Caret>
-              </Details>
+            <Box basis="2/3" direction="row">
+              <MakerLogo>
+                <img src="/static/maker-logo.svg" />
+              </MakerLogo>
+              <Box pad={{ top: '8px;' }} style={{ fontWeight: 'bold' }} direction="row">
+                This pool is directly integrated with a Maker vault for liquidity. &nbsp;
+                <Details onClick={() => setOpen(!open)} direction="row">
+                  <h2>Show details</h2>
+                  <Caret>
+                    <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
+                  </Caret>
+                </Details>
+              </Box>
             </Box>
-            <MakerMetric margin={{ left: 'auto' }} style={{ borderRight: '1px solid #fff' }}>
-              <h3>Current Debt</h3>
-              <h2>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.debt || new BN(0), 18), 0))}{' '}
-                <MakerUnit>DAI</MakerUnit>{' '}
-              </h2>
-            </MakerMetric>
-            <MakerMetric style={{ borderRight: '1px solid #fff' }}>
-              <h3>Debt Ceiling</h3>
-              <h2>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.line || new BN(0), 45 + 6), 0))}M{' '}
-                <MakerUnit>DAI</MakerUnit>
-              </h2>
-            </MakerMetric>
-            <MakerMetric>
-              <h3>Stability Fee (APY)</h3>
-              <h2>
-                {toPrecision(feeToInterestRateCompounding(poolData?.maker?.duty || '0'), 2)} <MakerUnit>%</MakerUnit>
-              </h2>
-            </MakerMetric>
+            <Box basis="1/3" direction="row">
+              <MakerMetric style={{ borderRight: '1px solid #fff' }}>
+                <h3>Current Debt</h3>
+                <h2>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.debt || new BN(0), 18), 0))}{' '}
+                  <MakerUnit>DAI</MakerUnit>{' '}
+                </h2>
+              </MakerMetric>
+              <MakerMetric style={{ borderRight: '1px solid #fff' }}>
+                <h3>Debt Ceiling</h3>
+                <h2>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.line || new BN(0), 45 + 6), 0))}M{' '}
+                  <MakerUnit>DAI</MakerUnit>
+                </h2>
+              </MakerMetric>
+              <MakerMetric>
+                <h3>Stability Fee (APY)</h3>
+                <h2>
+                  {toPrecision(feeToInterestRateCompounding(poolData?.maker?.duty || '0'), 2)} <MakerUnit>%</MakerUnit>
+                </h2>
+              </MakerMetric>
+            </Box>
           </Box>
           {open && (
-            <Box direction="row" gap="large" margin={{ bottom: 'small', top: 'small' }}>
-              <Box basis="2/3">
-                <div>
-                  Centrifuge and Maker complement each other and together they manage to efficiently bridge the already
-                  existing — regulated — world to a trustless system (DeFi). Centrifuge on the one side has been working
-                  meticulously with traditional SMEs and financial institutions to come up with the best infrastructure
-                  to connect the two protocols. We’ve built an integration that is founded on transparency, efficiency
-                  and trustless collaboration. On the other side Maker governance made it possible to provide instant
-                  liquidity at a minimal cost of capital to the asset originator when financing their assets.&nbsp;
-                  &nbsp;
+            <Box direction="row" margin={{ bottom: 'small' }}>
+              <Box basis="2/3" direction="row">
+                <div style={{ width: '75%', lineHeight: '1.8em' }}>
+                  For this pool Maker provides a revolving line of credit against real-world assets as collateral. The
+                  direct integration allows the Asset Originator to lock up DROP as collateral in a Maker vault, draw
+                  DAI in return and use it to finance new originations. The credit line is capped at the debt ceiling
+                  set by Maker governance. This provides instant liquidity for the Asset Originator. &nbsp; &nbsp;
                   <a
                     href="https://medium.com/centrifuge/defi-2-0-first-real-world-loan-is-financed-on-maker-fbe24675428f"
                     target="_blank"
                   >
-                    Continue reading
+                    Read more
                   </a>
                 </div>
+                <Box></Box>
               </Box>
-              <Box basis="1/3">
+              <Box basis="1/3" margin={{ top: 'xsmall' }}>
                 <Table>
                   <TableBody>
                     <TableRow>
@@ -211,7 +213,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
                         pad={{ top: '0', bottom: '12px' }}
                         border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
                       >
-                        DROP Collateral Balance
+                        Collateral Balance
                       </TableCell>
                       <TableCell
                         style={{ textAlign: 'end' }}
@@ -230,7 +232,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
                         border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
                         pad={{ vertical: '12px' }}
                       >
-                        DROP Collateral Price
+                        Collateral Value
                       </TableCell>
                       <TableCell
                         style={{ textAlign: 'end' }}
@@ -252,7 +254,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
                         border={{ color: 'transparent' }}
                         pad={{ vertical: '12px' }}
                       >
-                        {parseFloat(makerDebtUtilization.toString()) / 100} %
+                        {parseFloat((makerDebtUtilization || new BN(0)).toString()) / 100} %
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -330,7 +332,7 @@ const MakerLogo = styled.div`
 `
 
 const MakerMetric = styled(Box)`
-  padding: 0 24px 0 10px;
+  padding: 0 32px 0 18px;
   h3 {
     margin: 0;
     font-size: 12px;
@@ -338,6 +340,10 @@ const MakerMetric = styled(Box)`
   h2 {
     margin: 0;
     font-size: 16px;
+  }
+
+  &:first-child {
+    padding-left: 0;
   }
 
   &:last-child {

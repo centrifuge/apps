@@ -56,13 +56,13 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
       const formatted = addThousandsSeparators(valueToDecimal.toString())
 
       if (new BN(creditlineValue).gt(new BN(currentCreditline))) {
-        const txId = await props.createTransaction(`Increase creditline to ${formatted}`, 'raiseCreditline', [
+        const txId = await props.createTransaction(`Increase credit line to ${formatted}`, 'raiseCreditline', [
           props.tinlake,
           amount.toString(),
         ])
         setCreditlineTxId(txId)
       } else {
-        const txId = await props.createTransaction(`Lower creditline to ${formatted}`, 'sinkCreditline', [
+        const txId = await props.createTransaction(`Lower credit line to ${formatted}`, 'sinkCreditline', [
           props.tinlake,
           amount.toString(),
         ])
@@ -117,7 +117,7 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
       {mat && (
         <>
           <Heading level="5" margin={{ top: 'large', bottom: '0' }}>
-            Set Maker creditline
+            Set Maker credit line
           </Heading>
           <Description margin={{ top: 'small' }}>
             This will lock in the required TIN for overcollateralization.
