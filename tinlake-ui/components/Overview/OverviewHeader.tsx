@@ -8,6 +8,7 @@ import {
 } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { FormDown } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -17,7 +18,6 @@ import { ensureAuthed } from '../../ducks/auth'
 import { PoolData, PoolState } from '../../ducks/pool'
 import InvestAction from '../InvestAction'
 import { Tooltip } from '../Tooltip'
-import { FormDown } from 'grommet-icons'
 
 interface Props {
   tinlake: ITinlake
