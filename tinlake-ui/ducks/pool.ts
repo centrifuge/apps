@@ -341,6 +341,11 @@ export function loadPool(
             call: ['effectiveSeniorBalance()(uint)'],
             returns: [[`senior.effectiveBalance`, toBN]],
           },
+          {
+            target: tinlake.contractAddresses.SENIOR_TOKEN,
+            call: ['balanceOf(address)(uint)', tinlake.contractAddresses.MAKER_MGR],
+            returns: [[`maker.dropBalance`, toBN]],
+          },
         ]
       : []
 
