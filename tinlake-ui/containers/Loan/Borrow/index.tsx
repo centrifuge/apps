@@ -3,6 +3,7 @@ import { baseToDisplay, Loan } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { Pool } from '../../../config'
@@ -29,6 +30,9 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
     props.loadPool && props.loadPool(props.tinlake)
   }, [])
 
+  const router = useRouter()
+  const allowMultipleBorrow = 'allowMultipleBorrow' in router.query
+
   const [status, , setTxId] = useTransactionState()
 
   const borrow = async () => {
@@ -38,9 +42,14 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
     const valueToDecimal = new Decimal(baseToDisplay(borrowAmount, 18)).toFixed(4)
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
+    const action =
+      new BN(props.loan.debt).isZero() === false || props.loan.status !== 'NFT locked'
+        ? 'borrowWithdraw'
+        : 'lockBorrowWithdraw'
+
     const txId = await props.createTransaction(
       `Finance Asset ${props.loan.loanId} (${formatted} ${props.poolConfig.metadata.currencySymbol || 'DAI'})`,
-      'borrow',
+      action,
       [props.tinlake, props.loan, borrowAmount]
     )
     setTxId(txId)
@@ -69,7 +78,8 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
 
   const ceilingSet = props.loan.principal.toString() !== '0'
   const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds.toString()) || '0'
-  const borrowedAlready = new BN(props.loan.debt).isZero() === false || props.loan.status !== 'NFT locked'
+  const borrowedAlready =
+    !allowMultipleBorrow && (new BN(props.loan.debt).isZero() === false || props.loan.status !== 'NFT locked')
 
   const isBlockedState = props.pool ? props.pool?.epoch?.isBlockedState : false
 

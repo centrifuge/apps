@@ -145,17 +145,10 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
               Learn more
             </a>
           </Box>
-          {/* <MakerMetric style={{ borderRight: '1px solid #fff' }}>
-            <h3>Remaining credit</h3>
-            <h2>
-              {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.remainingCredit || new BN(0), 18), 0))}{' '}
-              <MakerUnit>DAI</MakerUnit>{' '}
-            </h2>
-          </MakerMetric> */}
           <MakerMetric margin={{ left: 'auto' }} style={{ borderRight: '1px solid #fff' }}>
             <h3>Current Debt</h3>
             <h2>
-              {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.art || new BN(0), 18), 0))}{' '}
+              {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.debt || new BN(0), 18), 0))}{' '}
               <MakerUnit>DAI</MakerUnit>{' '}
             </h2>
           </MakerMetric>
