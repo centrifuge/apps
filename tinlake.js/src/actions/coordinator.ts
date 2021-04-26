@@ -84,6 +84,11 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       }
     }
 
+    closeEpoch = async () => {
+      const coordinator = this.contract('COORDINATOR')
+      return this.pending(coordinator.closeEpoch({ ...this.overrides, gasLimit: 3000000 }))
+    }
+
     solveEpoch = async () => {
       const coordinator = this.contract('COORDINATOR')
 
@@ -272,6 +277,7 @@ export type ICoordinatorActions = {
   getOrders(beforeClosing?: boolean): Promise<Orders>
   getSolverWeights(): Promise<SolverWeights>
   solveEpoch(): Promise<PendingTransaction>
+  closeEpoch(): Promise<PendingTransaction>
   executeEpoch(): Promise<PendingTransaction>
   getCurrentEpochId(): Promise<number>
   getLatestBlockTimestamp(): Promise<number>

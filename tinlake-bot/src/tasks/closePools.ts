@@ -18,7 +18,10 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
       const state = await tinlake.getCurrentEpochState()
       const name = pool.metadata.shortName || pool.metadata.name
 
-      if (state !== 'can-be-closed') continue
+      if (state !== 'can-be-closed') {
+        console.log(`${name} cannot be closed yet`)
+        continue
+      }
 
       const epochState = await tinlake.getEpochState(true)
       const orders = await tinlake.getOrders(true)
@@ -58,9 +61,8 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
 
       if (solutionSum.eq(orderSum)) {
         // If 100% fulfillment is possible, close the epoch
-
-        const solveTx = await tinlake.solveEpoch()
-        console.log(`Closing & solving ${name} with tx: ${solveTx.hash}`)
+        const closeTx = await tinlake.closeEpoch()
+        console.log(`Closing ${name} with tx: ${closeTx.hash}`)
 
         pushNotificationToSlack(
           pool,
@@ -123,11 +125,12 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
           ],
           {
             title: 'View on Etherscan',
-            url: `${config.etherscanUrl}/tx/${solveTx.hash}`,
+            url: `${config.etherscanUrl}/tx/${closeTx.hash}`,
           }
         )
       } else {
         // Otherwise, just notify the team
+        console.log(`${name} cannot be fulfilled 100%`)
         const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
         const tinRatio = e27.sub(epochState.seniorAsset.mul(e27).div(epochState.netAssetValue.add(epochState.reserve)))
         const minTinRatio = e27.sub(epochState.maxDropRatio)
