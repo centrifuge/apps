@@ -9,6 +9,7 @@ import Apollo from '../services/apollo'
 import { getOnboard, initOnboard } from '../services/onboard'
 import { getTinlake } from '../services/tinlake'
 import { networkIdToName } from '../utils/networkNameResolver'
+import { useQueryDebugEthAddress } from '../utils/useQueryDebugEthAddress'
 
 // Actions
 const CLEAR = 'tinlake-ui/auth/CLEAR'
@@ -131,8 +132,7 @@ export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: Auth
     const { auth } = getState()
     let onboard = getOnboard()
 
-    const urlParams = new URLSearchParams(window.location.search)
-    const debugAddress = urlParams.get('debug_eth_address')
+    const debugAddress = useQueryDebugEthAddress()
 
     // onboard is already initialized, only ensure values are correct and return
     if (onboard) {
