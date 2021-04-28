@@ -62,7 +62,7 @@ jobs:
           NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.amber.centrifuge.io/'
           NEXT_PUBLIC_POOL_REGISTRY: '0x8FE85CeAe6157C1dfcDD1c5ec99361c9722d97de'
           NEXT_PUBLIC_POOLS_CONFIG: 'kovanStaging'
-          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmYAgaJi8YGok3Q26RLBqEq7fhPtcLRBCAndVXJ6KWnQCg'
+          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmbfkbZckfc3QLMTNN4X97NXh31NqjfRSxbRgQ2ivE7uhd'
           NEXT_PUBLIC_PORTIS_KEY: 'bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f'
           NEXT_PUBLIC_REWARDS_TREE_URL: 'https://storage.googleapis.com/rad-rewards-trees-kovan-staging/latest.json'
           NEXT_PUBLIC_RPC_URL: 'https://kovan.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5'
