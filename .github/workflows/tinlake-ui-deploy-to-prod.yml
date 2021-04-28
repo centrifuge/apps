@@ -18,6 +18,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Get Yarn Cache Directory Path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Cache Node Modules
+        id: yarn-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Cache Next.js Bundle
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/tinlake-ui/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}
+
       - name: Setup Node
         uses: actions/setup-node@v2-beta
         with:
@@ -55,12 +74,11 @@ jobs:
         with:
           deploy-message: ${{ github.event.head_commit.message }}
           enable-commit-comment: false
-          functions-dir: 'functions'
+          functions-dir: ./tinlake-ui/functions
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          netlify-config-path: ./netlify.toml
-          production-branch: production
+          netlify-config-path: ./tinlake-ui/netlify.toml
           production-deploy: true
-          publish-dir: 'out'
+          publish-dir: ./tinlake-ui/out
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
           NETLIFY_SITE_ID: ${{ secrets.TINLAKE_UI_PROD_NETLIFY_SITE_ID }}
