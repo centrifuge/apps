@@ -10,6 +10,10 @@ jobs:
   build-and-deploy-to-kovan:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: tinlake-ui
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -20,13 +24,13 @@ jobs:
           node-version: '12'
 
       - name: Install Dependencies
-        run: cd tinlake-ui && yarn
+        run: yarn
 
       - name: Lint
-        run: cd tinlake-ui && yarn lint
+        run: yarn lint
 
       - name: Build
-        run: cd tinlake-ui && yarn export
+        run: yarn export
         env:
           NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL: 'wss://fullnode.amber.centrifuge.io'
           NEXT_PUBLIC_CLAIM_CFG_CONTRACT_ADDRESS: '0x297237e17F327f8e5C8dEd78b15761A7D513353b'
@@ -72,6 +76,10 @@ jobs:
   build-and-deploy-to-mainnet:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: tinlake-ui
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -82,13 +90,13 @@ jobs:
           node-version: '12'
 
       - name: Install Dependencies
-        run: cd tinlake-ui && yarn
+        run: yarn
 
       - name: Lint
-        run: cd tinlake-ui && yarn lint
+        run: yarn lint
 
       - name: Build
-        run: cd tinlake-ui && yarn export
+        run: yarn export
         env:
           NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL: 'wss://fullnode.centrifuge.io'
           NEXT_PUBLIC_CLAIM_CFG_CONTRACT_ADDRESS: '0x1cA3B2E7FfCAF83d9228a64e4726402B1d5CC054'
