@@ -1,8 +1,8 @@
 name: 'tinlake-ui Pull Request'
 on:
-  [pull_request]
-  # paths:
-  # - 'tinlake-ui/**'
+  pull_request:
+    paths:
+      - 'tinlake-ui/**'
 
 jobs:
   build-and-deploy:
