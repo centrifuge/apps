@@ -36,6 +36,19 @@ type State = {
   schemas: Schema[];
 };
 
+function templateEmpty(template: string | undefined): boolean {
+  if (template === undefined) {
+    return true;
+  }
+  if (template === '') {
+    return true;
+  }
+  if (template === '0x0000000000000000000000000000000000000000') {
+    return true;
+  }
+  return false;
+}
+
 export const CreateDocument: FunctionComponent<Props> = props => {
   const [
     { defaultDocument, contacts, schemas, error },
@@ -107,11 +120,11 @@ export const CreateDocument: FunctionComponent<Props> = props => {
         },
       };
 
-      if (document.template && document.template !== '') {
-        createResult = (await httpClient.documents.clone(document, token!))
+      if (templateEmpty(document.template)) {
+        createResult = (await httpClient.documents.create(document, token!))
           .data;
       } else {
-        createResult = (await httpClient.documents.create(document, token!))
+        createResult = (await httpClient.documents.clone(document, token!))
           .data;
       }
       push(documentRoutes.index);

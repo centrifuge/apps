@@ -98,9 +98,17 @@ export const httpClient = {
         authHeader(token),
       ),
     archive: async (id: string, token: string) =>
-      instance.put(`${ROUTES.SCHEMAS}/${id}/archive`, authHeader(token)),
+      instance.put(
+        `${ROUTES.SCHEMAS}/${id}/archive`,
+        undefined,
+        authHeader(token),
+      ),
     restore: async (id: string, token: string) =>
-      instance.put(`${ROUTES.SCHEMAS}/${id}/restore`, authHeader(token)),
+      instance.put(
+        `${ROUTES.SCHEMAS}/${id}/restore`,
+        undefined,
+        authHeader(token),
+      ),
   },
   documents: {
     create: async (document: Document, token: string) =>
@@ -123,7 +131,11 @@ export const httpClient = {
         authHeader(token),
       ),
     commit: async (id: string, token: string) =>
-      instance.put(`${ROUTES.DOCUMENTS}/${id}/commit`, authHeader(token)),
+      instance.put(
+        `${ROUTES.DOCUMENTS}/${id}/commit`,
+        undefined,
+        authHeader(token),
+      ),
   },
   nfts: {
     mint: async (payload: MintNftRequest, token: string) =>
