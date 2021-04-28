@@ -176,7 +176,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                               style={{ alignItems: 'start', justifyContent: 'center' }}
                               pad={{ vertical: '6px' }}
                             >
-                              <span>Maker creditline</span>
+                              <span>Maker credit line</span>
                             </TableCell>
                             <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                               <LoadingValue done={poolData?.reserve !== undefined} height={39}>
