@@ -8,7 +8,7 @@ import WrongNetwork from '../WrongNetwork'
 
 interface Props {
   tinlake: ITinlake
-  render: (auth?: AuthState) => JSX.Element
+  render: (auth: AuthState) => JSX.Element
   auth?: AuthState
   load?: (tinlake: ITinlake, debugAddress: string | null) => Promise<void>
 }
