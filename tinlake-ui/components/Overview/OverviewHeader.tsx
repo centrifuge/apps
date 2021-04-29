@@ -40,15 +40,17 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 
   const [open, setOpen] = React.useState(false)
 
-  const makerDropCollateralValue = poolData?.maker
-    ? poolData?.maker?.dropBalance.mul(poolData.senior!.tokenPrice).div(new BN(10).pow(new BN(27)))
-    : undefined
-  const makerDebtUtilization = poolData?.maker
-    ? poolData?.maker?.debt
-        .mul(new BN(10).pow(new BN(45)))
-        .div(poolData?.maker?.line)
-        .div(new BN(10).pow(new BN(14)))
-    : undefined
+  const makerDropCollateralValue =
+    poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
+      ? poolData?.maker?.dropBalance.mul(poolData.senior!.tokenPrice).div(new BN(10).pow(new BN(27)))
+      : undefined
+  const makerDebtUtilization =
+    poolData?.maker && poolData?.maker?.dropBalance
+      ? poolData?.maker?.debt
+          .mul(new BN(10).pow(new BN(45)))
+          .div(poolData?.maker?.line)
+          .div(new BN(10).pow(new BN(14)))
+      : undefined
 
   React.useEffect(() => {
     if (address && awaitingConnect) {
