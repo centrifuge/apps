@@ -28,6 +28,7 @@ import { IpfsPools, Pool } from '../../config'
 import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
 import { loadPortfolio, PortfolioState, TokenBalance } from '../../ducks/portfolio'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
+import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
 
 interface Props {
   ipfsPools: IpfsPools
@@ -40,7 +41,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
   const portfolio = useSelector<any, PortfolioState>((state) => state.portfolio)
 
   const connectedAddress = useSelector<any, string | null>((state) => state.auth.address)
-  const address = 'address' in router.query ? (router.query.address as string) : connectedAddress
+  const address = useQueryDebugEthAddress() || connectedAddress
 
   React.useEffect(() => {
     dispatch(loadPools(props.ipfsPools))
