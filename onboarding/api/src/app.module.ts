@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
+import { SentryModule } from '@ntegral/nestjs-sentry'
+import { LogLevel } from '@sentry/types'
 import { AppController } from './app.controller'
+import config from './config'
 import { AddressController } from './controllers/address.controller'
 import { AgreementController } from './controllers/agreement.controller'
 import { KycController } from './controllers/kyc.controller'
@@ -18,9 +21,6 @@ import { MemberlistService } from './services/memberlist.service'
 import { PoolService } from './services/pool.service'
 import { SessionService } from './services/session.service'
 import { SyncService } from './services/sync.service'
-import { SentryModule } from '@ntegral/nestjs-sentry'
-import { LogLevel } from '@sentry/types'
-import config from './config'
 
 // TODO: separate into modules
 const databaseProviders = [DatabaseService, UserRepo, AddressRepo, KycRepo, AgreementRepo, InvestmentRepo]
