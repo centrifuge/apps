@@ -9,6 +9,8 @@ const MAX_GASPRICE_AGE = 10 * 60 * 1000 // 10 mins
 /**
  * This signer blocks the same transaction from being sent twice, and retries transactions with higher gas prices over time.
  * It uses gas prices from the GasNow API, initially standard and increasing to fast for retries.
+ *
+ * TODO: use gasnow price standard on the first sendTransaction already
  */
 class RetryingSigner extends ethers.Signer {
   readonly signer: ethers.Signer

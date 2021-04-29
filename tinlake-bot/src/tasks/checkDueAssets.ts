@@ -64,7 +64,7 @@ export const checkDueAssets = async (pools: PoolMap) => {
               type: 'mrkdwn',
               text: `*Asset ${loan.index}*\n${addThousandsSeparators(
                 toPrecision(baseToDisplay(loan.debt, 18), 0)
-              )} ${currencySymbol}} is due on ${dateToYMD(loan.maturityDate)}.`,
+              )} ${currencySymbol} is due on ${dateToYMD(loan.maturityDate)}.`,
             },
             accessory: {
               type: 'button',
