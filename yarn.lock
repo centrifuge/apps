@@ -2579,7 +2579,6 @@ __metadata:
     "@nestjs/platform-express": ^7.5.1
     "@nestjs/schedule": ^0.4.1
     "@nestjs/schematics": ^7.1.3
-    "@ntegral/nestjs-sentry": ^2.0.6
     "@sentry/node": ^6.3.1
     "@types/cookie-parser": ^1
     "@types/cron": ^1.7.2
@@ -2590,6 +2589,7 @@ __metadata:
     cookie-parser: ^1.4.5
     ethers: 5.0.23
     i18n-iso-countries: ^6.5.0
+    nest-raven: ^7.2.0
     postgres: 2.0.0-beta.2
     postgres-shift: ^0.0.4
     prettier-plugin-organize-imports: ^1.1.1
@@ -4756,7 +4756,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/graphql@npm:^7.9.9":
+"@nestjs/graphql@npm:^6.2.4 || ^7.0.0":
   version: 7.10.6
   resolution: "@nestjs/graphql@npm:7.10.6"
   dependencies:
@@ -5069,24 +5069,6 @@ __metadata:
     mkdirp: ^1.0.4
     rimraf: ^3.0.2
   checksum: 8a6e0c2f16b57c70f72a75c800cb8f1f50efe213a289dca67a7bc58f4c4097108bd7ac3986bf331d5a0174bd17e078a822a992c170857780e1d765ad9293fc48
-  languageName: node
-  linkType: hard
-
-"@ntegral/nestjs-sentry@npm:^2.0.6":
-  version: 2.0.6
-  resolution: "@ntegral/nestjs-sentry@npm:2.0.6"
-  dependencies:
-    "@nestjs/graphql": ^7.9.9
-  peerDependencies:
-    "@nestjs/common": ^7.6.12
-    "@nestjs/core": ^7.6.12
-    "@sentry/node": ^6.1.0
-    reflect-metadata: ^0.1.13
-    rxjs: ^6.5.4
-  dependenciesMeta:
-    "@nestjs/graphql":
-      optional: true
-  checksum: ab784eb9e9728d3215ae093ee5024bc858d268741fcae606174184fda84be9504e9b7a9e64c467b34248afcebdeb46fda379d99e85d6d93b5fd3c137bf2b08d7
   languageName: node
   linkType: hard
 
@@ -5734,6 +5716,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/core@npm:6.3.4":
+  version: 6.3.4
+  resolution: "@sentry/core@npm:6.3.4"
+  dependencies:
+    "@sentry/hub": 6.3.4
+    "@sentry/minimal": 6.3.4
+    "@sentry/types": 6.3.4
+    "@sentry/utils": 6.3.4
+    tslib: ^1.9.3
+  checksum: 9ff5525fc9255b9bdd0601d1244ab2d9be9948a1d02f7689f02c51c3dca51efb7d3c2f6dcd7156a62b600fdebe3e30b03e54769ebc9d75e15a08a462a929f816
+  languageName: node
+  linkType: hard
+
 "@sentry/hub@npm:5.30.0":
   version: 5.30.0
   resolution: "@sentry/hub@npm:5.30.0"
@@ -5756,6 +5751,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/hub@npm:6.3.4":
+  version: 6.3.4
+  resolution: "@sentry/hub@npm:6.3.4"
+  dependencies:
+    "@sentry/types": 6.3.4
+    "@sentry/utils": 6.3.4
+    tslib: ^1.9.3
+  checksum: 27ee9c688f9269507b25bb4b827fc305daa9b62027947f754a2f44242eedc5b0313f119091648df604e0fb318bcc166defbf06ef40dd3d9986d8455b0d43d1b0
+  languageName: node
+  linkType: hard
+
 "@sentry/minimal@npm:5.30.0":
   version: 5.30.0
   resolution: "@sentry/minimal@npm:5.30.0"
@@ -5775,6 +5781,34 @@ __metadata:
     "@sentry/types": 6.3.1
     tslib: ^1.9.3
   checksum: c6cb76401de11ea0ac23876e43c0b5c43cda056435adb94f19bd9e57344de60060bcecd766dd1cf09cd81bc6ef0d2131fe967a95cedafa2529632adb81abab58
+  languageName: node
+  linkType: hard
+
+"@sentry/minimal@npm:6.3.4, @sentry/minimal@npm:^6.0.4":
+  version: 6.3.4
+  resolution: "@sentry/minimal@npm:6.3.4"
+  dependencies:
+    "@sentry/hub": 6.3.4
+    "@sentry/types": 6.3.4
+    tslib: ^1.9.3
+  checksum: 13f2dcfd5be5e1f0af5f308a9d462ca55be3eee9986919eab070ad26caa80c491dea472c3564ee5b4e98e48ccbe4215ee7f79f9ec5dc2ac4956eecdd6d74f091
+  languageName: node
+  linkType: hard
+
+"@sentry/node@npm:^6.0.4":
+  version: 6.3.4
+  resolution: "@sentry/node@npm:6.3.4"
+  dependencies:
+    "@sentry/core": 6.3.4
+    "@sentry/hub": 6.3.4
+    "@sentry/tracing": 6.3.4
+    "@sentry/types": 6.3.4
+    "@sentry/utils": 6.3.4
+    cookie: ^0.4.1
+    https-proxy-agent: ^5.0.0
+    lru_map: ^0.3.3
+    tslib: ^1.9.3
+  checksum: 259d5e59e322ee45829cb2f9a90ebf6d6c5a65f59ac09f1df9aa41c1aa160efbe048b1a19c0f746ee237dfe3df0caf5da189e8b4b9ed3423940f0ff2ac15324e
   languageName: node
   linkType: hard
 
@@ -5825,6 +5859,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/tracing@npm:6.3.4":
+  version: 6.3.4
+  resolution: "@sentry/tracing@npm:6.3.4"
+  dependencies:
+    "@sentry/hub": 6.3.4
+    "@sentry/minimal": 6.3.4
+    "@sentry/types": 6.3.4
+    "@sentry/utils": 6.3.4
+    tslib: ^1.9.3
+  checksum: edeb3db1b5f518b5591b7bc43a479f6ac7e86c4d52e3279a9125fcc7e909b9886d6fb86564a3e8f82c0cbc256cd1e9d7b4608292e4d191ae9920ac71d07746aa
+  languageName: node
+  linkType: hard
+
 "@sentry/tracing@npm:^5.26.0":
   version: 5.30.0
   resolution: "@sentry/tracing@npm:5.30.0"
@@ -5852,6 +5899,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/types@npm:6.3.4":
+  version: 6.3.4
+  resolution: "@sentry/types@npm:6.3.4"
+  checksum: b9be2f5355dcedf9606cabec7954d8d7f9f4f15c77e761be20884a524fafad80eda80ac979fbc92e5cb434ec6bb269c660b5537d0bf0a861cf126b21890a6e12
+  languageName: node
+  linkType: hard
+
 "@sentry/utils@npm:5.30.0":
   version: 5.30.0
   resolution: "@sentry/utils@npm:5.30.0"
@@ -5869,6 +5923,16 @@ __metadata:
     "@sentry/types": 6.3.1
     tslib: ^1.9.3
   checksum: 3ae84b1fc75580b7eac4c9e4abcd937f3573b256c6ce5c6ba66116a7e40d315540b252563361d148beb75fafcb1758458666408b3108eb0d69e827e0d42ab0b2
+  languageName: node
+  linkType: hard
+
+"@sentry/utils@npm:6.3.4":
+  version: 6.3.4
+  resolution: "@sentry/utils@npm:6.3.4"
+  dependencies:
+    "@sentry/types": 6.3.4
+    tslib: ^1.9.3
+  checksum: 2c9e5ce2e207b0d6e066848a6a7eaf5bf83f5b83e4b4ed1714ad36e7029a70ec6b4a20f623cdc00338fafd67a44e112c7c3f1fb5bc070993c59213bad3a013cf
   languageName: node
   linkType: hard
 
@@ -23262,6 +23326,24 @@ fsevents@~2.1.2:
   version: 2.6.2
   resolution: "neo-async@npm:2.6.2"
   checksum: 34a8f5309135be258a97082af810ea43700a3e0121e7b1ea31b3e22e2663d7c0d502cd949abb6d1ab8c11abfd04500ee61721ec5408b2d4bef8105241fd8a4c2
+  languageName: node
+  linkType: hard
+
+"nest-raven@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "nest-raven@npm:7.2.0"
+  dependencies:
+    "@nestjs/graphql": ^6.2.4 || ^7.0.0
+    "@sentry/minimal": ^6.0.4
+    "@sentry/node": ^6.0.4
+  peerDependencies:
+    "@nestjs/common": ^7.0.0
+    reflect-metadata: ^0.1.12
+    rxjs: ^6.4.0
+  dependenciesMeta:
+    "@nestjs/graphql":
+      optional: true
+  checksum: 01117b044c0c4a4ce7e97c6f2a5c0e41a99ff9b573015d0adde6a83388f10f0f8f152b57fb0d725b3b361c76a3c8b801e19316cea041674dce7dc30736450995
   languageName: node
   linkType: hard
 
