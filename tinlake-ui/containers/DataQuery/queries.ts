@@ -1,10 +1,12 @@
 import { fortunaFiDailyInvestorBalances } from './fortunaFiDailyInvestorBalances'
 import { poolList } from './poolList'
+import { assetList } from './assetList'
 
 export type Query = () => Promise<void>
 
 const queries: { [name: string]: Query } = {
   'Pool list': poolList,
+  'Asset list': assetList,
   'FortunaFi Daily Investor Balances': fortunaFiDailyInvestorBalances,
 }
 

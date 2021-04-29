@@ -25,6 +25,7 @@ export class AddressRepo {
       select *
       from addresses
       where addresses.user_id = ${userId}
+      and addresses.unlinked_at is null
     `
 
     if (!data) return []
@@ -92,6 +93,19 @@ export class AddressRepo {
 
     return updatedAddress as AddressEntity | undefined
   }
+
+  async unlink(userId: string, address: string): Promise<AddressEntity | undefined> {
+    const [updatedAddress] = await this.db.sql`
+      update addresses
+      set unlinked_at = now()
+      where addresses.address = ${address}
+      and addresses.user_id = ${userId}
+
+      returning *
+    `
+
+    return updatedAddress as AddressEntity | undefined
+  }
 }
 
 export type Blockchain = 'ethereum'
@@ -104,4 +118,5 @@ export type AddressEntity = {
   network: Network
   address: string
   createdAt: Date
+  unlinkedAt?: Date
 }
