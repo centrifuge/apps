@@ -38,7 +38,7 @@ jobs:
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}
 
       - name: Setup Node
-        uses: actions/setup-node@v2-beta
+        uses: actions/setup-node@v2
         with:
           node-version: '12'
 
@@ -117,7 +117,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Setup Node
-        uses: actions/setup-node@v2-beta
+        uses: actions/setup-node@v2
         with:
           node-version: '12'
 
