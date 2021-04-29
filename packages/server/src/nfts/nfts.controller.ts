@@ -11,6 +11,7 @@ import { DatabaseService } from '../database/database.service';
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
 import { CoreapiMintNFTRequest } from '@centrifuge/gateway-lib/centrifuge-node-client';
 import {
+  Document,
   DocumentRequest,
   NftStatus,
 } from '@centrifuge/gateway-lib/models/document';
@@ -42,7 +43,7 @@ export class NftsController {
       proof_fields: body.proof_fields,
       deposit_address: body.deposit_address,
     };
-    const docFromDb: any = await this.databaseService.documents.update(
+    const docsFromDb = (await this.databaseService.documents.update(
       { 'header.document_id': docId },
       {
         $set: {
@@ -53,7 +54,7 @@ export class NftsController {
         multi: true,
         returnUpdatedDocs: true,
       },
-    );
+    )) as Document[];
 
     let mintingResult;
     try {
@@ -108,7 +109,9 @@ export class NftsController {
 
     if (
       !body.oracle_address ||
-      body.oracle_address === '0x0000000000000000000000000000000000000000'
+      body.oracle_address === '0x0000000000000000000000000000000000000000' ||
+      !docsFromDb[0]?.template ||
+      docsFromDb[0]?.template === '0x0000000000000000000000000000000000000000'
     ) {
       console.log('not pushing to oracle', mintingResult);
       return;

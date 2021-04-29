@@ -83,5 +83,5 @@ export const createDocumentCollaborators = (collaborators: Collaborator[]) => {
 };
 
 export const canLoadDocument = (document: Document) => {
-  return document._id && document.nft_status !== NftStatus.Minting;
+  return document._id && document.document_status !== DocumentStatus.Creating;
 };
