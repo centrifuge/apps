@@ -9,7 +9,6 @@ import Apollo from '../services/apollo'
 import { getOnboard, initOnboard } from '../services/onboard'
 import { getTinlake } from '../services/tinlake'
 import { networkIdToName } from '../utils/networkNameResolver'
-import { useQueryDebugEthAddress } from '../utils/useQueryDebugEthAddress'
 
 // Actions
 const CLEAR = 'tinlake-ui/auth/CLEAR'
@@ -127,12 +126,13 @@ export default function reducer(state: AuthState = initialState, action: AnyActi
 // navigation event between pages, which discards the redux state, but does not discard onboard. Putting onboard into
 // the state would work, but it would lead to two sources of truth. Consequently, we keep onboard as an external
 // stateful API here and manually sync values over on load.
-export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+export function load(
+  tinlake: ITinlake,
+  debugAddress: string | null
+): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const { auth } = getState()
     let onboard = getOnboard()
-
-    const debugAddress = useQueryDebugEthAddress()
 
     // onboard is already initialized, only ensure values are correct and return
     if (onboard) {
