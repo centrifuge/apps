@@ -22,7 +22,7 @@ export class SyncService {
     private readonly userRepo: UserRepo
   ) {}
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async syncKycStatus() {
     const processingInvestors = await this.kycRepo.getProcessingInvestors()
     if (processingInvestors.length === 0) return
@@ -30,6 +30,11 @@ export class SyncService {
     this.logger.debug(`Syncing ${processingInvestors.length} investors`)
     processingInvestors.forEach(async (kyc: KycEntity) => {
       const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
+
+      if (!investor) {
+        console.log(`Failed to retrieve investor status for user ${kyc.userId}`)
+        return
+      }
 
       await this.userRepo.update(
         kyc.userId,
@@ -39,8 +44,9 @@ export class SyncService {
         investor.domainInvestorDetails?.entityName
       )
 
+      // Skip manual-review because we are not saving that separately, so it will be the status processing
       if (
-        (investor && investor.verificationStatus !== kyc.status) ||
+        (investor && investor.verificationStatus !== kyc.status && investor.verificationStatus !== 'manual-review') ||
         investor.domainInvestorDetails.isAccredited !== kyc.accredited
       ) {
         this.logger.debug(
@@ -85,9 +91,9 @@ export class SyncService {
     const missedInvestors = await this.addressRepo.getMissingWhitelistedUsers()
     console.log(`Whitelisting ${missedInvestors.length} missed investors.`)
 
-    missedInvestors.forEach((investor) => {
-      this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
-    })
+    for (let investor of missedInvestors) {
+      await this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
+    }
   }
 
   // @Cron(CronExpression.EVERY_HOUR)

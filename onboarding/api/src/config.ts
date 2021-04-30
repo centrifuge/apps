@@ -8,6 +8,7 @@ export interface Config {
     port: number
     password: string
   }
+  sentryDsn: string | undefined
   ipfsGateway: string
   tinlakeUiHost: string
   onboardApiHost: string
@@ -45,6 +46,7 @@ const config: Config = {
     port: Number(process.env.DB_PORT),
     password: process.env.DB_PASSWORD,
   },
+  sentryDsn: process.env.SENTRY_DSN,
   ipfsGateway: process.env.IPFS_GATEWAY,
   tinlakeUiHost: process.env.TINLAKE_UI_HOST,
   onboardApiHost: process.env.ONBOARD_API_HOST,
