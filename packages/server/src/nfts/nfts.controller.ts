@@ -99,19 +99,19 @@ export class NftsController {
       console.log(e);
       return;
     }
-    /*
+    /**
      * TODO Improve handling for push to oracle. We can have an NFT and fail to push it
      * In this case we should not remint just repush the oracle.
      * Maybe we can use to document Status to have something like ready for funding?
      * Now the docuent gets blocked becase we have a Minted status and the user
      * can not edit
-     * */
+     */
 
     if (
       !body.oracle_address ||
       body.oracle_address === '0x0000000000000000000000000000000000000000' ||
-      !docsFromDb[0]?.template ||
-      docsFromDb[0]?.template === '0x0000000000000000000000000000000000000000'
+      !body.template ||
+      body.template === '0x0000000000000000000000000000000000000000'
     ) {
       console.log('not pushing to oracle', mintingResult);
       return;

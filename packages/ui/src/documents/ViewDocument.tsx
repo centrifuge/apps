@@ -172,6 +172,7 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
           onAsyncError={displayModalError}
           document={document!}
           contacts={contacts}
+          template={selectedSchema!.template}
           registries={selectedSchema!.registries}
         />
 

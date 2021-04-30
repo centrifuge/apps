@@ -214,6 +214,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
           viewMode={!canMint}
           document={document!}
           contacts={contacts}
+          template={selectedSchema!.template}
           registries={selectedSchema!.registries}
         />
 

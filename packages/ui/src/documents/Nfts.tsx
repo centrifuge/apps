@@ -28,6 +28,7 @@ type Props = {
   contacts: Contact[];
   registries: Registry[];
   viewMode: boolean;
+  template: string;
 };
 
 type State = {
@@ -50,6 +51,7 @@ export const Nfts: FunctionComponent<Props> = props => {
     document,
     registries,
     viewMode,
+    template,
   } = {
     onAsyncComplete: data => {},
     onAsyncError: (error, title?: string) => {},
@@ -59,7 +61,11 @@ export const Nfts: FunctionComponent<Props> = props => {
 
   const { token } = useContext(AuthContext);
 
-  const mintNFT = async (id: string, data: MintNftFormData) => {
+  const mintNFT = async (
+    id: string,
+    data: MintNftFormData,
+    template: string,
+  ) => {
     closeModal();
 
     try {
@@ -74,6 +80,7 @@ export const Nfts: FunctionComponent<Props> = props => {
               registry_address: data.registry!.address,
               asset_manager_address: data.registry!.asset_manager_address,
               oracle_address: data.registry!.oracle_address,
+              template,
             },
             token!,
           )
@@ -235,7 +242,9 @@ export const Nfts: FunctionComponent<Props> = props => {
       >
         <MintNftForm
           //        @ts-ignore
-          onSubmit={data => mintNFT(document.header!.document_id!, data)}
+          onSubmit={data =>
+            mintNFT(document.header!.document_id!, data, template)
+          }
           onDiscard={closeModal}
           registries={registries}
         />

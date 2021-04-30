@@ -120,7 +120,9 @@ describe('OrganizationController', () => {
       const result = await organizationsController.get({});
       expect(result.length).toEqual(insertedOrganizations.length);
       // should get the inserted organizations from the beforeEach hook in reverse
-      expect(result.reverse()).toMatchObject([...insertedOrganizations]);
+      expect(result.sort((a, b) => a.name.localeCompare(b.name))).toMatchObject(
+        [...insertedOrganizations].sort((a, b) => a.name.localeCompare(b.name)),
+      );
 
       expect(databaseSpies.spyGetCursor).toHaveBeenCalledTimes(1);
     });

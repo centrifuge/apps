@@ -124,7 +124,9 @@ describe('ContactsController', () => {
       });
       expect(result.length).toEqual(insertedContacts.length);
       // should get the inserted contracts from the beforeEach hook in reverse
-      expect(result.reverse()).toMatchObject([...insertedContacts]);
+      expect(result.sort((a, b) => a.name.localeCompare(b.name))).toMatchObject(
+        [...insertedContacts].sort((a, b) => a.name.localeCompare(b.name)),
+      );
 
       expect(databaseSpies.spyGetCursor).toHaveBeenCalledTimes(1);
     });
