@@ -1,6 +1,6 @@
+import { assetList } from './assetList'
 import { fortunaFiDailyInvestorBalances } from './fortunaFiDailyInvestorBalances'
 import { poolList } from './poolList'
-import { assetList } from './assetList'
 
 export type Query = () => Promise<void>
 
