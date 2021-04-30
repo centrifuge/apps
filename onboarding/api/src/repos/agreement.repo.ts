@@ -153,6 +153,18 @@ export class AgreementRepo {
     return updatedAgreement as Agreement | undefined
   }
 
+  async setDeclined(agreementId: string): Promise<Agreement | undefined> {
+    const [updatedAgreement] = await this.db.sql`
+      update agreements
+      set declined_at = now()
+      where id = ${agreementId}
+
+      returning *
+    `
+
+    return updatedAgreement as Agreement | undefined
+  }
+
   async getAwaitingCounterSignature(): Promise<Agreement[]> {
     const agreements = await this.db.sql`
       select *

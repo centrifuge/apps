@@ -94,10 +94,16 @@ export class AgreementController {
     const envelopeId = content.envelopeId
     console.log(`Received Docusign Connect message for envelope ID ${envelopeId}, status is ${content.status}`)
 
-    // TODO: if content.status is declined, agreementRepo.setDeclinedAt(agreementId)
-
     const agreement = await this.agreementRepo.findByProvider('docusign', envelopeId)
-    if (!agreement) throw new NotFoundException(`Agreement for docusign envelope id ${envelopeId} not found`)
+    if (!agreement) {
+      console.warn(`Agreement for docusign envelope id ${envelopeId} not found`)
+      return 'OK'
+    }
+
+    if (content.status === 'declined') {
+      this.agreementRepo.setDeclined(agreement.id)
+      return 'OK'
+    }
 
     const investor = content.recipients.signers.find((signer: any) => signer.roleName === InvestorRoleName)
     const issuer = content.recipients.signers.find((signer: any) => signer.roleName === IssuerRoleName)

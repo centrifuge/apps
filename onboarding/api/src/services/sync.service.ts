@@ -22,7 +22,7 @@ export class SyncService {
     private readonly userRepo: UserRepo
   ) {}
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async syncKycStatus() {
     const processingInvestors = await this.kycRepo.getProcessingInvestors()
     if (processingInvestors.length === 0) return
@@ -91,9 +91,9 @@ export class SyncService {
     const missedInvestors = await this.addressRepo.getMissingWhitelistedUsers()
     console.log(`Whitelisting ${missedInvestors.length} missed investors.`)
 
-    missedInvestors.forEach((investor) => {
-      this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
-    })
+    for (let investor of missedInvestors) {
+      await this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
+    }
   }
 
   // @Cron(CronExpression.EVERY_HOUR)
