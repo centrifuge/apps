@@ -5,7 +5,7 @@ import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { Box, Button, Image } from 'grommet'
 import { Close as CloseIcon, Menu as MenuIcon, User as UserIcon } from 'grommet-icons'
 import Link from 'next/link'
-import Router, { NextRouter, useRouter, withRouter } from 'next/router'
+import Router, { NextRouter, withRouter } from 'next/router'
 import React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -18,6 +18,7 @@ import { selectWalletTransactions, TransactionState } from '../../ducks/transact
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { toPrecision } from '../../utils/toPrecision'
+import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
 import { WalletRewards } from '../WalletRewards'
 
 const { isDemo } = config
@@ -47,9 +48,8 @@ const Header: React.FC<Props> = (props: Props) => {
   const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
   const portfolio = useSelector<any, PortfolioState>((state) => state.portfolio)
 
-  const router = useRouter()
   const connectedAddress = useSelector<any, string | null>((state) => state.auth.address)
-  const address = 'address' in router.query ? (router.query.address as string) : connectedAddress
+  const address = useQueryDebugEthAddress() || connectedAddress
   const dispatch = useDispatch()
 
   React.useEffect(() => {

@@ -29,7 +29,7 @@ There are a few flags you can use in your url query string to debug Tinlake:
 
 #### General
 
-`?debug_eth_address=0x..` allows you to view the state of the UI for any Ethereum address
+`?address=0x..` or `?debug_eth_address=0x..` allows you to view the state of the UI for any Ethereum address
 
 #### Dashboard/Pool list
 
