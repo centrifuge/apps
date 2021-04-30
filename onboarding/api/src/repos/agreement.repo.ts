@@ -101,6 +101,7 @@ export class AgreementRepo {
     name: string,
     templateId: string
   ): Promise<Agreement> {
+    // TODO: and declined_at is null
     const [existingAgreement] = await this.db.sql`
       select *
       from agreements

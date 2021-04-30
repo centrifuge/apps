@@ -69,4 +69,8 @@ export interface InvestmentEntity {
   isWhitelisted: boolean
   balance: number
   updatedAt: Date
+  // The two rows below are intentionally redundant, they are there to ensure that we always know which address
+  // is linked to which investor, either through the agreement or just by knowing their name.
+  agreementId?: string
+  investorName?: string
 }

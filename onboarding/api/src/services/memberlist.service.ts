@@ -20,12 +20,12 @@ export class MemberlistService {
   async update(userId: string, poolId?: string, tranche?: Tranche) {
     const user = await this.userRepo.find(userId)
     if (config.globalRestrictedCountries.includes(user.countryCode)) {
-      console.error(`User ${userId} is based in ${user.countryCode}, which is restricted globally.`)
+      console.log(`User ${userId} is based in ${user.countryCode}, which is restricted globally.`)
       return
     }
     const kyc = await this.kycRepo.find(userId)
     if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) {
-      console.error(`User ${userId} is not yet verified or accredited.`)
+      console.log(`User ${userId} is not yet verified or accredited.`)
       return
     }
 
@@ -38,25 +38,25 @@ export class MemberlistService {
       tranches = [tranche]
     }
 
-    tranches.forEach(async (t: Tranche) => {
+    for (let t of tranches) {
       // If poolId is supplied, whitelist just for that pool. Otherwise, try to whitelist for all pools
       const poolIds = poolId === undefined ? await this.poolService.getIds() : [poolId]
 
-      poolIds.forEach(async (poolId: string) => {
+      for (let poolId of poolIds) {
         const pool = await this.poolService.get(poolId)
         if (!pool || pool?.profile.issuer.restrictedCountryCodes?.includes(user.countryCode)) {
-          console.error(`User ${userId} is based in ${user.countryCode}, which is restricted for pool ${poolId}.`)
-          return
+          console.log(`User ${userId} is based in ${user.countryCode}, which is restricted for pool ${poolId}.`)
+          continue
         }
 
         const agreements = await this.agreementRepo.getByUserPoolTranche(userId, poolId, t)
         const done = agreements.every((agreement: Agreement) => agreement.signedAt && agreement.counterSignedAt)
         if (done) {
-          this.poolService.addToMemberlist(userId, poolId, t)
+          await this.poolService.addToMemberlist(userId, poolId, t)
         } else {
-          console.error(`User ${userId}'s agreement for ${poolId} has not yet been signed or counter-signed.`)
+          console.log(`User ${userId}'s agreement for ${poolId} has not yet been signed or counter-signed.`)
         }
-      })
-    })
+      }
+    }
   }
 }
