@@ -1,14 +1,16 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
+import { PublicUser } from '@centrifuge/gateway-lib/models/user';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpStatus,
+} from '@nestjs/common';
 import { AppService } from '../app.service';
 import config from '../config';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
-
-  constructor(
-    private readonly appService: AppService,
-  ) {
-  }
+  constructor(private readonly appService: AppService) {}
 
   /**
    * Handles all exceptions thrown inside the application
@@ -31,7 +33,9 @@ export class AllExceptionFilter implements ExceptionFilter {
         request.headers.accept.indexOf('text/html') !== -1
       ) {
         return response.render('index', {
-          preloaderState: this.appService.preloadReduxStore(request.user),
+          preloaderState: this.appService.preloadReduxStore(
+            new PublicUser(request.user),
+          ),
           ethNetwork: config.ethNetwork,
         });
       }

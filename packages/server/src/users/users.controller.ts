@@ -9,16 +9,17 @@ import {
   Post,
   Put,
   Request,
-  Response,
   UseGuards,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
-
 import * as speakeasy from 'speakeasy';
 import * as bcrypt from 'bcrypt';
 import { promisify } from 'util';
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
 import {
   LoggedInUser,
+  PublicUser,
   TwoFaType,
   User,
   UserWithOrg,
@@ -45,7 +46,7 @@ export class UsersController {
 
   @Post(ROUTES.USERS.loginTentative)
   @HttpCode(200)
-  async loginTentative(@Request() req): Promise<LoggedInUser> {
+  async loginTentative(@Request() req): Promise<PublicUser> {
     let { user } = req;
     if (user.twoFAType !== TwoFaType.APP) {
       if (!user.secret) {
@@ -77,8 +78,7 @@ export class UsersController {
         console.log(e);
       }
     }
-
-    return user;
+    return new PublicUser(user);
   }
 
   @Post(ROUTES.USERS.login)
@@ -100,25 +100,28 @@ export class UsersController {
       { algorithm: 'RS256', secret: config.jwtPrivKey },
     );
     return {
-      user: req.user,
+      user: new PublicUser(req.user),
       token: accessToken,
     };
   }
 
   @Get('/api/users/profile')
   @UseGuards(JwtAuthGuard)
-  async profile(@Request() req): Promise<User> {
+  async profile(@Request() req): Promise<PublicUser> {
     let { user } = req;
-    return user;
+    return new PublicUser(user);
   }
 
   @Get(ROUTES.USERS.base)
   @UseGuards(JwtAuthGuard, UserManagerAuthGuard)
   async getAllUsers(@Request() request) {
-    return await this.databaseService.users
+    const users = await this.databaseService.users
       .getCursor({})
       .sort({ createdAt: -1 })
       .exec();
+
+    // sanitizes each user
+    return users.map(user => new PublicUser(user));
   }
 
   @Post(ROUTES.USERS.base)
@@ -179,7 +182,7 @@ export class UsersController {
       throw new MethodNotAllowedException('User already invited!');
     }
 
-    const newUser = this.upsertUser(
+    const newUser = await this.upsertUser(
       {
         ...user,
         name: user.name!,
@@ -217,7 +220,7 @@ export class UsersController {
 
   @Put(ROUTES.USERS.base)
   @UseGuards(JwtAuthGuard, UserManagerAuthGuard)
-  async update(@Body() user): Promise<User> {
+  async update(@Body() user): Promise<PublicUser> {
     const otherUserWithEmail: User = await this.databaseService.users.findOne({
       email: user.email.toLowerCase(),
       $not: {
@@ -229,7 +232,7 @@ export class UsersController {
       throw new MethodNotAllowedException('Email taken!');
     }
 
-    return await this.upsertUser(user, false);
+    return this.upsertUser(user, false);
   }
 
   @Delete(`${ROUTES.USERS.base}/:id`)
@@ -264,6 +267,7 @@ export class UsersController {
       user,
       upsert,
     );
-    return result;
+
+    return new PublicUser(result);
   }
 }
