@@ -16,7 +16,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const feed = this.contract('FEED')
       const isMakerIntegrated = this.contractAddresses['CLERK'] !== undefined
       if (beforeClosing && isMakerIntegrated) {
-        console.error('TODO: getEpochState() doesnt work properly for Maker integrated pools')
+        throw new Error('TODO: getEpochState() doesnt work properly for Maker integrated pools')
       }
 
       // isMakerIntegrated ? this.contract('ASSESSOR').totalBalance() : this.contract('RESERVE').totalBalance()
