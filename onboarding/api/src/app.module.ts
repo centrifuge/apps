@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common'
+import { APP_INTERCEPTOR } from '@nestjs/core'
 import { ScheduleModule } from '@nestjs/schedule'
+import { RavenInterceptor, RavenModule } from 'nest-raven'
 import { AppController } from './app.controller'
+import config from './config'
 import { AddressController } from './controllers/address.controller'
 import { AgreementController } from './controllers/agreement.controller'
 import { KycController } from './controllers/kyc.controller'
@@ -31,9 +34,18 @@ const serviceProviders = [
 ]
 const taskProviders = [SyncService]
 
+const ravenProvider = config.sentryDsn
+  ? [
+      {
+        provide: APP_INTERCEPTOR,
+        useValue: new RavenInterceptor(),
+      },
+    ]
+  : []
+
 @Module({
-  imports: [ScheduleModule.forRoot()],
+  imports: config.sentryDsn ? [RavenModule, ScheduleModule.forRoot()] : [ScheduleModule.forRoot()],
   controllers: [AppController, AddressController, KycController, AgreementController, UserController],
-  providers: [...databaseProviders, ...serviceProviders, ...taskProviders],
+  providers: [...databaseProviders, ...serviceProviders, ...taskProviders, ...ravenProvider],
 })
 export class AppModule {}

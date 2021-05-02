@@ -101,6 +101,7 @@ export class AgreementRepo {
     name: string,
     templateId: string
   ): Promise<Agreement> {
+    // TODO: and declined_at is null
     const [existingAgreement] = await this.db.sql`
       select *
       from agreements
@@ -145,6 +146,18 @@ export class AgreementRepo {
     const [updatedAgreement] = await this.db.sql`
       update agreements
       set counter_signed_at = now()
+      where id = ${agreementId}
+
+      returning *
+    `
+
+    return updatedAgreement as Agreement | undefined
+  }
+
+  async setDeclined(agreementId: string): Promise<Agreement | undefined> {
+    const [updatedAgreement] = await this.db.sql`
+      update agreements
+      set declined_at = now()
       where id = ${agreementId}
 
       returning *

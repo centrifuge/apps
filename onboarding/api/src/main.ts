@@ -1,14 +1,17 @@
 import { NestFactory } from '@nestjs/core'
-// import * as cookieParser from 'cookie-parser'
-import { config } from 'dotenv'
+import * as Sentry from '@sentry/node'
 import { AppModule } from './app.module'
+import config from './config'
 
 async function bootstrap() {
-  config()
+  if (config.sentryDsn) {
+    Sentry.init({
+      dsn: config.sentryDsn,
+    })
+  }
 
   const app = await NestFactory.create(AppModule)
   app.enableCors()
-  // app.use(cookieParser())
 
   await app.listen(3100)
 }

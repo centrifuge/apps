@@ -126,13 +126,13 @@ export default function reducer(state: AuthState = initialState, action: AnyActi
 // navigation event between pages, which discards the redux state, but does not discard onboard. Putting onboard into
 // the state would work, but it would lead to two sources of truth. Consequently, we keep onboard as an external
 // stateful API here and manually sync values over on load.
-export function load(tinlake: ITinlake): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
+export function load(
+  tinlake: ITinlake,
+  debugAddress: string | null
+): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch, getState) => {
     const { auth } = getState()
     let onboard = getOnboard()
-
-    const urlParams = new URLSearchParams(window.location.search)
-    const debugAddress = urlParams.get('debug_eth_address')
 
     // onboard is already initialized, only ensure values are correct and return
     if (onboard) {

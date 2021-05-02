@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
+import { AddressRepo } from '../repos/address.repo'
 import { AgreementRepo } from '../repos/agreement.repo'
 import { KycEntity, KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
@@ -17,10 +18,11 @@ export class SyncService {
     private readonly securitizeService: SecuritizeService,
     private readonly docusignService: DocusignService,
     private readonly memberlistService: MemberlistService,
+    private readonly addressRepo: AddressRepo,
     private readonly userRepo: UserRepo
   ) {}
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async syncKycStatus() {
     const processingInvestors = await this.kycRepo.getProcessingInvestors()
     if (processingInvestors.length === 0) return
@@ -28,6 +30,11 @@ export class SyncService {
     this.logger.debug(`Syncing ${processingInvestors.length} investors`)
     processingInvestors.forEach(async (kyc: KycEntity) => {
       const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
+
+      if (!investor) {
+        console.log(`Failed to retrieve investor status for user ${kyc.userId}`)
+        return
+      }
 
       await this.userRepo.update(
         kyc.userId,
@@ -37,8 +44,9 @@ export class SyncService {
         investor.domainInvestorDetails?.entityName
       )
 
+      // Skip manual-review because we are not saving that separately, so it will be the status processing
       if (
-        (investor && investor.verificationStatus !== kyc.status) ||
+        (investor && investor.verificationStatus !== kyc.status && investor.verificationStatus !== 'manual-review') ||
         investor.domainInvestorDetails.isAccredited !== kyc.accredited
       ) {
         this.logger.debug(
@@ -78,11 +86,15 @@ export class SyncService {
     }
   }
 
-  // @Cron(CronExpression.EVERY_30_MINUTES) // TODO: change to e.g. every 5 min
-  // async syncWhitelistStatus() {
-  // TODO: get non whitelisted, kyced, accredited, agreement signed addresses
-  // TOOD: per tranche, check whitelist status
-  // }
+  @Cron(CronExpression.EVERY_HOUR)
+  async syncWhitelistStatus() {
+    const missedInvestors = await this.addressRepo.getMissingWhitelistedUsers()
+    console.log(`Whitelisting ${missedInvestors.length} missed investors.`)
+
+    for (let investor of missedInvestors) {
+      await this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
+    }
+  }
 
   // @Cron(CronExpression.EVERY_HOUR)
   // async syncInvestorBalances() {}

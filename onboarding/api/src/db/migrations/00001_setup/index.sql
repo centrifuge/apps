@@ -52,7 +52,8 @@ create table if not exists agreements (
     provider_envelope_id character varying(100) not null,
     created_at timestamp with time zone not null default now(),
     signed_at timestamp with time zone,
-    counter_signed_at timestamp with time zone
+    counter_signed_at timestamp with time zone,
+    declined_at timestamp with time zone
 );
 
 create unique index if not exists agreements_pkey on agreements(id uuid_ops);

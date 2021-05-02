@@ -134,6 +134,17 @@ export class AddressController {
     }
   }
 
+  @Delete('addresses/:address')
+  async unlinkAddress(@Param() params, @Query() query): Promise<any> {
+    const user = await this.userRepo.findByAddress(params.address)
+    if (!user) throw new BadRequestException('Invalid user')
+
+    const verifiedSession = this.sessionService.verify(query.session)
+    if (!verifiedSession || verifiedSession.sub !== user.id) throw new UnauthorizedException('Invalid session')
+
+    this.addressRepo.unlink(user.id, params.address)
+  }
+
   // TODO: this is a temporary method to delete users only on kovan. Should be removed or implemented properly at some point
   @Delete('addresses/:address')
   async deleteMyAccount(@Param() params, @Query() query): Promise<any> {

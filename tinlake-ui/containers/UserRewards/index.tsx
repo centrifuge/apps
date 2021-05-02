@@ -203,7 +203,7 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
         <ColRight>
           <Card margin={{ bottom: 'large' }}>
             <Box direction="row" background="#FCBA59" style={{ borderRadius: '6px 6px 0 0' }} pad={'14px 24px'}>
-              <TokenLogoBig src="/static/cfg-black.svg" />
+              <TokenLogoBig src="/static/cfg-white.svg" />
               <h3 style={{ margin: 0 }}>System-wide Rewards</h3>
             </Box>
             <MetricRow
@@ -406,7 +406,7 @@ const Metric = ({
   return (
     <Box pad={{ horizontal: 'medium' }} style={{ borderRight: borderRight ? '1px solid #f2f2f2' : undefined }}>
       <Cont>
-        <TokenLogo src={{ DAI: `/static/dai.svg`, CFG: `/static/cfg.svg` }[token]} />
+        <TokenLogo src={{ DAI: `/static/dai.svg`, CFG: `/static/cfg-white.svg` }[token]} />
         <Value>
           <LoadingValue
             done={!loading}
