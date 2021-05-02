@@ -76,7 +76,7 @@ class RetryingSigner extends ethers.Signer {
           this.latestGasPrices && this.latestGasPrices.timestamp - Date.now() < MAX_GASPRICE_AGE
             ? this.latestGasPrices.fast
             : initialGasPrice.add(initialGasPrice.div(5).mul(Math.min(increases + 1, MAX_INCREASES)))
-        const newTx = { ...transaction, gasPrice: newGasPrice }
+        const newTx = { ...transaction, gasPrice: newGasPrice, nonce: transaction.nonce }
         console.log(`Resubmitting with gas price of ${newGasPrice}`)
         this.sendTransaction(newTx, increases + 1)
       }
