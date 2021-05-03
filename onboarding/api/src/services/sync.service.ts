@@ -76,13 +76,13 @@ export class SyncService {
     this.logger.debug(`Syncing ${agreements.length} agreements`)
     // Synchronous, one by one, so the docusign access token doesn't get overwritten because multiple requests create multiple access tokens in parallel
     for (let agreement of agreements) {
-      const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
+    const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
 
-      if (!agreement.counterSignedAt && status.counterSigned) {
-        this.logger.log(`Agreement ${agreement.id} has been counter-signed`)
-        this.agreementRepo.setCounterSigned(agreement.id)
-        this.memberlistService.update(agreement.userId, agreement.poolId, agreement.tranche)
-      }
+    if (!agreement.counterSignedAt && status.counterSigned) {
+      this.logger.log(`Agreement ${agreement.id} has been counter-signed`)
+      this.agreementRepo.setCounterSigned(agreement.id)
+      this.memberlistService.update(agreement.userId, agreement.poolId, agreement.tranche)
+    }
     }
   }
 
