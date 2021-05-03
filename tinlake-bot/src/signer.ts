@@ -1,29 +1,36 @@
 import { ethers } from 'ethers'
-import config from './config'
 import * as WebSocket from 'ws'
 
-const TX_TIMEOUT = 5 * 60 * 1000 // 5 mins
-const MAX_INCREASES = 3
-const MAX_GASPRICE_AGE = 10 * 60 * 1000 // 10 mins
+const DEFAULT_CONFIG: BackendSignerConfig = {
+  transactionTimeout: 1 * 60 * 1000, // 1 minute; TODO: 5 minutes
+  gasnowWebsocketUrl: 'wss://www.gasnow.org/ws/gasprice',
+  initialSpeed: 'slow', // TODO: standard
+  increasedSpeed: 'fast',
+  maxGasPriceAge: 10 * 60 * 1000, // 10 mins
+  fallback: {
+    maxIncreases: 3,
+  },
+}
 
 /**
  * This signer blocks the same transaction from being sent twice, and retries transactions with higher gas prices over time.
  * It uses gas prices from the GasNow API, initially standard and increasing to fast for retries.
- *
- * TODO: use gasnow price standard on the first sendTransaction already
  */
-class RetryingSigner extends ethers.Signer {
+class BackendSigner extends ethers.Signer {
   readonly signer: ethers.Signer
+
+  private config: BackendSignerConfig
 
   history: { [key: string]: string | undefined } = {}
 
-  latestGasPrices: GasPrices | undefined = undefined
+  latestGasPrices: GasPricesConfig | undefined = undefined
 
-  constructor(signer: ethers.Signer) {
+  constructor(signer: ethers.Signer, config?: BackendSignerConfig) {
     super()
     ethers.utils.defineReadOnly(this, 'signer', signer)
+    this.config = { ...DEFAULT_CONFIG, ...config }
 
-    const gasnowWs = new WebSocket(config.gasnowWs)
+    const gasnowWs = new WebSocket(this.config.gasnowWebsocketUrl)
     gasnowWs.onmessage = (event: any) => {
       const data = JSON.parse(event.data)
 
@@ -42,11 +49,16 @@ class RetryingSigner extends ethers.Signer {
       throw new Error(`Transaction ${key} already sent`)
     }
 
-    const response = await super.sendTransaction(transaction)
+    const gasPrice =
+      this.latestGasPrices && this.latestGasPrices.timestamp - Date.now() < this.config.maxGasPriceAge
+        ? this.latestGasPrices.standard
+        : await this.provider.getGasPrice()
+
+    const response = await super.sendTransaction({ ...transaction, gasPrice })
     this.history[key] = response.hash
 
     // Purposefully not using await since it shouldnt block sendTransaction from returning
-    this.watch(transaction, response.hash, increases || 0)
+    this.watch(transaction, response.hash, response.nonce, increases || 0)
 
     return response
   }
@@ -54,15 +66,16 @@ class RetryingSigner extends ethers.Signer {
   async watch(
     transaction: ethers.utils.Deferrable<ethers.providers.TransactionRequest>,
     hash: string,
+    nonce: number,
     increases: number
   ) {
     if (!this.provider) {
-      throw new Error('Provider for RetryingSigner is not initialised')
+      throw new Error('Provider for BackendSigner is not initialised')
     }
 
     try {
       console.log(`Watching ${hash}`)
-      await this.provider.waitForTransaction(hash, undefined, TX_TIMEOUT)
+      await this.provider.waitForTransaction(hash, undefined, this.config.transactionTimeout)
 
       const key = `${transaction.to}-${transaction.data}`
       this.history[key] = undefined
@@ -70,13 +83,16 @@ class RetryingSigner extends ethers.Signer {
       console.error(`Error caught while waiting for transaction: ${e}`)
 
       if (e.toString().includes('timeout exceeded')) {
-        const initialGasPrice = await this.provider.getGasPrice()
         // Use the gasnow fast price if it's not too old, otherwise use 20% increasing over time.
+        const initialGasPrice = await this.provider.getGasPrice()
+
         const newGasPrice =
-          this.latestGasPrices && this.latestGasPrices.timestamp - Date.now() < MAX_GASPRICE_AGE
+          this.latestGasPrices && this.latestGasPrices.timestamp - Date.now() < this.config.maxGasPriceAge
             ? this.latestGasPrices.fast
-            : initialGasPrice.add(initialGasPrice.div(5).mul(Math.min(increases + 1, MAX_INCREASES)))
-        const newTx = { ...transaction, gasPrice: newGasPrice, nonce: transaction.nonce }
+            : initialGasPrice.add(
+                initialGasPrice.div(5).mul(Math.min(increases + 1, this.config.fallback.maxIncreases))
+              )
+        const newTx = { ...transaction, nonce, gasPrice: newGasPrice }
         console.log(`Resubmitting with gas price of ${newGasPrice}`)
         this.sendTransaction(newTx, increases + 1)
       }
@@ -88,8 +104,8 @@ class RetryingSigner extends ethers.Signer {
     return this.signer.provider
   }
 
-  connect(provider: ethers.providers.Provider): RetryingSigner {
-    return new RetryingSigner(this.signer.connect(provider))
+  connect(provider: ethers.providers.Provider): BackendSigner {
+    return new BackendSigner(this.signer.connect(provider))
   }
 
   getAddress(): Promise<string> {
@@ -105,12 +121,26 @@ class RetryingSigner extends ethers.Signer {
   }
 }
 
-export { RetryingSigner }
-
 interface GasPrices {
   rapid: number
   fast: number
   standard: number
   slow: number
+}
+
+interface GasPricesConfig extends GasPrices {
   timestamp: number
 }
+
+interface BackendSignerConfig {
+  transactionTimeout: number
+  gasnowWebsocketUrl: string
+  initialSpeed: keyof GasPrices
+  increasedSpeed: keyof GasPrices
+  maxGasPriceAge: number
+  fallback: {
+    maxIncreases: number
+  }
+}
+
+export { BackendSigner, BackendSignerConfig }

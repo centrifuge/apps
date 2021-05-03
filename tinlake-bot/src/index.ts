@@ -8,7 +8,7 @@ import { submitSolutions } from './tasks/submitSolutions'
 import { writeoffAssets } from './tasks/writeoffAssets'
 import CronExpression from './util/CronExpression'
 import { loadFromIPFS, PoolMap } from './util/ipfs'
-import { RetryingSigner } from './signer'
+import { BackendSigner } from './signer'
 require('log-timestamp')
 
 const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
@@ -20,7 +20,7 @@ const run = async () => {
 
   // Since the bot can submit multiple tx in quick succession, we need the experimental NonceManager to make sure they don't overlap.
   // Source: https://github.com/ethers-io/ethers.js/issues/435#issuecomment-581734980
-  const signer = new RetryingSigner(wallet).connect(provider)
+  const signer = new BackendSigner(wallet).connect(provider)
 
   console.log(`Booting Dennis 2.0 as ${wallet.address}`)
   pools = await loadFromIPFS(provider)
