@@ -67,15 +67,6 @@ jobs:
           NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL: 'https://api.thegraph.com/subgraphs/name/jennypollack/tinlake-rewards-staging'
           NEXT_PUBLIC_TRANSACTION_TIMEOUT: '3600'
 
-      - name: Upload to IPFS
-        uses: aquiladev/ipfs-action@v0.1.5
-        with:
-          path: ./out
-          pinataKey: ${{ secrets.PINATA_KEY }}
-          pinataPinName: tinlake-ui-kovan-staging-$GITHUB_SHA
-          pinataSecret: ${{ secrets.PINATA_SECRET }}
-          service: pinata
-
       - name: Deploy To Netlify
         uses: nwtgck/actions-netlify@v1.1
         with:
@@ -139,7 +130,7 @@ jobs:
           NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.centrifuge.io/'
           NEXT_PUBLIC_POOL_REGISTRY: '0xddf1c516cf87126c6c610b52fd8d609e67fb6033'
           NEXT_PUBLIC_POOLS_CONFIG: 'mainnetProduction'
-          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmdpnN85oHGBjizZkDRpJEK8XKG53URr7Vrx7UYphayJov'
+          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmSV2oyHsxBTtEhrYMECeT7HM12CZj3UqRsnSB9aPpmgoA'
           NEXT_PUBLIC_PORTIS_KEY: 'bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f'
           NEXT_PUBLIC_REWARDS_TREE_URL: 'https://storage.googleapis.com/rad-rewards-trees-mainnet-production/latest.json'
           NEXT_PUBLIC_RPC_URL: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516'
