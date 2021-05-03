@@ -34,7 +34,8 @@
     "publish:develop": "yarn workspaces foreach run prepublish && lerna publish --canary --preid develop.$(git rev-parse --short HEAD) --yes --force-publish",
     "onboarding-api": "yarn workspace @centrifuge/onboarding-api start",
     "tinlake-ui": "yarn workspace @centrifuge/tinlake-ui start",
-    "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\"  \"yarn tinlake-ui\" -p name -n \"onboarding-api,tinlake-ui\""
+    "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\"  \"yarn tinlake-ui\" -p name -n \"onboarding-api,tinlake-ui\"",
+    "postinstall": "husky install"
   },
   "husky": {
     "hooks": {

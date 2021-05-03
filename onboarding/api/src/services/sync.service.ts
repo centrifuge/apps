@@ -81,7 +81,7 @@ export class SyncService {
     if (!agreement.counterSignedAt && status.counterSigned) {
       this.logger.log(`Agreement ${agreement.id} has been counter-signed`)
       this.agreementRepo.setCounterSigned(agreement.id)
-      this.memberlistService.update(agreement.userId, agreement.poolId, agreement.tranche)
+        this.memberlistService.update(agreement.userId, agreement.poolId, agreement.tranche)
     }
     }
   }
