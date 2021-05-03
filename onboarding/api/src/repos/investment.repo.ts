@@ -41,13 +41,15 @@ export class InvestmentRepo {
     addressId: string,
     poolId: string,
     tranche: Tranche,
-    isWhitelisted: boolean
+    isWhitelisted: boolean,
+    agreementId: string,
+    investorName: string
   ): Promise<InvestmentEntity | undefined> {
     const [newInvestment] = await this.db.sql`
       insert into investments (
-        id, address_id, pool_id, tranche, is_whitelisted, updated_at
+        id, address_id, pool_id, tranche, is_whitelisted, agreement_id, investor_name, updated_at
       ) values (
-        ${[uuidv4(), addressId, poolId, tranche, isWhitelisted, new Date()]}
+        ${[uuidv4(), addressId, poolId, tranche, isWhitelisted, agreementId, investorName, new Date()]}
       )
       on conflict (address_id, pool_id, tranche) 
         do 

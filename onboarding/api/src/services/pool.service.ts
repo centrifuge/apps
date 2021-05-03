@@ -2,6 +2,7 @@ import { NonceManager } from '@ethersproject/experimental'
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { ethers } from 'ethers'
+import { UserRepo } from '../repos/user.repo'
 import config from '../config'
 import { Tranche } from '../controllers/types'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
@@ -9,6 +10,7 @@ import { InvestmentRepo } from '../repos/investment.repo'
 import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
 import contractAbiMemberlist from '../utils/Memberlist.abi'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
+import { AgreementRepo } from '../repos/agreement.repo'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 @Injectable()
@@ -20,7 +22,12 @@ export class PoolService {
   signer = new NonceManager(new ethers.Wallet(config.signerPrivateKey).connect(this.provider))
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
 
-  constructor(private readonly addressRepo: AddressRepo, private readonly investmentRepo: InvestmentRepo) {
+  constructor(
+    private readonly addressRepo: AddressRepo,
+    private readonly investmentRepo: InvestmentRepo,
+    private readonly userRepo: UserRepo,
+    private readonly agreementRepo: AgreementRepo
+  ) {
     this.loadFromIPFS()
   }
 
@@ -86,6 +93,7 @@ export class PoolService {
     return profile
   }
 
+  // TODO: move to memberlist.service
   async addToMemberlist(userId: string, poolId: string, tranche: Tranche): Promise<any> {
     const pool = await this.get(poolId)
     if (!pool) throw new Error(`Failed to get pool ${poolId} when adding to memberlist`)
@@ -99,27 +107,52 @@ export class PoolService {
 
     // TODO: this should also filter by blockchain and network
     const addresses = await this.addressRepo.getByUser(userId)
-    addresses.forEach(async (address: AddressEntity) => {
+    for (let address of addresses) {
       try {
         const tx = await memberAdmin.updateMember(memberlistAddress, address.address, validUntil, { gasLimit: 1000000 })
-        this.logger.log(`Submitted tx to add ${address.address} to ${memberlistAddress}: ${tx.hash}`)
+        this.logger.log(
+          `Submitted tx to add ${address.address} to ${memberlistAddress}: ${tx.hash} (nonce=${tx.nonce})`
+        )
         await this.provider.waitForTransaction(tx.hash)
+        this.logger.log(`${tx.hash} (nonce=${tx.nonce}) completed`)
 
-        this.checkMemberlist(memberlistAddress, address, pool, tranche)
+        await this.checkMemberlist(memberlistAddress, address, pool, tranche)
       } catch (e) {
         console.error(`Failed to add ${address.address} to ${memberlistAddress}: ${e}`)
       }
-    })
+    }
   }
 
-  async checkMemberlist(memberlistAddrss: string, address: AddressEntity, pool: Pool, tranche: Tranche): Promise<any> {
-    const memberlist = new ethers.Contract(memberlistAddrss, contractAbiMemberlist, this.provider)
+  // TODO: move to memberlist.service
+  async checkMemberlist(memberlistAddress: string, address: AddressEntity, pool: Pool, tranche: Tranche): Promise<any> {
+    const memberlist = new ethers.Contract(memberlistAddress, contractAbiMemberlist, this.provider)
 
+    this.logger.log(`Checking memberlist for ${address.address}`)
     const isWhitelisted = await memberlist.hasMember(address.address)
+    this.logger.log(`Checking memberlist for ${address.address} => ${isWhitelisted ? 'true' : 'false'}`)
 
     if (isWhitelisted) {
       this.logger.log(`${address.address} is a member of ${pool.metadata.name} - ${tranche}`)
-      this.investmentRepo.upsert(address.id, pool.addresses.ROOT_CONTRACT, tranche, true)
+      const user = await this.userRepo.findByAddress(address.address)
+
+      if (!user) {
+        throw new Error(`Failed to find user for whitelisting of address ${address.address}`)
+      }
+
+      const agreements = await this.agreementRepo.getByUserPoolTranche(user.id, pool.addresses.ROOT_CONTRACT, tranche)
+
+      if (!agreements || agreements.length === 0) {
+        throw new Error(`Failed to find agreement for whitelisting of address ${address.address}`)
+      }
+
+      this.investmentRepo.upsert(
+        address.id,
+        pool.addresses.ROOT_CONTRACT,
+        tranche,
+        true,
+        agreements[0].id,
+        user.entityName || user.fullName
+      )
     } else {
       this.logger.log(`${address.address} is not a member of ${pool.metadata.name} - ${tranche}`)
     }

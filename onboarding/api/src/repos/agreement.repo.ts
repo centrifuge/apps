@@ -72,7 +72,7 @@ export class AgreementRepo {
       select *
       from agreements
       where agreements.user_id = ${userId}
-      and agreements.pool_id = ${poolId}
+      and lower(agreements.pool_id) = ${poolId.toLowerCase()}
       and agreements.tranche = ${tranche}
     `
 
@@ -84,7 +84,7 @@ export class AgreementRepo {
       select *
       from agreements
       where user_id = ${userId}
-      and pool_id = ${poolId}
+      and lower(agreements.pool_id) = ${poolId.toLowerCase()}
       and signed_at is not null
       and counter_signed_at is not null
     `
@@ -106,7 +106,7 @@ export class AgreementRepo {
       select *
       from agreements
       where agreements.user_id = ${userId}
-      and agreements.pool_id = ${poolId}
+      and lower(agreements.pool_id) = ${poolId.toLowerCase()}
       and agreements.tranche = ${tranche}
       and agreements.provider_template_id = ${templateId}
     `
@@ -192,7 +192,7 @@ export class AgreementRepo {
       select *
       from agreements
       where agreements.user_id = ${userId}
-      and agreements.pool_id = ${poolId}
+      and lower(agreements.pool_id) = ${poolId.toLowerCase()}
       and agreements.provider = 'docusign'
       and agreements.provider_template_id in (${profileAgreements.map((pa) => pa.providerTemplateId)})
     `
