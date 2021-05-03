@@ -10,7 +10,6 @@ import { InvestmentRepo } from '../repos/investment.repo'
 import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
 import contractAbiMemberlist from '../utils/Memberlist.abi'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
-import { AgreementRepo } from '../repos/agreement.repo'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 @Injectable()
@@ -25,8 +24,7 @@ export class PoolService {
   constructor(
     private readonly addressRepo: AddressRepo,
     private readonly investmentRepo: InvestmentRepo,
-    private readonly userRepo: UserRepo,
-    private readonly agreementRepo: AgreementRepo
+    private readonly userRepo: UserRepo
   ) {
     this.loadFromIPFS()
   }
@@ -94,7 +92,7 @@ export class PoolService {
   }
 
   // TODO: move to memberlist.service
-  async addToMemberlist(userId: string, poolId: string, tranche: Tranche): Promise<any> {
+  async addToMemberlist(userId: string, poolId: string, tranche: Tranche, agreementId: string): Promise<any> {
     const pool = await this.get(poolId)
     if (!pool) throw new Error(`Failed to get pool ${poolId} when adding to memberlist`)
 
@@ -116,7 +114,7 @@ export class PoolService {
         await this.provider.waitForTransaction(tx.hash)
         this.logger.log(`${tx.hash} (nonce=${tx.nonce}) completed`)
 
-        await this.checkMemberlist(memberlistAddress, address, pool, tranche)
+        await this.checkMemberlist(memberlistAddress, address, pool, tranche, agreementId)
       } catch (e) {
         console.error(`Failed to add ${address.address} to ${memberlistAddress}: ${e}`)
       }
@@ -124,7 +122,13 @@ export class PoolService {
   }
 
   // TODO: move to memberlist.service
-  async checkMemberlist(memberlistAddress: string, address: AddressEntity, pool: Pool, tranche: Tranche): Promise<any> {
+  async checkMemberlist(
+    memberlistAddress: string,
+    address: AddressEntity,
+    pool: Pool,
+    tranche: Tranche,
+    agreementId: string
+  ): Promise<any> {
     const memberlist = new ethers.Contract(memberlistAddress, contractAbiMemberlist, this.provider)
 
     this.logger.log(`Checking memberlist for ${address.address}`)
@@ -139,18 +143,12 @@ export class PoolService {
         throw new Error(`Failed to find user for whitelisting of address ${address.address}`)
       }
 
-      const agreements = await this.agreementRepo.getByUserPoolTranche(user.id, pool.addresses.ROOT_CONTRACT, tranche)
-
-      if (!agreements || agreements.length === 0) {
-        throw new Error(`Failed to find agreement for whitelisting of address ${address.address}`)
-      }
-
       this.investmentRepo.upsert(
         address.id,
         pool.addresses.ROOT_CONTRACT,
         tranche,
         true,
-        agreements[0].id,
+        agreementId,
         user.entityName || user.fullName
       )
     } else {
