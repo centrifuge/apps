@@ -1,17 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { AgreementsStatus, Tranche } from '../controllers/types'
 import { DocusignService } from '../services/docusign.service'
-import { PoolService } from '../services/pool.service'
 import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
 
 @Injectable()
 export class AgreementRepo {
-  constructor(
-    private readonly db: DatabaseService,
-    private readonly docusignService: DocusignService,
-    private readonly poolService: PoolService
-  ) {}
+  constructor(private readonly db: DatabaseService, private readonly docusignService: DocusignService) {}
 
   async find(id: string): Promise<Agreement | undefined> {
     const [agreement] = await this.db.sql`
