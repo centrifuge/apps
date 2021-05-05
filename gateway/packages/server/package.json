@@ -30,7 +30,7 @@
     "url": "https://github.com/centrifuge/gateway.git)/issues"
   },
   "dependencies": {
-    "@centrifuge/gateway-lib": "workspace:*",
+    "@centrifuge/gateway-lib": "*",
     "@nestjs-modules/mailer": "^1.4.2",
     "@nestjs/common": "6.3.0",
     "@nestjs/core": "6.3.0",

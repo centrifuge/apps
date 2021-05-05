@@ -37,7 +37,7 @@ export default class UserForm extends React.Component<InviteProps> {
       [TwoFaType.EMAIL]: 'Email',
     }
 
-    const userValidation = (Yup.object() as any).shape({
+    const userValidation = Yup.object().shape({
       organizationName:
         newOrg &&
         Yup.string()

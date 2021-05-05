@@ -137,10 +137,10 @@ export const Nfts: FunctionComponent<Props> = (props) => {
                   copy={true}
                   as={'span'}
                   link={{
-                    href: getNFTLink((datum as CoreapiNFT).token_id!, (datum as CoreapiNFT).registry!),
+                    href: getNFTLink(datum.token_id, datum.registry),
                     target: '_blank',
                   }}
-                  value={hexToInt((datum as CoreapiNFT).token_id!)}
+                  value={hexToInt(datum.token_id)}
                 />
               ),
             },
@@ -152,10 +152,10 @@ export const Nfts: FunctionComponent<Props> = (props) => {
                   copy={true}
                   as={'span'}
                   link={{
-                    href: getAddressLink((datum as CoreapiNFT).registry!),
+                    href: getAddressLink(datum.registry),
                     target: '_blank',
                   }}
-                  value={(datum as CoreapiNFT).registry!}
+                  value={datum.registry}
                 />
               ),
             },
@@ -167,10 +167,10 @@ export const Nfts: FunctionComponent<Props> = (props) => {
                   copy={true}
                   as={'span'}
                   link={{
-                    href: getAddressLink((datum as CoreapiNFT).owner!),
+                    href: getAddressLink(datum.owner),
                     target: '_blank',
                   }}
-                  value={(datum as CoreapiNFT).owner!}
+                  value={datum.owner}
                 />
               ),
             },

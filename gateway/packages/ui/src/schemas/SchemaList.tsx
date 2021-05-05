@@ -268,7 +268,7 @@ const SchemaList: FunctionComponent = () => {
                 />,
               ]
 
-              if (!(data as Schema).archived) {
+              if (!data.archived) {
                 actions = [
                   ...actions,
                   <Anchor

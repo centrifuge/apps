@@ -3,7 +3,19 @@ import { LoggedInUser, PublicUser, TwoFaType, User, UserWithOrg } from '@centrif
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators'
 import { MailerService } from '@nestjs-modules/mailer'
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Request, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  MethodNotAllowedException,
+  Param,
+  Post,
+  Put,
+  Request,
+  UseGuards,
+} from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
 import * as speakeasy from 'speakeasy'

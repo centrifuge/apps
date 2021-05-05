@@ -2444,7 +2444,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@centrifuge/gateway-lib@workspace:*, @centrifuge/gateway-lib@workspace:gateway/packages/lib":
+"@centrifuge/gateway-lib@*, @centrifuge/gateway-lib@workspace:gateway/packages/lib":
   version: 0.0.0-use.local
   resolution: "@centrifuge/gateway-lib@workspace:gateway/packages/lib"
   dependencies:
@@ -2466,7 +2466,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@centrifuge/gateway-server@workspace:gateway/packages/server"
   dependencies:
-    "@centrifuge/gateway-lib": "workspace:*"
+    "@centrifuge/gateway-lib": "*"
     "@nestjs-modules/mailer": ^1.4.2
     "@nestjs/common": 6.3.0
     "@nestjs/core": 6.3.0
@@ -2524,12 +2524,12 @@ __metadata:
     "@centrifuge/axis-spinner": ^0.4.2-develop.a1231ee.147
     "@centrifuge/axis-theme": ^0.4.2-develop.a1231ee.147
     "@centrifuge/axis-utils": ^0.4.2-develop.a1231ee.147
-    "@centrifuge/gateway-lib": "workspace:*"
+    "@centrifuge/gateway-lib": "*"
     "@types/jest": 26.0.14
     "@types/react-dom": ^16.9.8
     "@types/react-router": ^4.3.1
     "@types/react-router-dom": ^5.1.5
-    axios: 0.21.1
+    axios: ^0.19.0
     enzyme: ^3.10.0
     enzyme-adapter-react-16: ^1.14.0
     enzyme-to-json: ^3.3.4
@@ -8868,6 +8868,15 @@ __metadata:
     follow-redirects: 1.5.10
     is-buffer: ^2.0.2
   checksum: 6188a1b815733c1b6118eddc70d931caea7f867ca77ade8205e49cd6e457b837460cc4e325e19c66a81190a170fde5b76480878366b3743131977da76d571bec
+  languageName: node
+  linkType: hard
+
+"axios@npm:^0.19.0":
+  version: 0.19.2
+  resolution: "axios@npm:0.19.2"
+  dependencies:
+    follow-redirects: 1.5.10
+  checksum: bad346deea24050f9953ce09bb8015f85a99a7b8f016806adccfab0b8981827d1fbee9c77c0ef7c70cc48392c1af6bbc65e07c3e88221d17282d2d5fd0a191f6
   languageName: node
   linkType: hard
 

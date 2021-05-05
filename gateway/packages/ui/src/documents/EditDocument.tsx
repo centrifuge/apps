@@ -8,13 +8,14 @@ import { LinkPrevious } from 'grommet-icons'
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
 import { Redirect, RouteComponentProps, withRouter } from 'react-router'
 import { Link } from 'react-router-dom'
-import { AppContext } from '../App'
+import { AuthContext } from '../auth/Auth'
 import { NOTIFICATION, NotificationContext } from '../components/NotificationContext'
 import { PageError } from '../components/PageError'
 import { Preloader } from '../components/Preloader'
 import { SecondaryHeader } from '../components/SecondaryHeader'
 import { useMergeState } from '../hooks'
 import { httpClient } from '../http-client'
+import { goToHomePage } from '../utils/goToHomePage'
 import DocumentForm from './DocumentForm'
 import { FundingAgreements } from './FundingAgreements'
 import { Nfts } from './Nfts'
@@ -43,7 +44,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
     contacts: [],
   })
 
-  const { user } = useContext(AppContext)
+  const { user, token } = useContext(AuthContext)
   const notification = useContext(NotificationContext)
 
   const displayPageError = useCallback(
@@ -61,9 +62,9 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
       loadingMessage: 'Loading',
     })
     try {
-      const contacts = (await httpClient.contacts.list()).data
-      const schemas = (await httpClient.schemas.list()).data
-      const document = (await httpClient.documents.getById(id)).data
+      const contacts = (await httpClient.contacts.list(token!)).data
+      const schemas = (await httpClient.schemas.list(undefined, token!)).data
+      const document = (await httpClient.documents.getById(id, token!)).data
       setState({
         loadingMessage: null,
         contacts,
@@ -73,7 +74,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
     } catch (e) {
       displayPageError(e)
     }
-  }, [id, setState, displayPageError])
+  }, [id, setState, displayPageError, token])
 
   useEffect(() => {
     loadData()
@@ -90,7 +91,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
        * TODO this might need to change if we do not auto commit anymore
        * */
       newDoc.document_id = newDoc!.header!.document_id
-      document = (await httpClient.documents.create(newDoc)).data
+      document = (await httpClient.documents.create(newDoc, token!)).data
       setState({
         loadingMessage: null,
         document,
@@ -101,7 +102,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
     }
 
     try {
-      await httpClient.documents.commit(document._id!)
+      await httpClient.documents.commit(document._id!, token!)
     } catch (e) {
       displayModalError(e, 'Failed to commit document')
     }
@@ -128,6 +129,10 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
 
   const onCancel = () => {
     props.history.goBack()
+  }
+
+  if (!token) {
+    goToHomePage()
   }
 
   if (loadingMessage) return <Preloader message={loadingMessage} />
@@ -187,6 +192,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
           viewMode={!canMint}
           document={document!}
           contacts={contacts}
+          template={selectedSchema!.template}
           registries={selectedSchema!.registries}
         />
 

@@ -211,7 +211,7 @@ export class DocumentForm extends React.Component<Props, State> {
 
     return {
       validationSchema: Yup.object().shape({
-        attributes: (Yup.object() as any).shape(attributes),
+        attributes: Yup.object().shape(attributes),
       }),
       clone,
     }

@@ -216,10 +216,10 @@ const UsersList: FunctionComponent = () => {
                   as={'span'}
                   copy={true}
                   link={{
-                    href: getAddressLink((data as UserWithOrg).account),
+                    href: getAddressLink(data.account),
                     target: '_blank',
                   }}
-                  value={(data as UserWithOrg).account}
+                  value={data.account}
                 />
               ) : null,
           },
