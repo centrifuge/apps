@@ -1,10 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common'
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 import { NotificationMessage } from '@centrifuge/gateway-lib/centrifuge-node-client'
-import { DatabaseService } from '../database/database.service'
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
-import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes'
 import { DocumentStatus } from '@centrifuge/gateway-lib/models/document'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
+import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes'
+import { Body, Controller, Post } from '@nestjs/common'
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
+import { DatabaseService } from '../database/database.service'
 
 // TODO add this in Common package
 export enum DocumentTypes {

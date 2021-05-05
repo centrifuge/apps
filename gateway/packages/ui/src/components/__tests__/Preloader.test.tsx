@@ -1,8 +1,7 @@
+import { Spinner } from '@centrifuge/axis-spinner'
 import { mount } from 'enzyme'
 import React from 'react'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
-import { Spinner } from '@centrifuge/axis-spinner'
-import { Heading, Paragraph } from 'grommet'
 import { Preloader } from '../Preloader'
 
 describe('Preloader', () => {

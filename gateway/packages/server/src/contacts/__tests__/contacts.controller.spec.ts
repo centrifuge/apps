@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing'
 import { HttpException } from '@nestjs/common'
-import { ContactsController } from '../contacts.controller'
+import { Test, TestingModule } from '@nestjs/testing'
 import { Contact } from '../../../../lib/models/contact'
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'
-import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
+import { ContactsController } from '../contacts.controller'
 
 const delay = require('util').promisify(setTimeout)
 

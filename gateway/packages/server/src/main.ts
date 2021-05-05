@@ -1,10 +1,10 @@
-import { NestFactory, Reflector } from '@nestjs/core'
-import { AppModule } from './app.module'
-import * as path from 'path'
-import * as passport from 'passport'
-import config from './config'
-import { NestExpressApplication } from '@nestjs/platform-express'
 import { ClassSerializerInterceptor } from '@nestjs/common'
+import { NestFactory, Reflector } from '@nestjs/core'
+import { NestExpressApplication } from '@nestjs/platform-express'
+import * as passport from 'passport'
+import * as path from 'path'
+import { AppModule } from './app.module'
+import config from './config'
 
 // accept self-signed certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1'

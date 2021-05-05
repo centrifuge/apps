@@ -1,10 +1,10 @@
-import React from 'react'
 import { mount } from 'enzyme'
-import { Nfts } from '../Nfts'
 import { Button, DataTable } from 'grommet'
-import MintNftForm from '../MintNftForm'
+import React from 'react'
 import { defaultContacts, defaultUser } from '../../test-utilities/default-data'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
+import MintNftForm from '../MintNftForm'
+import { Nfts } from '../Nfts'
 
 jest.mock('../../http-client')
 const httpClient = require('../../http-client').httpClient

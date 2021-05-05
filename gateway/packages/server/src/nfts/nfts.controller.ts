@@ -1,11 +1,11 @@
-import { Body, Controller, InternalServerErrorException, Param, Post, Req, UseGuards } from '@nestjs/common'
-import { DatabaseService } from '../database/database.service'
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
 import { CoreapiMintNFTRequest } from '@centrifuge/gateway-lib/centrifuge-node-client'
 import { Document, DocumentRequest, NftStatus } from '@centrifuge/gateway-lib/models/document'
 import { MintNftRequest } from '@centrifuge/gateway-lib/models/nfts'
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
+import { Body, Controller, InternalServerErrorException, Param, Post, Req, UseGuards } from '@nestjs/common'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
+import { DatabaseService } from '../database/database.service'
 
 @Controller(ROUTES.NFTS)
 @UseGuards(JwtAuthGuard)

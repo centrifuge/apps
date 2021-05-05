@@ -1,22 +1,22 @@
-import React, { FunctionComponent } from 'react'
-import { useMergeState } from '../hooks'
+import { DisplayField } from '@centrifuge/axis-display-field'
 import { Modal } from '@centrifuge/axis-modal'
+import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
 import {
   createDocumentCollaborators,
   Document,
   getDocumentCollaborators,
 } from '@centrifuge/gateway-lib/models/document'
-import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
-import { Section } from '../components/Section'
-import { Anchor, Box, Button, Paragraph, Text } from 'grommet'
-import { DisplayField } from '@centrifuge/axis-display-field'
-import { UserAdd } from 'grommet-icons'
-import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
-import { connect, FormikContext } from 'formik'
-import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
-import CollaboratorForm from './CollaboratorForm'
 import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user'
+import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
+import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
+import { connect, FormikContext } from 'formik'
+import { Anchor, Box, Button, Paragraph, Text } from 'grommet'
+import { UserAdd } from 'grommet-icons'
+import React, { FunctionComponent } from 'react'
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
+import { Section } from '../components/Section'
+import { useMergeState } from '../hooks'
+import CollaboratorForm from './CollaboratorForm'
 
 interface OuterProps {
   contacts: Contact[]

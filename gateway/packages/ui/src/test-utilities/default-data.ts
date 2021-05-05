@@ -1,8 +1,8 @@
-import { User } from '@centrifuge/gateway-lib/models/user'
-import { Contact } from '@centrifuge/gateway-lib/models/contact'
-import { AttrTypes } from '@centrifuge/gateway-lib/models/schema'
 import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
+import { Contact } from '@centrifuge/gateway-lib/models/contact'
 import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document'
+import { AttrTypes } from '@centrifuge/gateway-lib/models/schema'
+import { User } from '@centrifuge/gateway-lib/models/user'
 
 export const defaultUser: User = {
   name: 'Default User',

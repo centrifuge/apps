@@ -1,8 +1,8 @@
-import React from 'react'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
 import { Formik } from 'formik'
 import { Box, Button, FormField, Paragraph, TextArea } from 'grommet'
+import React from 'react'
 import * as Yup from 'yup'
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
 
 type Props = {
   selectedSchema: Schema

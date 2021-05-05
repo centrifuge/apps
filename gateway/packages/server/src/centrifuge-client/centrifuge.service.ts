@@ -7,9 +7,8 @@ import {
   NFTsApi,
   TransferDetailsApi,
 } from '@centrifuge/gateway-lib/centrifuge-node-client'
-import config from '../config'
 import { promisify } from 'util'
-import { BadRequestException } from '@nestjs/common'
+import config from '../config'
 
 const delay = promisify(setTimeout)
 

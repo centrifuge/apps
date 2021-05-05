@@ -1,6 +1,6 @@
-import React, { FunctionComponent } from 'react'
-import { Box, Heading, Paragraph } from 'grommet'
 import { AxiosError } from 'axios'
+import { Box, Heading, Paragraph } from 'grommet'
+import React, { FunctionComponent } from 'react'
 
 type Props = {
   error: Error | AxiosError

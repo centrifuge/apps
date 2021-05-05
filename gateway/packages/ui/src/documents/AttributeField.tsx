@@ -1,12 +1,12 @@
-import React, { FunctionComponent } from 'react'
-import { NumberInput } from '@centrifuge/axis-number-input'
 import { DateInput } from '@centrifuge/axis-date-input'
-import { Attribute, AttrTypes } from '@centrifuge/gateway-lib/models/schema'
-import { Box, FormField, Select, TextInput } from 'grommet'
-import { dateToString, extractDate, getPercentFormat } from '@centrifuge/gateway-lib/utils/formaters'
-import { get } from 'lodash'
-import { connect, FormikContext } from 'formik'
+import { NumberInput } from '@centrifuge/axis-number-input'
 import { Document } from '@centrifuge/gateway-lib/models/document'
+import { Attribute, AttrTypes } from '@centrifuge/gateway-lib/models/schema'
+import { dateToString, extractDate, getPercentFormat } from '@centrifuge/gateway-lib/utils/formaters'
+import { connect, FormikContext } from 'formik'
+import { Box, FormField, Select, TextInput } from 'grommet'
+import { get } from 'lodash'
+import React, { FunctionComponent } from 'react'
 
 type Props = OuterProps & {
   formik: FormikContext<Document>

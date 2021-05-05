@@ -1,8 +1,8 @@
 import { mount } from 'enzyme'
+import { Heading, Paragraph } from 'grommet'
 import React from 'react'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
 import { PageError } from '../PageError'
-import { Heading, Paragraph } from 'grommet'
 
 describe('Page Error', () => {
   it('should display a Error error and message when receiving a normal error', () => {

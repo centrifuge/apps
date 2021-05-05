@@ -1,37 +1,19 @@
 import { Organization } from '@centrifuge/gateway-lib/models/organization'
-import { TwoFaType, User, UserWithOrg } from '@centrifuge/gateway-lib/models/user'
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
-import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators'
-import { MailerService } from '@nestjs-modules/mailer'
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Param,
-  Post,
-  Put,
-  Request,
-  UseGuards,
-  UseInterceptors,
-  ClassSerializerInterceptor,
-} from '@nestjs/common'
-import * as speakeasy from 'speakeasy'
-import * as bcrypt from 'bcrypt'
-import { promisify } from 'util'
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 import { LoggedInUser, PublicUser, TwoFaType, User, UserWithOrg } from '@centrifuge/gateway-lib/models/user'
-import { DatabaseService } from '../database/database.service'
-import config from '../config'
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
-import { UserManagerAuthGuard } from '../auth/user-manager-auth.guard'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators'
-import { Organization } from '@centrifuge/gateway-lib/models/organization'
 import { MailerService } from '@nestjs-modules/mailer'
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Request, UseGuards } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
+import * as bcrypt from 'bcrypt'
+import * as speakeasy from 'speakeasy'
+import { promisify } from 'util'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { JWTPayload } from '../auth/jwt-payload.interface'
+import { UserManagerAuthGuard } from '../auth/user-manager-auth.guard'
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
+import config from '../config'
+import { DatabaseService } from '../database/database.service'
 
 @Controller()
 export class UsersController {

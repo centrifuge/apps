@@ -20,22 +20,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common'
-import { DatabaseService } from '../database/database.service'
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
-import {
-  CoreapiAttributeResponse,
-  CoreapiCreateDocumentRequest,
-  CoreapiDocumentResponse,
-  CoreapiResponseHeader,
-} from '@centrifuge/gateway-lib/centrifuge-node-client'
-import { Document, DocumentStatus, NftStatus } from '@centrifuge/gateway-lib/models/document'
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
-import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes'
 import { merge } from 'lodash'
-import { User } from '@centrifuge/gateway-lib/models/user'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
+import { DatabaseService } from '../database/database.service'
 import TypeEnum = CoreapiAttributeResponse.TypeEnum
 import SchemeEnum = CoreapiDocumentResponse.SchemeEnum
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 
 export class CommitResp {
   commitResult: Document

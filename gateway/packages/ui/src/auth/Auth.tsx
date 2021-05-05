@@ -1,7 +1,7 @@
-import React, { createContext, FC, ReactNode, useEffect, useState } from 'react'
 import { User } from '@centrifuge/gateway-lib/models/user'
-import { useJWT } from './useJWT'
+import React, { createContext, FC, ReactNode, useEffect, useState } from 'react'
 import { httpClient } from '../http-client'
+import { useJWT } from './useJWT'
 
 interface AuthContextData {
   user: User | null

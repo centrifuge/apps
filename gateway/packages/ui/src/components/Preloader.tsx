@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
 import { Spinner } from '@centrifuge/axis-spinner'
+import React, { Component } from 'react'
 
 type PreloaderProps = {
   message: string

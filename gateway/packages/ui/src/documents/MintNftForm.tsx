@@ -1,12 +1,12 @@
-import React from 'react'
-import { Box, Button, FormField, TextInput } from 'grommet'
-import { Formik } from 'formik'
-import * as Yup from 'yup'
-import { Registry } from '@centrifuge/gateway-lib/models/schema'
-import { SearchSelect } from '@centrifuge/axis-search-select'
-import { isValidAddress } from 'ethereumjs-util'
 import { DisplayField } from '@centrifuge/axis-display-field'
+import { SearchSelect } from '@centrifuge/axis-search-select'
+import { Registry } from '@centrifuge/gateway-lib/models/schema'
 import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
+import { isValidAddress } from 'ethereumjs-util'
+import { Formik } from 'formik'
+import { Box, Button, FormField, TextInput } from 'grommet'
+import React from 'react'
+import * as Yup from 'yup'
 
 type Props = {
   onSubmit: (data: MintNftFormData) => void

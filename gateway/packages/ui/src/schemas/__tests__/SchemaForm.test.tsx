@@ -1,9 +1,9 @@
-import { mount, shallow } from 'enzyme'
-import React from 'react'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import { mount } from 'enzyme'
 import { Paragraph, TextArea } from 'grommet'
+import React from 'react'
 import { withAxis } from '../../test-utilities/test-providers'
 import SchemaForm from '../SchemaForm'
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
 
 describe('Schema Form', () => {
   const onSubmit = jest.fn(() => {})

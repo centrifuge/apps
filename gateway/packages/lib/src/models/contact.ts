@@ -1,6 +1,6 @@
 import { isValidAddress } from 'ethereumjs-util'
-import { User } from './user'
 import { unionBy } from 'lodash'
+import { User } from './user'
 
 export class Contact {
   constructor(readonly name?: string, readonly address?: string, readonly ownerId?: string, readonly _id?: string) {}

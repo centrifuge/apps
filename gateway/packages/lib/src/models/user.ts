@@ -1,8 +1,8 @@
 import { Exclude } from 'class-transformer'
+import { CoreapiNFT } from '../centrifuge-node-client'
 import { PERMISSIONS } from '../utils/constants'
 import { Document, DOCUMENT_ACCESS } from './document'
 import { FundingAgreement } from './funding-request'
-import { CoreapiNFT } from '../centrifuge-node-client'
 
 export interface IUser {
   name: string

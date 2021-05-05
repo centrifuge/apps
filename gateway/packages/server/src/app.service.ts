@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common'
 import { PublicUser } from '@centrifuge/gateway-lib/models/user'
+import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export class AppService {

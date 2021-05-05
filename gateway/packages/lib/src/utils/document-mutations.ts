@@ -1,6 +1,6 @@
-import { Schema } from '../models/schema'
-import { Document } from '../models/document'
 import { BigNumber } from 'bignumber.js'
+import { Document } from '../models/document'
+import { Schema } from '../models/schema'
 /*
  * Applies mutations and transformation that are only valuable when saving data
  * Ex. type conversions, unit transformations, etc

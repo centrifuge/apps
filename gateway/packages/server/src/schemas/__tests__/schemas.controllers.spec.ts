@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing'
 import { HttpException } from '@nestjs/common'
+import { Test, TestingModule } from '@nestjs/testing'
 import { AttributesErrors, AttrTypes, DiffErrors, RegistriesErrors, Schema } from '../../../../lib/models/schema'
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'
 import { SchemasController } from '../schemas.controllers'
-import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 
 const delay = require('util').promisify(setTimeout)
 

@@ -1,10 +1,9 @@
-import React from 'react'
-import { Box, Button, FormField, Text, TextInput } from 'grommet'
-import { Link } from 'react-router-dom'
-
 import { User } from '@centrifuge/gateway-lib/models/user'
-import routes from './routes'
 import { Formik } from 'formik'
+import { Box, Button, FormField, Text, TextInput } from 'grommet'
+import React from 'react'
+import { Link } from 'react-router-dom'
+import routes from './routes'
 
 interface LoginProps {
   onSubmit: (values: any) => void

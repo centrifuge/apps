@@ -1,9 +1,9 @@
-import { LocalStrategy } from '../local.strategy'
 import { UnauthorizedException } from '@nestjs/common'
+import { Test } from '@nestjs/testing'
+import { User } from '../../../../lib/models/user'
 import { DatabaseService } from '../../database/database.service'
 import { AuthService } from '../auth.service'
-import { User } from '../../../../lib/models/user'
-import { Test } from '@nestjs/testing'
+import { LocalStrategy } from '../local.strategy'
 
 describe('LocalStrategy', () => {
   const mockUser: User = {

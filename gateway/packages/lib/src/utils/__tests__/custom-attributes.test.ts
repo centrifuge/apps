@@ -1,4 +1,4 @@
-import { unflatten, unflattenRaw, flatten } from '../custom-attributes'
+import { flatten, unflatten, unflattenRaw } from '../custom-attributes'
 
 describe('Custom Attributes', () => {
   const attr = {

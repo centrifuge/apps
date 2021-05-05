@@ -1,10 +1,10 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
-import { UsersController } from './users.controller'
-import { DatabaseModule } from '../database/database.module'
-import * as passport from 'passport'
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
-import { CentrifugeModule } from '../centrifuge-client/centrifuge.module'
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
+import * as passport from 'passport'
 import { AuthModule } from '../auth/auth.module'
+import { CentrifugeModule } from '../centrifuge-client/centrifuge.module'
+import { DatabaseModule } from '../database/database.module'
+import { UsersController } from './users.controller'
 @Module({
   controllers: [UsersController],
   providers: [],

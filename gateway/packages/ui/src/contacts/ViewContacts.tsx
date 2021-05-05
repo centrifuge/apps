@@ -1,12 +1,12 @@
-import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
 import { Contact } from '@centrifuge/gateway-lib/models/contact'
-import ContactList from './ContactList'
-import { Preloader } from '../components/Preloader'
-import { httpClient } from '../http-client'
+import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
 import { AuthContext } from '../auth/Auth'
-import { useMergeState } from '../hooks'
 import { PageError } from '../components/PageError'
+import { Preloader } from '../components/Preloader'
+import { useMergeState } from '../hooks'
+import { httpClient } from '../http-client'
 import { goToHomePage } from '../utils/goToHomePage'
+import ContactList from './ContactList'
 
 type State = {
   loading: boolean

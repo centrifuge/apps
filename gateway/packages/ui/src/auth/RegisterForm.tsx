@@ -1,11 +1,11 @@
+import { User } from '@centrifuge/gateway-lib/models/user'
+import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators'
+import { Formik } from 'formik'
+import { Box, Button, FormField, Text, TextInput } from 'grommet'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Box, Button, FormField, Text, TextInput } from 'grommet'
-import { User } from '@centrifuge/gateway-lib/models/user'
-import routes from './routes'
-import { Formik } from 'formik'
 import * as Yup from 'yup'
-import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators'
+import routes from './routes'
 
 interface RegisterProps {
   email: string

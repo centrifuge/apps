@@ -1,12 +1,11 @@
-import React from 'react'
-import { mount } from 'enzyme'
-import { BrowserRouter } from 'react-router-dom'
-import AttributeField from '../AttributeField'
-import { Attribute, AttrTypes } from '@centrifuge/gateway-lib/models/schema'
-import { NumberInput } from '@centrifuge/axis-number-input'
 import { DateInput } from '@centrifuge/axis-date-input'
+import { NumberInput } from '@centrifuge/axis-number-input'
+import { Attribute, AttrTypes } from '@centrifuge/gateway-lib/models/schema'
+import { mount } from 'enzyme'
 import { Select, TextInput } from 'grommet'
+import React from 'react'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
+import AttributeField from '../AttributeField'
 
 describe('AttributeField', () => {
   it('Should render a DECIMAL ', () => {

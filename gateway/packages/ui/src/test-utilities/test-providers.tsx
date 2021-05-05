@@ -1,8 +1,8 @@
+import { AxisTheme } from '@centrifuge/axis-theme'
 import { User } from '@centrifuge/gateway-lib/models/user'
 import React from 'react'
 import { AuthContext } from '../auth/Auth'
 import { NotificationProvider } from '../components/NotificationContext'
-import { AxisTheme } from '@centrifuge/axis-theme'
 import { defaultToken, defaultUser } from './default-data'
 
 // Wrap component with Application Context;

@@ -1,8 +1,8 @@
 import { Box } from 'grommet'
-import { StyledTextInput } from 'grommet/components/TextInput/StyledTextInput'
-import { StyledTextArea } from 'grommet/components/TextArea/StyledTextArea'
-import { StyledSelect } from 'grommet/components/Select/StyledSelect'
 import { StyledRadioButton } from 'grommet/components/RadioButton/RadioButton'
+import { StyledSelect } from 'grommet/components/Select/StyledSelect'
+import { StyledTextArea } from 'grommet/components/TextArea/StyledTextArea'
+import { StyledTextInput } from 'grommet/components/TextInput/StyledTextInput'
 import styled from 'styled-components'
 
 export const ViewModeFormContainer = styled(Box)`

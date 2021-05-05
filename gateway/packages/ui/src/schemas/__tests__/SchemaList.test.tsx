@@ -1,15 +1,12 @@
-import React from 'react'
-import { mount } from 'enzyme'
-import { BrowserRouter } from 'react-router-dom'
-import { SearchSelect } from '@centrifuge/axis-search-select'
-import { Anchor, CheckBox, DataTable } from 'grommet'
-import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
-import { Modal } from '@centrifuge/axis-modal'
 import { Schema } from '@centrifuge/gateway-lib/models/schema'
-import SchemaList from '../SchemaList'
-import { PageError } from '../../components/PageError'
-import SchemaForm from '../SchemaForm'
+import { mount } from 'enzyme'
+import { Anchor, CheckBox, DataTable } from 'grommet'
+import React from 'react'
 import { act } from 'react-dom/test-utils'
+import { PageError } from '../../components/PageError'
+import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
+import SchemaForm from '../SchemaForm'
+import SchemaList from '../SchemaList'
 
 jest.mock('../../http-client')
 const httpClient = require('../../http-client').httpClient

@@ -1,13 +1,11 @@
-import { LocalStrategy } from '../local.strategy'
-import { UnauthorizedException } from '@nestjs/common'
-import { DatabaseService } from '../../database/database.service'
-import { AuthService } from '../auth.service'
 import { User } from '@centrifuge/gateway-lib/models/user'
-import { Test } from '@nestjs/testing'
-import { JwtStrategy } from '../jwt.strategy'
+import { UnauthorizedException } from '@nestjs/common'
 import { JwtModule, JwtService } from '@nestjs/jwt'
-import { JWTPayload } from '../jwt-payload.interface'
+import { Test } from '@nestjs/testing'
 import config from '../../config'
+import { AuthService } from '../auth.service'
+import { JWTPayload } from '../jwt-payload.interface'
+import { JwtStrategy } from '../jwt.strategy'
 
 describe('JWTStrategy', () => {
   const mockUser: User = {

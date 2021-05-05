@@ -1,13 +1,13 @@
-import { promisify } from 'util'
-import * as bcrypt from 'bcrypt'
-import { User } from '@centrifuge/gateway-lib/models/user'
-import { DatabaseRepository } from './database.repository'
 import { Contact } from '@centrifuge/gateway-lib/models/contact'
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
-import config from '../config'
-import { DatabaseService } from './database.service'
 import { DocumentRequest } from '@centrifuge/gateway-lib/models/document'
 import { Organization } from '@centrifuge/gateway-lib/models/organization'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import { User } from '@centrifuge/gateway-lib/models/user'
+import * as bcrypt from 'bcrypt'
+import { promisify } from 'util'
+import config from '../config'
+import { DatabaseRepository } from './database.repository'
+import { DatabaseService } from './database.service'
 
 // TODO refactor this in mutiple providers,services
 

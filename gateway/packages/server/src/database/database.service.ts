@@ -1,9 +1,9 @@
-import { DatabaseRepository } from './database.repository'
-import { User } from '@centrifuge/gateway-lib/models/user'
 import { Contact } from '@centrifuge/gateway-lib/models/contact'
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
 import { Document } from '@centrifuge/gateway-lib/models/document'
 import { Organization } from '@centrifuge/gateway-lib/models/organization'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import { User } from '@centrifuge/gateway-lib/models/user'
+import { DatabaseRepository } from './database.repository'
 
 export class DatabaseService {
   constructor(

@@ -1,10 +1,10 @@
-import { mount, shallow } from 'enzyme'
-import React from 'react'
-import { defaultSchemas, defaultUser } from '../../test-utilities/default-data'
 import { SearchSelect } from '@centrifuge/axis-search-select'
-import MintNftForm from '../MintNftForm'
-import { withAxis } from '../../test-utilities/test-providers'
+import { mount } from 'enzyme'
 import { TextInput } from 'grommet'
+import React from 'react'
+import { defaultSchemas } from '../../test-utilities/default-data'
+import { withAxis } from '../../test-utilities/test-providers'
+import MintNftForm from '../MintNftForm'
 
 describe('Mint NFT Form', () => {
   const onSubmit = jest.fn(() => {})

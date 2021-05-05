@@ -1,9 +1,9 @@
-import { FundingController } from '../funding.controller'
-import { databaseServiceProvider } from '../../database/database.providers'
 import { Test, TestingModule } from '@nestjs/testing'
-import { DatabaseService } from '../../database/database.service'
-import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
+import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'
+import { databaseServiceProvider } from '../../database/database.providers'
+import { DatabaseService } from '../../database/database.service'
+import { FundingController } from '../funding.controller'
 
 describe('Funding controller', () => {
   const invoice: any = {

@@ -1,5 +1,5 @@
-import React, { FunctionComponent } from 'react'
 import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import React, { FunctionComponent } from 'react'
 import AttributeSection from './AttributeSection'
 
 interface Props {
