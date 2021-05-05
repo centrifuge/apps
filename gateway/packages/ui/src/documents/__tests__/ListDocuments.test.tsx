@@ -1,14 +1,15 @@
-import { mount } from 'enzyme'
-import { DataTable } from 'grommet'
 import React from 'react'
-import { act } from 'react-dom/test-utils'
-import { MemoryRouter } from 'react-router'
+import { mount } from 'enzyme'
 import { Link } from 'react-router-dom'
-import { PageError } from '../../components/PageError'
-import { defaultSchemas, defaultUser } from '../../test-utilities/default-data'
+import { Anchor, DataTable, Select } from 'grommet'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
+import { PageError } from '../../components/PageError'
+import { act } from 'react-dom/test-utils'
+import { defaultSchemas, defaultUser } from '../../test-utilities/default-data'
 import { ListDocuments } from '../ListDocuments'
 import documentRoutes from '../routes'
+import { MemoryRouter } from 'react-router'
+import { createMemoryHistory } from 'history'
 
 jest.mock('../../http-client')
 const httpClient = require('../../http-client').httpClient

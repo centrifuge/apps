@@ -1,9 +1,9 @@
-import { User } from '@centrifuge/gateway-lib/models/user'
+import { LocalStrategy } from '../local.strategy'
 import { UnauthorizedException } from '@nestjs/common'
-import { Test } from '@nestjs/testing'
 import { DatabaseService } from '../../database/database.service'
 import { AuthService } from '../auth.service'
-import { LocalStrategy } from '../local.strategy'
+import { User } from '../../../../lib/models/user'
+import { Test } from '@nestjs/testing'
 
 describe('LocalStrategy', () => {
   const mockUser: User = {

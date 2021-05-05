@@ -1,15 +1,17 @@
-import { mount } from 'enzyme'
-import { Button, DataTable } from 'grommet'
 import React from 'react'
+import { mount } from 'enzyme'
+import { Nfts } from '../Nfts'
+import { Button, DataTable } from 'grommet'
+import MintNftForm from '../MintNftForm'
 import { defaultContacts, defaultUser } from '../../test-utilities/default-data'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
-import MintNftForm from '../MintNftForm'
-import { Nfts } from '../Nfts'
 
 jest.mock('../../http-client')
 const httpClient = require('../../http-client').httpClient
 
 describe('Nfts', () => {
+  const template = '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef'
+
   const registries = [
     {
       label: 'First Registry',
@@ -112,6 +114,7 @@ describe('Nfts', () => {
           viewMode={true}
           user={defaultUser}
           registries={registries}
+          template={template}
         />
       )
     )
@@ -151,6 +154,7 @@ describe('Nfts', () => {
           viewMode={false}
           user={defaultUser}
           registries={registries}
+          template={template}
         />
       )
     )
@@ -181,6 +185,7 @@ describe('Nfts', () => {
           viewMode={false}
           user={defaultUser}
           registries={registries}
+          template={template}
         />
       )
     )

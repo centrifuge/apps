@@ -1,10 +1,10 @@
-import { User } from '@centrifuge/gateway-lib/models/user'
 import { Test, TestingModule } from '@nestjs/testing'
-import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'
-import { CentrifugeService } from '../../centrifuge-client/centrifuge.service'
-import { databaseServiceProvider } from '../../database/database.providers'
-import { DatabaseService } from '../../database/database.service'
 import { DocumentTypes, EventTypes, WebhooksController } from '../webhooks.controller'
+import { databaseServiceProvider } from '../../database/database.providers'
+import { CentrifugeService } from '../../centrifuge-client/centrifuge.service'
+import { DatabaseService } from '../../database/database.service'
+import { User } from '../../../../lib/models/user'
+import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'
 
 describe('WebhooksController', () => {
   let webhooksModule: TestingModule
@@ -58,6 +58,7 @@ describe('WebhooksController', () => {
               nfts: [{ owner: 'owner', token_id: 'token_id' }],
             },
             data: { currency: 'USD' },
+            document_status: 'Created',
             fromId: '0xRandomId',
             scheme: 'iUSDF2ax31e',
             attributes: {
@@ -74,9 +75,11 @@ describe('WebhooksController', () => {
                 value: 'insects',
               },
             },
+            read_access: ['0x111'],
+            write_access: ['0x222'],
           },
         },
-        { upsert: true }
+        { multi: true, upsert: true, returnUpdatedDocs: true }
       )
     })
 

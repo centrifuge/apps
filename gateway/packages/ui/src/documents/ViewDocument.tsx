@@ -1,25 +1,26 @@
-import { Contact, extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact'
-import { Document, documentIsEditable } from '@centrifuge/gateway-lib/models/document'
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
-import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user'
-import { AxiosError } from 'axios'
-import { Box, Button, Heading } from 'grommet'
-import { LinkPrevious } from 'grommet-icons'
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
-import { RouteComponentProps, withRouter } from 'react-router'
 import { Link } from 'react-router-dom'
-import { AppContext } from '../App'
-import { NOTIFICATION, NotificationContext } from '../components/NotificationContext'
-import { PageError } from '../components/PageError'
-import { Preloader } from '../components/Preloader'
-import { SecondaryHeader } from '../components/SecondaryHeader'
-import { useMergeState } from '../hooks'
+import { Document, documentIsEditable } from '@centrifuge/gateway-lib/models/document'
+import { RouteComponentProps, withRouter } from 'react-router'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import { Contact, extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact'
+import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user'
 import { httpClient } from '../http-client'
+import { AuthContext } from '../auth/Auth'
+import { useMergeState } from '../hooks'
+import { PageError } from '../components/PageError'
+import { SecondaryHeader } from '../components/SecondaryHeader'
+import { Box, Button, Heading } from 'grommet'
 import routes from '../routes'
-import DocumentForm from './DocumentForm'
-import { FundingAgreements } from './FundingAgreements'
-import { Nfts } from './Nfts'
+import { LinkPrevious } from 'grommet-icons'
 import documentRoutes from './routes'
+import DocumentForm from './DocumentForm'
+import { Preloader } from '../components/Preloader'
+import { Nfts } from './Nfts'
+import { FundingAgreements } from './FundingAgreements'
+import { AxiosError } from 'axios'
+import { NOTIFICATION, NotificationContext } from '../components/NotificationContext'
+import { goToHomePage } from '../utils/goToHomePage'
 
 type Props = RouteComponentProps<{ id: string }>
 
@@ -46,7 +47,7 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
     history: { push },
   } = props
 
-  const { user } = useContext(AppContext)
+  const { user, token } = useContext(AuthContext)
   const notification = useContext(NotificationContext)
 
   const displayPageError = useCallback(
@@ -79,9 +80,9 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
       loadingMessage: 'Loading',
     })
     try {
-      const contacts = (await httpClient.contacts.list()).data
-      const schemas = (await httpClient.schemas.list()).data
-      const document = (await httpClient.documents.getById(id)).data
+      const contacts = (await httpClient.contacts.list(token!)).data
+      const schemas = (await httpClient.schemas.list(undefined, token!)).data
+      const document = (await httpClient.documents.getById(id, token!)).data
       setState({
         loadingMessage: null,
         contacts,
@@ -91,11 +92,15 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
     } catch (e) {
       displayPageError(e)
     }
-  }, [id, setState, displayPageError])
+  }, [id, setState, displayPageError, token])
 
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  if (!token) {
+    goToHomePage()
+  }
 
   if (loadingMessage) return <Preloader message={loadingMessage} />
   if (error) return <PageError error={error} />
@@ -144,6 +149,7 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
           onAsyncError={displayModalError}
           document={document!}
           contacts={contacts}
+          template={selectedSchema!.template}
           registries={selectedSchema!.registries}
         />
 

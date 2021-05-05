@@ -1,14 +1,16 @@
-import { DateInput } from '@centrifuge/axis-date-input'
-import { NumberInput } from '@centrifuge/axis-number-input'
-import { SearchSelect } from '@centrifuge/axis-search-select'
+import { mount, shallow } from 'enzyme'
+import React from 'react'
+import { Spinner } from '@centrifuge/axis-spinner'
+import { Modal } from '@centrifuge/axis-modal'
+import FundingRequestForm from '../FundingAgreementForm'
 import { FundingAgreement } from '@centrifuge/gateway-lib/models/funding-request'
 import { dateToString } from '@centrifuge/gateway-lib/utils/formaters'
-import { mount } from 'enzyme'
-import { TextInput } from 'grommet'
-import React from 'react'
 import { defaultContacts } from '../../test-utilities/default-data'
+import { NumberInput } from '@centrifuge/axis-number-input'
+import { DateInput } from '@centrifuge/axis-date-input'
+import { SearchSelect } from '@centrifuge/axis-search-select'
+import { TextInput } from 'grommet'
 import { withAxis } from '../../test-utilities/test-providers'
-import FundingRequestForm from '../FundingAgreementForm'
 
 describe('Funding Agreement Form', () => {
   const onSubmit = jest.fn(() => {})

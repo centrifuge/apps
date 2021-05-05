@@ -1,24 +1,25 @@
-import { DisplayField } from '@centrifuge/axis-display-field'
-import { Modal } from '@centrifuge/axis-modal'
-import { Organization } from '@centrifuge/gateway-lib/models/organization'
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
-import { User, UserWithOrg } from '@centrifuge/gateway-lib/models/user'
-import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants'
-import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
-import { formatDate } from '@centrifuge/gateway-lib/utils/formaters'
-import { mapSchemaNames } from '@centrifuge/gateway-lib/utils/schema-utils'
-import { AxiosError } from 'axios'
-import { Anchor, Box, Button, Heading, Text } from 'grommet'
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
-import { AppContext } from '../App'
-import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
-import { NOTIFICATION, NotificationContext } from '../components/NotificationContext'
-import { PageError } from '../components/PageError'
+import { Anchor, Box, Button, Heading, Text } from 'grommet'
+import { User, UserWithOrg } from '@centrifuge/gateway-lib/models/user'
+import { Modal } from '@centrifuge/axis-modal'
+import UserForm from './UserForm'
+import { formatDate } from '@centrifuge/gateway-lib/utils/formaters'
 import { Preloader } from '../components/Preloader'
 import { SecondaryHeader } from '../components/SecondaryHeader'
-import { useMergeState } from '../hooks'
+import { DisplayField } from '@centrifuge/axis-display-field'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import { mapSchemaNames } from '@centrifuge/gateway-lib/utils/schema-utils'
+import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants'
 import { httpClient } from '../http-client'
-import UserForm from './UserForm'
+import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
+import { PageError } from '../components/PageError'
+import { useMergeState } from '../hooks'
+import { NOTIFICATION, NotificationContext } from '../components/NotificationContext'
+import { AxiosError } from 'axios'
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
+import { Organization } from '@centrifuge/gateway-lib/models/organization'
+import { AuthContext } from '../auth/Auth'
+import { goToHomePage } from '../utils/goToHomePage'
 
 type State = {
   loadingMessage: string | null
@@ -47,7 +48,7 @@ const UsersList: FunctionComponent = () => {
   })
 
   const notification = useContext(NotificationContext)
-  const { user } = useContext(AppContext)
+  const { user, token } = useContext(AuthContext)
 
   const displayPageError = useCallback(
     (error) => {
@@ -64,9 +65,9 @@ const UsersList: FunctionComponent = () => {
       loadingMessage: 'Loading',
     })
     try {
-      const organizations = (await httpClient.organizations.list()).data
-      const users = (await httpClient.user.list()).data.map((user) => {
-        const org = organizations.find((o) => o.account.toLowerCase() === user.account.toLowerCase())
+      const organizations = (await httpClient.organizations.list(token!)).data
+      const users = (await httpClient.user.list(token!)).data.map((user) => {
+        const org = organizations.find((o) => o.account?.toLowerCase() === user.account?.toLowerCase())
         const organizationName = org ? org.name : 'undefined'
         return {
           ...user,
@@ -75,9 +76,12 @@ const UsersList: FunctionComponent = () => {
       })
 
       const schemas = (
-        await httpClient.schemas.list({
-          archived: { $exists: false, $ne: true },
-        })
+        await httpClient.schemas.list(
+          {
+            archived: { $exists: false, $ne: true },
+          },
+          token!
+        )
       ).data
 
       setState({
@@ -90,7 +94,7 @@ const UsersList: FunctionComponent = () => {
     } catch (e) {
       displayPageError(e)
     }
-  }, [setState, displayPageError])
+  }, [setState, displayPageError, token])
 
   useEffect(() => {
     loadData()
@@ -130,7 +134,7 @@ const UsersList: FunctionComponent = () => {
       setState({
         loadingMessage: 'Deleting user',
       })
-      await httpClient.user.delete(user)
+      await httpClient.user.delete(user, token!)
       await loadData()
     } catch (e) {
       notification.alert({
@@ -162,7 +166,7 @@ const UsersList: FunctionComponent = () => {
         userFormOpened: false,
         loadingMessage: context.loadingMessage,
       })
-      await httpClient.user[context.method](user)
+      await httpClient.user[context.method](user, token!)
       await loadData()
     } catch (e) {
       notification.alert({
@@ -177,6 +181,10 @@ const UsersList: FunctionComponent = () => {
     }
   }
 
+  if (!token) {
+    goToHomePage()
+  }
+
   const renderUsers = (data, schemas) => {
     return (
       <DataTableWithDynamicHeight
@@ -187,24 +195,23 @@ const UsersList: FunctionComponent = () => {
           {
             property: 'name',
             header: 'Name',
-            render: (data) => ((data as UserWithOrg).name ? <Text>{(data as UserWithOrg).name}</Text> : null),
+            render: (data) => (data.name ? <Text>{data.name}</Text> : null),
           },
           {
             property: 'email',
             header: 'Email',
-            render: (data) => ((data as UserWithOrg).email ? <Text>{(data as UserWithOrg).email}</Text> : null),
+            render: (data) => (data.email ? <Text>{data.email}</Text> : null),
           },
           {
             property: 'organizationName',
             header: 'Organization name',
-            render: (data) =>
-              (data as UserWithOrg).organizationName ? <Text>{(data as UserWithOrg).organizationName}</Text> : null,
+            render: (data) => (data.organizationName ? <Text>{data.organizationName}</Text> : null),
           },
           {
             property: 'account',
             header: 'Centrifuge ID',
             render: (data) =>
-              (data as UserWithOrg).account ? (
+              data.account ? (
                 <DisplayField
                   as={'span'}
                   copy={true}
@@ -219,17 +226,13 @@ const UsersList: FunctionComponent = () => {
           {
             property: 'createdAt',
             header: 'Date added',
-            render: (data) => ((data as any).createdAt ? <Text>{formatDate((data as any).createdAt)}</Text> : null),
+            render: (data) => (data.createdAt ? <Text>{formatDate(data.createdAt)}</Text> : null),
           },
           {
             property: 'enabled',
             header: 'Status',
             render: (data) =>
-              (data as UserWithOrg).enabled ? (
-                <Text color="status-ok">Active</Text>
-              ) : (
-                <Text color="status-warning">Created</Text>
-              ),
+              data.enabled ? <Text color="status-ok">Active</Text> : <Text color="status-warning">Created</Text>,
           },
           {
             property: 'twoFAType',
@@ -240,7 +243,7 @@ const UsersList: FunctionComponent = () => {
             sortable: false,
             header: 'User rights',
             render: (data) => {
-              return (data as UserWithOrg).permissions.join(', ')
+              return data.permissions.join(', ')
             },
           },
           {
@@ -249,14 +252,11 @@ const UsersList: FunctionComponent = () => {
             header: 'Document schemas',
             render: (data) => {
               // User has not schemas display
-              if (!Array.isArray((data as UserWithOrg).schemas)) return ''
-              const activeSchemas = mapSchemaNames((data as UserWithOrg).schemas, schemas)
+              if (!Array.isArray(data.schemas)) return ''
+              const activeSchemas = mapSchemaNames(data.schemas, schemas)
                 .map((s) => s.label || s.name)
                 .join(', ')
-              if (
-                (data as UserWithOrg).permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS) &&
-                activeSchemas.length === 0
-              ) {
+              if (data.permissions.includes(PERMISSIONS.CAN_MANAGE_DOCUMENTS) && activeSchemas.length === 0) {
                 return <Text color="status-error">User should have at least one active schema assigned</Text>
               }
 
@@ -269,10 +269,8 @@ const UsersList: FunctionComponent = () => {
             header: 'Actions',
             render: (data) => (
               <Box direction="row" gap="small">
-                <Anchor label={'Edit'} onClick={() => openUserForm(data as UserWithOrg)} />
-                {user?.email !== (data as UserWithOrg).email && (
-                  <Anchor label={'Delete'} onClick={() => confirmUserDelete(data as UserWithOrg)} />
-                )}
+                <Anchor label={'Edit'} onClick={() => openUserForm(data)} />
+                {user?.email !== data.email && <Anchor label={'Delete'} onClick={() => confirmUserDelete(data)} />}
               </Box>
             ),
           },

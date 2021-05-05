@@ -1,6 +1,6 @@
-import { AxiosError } from 'axios'
-import { Box, Heading, Paragraph } from 'grommet'
 import React, { FunctionComponent } from 'react'
+import { Box, Heading, Paragraph } from 'grommet'
+import { AxiosError } from 'axios'
 
 type Props = {
   error: Error | AxiosError
@@ -8,6 +8,9 @@ type Props = {
 export const PageError: FunctionComponent<Props> = ({ error }) => {
   let title = 'Error'
   let message = error.message || 'Something is terribly wrong'
+
+  console.error(error)
+
   if (error.hasOwnProperty('isAxiosError')) {
     const axiosError = error as AxiosError
     title = axiosError!.response!.status ? axiosError!.response!.status.toString() : title

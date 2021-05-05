@@ -6,7 +6,7 @@
     "start:prod": "nodemon",
     "pretest": "yarn workspace @centrifuge/gateway-lib run build",
     "test": "CI=true yarn workspace @centrifuge/gateway-lib run test && CI=true yarn workspace @centrifuge/gateway-server run test && CI=true yarn workspace @centrifuge/gateway-ui run test",
-    "start": "yarn workspace @centrifuge/gateway-lib run start && yarn workspace @centrifuge/gateway-server run start && yarn workspace @centrifuge/gateway-ui run start",
+    "start": "concurrently \"yarn workspace @centrifuge/gateway-lib run start\" \"yarn workspace @centrifuge/gateway-server run start\" \"yarn workspace @centrifuge/gateway-ui run start\"",
     "build": "yarn workspace @centrifuge/gateway-lib run build && yarn workspace @centrifuge/gateway-server run build && yarn workspace @centrifuge/gateway-ui run build",
     "postbuild": "yarn run move:assets",
     "move:assets": "yarn run move:email-templates && yarn run move:ui",

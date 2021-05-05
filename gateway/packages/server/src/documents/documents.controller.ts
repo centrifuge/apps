@@ -20,12 +20,22 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common'
-import { merge } from 'lodash'
-import { SessionGuard } from '../auth/SessionGuard'
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
 import { DatabaseService } from '../database/database.service'
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
+import {
+  CoreapiAttributeResponse,
+  CoreapiCreateDocumentRequest,
+  CoreapiDocumentResponse,
+  CoreapiResponseHeader,
+} from '@centrifuge/gateway-lib/centrifuge-node-client'
+import { Document, DocumentStatus, NftStatus } from '@centrifuge/gateway-lib/models/document'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
+import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes'
+import { merge } from 'lodash'
+import { User } from '@centrifuge/gateway-lib/models/user'
 import TypeEnum = CoreapiAttributeResponse.TypeEnum
 import SchemeEnum = CoreapiDocumentResponse.SchemeEnum
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 
 export class CommitResp {
   commitResult: Document
@@ -33,7 +43,7 @@ export class CommitResp {
 }
 
 @Controller(ROUTES.DOCUMENTS)
-@UseGuards(SessionGuard)
+@UseGuards(JwtAuthGuard)
 export class DocumentsController {
   constructor(
     private readonly databaseService: DatabaseService,
@@ -59,8 +69,11 @@ export class DocumentsController {
 
     const updated = await this.centrifugeService.pullForJobComplete(commitResult.header.job_id, user.account)
 
-    await this.databaseService.documents.update(
-      { 'header.document_id': document.header.document_id },
+    const updatedDocs = await this.databaseService.documents.update(
+      {
+        'header.document_id': document.header.document_id,
+        organizationId: user.account.toLowerCase(),
+      },
       {
         $set: {
           document_status: updated.status === 'success' ? DocumentStatus.Created : DocumentStatus.CreationFail,
@@ -68,8 +81,10 @@ export class DocumentsController {
       },
       {
         multi: true,
+        returnUpdatedDocs: true,
       }
     )
+
     return commitResult
   }
   /*
@@ -100,8 +115,11 @@ export class DocumentsController {
 
     const createResult: Document = await this.centrifugeService.documents.createDocumentV2(user.account, payload)
 
-    return (await this.databaseService.documents.update(
-      { 'header.document_id': createResult.header.document_id },
+    const updated = (await this.databaseService.documents.update(
+      {
+        'header.document_id': createResult.header.document_id,
+        organizationId: user.account.toLowerCase(),
+      },
       {
         ...createResult,
         attributes: unflatten(createResult.attributes),
@@ -117,6 +135,8 @@ export class DocumentsController {
         upsert: true,
       }
     )) as Document
+
+    return updated
   }
 
   async cloneDoc(document: Document, template, user: User) {
@@ -136,13 +156,15 @@ export class DocumentsController {
      * TODO this should be removed when we do not require a commit before each update
      * */
     const mergedDoc: Document = merge(cloneResult, document)
-    return await this.databaseService.documents.insert({
+    const inserted = await this.databaseService.documents.insert({
       ...mergedDoc,
       ownerId: user._id,
       document_status: DocumentStatus.Creating,
       nft_status: NftStatus.NoNft,
       organizationId: user.account.toLowerCase(),
     })
+
+    return inserted
   }
 
   @Post()
@@ -237,7 +259,10 @@ export class DocumentsController {
        * and it can happen that the webhook is not called
        * */
       const docs: any = await this.databaseService.documents.update(
-        { 'header.document_id': docFromNode.header.document_id },
+        {
+          'header.document_id': docFromNode.header.document_id,
+          organizationId: request.user.account.toLowerCase(),
+        },
         {
           $set: {
             attributes: docFromNode.attributes,

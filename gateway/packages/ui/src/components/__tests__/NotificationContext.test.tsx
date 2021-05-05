@@ -1,10 +1,11 @@
-import { Modal } from '@centrifuge/axis-modal'
-import { AxisTheme } from '@centrifuge/axis-theme'
-import { mount, shallow } from 'enzyme'
 import React from 'react'
+import { BrowserRouter } from 'react-router-dom'
+import { AxisTheme } from '@centrifuge/axis-theme'
+import { NOTIFICATION, NotificationConsumer, NotificationProvider } from '../NotificationContext'
+import { mount, shallow } from 'enzyme'
+import { Modal } from '@centrifuge/axis-modal'
 import { serializeSnapshot } from '../../test-utilities/serialize'
 import { withAxis, withNotificationContext } from '../../test-utilities/test-providers'
-import { NOTIFICATION, NotificationConsumer, NotificationProvider } from '../NotificationContext'
 
 const setProviders = (component) => {
   return withAxis(withNotificationContext(component))

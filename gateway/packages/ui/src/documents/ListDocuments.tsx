@@ -1,23 +1,24 @@
-import { canLoadDocument, Document, documentHasNFTs } from '@centrifuge/gateway-lib/models/document'
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
-import { canCreateDocuments } from '@centrifuge/gateway-lib/models/user'
-import { hexToInt } from '@centrifuge/gateway-lib/utils/etherscan'
-import { formatDate } from '@centrifuge/gateway-lib/utils/formaters'
-import { getSchemaLabel } from '@centrifuge/gateway-lib/utils/schema-utils'
-import { Box, Button, Heading } from 'grommet'
-import { FormNext } from 'grommet-icons'
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
-import { RouteComponentProps, withRouter } from 'react-router'
 import { Link } from 'react-router-dom'
-import { AppContext } from '../App'
-import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
-import { PageError } from '../components/PageError'
-import { Preloader } from '../components/Preloader'
-import { SecondaryHeader } from '../components/SecondaryHeader'
-import { POLLING_INTERVAL } from '../constants'
-import { useMergeState } from '../hooks'
-import { httpClient } from '../http-client'
+import { Box, Button, Heading } from 'grommet'
 import documentRoutes from './routes'
+import { RouteComponentProps, withRouter } from 'react-router'
+import { Document, canLoadDocument, documentHasNFTs } from '@centrifuge/gateway-lib/models/document'
+import { SecondaryHeader } from '../components/SecondaryHeader'
+import { canCreateDocuments } from '@centrifuge/gateway-lib/models/user'
+import { Preloader } from '../components/Preloader'
+import { formatDate } from '@centrifuge/gateway-lib/utils/formaters'
+import { httpClient } from '../http-client'
+import { AuthContext } from '../auth/Auth'
+import { useMergeState } from '../hooks'
+import { PageError } from '../components/PageError'
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import { getSchemaLabel } from '@centrifuge/gateway-lib/utils/schema-utils'
+import { FormNext } from 'grommet-icons'
+import { POLLING_INTERVAL } from '../constants'
+import { hexToInt } from '@centrifuge/gateway-lib/utils/etherscan'
+import { goToHomePage } from '../utils/goToHomePage'
 
 type Props = RouteComponentProps
 
@@ -42,7 +43,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
     error: null,
   })
 
-  const { user } = useContext(AppContext)
+  const { user, token } = useContext(AuthContext)
 
   const displayPageError = useCallback(
     (error) => {
@@ -60,9 +61,9 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
         loadingMessage: inBg ? null : 'Loading',
       })
       try {
-        const documents = (await httpClient.documents.list()).data
+        const documents = (await httpClient.documents.list(token!)).data
         //get All schemas. We need to display even archived ones
-        const schemas = (await httpClient.schemas.list()).data
+        const schemas = (await httpClient.schemas.list(undefined, token!)).data
         setState({
           loadingMessage: null,
           schemas,
@@ -76,7 +77,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
         loadData(true)
       }, POLLING_INTERVAL)
     },
-    [setState, displayPageError]
+    [setState, displayPageError, token]
   )
 
   const getFilteredDocuments = () => {
@@ -98,6 +99,10 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
       clearTimeout(timeoutRef)
     }
   }, [loadData])
+
+  if (!token) {
+    goToHomePage()
+  }
 
   if (loadingMessage) {
     return <Preloader message={loadingMessage} />
@@ -121,8 +126,8 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
           sortable={true}
           data={getFilteredDocuments()}
           onClickRow={({ datum }) => {
-            if (!canLoadDocument(datum as Document)) return
-            push(documentRoutes.view.replace(':id', (datum as Document)._id!))
+            if (!canLoadDocument(datum)) return
+            push(documentRoutes.view.replace(':id', datum._id))
           }}
           primaryKey={'_id'}
           columns={[
@@ -141,7 +146,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               property: 'createdAt',
               header: 'Date created',
               sortable: true,
-              render: (datum) => formatDate((datum as Document).createdAt, true),
+              render: (datum) => formatDate(datum.createdAt, true),
             },
             {
               property: 'document_status',
@@ -153,10 +158,10 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               header: 'NFT ID',
               sortable: true,
               render: (datum) => {
-                if (documentHasNFTs(datum as Document)) {
-                  return (datum as Document).header!.nfts!.map((nft) => hexToInt(nft.token_id!)).join(', ')
+                if (documentHasNFTs(datum)) {
+                  return datum.header.nfts.map((nft) => hexToInt(nft.token_id)).join(', ')
                 }
-                return (datum as Document).nft_status
+                return datum.nft_status
               },
             },
             {
@@ -166,7 +171,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               sortable: false,
               size: '36px',
               render: (datum) => {
-                return canLoadDocument(datum as Document) ? (
+                return canLoadDocument(datum) ? (
                   <Box>
                     <FormNext />
                   </Box>

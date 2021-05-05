@@ -1,16 +1,10 @@
-import {
-  AttributesErrors,
-  AttrTypes,
-  DiffErrors,
-  RegistriesErrors,
-  Schema,
-} from '@centrifuge/gateway-lib/models/schema'
-import { HttpException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-import { SessionGuard } from '../../auth/SessionGuard'
+import { HttpException } from '@nestjs/common'
+import { AttributesErrors, AttrTypes, DiffErrors, RegistriesErrors, Schema } from '../../../../lib/models/schema'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'
 import { SchemasController } from '../schemas.controllers'
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 
 const delay = require('util').promisify(setTimeout)
 
@@ -58,7 +52,7 @@ describe('SchemasController', () => {
 
     schemaModule = await Test.createTestingModule({
       controllers: [SchemasController],
-      providers: [SessionGuard, databaseServiceProvider],
+      providers: [JwtAuthGuard, databaseServiceProvider],
     }).compile()
 
     const databaseService = schemaModule.get<DatabaseService>(DatabaseService)

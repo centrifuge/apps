@@ -1,5 +1,5 @@
-import { isValidAddress } from 'ethereumjs-util'
 import { DOCUMENT_ACCESS } from './document'
+import { isValidAddress } from 'ethereumjs-util'
 
 export class Collaborator {
   constructor(

@@ -1,10 +1,10 @@
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
-import * as passport from 'passport'
-import { AuthModule } from '../auth/auth.module'
-import { CentrifugeModule } from '../centrifuge-client/centrifuge.module'
-import { DatabaseModule } from '../database/database.module'
 import { UsersController } from './users.controller'
+import { DatabaseModule } from '../database/database.module'
+import * as passport from 'passport'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
+import { CentrifugeModule } from '../centrifuge-client/centrifuge.module'
+import { AuthModule } from '../auth/auth.module'
 @Module({
   controllers: [UsersController],
   providers: [],
@@ -15,7 +15,7 @@ export class UsersModule implements NestModule {
     consumer.apply(passport.authenticate('local', { session: false })).forRoutes(`${ROUTES.USERS.loginTentative}`)
 
     consumer
-      .apply(passport.authenticate(process.env.NODE_ENV === 'development' ? 'local' : '2fa'))
+      .apply(passport.authenticate(process.env.NODE_ENV === 'development' ? 'local' : '2fa', { session: false }))
       .forRoutes(`${ROUTES.USERS.login}`)
   }
 }

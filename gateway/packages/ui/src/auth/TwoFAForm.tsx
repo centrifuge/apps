@@ -1,7 +1,8 @@
+import React from 'react'
+import { Box, Button, FormField, Text, TextInput } from 'grommet'
+
 import { User } from '@centrifuge/gateway-lib/models/user'
 import { Formik } from 'formik'
-import { Box, Button, FormField, Text, TextInput } from 'grommet'
-import React from 'react'
 
 interface LoginProps {
   user: User

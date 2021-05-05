@@ -1,8 +1,8 @@
-import { Document } from '@centrifuge/gateway-lib/models/document'
-import { connect, FormikContext } from 'formik'
+import React, { FunctionComponent } from 'react'
 import { FormField, Grid, TextArea } from 'grommet'
 import { get } from 'lodash'
-import React, { FunctionComponent } from 'react'
+import { connect, FormikContext } from 'formik'
+import { Document } from '@centrifuge/gateway-lib/models/document'
 import { Section } from '../components/Section'
 
 type Props = OuterProps & {

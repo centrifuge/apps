@@ -1,13 +1,14 @@
-import { V2CreateDocumentRequest, V2SignedAttributeRequest } from '@centrifuge/gateway-lib/centrifuge-node-client'
-import { Document } from '@centrifuge/gateway-lib/models/document'
 import { Test, TestingModule } from '@nestjs/testing'
-import { SessionGuard } from '../../auth/SessionGuard'
-import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'
-import { CentrifugeService } from '../../centrifuge-client/centrifuge.service'
+import { Document } from '../../../../lib/models/document'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'
 import { DocumentsController } from '../documents.controller'
+import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'
+import { CentrifugeService } from '../../centrifuge-client/centrifuge.service'
+import { V2CreateDocumentRequest, V2SignedAttributeRequest } from '@centrifuge/gateway-lib/centrifuge-node-client'
 import TypeEnum = V2SignedAttributeRequest.TypeEnum
+import { RegistriesErrors } from '@centrifuge/gateway-lib/models/schema'
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 
 describe('DocumentsController', () => {
   let documentsModule: TestingModule
@@ -62,7 +63,7 @@ describe('DocumentsController', () => {
   beforeEach(async () => {
     documentsModule = await Test.createTestingModule({
       controllers: [DocumentsController],
-      providers: [SessionGuard, centrifugeServiceProvider, databaseServiceProvider],
+      providers: [JwtAuthGuard, centrifugeServiceProvider, databaseServiceProvider],
     }).compile()
 
     const databaseService = documentsModule.get<DatabaseService>(DatabaseService)

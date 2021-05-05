@@ -1,7 +1,7 @@
-import { User } from '@centrifuge/gateway-lib/models/user'
+import React, { FunctionComponent, useEffect, useState } from 'react'
 import { Box } from 'grommet'
 import QRCode from 'qrcode'
-import React, { FunctionComponent, useEffect, useState } from 'react'
+import { User } from '@centrifuge/gateway-lib/models/user'
 import styled from 'styled-components'
 import TwoFAForm from './TwoFAForm'
 

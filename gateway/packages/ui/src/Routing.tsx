@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from 'react'
 import { Redirect, Route, Switch } from 'react-router'
+import routes from './routes'
 import LoginPage from './auth/Login'
 import RegisterPage from './auth/Register'
-import routes from './routes'
 
 export interface RouteItem {
   path: string

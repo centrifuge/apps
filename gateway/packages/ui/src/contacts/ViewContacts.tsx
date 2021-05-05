@@ -1,11 +1,12 @@
-import { Contact } from '@centrifuge/gateway-lib/models/contact'
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
-import { AppContext } from '../App'
-import { PageError } from '../components/PageError'
-import { Preloader } from '../components/Preloader'
-import { useMergeState } from '../hooks'
-import { httpClient } from '../http-client'
+import { Contact } from '@centrifuge/gateway-lib/models/contact'
 import ContactList from './ContactList'
+import { Preloader } from '../components/Preloader'
+import { httpClient } from '../http-client'
+import { AuthContext } from '../auth/Auth'
+import { useMergeState } from '../hooks'
+import { PageError } from '../components/PageError'
+import { goToHomePage } from '../utils/goToHomePage'
 
 type State = {
   loading: boolean
@@ -20,7 +21,7 @@ const ViewContacts: FunctionComponent = () => {
     contacts: [],
   })
 
-  const { user } = useContext(AppContext)
+  const { user, token } = useContext(AuthContext)
 
   const displayPageError = useCallback(
     (error) => {
@@ -33,12 +34,16 @@ const ViewContacts: FunctionComponent = () => {
     [setState]
   )
 
+  if (!token) {
+    goToHomePage()
+  }
+
   const createContact = async (contact: Contact) => {
     setState({
       loading: true,
     })
     try {
-      await httpClient.contacts.create(contact)
+      await httpClient.contacts.create(contact, token!)
       await loadContacts()
     } catch (e) {
       displayPageError(e)
@@ -50,7 +55,7 @@ const ViewContacts: FunctionComponent = () => {
       loading: true,
     })
     try {
-      await httpClient.contacts.update(contact)
+      await httpClient.contacts.update(contact, token!)
       await loadContacts()
     } catch (e) {
       displayPageError(e)
@@ -62,7 +67,7 @@ const ViewContacts: FunctionComponent = () => {
       loading: true,
     })
     try {
-      const contacts = (await httpClient.contacts.list()).data
+      const contacts = (await httpClient.contacts.list(token!)).data
       setState({
         loading: false,
         contacts,
@@ -70,7 +75,7 @@ const ViewContacts: FunctionComponent = () => {
     } catch (e) {
       displayPageError(e)
     }
-  }, [displayPageError, setState])
+  }, [displayPageError, setState, token])
 
   useEffect(() => {
     loadContacts()

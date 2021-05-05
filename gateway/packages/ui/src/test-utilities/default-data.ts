@@ -1,8 +1,8 @@
-import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
-import { Contact } from '@centrifuge/gateway-lib/models/contact'
-import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document'
-import { AttrTypes } from '@centrifuge/gateway-lib/models/schema'
 import { User } from '@centrifuge/gateway-lib/models/user'
+import { Contact } from '@centrifuge/gateway-lib/models/contact'
+import { AttrTypes } from '@centrifuge/gateway-lib/models/schema'
+import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
+import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document'
 
 export const defaultUser: User = {
   name: 'Default User',
@@ -20,6 +20,8 @@ export const defaultUser: User = {
   permissions: [],
   schemas: ['first_schema', 'second_schema'],
 }
+
+export const defaultToken: string = 'test'
 
 export const defaultContacts: Contact[] = [
   {

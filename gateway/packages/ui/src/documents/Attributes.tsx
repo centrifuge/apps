@@ -1,5 +1,5 @@
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
 import React, { FunctionComponent } from 'react'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
 import AttributeSection from './AttributeSection'
 
 interface Props {
@@ -31,6 +31,7 @@ export const Attributes: FunctionComponent<Props> = (props: Props) => {
       {sectionNames.map((name) => {
         return (
           <AttributeSection
+            key={name}
             name={name}
             attributes={sections[name]}
             columnGap={columnGap}

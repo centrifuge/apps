@@ -1,5 +1,5 @@
-import { Box } from 'grommet'
 import React from 'react'
+import { Box } from 'grommet'
 import styled, { withTheme } from 'styled-components'
 
 const StyledSecondaryHeader = styled(Box)`

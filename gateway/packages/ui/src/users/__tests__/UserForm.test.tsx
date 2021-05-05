@@ -1,11 +1,11 @@
-import { Organization } from '@centrifuge/gateway-lib/models/organization'
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import React from 'react'
+import { mount } from 'enzyme'
+import UserForm from '../UserForm'
 import { User, UserWithOrg } from '@centrifuge/gateway-lib/models/user'
 import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants'
-import { mount } from 'enzyme'
-import { CheckBox } from 'grommet'
-import React from 'react'
-import UserForm from '../UserForm'
+import { Organization } from '@centrifuge/gateway-lib/models/organization'
+import { CheckBox, TextInput } from 'grommet'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
 
 it('Should render the create state', () => {
   const user = new User()

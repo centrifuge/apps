@@ -1,17 +1,19 @@
-import { DisplayField } from '@centrifuge/axis-display-field'
-import { Modal } from '@centrifuge/axis-modal'
-import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client'
-import { Document, NftStatus } from '@centrifuge/gateway-lib/models/document'
-import { Registry } from '@centrifuge/gateway-lib/models/schema'
-import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
-import { getAddressLink, getNFTLink, hexToInt } from '@centrifuge/gateway-lib/utils/etherscan'
-import { Anchor, Box, Button, Paragraph } from 'grommet'
-import React, { FunctionComponent } from 'react'
-import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
-import { Section } from '../components/Section'
+import React, { FunctionComponent, useContext } from 'react'
 import { useMergeState } from '../hooks'
 import { httpClient } from '../http-client'
+import { Modal } from '@centrifuge/axis-modal'
+import { Document, NftStatus } from '@centrifuge/gateway-lib/models/document'
+import { getAddressLink, getNFTLink, hexToInt } from '@centrifuge/gateway-lib/utils/etherscan'
+import { Section } from '../components/Section'
+import { Anchor, Box, Button, Paragraph } from 'grommet'
+import { DisplayField } from '@centrifuge/axis-display-field'
+import { Registry } from '@centrifuge/gateway-lib/models/schema'
 import MintNftForm, { MintNftFormData } from './MintNftForm'
+import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
+import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client'
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
+import { AuthContext } from '../auth/Auth'
+import { goToHomePage } from '../utils/goToHomePage'
 
 type Props = {
   onAsyncStart?: (message: string) => void
@@ -22,6 +24,7 @@ type Props = {
   contacts: Contact[]
   registries: Registry[]
   viewMode: boolean
+  template: string
 }
 
 type State = {
@@ -37,28 +40,34 @@ export const Nfts: FunctionComponent<Props> = (props) => {
     selectedNft: null,
   })
 
-  const { onAsyncComplete, onAsyncError, onMintStart, document, registries, viewMode } = {
+  const { onAsyncComplete, onAsyncError, onMintStart, document, registries, viewMode, template } = {
     onAsyncComplete: (data) => {},
     onAsyncError: (error, title?: string) => {},
     onMintStart: () => {},
     ...props,
   }
 
-  const mintNFT = async (id: string, data: MintNftFormData) => {
+  const { token } = useContext(AuthContext)
+
+  const mintNFT = async (id: string, data: MintNftFormData, template: string) => {
     closeModal()
 
     try {
       onMintStart()
       onAsyncComplete(
         (
-          await httpClient.nfts.mint({
-            document_id: id,
-            deposit_address: data.deposit_address,
-            proof_fields: data.registry!.proofs,
-            registry_address: data.registry!.address,
-            asset_manager_address: data.registry!.asset_manager_address,
-            oracle_address: data.registry!.oracle_address,
-          })
+          await httpClient.nfts.mint(
+            {
+              document_id: id,
+              deposit_address: data.deposit_address,
+              proof_fields: data.registry!.proofs,
+              registry_address: data.registry!.address,
+              asset_manager_address: data.registry!.asset_manager_address,
+              oracle_address: data.registry!.oracle_address,
+              template,
+            },
+            token!
+          )
         ).data
       )
     } catch (e) {
@@ -101,6 +110,10 @@ export const Nfts: FunctionComponent<Props> = (props) => {
     return window['__ETH_NETWORK__'] === 'kovan'
       ? getAddressLink('0x44a0579754D6c94e7bB2c26bFA7394311Cc50Ccb')
       : getAddressLink('0x3ba4280217e78a0eaea612c1502fc2e92a7fe5d7')
+  }
+
+  if (!token) {
+    goToHomePage()
   }
 
   const mintActions = !viewMode
@@ -196,7 +209,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
       >
         <MintNftForm
           //        @ts-ignore
-          onSubmit={(data) => mintNFT(document.header!.document_id!, data)}
+          onSubmit={(data) => mintNFT(document.header!.document_id!, data, template)}
           onDiscard={closeModal}
           registries={registries}
         />

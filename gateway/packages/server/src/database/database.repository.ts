@@ -1,6 +1,6 @@
+import * as DataStore from 'nedb-promises'
 import * as Nedb from 'nedb'
 import { DataStoreOptions, EnsureIndexOptions } from 'nedb'
-import * as DataStore from 'nedb-promises'
 
 const COMPACTION_INTERVAL = 1000 * 60 * 30
 /**

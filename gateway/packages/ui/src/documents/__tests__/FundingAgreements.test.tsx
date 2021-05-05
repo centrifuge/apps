@@ -1,12 +1,14 @@
-import { FundingAgreement } from '@centrifuge/gateway-lib/models/funding-request'
-import { getFundingStatus } from '@centrifuge/gateway-lib/utils/status'
-import { mount } from 'enzyme'
-import { Anchor, Button, DataTable } from 'grommet'
 import React from 'react'
-import { defaultContacts, defaultUser } from '../../test-utilities/default-data'
-import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
-import FundingAgreementForm from '../FundingAgreementForm'
+import { mount } from 'enzyme'
+import { BrowserRouter } from 'react-router-dom'
+import { SearchSelect } from '@centrifuge/axis-search-select'
+import { Anchor, Button, DataTable } from 'grommet'
 import { FundingAgreements } from '../FundingAgreements'
+import { defaultContacts, defaultUser } from '../../test-utilities/default-data'
+import { getFundingStatus } from '@centrifuge/gateway-lib/utils/status'
+import { FundingAgreement } from '@centrifuge/gateway-lib/models/funding-request'
+import FundingAgreementForm from '../FundingAgreementForm'
+import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
 
 jest.mock('../../http-client')
 const httpClient = require('../../http-client').httpClient

@@ -1,12 +1,12 @@
-import { DisplayField } from '@centrifuge/axis-display-field'
-import { SearchSelect } from '@centrifuge/axis-search-select'
-import { Registry } from '@centrifuge/gateway-lib/models/schema'
-import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
-import { isValidAddress } from 'ethereumjs-util'
-import { Formik } from 'formik'
-import { Box, Button, FormField, TextInput } from 'grommet'
 import React from 'react'
+import { Box, Button, FormField, TextInput } from 'grommet'
+import { Formik } from 'formik'
 import * as Yup from 'yup'
+import { Registry } from '@centrifuge/gateway-lib/models/schema'
+import { SearchSelect } from '@centrifuge/axis-search-select'
+import { isValidAddress } from 'ethereumjs-util'
+import { DisplayField } from '@centrifuge/axis-display-field'
+import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
 
 type Props = {
   onSubmit: (data: MintNftFormData) => void
@@ -43,17 +43,10 @@ export default class MintNftForm extends React.Component<Props> {
         name: 'test_schemas',
         test: function(this, value) {
           if (this.parent.transfer) {
-            if (!value)
-              return this.createError({
-                path: this.path,
-                message: 'This is field is required',
-              })
+            if (!value) return this.createError({ path: this.path, message: 'This is field is required' })
             else {
               if (!isValidAddress(value))
-                return this.createError({
-                  path: this.path,
-                  message: 'Not a valid account address',
-                })
+                return this.createError({ path: this.path, message: 'Not a valid account address' })
             }
           }
           return true

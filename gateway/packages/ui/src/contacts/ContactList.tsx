@@ -1,6 +1,4 @@
-import { Contact } from '@centrifuge/gateway-lib/models/contact'
-import { User } from '@centrifuge/gateway-lib/models/user'
-import { Formik } from 'formik'
+import React from 'react'
 import {
   Anchor,
   Box,
@@ -15,8 +13,10 @@ import {
   Text,
   TextInput,
 } from 'grommet'
-import React from 'react'
+import { Contact } from '@centrifuge/gateway-lib/models/contact'
+import { Formik } from 'formik'
 import { SecondaryHeader } from '../components/SecondaryHeader'
+import { User } from '@centrifuge/gateway-lib/models/user'
 
 type Props = {
   loggedInUser: User

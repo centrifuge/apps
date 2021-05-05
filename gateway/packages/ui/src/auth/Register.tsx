@@ -1,15 +1,15 @@
-import { TwoFaType, User } from '@centrifuge/gateway-lib/models/user'
-import { Box } from 'grommet'
-import { parse } from 'query-string'
 import React, { FunctionComponent, useContext, useState } from 'react'
-import { RouteComponentProps, withRouter } from 'react-router'
-import { AppContext } from '../App'
-import { httpClient } from '../http-client'
-import routes from '../routes'
-import QrCode from './QrCode'
-import RegisterForm from './RegisterForm'
-import TwoFAForm from './TwoFAForm'
 
+import RegisterForm from './RegisterForm'
+import { RouteComponentProps, withRouter } from 'react-router'
+import { TwoFaType, User } from '@centrifuge/gateway-lib/models/user'
+import { httpClient } from '../http-client'
+import { parse } from 'query-string'
+import QrCode from './QrCode'
+import TwoFAForm from './TwoFAForm'
+import { AuthContext } from '../auth/Auth'
+import { Box } from 'grommet'
+import { goToHomePage } from '../utils/goToHomePage'
 type Props = {
   register: (user: User) => void
   isRegistering: boolean
@@ -26,15 +26,15 @@ const Register: FunctionComponent<Props> = (props: Props) => {
 
   const [user, setUser] = useState<User>()
   const [error, setError] = useState<Error>()
-  const loggedInUser = useContext(AppContext).user
-
-  const goToHomePage = () => {
-    window.location.href = routes.index
-  }
+  const loggedInUser = useContext(AuthContext).user
 
   const login = async (loginCandidate: User) => {
     try {
-      await httpClient.user.login(loginCandidate)
+      await httpClient.user.login({
+        email: loginCandidate.email,
+        password: loginCandidate.password || '',
+        token: loginCandidate.token,
+      })
       goToHomePage()
     } catch (e) {
       setError(e)

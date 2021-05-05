@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common'
-import { CentrifugeModule } from '../centrifuge-client/centrifuge.module'
-import { DatabaseModule } from '../database/database.module'
+
 import { WebhooksController } from './webhooks.controller'
+import { DatabaseModule } from '../database/database.module'
+import { CentrifugeModule } from '../centrifuge-client/centrifuge.module'
 
 @Module({
   controllers: [WebhooksController],

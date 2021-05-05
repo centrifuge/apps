@@ -1,22 +1,22 @@
-import { DisplayField } from '@centrifuge/axis-display-field'
+import React, { FunctionComponent } from 'react'
+import { useMergeState } from '../hooks'
 import { Modal } from '@centrifuge/axis-modal'
-import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
 import {
   createDocumentCollaborators,
   Document,
   getDocumentCollaborators,
 } from '@centrifuge/gateway-lib/models/document'
-import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user'
-import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
 import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
-import { connect, FormikContext } from 'formik'
-import { Anchor, Box, Button, Paragraph, Text } from 'grommet'
-import { UserAdd } from 'grommet-icons'
-import React, { FunctionComponent } from 'react'
-import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
 import { Section } from '../components/Section'
-import { useMergeState } from '../hooks'
+import { Anchor, Box, Button, Paragraph, Text } from 'grommet'
+import { DisplayField } from '@centrifuge/axis-display-field'
+import { UserAdd } from 'grommet-icons'
+import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
+import { connect, FormikContext } from 'formik'
+import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
 import CollaboratorForm from './CollaboratorForm'
+import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user'
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
 
 interface OuterProps {
   contacts: Contact[]
@@ -194,32 +194,34 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
         <DataTableWithDynamicHeight
           size={'360px'}
           sortable={true}
-          data={contactsInstance as any}
+          data={contactsInstance}
           primaryKey={'address'}
           columns={[
             {
               property: 'name',
               header: 'Name',
-              render: (datum: unknown) => (
-                <Text>
-                  {(datum as Collaborator).name}
-                  {lastUpdatedBy(datum as Collaborator) && <Text weight={'bold'}> (Last update)</Text>}
-                </Text>
-              ),
+              render: (datum: Collaborator) => {
+                return (
+                  <Text>
+                    {datum.name}
+                    {lastUpdatedBy(datum) && <Text weight={'bold'}> (Last update)</Text>}
+                  </Text>
+                )
+              },
             },
             {
               sortable: false,
               property: 'address',
               header: 'Address',
-              render: (datum: unknown) => (
+              render: (datum: Collaborator) => (
                 <DisplayField
                   copy={true}
                   as={'span'}
                   link={{
-                    href: getAddressLink((datum as Collaborator).address),
+                    href: getAddressLink(datum.address),
                     target: '_blank',
                   }}
-                  value={(datum as Collaborator).address}
+                  value={datum.address}
                 />
               ),
             },
@@ -231,35 +233,35 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
               property: '_id',
               header: 'Actions',
               sortable: false,
-              render: (datum: unknown) => (
-                <>
+              render: (datum: Collaborator) => {
+                return (
                   <Box className={'actions'} direction="row" gap="small">
                     <Anchor
                       label={'View'}
                       onClick={() => {
-                        openCollaboratorFormInViewMode(datum as Collaborator)
+                        openCollaboratorFormInViewMode(datum)
                       }}
                     />
                     {!viewMode &&
-                      canWriteToDoc({ account: (datum as Collaborator).address }, values) && [
+                      canWriteToDoc({ account: datum.address }, values) && [
                         <Anchor
                           key={'edit-anchor'}
                           label={'Edit'}
                           onClick={() => {
-                            openCollaboratorFormInEditMode(datum as Collaborator)
+                            openCollaboratorFormInEditMode(datum)
                           }}
                         />,
                         <Anchor
                           key={'remove-anchor'}
                           label={'Remove'}
                           onClick={() => {
-                            removeCollaborator(datum as Collaborator)
+                            removeCollaborator(datum)
                           }}
                         />,
                       ]}
                   </Box>
-                </>
-              ),
+                )
+              },
             },
           ]}
         />

@@ -1,9 +1,10 @@
-import { User } from '@centrifuge/gateway-lib/models/user'
 import { Test } from '@nestjs/testing'
-import * as speakeasy from 'speakeasy'
+
+import { AuthService } from '../auth.service'
+import { User } from '../../../../lib/models/user'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'
-import { AuthService } from '../auth.service'
+import * as speakeasy from 'speakeasy'
 
 describe('LocalStrategy', () => {
   const secret = speakeasy.generateSecret()

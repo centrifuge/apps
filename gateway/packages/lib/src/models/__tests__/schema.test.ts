@@ -1,4 +1,3 @@
-import { CollaboratorErrors } from '../collaborator'
 import {
   AttributesErrors,
   AttrTypes,
@@ -8,6 +7,7 @@ import {
   Schema,
   SchemaPropsErrors,
 } from '../schema'
+import { Collaborator, CollaboratorErrors } from '../collaborator'
 
 /* tslint:disable */
 describe('Schema validations', () => {
@@ -71,7 +71,7 @@ describe('Schema validations', () => {
           {
             name: 'test',
             label: 'test',
-          } as any,
+          },
         ])
       }).toThrow(AttributesErrors.TYPE_PROP_MISSING)
     })

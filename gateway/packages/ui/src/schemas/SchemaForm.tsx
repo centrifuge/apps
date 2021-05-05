@@ -1,8 +1,8 @@
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import React from 'react'
 import { Formik } from 'formik'
 import { Box, Button, FormField, Paragraph, TextArea } from 'grommet'
-import React from 'react'
 import * as Yup from 'yup'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
 
 type Props = {
   selectedSchema: Schema
@@ -47,10 +47,7 @@ export default class SchemaForm extends React.Component<Props, State> {
             try {
               test = JSON.parse(value)
             } catch (e) {
-              return this.createError({
-                path: this.path,
-                message: 'Schema is not a valid JSON object',
-              })
+              return this.createError({ path: this.path, message: 'Schema is not a valid JSON object' })
             }
 
             try {
@@ -64,10 +61,7 @@ export default class SchemaForm extends React.Component<Props, State> {
               try {
                 Schema.validateDiff(selectedSchema, test)
               } catch (e) {
-                return this.createError({
-                  path: this.path,
-                  message: e.message,
-                })
+                return this.createError({ path: this.path, message: e.message })
               }
             }
 

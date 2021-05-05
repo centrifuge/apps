@@ -1,21 +1,23 @@
-import { DisplayField } from '@centrifuge/axis-display-field'
-import { Modal } from '@centrifuge/axis-modal'
-import { Contact, getContactByAddress } from '@centrifuge/gateway-lib/models/contact'
-import { Document } from '@centrifuge/gateway-lib/models/document'
-import { FundingAgreement, FundingRequest } from '@centrifuge/gateway-lib/models/funding-request'
-import { canSignFunding, User } from '@centrifuge/gateway-lib/models/user'
-import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
-import { extractDate, formatCurrency, formatPercent } from '@centrifuge/gateway-lib/utils/formaters'
-import { getFundingStatus } from '@centrifuge/gateway-lib/utils/status'
-import { Anchor, Box, Button, Paragraph } from 'grommet'
-import { Currency } from 'grommet-icons'
-import React, { FunctionComponent } from 'react'
-import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
-import { Section } from '../components/Section'
+import React, { FunctionComponent, useContext } from 'react'
 import { useMergeState } from '../hooks'
 import { httpClient } from '../http-client'
+import { Contact, getContactByAddress } from '@centrifuge/gateway-lib/models/contact'
 import FundingRequestForm from './FundingAgreementForm'
-import { FundingStatus, FUNDING_STATUS } from './FundingStatus'
+import { Modal } from '@centrifuge/axis-modal'
+import { Document } from '@centrifuge/gateway-lib/models/document'
+import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
+import { extractDate, formatCurrency, formatPercent } from '@centrifuge/gateway-lib/utils/formaters'
+import { Section } from '../components/Section'
+import { Anchor, Box, Button, Paragraph } from 'grommet'
+import { DisplayField } from '@centrifuge/axis-display-field'
+import { Currency } from 'grommet-icons'
+import { canSignFunding, User } from '@centrifuge/gateway-lib/models/user'
+import { FUNDING_STATUS, FundingStatus } from './FundingStatus'
+import { getFundingStatus } from '@centrifuge/gateway-lib/utils/status'
+import { FundingAgreement, FundingRequest } from '@centrifuge/gateway-lib/models/funding-request'
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
+import { AuthContext } from '../auth/Auth'
+import { goToHomePage } from '../utils/goToHomePage'
 
 type Props = {
   onAsyncStart?: (message: string) => void
@@ -48,6 +50,8 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
     ...props,
   }
 
+  const { token } = useContext(AuthContext)
+
   const createFundingAgreement = async (data: FundingAgreement) => {
     onAsyncStart('Creating Funding Agreement')
     try {
@@ -56,7 +60,7 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
         // @ts-ignore
         document_id: document.header!.document_id,
       } as FundingRequest
-      onAsyncComplete((await httpClient.funding.create(payload)).data)
+      onAsyncComplete((await httpClient.funding.create(payload, token!)).data)
     } catch (e) {
       onAsyncError(e, 'Failed to create funding agreement')
     }
@@ -70,7 +74,7 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
         // @ts-ignore
         document_id: document.header!.document_id!,
       }
-      onAsyncComplete((await httpClient.funding.sign(payload)).data)
+      onAsyncComplete((await httpClient.funding.sign(payload, token!)).data)
     } catch (e) {
       onAsyncError(e, 'Failed to sign funding agreement')
     }
@@ -94,6 +98,10 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
 
   const closeModal = () => {
     setState({ modalOpened: false })
+  }
+
+  if (!token) {
+    goToHomePage()
   }
 
   const fundingActions = !viewMode

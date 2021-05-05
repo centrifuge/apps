@@ -1,11 +1,11 @@
-import { SearchSelect } from '@centrifuge/axis-search-select'
-import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
-import { Contact, getContactByAddress } from '@centrifuge/gateway-lib/models/contact'
-import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document'
-import { Formik } from 'formik'
-import { Box, Button, FormField, RadioButton } from 'grommet'
 import React from 'react'
+import { Box, Button, FormField, RadioButton } from 'grommet'
+import { Formik } from 'formik'
 import * as Yup from 'yup'
+import { Contact, getContactByAddress } from '@centrifuge/gateway-lib/models/contact'
+import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
+import { SearchSelect } from '@centrifuge/axis-search-select'
+import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document'
 import { ViewModeFormContainer } from '../components/ViewModeFormContainer'
 
 type Props = {

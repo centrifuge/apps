@@ -1,5 +1,5 @@
-import { Text } from 'grommet'
 import React from 'react'
+import { Text } from 'grommet'
 
 export enum FUNDING_STATUS {
   NO_STATUS = '',

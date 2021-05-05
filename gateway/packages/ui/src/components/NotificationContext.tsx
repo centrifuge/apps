@@ -1,6 +1,6 @@
+import React, { Component } from 'react'
 import { Modal } from '@centrifuge/axis-modal'
 import { Box, Button, Paragraph } from 'grommet'
-import React, { Component } from 'react'
 
 export enum NOTIFICATION {
   DEFAULT = 'NOTIFICATION.DEFAULT',

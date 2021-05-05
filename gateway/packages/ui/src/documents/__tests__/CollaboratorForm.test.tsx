@@ -1,12 +1,16 @@
-import { SearchSelect } from '@centrifuge/axis-search-select'
-import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
-import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document'
-import { mount } from 'enzyme'
-import { RadioButton } from 'grommet'
+import { mount, shallow } from 'enzyme'
 import React from 'react'
+import { Spinner } from '@centrifuge/axis-spinner'
+import { Modal } from '@centrifuge/axis-modal'
 import { defaultContacts } from '../../test-utilities/default-data'
+import { NumberInput } from '@centrifuge/axis-number-input'
+import { DateInput } from '@centrifuge/axis-date-input'
+import { SearchSelect } from '@centrifuge/axis-search-select'
 import { withAxis } from '../../test-utilities/test-providers'
+import { RadioButton } from 'grommet'
 import CollaboratorForm from '../CollaboratorForm'
+import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document'
+import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
 
 describe('Collaborator Form', () => {
   const onSubmit = jest.fn((data) => {})

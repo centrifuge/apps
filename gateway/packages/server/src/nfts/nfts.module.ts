@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common'
+import { DatabaseModule } from '../database/database.module'
 import { AuthModule } from '../auth/auth.module'
 import { CentrifugeModule } from '../centrifuge-client/centrifuge.module'
-import { DatabaseModule } from '../database/database.module'
 import { NftsController } from './nfts.controller'
+import { Module } from '@nestjs/common'
 
 @Module({
   controllers: [NftsController],
