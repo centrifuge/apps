@@ -1,6 +1,23 @@
 .next
+<<<<<<< HEAD:.gitignore
 .idea/
 .vscode
+=======
+
+#  build files
+build
+dist
+
+# IntelliJ config files
+.idea
+
+#database
+# db
+
+#osx
+packages/*/.DS_Store
+packages/.DS_Store
+>>>>>>> gateway/develop:gateway2/.gitignore
 .DS_Store
 node_modules
 out

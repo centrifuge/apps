@@ -1,5 +1,28 @@
 {
   "private": true,
+<<<<<<< HEAD:package.json
+=======
+  "scripts": {
+    "start:prod": "nodemon",
+    "pretest": "yarn workspace @centrifuge/gateway-lib run build ",
+    "test": "cross-env CI=true yarn workspaces run test ",
+    "start": "concurrently \"yarn workspace @centrifuge/gateway-lib run start\" \"yarn workspace @centrifuge/gateway-server run start\" \"yarn workspace @centrifuge/gateway-ui run start\"",
+    "build": "yarn workspaces run build",
+    "postbuild": "yarn run move:assets",
+    "move:assets": "yarn run move:email-templates && yarn run move:ui",
+    "move:ui": "rm -rf ./build && rsync -a packages/ui/build .",
+    "move:email-templates": "rm -rf ./email-templates && rsync -a packages/server/email-templates ."
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+>>>>>>> gateway/develop:gateway2/package.json
   "workspaces": [
     "tinlake-bot",
     "e2e-tests",
@@ -26,6 +49,7 @@
     "dotenv": "8.2.0",
     "ethers": "5.0.23"
   },
+<<<<<<< HEAD:package.json
   "scripts": {
     "format:run": "cd $INIT_CWD && prettier --write \"./**/*.{ts,tsx}\"",
     "format:check": "cd $INIT_CWD && prettier --check \"./**/*.{ts,tsx}\"",
@@ -33,5 +57,10 @@
     "onboarding-api": "yarn workspace @centrifuge/onboarding-api start",
     "tinlake-ui": "yarn workspace @centrifuge/tinlake-ui start",
     "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\"  \"yarn tinlake-ui\" -p name -n \"onboarding-api,tinlake-ui\""
+=======
+  "proxy": "http://localhost:3002",
+  "devDependencies": {
+    "concurrently": "^6.0.0"
+>>>>>>> gateway/develop:gateway2/package.json
   }
 }
