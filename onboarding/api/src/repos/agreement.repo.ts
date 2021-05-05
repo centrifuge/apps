@@ -195,6 +195,7 @@ export class AgreementRepo {
     dbAgreements.forEach((dbAgreement: Agreement) => {
       agreements[dbAgreement.providerTemplateId].signed = !!dbAgreement.signedAt
       agreements[dbAgreement.providerTemplateId].counterSigned = !!dbAgreement.counterSignedAt
+      agreements[dbAgreement.providerTemplateId].declined = !!dbAgreement.declinedAt
     })
 
     return Object.values(agreements)
@@ -212,4 +213,5 @@ export type Agreement = {
   providerEnvelopeId: string
   signedAt: Date
   counterSignedAt: Date
+  declinedAt?: Date
 }

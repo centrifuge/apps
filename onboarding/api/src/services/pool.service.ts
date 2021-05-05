@@ -60,9 +60,9 @@ export class PoolService {
     )
 
     this.pools = poolsWithProfiles
-    const newPools = Object.values(poolsWithProfiles).filter((pool: Pool) => !prevPools.includes(pool))
+    const newPools = prevPools.length - Object.keys(poolsWithProfiles).length
 
-    if (newPools.length > 0) this.logger.log(`Loaded ${Object.keys(this.pools).length} pools with profiles from IPFS`)
+    if (newPools > 0) this.logger.log(`Loaded ${Object.keys(this.pools).length} pools with profiles from IPFS`)
   }
 
   @Cron(CronExpression.EVERY_5_MINUTES)
