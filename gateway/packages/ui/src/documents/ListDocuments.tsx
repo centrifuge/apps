@@ -1,96 +1,84 @@
-import React, {
-  FunctionComponent,
-  useCallback,
-  useContext,
-  useEffect,
-} from 'react';
-import { Link } from 'react-router-dom';
-import { Box, Button, Heading } from 'grommet';
-import documentRoutes from './routes';
-import { RouteComponentProps, withRouter } from 'react-router';
-import {
-  Document,
-  canLoadDocument,
-  documentHasNFTs,
-} from '@centrifuge/gateway-lib/models/document';
-import { SecondaryHeader } from '../components/SecondaryHeader';
-import { canCreateDocuments } from '@centrifuge/gateway-lib/models/user';
-import { Preloader } from '../components/Preloader';
-import { formatDate } from '@centrifuge/gateway-lib/utils/formaters';
-import { httpClient } from '../http-client';
-import { AuthContext } from '../auth/Auth';
-import { useMergeState } from '../hooks';
-import { PageError } from '../components/PageError';
-import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight';
-import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { getSchemaLabel } from '@centrifuge/gateway-lib/utils/schema-utils';
-import { FormNext } from 'grommet-icons';
-import { POLLING_INTERVAL } from '../constants';
-import { hexToInt } from '@centrifuge/gateway-lib/utils/etherscan';
-import { goToHomePage } from '../utils/goToHomePage';
+import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { Box, Button, Heading } from 'grommet'
+import documentRoutes from './routes'
+import { RouteComponentProps, withRouter } from 'react-router'
+import { Document, canLoadDocument, documentHasNFTs } from '@centrifuge/gateway-lib/models/document'
+import { SecondaryHeader } from '../components/SecondaryHeader'
+import { canCreateDocuments } from '@centrifuge/gateway-lib/models/user'
+import { Preloader } from '../components/Preloader'
+import { formatDate } from '@centrifuge/gateway-lib/utils/formaters'
+import { httpClient } from '../http-client'
+import { AuthContext } from '../auth/Auth'
+import { useMergeState } from '../hooks'
+import { PageError } from '../components/PageError'
+import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import { getSchemaLabel } from '@centrifuge/gateway-lib/utils/schema-utils'
+import { FormNext } from 'grommet-icons'
+import { POLLING_INTERVAL } from '../constants'
+import { hexToInt } from '@centrifuge/gateway-lib/utils/etherscan'
+import { goToHomePage } from '../utils/goToHomePage'
 
-type Props = RouteComponentProps;
+type Props = RouteComponentProps
 
 type State = {
-  documents: Document[];
-  schemas: Schema[];
-  loadingMessage: string | null;
-  error: any;
-};
+  documents: Document[]
+  schemas: Schema[]
+  loadingMessage: string | null
+  error: any
+}
 
-let timeoutRef;
+let timeoutRef
 
 export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
   const {
     history: { push },
-  } = props;
+  } = props
 
-  const [
-    { loadingMessage, documents, schemas, error },
-    setState,
-  ] = useMergeState<State>({
+  const [{ loadingMessage, documents, schemas, error }, setState] = useMergeState<State>({
     documents: [],
     schemas: [],
     loadingMessage: 'Loading',
     error: null,
-  });
+  })
 
-  const { user, token } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext)
 
   const displayPageError = useCallback(
-    error => {
+    (error) => {
       setState({
         loadingMessage: null,
         error,
-      });
+      })
     },
-    [setState],
-  );
+    [setState]
+  )
 
   const loadData = useCallback(
     async (inBg: boolean = false) => {
       setState({
         loadingMessage: inBg ? null : 'Loading',
-      });
+      })
       try {
-        const documents = (await httpClient.documents.list(token!)).data;
+        const documents = (await httpClient.documents.list(token!)).data
         //get All schemas. We need to display even archived ones
-        const schemas = (await httpClient.schemas.list(undefined, token!)).data;
+        const schemas = (await httpClient.schemas.list(undefined, token!)).data
         setState({
           loadingMessage: null,
           schemas,
           documents,
-        });
+        })
       } catch (e) {
-        !inBg && displayPageError(e);
+        !inBg && displayPageError(e)
       }
 
       timeoutRef = setTimeout(() => {
-        loadData(true);
-      }, POLLING_INTERVAL);
+        loadData(true)
+      }, POLLING_INTERVAL)
     },
-    [setState, displayPageError, token],
-  );
+    [setState, displayPageError, token]
+  )
 
   const getFilteredDocuments = () => {
     return documents.map((doc: any) => {
@@ -99,32 +87,29 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
         // Datable does not have support for nested props ex data.myValue
         // We need make the props accessible top level and we use a special
         // prefix in order to avoid overriding some prop
-        $_reference_id:
-          doc.attributes.reference_id && doc.attributes.reference_id.value,
-        $_schema:
-          doc.attributes._schema &&
-          getSchemaLabel(doc.attributes._schema.value, schemas),
-      };
-    });
-  };
+        $_reference_id: doc.attributes.reference_id && doc.attributes.reference_id.value,
+        $_schema: doc.attributes._schema && getSchemaLabel(doc.attributes._schema.value, schemas),
+      }
+    })
+  }
 
   useEffect(() => {
-    loadData();
+    loadData()
     return () => {
-      clearTimeout(timeoutRef);
-    };
-  }, [loadData]);
+      clearTimeout(timeoutRef)
+    }
+  }, [loadData])
 
   if (!token) {
-    goToHomePage();
+    goToHomePage()
   }
 
   if (loadingMessage) {
-    return <Preloader message={loadingMessage} />;
+    return <Preloader message={loadingMessage} />
   }
 
   if (error) {
-    return <PageError error={error} />;
+    return <PageError error={error} />
   }
 
   return (
@@ -133,11 +118,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
         <Box direction={'row'} gap={'medium'} align="center">
           <Heading level="3">Documents</Heading>
         </Box>
-        <Link to={documentRoutes.new}>
-          {canCreateDocuments(user!) && (
-            <Button primary label="Create Document" />
-          )}
-        </Link>
+        <Link to={documentRoutes.new}>{canCreateDocuments(user!) && <Button primary label="Create Document" />}</Link>
       </SecondaryHeader>
 
       <Box pad={{ horizontal: 'medium' }}>
@@ -145,8 +126,8 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
           sortable={true}
           data={getFilteredDocuments()}
           onClickRow={({ datum }) => {
-            if (!canLoadDocument(datum)) return;
-            push(documentRoutes.view.replace(':id', datum._id));
+            if (!canLoadDocument(datum)) return
+            push(documentRoutes.view.replace(':id', datum._id))
           }}
           primaryKey={'_id'}
           columns={[
@@ -165,7 +146,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               property: 'createdAt',
               header: 'Date created',
               sortable: true,
-              render: datum => formatDate(datum.createdAt, true),
+              render: (datum) => formatDate(datum.createdAt, true),
             },
             {
               property: 'document_status',
@@ -176,13 +157,11 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               property: 'nft_status',
               header: 'NFT ID',
               sortable: true,
-              render: datum => {
+              render: (datum) => {
                 if (documentHasNFTs(datum)) {
-                  return datum.header.nfts
-                    .map(nft => hexToInt(nft.token_id))
-                    .join(', ');
+                  return datum.header.nfts.map((nft) => hexToInt(nft.token_id)).join(', ')
                 }
-                return datum.nft_status;
+                return datum.nft_status
               },
             },
             {
@@ -191,21 +170,21 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
               align: 'center',
               sortable: false,
               size: '36px',
-              render: datum => {
+              render: (datum) => {
                 return canLoadDocument(datum) ? (
                   <Box>
                     <FormNext />
                   </Box>
                 ) : (
                   <></>
-                );
+                )
               },
             },
           ]}
         />
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default withRouter(ListDocuments);
+export default withRouter(ListDocuments)

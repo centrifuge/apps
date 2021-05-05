@@ -1,7 +1,7 @@
-const API_BASE = '/api';
+const API_BASE = '/api'
 
-const baseUsersRoute = `${API_BASE}/users`;
-const baseFundingRoute = `${API_BASE}/funding`;
+const baseUsersRoute = `${API_BASE}/users`
+const baseFundingRoute = `${API_BASE}/funding`
 
 const userRoutes = {
   base: baseUsersRoute,
@@ -11,12 +11,12 @@ const userRoutes = {
   logout: `${baseUsersRoute}/logout`,
   invite: `${baseUsersRoute}/invite`,
   register: `${baseUsersRoute}/register`,
-};
+}
 
 const fundingRoutes = {
   base: baseFundingRoute,
   sign: `${baseFundingRoute}/sign`,
-};
+}
 
 export const ROUTES = Object.freeze({
   API_BASE,
@@ -31,7 +31,7 @@ export const ROUTES = Object.freeze({
   SCHEMAS: `${API_BASE}/schemas`,
   DOCUMENTS: `${API_BASE}/documents`,
   NFTS: `${API_BASE}/nfts`,
-});
+})
 
 export enum PERMISSIONS {
   CAN_MANAGE_USERS = 'can_manage_users',

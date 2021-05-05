@@ -1,5 +1,5 @@
-import routes from '../routes';
+import routes from '../routes'
 
 export const goToHomePage = () => {
-  window.location.href = routes.index;
-};
+  window.location.href = routes.index
+}

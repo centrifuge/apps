@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import { promisify } from 'util';
-import * as speakeasy from 'speakeasy';
-import { User } from '@centrifuge/gateway-lib/models/user';
-import { DatabaseService } from '../database/database.service';
+import { Injectable } from '@nestjs/common'
+import * as bcrypt from 'bcrypt'
+import { promisify } from 'util'
+import * as speakeasy from 'speakeasy'
+import { User } from '@centrifuge/gateway-lib/models/user'
+import { DatabaseService } from '../database/database.service'
 
 @Injectable()
 export class AuthService {
@@ -20,9 +20,9 @@ export class AuthService {
   async validateUserByEmail(email: string): Promise<User | null> {
     const databaseUser: User = await this.database.users.findOne({
       email,
-    });
-    if (!databaseUser || !databaseUser.enabled) return null;
-    return databaseUser;
+    })
+    if (!databaseUser || !databaseUser.enabled) return null
+    return databaseUser
   }
 
   /**
@@ -34,19 +34,13 @@ export class AuthService {
    * @return {Promise<User|null>} promise - a promise with the validation results. If successful
    * will return the user, otherwise it returns null.
    */
-  async validateUser(
-    emailValue: string,
-    passwordValue: string,
-  ): Promise<User | null> {
+  async validateUser(emailValue: string, passwordValue: string): Promise<User | null> {
     const databaseUser: User = await this.database.users.findOne({
       email: emailValue,
-    });
-    if (!databaseUser || !databaseUser.enabled) return null;
-    const passwordMatch = await promisify(bcrypt.compare)(
-      passwordValue,
-      databaseUser.password,
-    );
-    return passwordMatch ? databaseUser : null;
+    })
+    if (!databaseUser || !databaseUser.enabled) return null
+    const passwordMatch = await promisify(bcrypt.compare)(passwordValue, databaseUser.password)
+    return passwordMatch ? databaseUser : null
   }
 
   /**
@@ -59,25 +53,18 @@ export class AuthService {
    * @return {Promise<User|null>} promise - a promise with the validation results. If successful
    * will return the user, otherwise it returns null.
    */
-  async validateUserWithToken(
-    emailValue: string,
-    passwordValue: string,
-    tokenValue: string,
-  ): Promise<User | null> {
+  async validateUserWithToken(emailValue: string, passwordValue: string, tokenValue: string): Promise<User | null> {
     const databaseUser: User = await this.database.users.findOne({
       email: emailValue,
-    });
+    })
     if (!databaseUser || !databaseUser.enabled || !databaseUser.secret) {
-      return null;
+      return null
     }
 
-    const passwordMatch = await promisify(bcrypt.compare)(
-      passwordValue,
-      databaseUser.password,
-    );
+    const passwordMatch = await promisify(bcrypt.compare)(passwordValue, databaseUser.password)
 
     if (!passwordMatch) {
-      return null;
+      return null
     }
 
     const isTokenValid = speakeasy.totp.verify({
@@ -85,7 +72,7 @@ export class AuthService {
       encoding: 'base32',
       token: tokenValue,
       window: 20,
-    });
-    return isTokenValid ? databaseUser : null;
+    })
+    return isTokenValid ? databaseUser : null
   }
 }

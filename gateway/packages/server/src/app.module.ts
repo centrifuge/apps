@@ -1,20 +1,20 @@
-import { Module } from '@nestjs/common';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
-import { ContactsModule } from './contacts/contacts.module';
-import { WebhooksModule } from './webhooks/webhooks.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { APP_FILTER } from '@nestjs/core';
-import { FundingModule } from './funding/funding.module';
-import { AllExceptionFilter } from './exceptions/all-exception.filter';
-import { SchemasModule } from './schemas/schemas.module';
-import { DocumentsModule } from './documents/documents.module';
-import { NftsModule } from './nfts/nfts.module';
-import { OrganizationsModule } from './organizations/organizations.module';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import config from './config';
+import { Module } from '@nestjs/common'
+import { UsersModule } from './users/users.module'
+import { AuthModule } from './auth/auth.module'
+import { ContactsModule } from './contacts/contacts.module'
+import { WebhooksModule } from './webhooks/webhooks.module'
+import { AppController } from './app.controller'
+import { AppService } from './app.service'
+import { APP_FILTER } from '@nestjs/core'
+import { FundingModule } from './funding/funding.module'
+import { AllExceptionFilter } from './exceptions/all-exception.filter'
+import { SchemasModule } from './schemas/schemas.module'
+import { DocumentsModule } from './documents/documents.module'
+import { NftsModule } from './nfts/nfts.module'
+import { OrganizationsModule } from './organizations/organizations.module'
+import { MailerModule } from '@nestjs-modules/mailer'
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter'
+import config from './config'
 
 @Module({
   controllers: [AppController],
@@ -55,8 +55,7 @@ import config from './config';
           strict: true,
         },
       },
-    })
+    }),
   ],
 })
-
 export class AppModule {}

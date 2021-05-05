@@ -1,18 +1,8 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Put,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
-import { DatabaseService } from '../database/database.service';
-import { Organization } from '@centrifuge/gateway-lib/models/organization';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { BadRequestException, Body, Controller, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
+import { DatabaseService } from '../database/database.service'
+import { Organization } from '@centrifuge/gateway-lib/models/organization'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 
 @Controller(ROUTES.ORGANIZATIONS)
 @UseGuards(JwtAuthGuard)
@@ -28,16 +18,13 @@ export class OrganizationsController {
    */
   async create(@Body() organization: Organization) {
     try {
-      Organization.validate(organization);
+      Organization.validate(organization)
     } catch (err) {
-      throw new BadRequestException(err.message);
+      throw new BadRequestException(err.message)
     }
 
-    const newOrg = new Organization(
-      organization.name.trim(),
-      organization.account.toLowerCase().trim(),
-    );
-    return await this.databaseService.organizations.insert(newOrg);
+    const newOrg = new Organization(organization.name.trim(), organization.account.toLowerCase().trim())
+    return await this.databaseService.organizations.insert(newOrg)
   }
 
   @Get()
@@ -51,7 +38,7 @@ export class OrganizationsController {
     return this.databaseService.organizations
       .getCursor()
       .sort({ updatedAt: -1 })
-      .exec();
+      .exec()
   }
 
   @Put(':id')
@@ -63,14 +50,7 @@ export class OrganizationsController {
    * @param {Request} request - the http request
    * @return {Promise<Organization>} result
    */
-  async updateById(
-    @Param() params,
-    @Body() organization: Partial<Organization>,
-    @Req() request,
-  ) {
-    return this.databaseService.organizations.update(
-      { _id: params.id },
-      { ...organization },
-    );
+  async updateById(@Param() params, @Body() organization: Partial<Organization>, @Req() request) {
+    return this.databaseService.organizations.update({ _id: params.id }, { ...organization })
   }
 }

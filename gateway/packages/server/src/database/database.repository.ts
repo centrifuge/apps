@@ -1,29 +1,26 @@
-import * as DataStore from 'nedb-promises';
-import * as Nedb from 'nedb';
-import { DataStoreOptions, EnsureIndexOptions } from 'nedb';
+import * as DataStore from 'nedb-promises'
+import * as Nedb from 'nedb'
+import { DataStoreOptions, EnsureIndexOptions } from 'nedb'
 
-const COMPACTION_INTERVAL = 1000 * 60 * 30;
+const COMPACTION_INTERVAL = 1000 * 60 * 30
 /**
  * A repository class for accessing database data. Class methods promisify the equivalent Nedb methods
  * @type T - the entity model as saved in the database
  */
 export class DatabaseRepository<T> {
-  private repository: DataStore;
+  private repository: DataStore
 
   constructor(private readonly options: DataStoreOptions) {
     const defaultOptions: DataStoreOptions = {
       timestampData: true,
-    };
+    }
 
     this.repository = DataStore.create({
       ...defaultOptions,
       ...options,
-    });
+    })
 
-    if (process.env.NODE_ENV !== 'test')
-      this.repository.persistence.setAutocompactionInterval(
-        COMPACTION_INTERVAL,
-      );
+    if (process.env.NODE_ENV !== 'test') this.repository.persistence.setAutocompactionInterval(COMPACTION_INTERVAL)
   }
 
   /**
@@ -31,7 +28,7 @@ export class DatabaseRepository<T> {
    * @param {T} object
    */
   insert(object: T): Promise<T> {
-    return this.repository.insert(object);
+    return this.repository.insert(object)
   }
 
   /**
@@ -41,11 +38,11 @@ export class DatabaseRepository<T> {
    * @returns {Promise<T[]>} promise
    */
   find(query: any): Promise<T[]> {
-    return this.repository.find(query).exec();
+    return this.repository.find(query).exec()
   }
 
   getCursor(query?: any): any {
-    return this.repository.find(query);
+    return this.repository.find(query)
   }
 
   /**
@@ -55,7 +52,7 @@ export class DatabaseRepository<T> {
    * @returns {Promise<T|null>} promise
    */
   findOne(query: any): Promise<T | null> {
-    return this.repository.findOne(query);
+    return this.repository.findOne(query)
   }
 
   /**
@@ -64,15 +61,11 @@ export class DatabaseRepository<T> {
    * @param {object} updateObject - The update object query
    * @returns {Promise<T|null>} promise
    */
-  updateById(
-    id: string | undefined,
-    updateObject: Modifier<T> | T,
-    upsert: boolean = false,
-  ): Promise<T | null> {
+  updateById(id: string | undefined, updateObject: Modifier<T> | T, upsert: boolean = false): Promise<T | null> {
     return this.update({ _id: id }, updateObject, {
       returnUpdatedDocs: true,
       upsert,
-    }) as Promise<T | null>;
+    }) as Promise<T | null>
   }
 
   /**
@@ -82,12 +75,8 @@ export class DatabaseRepository<T> {
    * @param {Nedb.UpdateOptions} options - {multi,upsert,returnUpdatedDocs}
    * @returns {Promise<T|null>} promise
    */
-  update(
-    query: any,
-    updateObject: Modifier<T> | T,
-    options?: Nedb.UpdateOptions,
-  ): Promise<T | null | number> {
-    return this.repository.update(query, updateObject, options);
+  update(query: any, updateObject: Modifier<T> | T, options?: Nedb.UpdateOptions): Promise<T | null | number> {
+    return this.repository.update(query, updateObject, options)
   }
 
   /**
@@ -95,7 +84,7 @@ export class DatabaseRepository<T> {
    * @param {EnsureIndexOptions} options
    */
   ensureIndex(options: EnsureIndexOptions): Promise<undefined> {
-    return this.repository.ensureIndex(options);
+    return this.repository.ensureIndex(options)
   }
 
   /**
@@ -103,12 +92,12 @@ export class DatabaseRepository<T> {
    * @param {any} query - Nedb query object
    */
   remove(query: any): Promise<number> {
-    return this.repository.remove(query);
+    return this.repository.remove(query)
   }
 }
 
 interface Modifier<T> {
-  $set?: Partial<T>;
-  $push?: any;
-  $pop?: Partial<T>;
+  $set?: Partial<T>
+  $push?: any
+  $pop?: Partial<T>
 }

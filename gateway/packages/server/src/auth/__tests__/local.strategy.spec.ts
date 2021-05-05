@@ -1,13 +1,13 @@
-import { LocalStrategy } from '../local.strategy';
-import { UnauthorizedException } from '@nestjs/common';
-import {DatabaseService} from "../../database/database.service";
-import { AuthService } from '../auth.service';
-import { User } from '../../../../lib/models/user';
-import { Test } from '@nestjs/testing';
+import { LocalStrategy } from '../local.strategy'
+import { UnauthorizedException } from '@nestjs/common'
+import { DatabaseService } from '../../database/database.service'
+import { AuthService } from '../auth.service'
+import { User } from '../../../../lib/models/user'
+import { Test } from '@nestjs/testing'
 
 describe('LocalStrategy', () => {
   const mockUser: User = {
-    ...(new User()),
+    ...new User(),
     name: 'my_username',
     password: 'my_password',
     email: 'test@test.com',
@@ -16,42 +16,37 @@ describe('LocalStrategy', () => {
     enabled: true,
     invited: false,
     permissions: [],
-  };
+  }
 
   it('should return user validation succeeds', async () => {
     const mockAuthService = {
       validateUser: jest.fn(() => mockUser),
-    };
+    }
     const module = await Test.createTestingModule({
       providers: [AuthService, DatabaseService, LocalStrategy],
     })
       .overrideProvider(AuthService)
       .useValue(mockAuthService)
-      .compile();
+      .compile()
 
-    const httpStrategy = module.get<LocalStrategy>(LocalStrategy);
-    const result = await httpStrategy.validate(
-      mockUser.email,
-      mockUser.password + '',
-    );
-    expect(result).toBe(mockUser);
-  });
+    const httpStrategy = module.get<LocalStrategy>(LocalStrategy)
+    const result = await httpStrategy.validate(mockUser.email, mockUser.password + '')
+    expect(result).toBe(mockUser)
+  })
 
   it('should throw when validation fails', async () => {
     const mockAuthService = {
       validateUser: jest.fn(() => null),
-    };
+    }
     const module = await Test.createTestingModule({
       providers: [AuthService, DatabaseService, LocalStrategy],
     })
       .overrideProvider(AuthService)
       .useValue(mockAuthService)
-      .compile();
+      .compile()
 
-    const httpStrategy = module.get<LocalStrategy>(LocalStrategy);
+    const httpStrategy = module.get<LocalStrategy>(LocalStrategy)
 
-    await expect(
-      httpStrategy.validate('some username', 'some password'),
-    ).rejects.toThrow(UnauthorizedException);
-  });
-});
+    await expect(httpStrategy.validate('some username', 'some password')).rejects.toThrow(UnauthorizedException)
+  })
+})

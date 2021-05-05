@@ -1,19 +1,13 @@
-import React, {
-  createContext,
-  FC,
-  ReactNode,
-  useEffect,
-  useState,
-} from 'react';
-import { User } from '@centrifuge/gateway-lib/models/user';
-import { useJWT } from './useJWT';
-import { httpClient } from '../http-client';
+import React, { createContext, FC, ReactNode, useEffect, useState } from 'react'
+import { User } from '@centrifuge/gateway-lib/models/user'
+import { useJWT } from './useJWT'
+import { httpClient } from '../http-client'
 
 interface AuthContextData {
-  user: User | null;
-  setUser: (user: User) => void;
-  token: string | null;
-  setToken: (token: string) => void;
+  user: User | null
+  setUser: (user: User) => void
+  token: string | null
+  setToken: (token: string) => void
 }
 
 export const AuthContext = createContext<AuthContextData>({
@@ -21,55 +15,55 @@ export const AuthContext = createContext<AuthContextData>({
   setUser: () => undefined,
   token: null,
   setToken: () => undefined,
-});
+})
 
 interface Props {
-  children: (user: null | User, logout: () => void) => ReactNode;
+  children: (user: null | User, logout: () => void) => ReactNode
 }
 
 export const Auth: FC<Props> = ({ children }) => {
-  const [userLoaded, setUserLoaded] = useState(false);
-  const [user, setUser] = useState<null | User>(null);
-  const [token, setToken] = useJWT();
+  const [userLoaded, setUserLoaded] = useState(false)
+  const [user, setUser] = useState<null | User>(null)
+  const [token, setToken] = useJWT()
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       // if auto login should happen
       if (!user && !token && process.env.REACT_APP_ADMIN_USER) {
         const res = await httpClient.user.login({
           email: process.env.REACT_APP_ADMIN_USER,
           password: process.env.REACT_APP_ADMIN_PASSWORD || '',
-        });
-        setUser(res.data.user);
-        setToken(res.data.token);
-        setUserLoaded(true);
-        return;
+        })
+        setUser(res.data.user)
+        setToken(res.data.token)
+        setUserLoaded(true)
+        return
       }
 
       // if already loaded or if no token exists
       if (user || !token) {
-        setUserLoaded(true);
-        return;
+        setUserLoaded(true)
+        return
       }
 
       try {
-        const res = await httpClient.user.profile(token);
-        setUser(res.data);
+        const res = await httpClient.user.profile(token)
+        setUser(res.data)
       } catch (e) {
-        setToken(null);
+        setToken(null)
       }
-      setUserLoaded(true);
-    })();
-  }, [token, user, setUserLoaded, setUser, setToken]);
+      setUserLoaded(true)
+    })()
+  }, [token, user, setUserLoaded, setUser, setToken])
 
-  if (!userLoaded) return null;
+  if (!userLoaded) return null
 
   return (
     <AuthContext.Provider value={{ user, setUser, token, setToken }}>
       {children(user, () => {
-        setToken(null);
-        setUser(null);
+        setToken(null)
+        setUser(null)
       })}
     </AuthContext.Provider>
-  );
-};
+  )
+}

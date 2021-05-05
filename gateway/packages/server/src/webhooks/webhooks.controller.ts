@@ -1,10 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants';
-import { NotificationMessage } from '@centrifuge/gateway-lib/centrifuge-node-client';
-import { DatabaseService } from '../database/database.service';
-import { CentrifugeService } from '../centrifuge-client/centrifuge.service';
-import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes';
-import { DocumentStatus } from '@centrifuge/gateway-lib/models/document';
+import { Body, Controller, Post } from '@nestjs/common'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
+import { NotificationMessage } from '@centrifuge/gateway-lib/centrifuge-node-client'
+import { DatabaseService } from '../database/database.service'
+import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
+import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes'
+import { DocumentStatus } from '@centrifuge/gateway-lib/models/document'
 
 // TODO add this in Common package
 export enum DocumentTypes {
@@ -23,7 +23,7 @@ export enum EventTypes {
 export class WebhooksController {
   constructor(
     private readonly centrifugeService: CentrifugeService,
-    private readonly databaseService: DatabaseService,
+    private readonly databaseService: DatabaseService
   ) {}
 
   /**
@@ -38,22 +38,16 @@ export class WebhooksController {
       if (notification.event_type === EventTypes.DOCUMENT) {
         // Search for the user in the database
         const user = await this.databaseService.users.findOne({
-          $or: [
-            { account: notification.to_id!.toLowerCase() },
-            { account: notification.to_id },
-          ],
-        });
+          $or: [{ account: notification.to_id!.toLowerCase() }, { account: notification.to_id }],
+        })
         if (!user) {
-          throw new Error('User is not present in database');
+          throw new Error('User is not present in database')
         }
 
         if (notification.document_type === DocumentTypes.GENERIC_DOCUMENT) {
-          const result = await this.centrifugeService.documents.getDocument(
-            user.account,
-            notification.document_id!,
-          );
+          const result = await this.centrifugeService.documents.getDocument(user.account, notification.document_id!)
 
-          const unflattenedAttributes = unflatten(result.attributes);
+          const unflattenedAttributes = unflatten(result.attributes)
           const updated = await this.databaseService.documents.update(
             {
               'header.document_id': notification.document_id,
@@ -72,17 +66,15 @@ export class WebhooksController {
                 document_status: DocumentStatus.Created, // webhook always follows commit, so creation is guaranteed
               },
             },
-            { multi: true, upsert: true, returnUpdatedDocs: true },
-          );
+            { multi: true, upsert: true, returnUpdatedDocs: true }
+          )
         } else {
-          throw new Error(
-            `Document type ${notification.document_type} not supported`,
-          );
+          throw new Error(`Document type ${notification.document_type} not supported`)
         }
       }
     } catch (e) {
-      throw new Error(`Webhook Error: ${e.message}`);
+      throw new Error(`Webhook Error: ${e.message}`)
     }
-    return 'OK';
+    return 'OK'
   }
 }

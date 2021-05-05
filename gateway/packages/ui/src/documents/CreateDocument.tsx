@@ -1,113 +1,102 @@
-import React, {
-  FunctionComponent,
-  useCallback,
-  useContext,
-  useEffect,
-} from 'react';
-import { Link } from 'react-router-dom';
-import DocumentForm from './DocumentForm';
-import { RouteComponentProps, withRouter } from 'react-router';
-import { Box, Button, Heading } from 'grommet';
-import { LinkPrevious } from 'grommet-icons';
-import { SecondaryHeader } from '../components/SecondaryHeader';
-import documentRoutes from './routes';
-import { Schema } from '@centrifuge/gateway-lib/models/schema';
-import { Contact } from '@centrifuge/gateway-lib/models/contact';
-import { Document } from '@centrifuge/gateway-lib/models/document';
-import { httpClient } from '../http-client';
-import { mapSchemaNames } from '@centrifuge/gateway-lib/utils/schema-utils';
-import {
-  NOTIFICATION,
-  NotificationContext,
-} from '../components/NotificationContext';
-import { AuthContext } from '../auth/Auth';
-import { useMergeState } from '../hooks';
-import { PageError } from '../components/PageError';
-import { AxiosError } from 'axios';
-import { HARDCODED_FIELDS } from '@centrifuge/gateway-lib/utils/constants';
-import { goToHomePage } from '../utils/goToHomePage';
+import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import DocumentForm from './DocumentForm'
+import { RouteComponentProps, withRouter } from 'react-router'
+import { Box, Button, Heading } from 'grommet'
+import { LinkPrevious } from 'grommet-icons'
+import { SecondaryHeader } from '../components/SecondaryHeader'
+import documentRoutes from './routes'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import { Contact } from '@centrifuge/gateway-lib/models/contact'
+import { Document } from '@centrifuge/gateway-lib/models/document'
+import { httpClient } from '../http-client'
+import { mapSchemaNames } from '@centrifuge/gateway-lib/utils/schema-utils'
+import { NOTIFICATION, NotificationContext } from '../components/NotificationContext'
+import { AuthContext } from '../auth/Auth'
+import { useMergeState } from '../hooks'
+import { PageError } from '../components/PageError'
+import { AxiosError } from 'axios'
+import { HARDCODED_FIELDS } from '@centrifuge/gateway-lib/utils/constants'
+import { goToHomePage } from '../utils/goToHomePage'
 
-type Props = RouteComponentProps;
+type Props = RouteComponentProps
 
 type State = {
-  defaultDocument: Document;
-  error: any;
-  contacts: Contact[];
-  schemas: Schema[];
-};
+  defaultDocument: Document
+  error: any
+  contacts: Contact[]
+  schemas: Schema[]
+}
 
 function templateEmpty(template: string | undefined): boolean {
   if (template === undefined) {
-    return true;
+    return true
   }
   if (template === '') {
-    return true;
+    return true
   }
   if (template === '0x0000000000000000000000000000000000000000') {
-    return true;
+    return true
   }
-  return false;
+  return false
 }
 
-export const CreateDocument: FunctionComponent<Props> = props => {
-  const [
-    { defaultDocument, contacts, schemas, error },
-    setState,
-  ] = useMergeState<State>({
+export const CreateDocument: FunctionComponent<Props> = (props) => {
+  const [{ defaultDocument, contacts, schemas, error }, setState] = useMergeState<State>({
     defaultDocument: {
       attributes: {},
     },
     error: null,
     contacts: [],
     schemas: [],
-  });
+  })
 
   const {
     history: { push },
-  } = props;
+  } = props
 
-  const notification = useContext(NotificationContext);
-  const { user, token } = useContext(AuthContext);
+  const notification = useContext(NotificationContext)
+  const { user, token } = useContext(AuthContext)
 
   const displayPageError = useCallback(
-    error => {
+    (error) => {
       setState({
         error,
-      });
+      })
     },
-    [setState],
-  );
+    [setState]
+  )
 
   const loadData = useCallback(async () => {
-    setState({});
+    setState({})
     try {
-      const contacts = (await httpClient.contacts.list(token!)).data;
+      const contacts = (await httpClient.contacts.list(token!)).data
       const schemas = (
         await httpClient.schemas.list(
           {
             archived: { $exists: false, $ne: true },
           },
-          token!,
+          token!
         )
-      ).data;
+      ).data
       setState({
         contacts,
         schemas,
-      });
+      })
     } catch (e) {
-      displayPageError(e);
+      displayPageError(e)
     }
-  }, [setState, displayPageError, token]);
+  }, [setState, displayPageError, token])
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadData()
+  }, [loadData])
 
   const handleOnSubmit = async (document: Document) => {
     setState({
       defaultDocument: document,
-    });
-    let createResult: Document | undefined;
+    })
+    let createResult: Document | undefined
     try {
       document = {
         ...document,
@@ -118,18 +107,16 @@ export const CreateDocument: FunctionComponent<Props> = props => {
             value: user?.account,
           } as any,
         },
-      };
+      }
 
       if (templateEmpty(document.template)) {
-        createResult = (await httpClient.documents.create(document, token!))
-          .data;
+        createResult = (await httpClient.documents.create(document, token!)).data
       } else {
-        createResult = (await httpClient.documents.clone(document, token!))
-          .data;
+        createResult = (await httpClient.documents.clone(document, token!)).data
       }
-      push(documentRoutes.index);
+      push(documentRoutes.index)
 
-      await httpClient.documents.commit(createResult._id!, token!);
+      await httpClient.documents.commit(createResult._id!, token!)
 
       const result = await httpClient.documents.create(
         {
@@ -144,31 +131,31 @@ export const CreateDocument: FunctionComponent<Props> = props => {
           },
           template: createResult.template,
         },
-        token!,
-      );
+        token!
+      )
 
-      await httpClient.documents.commit(result.data._id!, token!);
+      await httpClient.documents.commit(result.data._id!, token!)
     } catch (e) {
-      console.error(e);
+      console.error(e)
 
       notification.alert({
         type: NOTIFICATION.ERROR,
         title: 'Failed to save document',
         message: (e as AxiosError)!.response?.data.message,
-      });
+      })
     }
-  };
+  }
 
   const onCancel = () => {
-    push(documentRoutes.index);
-  };
+    push(documentRoutes.index)
+  }
 
-  if (error) return <PageError error={error} />;
+  if (error) return <PageError error={error} />
 
-  const availableSchemas = mapSchemaNames(user!.schemas, schemas);
+  const availableSchemas = mapSchemaNames(user!.schemas, schemas)
 
   if (!token) {
-    goToHomePage();
+    goToHomePage()
   }
 
   return (
@@ -194,10 +181,10 @@ export const CreateDocument: FunctionComponent<Props> = props => {
               <Button type="submit" primary label="Save" />
             </Box>
           </SecondaryHeader>
-        );
+        )
       }}
     ></DocumentForm>
-  );
-};
+  )
+}
 
-export default withRouter(CreateDocument);
+export default withRouter(CreateDocument)

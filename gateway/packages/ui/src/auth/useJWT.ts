@@ -1,21 +1,21 @@
-import { useState } from 'react';
+import { useState } from 'react'
 
-const LOCAL_STORAGE_JWT_KEY = 'jwt';
+const LOCAL_STORAGE_JWT_KEY = 'jwt'
 
 export function useJWT(): [string | null, (token: string | null) => void] {
-  const item = localStorage.getItem(LOCAL_STORAGE_JWT_KEY);
+  const item = localStorage.getItem(LOCAL_STORAGE_JWT_KEY)
 
-  const [token, setToken] = useState<null | string>(item);
+  const [token, setToken] = useState<null | string>(item)
 
   return [
     token,
-    token => {
+    (token) => {
       if (token === null) {
-        localStorage.removeItem(LOCAL_STORAGE_JWT_KEY);
+        localStorage.removeItem(LOCAL_STORAGE_JWT_KEY)
       } else {
-        localStorage.setItem(LOCAL_STORAGE_JWT_KEY, token);
+        localStorage.setItem(LOCAL_STORAGE_JWT_KEY, token)
       }
-      setToken(token);
+      setToken(token)
     },
-  ];
+  ]
 }
