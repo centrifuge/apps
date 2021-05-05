@@ -1,6 +1,6 @@
 import { HttpException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-import { Contact } from '../../../../lib/models/contact'
+import { Contact } from '../../../../lib/src/models/contact'
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'

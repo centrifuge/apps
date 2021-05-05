@@ -1,7 +1,7 @@
 import { MailerService } from '@nestjs-modules/mailer'
 import { JwtService } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
-import { User, UserWithOrg } from '../../../../lib/models/user'
+import { User, UserWithOrg } from '../../../../lib/src/models/user'
 import { PERMISSIONS } from '../../../../lib/utils/constants'
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'

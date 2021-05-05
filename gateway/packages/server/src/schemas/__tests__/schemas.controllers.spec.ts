@@ -1,6 +1,6 @@
 import { HttpException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-import { AttributesErrors, AttrTypes, DiffErrors, RegistriesErrors, Schema } from '../../../../lib/models/schema'
+import { AttributesErrors, AttrTypes, DiffErrors, RegistriesErrors, Schema } from '../../../../lib/src/models/schema'
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'

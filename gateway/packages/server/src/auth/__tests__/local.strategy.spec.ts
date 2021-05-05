@@ -1,6 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
-import { User } from '../../../../lib/models/user'
+import { User } from '../../../../lib/src/models/user'
 import { DatabaseService } from '../../database/database.service'
 import { AuthService } from '../auth.service'
 import { LocalStrategy } from '../local.strategy'

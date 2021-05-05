@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { User } from '../../../../lib/models/user'
+import { User } from '../../../../lib/src/models/user'
 import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'
 import { CentrifugeService } from '../../centrifuge-client/centrifuge.service'
 import { databaseServiceProvider } from '../../database/database.providers'
