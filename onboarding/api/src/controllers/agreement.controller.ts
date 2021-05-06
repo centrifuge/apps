@@ -55,7 +55,7 @@ export class AgreementController {
     const agreement = await this.agreementRepo.findOrCreate(
       user.id,
       user.email,
-      user.entityName || user.fullName,
+      user.entityName?.length > 0 ? user.entityName : user.fullName,
       params.poolId,
       profileAgreement.tranche,
       profileAgreement.name,

@@ -149,7 +149,7 @@ export class PoolService {
         tranche,
         true,
         agreementId,
-        user.entityName || user.fullName
+        user.entityName?.length > 0 ? user.entityName : user.fullName
       )
     } else {
       this.logger.log(`${address.address} is not a member of ${pool.metadata.name} - ${tranche}`)
