@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { Modal } from '@centrifuge/axis-modal'
 import { Organization } from '@centrifuge/gateway-lib/models/organization'

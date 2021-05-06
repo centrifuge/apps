@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { canLoadDocument, Document, documentHasNFTs } from '@centrifuge/gateway-lib/models/document'
 import { Schema } from '@centrifuge/gateway-lib/models/schema'
 import { canCreateDocuments } from '@centrifuge/gateway-lib/models/user'

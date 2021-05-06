@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MultipleSelect } from '@centrifuge/axis-multiple-select'
 import { SearchSelect } from '@centrifuge/axis-search-select'
 import { Organization } from '@centrifuge/gateway-lib/models/organization'

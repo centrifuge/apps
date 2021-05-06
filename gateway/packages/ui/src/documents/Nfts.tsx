@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { Modal } from '@centrifuge/axis-modal'
 import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client'

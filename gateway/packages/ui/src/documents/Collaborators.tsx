@@ -191,6 +191,7 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
   const renderCollaborators = () => {
     return (
       <Section title="Collaborators" actions={collaboratorActions}>
+        {/* @ts-ignore */}
         <DataTableWithDynamicHeight
           size={'360px'}
           sortable={true}

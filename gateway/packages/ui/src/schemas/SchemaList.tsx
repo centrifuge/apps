@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Modal } from '@centrifuge/axis-modal'
 import { Schema } from '@centrifuge/gateway-lib/models/schema'
 import { formatDate } from '@centrifuge/gateway-lib/utils/formaters'
