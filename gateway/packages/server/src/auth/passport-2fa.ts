@@ -22,7 +22,7 @@ export function Strategy(options, verify) {
 
 inherits(Strategy, passport.Strategy)
 
-Strategy.prototype.authenticate = function(req, options) {
+Strategy.prototype.authenticate = function (req, options) {
   options = options || {}
   const username = lookup(req.body, this._usernameField) || lookup(req.query, this._usernameField)
   const password = lookup(req.body, this._passwordField) || lookup(req.query, this._passwordField)
@@ -60,10 +60,7 @@ function lookup(obj, field) {
     return null
   }
 
-  const chain = field
-    .split(']')
-    .join('')
-    .split('[')
+  const chain = field.split(']').join('').split('[')
   for (let i = 0, len = chain.length; i < len; i++) {
     const prop = obj[chain[i]]
     if (typeof prop === 'undefined') {
