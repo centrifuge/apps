@@ -96,7 +96,6 @@ export class AgreementRepo {
     name: string,
     templateId: string
   ): Promise<Agreement> {
-    // TODO: and declined_at is null
     const [existingAgreement] = await this.db.sql`
       select *
       from agreements
@@ -104,6 +103,7 @@ export class AgreementRepo {
       and lower(agreements.pool_id) = ${poolId.toLowerCase()}
       and agreements.tranche = ${tranche}
       and agreements.provider_template_id = ${templateId}
+      and agreements.declined_at is null
     `
 
     if (!existingAgreement) {
