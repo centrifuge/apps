@@ -80,6 +80,11 @@ export class SecuritizeService {
       return this.getInvestor(userId, providerAccountId, newDigest, true)
     }
 
+    if (!response.ok) {
+      this.logger.error(`Failed to retrieve investor ${providerAccountId}: ${response.statusText}`)
+      return undefined
+    }
+
     const investor = await response.json()
     return investor
   }
