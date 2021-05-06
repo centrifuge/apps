@@ -25,7 +25,7 @@ export const WalletRewards = ({ address }: { address: string }) => {
 
   return (
     <Cont direction="row" pad={{ vertical: '10px', horizontal: '16px' }}>
-      <TokenLogo src="/static/cfg-black.svg" />
+      <TokenLogo src="/static/cfg-white.svg" />
       <Box>
         <Label>Your rewards</Label>
         <Number>
