@@ -50,7 +50,7 @@ export class MemberlistService {
         }
 
         const agreements = await this.agreementRepo.getByUserPoolTranche(userId, poolId, t)
-        const done = agreements.every((agreement: Agreement) => agreement.signedAt && agreement.counterSignedAt)
+        const done = agreements.some((agreement: Agreement) => agreement.signedAt && agreement.counterSignedAt)
         if (done && agreements.length > 0) {
           await this.poolService.addToMemberlist(userId, poolId, t, agreements[0].id)
         } else {
