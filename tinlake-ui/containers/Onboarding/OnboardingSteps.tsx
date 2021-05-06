@@ -45,7 +45,13 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
   const whitelistStatus = onboarding.data?.kyc?.isWhitelisted
     ? onboarding.data?.kyc?.isWhitelisted[DefaultTranche]
     : false
-  const agreementStatus = agreement?.counterSigned ? 'countersigned' : agreement?.signed ? 'signed' : 'none'
+  const agreementStatus = agreement?.declined
+    ? 'declined'
+    : agreement?.counterSigned
+    ? 'countersigned'
+    : agreement?.signed
+    ? 'signed'
+    : 'none'
 
   const router = useRouter()
   const session = 'session' in router.query ? router.query.session : ''

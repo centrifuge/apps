@@ -1,17 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { AgreementsStatus, Tranche } from '../controllers/types'
 import { DocusignService } from '../services/docusign.service'
-import { PoolService } from '../services/pool.service'
 import { uuidv4 } from '../utils/uuid'
 import { DatabaseService } from './db.service'
 
 @Injectable()
 export class AgreementRepo {
-  constructor(
-    private readonly db: DatabaseService,
-    private readonly docusignService: DocusignService,
-    private readonly poolService: PoolService
-  ) {}
+  constructor(private readonly db: DatabaseService, private readonly docusignService: DocusignService) {}
 
   async find(id: string): Promise<Agreement | undefined> {
     const [agreement] = await this.db.sql`
@@ -72,7 +67,7 @@ export class AgreementRepo {
       select *
       from agreements
       where agreements.user_id = ${userId}
-      and agreements.pool_id = ${poolId}
+      and lower(agreements.pool_id) = ${poolId.toLowerCase()}
       and agreements.tranche = ${tranche}
     `
 
@@ -84,7 +79,7 @@ export class AgreementRepo {
       select *
       from agreements
       where user_id = ${userId}
-      and pool_id = ${poolId}
+      and lower(agreements.pool_id) = ${poolId.toLowerCase()}
       and signed_at is not null
       and counter_signed_at is not null
     `
@@ -101,14 +96,14 @@ export class AgreementRepo {
     name: string,
     templateId: string
   ): Promise<Agreement> {
-    // TODO: and declined_at is null
     const [existingAgreement] = await this.db.sql`
       select *
       from agreements
       where agreements.user_id = ${userId}
-      and agreements.pool_id = ${poolId}
+      and lower(agreements.pool_id) = ${poolId.toLowerCase()}
       and agreements.tranche = ${tranche}
       and agreements.provider_template_id = ${templateId}
+      and agreements.declined_at is null
     `
 
     if (!existingAgreement) {
@@ -192,7 +187,7 @@ export class AgreementRepo {
       select *
       from agreements
       where agreements.user_id = ${userId}
-      and agreements.pool_id = ${poolId}
+      and lower(agreements.pool_id) = ${poolId.toLowerCase()}
       and agreements.provider = 'docusign'
       and agreements.provider_template_id in (${profileAgreements.map((pa) => pa.providerTemplateId)})
     `
@@ -200,6 +195,7 @@ export class AgreementRepo {
     dbAgreements.forEach((dbAgreement: Agreement) => {
       agreements[dbAgreement.providerTemplateId].signed = !!dbAgreement.signedAt
       agreements[dbAgreement.providerTemplateId].counterSigned = !!dbAgreement.counterSignedAt
+      agreements[dbAgreement.providerTemplateId].declined = !!dbAgreement.declinedAt
     })
 
     return Object.values(agreements)
@@ -217,4 +213,5 @@ export type Agreement = {
   providerEnvelopeId: string
   signedAt: Date
   counterSignedAt: Date
+  declinedAt?: Date
 }

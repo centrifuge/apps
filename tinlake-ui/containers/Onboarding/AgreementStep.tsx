@@ -17,7 +17,7 @@ interface Props {
   tranche?: 'senior' | 'junior'
   onboarding: OnboardingState
   agreement: AgreementsStatus | undefined
-  agreementStatus: 'none' | 'signed' | 'countersigned'
+  agreementStatus: 'none' | 'signed' | 'countersigned' | 'declined'
   whitelistStatus: boolean
 }
 
@@ -53,25 +53,31 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
           />
         )}
         <StepTitle inactive={!props.active}>
-          {props.agreementStatus === 'none'
+          {props.agreementStatus === 'none' || props.agreementStatus === 'declined'
             ? `Sign the Subscription Agreement`
             : props.agreementStatus === 'countersigned'
             ? `${props.agreement?.name} signed`
             : `${props.agreement?.name} status: awaiting Issuer signature`}
         </StepTitle>
       </StepHeader>
-      {props.active && !isRestricted && props.agreementStatus === 'none' && props.agreement && !session && (
-        <StepBody>
-          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
-            Start the final step of signing the {props.agreement.name} for {poolName} by signing in with your Securitize
-            iD.
-          </Paragraph>
-          <div>
-            <Button primary label={'Sign in with Securitize'} href={props.onboarding.data?.kyc?.url} fill={false} />
-          </div>
-          <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
-        </StepBody>
-      )}
+      {props.active &&
+        !isRestricted &&
+        (props.agreementStatus === 'none' || props.agreementStatus === 'declined') &&
+        props.agreement &&
+        !session && (
+          <StepBody>
+            <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
+              {props.agreementStatus === 'declined'
+                ? `The issuer has declined signing your subscription agreement. This may be due to missing or incorrect information provided in the subscription agreement. Please check your email inbox for further feedback and instructions. To continue, sign in again with Securitize, then complete and sign a new subscription agreement to finalize your onboarding process.`
+                : `Start the final step of signing the ${props.agreement.name} for ${poolName} by signing in with your
+              Securitize iD.`}
+            </Paragraph>
+            <div>
+              <Button primary label={'Sign in with Securitize'} href={props.onboarding.data?.kyc?.url} fill={false} />
+            </div>
+            <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
+          </StepBody>
+        )}
       {props.active && isRestricted && (
         <StepBody>
           {props.onboarding.data?.restrictedGlobal && (
@@ -102,57 +108,66 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
           <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
         </StepBody>
       )}
-      {props.active && !isRestricted && props.agreementStatus === 'none' && props.agreement && session && (
-        <StepBody>
-          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
-            Finalize onboarding by signing the {props.agreement.name} for {poolName}. Note that the minimum investment
-            amount for this pool is 5000 {props.activePool?.metadata.currencySymbol || 'DAI'}.
-          </Paragraph>
-          {props.onboarding.data?.showNonSolicitationNotice && (
-            <Box margin={{ right: 'auto', bottom: 'medium' }}>
-              <FormFieldWithoutBorder error={error}>
-                <CheckBox
-                  checked={checked}
-                  label={
-                    <div style={{ lineHeight: '24px' }}>
-                      I confirm that I am requesting the subscription agreement and further investment information
-                      without having being solicited or approached, directly or indirectly by the issuer of{' '}
-                      {props.activePool?.metadata.shortName || props.activePool?.metadata.name} or any affiliate.&nbsp;
-                      <Anchor
-                        onClick={(event: any) => {
-                          openNonSolicitationModal()
-                          event.preventDefault()
-                        }}
-                        style={{ display: 'inline' }}
-                        label="View more"
-                      />
-                      .
-                    </div>
+      {props.active &&
+        !isRestricted &&
+        (props.agreementStatus === 'none' || props.agreementStatus === 'declined') &&
+        props.agreement &&
+        session && (
+          <StepBody>
+            <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
+              {props.agreementStatus === 'declined'
+                ? `The issuer has declined signing your subscription agreement. This may be due to missing or incorrect information provided in the subscription agreement. Please check your email inbox for further feedback and instructions. Please click the button below to complete a new subscription agreement to finalize your onboarding process.`
+                : `Finalize onboarding by signing the ${
+                    props.agreement.name
+                  } for ${poolName}. Note that the minimum investment
+            amount for this pool is 5000 ${props.activePool?.metadata.currencySymbol || 'DAI'}.`}
+            </Paragraph>
+            {props.onboarding.data?.showNonSolicitationNotice && (
+              <Box margin={{ right: 'auto', bottom: 'medium' }}>
+                <FormFieldWithoutBorder error={error}>
+                  <CheckBox
+                    checked={checked}
+                    label={
+                      <div style={{ lineHeight: '24px' }}>
+                        I confirm that I am requesting the subscription agreement and further investment information
+                        without having being solicited or approached, directly or indirectly by the issuer of{' '}
+                        {props.activePool?.metadata.shortName || props.activePool?.metadata.name} or any
+                        affiliate.&nbsp;
+                        <Anchor
+                          onClick={(event: any) => {
+                            openNonSolicitationModal()
+                            event.preventDefault()
+                          }}
+                          style={{ display: 'inline' }}
+                          label="View more"
+                        />
+                        .
+                      </div>
+                    }
+                    onChange={(event) => setChecked(event.target.checked)}
+                  />
+                </FormFieldWithoutBorder>
+              </Box>
+            )}
+            <div>
+              <Button
+                primary
+                label={`Sign Subscription Agreement`}
+                href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
+                  props.agreement?.provider
+                }/${props.agreement?.providerTemplateId}/redirect?session=${session}`}
+                onClick={(event: any) => {
+                  if (props.onboarding.data?.showNonSolicitationNotice && !checked) {
+                    event.preventDefault()
+                    setError('This needs to be checked to proceed.')
                   }
-                  onChange={(event) => setChecked(event.target.checked)}
-                />
-              </FormFieldWithoutBorder>
-            </Box>
-          )}
-          <div>
-            <Button
-              primary
-              label={`Sign Subscription Agreement`}
-              href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
-                props.agreement?.provider
-              }/${props.agreement?.providerTemplateId}/redirect?session=${session}`}
-              onClick={(event: any) => {
-                if (props.onboarding.data?.showNonSolicitationNotice && !checked) {
-                  event.preventDefault()
-                  setError('This needs to be checked to proceed.')
-                }
-              }}
-              fill={false}
-            />
-          </div>
-          <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
-        </StepBody>
-      )}
+                }}
+                fill={false}
+              />
+            </div>
+            <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
+          </StepBody>
+        )}
       {props.active && !isRestricted && props.agreement && props.agreementStatus === 'signed' && (
         <StepBody>
           <Box pad={{ vertical: 'medium' }}>

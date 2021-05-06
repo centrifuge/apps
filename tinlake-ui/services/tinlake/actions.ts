@@ -14,6 +14,11 @@ export interface TinlakeResult {
   loanId?: string
 }
 
+const PERMIT_UNSUPPORTED_CURRENCIES = [
+  '0xad3E3Fc59dff318BecEaAb7D00EB4F68b1EcF195',
+  '0xb3037647a7E114Da86653Daa8cdCEd738727ab11',
+]
+
 // TinlakeAction args need to be serializable, as they are stored in Redux state for the async transactions duck
 // Based on: https://github.com/microsoft/TypeScript/issues/1897#issuecomment-657294463
 type SerializableScalar = string & number & boolean
@@ -237,10 +242,11 @@ export async function submitSeniorSupplyOrder(
 
   const address = await tinlake.signer?.getAddress()
 
-  // wCUSD doesnt support permit signing
-  const isWCUSD = tinlake.contractAddresses.TINLAKE_CURRENCY === '0xad3E3Fc59dff318BecEaAb7D00EB4F68b1EcF195'
+  const currencyDoesntSupportPermits = PERMIT_UNSUPPORTED_CURRENCIES.includes(
+    tinlake.contractAddresses.TINLAKE_CURRENCY!
+  )
 
-  if (isWCUSD || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
+  if (currencyDoesntSupportPermits || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
     return await tinlake.submitSeniorSupplyOrderWithAllowance(amount, address)
   }
 
@@ -289,10 +295,11 @@ export async function submitJuniorSupplyOrder(
 
   const address = await tinlake.signer?.getAddress()
 
-  // wCUSD doesnt support permit signing
-  const isWCUSD = tinlake.contractAddresses.TINLAKE_CURRENCY === '0xad3E3Fc59dff318BecEaAb7D00EB4F68b1EcF195'
+  const currencyDoesntSupportPermits = PERMIT_UNSUPPORTED_CURRENCIES.includes(
+    tinlake.contractAddresses.TINLAKE_CURRENCY!
+  )
 
-  if (isWCUSD || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
+  if (currencyDoesntSupportPermits || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
     return await tinlake.submitJuniorSupplyOrderWithAllowance(amount, address)
   }
 
@@ -341,10 +348,11 @@ export async function submitSeniorRedeemOrder(
 
   const address = await tinlake.signer?.getAddress()
 
-  // wCUSD doesnt support permit signing
-  const isWCUSD = tinlake.contractAddresses.TINLAKE_CURRENCY === '0xad3E3Fc59dff318BecEaAb7D00EB4F68b1EcF195'
+  const currencyDoesntSupportPermits = PERMIT_UNSUPPORTED_CURRENCIES.includes(
+    tinlake.contractAddresses.TINLAKE_CURRENCY!
+  )
 
-  if (isWCUSD || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
+  if (currencyDoesntSupportPermits || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
     return await tinlake.submitSeniorRedeemOrderWithAllowance(amount, address)
   }
 
@@ -393,10 +401,11 @@ export async function submitJuniorRedeemOrder(
 
   const address = await tinlake.signer?.getAddress()
 
-  // wCUSD doesnt support permit signing
-  const isWCUSD = tinlake.contractAddresses.TINLAKE_CURRENCY === '0xad3E3Fc59dff318BecEaAb7D00EB4F68b1EcF195'
+  const currencyDoesntSupportPermits = PERMIT_UNSUPPORTED_CURRENCIES.includes(
+    tinlake.contractAddresses.TINLAKE_CURRENCY!
+  )
 
-  if (isWCUSD || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
+  if (currencyDoesntSupportPermits || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
     return await tinlake.submitJuniorRedeemOrderWithAllowance(amount, address)
   }
 
