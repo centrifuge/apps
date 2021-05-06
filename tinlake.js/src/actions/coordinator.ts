@@ -14,11 +14,17 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const coordinator = this.contract('COORDINATOR')
       const assessor = this.contract('ASSESSOR')
       const feed = this.contract('FEED')
+      const isMakerIntegrated = this.contractAddresses['CLERK'] !== undefined
+      if (beforeClosing && isMakerIntegrated) {
+        throw new Error('TODO: getEpochState() doesnt work properly for Maker integrated pools')
+      }
 
+      // isMakerIntegrated ? this.contract('ASSESSOR').totalBalance() : this.contract('RESERVE').totalBalance()
       const reserve = await this.toBN(
         beforeClosing ? this.contract('RESERVE').totalBalance() : coordinator.epochReserve()
       )
       const netAssetValue = await this.toBN(beforeClosing ? feed.approximatedNAV() : coordinator.epochNAV())
+      // (await this.toBN(assessor.seniorDebt())).add(await this.toBN(assessor.seniorBalance()))
       const seniorAsset = beforeClosing
         ? (await this.toBN(assessor.seniorDebt_())).add(await this.toBN(assessor.seniorBalance_()))
         : await this.toBN(coordinator.epochSeniorAsset())
@@ -76,6 +82,11 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
         tinInvest: await this.toBN(coordinator.weightJuniorSupply()),
         tinRedeem: await this.toBN(coordinator.weightJuniorRedeem()),
       }
+    }
+
+    closeEpoch = async () => {
+      const coordinator = this.contract('COORDINATOR')
+      return this.pending(coordinator.closeEpoch({ ...this.overrides, gasLimit: 3000000 }))
     }
 
     solveEpoch = async () => {
@@ -266,6 +277,7 @@ export type ICoordinatorActions = {
   getOrders(beforeClosing?: boolean): Promise<Orders>
   getSolverWeights(): Promise<SolverWeights>
   solveEpoch(): Promise<PendingTransaction>
+  closeEpoch(): Promise<PendingTransaction>
   executeEpoch(): Promise<PendingTransaction>
   getCurrentEpochId(): Promise<number>
   getLatestBlockTimestamp(): Promise<number>

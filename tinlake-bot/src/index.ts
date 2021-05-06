@@ -1,4 +1,3 @@
-import { NonceManager } from '@ethersproject/experimental'
 import { CronJob } from 'cron'
 import { ethers } from 'ethers'
 import config from './config'
@@ -9,22 +8,21 @@ import { submitSolutions } from './tasks/submitSolutions'
 import { writeoffAssets } from './tasks/writeoffAssets'
 import CronExpression from './util/CronExpression'
 import { loadFromIPFS, PoolMap } from './util/ipfs'
+import { BackendSigner } from './signer'
+require('log-timestamp')
 
 const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
 let pools: PoolMap = {}
 
 const run = async () => {
   console.log('Decrypting wallet')
-  const signer = await ethers.Wallet.fromEncryptedJson(config.signerEncryptedJson, config.signerPassword)
+  const wallet = await ethers.Wallet.fromEncryptedJson(config.signerEncryptedJson, config.signerPassword)
 
   // Since the bot can submit multiple tx in quick succession, we need the experimental NonceManager to make sure they don't overlap.
   // Source: https://github.com/ethers-io/ethers.js/issues/435#issuecomment-581734980
-  const signerWithProvider = new NonceManager(signer.connect(provider))
+  const signer = new BackendSigner(wallet).connect(provider)
 
-  await submitSolutions(pools, provider, signerWithProvider)
-  await executePools(pools, provider, signerWithProvider)
-
-  console.log(`Booting Dennis 2.0 as ${signer.address}`)
+  console.log(`Booting Dennis 2.0 as ${wallet.address}`)
   pools = await loadFromIPFS(provider)
 
   let cronJobs: Map<string, CronJob> = new Map<string, CronJob>()
@@ -37,19 +35,19 @@ const run = async () => {
 
   let closePoolsTask = new CronJob('0 9 * * *', async () => {
     // Close pool epochs every day at 10am CET (9am UTC)
-    await closePools(pools, provider, signerWithProvider)
+    await closePools(pools, provider, signer)
   })
   cronJobs.set('closePools', closePoolsTask)
 
   let submitSolutionsTask = new CronJob(CronExpression.EVERY_30_MINUTES, async () => {
     // Submit solutions every x minutes
-    await submitSolutions(pools, provider, signerWithProvider)
+    await submitSolutions(pools, provider, signer)
   })
   cronJobs.set('submitSolutions', submitSolutionsTask)
 
   let executePoolsTask = new CronJob(CronExpression.EVERY_30_MINUTES, async () => {
     // Execute pool epochs every x minutes
-    await executePools(pools, provider, signerWithProvider)
+    await executePools(pools, provider, signer)
   })
   cronJobs.set('executePools', executePoolsTask)
 

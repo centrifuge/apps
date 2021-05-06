@@ -46,6 +46,8 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
         .div(newReserve.add(epochState.netAssetValue))
         .div(new BN('10').pow(new BN('14')))
 
+      const currencySymbol = pool.metadata.currencySymbol || 'DAI'
+
       pushNotificationToSlack(
         pool,
         `I just executed epoch ${id - 1} for *<${config.tinlakeUiHost}pool/${pool.addresses.ROOT_CONTRACT}/${
@@ -59,7 +61,7 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
                 type: 'mrkdwn',
                 text: `*DROP investments*\n${addThousandsSeparators(
                   toPrecision(baseToDisplay(solution.dropInvest, 18), 0)
-                )} DAI`,
+                )} ${currencySymbol}`,
               },
               {
                 type: 'mrkdwn',
@@ -71,7 +73,7 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
                 type: 'mrkdwn',
                 text: `*TIN investments*\n${addThousandsSeparators(
                   toPrecision(baseToDisplay(solution.tinInvest, 18), 0)
-                )} DAI`,
+                )} ${currencySymbol}`,
               },
               {
                 type: 'mrkdwn',
@@ -88,9 +90,9 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
                 type: 'mrkdwn',
                 text: `:moneybag: The new reserve is ${addThousandsSeparators(
                   toPrecision(baseToDisplay(newReserve, 18), 0)
-                )} DAI out of ${addThousandsSeparators(
+                )} ${currencySymbol} out of ${addThousandsSeparators(
                   toPrecision(baseToDisplay(epochState.maxReserve, 18), 0)
-                )} DAI max. The cash drag is ${parseFloat(cashdrag.toString()) / 100}%.`,
+                )} ${currencySymbol} max. The cash drag is ${parseFloat(cashdrag.toString()) / 100}%.`,
               },
               {
                 type: 'mrkdwn',
@@ -102,7 +104,7 @@ export const executePools = async (pools: PoolMap, provider: ethers.providers.Pr
                 type: 'mrkdwn',
                 text: `:cyclone: The new pool value is ${addThousandsSeparators(
                   toPrecision(baseToDisplay(newReserve.add(epochState.netAssetValue), 18), 0)
-                )} DAI.`,
+                )} ${currencySymbol}.`,
               },
             ],
           },

@@ -6,12 +6,11 @@ import { PoolMap } from '../util/ipfs'
 import { pushNotificationToSlack } from '../util/slack'
 
 export const checkDueAssets = async (pools: PoolMap) => {
-  console.log('Checking if any assets are due in the next 3 days')
-  try {
-    const threeDaysFromNow = Math.ceil(Date.now() / 1000 + 3 * 24 * 60 * 60)
-    const data = await fetchFromSubgraph(`
+  console.log('Checking if any assets are due in the next 5 days')
+  const fiveDaysFromNow = Math.ceil(Date.now() / 1000 + 5 * 24 * 60 * 60)
+  const data = await fetchFromSubgraph(`
       query {
-        loans(where: { maturityDate_not: 0, maturityDate_lte: "${threeDaysFromNow}", borrowsCount_gt:0, repaysCount:0}) {
+        loans(where: { maturityDate_not: 0, maturityDate_lte: "${fiveDaysFromNow}", borrowsCount_gt:0, repaysCount:0}) {
           debt
           index
           maturityDate
@@ -24,18 +23,32 @@ export const checkDueAssets = async (pools: PoolMap) => {
       
     `)
 
-    if (!data.loans) {
-      console.error(`Failed to retrieve loans: ${data}`)
-      return
-    }
+  if (!data.loans) {
+    console.error(`Failed to retrieve loans: ${data}`)
+    return
+  }
 
-    const groupedLoans = groupBy(data.loans, (loan: any) => loan.pool.id)
+  const groupedLoans = groupBy(data.loans, (loan: any) => loan.pool.id)
 
-    Object.keys(groupedLoans).forEach((poolId: string) => {
-      const pool = pools[poolId]
+  let lowercasedPools = {}
+  for (let poolId of Object.keys(pools)) {
+    lowercasedPools[poolId.toLowerCase()] = pools[poolId]
+  }
+
+  Object.keys(groupedLoans).forEach((poolId: string) => {
+    try {
+      const pool = lowercasedPools[poolId]
+
+      if (!pool) {
+        console.error(`Pool ${poolId} is missing`)
+        return
+      }
+
       const name = pool.metadata.shortName || pool.metadata.name
       const loans = groupedLoans[poolId]
       console.log(`${name}: ${loans.length}`)
+
+      const currencySymbol = pool.metadata.currencySymbol || 'DAI'
 
       pushNotificationToSlack(
         pool,
@@ -51,7 +64,7 @@ export const checkDueAssets = async (pools: PoolMap) => {
               type: 'mrkdwn',
               text: `*Asset ${loan.index}*\n${addThousandsSeparators(
                 toPrecision(baseToDisplay(loan.debt, 18), 0)
-              )} DAI is due on ${dateToYMD(loan.maturityDate)}.`,
+              )} ${currencySymbol} is due on ${dateToYMD(loan.maturityDate)}.`,
             },
             accessory: {
               type: 'button',
@@ -66,10 +79,10 @@ export const checkDueAssets = async (pools: PoolMap) => {
           }
         })
       )
-    })
-  } catch (e) {
-    console.error(`Error caught during pool closing task: ${e}`)
-  }
+    } catch (e) {
+      console.error(`Error caught during due asset task: ${e}`)
+    }
+  })
 }
 
 export const dateToYMD = (unix: number) => {

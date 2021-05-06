@@ -2633,16 +2633,19 @@ __metadata:
     "@types/cron": ^1
     "@types/node": ^14.14.10
     "@types/node-fetch": ^2
+    "@types/ws": ^7
     "@vercel/fetch-retry": ^5.0.3
     bignumber.js: ^9.0.0
     cron: ^1.8.2
     ethers: 5.0.23
+    log-timestamp: ^0.3.0
     node-fetch: ^2.6.1
     prettier: 1.19.1
     prettier-plugin-organize-imports: ^1.1.1
     ts-node: 9.0.0
     ts-node-dev: ^1.1.1
     typescript: 4.1.2
+    ws: ^7.4.5
   languageName: unknown
   linkType: soft
 
@@ -7143,6 +7146,15 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 93d407970a6487290f8bace3b6de40d6f35f092386e5fba8981c3cb5ee60b155da419ab98007a3991c4a2e27eee948c5f98786a13619359b42a4a04aaf7bdf27
+  languageName: node
+  linkType: hard
+
+"@types/ws@npm:^7":
+  version: 7.4.2
+  resolution: "@types/ws@npm:7.4.2"
+  dependencies:
+    "@types/node": "*"
+  checksum: 29fc34b61cc039c0f51e835ff8746faf7b98186e6bf785fb099c9fb006ae79825312e62a0c1e856b405543ae6302e196d1a1d372753dbcdce59ab5b72011a9f2
   languageName: node
   linkType: hard
 
@@ -21996,6 +22008,13 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"log-prefix@npm:0.1.1":
+  version: 0.1.1
+  resolution: "log-prefix@npm:0.1.1"
+  checksum: 7f48e289db90367af150be990c712cf398786f703688dc991bf91572f5f3d6b8c69e574d423921fd36def5f413540c50f4ae0013eee2cf2a0697eca6e3f76dcb
+  languageName: node
+  linkType: hard
+
 "log-symbols@npm:2.2.0":
   version: 2.2.0
   resolution: "log-symbols@npm:2.2.0"
@@ -22011,6 +22030,15 @@ fsevents@~2.1.2:
   dependencies:
     chalk: ^4.0.0
   checksum: 2cbdb0427d1853f2bd36645bff42aaca200902284f28aadacb3c0fa4c8c43fe6bfb71b5d61ab08b67063d066d7c55b8bf5fbb43b03e4a150dbcdd643e9cd1dbf
+  languageName: node
+  linkType: hard
+
+"log-timestamp@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "log-timestamp@npm:0.3.0"
+  dependencies:
+    log-prefix: 0.1.1
+  checksum: 87a208b1c1b208bc42f5152b855db110bb09ef65990854f2e2658e590ad4e8fc86f2003dfe900d546d2b0c3577ba070424990b1d91d2d37e4f9278a7cda2af29
   languageName: node
   linkType: hard
 
@@ -34257,6 +34285,21 @@ typescript@^4.1.5:
     utf-8-validate:
       optional: true
   checksum: 493655b7c4589d09ff3c2b6e8870b9ad7f7aea0aff34034e2dbb9a2e13f6868a47b06b423bc2365aec6143500b04ad24fdaecfbd9a6752f8eab2d339182c9884
+  languageName: node
+  linkType: hard
+
+"ws@npm:^7.4.5":
+  version: 7.4.5
+  resolution: "ws@npm:7.4.5"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ^5.0.2
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 20731aa1075336b94677f6741b674469c3c7fce9b70115bb535827c7c108a9d714f0b38ce39289b63c652870f9801afaf096f8aab32da96be62d919e80e4ed32
   languageName: node
   linkType: hard
 
