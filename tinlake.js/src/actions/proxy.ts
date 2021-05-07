@@ -169,6 +169,20 @@ export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         proxy.execute(this.contract('ACTIONS').address, encoded, { ...this.overrides, gasLimit: 1500000 })
       )
     }
+
+    proxyTransferCurrency = async (proxyAddress: string, borrowerAddress: string) => {
+      const proxyBalance = await this.contract('TINLAKE_CURRENCY').balanceOf(proxyAddress)
+      console.log(proxyBalance)
+      const proxy = this.contract('PROXY', proxyAddress)
+      const encoded = this.contract('ACTIONS').interface.encodeFunctionData('transferERC20', [
+        this.contract('TINLAKE_CURRENCY').address,
+        borrowerAddress,
+        proxyBalance,
+      ])
+
+      const newActionsContract = '0x80F33ED0A69935dd74310b9D0009D0BA647Cf223'
+      return this.pending(proxy.execute(newActionsContract, encoded, { ...this.overrides, gasLimit: 550000 }))
+    }
   }
 }
 
@@ -195,6 +209,7 @@ export type IProxyActions = {
   ): Promise<PendingTransaction>
   proxyLock(proxyAddr: string, loanId: string): Promise<PendingTransaction>
   proxyBorrowWithdraw(proxyAddr: string, loanId: string, amount: string, usr: string): Promise<PendingTransaction>
+  proxyTransferCurrency(proxyAddress: string, borrowerAddress: string): Promise<PendingTransaction>
 }
 
 export default ProxyActions
