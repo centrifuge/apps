@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { Modal } from '@centrifuge/axis-modal'
 import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
@@ -191,7 +192,6 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
   const renderCollaborators = () => {
     return (
       <Section title="Collaborators" actions={collaboratorActions}>
-        {/* @ts-ignore */}
         <DataTableWithDynamicHeight
           size={'360px'}
           sortable={true}
