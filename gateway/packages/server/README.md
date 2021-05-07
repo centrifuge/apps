@@ -4,6 +4,8 @@
 
 ### Running locally
 
+Run `cp .env.example .env`, generate JWT private/public keys as outlined below, and put the values into `.env`. Make sure to replace all line breaks with `\n`.
+
 Gateway requires a Centrifuge Node to run. Either connect via VPN to a deployed node, or see [here](https://developer.centrifuge.io/cent-node/overview/introduction/), how to set-up and configure a Centrifuge Node and interact with it. If running your own node, make sure you configure the node's webhooks to call your future Gateway instance. By default this will be `localhost:3001/webhooks`.
 
 #### Connect with deployed Amber node
