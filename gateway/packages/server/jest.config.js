@@ -7,4 +7,5 @@ module.exports = {
   },
   coverageDirectory: '../coverage',
   testEnvironment: 'node',
-};
+  setupFiles: ['<rootDir>/.jest/setEnvVars.js'],
+}
