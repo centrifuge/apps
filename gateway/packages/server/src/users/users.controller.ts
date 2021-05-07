@@ -107,10 +107,7 @@ export class UsersController {
   @Get(ROUTES.USERS.base)
   @UseGuards(JwtAuthGuard, UserManagerAuthGuard)
   async getAllUsers(@Request() request) {
-    const users = await this.databaseService.users
-      .getCursor({})
-      .sort({ createdAt: -1 })
-      .exec()
+    const users = await this.databaseService.users.getCursor({}).sort({ createdAt: -1 }).exec()
 
     // sanitizes each user
     return users.map((user) => new PublicUser(user))
