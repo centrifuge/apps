@@ -12,6 +12,7 @@ export interface Config {
   tinlakeDataBackendUrl: string
   profileRoot: string
   defaultSlackChannelId: string
+  gasnowWs: string
 }
 
 const config: Config = {
@@ -26,6 +27,7 @@ const config: Config = {
   tinlakeDataBackendUrl: process.env.TINLAKE_DATA_BACKEND_URL,
   profileRoot: process.env.PROFILE_ROOT,
   defaultSlackChannelId: process.env.DEFAULT_SLACK_CHANNEL_ID,
+  gasnowWs: process.env.GASNOW_WS,
 }
 
 export default config

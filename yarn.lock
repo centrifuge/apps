@@ -2697,16 +2697,19 @@ __metadata:
     "@types/cron": ^1
     "@types/node": ^14.14.10
     "@types/node-fetch": ^2
+    "@types/ws": ^7
     "@vercel/fetch-retry": ^5.0.3
     bignumber.js: ^9.0.0
     cron: ^1.8.2
     ethers: 5.0.23
+    log-timestamp: ^0.3.0
     node-fetch: ^2.6.1
     prettier: 1.19.1
     prettier-plugin-organize-imports: ^1.1.1
     ts-node: 9.0.0
     ts-node-dev: ^1.1.1
     typescript: 4.1.2
+    ws: ^7.4.5
   languageName: unknown
   linkType: soft
 
@@ -6944,7 +6947,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ws@npm:^7.0.0":
+"@types/ws@npm:^7, @types/ws@npm:^7.0.0":
   version: 7.4.2
   resolution: "@types/ws@npm:7.4.2"
   dependencies:
@@ -21959,10 +21962,24 @@ fsevents@2.1.2:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.17.21, lodash@npm:4.x, lodash@npm:>=3.5 <5, lodash@npm:^4.17.11, lodash@npm:^4.17.13, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.17.4, lodash@npm:^4.17.5, lodash@npm:^4.7.0, lodash@npm:~4.17.4":
+"lodash@npm:4.17.21, lodash@npm:^4.17.21, lodash@npm:^4.7.0":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: 4983720b9abca930a4a46f18db163d7dad8dd00dbed6db0cc7b499b33b717cce69f80928b27bbb1ff2cbd3b19d251ee90669a8b5ea466072ca81c2ebe91e7468
+  languageName: node
+  linkType: hard
+
+"lodash@npm:4.x, lodash@npm:>=3.5 <5, lodash@npm:^4.17.11, lodash@npm:^4.17.13, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.4, lodash@npm:^4.17.5, lodash@npm:~4.17.4":
+  version: 4.17.20
+  resolution: "lodash@npm:4.17.20"
+  checksum: c62101d2500c383b5f174a7e9e6fe8098149ddd6e9ccfa85f36d4789446195f5c4afd3cfba433026bcaf3da271256566b04a2bf2618e5a39f6e67f8c12030cb6
+  languageName: node
+  linkType: hard
+
+"log-prefix@npm:0.1.1":
+  version: 0.1.1
+  resolution: "log-prefix@npm:0.1.1"
+  checksum: 7f48e289db90367af150be990c712cf398786f703688dc991bf91572f5f3d6b8c69e574d423921fd36def5f413540c50f4ae0013eee2cf2a0697eca6e3f76dcb
   languageName: node
   linkType: hard
 
@@ -21982,6 +21999,15 @@ fsevents@2.1.2:
     chalk: ^4.1.0
     is-unicode-supported: ^0.1.0
   checksum: 57be4aeb6a6ecb81d8267600836f81928da1d846ad13384a9a22d179e27590fdb680946edbd15642a31735183adaa3dc6aae2d20e619a19fa0d54e1aee945915
+  languageName: node
+  linkType: hard
+
+"log-timestamp@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "log-timestamp@npm:0.3.0"
+  dependencies:
+    log-prefix: 0.1.1
+  checksum: 87a208b1c1b208bc42f5152b855db110bb09ef65990854f2e2658e590ad4e8fc86f2003dfe900d546d2b0c3577ba070424990b1d91d2d37e4f9278a7cda2af29
   languageName: node
   linkType: hard
 
@@ -26161,6 +26187,15 @@ fsevents@2.1.2:
   languageName: node
   linkType: hard
 
+"prettier@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "prettier@npm:2.2.1"
+  bin:
+    prettier: bin-prettier.js
+  checksum: 92c6c9f4b87eba1f28466edee57dd18c80d00b858edda77d46d1950d20e6e302b68ee255fc91133ba931e63c4577b5ae30da194d9626a8f3c0177778b91bf056
+  languageName: node
+  linkType: hard
+
 "pretty-bytes@npm:^5.1.0":
   version: 5.6.0
   resolution: "pretty-bytes@npm:5.6.0"
@@ -28447,7 +28482,7 @@ resolve@~1.17.0:
     concurrently: ^5.3.0
     dotenv: 8.2.0
     ethers: 5.0.23
-    prettier: 1.19.1
+    prettier: ^2.2.1
     prettier-plugin-organize-imports: 1.1.1
     ts-node: 9.0.0
     typescript: 4.1.2
@@ -33798,7 +33833,7 @@ resolve@~1.17.0:
   languageName: node
   linkType: hard
 
-"ws@npm:^7.2.0, ws@npm:^7.2.3, ws@npm:^7.4.4":
+"ws@npm:^7.2.0, ws@npm:^7.2.3, ws@npm:^7.4.4, ws@npm:^7.4.5":
   version: 7.4.5
   resolution: "ws@npm:7.4.5"
   peerDependencies:

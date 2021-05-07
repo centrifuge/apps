@@ -98,7 +98,10 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     setMaximumReserve = async (value: string) => {
-      return this.pending(this.contract('ASSESSOR_ADMIN').setMaxReserve(value, this.overrides))
+      const adminContract = this.contractAddresses.POOL_ADMIN
+        ? this.contract('POOL_ADMIN')
+        : this.contract('ASSESSOR_ADMIN')
+      return this.pending(adminContract.setMaxReserve(value, this.overrides))
     }
 
     raiseCreditline = async (amount: string) => {
