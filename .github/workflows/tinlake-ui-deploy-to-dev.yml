@@ -18,32 +18,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Get Yarn Cache Directory Path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: Cache Node Modules
-        id: yarn-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: Cache Next.js Bundle
-        uses: actions/cache@v2
-        with:
-          path: ${{ github.workspace }}/tinlake-ui/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}
-
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
           node-version: '12'
 
+      - name: Restore Yarn Workspaces
+        id: yarn-cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+
       - name: Install Dependencies
-        run: yarn
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install
+
+      - name: Cache Next.js Bundle
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/tinlake-ui/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}
 
       - name: Lint
         run: yarn lint
