@@ -1,4 +1,4 @@
-import { User } from '@centrifuge/gateway-lib/models/user'
+import { User } from '@centrifuge/gateway-lib/src/models/user'
 import { UnauthorizedException } from '@nestjs/common'
 import { JwtModule, JwtService } from '@nestjs/jwt'
 import { Test } from '@nestjs/testing'

@@ -1,4 +1,4 @@
-import { Contact } from '@centrifuge/gateway-lib/models/contact'
+import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
 import { AuthContext } from '../auth/Auth'
 import { PageError } from '../components/PageError'

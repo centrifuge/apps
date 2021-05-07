@@ -1,5 +1,5 @@
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
-import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
+import { Schema } from '@centrifuge/gateway-lib/src/models/schema'
+import { ROUTES } from '@centrifuge/gateway-lib/src/utils/constants'
 import {
   BadRequestException,
   Body,

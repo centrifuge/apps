@@ -1,4 +1,4 @@
-import { User } from '@centrifuge/gateway-lib/models/user'
+import { User } from '@centrifuge/gateway-lib/src/models/user'
 import { Injectable } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
 import * as speakeasy from 'speakeasy'

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Modal } from '@centrifuge/axis-modal'
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
-import { formatDate } from '@centrifuge/gateway-lib/utils/formaters'
+import { Schema } from '@centrifuge/gateway-lib/src/models/schema'
+import { formatDate } from '@centrifuge/gateway-lib/src/utils/formaters'
 import { AxiosError } from 'axios'
 import { Anchor, Box, Button, CheckBox, Heading, Text } from 'grommet'
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'

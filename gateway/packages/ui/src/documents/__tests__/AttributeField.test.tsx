@@ -1,6 +1,6 @@
 import { DateInput } from '@centrifuge/axis-date-input'
 import { NumberInput } from '@centrifuge/axis-number-input'
-import { Attribute, AttrTypes } from '@centrifuge/gateway-lib/models/schema'
+import { Attribute, AttrTypes } from '@centrifuge/gateway-lib/src/models/schema'
 import { mount } from 'enzyme'
 import { Select, TextInput } from 'grommet'
 import React from 'react'

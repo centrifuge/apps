@@ -1,4 +1,5 @@
-import { PERMISSIONS } from '../../lib/utils/constants'
+import { PERMISSIONS } from '@centrifuge/gateway-lib/src/utils/constants'
+
 require('dotenv').config()
 
 const { env } = process

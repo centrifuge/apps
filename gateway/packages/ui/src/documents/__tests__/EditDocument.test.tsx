@@ -1,6 +1,6 @@
 import { Modal } from '@centrifuge/axis-modal'
-import { extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact'
-import { DocumentStatus, NftStatus } from '@centrifuge/gateway-lib/models/document'
+import { extendContactsWithUsers } from '@centrifuge/gateway-lib/src/models/contact'
+import { DocumentStatus, NftStatus } from '@centrifuge/gateway-lib/src/models/document'
 import { mount } from 'enzyme'
 import { Heading, Paragraph } from 'grommet'
 import { createMemoryHistory } from 'history'

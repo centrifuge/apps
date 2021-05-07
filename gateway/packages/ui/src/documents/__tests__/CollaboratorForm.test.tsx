@@ -1,6 +1,6 @@
 import { SearchSelect } from '@centrifuge/axis-search-select'
-import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
-import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/models/document'
+import { Collaborator } from '@centrifuge/gateway-lib/src/models/collaborator'
+import { DOCUMENT_ACCESS } from '@centrifuge/gateway-lib/src/models/document'
 import { mount } from 'enzyme'
 import { RadioButton } from 'grommet'
 import React from 'react'

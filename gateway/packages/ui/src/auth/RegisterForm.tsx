@@ -1,5 +1,5 @@
-import { User } from '@centrifuge/gateway-lib/models/user'
-import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators'
+import { User } from '@centrifuge/gateway-lib/src/models/user'
+import { isPasswordValid } from '@centrifuge/gateway-lib/src/utils/validators'
 import { Formik } from 'formik'
 import { Box, Button, FormField, Text, TextInput } from 'grommet'
 import React from 'react'

@@ -1,15 +1,15 @@
 // @ts-nocheck
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { Modal } from '@centrifuge/axis-modal'
-import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
+import { Collaborator } from '@centrifuge/gateway-lib/src/models/collaborator'
+import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
 import {
   createDocumentCollaborators,
   Document,
   getDocumentCollaborators,
-} from '@centrifuge/gateway-lib/models/document'
-import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user'
-import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
-import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
+} from '@centrifuge/gateway-lib/src/models/document'
+import { canWriteToDoc } from '@centrifuge/gateway-lib/src/models/user'
+import { getAddressLink } from '@centrifuge/gateway-lib/src/utils/etherscan'
 import { connect, FormikContext } from 'formik'
 import { Anchor, Box, Button, Paragraph, Text } from 'grommet'
 import { UserAdd } from 'grommet-icons'

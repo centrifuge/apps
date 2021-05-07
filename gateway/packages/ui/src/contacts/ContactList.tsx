@@ -1,5 +1,5 @@
-import { Contact } from '@centrifuge/gateway-lib/models/contact'
-import { User } from '@centrifuge/gateway-lib/models/user'
+import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
+import { User } from '@centrifuge/gateway-lib/src/models/user'
 import { Formik } from 'formik'
 import {
   Anchor,

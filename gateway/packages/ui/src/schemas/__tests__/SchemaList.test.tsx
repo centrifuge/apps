@@ -1,4 +1,4 @@
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
+import { Schema } from '@centrifuge/gateway-lib/src/models/schema'
 import { mount } from 'enzyme'
 import { Anchor, CheckBox, DataTable } from 'grommet'
 import React from 'react'

@@ -1,8 +1,8 @@
-import { Contact } from '@centrifuge/gateway-lib/models/contact'
-import { Document } from '@centrifuge/gateway-lib/models/document'
-import { Organization } from '@centrifuge/gateway-lib/models/organization'
-import { Schema } from '@centrifuge/gateway-lib/models/schema'
-import { User } from '@centrifuge/gateway-lib/models/user'
+import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
+import { Document } from '@centrifuge/gateway-lib/src/models/document'
+import { Organization } from '@centrifuge/gateway-lib/src/models/organization'
+import { Schema } from '@centrifuge/gateway-lib/src/models/schema'
+import { User } from '@centrifuge/gateway-lib/src/models/user'
 import { DatabaseRepository } from './database.repository'
 
 export class DatabaseService {

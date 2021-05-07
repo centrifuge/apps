@@ -1,5 +1,5 @@
-import { TwoFaType, User } from '@centrifuge/gateway-lib/models/user'
-import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants'
+import { TwoFaType, User } from '@centrifuge/gateway-lib/src/models/user'
+import { PERMISSIONS } from '@centrifuge/gateway-lib/src/utils/constants'
 import { Box } from 'grommet'
 import React, { FunctionComponent, useContext, useState } from 'react'
 import { Redirect, RouteComponentProps, withRouter } from 'react-router'

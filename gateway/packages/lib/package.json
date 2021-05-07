@@ -2,6 +2,7 @@
   "name": "@centrifuge/gateway-lib",
   "version": "0.1.0",
   "description": "Gateway shared library",
+  "main": "./src",
   "keywords": [
     "gateway",
     "centrifuge",
