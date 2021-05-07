@@ -52,17 +52,11 @@ export default class FundingRequestForm extends React.Component<Props> {
 
     const fundingRequestValidation = Yup.object().shape({
       funder_id: Yup.string().required('This field is required'),
-      nft_address: Yup.string()
-        .matches(/^0x/, 'must start with 0x')
-        .length(66, 'must have 66 characters'),
-      repayment_amount: Yup.number()
-        .moreThan(0, 'Must be greater than 0')
-        .required('This field is required'),
+      nft_address: Yup.string().matches(/^0x/, 'must start with 0x').length(66, 'must have 66 characters'),
+      repayment_amount: Yup.number().moreThan(0, 'Must be greater than 0').required('This field is required'),
       apr: Yup.number().required('This field is required'),
       fee: Yup.number().required('This field is required'),
-      repayment_due_date: Yup.date()
-        .typeError('Wrong date format')
-        .required('This field is required'),
+      repayment_due_date: Yup.date().typeError('Wrong date format').required('This field is required'),
     })
 
     return (

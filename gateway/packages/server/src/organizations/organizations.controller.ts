@@ -35,10 +35,7 @@ export class OrganizationsController {
    * @return {Promise<Contact[]>} result
    */
   async get(@Req() request) {
-    return this.databaseService.organizations
-      .getCursor()
-      .sort({ updatedAt: -1 })
-      .exec()
+    return this.databaseService.organizations.getCursor().sort({ updatedAt: -1 }).exec()
   }
 
   @Put(':id')

@@ -26,7 +26,7 @@ export const flatten = (data): any => {
 
 // It will parse and unflatten the custom attributes with no data manipulation
 // Warning: Raw custom attributes have only objects. No arrays just array like objects that are not iterable
-export const unflattenRaw = function(data): any {
+export const unflattenRaw = function (data): any {
   if (Object(data) !== data || Array.isArray(data)) return data
   const regex = /\.?([^.\[\]]+)|\[(\d+)\]/g
   const result = {}
@@ -44,7 +44,7 @@ export const unflattenRaw = function(data): any {
 }
 
 // It will parse and unflatten the custom attributes and it will convert array like objects to arrays
-export const unflatten = function(data): any {
+export const unflatten = function (data): any {
   const result = unflattenRaw(data)
   let withIterables = {}
   for (let k in result) {

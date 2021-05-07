@@ -85,10 +85,7 @@ export class UsersController {
   @Get(ROUTES.USERS.base)
   @UseGuards(UserAuthGuard)
   async getAllUsers(@Request() request) {
-    return await this.databaseService.users
-      .getCursor({})
-      .sort({ createdAt: -1 })
-      .exec()
+    return await this.databaseService.users.getCursor({}).sort({ createdAt: -1 }).exec()
   }
 
   @Post(ROUTES.USERS.base)

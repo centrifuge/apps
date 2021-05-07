@@ -61,7 +61,7 @@ describe('ContactsController', () => {
       expect(databaseSpies.spyInsert).toHaveBeenCalledTimes(1)
     })
 
-    it('should throw error when no name specified', async function() {
+    it('should throw error when no name specified', async function () {
       expect.assertions(3)
       const contactsController = contactsModule.get<ContactsController>(ContactsController)
 
@@ -76,7 +76,7 @@ describe('ContactsController', () => {
       }
     })
 
-    it('should throw error when no address specified', async function() {
+    it('should throw error when no address specified', async function () {
       expect.assertions(3)
       const contactsController = contactsModule.get<ContactsController>(ContactsController)
 
@@ -111,8 +111,8 @@ describe('ContactsController', () => {
     })
   })
 
-  describe('update', function() {
-    it('should call the database service', async function() {
+  describe('update', function () {
+    it('should call the database service', async function () {
       const contactsController = contactsModule.get<ContactsController>(ContactsController)
 
       const updateContactObject = {

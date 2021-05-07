@@ -318,17 +318,8 @@ describe('Funding Agreements', () => {
     const rows = dataTable.find('tbody tr')
     expect(rows.length).toEqual(2)
 
-    expect(
-      rows
-        .at(0)
-        .find('.actions')
-        .find(Anchor)
-        .text()
-    ).toEqual('View')
-    const anchorsForSecondRow = rows
-      .at(1)
-      .find('.actions')
-      .find(Anchor)
+    expect(rows.at(0).find('.actions').find(Anchor).text()).toEqual('View')
+    const anchorsForSecondRow = rows.at(1).find('.actions').find(Anchor)
     expect(anchorsForSecondRow.at(0).text()).toEqual('View')
     expect(anchorsForSecondRow.at(1).text()).toEqual('Sign')
   })
@@ -355,12 +346,7 @@ describe('Funding Agreements', () => {
       return { data: 'Custom Payload' }
     })
 
-    const signAction = component
-      .find('tbody tr')
-      .at(1)
-      .find('.actions')
-      .find(Anchor)
-      .at(1)
+    const signAction = component.find('tbody tr').at(1).find('.actions').find(Anchor).at(1)
     await signAction.prop('onClick')()
     expect(onAsyncStart).toHaveBeenCalledTimes(1)
     expect(onAsyncError).toHaveBeenCalledTimes(0)
@@ -390,12 +376,7 @@ describe('Funding Agreements', () => {
       throw error
     })
 
-    const signAction = component
-      .find('tbody tr')
-      .at(1)
-      .find('.actions')
-      .find(Anchor)
-      .at(1)
+    const signAction = component.find('tbody tr').at(1).find('.actions').find(Anchor).at(1)
     await signAction.prop('onClick')()
     expect(onAsyncStart).toHaveBeenCalledTimes(1)
     expect(onAsyncComplete).toHaveBeenCalledTimes(0)
@@ -420,12 +401,7 @@ describe('Funding Agreements', () => {
       )
     )
 
-    const viewAction = component
-      .find('tbody tr')
-      .at(1)
-      .find('.actions')
-      .find(Anchor)
-      .at(0)
+    const viewAction = component.find('tbody tr').at(1).find('.actions').find(Anchor).at(0)
     viewAction.simulate('click')
     const fundingForm = component.find(FundingAgreementForm)
     expect(fundingForm.prop('isViewMode')).toEqual(true)

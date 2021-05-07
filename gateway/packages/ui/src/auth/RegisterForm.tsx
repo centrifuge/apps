@@ -30,14 +30,12 @@ class RegisterForm extends React.Component<RegisterProps> {
     }
 
     const registrationValidation = Yup.object({
-      email: Yup.string()
-        .email('Please enter a valid email')
-        .required('This field is required'),
+      email: Yup.string().email('Please enter a valid email').required('This field is required'),
       password: Yup.string()
         .required('Password is required')
         .test({
           name: 'password_format',
-          test: function(this, value) {
+          test: function (this, value) {
             return isPasswordValid(value)
           },
           message: 'Password format not valid',

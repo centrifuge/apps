@@ -32,8 +32,8 @@ describe('WebhooksController', () => {
     centrifugeSpies.spyDocGet = jest.spyOn(centrifugeService.documents, 'getDocument')
   })
 
-  describe('when it receives  an document', function() {
-    it('should fetch it from the node and persist it in the database', async function() {
+  describe('when it receives  an document', function () {
+    it('should fetch it from the node and persist it in the database', async function () {
       const webhooksController = webhooksModule.get<WebhooksController>(WebhooksController)
 
       const result = await webhooksController.receiveMessage({
@@ -80,7 +80,7 @@ describe('WebhooksController', () => {
       )
     })
 
-    it('Should fail when it does not find the user', async function() {
+    it('Should fail when it does not find the user', async function () {
       const webhooksController = webhooksModule.get<WebhooksController>(WebhooksController)
       try {
         const result = await webhooksController.receiveMessage({
@@ -95,8 +95,8 @@ describe('WebhooksController', () => {
     })
   })
 
-  describe('when it receives invalid message', function() {
-    it('should do nothing', async function() {
+  describe('when it receives invalid message', function () {
+    it('should do nothing', async function () {
       const webhooksController = webhooksModule.get<WebhooksController>(WebhooksController)
 
       const result = await webhooksController.receiveMessage({})
