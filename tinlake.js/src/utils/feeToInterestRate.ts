@@ -35,10 +35,7 @@ export const feeToInterestRate = (fee: string | BN): string => {
     return lookup[feeToConvert]
   }
 
-  const i = new Decimal(feeToConvert)
-    .div('1e27')
-    .minus(1)
-    .times(n)
+  const i = new Decimal(feeToConvert).div('1e27').minus(1).times(n)
 
   const interestRate = i.mul(100).toDecimalPlaces(1)
 
@@ -59,10 +56,7 @@ export const feeToInterestRateCompounding = (fee: string | BN): string => {
     return feeToConvert.toString()
   }
 
-  const i = new Decimal(feeToConvert)
-    .div('1e27')
-    .pow(n)
-    .minus(1)
+  const i = new Decimal(feeToConvert).div('1e27').pow(n).minus(1)
 
   const interestRate = i.mul(100).toDecimalPlaces(1)
 

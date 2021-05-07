@@ -150,23 +150,17 @@ export class DocumentForm extends React.Component<Props, State> {
           case AttrTypes.INTEGER:
           case AttrTypes.PERCENT:
             attributes[path] = Yup.object().shape({
-              value: Yup.number()
-                .required('This field is required')
-                .typeError('must be a number'),
+              value: Yup.number().required('This field is required').typeError('must be a number'),
             })
             break
           case AttrTypes.TIMESTAMP:
             attributes[path] = Yup.object().shape({
-              value: Yup.date()
-                .required('This field is required')
-                .typeError('This field is required'),
+              value: Yup.date().required('This field is required').typeError('This field is required'),
             })
             break
           case AttrTypes.BYTES:
             attributes[path] = Yup.object().shape({
-              value: Yup.string()
-                .matches(/^0x/, 'bytes must start with 0x')
-                .required('This field is required'),
+              value: Yup.string().matches(/^0x/, 'bytes must start with 0x').required('This field is required'),
             })
             break
           default:

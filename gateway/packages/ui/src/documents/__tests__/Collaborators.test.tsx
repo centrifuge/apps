@@ -175,11 +175,7 @@ describe('Collaborators', () => {
     })
 
     component.update()
-    const columns = component
-      .find(DataTable)
-      .find('tbody tr')
-      .at(0)
-      .find('td')
+    const columns = component.find(DataTable).find('tbody tr').at(0).find('td')
     expect(columns.at(0).text()).toBe(defaultContacts[0].name)
     expect(columns.at(1).text()).toBe(DOCUMENT_ACCESS.WRITE)
   })
@@ -241,10 +237,7 @@ describe('Collaborators', () => {
 
     const rows = dataTable.find('tbody tr')
     const columnWithWriteAccess = rows.at(1).find('td')
-    const removeAction = columnWithWriteAccess
-      .at(2)
-      .find(Anchor)
-      .at(2)
+    const removeAction = columnWithWriteAccess.at(2).find(Anchor).at(2)
     removeAction.simulate('click')
     component.update()
     expect(component.find(DataTable).find('tbody tr').length).toBe(1)
@@ -273,10 +266,7 @@ describe('Collaborators', () => {
 
     const rows = dataTable.find('tbody tr')
     const columnWithWriteAccess = rows.at(1).find('td')
-    const editAction = columnWithWriteAccess
-      .at(2)
-      .find(Anchor)
-      .at(1)
+    const editAction = columnWithWriteAccess.at(2).find(Anchor).at(1)
     editAction.simulate('click')
     expect(component.find({ title: 'Edit collaborator' }).find(Modal).length).toBe(1)
     const collaboratorForm = component.find(CollaboratorForm)
@@ -312,10 +302,7 @@ describe('Collaborators', () => {
 
     const rows = dataTable.find('tbody tr')
     const firstRowColumns = rows.at(0).find('td')
-    const viewAction = firstRowColumns
-      .at(2)
-      .find(Anchor)
-      .at(0)
+    const viewAction = firstRowColumns.at(2).find(Anchor).at(0)
     viewAction.simulate('click')
     expect(component.find({ title: 'View collaborator' }).find(Modal).length).toBe(1)
     const collaboratorForm = component.find(CollaboratorForm)

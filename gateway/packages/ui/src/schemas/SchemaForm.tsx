@@ -42,7 +42,7 @@ export default class SchemaForm extends React.Component<Props, State> {
         .required('Schema is required')
         .test({
           name: 'test-json',
-          test: function(this, value) {
+          test: function (this, value) {
             let test
             try {
               test = JSON.parse(value)
