@@ -1,5 +1,5 @@
 import { Modal } from '@centrifuge/axis-modal'
-import { DocumentStatus, DOCUMENT_ACCESS, NftStatus } from '@centrifuge/gateway-lib/src/models/document'
+import { DocumentStatus, DOCUMENT_ACCESS, NftStatus } from '@centrifuge/gateway-lib/models/document'
 import { mount } from 'enzyme'
 import { Formik } from 'formik'
 import { Anchor, Button, DataTable } from 'grommet'

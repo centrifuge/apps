@@ -1,4 +1,4 @@
-import { ROUTES } from '@centrifuge/gateway-lib/src/utils/constants'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import * as passport from 'passport'
 import { AuthModule } from '../auth/auth.module'

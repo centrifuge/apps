@@ -1,5 +1,5 @@
-import { FundingAgreement } from '@centrifuge/gateway-lib/src/models/funding-request'
-import { getFundingStatus } from '@centrifuge/gateway-lib/src/utils/status'
+import { FundingAgreement } from '@centrifuge/gateway-lib/models/funding-request'
+import { getFundingStatus } from '@centrifuge/gateway-lib/utils/status'
 import { mount } from 'enzyme'
 import { Anchor, Button, DataTable } from 'grommet'
 import React from 'react'

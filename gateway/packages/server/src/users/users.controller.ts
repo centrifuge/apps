@@ -1,7 +1,7 @@
-import { Organization } from '@centrifuge/gateway-lib/src/models/organization'
-import { LoggedInUser, PublicUser, TwoFaType, User, UserWithOrg } from '@centrifuge/gateway-lib/src/models/user'
-import { ROUTES } from '@centrifuge/gateway-lib/src/utils/constants'
-import { isPasswordValid } from '@centrifuge/gateway-lib/src/utils/validators'
+import { Organization } from '@centrifuge/gateway-lib/models/organization'
+import { LoggedInUser, PublicUser, TwoFaType, User, UserWithOrg } from '@centrifuge/gateway-lib/models/user'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
+import { isPasswordValid } from '@centrifuge/gateway-lib/utils/validators'
 import { MailerService } from '@nestjs-modules/mailer'
 import {
   Body,

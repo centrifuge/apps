@@ -1,5 +1,5 @@
-import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
-import { ROUTES } from '@centrifuge/gateway-lib/src/utils/constants'
+import { Contact } from '@centrifuge/gateway-lib/models/contact'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 import { BadRequestException, Body, Controller, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { DatabaseService } from '../database/database.service'

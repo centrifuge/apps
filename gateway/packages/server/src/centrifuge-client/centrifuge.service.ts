@@ -6,7 +6,7 @@ import {
   JobsStatusResponse,
   NFTsApi,
   TransferDetailsApi,
-} from '@centrifuge/gateway-lib/src/centrifuge-node-client'
+} from '@centrifuge/gateway-lib/centrifuge-node-client'
 import { promisify } from 'util'
 import config from '../config'
 

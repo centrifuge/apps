@@ -1,4 +1,4 @@
-import { User } from '@centrifuge/gateway-lib/src/models/user'
+import { User } from '@centrifuge/gateway-lib/models/user'
 import { Formik } from 'formik'
 import { Box, Button, FormField, Text, TextInput } from 'grommet'
 import React from 'react'

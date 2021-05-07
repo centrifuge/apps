@@ -1,4 +1,4 @@
-import { Organization } from '@centrifuge/gateway-lib/src/models/organization'
+import { Organization } from '@centrifuge/gateway-lib/models/organization'
 import { HttpException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard'

@@ -1,4 +1,4 @@
-import { Document } from '@centrifuge/gateway-lib/src/models/document'
+import { Document } from '@centrifuge/gateway-lib/models/document'
 import { connect, FormikContext } from 'formik'
 import { FormField, Grid, TextArea } from 'grommet'
 import { get } from 'lodash'

@@ -1,4 +1,4 @@
-import { TwoFaType, User } from '@centrifuge/gateway-lib/src/models/user'
+import { TwoFaType, User } from '@centrifuge/gateway-lib/models/user'
 import { Box } from 'grommet'
 import { parse } from 'query-string'
 import React, { FunctionComponent, useContext, useState } from 'react'

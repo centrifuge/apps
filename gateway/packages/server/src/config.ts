@@ -1,4 +1,4 @@
-import { PERMISSIONS } from '@centrifuge/gateway-lib/src/utils/constants'
+import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants'
 
 require('dotenv').config()
 

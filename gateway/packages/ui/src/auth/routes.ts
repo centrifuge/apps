@@ -1,4 +1,4 @@
-import { ROUTES } from '@centrifuge/gateway-lib/src/utils/constants'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 
 const index = '/users'
 

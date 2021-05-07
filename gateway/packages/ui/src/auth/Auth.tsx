@@ -1,4 +1,4 @@
-import { User } from '@centrifuge/gateway-lib/src/models/user'
+import { User } from '@centrifuge/gateway-lib/models/user'
 import React, { createContext, FC, ReactNode, useEffect, useState } from 'react'
 import { httpClient } from '../http-client'
 import { useJWT } from './useJWT'

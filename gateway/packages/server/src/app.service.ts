@@ -1,4 +1,4 @@
-import { PublicUser } from '@centrifuge/gateway-lib/src/models/user'
+import { PublicUser } from '@centrifuge/gateway-lib/models/user'
 import { Injectable } from '@nestjs/common'
 
 @Injectable()

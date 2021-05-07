@@ -1,4 +1,4 @@
-import { Schema } from '@centrifuge/gateway-lib/src/models/schema'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
 import React, { FunctionComponent } from 'react'
 import AttributeSection from './AttributeSection'
 

@@ -1,14 +1,9 @@
 import { DateInput } from '@centrifuge/axis-date-input'
 import { NumberInput } from '@centrifuge/axis-number-input'
 import { SearchSelect } from '@centrifuge/axis-search-select'
-import { Contact, getContactByAddress } from '@centrifuge/gateway-lib/src/models/contact'
-import { FundingAgreement } from '@centrifuge/gateway-lib/src/models/funding-request'
-import {
-  dateToString,
-  extractDate,
-  getCurrencyFormat,
-  getPercentFormat,
-} from '@centrifuge/gateway-lib/src/utils/formaters'
+import { Contact, getContactByAddress } from '@centrifuge/gateway-lib/models/contact'
+import { FundingAgreement } from '@centrifuge/gateway-lib/models/funding-request'
+import { dateToString, extractDate, getCurrencyFormat, getPercentFormat } from '@centrifuge/gateway-lib/utils/formaters'
 import { Formik } from 'formik'
 import { Box, Button, FormField, TextInput } from 'grommet'
 import React from 'react'

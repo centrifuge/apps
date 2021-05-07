@@ -1,4 +1,4 @@
-import { Schema } from '@centrifuge/gateway-lib/src/models/schema'
+import { Schema } from '@centrifuge/gateway-lib/models/schema'
 import { Formik } from 'formik'
 import { Box, Button, FormField, Paragraph, TextArea } from 'grommet'
 import React from 'react'

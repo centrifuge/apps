@@ -1,4 +1,4 @@
-import { V2CreateDocumentRequest, V2SignedAttributeRequest } from '@centrifuge/gateway-lib/src/centrifuge-node-client'
+import { V2CreateDocumentRequest, V2SignedAttributeRequest } from '@centrifuge/gateway-lib/centrifuge-node-client'
 import { Test, TestingModule } from '@nestjs/testing'
 import { Document } from '../../../../lib/src/models/document'
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard'

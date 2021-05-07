@@ -1,4 +1,4 @@
-import { extendContactsWithUsers } from '@centrifuge/gateway-lib/src/models/contact'
+import { extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact'
 import { mount } from 'enzyme'
 import React from 'react'
 import { act } from 'react-dom/test-utils'

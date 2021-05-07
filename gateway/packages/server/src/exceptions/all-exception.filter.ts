@@ -1,4 +1,4 @@
-import { PublicUser } from '@centrifuge/gateway-lib/src/models/user'
+import { PublicUser } from '@centrifuge/gateway-lib/models/user'
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common'
 import { AppService } from '../app.service'
 import config from '../config'

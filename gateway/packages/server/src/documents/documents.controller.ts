@@ -3,11 +3,11 @@ import {
   CoreapiCreateDocumentRequest,
   CoreapiDocumentResponse,
   CoreapiResponseHeader,
-} from '@centrifuge/gateway-lib/src/centrifuge-node-client'
-import { Document, DocumentStatus, NftStatus } from '@centrifuge/gateway-lib/src/models/document'
-import { User } from '@centrifuge/gateway-lib/src/models/user'
-import { ROUTES } from '@centrifuge/gateway-lib/src/utils/constants'
-import { unflatten } from '@centrifuge/gateway-lib/src/utils/custom-attributes'
+} from '@centrifuge/gateway-lib/centrifuge-node-client'
+import { Document, DocumentStatus, NftStatus } from '@centrifuge/gateway-lib/models/document'
+import { User } from '@centrifuge/gateway-lib/models/user'
+import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
+import { unflatten } from '@centrifuge/gateway-lib/utils/custom-attributes'
 import {
   Body,
   Controller,
