@@ -20,6 +20,8 @@ Head over to our developer documentation at [developer.centrifuge.io](http://dev
 
 ### Running locally
 
+Create `packages/server/.env` as described in `packages/server/README.md`.
+
 Gateway requires a Centrifuge Node to run. Either connect via VPN to a deployed node, or see [here](https://developer.centrifuge.io/cent-node/overview/introduction/), how to set-up and configure a Centrifuge Node and interact with it. If running your own node, make sure you configure the node's webhooks to call your future Gateway instance. By default this will be `localhost:3001/webhooks`.
 
 #### Connect with deployed Amber node
@@ -85,6 +87,6 @@ Required Node Version: 12.16.1
 
 ```bash
 yarn install
-yarn run test
 yarn run build
+yarn run test
 ```
