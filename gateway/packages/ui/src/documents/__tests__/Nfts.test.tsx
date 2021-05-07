@@ -10,6 +10,8 @@ jest.mock('../../http-client')
 const httpClient = require('../../http-client').httpClient
 
 describe('Nfts', () => {
+  const template = '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef'
+
   const registries = [
     {
       label: 'First Registry',
@@ -112,6 +114,7 @@ describe('Nfts', () => {
           viewMode={true}
           user={defaultUser}
           registries={registries}
+          template={template}
         />
       )
     )
@@ -141,6 +144,7 @@ describe('Nfts', () => {
           viewMode={false}
           user={defaultUser}
           registries={registries}
+          template={template}
         />
       )
     )
@@ -171,6 +175,7 @@ describe('Nfts', () => {
           viewMode={false}
           user={defaultUser}
           registries={registries}
+          template={template}
         />
       )
     )

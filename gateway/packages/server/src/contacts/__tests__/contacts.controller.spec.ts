@@ -1,7 +1,7 @@
-import { Contact } from '@centrifuge/gateway-lib/models/contact'
 import { HttpException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-import { SessionGuard } from '../../auth/SessionGuard'
+import { Contact } from '../../../../lib/src/models/contact'
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'
 import { ContactsController } from '../contacts.controller'
@@ -31,7 +31,7 @@ describe('ContactsController', () => {
   beforeEach(async () => {
     contactsModule = await Test.createTestingModule({
       controllers: [ContactsController],
-      providers: [SessionGuard, databaseServiceProvider],
+      providers: [JwtAuthGuard, databaseServiceProvider],
     }).compile()
 
     const databaseService = contactsModule.get<DatabaseService>(DatabaseService)
@@ -105,7 +105,9 @@ describe('ContactsController', () => {
       })
       expect(result.length).toEqual(insertedContacts.length)
       // should get the inserted contracts from the beforeEach hook in reverse
-      expect(result.reverse()).toMatchObject([...insertedContacts])
+      expect(result.sort((a, b) => a.name.localeCompare(b.name))).toMatchObject(
+        [...insertedContacts].sort((a, b) => a.name.localeCompare(b.name))
+      )
 
       expect(databaseSpies.spyGetCursor).toHaveBeenCalledTimes(1)
     })

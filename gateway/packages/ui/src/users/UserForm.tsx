@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MultipleSelect } from '@centrifuge/axis-multiple-select'
 import { SearchSelect } from '@centrifuge/axis-search-select'
 import { Organization } from '@centrifuge/gateway-lib/models/organization'
@@ -37,7 +38,7 @@ export default class UserForm extends React.Component<InviteProps> {
       [TwoFaType.EMAIL]: 'Email',
     }
 
-    const userValidation = (Yup.object() as any).shape({
+    const userValidation = Yup.object().shape({
       organizationName:
         newOrg &&
         Yup.string()

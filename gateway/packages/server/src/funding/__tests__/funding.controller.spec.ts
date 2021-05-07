@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { SessionGuard } from '../../auth/SessionGuard'
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'
@@ -21,7 +21,7 @@ describe('Funding controller', () => {
   beforeEach(async () => {
     fundingModule = await Test.createTestingModule({
       controllers: [FundingController],
-      providers: [SessionGuard, centrifugeServiceProvider, databaseServiceProvider],
+      providers: [JwtAuthGuard, centrifugeServiceProvider, databaseServiceProvider],
     }).compile()
 
     const databaseService = fundingModule.get<DatabaseService>(DatabaseService)

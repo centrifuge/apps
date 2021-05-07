@@ -12,11 +12,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { SessionGuard } from '../auth/SessionGuard'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { DatabaseService } from '../database/database.service'
 
 @Controller(ROUTES.SCHEMAS)
-@UseGuards(SessionGuard)
+@UseGuards(JwtAuthGuard)
 export class SchemasController {
   constructor(private readonly databaseService: DatabaseService) {}
 

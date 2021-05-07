@@ -1,6 +1,6 @@
-import { User } from '@centrifuge/gateway-lib/models/user'
 import { Test } from '@nestjs/testing'
 import * as speakeasy from 'speakeasy'
+import { User } from '../../../../lib/src/models/user'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'
 import { AuthService } from '../auth.service'

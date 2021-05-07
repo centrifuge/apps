@@ -31,6 +31,7 @@ export const Attributes: FunctionComponent<Props> = (props: Props) => {
       {sectionNames.map((name) => {
         return (
           <AttributeSection
+            key={name}
             name={name}
             attributes={sections[name]}
             columnGap={columnGap}

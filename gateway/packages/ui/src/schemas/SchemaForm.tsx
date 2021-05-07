@@ -47,10 +47,7 @@ export default class SchemaForm extends React.Component<Props, State> {
             try {
               test = JSON.parse(value)
             } catch (e) {
-              return this.createError({
-                path: this.path,
-                message: 'Schema is not a valid JSON object',
-              })
+              return this.createError({ path: this.path, message: 'Schema is not a valid JSON object' })
             }
 
             try {
@@ -64,10 +61,7 @@ export default class SchemaForm extends React.Component<Props, State> {
               try {
                 Schema.validateDiff(selectedSchema, test)
               } catch (e) {
-                return this.createError({
-                  path: this.path,
-                  message: e.message,
-                })
+                return this.createError({ path: this.path, message: e.message })
               }
             }
 

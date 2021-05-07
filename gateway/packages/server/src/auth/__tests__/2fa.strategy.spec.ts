@@ -1,6 +1,6 @@
-import { User } from '@centrifuge/gateway-lib/models/user'
 import { UnauthorizedException } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
+import { User } from '../../../../lib/src/models/user'
 import { DatabaseService } from '../../database/database.service'
 import { TwoFAStrategy } from '../2fa.strategy'
 import { AuthService } from '../auth.service'

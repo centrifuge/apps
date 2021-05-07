@@ -1,9 +1,11 @@
+// @ts-nocheck
 import { Modal } from '@centrifuge/axis-modal'
 import { Schema } from '@centrifuge/gateway-lib/models/schema'
 import { formatDate } from '@centrifuge/gateway-lib/utils/formaters'
 import { AxiosError } from 'axios'
 import { Anchor, Box, Button, CheckBox, Heading, Text } from 'grommet'
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
+import { AuthContext } from '../auth/Auth'
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
 import { NOTIFICATION, NotificationContext } from '../components/NotificationContext'
 import { PageError } from '../components/PageError'
@@ -11,6 +13,7 @@ import { Preloader } from '../components/Preloader'
 import { SecondaryHeader } from '../components/SecondaryHeader'
 import { useMergeState } from '../hooks'
 import { httpClient } from '../http-client'
+import { goToHomePage } from '../utils/goToHomePage'
 import SchemaForm from './SchemaForm'
 
 type State = {
@@ -82,6 +85,7 @@ const SchemaList: FunctionComponent = () => {
     error: null,
   })
 
+  const { token } = useContext(AuthContext)
   const notification = useContext(NotificationContext)
 
   const displayPageError = useCallback(
@@ -99,7 +103,7 @@ const SchemaList: FunctionComponent = () => {
       loadingMessage: 'Loading',
     })
     try {
-      const schemas = (await httpClient.schemas.list()).data
+      const schemas = (await httpClient.schemas.list(undefined, token!)).data
 
       setState({
         loadingMessage: null,
@@ -108,7 +112,7 @@ const SchemaList: FunctionComponent = () => {
     } catch (e) {
       displayPageError(e)
     }
-  }, [setState, displayPageError])
+  }, [setState, displayPageError, token])
 
   useEffect(() => {
     loadData()
@@ -133,7 +137,7 @@ const SchemaList: FunctionComponent = () => {
     })
 
     try {
-      await httpClient.schemas[context.method](schema)
+      await httpClient.schemas[context.method](schema, token!)
       await loadData()
     } catch (e) {
       setState({
@@ -155,7 +159,7 @@ const SchemaList: FunctionComponent = () => {
       selectedSchema: null,
     })
     try {
-      await httpClient.schemas.archive(schema._id)
+      await httpClient.schemas.archive(schema._id, token!)
       loadData()
     } catch (e) {
       setState({
@@ -177,7 +181,7 @@ const SchemaList: FunctionComponent = () => {
       selectedSchema: null,
     })
     try {
-      await httpClient.schemas.restore(schema._id)
+      await httpClient.schemas.restore(schema._id, token!)
       loadData()
     } catch (e) {
       setState({
@@ -220,6 +224,10 @@ const SchemaList: FunctionComponent = () => {
     })
   }
 
+  if (!token) {
+    goToHomePage()
+  }
+
   const renderSchemas = (data) => {
     return (
       <DataTableWithDynamicHeight
@@ -230,7 +238,7 @@ const SchemaList: FunctionComponent = () => {
           {
             property: 'name',
             header: 'Name',
-            render: (data) => ((data as Schema).name ? <Text>{(data as Schema).name}</Text> : null),
+            render: (data) => (data.name ? <Text>{data.name}</Text> : null),
           },
           {
             property: 'label',
@@ -239,12 +247,12 @@ const SchemaList: FunctionComponent = () => {
           {
             property: 'createdAt',
             header: 'Date added',
-            render: (data) => ((data as any).createdAt ? <Text>{formatDate((data as any).createdAt)}</Text> : null),
+            render: (data) => (data.createdAt ? <Text>{formatDate(data.createdAt)}</Text> : null),
           },
           {
             property: 'updatedAt',
             header: 'Date updated',
-            render: (data) => ((data as any).updatedAt ? <Text>{formatDate((data as any).updatedAt)}</Text> : null),
+            render: (data) => (data.updatedAt ? <Text>{formatDate(data.updatedAt)}</Text> : null),
           },
           {
             property: 'actions',
@@ -261,7 +269,7 @@ const SchemaList: FunctionComponent = () => {
                 />,
               ]
 
-              if (!(data as Schema).archived) {
+              if (!data.archived) {
                 actions = [
                   ...actions,
                   <Anchor
@@ -275,7 +283,7 @@ const SchemaList: FunctionComponent = () => {
                     key={'archive'}
                     label={'Archive'}
                     onClick={() => {
-                      archiveSchema(data as Schema)
+                      archiveSchema(data)
                     }}
                   />,
                 ]
@@ -286,7 +294,7 @@ const SchemaList: FunctionComponent = () => {
                     key={'restore'}
                     label={'Restore'}
                     onClick={() => {
-                      restoreSchema(data as Schema)
+                      restoreSchema(data)
                     }}
                   />,
                 ]

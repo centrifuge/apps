@@ -1,13 +1,14 @@
+// @ts-nocheck
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { Modal } from '@centrifuge/axis-modal'
 import { Collaborator } from '@centrifuge/gateway-lib/models/collaborator'
+import { Contact } from '@centrifuge/gateway-lib/models/contact'
 import {
   createDocumentCollaborators,
   Document,
   getDocumentCollaborators,
 } from '@centrifuge/gateway-lib/models/document'
 import { canWriteToDoc } from '@centrifuge/gateway-lib/models/user'
-import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
 import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
 import { connect, FormikContext } from 'formik'
 import { Anchor, Box, Button, Paragraph, Text } from 'grommet'
@@ -194,32 +195,34 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
         <DataTableWithDynamicHeight
           size={'360px'}
           sortable={true}
-          data={contactsInstance as any}
+          data={contactsInstance}
           primaryKey={'address'}
           columns={[
             {
               property: 'name',
               header: 'Name',
-              render: (datum: unknown) => (
-                <Text>
-                  {(datum as Collaborator).name}
-                  {lastUpdatedBy(datum as Collaborator) && <Text weight={'bold'}> (Last update)</Text>}
-                </Text>
-              ),
+              render: (datum: Collaborator) => {
+                return (
+                  <Text>
+                    {datum.name}
+                    {lastUpdatedBy(datum) && <Text weight={'bold'}> (Last update)</Text>}
+                  </Text>
+                )
+              },
             },
             {
               sortable: false,
               property: 'address',
               header: 'Address',
-              render: (datum: unknown) => (
+              render: (datum: Collaborator) => (
                 <DisplayField
                   copy={true}
                   as={'span'}
                   link={{
-                    href: getAddressLink((datum as Collaborator).address),
+                    href: getAddressLink(datum.address),
                     target: '_blank',
                   }}
-                  value={(datum as Collaborator).address}
+                  value={datum.address}
                 />
               ),
             },
@@ -231,35 +234,35 @@ export const Collaborators: FunctionComponent<Props> = (props) => {
               property: '_id',
               header: 'Actions',
               sortable: false,
-              render: (datum: unknown) => (
-                <>
+              render: (datum: Collaborator) => {
+                return (
                   <Box className={'actions'} direction="row" gap="small">
                     <Anchor
                       label={'View'}
                       onClick={() => {
-                        openCollaboratorFormInViewMode(datum as Collaborator)
+                        openCollaboratorFormInViewMode(datum)
                       }}
                     />
                     {!viewMode &&
-                      canWriteToDoc({ account: (datum as Collaborator).address }, values) && [
+                      canWriteToDoc({ account: datum.address }, values) && [
                         <Anchor
                           key={'edit-anchor'}
                           label={'Edit'}
                           onClick={() => {
-                            openCollaboratorFormInEditMode(datum as Collaborator)
+                            openCollaboratorFormInEditMode(datum)
                           }}
                         />,
                         <Anchor
                           key={'remove-anchor'}
                           label={'Remove'}
                           onClick={() => {
-                            removeCollaborator(datum as Collaborator)
+                            removeCollaborator(datum)
                           }}
                         />,
                       ]}
                   </Box>
-                </>
-              ),
+                )
+              },
             },
           ]}
         />

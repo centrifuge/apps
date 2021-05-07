@@ -9,12 +9,13 @@ import { LinkPrevious } from 'grommet-icons'
 import React, { FunctionComponent, useCallback, useContext, useEffect } from 'react'
 import { RouteComponentProps, withRouter } from 'react-router'
 import { Link } from 'react-router-dom'
-import { AppContext } from '../App'
+import { AuthContext } from '../auth/Auth'
 import { NOTIFICATION, NotificationContext } from '../components/NotificationContext'
 import { PageError } from '../components/PageError'
 import { SecondaryHeader } from '../components/SecondaryHeader'
 import { useMergeState } from '../hooks'
 import { httpClient } from '../http-client'
+import { goToHomePage } from '../utils/goToHomePage'
 import DocumentForm from './DocumentForm'
 import documentRoutes from './routes'
 
@@ -25,6 +26,19 @@ type State = {
   error: any
   contacts: Contact[]
   schemas: Schema[]
+}
+
+function templateEmpty(template: string | undefined): boolean {
+  if (template === undefined) {
+    return true
+  }
+  if (template === '') {
+    return true
+  }
+  if (template === '0x0000000000000000000000000000000000000000') {
+    return true
+  }
+  return false
 }
 
 export const CreateDocument: FunctionComponent<Props> = (props) => {
@@ -42,7 +56,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
   } = props
 
   const notification = useContext(NotificationContext)
-  const { user } = useContext(AppContext)
+  const { user, token } = useContext(AuthContext)
 
   const displayPageError = useCallback(
     (error) => {
@@ -56,11 +70,14 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
   const loadData = useCallback(async () => {
     setState({})
     try {
-      const contacts = (await httpClient.contacts.list()).data
+      const contacts = (await httpClient.contacts.list(token!)).data
       const schemas = (
-        await httpClient.schemas.list({
-          archived: { $exists: false, $ne: true },
-        })
+        await httpClient.schemas.list(
+          {
+            archived: { $exists: false, $ne: true },
+          },
+          token!
+        )
       ).data
       setState({
         contacts,
@@ -69,7 +86,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
     } catch (e) {
       displayPageError(e)
     }
-  }, [setState, displayPageError])
+  }, [setState, displayPageError, token])
 
   useEffect(() => {
     loadData()
@@ -92,40 +109,19 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
         },
       }
 
-      if (document.template && document.template !== '') {
-        createResult = (await httpClient.documents.clone(document)).data
+      if (templateEmpty(document.template)) {
+        createResult = (await httpClient.documents.create(document, token!)).data
       } else {
-        createResult = (await httpClient.documents.create(document)).data
+        createResult = (await httpClient.documents.clone(document, token!)).data
       }
       push(documentRoutes.index)
 
-      if (document.template && document.template !== '') {
-        /*
-         * When a document has a template if we update template rules are lost
-         * A temp workaround is to commit and create a new version.
-         * The extra commit is necessary because you can create a new version
-         * only for committed docs.
-         * TODO this should be changed
-         * */
-        await httpClient.documents.commit(createResult._id!)
-        await httpClient.documents.create({
-          ...document,
-          document_id: createResult?.header!.document_id,
-          attributes: {
-            ...document.attributes,
-            [HARDCODED_FIELDS.ASSET_IDENTIFIER]: {
-              type: 'bytes',
-              value: createResult.header!.document_id,
-            } as any,
-          },
-        })
-      } else {
-        /*
-         * Update v2 replaces the entire document we make sure we do not lose
-         * any fields when adding the ASSET_IDENTIFIER
-         * */
-        const toUpdate = {
-          ...createResult,
+      await httpClient.documents.commit(createResult._id!, token!)
+
+      const result = await httpClient.documents.create(
+        {
+          document_id: createResult.header!.document_id,
+          header: createResult.header,
           attributes: {
             ...createResult.attributes,
             [HARDCODED_FIELDS.ASSET_IDENTIFIER]: {
@@ -133,17 +129,21 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
               value: createResult.header!.document_id,
             } as any,
           },
-        }
-        await httpClient.documents.update(toUpdate)
-      }
+          template: createResult.template,
+        },
+        token!
+      )
+
+      await httpClient.documents.commit(result.data._id!, token!)
     } catch (e) {
+      console.error(e)
+
       notification.alert({
         type: NOTIFICATION.ERROR,
         title: 'Failed to save document',
         message: (e as AxiosError)!.response?.data.message,
       })
     }
-    createResult && (await httpClient.documents.commit(createResult._id!))
   }
 
   const onCancel = () => {
@@ -153,6 +153,10 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
   if (error) return <PageError error={error} />
 
   const availableSchemas = mapSchemaNames(user!.schemas, schemas)
+
+  if (!token) {
+    goToHomePage()
+  }
 
   return (
     <DocumentForm

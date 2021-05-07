@@ -1,11 +1,11 @@
 import { Organization } from '@centrifuge/gateway-lib/models/organization'
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 import { BadRequestException, Body, Controller, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common'
-import { SessionGuard } from '../auth/SessionGuard'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { DatabaseService } from '../database/database.service'
 
 @Controller(ROUTES.ORGANIZATIONS)
-@UseGuards(SessionGuard)
+@UseGuards(JwtAuthGuard)
 export class OrganizationsController {
   constructor(private readonly databaseService: DatabaseService) {}
 
