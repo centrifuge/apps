@@ -2,6 +2,7 @@ import { NonceManager } from '@ethersproject/experimental'
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { ethers } from 'ethers'
+import { TransactionManager } from '../utils/tx-manager'
 import config from '../config'
 import { Tranche } from '../controllers/types'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
@@ -18,7 +19,7 @@ export class PoolService {
   private pools: { [key: string]: Pool } = {}
 
   provider = new FastJsonRpcProvider(config.rpcUrl)
-  signer = new NonceManager(new ethers.Wallet(config.signerPrivateKey).connect(this.provider))
+  signer = new TransactionManager(new ethers.Wallet(config.signerPrivateKey)).connect(this.provider)
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
 
   constructor(

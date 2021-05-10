@@ -8,7 +8,7 @@ import { submitSolutions } from './tasks/submitSolutions'
 import { writeoffAssets } from './tasks/writeoffAssets'
 import CronExpression from './util/CronExpression'
 import { loadFromIPFS, PoolMap } from './util/ipfs'
-import { TransactionManager } from './signer'
+import { TransactionManager } from './tx-manager'
 require('log-timestamp')
 
 const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
