@@ -1,7 +1,6 @@
 import { CronJob } from 'cron'
 import { ethers } from 'ethers'
 import config from './config'
-import { BackendSigner } from './signer'
 import { checkDueAssets } from './tasks/checkDueAssets'
 import { closePools } from './tasks/closePools'
 import { executePools } from './tasks/executePools'

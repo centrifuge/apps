@@ -2,9 +2,9 @@ import { ethers } from 'ethers'
 import * as WebSocket from 'ws'
 
 const DEFAULT_CONFIG: TransactionManagerConfig = {
-  transactionTimeout: 1 * 60 * 1000, // 1 minute; TODO: 5 minutes
+  transactionTimeout: 5 * 60 * 1000, // 5 minutes
   gasnowWebsocketUrl: 'wss://www.gasnow.org/ws/gasprice',
-  initialSpeed: 'slow', // TODO: standard
+  initialSpeed: 'standard',
   increasedSpeed: 'fast',
   maxGasPriceAge: 10 * 60 * 1000, // 10 mins
   filterDuplicates: true,
