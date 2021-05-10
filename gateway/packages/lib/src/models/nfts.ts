@@ -5,6 +5,7 @@ export class MintNftRequest {
   deposit_address: string
   registry_address: string
   oracle_address: string
+  template: string
 }
 
 export class TransferNftRequest {

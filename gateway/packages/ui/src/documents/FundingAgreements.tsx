@@ -9,11 +9,13 @@ import { extractDate, formatCurrency, formatPercent } from '@centrifuge/gateway-
 import { getFundingStatus } from '@centrifuge/gateway-lib/utils/status'
 import { Anchor, Box, Button, Paragraph } from 'grommet'
 import { Currency } from 'grommet-icons'
-import React, { FunctionComponent } from 'react'
+import React, { FunctionComponent, useContext } from 'react'
+import { AuthContext } from '../auth/Auth'
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
 import { Section } from '../components/Section'
 import { useMergeState } from '../hooks'
 import { httpClient } from '../http-client'
+import { goToHomePage } from '../utils/goToHomePage'
 import FundingRequestForm from './FundingAgreementForm'
 import { FundingStatus, FUNDING_STATUS } from './FundingStatus'
 
@@ -48,6 +50,8 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
     ...props,
   }
 
+  const { token } = useContext(AuthContext)
+
   const createFundingAgreement = async (data: FundingAgreement) => {
     onAsyncStart('Creating Funding Agreement')
     try {
@@ -56,7 +60,7 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
         // @ts-ignore
         document_id: document.header!.document_id,
       } as FundingRequest
-      onAsyncComplete((await httpClient.funding.create(payload)).data)
+      onAsyncComplete((await httpClient.funding.create(payload, token!)).data)
     } catch (e) {
       onAsyncError(e, 'Failed to create funding agreement')
     }
@@ -70,7 +74,7 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
         // @ts-ignore
         document_id: document.header!.document_id!,
       }
-      onAsyncComplete((await httpClient.funding.sign(payload)).data)
+      onAsyncComplete((await httpClient.funding.sign(payload, token!)).data)
     } catch (e) {
       onAsyncError(e, 'Failed to sign funding agreement')
     }
@@ -94,6 +98,10 @@ export const FundingAgreements: FunctionComponent<Props> = (props) => {
 
   const closeModal = () => {
     setState({ modalOpened: false })
+  }
+
+  if (!token) {
+    goToHomePage()
   }
 
   const fundingActions = !viewMode

@@ -3,7 +3,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
 import { Observable } from 'rxjs'
 
 @Injectable()
-export class UserAuthGuard implements CanActivate {
+export class UserManagerAuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest()
     return this.validateRequest(request)
@@ -15,7 +15,7 @@ export class UserAuthGuard implements CanActivate {
    * @param request
    */
   async validateRequest(request) {
-    if (request.user.permissions.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
+    if (request.user?.permissions?.includes(PERMISSIONS.CAN_MANAGE_USERS)) {
       return true
     }
     return false

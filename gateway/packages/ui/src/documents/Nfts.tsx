@@ -1,16 +1,19 @@
+// @ts-nocheck
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { Modal } from '@centrifuge/axis-modal'
 import { CoreapiNFT } from '@centrifuge/gateway-lib/centrifuge-node-client'
+import { Contact } from '@centrifuge/gateway-lib/models/contact'
 import { Document, NftStatus } from '@centrifuge/gateway-lib/models/document'
 import { Registry } from '@centrifuge/gateway-lib/models/schema'
-import { Contact } from '@centrifuge/gateway-lib/src/models/contact'
 import { getAddressLink, getNFTLink, hexToInt } from '@centrifuge/gateway-lib/utils/etherscan'
 import { Anchor, Box, Button, Paragraph } from 'grommet'
-import React, { FunctionComponent } from 'react'
+import React, { FunctionComponent, useContext } from 'react'
+import { AuthContext } from '../auth/Auth'
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
 import { Section } from '../components/Section'
 import { useMergeState } from '../hooks'
 import { httpClient } from '../http-client'
+import { goToHomePage } from '../utils/goToHomePage'
 import MintNftForm, { MintNftFormData } from './MintNftForm'
 
 type Props = {
@@ -22,6 +25,7 @@ type Props = {
   contacts: Contact[]
   registries: Registry[]
   viewMode: boolean
+  template: string
 }
 
 type State = {
@@ -37,28 +41,34 @@ export const Nfts: FunctionComponent<Props> = (props) => {
     selectedNft: null,
   })
 
-  const { onAsyncComplete, onAsyncError, onMintStart, document, registries, viewMode } = {
+  const { onAsyncComplete, onAsyncError, onMintStart, document, registries, viewMode, template } = {
     onAsyncComplete: (data) => {},
     onAsyncError: (error, title?: string) => {},
     onMintStart: () => {},
     ...props,
   }
 
-  const mintNFT = async (id: string, data: MintNftFormData) => {
+  const { token } = useContext(AuthContext)
+
+  const mintNFT = async (id: string, data: MintNftFormData, template: string) => {
     closeModal()
 
     try {
       onMintStart()
       onAsyncComplete(
         (
-          await httpClient.nfts.mint({
-            document_id: id,
-            deposit_address: data.deposit_address,
-            proof_fields: data.registry!.proofs,
-            registry_address: data.registry!.address,
-            asset_manager_address: data.registry!.asset_manager_address,
-            oracle_address: data.registry!.oracle_address,
-          })
+          await httpClient.nfts.mint(
+            {
+              document_id: id,
+              deposit_address: data.deposit_address,
+              proof_fields: data.registry!.proofs,
+              registry_address: data.registry!.address,
+              asset_manager_address: data.registry!.asset_manager_address,
+              oracle_address: data.registry!.oracle_address,
+              template,
+            },
+            token!
+          )
         ).data
       )
     } catch (e) {
@@ -103,6 +113,10 @@ export const Nfts: FunctionComponent<Props> = (props) => {
       : getAddressLink('0x3ba4280217e78a0eaea612c1502fc2e92a7fe5d7')
   }
 
+  if (!token) {
+    goToHomePage()
+  }
+
   const mintActions = !viewMode
     ? [<Button key="mint-nft" onClick={openMintModal} primary={true} label={'Mint NFT'} />]
     : []
@@ -124,10 +138,10 @@ export const Nfts: FunctionComponent<Props> = (props) => {
                   copy={true}
                   as={'span'}
                   link={{
-                    href: getNFTLink((datum as CoreapiNFT).token_id!, (datum as CoreapiNFT).registry!),
+                    href: getNFTLink(datum.token_id, datum.registry),
                     target: '_blank',
                   }}
-                  value={hexToInt((datum as CoreapiNFT).token_id!)}
+                  value={hexToInt(datum.token_id)}
                 />
               ),
             },
@@ -139,10 +153,10 @@ export const Nfts: FunctionComponent<Props> = (props) => {
                   copy={true}
                   as={'span'}
                   link={{
-                    href: getAddressLink((datum as CoreapiNFT).registry!),
+                    href: getAddressLink(datum.registry),
                     target: '_blank',
                   }}
-                  value={(datum as CoreapiNFT).registry!}
+                  value={datum.registry}
                 />
               ),
             },
@@ -154,10 +168,10 @@ export const Nfts: FunctionComponent<Props> = (props) => {
                   copy={true}
                   as={'span'}
                   link={{
-                    href: getAddressLink((datum as CoreapiNFT).owner!),
+                    href: getAddressLink(datum.owner),
                     target: '_blank',
                   }}
-                  value={(datum as CoreapiNFT).owner!}
+                  value={datum.owner}
                 />
               ),
             },
@@ -196,7 +210,7 @@ export const Nfts: FunctionComponent<Props> = (props) => {
       >
         <MintNftForm
           //        @ts-ignore
-          onSubmit={(data) => mintNFT(document.header!.document_id!, data)}
+          onSubmit={(data) => mintNFT(document.header!.document_id!, data, template)}
           onDiscard={closeModal}
           registries={registries}
         />

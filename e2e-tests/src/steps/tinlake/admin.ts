@@ -8,7 +8,7 @@ import { getTextContent } from '../../utils/getTextContent'
 import { waitUntil } from '../../utils/waitUntil'
 const BN = require('bn.js')
 
-Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld, minTinRatio: number) {
+Given('the min TIN ratio is set to {int}%', async function (this: CentrifugeWorld, minTinRatio: number) {
   const tinlake = await this.initializedTinlake()
   const newVal = displayToBase(`${minTinRatio}`, 27 - 2) // 27 is the default, but the int is given in percentage points
 
@@ -22,7 +22,7 @@ Given('the min TIN ratio is set to {int}%', async function(this: CentrifugeWorld
   this.currentPage.waitFor(3000)
 })
 
-Given('the max reserve amount is set to X', async function(this: CentrifugeWorld) {
+Given('the max reserve amount is set to X', async function (this: CentrifugeWorld) {
   const tinlake = await this.initializedTinlake()
   const maxReserve = (await tinlake.getMaxReserve()).toString()
   console.log(`Max reserve is ${maxReserve}`)
@@ -30,14 +30,14 @@ Given('the max reserve amount is set to X', async function(this: CentrifugeWorld
   this.context.maxReserve = maxReserve
 })
 
-Given('I have set the NFT reference to {string}', async function(this: CentrifugeWorld, string: string) {
+Given('I have set the NFT reference to {string}', async function (this: CentrifugeWorld, string: string) {
   this.currentPage.waitFor(100)
   const input = await this.currentPage.waitForXPath(tinlake('mintNFTPage.referenceInput'))
   await input.click({ clickCount: 3 }) // triple click to select all content
   await input.type(string)
 })
 
-When('I set Min TIN ratio to {int}%', async function(this: CentrifugeWorld, minTinRatio: number) {
+When('I set Min TIN ratio to {int}%', async function (this: CentrifugeWorld, minTinRatio: number) {
   const input = await this.currentPage.waitForXPath(tinlake('investmentsPage.minTinRatio.input'))
   await input.click({ clickCount: 3 }) // triple click to select all content
   await input.type(`${minTinRatio}`)
@@ -51,14 +51,14 @@ When('I set Min TIN ratio to {int}%', async function(this: CentrifugeWorld, minT
   await this.currentPage.waitFor(3000)
 })
 
-When('I do mint NFT', async function(this: CentrifugeWorld) {
+When('I do mint NFT', async function (this: CentrifugeWorld) {
   const button = await this.currentPage.waitForXPath(tinlake('mintNFTPage.mintButton'))
   await button.click()
 
   await this.metamaskConfirmTransaction({ gas: 50, gasLimit: 300000 })
 })
 
-When('I increase the max reserve amount by 1', async function(this: CentrifugeWorld) {
+When('I increase the max reserve amount by 1', async function (this: CentrifugeWorld) {
   const button = await this.currentPage.waitForXPath(tinlake('assetsPage.setMaxReserveButton'))
   await button.click()
 
@@ -80,21 +80,24 @@ When('I increase the max reserve amount by 1', async function(this: CentrifugeWo
   await this.currentPage.waitFor(3000)
 })
 
-Then('I see that Min TIN ratio component is set to {int}%', async function(this: CentrifugeWorld, minTinRatio: number) {
-  const expected = `${minTinRatio}.00%`
-  let actual = ''
-  await waitUntil(
-    async () => {
-      const display = await this.currentPage.waitForXPath(tinlake('investmentsPage.minTinRatio.value'))
-      actual = await getTextContent(display)
+Then(
+  'I see that Min TIN ratio component is set to {int}%',
+  async function (this: CentrifugeWorld, minTinRatio: number) {
+    const expected = `${minTinRatio}.00%`
+    let actual = ''
+    await waitUntil(
+      async () => {
+        const display = await this.currentPage.waitForXPath(tinlake('investmentsPage.minTinRatio.value'))
+        actual = await getTextContent(display)
 
-      return actual === expected
-    },
-    { errorMsg: `expected min tin ratio display to show ${minTinRatio} %, but got ${actual}` }
-  )
-})
+        return actual === expected
+      },
+      { errorMsg: `expected min tin ratio display to show ${minTinRatio} %, but got ${actual}` }
+    )
+  }
+)
 
-Then('I see that the max reserve amount is set to X+1', async function(this: CentrifugeWorld) {
+Then('I see that the max reserve amount is set to X+1', async function (this: CentrifugeWorld) {
   const expected = `Max: ${this.context.newMaxReserve} DAI`
   let actual = ''
   await waitUntil(
@@ -108,7 +111,7 @@ Then('I see that the max reserve amount is set to X+1', async function(this: Cen
   )
 })
 
-Then('I can verify that the max reserve amount is set to X+1', async function(this: CentrifugeWorld) {
+Then('I can verify that the max reserve amount is set to X+1', async function (this: CentrifugeWorld) {
   const tinlake = await this.initializedTinlake()
   const actual = (await tinlake.getMaxReserve()).toString()
   const expected = new BN(this.context.newMaxReserve).mul(new BN(10).pow(new BN(18))).toString()
@@ -116,18 +119,18 @@ Then('I can verify that the max reserve amount is set to X+1', async function(th
   assert.strictEqual(expected, actual)
 })
 
-Then('I can verify that the min TIN ratio is set to {int}%', async function(
-  this: CentrifugeWorld,
-  minTinRatio: number
-) {
-  const tinlake = await this.initializedTinlake()
-  const expected = minTinRatio.toString() + '0'.repeat(25)
-  const actual = (await tinlake.getMinJuniorRatio()).toString()
+Then(
+  'I can verify that the min TIN ratio is set to {int}%',
+  async function (this: CentrifugeWorld, minTinRatio: number) {
+    const tinlake = await this.initializedTinlake()
+    const expected = minTinRatio.toString() + '0'.repeat(25)
+    const actual = (await tinlake.getMinJuniorRatio()).toString()
 
-  assert.strictEqual(expected, actual)
-})
+    assert.strictEqual(expected, actual)
+  }
+)
 
-Then('I see that NFT ID is shown in UI', async function(this: CentrifugeWorld) {
+Then('I see that NFT ID is shown in UI', async function (this: CentrifugeWorld) {
   const alert = await this.currentPage.waitForXPath(tinlake('mintNFTPage.successAlert'))
   const text = await getTextContent(alert)
 
@@ -138,7 +141,7 @@ Then('I see that NFT ID is shown in UI', async function(this: CentrifugeWorld) {
   assert.ok(this.context.nftID, 'NFT ID must not be empty')
 })
 
-Then('that minted NFT is in my wallet', async function(this: CentrifugeWorld) {
+Then('that minted NFT is in my wallet', async function (this: CentrifugeWorld) {
   const tinlake = await this.initializedTinlake()
   const owner = await tinlake.getNFTOwner(config.nftRegistry, this.context.nftID)
 

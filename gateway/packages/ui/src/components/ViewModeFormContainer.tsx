@@ -10,18 +10,19 @@ export const ViewModeFormContainer = styled(Box)<{ isViewMode?: boolean }>`
     ${(props) => {
       if (props.isViewMode)
         return `svg {
-                      opacity: 0;
-                    }
-                    cursor:default;
-                    opacity: 1;`
+          opacity: 0;
+        }
+      cursor:default;
+      opacity: 1;`
     }}
   }
   // Components that can have a svg inside and we do not want to mess with its opacity
   ${StyledRadioButton} label {
     ${(props) => {
       if (props.isViewMode)
-        return `cursor:default;
-                    opacity: 1;`
+        return `
+          cursor:default;
+          opacity: 1;`
     }}
   }
 `

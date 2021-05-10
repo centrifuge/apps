@@ -1,7 +1,7 @@
 import { Organization } from '@centrifuge/gateway-lib/models/organization'
 import { HttpException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-import { SessionGuard } from '../../auth/SessionGuard'
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'
 import { OrganizationsController } from '../organizations.controller'
@@ -26,7 +26,7 @@ describe('OrganizationController', () => {
   beforeEach(async () => {
     organizationsModule = await Test.createTestingModule({
       controllers: [OrganizationsController],
-      providers: [SessionGuard, databaseServiceProvider],
+      providers: [JwtAuthGuard, databaseServiceProvider],
     }).compile()
 
     const databaseService = organizationsModule.get<DatabaseService>(DatabaseService)
@@ -98,7 +98,9 @@ describe('OrganizationController', () => {
       const result = await organizationsController.get({})
       expect(result.length).toEqual(insertedOrganizations.length)
       // should get the inserted organizations from the beforeEach hook in reverse
-      expect(result.reverse()).toMatchObject([...insertedOrganizations])
+      expect(result.sort((a, b) => a.name.localeCompare(b.name))).toMatchObject(
+        [...insertedOrganizations].sort((a, b) => a.name.localeCompare(b.name))
+      )
 
       expect(databaseSpies.spyGetCursor).toHaveBeenCalledTimes(1)
     })

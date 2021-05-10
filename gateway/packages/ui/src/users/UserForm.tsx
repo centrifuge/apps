@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MultipleSelect } from '@centrifuge/axis-multiple-select'
 import { SearchSelect } from '@centrifuge/axis-search-select'
 import { Organization } from '@centrifuge/gateway-lib/models/organization'
@@ -37,7 +38,7 @@ export default class UserForm extends React.Component<InviteProps> {
       [TwoFaType.EMAIL]: 'Email',
     }
 
-    const userValidation = (Yup.object() as any).shape({
+    const userValidation = Yup.object().shape({
       organizationName:
         newOrg &&
         Yup.string()
@@ -45,7 +46,7 @@ export default class UserForm extends React.Component<InviteProps> {
           .required('This field is required')
           .test({
             name: 'test_org_name',
-            test: function(this, value) {
+            test: function (this, value) {
               if (!value) return true
               const org = organizations.find((o) => o.name?.trim().toLowerCase() === value.trim().toLowerCase())
               return !org
@@ -53,23 +54,19 @@ export default class UserForm extends React.Component<InviteProps> {
             message: 'Organization name exists',
           }),
       account: !newOrg && Yup.string().required('This field is required'),
-      name: Yup.string()
-        .max(40, 'Please enter no more than 40 characters')
-        .required('This field is required'),
+      name: Yup.string().max(40, 'Please enter no more than 40 characters').required('This field is required'),
       email: Yup.string()
         .email('Please enter a valid email')
         .required('This field is required')
         .test({
           name: 'lowercase_string',
-          test: function(this, value) {
+          test: function (this, value) {
             return value && value === value.toLocaleLowerCase()
           },
           message: 'Only lowercase letters',
         }),
       permissions: Yup.array().required('This field is required'),
-      twoFAType: Yup.string()
-        .oneOf(twoFAOptions, 'Unsupported value')
-        .required('This field is required'),
+      twoFAType: Yup.string().oneOf(twoFAOptions, 'Unsupported value').required('This field is required'),
     })
 
     const permissionOptions = [

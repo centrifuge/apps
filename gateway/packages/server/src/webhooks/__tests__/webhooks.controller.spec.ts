@@ -1,5 +1,5 @@
-import { User } from '@centrifuge/gateway-lib/models/user'
 import { Test, TestingModule } from '@nestjs/testing'
+import { User } from '../../../../lib/src/models/user'
 import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'
 import { CentrifugeService } from '../../centrifuge-client/centrifuge.service'
 import { databaseServiceProvider } from '../../database/database.providers'
@@ -32,8 +32,8 @@ describe('WebhooksController', () => {
     centrifugeSpies.spyDocGet = jest.spyOn(centrifugeService.documents, 'getDocument')
   })
 
-  describe('when it receives  an document', function() {
-    it('should fetch it from the node and persist it in the database', async function() {
+  describe('when it receives  an document', function () {
+    it('should fetch it from the node and persist it in the database', async function () {
       const webhooksController = webhooksModule.get<WebhooksController>(WebhooksController)
 
       const result = await webhooksController.receiveMessage({
@@ -58,6 +58,7 @@ describe('WebhooksController', () => {
               nfts: [{ owner: 'owner', token_id: 'token_id' }],
             },
             data: { currency: 'USD' },
+            document_status: 'Created',
             fromId: '0xRandomId',
             scheme: 'iUSDF2ax31e',
             attributes: {
@@ -74,13 +75,15 @@ describe('WebhooksController', () => {
                 value: 'insects',
               },
             },
+            read_access: ['0x111'],
+            write_access: ['0x222'],
           },
         },
-        { upsert: true }
+        { multi: true, upsert: true, returnUpdatedDocs: true }
       )
     })
 
-    it('Should fail when it does not find the user', async function() {
+    it('Should fail when it does not find the user', async function () {
       const webhooksController = webhooksModule.get<WebhooksController>(WebhooksController)
       try {
         const result = await webhooksController.receiveMessage({
@@ -95,8 +98,8 @@ describe('WebhooksController', () => {
     })
   })
 
-  describe('when it receives invalid message', function() {
-    it('should do nothing', async function() {
+  describe('when it receives invalid message', function () {
+    it('should do nothing', async function () {
       const webhooksController = webhooksModule.get<WebhooksController>(WebhooksController)
 
       const result = await webhooksController.receiveMessage({})

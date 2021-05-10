@@ -33,5 +33,9 @@
     "onboarding-api": "yarn workspace @centrifuge/onboarding-api start",
     "tinlake-ui": "yarn workspace @centrifuge/tinlake-ui start",
     "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\"  \"yarn tinlake-ui\" -p name -n \"onboarding-api,tinlake-ui\""
+  },
+  "resolutions": {
+    "typescript": "3.9.7",
+    "@types/react": "16.9.34"
   }
 }

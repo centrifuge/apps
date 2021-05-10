@@ -41,19 +41,12 @@ export default class MintNftForm extends React.Component<Props> {
       }),
       deposit_address: Yup.string().test({
         name: 'test_schemas',
-        test: function(this, value) {
+        test: function (this, value) {
           if (this.parent.transfer) {
-            if (!value)
-              return this.createError({
-                path: this.path,
-                message: 'This is field is required',
-              })
+            if (!value) return this.createError({ path: this.path, message: 'This is field is required' })
             else {
               if (!isValidAddress(value))
-                return this.createError({
-                  path: this.path,
-                  message: 'Not a valid account address',
-                })
+                return this.createError({ path: this.path, message: 'Not a valid account address' })
             }
           }
           return true
