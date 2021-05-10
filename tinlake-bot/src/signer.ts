@@ -1,13 +1,15 @@
 import { ethers } from 'ethers'
 import * as WebSocket from 'ws'
 
-const DEFAULT_CONFIG: BackendSignerConfig = {
+const DEFAULT_CONFIG: TransactionManagerConfig = {
   transactionTimeout: 1 * 60 * 1000, // 1 minute; TODO: 5 minutes
   gasnowWebsocketUrl: 'wss://www.gasnow.org/ws/gasprice',
   initialSpeed: 'slow', // TODO: standard
   increasedSpeed: 'fast',
   maxGasPriceAge: 10 * 60 * 1000, // 10 mins
+  filterDuplicates: true,
   fallback: {
+    stepSize: 0.2, // 20% increase every time
     maxIncreases: 3,
   },
 }
@@ -16,16 +18,24 @@ const DEFAULT_CONFIG: BackendSignerConfig = {
  * This signer blocks the same transaction from being sent twice, and retries transactions with higher gas prices over time.
  * It uses gas prices from the GasNow API, initially standard and increasing to fast for retries.
  */
-class BackendSigner extends ethers.Signer {
+class TransactionManager extends ethers.Signer {
   readonly signer: ethers.Signer
 
-  private config: BackendSignerConfig
-
-  history: { [key: string]: string | undefined } = {}
+  private config: TransactionManagerConfig
 
   latestGasPrices: GasPricesConfig | undefined = undefined
 
-  constructor(signer: ethers.Signer, config?: BackendSignerConfig) {
+  transactions: {
+    [key: string]: {
+      request: ethers.providers.TransactionRequest
+      response?: ethers.providers.TransactionResponse
+      resolve?: Function
+      reject?: Function
+    }
+  } = {}
+  queue: string[] = []
+
+  constructor(signer: ethers.Signer, config?: Partial<TransactionManagerConfig>) {
     super()
     ethers.utils.defineReadOnly(this, 'signer', signer)
     this.config = { ...DEFAULT_CONFIG, ...config }
@@ -41,60 +51,80 @@ class BackendSigner extends ethers.Signer {
   }
 
   async sendTransaction(
-    transaction: ethers.utils.Deferrable<ethers.providers.TransactionRequest>,
+    transaction: ethers.providers.TransactionRequest,
     increases?: number
   ): Promise<ethers.providers.TransactionResponse> {
-    const key = `${transaction.to}-${transaction.data}`
-    if (!increases && this.history[key]) {
-      throw new Error(`Transaction ${key} already sent`)
-    }
+    return new Promise(async (resolve, reject) => {
+      const key = `${transaction.to}-${transaction.data}`
+      if (this.config.filterDuplicates && !increases && this.transactions[key]) {
+        reject(`Transaction ${key} already sent`)
+      }
+
+      this.transactions[key] = { request: transaction, resolve, reject }
+      this.queue.push(key)
+
+      if (this.queue.length === 1) {
+        this.process(key)
+      }
+    })
+  }
+
+  async process(key: string, increases: number = 0) {
+    const request: ethers.providers.TransactionRequest = this.transactions[key].response
+      ? { ...this.transactions[key].request, nonce: this.transactions[key].response.nonce }
+      : this.transactions[key].request
+
+    // Use the gasnow fast price if it's not too old, otherwise use 20% increasing over time.
+    const initialGasPrice = await this.provider.getGasPrice()
 
     const gasPrice =
       this.latestGasPrices && this.latestGasPrices.timestamp - Date.now() < this.config.maxGasPriceAge
-        ? this.latestGasPrices.standard
-        : await this.provider.getGasPrice()
+        ? increases === 0
+          ? 1
+          : this.latestGasPrices[this.config.increasedSpeed]
+        : initialGasPrice.add(
+            initialGasPrice
+              .div(1 / this.config.fallback.stepSize)
+              .mul(Math.min(increases + 1, this.config.fallback.maxIncreases))
+          )
+    const txWithGasPrice = { ...request, gasPrice }
+    if (increases > 0) console.log(`Resubmitting ${this.transactions[key].response.hash} with gas price of ${gasPrice}`)
 
-    const response = await super.sendTransaction({ ...transaction, gasPrice })
-    this.history[key] = response.hash
+    const response = await super.sendTransaction({ ...txWithGasPrice, gasPrice })
+    this.transactions[key] = { ...this.transactions[key], response }
 
-    // Purposefully not using await since it shouldnt block sendTransaction from returning
-    this.watch(transaction, response.hash, response.nonce, increases || 0)
+    // Resolve the sendTransaction() call
+    if (increases === 0 && this.transactions[key].resolve) await this.transactions[key].resolve(response)
 
-    return response
+    this.watch(key, increases || 0)
   }
 
-  async watch(
-    transaction: ethers.utils.Deferrable<ethers.providers.TransactionRequest>,
-    hash: string,
-    nonce: number,
-    increases: number
-  ) {
+  async watch(key: string, increases: number) {
     if (!this.provider) {
-      throw new Error('Provider for BackendSigner is not initialised')
+      throw new Error('Provider for TransactionManager is not initialised')
+    }
+
+    if (!this.transactions[key].response?.hash) {
+      throw new Error(`Transaction response missing for ${key}`)
     }
 
     try {
-      console.log(`Watching ${hash}`)
-      await this.provider.waitForTransaction(hash, undefined, this.config.transactionTimeout)
+      console.log(`Watching ${this.transactions[key].response?.hash}`)
+      await this.provider.waitForTransaction(
+        this.transactions[key].response?.hash,
+        undefined,
+        this.config.transactionTimeout
+      )
 
-      const key = `${transaction.to}-${transaction.data}`
-      this.history[key] = undefined
+      this.queue = this.queue.slice(1)
+      if (this.queue.length > 0) {
+        this.process(this.queue[0])
+      }
     } catch (e) {
       console.error(`Error caught while waiting for transaction: ${e}`)
 
       if (e.toString().includes('timeout exceeded')) {
-        // Use the gasnow fast price if it's not too old, otherwise use 20% increasing over time.
-        const initialGasPrice = await this.provider.getGasPrice()
-
-        const newGasPrice =
-          this.latestGasPrices && this.latestGasPrices.timestamp - Date.now() < this.config.maxGasPriceAge
-            ? this.latestGasPrices.fast
-            : initialGasPrice.add(
-                initialGasPrice.div(5).mul(Math.min(increases + 1, this.config.fallback.maxIncreases))
-              )
-        const newTx = { ...transaction, nonce, gasPrice: newGasPrice }
-        console.log(`Resubmitting with gas price of ${newGasPrice}`)
-        this.sendTransaction(newTx, increases + 1)
+        this.process(key, increases + 1)
       }
     }
   }
@@ -104,8 +134,8 @@ class BackendSigner extends ethers.Signer {
     return this.signer.provider
   }
 
-  connect(provider: ethers.providers.Provider): BackendSigner {
-    return new BackendSigner(this.signer.connect(provider))
+  connect(provider: ethers.providers.Provider): TransactionManager {
+    return new TransactionManager(this.signer.connect(provider))
   }
 
   getAddress(): Promise<string> {
@@ -116,7 +146,7 @@ class BackendSigner extends ethers.Signer {
     return this.signer.signMessage(message)
   }
 
-  signTransaction(transaction: ethers.utils.Deferrable<ethers.providers.TransactionRequest>): Promise<string> {
+  signTransaction(transaction: ethers.providers.TransactionRequest): Promise<string> {
     return this.signer.signTransaction(transaction)
   }
 }
@@ -132,15 +162,17 @@ interface GasPricesConfig extends GasPrices {
   timestamp: number
 }
 
-interface BackendSignerConfig {
+interface TransactionManagerConfig {
   transactionTimeout: number
   gasnowWebsocketUrl: string
   initialSpeed: keyof GasPrices
   increasedSpeed: keyof GasPrices
   maxGasPriceAge: number
+  filterDuplicates: boolean
   fallback: {
+    stepSize: number
     maxIncreases: number
   }
 }
 
-export { BackendSigner, BackendSignerConfig }
+export { TransactionManager, TransactionManagerConfig }
