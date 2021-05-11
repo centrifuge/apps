@@ -86,7 +86,7 @@ export class SyncService {
     }
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async syncWhitelistStatus() {
     const missedInvestors = await this.addressRepo.getMissingWhitelistedUsers()
     console.log(`Whitelisting ${missedInvestors.length} missed investors.`)
@@ -95,7 +95,4 @@ export class SyncService {
       await this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
     }
   }
-
-  // @Cron(CronExpression.EVERY_HOUR)
-  // async syncInvestorBalances() {}
 }
