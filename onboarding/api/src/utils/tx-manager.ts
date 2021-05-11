@@ -26,12 +26,14 @@ class TransactionManager extends ethers.Signer {
   latestGasPrices: GasPricesConfig | undefined = undefined
 
   transactions: {
-    [key: string]: {
-      request: ethers.providers.TransactionRequest
-      response?: ethers.providers.TransactionResponse
-      resolve?: Function
-      reject?: Function
-    }
+    [key: string]:
+      | {
+          request: ethers.providers.TransactionRequest
+          response?: ethers.providers.TransactionResponse
+          resolve?: Function
+          reject?: Function
+        }
+      | undefined
   } = {}
   queue: string[] = []
 
@@ -57,7 +59,7 @@ class TransactionManager extends ethers.Signer {
     return new Promise(async (resolve, reject) => {
       const key = `${transaction.to}-${transaction.data}`
       if (this.config.filterDuplicates && !increases && this.transactions[key]) {
-        reject(`Transaction ${key} already sent`)
+        throw new Error(`Transaction ${key} already sent`)
       }
 
       this.transactions[key] = { request: transaction, resolve, reject }
@@ -117,6 +119,7 @@ class TransactionManager extends ethers.Signer {
       )
 
       this.queue = this.queue.slice(1)
+      this.transactions[key] = undefined
       if (this.queue.length > 0) {
         this.process(this.queue[0])
       }
