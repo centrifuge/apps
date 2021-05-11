@@ -82,7 +82,7 @@ class TransactionManager extends ethers.Signer {
     const gasPrice =
       this.latestGasPrices && this.latestGasPrices.timestamp - Date.now() < this.config.maxGasPriceAge
         ? increases === 0
-          ? 1
+          ? this.latestGasPrices[this.config.initialSpeed]
           : this.latestGasPrices[this.config.increasedSpeed]
         : initialGasPrice.add(
             initialGasPrice
