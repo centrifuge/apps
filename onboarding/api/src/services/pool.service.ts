@@ -97,6 +97,7 @@ export class PoolService {
     const pool = await this.get(poolId)
     if (!pool) throw new Error(`Failed to get pool ${poolId} when adding to memberlist`)
 
+    this.logger.log(`Adding user ${userId} to pool ${poolId}`)
     const memberAdmin = new ethers.Contract(config.memberAdminContractAddress, contractAbiMemberAdmin, this.signer)
     const memberlistAddress = tranche === 'senior' ? pool.addresses.SENIOR_MEMBERLIST : pool.addresses.JUNIOR_MEMBERLIST
 
@@ -108,6 +109,7 @@ export class PoolService {
     const addresses = await this.addressRepo.getByUser(userId)
     for (let address of addresses) {
       try {
+        this.logger.log(`Submitting tx to add ${address.address} to ${memberlistAddress}`)
         const tx = await memberAdmin.updateMember(memberlistAddress, address.address, validUntil, { gasLimit: 1000000 })
         this.logger.log(
           `Submitted tx to add ${address.address} to ${memberlistAddress}: ${tx.hash} (nonce=${tx.nonce})`
