@@ -107,20 +107,23 @@ export class PoolService {
 
     // TODO: this should also filter by blockchain and network
     const addresses = await this.addressRepo.getByUser(userId)
-    for (let address of addresses) {
-      try {
-        this.logger.log(`Submitting tx to add ${address.address} to ${memberlistAddress}`)
-        const tx = await memberAdmin.updateMember(memberlistAddress, address.address, validUntil, { gasLimit: 1000000 })
-        this.logger.log(
-          `Submitted tx to add ${address.address} to ${memberlistAddress}: ${tx.hash} (nonce=${tx.nonce})`
-        )
-        await this.provider.waitForTransaction(tx.hash)
-        this.logger.log(`${tx.hash} (nonce=${tx.nonce}) completed`)
+    const ethAddresses = addresses.map((a) => a.address)
 
+    try {
+      this.logger.log(`Submitting tx to add ${ethAddresses.join(',')} to ${memberlistAddress}`)
+      const tx = await memberAdmin.updateMembers(memberlistAddress, ethAddresses, validUntil, { gasLimit: 1000000 })
+
+      this.logger.log(
+        `Submitted tx to add ${ethAddresses.join(',')} to ${memberlistAddress}: ${tx.hash} (nonce=${tx.nonce})`
+      )
+      await this.provider.waitForTransaction(tx.hash)
+      this.logger.log(`${tx.hash} (nonce=${tx.nonce}) completed`)
+
+      for (let address of addresses) {
         await this.checkMemberlist(memberlistAddress, address, pool, tranche, agreementId)
-      } catch (e) {
-        console.error(`Failed to add ${address.address} to ${memberlistAddress}: ${e}`)
       }
+    } catch (e) {
+      console.error(`Failed to add ${ethAddresses.join(',')} to ${memberlistAddress}: ${e}`)
     }
   }
 
