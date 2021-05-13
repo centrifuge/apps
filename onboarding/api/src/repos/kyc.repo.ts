@@ -55,8 +55,7 @@ export class KycRepo {
       )
       on conflict (user_id, provider, provider_account_id) 
         do 
-          update set kyc.digest = ${JSON.stringify(digest)}
-          and kyc.invalidated_at = null
+          update set digest = ${JSON.stringify(digest)}, invalidated_at = null
 
       returning *
     `
