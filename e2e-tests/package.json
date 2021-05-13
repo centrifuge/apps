@@ -20,10 +20,10 @@
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.3",
     "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.3",
     "@cucumber/cucumber": "^7.0.0-rc.0",
-    "dappeteer-test": "1.0.0-develop.2",
-    "puppeteer": "5.2.1"
+    "dappeteer": "git://github.com/dasanra/dappeteer.git#feature/migrate-to-metamask-v8",
+    "puppeteer": "5.5.0"
   },
   "devDependencies": {
-    "@types/puppeteer": "5.4.0"
+    "@types/puppeteer": "5.4.3"
   }
 }

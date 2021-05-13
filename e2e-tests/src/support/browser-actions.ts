@@ -1,4 +1,4 @@
-import * as dappeteer from 'dappeteer-test'
+import * as dappeteer from 'dappeteer'
 import * as puppeteer from 'puppeteer'
 import { config } from '../config'
 import { CentrifugeWorld } from './world'
