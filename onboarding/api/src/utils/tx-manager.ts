@@ -97,7 +97,7 @@ class TransactionManager extends ethers.Signer {
               .mul(Math.min(increases + 1, this.config.fallback.maxIncreases))
           )
 
-    if (gasPrice < parseInt(request.gasPrice.toString()) + this.config.minGasPriceIncrease) {
+    if (request.gasPrice && gasPrice < parseInt(request.gasPrice.toString()) + this.config.minGasPriceIncrease) {
       // Don't resubmit if these new gas price isn't a significant increase
       this.watch(key, increases || 0)
       return
