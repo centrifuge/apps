@@ -6,6 +6,7 @@ const DEFAULT_CONFIG: TransactionManagerConfig = {
   gasnowWebsocketUrl: 'wss://www.gasnow.org/ws/gasprice',
   initialSpeed: 'standard',
   increasedSpeed: 'fast',
+  minGasPriceIncrease: 10000000000, // 10 gwei
   maxGasPriceAge: 10 * 60 * 1000, // 10 mins
   filterDuplicates: true,
   fallback: {
@@ -66,7 +67,10 @@ class TransactionManager extends ethers.Signer {
       this.queue.push(key)
 
       if (this.queue.length === 1) {
+        console.log(`Procesisng ${key} immediately`)
         this.process(key)
+      } else {
+        console.log(`Adding ${key} to the queue`)
       }
     })
   }
@@ -76,9 +80,12 @@ class TransactionManager extends ethers.Signer {
       ? { ...this.transactions[key].request, nonce: this.transactions[key].response.nonce }
       : this.transactions[key].request
 
-    // Use the gasnow fast price if it's not too old, otherwise use 20% increasing over time.
     const initialGasPrice = await this.provider.getGasPrice()
 
+    /**
+     * Try to use the gasnow gas price, fallback to adding a preset step size to the initial price.
+     * If the increased speed is not more than the previous gas price, default to adding the step size.
+     */
     const gasPrice =
       this.latestGasPrices && this.latestGasPrices.timestamp - Date.now() < this.config.maxGasPriceAge
         ? increases === 0
@@ -89,6 +96,17 @@ class TransactionManager extends ethers.Signer {
               .div(1 / this.config.fallback.stepSize)
               .mul(Math.min(increases + 1, this.config.fallback.maxIncreases))
           )
+
+    if (
+      ethers.BigNumber.from(gasPrice).lt(
+        ethers.BigNumber.from(request.gasPrice).add(ethers.BigNumber.from(this.config.minGasPriceIncrease))
+      )
+    ) {
+      // Don't resubmit if these new gas price isn't a significant increase
+      this.watch(key, increases || 0)
+      return
+    }
+
     const txWithGasPrice = { ...request, gasPrice }
     if (increases > 0) console.log(`Resubmitting ${this.transactions[key].response.hash} with gas price of ${gasPrice}`)
 
@@ -170,6 +188,7 @@ interface TransactionManagerConfig {
   gasnowWebsocketUrl: string
   initialSpeed: keyof GasPrices
   increasedSpeed: keyof GasPrices
+  minGasPriceIncrease: number
   maxGasPriceAge: number
   filterDuplicates: boolean
   fallback: {

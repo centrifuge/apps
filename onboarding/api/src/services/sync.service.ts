@@ -33,6 +33,7 @@ export class SyncService {
 
       if (!investor) {
         console.log(`Failed to retrieve investor status for user ${kyc.userId}`)
+        await this.kycRepo.invalidate(kyc.provider, kyc.providerAccountId)
         return
       }
 
