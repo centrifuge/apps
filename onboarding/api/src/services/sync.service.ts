@@ -92,8 +92,8 @@ export class SyncService {
     const missedInvestors = await this.addressRepo.getMissingWhitelistedUsers()
     console.log(`Whitelisting ${missedInvestors.length} missed investors.`)
 
-    for (let investor of missedInvestors) {
-      await this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
-    }
+    missedInvestors.forEach((investor) => {
+      this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
+    })
   }
 }
