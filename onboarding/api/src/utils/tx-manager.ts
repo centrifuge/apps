@@ -87,7 +87,7 @@ class TransactionManager extends ethers.Signer {
      * If the increased speed is not more than the previous gas price, default to adding the step size.
      */
     const gasPrice =
-      this.latestGasPrices && this.latestGasPrices.timestamp - Date.now() < this.config.maxGasPriceAge
+      this.latestGasPrices && Date.now() - this.latestGasPrices.timestamp < this.config.maxGasPriceAge
         ? increases === 0
           ? this.latestGasPrices[this.config.initialSpeed]
           : this.latestGasPrices[this.config.increasedSpeed]
