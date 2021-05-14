@@ -101,7 +101,7 @@ class TransactionManager extends ethers.Signer {
       request.gasPrice &&
       gasPrice < parseFloat(request.gasPrice.toString()) * (1 + this.config.minGasPriceIncrease)
     ) {
-      // Don't resubmit if these new gas price isn't a significant increase
+      // Don't resubmit if the new gas price isn't a significant increase
       this.watch(key, increases || 0)
       return
     }
@@ -123,7 +123,7 @@ class TransactionManager extends ethers.Signer {
         console.log(`Failed to resubmit ${this.transactions[key].response.hash} with ${gasPrice}`)
         this.watch(key, increases || 0)
       } else {
-        throw new Error(`Failed to submit ${this.transactions[key].response.hash} with ${gasPrice}`)
+        throw new Error(`Failed to submit tx with ${gasPrice}: ${e}`)
       }
     }
   }
