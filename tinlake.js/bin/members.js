@@ -38,45 +38,45 @@ const run = async () => {
 
   // Get non-internal tx from separate memberlists
   let memberlistToPoolTranche = {}
-  // for (let config of Object.values(poolConfig)) {
-  //   if (!config.addresses || !('JUNIOR_MEMBERLIST' in config.addresses)) continue
+  for (let config of Object.values(poolConfig)) {
+    if (!config.addresses || !('JUNIOR_MEMBERLIST' in config.addresses)) continue
     
-  //   const juniorAddresses = await getAddresses(provider, config.addresses['JUNIOR_MEMBERLIST'])
-  //   for (let address of juniorAddresses) {
-  //     data.push([
-  //       config.metadata.shortName || config.metadata.name,
-  //       'junior',
-  //       address,
-  //     ])
-  //   }
-  //   memberlistToPoolTranche[config.addresses['JUNIOR_MEMBERLIST']] = {
-  //     pool: config.metadata.shortName || config.metadata.name,
-  //     tranche: 'junior'
-  //   }
+    const juniorAddresses = await getAddresses(provider, config.addresses['JUNIOR_MEMBERLIST'])
+    for (let address of juniorAddresses) {
+      data.push([
+        config.metadata.shortName || config.metadata.name,
+        'junior',
+        address,
+      ])
+    }
+    memberlistToPoolTranche[config.addresses['JUNIOR_MEMBERLIST']] = {
+      pool: config.metadata.shortName || config.metadata.name,
+      tranche: 'junior'
+    }
     
-  //   const seniorAddresses = await getAddresses(provider, config.addresses['SENIOR_MEMBERLIST'])
-  //   for (let address of seniorAddresses) {
-  //     data.push([
-  //       config.metadata.shortName || config.metadata.name,
-  //       'senior',
-  //       address,
-  //     ])
-  //   }
-  //   memberlistToPoolTranche[config.addresses['SENIOR_MEMBERLIST']] = {
-  //     pool: config.metadata.shortName || config.metadata.name,
-  //     tranche: 'senior'
-  //   }
-  // }
+    const seniorAddresses = await getAddresses(provider, config.addresses['SENIOR_MEMBERLIST'])
+    for (let address of seniorAddresses) {
+      data.push([
+        config.metadata.shortName || config.metadata.name,
+        'senior',
+        address,
+      ])
+    }
+    memberlistToPoolTranche[config.addresses['SENIOR_MEMBERLIST']] = {
+      pool: config.metadata.shortName || config.metadata.name,
+      tranche: 'senior'
+    }
+  }
 
-  console.log(memberlistToPoolTranche)
+  // console.log(memberlistToPoolTranche)
   
   // Get tx from member admin
-  const history = await provider.getHistory('0xB7e70B77f6386Ffa5F55DDCb53D87A0Fb5a2f53b')
+  // const history = await provider.getHistory('0xB7e70B77f6386Ffa5F55DDCb53D87A0Fb5a2f53b')
 
-  return history
-    .map((tx) => memberAdminInterface.parseTransaction(tx))
-    .map((tx) => console.log(tx))
-    // .filter((tx) => tx.name === 'updateMember')
+  // return history
+  //   .map((tx) => memberAdminInterface.parseTransaction(tx))
+  //   .map((tx) => console.log(tx))
+  //   // .filter((tx) => tx.name === 'updateMember')
 
   stringify(data, { header: true, columns: columns }, (err, output) => {
     if (err) throw err;
