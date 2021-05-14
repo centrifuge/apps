@@ -6,7 +6,7 @@ const DEFAULT_CONFIG: TransactionManagerConfig = {
   gasnowWebsocketUrl: 'wss://www.gasnow.org/ws/gasprice',
   initialSpeed: 'standard',
   increasedSpeed: 'fast',
-  minGasPriceIncrease: 10000000000, // 10 gwei
+  minGasPriceIncrease: 0.1, // 10%
   maxGasPriceAge: 10 * 60 * 1000, // 10 mins
   filterDuplicates: true,
   fallback: {
@@ -97,7 +97,10 @@ class TransactionManager extends ethers.Signer {
               .mul(Math.min(increases + 1, this.config.fallback.maxIncreases))
           )
 
-    if (request.gasPrice && gasPrice < parseInt(request.gasPrice.toString()) + this.config.minGasPriceIncrease) {
+    if (
+      request.gasPrice &&
+      gasPrice < parseFloat(request.gasPrice.toString()) * (1 + this.config.minGasPriceIncrease)
+    ) {
       // Don't resubmit if these new gas price isn't a significant increase
       this.watch(key, increases || 0)
       return
@@ -106,13 +109,23 @@ class TransactionManager extends ethers.Signer {
     const txWithGasPrice = { ...request, gasPrice }
     if (increases > 0) console.log(`Resubmitting ${this.transactions[key].response.hash} with gas price of ${gasPrice}`)
 
-    const response = await super.sendTransaction({ ...txWithGasPrice, gasPrice })
-    this.transactions[key] = { ...this.transactions[key], response }
+    try {
+      const response = await super.sendTransaction({ ...txWithGasPrice, gasPrice })
+      this.transactions[key] = { ...this.transactions[key], response }
 
-    // Resolve the sendTransaction() call
-    if (increases === 0 && this.transactions[key].resolve) await this.transactions[key].resolve(response)
+      // Resolve the sendTransaction() call
+      if (increases === 0 && this.transactions[key].resolve) await this.transactions[key].resolve(response)
 
-    this.watch(key, increases || 0)
+      this.watch(key, increases || 0)
+    } catch (e) {
+      if (increases > 0) {
+        // Keep watching previous transaction
+        console.log(`Failed to resubmit ${this.transactions[key].response.hash} with ${gasPrice}`)
+        this.watch(key, increases || 0)
+      } else {
+        throw new Error(`Failed to submit ${this.transactions[key].response.hash} with ${gasPrice}`)
+      }
+    }
   }
 
   async watch(key: string, increases: number) {
