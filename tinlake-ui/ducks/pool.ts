@@ -27,6 +27,8 @@ export interface PoolTranche extends Tranche {
   address?: string
   inMemberlist?: boolean
   effectiveBalance?: BN
+  debt?: BN
+  balance?: BN
 }
 
 export interface PoolData {
@@ -44,6 +46,7 @@ export interface PoolData {
   totalPendingInvestments: BN
   totalRedemptionsCurrency: BN
   isPoolAdmin?: boolean
+  reserveAndRemainingCredit?: BN
 }
 
 export type PoolStatus = 'Upcoming' | 'Active' | 'Deployed' | 'Closed'
@@ -340,6 +343,21 @@ export function loadPool(
             target: tinlake.contractAddresses.ASSESSOR,
             call: ['effectiveSeniorBalance()(uint)'],
             returns: [[`senior.effectiveBalance`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.ASSESSOR,
+            call: ['seniorDebt()(uint)'],
+            returns: [[`senior.debt`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.ASSESSOR,
+            call: ['seniorBalance()(uint)'],
+            returns: [[`senior.balance`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.ASSESSOR,
+            call: ['totalBalance()(uint)'],
+            returns: [[`reserveAndRemainingCredit`, toBN]],
           },
           {
             target: tinlake.contractAddresses.SENIOR_TOKEN,
