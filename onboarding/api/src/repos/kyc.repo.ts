@@ -39,7 +39,7 @@ export class KycRepo {
     `
     if (!investors) return []
 
-    return investors as unknown as KycEntity[]
+    return (investors as unknown) as KycEntity[]
   }
 
   async upsertSecuritize(
