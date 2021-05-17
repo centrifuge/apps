@@ -47,7 +47,7 @@ export class AgreementRepo {
       where agreements.user_id = ${userId}
     `
 
-    return (agreements as unknown) as Agreement[]
+    return agreements as unknown as Agreement[]
   }
 
   async getByUserIds(userIds: string[]): Promise<Agreement[]> {
@@ -59,7 +59,7 @@ export class AgreementRepo {
       where agreements.user_id in (${userIds})
     `
 
-    return (agreements as unknown) as Agreement[]
+    return agreements as unknown as Agreement[]
   }
 
   async getByUserPoolTranche(userId: string, poolId: string, tranche: Tranche): Promise<Agreement[]> {
@@ -71,7 +71,7 @@ export class AgreementRepo {
       and agreements.tranche = ${tranche}
     `
 
-    return (agreements as unknown) as Agreement[]
+    return agreements as unknown as Agreement[]
   }
 
   async getCompletedAgreementsByUserPool(userId: string, poolId: string): Promise<Agreement[]> {
@@ -84,7 +84,7 @@ export class AgreementRepo {
       and counter_signed_at is not null
     `
 
-    return (agreements as unknown) as Agreement[]
+    return agreements as unknown as Agreement[]
   }
 
   async findOrCreate(
@@ -161,6 +161,18 @@ export class AgreementRepo {
     return updatedAgreement as Agreement | undefined
   }
 
+  async setVoided(agreementId: string): Promise<Agreement | undefined> {
+    const [updatedAgreement] = await this.db.sql`
+      update agreements
+      set voided_at = now()
+      where id = ${agreementId}
+
+      returning *
+    `
+
+    return updatedAgreement as Agreement | undefined
+  }
+
   async getAwaitingCounterSignature(): Promise<Agreement[]> {
     const agreements = await this.db.sql`
       select *
@@ -171,7 +183,7 @@ export class AgreementRepo {
 
     if (!agreements) return []
 
-    return (agreements as unknown) as Agreement[]
+    return agreements as unknown as Agreement[]
   }
 
   async getStatusForProfileAgreements(
@@ -214,4 +226,5 @@ export type Agreement = {
   signedAt: Date
   counterSignedAt: Date
   declinedAt?: Date
+  voidedAt?: Date
 }

@@ -80,25 +80,27 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
-  // TODO: fix and then refactor these
+  // TODO: refactor
   const debtCeiling = (poolData?.maker?.line || new BN('0')).div(new BN(10).pow(new BN(45 - 18)))
-  const maxRaise = (poolData?.netAssetValue || new BN(0))
-    .add(poolData?.reserveAndRemainingCredit || new BN(0))
-    .mul(e27.sub(poolData?.minJuniorRatio || new BN(0)))
-    .div(e27)
-    .sub(poolData?.senior?.debt || new BN(0))
-    .sub(poolData?.senior?.balance || new BN(0))
-    .div(
-      (mat || new BN(0))
-        .sub(e27)
-        .sub(e27)
+  const maxRaise = mat
+    ? (poolData?.netAssetValue || new BN(0))
+        .add(poolData?.reserveAndRemainingCredit || new BN(0))
         .mul(e27.sub(poolData?.minJuniorRatio || new BN(0)))
         .div(e27)
-        .add(e27)
-        .div(new BN(10).pow(new BN(27 - 18)))
-    )
-    .mul(new BN(10).pow(new BN(27 + 18)))
-    .div(mat || new BN(0))
+        .sub(poolData?.senior?.debt || new BN(0))
+        .sub(poolData?.senior?.balance || new BN(0))
+        .div(
+          (mat || new BN(0))
+            .sub(e27)
+            .sub(e27)
+            .mul(e27.sub(poolData?.minJuniorRatio || new BN(0)))
+            .div(e27)
+            .add(e27)
+            .div(new BN(10).pow(new BN(27 - 18)))
+        )
+        .mul(new BN(10).pow(new BN(27 + 18)))
+        .div(mat || new BN(0))
+    : new BN(0)
 
   const maxCreditline = (poolData?.maker?.creditline || new BN(0)).add(maxRaise)
 

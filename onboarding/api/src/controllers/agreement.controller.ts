@@ -105,6 +105,11 @@ export class AgreementController {
       return 'OK'
     }
 
+    if (content.status === 'voided') {
+      this.agreementRepo.setVoided(agreement.id)
+      return 'OK'
+    }
+
     const investor = content.recipients.signers.find((signer: any) => signer.roleName === InvestorRoleName)
     const issuer = content.recipients.signers.find((signer: any) => signer.roleName === IssuerRoleName)
 

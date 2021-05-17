@@ -32,6 +32,8 @@ const CollectCard: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const amount = type === 'Invest' ? props.disbursements.payoutTokenAmount : props.disbursements.payoutCurrencyAmount
+  const remaining =
+    type === 'Invest' ? props.disbursements.remainingSupplyCurrency : props.disbursements.remainingRedeemToken
 
   const collect = async () => {
     const valueToDecimal = new Decimal(
@@ -68,7 +70,8 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           waiting for collection
         </Heading>
         <Description>
-          Your {type === 'Invest' ? 'investment' : 'redemption'} order has been executed.{' '}
+          Your {type === 'Invest' ? 'investment' : 'redemption'} order has been {remaining.gtn(0) && 'partially '}{' '}
+          executed.{' '}
           {type === 'Invest' &&
             `Your ${props.tranche === 'senior' ? 'DROP' : 'TIN'} tokens are already earning yield and CFG rewards. `}
           Please collect your{' '}
@@ -77,7 +80,19 @@ const CollectCard: React.FC<Props> = (props: Props) => {
               ? 'DROP'
               : 'TIN'
             : props.selectedPool?.metadata.currencySymbol || 'DAI'}{' '}
-          at your convenience to transfer them to your ETH account.
+          at your convenience to transfer them to your ETH account.{' '}
+          {remaining.gtn(0) && (
+            <Box margin={{ top: 'small' }}>
+              The remaining {addThousandsSeparators(toMaxPrecision(baseToDisplay(remaining, 18), 4))}{' '}
+              {type === 'Redeem'
+                ? props.tranche === 'senior'
+                  ? 'DROP'
+                  : 'TIN'
+                : props.selectedPool?.metadata.currencySymbol || 'DAI'}{' '}
+              is still locked for {type === 'Invest' ? 'investment' : 'redemption'} and will be executed in a future
+              epoch.
+            </Box>
+          )}
         </Description>
         <OrderSteps
           src={`/static/steps/collect-${type === 'Invest' ? 'dai' : props.tranche === 'senior' ? 'drop' : 'tin'}-${
