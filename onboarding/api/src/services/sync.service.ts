@@ -69,7 +69,7 @@ export class SyncService {
   }
 
   // This is just a backup option, it should already be covered by the Docusign Connect integration
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async syncAgreementStatus() {
     const agreements = await this.agreementRepo.getAwaitingCounterSignature()
     if (agreements.length === 0) return

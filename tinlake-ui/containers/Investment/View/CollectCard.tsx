@@ -89,8 +89,14 @@ const CollectCard: React.FC<Props> = (props: Props) => {
                   ? 'DROP'
                   : 'TIN'
                 : props.selectedPool?.metadata.currencySymbol || 'DAI'}{' '}
-              is still locked for {type === 'Invest' ? 'investment' : 'redemption'} and will be executed in a future
-              epoch.
+              is still locked for {type === 'Invest' ? 'investment' : 'redemption'} and will be executed in the next
+              epochs. You can keep it locked or cancel after collecting your{' '}
+              {type === 'Invest'
+                ? props.tranche === 'senior'
+                  ? 'DROP'
+                  : 'TIN'
+                : props.selectedPool?.metadata.currencySymbol || 'DAI'}
+              .
             </Box>
           )}
         </Description>
