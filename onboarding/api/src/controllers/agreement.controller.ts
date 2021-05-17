@@ -55,7 +55,7 @@ export class AgreementController {
     const agreement = await this.agreementRepo.findOrCreate(
       user.id,
       user.email,
-      user.entityName || user.fullName,
+      user.entityName?.length > 0 ? user.entityName : user.fullName,
       params.poolId,
       profileAgreement.tranche,
       profileAgreement.name,
@@ -102,6 +102,11 @@ export class AgreementController {
 
     if (content.status === 'declined') {
       this.agreementRepo.setDeclined(agreement.id)
+      return 'OK'
+    }
+
+    if (content.status === 'voided') {
+      this.agreementRepo.setVoided(agreement.id)
       return 'OK'
     }
 

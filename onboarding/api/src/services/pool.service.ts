@@ -1,4 +1,3 @@
-import { NonceManager } from '@ethersproject/experimental'
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { ethers } from 'ethers'
@@ -10,6 +9,7 @@ import { UserRepo } from '../repos/user.repo'
 import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
 import contractAbiMemberlist from '../utils/Memberlist.abi'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
+import { TransactionManager } from '../utils/tx-manager'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 @Injectable()
@@ -18,7 +18,10 @@ export class PoolService {
   private pools: { [key: string]: Pool } = {}
 
   provider = new FastJsonRpcProvider(config.rpcUrl)
-  signer = new NonceManager(new ethers.Wallet(config.signerPrivateKey).connect(this.provider))
+  signer = new TransactionManager(new ethers.Wallet(config.signerPrivateKey), {
+    initialSpeed: 'fast',
+    increasedSpeed: 'rapid',
+  }).connect(this.provider)
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
 
   constructor(
@@ -96,6 +99,7 @@ export class PoolService {
     const pool = await this.get(poolId)
     if (!pool) throw new Error(`Failed to get pool ${poolId} when adding to memberlist`)
 
+    this.logger.log(`Adding user ${userId} to pool ${poolId}`)
     const memberAdmin = new ethers.Contract(config.memberAdminContractAddress, contractAbiMemberAdmin, this.signer)
     const memberlistAddress = tranche === 'senior' ? pool.addresses.SENIOR_MEMBERLIST : pool.addresses.JUNIOR_MEMBERLIST
 
@@ -105,19 +109,23 @@ export class PoolService {
 
     // TODO: this should also filter by blockchain and network
     const addresses = await this.addressRepo.getByUser(userId)
-    for (let address of addresses) {
-      try {
-        const tx = await memberAdmin.updateMember(memberlistAddress, address.address, validUntil, { gasLimit: 1000000 })
-        this.logger.log(
-          `Submitted tx to add ${address.address} to ${memberlistAddress}: ${tx.hash} (nonce=${tx.nonce})`
-        )
-        await this.provider.waitForTransaction(tx.hash)
-        this.logger.log(`${tx.hash} (nonce=${tx.nonce}) completed`)
+    const ethAddresses = addresses.map((a) => a.address)
 
+    try {
+      this.logger.log(`Submitting tx to add ${ethAddresses.join(',')} to ${memberlistAddress}`)
+      const tx = await memberAdmin.updateMembers(memberlistAddress, ethAddresses, validUntil, { gasLimit: 1000000 })
+
+      this.logger.log(
+        `Submitted tx to add ${ethAddresses.join(',')} to ${memberlistAddress}: ${tx.hash} (nonce=${tx.nonce})`
+      )
+      await this.provider.waitForTransaction(tx.hash)
+      this.logger.log(`${tx.hash} (nonce=${tx.nonce}) completed`)
+
+      for (let address of addresses) {
         await this.checkMemberlist(memberlistAddress, address, pool, tranche, agreementId)
-      } catch (e) {
-        console.error(`Failed to add ${address.address} to ${memberlistAddress}: ${e}`)
       }
+    } catch (e) {
+      console.error(`Failed to add ${ethAddresses.join(',')} to ${memberlistAddress}: ${e}`)
     }
   }
 
@@ -149,7 +157,7 @@ export class PoolService {
         tranche,
         true,
         agreementId,
-        user.entityName || user.fullName
+        user.entityName?.length > 0 ? user.entityName : user.fullName
       )
     } else {
       this.logger.log(`${address.address} is not a member of ${pool.metadata.name} - ${tranche}`)

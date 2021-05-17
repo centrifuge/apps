@@ -20,12 +20,12 @@ export class MemberlistService {
   async update(userId: string, poolId?: string, tranche?: Tranche) {
     const user = await this.userRepo.find(userId)
     if (config.globalRestrictedCountries.includes(user.countryCode)) {
-      console.log(`User ${userId} is based in ${user.countryCode}, which is restricted globally.`)
+      this.logger.log(`User ${userId} is based in ${user.countryCode}, which is restricted globally.`)
       return
     }
     const kyc = await this.kycRepo.find(userId)
     if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) {
-      console.log(`User ${userId} is not yet verified or accredited.`)
+      this.logger.log(`User ${userId} is not yet verified or accredited.`)
       return
     }
 
@@ -38,25 +38,25 @@ export class MemberlistService {
       tranches = [tranche]
     }
 
-    for (let t of tranches) {
+    tranches.forEach(async (t: Tranche) => {
       // If poolId is supplied, whitelist just for that pool. Otherwise, try to whitelist for all pools
       const poolIds = poolId === undefined ? await this.poolService.getIds() : [poolId]
 
-      for (let poolId of poolIds) {
+      poolIds.forEach(async (poolId: string) => {
         const pool = await this.poolService.get(poolId)
         if (!pool || pool?.profile.issuer.restrictedCountryCodes?.includes(user.countryCode)) {
-          console.log(`User ${userId} is based in ${user.countryCode}, which is restricted for pool ${poolId}.`)
-          continue
+          this.logger.log(`User ${userId} is based in ${user.countryCode}, which is restricted for pool ${poolId}.`)
+          return
         }
 
         const agreements = await this.agreementRepo.getByUserPoolTranche(userId, poolId, t)
-        const done = agreements.every((agreement: Agreement) => agreement.signedAt && agreement.counterSignedAt)
+        const done = agreements.some((agreement: Agreement) => agreement.signedAt && agreement.counterSignedAt)
         if (done && agreements.length > 0) {
           await this.poolService.addToMemberlist(userId, poolId, t, agreements[0].id)
         } else {
-          console.log(`User ${userId}'s agreement for ${poolId} has not yet been signed or counter-signed.`)
+          this.logger.log(`User ${userId}'s agreement for ${poolId} has not yet been signed or counter-signed.`)
         }
-      }
-    }
+      })
+    })
   }
 }

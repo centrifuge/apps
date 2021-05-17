@@ -33,6 +33,7 @@ export class SyncService {
 
       if (!investor) {
         console.log(`Failed to retrieve investor status for user ${kyc.userId}`)
+        await this.kycRepo.invalidate(kyc.provider, kyc.providerAccountId)
         return
       }
 
@@ -68,7 +69,7 @@ export class SyncService {
   }
 
   // This is just a backup option, it should already be covered by the Docusign Connect integration
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async syncAgreementStatus() {
     const agreements = await this.agreementRepo.getAwaitingCounterSignature()
     if (agreements.length === 0) return
@@ -86,16 +87,13 @@ export class SyncService {
     }
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async syncWhitelistStatus() {
     const missedInvestors = await this.addressRepo.getMissingWhitelistedUsers()
     console.log(`Whitelisting ${missedInvestors.length} missed investors.`)
 
-    for (let investor of missedInvestors) {
-      await this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
-    }
+    missedInvestors.forEach((investor) => {
+      this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
+    })
   }
-
-  // @Cron(CronExpression.EVERY_HOUR)
-  // async syncInvestorBalances() {}
 }

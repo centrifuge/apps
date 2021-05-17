@@ -161,6 +161,18 @@ export class AgreementRepo {
     return updatedAgreement as Agreement | undefined
   }
 
+  async setVoided(agreementId: string): Promise<Agreement | undefined> {
+    const [updatedAgreement] = await this.db.sql`
+      update agreements
+      set voided_at = now()
+      where id = ${agreementId}
+
+      returning *
+    `
+
+    return updatedAgreement as Agreement | undefined
+  }
+
   async getAwaitingCounterSignature(): Promise<Agreement[]> {
     const agreements = await this.db.sql`
       select *
@@ -214,4 +226,5 @@ export type Agreement = {
   signedAt: Date
   counterSignedAt: Date
   declinedAt?: Date
+  voidedAt?: Date
 }
