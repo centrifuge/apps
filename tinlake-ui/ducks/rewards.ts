@@ -11,6 +11,7 @@ const RECEIVE_REWARDS = 'tinlake-ui/rewards/RECEIVE_REWARDS'
 
 export interface RewardsData {
   toDateRewardAggregateValue: BN
+  toDateAORewardAggregateValue: BN
   rewardRate: Decimal
   todayReward: BN
 }

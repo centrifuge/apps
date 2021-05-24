@@ -28,7 +28,16 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
     dispatch(maybeLoadRewards())
   }, [])
 
-  const totalRewardsEarned = baseToDisplay(rewards.data?.toDateRewardAggregateValue || '0', 18)
+  const AORewardsEarned = rewards.data?.toDateAORewardAggregateValue
+  const investorRewardsEarned = rewards.data?.toDateRewardAggregateValue
+
+  const totalRewardsEarned = React.useMemo((): string => {
+    if (AORewardsEarned && investorRewardsEarned) {
+      return baseToDisplay(investorRewardsEarned.add(AORewardsEarned), 18)
+    }
+
+    return '0'
+  }, [AORewardsEarned, investorRewardsEarned])
 
   const maxPoolValue = Math.max.apply(
     Math,

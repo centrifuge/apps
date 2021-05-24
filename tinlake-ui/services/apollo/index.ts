@@ -306,6 +306,7 @@ class Apollo {
             rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
               rewardRate
               toDateRewardAggregateValue
+              toDateAORewardAggregateValue
               todayReward
             }
           }
@@ -322,6 +323,7 @@ class Apollo {
 
     return {
       toDateRewardAggregateValue: new BN(new Decimal(data.toDateRewardAggregateValue).toFixed(0)),
+      toDateAORewardAggregateValue: new BN(new Decimal(data.toDateAORewardAggregateValue).toFixed(0)),
       rewardRate: new Decimal(data.rewardRate),
       todayReward: new BN(new Decimal(data.todayReward).toFixed(0)),
     }
