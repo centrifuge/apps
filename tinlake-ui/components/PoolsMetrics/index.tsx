@@ -1,4 +1,5 @@
-import { addThousandsSeparators, baseToDisplay, toPrecision } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
@@ -10,8 +11,6 @@ import { dateToYMD } from '../../utils/date'
 import { dynamicPrecision } from '../../utils/toDynamicPrecision'
 import NumberDisplay from '../NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from './styles'
-import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
-import BN from 'bn.js'
 
 interface Props {
   pools: PoolsData
@@ -30,16 +29,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
     dispatch(maybeLoadRewards())
   }, [])
 
-  const AORewardsEarned = rewards.data?.toDateAORewardAggregateValue
   const investorRewardsEarned = rewards.data?.toDateRewardAggregateValue
-
-  const totalRewardsEarned = React.useMemo((): string => {
-    if (AORewardsEarned && investorRewardsEarned) {
-      return baseToDisplay(investorRewardsEarned.add(AORewardsEarned), 18)
-    }
-
-    return '0'
-  }, [AORewardsEarned, investorRewardsEarned])
 
   const maxPoolValue = Math.max.apply(
     Math,
@@ -129,22 +119,17 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         justify="center"
       >
         <Box>
-          <AxisTooltip
-            title={`This denotes the total amount of CFG earned since 15 Oct 2020. ${addThousandsSeparators(
-              toPrecision(baseToDisplay(investorRewardsEarned || new BN(0), 18), 0)
-            )} CFG have been earned by investors, ${addThousandsSeparators(
-              toPrecision(baseToDisplay(AORewardsEarned || new BN(0), 18), 0)
-            )} CFG have been earned by Asset Originators.`}
-          >
-            <Cont style={{ marginTop: '8px' }}>
-              <TokenLogo src={`/static/cfg-white.svg`} />
-              <Value>
-                <NumberDisplay value={totalRewardsEarned} precision={dynamicPrecision(totalRewardsEarned)} />
-              </Value>{' '}
-              <Unit>CFG</Unit>
-            </Cont>
-            <Label>Total Rewards Earned</Label>
-          </AxisTooltip>
+          <Cont style={{ marginTop: '8px' }}>
+            <TokenLogo src={`/static/cfg-white.svg`} />
+            <Value>
+              <NumberDisplay
+                value={baseToDisplay(investorRewardsEarned || new BN(0), 18)}
+                precision={dynamicPrecision(baseToDisplay(investorRewardsEarned || new BN(0), 18))}
+              />
+            </Value>{' '}
+            <Unit>CFG</Unit>
+          </Cont>
+          <Label>Total Rewards Earned</Label>
         </Box>
         <Box margin={{ left: 'medium' }} justify="center">
           <Button label="Claim Rewards" primary onClick={goToRewards} color="#FCBA59" />
