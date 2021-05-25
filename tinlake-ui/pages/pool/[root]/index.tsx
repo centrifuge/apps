@@ -62,8 +62,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   // We'll pre-render only these paths at build time.
   const pools = await loadPoolsFromIPFS()
   let paths = pools.upcoming.map((pool) => ({ params: { root: pool.metadata.slug } }))
+  const activePaths = pools.active.map((pool) => ({ params: { root: pool.metadata.slug } }))
   const archivePaths = pools.archived.map((pool) => ({ params: { root: pool.metadata.slug } }))
-  paths = paths.concat(archivePaths)
+  paths = paths.concat(activePaths).concat(archivePaths)
 
   // { fallback: false } means other routes should 404.
   return { paths, fallback: false }
