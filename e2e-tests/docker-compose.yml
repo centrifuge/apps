@@ -1,0 +1,106 @@
+version: '3'
+
+volumes:
+  ipfs:
+    labels: 
+      - "${PROJECT}=ipfs"
+  data:
+    labels: 
+      - "${PROJECT}=data"
+
+services:
+  parity:
+    image: parity/parity:v2.7.2-stable
+    container_name: parity
+    user: "1000:1000"
+    volumes: 
+      - ./parity/chain.json:/home/parity/.local/share/io.parity.ethereum/chain.json
+      - ./parity/config.toml:/home/parity/.local/share/io.parity.ethereum/config.toml
+    command: --config /home/parity/.local/share/io.parity.ethereum/config.toml
+    ports:
+      - 8545:8545
+      - 8546:8546
+      - 30303:30303
+      - 30303:30303/udp
+
+  db:
+    image: postgres:12.2-alpine
+    container_name: db
+    env_file:
+      - .env
+    volumes:
+      - data:/var/lib/postgresql/data
+
+  ipfs:
+    image: ipfs/go-ipfs:v0.4.23
+    container_name: ipfs
+    ports:
+      - "5001:5001"
+      - "8080:8080"
+    volumes:
+      - ipfs:/data/ipfs
+
+  graph:
+    image: graphprotocol/graph-node:v0.21.0
+    container_name: graph
+    depends_on:
+      - db
+      - ipfs
+      - parity
+    ports:
+      - "8020:8020"
+      - "8000:8000"
+    environment:
+      - ethereum=${ETH_NETWORK}:http://parity:8545
+      - ipfs=ipfs:5001
+      - postgres_db=${POSTGRES_DB}
+      - postgres_host=db
+      - postgres_pass=${POSTGRES_PASSWORD}
+      - postgres_user=${POSTGRES_USER}
+      - postgres_port=5432
+      - GRAPH_ALLOW_NON_DETERMINISTIC_IPFS="true"
+      - GRAPH_ETH_CALL_BY_NUMBER="true"
+      - GRAPH_LOG=info
+      - GRAPH_IPFS_TIMEOUT=12000
+
+  contracts:
+    build:
+      context: ./contracts
+    container_name: contracts
+    depends_on:
+      - parity
+    environment:
+      - ETH_RPC_URL=http://parity:8545
+      - ETH_KEYSTORE=/app/keystore
+      - ETH_PASSWORD=/app/dev-password
+      - ETH_FROM=${ETH_FROM}
+      - ETH_GAS=${ETH_GAS}
+      - ETH_PRIVATE_KEY=${ETH_ADMIN_PRIVATE_KEY}
+      - POOL_ID=${POOL_ID}
+      - IPFS_METADATA=${IPFS_METADATA}
+      - IPFS_ROOT=${IPFS_ROOT}
+      - GIT_COMMIT_TINLAKE_PROXY=767ef0b
+      - GIT_COMMIT_TINLAKE_POOLS_CLI=9d6f7f6
+      - GIT_COMMIT_TINLAKE_CLAIM_RAD=6dc0fb8
+      - GIT_COMMIT_TINLAKE_ACTIONS=acf08fe
+      - GIT_COMMIT_MULTICALL=e0c7d9
+      - GIT_COMMIT_ETHEREUM_CONTRACTS=e595582
+      - GIT_COMMIT_PRIVACY_ENABLED_ERC721=7b20dcf
+      - GIT_COMMIT_TINLAKE_DEPLOY=4ef38c5
+    command: ./deploy.sh
+
+  subgraph:
+    build:
+      context: subgraph
+      args: 
+        NETWORK_NAME: ${ETH_NETWORK}
+        GIT_COMMIT_TINLAKE_SUBGRAPH: e585cbc
+    container_name: subgraph
+    depends_on:
+      - ipfs
+      - graph
+    environment:
+      - GRAPH_HOST=http://graph
+      - IPFS_HOST=http://ipfs:5001
+      - PROJECT=${PROJECT}
+    command: "./deploy.sh"

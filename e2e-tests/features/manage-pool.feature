@@ -1,3 +1,4 @@
+@metamask
 Feature: Set min TIN ratio
 
     Only AOs should be allowed to do this
