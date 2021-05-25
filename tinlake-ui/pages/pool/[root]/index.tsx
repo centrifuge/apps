@@ -75,10 +75,13 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     throw new Error(`Params are not passed`)
   }
   const pools = await loadPoolsFromIPFS()
-  let pool: UpcomingPool | ArchivedPool | undefined
+  let pool: UpcomingPool | ArchivedPool | LivePool | undefined
   pool = pools.upcoming.find((p) => p.metadata.slug === params!.root)
   if (!pool) {
     pool = pools.archived.find((p) => p.metadata.slug === params!.root)
+  }
+  if (!pool) {
+    pool = pools.active.find((p) => p.metadata.slug === params!.root)
   }
   if (!pool) {
     throw new Error(`Pool ${params.root} cannot be loaded`)
