@@ -1,4 +1,5 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
@@ -28,16 +29,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
     dispatch(maybeLoadRewards())
   }, [])
 
-  const AORewardsEarned = rewards.data?.toDateAORewardAggregateValue
   const investorRewardsEarned = rewards.data?.toDateRewardAggregateValue
-
-  const totalRewardsEarned = React.useMemo((): string => {
-    if (AORewardsEarned && investorRewardsEarned) {
-      return baseToDisplay(investorRewardsEarned.add(AORewardsEarned), 18)
-    }
-
-    return '0'
-  }, [AORewardsEarned, investorRewardsEarned])
 
   const maxPoolValue = Math.max.apply(
     Math,
@@ -130,7 +122,10 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
           <Cont style={{ marginTop: '8px' }}>
             <TokenLogo src={`/static/cfg-white.svg`} />
             <Value>
-              <NumberDisplay value={totalRewardsEarned} precision={dynamicPrecision(totalRewardsEarned)} />
+              <NumberDisplay
+                value={baseToDisplay(investorRewardsEarned || new BN(0), 18)}
+                precision={dynamicPrecision(baseToDisplay(investorRewardsEarned || new BN(0), 18))}
+              />
             </Value>{' '}
             <Unit>CFG</Unit>
           </Cont>

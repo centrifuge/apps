@@ -92,7 +92,7 @@ class Apollo {
         weightedInterestRateNum,
         seniorInterestRateNum,
         order: poolValueNum,
-        isUpcoming: pool?.metadata?.isUpcoming || false,
+        isUpcoming: poolConfig?.metadata?.isUpcoming || false,
         isArchived: false,
         isOversubscribed:
           (pool && new BN(pool.maxReserve).lte(new BN(pool.reserve).add(OversubscribedBuffer))) || false,

@@ -334,7 +334,7 @@ const MakerLogo = styled.div`
 `
 
 const MakerMetric = styled(Box)`
-  padding: 0 32px 0 18px;
+  padding: 0 26px 0 12px;
   h3 {
     margin: 0;
     font-size: 12px;
