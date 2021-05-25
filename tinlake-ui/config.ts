@@ -259,13 +259,13 @@ export const loadPoolsFromIPFS = async () => {
   const networkConfigs: any[] = Object.values(body)
 
   const active = poolsSchema
-    .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
+    .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT && !p.isUpcoming))
     .map((p) => ({ ...p, isUpcoming: false } as Pool))
   const archived = archivedPoolsSchema
     .validateSync(networkConfigs.filter((p: Pool) => 'archivedValues' in p))
     .map((p) => ({ ...p, isArchived: true } as ArchivedPool))
   const upcoming = upcomingPoolsSchema
-    .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
+    .validateSync(networkConfigs.filter((p: Pool) => (!('archivedValues' in p) && !p.addresses) || p.isUpcoming))
     .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
   ipfsPools = { active, upcoming, archived }
   return ipfsPools
