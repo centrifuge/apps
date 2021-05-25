@@ -10,6 +10,7 @@ import WithTinlake from '../../../components/WithTinlake'
 import { ArchivedPool, IpfsPools, loadPoolsFromIPFS, Pool as LivePool, UpcomingPool } from '../../../config'
 import OverviewArchived from '../../../containers/OverviewArchived'
 import OverviewUpcoming from '../../../containers/OverviewUpcoming'
+import Overview from '../../../containers/Overview'
 import { menuItems, noDemo } from '../../../menuItems'
 
 interface Props {
@@ -31,18 +32,22 @@ class Pool extends React.Component<Props> {
           ipfsPools={ipfsPools}
           poolTitle={pool.metadata.shortName || pool.metadata.name}
           selectedRoute={'/'}
-          menuItems={'isArchived' in pool || 'isUpcoming' in pool ? [] : menuItems.filter(noDemo)}
+          menuItems={'isArchived' in pool || !('addresses' in pool) ? [] : menuItems.filter(noDemo)}
         />
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge">
               <WithTinlake
+                addresses={'addresses' in pool ? pool.addresses : undefined}
+                contractConfig={'contractConfig' in pool ? pool.contractConfig : undefined}
                 render={(tinlake) => (
                   <Auth
                     tinlake={tinlake}
                     render={() =>
                       'isArchived' in pool ? (
                         <OverviewArchived selectedPool={pool} />
+                      ) : 'addresses' in pool && pool.addresses.ROOT_CONTRACT ? (
+                        <Overview tinlake={tinlake} selectedPool={pool as LivePool} />
                       ) : (
                         <OverviewUpcoming tinlake={tinlake} selectedPool={pool as UpcomingPool} />
                       )
