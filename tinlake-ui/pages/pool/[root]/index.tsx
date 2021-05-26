@@ -8,9 +8,9 @@ import Header from '../../../components/Header'
 import WithFooter from '../../../components/WithFooter'
 import WithTinlake from '../../../components/WithTinlake'
 import { ArchivedPool, IpfsPools, loadPoolsFromIPFS, Pool as LivePool, UpcomingPool } from '../../../config'
+import Overview from '../../../containers/Overview'
 import OverviewArchived from '../../../containers/OverviewArchived'
 import OverviewUpcoming from '../../../containers/OverviewUpcoming'
-import Overview from '../../../containers/Overview'
 import { menuItems, noDemo } from '../../../menuItems'
 
 interface Props {
