@@ -59,7 +59,8 @@ const PageTitle: React.FC<Props> = (props: Props) => {
           <PoolName>
             {props.pool.metadata.name}
             <PoolLabel>
-              {props.pool.isUpcoming || (pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero()) ? (
+              {props.pool.metadata.isUpcoming ||
+              (pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero()) ? (
                 <Label blue>Upcoming</Label>
               ) : (
                 isOversubscribed && (
