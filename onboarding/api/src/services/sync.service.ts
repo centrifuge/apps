@@ -22,7 +22,7 @@ export class SyncService {
     private readonly userRepo: UserRepo
   ) {}
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_2_HOURS)
   async syncKycStatus() {
     const processingInvestors = await this.kycRepo.getProcessingInvestors()
     if (processingInvestors.length === 0) return
