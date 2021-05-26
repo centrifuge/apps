@@ -20,6 +20,7 @@ const wallets = [
     walletName: 'walletConnect',
     infuraKey: config.infuraKey,
   },
+  { walletName: 'gnosis' },
 ]
 
 let onboard: API | null = null
