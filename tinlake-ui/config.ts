@@ -29,6 +29,7 @@ interface PoolMetadata {
   attributes?: { [key: string]: string | { [key: string]: string } }
   assetMaturity?: string
   currencySymbol?: string
+  isUpcoming?: boolean
 }
 
 export interface BasePool {
