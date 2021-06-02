@@ -113,6 +113,8 @@ export function loadPool(
   return async (dispatch, getState) => {
     const address = await tinlake.signer?.getAddress()
 
+    const { ilk } = getState().pool.data?.maker
+
     const poolId = tinlake.contractAddresses.ROOT_CONTRACT
 
     // Dont load data again for the same pool and address combination
@@ -299,10 +301,7 @@ export function loadPool(
       ? [
           {
             target: tinlake.contractAddresses.MCD_VAT,
-            call: [
-              'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
-              ethers.utils.formatBytes32String('RWA002-A'),
-            ],
+            call: ['ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)', ethers.utils.formatBytes32String(ilk)],
             returns: [
               [`maker.art`, toBN],
               [`maker.rate`, toBN],
@@ -313,7 +312,7 @@ export function loadPool(
           },
           {
             target: tinlake.contractAddresses.MCD_JUG,
-            call: ['ilks(bytes32)(uint256,uint256)', ethers.utils.formatBytes32String('RWA002-A')],
+            call: ['ilks(bytes32)(uint256,uint256)', ethers.utils.formatBytes32String(ilk)],
             returns: [
               [`maker.duty`, toBN],
               [`maker.rho`, toBN],
