@@ -137,30 +137,34 @@ export class PoolService {
     tranche: Tranche,
     agreementId: string
   ): Promise<any> {
-    const memberlist = new ethers.Contract(memberlistAddress, contractAbiMemberlist, this.provider)
+    try {
+      const memberlist = new ethers.Contract(memberlistAddress, contractAbiMemberlist, this.provider)
 
-    this.logger.log(`Checking memberlist for ${address.address}`)
-    const isWhitelisted = await memberlist.hasMember(address.address)
-    this.logger.log(`Checking memberlist for ${address.address} => ${isWhitelisted ? 'true' : 'false'}`)
+      this.logger.log(`Checking memberlist for ${address.address}`)
+      const isWhitelisted = await memberlist.hasMember(address.address)
+      this.logger.log(`Checking memberlist for ${address.address} => ${isWhitelisted ? 'true' : 'false'}`)
 
-    if (isWhitelisted) {
-      this.logger.log(`${address.address} is a member of ${pool.metadata.name} - ${tranche}`)
-      const user = await this.userRepo.findByAddress(address.address)
+      if (isWhitelisted) {
+        this.logger.log(`${address.address} is a member of ${pool.metadata.name} - ${tranche}`)
+        const user = await this.userRepo.findByAddress(address.address)
 
-      if (!user) {
-        throw new Error(`Failed to find user for whitelisting of address ${address.address}`)
+        if (!user) {
+          throw new Error(`Failed to find user for whitelisting of address ${address.address}`)
+        }
+
+        this.investmentRepo.upsert(
+          address.id,
+          pool.addresses.ROOT_CONTRACT,
+          tranche,
+          true,
+          agreementId,
+          user.entityName?.length > 0 ? user.entityName : user.fullName
+        )
+      } else {
+        this.logger.log(`${address.address} is not a member of ${pool.metadata.name} - ${tranche}`)
       }
-
-      this.investmentRepo.upsert(
-        address.id,
-        pool.addresses.ROOT_CONTRACT,
-        tranche,
-        true,
-        agreementId,
-        user.entityName?.length > 0 ? user.entityName : user.fullName
-      )
-    } else {
-      this.logger.log(`${address.address} is not a member of ${pool.metadata.name} - ${tranche}`)
+    } catch (e) {
+      console.error(`Failed to check ${address.address} for ${memberlistAddress}: ${e}`)
     }
   }
 }
