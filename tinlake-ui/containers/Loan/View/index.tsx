@@ -10,6 +10,7 @@ import { loadLoan, LoansState } from '../../../ducks/loans'
 import { TransactionState } from '../../../ducks/transactions'
 import LoanBorrow from '../Borrow'
 import LoanRepay from '../Repay'
+import { useRouter } from 'next/router'
 
 interface Props {
   tinlake: any
@@ -23,61 +24,61 @@ interface Props {
 }
 
 // on state change tokenId --> load nft data for asset collateral
-class LoanView extends React.Component<Props> {
-  componentDidMount() {
-    const { tinlake, loanId, loadLoan, loadProxies } = this.props
+const LoanView: React.FC<Props> = (props: Props) => {
+  const router = useRouter()
+
+  React.useEffect(() => {
+    const { tinlake, loanId, loadLoan, loadProxies } = props
     loanId && loadLoan!(tinlake, loanId)
     loadProxies && loadProxies()
-  }
+  }, [])
 
-  render() {
-    const { loans, loanId, tinlake, auth } = this.props
-    const { loan, loanState } = loans!
-    // if (loanState === null || loanState === 'loading') {
-    //   return <Spinner height={'300px'} message={'Loading...'} />
-    // }
-    if (loanState === 'not found') {
-      return (
-        <Alert margin="medium" type="error">
-          Could not find asset {loanId}
-        </Alert>
-      )
-    }
+  const { loans, loanId, tinlake, auth } = props
+  const { loan, loanState } = loans!
 
-    const hasBorrowerPermissions =
-      loan && auth?.proxies?.map((proxy: string) => proxy.toLowerCase()).includes(loan.ownerOf.toString().toLowerCase())
-
+  if (loanState === 'not found') {
     return (
-      <Box>
-        <LoanData loan={loan!} auth={this.props.auth} tinlake={tinlake} poolConfig={this.props.poolConfig} />
-        {loan?.status !== 'closed' && (
-          <Box>
-            {hasBorrowerPermissions && (
-              <>
-                <Heading level="5" margin={{ top: 'large', bottom: 'medium' }}>
-                  Finance / Repay{' '}
-                </Heading>
-                <Box
-                  width="80%"
-                  justify="between"
-                  gap="medium"
-                  pad="medium"
-                  elevation="small"
-                  round="xsmall"
-                  background="white"
-                  direction="row"
-                >
-                  <LoanBorrow loan={loan!} tinlake={tinlake} poolConfig={this.props.poolConfig} />
-                  <LoanRepay loan={loan!} tinlake={tinlake} poolConfig={this.props.poolConfig} />
-                </Box>
-              </>
-            )}
-          </Box>
-        )}
-        <NftData data={loan?.nft} />
-      </Box>
+      <Alert margin="medium" type="error">
+        Could not find asset {loanId}
+      </Alert>
     )
   }
+
+  const hasBorrowerPermissions =
+    (loan &&
+      auth?.proxies?.map((proxy: string) => proxy.toLowerCase()).includes(loan.ownerOf.toString().toLowerCase())) ||
+    'borrower' in router.query
+
+  return (
+    <Box>
+      <LoanData loan={loan!} auth={props.auth} tinlake={tinlake} poolConfig={props.poolConfig} />
+      {loan?.status !== 'closed' && (
+        <Box>
+          {hasBorrowerPermissions && (
+            <>
+              <Heading level="5" margin={{ top: 'large', bottom: 'medium' }}>
+                Finance / Repay{' '}
+              </Heading>
+              <Box
+                width="80%"
+                justify="between"
+                gap="medium"
+                pad="medium"
+                elevation="small"
+                round="xsmall"
+                background="white"
+                direction="row"
+              >
+                <LoanBorrow loan={loan!} tinlake={tinlake} poolConfig={props.poolConfig} />
+                <LoanRepay loan={loan!} tinlake={tinlake} poolConfig={props.poolConfig} />
+              </Box>
+            </>
+          )}
+        </Box>
+      )}
+      <NftData data={loan?.nft} />
+    </Box>
+  )
 }
 
 export default connect((state) => state, { loadLoan, loadProxies })(LoanView)
