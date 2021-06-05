@@ -54,7 +54,7 @@ const LoanView: React.FC<Props> = (props: Props) => {
       <LoanData loan={loan!} auth={props.auth} tinlake={tinlake} poolConfig={props.poolConfig} />
       {loan?.status !== 'closed' && (
         <Box>
-          {hasBorrowerPermissions && (
+          {loan && hasBorrowerPermissions && (
             <>
               <Heading level="5" margin={{ top: 'large', bottom: 'medium' }}>
                 Finance / Repay{' '}
@@ -69,8 +69,8 @@ const LoanView: React.FC<Props> = (props: Props) => {
                 background="white"
                 direction="row"
               >
-                <LoanBorrow loan={loan!} tinlake={tinlake} poolConfig={props.poolConfig} />
-                <LoanRepay loan={loan!} tinlake={tinlake} poolConfig={props.poolConfig} />
+                <LoanBorrow loan={loan} tinlake={tinlake} poolConfig={props.poolConfig} />
+                <LoanRepay loan={loan} tinlake={tinlake} poolConfig={props.poolConfig} />
               </Box>
             </>
           )}
