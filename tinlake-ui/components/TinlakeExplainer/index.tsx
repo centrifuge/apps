@@ -32,7 +32,7 @@ const TinlakeExplainer: React.FC = () => {
               <Button
                 primary
                 label="Read more about Tinlake"
-                href="https://centrifuge.io/products/tinlake/"
+                href="https://docs.centrifuge.io/learn/understanding-tinlake/"
                 target="_blank"
                 fill={false}
               />
