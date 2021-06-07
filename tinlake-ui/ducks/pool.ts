@@ -108,12 +108,11 @@ let prevAddress: string | undefined = undefined
 
 export function loadPool(
   tinlake: any,
+  ilk: string = '',
   forceReload?: boolean
 ): ThunkAction<Promise<void>, { pool: PoolState }, undefined, Action> {
   return async (dispatch, getState) => {
     const address = await tinlake.signer?.getAddress()
-
-    const { ilk } = getState().pool.data?.maker
 
     const poolId = tinlake.contractAddresses.ROOT_CONTRACT
 

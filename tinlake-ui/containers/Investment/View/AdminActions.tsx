@@ -3,6 +3,7 @@ import { Box, Button, FormField, Heading } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import NumberInput from '../../../components/NumberInput'
+import { LoadPool } from '../../../config'
 import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -10,7 +11,7 @@ import { toPrecision } from '../../../utils/toPrecision'
 
 interface Props extends TransactionProps {
   tinlake: ITinlake
-  loadPool?: (tinlake: any) => Promise<void>
+  loadPool?: LoadPool
 }
 
 const AdminActions: React.FC<Props> = (props: Props) => {

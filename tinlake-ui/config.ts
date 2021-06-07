@@ -1,3 +1,4 @@
+import { ITinlake } from '@centrifuge/tinlake-js'
 import contractAbiPoolRegistry from '@centrifuge/tinlake-js/src/abi/PoolRegistry.abi.json'
 import BN from 'bn.js'
 import { ethers } from 'ethers'
@@ -30,6 +31,7 @@ interface PoolMetadata {
   assetMaturity?: string
   currencySymbol?: string
   isUpcoming?: boolean
+  maker?: { ilk: string }
 }
 
 export interface BasePool {
@@ -111,6 +113,8 @@ export interface IpfsPools {
   archived: ArchivedPool[]
   upcoming: UpcomingPool[]
 }
+
+export type LoadPool = (tinlake: ITinlake, ilk?: string, forceReload?: boolean) => Promise<void>
 
 const contractAddressesSchema = yup.object().shape({
   ROOT_CONTRACT: yup
