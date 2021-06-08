@@ -108,6 +108,7 @@ let prevAddress: string | undefined = undefined
 
 export function loadPool(
   tinlake: any,
+  ilk: string = '',
   forceReload?: boolean
 ): ThunkAction<Promise<void>, { pool: PoolState }, undefined, Action> {
   return async (dispatch, getState) => {
@@ -299,10 +300,7 @@ export function loadPool(
       ? [
           {
             target: tinlake.contractAddresses.MCD_VAT,
-            call: [
-              'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
-              ethers.utils.formatBytes32String('RWA002-A'),
-            ],
+            call: ['ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)', ethers.utils.formatBytes32String(ilk)],
             returns: [
               [`maker.art`, toBN],
               [`maker.rate`, toBN],
@@ -313,7 +311,7 @@ export function loadPool(
           },
           {
             target: tinlake.contractAddresses.MCD_JUG,
-            call: ['ilks(bytes32)(uint256,uint256)', ethers.utils.formatBytes32String('RWA002-A')],
+            call: ['ilks(bytes32)(uint256,uint256)', ethers.utils.formatBytes32String(ilk)],
             returns: [
               [`maker.duty`, toBN],
               [`maker.rho`, toBN],

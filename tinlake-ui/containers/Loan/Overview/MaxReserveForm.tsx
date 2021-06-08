@@ -5,7 +5,7 @@ import Decimal from 'decimal.js-light'
 import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
-import { Pool } from '../../../config'
+import { LoadPool, Pool } from '../../../config'
 import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { Description } from './styles'
@@ -13,7 +13,7 @@ import { Description } from './styles'
 interface Props extends TransactionProps {
   tinlake: ITinlake
   selectedPool?: Pool
-  loadPool?: (tinlake: any) => Promise<void>
+  loadPool?: LoadPool
   setShowMaxReserveForm: (value: boolean) => void
 }
 
@@ -75,7 +75,7 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
-      props.loadPool && props.loadPool(props.tinlake)
+      props.loadPool && props.loadPool(props.tinlake, props.selectedPool?.metadata.maker?.ilk)
       props.setShowMaxReserveForm(false)
     }
   }, [status])

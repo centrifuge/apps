@@ -72,7 +72,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
   React.useEffect(() => {
-    dispatch(loadPool(props.tinlake))
+    dispatch(loadPool(props.tinlake, props.selectedPool?.metadata.maker?.ilk))
     dispatch(loadAssetData(props.tinlake))
   }, [address])
 
