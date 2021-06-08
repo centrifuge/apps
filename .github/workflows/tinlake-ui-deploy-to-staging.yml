@@ -128,11 +128,11 @@ jobs:
           NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.centrifuge.io/'
           NEXT_PUBLIC_POOL_REGISTRY: '0xddf1c516cf87126c6c610b52fd8d609e67fb6033'
           NEXT_PUBLIC_POOLS_CONFIG: 'mainnetProduction'
-          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmdvvXVo6Gz7pjtLd79vWFVzBG7SyuxHSRM7Gg6DRAYPtp'
+          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmVwBZwhJPyP8ThbZ3m6D9i59mFJPNAKHFoi4SgAzyX1K9'
           NEXT_PUBLIC_PORTIS_KEY: 'bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f'
           NEXT_PUBLIC_REWARDS_TREE_URL: 'https://storage.googleapis.com/rad-rewards-trees-mainnet-production/latest.json'
           NEXT_PUBLIC_RPC_URL: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516'
-          NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL: 'https://api.thegraph.com/subgraphs/name/centrifuge/tinlake-v3'
+          NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL: 'https://thegraph.centrifuge.io/subgraphs/name/centrifuge/tinlake'
           NEXT_PUBLIC_TRANSACTION_TIMEOUT: '3600'
 
       - name: Deploy To Netlify
