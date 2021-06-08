@@ -583,7 +583,7 @@ function toTinlakeLoans(loans: any[]): { data: Loan[] } {
 
   tinlakeLoans.length &&
     tinlakeLoans.sort((l1: Loan, l2: Loan) => {
-      return (l1.loanId as unknown as number) - (l2.loanId as unknown as number)
+      return ((l1.loanId as unknown) as number) - ((l2.loanId as unknown) as number)
     })
 
   return { data: tinlakeLoans }
