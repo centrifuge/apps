@@ -80,12 +80,6 @@ export class PoolService {
   }
 
   private async getPoolProfile(poolId: string): Promise<Profile | undefined> {
-    // Get pool metadata
-    const poolData = await this.registry.find(poolId)
-    const url = new URL(poolData[2], config.ipfsGateway)
-    const response = await fetch(url)
-    const pool = await response.json()
-
     // Get pool profile
     const profileUrl = `https://raw.githubusercontent.com/centrifuge/tinlake-pools-mainnet/main/profiles/${poolId}.json`
     const profileResponse = await fetch(profileUrl)
