@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'tinlake-ui/**'
+      - '.github/workflows/tinlake-ui-pull-request.yml'
 
 jobs:
   build-and-deploy:
