@@ -1,4 +1,5 @@
 import { Box, Heading } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import Alert from '../../../components/Alert'
@@ -10,7 +11,6 @@ import { loadLoan, LoansState } from '../../../ducks/loans'
 import { TransactionState } from '../../../ducks/transactions'
 import LoanBorrow from '../Borrow'
 import LoanRepay from '../Repay'
-import { useRouter } from 'next/router'
 
 interface Props {
   tinlake: any
