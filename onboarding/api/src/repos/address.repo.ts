@@ -41,7 +41,7 @@ export class AddressRepo {
       right join users on users.id = addresses.user_id
       right join kyc on kyc.user_id = users.id
       right join agreements on agreements.user_id = users.id
-      left join investments on investments.address_id = addresses.id
+      left join investments on investments.address_id = addresses.id and investments.pool_id = agreements.pool_id and investments.tranche = agreements.tranche
       where kyc.status like 'verified' and (kyc.usa_tax_resident is false or kyc.accredited is true)
       and agreements.signed_at is not null and agreements.counter_signed_at is not null
       and investments.is_whitelisted is not true
