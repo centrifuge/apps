@@ -3,7 +3,7 @@ import { NextRouter, withRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import OverviewComp from '../../components/Overview'
-import { Pool } from '../../config'
+import { LoadPool, Pool } from '../../config'
 import { AuthState } from '../../ducks/auth'
 import { loadPool, PoolState } from '../../ducks/pool'
 import { PoolsState } from '../../ducks/pools'
@@ -13,7 +13,7 @@ interface Props {
   pool?: PoolState
   pools?: PoolsState
   auth?: AuthState
-  loadPool?: (tinlake: ITinlake) => Promise<void>
+  loadPool?: LoadPool
   selectedPool: Pool
   router: NextRouter
 }
@@ -30,8 +30,8 @@ class Overview extends React.Component<Props> {
   }
 
   loadData() {
-    const { loadPool, tinlake } = this.props
-    loadPool && loadPool(tinlake)
+    const { loadPool, selectedPool, tinlake } = this.props
+    loadPool && loadPool(tinlake, selectedPool.metadata.maker?.ilk)
   }
 
   render() {
