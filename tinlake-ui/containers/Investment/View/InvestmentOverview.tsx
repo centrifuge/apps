@@ -40,39 +40,32 @@ const parseRatio = (num: BN): number => {
 const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const loans = useSelector<any, LoansState>((state) => state.loans)
-  const outstandingLoans = loans?.loans
-    ? loans?.loans.filter((loan) => loan.status && loan.status === 'ongoing').length
-    : undefined
 
-  const financedAssets = loans?.loans
-    ? loans?.loans.filter(
-        (loan) =>
-          (loan.status && loan.status === 'ongoing') ||
-          (loan.status === 'closed' && loan.borrowsAggregatedAmount && loan.maturityDate && loan.financingDate)
-      )
+  const ongoingAssets = loans?.loans
+    ? loans?.loans.filter((loan) => loan.status && loan.status === 'ongoing')
     : undefined
-  const avgAmount = financedAssets
-    ? financedAssets
-        .filter((loan) => loan.borrowsAggregatedAmount)
+  const avgAmount = ongoingAssets
+    ? ongoingAssets
+        .filter((loan) => loan.debt)
         .reduce((sum: BN, loan: SortableLoan) => {
-          return sum.add(new BN(loan.borrowsAggregatedAmount!))
+          return sum.add(new BN(loan.debt!))
         }, new BN(0))
-        .divn(financedAssets.length)
+        .divn(ongoingAssets.length)
     : undefined
-  const avgInterestRate = financedAssets
-    ? financedAssets
+  const avgInterestRate = ongoingAssets
+    ? ongoingAssets
         .filter((loan) => loan.interestRate)
         .reduce((sum: BN, loan: SortableLoan) => {
           return sum.add(new BN(loan.interestRate!))
         }, new BN(0))
-        .divn(financedAssets.length)
+        .divn(ongoingAssets.length)
     : undefined
-  const avgMaturity = financedAssets
-    ? financedAssets
+  const avgMaturity = ongoingAssets
+    ? ongoingAssets
         .filter((loan) => loan.maturityDate && loan.financingDate)
         .reduce((sum: number, loan: SortableLoan) => {
           return sum + (loan.maturityDate! - loan.financingDate!) / SecondsInDay
-        }, 0) / financedAssets.length
+        }, 0) / ongoingAssets.length
     : undefined
 
   const dispatch = useDispatch()
@@ -129,11 +122,11 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 <TableRow>
                   <TableCell scope="row">Number of Assets</TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={outstandingLoans !== undefined}>{outstandingLoans || 0}</LoadingValue>
+                    <LoadingValue done={ongoingAssets !== undefined}>{ongoingAssets?.length || 0}</LoadingValue>
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell scope="row">Average Financing Amount</TableCell>
+                  <TableCell scope="row">Average Outstanding Amount</TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
                     <LoadingValue done={avgAmount !== undefined}>
                       {addThousandsSeparators(toPrecision(baseToDisplay(avgAmount || new BN(0), 18), 0))}{' '}
