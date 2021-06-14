@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - 'tinlake-ui/**'
+      - '.github/workflows/tinlake-ui-deploy-to-dev.yml'
 
 jobs:
   build-and-deploy:
