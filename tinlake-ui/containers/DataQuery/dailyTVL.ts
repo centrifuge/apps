@@ -86,8 +86,6 @@ export async function dailyTVL() {
     return data
   })
 
-  console.log(summedResults)
-
   const headers = ['Day', 'NAV', 'Reserve', 'TVL']
   const rows: string[][] = [
     headers,

@@ -100,8 +100,6 @@ export async function dailyTokenPrices() {
     return data
   })
 
-  console.log(summedResults)
-
   const headers = ['Day', ...Object.keys(tokens)]
   const rows: string[][] = [
     headers,
