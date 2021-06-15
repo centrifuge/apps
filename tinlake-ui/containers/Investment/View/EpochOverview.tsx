@@ -2,6 +2,7 @@ import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import { FormDown } from 'grommet-icons'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import { LoadingValue } from '../../../components/LoadingValue/index'
@@ -22,6 +23,8 @@ interface Props extends TransactionProps {
 }
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
+  const { query } = useRouter()
+
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
   const epochData = pool?.epoch as EpochData | undefined
@@ -43,6 +46,34 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   const investmentCapacity = poolData ? poolData.maxReserve.sub(poolData.reserve) : undefined
 
   const [open, setOpen] = React.useState(false)
+
+  const EpochButton = React.useCallback(() => {
+    switch (epochData?.state) {
+      case 'can-be-closed':
+        if (poolData?.isPoolAdmin || query.show_close_epoch === 'true') {
+          return (
+            <Button
+              label="Close epoch"
+              primary
+              onClick={solve}
+              disabled={
+                disabled || epochData?.lastEpochClosed + epochData?.minimumEpochTime >= new Date().getTime() / 1000
+              }
+            />
+          )
+        }
+
+        return null
+      case 'in-submission-period':
+        return <Button label="Submit a solution" primary onClick={solve} />
+      case 'in-challenge-period':
+        return <Button label={`Execute epoch ${epochData?.id}`} primary disabled />
+      case 'challenge-period-ended':
+        return <Button label={`Execute epoch ${epochData?.id}`} primary onClick={execute} disabled={disabled} />
+      default:
+        return null
+    }
+  }, [disabled, epochData, poolData, query])
 
   return (
     <Box background="#eee" pad={{ horizontal: '34px', bottom: 'xsmall' }} round="xsmall" margin={{ bottom: 'medium' }}>
@@ -258,26 +289,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
             {epochData && (
               <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                {epochData?.state === 'can-be-closed' && (
-                  <Button
-                    label={`Close epoch`}
-                    primary
-                    onClick={solve}
-                    disabled={
-                      disabled ||
-                      epochData?.lastEpochClosed + epochData?.minimumEpochTime >= new Date().getTime() / 1000
-                    }
-                  />
-                )}
-                {epochData?.state === 'in-submission-period' && (
-                  <Button label={`Submit a solution`} primary onClick={solve} />
-                )}
-                {epochData?.state === 'in-challenge-period' && (
-                  <Button label={`Execute epoch ${epochData?.id}`} primary disabled={true} />
-                )}
-                {epochData?.state === 'challenge-period-ended' && (
-                  <Button label={`Execute epoch ${epochData?.id}`} primary onClick={execute} disabled={disabled} />
-                )}
+                <EpochButton />
               </Box>
             )}
           </Box>
