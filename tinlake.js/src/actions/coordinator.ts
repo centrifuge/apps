@@ -86,7 +86,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
     closeEpoch = async () => {
       const coordinator = this.contract('COORDINATOR')
-      return this.pending(coordinator.closeEpoch({ ...this.overrides, gasLimit: 3000000 }))
+      return this.pending(coordinator.closeEpoch({ ...this.overrides, gasLimit: 5000000 }))
     }
 
     solveEpoch = async () => {
@@ -94,7 +94,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       if ((await coordinator.submissionPeriod()) === false) {
         // The epoch is can be closed, but is not closed yet
-        const closeTx = await coordinator.closeEpoch({ ...this.overrides, gasLimit: 3000000 })
+        const closeTx = await coordinator.closeEpoch({ ...this.overrides, gasLimit: 5000000 })
         const closeResult = await this.getTransactionReceipt(closeTx)
 
         if (closeResult.status === 0) {
