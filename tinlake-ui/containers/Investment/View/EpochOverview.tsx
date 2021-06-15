@@ -23,7 +23,7 @@ interface Props extends TransactionProps {
 }
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
-  const { query } = useRouter()
+  const router = useRouter()
 
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
@@ -47,23 +47,24 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
   const [open, setOpen] = React.useState(false)
 
+  const showEpochButton = React.useMemo(
+    () => epochData && (poolData?.isPoolAdmin || router.query.show_close_epoch === 'true'),
+    [epochData, poolData, router.query]
+  )
+
   const EpochButton = React.useCallback(() => {
     switch (epochData?.state) {
       case 'can-be-closed':
-        if (poolData?.isPoolAdmin || query.show_close_epoch === 'true') {
-          return (
-            <Button
-              label="Close epoch"
-              primary
-              onClick={solve}
-              disabled={
-                disabled || epochData?.lastEpochClosed + epochData?.minimumEpochTime >= new Date().getTime() / 1000
-              }
-            />
-          )
-        }
-
-        return null
+        return (
+          <Button
+            label="Close epoch"
+            primary
+            onClick={solve}
+            disabled={
+              disabled || epochData?.lastEpochClosed + epochData?.minimumEpochTime >= new Date().getTime() / 1000
+            }
+          />
+        )
       case 'in-submission-period':
         return <Button label="Submit a solution" primary onClick={solve} />
       case 'in-challenge-period':
@@ -73,7 +74,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
       default:
         return null
     }
-  }, [disabled, epochData, poolData, query])
+  }, [disabled, epochData, poolData, router.query])
 
   return (
     <Box background="#eee" pad={{ horizontal: '34px', bottom: 'xsmall' }} round="xsmall" margin={{ bottom: 'medium' }}>
@@ -287,7 +288,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               </TableBody>
             </Table>
 
-            {epochData && (
+            {showEpochButton && (
               <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
                 <EpochButton />
               </Box>
