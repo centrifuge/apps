@@ -1,7 +1,6 @@
-import { addThousandsSeparators, baseToDisplay, toPrecision } from '@centrifuge/tinlake-js'
+import { baseToDisplay, toPrecision } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import gql from 'graphql-tag'
-import { string } from 'prop-types'
 import Apollo from '../../services/apollo'
 import { downloadCSV } from '../../utils/export'
 import { csvName } from './queries'
@@ -15,11 +14,6 @@ interface DailyPoolData {
   }
   reserve: string
   assetValue: string
-}
-
-interface SystemWideData {
-  reserve: BN
-  assetValue: BN
 }
 
 const fetch = async (skip: number, first: number, blockHash: string | null): Promise<any> => {
