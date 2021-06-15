@@ -67,7 +67,7 @@ export async function dailyTokenPrices() {
     (output: { [day: string]: DailyPoolData[] }, input: DailyPoolData) => {
       const day = input.day.id.toString()
       if (day in output) return { ...output, [day]: [...output[day], input] }
-      else return { ...output, [day]: [input] }
+      return { ...output, [day]: [input] }
     },
     {}
   )
@@ -79,7 +79,8 @@ export async function dailyTokenPrices() {
         [`${data.pool.shortName} DROP`]: new BN(10).pow(new BN(27)),
         [`${data.pool.shortName} TIN`]: new BN(10).pow(new BN(27)),
       }
-    } else return pools
+    }
+    return pools
   }, {})
 
   const summedResults = Object.keys(groupedResults).map((day: string) => {

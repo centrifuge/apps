@@ -67,7 +67,7 @@ export async function dailyTVL() {
     (output: { [day: string]: DailyPoolData[] }, input: DailyPoolData) => {
       const day = input.day.id.toString()
       if (day in output) return { ...output, [day]: [...output[day], input] }
-      else return { ...output, [day]: [input] }
+      return { ...output, [day]: [input] }
     },
     {}
   )
