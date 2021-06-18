@@ -2,25 +2,53 @@
 
 ## Development
 
-1. Make sure you are on a stable node version, v12.16.3 on the time of writing this (the `sha3` dependency did not work with newer versions in some cases): `nvm use`
-2. Install dependencies with `yarn install`
+### Clone the repository
+
+```sh
+$ git clone git@github.com:centrifuge/apps.git
+$ cd apps
+```
+
+### Setup node
+
+Use [nvm](https://github.com/nvm-sh/nvm) to install a stable version of node, `v12.16.3` at the time of writing (the `sha3` dependency did not work with newer versions in some cases). Once `nvm` is installed:
+
+```sh
+$ nvm install 12.16.3
+$ nvm use 12.16.3
+```
+
+### Install dependencies
+
+```sh
+$ yarn install
+```
 
 ### Setup environment
 
-add the following env variables
+Copy `env` variables from the example file.
 
-- `export NFT_DATA_DEFINITION=PARTNER_NFT_DATA_DEFINITION`
-- `export RPC_URL=NETWORK_RPC_URL`
-- `export TINLAKE_ADDRESSES=ADDRESSES_FOR_THE_PARTNER_TINLAKE_CONTRACTS`
+To point to the Kovan testnet:
 
-...or just add a .env file containing the variables to the project folder
+```sh
+$ cd tinlake-ui
+$ cp .env.kovan-example .env
+```
 
-### Run
+To point to mainnet:
 
-To build tinlake.js and start the NextJs server and serve the Netlify lambdas locally
+```sh
+$ cd tinlake-ui
+$ cp .env.mainnet-example .env
+```
+
+### Run application
+
+To build `tinlake.js` and start the NextJS server locally:
 
 ```shell
-yarn start
+$ cd tinlake-ui
+$ yarn start
 ```
 
 ### Debugging
