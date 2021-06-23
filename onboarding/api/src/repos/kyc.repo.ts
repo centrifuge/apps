@@ -39,7 +39,7 @@ export class KycRepo {
     `
     if (!investors) return []
 
-    return (investors as unknown) as KycEntity[]
+    return investors as unknown as KycEntity[]
   }
 
   async upsertSecuritize(
@@ -53,8 +53,8 @@ export class KycRepo {
       ) values (
         ${[userId, 'securitize', providerAccountId, JSON.stringify(digest)]}
       )
-      on conflict (user_id, provider, provider_account_id) 
-        do 
+      on conflict (user_id, provider, provider_account_id)
+        do
           update set digest = ${JSON.stringify(digest)}, invalidated_at = null
 
       returning *

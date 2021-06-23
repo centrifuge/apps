@@ -7014,7 +7014,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/minimatch@npm:*":
+"@types/minimatch@npm:*, @types/minimatch@npm:^3.0.3":
   version: 3.0.4
   resolution: "@types/minimatch@npm:3.0.4"
   checksum: abbe7031d8a6144c36f1803c5c1914885c2349d5d73fc45aae44807c12c4c803b8acfb134c71c7eff75c462c218697f982b96633f8fdf71b83ec50eba36122a6
@@ -9148,6 +9148,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"array-differ@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "array-differ@npm:3.0.0"
+  checksum: 6d87a752b56b9e9b29b617d7092173ac3b418d77621077eb7d7637a143b8df6019d59fe98cb3ba8ceba2677ad9904220dabd816f762c1cd5afaa3eec14db3b92
+  languageName: node
+  linkType: hard
+
 "array-equal@npm:^1.0.0":
   version: 1.0.0
   resolution: "array-equal@npm:1.0.0"
@@ -9258,6 +9265,13 @@ __metadata:
   version: 1.0.1
   resolution: "arrify@npm:1.0.1"
   checksum: f1d3bae819f49f51a09da5f5c5ce282e79ca69bbdb32db1d9f6c62b151ef801b74398d007cfe89686e2c5aeb62576a398b9068e5172b7f4e20157aa3284076d3
+  languageName: node
+  linkType: hard
+
+"arrify@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "arrify@npm:2.0.1"
+  checksum: 2a19726815590d829e07998aefa2c352bd9061e58bf4391ffffa227129995841a710bef2d8b4c9408a6b0679d96c96bd23764bdbcc29bb21666c976816093972
   languageName: node
   linkType: hard
 
@@ -18823,6 +18837,15 @@ fsevents@2.1.2:
   languageName: node
   linkType: hard
 
+"husky@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "husky@npm:6.0.0"
+  bin:
+    husky: lib/bin.js
+  checksum: 61e1f7f53f3c969d361c2a1d4ed8018b9447406ea6cd644a2526d18b76877d135001d8cbd48a1d201fc1614d96995e691ecd2b82a8d8513a6b4a313da1188ccd
+  languageName: node
+  linkType: hard
+
 "i18n-iso-countries@npm:^6.5.0":
   version: 6.7.0
   resolution: "i18n-iso-countries@npm:6.7.0"
@@ -23382,6 +23405,13 @@ fsevents@2.1.2:
   languageName: node
   linkType: hard
 
+"mri@npm:^1.1.5":
+  version: 1.1.6
+  resolution: "mri@npm:1.1.6"
+  checksum: 87a09465063063da6d69d98ac75a6206a597c7533561c74e8aab5e6490ebe2a0e94c583fb6e02429e1f4291286a9549eb6a9699c83f5bad252c2c9b4eada97da
+  languageName: node
+  linkType: hard
+
 "ms@npm:2.0.0":
   version: 2.0.0
   resolution: "ms@npm:2.0.0"
@@ -23508,6 +23538,19 @@ fsevents@2.1.2:
     multibase: ^0.7.0
     varint: ^5.0.0
   checksum: b950e045db982899f712ddfed7b3eb27b04576fa1a78bfd179e9dc86ded35823398d8cac6c3935f405b9a3cf2e8767022bd4287fb5e9d2b0fa6de098caa61323
+  languageName: node
+  linkType: hard
+
+"multimatch@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "multimatch@npm:4.0.0"
+  dependencies:
+    "@types/minimatch": ^3.0.3
+    array-differ: ^3.0.0
+    array-union: ^2.1.0
+    arrify: ^2.0.1
+    minimatch: ^3.0.4
+  checksum: c1ba3c9b68e7840cdb4d5d2998eeb68a88ef14a09ce03bd392738529665147a6ec6970d8bf9e7fbac618bb58c2a615f190c048f97c290e36fb4890a3ef78991e
   languageName: node
   linkType: hard
 
@@ -26584,12 +26627,12 @@ fsevents@2.1.2:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.2.1":
-  version: 2.2.1
-  resolution: "prettier@npm:2.2.1"
+"prettier@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "prettier@npm:2.3.1"
   bin:
     prettier: bin-prettier.js
-  checksum: 92c6c9f4b87eba1f28466edee57dd18c80d00b858edda77d46d1950d20e6e302b68ee255fc91133ba931e63c4577b5ae30da194d9626a8f3c0177778b91bf056
+  checksum: 9b4a695b87ce5f510fc20feec01cce7371f0fa0b92ffe79d543f6be52e2004c532861629de4d7ab1c577e1f649dce3cfccd62cb2ca6526b1da8d9c63eb84bf36
   languageName: node
   linkType: hard
 
@@ -26643,6 +26686,24 @@ fsevents@2.1.2:
     ansi-styles: ^4.0.0
     react-is: ^17.0.1
   checksum: 5ad34fc128218485732cf0271d396158a00584708fc97bf063c1c3c000fe14da572e9a1d3d7b92d95c5e24965434656c56ed0e45804dea2435ca59a1f86f1b07
+  languageName: node
+  linkType: hard
+
+"pretty-quick@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "pretty-quick@npm:3.1.1"
+  dependencies:
+    chalk: ^3.0.0
+    execa: ^4.0.0
+    find-up: ^4.1.0
+    ignore: ^5.1.4
+    mri: ^1.1.5
+    multimatch: ^4.0.0
+  peerDependencies:
+    prettier: ">=2.0.0"
+  bin:
+    pretty-quick: bin/pretty-quick.js
+  checksum: 2e1f0ca8166e3930c1eb702ee9f3026e7448ca4e647470abcda1e23a8fae2e39e9708acbfc974727513861f4d33d8e9ee2a8811b6765a6124ca4d5f24675ac4f
   languageName: node
   linkType: hard
 
@@ -28937,8 +28998,10 @@ resolve@1.15.0:
     concurrently: ^5.3.0
     dotenv: 8.2.0
     ethers: 5.0.23
-    prettier: ^2.2.1
+    husky: ^6.0.0
+    prettier: ^2.3.1
     prettier-plugin-organize-imports: 1.1.1
+    pretty-quick: ^3.1.1
     ts-node: 9.0.0
     typescript: 4.1.2
   languageName: unknown
