@@ -20,6 +20,7 @@ export interface AgreementsStatus {
   signed?: boolean
   counterSigned?: boolean
   declined?: boolean
+  voided?: boolean
 }
 
 export interface AddressStatus {
