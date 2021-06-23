@@ -258,7 +258,7 @@ class Apollo {
         {
           pools (where : {id: "${root.toLowerCase()}"}){
             id
-            loans {
+            loans (first: 1000) {
               id
               pool {
                 id
