@@ -37,16 +37,16 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
   const [awaitingConnect, setAwaitingConnect] = React.useState(false)
 
   const isMakerIntegrated =
-    props.selectedPool.addresses.CLERK !== undefined && props.selectedPool.metadata.maker?.ilk !== undefined
+    props.selectedPool.addresses.CLERK !== undefined && props.selectedPool.metadata.maker?.ilk !== ''
 
   const [open, setOpen] = React.useState(false)
 
   const makerDropCollateralValue =
-    poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
+    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
       ? poolData?.maker?.dropBalance.mul(poolData.senior!.tokenPrice).div(new BN(10).pow(new BN(27)))
       : undefined
   const makerDebtUtilization =
-    poolData?.maker && poolData?.maker?.dropBalance
+    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance
       ? poolData?.maker?.debt
           .mul(new BN(10).pow(new BN(45)))
           .div(poolData?.maker?.line)
