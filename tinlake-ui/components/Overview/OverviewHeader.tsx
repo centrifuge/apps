@@ -36,7 +36,8 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 
   const [awaitingConnect, setAwaitingConnect] = React.useState(false)
 
-  const isMakerIntegrated = props.selectedPool.addresses.CLERK !== undefined
+  const isMakerIntegrated =
+    props.selectedPool.addresses.CLERK !== undefined && props.selectedPool.metadata.maker?.ilk !== undefined
 
   const [open, setOpen] = React.useState(false)
 

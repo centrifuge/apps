@@ -294,7 +294,7 @@ export function loadPool(
       },
     ]
 
-    const isMakerIntegrated = tinlake.contractAddresses.CLERK !== undefined
+    const isMakerIntegrated = tinlake.contractAddresses.CLERK !== undefined && ilk !== undefined
 
     const makerWatchers = isMakerIntegrated
       ? [
