@@ -19,7 +19,7 @@ const PERMIT_UNSUPPORTED_CURRENCIES = [
   '0xb3037647a7E114Da86653Daa8cdCEd738727ab11',
 ]
 
-const DisablePermitSigning = true
+const disablePermitSigning = true
 
 // TinlakeAction args need to be serializable, as they are stored in Redux state for the async transactions duck
 // Based on: https://github.com/microsoft/TypeScript/issues/1897#issuecomment-657294463
@@ -249,7 +249,7 @@ export async function submitSeniorSupplyOrder(
   )
 
   if (
-    DisablePermitSigning ||
+    disablePermitSigning ||
     currencyDoesntSupportPermits ||
     skipSigning ||
     getAddressMemory(address)?.supportsPermits === false
@@ -307,7 +307,7 @@ export async function submitJuniorSupplyOrder(
   )
 
   if (
-    DisablePermitSigning ||
+    disablePermitSigning ||
     currencyDoesntSupportPermits ||
     skipSigning ||
     getAddressMemory(address)?.supportsPermits === false
@@ -365,7 +365,7 @@ export async function submitSeniorRedeemOrder(
   )
 
   if (
-    DisablePermitSigning ||
+    disablePermitSigning ||
     currencyDoesntSupportPermits ||
     skipSigning ||
     getAddressMemory(address)?.supportsPermits === false
@@ -423,7 +423,7 @@ export async function submitJuniorRedeemOrder(
   )
 
   if (
-    DisablePermitSigning ||
+    disablePermitSigning ||
     currencyDoesntSupportPermits ||
     skipSigning ||
     getAddressMemory(address)?.supportsPermits === false
