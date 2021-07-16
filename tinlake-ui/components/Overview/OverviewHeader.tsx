@@ -36,16 +36,17 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 
   const [awaitingConnect, setAwaitingConnect] = React.useState(false)
 
-  const isMakerIntegrated = props.selectedPool.addresses.CLERK !== undefined
+  const isMakerIntegrated =
+    props.selectedPool.addresses.CLERK !== undefined && props.selectedPool.metadata.maker?.ilk !== ''
 
   const [open, setOpen] = React.useState(false)
 
   const makerDropCollateralValue =
-    poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
+    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
       ? poolData?.maker?.dropBalance.mul(poolData.senior!.tokenPrice).div(new BN(10).pow(new BN(27)))
       : undefined
   const makerDebtUtilization =
-    poolData?.maker && poolData?.maker?.dropBalance
+    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance
       ? poolData?.maker?.debt
           .mul(new BN(10).pow(new BN(45)))
           .div(poolData?.maker?.line)
@@ -170,14 +171,14 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
               <MakerMetric style={{ borderRight: '1px solid #fff' }}>
                 <h3>Current Debt</h3>
                 <h2>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.debt || new BN(0), 18), 0))}{' '}
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.debt || new BN(0), 18 + 6), 1))}M{' '}
                   <MakerUnit>DAI</MakerUnit>{' '}
                 </h2>
               </MakerMetric>
               <MakerMetric style={{ borderRight: '1px solid #fff' }}>
                 <h3>Debt Ceiling</h3>
                 <h2>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.line || new BN(0), 45 + 6), 0))}M{' '}
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.line || new BN(0), 45 + 6), 1))}M{' '}
                   <MakerUnit>DAI</MakerUnit>
                 </h2>
               </MakerMetric>
