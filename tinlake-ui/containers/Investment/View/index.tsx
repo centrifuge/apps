@@ -25,10 +25,12 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
 
   const dispatch = useDispatch()
   const address = useSelector<any, string | null>((state) => state.auth.address)
+  const activeTransactions = useSelector<any, string | null>((state) => state.transactions.active)
+  const portfolioData = useSelector<any, string | null>((state) => state.portfolio.data)
 
   React.useEffect(() => {
-    dispatch(loadPool(props.tinlake))
-  }, [props.tinlake.signer, address])
+    dispatch(loadPool(props.tinlake, '', true))
+  }, [props.tinlake.signer, address, activeTransactions, portfolioData])
 
   return (
     <Box margin={{ top: 'medium' }}>
