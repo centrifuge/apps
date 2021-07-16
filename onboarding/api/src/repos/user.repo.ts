@@ -38,7 +38,7 @@ export class UserRepo {
       group by users.id, kyc.user_id, kyc.provider, kyc.provider_account_id, kyc.digest, kyc.created_at, kyc.status, kyc.usa_tax_resident, kyc.accredited
     `
 
-    return (data as unknown) as UserWithKyc[]
+    return data as unknown as UserWithKyc[]
   }
 
   async create(): Promise<User | undefined> {

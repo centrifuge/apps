@@ -72,18 +72,16 @@ const formModePropMapping = {
 }
 
 const SchemaList: FunctionComponent = () => {
-  const [
-    { loadingMessage, selectedSchema, schemas, formMode, openedSchemaForm, showArchive, error },
-    setState,
-  ] = useMergeState<State>({
-    loadingMessage: 'Loading',
-    schemas: [],
-    selectedSchema: null,
-    formMode: FormModes.CREATE,
-    openedSchemaForm: false,
-    showArchive: false,
-    error: null,
-  })
+  const [{ loadingMessage, selectedSchema, schemas, formMode, openedSchemaForm, showArchive, error }, setState] =
+    useMergeState<State>({
+      loadingMessage: 'Loading',
+      schemas: [],
+      selectedSchema: null,
+      formMode: FormModes.CREATE,
+      openedSchemaForm: false,
+      showArchive: false,
+      error: null,
+    })
 
   const { token } = useContext(AuthContext)
   const notification = useContext(NotificationContext)
