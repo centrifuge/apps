@@ -1,11 +1,14 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { baseToDisplay, feeToInterestRate, ITinlake, Loan } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Box, Button, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
+import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { Pool } from '../../../config'
 import { AuthState } from '../../../ducks/auth'
+import { createTransaction, TransactionProps } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { dateToYMD } from '../../../utils/date'
 import { getAddressLink } from '../../../utils/etherscanLinkGenerator'
@@ -13,7 +16,7 @@ import { toPrecision } from '../../../utils/toPrecision'
 import { LoadingValue } from '../../LoadingValue'
 import LoanLabel from '../Label'
 
-interface Props {
+interface Props extends TransactionProps {
   loan: Loan
   tinlake: ITinlake
   auth?: AuthState
@@ -29,7 +32,18 @@ const DisplayFieldWrapper = styled.div`
 `
 
 const LoanData: React.FC<Props> = (props: Props) => {
+  const router = useRouter()
   const availableForFinancing = props.loan?.debt.isZero() ? props.loan?.principal || new BN(0) : new BN(0)
+
+  const proxyTransfer = async () => {
+    if (!props.loan.borrower) throw new Error('Borrower field missing')
+
+    await props.createTransaction(`Transfer currency from proxy`, 'proxyTransferCurrency', [
+      props.tinlake,
+      props.loan.ownerOf,
+      props.loan.borrower,
+    ])
+  }
 
   return (
     <Box gap="medium" pad="medium" elevation="small" round="xsmall" background="white" width="80%">
@@ -128,10 +142,16 @@ const LoanData: React.FC<Props> = (props: Props) => {
               </TableRow>
             </TableBody>
           </Table>
+
+          {props.loan?.ownerOf && props.loan?.borrower && 'transferCurrency' in router.query && (
+            <Box margin={{ left: 'auto' }}>
+              <Button label="Transfer currency from proxy" size="small" onClick={() => proxyTransfer()}></Button>
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>
   )
 }
 
-export default LoanData
+export default connect((state) => state, { createTransaction })(LoanData)
