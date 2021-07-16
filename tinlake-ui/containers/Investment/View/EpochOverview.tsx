@@ -71,6 +71,8 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         return <Button label={`Execute epoch ${epochData?.id}`} primary disabled />
       case 'challenge-period-ended':
         return <Button label={`Execute epoch ${epochData?.id}`} primary onClick={execute} disabled={disabled} />
+      case 'open':
+        return <Button label="Close epoch" primary disabled />
       default:
         return null
     }
