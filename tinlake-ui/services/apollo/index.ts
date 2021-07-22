@@ -435,9 +435,7 @@ class Apollo {
       })
     } catch (err) {
       console.error(`error occured while fetching pools daily data from apollo ${err}`)
-      return {
-        data: [],
-      }
+      return []
     }
     const poolsDailyData = result.data.days
       .map((item: any) => {
