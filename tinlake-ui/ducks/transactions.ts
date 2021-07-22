@@ -176,29 +176,6 @@ export function processTransaction(
         }
         await dispatch({ id, transaction: pendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
 
-        const pendingTxTimeout = 10000
-        const hidePendingTxCallback = async () => {
-          if (hasCompleted) return
-
-          if (!document.hidden) {
-            const hiddenPendingTx: Transaction = {
-              ...pendingTx,
-              showIfClosed: false,
-            }
-            await dispatch({
-              id,
-              transaction: hiddenPendingTx,
-              dontChangeUpdatedAt: true,
-              type: SET_ACTIVE_TRANSACTION,
-            })
-          } else {
-            setTimeout(hidePendingTxCallback, pendingTxTimeout)
-          }
-        }
-
-        // Hide pending tx after 10s
-        setTimeout(hidePendingTxCallback, pendingTxTimeout)
-
         const receipt = await tinlake.getTransactionReceipt(tx)
         hasCompleted = true
 
