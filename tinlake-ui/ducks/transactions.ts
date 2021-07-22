@@ -150,7 +150,6 @@ export function processTransaction(
   return async (dispatch) => {
     const id = unconfirmedTx.id
     dispatch({ id, transaction: unconfirmedTx, type: SET_ACTIVE_TRANSACTION })
-    let hasCompleted = false
 
     // Start transaction
     const tinlake = initTinlake(unconfirmedTx.tinlakeConfig)
@@ -177,7 +176,6 @@ export function processTransaction(
         await dispatch({ id, transaction: pendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
 
         const receipt = await tinlake.getTransactionReceipt(tx)
-        hasCompleted = true
 
         const outcome = receipt.status === 1
         outcomeTx.status = outcome ? 'succeeded' : 'failed'
@@ -189,11 +187,9 @@ export function processTransaction(
         }
       } else if (tx.status === 1) {
         // Succeeded immediately
-        hasCompleted = true
         outcomeTx.status = 'succeeded'
       } else {
         // Failed or rejected
-        hasCompleted = true
         outcomeTx.status = 'failed'
         outcomeTx.failedReason = tx.error
         if (tx.transactionhash) {
