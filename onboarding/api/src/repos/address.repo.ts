@@ -30,7 +30,7 @@ export class AddressRepo {
 
     if (!data) return []
 
-    return (data as unknown) as AddressEntity[]
+    return data as unknown as AddressEntity[]
   }
 
   // Gets the list of users which should have been whitelisted, but arent
@@ -50,7 +50,7 @@ export class AddressRepo {
 
     if (!data) return []
 
-    return (data as unknown) as { userId: string; poolId: string; tranche: Tranche }[]
+    return data as unknown as { userId: string; poolId: string; tranche: Tranche }[]
   }
 
   async findOrCreate(blockchain: Blockchain, network: Network, address: string): Promise<AddressEntity> {

@@ -50,7 +50,15 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
       ? poolData?.maker?.debt
           .mul(new BN(10).pow(new BN(45)))
           .div(poolData?.maker?.line)
-          .div(new BN(10).pow(new BN(14)))
+          .div(new BN(10).pow(new BN(16)))
+      : undefined
+
+  const makerDropShare =
+    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
+      ? poolData?.maker?.dropBalance
+          .mul(new BN(10).pow(new BN(18)))
+          .div(poolData?.senior?.totalSupply)
+          .div(new BN(10).pow(new BN(16)))
       : undefined
 
   React.useEffect(() => {
@@ -171,14 +179,14 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
               <MakerMetric style={{ borderRight: '1px solid #fff' }}>
                 <h3>Current Debt</h3>
                 <h2>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.debt || new BN(0), 18), 0))}{' '}
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.debt || new BN(0), 18 + 6), 1))}M{' '}
                   <MakerUnit>DAI</MakerUnit>{' '}
                 </h2>
               </MakerMetric>
               <MakerMetric style={{ borderRight: '1px solid #fff' }}>
                 <h3>Debt Ceiling</h3>
                 <h2>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.line || new BN(0), 45 + 6), 0))}M{' '}
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.line || new BN(0), 45 + 6), 1))}M{' '}
                   <MakerUnit>DAI</MakerUnit>
                 </h2>
               </MakerMetric>
@@ -193,7 +201,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           {open && (
             <Box direction="row" margin={{ bottom: 'small' }}>
               <Box basis="2/3" direction="row">
-                <div style={{ width: '75%', lineHeight: '1.8em' }}>
+                <div style={{ width: '60%', lineHeight: '1.8em' }}>
                   For this pool Maker provides a revolving line of credit against real-world assets as collateral. The
                   direct integration allows the Asset Originator to lock up DROP as collateral in a Maker vault, draw
                   DAI in return and use it to finance new originations. The credit line is capped at the debt ceiling
@@ -249,15 +257,31 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell scope="row" border={{ color: 'transparent' }} pad={{ vertical: '12px' }}>
+                      <TableCell
+                        scope="row"
+                        border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
+                        pad={{ vertical: '12px' }}
+                      >
                         Debt Utilization
+                      </TableCell>
+                      <TableCell
+                        style={{ textAlign: 'end' }}
+                        border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
+                        pad={{ vertical: '12px' }}
+                      >
+                        {parseFloat((makerDebtUtilization || new BN(0)).toString())} %
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell scope="row" border={{ color: 'transparent' }} pad={{ vertical: '12px' }}>
+                        Maker DROP Share
                       </TableCell>
                       <TableCell
                         style={{ textAlign: 'end' }}
                         border={{ color: 'transparent' }}
                         pad={{ vertical: '12px' }}
                       >
-                        {parseFloat((makerDebtUtilization || new BN(0)).toString()) / 100} %
+                        {parseFloat((makerDropShare || new BN(0)).toString())} %
                       </TableCell>
                     </TableRow>
                   </TableBody>

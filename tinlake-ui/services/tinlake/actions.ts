@@ -19,6 +19,8 @@ const PERMIT_UNSUPPORTED_CURRENCIES = [
   '0xb3037647a7E114Da86653Daa8cdCEd738727ab11',
 ]
 
+const disablePermitSigning = true
+
 // TinlakeAction args need to be serializable, as they are stored in Redux state for the async transactions duck
 // Based on: https://github.com/microsoft/TypeScript/issues/1897#issuecomment-657294463
 type SerializableScalar = string & number & boolean
@@ -246,7 +248,12 @@ export async function submitSeniorSupplyOrder(
     tinlake.contractAddresses.TINLAKE_CURRENCY!
   )
 
-  if (currencyDoesntSupportPermits || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
+  if (
+    disablePermitSigning ||
+    currencyDoesntSupportPermits ||
+    skipSigning ||
+    getAddressMemory(address)?.supportsPermits === false
+  ) {
     return await tinlake.submitSeniorSupplyOrderWithAllowance(amount, address)
   }
 
@@ -299,7 +306,12 @@ export async function submitJuniorSupplyOrder(
     tinlake.contractAddresses.TINLAKE_CURRENCY!
   )
 
-  if (currencyDoesntSupportPermits || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
+  if (
+    disablePermitSigning ||
+    currencyDoesntSupportPermits ||
+    skipSigning ||
+    getAddressMemory(address)?.supportsPermits === false
+  ) {
     return await tinlake.submitJuniorSupplyOrderWithAllowance(amount, address)
   }
 
@@ -352,7 +364,12 @@ export async function submitSeniorRedeemOrder(
     tinlake.contractAddresses.TINLAKE_CURRENCY!
   )
 
-  if (currencyDoesntSupportPermits || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
+  if (
+    disablePermitSigning ||
+    currencyDoesntSupportPermits ||
+    skipSigning ||
+    getAddressMemory(address)?.supportsPermits === false
+  ) {
     return await tinlake.submitSeniorRedeemOrderWithAllowance(amount, address)
   }
 
@@ -405,7 +422,12 @@ export async function submitJuniorRedeemOrder(
     tinlake.contractAddresses.TINLAKE_CURRENCY!
   )
 
-  if (currencyDoesntSupportPermits || skipSigning || getAddressMemory(address)?.supportsPermits === false) {
+  if (
+    disablePermitSigning ||
+    currencyDoesntSupportPermits ||
+    skipSigning ||
+    getAddressMemory(address)?.supportsPermits === false
+  ) {
     return await tinlake.submitJuniorRedeemOrderWithAllowance(amount, address)
   }
 
