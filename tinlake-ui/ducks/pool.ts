@@ -64,6 +64,7 @@ export type EpochData = {
   state: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
   isBlockedState: boolean
   minimumEpochTime: number
+  challengeTime: number
   minimumEpochTimeLeft: number
   minChallengePeriodEnd: number
   lastEpochClosed: number

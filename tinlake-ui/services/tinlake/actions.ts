@@ -502,12 +502,14 @@ export async function getEpoch(tinlake: ITinlake, address?: string): Promise<Epo
   const state = await tinlake.getCurrentEpochState()
 
   const minimumEpochTime = await tinlake.getMinimumEpochTime()
+  const challengeTime = await tinlake.getChallengeTime()
   const lastEpochClosed = await tinlake.getLastEpochClosed()
   const minimumEpochTimeLeft = lastEpochClosed + minimumEpochTime - new Date().getTime() / 1000
 
   return {
     state,
     minimumEpochTime,
+    challengeTime,
     minimumEpochTimeLeft,
     lastEpochClosed,
     id: await tinlake.getCurrentEpochId(),

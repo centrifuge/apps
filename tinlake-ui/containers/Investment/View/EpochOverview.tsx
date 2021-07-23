@@ -1,12 +1,13 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Box, Button, Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
 import { FormDown } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
+import styled from 'styled-components'
+import { SolverResult } from '../../../../tinlake.js/dist/services/solver/solver'
 import { LoadingValue } from '../../../components/LoadingValue/index'
-import { Tooltip } from '../../../components/Tooltip'
 import { Pool } from '../../../config'
 import { AuthState } from '../../../ducks/auth'
 import { EpochData, PoolData, PoolState } from '../../../ducks/pool'
@@ -14,13 +15,16 @@ import { createTransaction, TransactionProps, useTransactionState } from '../../
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
 import { toPrecision } from '../../../utils/toPrecision'
-import { Caret, Sidenote, SignIcon } from './styles'
+import { HelpIcon } from '../../Onboarding/styles'
+import { Caret } from './styles'
 
 interface Props extends TransactionProps {
   tinlake: ITinlake
   auth?: AuthState
   activePool?: Pool
 }
+
+const Fixed27 = new BN(10).pow(new BN(27))
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const router = useRouter()
@@ -42,8 +46,6 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   }
 
   const disabled = status === 'unconfirmed' || status === 'pending'
-
-  const investmentCapacity = poolData ? poolData.maxReserve.sub(poolData.reserve) : undefined
 
   const [open, setOpen] = React.useState(false)
 
@@ -78,228 +80,320 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
     }
   }, [disabled, epochData, poolData, router.query])
 
+  const [solution, setSolution] = React.useState(undefined as SolverResult | undefined)
+
+  const getSolutionState = () => {
+    const orders = {
+      tinRedeem: poolData?.junior?.pendingRedemptions || new BN(0),
+      dropRedeem: poolData?.senior?.pendingRedemptions || new BN(0),
+      tinInvest: poolData?.junior?.pendingInvestments || new BN(0),
+      dropInvest: poolData?.senior?.pendingInvestments || new BN(0),
+    }
+    const orderSum: any = Object.values(orders).reduce((prev: any, order) => prev.add(order), new BN('0'))
+    const solutionSum: any = solution
+      ? Object.values(solution).reduce((prev: any, order) => prev.add(order), new BN('0'))
+      : new BN(0)
+
+    if (orderSum.lte(new BN('10').pow(new BN('18')))) return 'no-orders-locked'
+    if (solutionSum.lte(new BN('10').pow(new BN('18')))) return 'no-executions'
+    if (solutionSum.lt(orderSum)) return 'partial-executions'
+    return 'to-be-closed'
+  }
+
+  const updateSolution = async () => {
+    const epochState = await props.tinlake.getEpochState(true)
+    const orders = {
+      tinRedeem: poolData?.junior?.pendingRedemptions || new BN(0),
+      dropRedeem: poolData?.senior?.pendingRedemptions || new BN(0),
+      tinInvest: poolData?.junior?.pendingInvestments || new BN(0),
+      dropInvest: poolData?.senior?.pendingInvestments || new BN(0),
+    }
+    const solution = await props.tinlake.runSolver(epochState, orders)
+    setSolution(solution)
+  }
+
+  React.useEffect(() => {
+    if (poolData?.senior && poolData?.junior) {
+      updateSolution()
+    }
+  }, [poolData?.senior, poolData?.junior])
+
+  const formatCurrencyAmount = (bn: BN | undefined) => {
+    if (!bn) return ''
+    return `${addThousandsSeparators(toPrecision(baseToDisplay(bn || '0', 18), 0))} ${
+      props.activePool?.metadata.currencySymbol || 'DAI'
+    }`
+  }
+
   return (
     <Box background="#eee" pad={{ horizontal: '34px', bottom: 'xsmall' }} round="xsmall" margin={{ bottom: 'medium' }}>
-      <Heading level="4" onClick={() => setOpen(!open)} style={{ cursor: 'pointer' }}>
-        Epoch Details
-        <Caret>
+      <Box direction="row" pad={'26px 0 20px 0'} onClick={() => setOpen(!open)} style={{ cursor: 'pointer' }}>
+        <HelpIcon src="/static/help-circle.svg" />
+        <EpochState>
+          <LoadingValue done={epochData?.state !== undefined && solution !== undefined}>
+            <h3>Epoch {epochData?.id}</h3>
+
+            {epochData?.state === 'open' && <h4>Ongoing</h4>}
+            {epochData?.state === 'can-be-closed' && <h4>Minimum duration ended</h4>}
+            {epochData?.state === 'in-submission-period' && <h4>Computing orders</h4>}
+            {epochData?.state === 'in-challenge-period' && <h4>Computing orders</h4>}
+            {epochData?.state === 'challenge-period-ended' && <h4>Orders computed</h4>}
+
+            {epochData?.state === 'open' && (
+              <h5>{secondsToHms(epochData?.minimumEpochTimeLeft || 0)} until end of minimum duration</h5>
+            )}
+            {epochData?.state === 'can-be-closed' && (
+              <>
+                {getSolutionState() === 'to-be-closed' && <h5>To be closed</h5>}
+                {getSolutionState() === 'no-orders-locked' && <h5>No orders locked</h5>}
+                {getSolutionState() === 'no-executions' && <h5>Locked orders cannot be executed</h5>}
+                {getSolutionState() === 'partial-executions' && <h5>Locked orders can only be partially executed</h5>}
+              </>
+            )}
+            {epochData?.state === 'in-submission-period' && (
+              <h5>Minimum {secondsToHms(epochData?.challengeTime || 0)} remaining</h5>
+            )}
+            {epochData?.state === 'in-challenge-period' && (
+              <h5>
+                {secondsToHms((epochData?.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000)} remaining
+              </h5>
+            )}
+            {epochData?.state === 'challenge-period-ended' && <h5>To be closed</h5>}
+          </LoadingValue>
+        </EpochState>
+        <Caret style={{ marginLeft: 'auto', position: 'relative', top: '-2px' }}>
           <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
         </Caret>
-      </Heading>
+      </Box>
       {open && (
-        <Box direction="row" justify="between" margin={{ bottom: 'medium' }}>
-          <Box width="420px" margin={{ bottom: 'medium' }}>
-            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-              <Heading level="5" margin={'0'}>
-                Total Locked Orders
-              </Heading>
-            </Box>
-
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell scope="row" border={{ color: 'transparent' }} pad={{ vertical: '6px' }}>
-                    <Box direction="row">
-                      <SignIcon src={`/static/plus.svg`} />
-                      Investments DROP Tranche
-                    </Box>
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }} pad={{ vertical: '6px' }}>
-                    <LoadingValue done={poolData?.senior?.pendingInvestments !== undefined}>
-                      {addThousandsSeparators(
-                        toPrecision(baseToDisplay(poolData?.senior?.pendingInvestments || '0', 18), 0)
-                      )}{' '}
-                      {props.activePool?.metadata.currencySymbol || 'DAI'}
-                    </LoadingValue>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row">
-                    <Box direction="row">
-                      <SignIcon src={`/static/plus.svg`} />
-                      Investments TIN Tranche
-                    </Box>
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={poolData?.junior?.pendingInvestments !== undefined}>
-                      {addThousandsSeparators(
-                        toPrecision(baseToDisplay(poolData?.junior?.pendingInvestments || '0', 18), 0)
-                      )}{' '}
-                      {props.activePool?.metadata.currencySymbol || 'DAI'}
-                    </LoadingValue>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row">
-                    <Box direction="row">Total Pending Investments</Box>
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={poolData?.totalPendingInvestments !== undefined}>
-                      {addThousandsSeparators(
-                        toPrecision(baseToDisplay(poolData?.totalPendingInvestments || '0', 18), 0)
-                      )}{' '}
-                      {props.activePool?.metadata.currencySymbol || 'DAI'}
-                    </LoadingValue>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-            <br />
-
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell scope="row" border={{ color: 'transparent' }} pad={{ top: '15px', bottom: '6px' }}>
-                    <Box direction="row">
-                      <SignIcon src={`/static/min.svg`} />
-                      Redemptions DROP Tranche
-                    </Box>
-                  </TableCell>
-                  <TableCell
-                    style={{ textAlign: 'end' }}
-                    border={{ color: 'transparent' }}
-                    pad={{ top: '15px', bottom: '6px' }}
+        <>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell size="40%">Investments</TableCell>
+                <TableCell size="20%" style={{ textAlign: 'right' }}>
+                  Locked
+                </TableCell>
+                <TableCell size="20%" style={{ textAlign: 'right' }}>
+                  To be executed
+                </TableCell>
+                <TableCell size="20%" style={{ textAlign: 'right' }}>
+                  In %
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell>DROP investments</TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  <LoadingValue done={poolData?.senior?.pendingInvestments !== undefined}>
+                    {formatCurrencyAmount(poolData?.senior?.pendingInvestments)}
+                  </LoadingValue>
+                </TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  <LoadingValue done={solution?.dropInvest !== undefined}>
+                    {formatCurrencyAmount(solution?.dropInvest)}
+                  </LoadingValue>
+                </TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  <LoadingValue
+                    done={poolData?.senior?.pendingInvestments !== undefined && solution?.dropInvest !== undefined}
                   >
-                    <LoadingValue done={poolData?.senior?.pendingRedemptions !== undefined}>
-                      {addThousandsSeparators(
-                        toPrecision(baseToDisplay(poolData?.senior?.pendingRedemptions || '0', 18), 0)
-                      )}{' '}
-                      DROP
-                    </LoadingValue>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row">
-                    <Box direction="row">
-                      <SignIcon src={`/static/min.svg`} />
-                      Redemptions TIN Tranche
-                    </Box>
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={poolData?.junior?.pendingRedemptions !== undefined}>
-                      {addThousandsSeparators(
-                        toPrecision(baseToDisplay(poolData?.junior?.pendingRedemptions || '0', 18), 0)
-                      )}{' '}
-                      TIN
-                    </LoadingValue>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row">
-                    <Box direction="row">
-                      Estimated Total Pending Redemptions in {props.activePool?.metadata.currencySymbol || 'DAI'}
-                    </Box>
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={poolData?.totalRedemptionsCurrency !== undefined}>
-                      {addThousandsSeparators(
-                        toPrecision(baseToDisplay(poolData?.totalRedemptionsCurrency || '0', 18), 0)
-                      )}{' '}
-                      {props.activePool?.metadata.currencySymbol || 'DAI'}
-                    </LoadingValue>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </Box>
-
-          <Box width="420px" margin={{ top: 'small', bottom: 'medium' }}>
-            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-              <Heading level="5" margin={'0'}>
-                Current Epoch
-              </Heading>
-            </Box>
-
-            <Table>
-              <TableBody>
-                <TableRow>
-                  <TableCell scope="row">
-                    <Tooltip id="epochNumber">Epoch #</Tooltip>
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={epochData?.id !== undefined}>{epochData?.id || ''}</LoadingValue>
-                  </TableCell>
-                </TableRow>
-                {!epochData?.isBlockedState && (
-                  <>
-                    <TableRow>
-                      <TableCell scope="row">
-                        <Tooltip id="mininumEpochDuration">Minimum epoch duration</Tooltip>
-                      </TableCell>
-                      <TableCell style={{ textAlign: 'end' }}>
-                        <LoadingValue done={epochData?.minimumEpochTime !== undefined}>
-                          {secondsToHms(epochData?.minimumEpochTime || 0)}
-                        </LoadingValue>
-                      </TableCell>
-                    </TableRow>
-                  </>
-                )}
-                <TableRow>
-                  <TableCell
-                    scope="row"
-                    style={{ alignItems: 'start', justifyContent: 'center' }}
-                    pad={{ vertical: '6px' }}
+                    {(poolData?.senior?.pendingInvestments || new BN(0)).isZero()
+                      ? '0'
+                      : parseFloat(
+                          (solution?.dropInvest || new BN(0))
+                            .mul(new BN(10).pow(new BN(18)))
+                            .div(poolData?.senior?.pendingInvestments || new BN(1))
+                            .div(new BN(10).pow(new BN(16)))
+                            .toString()
+                        )}
+                    %
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>TIN investments</TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  <LoadingValue done={poolData?.junior?.pendingInvestments !== undefined}>
+                    {formatCurrencyAmount(poolData?.junior?.pendingInvestments)}
+                  </LoadingValue>
+                </TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  <LoadingValue done={solution?.tinInvest !== undefined}>
+                    {formatCurrencyAmount(solution?.tinInvest)}
+                  </LoadingValue>
+                </TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  <LoadingValue
+                    done={poolData?.junior?.pendingInvestments !== undefined && solution?.tinInvest !== undefined}
                   >
-                    Current epoch state
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
-                    <LoadingValue done={epochData?.state !== undefined} height={39}>
-                      {(epochData?.state === 'open' || epochData?.state === 'can-be-closed') && (
-                        <>
-                          Open
-                          <Sidenote>Min time left: {secondsToHms(epochData?.minimumEpochTimeLeft || 0)}</Sidenote>
-                        </>
-                      )}
-                      {(epochData?.state === 'in-submission-period' ||
-                        epochData?.state === 'in-challenge-period' ||
-                        epochData?.state === 'challenge-period-ended') && (
-                        <>
-                          In computation period
-                          {epochData?.minChallengePeriodEnd > 0 && (
-                            <Sidenote>
-                              Min time left:{' '}
-                              {secondsToHms((epochData?.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000)}
-                            </Sidenote>
-                          )}
-                        </>
-                      )}
-                    </LoadingValue>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell scope="row">
-                    <Tooltip id="investmentCapacity">Total epoch investment capacity</Tooltip>
-                  </TableCell>
-                  <TableCell style={{ textAlign: 'end' }}>
-                    <LoadingValue done={investmentCapacity !== undefined}>
-                      {addThousandsSeparators(
-                        toPrecision(
-                          baseToDisplay(
-                            (investmentCapacity || new BN(0)).lt(new BN(0))
-                              ? new BN(0)
-                              : investmentCapacity || new BN(0),
-                            18
-                          ),
-                          0
-                        )
-                      )}{' '}
-                      {props.activePool?.metadata.currencySymbol || 'DAI'}
-                    </LoadingValue>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+                    {(poolData?.junior?.pendingInvestments || new BN(0)).isZero()
+                      ? '0'
+                      : parseFloat(
+                          (solution?.tinInvest || new BN(0))
+                            .mul(new BN(10).pow(new BN(18)))
+                            .div(poolData?.junior?.pendingInvestments || new BN(1))
+                            .div(new BN(10).pow(new BN(16)))
+                            .toString()
+                        )}
+                    %
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+              <TableRow style={{ fontWeight: 'bold' }}>
+                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }}>
+                  Total pending investments
+                </TableCell>
+                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
+                  <LoadingValue done={poolData?.totalPendingInvestments !== undefined}>
+                    {formatCurrencyAmount(poolData?.totalPendingInvestments)}
+                  </LoadingValue>
+                </TableCell>
+                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
+                  &nbsp;
+                </TableCell>
+                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
+                  &nbsp;
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+          <br />
+          <br />
 
-            {showEpochButton && (
-              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                <EpochButton />
-              </Box>
-            )}
-          </Box>
-        </Box>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell size="40%">Redemptions</TableCell>
+                <TableCell size="20%" style={{ textAlign: 'right' }}>
+                  Locked
+                </TableCell>
+                <TableCell size="20%" style={{ textAlign: 'right' }}>
+                  To be executed
+                </TableCell>
+                <TableCell size="20%" style={{ textAlign: 'right' }}>
+                  In %
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell>DROP redemptions</TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  <LoadingValue done={poolData?.senior?.pendingRedemptions !== undefined}>
+                    {addThousandsSeparators(
+                      toPrecision(baseToDisplay(poolData?.senior?.pendingRedemptions || '0', 18), 0)
+                    )}{' '}
+                    DROP
+                  </LoadingValue>
+                </TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  <LoadingValue done={solution?.dropRedeem !== undefined}>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(solution?.dropRedeem || '0', 18), 0))} DROP
+                  </LoadingValue>
+                </TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  <LoadingValue
+                    done={poolData?.senior?.pendingRedemptions !== undefined && solution?.dropRedeem !== undefined}
+                  >
+                    {(poolData?.senior?.pendingRedemptions || new BN(0)).isZero()
+                      ? '0'
+                      : parseFloat(
+                          (solution?.dropRedeem || new BN(0))
+                            .mul(new BN(10).pow(new BN(18)))
+                            .div(poolData?.senior?.pendingRedemptions || new BN(1))
+                            .div(new BN(10).pow(new BN(16)))
+                            .toString()
+                        )}
+                    %
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>TIN redemptions</TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  <LoadingValue done={poolData?.junior?.pendingRedemptions !== undefined}>
+                    {addThousandsSeparators(
+                      toPrecision(baseToDisplay(poolData?.junior?.pendingRedemptions || '0', 18), 0)
+                    )}{' '}
+                    TIN
+                  </LoadingValue>
+                </TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  <LoadingValue done={solution?.tinRedeem !== undefined}>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(solution?.tinRedeem || '0', 18), 0))} TIN
+                  </LoadingValue>
+                </TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
+                  <LoadingValue
+                    done={poolData?.junior?.pendingRedemptions !== undefined && solution?.tinRedeem !== undefined}
+                  >
+                    {(poolData?.junior?.pendingRedemptions || new BN(0)).isZero()
+                      ? '0'
+                      : parseFloat(
+                          (solution?.tinRedeem || new BN(0))
+                            .mul(new BN(10).pow(new BN(18)))
+                            .div(poolData?.junior?.pendingRedemptions || new BN(1))
+                            .div(new BN(10).pow(new BN(16)))
+                            .toString()
+                        )}
+                    %
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+              <TableRow style={{ fontWeight: 'bold' }}>
+                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }}>
+                  Total pending redemptions in {props.activePool?.metadata.currencySymbol || 'DAI'}
+                </TableCell>
+                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
+                  <LoadingValue done={poolData?.totalRedemptionsCurrency !== undefined}>
+                    {formatCurrencyAmount(poolData?.totalRedemptionsCurrency)}
+                  </LoadingValue>
+                </TableCell>
+                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
+                  &nbsp;
+                </TableCell>
+                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
+                  &nbsp;
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+          <br />
+          {showEpochButton && (
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+              <EpochButton />
+            </Box>
+          )}
+        </>
       )}
     </Box>
   )
 }
+
+const EpochState = styled.div`
+  display: flex;
+  direction: row;
+  margin: 0;
+
+  h3 {
+    font-size: 14px;
+    margin: 0;
+  }
+
+  h4 {
+    font-size: 14px;
+    margin: 0 0 0 14px;
+    color: #777777;
+  }
+
+  h5 {
+    font-size: 14px;
+    margin: 0 0 0 14px;
+    color: #777777;
+    border-bottom: 1px dashed #777777;
+  }
+`
 
 export default connect((state) => state, { createTransaction })(EpochOverview)
