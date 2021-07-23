@@ -55,7 +55,7 @@ class Apollo {
     if (!poolConfigs) {
       return []
     }
-    const tinlakePools = poolConfigs?.map((poolConfig: any) => {
+    const tinlakePools = poolConfigs.map((poolConfig) => {
       const poolId = poolConfig.addresses.ROOT_CONTRACT
       const pool = pools.find((p) => p.id.toLowerCase() === poolId.toLowerCase())
 
@@ -107,6 +107,7 @@ class Apollo {
         seniorTokenPrice: (pool?.seniorTokenPrice && new BN(pool.seniorTokenPrice)) || null,
         icon: poolConfig.metadata.media?.icon || null,
         currency: poolConfig.metadata.currencySymbol || 'DAI',
+        discourseLink: poolConfig.metadata.discourseLink,
       }
 
       return { ...poolData, status: getPoolStatus(poolData) }
@@ -145,6 +146,7 @@ class Apollo {
       seniorYield14Days: null,
       icon: p.metadata.media?.icon || null,
       currency: p.metadata.currencySymbol || 'DAI',
+      discourseLink: p.metadata.discourseLink,
     }))
   }
 
@@ -180,6 +182,7 @@ class Apollo {
       seniorYield14Days: null,
       icon: p.metadata.media?.icon || null,
       currency: p.metadata.currencySymbol || 'DAI',
+      discourseLink: p.metadata.discourseLink,
     }))
   }
 

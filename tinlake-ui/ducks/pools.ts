@@ -41,6 +41,7 @@ export interface PoolData {
   juniorTokenPrice?: BN | null
   seniorTokenPrice?: BN | null
   currency: string
+  discourseLink?: string
 }
 
 export interface PoolsData {

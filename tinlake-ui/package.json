@@ -8,7 +8,7 @@
     "fs": false
   },
   "scripts": {
-    "build": "yarn build:deps && yarn build:next && yarn build:lambda",
+    "build": "yarn build:deps && yarn build:next",
     "build-for-husky": "tsc",
     "dev:next": "PORT=3000 node server.js",
     "build:next": "next build",
@@ -19,8 +19,7 @@
     "lint": "tslint --project .",
     "lint-fix": "tslint --fix --project .",
     "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs yarn lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add",
-    "dev:lambda": "netlify-lambda serve lambda",
-    "build:lambda": "netlify-lambda build lambda",
+    "dev:lambda": "netlify functions:serve --port=9000",
     "build:deps": "cd ../tinlake.js && yarn build && cd ../tinlake-ui"
   },
   "repository": {
@@ -102,7 +101,7 @@
     "http-proxy-middleware": "1.0.5",
     "husky": "4.2.5",
     "jest": "26.6.3",
-    "netlify-lambda": "2.0.1",
+    "netlify-cli": "^5.2.2",
     "npm-run-all": "4.1.5",
     "react-test-renderer": "16.13.1",
     "ts-jest": "^26.4.3",

@@ -32,6 +32,7 @@ interface PoolMetadata {
   currencySymbol?: string
   isUpcoming?: boolean
   maker?: { ilk: string }
+  discourseLink?: string
 }
 
 export interface BasePool {
