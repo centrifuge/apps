@@ -1,3 +1,4 @@
+import { Tooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button, Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
@@ -87,10 +88,11 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
       tinInvest: poolData?.junior?.pendingInvestments || new BN(0),
       dropInvest: poolData?.senior?.pendingInvestments || new BN(0),
     }
-    const orderSum: any = Object.values(orders).reduce((prev: any, order) => prev.add(order), new BN('0'))
-    const solutionSum: any = solution
-      ? Object.values(solution).reduce((prev: any, order) => prev.add(order), new BN('0'))
-      : new BN(0)
+    const orderSum: BN = Object.values(orders).reduce((prev: any, order) => prev.add(order), new BN('0'))
+    const solutionSum: BN =
+      solution?.dropInvest !== undefined
+        ? solution.dropInvest.add(solution.dropRedeem).add(solution.tinInvest).add(solution.tinRedeem)
+        : new BN(0)
 
     if (orderSum.lte(new BN('10').pow(new BN('18')))) return 'no-orders-locked'
     if (solutionSum.lte(new BN('10').pow(new BN('18')))) return 'no-executions'
@@ -126,9 +128,17 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   return (
     <Box background="#eee" pad={{ horizontal: '34px', bottom: 'xsmall' }} round="xsmall" margin={{ bottom: 'medium' }}>
       <Box direction="row" pad={'26px 0 20px 0'} onClick={() => setOpen(!open)} style={{ cursor: 'pointer' }}>
-        <HelpIcon src="/static/help-circle.svg" />
+        {epochData?.state === 'open' && <HelpIcon src="/static/clock.svg" />}
+        {epochData?.state === 'can-be-closed' && getSolutionState() !== 'to-be-closed' && (
+          <HelpIcon src="/static/help-circle.svg" />
+        )}
+        {((epochData?.state === 'can-be-closed' && getSolutionState() === 'to-be-closed') ||
+          epochData?.state === 'challenge-period-ended') && <HelpIcon src="/static/circle-checked.svg" />}
+        {(epochData?.state === 'in-submission-period' || epochData?.state === 'in-challenge-period') && (
+          <HelpIcon src="/static/clock.svg" />
+        )}
         <EpochState>
-          <LoadingValue done={epochData?.state !== undefined && solution !== undefined}>
+          <LoadingValue done={epochData?.state !== undefined && solution !== undefined} maxWidth={120}>
             <h3>Epoch {epochData?.id}</h3>
 
             {epochData?.state === 'open' && <h4>Ongoing</h4>}
@@ -142,7 +152,11 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             )}
             {epochData?.state === 'can-be-closed' && (
               <>
-                {getSolutionState() === 'to-be-closed' && <h5>To be closed</h5>}
+                {getSolutionState() === 'to-be-closed' && (
+                  <Tooltip title="The minimum epoch duration has passed and will soon be closed automatically. All locked orders will be executed.">
+                    <h5>To be closed</h5>
+                  </Tooltip>
+                )}
                 {getSolutionState() === 'no-orders-locked' && <h5>No orders locked</h5>}
                 {getSolutionState() === 'no-executions' && <h5>Locked orders cannot be executed</h5>}
                 {getSolutionState() === 'partial-executions' && <h5>Locked orders can only be partially executed</h5>}
@@ -164,18 +178,18 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         </Caret>
       </Box>
       {open && (
-        <>
+        <TableWrapper>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableCell size="40%">Investments</TableCell>
-                <TableCell size="20%" style={{ textAlign: 'right' }}>
+                <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
                   Locked
                 </TableCell>
-                <TableCell size="20%" style={{ textAlign: 'right' }}>
+                <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
                   To be executed
                 </TableCell>
-                <TableCell size="20%" style={{ textAlign: 'right' }}>
+                <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
                   In %
                 </TableCell>
               </TableRow>
@@ -249,7 +263,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                   </LoadingValue>
                 </TableCell>
                 <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
-                  &nbsp;
+                  <LoadingValue done={solution?.tinInvest !== undefined}>
+                    {formatCurrencyAmount((solution?.dropInvest || new BN(0)).add(solution?.tinInvest || new BN(0)))}
+                  </LoadingValue>
                 </TableCell>
                 <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
                   &nbsp;
@@ -264,13 +280,13 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             <TableHeader>
               <TableRow>
                 <TableCell size="40%">Redemptions</TableCell>
-                <TableCell size="20%" style={{ textAlign: 'right' }}>
+                <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
                   Locked
                 </TableCell>
-                <TableCell size="20%" style={{ textAlign: 'right' }}>
+                <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
                   To be executed
                 </TableCell>
-                <TableCell size="20%" style={{ textAlign: 'right' }}>
+                <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
                   In %
                 </TableCell>
               </TableRow>
@@ -350,7 +366,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                   </LoadingValue>
                 </TableCell>
                 <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
-                  &nbsp;
+                  <LoadingValue done={solution?.tinInvest !== undefined}>
+                    {formatCurrencyAmount((solution?.dropRedeem || new BN(0)).add(solution?.tinRedeem || new BN(0)))}
+                  </LoadingValue>
                 </TableCell>
                 <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
                   &nbsp;
@@ -364,7 +382,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               <EpochButton />
             </Box>
           )}
-        </>
+        </TableWrapper>
       )}
     </Box>
   )
@@ -373,7 +391,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 const EpochState = styled.div`
   display: flex;
   direction: row;
-  margin: 0;
+  margin: 2px 0 0 0;
 
   h3 {
     font-size: 14px;
@@ -392,6 +410,10 @@ const EpochState = styled.div`
     color: #777777;
     border-bottom: 1px dashed #777777;
   }
+`
+
+const TableWrapper = styled.div`
+  margin-left: 46px;
 `
 
 export default connect((state) => state, { createTransaction })(EpochOverview)
