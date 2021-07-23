@@ -2,9 +2,21 @@ import { Anchor, Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import styled from 'styled-components'
 import Alert from '../../components/Alert'
 import { CentChainWalletState, connect } from '../../ducks/centChainWallet'
 import { usePolkadotExtensionInstalled } from '../../utils/usePolkadotExtensionInstalled'
+
+const HelpIcon = styled.img`
+  height: 16px;
+  width: 16px;
+  vertical-align: text-top;
+`
+
+const HelpText = styled.span`
+  padding-left: 6px;
+  font-weight: 800;
+`
 
 const CentChainWalletDialog: React.FC = () => {
   const polkadotExtensionInstalled = usePolkadotExtensionInstalled()
@@ -33,6 +45,12 @@ const CentChainWalletDialog: React.FC = () => {
         <br />
         Please first install the Polkadot Wallet extension to get started. Please reload this page after you have
         installed the extension.
+        <Alert type="info" margin={{ vertical: 'medium' }}>
+          <div>
+            <HelpIcon src="/static/help-circle.svg" />
+            <HelpText>To claim rewards, link your Centrifuge Chain account before redeeming your investment</HelpText>
+          </div>
+        </Alert>
         <Box direction="row" justify="end" margin={{ top: 'medium' }}>
           <Button
             primary={!clickedInstall}

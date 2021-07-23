@@ -5,10 +5,29 @@ import { Decimal } from 'decimal.js-light'
 import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
+import styled from 'styled-components'
+import Alert from '../../../components/Alert'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { Card } from './TrancheOverview'
+
+const HelpIcon = styled.img`
+  font-weight: 800;
+  height: 16px;
+  width: 16px;
+  vertical-align: text-top;
+`
+
+const HelpTitle = styled.span`
+  margin-bottom: 20px;
+  padding-left: 6px;
+  font-weight: 800;
+`
+
+const HelpText = styled.div`
+  padding-top: 8px;
+`
 
 interface Props extends TransactionProps {
   selectedPool?: Pool
@@ -90,7 +109,13 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
         onChange={onChange}
         disabled={disabled}
       />
-
+      <Alert type="info" margin={{ vertical: 'medium' }}>
+        <div>
+          <HelpIcon src="/static/help-circle.svg" />
+          <HelpTitle>No Centrifuge Chain Account Linked</HelpTitle>
+          <HelpText>To claim rewards, link your Centrifuge Chain account before redeeming your investment</HelpText>
+        </div>
+      </Alert>
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
         <Button primary label={'Redeem'} onClick={submit} disabled={error !== undefined || disabled} />

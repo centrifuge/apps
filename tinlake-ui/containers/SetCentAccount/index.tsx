@@ -4,6 +4,7 @@ import { Box, Button, Select } from 'grommet'
 import * as React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
+import Alert from '../../components/Alert'
 import { AuthState } from '../../ducks/auth'
 import { CentChainWalletState, InjectedAccount } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
@@ -12,6 +13,17 @@ import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCe
 import { centChainAddrToAccountId } from '../../services/centChain/centChainAddrToAccountId'
 import { isCentChainAddr } from '../../services/centChain/isCentChainAddr'
 import { shortAddr } from '../../utils/shortAddr'
+
+const HelpIcon = styled.img`
+  height: 16px;
+  width: 16px;
+  vertical-align: text-top;
+`
+
+const HelpText = styled.span`
+  padding-left: 6px;
+  font-weight: 800;
+`
 
 interface Props extends TransactionProps {
   tinlake: ITinlake
@@ -107,10 +119,14 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
 
   return (
     <div>
-      Select the Centrifuge Chain account you want to link to your Ethereum account below.{' '}
-      <strong>This step cannot be undone. Please make sure to link the correct account.</strong>
-      <br />
-      <br />
+      Select the Centrifuge Chain account you want to link to your Ethereum account below. Note: To claim rewards, link
+      your Centrifuge Chain account before redeeming your investment.
+      <Alert type="info" margin={{ vertical: 'medium' }}>
+        <div>
+          <HelpIcon src="/static/help-circle.svg" />
+          <HelpText>Make sure to select the correct account – linking the account cannot be undone</HelpText>
+        </div>
+      </Alert>
       <div>
         <Select
           options={cWallet.accounts}
