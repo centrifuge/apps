@@ -23,7 +23,7 @@ const run = async () => {
 
   const signer = new TransactionManager(wallet).connect(provider)
 
-  console.log(`Booting Dennis 2.0 as ${wallet.address}`)
+  console.log(`Booting Tinlake Bot as ${wallet.address}`)
   pools = await loadFromIPFS(provider)
 
   let cronJobs: Map<string, CronJob> = new Map<string, CronJob>()
