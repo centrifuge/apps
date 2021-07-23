@@ -6,6 +6,7 @@ import styled from 'styled-components'
 import Alert from '../../components/Alert'
 import { CentChainWalletState, connect } from '../../ducks/centChainWallet'
 import { usePolkadotExtensionInstalled } from '../../utils/usePolkadotExtensionInstalled'
+import { Warning } from '../Investment/View/styles'
 
 const HelpIcon = styled.img`
   height: 16px;
@@ -45,12 +46,11 @@ const CentChainWalletDialog: React.FC = () => {
         <br />
         Please first install the Polkadot Wallet extension to get started. Please reload this page after you have
         installed the extension.
-        <Alert type="info" margin={{ vertical: 'medium' }}>
-          <div>
-            <HelpIcon src="/static/help-circle.svg" />
-            <HelpText>To claim rewards, link your Centrifuge Chain account before redeeming your investment</HelpText>
-          </div>
-        </Alert>
+        <Warning>
+          <HelpIcon src="/static/help-circle.svg" />
+          <HelpText>To claim rewards, link your Centrifuge Chain account before redeeming your investment</HelpText>
+        </Warning>
+        <br />
         <Box direction="row" justify="end" margin={{ top: 'medium' }}>
           <Button
             primary={!clickedInstall}
