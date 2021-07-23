@@ -24,8 +24,6 @@ interface Props extends TransactionProps {
   activePool?: Pool
 }
 
-const Fixed27 = new BN(10).pow(new BN(27))
-
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const router = useRouter()
 
