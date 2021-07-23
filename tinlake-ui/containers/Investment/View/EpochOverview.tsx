@@ -14,6 +14,7 @@ import { AuthState } from '../../../ducks/auth'
 import { EpochData, PoolData, PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { Fixed27Base } from '../../../utils/ratios'
 import { secondsToHms } from '../../../utils/time'
 import { toPrecision } from '../../../utils/toPrecision'
 import { HelpIcon } from '../../Onboarding/styles'
@@ -148,7 +149,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             {epochData?.state === 'challenge-period-ended' && <h4>Orders computed</h4>}
 
             {epochData?.state === 'open' && (
-              <h5>{secondsToHms(epochData?.minimumEpochTimeLeft || 0)} until end of minimum duration</h5>
+              <Tooltip
+                title="Tinlake epochs have a minimum duration of 24 hours. Once the minimum duration has passed, the epoch will be closed and, if possible, the orders will be executed.
+              "
+              >
+                <h5>{secondsToHms(epochData?.minimumEpochTimeLeft || 0)} until end of minimum duration</h5>
+              </Tooltip>
             )}
             {epochData?.state === 'can-be-closed' && (
               <>
@@ -157,23 +163,44 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     <h5>To be closed</h5>
                   </Tooltip>
                 )}
-                {getSolutionState() === 'no-orders-locked' && <h5>No orders locked</h5>}
-                {getSolutionState() === 'no-executions' && <h5>Locked orders cannot be executed</h5>}
-                {getSolutionState() === 'partial-executions' && <h5>Locked orders can only be partially executed</h5>}
+                {getSolutionState() === 'no-orders-locked' && (
+                  <Tooltip title="The minimum epoch duration has passed but currently no orders are locked. The epoch will be closed once orders are locked and can be executed.">
+                    <h5>No orders locked</h5>
+                  </Tooltip>
+                )}
+                {getSolutionState() === 'no-executions' && (
+                  <Tooltip title="The minimum epoch duration has passed but the locked orders cannot be executed. This may be because the pool is oversubscribed or no liquidity is available for redemptions. The epoch will be closed and orders executed as soon as the pool state changes or liquidity is provided.">
+                    <h5>Locked orders cannot be executed</h5>
+                  </Tooltip>
+                )}
+                {getSolutionState() === 'partial-executions' && (
+                  <Tooltip title="The minimum epoch duration has passed but only a fraction of the locked orders could be executed. The epoch is not automatically closed to avoid unsustainable gas fees for small transaction amounts.">
+                    <h5>Locked orders can only be partially executed</h5>
+                  </Tooltip>
+                )}
               </>
             )}
             {epochData?.state === 'in-submission-period' && (
-              <h5>Minimum {secondsToHms(epochData?.challengeTime || 0)} remaining</h5>
+              <Tooltip title="The epoch has been closed and orders are currently being computed. After the computing period has ended the orders will be executed.">
+                <h5>Minimum {secondsToHms(epochData?.challengeTime || 0)} remaining</h5>
+              </Tooltip>
             )}
             {epochData?.state === 'in-challenge-period' && (
-              <h5>
-                {secondsToHms((epochData?.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000)} remaining
-              </h5>
+              <Tooltip title="The epoch has been closed and orders are currently being computed. After the computing period has ended the orders will be executed.">
+                <h5>
+                  {secondsToHms((epochData?.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000)}{' '}
+                  remaining...
+                </h5>
+              </Tooltip>
             )}
-            {epochData?.state === 'challenge-period-ended' && <h5>To be closed</h5>}
+            {epochData?.state === 'challenge-period-ended' && (
+              <Tooltip title="The epoch has been closed and orders have been computed. The orders will be executed shortly.">
+                <h5>To be closed</h5>
+              </Tooltip>
+            )}
           </LoadingValue>
         </EpochState>
-        <Caret style={{ marginLeft: 'auto', position: 'relative', top: '-2px' }}>
+        <Caret style={{ marginLeft: 'auto', position: 'relative', top: '0' }}>
           <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
         </Caret>
       </Box>
@@ -386,11 +413,39 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 </TableCell>
                 <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
                   <LoadingValue done={solution?.tinInvest !== undefined}>
-                    {formatCurrencyAmount((solution?.dropRedeem || new BN(0)).add(solution?.tinRedeem || new BN(0)))}
+                    {formatCurrencyAmount(
+                      (solution?.dropRedeem || new BN(0))
+                        .mul(poolData?.senior?.tokenPrice || new BN(0))
+                        .div(Fixed27Base)
+                        .add(
+                          (solution?.tinRedeem || new BN(0))
+                            .mul(poolData?.junior?.tokenPrice || new BN(0))
+                            .div(Fixed27Base)
+                        )
+                    )}
                   </LoadingValue>
                 </TableCell>
                 <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
-                  &nbsp;
+                  <LoadingValue
+                    done={poolData?.senior?.pendingRedemptions !== undefined && solution?.dropRedeem !== undefined}
+                  >
+                    {(poolData?.senior?.pendingRedemptions || new BN(0)).isZero() &&
+                    (poolData?.junior?.pendingRedemptions || new BN(0)).isZero()
+                      ? '0'
+                      : parseFloat(
+                          (solution?.dropRedeem || new BN(0))
+                            .add(solution?.tinInvest || new BN(0))
+                            .mul(new BN(10).pow(new BN(18)))
+                            .div(
+                              (poolData?.senior?.pendingRedemptions || new BN(1)).add(
+                                poolData?.junior?.pendingRedemptions || new BN(1)
+                              )
+                            )
+                            .div(new BN(10).pow(new BN(16)))
+                            .toString()
+                        )}
+                    %
+                  </LoadingValue>
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -432,7 +487,7 @@ const EpochState = styled.div`
 `
 
 const TableWrapper = styled.div`
-  margin-left: 46px;
+  margin-left: 0;
 `
 
 export default connect((state) => state, { createTransaction })(EpochOverview)
