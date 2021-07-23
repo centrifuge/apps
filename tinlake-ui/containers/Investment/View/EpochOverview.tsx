@@ -268,7 +268,26 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                   </LoadingValue>
                 </TableCell>
                 <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
-                  &nbsp;
+                  <LoadingValue
+                    done={poolData?.senior?.pendingInvestments !== undefined && solution?.dropInvest !== undefined}
+                  >
+                    {(poolData?.senior?.pendingInvestments || new BN(0)).isZero() &&
+                    (poolData?.junior?.pendingInvestments || new BN(0)).isZero()
+                      ? '0'
+                      : parseFloat(
+                          (solution?.dropInvest || new BN(0))
+                            .add(solution?.tinInvest || new BN(0))
+                            .mul(new BN(10).pow(new BN(18)))
+                            .div(
+                              (poolData?.senior?.pendingInvestments || new BN(1)).add(
+                                poolData?.junior?.pendingInvestments || new BN(1)
+                              )
+                            )
+                            .div(new BN(10).pow(new BN(16)))
+                            .toString()
+                        )}
+                    %
+                  </LoadingValue>
                 </TableCell>
               </TableRow>
             </TableBody>
