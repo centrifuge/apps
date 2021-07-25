@@ -30,7 +30,7 @@ class ManagementPage extends React.Component<Props> {
         <Header
           ipfsPools={ipfsPools}
           poolTitle={pool.metadata.shortName || pool.metadata.name}
-          selectedRoute={'/investments'}
+          selectedRoute={'/management'}
           menuItems={menuItems}
         />
         <Container>

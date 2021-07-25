@@ -94,50 +94,6 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
           >
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                Add/Remove TIN member
-              </Heading>
-            </Box>
-
-            <FormField label="Address">
-              <TextInput
-                value={juniorAddress}
-                placeholder="0x..."
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setJuniorAddress(event.currentTarget.value)
-                }}
-              />
-            </FormField>
-
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button
-                secondary
-                label="Remove"
-                onClick={() => {
-                  remove('junior')
-                }}
-                disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
-              />
-              <Button
-                primary
-                label="Add"
-                onClick={() => {
-                  add('junior')
-                }}
-                disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
-              />
-            </Box>
-          </Box>
-
-          <Box
-            width="medium"
-            pad="medium"
-            elevation="small"
-            round="xsmall"
-            margin={{ bottom: 'medium' }}
-            background="white"
-          >
-            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-              <Heading level="5" margin={'0'}>
                 Add/Remove DROP member
               </Heading>
             </Box>
@@ -168,6 +124,49 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
                   add('senior')
                 }}
                 disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
+              />
+            </Box>
+          </Box>
+          <Box
+            width="medium"
+            pad="medium"
+            elevation="small"
+            round="xsmall"
+            margin={{ bottom: 'medium' }}
+            background="white"
+          >
+            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+              <Heading level="5" margin={'0'}>
+                Add/Remove TIN member
+              </Heading>
+            </Box>
+
+            <FormField label="Address">
+              <TextInput
+                value={juniorAddress}
+                placeholder="0x..."
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  setJuniorAddress(event.currentTarget.value)
+                }}
+              />
+            </FormField>
+
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+              <Button
+                secondary
+                label="Remove"
+                onClick={() => {
+                  remove('junior')
+                }}
+                disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
+              />
+              <Button
+                primary
+                label="Add"
+                onClick={() => {
+                  add('junior')
+                }}
+                disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
               />
             </Box>
           </Box>
