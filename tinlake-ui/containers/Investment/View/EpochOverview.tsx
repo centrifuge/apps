@@ -487,7 +487,7 @@ const EpochState = styled.div`
 `
 
 const TableWrapper = styled.div`
-  margin-left: 0;
+  margin-left: 44px;
 `
 
 export default connect((state) => state, { createTransaction })(EpochOverview)

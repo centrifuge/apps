@@ -339,6 +339,11 @@ export function loadPool(
             returns: [[`maker.debt`, toBN]],
           },
           {
+            target: tinlake.contractAddresses.CLERK,
+            call: ['juniorStake()(uint)'],
+            returns: [[`maker.juniorStake`, toBN]],
+          },
+          {
             target: tinlake.contractAddresses.ASSESSOR,
             call: ['effectiveSeniorBalance()(uint)'],
             returns: [[`senior.effectiveBalance`, toBN]],

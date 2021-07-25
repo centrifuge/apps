@@ -43,6 +43,9 @@ interface Props {
 }
 
 const Header: React.FC<Props> = (props: Props) => {
+  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const poolData = pool?.data as PoolData | undefined
+
   const { poolTitle, selectedRoute, menuItems, transactions, auth, clear } = props
 
   const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
@@ -104,9 +107,9 @@ const Header: React.FC<Props> = (props: Props) => {
     },
   }
 
-  const filtMenuItems = menuItems.filter(
-    (item) => ((isDemo && item.env === 'demo') || item.env === '') && !item.secondary
-  )
+  const filtMenuItems = menuItems
+    .filter((item) => ((isDemo && item.env === 'demo') || item.env !== 'demo') && !item.secondary)
+    .filter((item) => (poolData?.isPoolAdmin ? true : item.env !== 'admin'))
 
   return (
     <Box

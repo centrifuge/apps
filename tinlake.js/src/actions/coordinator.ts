@@ -130,9 +130,9 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return this.pending(submissionTx)
     }
 
-    runSolver = async (state: State, orders: Orders) => {
+    runSolver = async (state: State, orders: Orders, calcInvestmentCapacity?: boolean) => {
       const weights = await this.getSolverWeights()
-      const solution = await calculateOptimalSolution(state, orders, weights)
+      const solution = await calculateOptimalSolution(state, orders, weights, calcInvestmentCapacity)
 
       if (!solution.isFeasible) {
         throw new Error('Failed to find a solution')
