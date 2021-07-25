@@ -44,7 +44,7 @@ class ManagementPage extends React.Component<Props> {
                     tinlake={tinlake}
                     render={() => (
                       <Box>
-                        <PoolManagement tinlake={tinlake} />
+                        <PoolManagement tinlake={tinlake} activePool={pool} />
                       </Box>
                     )}
                   />
