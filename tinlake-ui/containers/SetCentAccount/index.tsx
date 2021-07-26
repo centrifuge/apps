@@ -25,6 +25,10 @@ const HelpText = styled.span`
   font-weight: 800;
 `
 
+const LinkingWarning = styled(Warning)`
+  margin-bottom: 16px;
+`
+
 interface Props extends TransactionProps {
   tinlake: ITinlake
 }
@@ -121,10 +125,10 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
     <div>
       Select the Centrifuge Chain account you want to link to your Ethereum account below. Note: To claim rewards, link
       your Centrifuge Chain account before redeeming your investment.
-      <Warning>
+      <LinkingWarning>
         <HelpIcon src="/static/help-circle.svg" />
         <HelpText>Make sure to select the correct account – linking the account cannot be undone</HelpText>
-      </Warning>
+      </LinkingWarning>
       <div>
         <Select
           options={cWallet.accounts}
