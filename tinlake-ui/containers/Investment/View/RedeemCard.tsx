@@ -3,12 +3,31 @@ import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button, Heading } from 'grommet'
+import { CircleAlert } from 'grommet-icons'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
+import styled from 'styled-components'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { Warning } from './styles'
 import { Card } from './TrancheOverview'
+
+const LinkingAlert = styled(CircleAlert)`
+  height: 16px;
+  width: 16px;
+  vertical-align: text-top;
+`
+
+const HelpTitle = styled.span`
+  margin-bottom: 20px;
+  padding-left: 6px;
+  font-weight: 800;
+`
+
+const HelpText = styled.div`
+  padding-top: 8px;
+`
 
 interface Props extends TransactionProps {
   selectedPool?: Pool
@@ -90,7 +109,11 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
         onChange={onChange}
         disabled={disabled}
       />
-
+      <Warning>
+        <LinkingAlert />
+        <HelpTitle>No Centrifuge Chain Account Linked</HelpTitle>
+        <HelpText>To claim rewards, link your Centrifuge Chain account before redeeming your investment</HelpText>
+      </Warning>
       <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
         <Button primary label={'Redeem'} onClick={submit} disabled={error !== undefined || disabled} />
