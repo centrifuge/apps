@@ -3911,6 +3911,7 @@ __metadata:
     "@sentry/tracing": ^5.26.0
     "@types/aws-lambda": 8.10.59
     "@types/bn.js": 4.11.6
+    "@types/dompurify": ^2
     "@types/jest": 24.9.1
     "@types/jsonp": ^0.2.0
     "@types/next": 9.0.0
@@ -3929,6 +3930,7 @@ __metadata:
     chai: 4.2.0
     chart.js: 2.9.3
     decimal.js-light: 2.5.0
+    dompurify: ^2.3.0
     dotenv: 8.2.0
     express: 4.17.1
     graphql: 15.0.0
@@ -8739,6 +8741,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/dompurify@npm:^2":
+  version: 2.2.3
+  resolution: "@types/dompurify@npm:2.2.3"
+  dependencies:
+    "@types/trusted-types": "*"
+  checksum: db733587d47afc43f4a2eacb1e8fa7585240753ce54270c578d193e38835766412d4b9bf7000d84baeaac73d8fba3e5c671e9fc9727cf787ffe7e527f6f568fb
+  languageName: node
+  linkType: hard
+
 "@types/download@npm:^8.0.0":
   version: 8.0.1
   resolution: "@types/download@npm:8.0.1"
@@ -9512,6 +9523,13 @@ __metadata:
     "@types/react": "*"
     csstype: ^3.0.2
   checksum: a2ad66350374d45e4a453f09ab7e010eeedeb8ddf90b619106601db5364bad2e196734f92d8b8a240327f6be3e9a1440b874ac73d3733c08f0a40b25fb783e79
+  languageName: node
+  linkType: hard
+
+"@types/trusted-types@npm:*":
+  version: 2.0.2
+  resolution: "@types/trusted-types@npm:2.0.2"
+  checksum: a3c67c20a9c7addd166508f166e3f908583fe4f53438b13608c4faae3fed84bff561f7aaa46a54aec2e3abb3fbaf22217ce35480c9822378cb08847ff3e29290
   languageName: node
   linkType: hard
 
@@ -17661,6 +17679,13 @@ __metadata:
   dependencies:
     domelementtype: ^2.2.0
   checksum: 1bdb0ae6b9a93f4a2e8a77da304a435bfd35af0e52c5208f24277093b7fa2e6084cdbd4eb7fdd5c0ca5bf2c67736a19b258fe9e61588f4c49eaa0abde8d3595d
+  languageName: node
+  linkType: hard
+
+"dompurify@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "dompurify@npm:2.3.0"
+  checksum: e0d406677199638ce54ac2efcce69c20c00ca18ee2e32ca5ba2b486e7f9441773bf867c6e18b50a00535edaa8afff4ad06aebbb307654f5f88e7f1c40e80b749
   languageName: node
   linkType: hard
 

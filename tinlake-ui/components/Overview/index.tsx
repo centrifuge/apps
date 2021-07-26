@@ -9,6 +9,7 @@ import InvestmentOverview from '../../containers/Investment/View/InvestmentOverv
 import { PoolState } from '../../ducks/pool'
 import PageTitle from '../PageTitle'
 import OverviewHeader from './OverviewHeader'
+import Posts from './Posts'
 
 interface Props {
   pool?: PoolState
@@ -38,91 +39,108 @@ const Overview: React.FC<Props> = (props: Props) => {
           <OverviewHeader selectedPool={props.selectedPool as Pool} tinlake={props.tinlake} />
         </>
       )}
-      {/* <Box direction="row" gap="small">
-        <Box basis="2/3"> */}
-      <Heading level="4">
-        {isUpcoming ? `Upcoming Pool: ${props.selectedPool.metadata.name}` : 'Asset Originator Details'}
-      </Heading>
-      <Box
-        direction="column"
-        justify="start"
-        gap="medium"
-        elevation="small"
-        round="xsmall"
-        pad={{ horizontal: 'medium', top: 'medium', bottom: '0' }}
-        margin={{ bottom: 'large' }}
-        width="100%"
-        background="white"
-      >
-        <div>
-          <img src={props.selectedPool.metadata.media?.logo} style={{ maxHeight: '60px', maxWidth: '30%' }} />
-        </div>
-        <p style={{ margin: '0' }}>{props.selectedPool.metadata.description}</p>
 
-        <div>
-          {props.selectedPool.metadata.attributes &&
-            Object.keys(props.selectedPool.metadata.attributes).map((key: string) => (
-              <Box key={key} direction="row" gap="medium" height="44px">
-                <Type>{key}</Type>
-                {typeof props.selectedPool.metadata.attributes![key] === 'string' && (
-                  <Heading level="6" margin={'0'}>
-                    {props.selectedPool.metadata.attributes![key]}
-                  </Heading>
-                )}
-                {typeof props.selectedPool.metadata.attributes![key] !== 'string' && (
-                  <div style={{ position: 'relative', top: '-8px' }}>
-                    {Object.keys(props.selectedPool.metadata.attributes![key]).map((label: string) => (
-                      <>
-                        {label === 'Executive Summary' && (
-                          <AttributeLink
-                            onClick={() => openModal((props.selectedPool.metadata.attributes![key] as any)[label])}
-                          >
-                            <ButtonWithIcon label={label} icon={<Catalog />} size="small" />
-                          </AttributeLink>
-                        )}
-                        {label !== 'Executive Summary' && (
-                          <AttributeLink
-                            href={(props.selectedPool.metadata.attributes![key] as any)[label]}
-                            target="_blank"
-                          >
-                            <ButtonWithIcon
-                              label={label}
-                              icon={label.includes('Discussion') ? <Chat /> : <Globe />}
-                              size="small"
-                            />
-                          </AttributeLink>
-                        )}
-                      </>
-                    ))}
-                  </div>
-                )}
-              </Box>
-            ))}
-        </div>
-      </Box>
-      {/* </Box>{' '} */}
-      {/* <Box basis="1/3">
-          <Heading level="4">Tweets by @NewSilverLend</Heading>
+      <Box gap="medium" direction="row">
+        <Box style={{ flex: '1 1 auto' }}>
+          <Heading level="4">
+            {isUpcoming ? `Upcoming Pool: ${props.selectedPool.metadata.name}` : 'Asset Originator Details'}
+          </Heading>
           <Box
+            direction="column"
+            justify="start"
+            gap="medium"
             elevation="small"
             round="xsmall"
-            pad="small"
+            pad={{ horizontal: 'medium', top: 'medium', bottom: '0' }}
             margin={{ bottom: 'large' }}
             width="100%"
-            height="100%"
             background="white"
+            style={{ flex: '1 0 auto' }}
           >
-            <TwitterTimelineEmbed
-              sourceType="profile"
-              screenName="NewSilverLend"
-              autoHeight
-              noHeader
-              noFooter
-              noBorders
-            />
+            <div>
+              <img src={props.selectedPool.metadata.media?.logo} style={{ maxHeight: '60px', maxWidth: '30%' }} />
+            </div>
+            <p style={{ margin: '0' }}>{props.selectedPool.metadata.description}</p>
+
+            <div>
+              {props.selectedPool.metadata.attributes &&
+                Object.keys(props.selectedPool.metadata.attributes).map((key: string) => (
+                  <Box key={key} direction="row" gap="medium" height="44px">
+                    <Type>{key}</Type>
+                    {typeof props.selectedPool.metadata.attributes![key] === 'string' && (
+                      <Heading level="6" margin={'0'}>
+                        {props.selectedPool.metadata.attributes![key]}
+                      </Heading>
+                    )}
+                    {typeof props.selectedPool.metadata.attributes![key] !== 'string' && (
+                      <div style={{ position: 'relative', top: '-8px' }}>
+                        {Object.keys(props.selectedPool.metadata.attributes![key]).map((label: string) => (
+                          <>
+                            {label === 'Executive Summary' && (
+                              <AttributeLink
+                                onClick={() => openModal((props.selectedPool.metadata.attributes![key] as any)[label])}
+                              >
+                                <ButtonWithIcon label={label} icon={<Catalog />} size="small" />
+                              </AttributeLink>
+                            )}
+                            {label !== 'Executive Summary' && (
+                              <AttributeLink
+                                href={(props.selectedPool.metadata.attributes![key] as any)[label]}
+                                target="_blank"
+                              >
+                                <ButtonWithIcon
+                                  label={label}
+                                  icon={label.includes('Discussion') ? <Chat /> : <Globe />}
+                                  size="small"
+                                />
+                              </AttributeLink>
+                            )}
+                          </>
+                        ))}
+                      </div>
+                    )}
+                  </Box>
+                ))}
+            </div>
           </Box>
         </Box>
-      </Box> */}
+
+        {props.selectedPool.metadata.discourseLink ||
+          (true && (
+            <Box style={{ flex: '1 1 40%' }}>
+              <Heading level="4">Latest posts</Heading>
+              <Box
+                direction="column"
+                justify="start"
+                gap="medium"
+                elevation="small"
+                round="xsmall"
+                style={{
+                  overflowY: 'auto',
+                  height: '100%',
+                  minHeight: '400px',
+                  position: 'relative',
+                }}
+                margin={{ bottom: 'large' }}
+                width="100%"
+                background="white"
+              >
+                <Box
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    position: 'absolute',
+                    left: '0',
+                    top: '0',
+                  }}
+                  pad="medium"
+                >
+                  <Posts pool={props.selectedPool} />
+                </Box>
+              </Box>
+            </Box>
+          ))}
+      </Box>
 
       <Heading level="4">Pool Balance</Heading>
       <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
