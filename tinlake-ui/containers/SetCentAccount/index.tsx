@@ -1,6 +1,7 @@
 import { Tooltip } from '@centrifuge/axis-tooltip'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Select } from 'grommet'
+import { CircleAlert } from 'grommet-icons'
 import * as React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -14,7 +15,7 @@ import { isCentChainAddr } from '../../services/centChain/isCentChainAddr'
 import { shortAddr } from '../../utils/shortAddr'
 import { Warning } from '../Investment/View/styles'
 
-const HelpIcon = styled.img`
+const LinkingAlert = styled(CircleAlert)`
   height: 16px;
   width: 16px;
   vertical-align: text-top;
@@ -126,7 +127,7 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
       Select the Centrifuge Chain account you want to link to your Ethereum account below. Note: To claim rewards, link
       your Centrifuge Chain account before redeeming your investment.
       <LinkingWarning>
-        <HelpIcon src="/static/help-circle.svg" />
+        <LinkingAlert />
         <HelpText>Make sure to select the correct account – linking the account cannot be undone</HelpText>
       </LinkingWarning>
       <div>

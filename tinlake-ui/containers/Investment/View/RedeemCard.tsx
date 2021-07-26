@@ -3,6 +3,7 @@ import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button, Heading } from 'grommet'
+import { CircleAlert } from 'grommet-icons'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -12,8 +13,7 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { Warning } from './styles'
 import { Card } from './TrancheOverview'
 
-const HelpIcon = styled.img`
-  font-weight: 800;
+const LinkingAlert = styled(CircleAlert)`
   height: 16px;
   width: 16px;
   vertical-align: text-top;
@@ -110,7 +110,7 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
         disabled={disabled}
       />
       <Warning>
-        <HelpIcon src="/static/help-circle.svg" />
+        <LinkingAlert />
         <HelpTitle>No Centrifuge Chain Account Linked</HelpTitle>
         <HelpText>To claim rewards, link your Centrifuge Chain account before redeeming your investment</HelpText>
       </Warning>
