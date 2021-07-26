@@ -127,8 +127,20 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box background="#eee" pad={{ horizontal: '34px', bottom: 'xsmall' }} round="xsmall" margin={{ bottom: 'medium' }}>
-      <Box direction="row" pad={'26px 0 20px 0'} onClick={() => setOpen(!open)} style={{ cursor: 'pointer' }}>
+    <Box
+      background="white"
+      elevation="small"
+      pad={{ horizontal: '34px', bottom: 'xsmall' }}
+      round="xsmall"
+      margin={{ bottom: 'medium' }}
+    >
+      <Box
+        direction="row"
+        focusIndicator={false}
+        pad={'26px 0 20px 0'}
+        onClick={() => setOpen(!open)}
+        style={{ cursor: 'pointer' }}
+      >
         {epochData?.state === 'open' && <HelpIcon src="/static/clock.svg" />}
         {epochData?.state === 'can-be-closed' && getSolutionState() !== 'to-be-closed' && (
           <HelpIcon src="/static/help-circle.svg" />
@@ -139,7 +151,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
           <HelpIcon src="/static/clock.svg" />
         )}
         <EpochState>
-          <LoadingValue done={epochData?.state !== undefined && solution !== undefined} maxWidth={120}>
+          <LoadingValue done={epochData?.state !== undefined} maxWidth={120}>
             <h3>Epoch {epochData?.id}</h3>
 
             {epochData?.state === 'open' && <h4>Ongoing</h4>}
