@@ -7,7 +7,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts'
 import { PoolsDailyData, PoolsData } from '../../ducks/pools'
 import { maybeLoadRewards, RewardsState } from '../../ducks/rewards'
+import { getWCFGPrice } from '../../ducks/userRewards'
 import { dateToYMD } from '../../utils/date'
+import { useCFGYield } from '../../utils/hooks'
 import { dynamicPrecision } from '../../utils/toDynamicPrecision'
 import NumberDisplay from '../NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from './styles'
@@ -24,9 +26,16 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
   const [hoveredDay, setHoveredDay] = React.useState<number | undefined>(undefined)
 
   const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
+
+  const cfgYield = useCFGYield()
+
   const dispatch = useDispatch()
   React.useEffect(() => {
     dispatch(maybeLoadRewards())
+  }, [])
+
+  React.useEffect(() => {
+    dispatch(getWCFGPrice())
   }, [])
 
   const investorRewardsEarned = rewards.data?.toDateRewardAggregateValue
@@ -43,34 +52,15 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Box
-        width="460px"
+        width="568px"
         elevation="small"
         round="xsmall"
         background="white"
-        margin={{ horizontal: '16px' }}
+        margin={{ right: '16px' }}
         direction="row"
         pad="medium"
       >
-        <Box pad={{ top: '8px' }} width="200px">
-          <Cont>
-            <TokenLogo src={`/static/dai.svg`} />
-            <Value>
-              <NumberDisplay
-                value={hoveredPoolValue?.toString() || baseToDisplay(props.pools.totalValue, 18)}
-                precision={0}
-              />
-            </Value>{' '}
-            <Unit>DAI</Unit>
-          </Cont>
-          <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
-        </Box>
-        <Box
-          width="200px"
-          height="80px"
-          pad={{ left: 'medium' }}
-          margin={{ left: 'medium' }}
-          style={{ borderLeft: '1px solid #D8D8D8' }}
-        >
+        <Box width="254px" height="80px">
           <ResponsiveContainer>
             <AreaChart
               data={poolsDailyData}
@@ -107,18 +97,36 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
             </AreaChart>
           </ResponsiveContainer>
         </Box>
+        <Box
+          width="254px"
+          pad={{ left: 'medium', top: '8px' }}
+          margin={{ left: 'medium' }}
+          style={{ borderLeft: '1px solid #D8D8D8' }}
+        >
+          <Cont>
+            <TokenLogo src={`/static/dai.svg`} />
+            <Value>
+              <NumberDisplay
+                value={hoveredPoolValue?.toString() || baseToDisplay(props.pools.totalValue, 18)}
+                precision={0}
+              />
+            </Value>{' '}
+            <Unit>DAI</Unit>
+          </Cont>
+          <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
+        </Box>
       </Box>
       <Box
-        width="430px"
+        width="568px"
         elevation="small"
         round="xsmall"
         background="white"
-        margin={{ horizontal: '16px' }}
+        margin={{ left: '16px' }}
         direction="row"
         pad="medium"
         justify="center"
       >
-        <Box>
+        <Box width="208px">
           <Cont style={{ marginTop: '8px' }}>
             <TokenLogo src={`/static/cfg-white.svg`} />
             <Value>
@@ -131,8 +139,23 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
           </Cont>
           <Label>Total Rewards Earned</Label>
         </Box>
-        <Box margin={{ left: 'medium' }} justify="center">
-          <Button label="Claim Rewards" primary onClick={goToRewards} color="#FCBA59" />
+        <Box
+          width="300px"
+          style={{ borderLeft: '1px solid #D8D8D8', display: 'flex', flexDirection: 'row' }}
+          pad={{ left: 'medium', top: '8px' }}
+        >
+          <Box width="150px">
+            <Cont>
+              <Value>
+                <NumberDisplay value={cfgYield} precision={2} />
+              </Value>{' '}
+              <Unit>%</Unit>
+              <Label style={{ lineHeight: '20px' }}>Current annualized reward APR</Label>
+            </Cont>
+          </Box>
+          <Box margin={{ left: 'medium' }} justify="center" width="150px">
+            <Button label="Claim CFG" primary onClick={goToRewards} style={{ padding: '8px', width: '118px' }} />
+          </Box>
         </Box>
       </Box>
     </>

@@ -3,6 +3,7 @@ import BN from 'bn.js'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
+import { ChainId, UniswapPair } from 'simple-uniswap-sdk'
 import config from '../config'
 import Apollo from '../services/apollo'
 import { centChainService } from '../services/centChain'
@@ -16,6 +17,7 @@ const LOAD_CENT_CHAIN = 'tinlake-ui/user-rewards/LOAD_CENT_CHAIN'
 const RECEIVE_CENT_CHAIN = 'tinlake-ui/user-rewards/RECEIVE_CENT_CHAIN'
 const LOAD_CLAIMS = 'tinlake-ui/user-rewards/LOAD_CLAIMS'
 const RECEIVE_CLAIMS = 'tinlake-ui/user-rewards/RECEIVE_CLAIMS'
+const RECEIVE_WCFG_PRICE = 'tinlake-io/user-rewards/RECEIVE_WCFG_PRICE'
 
 // just used for readability
 type AccountIDString = string
@@ -28,6 +30,7 @@ export interface UserRewardsState {
   claims: null | RewardClaim[]
   ethLinkState: null | 'loading' | 'found'
   ethLink: null | string
+  wCFGPrice: null | string
 }
 
 /**
@@ -112,6 +115,7 @@ const initialState: UserRewardsState = {
   claims: null,
   ethLinkState: null,
   ethLink: null,
+  wCFGPrice: null,
 }
 
 export default function reducer(
@@ -158,6 +162,8 @@ export default function reducer(
       return { ...state, ethLink: null, ethLinkState: 'loading' }
     case RECEIVE_ETH_LINK:
       return { ...state, ethLink: action.link, ethLinkState: 'found' }
+    case RECEIVE_WCFG_PRICE:
+      return { ...state, wCFGPrice: action.data }
     default:
       return state
   }
@@ -254,5 +260,24 @@ export function maybeLoadAndApplyClaims(): ThunkAction<
     } else {
       dispatch(loadClaims())
     }
+  }
+}
+
+export function getWCFGPrice(): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
+  return async (dispatch) => {
+    const uniswapPair = new UniswapPair({
+      // the contract address of the token you want to convert FROM
+      toTokenContractAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+      // the contract address of the token you want to convert TO
+      fromTokenContractAddress: '0xc221b7E65FfC80DE234bbB6667aBDd46593D34F0',
+      // the ethereum address of the user using this part of the dApp
+      ethereumAddress: '0x0000000000000000000000000000000000000000',
+      chainId: ChainId.MAINNET,
+    })
+
+    const uniswapPairFactory = await uniswapPair.createFactory()
+    const wCFGPrice = await uniswapPairFactory.trade('1')
+
+    dispatch({ data: wCFGPrice.expectedConvertQuote, type: RECEIVE_WCFG_PRICE })
   }
 }

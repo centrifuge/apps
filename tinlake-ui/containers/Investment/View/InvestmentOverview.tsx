@@ -10,6 +10,7 @@ import { Pool, UpcomingPool } from '../../../config'
 import { loadLoans, LoansState, SortableLoan } from '../../../ducks/loans'
 import { PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { useYield } from '../../../utils/hooks'
 import { toPrecision } from '../../../utils/toPrecision'
 import {
   BalanceSheetDiagram,
@@ -71,13 +72,13 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
   const poolData = pool?.data as PoolData | undefined
 
-  const dropRate = poolData?.senior?.interestRate || undefined
-
   const dropTotalValue = poolData?.senior ? poolData?.senior.totalSupply.mul(poolData.senior!.tokenPrice) : undefined
   const tinTotalValue = poolData ? poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice) : undefined
 
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
+
+  const { dropYield } = useYield()
 
   const reserveRatio =
     poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
@@ -228,7 +229,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   </LoadingValue>
                 </span>
                 <Box margin={{ left: 'auto' }} direction="row">
-                  {toPrecision(feeToInterestRate(dropRate || '0'), 2)}% APR
+                  {dropYield} % APY (30 days)
                 </Box>
               </Box>
             </Box>

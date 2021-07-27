@@ -18,7 +18,7 @@
   },
   "dropAPR": {
     "title": "DROP APR",
-    "description": "Annual interest rate (APR) at which the DROP tokens accrues interest applied on outstanding financings (compounded per second)."
+    "description": "DROP tokens earn yield on the outstanding assets at the DROP APR. The effective annual yield may deviate due to compounding effects or unused liquidity in the pool reserve. The 30d DROP APY is the effective annualized return of the pool's DROP token over the last 30 days."
   },
   "dropSupply": {
     "title": "DROP Supply",
@@ -92,5 +92,17 @@
   "oversubscribed": {
     "title": "Oversubscribed pool",
     "description": "This pool is currently oversubscribed and not open for investments. Locked investment orders may be pending until the pool opens again."
+  },
+  "dropApy": {
+    "title": "Drop APY",
+    "description": "The 30d DROP yield is the effective annualized return of the pool's DROP token over the last 30 days."
+  },
+  "dropApr": {
+    "title": "Drop APR",
+    "description": "DROP tokens earn yield on the outstanding assets at the DROP APR. The effective APY may deviate due to compounding effects or unused liquidity in the pool reserve."
+  },
+  "dropInvestment": {
+    "title": "Drop Investment",
+    "description": "DROP tokens earn yield on the outstanding assets at the DROP APR. The effective APY may deviate due to compounding effects or unused liquidity in the pool reserve. The 30d DROP APY is the effective annualized return of the pool's DROP token over the last 30 days."
   }
 }

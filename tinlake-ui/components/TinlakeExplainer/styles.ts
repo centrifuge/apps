@@ -1,14 +1,13 @@
 import styled from 'styled-components'
 
 export const Container = styled.div`
-  flex: 1;
-  border-bottom: 1px solid #d8d8d8;
-  padding-bottom: 16px;
+  padding-bottom: 12px;
 `
 
 export const Row = styled.div`
   cursor: pointer;
   display: flex;
+  width: fit-content;
 `
 
 export const Primer = styled.div`
