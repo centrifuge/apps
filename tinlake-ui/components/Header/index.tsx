@@ -16,7 +16,7 @@ import { loadPortfolio, PortfolioState } from '../../ducks/portfolio'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
-import { toPrecision } from '../../utils/toPrecision'
+import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
 import { useCFGRewards } from '../../utils/useCFGRewards'
 import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
 import { Web3Wallet } from '../Web3Wallet'
@@ -113,7 +113,7 @@ const Header: React.FC<Props> = (props: Props) => {
       <Box as="a" direction="row">
         <Icon src="/static/DAI.svg" />
         <HoldingValue>
-          {portfolio.totalValue && addThousandsSeparators(toPrecision(baseToDisplay(portfolio.totalValue, 18), 0))}
+          {addThousandsSeparators(toDynamicPrecision(baseToDisplay(portfolio.totalValue || '0', 18)))}
         </HoldingValue>
         <Unit>DAI</Unit>
       </Box>
@@ -155,14 +155,14 @@ const Header: React.FC<Props> = (props: Props) => {
       <AccountWrapper align="center" direction="row">
         <Holdings>
           {address && (
-            <Box pad={{ left: '14px', right: '14px' }}>
-              <AxisTooltip title="View your rewards">{rewardsLink}</AxisTooltip>
-            </Box>
-          )}
-          {address && portfolio.totalValue && !portfolio.totalValue.isZero() && (
-            <Box pad={{ left: '14px', right: '14px' }}>
-              <AxisTooltip title="View your investment portfolio">{portfolioLink}</AxisTooltip>
-            </Box>
+            <>
+              <Box pad={{ left: '14px', right: '14px' }}>
+                <AxisTooltip title="View your rewards">{rewardsLink}</AxisTooltip>
+              </Box>
+              <Box pad={{ left: '14px', right: '14px' }}>
+                <AxisTooltip title="View your investment portfolio">{portfolioLink}</AxisTooltip>
+              </Box>
+            </>
           )}
         </Holdings>
         <WalletNav style={{ flex: '0 0 auto', paddingLeft: 16 }}>
@@ -209,7 +209,7 @@ const Header: React.FC<Props> = (props: Props) => {
                 {address && (
                   <Box gap="large">
                     {rewardsLink}
-                    {portfolio.totalValue && portfolioLink}
+                    {portfolioLink}
                   </Box>
                 )}
                 <Box gap="medium">
