@@ -1,6 +1,6 @@
 import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import { Anchor, Box, Button, Layer } from 'grommet'
+import { Box, Button, Layer } from 'grommet'
 import { Close as CloseIcon, Menu as MenuIcon } from 'grommet-icons'
 import Link from 'next/link'
 import Router, { useRouter } from 'next/router'
@@ -154,9 +154,11 @@ const Header: React.FC<Props> = (props: Props) => {
       </NavWrapper>
       <AccountWrapper align="center" direction="row">
         <Holdings>
-          <Box pad={{ left: '14px', right: '14px' }}>
-            <AxisTooltip title="View your rewards">{rewardsLink}</AxisTooltip>
-          </Box>
+          {address && (
+            <Box pad={{ left: '14px', right: '14px' }}>
+              <AxisTooltip title="View your rewards">{rewardsLink}</AxisTooltip>
+            </Box>
+          )}
           {address && portfolio.totalValue && !portfolio.totalValue.isZero() && (
             <Box pad={{ left: '14px', right: '14px' }}>
               <AxisTooltip title="View your investment portfolio">{portfolioLink}</AxisTooltip>
@@ -191,12 +193,10 @@ const Header: React.FC<Props> = (props: Props) => {
             onClickOutside={() => setMenuOpen(false)}
             onEsc={() => setMenuOpen(false)}
           >
-            <Box pad={{ top: '20px', right: '20px', bottom: '20px', left: '40px' }} width="300px">
-              <Box fill="horizontal" align="end" width="20" height="20">
-                <Anchor onClick={() => setMenuOpen(false)}>
-                  <CloseIcon size="medium" />
-                </Anchor>
-              </Box>
+            <Box pad="40px" width="300px">
+              <CloseButton onClick={() => setMenuOpen(false)}>
+                <CloseIcon size="16px" />
+              </CloseButton>
               <Box gap="xlarge">
                 {poolTitle && filtMenuItems.length > 0 && (
                   <Box gap="medium">
@@ -273,15 +273,6 @@ const HeaderBar = styled(Box)`
   }
 `
 
-const Holdings = styled.div`
-  display: flex;
-  flex-direction: row;
-
-  @media (max-width: 1199px) {
-    display: none;
-  }
-`
-
 const HoldingValue = styled.div`
   font-weight: 500;
   font-size: 14px;
@@ -296,9 +287,29 @@ const Unit = styled.div`
 `
 
 const Icon = styled.img`
-  margin-right: 5px;
   width: 18px;
   height: 18px;
+  margin-right: 5px;
+`
+
+const Holdings = styled.div`
+  display: flex;
+  flex-direction: row;
+
+  @media (min-width: 900px) and (max-width: 1199px) {
+    ${Icon} {
+      width: 30px;
+      height: 30px;
+      margin-right: 0;
+    }
+    ${Unit}, ${HoldingValue} {
+      display: none;
+    }
+  }
+
+  @media (max-width: 899px) {
+    display: none;
+  }
 `
 
 const DesktopLogo = styled.img`
@@ -337,10 +348,29 @@ const Hamburger = styled(Box)`
   border: 1px solid #000;
   background-color: #fff;
   box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.1);
+  z-index: 5;
 
   svg {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
+  }
+`
+
+const CloseButton = styled.button`
+  width: 40px;
+  height: 40px;
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-radius: 50%;
+  background-color: #000;
+
+  path {
+    stroke: #fff !important;
   }
 `
 
