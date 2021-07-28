@@ -26,11 +26,7 @@ export const interestRateToFee = (interestRate: string): string => {
 
   const i = new Decimal(interestRate).div(100)
 
-  const fee = i
-    .div(n)
-    .plus(1)
-    .mul('1e27')
-    .toDecimalPlaces(0)
+  const fee = i.div(n).plus(1).mul('1e27').toDecimalPlaces(0)
 
   const feeString = fee.toString()
 

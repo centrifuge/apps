@@ -10,6 +10,8 @@ jest.mock('../../http-client')
 const httpClient = require('../../http-client').httpClient
 
 describe('Nfts', () => {
+  const template = '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef'
+
   const registries = [
     {
       label: 'First Registry',
@@ -112,6 +114,7 @@ describe('Nfts', () => {
           viewMode={true}
           user={defaultUser}
           registries={registries}
+          template={template}
         />
       )
     )
@@ -121,20 +124,10 @@ describe('Nfts', () => {
     expect(dataTable.prop('data')).toEqual(document.header.nfts)
     expect(rows.length).toEqual(2)
     // make sure the token_id gets converted to int
-    expect(
-      rows
-        .at(0)
-        .find('th')
-        .at(0)
-        .text()
-    ).toBe('59745497403145064117625740497207663202436576057166382573054801816399596350780')
-    expect(
-      rows
-        .at(1)
-        .find('th')
-        .at(0)
-        .text()
-    ).toBe('18')
+    expect(rows.at(0).find('th').at(0).text()).toBe(
+      '59745497403145064117625740497207663202436576057166382573054801816399596350780'
+    )
+    expect(rows.at(1).find('th').at(0).text()).toBe('18')
     expect(component.find(Button).length).toEqual(0)
   })
 
@@ -151,6 +144,7 @@ describe('Nfts', () => {
           viewMode={false}
           user={defaultUser}
           registries={registries}
+          template={template}
         />
       )
     )
@@ -181,6 +175,7 @@ describe('Nfts', () => {
           viewMode={false}
           user={defaultUser}
           registries={registries}
+          template={template}
         />
       )
     )

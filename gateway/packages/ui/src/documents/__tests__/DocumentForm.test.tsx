@@ -160,13 +160,7 @@ describe('DocumentForm', () => {
       )
     )
     expect(documentForm.find(ViewModeFormContainer).prop('isViewMode')).toEqual(true)
-    expect(
-      documentForm
-        .find(Section)
-        .first()
-        .find(SearchSelect)
-        .prop('disabled')
-    ).not.toBeUndefined()
+    expect(documentForm.find(Section).first().find(SearchSelect).prop('disabled')).not.toBeUndefined()
   })
 
   it('Should have schema select disabled in edit mode', () => {
@@ -181,13 +175,7 @@ describe('DocumentForm', () => {
         />
       )
     )
-    expect(
-      documentForm
-        .find(Section)
-        .first()
-        .find(SearchSelect)
-        .prop('disabled')
-    ).not.toBeUndefined()
+    expect(documentForm.find(Section).first().find(SearchSelect).prop('disabled')).not.toBeUndefined()
   })
 
   it('Should render attributes section if document has a _schema attribute defined', () => {
@@ -202,17 +190,8 @@ describe('DocumentForm', () => {
       withAllProvidersAndContexts(<DocumentForm document={documents[1]} schemas={defaultSchemas} onSubmit={onSubmit} />)
     )
     expect(documentForm.find(Attributes).length).toEqual(0)
-    documentForm
-      .find(Section)
-      .first()
-      .find(SearchSelect)
-      .simulate('click')
-    documentForm
-      .find(SelectContainer)
-      .first()
-      .find('button')
-      .first()
-      .simulate('click')
+    documentForm.find(Section).first().find(SearchSelect).simulate('click')
+    documentForm.find(SelectContainer).first().find('button').first().simulate('click')
     expect(documentForm.find(Attributes).length).toEqual(1)
   })
 

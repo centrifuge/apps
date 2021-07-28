@@ -1,7 +1,7 @@
 import { Drop } from 'grommet'
 import React from 'react'
 import { preload } from '../../utils/images'
-import { InnerMenu, MenuItem, Name, Title, Wrapper } from './styles'
+import { HelpMenuWrapper, InnerMenu, MenuItem, Name, Title } from './styles'
 
 const HelpMenu: React.FC<{}> = () => {
   const ref = React.useRef<HTMLDivElement>(null)
@@ -35,14 +35,14 @@ const HelpMenu: React.FC<{}> = () => {
 
   return (
     <>
-      <Wrapper
+      <HelpMenuWrapper
         onClick={() => {
           if (!justClosed) setOpen(!open)
           if (!hasPreloaded) loadImages()
         }}
       >
         <div ref={ref}>?</div>
-      </Wrapper>
+      </HelpMenuWrapper>
 
       {open && ref.current && (
         <Drop

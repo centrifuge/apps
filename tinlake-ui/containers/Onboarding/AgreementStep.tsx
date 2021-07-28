@@ -17,7 +17,7 @@ interface Props {
   tranche?: 'senior' | 'junior'
   onboarding: OnboardingState
   agreement: AgreementsStatus | undefined
-  agreementStatus: 'none' | 'signed' | 'countersigned' | 'declined'
+  agreementStatus: 'none' | 'signed' | 'countersigned' | 'declined' | 'voided'
   whitelistStatus: boolean
 }
 
@@ -53,7 +53,9 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
           />
         )}
         <StepTitle inactive={!props.active}>
-          {props.agreementStatus === 'none' || props.agreementStatus === 'declined'
+          {props.agreementStatus === 'none' ||
+          props.agreementStatus === 'declined' ||
+          props.agreementStatus === 'voided'
             ? `Sign the Subscription Agreement`
             : props.agreementStatus === 'countersigned'
             ? `${props.agreement?.name} signed`
@@ -62,13 +64,17 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
       </StepHeader>
       {props.active &&
         !isRestricted &&
-        (props.agreementStatus === 'none' || props.agreementStatus === 'declined') &&
+        (props.agreementStatus === 'none' ||
+          props.agreementStatus === 'declined' ||
+          props.agreementStatus === 'voided') &&
         props.agreement &&
         !session && (
           <StepBody>
             <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
               {props.agreementStatus === 'declined'
                 ? `The issuer has declined signing your subscription agreement. This may be due to missing or incorrect information provided in the subscription agreement. Please check your email inbox for further feedback and instructions. To continue, sign in again with Securitize, then complete and sign a new subscription agreement to finalize your onboarding process.`
+                : props.agreementStatus === 'voided'
+                ? `The agreement has expired. To continue, sign in again with Securitize, then complete and sign a new subscription agreement to finalize your onboarding process.`
                 : `Start the final step of signing the ${props.agreement.name} for ${poolName} by signing in with your
               Securitize iD.`}
             </Paragraph>
@@ -110,13 +116,17 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
       )}
       {props.active &&
         !isRestricted &&
-        (props.agreementStatus === 'none' || props.agreementStatus === 'declined') &&
+        (props.agreementStatus === 'none' ||
+          props.agreementStatus === 'declined' ||
+          props.agreementStatus === 'voided') &&
         props.agreement &&
         session && (
           <StepBody>
             <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
               {props.agreementStatus === 'declined'
                 ? `The issuer has declined signing your subscription agreement. This may be due to missing or incorrect information provided in the subscription agreement. Please check your email inbox for further feedback and instructions. Please click the button below to complete a new subscription agreement to finalize your onboarding process.`
+                : props.agreementStatus === 'voided'
+                ? `The agreement has expired. Please click the button below to complete a new subscription agreement to finalize your onboarding process.`
                 : `Finalize onboarding by signing the ${
                     props.agreement.name
                   } for ${poolName}. Note that the minimum investment

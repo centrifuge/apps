@@ -5,7 +5,7 @@ import Decimal from 'decimal.js-light'
 import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
-import { Pool } from '../../../config'
+import { LoadPool, Pool } from '../../../config'
 import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { Description } from './styles'
@@ -13,9 +13,11 @@ import { Description } from './styles'
 interface Props extends TransactionProps {
   tinlake: ITinlake
   selectedPool?: Pool
-  loadPool?: (tinlake: any) => Promise<void>
+  loadPool?: LoadPool
   setShowMaxReserveForm: (value: boolean) => void
 }
+
+const e27 = new BN(10).pow(new BN(27))
 
 const MaxReserveForm: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
@@ -73,32 +75,34 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
-      props.loadPool && props.loadPool(props.tinlake)
+      props.loadPool && props.loadPool(props.tinlake, props.selectedPool?.metadata.maker?.ilk)
       props.setShowMaxReserveForm(false)
     }
   }, [status])
 
-  // TODO: fix and then refactor these
+  // TODO: refactor
   const debtCeiling = (poolData?.maker?.line || new BN('0')).div(new BN(10).pow(new BN(45 - 18)))
-  const tinSupplyDAI = (poolData?.junior?.totalSupply || new BN(0))
-    .mul(poolData?.junior?.tokenPrice || new BN(0))
-    .div(new BN(10).pow(new BN(27)))
-  const effectiveDropBalanceDAI = (poolData?.senior?.effectiveBalance || new BN(0))
-    .mul(poolData?.senior?.tokenPrice || new BN(0))
-    .div(new BN(10).pow(new BN(27)))
+  const maxRaise = mat
+    ? (poolData?.netAssetValue || new BN(0))
+        .add(poolData?.reserveAndRemainingCredit || new BN(0))
+        .mul(e27.sub(poolData?.minJuniorRatio || new BN(0)))
+        .div(e27)
+        .sub(poolData?.senior?.debt || new BN(0))
+        .sub(poolData?.senior?.balance || new BN(0))
+        .div(
+          (mat || new BN(0))
+            .sub(e27)
+            .sub(e27)
+            .mul(e27.sub(poolData?.minJuniorRatio || new BN(0)))
+            .div(e27)
+            .add(e27)
+            .div(new BN(10).pow(new BN(27 - 18)))
+        )
+        .mul(new BN(10).pow(new BN(27 + 18)))
+        .div(mat || new BN(0))
+    : new BN(0)
 
-  const maxDropDAI = tinSupplyDAI
-    .mul(new BN(10).pow(new BN(27)))
-    .div(poolData?.minJuniorRatio || new BN(0))
-    .mul(new BN(10).pow(new BN(27)).sub(poolData?.minJuniorRatio || new BN(0)))
-    .div(new BN(10).pow(new BN(27)))
-  const maxCreditline =
-    mat && !mat.isZero()
-      ? maxDropDAI
-          .sub(effectiveDropBalanceDAI)
-          .mul(new BN(10).pow(new BN(27)))
-          .div(mat)
-      : new BN('0')
+  const maxCreditline = (poolData?.maker?.creditline || new BN(0)).add(maxRaise)
 
   return (
     <Box>

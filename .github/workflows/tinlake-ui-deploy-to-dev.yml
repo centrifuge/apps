@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - 'tinlake-ui/**'
+      - '.github/workflows/tinlake-ui-deploy-to-dev.yml'
 
 jobs:
   build-and-deploy:
@@ -18,32 +19,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Get Yarn Cache Directory Path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: Cache Node Modules
-        id: yarn-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: Cache Next.js Bundle
-        uses: actions/cache@v2
-        with:
-          path: ${{ github.workspace }}/tinlake-ui/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}
-
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
           node-version: '12'
 
+      - name: Restore Yarn Workspaces
+        id: yarn-cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+
       - name: Install Dependencies
-        run: yarn
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install
+
+      - name: Cache Next.js Bundle
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/tinlake-ui/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}
 
       - name: Lint
         run: yarn lint
@@ -62,7 +59,7 @@ jobs:
           NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.amber.centrifuge.io/'
           NEXT_PUBLIC_POOL_REGISTRY: '0x8FE85CeAe6157C1dfcDD1c5ec99361c9722d97de'
           NEXT_PUBLIC_POOLS_CONFIG: 'kovanStaging'
-          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmUh2DfRCejKTXZnWq364U4ZLuNAbRuqqQZmX98SkV32uZ'
+          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmVb3MM5A9d5MWjpdTXuNMrZs6siaJRyu4dWEqmJ14fo1h'
           NEXT_PUBLIC_PORTIS_KEY: 'bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f'
           NEXT_PUBLIC_REWARDS_TREE_URL: 'https://storage.googleapis.com/rad-rewards-trees-kovan-staging/latest.json'
           NEXT_PUBLIC_RPC_URL: 'https://kovan.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5'

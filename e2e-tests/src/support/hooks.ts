@@ -3,14 +3,14 @@ import { After, Before, Status } from '@cucumber/cucumber'
 import { closeBrowser, openBrowser, takeScreenshot } from './browser-actions'
 import { CentrifugeWorld } from './world'
 
-Before(async function(this: CentrifugeWorld) {
+Before(async function (this: CentrifugeWorld) {
   this.clearContext()
 
   await openBrowser(this)
   await this.metamaskInit()
 })
 
-After(async function(this: CentrifugeWorld, scenario) {
+After(async function (this: CentrifugeWorld, scenario) {
   this.clearContext()
 
   if (scenario.result?.status === Status.FAILED) {

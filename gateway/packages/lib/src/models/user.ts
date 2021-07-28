@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer'
 import { CoreapiNFT } from '../centrifuge-node-client'
 import { PERMISSIONS } from '../utils/constants'
 import { Document, DOCUMENT_ACCESS } from './document'
@@ -35,6 +36,11 @@ export type TwoFASecret = {
   otpauth_url: string
 }
 
+export type LoggedInUser = {
+  user: PublicUser
+  token: string
+}
+
 export class User implements IUser {
   name: string = ''
   password?: string = ''
@@ -50,6 +56,20 @@ export class User implements IUser {
   twoFAType?: TwoFaType
   enabled: boolean
   invited: boolean
+}
+
+export class PublicUser extends User {
+  @Exclude()
+  password?: string = ''
+  @Exclude()
+  token?: string
+  @Exclude()
+  secret?: TwoFASecret
+
+  constructor(partial: Partial<PublicUser>) {
+    super()
+    Object.assign(this, partial)
+  }
 }
 
 export class UserWithOrg extends User {

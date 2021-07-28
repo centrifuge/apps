@@ -52,14 +52,15 @@ const InfoBox: React.FC<Props> = (props: Props) => {
       require a minimum investment amount of 5000 DAI. Residents of some countries may also be excluded from investing.
       <br />
       <br />
-      <Anchor href="https://centrifuge.hackmd.io/QXUCI0wRSLepfABBivNruw?view" target="_blank">
+      <Anchor href="https://docs.centrifuge.io/use/invest/#onboarding-guide" target="_blank">
         Read the onboarding guide
       </Anchor>
       <Anchor onClick={() => openModal()}>See list of excluded countries</Anchor>
       <Modal
         opened={modalIsOpen}
-        title={`List of excluded countries for ${props.activePool.metadata.shortName ||
-          props.activePool.metadata.name}.`}
+        title={`List of excluded countries for ${
+          props.activePool.metadata.shortName || props.activePool.metadata.name
+        }.`}
         headingProps={{ style: { maxWidth: '100%', display: 'flex' } }}
         titleIcon={<StatusInfoIcon />}
         onClose={closeModal}

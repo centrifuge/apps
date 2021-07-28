@@ -27,6 +27,8 @@ export interface PoolTranche extends Tranche {
   address?: string
   inMemberlist?: boolean
   effectiveBalance?: BN
+  debt?: BN
+  balance?: BN
 }
 
 export interface PoolData {
@@ -44,6 +46,7 @@ export interface PoolData {
   totalPendingInvestments: BN
   totalRedemptionsCurrency: BN
   isPoolAdmin?: boolean
+  reserveAndRemainingCredit?: BN
 }
 
 export type PoolStatus = 'Upcoming' | 'Active' | 'Deployed' | 'Closed'
@@ -61,6 +64,7 @@ export type EpochData = {
   state: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
   isBlockedState: boolean
   minimumEpochTime: number
+  challengeTime: number
   minimumEpochTimeLeft: number
   minChallengePeriodEnd: number
   lastEpochClosed: number
@@ -105,6 +109,7 @@ let prevAddress: string | undefined = undefined
 
 export function loadPool(
   tinlake: any,
+  ilk: string = '',
   forceReload?: boolean
 ): ThunkAction<Promise<void>, { pool: PoolState }, undefined, Action> {
   return async (dispatch, getState) => {
@@ -290,16 +295,13 @@ export function loadPool(
       },
     ]
 
-    const isMakerIntegrated = tinlake.contractAddresses.CLERK !== undefined
+    const isMakerIntegrated = tinlake.contractAddresses.CLERK !== undefined && ilk !== ''
 
     const makerWatchers = isMakerIntegrated
       ? [
           {
             target: tinlake.contractAddresses.MCD_VAT,
-            call: [
-              'ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)',
-              ethers.utils.formatBytes32String('RWA002-A'),
-            ],
+            call: ['ilks(bytes32)(uint256,uint256,uint256,uint256,uint256)', ethers.utils.formatBytes32String(ilk)],
             returns: [
               [`maker.art`, toBN],
               [`maker.rate`, toBN],
@@ -310,7 +312,7 @@ export function loadPool(
           },
           {
             target: tinlake.contractAddresses.MCD_JUG,
-            call: ['ilks(bytes32)(uint256,uint256)', ethers.utils.formatBytes32String('RWA002-A')],
+            call: ['ilks(bytes32)(uint256,uint256)', ethers.utils.formatBytes32String(ilk)],
             returns: [
               [`maker.duty`, toBN],
               [`maker.rho`, toBN],
@@ -337,9 +339,29 @@ export function loadPool(
             returns: [[`maker.debt`, toBN]],
           },
           {
+            target: tinlake.contractAddresses.CLERK,
+            call: ['juniorStake()(uint)'],
+            returns: [[`maker.juniorStake`, toBN]],
+          },
+          {
             target: tinlake.contractAddresses.ASSESSOR,
             call: ['effectiveSeniorBalance()(uint)'],
             returns: [[`senior.effectiveBalance`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.ASSESSOR,
+            call: ['seniorDebt()(uint)'],
+            returns: [[`senior.debt`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.ASSESSOR,
+            call: ['seniorBalance()(uint)'],
+            returns: [[`senior.balance`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.ASSESSOR,
+            call: ['totalBalance()(uint)'],
+            returns: [[`reserveAndRemainingCredit`, toBN]],
           },
           {
             target: tinlake.contractAddresses.SENIOR_TOKEN,

@@ -8,6 +8,7 @@ import Header from '../../../components/Header'
 import WithFooter from '../../../components/WithFooter'
 import WithTinlake from '../../../components/WithTinlake'
 import { ArchivedPool, IpfsPools, loadPoolsFromIPFS, Pool as LivePool, UpcomingPool } from '../../../config'
+import Overview from '../../../containers/Overview'
 import OverviewArchived from '../../../containers/OverviewArchived'
 import OverviewUpcoming from '../../../containers/OverviewUpcoming'
 import { menuItems, noDemo } from '../../../menuItems'
@@ -31,18 +32,22 @@ class Pool extends React.Component<Props> {
           ipfsPools={ipfsPools}
           poolTitle={pool.metadata.shortName || pool.metadata.name}
           selectedRoute={'/'}
-          menuItems={'isArchived' in pool || 'isUpcoming' in pool ? [] : menuItems.filter(noDemo)}
+          menuItems={'isArchived' in pool || !('addresses' in pool) ? [] : menuItems.filter(noDemo)}
         />
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge">
               <WithTinlake
+                addresses={'addresses' in pool ? pool.addresses : undefined}
+                contractConfig={'contractConfig' in pool ? pool.contractConfig : undefined}
                 render={(tinlake) => (
                   <Auth
                     tinlake={tinlake}
                     render={() =>
                       'isArchived' in pool ? (
                         <OverviewArchived selectedPool={pool} />
+                      ) : 'addresses' in pool && pool.addresses.ROOT_CONTRACT ? (
+                        <Overview tinlake={tinlake} selectedPool={pool as LivePool} />
                       ) : (
                         <OverviewUpcoming tinlake={tinlake} selectedPool={pool as UpcomingPool} />
                       )
@@ -62,8 +67,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   // We'll pre-render only these paths at build time.
   const pools = await loadPoolsFromIPFS()
   let paths = pools.upcoming.map((pool) => ({ params: { root: pool.metadata.slug } }))
+  const activePaths = pools.active.map((pool) => ({ params: { root: pool.metadata.slug } }))
   const archivePaths = pools.archived.map((pool) => ({ params: { root: pool.metadata.slug } }))
-  paths = paths.concat(archivePaths)
+  paths = paths.concat(activePaths).concat(archivePaths)
 
   // { fallback: false } means other routes should 404.
   return { paths, fallback: false }
@@ -74,10 +80,13 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     throw new Error(`Params are not passed`)
   }
   const pools = await loadPoolsFromIPFS()
-  let pool: UpcomingPool | ArchivedPool | undefined
+  let pool: UpcomingPool | ArchivedPool | LivePool | undefined
   pool = pools.upcoming.find((p) => p.metadata.slug === params!.root)
   if (!pool) {
     pool = pools.archived.find((p) => p.metadata.slug === params!.root)
+  }
+  if (!pool) {
+    pool = pools.active.find((p) => p.metadata.slug === params!.root)
   }
   if (!pool) {
     throw new Error(`Pool ${params.root} cannot be loaded`)

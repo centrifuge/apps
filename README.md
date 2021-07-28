@@ -1,12 +1,15 @@
 # apps
+
 Monorepo for the Tinlake applications.
 
 ## Setup
+
 Make sure you have installed Yarn and NVM.
 
 1. Use Node v14.15.1: `nvm use`
 2. Install dependencies: `yarn install`
-3. Add `.env` files with the right environment variables to each project.
+3. Install `husky`: `yarn postinstall`
+4. Add `.env` files with the right environment variables to each project.
 
 It's also recommended to run Prettier automatically in your editor, e.g. using [this VS Code plugin](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode).
 

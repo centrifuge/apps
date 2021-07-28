@@ -92,7 +92,7 @@ class Apollo {
         weightedInterestRateNum,
         seniorInterestRateNum,
         order: poolValueNum,
-        isUpcoming: pool?.metadata?.isUpcoming || false,
+        isUpcoming: false, // TODO: poolConfig?.metadata?.isUpcoming || false
         isArchived: false,
         isOversubscribed:
           (pool && new BN(pool.maxReserve).lte(new BN(pool.reserve).add(OversubscribedBuffer))) || false,
@@ -258,7 +258,7 @@ class Apollo {
         {
           pools (where : {id: "${root.toLowerCase()}"}){
             id
-            loans {
+            loans (first: 1000) {
               id
               pool {
                 id
@@ -306,6 +306,7 @@ class Apollo {
             rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
               rewardRate
               toDateRewardAggregateValue
+              toDateAORewardAggregateValue
               todayReward
             }
           }
@@ -322,6 +323,7 @@ class Apollo {
 
     return {
       toDateRewardAggregateValue: new BN(new Decimal(data.toDateRewardAggregateValue).toFixed(0)),
+      toDateAORewardAggregateValue: new BN(new Decimal(data.toDateAORewardAggregateValue).toFixed(0)),
       rewardRate: new Decimal(data.rewardRate),
       todayReward: new BN(new Decimal(data.todayReward).toFixed(0)),
     }
@@ -433,20 +435,13 @@ class Apollo {
       })
     } catch (err) {
       console.error(`error occured while fetching pools daily data from apollo ${err}`)
-      return {
-        data: [],
-      }
+      return []
     }
     const poolsDailyData = result.data.days
       .map((item: any) => {
         return {
           day: Number(item.id),
-          poolValue: parseFloat(
-            new BN(item.assetValue)
-              .add(new BN(item.reserve))
-              .div(UintBase)
-              .toString()
-          ),
+          poolValue: parseFloat(new BN(item.assetValue).add(new BN(item.reserve)).div(UintBase).toString()),
         }
       })
       .sort((a: PoolsDailyData, b: PoolsDailyData) => a.day - b.day)
@@ -586,7 +581,7 @@ function toTinlakeLoans(loans: any[]): { data: Loan[] } {
 
   tinlakeLoans.length &&
     tinlakeLoans.sort((l1: Loan, l2: Loan) => {
-      return ((l1.loanId as unknown) as number) - ((l2.loanId as unknown) as number)
+      return (l1.loanId as unknown as number) - (l2.loanId as unknown as number)
     })
 
   return { data: tinlakeLoans }

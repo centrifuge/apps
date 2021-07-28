@@ -1,3 +1,4 @@
+import { PublicUser } from '@centrifuge/gateway-lib/models/user'
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common'
 import { AppService } from '../app.service'
 import config from '../config'
@@ -23,7 +24,7 @@ export class AllExceptionFilter implements ExceptionFilter {
        * */
       if (status === 404 && request.headers.accept && request.headers.accept.indexOf('text/html') !== -1) {
         return response.render('index', {
-          preloaderState: this.appService.preloadReduxStore(request.user),
+          preloaderState: this.appService.preloadReduxStore(new PublicUser(request.user)),
           ethNetwork: config.ethNetwork,
         })
       }

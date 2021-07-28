@@ -33,12 +33,13 @@ export class KycRepo {
       select *
       from kyc
       where kyc.created_at is not null
-      and kyc.status != 'verified'
-      or (kyc.usa_tax_resident = TRUE and kyc.accredited = FALSE)
+      and (kyc.status != 'verified'
+      or (kyc.usa_tax_resident = TRUE and kyc.accredited = FALSE))
+      and kyc.invalidated_at is null
     `
     if (!investors) return []
 
-    return (investors as unknown) as KycEntity[]
+    return investors as unknown as KycEntity[]
   }
 
   async upsertSecuritize(
@@ -52,9 +53,9 @@ export class KycRepo {
       ) values (
         ${[userId, 'securitize', providerAccountId, JSON.stringify(digest)]}
       )
-      on conflict (user_id, provider, provider_account_id) 
-        do 
-          update set digest = ${JSON.stringify(digest)}
+      on conflict (user_id, provider, provider_account_id)
+        do
+          update set digest = ${JSON.stringify(digest)}, invalidated_at = null
 
       returning *
     `
@@ -82,6 +83,19 @@ export class KycRepo {
 
     return updatedKyc as KycEntity | undefined
   }
+
+  async invalidate(provider: string, providerAccountId: string): Promise<KycEntity | undefined> {
+    const [updatedKyc] = await this.db.sql`
+      update kyc
+      set invalidated_at = now()
+      where provider = ${provider}
+      and provider_account_id = ${providerAccountId}
+
+      returning *
+    `
+
+    return updatedKyc as KycEntity | undefined
+  }
 }
 
 export type Blockchain = 'ethereum'
@@ -96,6 +110,7 @@ export interface KycEntity {
   status: KycStatusLabel
   accredited: boolean
   usaTaxResident: boolean
+  invalidatedAt?: boolean
 }
 
 export interface SecuritizeDigest {

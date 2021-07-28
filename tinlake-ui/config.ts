@@ -1,3 +1,4 @@
+import { ITinlake } from '@centrifuge/tinlake-js'
 import contractAbiPoolRegistry from '@centrifuge/tinlake-js/src/abi/PoolRegistry.abi.json'
 import BN from 'bn.js'
 import { ethers } from 'ethers'
@@ -29,6 +30,8 @@ interface PoolMetadata {
   attributes?: { [key: string]: string | { [key: string]: string } }
   assetMaturity?: string
   currencySymbol?: string
+  isUpcoming?: boolean
+  maker?: { ilk: string }
 }
 
 export interface BasePool {
@@ -111,6 +114,8 @@ export interface IpfsPools {
   upcoming: UpcomingPool[]
 }
 
+export type LoadPool = (tinlake: ITinlake, ilk?: string, forceReload?: boolean) => Promise<void>
+
 const contractAddressesSchema = yup.object().shape({
   ROOT_CONTRACT: yup
     .string()
@@ -190,28 +195,16 @@ const metadataSchema = yup.object().shape({
 })
 
 const poolSchema = yup.object().shape({
-  network: yup
-    .string()
-    .oneOf(['mainnet', 'kovan'])
-    .required('poolSchema.network is required'),
-  version: yup
-    .number()
-    .oneOf([2, 3])
-    .required('poolSchema.version is required'),
+  network: yup.string().oneOf(['mainnet', 'kovan']).required('poolSchema.network is required'),
+  version: yup.number().oneOf([2, 3]).required('poolSchema.version is required'),
   addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
   contractConfig: contractConfigSchema.default(undefined),
   metadata: metadataSchema.required('poolSchema.metadata is required'),
 })
 
 const upcomingPoolSchema = yup.object().shape({
-  network: yup
-    .string()
-    .oneOf(['mainnet', 'kovan'])
-    .required('poolSchema.network is required'),
-  version: yup
-    .number()
-    .oneOf([2, 3])
-    .required('poolSchema.version is required'),
+  network: yup.string().oneOf(['mainnet', 'kovan']).required('poolSchema.network is required'),
+  version: yup.number().oneOf([2, 3]).required('poolSchema.version is required'),
   metadata: metadataSchema.required('poolSchema.metadata is required'),
   presetValues: yup.object().shape({
     seniorInterestRate: yup
@@ -226,14 +219,8 @@ const upcomingPoolSchema = yup.object().shape({
 })
 
 const archivedPoolSchema = yup.object().shape({
-  network: yup
-    .string()
-    .oneOf(['mainnet', 'kovan'])
-    .required('poolSchema.network is required'),
-  version: yup
-    .number()
-    .oneOf([2, 3])
-    .required('poolSchema.version is required'),
+  network: yup.string().oneOf(['mainnet', 'kovan']).required('poolSchema.network is required'),
+  version: yup.number().oneOf([2, 3]).required('poolSchema.version is required'),
   metadata: metadataSchema.required('poolSchema.metadata is required'),
   archivedValues: yup.object().shape({
     status: yup.string().oneOf(['Deployed', 'Closed']),
@@ -294,11 +281,7 @@ const config: Config = {
     .string()
     .required('NEXT_PUBLIC_POOL_REGISTRY is required')
     .validateSync(process.env.NEXT_PUBLIC_POOL_REGISTRY),
-  rpcUrl: yup
-    .string()
-    .required('NEXT_PUBLIC_RPC_URL is required')
-    .url()
-    .validateSync(process.env.NEXT_PUBLIC_RPC_URL),
+  rpcUrl: yup.string().required('NEXT_PUBLIC_RPC_URL is required').url().validateSync(process.env.NEXT_PUBLIC_RPC_URL),
   ipfsGateway: yup
     .string()
     .required('NEXT_PUBLIC_IPFS_GATEWAY is required')
@@ -319,11 +302,7 @@ const config: Config = {
     .required('NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL is required')
     .url()
     .validateSync(process.env.NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL),
-  isDemo:
-    yup
-      .string()
-      .required('NEXT_PUBLIC_ENV is required')
-      .validateSync(process.env.NEXT_PUBLIC_ENV) === 'demo',
+  isDemo: yup.string().required('NEXT_PUBLIC_ENV is required').validateSync(process.env.NEXT_PUBLIC_ENV) === 'demo',
   network: yup
     .mixed<'Mainnet' | 'Kovan'>()
     .required('NEXT_PUBLIC_RPC_URL is required')
@@ -337,10 +316,7 @@ const config: Config = {
     .string()
     .required('NEXT_PUBLIC_INFURA_KEY is required')
     .validateSync(process.env.NEXT_PUBLIC_INFURA_KEY),
-  gasLimit: yup
-    .number()
-    .required('gasLimit is required')
-    .validateSync('7000000'),
+  gasLimit: yup.number().required('gasLimit is required').validateSync('7000000'),
   onboardAPIHost: yup
     .string()
     .required('NEXT_PUBLIC_ONBOARD_API_HOST is required')
@@ -367,10 +343,7 @@ const config: Config = {
     .string()
     .required('NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS is required')
     .validateSync(process.env.NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS),
-  matomoSiteId: yup
-    .number()
-    .optional()
-    .validateSync(process.env.NEXT_PUBLIC_MATOMO_SITE_ID),
+  matomoSiteId: yup.number().optional().validateSync(process.env.NEXT_PUBLIC_MATOMO_SITE_ID),
 }
 
 function between1e23and1e27(s: string): boolean {

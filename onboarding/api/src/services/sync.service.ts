@@ -22,7 +22,7 @@ export class SyncService {
     private readonly userRepo: UserRepo
   ) {}
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_2_HOURS)
   async syncKycStatus() {
     const processingInvestors = await this.kycRepo.getProcessingInvestors()
     if (processingInvestors.length === 0) return
@@ -33,6 +33,7 @@ export class SyncService {
 
       if (!investor) {
         console.log(`Failed to retrieve investor status for user ${kyc.userId}`)
+        await this.kycRepo.invalidate(kyc.provider, kyc.providerAccountId)
         return
       }
 
@@ -68,7 +69,7 @@ export class SyncService {
   }
 
   // This is just a backup option, it should already be covered by the Docusign Connect integration
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async syncAgreementStatus() {
     const agreements = await this.agreementRepo.getAwaitingCounterSignature()
     if (agreements.length === 0) return
@@ -76,26 +77,23 @@ export class SyncService {
     this.logger.debug(`Syncing ${agreements.length} agreements`)
     // Synchronous, one by one, so the docusign access token doesn't get overwritten because multiple requests create multiple access tokens in parallel
     for (let agreement of agreements) {
-    const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
+      const status = await this.docusignService.getEnvelopeStatus(agreement.providerEnvelopeId)
 
-    if (!agreement.counterSignedAt && status.counterSigned) {
-      this.logger.log(`Agreement ${agreement.id} has been counter-signed`)
-      this.agreementRepo.setCounterSigned(agreement.id)
+      if (!agreement.counterSignedAt && status.counterSigned) {
+        this.logger.log(`Agreement ${agreement.id} has been counter-signed`)
+        this.agreementRepo.setCounterSigned(agreement.id)
         this.memberlistService.update(agreement.userId, agreement.poolId, agreement.tranche)
-    }
+      }
     }
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async syncWhitelistStatus() {
     const missedInvestors = await this.addressRepo.getMissingWhitelistedUsers()
     console.log(`Whitelisting ${missedInvestors.length} missed investors.`)
 
-    for (let investor of missedInvestors) {
-      await this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
-    }
+    missedInvestors.forEach((investor) => {
+      this.memberlistService.update(investor.userId, investor.poolId, investor.tranche)
+    })
   }
-
-  // @Cron(CronExpression.EVERY_HOUR)
-  // async syncInvestorBalances() {}
 }

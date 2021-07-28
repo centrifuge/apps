@@ -1,13 +1,15 @@
-import { User, UserWithOrg } from '@centrifuge/gateway-lib/models/user'
-import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants'
 import { MailerService } from '@nestjs-modules/mailer'
+import { JwtService } from '@nestjs/jwt'
 import { Test, TestingModule } from '@nestjs/testing'
-import { SessionGuard } from '../../auth/SessionGuard'
+import { User, UserWithOrg } from '../../../../lib/src/models/user'
+import { PERMISSIONS } from '../../../../lib/src/utils/constants'
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'
 import config from '../../config'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'
 import { testingHelpers } from '../../mocks/centrifuge-client.mock'
+import { JwtServiceMock } from '../../mocks/jwt-service.mock'
 import { MailerServiceMock } from '../../mocks/mailer-service.mock'
 import { UsersController } from '../users.controller'
 
@@ -20,9 +22,13 @@ describe('Users controller', () => {
     userModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [
-        SessionGuard,
+        JwtAuthGuard,
         centrifugeServiceProvider,
         databaseServiceProvider,
+        {
+          provide: JwtService,
+          useValue: new JwtServiceMock(),
+        },
         {
           provide: MailerService,
           useValue: new MailerServiceMock(),
@@ -68,23 +74,6 @@ describe('Users controller', () => {
       invited: false,
       schemas: ['some_schema'],
       permissions: [PERMISSIONS.CAN_MANAGE_DOCUMENTS],
-    })
-  })
-
-  describe('logout', () => {
-    it('should call request logout', async () => {
-      const usersController = userModule.get<UsersController>(UsersController)
-
-      const request = {
-        logout: jest.fn(),
-      }
-
-      const response = {
-        redirect: jest.fn(),
-      }
-      await usersController.logout(request, response)
-      expect(request.logout).toHaveBeenCalledTimes(1)
-      expect(response.redirect).toHaveBeenCalledWith('/')
     })
   })
 
@@ -209,7 +198,7 @@ describe('Users controller', () => {
 
         await expect(usersController.register(notInvitedUser)).rejects.toMatchObject({
           message: {
-            message: 'Email taken!',
+            message: 'Pending invite required!',
           },
         })
       })

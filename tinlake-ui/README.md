@@ -2,25 +2,53 @@
 
 ## Development
 
-1. Make sure you are on a stable node version, v12.16.3 on the time of writing this (the `sha3` dependency did not work with newer versions in some cases): `nvm use`
-2. Install dependencies with `yarn install`
+### Clone the repository
+
+```sh
+$ git clone git@github.com:centrifuge/apps.git
+$ cd apps
+```
+
+### Setup node
+
+Use [nvm](https://github.com/nvm-sh/nvm) to install a stable version of node, `v12.16.3` at the time of writing (the `sha3` dependency did not work with newer versions in some cases). Once `nvm` is installed:
+
+```sh
+$ nvm install 12.16.3
+$ nvm use 12.16.3
+```
+
+### Install dependencies
+
+```sh
+$ yarn install
+```
 
 ### Setup environment
 
-add the following env variables
+Copy `env` variables from the example file.
 
-- `export NFT_DATA_DEFINITION=PARTNER_NFT_DATA_DEFINITION`
-- `export RPC_URL=NETWORK_RPC_URL`
-- `export TINLAKE_ADDRESSES=ADDRESSES_FOR_THE_PARTNER_TINLAKE_CONTRACTS`
+To point to the Kovan testnet:
 
-...or just add a .env file containing the variables to the project folder
+```sh
+$ cd tinlake-ui
+$ cp .env.kovan-example .env
+```
 
-### Run
+To point to mainnet:
 
-To build tinlake.js and start the NextJs server and serve the Netlify lambdas locally
+```sh
+$ cd tinlake-ui
+$ cp .env.mainnet-example .env
+```
+
+### Run application
+
+To build `tinlake.js` and start the NextJS server locally:
 
 ```shell
-yarn start
+$ cd tinlake-ui
+$ yarn start
 ```
 
 ### Debugging
@@ -42,13 +70,13 @@ There are a few flags you can use in your url query string to debug Tinlake:
 
 ### Environments
 
-| Domain                                                                                        | Description                                                                                              | Status                                                                                                                                                                          |
-| --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pr-<pull-request-number>--dev-tinlake.netlify.app`                                           | <ul><li>Deploys from a pull request</li><li>Points to Kovan testnet</li><li>Unstable</li></ul>           | N/A                                                                                                                                                                             |
-| <a href="https://dev.tinlake.centrifuge.io">dev.tinlake.centrifuge.io</a>                     | <ul><li>Deploys from the `main` branch</li><li>Points to Kovan testnet</li><li>Unstable</li></ul>        | [![Netlify Status](https://api.netlify.com/api/v1/badges/1b7eaeb2-f8a4-4e8f-bb8a-8e75975d1e3b/deploy-status)](https://app.netlify.com/sites/dev-tinlake/deploys)                |
-| <a href="https://kovan.staging.tinlake.centrifuge.io">kovan.staging.tinlake.centrifuge.io</a> | <ul><li>Deploys from a release candidate branch</li><li>Points to Kovan testnet</li><li>Stable</li></ul> | [![Netlify Status](https://api.netlify.com/api/v1/badges/364d93c3-e16e-4259-910f-d6e942ef8fa2/deploy-status)](https://app.netlify.com/sites/tinlake-kovan-staging/deploys)      |
-| <a href="https://staging.tinlake.centrifuge.io">staging.tinlake.centrifuge.io</a>             | <ul><li>Deploys from a release candidate branch</li><li>Points to mainnet</li><li>Stable</li></ul>       | [![Netlify Status](https://api.netlify.com/api/v1/badges/68c53a25-9852-46d1-8255-733e69bc79d5/deploy-status)](https://app.netlify.com/sites/staging-tinlake/deploys)            |
-| <a href="https://tinlake.centrifuge.io">tinlake.centrifuge.io</a>                             | <ul><li>Deploys from a release tag</li><li>Points to mainnet</li><li>Production environment</li></ul>    | [![Netlify Status](https://api.netlify.com/api/v1/badges/937dea97-1683-4436-82a0-2ec71ea36fd9/deploy-status)](https://app.netlify.com/sites/tinlake-mainnet-production/deploys) |
+| Name            | Description                                                                                              | Domain                                                                                        |
+| --------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Pull Request    | <ul><li>Deploys from a pull request</li><li>Points to Kovan testnet</li><li>Unstable</li></ul>           | `pr-<pull-request-number>--dev-tinlake.netlify.app`                                           |
+| Dev             | <ul><li>Deploys from the `main` branch</li><li>Points to Kovan testnet</li><li>Unstable</li></ul>        | <a href="https://dev.tinlake.centrifuge.io">dev.tinlake.centrifuge.io</a>                     |
+| Kovan Staging   | <ul><li>Deploys from a release candidate branch</li><li>Points to Kovan testnet</li><li>Stable</li></ul> | <a href="https://kovan.staging.tinlake.centrifuge.io">kovan.staging.tinlake.centrifuge.io</a> |
+| Mainnet Staging | <ul><li>Deploys from a release candidate branch</li><li>Points to mainnet</li><li>Stable</li></ul>       | <a href="https://staging.tinlake.centrifuge.io">staging.tinlake.centrifuge.io</a>             |
+| Prod            | <ul><li>Deploys from a release tag</li><li>Points to mainnet</li><li>Production environment</li></ul>    | <a href="https://tinlake.centrifuge.io">tinlake.centrifuge.io</a>                             |
 
 ### Release
 

@@ -1,5 +1,8 @@
 import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants'
-import { env } from 'process'
+
+require('dotenv').config()
+
+const { env } = process
 
 const config = {
   // URI for centrifuge node
@@ -9,7 +12,6 @@ const config = {
   applicationHost: env.CENTRIFUGE_APPLICATION_HOST || 'http://gateway.centrifuge.io',
   // Port on which the application will run
   applicationPort: env.CENTRIFUGE_APPLICATION_PORT || '3001',
-  sessionSecret: env.CENTRIFUGE_SESSION_SECRET || 'centrifuge',
   email: {
     host: env.CENTRIFUGE_EMAIL_CLIENT_HOST || 'smtp.sendgrid.net',
     port: env.CENTRIFUGE_EMAIL_CLIENT_PORT || 465,
@@ -45,5 +47,15 @@ const config = {
   inviteOnly: Boolean(env.CENTRIFUGE_INVITE_ONLY || true),
   ethNetwork: env.ETH_NETWORK || 'mainnet',
   ethProvider: env.ETH_PROVIDER || 'https://mainnet.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5',
+  jwtPrivKey: envStringOrThrow('JWT_PRIV_KEY'),
+  jwtPubKey: envStringOrThrow('JWT_PUB_KEY'),
+  jwtExpiresIn: '8h',
 }
 export default config
+
+function envStringOrThrow(key: string): string {
+  if (!env[key]) {
+    throw new Error(`Env variable ${key} is required`)
+  }
+  return env[key]
+}

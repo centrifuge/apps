@@ -1,14 +1,14 @@
 import { CoreapiMintNFTRequest } from '@centrifuge/gateway-lib/centrifuge-node-client'
-import { DocumentRequest, NftStatus } from '@centrifuge/gateway-lib/models/document'
+import { Document, DocumentRequest, NftStatus } from '@centrifuge/gateway-lib/models/document'
 import { MintNftRequest } from '@centrifuge/gateway-lib/models/nfts'
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 import { Body, Controller, InternalServerErrorException, Param, Post, Req, UseGuards } from '@nestjs/common'
-import { SessionGuard } from '../auth/SessionGuard'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
 import { DatabaseService } from '../database/database.service'
 
 @Controller(ROUTES.NFTS)
-@UseGuards(SessionGuard)
+@UseGuards(JwtAuthGuard)
 export class NftsController {
   constructor(
     private readonly databaseService: DatabaseService,
@@ -31,7 +31,7 @@ export class NftsController {
       proof_fields: body.proof_fields,
       deposit_address: body.deposit_address,
     }
-    const docFromDb: any = await this.databaseService.documents.update(
+    const docsFromDb = (await this.databaseService.documents.update(
       { 'header.document_id': docId },
       {
         $set: {
@@ -42,7 +42,7 @@ export class NftsController {
         multi: true,
         returnUpdatedDocs: true,
       }
-    )
+    )) as Document[]
 
     let mintingResult
     try {
@@ -80,15 +80,20 @@ export class NftsController {
       console.log(e)
       return
     }
-    /*
+    /**
      * TODO Improve handling for push to oracle. We can have an NFT and fail to push it
      * In this case we should not remint just repush the oracle.
      * Maybe we can use to document Status to have something like ready for funding?
      * Now the docuent gets blocked becase we have a Minted status and the user
      * can not edit
-     * */
+     */
 
-    if (!body.oracle_address || body.oracle_address === '0x0000000000000000000000000000000000000000') {
+    if (
+      !body.oracle_address ||
+      body.oracle_address === '0x0000000000000000000000000000000000000000' ||
+      !body.template ||
+      body.template === '0x0000000000000000000000000000000000000000'
+    ) {
       console.log('not pushing to oracle', mintingResult)
       return
     }

@@ -70,7 +70,7 @@ export class DocusignService {
     const recipientViewRequest = {
       authenticationMethod: 'none',
       email: user.email,
-      userName: user.entityName || user.fullName,
+      userName: user.entityName?.length > 0 ? user.entityName : user.fullName,
       roleName: InvestorRoleName,
       clientUserId: user.id,
       returnUrl: returnUrl,

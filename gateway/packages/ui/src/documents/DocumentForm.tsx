@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { SearchSelect } from '@centrifuge/axis-search-select'
 import { Contact } from '@centrifuge/gateway-lib/models/contact'
 import { Document } from '@centrifuge/gateway-lib/models/document'
@@ -46,7 +47,6 @@ export class DocumentForm extends React.Component<Props, State> {
     document: {
       attributes: {},
       header: {
-        // @ts-ignore
         read_access: [],
         write_access: [],
       },
@@ -101,7 +101,6 @@ export class DocumentForm extends React.Component<Props, State> {
     let payload = {
       ...values,
       header: {
-        // @ts-ignore
         ...document.header,
       },
       attributes: {
@@ -124,20 +123,14 @@ export class DocumentForm extends React.Component<Props, State> {
     let write_access = []
 
     collaborators.forEach((c) => {
-      // @ts-ignore
       if (c.access === 'read_access' && !read_access.includes(c.address)) {
-        // @ts-ignore
         read_access.push(c.address)
       }
-      // @ts-ignore
       if (c.access === 'write_access' && !write_access.includes(c.address)) {
-        // @ts-ignore
         write_access.push(c.address)
       }
     })
-    // @ts-ignore
     document.header.read_access = read_access
-    // @ts-ignore
     document.header.write_access = write_access
   }
 
@@ -157,23 +150,17 @@ export class DocumentForm extends React.Component<Props, State> {
           case AttrTypes.INTEGER:
           case AttrTypes.PERCENT:
             attributes[path] = Yup.object().shape({
-              value: Yup.number()
-                .required('This field is required')
-                .typeError('must be a number'),
+              value: Yup.number().required('This field is required').typeError('must be a number'),
             })
             break
           case AttrTypes.TIMESTAMP:
             attributes[path] = Yup.object().shape({
-              value: Yup.date()
-                .required('This field is required')
-                .typeError('This field is required'),
+              value: Yup.date().required('This field is required').typeError('This field is required'),
             })
             break
           case AttrTypes.BYTES:
             attributes[path] = Yup.object().shape({
-              value: Yup.string()
-                .matches(/^0x/, 'bytes must start with 0x')
-                .required('This field is required'),
+              value: Yup.string().matches(/^0x/, 'bytes must start with 0x').required('This field is required'),
             })
             break
           default:
@@ -211,7 +198,7 @@ export class DocumentForm extends React.Component<Props, State> {
 
     return {
       validationSchema: Yup.object().shape({
-        attributes: (Yup.object() as any).shape(attributes),
+        attributes: Yup.object().shape(attributes),
       }),
       clone,
     }

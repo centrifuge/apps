@@ -47,6 +47,8 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     : false
   const agreementStatus = agreement?.declined
     ? 'declined'
+    : agreement?.voided
+    ? 'voided'
     : agreement?.counterSigned
     ? 'countersigned'
     : agreement?.signed

@@ -35,7 +35,7 @@ export const saveAsCSV = (loans: SortableLoan[]) => {
 }
 
 export const downloadCSV = (rows: any[], filename: string) => {
-  const csvContent = `data:text/csv;charset=utf-8,${rows.map((e) => e.join(',')).join('\n')}`
+  const csvContent = `data:text/csv;charset=utf-8,${rows.map((e) => e.join(';')).join('\n')}`
   const encodedUri = encodeURI(csvContent)
   const link = document.createElement('a')
   link.setAttribute('href', encodedUri)

@@ -1,7 +1,7 @@
 import { V2CreateDocumentRequest, V2SignedAttributeRequest } from '@centrifuge/gateway-lib/centrifuge-node-client'
-import { Document } from '@centrifuge/gateway-lib/models/document'
 import { Test, TestingModule } from '@nestjs/testing'
-import { SessionGuard } from '../../auth/SessionGuard'
+import { Document } from '../../../../lib/src/models/document'
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard'
 import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.module'
 import { CentrifugeService } from '../../centrifuge-client/centrifuge.service'
 import { databaseServiceProvider } from '../../database/database.providers'
@@ -62,7 +62,7 @@ describe('DocumentsController', () => {
   beforeEach(async () => {
     documentsModule = await Test.createTestingModule({
       controllers: [DocumentsController],
-      providers: [SessionGuard, centrifugeServiceProvider, databaseServiceProvider],
+      providers: [JwtAuthGuard, centrifugeServiceProvider, databaseServiceProvider],
     }).compile()
 
     const databaseService = documentsModule.get<DatabaseService>(DatabaseService)

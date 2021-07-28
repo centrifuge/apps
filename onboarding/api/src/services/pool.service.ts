@@ -1,15 +1,15 @@
-import { NonceManager } from '@ethersproject/experimental'
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { ethers } from 'ethers'
-import { UserRepo } from '../repos/user.repo'
 import config from '../config'
 import { Tranche } from '../controllers/types'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
+import { UserRepo } from '../repos/user.repo'
 import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
 import contractAbiMemberlist from '../utils/Memberlist.abi'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
+import { TransactionManager } from '../utils/tx-manager'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 @Injectable()
@@ -18,7 +18,10 @@ export class PoolService {
   private pools: { [key: string]: Pool } = {}
 
   provider = new FastJsonRpcProvider(config.rpcUrl)
-  signer = new NonceManager(new ethers.Wallet(config.signerPrivateKey).connect(this.provider))
+  signer = new TransactionManager(new ethers.Wallet(config.signerPrivateKey), {
+    initialSpeed: 'fast',
+    increasedSpeed: 'rapid',
+  }).connect(this.provider)
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
 
   constructor(
@@ -77,12 +80,6 @@ export class PoolService {
   }
 
   private async getPoolProfile(poolId: string): Promise<Profile | undefined> {
-    // Get pool metadata
-    const poolData = await this.registry.find(poolId)
-    const url = new URL(poolData[2], config.ipfsGateway)
-    const response = await fetch(url)
-    const pool = await response.json()
-
     // Get pool profile
     const profileUrl = `https://raw.githubusercontent.com/centrifuge/tinlake-pools-mainnet/main/profiles/${poolId}.json`
     const profileResponse = await fetch(profileUrl)
@@ -96,6 +93,7 @@ export class PoolService {
     const pool = await this.get(poolId)
     if (!pool) throw new Error(`Failed to get pool ${poolId} when adding to memberlist`)
 
+    this.logger.log(`Adding user ${userId} to pool ${poolId}`)
     const memberAdmin = new ethers.Contract(config.memberAdminContractAddress, contractAbiMemberAdmin, this.signer)
     const memberlistAddress = tranche === 'senior' ? pool.addresses.SENIOR_MEMBERLIST : pool.addresses.JUNIOR_MEMBERLIST
 
@@ -105,19 +103,23 @@ export class PoolService {
 
     // TODO: this should also filter by blockchain and network
     const addresses = await this.addressRepo.getByUser(userId)
-    for (let address of addresses) {
-      try {
-        const tx = await memberAdmin.updateMember(memberlistAddress, address.address, validUntil, { gasLimit: 1000000 })
-        this.logger.log(
-          `Submitted tx to add ${address.address} to ${memberlistAddress}: ${tx.hash} (nonce=${tx.nonce})`
-        )
-        await this.provider.waitForTransaction(tx.hash)
-        this.logger.log(`${tx.hash} (nonce=${tx.nonce}) completed`)
+    const ethAddresses = addresses.map((a) => a.address)
 
+    try {
+      this.logger.log(`Submitting tx to add ${ethAddresses.join(',')} to ${memberlistAddress}`)
+      const tx = await memberAdmin.updateMembers(memberlistAddress, ethAddresses, validUntil, { gasLimit: 1000000 })
+
+      this.logger.log(
+        `Submitted tx to add ${ethAddresses.join(',')} to ${memberlistAddress}: ${tx.hash} (nonce=${tx.nonce})`
+      )
+      await this.provider.waitForTransaction(tx.hash)
+      this.logger.log(`${tx.hash} (nonce=${tx.nonce}) completed`)
+
+      for (let address of addresses) {
         await this.checkMemberlist(memberlistAddress, address, pool, tranche, agreementId)
-      } catch (e) {
-        console.error(`Failed to add ${address.address} to ${memberlistAddress}: ${e}`)
       }
+    } catch (e) {
+      console.error(`Failed to add ${ethAddresses.join(',')} to ${memberlistAddress}: ${e}`)
     }
   }
 
@@ -129,30 +131,34 @@ export class PoolService {
     tranche: Tranche,
     agreementId: string
   ): Promise<any> {
-    const memberlist = new ethers.Contract(memberlistAddress, contractAbiMemberlist, this.provider)
+    try {
+      const memberlist = new ethers.Contract(memberlistAddress, contractAbiMemberlist, this.provider)
 
-    this.logger.log(`Checking memberlist for ${address.address}`)
-    const isWhitelisted = await memberlist.hasMember(address.address)
-    this.logger.log(`Checking memberlist for ${address.address} => ${isWhitelisted ? 'true' : 'false'}`)
+      this.logger.log(`Checking memberlist for ${address.address}`)
+      const isWhitelisted = await memberlist.hasMember(address.address)
+      this.logger.log(`Checking memberlist for ${address.address} => ${isWhitelisted ? 'true' : 'false'}`)
 
-    if (isWhitelisted) {
-      this.logger.log(`${address.address} is a member of ${pool.metadata.name} - ${tranche}`)
-      const user = await this.userRepo.findByAddress(address.address)
+      if (isWhitelisted) {
+        this.logger.log(`${address.address} is a member of ${pool.metadata.name} - ${tranche}`)
+        const user = await this.userRepo.findByAddress(address.address)
 
-      if (!user) {
-        throw new Error(`Failed to find user for whitelisting of address ${address.address}`)
+        if (!user) {
+          throw new Error(`Failed to find user for whitelisting of address ${address.address}`)
+        }
+
+        this.investmentRepo.upsert(
+          address.id,
+          pool.addresses.ROOT_CONTRACT,
+          tranche,
+          true,
+          agreementId,
+          user.entityName?.length > 0 ? user.entityName : user.fullName
+        )
+      } else {
+        this.logger.log(`${address.address} is not a member of ${pool.metadata.name} - ${tranche}`)
       }
-
-      this.investmentRepo.upsert(
-        address.id,
-        pool.addresses.ROOT_CONTRACT,
-        tranche,
-        true,
-        agreementId,
-        user.entityName || user.fullName
-      )
-    } else {
-      this.logger.log(`${address.address} is not a member of ${pool.metadata.name} - ${tranche}`)
+    } catch (e) {
+      console.error(`Failed to check ${address.address} for ${memberlistAddress}: ${e}`)
     }
   }
 }

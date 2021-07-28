@@ -21,8 +21,9 @@ export class UserRepo {
   async findByAddress(address: string): Promise<User | undefined> {
     const [data] = await this.db.sql`
       select users.*
-      from users
-      inner join addresses on addresses.address = ${address}
+      from addresses
+      inner join users on users.id = addresses.user_id
+      where addresses.address = ${address}
     `
 
     return data as User | undefined
@@ -37,7 +38,7 @@ export class UserRepo {
       group by users.id, kyc.user_id, kyc.provider, kyc.provider_account_id, kyc.digest, kyc.created_at, kyc.status, kyc.usa_tax_resident, kyc.accredited
     `
 
-    return (data as unknown) as UserWithKyc[]
+    return data as unknown as UserWithKyc[]
   }
 
   async create(): Promise<User | undefined> {

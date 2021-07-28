@@ -1,11 +1,13 @@
 import { UserapiFundingRequest, UserapiFundingResponse } from '@centrifuge/gateway-lib/centrifuge-node-client'
 import { FundingRequest, FundingSignatureRequest } from '@centrifuge/gateway-lib/models/funding-request'
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
-import { Body, Controller, Post, Request } from '@nestjs/common'
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { CentrifugeService } from '../centrifuge-client/centrifuge.service'
 import { DatabaseService } from '../database/database.service'
 
 @Controller()
+@UseGuards(JwtAuthGuard)
 export class FundingController {
   constructor(
     private readonly databaseService: DatabaseService,

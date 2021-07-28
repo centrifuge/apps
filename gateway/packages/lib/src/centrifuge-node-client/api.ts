@@ -2297,7 +2297,7 @@ export interface V2UpdateRole {
  * AccountsApi - fetch parameter creator
  * @export
  */
-export const AccountsApiFetchParamCreator = function(configuration?: Configuration) {
+export const AccountsApiFetchParamCreator = function (configuration?: Configuration) {
   return {
     /**
      * Signs and returns the signature of the Payload.
@@ -2518,7 +2518,7 @@ export const AccountsApiFetchParamCreator = function(configuration?: Configurati
  * AccountsApi - functional programming interface
  * @export
  */
-export const AccountsApiFp = function(configuration?: Configuration) {
+export const AccountsApiFp = function (configuration?: Configuration) {
   return {
     /**
      * Signs and returns the signature of the Payload.
@@ -2656,7 +2656,7 @@ export const AccountsApiFp = function(configuration?: Configuration) {
  * AccountsApi - factory interface
  * @export
  */
-export const AccountsApiFactory = function(configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const AccountsApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
   return {
     /**
      * Signs and returns the signature of the Payload.
@@ -2807,7 +2807,7 @@ export class AccountsApi extends BaseAPI {
  * DocumentsApi - fetch parameter creator
  * @export
  */
-export const DocumentsApiFetchParamCreator = function(configuration?: Configuration) {
+export const DocumentsApiFetchParamCreator = function (configuration?: Configuration) {
   return {
     /**
      * Adds a new role to the document.
@@ -3992,7 +3992,7 @@ export const DocumentsApiFetchParamCreator = function(configuration?: Configurat
  * DocumentsApi - functional programming interface
  * @export
  */
-export const DocumentsApiFp = function(configuration?: Configuration) {
+export const DocumentsApiFp = function (configuration?: Configuration) {
   return {
     /**
      * Adds a new role to the document.
@@ -4640,7 +4640,7 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
  * DocumentsApi - factory interface
  * @export
  */
-export const DocumentsApiFactory = function(configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const DocumentsApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
   return {
     /**
      * Adds a new role to the document.
@@ -5352,7 +5352,7 @@ export class DocumentsApi extends BaseAPI {
  * EntitiesApi - fetch parameter creator
  * @export
  */
-export const EntitiesApiFetchParamCreator = function(configuration?: Configuration) {
+export const EntitiesApiFetchParamCreator = function (configuration?: Configuration) {
   return {
     /**
      * Creates a new Entity and anchors it.
@@ -5685,7 +5685,7 @@ export const EntitiesApiFetchParamCreator = function(configuration?: Configurati
  * EntitiesApi - functional programming interface
  * @export
  */
-export const EntitiesApiFp = function(configuration?: Configuration) {
+export const EntitiesApiFp = function (configuration?: Configuration) {
   return {
     /**
      * Creates a new Entity and anchors it.
@@ -5867,7 +5867,7 @@ export const EntitiesApiFp = function(configuration?: Configuration) {
  * EntitiesApi - factory interface
  * @export
  */
-export const EntitiesApiFactory = function(configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const EntitiesApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
   return {
     /**
      * Creates a new Entity and anchors it.
@@ -6057,7 +6057,7 @@ export class EntitiesApi extends BaseAPI {
  * FundingAgreementsApi - fetch parameter creator
  * @export
  */
-export const FundingAgreementsApiFetchParamCreator = function(configuration?: Configuration) {
+export const FundingAgreementsApiFetchParamCreator = function (configuration?: Configuration) {
   return {
     /**
      * Creates a new funding agreement on the document.
@@ -6492,7 +6492,7 @@ export const FundingAgreementsApiFetchParamCreator = function(configuration?: Co
  * FundingAgreementsApi - functional programming interface
  * @export
  */
-export const FundingAgreementsApiFp = function(configuration?: Configuration) {
+export const FundingAgreementsApiFp = function (configuration?: Configuration) {
   return {
     /**
      * Creates a new funding agreement on the document.
@@ -6721,7 +6721,7 @@ export const FundingAgreementsApiFp = function(configuration?: Configuration) {
  * FundingAgreementsApi - factory interface
  * @export
  */
-export const FundingAgreementsApiFactory = function(
+export const FundingAgreementsApiFactory = function (
   configuration?: Configuration,
   fetch?: FetchAPI,
   basePath?: string
@@ -7027,7 +7027,7 @@ export class FundingAgreementsApi extends BaseAPI {
  * HealthApi - fetch parameter creator
  * @export
  */
-export const HealthApiFetchParamCreator = function(configuration?: Configuration) {
+export const HealthApiFetchParamCreator = function (configuration?: Configuration) {
   return {
     /**
      * returns node version and network
@@ -7059,7 +7059,7 @@ export const HealthApiFetchParamCreator = function(configuration?: Configuration
  * HealthApi - functional programming interface
  * @export
  */
-export const HealthApiFp = function(configuration?: Configuration) {
+export const HealthApiFp = function (configuration?: Configuration) {
   return {
     /**
      * returns node version and network
@@ -7086,7 +7086,7 @@ export const HealthApiFp = function(configuration?: Configuration) {
  * HealthApi - factory interface
  * @export
  */
-export const HealthApiFactory = function(configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const HealthApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
   return {
     /**
      * returns node version and network
@@ -7123,7 +7123,7 @@ export class HealthApi extends BaseAPI {
  * JobsApi - fetch parameter creator
  * @export
  */
-export const JobsApiFetchParamCreator = function(configuration?: Configuration) {
+export const JobsApiFetchParamCreator = function (configuration?: Configuration) {
   return {
     /**
      * Returns the status of a given Job.
@@ -7172,7 +7172,7 @@ export const JobsApiFetchParamCreator = function(configuration?: Configuration) 
  * JobsApi - functional programming interface
  * @export
  */
-export const JobsApiFp = function(configuration?: Configuration) {
+export const JobsApiFp = function (configuration?: Configuration) {
   return {
     /**
      * Returns the status of a given Job.
@@ -7205,7 +7205,7 @@ export const JobsApiFp = function(configuration?: Configuration) {
  * JobsApi - factory interface
  * @export
  */
-export const JobsApiFactory = function(configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const JobsApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
   return {
     /**
      * Returns the status of a given Job.
@@ -7246,7 +7246,7 @@ export class JobsApi extends BaseAPI {
  * NFTsApi - fetch parameter creator
  * @export
  */
-export const NFTsApiFetchParamCreator = function(configuration?: Configuration) {
+export const NFTsApiFetchParamCreator = function (configuration?: Configuration) {
   return {
     /**
      * Mints an NFT against a document.
@@ -7505,7 +7505,7 @@ export const NFTsApiFetchParamCreator = function(configuration?: Configuration) 
  * NFTsApi - functional programming interface
  * @export
  */
-export const NFTsApiFp = function(configuration?: Configuration) {
+export const NFTsApiFp = function (configuration?: Configuration) {
   return {
     /**
      * Mints an NFT against a document.
@@ -7641,7 +7641,7 @@ export const NFTsApiFp = function(configuration?: Configuration) {
  * NFTsApi - factory interface
  * @export
  */
-export const NFTsApiFactory = function(configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const NFTsApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
   return {
     /**
      * Mints an NFT against a document.
@@ -7813,7 +7813,7 @@ export class NFTsApi extends BaseAPI {
  * TransferDetailsApi - fetch parameter creator
  * @export
  */
-export const TransferDetailsApiFetchParamCreator = function(configuration?: Configuration) {
+export const TransferDetailsApiFetchParamCreator = function (configuration?: Configuration) {
   return {
     /**
      * Creates a new transfer detail extension on a document and anchors it.
@@ -8059,7 +8059,7 @@ export const TransferDetailsApiFetchParamCreator = function(configuration?: Conf
  * TransferDetailsApi - functional programming interface
  * @export
  */
-export const TransferDetailsApiFp = function(configuration?: Configuration) {
+export const TransferDetailsApiFp = function (configuration?: Configuration) {
   return {
     /**
      * Creates a new transfer detail extension on a document and anchors it.
@@ -8192,7 +8192,7 @@ export const TransferDetailsApiFp = function(configuration?: Configuration) {
  * TransferDetailsApi - factory interface
  * @export
  */
-export const TransferDetailsApiFactory = function(configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const TransferDetailsApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
   return {
     /**
      * Creates a new transfer detail extension on a document and anchors it.
@@ -8375,7 +8375,7 @@ export class TransferDetailsApi extends BaseAPI {
  * WebhookApi - fetch parameter creator
  * @export
  */
-export const WebhookApiFetchParamCreator = function(configuration?: Configuration) {
+export const WebhookApiFetchParamCreator = function (configuration?: Configuration) {
   return {
     /**
      * Webhook is a place holder to describe webhook response in swagger.
@@ -8407,7 +8407,7 @@ export const WebhookApiFetchParamCreator = function(configuration?: Configuratio
  * WebhookApi - functional programming interface
  * @export
  */
-export const WebhookApiFp = function(configuration?: Configuration) {
+export const WebhookApiFp = function (configuration?: Configuration) {
   return {
     /**
      * Webhook is a place holder to describe webhook response in swagger.
@@ -8434,7 +8434,7 @@ export const WebhookApiFp = function(configuration?: Configuration) {
  * WebhookApi - factory interface
  * @export
  */
-export const WebhookApiFactory = function(configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+export const WebhookApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
   return {
     /**
      * Webhook is a place holder to describe webhook response in swagger.
