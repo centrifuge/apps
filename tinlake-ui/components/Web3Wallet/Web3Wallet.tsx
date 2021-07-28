@@ -125,7 +125,7 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
 export default Web3Wallet
 
 const shorten = (addr: string, visibleChars: number) =>
-  addr.substr(0, visibleChars) + '...' + addr.substr(addr.length - visibleChars)
+  `${addr.substr(0, visibleChars)}...${addr.substr(addr.length - visibleChars)}`
 
 const InnerWallet = styled.div`
   display: flex;
