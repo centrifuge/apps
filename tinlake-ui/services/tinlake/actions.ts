@@ -481,6 +481,14 @@ export async function executeEpoch(tinlake: ITinlake): Promise<PendingTransactio
   return tinlake.executeEpoch()
 }
 
+export async function proxyTransferCurrency(
+  tinlake: ITinlake,
+  proxy: string,
+  borrower: string
+): Promise<PendingTransaction> {
+  return tinlake.proxyTransferCurrency(proxy, borrower)
+}
+
 export async function updateJuniorMemberList(
   tinlake: ITinlake,
   user: string,
