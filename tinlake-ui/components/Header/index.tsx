@@ -13,6 +13,7 @@ import { PoolSelector } from '../../components/PoolSelector'
 import config, { IpfsPools } from '../../config'
 import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
 import { OnboardingState } from '../../ducks/onboarding'
+import { PoolData, PoolState } from '../../ducks/pool'
 import { loadPortfolio, PortfolioState } from '../../ducks/portfolio'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
@@ -43,6 +44,9 @@ interface Props {
 }
 
 const Header: React.FC<Props> = (props: Props) => {
+  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const poolData = pool?.data as PoolData | undefined
+
   const { poolTitle, selectedRoute, menuItems, transactions, auth, clear } = props
 
   const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
@@ -104,9 +108,9 @@ const Header: React.FC<Props> = (props: Props) => {
     },
   }
 
-  const filtMenuItems = menuItems.filter(
-    (item) => ((isDemo && item.env === 'demo') || item.env === '') && !item.secondary
-  )
+  const filtMenuItems = menuItems
+    .filter((item) => ((isDemo && item.env === 'demo') || item.env !== 'demo') && !item.secondary)
+    .filter((item) => (poolData?.isPoolAdmin ? true : item.env !== 'admin'))
 
   return (
     <Box

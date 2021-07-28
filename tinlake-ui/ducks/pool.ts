@@ -64,6 +64,7 @@ export type EpochData = {
   state: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
   isBlockedState: boolean
   minimumEpochTime: number
+  challengeTime: number
   minimumEpochTimeLeft: number
   minChallengePeriodEnd: number
   lastEpochClosed: number
@@ -336,6 +337,11 @@ export function loadPool(
             target: tinlake.contractAddresses.CLERK,
             call: ['debt()(uint)'],
             returns: [[`maker.debt`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.CLERK,
+            call: ['juniorStake()(uint)'],
+            returns: [[`maker.juniorStake`, toBN]],
           },
           {
             target: tinlake.contractAddresses.ASSESSOR,

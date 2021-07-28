@@ -15,18 +15,19 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       const assessor = this.contract('ASSESSOR')
       const feed = this.contract('FEED')
       const isMakerIntegrated = this.contractAddresses['CLERK'] !== undefined
-      if (beforeClosing && isMakerIntegrated) {
-        throw new Error('TODO: getEpochState() doesnt work properly for Maker integrated pools')
-      }
 
-      // isMakerIntegrated ? this.contract('ASSESSOR').totalBalance() : this.contract('RESERVE').totalBalance()
       const reserve = await this.toBN(
-        beforeClosing ? this.contract('RESERVE').totalBalance() : coordinator.epochReserve()
+        beforeClosing
+          ? isMakerIntegrated
+            ? this.contract('ASSESSOR').totalBalance()
+            : this.contract('RESERVE').totalBalance()
+          : coordinator.epochReserve()
       )
       const netAssetValue = await this.toBN(beforeClosing ? feed.approximatedNAV() : coordinator.epochNAV())
-      // (await this.toBN(assessor.seniorDebt())).add(await this.toBN(assessor.seniorBalance()))
       const seniorAsset = beforeClosing
-        ? (await this.toBN(assessor.seniorDebt_())).add(await this.toBN(assessor.seniorBalance_()))
+        ? isMakerIntegrated
+          ? (await this.toBN(assessor.seniorDebt())).add(await this.toBN(assessor.seniorBalance()))
+          : (await this.toBN(assessor.seniorDebt_())).add(await this.toBN(assessor.seniorBalance_()))
         : await this.toBN(coordinator.epochSeniorAsset())
 
       const minDropRatio = await this.toBN(assessor.minSeniorRatio())
@@ -109,21 +110,15 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
           return { status: 1, hash: closeResult.transactionHash } as any
         }
       }
-      console.log('Retrieving epoch state')
       const state = await this.getEpochState()
-      console.log('Retrieving orders')
       const orders = await this.getOrders()
 
       const solution = await this.runSolver(state, orders)
-      Object.keys(solution).forEach((key: string) => {
-        console.log(`\t${key}: ${(solution as any)[key].toString()}`)
-      })
 
       if (!solution.isFeasible) {
         throw new Error('Failed to find a solution')
       }
 
-      console.log('Solution found', solution)
       const submissionTx = coordinator.submitSolution(
         solution.dropRedeem.toString(),
         solution.tinRedeem.toString(),
@@ -135,29 +130,14 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
       return this.pending(submissionTx)
     }
 
-    runSolver = async (state: State, orders: Orders) => {
+    runSolver = async (state: State, orders: Orders, calcInvestmentCapacity?: boolean) => {
       const weights = await this.getSolverWeights()
-
-      console.log(`\n\t- State`)
-      Object.keys(state).forEach((key: string) => {
-        console.log(`\t${key}: ${(state as any)[key].toString()}`)
-      })
-      console.log(`\n\t- Orders`)
-      Object.keys(orders).forEach((key: string) => {
-        console.log(`\t${key}: ${(orders as any)[key].toString()}`)
-      })
-      const solution = await calculateOptimalSolution(state, orders, weights)
-
-      console.log(`\n\t- Solution`)
-      Object.keys(solution).forEach((key: string) => {
-        console.log(`\t${key}: ${(solution as any)[key].toString()}`)
-      })
+      const solution = await calculateOptimalSolution(state, orders, weights, calcInvestmentCapacity)
 
       if (!solution.isFeasible) {
         throw new Error('Failed to find a solution')
       }
 
-      console.log('Solution found', solution)
       return solution
     }
 
@@ -215,7 +195,7 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
     }
 
     getChallengeTime = async () => {
-      return await this.toBN(this.contract('COORDINATOR').challengeTime())
+      return (await this.toBN(this.contract('COORDINATOR').challengeTime())).toNumber()
     }
 
     getCurrentEpochState = async () => {
@@ -285,7 +265,7 @@ export type ICoordinatorActions = {
   getMinimumEpochTime(): Promise<number>
   getMinChallengePeriodEnd(): Promise<number>
   getSubmissionPeriod(): Promise<boolean>
-  getChallengeTime(): Promise<BN>
+  getChallengeTime(): Promise<number>
   getCurrentEpochState(): Promise<EpochState>
   setMinimumEpochTime(minEpochTime: string): Promise<PendingTransaction>
   setMinimumChallengeTime(minChallengeTime: string): Promise<PendingTransaction>
