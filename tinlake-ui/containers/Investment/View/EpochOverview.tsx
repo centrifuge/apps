@@ -130,7 +130,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
     <Box
       background="white"
       elevation="small"
-      pad={{ horizontal: '24px', bottom: '48px' }}
+      pad={{ horizontal: '24px', bottom: 'xsmall' }}
       round="xsmall"
       margin={{ bottom: 'medium' }}
     >
@@ -354,15 +354,20 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 <TableCell>DROP redemptions</TableCell>
                 <TableCell style={{ textAlign: 'right' }}>
                   <LoadingValue done={poolData?.senior?.pendingRedemptions !== undefined}>
-                    {addThousandsSeparators(
-                      toPrecision(baseToDisplay(poolData?.senior?.pendingRedemptions || '0', 18), 0)
-                    )}{' '}
-                    DROP
+                    {formatCurrencyAmount(
+                      (poolData?.senior?.pendingRedemptions || new BN(1))
+                        .mul(poolData?.senior?.tokenPrice || new BN(0))
+                        .div(Fixed27Base)
+                    )}
                   </LoadingValue>
                 </TableCell>
                 <TableCell style={{ textAlign: 'right' }}>
                   <LoadingValue done={solution?.dropRedeem !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(solution?.dropRedeem || '0', 18), 0))} DROP
+                    {formatCurrencyAmount(
+                      (solution?.dropRedeem || new BN(1))
+                        .mul(poolData?.senior?.tokenPrice || new BN(0))
+                        .div(Fixed27Base)
+                    )}
                   </LoadingValue>
                 </TableCell>
                 <TableCell style={{ textAlign: 'right' }}>
@@ -386,15 +391,18 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 <TableCell>TIN redemptions</TableCell>
                 <TableCell style={{ textAlign: 'right' }}>
                   <LoadingValue done={poolData?.junior?.pendingRedemptions !== undefined}>
-                    {addThousandsSeparators(
-                      toPrecision(baseToDisplay(poolData?.junior?.pendingRedemptions || '0', 18), 0)
-                    )}{' '}
-                    TIN
+                    {formatCurrencyAmount(
+                      (poolData?.junior?.pendingRedemptions || new BN(1))
+                        .mul(poolData?.junior?.tokenPrice || new BN(0))
+                        .div(Fixed27Base)
+                    )}
                   </LoadingValue>
                 </TableCell>
                 <TableCell style={{ textAlign: 'right' }}>
                   <LoadingValue done={solution?.tinRedeem !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(solution?.tinRedeem || '0', 18), 0))} TIN
+                    {formatCurrencyAmount(
+                      (solution?.tinRedeem || new BN(1)).mul(poolData?.senior?.tokenPrice || new BN(0)).div(Fixed27Base)
+                    )}
                   </LoadingValue>
                 </TableCell>
                 <TableCell style={{ textAlign: 'right' }}>
@@ -416,7 +424,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               </TableRow>
               <TableRow style={{ fontWeight: 'bold' }}>
                 <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }}>
-                  Total pending redemptions in {props.activePool?.metadata.currencySymbol || 'DAI'}
+                  Total pending redemptions
                 </TableCell>
                 <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
                   <LoadingValue done={poolData?.totalRedemptionsCurrency !== undefined}>
@@ -503,6 +511,7 @@ const EpochState = styled.div`
 
 const TableWrapper = styled.div`
   margin-left: 44px;
+  margin-bottom: 42px;
 `
 
 export default connect((state) => state, { createTransaction })(EpochOverview)
