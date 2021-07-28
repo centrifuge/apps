@@ -206,10 +206,12 @@ const Header: React.FC<Props> = (props: Props) => {
                     </Box>
                   </Box>
                 )}
-                <Box gap="large">
-                  {rewardsLink}
-                  {portfolioLink}
-                </Box>
+                {address && (
+                  <Box gap="large">
+                    {rewardsLink}
+                    {portfolio.totalValue && portfolioLink}
+                  </Box>
+                )}
                 <Box gap="medium">
                   <SocialLink href="https://t.me/centrifuge_chat" target="_blank">
                     <Icon src="/static/help/telegram.svg" />
