@@ -40,7 +40,7 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
         {...rest}
         ref={contRef}
         plain
-        onClick={(e) => {
+        onClick={() => {
           if (!justClosed) {
             setOpen(true)
           }
@@ -66,7 +66,7 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
         <Drop
           plain
           responsive
-          onClickOutside={(e) => {
+          onClickOutside={() => {
             if (open) {
               setJustClosed(true)
               setOpen(false)
