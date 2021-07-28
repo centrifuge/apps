@@ -130,7 +130,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
     <Box
       background="white"
       elevation="small"
-      pad={{ horizontal: '34px', bottom: 'xsmall' }}
+      pad={{ horizontal: '24px', bottom: '48px' }}
       round="xsmall"
       margin={{ bottom: 'medium' }}
     >
@@ -225,10 +225,10 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
                   Locked
                 </TableCell>
-                <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
+                <TableCell size="30%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
                   To be executed
                 </TableCell>
-                <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
+                <TableCell size="10%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
                   In %
                 </TableCell>
               </TableRow>
@@ -341,10 +341,10 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                 <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
                   Locked
                 </TableCell>
-                <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
+                <TableCell size="30%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
                   To be executed
                 </TableCell>
-                <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
+                <TableCell size="10%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
                   In %
                 </TableCell>
               </TableRow>
@@ -464,7 +464,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
           </Table>
           <br />
           {showEpochButton && (
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'xsmall', bottom: 'medium' }}>
               <EpochButton />
             </Box>
           )}
@@ -480,21 +480,24 @@ const EpochState = styled.div`
   margin: 2px 0 0 0;
 
   h3 {
-    font-size: 14px;
+    line-height: 22px;
+    font-size: 16px;
     margin: 0;
   }
 
   h4 {
+    line-height: 22px;
     font-size: 14px;
     margin: 0 0 0 14px;
     color: #777777;
   }
 
   h5 {
+    line-height: 22px;
     font-size: 14px;
     margin: 0 0 0 14px;
     color: #777777;
-    border-bottom: 1px dashed #777777;
+    border-bottom: 1px dotted #777777;
   }
 `
 
