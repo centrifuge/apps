@@ -486,6 +486,7 @@ const EpochState = styled.div`
   display: flex;
   direction: row;
   margin: 2px 0 0 0;
+  align-items: baseline;
 
   h3 {
     line-height: 22px;

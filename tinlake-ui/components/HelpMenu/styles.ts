@@ -1,7 +1,7 @@
 import { Box } from 'grommet'
 import styled from 'styled-components'
 
-export const Wrapper = styled.div`
+export const HelpMenuWrapper = styled.div`
   position: fixed;
   bottom: 40px;
   right: 40px;
