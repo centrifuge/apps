@@ -1,26 +1,11 @@
 import { Box, FormField } from 'grommet'
 import styled from 'styled-components'
 
-export const DesktopOnlyBox = styled.div`
-  display: block;
-  width: 239px;
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-`
-
 export const Button = styled(Box)`
-  flex: 0 0 239px;
-  height: 32;
-  padding: 0 16px;
-  border-right: 1px solid #d8d8d8;
+  padding: 0 16px 0 0;
   display: flex;
   flex-direction: row;
-`
-
-export const PoolTitle = styled.div`
-  flex-grow: 1;
+  align-items: center;
 `
 
 export const Icon = styled.img`
@@ -31,31 +16,18 @@ export const Icon = styled.img`
   top: 5px;
 `
 
-export const Desc = styled.div`
-  height: 12px;
-  line-height: 12px;
-  font-weight: 500;
-  font-size: 10px;
-  color: #bbb;
-`
-
 export const Title = styled.div`
   height: 16px;
   line-height: 16px;
   font-weight: 500;
   font-size: 14px;
-  margin-top: 4px;
 `
 
-export const Caret = styled.div`
-  height: 24px;
-  margin-left: 20px;
-  margin-top: 4px;
-
-  svg {
-    transition: 200ms;
-    transform-style: preserve-3d;
-  }
+export const Caret = styled.img`
+  margin-left: 6px;
+  width: 16px;
+  height: 16px;
+  transition: transform 200ms;
 `
 
 export const Wrapper = styled.div`

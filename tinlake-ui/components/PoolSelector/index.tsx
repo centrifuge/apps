@@ -1,23 +1,11 @@
 import { Drop, TextInput } from 'grommet'
-import { FormDown, FormSearch } from 'grommet-icons'
+import { FormSearch } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { IpfsPools } from '../../config'
 import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
-import {
-  Button,
-  Caret,
-  Desc,
-  DesktopOnlyBox,
-  Icon,
-  PoolLink,
-  PoolList,
-  PoolTitle,
-  SearchField,
-  Title,
-  Wrapper,
-} from './styles'
+import { Button, Caret, Icon, PoolLink, PoolList, SearchField, Title, Wrapper } from './styles'
 
 interface Props {
   ipfsPools: IpfsPools
@@ -80,7 +68,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <DesktopOnlyBox>
+    <>
       <Button
         ref={poolRef}
         onClick={() => {
@@ -89,13 +77,8 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
           }
         }}
       >
-        <PoolTitle>
-          <Desc>Investment Pool</Desc>
-          <Title>{props.title}</Title>
-        </PoolTitle>
-        <Caret>
-          <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
-        </Caret>
+        <Title>{props.title}</Title>
+        <Caret src="/static/chevron-down.svg" />
       </Button>
 
       {open && poolRef.current && (
@@ -132,6 +115,6 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
           </Wrapper>
         </Drop>
       )}
-    </DesktopOnlyBox>
+    </>
   )
 }

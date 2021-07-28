@@ -1,13 +1,11 @@
-import { NavBar } from '@centrifuge/axis-nav-bar'
 import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
-import { Web3Wallet } from '@centrifuge/axis-web3-wallet'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import { Box, Button, Image } from 'grommet'
-import { Close as CloseIcon, Menu as MenuIcon, User as UserIcon } from 'grommet-icons'
+import { Anchor, Box, Button, Layer } from 'grommet'
+import { Close as CloseIcon, Menu as MenuIcon } from 'grommet-icons'
 import Link from 'next/link'
-import Router, { NextRouter, withRouter } from 'next/router'
+import Router, { useRouter } from 'next/router'
 import React from 'react'
-import { connect, useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { PoolSelector } from '../../components/PoolSelector'
 import config, { IpfsPools } from '../../config'
@@ -19,8 +17,9 @@ import { selectWalletTransactions, TransactionState } from '../../ducks/transact
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { toPrecision } from '../../utils/toPrecision'
+import { useCFGRewards } from '../../utils/useCFGRewards'
 import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
-import { WalletRewards } from '../WalletRewards'
+import { Web3Wallet } from '../Web3Wallet'
 
 const { isDemo } = config
 export interface MenuItem {
@@ -36,29 +35,25 @@ interface Props {
   poolTitle?: string
   selectedRoute: string
   menuItems: MenuItem[]
-  auth?: AuthState
-  router: NextRouter
-  transactions?: TransactionState
-  ensureAuthed?: () => Promise<void>
-  clear?: () => Promise<void>
 }
 
 const Header: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
 
-  const { poolTitle, selectedRoute, menuItems, transactions, auth, clear } = props
+  const { poolTitle, selectedRoute, menuItems } = props
+  const router = useRouter()
 
   const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
   const portfolio = useSelector<any, PortfolioState>((state) => state.portfolio)
+  const transactions = useSelector<any, TransactionState>((state) => state.transactions)
 
-  const connectedAddress = useSelector<any, string | null>((state) => state.auth.address)
+  const auth = useSelector<any, AuthState>((state) => state.auth)
+  const connectedAddress = auth.address
   const address = useQueryDebugEthAddress() || connectedAddress
+  const { formattedAmount: CFGRewardAmount } = useCFGRewards(address)
   const dispatch = useDispatch()
-
-  React.useEffect(() => {
-    if (address) dispatch(loadPortfolio(address, props.ipfsPools))
-  }, [])
+  const [menuOpen, setMenuOpen] = React.useState(false)
 
   React.useEffect(() => {
     if (address) dispatch(loadPortfolio(address, props.ipfsPools))
@@ -66,7 +61,7 @@ const Header: React.FC<Props> = (props: Props) => {
 
   const connectAccount = async () => {
     try {
-      await props.ensureAuthed!()
+      await dispatch(ensureAuthed())
     } catch (e) {
       console.error(`authentication failed with Error ${e}`)
     }
@@ -82,7 +77,7 @@ const Header: React.FC<Props> = (props: Props) => {
 
   const pushWithPrefixIfInPool = (item: MenuItem) => {
     if (item.inPool) {
-      const { root, slug } = props.router.query
+      const { root, slug } = router.query
       const route = item.route === '/' ? '' : item.route
 
       if (slug === undefined) {
@@ -98,128 +93,270 @@ const Header: React.FC<Props> = (props: Props) => {
   const { network, providerName } = auth!
   const logoUrl = (isDemo && '/static/demo_logo.svg') || '/static/logo.svg'
 
-  const theme = {
-    navBar: {
-      icons: {
-        menu: MenuIcon,
-        close: CloseIcon,
-        user: UserIcon,
-      },
-    },
-  }
-
   const filtMenuItems = menuItems
     .filter((item) => ((isDemo && item.env === 'demo') || item.env !== 'demo') && !item.secondary)
     .filter((item) => (poolData?.isPoolAdmin ? true : item.env !== 'admin'))
 
+  const menuButtons = filtMenuItems.map((item) => (
+    <Button
+      plain
+      key={item.label}
+      label={item.label}
+      onClick={() => onRouteClick(item)}
+      color={selectedRoute === item.route ? 'selected' : undefined}
+      style={{ fontSize: 14, padding: '0 12px', textAlign: 'left' }}
+    />
+  ))
+
+  const portfolioLink = (
+    <Link href="/portfolio">
+      <Box as="a" direction="row">
+        <Icon src="/static/DAI.svg" />
+        <HoldingValue>
+          {portfolio.totalValue && addThousandsSeparators(toPrecision(baseToDisplay(portfolio.totalValue, 18), 0))}
+        </HoldingValue>
+        <Unit>DAI</Unit>
+      </Box>
+    </Link>
+  )
+
+  const rewardsLink = (
+    <Link href="/rewards">
+      <Box as="a" direction="row">
+        <Icon src="/static/cfg-white.svg" />
+        <HoldingValue>{CFGRewardAmount}</HoldingValue>
+        <Unit>CFG</Unit>
+      </Box>
+    </Link>
+  )
+
   return (
-    <Box
+    <HeaderBar
       style={{ position: 'sticky', top: 0, height: '56px', zIndex: 2, boxShadow: '0 0 4px 0px #00000075' }}
       background="white"
-      justify="center"
+      justify="between"
       align="center"
       direction="row"
       fill="horizontal"
-      pad={{ horizontal: 'small' }}
+      pad={{ horizontal: 'medium' }}
     >
-      <Box direction="row" width="xlarge" align="center">
-        <Box align="center" direction="row" basis="full">
-          <div
-            style={{
-              height: 32,
-              paddingRight: 16,
-              borderRight: '1px solid #D8D8D8',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <Link href="/" shallow>
-              <a title="Tinlake" style={{ display: 'block' }}>
-                <Image src={logoUrl} style={{ width: 130, verticalAlign: 'middle' }} />
-              </a>
-            </Link>
-          </div>
-          {poolTitle && <PoolSelector title={poolTitle} ipfsPools={props.ipfsPools} />}
-          <Box flex="grow" basis="auto" style={{ height: 32, padding: '0 16px 0 32px' }}>
-            {filtMenuItems.length > 0 && (
-              <NavBar
-                border={false}
-                itemGap="large"
-                theme={theme}
-                menuItems={filtMenuItems}
-                selectedRoute={selectedRoute}
-                onRouteClick={onRouteClick}
-                pad={{ horizontal: 'none' }}
-                menuItemProps={{ style: { fontSize: 14 } }}
-                hamburgerBreakpoint={1000}
-              />
-            )}
+      <LogoWrapper>
+        <Link href="/" shallow>
+          <a title="Tinlake" style={{ display: 'block' }}>
+            <DesktopLogo src={logoUrl} />
+            <MobileLogo src="/static/tinlake-logo-icon-only.svg" />
+          </a>
+        </Link>
+      </LogoWrapper>
+      <NavWrapper align="center" direction="row" flex="grow" basis="auto">
+        {poolTitle && <PoolSelector title={poolTitle} ipfsPools={props.ipfsPools} />}
+        {filtMenuItems.length > 0 && <DesktopNav>{menuButtons}</DesktopNav>}
+      </NavWrapper>
+      <AccountWrapper align="center" direction="row">
+        <Holdings>
+          <Box pad={{ left: '14px', right: '14px' }}>
+            <AxisTooltip title="View your rewards">{rewardsLink}</AxisTooltip>
           </Box>
           {address && portfolio.totalValue && !portfolio.totalValue.isZero() && (
-            <Portfolio pad={{ left: '14px', right: '14px' }}>
-              <AxisTooltip title="View your investment portfolio" cursor="pointer">
-                <Link href="/portfolio">
-                  <Box>
-                    <Box direction="row">
-                      <TokenLogo src={`/static/DAI.svg`} />
-                      <Box>
-                        <Holdings>
-                          {addThousandsSeparators(toPrecision(baseToDisplay(portfolio.totalValue, 18), 0))}
-                        </Holdings>
-                        <Desc>Portfolio Value</Desc>
-                      </Box>
+            <Box pad={{ left: '14px', right: '14px' }}>
+              <AxisTooltip title="View your investment portfolio">{portfolioLink}</AxisTooltip>
+            </Box>
+          )}
+        </Holdings>
+        <WalletNav style={{ flex: '0 0 auto', paddingLeft: 16 }}>
+          {!address && <Button onClick={connectAccount} label="Connect" />}
+          {address && (
+            <Web3Wallet
+              address={address}
+              providerName={providerName!}
+              networkName={network}
+              onDisconnect={() => dispatch(clear())}
+              transactions={selectWalletTransactions(transactions)}
+              getAddressLink={getAddressLink}
+              kycStatus={onboarding.data?.kyc?.status === 'verified' ? 'verified' : 'none'}
+            />
+          )}
+        </WalletNav>
+      </AccountWrapper>
+      <MobileNav>
+        <Hamburger width="24" onClick={() => setMenuOpen(true)}>
+          <MenuIcon size="menu" />
+        </Hamburger>
+        {menuOpen && (
+          <Layer
+            position="right"
+            full="vertical"
+            responsive={false}
+            animate={true}
+            onClickOutside={() => setMenuOpen(false)}
+            onEsc={() => setMenuOpen(false)}
+          >
+            <Box pad={{ top: '20px', right: '20px', bottom: '20px', left: '40px' }} width="300px">
+              <Box fill="horizontal" align="end" width="20" height="20">
+                <Anchor onClick={() => setMenuOpen(false)}>
+                  <CloseIcon size="medium" />
+                </Anchor>
+              </Box>
+              <Box gap="xlarge">
+                {poolTitle && filtMenuItems.length > 0 && (
+                  <Box gap="medium">
+                    <div>{poolTitle}</div>
+                    <Box gap="medium" pad={{ left: 'small' }}>
+                      {menuButtons}
                     </Box>
                   </Box>
-                </Link>
-              </AxisTooltip>
-            </Portfolio>
-          )}
-          <div style={{ flex: '0 0 auto', paddingLeft: 16, borderLeft: '1px solid #D8D8D8' }}>
-            {!address && <Button onClick={connectAccount} label="Connect" />}
-            {address && (
-              <Web3Wallet
-                address={address}
-                providerName={providerName}
-                networkName={network}
-                onDisconnect={clear}
-                transactions={selectWalletTransactions(transactions)}
-                getAddressLink={getAddressLink}
-                style={{ padding: 0 }}
-                kycStatus={onboarding.data?.kyc?.status === 'verified' ? 'verified' : 'none'}
-                extension={<WalletRewards address={address} />}
-              />
-            )}
-          </div>
-        </Box>
-      </Box>
-    </Box>
+                )}
+                <Box gap="large">
+                  {rewardsLink}
+                  {portfolioLink}
+                </Box>
+                <Box gap="medium">
+                  <SocialLink href="https://t.me/centrifuge_chat" target="_blank">
+                    <Icon src="/static/help/telegram.svg" />
+                    <span>Telegram</span>
+                  </SocialLink>
+                  <SocialLink href="https://centrifuge.io/discord" target="_blank">
+                    <Icon src="/static/help/slack.svg" />
+                    <span>Discord</span>
+                  </SocialLink>
+                  <SocialLink href="mailto:support@centrifuge.io" target="_blank">
+                    <Icon src="/static/help/email.svg" />
+                    <span>Email</span>
+                  </SocialLink>
+                  <SocialLink href="https://docs.centrifuge.io/tinlake/overview/introduction/" target="_blank">
+                    <Icon src="/static/help/documentation.svg" />
+                    <span>Documentation</span>
+                  </SocialLink>
+                </Box>
+              </Box>
+            </Box>
+          </Layer>
+        )}
+      </MobileNav>
+    </HeaderBar>
   )
 }
 
-export default connect((state) => state, { ensureAuthed, clear })(withRouter(Header))
+export default Header
 
-const Portfolio = styled(Box)`
-  cursor: pointer;
+const LogoWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding-right: 32px;
+`
+const NavWrapper = styled(Box)`
+  flex-grow: 1;
+`
+const AccountWrapper = styled(Box)``
+
+const HeaderBar = styled(Box)`
+  @media (min-width: 1500px) {
+    display: grid;
+    grid-template-columns: 1fr 1152px 1fr;
+
+    ${LogoWrapper} {
+      grid-column: 1 / 1;
+      grid-row: 1;
+    }
+
+    ${NavWrapper} {
+      grid-column: 2 / 3;
+      grid-row: 1;
+    }
+
+    ${AccountWrapper} {
+      grid-column: 2 / 4;
+      grid-row: 1;
+      justify-self: right;
+    }
+  }
 `
 
 const Holdings = styled.div`
-  font-weight: bold;
-  font-size: 13px;
+  display: flex;
+  flex-direction: row;
+
+  @media (max-width: 1199px) {
+    display: none;
+  }
 `
 
-const TokenLogo = styled.img`
-  display: inline-block;
-  margin: 0 8px 0 0;
-  width: 16px;
-  height: 16px;
-  position: relative;
-  top: 8px;
-`
-
-const Desc = styled.div`
-  height: 12px;
-  line-height: 12px;
+const HoldingValue = styled.div`
   font-weight: 500;
-  font-size: 10px;
-  color: #bbb;
+  font-size: 14px;
+  line-height: 20px;
+`
+
+const Unit = styled.div`
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 21px;
+  margin-left: 5px;
+`
+
+const Icon = styled.img`
+  margin-right: 5px;
+  width: 18px;
+  height: 18px;
+`
+
+const DesktopLogo = styled.img`
+  width: 130px;
+  vertical-align: middle;
+
+  @media (max-width: 1199px) {
+    display: none;
+  }
+`
+
+const DesktopNav = styled.div`
+  @media (max-width: 899px) {
+    display: none;
+  }
+`
+
+const WalletNav = styled.div``
+
+const MobileNav = styled.div`
+  @media (min-width: 900px) {
+    display: none;
+  }
+`
+
+const Hamburger = styled(Box)`
+  width: 40px;
+  height: 40px;
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border: 1px solid #000;
+  background-color: #fff;
+  box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.1);
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+`
+
+const MobileLogo = styled.img`
+  height: 20px;
+  vertical-align: middle;
+
+  @media (min-width: 1200px) {
+    display: none;
+  }
+`
+
+const SocialLink = styled.a`
+  display: flex;
+  align-items: center;
+  color: #000;
+  font-weight: 500;
+  text-decoration: none;
 `

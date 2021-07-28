@@ -33,7 +33,7 @@ class MyApp extends App {
     return (
       <AxisTheme full={true}>
         <Head>
-          <meta name="viewport" content="width=900, initial-scale=1" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>Tinlake | Centrifuge | Decentralized Asset Financing</title>
           {config.matomoSiteId && (
             <script

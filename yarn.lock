@@ -2286,18 +2286,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@centrifuge/axis-nav-bar@npm:0.4.2-develop.109":
-  version: 0.4.2-develop.109
-  resolution: "@centrifuge/axis-nav-bar@npm:0.4.2-develop.109"
-  peerDependencies:
-    grommet: 2.7.x
-    react: ">= 16.6.1"
-    react-dom: ">= 16.6.1"
-    styled-components: ">= 4.x"
-  checksum: a1a1cd120c3898872e751a3d0641e2e4fbd8503494f0e181ac8356d50403d80e4d73c7fc7e3b862e613d4e62c668bfe0b9eae0e33a52338a386eb63243a4438a
-  languageName: node
-  linkType: hard
-
 "@centrifuge/axis-nav-bar@npm:^0.3.2-develop.47":
   version: 0.3.2-develop.51
   resolution: "@centrifuge/axis-nav-bar@npm:0.3.2-develop.51"
@@ -2470,22 +2458,6 @@ __metadata:
     react-dom: ">= 16.6.1"
     styled-components: ">= 4.x"
   checksum: 3c64b03b56c3bbbf55d82609e9f4dc24ac48a52dc2f7260ce532fb4b25bb2770cb171b5db65d126d38d2389f5716c7fec504550d0cecb3838a0e3e15eb982115
-  languageName: node
-  linkType: hard
-
-"@centrifuge/axis-web3-wallet@npm:0.0.3-develop.a14b10c.151":
-  version: 0.0.3-develop.a14b10c.151
-  resolution: "@centrifuge/axis-web3-wallet@npm:0.0.3-develop.a14b10c.151"
-  dependencies:
-    ethereum-blockies: "github:MyEtherWallet/blockies"
-    grommet-icons: ^4.4.0
-  peerDependencies:
-    "@centrifuge/axis-utils": ">= 0.x"
-    grommet: 2.7.x
-    react: ">= 16.6.1"
-    react-dom: ">= 16.6.1"
-    styled-components: ">= 4.x"
-  checksum: 282025647b363cc1cbb1f146734492db006ca00cfaefcbcbc0550e3e420e0e5c6ad9d61f198ea65ff5e963d48bd429a9a39165268f60f55b423930f8ad8b9764
   languageName: node
   linkType: hard
 
@@ -2787,14 +2759,12 @@ __metadata:
     "@babel/preset-typescript": 7.10.4
     "@centrifuge/axis-display-field": 0.4.2-develop.109
     "@centrifuge/axis-modal": 0.1.1-develop.57
-    "@centrifuge/axis-nav-bar": 0.4.2-develop.109
     "@centrifuge/axis-ratio-bar": 0.4.2-develop.137
     "@centrifuge/axis-spinner": 0.4.2-develop.109
     "@centrifuge/axis-theme": 0.4.2-develop.145
     "@centrifuge/axis-token-input": 0.4.1-develop.c79e643.146+c79e643
     "@centrifuge/axis-tooltip": 0.4.2-develop.6d6e183.148
     "@centrifuge/axis-utils": 0.4.2-develop.109
-    "@centrifuge/axis-web3-wallet": 0.0.3-develop.a14b10c.151
     "@centrifuge/onboarding-api": "workspace:*"
     "@centrifuge/tinlake-js": "workspace:*"
     "@centrifuge/tinlake-pools-kovan": 0.0.1-develop.6
@@ -2826,10 +2796,12 @@ __metadata:
     chart.js: 2.9.3
     decimal.js-light: 2.5.0
     dotenv: 8.2.0
+    ethereum-blockies: "github:MyEtherWallet/blockies"
     express: 4.17.1
     graphql: 15.0.0
     graphql-tag: 2.10.3
     grommet: 2.15.0
+    grommet-icons: ^4.6.0
     http-proxy-middleware: 1.0.5
     husky: 4.2.5
     jest: 26.6.3
@@ -18084,6 +18056,19 @@ fsevents@2.1.2:
     react-dom: ">= 16.6.0"
     styled-components: ">= 5.x"
   checksum: 4c7df4358c85121c2166b363a13cfdae8c77351a75690ecff5cbc95a2a6fd4622f625a173ed7d0f1f98a09470b78880a9e7c84a210ad7964d01b8c0c2881d9e2
+  languageName: node
+  linkType: hard
+
+"grommet-icons@npm:^4.6.0":
+  version: 4.6.0
+  resolution: "grommet-icons@npm:4.6.0"
+  dependencies:
+    grommet-styles: ^0.2.0
+  peerDependencies:
+    react: ">= 16.6.0"
+    react-dom: ">= 16.6.0"
+    styled-components: ">= 5.x"
+  checksum: 1987a4e858e9acafd83077b13159fc55ef7af8a5ed5d3ef8d2377070e185735b89a1d3d3d8e1e453f736293540039aa1f5aef98d5479dbfd7688a39e37bf1915
   languageName: node
   linkType: hard
 

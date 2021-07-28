@@ -15,6 +15,10 @@ export const HelpMenuWrapper = styled.div`
   box-shadow: 0px 2px 4px rgba(8, 40, 190, 0.3);
   cursor: pointer;
   padding-top: 6px;
+
+  @media (max-width: 899px) {
+    display: none;
+  }
 `
 
 export const InnerMenu = styled(Box)`

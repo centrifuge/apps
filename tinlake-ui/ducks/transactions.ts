@@ -8,7 +8,6 @@ import config from '../config'
 import { initTinlake } from '../services/tinlake'
 import * as actions from '../services/tinlake/actions'
 
-// TODO: should be imported from @centrifuge/axis-web3-wallet
 export interface WalletTransaction {
   description: string
   status: 'unconfirmed' | 'pending' | 'succeeded' | 'failed'
