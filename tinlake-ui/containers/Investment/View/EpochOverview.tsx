@@ -256,9 +256,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                           (solution?.dropInvest || new BN(0))
                             .mul(new BN(10).pow(new BN(18)))
                             .div(poolData?.senior?.pendingInvestments || new BN(1))
-                            .div(new BN(10).pow(new BN(16)))
+                            .div(new BN(10).pow(new BN(14)))
                             .toString()
-                        )}
+                        ) / 100}
                     %
                   </LoadingValue>
                 </TableCell>
@@ -285,9 +285,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                           (solution?.tinInvest || new BN(0))
                             .mul(new BN(10).pow(new BN(18)))
                             .div(poolData?.junior?.pendingInvestments || new BN(1))
-                            .div(new BN(10).pow(new BN(16)))
+                            .div(new BN(10).pow(new BN(14)))
                             .toString()
-                        )}
+                        ) / 100}
                     %
                   </LoadingValue>
                 </TableCell>
@@ -322,9 +322,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                                 poolData?.junior?.pendingInvestments || new BN(1)
                               )
                             )
-                            .div(new BN(10).pow(new BN(16)))
+                            .div(new BN(10).pow(new BN(14)))
                             .toString()
-                        )}
+                        ) / 100}
                     %
                   </LoadingValue>
                 </TableCell>
@@ -380,9 +380,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                           (solution?.dropRedeem || new BN(0))
                             .mul(new BN(10).pow(new BN(18)))
                             .div(poolData?.senior?.pendingRedemptions || new BN(1))
-                            .div(new BN(10).pow(new BN(16)))
+                            .div(new BN(10).pow(new BN(14)))
                             .toString()
-                        )}
+                        ) / 100}
                     %
                   </LoadingValue>
                 </TableCell>
@@ -415,9 +415,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                           (solution?.tinRedeem || new BN(0))
                             .mul(new BN(10).pow(new BN(18)))
                             .div(poolData?.junior?.pendingRedemptions || new BN(1))
-                            .div(new BN(10).pow(new BN(16)))
+                            .div(new BN(10).pow(new BN(14)))
                             .toString()
-                        )}
+                        ) / 100}
                     %
                   </LoadingValue>
                 </TableCell>
@@ -461,9 +461,9 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                                 poolData?.junior?.pendingRedemptions || new BN(1)
                               )
                             )
-                            .div(new BN(10).pow(new BN(16)))
+                            .div(new BN(10).pow(new BN(14)))
                             .toString()
-                        )}
+                        ) / 100}
                     %
                   </LoadingValue>
                 </TableCell>
