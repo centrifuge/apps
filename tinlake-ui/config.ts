@@ -70,6 +70,9 @@ export interface Pool extends BasePool {
     JUNIOR_TOKEN: string
     CLERK?: string
     ASSESSOR: string
+    RESERVE: string
+    SENIOR_TRANCHE: string
+    JUNIOR_TRANCHE: string
   }
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
@@ -354,6 +357,12 @@ function between1e23and1e27(s: string): boolean {
 function fee(s: string): boolean {
   const n = new BN(s)
   return n.gte(new BN('1000000000000000000000000000')) && n.lte(new BN('1000000009000000000000000000'))
+}
+
+export const multicallConfig = {
+  rpcUrl: config.rpcUrl,
+  multicallAddress: config.multicallContractAddress,
+  interval: 60000,
 }
 
 export default config

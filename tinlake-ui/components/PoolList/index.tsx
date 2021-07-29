@@ -66,6 +66,11 @@ class PoolList extends React.Component<Props> {
               <HeaderTitle>Total Financed</HeaderTitle>
             </HeaderCol>
           )}
+          {showAll && (
+            <HeaderCol>
+              <HeaderTitle>DROP Capacity</HeaderTitle>
+            </HeaderCol>
+          )}
           <HeaderCol>
             <HeaderTitle>Pool Value</HeaderTitle>
           </HeaderCol>
@@ -116,6 +121,20 @@ class PoolList extends React.Component<Props> {
                     )}
                     precision={0}
                     value={baseToDisplay(p.totalFinancedCurrency, 18)}
+                  />
+                </DataCol>
+              )}
+
+              {showAll && (
+                <DataCol>
+                  <NumberDisplay
+                    render={(v) => (
+                      <>
+                        <Number>{v}</Number> <Unit>{p.currency}</Unit>
+                      </>
+                    )}
+                    precision={0}
+                    value={baseToDisplay(p.capacity, 18)}
                   />
                 </DataCol>
               )}
