@@ -138,7 +138,7 @@ const Header: React.FC<Props> = (props: Props) => {
       align="center"
       direction="row"
       fill="horizontal"
-      pad={{ horizontal: 'medium' }}
+      pad={{ horizontal: '24px' }}
     >
       <LogoWrapper>
         <Link href="/" shallow>
