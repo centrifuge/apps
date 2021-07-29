@@ -309,7 +309,7 @@ const Holdings = styled.div`
   flex-direction: row;
 
   a:hover {
-    color: #0828be;
+    color: #2762ff;
   }
 
   @media (min-width: 900px) and (max-width: 1199px) {
