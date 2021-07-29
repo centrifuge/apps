@@ -78,7 +78,6 @@
     "recharts": "^1.8.5",
     "redux": "4.0.5",
     "redux-thunk": "2.3.0",
-    "simple-uniswap-sdk": "^3.3.2",
     "styled-components": "5.1.1",
     "web3-utils": "1.2.7",
     "yup": "0.28.5"

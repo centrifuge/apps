@@ -16,7 +16,7 @@ import styled from 'styled-components'
 import config, { Pool } from '../../config'
 import { ensureAuthed } from '../../ducks/auth'
 import { PoolData, PoolState } from '../../ducks/pool'
-import { useYield } from '../../utils/hooks'
+import { useTrancheYield } from '../../utils/hooks'
 import InvestAction from '../InvestAction'
 import { Tooltip } from '../Tooltip'
 
@@ -32,7 +32,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
   const address = useSelector<any, string | null>((state) => state.auth.address)
   const pool = useSelector<any, PoolState>((state) => state.pool)
 
-  const { dropYield } = useYield()
+  const { dropYield } = useTrancheYield()
 
   const poolData = pool?.data as PoolData | undefined
 

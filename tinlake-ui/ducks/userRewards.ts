@@ -3,7 +3,6 @@ import BN from 'bn.js'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
-import { ChainId, UniswapPair } from 'simple-uniswap-sdk'
 import config from '../config'
 import Apollo from '../services/apollo'
 import { centChainService } from '../services/centChain'
@@ -265,19 +264,13 @@ export function maybeLoadAndApplyClaims(): ThunkAction<
 
 export function getWCFGPrice(): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
   return async (dispatch) => {
-    const uniswapPair = new UniswapPair({
-      // the contract address of the token you want to convert FROM
-      toTokenContractAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-      // the contract address of the token you want to convert TO
-      fromTokenContractAddress: '0xc221b7E65FfC80DE234bbB6667aBDd46593D34F0',
-      // the ethereum address of the user using this part of the dApp
-      ethereumAddress: '0x0000000000000000000000000000000000000000',
-      chainId: ChainId.MAINNET,
-    })
+    const response = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=wrapped-centrifuge&vs_currencies=usd'
+    )
+    const json = await response.json()
 
-    const uniswapPairFactory = await uniswapPair.createFactory()
-    const wCFGPrice = await uniswapPairFactory.trade('1')
+    const wCFGUSD = json['wrapped-centrifuge']?.usd
 
-    dispatch({ data: wCFGPrice.expectedConvertQuote, type: RECEIVE_WCFG_PRICE })
+    dispatch({ data: wCFGUSD, type: RECEIVE_WCFG_PRICE })
   }
 }

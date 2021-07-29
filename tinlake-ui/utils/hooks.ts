@@ -24,7 +24,7 @@ export const useInterval = (callback: any, delay: number) => {
   }, [delay])
 }
 
-export const useYield = () => {
+export const useTrancheYield = () => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const pools = useSelector<any, PoolsState>((state) => state.pools)
 
@@ -33,7 +33,7 @@ export const useYield = () => {
 
   React.useEffect(() => {
     if (pools.data?.pools && pool.poolId) {
-      const poolData = pools.data?.pools.find((singlePool) => singlePool.id === pool.poolId)
+      const poolData = pools.data.pools.find((singlePool) => singlePool.id === pool.poolId)
       if (poolData?.seniorYield30Days && poolData?.juniorYield30Days) {
         setDropYield(toPrecision(baseToDisplay(poolData.seniorYield30Days.muln(100), 27), 2))
         setTinYield(toPrecision(baseToDisplay(poolData.juniorYield30Days.muln(100), 27), 2))
@@ -46,7 +46,7 @@ export const useYield = () => {
 
 export const useCFGYield = () => {
   const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
-  const wCFGPrice = useSelector<any, string>((state: any) => state.userRewards.wCFGPrice)
+  const wCFGPrice = useSelector<any, number>((state: any) => state.userRewards.wCFGPrice)
 
   const [cfgYield, setCFGYield] = React.useState('0')
 
@@ -55,7 +55,7 @@ export const useCFGYield = () => {
       const DAYS = 365
       const rewardRate = rewards.data.rewardRate.toNumber()
 
-      setCFGYield((DAYS * rewardRate * parseFloat(wCFGPrice) * 100).toString())
+      setCFGYield((DAYS * rewardRate * wCFGPrice * 100).toString())
     }
   }, [wCFGPrice, rewards.data?.rewardRate])
 

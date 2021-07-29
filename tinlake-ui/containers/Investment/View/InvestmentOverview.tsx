@@ -10,7 +10,7 @@ import { Pool, UpcomingPool } from '../../../config'
 import { loadLoans, LoansState, SortableLoan } from '../../../ducks/loans'
 import { PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { useYield } from '../../../utils/hooks'
+import { useTrancheYield } from '../../../utils/hooks'
 import { toPrecision } from '../../../utils/toPrecision'
 import {
   BalanceSheetDiagram,
@@ -78,7 +78,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
-  const { dropYield } = useYield()
+  const { dropYield } = useTrancheYield()
 
   const reserveRatio =
     poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()

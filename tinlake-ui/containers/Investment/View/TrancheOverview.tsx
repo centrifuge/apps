@@ -13,7 +13,7 @@ import config, { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadPool, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { useYield } from '../../../utils/hooks'
+import { useTrancheYield } from '../../../utils/hooks'
 import { secondsToHms } from '../../../utils/time'
 import { toMaxPrecision, toPrecision } from '../../../utils/toPrecision'
 import CollectCard from './CollectCard'
@@ -65,7 +65,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   const dispatch = useDispatch()
 
-  const { dropYield } = useYield()
+  const { dropYield } = useTrancheYield()
 
   const connect = () => {
     dispatch(ensureAuthed())
