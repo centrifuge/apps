@@ -51,7 +51,7 @@ const Header: React.FC<Props> = (props: Props) => {
   const auth = useSelector<any, AuthState>((state) => state.auth)
   const connectedAddress = auth.address
   const address = useQueryDebugEthAddress() || connectedAddress
-  const { formattedAmount: CFGRewardAmount } = useCFGRewards(address)
+  const { formattedAmount: CFGRewardFormatted, amount: CFGRewardAmount } = useCFGRewards(address)
   const dispatch = useDispatch()
   const [menuOpen, setMenuOpen] = React.useState(false)
 
@@ -108,24 +108,29 @@ const Header: React.FC<Props> = (props: Props) => {
     />
   ))
 
+  const portfolioIsNonZero = portfolio.totalValue && !portfolio.totalValue.isZero()
   const portfolioLink = (
     <Link href="/portfolio">
-      <Box as="a" direction="row">
+      <Box as="a" direction="row" align="center">
         <Icon src="/static/DAI.svg" />
         <HoldingValue>
-          {addThousandsSeparators(toDynamicPrecision(baseToDisplay(portfolio.totalValue || '0', 18)))}
+          {portfolioIsNonZero
+            ? addThousandsSeparators(toDynamicPrecision(baseToDisplay(portfolio.totalValue || '0', 18)))
+            : 'Portfolio'}
         </HoldingValue>
-        <Unit>DAI</Unit>
+        <Unit>{!portfolioIsNonZero && '0 '}DAI</Unit>
       </Box>
     </Link>
   )
 
+  const rewardsIsNonZero = address && CFGRewardAmount != null && !CFGRewardAmount.isZero()
+  console.log('CFGRewardAmount', CFGRewardAmount)
   const rewardsLink = (
     <Link href="/rewards">
-      <Box as="a" direction="row">
+      <Box as="a" direction="row" align="center">
         <Icon src="/static/cfg-white.svg" />
-        <HoldingValue>{CFGRewardAmount}</HoldingValue>
-        <Unit>CFG</Unit>
+        <HoldingValue>{address && rewardsIsNonZero ? CFGRewardFormatted : 'Rewards'}</HoldingValue>
+        {address && <Unit>{!rewardsIsNonZero && '0 '}CFG</Unit>}
       </Box>
     </Link>
   )
@@ -154,11 +159,11 @@ const Header: React.FC<Props> = (props: Props) => {
       </NavWrapper>
       <AccountWrapper align="center" direction="row">
         <Holdings>
+          <Box pad={{ left: '14px', right: '14px' }}>
+            <AxisTooltip title="View your rewards">{rewardsLink}</AxisTooltip>
+          </Box>
           {address && (
             <>
-              <Box pad={{ left: '14px', right: '14px' }}>
-                <AxisTooltip title="View your rewards">{rewardsLink}</AxisTooltip>
-              </Box>
               <Box pad={{ left: '14px', right: '14px' }}>
                 <AxisTooltip title="View your investment portfolio">{portfolioLink}</AxisTooltip>
               </Box>
@@ -207,12 +212,11 @@ const Header: React.FC<Props> = (props: Props) => {
                     </Box>
                   </Box>
                 )}
-                {address && (
-                  <Box gap="large">
-                    {rewardsLink}
-                    {portfolioLink}
-                  </Box>
-                )}
+
+                <Box gap="large">
+                  {rewardsLink}
+                  {address && portfolioLink}
+                </Box>
                 <Box gap="medium" margin={{ top: 'auto' }}>
                   <SocialLink href="https://t.me/centrifuge_chat" target="_blank">
                     <Icon src="/static/help/telegram.svg" />
@@ -285,19 +289,19 @@ const HeaderBar = styled(Box)`
 const HoldingValue = styled.div`
   font-weight: 500;
   font-size: 14px;
-  line-height: 20px;
 `
 
 const Unit = styled.div`
   font-weight: 500;
   font-size: 11px;
-  line-height: 21px;
   margin-left: 5px;
+  position: relative;
+  top: 2px;
 `
 
 const Icon = styled.img`
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   margin-right: 5px;
 `
 
@@ -305,10 +309,12 @@ const Holdings = styled.div`
   display: flex;
   flex-direction: row;
 
+  a:hover {
+    color: #0828be;
+  }
+
   @media (min-width: 900px) and (max-width: 1199px) {
     ${Icon} {
-      width: 30px;
-      height: 30px;
       margin-right: 0;
     }
     ${Unit}, ${HoldingValue} {
@@ -345,13 +351,6 @@ const MobileNav = styled.div`
 
   @media (min-width: 900px) {
     display: none;
-  }
-`
-
-const Hamburger = styled(Box)`
-  svg {
-    width: 24px;
-    height: 24px;
   }
 `
 

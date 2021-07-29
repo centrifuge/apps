@@ -1,3 +1,4 @@
+import BN from 'bn.js'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { baseToDisplay } from '../../tinlake.js/dist'
@@ -19,6 +20,6 @@ export function useCFGRewards(address?: string | null) {
     formattedAmount: addThousandsSeparators(
       toDynamicPrecision(baseToDisplay(userRewards.data?.totalEarnedRewards || '0', 18))
     ),
-    amount: userRewards.data?.totalEarnedRewards || '0',
+    amount: userRewards.data?.totalEarnedRewards || new BN(0),
   }
 }
