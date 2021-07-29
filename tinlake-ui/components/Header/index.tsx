@@ -147,8 +147,8 @@ const Header: React.FC<Props> = (props: Props) => {
       <LogoWrapper>
         <Link href="/" shallow>
           <a title="Tinlake" style={{ display: 'block' }}>
-            <DesktopLogo src={logoUrl} />
-            <MobileLogo src="/static/tinlake-logo-icon-only.svg" />
+            <DesktopLogo hasPoolSelector={!!poolTitle} src={logoUrl} />
+            <MobileLogo hasPoolSelector={!!poolTitle} src="/static/tinlake-logo-icon-only.svg" />
           </a>
         </Link>
       </LogoWrapper>
@@ -326,12 +326,12 @@ const Holdings = styled.div`
   }
 `
 
-const DesktopLogo = styled.img`
+const DesktopLogo = styled.img<{ hasPoolSelector: boolean }>`
   width: 130px;
   vertical-align: middle;
 
   @media (max-width: 1199px) {
-    display: none;
+    display: ${(props) => (props.hasPoolSelector ? 'none' : 'initial')};
   }
 `
 
@@ -366,9 +366,10 @@ const CloseButton = styled.button`
   background-color: transparent;
 `
 
-const MobileLogo = styled.img`
-  height: 20px;
+const MobileLogo = styled.img<{ hasPoolSelector: boolean }>`
+  width: 34px;
   vertical-align: middle;
+  display: ${(props) => (props.hasPoolSelector ? 'initial' : 'none')};
 
   @media (min-width: 1200px) {
     display: none;
