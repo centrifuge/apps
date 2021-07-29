@@ -338,8 +338,8 @@ const MobileNav = styled.div`
 `
 
 const Hamburger = styled(Box)`
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   position: fixed;
   bottom: 16px;
   right: 16px;
@@ -347,20 +347,23 @@ const Hamburger = styled(Box)`
   justify-content: center;
   align-items: center;
   border-radius: 50%;
-  border: 1px solid #000;
-  background-color: #fff;
-  box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.1);
+  background-color: #0828be;
+  box-shadow: 0px 2px 4px rgba(8, 40, 190, 0.3);
   z-index: 5;
 
   svg {
     width: 20px;
     height: 20px;
   }
+
+  path {
+    stroke: #fff !important;
+  }
 `
 
 const CloseButton = styled.button`
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   position: fixed;
   bottom: 16px;
   right: 16px;
