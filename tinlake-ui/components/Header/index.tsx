@@ -123,8 +123,7 @@ const Header: React.FC<Props> = (props: Props) => {
     </Link>
   )
 
-  const rewardsIsNonZero = address && CFGRewardAmount != null && !CFGRewardAmount.isZero()
-  console.log('CFGRewardAmount', CFGRewardAmount)
+  const rewardsIsNonZero = address && CFGRewardAmount && !CFGRewardAmount.isZero()
   const rewardsLink = (
     <Link href="/rewards">
       <Box as="a" direction="row" align="center">
