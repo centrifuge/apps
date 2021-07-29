@@ -6,6 +6,7 @@ import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { IpfsPools, multicallConfig, Pool } from '../config'
 import Apollo from '../services/apollo'
+import { Fixed27Base } from '../utils/ratios'
 import { PoolStatus } from './pool'
 
 // Actions
@@ -136,6 +137,26 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
             call: ['totalRedeem()(uint256)'],
             returns: [[`${pool.addresses.ROOT_CONTRACT}.pendingJuniorRedemptions`, toBN]],
           },
+          {
+            target: pool.addresses.FEED,
+            call: ['currentNAV()(uint256)'],
+            returns: [[`${pool.addresses.ROOT_CONTRACT}.netAssetValue`, toBN]],
+          },
+          {
+            target: pool.addresses.ASSESSOR,
+            call: ['seniorDebt_()(uint256)'],
+            returns: [[`${pool.addresses.ROOT_CONTRACT}.seniorDebt`, toBN]],
+          },
+          {
+            target: pool.addresses.ASSESSOR,
+            call: ['seniorBalance_()(uint256)'],
+            returns: [[`${pool.addresses.ROOT_CONTRACT}.seniorBalance`, toBN]],
+          },
+          {
+            target: pool.addresses.ASSESSOR,
+            call: ['maxSeniorRatio()(uint256)'],
+            returns: [[`${pool.addresses.ROOT_CONTRACT}.maxSeniorRatio`, toBN]],
+          },
         ],
       ]
     })
@@ -154,15 +175,35 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
         let capacityPerPool: { [key: string]: BN } = {}
         Object.keys(updatesPerPool).forEach((poolId: string) => {
           const state: State = updatesPerPool[poolId]
+
+          const newReserve = BN.max(
+            new BN(0),
+            state.reserve
+              .add(state.pendingSeniorInvestments)
+              .add(state.pendingJuniorInvestments)
+              .sub(state.pendingSeniorRedemptions)
+              .sub(state.pendingJuniorRedemptions)
+          )
+
           // TODO: add remainingCredit
-          const capacity = state.maxReserve
-            .sub(state.reserve)
-            .sub(state.pendingSeniorInvestments)
-            .sub(state.pendingJuniorInvestments)
-            .add(state.pendingSeniorRedemptions)
-            .add(state.pendingJuniorRedemptions)
-          const capacityGivenMaxReserve = capacity.ltn(0) ? new BN(0) : capacity
-          capacityPerPool[poolId] = capacityGivenMaxReserve
+          const capacityGivenMaxReserve = BN.max(new BN(0), state.maxReserve.sub(newReserve))
+
+          const newSeniorAsset = state.seniorDebt
+            .add(state.seniorBalance)
+            .add(state.pendingSeniorInvestments)
+            .sub(state.pendingSeniorRedemptions)
+          const maxDropGivenMaxDropRatio = BN.max(
+            new BN(0),
+            state.maxSeniorRatio.mul(state.netAssetValue.add(newReserve)).div(Fixed27Base).sub(newSeniorAsset)
+          )
+          // console.log(poolId)
+          // console.log(` - nav: ${parseFloat(state.netAssetValue.toString()) / 10 ** 24}M`)
+          // console.log(` - newReserve: ${parseFloat(newReserve.toString()) / 10 ** 24}M`)
+          // console.log(` - newSeniorAsset: ${parseFloat(newSeniorAsset.toString()) / 10 ** 24}M`)
+          // console.log(` - maxDropGivenMaxDropRatio: ${parseFloat(maxDropGivenMaxDropRatio.toString()) / 10 ** 24}M`)
+          // console.log('\n\n')
+
+          capacityPerPool[poolId] = BN.min(capacityGivenMaxReserve, maxDropGivenMaxDropRatio)
         })
 
         const poolsWithCapacity = poolsData.pools.map((pool: PoolData) => {
@@ -193,4 +234,8 @@ interface State {
   pendingSeniorRedemptions: BN
   pendingJuniorInvestments: BN
   pendingJuniorRedemptions: BN
+  netAssetValue: BN
+  seniorDebt: BN
+  seniorBalance: BN
+  maxSeniorRatio: BN
 }

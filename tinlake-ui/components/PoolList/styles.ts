@@ -48,7 +48,7 @@ export const Type = styled.p`
 `
 
 export const HeaderCol = styled.div`
-  width: 120px;
+  width: 160px;
   margin-left: 16px;
   text-align: right;
 `
@@ -91,17 +91,20 @@ export const HeaderSub = styled.p`
   color: #979797;
 `
 
-export const Label = styled.div<{ blue?: true; orange?: true }>`
+export const Label = styled.div<{ green?: true; blue?: true; orange?: true }>`
   margin-left: 13px;
   position: relative;
   top: -2px;
   display: inline-block;
-  height: 16px;
-  font-weight: 500;
-  font-size: 11px;
-  line-height: 16px;
+  height: 20px;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 20px;
   color: white;
   padding: 0 12px;
+  text-align: center;
   border-radius: 8px;
-  background-color: ${({ blue, orange }) => (blue ? '#0828be' : orange ? '#fcba59' : '#aaa')};
+  color: ${({ green, blue, orange }) => (green ? '#36590E' : blue ? '#13467D' : orange ? '#7D5613' : '#fff')};
+  background-color: ${({ green, blue, orange }) =>
+    green ? '#ECFFD6' : blue ? '#D6EAFF' : orange ? '#FFF0D6' : '#aaa'};
 `

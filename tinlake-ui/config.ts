@@ -73,6 +73,7 @@ export interface Pool extends BasePool {
     RESERVE: string
     SENIOR_TRANCHE: string
     JUNIOR_TRANCHE: string
+    FEED: string
   }
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
