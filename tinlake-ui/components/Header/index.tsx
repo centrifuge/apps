@@ -166,7 +166,7 @@ const Header: React.FC<Props> = (props: Props) => {
           )}
         </Holdings>
         <WalletNav style={{ flex: '0 0 auto', paddingLeft: 16 }}>
-          {!address && <Button onClick={connectAccount} label="Connect" />}
+          {!address && <ConnectButton onClick={connectAccount} label="Connect" />}
           {address && (
             <Web3Wallet
               address={address}
@@ -181,9 +181,9 @@ const Header: React.FC<Props> = (props: Props) => {
         </WalletNav>
       </AccountWrapper>
       <MobileNav>
-        <Hamburger width="24" onClick={() => setMenuOpen(true)}>
-          <MenuIcon size="menu" />
-        </Hamburger>
+        <Box pad={{ left: '24px' }}>
+          <MenuIcon size="24px" onClick={() => setMenuOpen(true)} />
+        </Box>
         {menuOpen && (
           <Layer
             position="right"
@@ -192,12 +192,13 @@ const Header: React.FC<Props> = (props: Props) => {
             animate={true}
             onClickOutside={() => setMenuOpen(false)}
             onEsc={() => setMenuOpen(false)}
+            style={{ borderRadius: 0 }}
           >
-            <Box pad="40px" width="300px">
+            <Box pad="40px" width="300px" height="100%">
               <CloseButton onClick={() => setMenuOpen(false)}>
                 <CloseIcon size="16px" />
               </CloseButton>
-              <Box gap="xlarge">
+              <Box gap="xlarge" height="100%">
                 {poolTitle && filtMenuItems.length > 0 && (
                   <Box gap="medium">
                     <div>{poolTitle}</div>
@@ -212,7 +213,7 @@ const Header: React.FC<Props> = (props: Props) => {
                     {portfolioLink}
                   </Box>
                 )}
-                <Box gap="medium">
+                <Box gap="medium" margin={{ top: 'auto' }}>
                   <SocialLink href="https://t.me/centrifuge_chat" target="_blank">
                     <Icon src="/static/help/telegram.svg" />
                     <span>Telegram</span>
@@ -240,6 +241,12 @@ const Header: React.FC<Props> = (props: Props) => {
 }
 
 export default Header
+
+const ConnectButton = styled(Button)`
+  @media (max-width: 899px) {
+    display: none;
+  }
+`
 
 const LogoWrapper = styled.div`
   display: flex;
@@ -332,51 +339,33 @@ const DesktopNav = styled.div`
 const WalletNav = styled.div``
 
 const MobileNav = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   @media (min-width: 900px) {
     display: none;
   }
 `
 
 const Hamburger = styled(Box)`
-  width: 48px;
-  height: 48px;
-  position: fixed;
-  bottom: 16px;
-  right: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  background-color: #0828be;
-  box-shadow: 0px 2px 4px rgba(8, 40, 190, 0.3);
-  z-index: 5;
-
   svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  path {
-    stroke: #fff !important;
+    width: 24px;
+    height: 24px;
   }
 `
 
 const CloseButton = styled.button`
-  width: 48px;
-  height: 48px;
+  width: 24px;
+  height: 24px;
   position: fixed;
-  bottom: 16px;
+  top: 16px;
   right: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
   border: none;
-  border-radius: 50%;
-  background-color: #000;
-
-  path {
-    stroke: #fff !important;
-  }
+  background-color: transparent;
 `
 
 const MobileLogo = styled.img`
