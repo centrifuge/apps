@@ -103,10 +103,15 @@ class Apollo {
         version: Number(pool?.version || 3),
         juniorYield14Days: (pool?.juniorYield14Days && new BN(pool.juniorYield14Days)) || null,
         seniorYield14Days: (pool?.seniorYield14Days && new BN(pool.seniorYield14Days)) || null,
+        juniorYield30Days: (pool?.juniorYield30Days && new BN(pool.juniorYield30Days)) || null,
+        seniorYield30Days: (pool?.seniorYield30Days && new BN(pool.seniorYield30Days)) || null,
+        juniorYield90Days: (pool?.juniorYield90Days && new BN(pool.juniorYield90Days)) || null,
+        seniorYield90Days: (pool?.seniorYield90Days && new BN(pool.seniorYield90Days)) || null,
         juniorTokenPrice: (pool?.juniorTokenPrice && new BN(pool.juniorTokenPrice)) || null,
         seniorTokenPrice: (pool?.seniorTokenPrice && new BN(pool.seniorTokenPrice)) || null,
         icon: poolConfig.metadata.media?.icon || null,
         currency: poolConfig.metadata.currencySymbol || 'DAI',
+        shortName: '',
       }
 
       return { ...poolData, status: getPoolStatus(poolData) }
@@ -145,6 +150,11 @@ class Apollo {
       seniorYield14Days: null,
       icon: p.metadata.media?.icon || null,
       currency: p.metadata.currencySymbol || 'DAI',
+      shortName: '',
+      seniorYield30Days: null,
+      seniorYield90Days: null,
+      juniorYield30Days: null,
+      juniorYield90Days: null,
     }))
   }
 
@@ -180,6 +190,11 @@ class Apollo {
       seniorYield14Days: null,
       icon: p.metadata.media?.icon || null,
       currency: p.metadata.currencySymbol || 'DAI',
+      shortName: '',
+      seniorYield30Days: null,
+      seniorYield90Days: null,
+      juniorYield30Days: null,
+      juniorYield90Days: null,
     }))
   }
 
@@ -220,10 +235,13 @@ class Apollo {
               reserve
               maxReserve
               assetValue
-              juniorYield14Days
-              seniorYield14Days
               juniorTokenPrice
               seniorTokenPrice
+              shortName
+              seniorYield30Days
+              seniorYield90Days
+              juniorYield30Days
+              juniorYield90Days
             }
           }
         `,

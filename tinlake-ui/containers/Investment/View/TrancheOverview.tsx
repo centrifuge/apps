@@ -8,10 +8,12 @@ import styled from 'styled-components'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { PoolLink } from '../../../components/PoolLink'
+import { Tooltip } from '../../../components/Tooltip'
 import config, { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadPool, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { useTrancheYield } from '../../../utils/hooks'
 import { secondsToHms } from '../../../utils/time'
 import { toMaxPrecision, toPrecision } from '../../../utils/toPrecision'
 import CollectCard from './CollectCard'
@@ -62,6 +64,8 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const [hasPendingCollection, setHasPendingCollection] = React.useState(false)
 
   const dispatch = useDispatch()
+
+  const { dropYield } = useTrancheYield()
 
   const connect = () => {
     dispatch(ensureAuthed())
@@ -308,9 +312,13 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))) && (
             <>
               <Info>
-                DROP APR: <b>{toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2)}%</b>
-                <br />
-                Minimum investment amount: <b>5000 {props.pool?.metadata.currencySymbol || 'DAI'}</b>
+                <Tooltip id="dropInvestment">
+                  DROP APY (30d): <b>{dropYield}%</b>
+                  <br />
+                  DROP APR: <b>{toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2)}%</b>
+                  <br />
+                  Minimum investment amount: <b>5000 {props.pool?.metadata.currencySymbol || 'DAI'}</b>
+                </Tooltip>
               </Info>
               <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
                 <PoolLink href={'/onboarding'}>

@@ -52,19 +52,6 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         direction="row"
         pad="medium"
       >
-        <Box pad={{ top: '8px' }} width="200px">
-          <Cont>
-            <TokenLogo src={`/static/dai.svg`} />
-            <Value>
-              <NumberDisplay
-                value={hoveredPoolValue?.toString() || baseToDisplay(props.pools.totalValue, 18)}
-                precision={0}
-              />
-            </Value>{' '}
-            <Unit>DAI</Unit>
-          </Cont>
-          <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
-        </Box>
         <Box width="200px" height="80px" pad={{ left: 'small' }} margin={{ left: '0' }}>
           <ResponsiveContainer>
             <AreaChart
@@ -101,6 +88,37 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
               />
             </AreaChart>
           </ResponsiveContainer>
+        </Box>
+        <Box pad={{ top: '8px' }} width="200px">
+          <Cont>
+            <TokenLogo src={`/static/dai.svg`} />
+            <Value>
+              <NumberDisplay
+                value={hoveredPoolValue?.toString() || baseToDisplay(props.pools.totalValue, 18)}
+                precision={0}
+              />
+            </Value>{' '}
+            <Unit>DAI</Unit>
+          </Cont>
+          <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
+        </Box>
+        <Box
+          width="200px"
+          pad={{ left: 'medium', top: '8px' }}
+          margin={{ left: 'medium' }}
+          style={{ borderLeft: '1px solid #D8D8D8' }}
+        >
+          <Cont>
+            <TokenLogo src={`/static/dai.svg`} />
+            <Value>
+              <NumberDisplay
+                value={hoveredPoolValue?.toString() || baseToDisplay(props.pools.totalValue, 18)}
+                precision={0}
+              />
+            </Value>{' '}
+            <Unit>DAI</Unit>
+          </Cont>
+          <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
         </Box>
       </Box>
       <Box
