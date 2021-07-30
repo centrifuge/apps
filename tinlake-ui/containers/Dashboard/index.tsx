@@ -33,7 +33,7 @@ const Dashboard: React.FC<Props> = (props: Props) => {
             <Box margin={{ top: 'medium', bottom: 'none' }} direction="row">
               <TinlakeExplainer />
             </Box>
-            <Box direction="row" gap="large" margin={{ bottom: 'large' }} justify="center" wrap>
+            <Box direction="row" gap="large" margin={{ bottom: 'medium', top: 'medium' }} justify="center" wrap>
               <PoolsMetrics pools={pools.data} tinlake={props.tinlake} />
             </Box>
             <PoolList poolsData={pools.data} />
