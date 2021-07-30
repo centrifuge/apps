@@ -46,7 +46,7 @@ const TinlakeExplainer: React.FC = () => {
           </a>{' '}
           for more info.
           <Box justify="center">
-            <Box margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}>
+            <Box margin={{ top: '24px', bottom: 'medium', left: 'auto', right: 'auto' }}>
               <Button
                 secondary
                 label="Get started"

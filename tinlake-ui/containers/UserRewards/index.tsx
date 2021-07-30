@@ -223,7 +223,26 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
             />
             <MetricRow
               loading={!rewards.data}
-              value={baseToDisplay(rewards.data?.toDateRewardAggregateValue || '0', 18)}
+              value={baseToDisplay(rewards.data?.toDateRewardAggregateValue || new BN(0), 18)}
+              label="Investor Rewards"
+              token="CFG"
+              borderBottom
+            />
+            <MetricRow
+              loading={!rewards.data}
+              value={baseToDisplay(rewards.data?.toDateAORewardAggregateValue || new BN(0), 18)}
+              label="Asset Originator Rewards"
+              token="CFG"
+              borderBottom
+            />
+            <MetricRow
+              loading={!rewards.data}
+              value={baseToDisplay(
+                (rewards.data?.toDateRewardAggregateValue || new BN(0)).add(
+                  rewards.data?.toDateAORewardAggregateValue || new BN(0)
+                ),
+                18
+              )}
               label="Total Rewards Earned"
               token="CFG"
             />
