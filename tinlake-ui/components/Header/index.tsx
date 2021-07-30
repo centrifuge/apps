@@ -162,11 +162,9 @@ const Header: React.FC<Props> = (props: Props) => {
             <AxisTooltip title="View your rewards">{rewardsLink}</AxisTooltip>
           </Box>
           {address && (
-            <>
-              <Box pad={{ left: '14px', right: '14px' }}>
-                <AxisTooltip title="View your investment portfolio">{portfolioLink}</AxisTooltip>
-              </Box>
-            </>
+            <Box pad={{ left: '14px', right: '14px' }}>
+              <AxisTooltip title="View your investment portfolio">{portfolioLink}</AxisTooltip>
+            </Box>
           )}
         </Holdings>
         <WalletNav style={{ flex: '0 0 auto', paddingLeft: 16 }}>

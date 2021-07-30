@@ -32,7 +32,7 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
   const [copied, setCopied] = useState(false)
   const contRef = useRef<HTMLButtonElement>(null)
   const [, setShowDrop] = useState(false)
-  useEffect(() => setShowDrop(true))
+  useEffect(() => setShowDrop(true), [])
 
   return (
     <>
