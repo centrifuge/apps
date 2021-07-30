@@ -1,5 +1,5 @@
+import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
-import BN from 'bn.js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
@@ -7,8 +7,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts'
 import { PoolsDailyData, PoolsData } from '../../ducks/pools'
 import { maybeLoadRewards, RewardsState } from '../../ducks/rewards'
+import { getWCFGPrice } from '../../ducks/userRewards'
 import { dateToYMD } from '../../utils/date'
-import { dynamicPrecision } from '../../utils/toDynamicPrecision'
+import { useCFGYield } from '../../utils/hooks'
 import NumberDisplay from '../NumberDisplay'
 import { Cont, Label, TokenLogo, Unit, Value } from './styles'
 
@@ -24,12 +25,13 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
   const [hoveredDay, setHoveredDay] = React.useState<number | undefined>(undefined)
 
   const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
+  const cfgYield = useCFGYield()
+
   const dispatch = useDispatch()
   React.useEffect(() => {
     dispatch(maybeLoadRewards())
+    dispatch(getWCFGPrice())
   }, [])
-
-  const investorRewardsEarned = rewards.data?.toDateRewardAggregateValue
 
   const maxPoolValue = Math.max.apply(
     Math,
@@ -119,20 +121,22 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         justify="center"
       >
         <Box>
-          <Cont style={{ marginTop: '8px' }}>
-            <TokenLogo src={`/static/cfg-white.svg`} />
-            <Value>
-              <NumberDisplay
-                value={baseToDisplay(investorRewardsEarned || new BN(0), 18)}
-                precision={dynamicPrecision(baseToDisplay(investorRewardsEarned || new BN(0), 18))}
-              />
-            </Value>{' '}
-            <Unit>CFG</Unit>
-          </Cont>
-          <Label>Total Rewards Earned</Label>
+          <AxisTooltip title="The annualized CFG reward rate for investments in Tinlake pools, based on the current CFG token market price and the current daily Tinlake protocol reward rate">
+            <>
+              <Cont style={{ marginTop: '8px' }}>
+                <TokenLogo src={`/static/cfg-white.svg`} />
+                <Value>
+                  <NumberDisplay value={cfgYield} precision={2} />
+                </Value>{' '}
+                <Unit>%</Unit>
+              </Cont>
+
+              <Label>Investment Reward Rate (APR)</Label>
+            </>
+          </AxisTooltip>
         </Box>
         <Box margin={{ left: 'medium' }} justify="center">
-          <Button label="Claim Rewards" primary onClick={goToRewards} color="#FCBA59" />
+          <Button label="Claim CFG" primary onClick={goToRewards} />
         </Box>
       </Box>
     </>

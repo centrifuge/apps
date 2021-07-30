@@ -1,32 +1,50 @@
 import { Box, Button } from 'grommet'
-import { FormDown } from 'grommet-icons'
 import * as React from 'react'
-import { Btn, Caret, Container, Primer, Row, Text } from './styles'
+import styled from 'styled-components'
+import InvestmentDisclaimer from '../Footer/InvestmentDisclaimer'
+import { Container, Primer, Row, Text } from './styles'
+
+const LearnMore = styled.span`
+  text-decoration: underline;
+`
 
 const TinlakeExplainer: React.FC = () => {
+  const [modalIsOpen, setModalIsOpen] = React.useState(false)
+
+  const openModal = () => {
+    setModalIsOpen(true)
+  }
+  const closeModal = () => {
+    setModalIsOpen(false)
+  }
+
   const [open, setOpen] = React.useState(false)
 
   return (
     <Container>
-      <Row onClick={() => setOpen(!open)}>
+      <Row onClick={() => setOpen(!open)} role="button">
         <Primer>
-          Tinlake is an open market place of real-world asset pools. Explore the pools and start investing now.
+          Tinlake is an open market place of real-world asset pools. Investments earn rewards in CFG token.{' '}
+          <LearnMore>Learn more</LearnMore>
         </Primer>
-        <Btn>
-          Learn more{' '}
-          <Caret>
-            <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
-          </Caret>
-        </Btn>
       </Row>
       {open && (
         <Text>
-          Tinlake is an open market place of asset pools bringing together Asset Originators and Investors that seek to
-          utilize the full potential of Decentralized Finance (DeFi). Asset Originators can responsibly bridge
-          real-world assets into DeFi and access bankless liquidity. Investors can earn attractive yields on different
-          tokenized real-world assets such as invoices, mortgages or streaming royalties. Tinlake’s smart contract
-          platform coordinates the different parties required to structure, administer and finance collateralized pools
-          of these real-world assets.
+          The Tinlake protocol is rewarding every Tinlake investment daily in CFG token, the Centrifuge Chain’s native
+          token. The Investment Reward Rate (APR)” is an annualized representation of these rewards considering the
+          current CFG token market price taken from CoinGecko and current daily Tinlake protocol reward rate (see
+          related governance discussions and decisions{' '}
+          <a href="https://gov.centrifuge.io/c/governance/35" target="_blank">
+            here
+          </a>
+          ). Note that these are rewards from the protocol for providing liquidity to the ecosystem independent from the
+          pool, it’s issuers, their asset originators, or any Centrifuge entity. There is no guarantee that an investor
+          will receive those rewards nor that the current annualized reward APR will be met. This is not investment
+          advice — please see the{' '}
+          <a onClick={openModal} href="#">
+            Investment Disclaimer
+          </a>{' '}
+          for more info.
           <Box justify="center">
             <Box margin={{ bottom: 'small', left: 'auto', right: 'auto' }}>
               <Button
@@ -40,6 +58,8 @@ const TinlakeExplainer: React.FC = () => {
           </Box>
         </Text>
       )}
+
+      <InvestmentDisclaimer isOpen={modalIsOpen} onClose={closeModal} />
     </Container>
   )
 }
