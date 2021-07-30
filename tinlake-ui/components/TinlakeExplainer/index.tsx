@@ -29,7 +29,7 @@ const TinlakeExplainer: React.FC = () => {
         </Primer>
       </Row>
       {open && (
-        <Text>
+        <Text style={{ borderBottom: '1px solid #d8d8d8' }}>
           The Tinlake protocol is rewarding every Tinlake investment daily in CFG token, the Centrifuge Chain’s native
           token. The Investment Reward Rate (APR)” is an annualized representation of these rewards considering the
           current CFG token market price taken from CoinGecko and current daily Tinlake protocol reward rate (see
@@ -46,10 +46,10 @@ const TinlakeExplainer: React.FC = () => {
           </a>{' '}
           for more info.
           <Box justify="center">
-            <Box margin={{ bottom: 'small', left: 'auto', right: 'auto' }}>
+            <Box margin={{ top: 'small', bottom: 'medium', left: 'auto', right: 'auto' }}>
               <Button
-                primary
-                label="Read more about Tinlake"
+                secondary
+                label="Get started"
                 href="https://developer.centrifuge.io/learn/understanding-tinlake/"
                 target="_blank"
                 fill={false}

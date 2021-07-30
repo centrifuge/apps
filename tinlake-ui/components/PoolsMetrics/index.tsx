@@ -65,13 +65,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
           </Cont>
           <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
         </Box>
-        <Box
-          width="200px"
-          height="80px"
-          pad={{ left: 'medium' }}
-          margin={{ left: 'medium' }}
-          style={{ borderLeft: '1px solid #D8D8D8' }}
-        >
+        <Box width="200px" height="80px" pad={{ left: 'small' }} margin={{ left: '0' }}>
           <ResponsiveContainer>
             <AreaChart
               data={poolsDailyData}
@@ -130,11 +124,11 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
                 <Unit>%</Unit>
               </Cont>
 
-              <Label>Investment Reward Rate (APR)</Label>
+              <Label>Reward Rate (APR)</Label>
             </>
           </AxisTooltip>
         </Box>
-        <Box margin={{ left: 'medium' }} justify="center">
+        <Box margin={{ left: 'large' }} justify="center">
           <Button label="Claim CFG" primary onClick={goToRewards} />
         </Box>
       </Box>
