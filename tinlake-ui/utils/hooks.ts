@@ -1,9 +1,10 @@
 import { baseToDisplay, toPrecision } from '@centrifuge/tinlake-js'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { PoolState } from '../ducks/pool'
 import { PoolsState } from '../ducks/pools'
-import { RewardsState } from '../ducks/rewards'
+import { maybeLoadRewards, RewardsState } from '../ducks/rewards'
+import { getWCFGPrice } from '../ducks/userRewards'
 
 // Source: https://www.30secondsofcode.org/react/s/use-interval
 export const useInterval = (callback: any, delay: number) => {
@@ -28,36 +29,43 @@ export const useTrancheYield = () => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const pools = useSelector<any, PoolsState>((state) => state.pools)
 
-  const [dropYield, setDropYield] = React.useState('')
-  const [tinYield, setTinYield] = React.useState('')
-
-  React.useEffect(() => {
+  return React.useMemo(() => {
     if (pools.data?.pools && pool.poolId) {
       const poolData = pools.data.pools.find((singlePool) => singlePool.id === pool.poolId)
       if (poolData?.seniorYield30Days && poolData?.juniorYield30Days) {
-        setDropYield(toPrecision(baseToDisplay(poolData.seniorYield30Days.muln(100), 27), 2))
-        setTinYield(toPrecision(baseToDisplay(poolData.juniorYield30Days.muln(100), 27), 2))
+        return {
+          dropYield: toPrecision(baseToDisplay(poolData.seniorYield30Days.muln(100), 27), 2),
+          tinYield: toPrecision(baseToDisplay(poolData.juniorYield30Days.muln(100), 27), 2),
+        }
       }
     }
-  }, [pool, pools])
 
-  return { dropYield, tinYield }
+    return {
+      dropYield: '',
+      tinYield: '',
+    }
+  }, [pool, pools])
 }
 
 export const useCFGYield = () => {
   const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
   const wCFGPrice = useSelector<any, number>((state: any) => state.userRewards.wCFGPrice)
 
-  const [cfgYield, setCFGYield] = React.useState('0')
+  const dispatch = useDispatch()
 
   React.useEffect(() => {
+    dispatch(maybeLoadRewards())
+    dispatch(getWCFGPrice())
+  }, [])
+
+  return React.useMemo(() => {
     if (wCFGPrice && rewards.data?.rewardRate) {
       const DAYS = 365
       const rewardRate = rewards.data.rewardRate.toNumber()
 
-      setCFGYield((DAYS * rewardRate * wCFGPrice * 100).toString())
+      return (DAYS * rewardRate * wCFGPrice * 100).toString()
     }
-  }, [wCFGPrice, rewards.data?.rewardRate])
 
-  return cfgYield
+    return '0'
+  }, [wCFGPrice, rewards.data?.rewardRate])
 }

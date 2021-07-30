@@ -3,11 +3,9 @@ import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts'
 import { PoolsDailyData, PoolsData } from '../../ducks/pools'
-import { maybeLoadRewards } from '../../ducks/rewards'
-import { getWCFGPrice } from '../../ducks/userRewards'
 import { dateToYMD } from '../../utils/date'
 import { useCFGYield } from '../../utils/hooks'
 import NumberDisplay from '../NumberDisplay'
@@ -26,12 +24,6 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
 
   const cfgYield = useCFGYield()
 
-  const dispatch = useDispatch()
-  React.useEffect(() => {
-    dispatch(maybeLoadRewards())
-    dispatch(getWCFGPrice())
-  }, [])
-
   const maxPoolValue = Math.max.apply(
     Math,
     poolsDailyData.map((o) => {
@@ -44,7 +36,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
   return (
     <>
       <Box
-        width="460px"
+        width="500px"
         elevation="small"
         round="xsmall"
         background="white"
@@ -52,7 +44,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         direction="row"
         pad="medium"
       >
-        <Box width="200px" height="80px" pad={{ left: 'small' }} margin={{ left: '0' }}>
+        <Box width="250px" height="80px" pad={{ left: 'small' }} margin={{ left: '0' }}>
           <ResponsiveContainer>
             <AreaChart
               data={poolsDailyData}
@@ -89,21 +81,8 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
             </AreaChart>
           </ResponsiveContainer>
         </Box>
-        <Box pad={{ top: '8px' }} width="200px">
-          <Cont>
-            <TokenLogo src={`/static/dai.svg`} />
-            <Value>
-              <NumberDisplay
-                value={hoveredPoolValue?.toString() || baseToDisplay(props.pools.totalValue, 18)}
-                precision={0}
-              />
-            </Value>{' '}
-            <Unit>DAI</Unit>
-          </Cont>
-          <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
-        </Box>
         <Box
-          width="200px"
+          width="250px"
           pad={{ left: 'medium', top: '8px' }}
           margin={{ left: 'medium' }}
           style={{ borderLeft: '1px solid #D8D8D8' }}
