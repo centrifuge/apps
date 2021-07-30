@@ -6,7 +6,7 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts'
 import { PoolsDailyData, PoolsData } from '../../ducks/pools'
-import { maybeLoadRewards, RewardsState } from '../../ducks/rewards'
+import { maybeLoadRewards } from '../../ducks/rewards'
 import { getWCFGPrice } from '../../ducks/userRewards'
 import { dateToYMD } from '../../utils/date'
 import { useCFGYield } from '../../utils/hooks'
@@ -24,7 +24,6 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
   const [hoveredPoolValue, setHoveredPoolValue] = React.useState<number | undefined>(undefined)
   const [hoveredDay, setHoveredDay] = React.useState<number | undefined>(undefined)
 
-  const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
   const cfgYield = useCFGYield()
 
   const dispatch = useDispatch()
@@ -121,7 +120,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         justify="center"
       >
         <Box>
-          <AxisTooltip title="The annualized CFG reward rate for investments in Tinlake pools, based on the current CFG token market price and the current daily Tinlake protocol reward rate">
+          <AxisTooltip title="The annualized CFG reward rate for investments, based on the current CFG token market price and the daily reward rate">
             <>
               <Cont style={{ marginTop: '8px' }}>
                 <TokenLogo src={`/static/cfg-white.svg`} />
