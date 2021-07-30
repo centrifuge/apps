@@ -254,9 +254,8 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           You do not have any investments.
           <br />
           <Link href="/">
-            <a style={{ color: 'inherit' }}>Browse all pools</a>
+            <a style={{ color: 'inherit' }}>Browse pools to invest in</a>
           </Link>
-          .
         </EmptyParagraph>
       )}
     </Box>
