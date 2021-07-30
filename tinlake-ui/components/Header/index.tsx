@@ -136,7 +136,7 @@ const Header: React.FC<Props> = (props: Props) => {
 
   return (
     <HeaderBar
-      style={{ position: 'sticky', top: 0, height: '56px', zIndex: 2, boxShadow: '0 0 4px 0px #00000075' }}
+      style={{ position: 'sticky', top: 0, height: '56px', zIndex: 6, boxShadow: '0 0 4px 0px #00000075' }}
       background="white"
       justify="between"
       align="center"
