@@ -86,7 +86,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
           plain
           responsive
           target={poolRef.current}
-          align={{ right: 'right', top: 'bottom' }}
+          align={{ left: 'left', top: 'bottom' }}
           style={{ padding: 6, marginTop: 10 }}
           onClickOutside={onClickOutside}
           onEsc={() => setOpen(false)}
