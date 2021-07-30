@@ -2,7 +2,6 @@ import styled from 'styled-components'
 
 export const Container = styled.div`
   flex: 1;
-  border-bottom: 1px solid #d8d8d8;
   padding-bottom: 16px;
 `
 
@@ -13,7 +12,7 @@ export const Row = styled.div`
 
 export const Primer = styled.div`
   font-weight: 500;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 24px;
   color: #0828be;
 `
@@ -41,7 +40,7 @@ export const Caret = styled.div`
 export const Text = styled.div`
   margin-top: 16px;
   font-weight: 400;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 24px;
   color: #333;
 `
