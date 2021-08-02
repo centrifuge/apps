@@ -102,7 +102,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ bottom: 'large' }}>
-      <Box
+      <Card
         elevation="small"
         round="xsmall"
         background="white"
@@ -157,7 +157,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
             <InvestAction pool={props.selectedPool} />
           )}
         </HeaderBox>
-      </Box>
+      </Card>
       {isMakerIntegrated && (
         <MakerBox round="xsmall" gap="small" elevation="small" background="#1AAB9B">
           <Box direction="row">
@@ -297,6 +297,12 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 
 export default OverviewHeader
 
+const Card = styled(Box)`
+  @media (max-width: 900px) {
+    flex-direction: column;
+  }
+`
+
 const HeaderBox = styled(Box)<{ width?: string }>`
   text-align: center;
   border-right: 1px solid #dadada;
@@ -311,6 +317,19 @@ const HeaderBox = styled(Box)<{ width?: string }>`
   h5,
   h6 {
     margin: 0 4px 4px 4px;
+  }
+
+  @media (max-width: 900px) {
+    border-right: none;
+    flex-direction: column-reverse;
+    text-align: left;
+
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin: 4px 0 0 0;
+    }
   }
 `
 

@@ -1,6 +1,19 @@
 import { Box, Text } from 'grommet'
 import styled from 'styled-components'
 
+export const FlexWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+    & > div:first-child {
+      margin-bottom: 40px;
+    }
+  }
+`
+
 export const Description = styled(Text)`
   color: #777;
   font-size: 14px;
@@ -88,6 +101,9 @@ export const PoolValueLineRight = styled.div`
 
 export const BalanceSheetDiagram = styled(Box)`
   flex: 1;
+  @media (max-width: 899px) {
+    display: none;
+  }
 `
 
 export const BalanceSheetDiagramLeft = styled(Box)`

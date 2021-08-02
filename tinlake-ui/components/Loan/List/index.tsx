@@ -42,6 +42,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
         pad={{ top: 'xsmall' }}
         margin={{ bottom: 'medium' }}
         background="white"
+        overflow="auto"
       >
         {props.loans.length > 0 && (
           <DataTable
