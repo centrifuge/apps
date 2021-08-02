@@ -105,3 +105,10 @@ export const Label = styled.div<{ blue?: true; orange?: true }>`
   border-radius: 8px;
   background-color: ${({ blue, orange }) => (blue ? '#0828be' : orange ? '#fcba59' : '#aaa')};
 `
+
+export const EmptyParagraph = styled.p`
+  color: #0828be;
+  font-size: 20px;
+  line-height: 32px;
+  font-weight: 500;
+`
