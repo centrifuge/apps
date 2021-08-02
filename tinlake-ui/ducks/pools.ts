@@ -198,7 +198,7 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
 
     try {
       watcher.batch().subscribe((updates: any[]) => {
-        let updatesPerPool: any = {}
+        const updatesPerPool: any = {}
         updates.forEach((update: any) => {
           const poolId = update.type.split('.')[0]
           const key = update.type.split('.')[1]
@@ -206,7 +206,7 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
           updatesPerPool[poolId][key] = update.value
         })
 
-        let capacityPerPool: { [key: string]: BN } = {}
+        const capacityPerPool: { [key: string]: BN } = {}
         Object.keys(updatesPerPool).forEach((poolId: string) => {
           const state: State = updatesPerPool[poolId]
 
