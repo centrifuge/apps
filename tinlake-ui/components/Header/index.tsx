@@ -142,7 +142,7 @@ const Header: React.FC<Props> = (props: Props) => {
       align="center"
       direction="row"
       fill="horizontal"
-      pad={{ horizontal: '24px' }}
+      pad={{ horizontal: 'medium' }}
     >
       <LogoWrapper>
         <Link href="/" shallow>
@@ -152,7 +152,7 @@ const Header: React.FC<Props> = (props: Props) => {
           </a>
         </Link>
       </LogoWrapper>
-      <NavWrapper align="center" direction="row" flex="grow" basis="auto">
+      <NavWrapper align="center" direction="row" style={{ flex: '1 1 auto' }}>
         {poolTitle && <PoolSelector title={poolTitle} ipfsPools={props.ipfsPools} />}
         {filtMenuItems.length > 0 && <DesktopNav>{menuButtons}</DesktopNav>}
       </NavWrapper>
@@ -253,7 +253,7 @@ const LogoWrapper = styled.div`
   display: flex;
   align-items: center;
   height: 32px;
-  padding-right: 32px;
+  padding-right: 24px;
 `
 const NavWrapper = styled(Box)`
   flex-grow: 1;

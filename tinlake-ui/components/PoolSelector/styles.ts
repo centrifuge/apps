@@ -2,7 +2,7 @@ import { Box, FormField } from 'grommet'
 import styled from 'styled-components'
 
 export const Button = styled(Box)`
-  padding: 0 16px 0 0;
+  padding: 0 8px 0 0;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -21,6 +21,9 @@ export const Title = styled.div`
   line-height: 16px;
   font-weight: 500;
   font-size: 14px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `
 
 export const Caret = styled.img`
