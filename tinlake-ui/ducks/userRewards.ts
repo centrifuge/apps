@@ -16,6 +16,7 @@ const LOAD_CENT_CHAIN = 'tinlake-ui/user-rewards/LOAD_CENT_CHAIN'
 const RECEIVE_CENT_CHAIN = 'tinlake-ui/user-rewards/RECEIVE_CENT_CHAIN'
 const LOAD_CLAIMS = 'tinlake-ui/user-rewards/LOAD_CLAIMS'
 const RECEIVE_CLAIMS = 'tinlake-ui/user-rewards/RECEIVE_CLAIMS'
+const RECEIVE_WCFG_PRICE = 'tinlake-io/user-rewards/RECEIVE_WCFG_PRICE'
 
 // just used for readability
 type AccountIDString = string
@@ -28,6 +29,7 @@ export interface UserRewardsState {
   claims: null | RewardClaim[]
   ethLinkState: null | 'loading' | 'found'
   ethLink: null | string
+  wCFGPrice: null | string
 }
 
 /**
@@ -112,6 +114,7 @@ const initialState: UserRewardsState = {
   claims: null,
   ethLinkState: null,
   ethLink: null,
+  wCFGPrice: null,
 }
 
 export default function reducer(
@@ -158,6 +161,8 @@ export default function reducer(
       return { ...state, ethLink: null, ethLinkState: 'loading' }
     case RECEIVE_ETH_LINK:
       return { ...state, ethLink: action.link, ethLinkState: 'found' }
+    case RECEIVE_WCFG_PRICE:
+      return { ...state, wCFGPrice: action.data }
     default:
       return state
   }
@@ -254,5 +259,18 @@ export function maybeLoadAndApplyClaims(): ThunkAction<
     } else {
       dispatch(loadClaims())
     }
+  }
+}
+
+export function getWCFGPrice(): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
+  return async (dispatch) => {
+    const response = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=wrapped-centrifuge&vs_currencies=usd'
+    )
+    const json = await response.json()
+
+    const wCFGUSD = json['wrapped-centrifuge']?.usd
+
+    dispatch({ data: wCFGUSD, type: RECEIVE_WCFG_PRICE })
   }
 }
