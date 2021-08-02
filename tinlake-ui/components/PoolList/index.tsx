@@ -67,7 +67,7 @@ class PoolList extends React.Component<Props> {
             </HeaderCol>
           )}
           <HeaderCol>
-            <HeaderTitle>DROP Capacity</HeaderTitle>
+            <HeaderTitle>Investment Capacity</HeaderTitle>
           </HeaderCol>
           <HeaderCol>
             <HeaderTitle>Pool Value</HeaderTitle>

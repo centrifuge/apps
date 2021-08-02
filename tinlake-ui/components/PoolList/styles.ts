@@ -97,14 +97,12 @@ export const Label = styled.div<{ green?: true; blue?: true; orange?: true }>`
   top: -2px;
   display: inline-block;
   height: 20px;
-  font-weight: bold;
+  font-weight: 500;
   font-size: 12px;
-  line-height: 20px;
   color: white;
-  padding: 0 12px;
+  padding: 0 8px 0 8px;
   text-align: center;
-  border-radius: 8px;
-  color: ${({ green, blue, orange }) => (green ? '#36590E' : blue ? '#13467D' : orange ? '#7D5613' : '#fff')};
-  background-color: ${({ green, blue, orange }) =>
-    green ? '#ECFFD6' : blue ? '#D6EAFF' : orange ? '#FFF0D6' : '#aaa'};
+  border-radius: 12px;
+  border: 1px solid ${({ green, blue, orange }) => (green ? '#598232' : blue ? '#2976D4' : orange ? '#9B6F2B' : '#666')};
+  color: ${({ green, blue, orange }) => (green ? '#598232' : blue ? '#2976D4' : orange ? '#9B6F2B' : '#666')};
 `
