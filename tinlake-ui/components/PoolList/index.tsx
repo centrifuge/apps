@@ -123,7 +123,7 @@ class PoolList extends React.Component<Props> {
                   <Label orange>Oversubscribed</Label>
                 ) : (
                   <Label green>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(p.capacity || new BN(0), 18), 0))} {p.currency}
+                    {addThousandsSeparators(toPrecision(baseToDisplay(p.capacity || new BN(0), 21), 0))}K {p.currency}
                   </Label>
                 )}
               </DataCol>
