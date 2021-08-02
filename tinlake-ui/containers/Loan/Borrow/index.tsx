@@ -141,18 +141,16 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
       </Box>
       <Box align="start">
         <Box direction="row" gap="small">
-          <Button
-            onClick={borrow}
-            primary
-            label="Finance Asset"
-            disabled={
-              error !== undefined ||
-              new BN(borrowAmount).isZero() ||
-              !borrowEnabled ||
-              status === 'unconfirmed' ||
-              status === 'pending'
-            }
-          />
+          {props.pool?.epoch && borrowEnabled && (
+            <Button
+              onClick={borrow}
+              primary
+              label="Finance Asset"
+              disabled={
+                new BN(borrowAmount).isZero() || error !== undefined || status === 'unconfirmed' || status === 'pending'
+              }
+            />
+          )}
           {props.loan.status === 'NFT locked' && (
             <Button
               onClick={close}

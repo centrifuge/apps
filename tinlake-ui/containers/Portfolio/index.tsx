@@ -2,17 +2,17 @@ import { DisplayField } from '@centrifuge/axis-display-field'
 import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Button } from 'grommet'
+import { Box, Button, Heading } from 'grommet'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import NumberDisplay from '../../components/NumberDisplay'
-import PageTitle from '../../components/PageTitle'
 import {
   Dash,
   DataCol,
   Desc,
+  EmptyParagraph,
   Header,
   HeaderCol,
   HeaderTitle,
@@ -93,7 +93,12 @@ const Portfolio: React.FC<Props> = (props: Props) => {
     <Box margin={{ top: 'medium' }}>
       <Box margin={{ bottom: 'medium' }}>
         <Box direction="row" justify="between">
-          <PageTitle page="My Investment Portfolio" return />
+          <Box direction="row" align="center">
+            <Icon src="/static/dai.svg" />
+            <Heading level={2} size="20px">
+              Portfolio
+            </Heading>
+          </Box>
           {address && address !== connectedAddress && (
             <Box margin={{ top: 'medium' }}>
               <DisplayField
@@ -245,17 +250,13 @@ const Portfolio: React.FC<Props> = (props: Props) => {
         </>
       )}
       {portfolio.data?.filter((tokenBalance: TokenBalance) => !tokenBalance.balanceAmount.isZero()).length === 0 && (
-        <>
-          <Box elevation="small" round="xsmall" pad={'medium'} background="white">
-            No token holdings found.
-          </Box>
-
-          <Box margin={{ top: 'medium', left: 'auto', right: 'auto' }}>
-            <Link href="/">
-              <Button label="Explore investment opportunities" secondary size="small" />
-            </Link>
-          </Box>
-        </>
+        <EmptyParagraph>
+          You do not have any investments.
+          <br />
+          <Link href="/">
+            <a style={{ color: 'inherit' }}>Browse pools to invest in</a>
+          </Link>
+        </EmptyParagraph>
       )}
     </Box>
   )

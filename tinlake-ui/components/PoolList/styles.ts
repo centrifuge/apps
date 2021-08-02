@@ -106,3 +106,10 @@ export const Label = styled.div<{ green?: true; blue?: true; orange?: true }>`
   border: 1px solid ${({ green, blue, orange }) => (green ? '#598232' : blue ? '#2976D4' : orange ? '#9B6F2B' : '#666')};
   color: ${({ green, blue, orange }) => (green ? '#598232' : blue ? '#2976D4' : orange ? '#9B6F2B' : '#666')};
 `
+
+export const EmptyParagraph = styled.p`
+  color: #0828be;
+  font-size: 20px;
+  line-height: 32px;
+  font-weight: 500;
+`
