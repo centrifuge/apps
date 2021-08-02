@@ -57,8 +57,8 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
     <Box margin={{ top: 'medium' }}>
       <PageTitle page="Claim Your CFG Rewards" return />
 
-      <Box direction="row" align="start" justify="between">
-        <Box flex>
+      <Box direction="row" align="start" justify="between" wrap>
+        <ColLeft flex>
           {ethAddr && (
             <Box
               pad="medium"
@@ -199,8 +199,8 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
               {showClaimStripe(data) && <ClaimRewards activeLink={data.links[data.links.length - 1]} />}
             </Card>
           )}
-        </Box>
-        <ColRight>
+        </ColLeft>
+        <ColRight margin={{ left: 'xlarge' }}>
           <Card margin={{ bottom: 'large' }}>
             <Box direction="row" background="#FCBA59" style={{ borderRadius: '6px 6px 0 0' }} pad={'14px 24px'}>
               <TokenLogoBig src="/static/cfg-white.svg" />
@@ -332,11 +332,15 @@ const Head = ({ children }: React.PropsWithChildren<{}>) => (
   </Heading>
 )
 
-const ColRight = ({ children }: React.PropsWithChildren<{}>) => (
-  <Box margin={{ left: 'xlarge' }} width="360px">
-    {children}
-  </Box>
-)
+const ColLeft = styled(Box)`
+  flex: 1 1 600px;
+`
+const ColRight = styled(Box)`
+  flex: 1 1 250px;
+  @media (max-width: 899px) {
+    margin: 32px 0 0;
+  }
+`
 
 const Explainer = () => (
   <Box background="#eee" pad="medium" round="xsmall" style={{ color: '#555555' }}>

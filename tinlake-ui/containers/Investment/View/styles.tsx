@@ -6,7 +6,7 @@ export const FlexWrapper = styled.div`
   justify-content: space-between;
   flex-direction: row;
 
-  @media (max-width: 900px) {
+  @media (max-width: 899px) {
     flex-direction: column;
     & > div:first-child {
       margin-bottom: 40px;

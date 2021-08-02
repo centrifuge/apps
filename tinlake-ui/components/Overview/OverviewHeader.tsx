@@ -298,7 +298,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 export default OverviewHeader
 
 const Card = styled(Box)`
-  @media (max-width: 900px) {
+  @media (max-width: 899px) {
     flex-direction: column;
   }
 `
@@ -319,7 +319,7 @@ const HeaderBox = styled(Box)<{ width?: string }>`
     margin: 0 4px 4px 4px;
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 899px) {
     border-right: none;
     flex-direction: column-reverse;
     text-align: left;
