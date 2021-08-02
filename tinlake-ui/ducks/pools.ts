@@ -145,7 +145,7 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
         ],
       ]
 
-      if (pool.addresses.CLERK !== undefined) {
+      if (pool.addresses.CLERK !== undefined && pool.metadata.maker?.ilk !== '') {
         watchers = [
           ...watchers,
           ...[
