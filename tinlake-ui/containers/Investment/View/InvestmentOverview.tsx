@@ -20,6 +20,7 @@ import {
   DividerBottom,
   DividerInner,
   DividerTop,
+  FlexWrapper,
   TokenLogo,
 } from './styles'
 
@@ -93,16 +94,17 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <Box direction="row" justify="between">
+      <FlexWrapper>
         <Box
           direction="column"
           justify="start"
-          width="460px"
           pad="medium"
           elevation="small"
           round="xsmall"
           margin={{ bottom: 'medium' }}
           background="white"
+          flex="grow"
+          basis="auto"
         >
           <Box>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
@@ -196,14 +198,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
         </BalanceSheetDiagram>
 
         <Box direction="column" justify="between">
-          <Box
-            width="460px"
-            pad="medium"
-            elevation="small"
-            round="xsmall"
-            margin={{ bottom: 'small' }}
-            background="white"
-          >
+          <Box pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'small' }} background="white">
             <Box direction="row" margin={{ top: '0', bottom: '0' }}>
               <Box direction="column">
                 <Heading level="5" margin={{ bottom: 'xsmall', top: '0' }}>
@@ -254,14 +249,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             <DividerInner>&nbsp;</DividerInner>
           </DividerBottom>
 
-          <Box
-            width="460px"
-            pad="medium"
-            elevation="small"
-            round="xsmall"
-            margin={{ bottom: 'medium' }}
-            background="white"
-          >
+          <Box pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
             <Box direction="row" margin={{ top: '0', bottom: '0' }}>
               <Box direction="column">
                 <Heading level="5" margin={{ bottom: 'xsmall', top: '0' }}>
@@ -288,7 +276,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
         </Box>
-      </Box>
+      </FlexWrapper>
     </>
   )
 }

@@ -102,7 +102,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ bottom: 'large' }}>
-      <Box
+      <Card
         elevation="small"
         round="xsmall"
         background="white"
@@ -157,11 +157,11 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
             <InvestAction pool={props.selectedPool} />
           )}
         </HeaderBox>
-      </Box>
+      </Card>
       {isMakerIntegrated && (
         <MakerBox round="xsmall" gap="small" elevation="small" background="#1AAB9B">
-          <Box direction="row">
-            <Box basis="2/3" direction="row">
+          <Box direction="row" wrap style={{ gap: '16px' }}>
+            <Box direction="row" style={{ flex: '100 1 500px' }}>
               <MakerLogo>
                 <img src="/static/maker-logo.svg" />
               </MakerLogo>
@@ -175,7 +175,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
                 </Details>
               </Box>
             </Box>
-            <Box basis="1/3" direction="row">
+            <Box direction="row" style={{ flex: '1 1 33%' }}>
               <MakerMetric style={{ borderRight: '1px solid #fff' }}>
                 <h3>Current Debt</h3>
                 <h2>
@@ -199,8 +199,8 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
           {open && (
-            <Box direction="row" margin={{ bottom: 'small' }}>
-              <Box basis="2/3" direction="row">
+            <Box direction="row" margin={{ bottom: 'small' }} style={{ gap: '16px' }} wrap>
+              <Box direction="row" style={{ flex: '100 1 500px' }}>
                 <div style={{ width: '60%', lineHeight: '1.8em' }}>
                   For this pool Maker provides a revolving line of credit against real-world assets as collateral. The
                   direct integration allows the Asset Originator to lock up DROP as collateral in a Maker vault, draw
@@ -215,7 +215,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
                 </div>
                 <Box></Box>
               </Box>
-              <Box basis="1/3" margin={{ top: 'xsmall' }}>
+              <Box margin={{ top: 'xsmall' }} style={{ flex: '1 1 33%' }}>
                 <Table>
                   <TableBody>
                     <TableRow>
@@ -297,6 +297,12 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 
 export default OverviewHeader
 
+const Card = styled(Box)`
+  @media (max-width: 899px) {
+    flex-direction: column;
+  }
+`
+
 const HeaderBox = styled(Box)<{ width?: string }>`
   text-align: center;
   border-right: 1px solid #dadada;
@@ -311,6 +317,19 @@ const HeaderBox = styled(Box)<{ width?: string }>`
   h5,
   h6 {
     margin: 0 4px 4px 4px;
+  }
+
+  @media (max-width: 899px) {
+    border-right: none;
+    flex-direction: column-reverse;
+    text-align: left;
+
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin: 4px 0 0 0;
+    }
   }
 `
 

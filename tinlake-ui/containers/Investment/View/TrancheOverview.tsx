@@ -131,234 +131,236 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   }, [hasPendingCollection, hasPendingOrder])
 
   return (
-    <Box>
-      <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
-        <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-          <Heading level="5" margin={'0'}>
-            <TokenLogo src={`/static/${token}_final.svg`} />
-            {token} Token
-          </Heading>
-        </Box>
-        <Box margin={{ bottom: 'medium' }}>
-          <TrancheNote>
-            {props.tranche === 'senior' ? 'Senior tranche' : 'Junior tranche'} —{' '}
-            {props.tranche === 'senior' ? 'Lower risk, stable return' : 'Higher risk, variable return'}
-          </TrancheNote>
-        </Box>
-        <Table>
-          <TableBody>
-            {(!disbursements?.payoutTokenAmount || disbursements?.payoutTokenAmount.isZero()) && (
-              <TableRow>
-                <TableCell scope="row">Your balance</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={balance !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))} {token}
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-            )}
-            {disbursements?.payoutTokenAmount && !disbursements.payoutTokenAmount.isZero() && (
-              <TableRow>
-                <TableCell
-                  scope="row"
-                  style={{ alignItems: 'start', justifyContent: 'center' }}
-                  pad={{ vertical: '6px' }}
-                >
-                  <span>Your balance</span>
-                </TableCell>
-                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
-                  <LoadingValue done={balance !== undefined} height={39}>
-                    <>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))} {token}
-                      <Sidenote>
-                        Uncollected:{' '}
-                        {addThousandsSeparators(
-                          toMaxPrecision(baseToDisplay(disbursements?.payoutTokenAmount || new BN(0), 18), 4)
-                        )}{' '}
-                        {token}
-                      </Sidenote>
-                    </>
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-            )}
+    <Box
+      pad="24px"
+      elevation="small"
+      round="xsmall"
+      margin={{ bottom: 'medium' }}
+      style={{ flex: '1 1 400px', maxWidth: '420px' }}
+      background="white"
+    >
+      <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+        <Heading level="5" margin={'0'}>
+          <TokenLogo src={`/static/${token}_final.svg`} />
+          {token} Token
+        </Heading>
+      </Box>
+      <Box margin={{ bottom: 'medium' }}>
+        <TrancheNote>
+          {props.tranche === 'senior' ? 'Senior tranche' : 'Junior tranche'} —{' '}
+          {props.tranche === 'senior' ? 'Lower risk, stable return' : 'Higher risk, variable return'}
+        </TrancheNote>
+      </Box>
+      <Table>
+        <TableBody>
+          {(!disbursements?.payoutTokenAmount || disbursements?.payoutTokenAmount.isZero()) && (
             <TableRow>
-              <TableCell scope="row">Current price</TableCell>
+              <TableCell scope="row">Your balance</TableCell>
               <TableCell style={{ textAlign: 'end' }}>
-                <LoadingValue done={tokenPrice !== undefined}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice || '0', 27), 4))}
+                <LoadingValue done={balance !== undefined}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))} {token}
                 </LoadingValue>
               </TableCell>
             </TableRow>
+          )}
+          {disbursements?.payoutTokenAmount && !disbursements.payoutTokenAmount.isZero() && (
             <TableRow>
-              <TableCell scope="row" border={{ color: 'transparent' }}>
-                Current value
+              <TableCell
+                scope="row"
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
+              >
+                <span>Your balance</span>
               </TableCell>
-              <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                <LoadingValue done={value !== undefined}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 4))}{' '}
-                  {props.pool?.metadata.currencySymbol || 'DAI'}
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                <LoadingValue done={balance !== undefined} height={39}>
+                  <>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 18), 4))} {token}
+                    <Sidenote>
+                      Uncollected:{' '}
+                      {addThousandsSeparators(
+                        toMaxPrecision(baseToDisplay(disbursements?.payoutTokenAmount || new BN(0), 18), 4)
+                      )}{' '}
+                      {token}
+                    </Sidenote>
+                  </>
                 </LoadingValue>
               </TableCell>
             </TableRow>
-          </TableBody>
-        </Table>
-        {props.pool && config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT) && (
-          <Warning>
-            <Heading level="6" margin={{ bottom: 'xsmall' }}>
-              Pool maintenance ongoing
-            </Heading>
-            Until this upgrade is finished, investments and redemptions are not possible for a short while. Please come
-            back soon.
-          </Warning>
-        )}
-        {!(props.pool && config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT)) &&
-          address &&
-          trancheData?.inMemberlist === true && (
-            <>
-              {card === 'home' && (
-                <>
-                  {epochData?.isBlockedState && (
-                    <Warning>
-                      <Heading level="6" margin={{ bottom: 'xsmall' }}>
-                        Computing orders
-                      </Heading>
-                      The Epoch has just been closed and the order executions are currently being computed. Until the
-                      next Epoch opens, you cannot submit new orders.
-                      {epochData?.minChallengePeriodEnd !== 0 && (
-                        <MinTimeRemaining>
-                          Minimum time remaining:{' '}
-                          {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
-                        </MinTimeRemaining>
-                      )}
-                    </Warning>
-                  )}
-
-                  {!epochData?.isBlockedState && (
-                    <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                      <Button
-                        primary
-                        label="Invest"
-                        onClick={() => setCard('invest')}
-                        disabled={epochData?.isBlockedState === true}
-                      />
-                      <Button
-                        primary
-                        label="Redeem"
-                        onClick={() => setCard('redeem')}
-                        disabled={balance === '0' || epochData?.isBlockedState === true}
-                      />
-                    </Box>
-                  )}
-                </>
-              )}
-              {card === 'order' && (
-                <OrderCard
-                  {...props}
-                  selectedPool={props.pool}
-                  tinlake={props.tinlake}
-                  setCard={setCard}
-                  disbursements={disbursements}
-                  tokenPrice={tokenPrice || '0'}
-                  updateTrancheData={updateTrancheData}
-                />
-              )}
-              {card === 'collect' && (
-                <CollectCard
-                  {...props}
-                  selectedPool={props.pool}
-                  setCard={setCard}
-                  disbursements={disbursements}
-                  tokenPrice={tokenPrice || '0'}
-                  updateTrancheData={updateTrancheData}
-                />
-              )}
-              {card === 'invest' && (
-                <InvestCard
-                  selectedPool={props.pool}
-                  tranche={props.tranche}
-                  tinlake={props.tinlake}
-                  setCard={setCard}
-                  updateTrancheData={updateTrancheData}
-                />
-              )}
-              {card === 'redeem' && (
-                <RedeemCard
-                  {...props}
-                  selectedPool={props.pool}
-                  setCard={setCard}
-                  updateTrancheData={updateTrancheData}
-                />
-              )}
-
-              {card === 'home' &&
-                trancheData?.token &&
-                trancheData.token.length > 0 &&
-                trancheData.token.length < 7 && (
-                  <AddWalletLink onClick={addToWallet}>Display {trancheData?.token} in your wallet</AddWalletLink>
-                )}
-            </>
           )}
-        {props.pool &&
-          !config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT) &&
-          props.tranche === 'senior' &&
-          !trancheData?.inMemberlist &&
-          ('onboard' in router.query ||
-            ('addresses' in props.pool &&
-              config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))) && (
-            <>
-              <Info>
-                DROP APR: <b>{toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2)}%</b>
-                <br />
-                Minimum investment amount: <b>5000 {props.pool?.metadata.currencySymbol || 'DAI'}</b>
-              </Info>
-              <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-                <PoolLink href={'/onboarding'}>
-                  <Anchor>
-                    <Button label="Invest" primary />
-                  </Anchor>
-                </PoolLink>
-              </Box>
-            </>
-          )}
-
-        {props.pool &&
-          !config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT) &&
-          !(
-            'onboard' in router.query ||
-            ('addresses' in props.pool &&
-              config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))
-          ) &&
-          !trancheData?.inMemberlist && (
-            <>
-              {address && (
-                <Info>
-                  <>
+          <TableRow>
+            <TableCell scope="row">Current price</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>
+              <LoadingValue done={tokenPrice !== undefined}>
+                {addThousandsSeparators(toPrecision(baseToDisplay(tokenPrice || '0', 27), 4))}
+              </LoadingValue>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell scope="row" border={{ color: 'transparent' }}>
+              Current value
+            </TableCell>
+            <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+              <LoadingValue done={value !== undefined}>
+                {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 4))}{' '}
+                {props.pool?.metadata.currencySymbol || 'DAI'}
+              </LoadingValue>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+      {props.pool && config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT) && (
+        <Warning>
+          <Heading level="6" margin={{ bottom: 'xsmall' }}>
+            Pool maintenance ongoing
+          </Heading>
+          Until this upgrade is finished, investments and redemptions are not possible for a short while. Please come
+          back soon.
+        </Warning>
+      )}
+      {!(props.pool && config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT)) &&
+        address &&
+        trancheData?.inMemberlist === true && (
+          <>
+            {card === 'home' && (
+              <>
+                {epochData?.isBlockedState && (
+                  <Warning>
                     <Heading level="6" margin={{ bottom: 'xsmall' }}>
-                      Interested in investing?
+                      Computing orders
                     </Heading>
-                    If you want to learn more get started with your onboarding process.
-                    <Box justify="end" margin={{ top: 'small' }}>
-                      <InvestAction pool={props.pool} />
-                    </Box>
-                  </>
-                </Info>
-              )}
+                    The Epoch has just been closed and the order executions are currently being computed. Until the next
+                    Epoch opens, you cannot submit new orders.
+                    {epochData?.minChallengePeriodEnd !== 0 && (
+                      <MinTimeRemaining>
+                        Minimum time remaining:{' '}
+                        {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
+                      </MinTimeRemaining>
+                    )}
+                  </Warning>
+                )}
 
-              {!address && (
-                <Info>
+                {!epochData?.isBlockedState && (
+                  <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                    <Button
+                      primary
+                      label="Invest"
+                      onClick={() => setCard('invest')}
+                      disabled={epochData?.isBlockedState === true}
+                    />
+                    <Button
+                      primary
+                      label="Redeem"
+                      onClick={() => setCard('redeem')}
+                      disabled={balance === '0' || epochData?.isBlockedState === true}
+                    />
+                  </Box>
+                )}
+              </>
+            )}
+            {card === 'order' && (
+              <OrderCard
+                {...props}
+                selectedPool={props.pool}
+                tinlake={props.tinlake}
+                setCard={setCard}
+                disbursements={disbursements}
+                tokenPrice={tokenPrice || '0'}
+                updateTrancheData={updateTrancheData}
+              />
+            )}
+            {card === 'collect' && (
+              <CollectCard
+                {...props}
+                selectedPool={props.pool}
+                setCard={setCard}
+                disbursements={disbursements}
+                tokenPrice={tokenPrice || '0'}
+                updateTrancheData={updateTrancheData}
+              />
+            )}
+            {card === 'invest' && (
+              <InvestCard
+                selectedPool={props.pool}
+                tranche={props.tranche}
+                tinlake={props.tinlake}
+                setCard={setCard}
+                updateTrancheData={updateTrancheData}
+              />
+            )}
+            {card === 'redeem' && (
+              <RedeemCard
+                {...props}
+                selectedPool={props.pool}
+                setCard={setCard}
+                updateTrancheData={updateTrancheData}
+              />
+            )}
+
+            {card === 'home' && trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
+              <AddWalletLink onClick={addToWallet}>Display {trancheData?.token} in your wallet</AddWalletLink>
+            )}
+          </>
+        )}
+      {props.pool &&
+        !config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT) &&
+        props.tranche === 'senior' &&
+        !trancheData?.inMemberlist &&
+        ('onboard' in router.query ||
+          ('addresses' in props.pool &&
+            config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))) && (
+          <>
+            <Info>
+              DROP APR: <b>{toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2)}%</b>
+              <br />
+              Minimum investment amount: <b>5000 {props.pool?.metadata.currencySymbol || 'DAI'}</b>
+            </Info>
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+              <PoolLink href={'/onboarding'}>
+                <Anchor>
+                  <Button label="Invest" primary />
+                </Anchor>
+              </PoolLink>
+            </Box>
+          </>
+        )}
+
+      {props.pool &&
+        !config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT) &&
+        !(
+          'onboard' in router.query ||
+          ('addresses' in props.pool &&
+            config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))
+        ) &&
+        !trancheData?.inMemberlist && (
+          <>
+            {address && (
+              <Info>
+                <>
                   <Heading level="6" margin={{ bottom: 'xsmall' }}>
                     Interested in investing?
                   </Heading>
-                  Connect your wallet to start the process.
-                  <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                    <Button primary label="Connect" onClick={connect} />
+                  If you want to learn more get started with your onboarding process.
+                  <Box justify="end" margin={{ top: 'small' }}>
+                    <InvestAction pool={props.pool} />
                   </Box>
-                </Info>
-              )}
-            </>
-          )}
-      </Box>
+                </>
+              </Info>
+            )}
+
+            {!address && (
+              <Info>
+                <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                  Interested in investing?
+                </Heading>
+                Connect your wallet to start the process.
+                <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                  <Button primary label="Connect" onClick={connect} />
+                </Box>
+              </Info>
+            )}
+          </>
+        )}
     </Box>
   )
 }

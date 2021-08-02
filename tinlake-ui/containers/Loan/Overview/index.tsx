@@ -96,166 +96,157 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ bottom: 'medium' }}>
-      <Box direction="row" justify="between">
-        <Box>
-          <Box
-            width="420px"
-            pad="medium"
-            elevation="small"
-            round="xsmall"
-            margin={{ bottom: 'medium' }}
-            background="white"
-          >
-            {!showMaxReserveForm && (
-              <>
-                <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-                  <Heading level="5" margin={'0'}>
-                    Asset Value
-                  </Heading>
-                  <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                    <LoadingValue done={poolData?.outstandingVolume !== undefined} height={22}>
-                      {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))}{' '}
-                      {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                    </LoadingValue>
-                  </Heading>
-                </Box>
+      <Box direction="row" justify="between" gap="medium" wrap>
+        <Box
+          pad="medium"
+          elevation="small"
+          round="xsmall"
+          margin={{ bottom: 'medium' }}
+          style={{ flex: '1 1 420px', maxWidth: '420px' }}
+          background="white"
+        >
+          {!showMaxReserveForm && (
+            <>
+              <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+                <Heading level="5" margin={'0'}>
+                  Asset Value
+                </Heading>
+                <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+                  <LoadingValue done={poolData?.outstandingVolume !== undefined} height={22}>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))}{' '}
+                    {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                  </LoadingValue>
+                </Heading>
+              </Box>
 
-                <Table margin={{ bottom: '0' }}>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell
-                        scope="row"
-                        style={{ alignItems: 'start', justifyContent: 'center' }}
-                        pad={{ vertical: '6px' }}
-                        border={isAdmin ? undefined : { color: 'transparent' }}
-                      >
-                        <span>Pool reserve</span>
-                      </TableCell>
-                      <TableCell
-                        style={{ textAlign: 'end' }}
-                        pad={{ vertical: '6px' }}
-                        border={isAdmin ? undefined : { color: 'transparent' }}
-                      >
-                        <LoadingValue done={poolData?.reserve !== undefined} height={39}>
-                          <>
-                            {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))}{' '}
+              <Table margin={{ bottom: '0' }}>
+                <TableBody>
+                  <TableRow>
+                    <TableCell
+                      scope="row"
+                      style={{ alignItems: 'start', justifyContent: 'center' }}
+                      pad={{ vertical: '6px' }}
+                      border={isAdmin ? undefined : { color: 'transparent' }}
+                    >
+                      <span>Pool reserve</span>
+                    </TableCell>
+                    <TableCell
+                      style={{ textAlign: 'end' }}
+                      pad={{ vertical: '6px' }}
+                      border={isAdmin ? undefined : { color: 'transparent' }}
+                    >
+                      <LoadingValue done={poolData?.reserve !== undefined} height={39}>
+                        <>
+                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))}{' '}
+                          {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                          <Sidenote>
+                            Max:{' '}
+                            {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 0))}{' '}
                             {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                            <Sidenote>
-                              Max:{' '}
-                              {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 0))}{' '}
-                              {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                            </Sidenote>
-                          </>
-                        </LoadingValue>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                          </Sidenote>
+                        </>
+                      </LoadingValue>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
 
-                {isAdmin && (
-                  <>
-                    <Table>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
-                            <span>Available funds for Financing</span>
-                          </TableCell>
-                          <TableCell style={{ textAlign: 'end' }}>
-                            <LoadingValue done={poolData?.reserve !== undefined}>
-                              {addThousandsSeparators(
-                                toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 0)
-                              )}{' '}
-                              {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                            </LoadingValue>
-                          </TableCell>
-                        </TableRow>
-                        {poolData?.maker?.line && (
-                          <TableRow>
-                            <TableCell
-                              scope="row"
-                              style={{ alignItems: 'start', justifyContent: 'center' }}
-                              pad={{ vertical: '6px' }}
-                            >
-                              <span>Maker credit line</span>
-                            </TableCell>
-                            <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
-                              <LoadingValue done={poolData?.reserve !== undefined} height={39}>
-                                <>
-                                  {addThousandsSeparators(
-                                    toPrecision(baseToDisplay(poolData?.maker?.creditline || '0', 18), 0)
-                                  )}{' '}
-                                  {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                                  <Sidenote>
-                                    Remaining:{' '}
-                                    {addThousandsSeparators(
-                                      toPrecision(baseToDisplay(poolData?.maker?.remainingCredit || '0', 18), 0)
-                                    )}{' '}
-                                    {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                                  </Sidenote>
-                                </>
-                              </LoadingValue>
-                            </TableCell>
-                          </TableRow>
-                        )}
+              {isAdmin && (
+                <>
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+                          <span>Available funds for Financing</span>
+                        </TableCell>
+                        <TableCell style={{ textAlign: 'end' }}>
+                          <LoadingValue done={poolData?.reserve !== undefined}>
+                            {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 0))}{' '}
+                            {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                          </LoadingValue>
+                        </TableCell>
+                      </TableRow>
+                      {poolData?.maker?.line && (
                         <TableRow>
                           <TableCell
                             scope="row"
                             style={{ alignItems: 'start', justifyContent: 'center' }}
-                            border={{ color: 'transparent' }}
-                            pad={{ top: '15px' }}
+                            pad={{ vertical: '6px' }}
                           >
-                            <span>Repaid this epoch</span>
+                            <span>Maker credit line</span>
                           </TableCell>
-                          <TableCell
-                            style={{ textAlign: 'end' }}
-                            border={{ color: 'transparent' }}
-                            pad={{ top: '15px' }}
-                          >
-                            <LoadingValue done={poolData?.reserve !== undefined}>
-                              {addThousandsSeparators(
-                                toPrecision(
-                                  baseToDisplay(
-                                    (poolData?.reserve || new BN(0))
-                                      .add(poolData?.maker?.remainingCredit || new BN(0))
-                                      .sub(poolData?.availableFunds || new BN(0)),
-                                    18
-                                  ),
-                                  0
-                                )
-                              )}{' '}
-                              {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                          <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                            <LoadingValue done={poolData?.reserve !== undefined} height={39}>
+                              <>
+                                {addThousandsSeparators(
+                                  toPrecision(baseToDisplay(poolData?.maker?.creditline || '0', 18), 0)
+                                )}{' '}
+                                {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                                <Sidenote>
+                                  Remaining:{' '}
+                                  {addThousandsSeparators(
+                                    toPrecision(baseToDisplay(poolData?.maker?.remainingCredit || '0', 18), 0)
+                                  )}{' '}
+                                  {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                                </Sidenote>
+                              </>
                             </LoadingValue>
                           </TableCell>
                         </TableRow>
-                      </TableBody>
-                    </Table>
+                      )}
+                      <TableRow>
+                        <TableCell
+                          scope="row"
+                          style={{ alignItems: 'start', justifyContent: 'center' }}
+                          border={{ color: 'transparent' }}
+                          pad={{ top: '15px' }}
+                        >
+                          <span>Repaid this epoch</span>
+                        </TableCell>
+                        <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }} pad={{ top: '15px' }}>
+                          <LoadingValue done={poolData?.reserve !== undefined}>
+                            {addThousandsSeparators(
+                              toPrecision(
+                                baseToDisplay(
+                                  (poolData?.reserve || new BN(0))
+                                    .add(poolData?.maker?.remainingCredit || new BN(0))
+                                    .sub(poolData?.availableFunds || new BN(0)),
+                                  18
+                                ),
+                                0
+                              )
+                            )}{' '}
+                            {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                          </LoadingValue>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
 
-                    {isAdmin && (
-                      <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                        <Button label="Manage" onClick={() => setShowMaxReserveForm(true)} disabled={!poolData} />
-                      </Box>
-                    )}
-                  </>
-                )}
-              </>
-            )}
-            {showMaxReserveForm && (
-              <MaxReserveForm
-                tinlake={props.tinlake}
-                setShowMaxReserveForm={setShowMaxReserveForm}
-                selectedPool={props.selectedPool}
-              />
-            )}
-          </Box>
+                  {isAdmin && (
+                    <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                      <Button label="Manage" onClick={() => setShowMaxReserveForm(true)} disabled={!poolData} />
+                    </Box>
+                  )}
+                </>
+              )}
+            </>
+          )}
+          {showMaxReserveForm && (
+            <MaxReserveForm
+              tinlake={props.tinlake}
+              setShowMaxReserveForm={setShowMaxReserveForm}
+              selectedPool={props.selectedPool}
+            />
+          )}
         </Box>
 
         <Box
-          width="480px"
           height="200px"
-          // pad="medium"
           elevation="small"
           round="xsmall"
           margin={{ bottom: 'medium' }}
+          style={{ flex: '1 1 480px', maxWidth: '480px' }}
           background="white"
         >
           <Box direction="row" justify="between">
