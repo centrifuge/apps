@@ -1,5 +1,5 @@
 import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
-import { baseToDisplay } from '@centrifuge/tinlake-js'
+import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
@@ -15,6 +15,7 @@ import { Cont, Label, TokenLogo, Unit, Value } from './styles'
 
 interface Props {
   pools: PoolsData
+  tinlake: ITinlake
 }
 
 const PoolsMetrics: React.FC<Props> = (props: Props) => {
@@ -29,8 +30,8 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
   React.useEffect(() => {
     dispatch(maybeLoadRewards())
-    dispatch(getWCFGPrice())
-  }, [])
+    if (props.tinlake) dispatch(getWCFGPrice(props.tinlake))
+  }, [props.tinlake])
 
   const maxPoolValue = Math.max.apply(
     Math,

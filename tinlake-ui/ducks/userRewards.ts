@@ -1,5 +1,7 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
+import { Decimal } from 'decimal.js-light'
+import { ethers } from 'ethers'
 import { HYDRATE } from 'next-redux-wrapper'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
@@ -262,15 +264,19 @@ export function maybeLoadAndApplyClaims(): ThunkAction<
   }
 }
 
-export function getWCFGPrice(): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
+export function getWCFGPrice(
+  tinlake: ITinlake
+): ThunkAction<Promise<void>, { userRewards: UserRewardsState }, undefined, Action> {
   return async (dispatch) => {
-    const response = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=wrapped-centrifuge&vs_currencies=usd'
-    )
-    const json = await response.json()
+    const usdcWcfgPool = '0x7270233cCAE676e776a659AFfc35219e6FCfbB10'
+    const uniswapPoolAbi = ['function observe(uint32[] secondsAgos) external view returns (int56[], uint160[])']
 
-    const wCFGUSD = json['wrapped-centrifuge']?.usd
+    const poolContract = new ethers.Contract(usdcWcfgPool, uniswapPoolAbi, tinlake.provider)
+    const observations = (await poolContract.observe([0, 1]))[0]
+    const first = new Decimal(observations[0].toString())
+    const second = new Decimal(observations[1].toString())
+    const price = new Decimal(1.0001).toPower(second.sub(first)).times(new Decimal(10).toPower(12)).toNumber()
 
-    dispatch({ data: wCFGUSD, type: RECEIVE_WCFG_PRICE })
+    dispatch({ data: price, type: RECEIVE_WCFG_PRICE })
   }
 }

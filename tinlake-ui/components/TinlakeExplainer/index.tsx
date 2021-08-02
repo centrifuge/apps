@@ -32,8 +32,8 @@ const TinlakeExplainer: React.FC = () => {
         <Text style={{ borderBottom: '1px solid #d8d8d8' }}>
           The Tinlake protocol is rewarding every Tinlake investment daily in CFG token, the Centrifuge Chain’s native
           token. The Investment Reward Rate (APR)” is an annualized representation of these rewards considering the
-          current CFG token market price taken from CoinGecko and current daily Tinlake protocol reward rate (see
-          related governance discussions and decisions{' '}
+          current CFG token market price taken from Uniswap and current daily Tinlake protocol reward rate (see related
+          governance discussions and decisions{' '}
           <a href="https://gov.centrifuge.io/c/governance/35" target="_blank">
             here
           </a>

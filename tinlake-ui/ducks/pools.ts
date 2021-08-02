@@ -104,6 +104,8 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
 
     let watchers: any[] = []
     pools.active.forEach((pool: Pool) => {
+      // if (pool.metadata.slug === 'gig-pool') return
+
       watchers = [
         ...watchers,
         ...[
@@ -145,7 +147,7 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
         ],
       ]
 
-      if (pool.addresses.CLERK !== undefined) {
+      if (pool.addresses.CLERK !== undefined && pool.metadata.maker?.ilk !== '') {
         watchers = [
           ...watchers,
           ...[
