@@ -1,9 +1,10 @@
 import { NFT } from '@centrifuge/tinlake-js'
-import { Box, Button, FormField, TextInput } from 'grommet'
+import { Anchor, Box, Button, FormField, TextInput } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import Alert from '../../../components/Alert'
 import NftData from '../../../components/NftData'
+import { PoolLink } from '../../../components/PoolLink'
 import { Pool } from '../../../config'
 import { AuthState, ensureAuthed, loadProxies } from '../../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -92,6 +93,17 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
 
   return (
     <Box>
+      {status === 'succeeded' && (
+        <Alert pad={{ horizontal: 'medium' }} margin={{ bottom: 'medium' }} type="success">
+          <p>
+            Your NFT is succesfully locked. Please proceed to the{' '}
+            <PoolLink href={{ pathname: '/assets' }}>
+              <Anchor>Asset List</Anchor>
+            </PoolLink>{' '}
+            to finance this NFT.
+          </p>
+        </Alert>
+      )}
       <Box pad="medium" elevation="small" round="xsmall" background="white">
         <Box>
           <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
