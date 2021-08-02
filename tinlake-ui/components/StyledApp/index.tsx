@@ -10,7 +10,7 @@ export const StyledApp = createGlobalStyle`
   }
 
   .bn-onboard-custom.bn-onboard-modal {
-    z-index: 2;
+    z-index: 8;
   }
 
   .bn-onboard-custom.bn-onboard-modal {
