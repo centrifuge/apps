@@ -36,7 +36,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
     <Box margin={{ top: 'medium' }}>
       <PageTitle pool={props.activePool} page="Investments" />
 
-      <Box direction="row" justify="between" gap="medium" margin={{ bottom: 'large' }} wrap>
+      <Box direction="row" justify="between" gap="medium" margin={{ bottom: 'large' }} wrap align="start">
         <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="senior" />
         <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="junior" />
       </Box>
