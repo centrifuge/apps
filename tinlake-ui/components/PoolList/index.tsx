@@ -1,4 +1,4 @@
-import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
+import { addThousandsSeparators, baseToDisplay, feeToInterestRate, toPrecision } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box } from 'grommet'
 import { WithRouterProps } from 'next/dist/client/with-router'
@@ -67,6 +67,9 @@ class PoolList extends React.Component<Props> {
             </HeaderCol>
           )}
           <HeaderCol>
+            <HeaderTitle>Investment Capacity</HeaderTitle>
+          </HeaderCol>
+          <HeaderCol>
             <HeaderTitle>Pool Value</HeaderTitle>
           </HeaderCol>
           <HeaderCol>
@@ -92,18 +95,7 @@ class PoolList extends React.Component<Props> {
             <PoolRow key={p.id} onClick={() => this.clickPool(p)}>
               <Icon src={p.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'} />
               <Desc>
-                <Name>
-                  {p.name}{' '}
-                  {p.isUpcoming ||
-                  (!subgraphIsLoading &&
-                    ((!p.assetValue && !p.reserve) || (p.assetValue?.isZero() && p.reserve?.isZero()))) ? (
-                    <Label blue>Upcoming</Label>
-                  ) : p.isArchived ? (
-                    <Label>Archived</Label>
-                  ) : (
-                    p.isOversubscribed && <Label orange>Oversubscribed</Label>
-                  )}
-                </Name>
+                <Name>{p.name}</Name>
                 <Type>{p.asset}</Type>
               </Desc>
               {showAll && (
@@ -119,6 +111,22 @@ class PoolList extends React.Component<Props> {
                   />
                 </DataCol>
               )}
+
+              <DataCol>
+                {p.isUpcoming ||
+                (!subgraphIsLoading &&
+                  ((!p.assetValue && !p.reserve) || (p.assetValue?.isZero() && p.reserve?.isZero()))) ? (
+                  <Label blue>Upcoming</Label>
+                ) : p.isArchived ? (
+                  <Label>Archived</Label>
+                ) : p.isOversubscribed ? (
+                  <Label orange>Oversubscribed</Label>
+                ) : (
+                  <Label green>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(p.capacity || new BN(0), 18), 0))} {p.currency}
+                  </Label>
+                )}
+              </DataCol>
 
               <DataCol>
                 <LoadingValue done={!subgraphIsLoading} height={28}>

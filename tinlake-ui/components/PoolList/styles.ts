@@ -48,7 +48,7 @@ export const Type = styled.p`
 `
 
 export const HeaderCol = styled.div`
-  width: 120px;
+  width: 160px;
   margin-left: 16px;
   text-align: right;
 `
@@ -91,19 +91,20 @@ export const HeaderSub = styled.p`
   color: #979797;
 `
 
-export const Label = styled.div<{ blue?: true; orange?: true }>`
+export const Label = styled.div<{ green?: true; blue?: true; orange?: true }>`
   margin-left: 13px;
   position: relative;
   top: -2px;
   display: inline-block;
-  height: 16px;
+  height: 20px;
   font-weight: 500;
-  font-size: 11px;
-  line-height: 16px;
+  font-size: 12px;
   color: white;
-  padding: 0 12px;
-  border-radius: 8px;
-  background-color: ${({ blue, orange }) => (blue ? '#0828be' : orange ? '#fcba59' : '#aaa')};
+  padding: 0 8px 0 8px;
+  text-align: center;
+  border-radius: 12px;
+  border: 1px solid ${({ green, blue, orange }) => (green ? '#598232' : blue ? '#2976D4' : orange ? '#9B6F2B' : '#666')};
+  color: ${({ green, blue, orange }) => (green ? '#598232' : blue ? '#2976D4' : orange ? '#9B6F2B' : '#666')};
 `
 
 export const EmptyParagraph = styled.p`

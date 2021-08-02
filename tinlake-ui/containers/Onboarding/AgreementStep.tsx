@@ -48,7 +48,7 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
         {props.agreementStatus !== 'signed' && (
           <StepIcon
             inactive={!props.active}
-            checked={props.agreementStatus === 'countersigned'}
+            checked={props.agreementStatus === 'countersigned' && props.whitelistStatus === true}
             failed={isRestricted}
           />
         )}
@@ -186,6 +186,18 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
           </Box>
         </StepBody>
       )}
+      {props.active &&
+        !isRestricted &&
+        props.agreement &&
+        props.agreementStatus === 'countersigned' &&
+        props.whitelistStatus === false && (
+          <StepBody>
+            <Box pad={{ vertical: 'medium' }}>
+              Your address is currently being whitelisted. This should only take a couple of minutes. Please contact{' '}
+              <a href="mailto:support@centrifuge.io">support@centrifuge.io</a> if you can’t invest after one hour.
+            </Box>
+          </StepBody>
+        )}
       {!props.active && <StepBody inactive>&nbsp;</StepBody>}
       {props.whitelistStatus === true && <StepBody>&nbsp;</StepBody>}
 

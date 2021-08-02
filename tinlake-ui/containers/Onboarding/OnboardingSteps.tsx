@@ -23,6 +23,7 @@ interface Props {
   tinlake: ITinlake
 }
 
+type Tranche = 'junior' | 'senior'
 export type Step = 'connect' | 'kyc' | 'agreement' | 'invest'
 
 const DefaultTranche = 'senior'
@@ -34,17 +35,19 @@ const deleteMyAccount = async (address: string, session: string) => {
 
 const OnboardingSteps: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
+  const router = useRouter()
+  const session = 'session' in router.query ? router.query.session : ''
+  const trancheOverride = router.query.tranche as Tranche | undefined
+  const tranche = trancheOverride || DefaultTranche
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
   const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
   const kycStatus = onboarding.data?.kyc?.requiresSignin ? 'requires-signin' : onboarding.data?.kyc?.status
   const accreditationStatus = onboarding.data?.kyc?.isUsaTaxResident ? onboarding.data?.kyc?.accredited || false : true
   const agreement = (onboarding.data?.agreements || []).filter(
-    (agreement: AgreementsStatus) => agreement.tranche === DefaultTranche
+    (agreement: AgreementsStatus) => agreement.tranche === tranche
   )[0]
-  const whitelistStatus = onboarding.data?.kyc?.isWhitelisted
-    ? onboarding.data?.kyc?.isWhitelisted[DefaultTranche]
-    : false
+  const whitelistStatus = onboarding.data?.kyc?.isWhitelisted ? onboarding.data?.kyc?.isWhitelisted[tranche] : false
   const agreementStatus = agreement?.declined
     ? 'declined'
     : agreement?.voided
@@ -54,9 +57,6 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     : agreement?.signed
     ? 'signed'
     : 'none'
-
-  const router = useRouter()
-  const session = 'session' in router.query ? router.query.session : ''
 
   useInterval(() => {
     dispatch(loadOnboardingStatus(props.activePool))
