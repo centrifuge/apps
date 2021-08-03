@@ -1,6 +1,5 @@
 import { Modal } from '@centrifuge/axis-modal'
 import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, CheckBox, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import Link from 'next/link'
@@ -12,7 +11,6 @@ import { FormFieldWithoutBorder, LegalCopy, Step, StepBody, StepHeader, StepIcon
 
 interface Props {
   activePool?: Pool
-  tinlake: ITinlake
   active: boolean
   tranche?: 'senior' | 'junior'
   onboarding: OnboardingState

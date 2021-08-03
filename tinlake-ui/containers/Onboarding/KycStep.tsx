@@ -1,5 +1,4 @@
 import { KycStatusLabel } from '@centrifuge/onboarding-api/src/controllers/types'
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
 import config, { Pool } from '../../config'
@@ -8,7 +7,6 @@ import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool
-  tinlake: ITinlake
   active: boolean
   onboarding: OnboardingState
   kycStatus: KycStatusLabel | 'requires-signin' | undefined

@@ -1,6 +1,5 @@
 import { Spinner } from '@centrifuge/axis-spinner'
 import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
@@ -20,7 +19,7 @@ import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool
-  tinlake: ITinlake
+  hidePageTitle?: boolean
 }
 
 type Tranche = 'junior' | 'senior'
@@ -59,11 +58,11 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     : 'none'
 
   useInterval(() => {
-    dispatch(loadOnboardingStatus(props.activePool))
+    if (props.activePool) dispatch(loadOnboardingStatus(props.activePool))
   }, 60000)
 
   React.useEffect(() => {
-    dispatch(loadOnboardingStatus(props.activePool))
+    if (props.activePool) dispatch(loadOnboardingStatus(props.activePool))
   }, [address, props.activePool])
 
   React.useEffect(() => {
@@ -101,8 +100,10 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      <PageTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
-      <Box direction="row" gap="medium">
+      {!props.hidePageTitle && (
+        <PageTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
+      )}
+      <Box direction="row" gap="medium" margin={props.hidePageTitle ? { top: '120px' } : {}}>
         <Box basis="2/3">
           <Box pad="medium" elevation="small" round="xsmall" background="white">
             {address && onboarding.state !== 'found' ? (

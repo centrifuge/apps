@@ -1,5 +1,4 @@
 import { Modal } from '@centrifuge/axis-modal'
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, CheckBox, Heading, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import * as React from 'react'
@@ -9,7 +8,6 @@ import { FormFieldWithoutBorder, LegalCopy, Step, StepBody, StepHeader, StepIcon
 
 interface Props {
   activePool: Pool
-  tinlake: ITinlake
   active: boolean
   linked: boolean
   onboarding: OnboardingState
