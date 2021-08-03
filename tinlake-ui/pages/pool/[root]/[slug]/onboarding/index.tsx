@@ -44,7 +44,7 @@ class OnboardingPage extends React.Component<Props> {
                     tinlake={tinlake}
                     render={() => (
                       <Box>
-                        <OnboardingSteps activePool={pool} tinlake={tinlake} />
+                        <OnboardingSteps activePool={pool} />
                       </Box>
                     )}
                   />
