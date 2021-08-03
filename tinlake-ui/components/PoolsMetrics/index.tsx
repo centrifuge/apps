@@ -1,16 +1,16 @@
-import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts'
+import { Area, AreaChart, ResponsiveContainer, Tooltip as ChartTooltip, YAxis } from 'recharts'
 import { PoolsDailyData, PoolsData } from '../../ducks/pools'
 import { maybeLoadRewards } from '../../ducks/rewards'
 import { getWCFGPrice } from '../../ducks/userRewards'
 import { dateToYMD } from '../../utils/date'
 import { useCFGYield } from '../../utils/hooks'
 import NumberDisplay from '../NumberDisplay'
+import { Tooltip } from '../Tooltip'
 import { Cont, Label, TokenLogo, Unit, Value } from './styles'
 
 interface Props {
@@ -88,7 +88,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
                   <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <Tooltip content={<></>} />
+              <ChartTooltip content={<></>} />
               <YAxis type="number" domain={[0, maxPoolValue]} hide />
               {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMD(val)} /> */}
               <Area
@@ -115,19 +115,22 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         justify="center"
       >
         <Box>
-          <AxisTooltip title="The annualized CFG reward rate for investments, based on the current CFG token market price and the daily reward rate">
-            <>
-              <Cont style={{ marginTop: '8px' }}>
-                <TokenLogo src={`/static/cfg-white.svg`} />
-                <Value>
-                  <NumberDisplay value={cfgYield} precision={2} />
-                </Value>{' '}
-                <Unit>%</Unit>
-              </Cont>
+          <>
+            <Cont style={{ marginTop: '8px' }}>
+              <TokenLogo src={`/static/cfg-white.svg`} />
+              <Value>
+                <NumberDisplay value={cfgYield} precision={2} />
+              </Value>{' '}
+              <Unit>%</Unit>
+            </Cont>
 
+            <Tooltip
+              title="The annualized CFG reward rate for investments, based on the current CFG token market price and the daily reward rate"
+              underline
+            >
               <Label>Reward Rate (APR)</Label>
-            </>
-          </AxisTooltip>
+            </Tooltip>
+          </>
         </Box>
         <Box margin={{ left: 'large' }} justify="center">
           <Button label="Claim CFG" primary onClick={goToRewards} />

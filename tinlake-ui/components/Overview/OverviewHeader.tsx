@@ -116,37 +116,43 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           <Heading level="5">{props.selectedPool.metadata.asset}</Heading>
           <Type>Asset type</Type>
         </HeaderBox>
-        <Tooltip id="assetMaturity">
-          <HeaderBox>
-            <Heading level="4">{props.selectedPool.metadata.assetMaturity}</Heading>
-            <Type>Asset maturity</Type>
-          </HeaderBox>
-        </Tooltip>
-        <Tooltip id="dropAPR">
-          <HeaderBox>
-            <Heading level="4">
-              <TokenLogo src={`/static/DROP_final.svg`} />
-              {toPrecision(feeToInterestRate(dropRate || '0'), 2)}
-              <Unit>%</Unit>
-            </Heading>
-            <Type>DROP APR</Type>
-          </HeaderBox>
-        </Tooltip>
-        <Tooltip id="poolValue">
-          <HeaderBox style={{ borderRight: 'none' }}>
-            <Heading level="4">
-              <TokenLogo src={`/static/currencies/${props.selectedPool.metadata.currencySymbol}.svg`} />
-              {addThousandsSeparators(
-                toPrecision(
-                  baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18),
-                  0
-                )
-              )}
-              <Unit>{props.selectedPool.metadata.currencySymbol}</Unit>
-            </Heading>
-            <Type>Pool Value</Type>
-          </HeaderBox>
-        </Tooltip>
+        <HeaderBox>
+          <Heading level="4">{props.selectedPool.metadata.assetMaturity}</Heading>
+          <Type>
+            <Tooltip id="assetMaturity" underline>
+              Asset maturity
+            </Tooltip>
+          </Type>
+        </HeaderBox>
+        <HeaderBox>
+          <Heading level="4">
+            <TokenLogo src={`/static/DROP_final.svg`} />
+            {toPrecision(feeToInterestRate(dropRate || '0'), 2)}
+            <Unit>%</Unit>
+          </Heading>
+          <Type>
+            <Tooltip id="dropAPR" underline>
+              DROP APR
+            </Tooltip>
+          </Type>
+        </HeaderBox>
+        <HeaderBox style={{ borderRight: 'none' }}>
+          <Heading level="4">
+            <TokenLogo src={`/static/currencies/${props.selectedPool.metadata.currencySymbol}.svg`} />
+            {addThousandsSeparators(
+              toPrecision(
+                baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18),
+                0
+              )
+            )}
+            <Unit>{props.selectedPool.metadata.currencySymbol}</Unit>
+          </Heading>
+          <Type>
+            <Tooltip id="poolValue" underline>
+              Pool Value
+            </Tooltip>
+          </Type>
+        </HeaderBox>
         <HeaderBox style={{ borderRight: 'none' }}>
           {'addresses' in props.selectedPool &&
           config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (

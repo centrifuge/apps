@@ -1,5 +1,4 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
-import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button, Heading } from 'grommet'
@@ -24,6 +23,7 @@ import {
   Unit,
 } from '../../components/PoolList/styles'
 import { Cont, Label as MetricLabel, TokenLogo, Value } from '../../components/PoolsMetrics/styles'
+import { Tooltip } from '../../components/Tooltip'
 import { IpfsPools, Pool } from '../../config'
 import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
 import { loadPortfolio, PortfolioState, TokenBalance } from '../../ducks/portfolio'
@@ -162,7 +162,9 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             </HeaderCol>
             <HeaderCol>
               <HeaderTitle>
-                <AxisTooltip title="Token prices for this overview are updated daily">Current Price</AxisTooltip>
+                <Tooltip underline title="Token prices for this overview are updated daily">
+                  Current Price
+                </Tooltip>
               </HeaderTitle>
             </HeaderCol>
             <HeaderCol>
