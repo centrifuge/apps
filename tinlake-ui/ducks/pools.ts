@@ -40,11 +40,16 @@ export interface PoolData {
   assetValue?: BN
   juniorYield14Days: BN | null
   seniorYield14Days: BN | null
+  juniorYield30Days: BN | null
+  seniorYield30Days: BN | null
+  juniorYield90Days: BN | null
+  seniorYield90Days: BN | null
   icon: string | null
   juniorTokenPrice?: BN | null
   seniorTokenPrice?: BN | null
   currency: string
   capacity?: BN
+  shortName: string
 }
 
 export interface PoolsData {

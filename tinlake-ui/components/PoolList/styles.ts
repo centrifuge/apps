@@ -64,6 +64,13 @@ export const Number = styled.span`
   color: #333;
 `
 
+export const SubNumber = styled.span`
+  display: block;
+  font-weight: 500;
+  font-size: 10px;
+  color: #777777;
+`
+
 export const Unit = styled.span`
   font-weight: 500;
   font-size: 11px;
