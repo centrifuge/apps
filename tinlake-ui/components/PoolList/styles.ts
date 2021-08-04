@@ -91,22 +91,6 @@ export const HeaderSub = styled.p`
   color: #979797;
 `
 
-export const Label = styled.div<{ green?: true; blue?: true; orange?: true }>`
-  margin-left: 13px;
-  position: relative;
-  top: -2px;
-  display: inline-block;
-  height: 20px;
-  font-weight: 500;
-  font-size: 12px;
-  color: white;
-  padding: 0 8px 0 8px;
-  text-align: center;
-  border-radius: 12px;
-  border: 1px solid ${({ green, blue, orange }) => (green ? '#598232' : blue ? '#2976D4' : orange ? '#9B6F2B' : '#666')};
-  color: ${({ green, blue, orange }) => (green ? '#598232' : blue ? '#2976D4' : orange ? '#9B6F2B' : '#666')};
-`
-
 export const EmptyParagraph = styled.p`
   color: #0828be;
   font-size: 20px;

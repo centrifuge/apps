@@ -1,4 +1,4 @@
-import { addThousandsSeparators, baseToDisplay, feeToInterestRate, toPrecision } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box } from 'grommet'
 import { WithRouterProps } from 'next/dist/client/with-router'
@@ -7,6 +7,7 @@ import * as React from 'react'
 import { PoolData, PoolsData } from '../../ducks/pools'
 import { LoadingValue } from '../LoadingValue'
 import NumberDisplay from '../NumberDisplay'
+import { PoolCapacityLabel } from '../PoolCapacityLabel'
 import {
   Dash,
   DataCol,
@@ -16,7 +17,6 @@ import {
   HeaderSub,
   HeaderTitle,
   Icon,
-  Label,
   Name,
   Number,
   PoolRow,
@@ -112,21 +112,7 @@ class PoolList extends React.Component<Props> {
                 </DataCol>
               )}
 
-              <DataCol>
-                {p.isUpcoming ||
-                (!subgraphIsLoading &&
-                  ((!p.assetValue && !p.reserve) || (p.assetValue?.isZero() && p.reserve?.isZero()))) ? (
-                  <Label blue>Upcoming</Label>
-                ) : p.isArchived ? (
-                  <Label>Archived</Label>
-                ) : p.isOversubscribed ? (
-                  <Label orange>Oversubscribed</Label>
-                ) : (
-                  <Label green>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(p.capacity || new BN(0), 21), 0))}K {p.currency}
-                  </Label>
-                )}
-              </DataCol>
+              <DataCol>{!subgraphIsLoading && <PoolCapacityLabel pool={p} />}</DataCol>
 
               <DataCol>
                 <LoadingValue done={!subgraphIsLoading} height={28}>
