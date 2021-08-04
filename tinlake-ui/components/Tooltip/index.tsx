@@ -34,10 +34,14 @@ const Wrapper = styled.span<{ underline?: boolean }>`
 `
 
 export const Tooltip: React.FC<Props> = (props: Props) => {
+  let title
+  let link
+  let description
+
   if ('id' in props) {
-    var { title, link, description } = tooltips[props.id] as Tooltip
+    ;({ title, link, description } = tooltips[props.id] as Tooltip)
   } else {
-    var { title, link, description } = props
+    ;({ title, link, description } = props)
   }
 
   return (
