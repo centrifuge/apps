@@ -100,7 +100,7 @@ export const PoolValueLineRight = styled.div`
 `
 
 export const BalanceSheetDiagram = styled(Box)`
-  flex: 1;
+  flex: 1 1 10%;
   @media (max-width: 899px) {
     display: none;
   }

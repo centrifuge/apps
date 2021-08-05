@@ -104,8 +104,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           round="xsmall"
           margin={{ bottom: 'medium' }}
           background="white"
-          flex="grow"
-          basis="auto"
+          style={{ flex: '1 1 40%' }}
         >
           <Box>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
@@ -198,7 +197,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           <BalanceSheetDiagramRight>&nbsp;</BalanceSheetDiagramRight>
         </BalanceSheetDiagram>
 
-        <Box direction="column" justify="between">
+        <Box direction="column" justify="between" style={{ flex: '1 1 35%' }}>
           <Box pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'small' }} background="white">
             <Box direction="row" margin={{ top: '0', bottom: '0' }}>
               <Box direction="column">
