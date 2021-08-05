@@ -259,7 +259,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
           </Box>
           {assetDataWithToday.length > 0 && (
             <ResponsiveContainer>
-              <AreaChart data={assetDataWithToday} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+              <AreaChart data={assetDataWithToday} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
                 <defs>
                   <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />

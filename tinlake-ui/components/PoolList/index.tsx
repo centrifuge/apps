@@ -8,6 +8,7 @@ import { PoolData, PoolsData } from '../../ducks/pools'
 import { LoadingValue } from '../LoadingValue'
 import NumberDisplay from '../NumberDisplay'
 import { PoolCapacityLabel } from '../PoolCapacityLabel'
+import { Tooltip } from '../Tooltip'
 import {
   Dash,
   DataCol,
@@ -20,12 +21,19 @@ import {
   Name,
   Number,
   PoolRow,
+  SubNumber,
   Type,
   Unit,
 } from './styles'
 
 interface Props extends WithRouterProps {
   poolsData?: PoolsData
+}
+
+const getDropAPY = (dropAPY: BN | null) => {
+  if (dropAPY) {
+    return toPrecision(baseToDisplay(dropAPY.muln(100), 27), 2)
+  }
 }
 
 class PoolList extends React.Component<Props> {
@@ -73,19 +81,16 @@ class PoolList extends React.Component<Props> {
             <HeaderTitle>Pool Value</HeaderTitle>
           </HeaderCol>
           <HeaderCol>
-            <HeaderTitle>DROP APR</HeaderTitle>
+            <Tooltip id="dropApy">
+              <HeaderTitle>DROP APY</HeaderTitle>
+            </Tooltip>
+            <HeaderSub>30 days</HeaderSub>
           </HeaderCol>
           {showAll && (
-            <>
-              <HeaderCol>
-                <HeaderTitle>DROP Yield</HeaderTitle>
-                <HeaderSub>14 days</HeaderSub>
-              </HeaderCol>
-              <HeaderCol>
-                <HeaderTitle>TIN Yield</HeaderTitle>
-                <HeaderSub>14 days</HeaderSub>
-              </HeaderCol>
-            </>
+            <HeaderCol>
+              <HeaderTitle>TIN APY</HeaderTitle>
+              <HeaderSub>3 months</HeaderSub>
+            </HeaderCol>
           )}
         </Header>
         {poolsData?.pools
@@ -139,7 +144,8 @@ class PoolList extends React.Component<Props> {
                         <Dash>-</Dash>
                       ) : (
                         <>
-                          <Number>{v}</Number> <Unit>%</Unit>
+                          {getDropAPY(p.seniorYield30Days)} <Unit>%</Unit>
+                          <SubNumber>{v} % APR</SubNumber>
                         </>
                       )
                     }
@@ -148,36 +154,20 @@ class PoolList extends React.Component<Props> {
                 </LoadingValue>
               </DataCol>
               {showAll && (
-                <>
-                  <DataCol>
-                    {p.seniorYield14Days === null ? (
-                      <Unit>N/A</Unit>
-                    ) : (
-                      <NumberDisplay
-                        render={(v) => (
-                          <>
-                            <Number>{v}</Number> <Unit>%</Unit>
-                          </>
-                        )}
-                        value={baseToDisplay(p.seniorYield14Days.muln(100), 27)}
-                      />
-                    )}
-                  </DataCol>
-                  <DataCol>
-                    {p.juniorYield14Days === null ? (
-                      <Unit>N/A</Unit>
-                    ) : (
-                      <NumberDisplay
-                        render={(v) => (
-                          <>
-                            <Number>{v}</Number> <Unit>%</Unit>
-                          </>
-                        )}
-                        value={baseToDisplay(p.juniorYield14Days.muln(100), 27)}
-                      />
-                    )}
-                  </DataCol>
-                </>
+                <DataCol>
+                  {p.juniorYield90Days === null ? (
+                    <Unit>N/A</Unit>
+                  ) : (
+                    <NumberDisplay
+                      render={(v) => (
+                        <>
+                          <Number>{v}</Number> <Unit>%</Unit>
+                        </>
+                      )}
+                      value={baseToDisplay(p.juniorYield90Days.muln(100), 27)}
+                    />
+                  )}
+                </DataCol>
               )}
             </PoolRow>
           ))}

@@ -3,11 +3,9 @@ import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts'
 import { PoolsDailyData, PoolsData } from '../../ducks/pools'
-import { maybeLoadRewards } from '../../ducks/rewards'
-import { getWCFGPrice } from '../../ducks/userRewards'
 import { dateToYMD } from '../../utils/date'
 import { useCFGYield } from '../../utils/hooks'
 import NumberDisplay from '../NumberDisplay'
@@ -25,13 +23,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
   const [hoveredPoolValue, setHoveredPoolValue] = React.useState<number | undefined>(undefined)
   const [hoveredDay, setHoveredDay] = React.useState<number | undefined>(undefined)
 
-  const cfgYield = useCFGYield()
-
-  const dispatch = useDispatch()
-  React.useEffect(() => {
-    dispatch(maybeLoadRewards())
-    if (props.tinlake) dispatch(getWCFGPrice(props.tinlake))
-  }, [props.tinlake])
+  const cfgYield = useCFGYield(props.tinlake)
 
   const maxPoolValue = Math.max.apply(
     Math,
@@ -53,24 +45,11 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         direction="row"
         pad="medium"
       >
-        <Box pad={{ top: '8px' }} width="200px">
-          <Cont>
-            <TokenLogo src={`/static/dai.svg`} />
-            <Value>
-              <NumberDisplay
-                value={hoveredPoolValue?.toString() || baseToDisplay(props.pools.totalValue, 18)}
-                precision={0}
-              />
-            </Value>{' '}
-            <Unit>DAI</Unit>
-          </Cont>
-          <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
-        </Box>
-        <Box width="200px" height="80px" pad={{ left: 'small' }} margin={{ left: '0' }}>
+        <Box width="250px" height="80px" pad={{ left: 'small' }} margin={{ left: '0' }}>
           <ResponsiveContainer>
             <AreaChart
               data={poolsDailyData}
-              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+              margin={{ top: 4, right: 4, left: 4, bottom: 4 }}
               onMouseMove={(val: any) => {
                 if (val.activePayload) {
                   setHoveredPoolValue(val.activePayload[0].payload.poolValue)
@@ -102,6 +81,24 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
               />
             </AreaChart>
           </ResponsiveContainer>
+        </Box>
+        <Box
+          width="370px"
+          pad={{ left: 'medium', top: '8px' }}
+          margin={{ left: 'medium' }}
+          style={{ borderLeft: '1px solid #D8D8D8' }}
+        >
+          <Cont>
+            <TokenLogo src={`/static/dai.svg`} />
+            <Value>
+              <NumberDisplay
+                value={hoveredPoolValue?.toString() || baseToDisplay(props.pools.totalValue, 18)}
+                precision={0}
+              />
+            </Value>{' '}
+            <Unit>DAI</Unit>
+          </Cont>
+          <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
         </Box>
       </Box>
       <Box
