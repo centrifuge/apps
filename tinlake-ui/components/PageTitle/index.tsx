@@ -1,14 +1,12 @@
-import BN from 'bn.js'
 import { LinkPrevious } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Pool, UpcomingPool } from '../../config'
-import { PoolState } from '../../ducks/pool'
+import { PoolsState } from '../../ducks/pools'
+import { PoolCapacityLabel } from '../PoolCapacityLabel'
 import { PoolLink } from '../PoolLink'
-import { Label } from '../PoolList/styles'
-import { Tooltip } from '../Tooltip'
 
 interface Props {
   pool?: Pool | UpcomingPool
@@ -19,26 +17,14 @@ interface Props {
   return?: boolean
 }
 
-const OversubscribedBuffer = new BN(5000).mul(new BN(10).pow(new BN(18))) // 5k DAI
-
 const PageTitle: React.FC<Props> = (props: Props) => {
   const router = useRouter()
 
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const isOversubscribed =
-    (pool?.data &&
-      new BN(pool?.data.maxReserve).lte(
-        new BN(pool?.data.reserve).add(pool?.data.maker?.remainingCredit || new BN(0)).add(OversubscribedBuffer)
-      )) ||
-    false
-
-  // TODO: fix this somehow, otherwise the oversubscribed label isn't shown on pages which don't load the pool data
-  // (but this requires injecting the tinlake prop everywhere we include the PoolTitle component)
-  // const dispatch = useDispatch()
-
-  // React.useEffect(() => {
-  //   dispatch(loadPool(props.tinlake))
-  // }, [props.pool])
+  // TODO: This doesn't fetch the pools data itself, but gets the data because the PoolSelector fetches it.
+  // Ideally, we don't want to rely on this data coincidentally being fetched elsewhere.
+  const pools = useSelector<any, PoolsState>((state) => state.pools)
+  const poolData = pools.data?.pools.find((p) => p.id === router.query.root)
+  const subgraphIsLoading = pools.data?.totalValue.isZero()
 
   return (
     <Wrapper>
@@ -58,18 +44,7 @@ const PageTitle: React.FC<Props> = (props: Props) => {
         {props.pool && (
           <PoolName>
             {props.pool.metadata.name}
-            <PoolLabel>
-              {props.pool.metadata.isUpcoming ||
-              (pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero()) ? (
-                <Label blue>Upcoming</Label>
-              ) : (
-                isOversubscribed && (
-                  <Tooltip id="oversubscribed">
-                    <Label orange>Oversubscribed</Label>
-                  </Tooltip>
-                )
-              )}
-            </PoolLabel>
+            <PoolLabel>{poolData && !subgraphIsLoading && <PoolCapacityLabel pool={poolData} />}</PoolLabel>
           </PoolName>
         )}
         {!props.pool && <PoolName>Tinlake</PoolName>}
