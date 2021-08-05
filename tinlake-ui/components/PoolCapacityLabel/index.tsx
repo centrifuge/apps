@@ -8,16 +8,26 @@ interface Props {
   pool: PoolData
 }
 
-export const PoolCapacityLabel: React.FC<Props> = ({ pool: p }) => {
-  return p.isUpcoming || (!p.assetValue && !p.reserve) || (p.assetValue?.isZero() && p.reserve?.isZero()) ? (
-    <Label blue>Upcoming</Label>
-  ) : p.isArchived ? (
-    <Label>Archived</Label>
-  ) : p.isOversubscribed ? (
-    <Label orange>Oversubscribed</Label>
-  ) : (
+export const PoolCapacityLabel: React.FC<Props> = ({ pool }) => {
+  const { assetValue, capacity, currency, isArchived, isOversubscribed, reserve } = pool
+
+  const isUpcoming = pool.isUpcoming || (!assetValue && !reserve) || (assetValue?.isZero() && reserve?.isZero())
+
+  if (isUpcoming) {
+    return <Label blue>Upcoming</Label>
+  }
+
+  if (isArchived) {
+    return <Label>Archived</Label>
+  }
+
+  if (isOversubscribed) {
+    return <Label orange>Oversubscribed</Label>
+  }
+
+  return (
     <Label green>
-      {addThousandsSeparators(toPrecision(baseToDisplay(p.capacity || new BN(0), 21), 0))}K {p.currency}
+      {addThousandsSeparators(toPrecision(baseToDisplay(capacity || new BN(0), 21), 0))}K {currency}
     </Label>
   )
 }
