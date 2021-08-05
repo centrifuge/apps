@@ -28,9 +28,15 @@ export interface TokenBalance {
   pendingSupplyCurrency: BN
 }
 
+export interface TokenBalanceWithTokenPrice extends TokenBalance {
+  price: BN
+  value: BN
+  balance: BN
+}
+
 export interface PortfolioState {
   state: null | 'loading' | 'found'
-  data: TokenBalance[]
+  data: TokenBalanceWithTokenPrice[]
   totalValue: null | BN
 }
 
@@ -131,6 +137,7 @@ export function loadPortfolio(
 
         return {
           ...balance,
+          price: updatedPrice,
           value: updatedValue,
           balance: updatedBalance,
         }
