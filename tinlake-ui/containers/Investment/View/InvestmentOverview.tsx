@@ -224,7 +224,12 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   </LoadingValue>
                 </span>
                 <Box margin={{ left: 'auto' }} direction="row">
-                  {dropYield} % APY (30 days)
+                  {dropYield && !(pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero()) && (
+                    <>{dropYield} % APY (30 days)</>
+                  )}
+                  {(!dropYield || (pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero())) && (
+                    <>Expected APR: {toPrecision(feeToInterestRate(poolData?.senior?.interestRate || '0'), 2)}%</>
+                  )}
                 </Box>
               </Box>
             </Box>

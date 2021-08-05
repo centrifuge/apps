@@ -316,9 +316,13 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           <>
             <Info>
               <Tooltip id="dropInvestment">
-                DROP APY (30d): <b>{dropYield}%</b>
-                <br />
-                DROP APR: <b>{toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2)}%</b>
+                {dropYield && !(pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero()) && (
+                  <>
+                    DROP APY (30d): <b>{dropYield}%</b>
+                    <br />
+                  </>
+                )}
+                Expected DROP APR: <b>{toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2)}%</b>
                 <br />
                 Minimum investment amount: <b>5000 {props.pool?.metadata.currencySymbol || 'DAI'}</b>
               </Tooltip>

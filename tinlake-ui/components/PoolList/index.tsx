@@ -183,8 +183,8 @@ class PoolList extends React.Component<Props> {
                       <NumberDisplay
                         precision={0}
                         render={(v) =>
-                          v === '0' ? (
-                            <Dash>-</Dash>
+                          v == '0' ? (
+                            <Dash></Dash>
                           ) : (
                             <>
                               <Number>{v}</Number> <Unit>{p.currency}</Unit>
@@ -201,6 +201,11 @@ class PoolList extends React.Component<Props> {
                         render={(v) =>
                           v === '0.00' ? (
                             <Dash>-</Dash>
+                          ) : p.isUpcoming ||
+                            (!p.assetValue && !p.reserve) ||
+                            (p.assetValue?.isZero() && p.reserve?.isZero()) ||
+                            !p.seniorYield30Days ? (
+                            <SubNumber>Expected: {v} % APR</SubNumber>
                           ) : (
                             <>
                               {getDropAPY(p.seniorYield30Days)} <Unit>%</Unit>
