@@ -20,6 +20,20 @@ const InvestmentDisclaimer: React.FC<Props> = (props: Props) => {
         full responsibility. Please contact the respective issuer in case of any inquiries. Centrifuge and its
         affiliates are not liable nor responsible for the information provided hereby.
       </Paragraph>
+      <Paragraph margin={{ top: '0', bottom: 'medium' }}>
+        Before investing in any of the Tinlake pools, please check the issuer's offering materials and subscription
+        documents including the Executive Summary to understand the terms, conditions, and investment risks of each
+        pool. The issuer provides investment risk factors which are important to understand when you consider whether to
+        invest in a pool. You alone assume the sole responsibility of evaluating the merits and risks associated with
+        the use of any information or other content before making any decisions based on such information or other
+        content.
+      </Paragraph>
+      <Paragraph margin={{ top: '0', bottom: 'medium' }}>
+        The Tinlake protocol is rewarding every Tinlake investment daily in CFG token, the Centrifuge Chain's native
+        token. Note that these are rewards from the protocol for providing liquidity to the ecosystem independent from
+        the pool, it's issuers, their asset originators, or any Centrifuge entity. There is no guarantee that an
+        investor will receive those rewards.
+      </Paragraph>
 
       <Box direction="row" justify="end">
         <Box basis={'1/5'}>

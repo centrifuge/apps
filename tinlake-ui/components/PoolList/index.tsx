@@ -58,7 +58,7 @@ class PoolList extends React.Component<Props> {
     const {
       poolsData,
       router: {
-        query: { showAll, showArchived },
+        query: { showAll, showArchived, capacity },
       },
     } = this.props
 
@@ -78,15 +78,31 @@ class PoolList extends React.Component<Props> {
           <HeaderCol>
             <HeaderTitle>Investment Capacity</HeaderTitle>
           </HeaderCol>
-          <HeaderCol>
-            <HeaderTitle>Pool Value</HeaderTitle>
-          </HeaderCol>
-          <HeaderCol>
-            <Tooltip id="dropApy">
-              <HeaderTitle>DROP APY</HeaderTitle>
-            </Tooltip>
-            <HeaderSub>30 days</HeaderSub>
-          </HeaderCol>
+          {capacity && (
+            <>
+              <HeaderCol>
+                <HeaderTitle>DROP Capacity</HeaderTitle>
+                <HeaderSub>Given max reserve</HeaderSub>
+              </HeaderCol>
+              <HeaderCol>
+                <HeaderTitle>DROP Capacity</HeaderTitle>
+                <HeaderSub>Given min TIN risk buffer</HeaderSub>
+              </HeaderCol>
+            </>
+          )}
+          {!capacity && (
+            <>
+              <HeaderCol>
+                <HeaderTitle>Pool Value</HeaderTitle>
+              </HeaderCol>
+              <HeaderCol>
+                <Tooltip id="dropApy">
+                  <HeaderTitle>DROP APY</HeaderTitle>
+                </Tooltip>
+                <HeaderSub>30 days</HeaderSub>
+              </HeaderCol>
+            </>
+          )}
           {showAll && (
             <HeaderCol>
               <HeaderTitle>TIN APY</HeaderTitle>
@@ -120,40 +136,75 @@ class PoolList extends React.Component<Props> {
 
               <DataCol>{!subgraphIsLoading && <PoolCapacityLabel pool={p} />}</DataCol>
 
-              <DataCol>
-                <LoadingValue done={!subgraphIsLoading} height={28}>
-                  <NumberDisplay
-                    precision={0}
-                    render={(v) =>
-                      v === '0' ? (
-                        <Dash>-</Dash>
-                      ) : (
+              {capacity && (
+                <>
+                  <DataCol>
+                    <NumberDisplay
+                      render={(v) => (
                         <>
                           <Number>{v}</Number> <Unit>{p.currency}</Unit>
                         </>
-                      )
-                    }
-                    value={baseToDisplay((p.reserve || new BN(0)).add(p.assetValue || new BN(0)), 18)}
-                  />
-                </LoadingValue>
-              </DataCol>
-              <DataCol>
-                <LoadingValue done={!subgraphIsLoading} height={28}>
-                  <NumberDisplay
-                    render={(v) =>
-                      v === '0.00' ? (
-                        <Dash>-</Dash>
-                      ) : (
+                      )}
+                      precision={0}
+                      value={baseToDisplay(p.capacityGivenMaxReserve || new BN(0), 18)}
+                    />
+                  </DataCol>
+                  <DataCol>
+                    <NumberDisplay
+                      render={(v) => (
                         <>
-                          {getDropAPY(p.seniorYield30Days)} <Unit>%</Unit>
-                          <SubNumber>{v} % APR</SubNumber>
+                          <Number>{v}</Number> <Unit>{p.currency}</Unit>
                         </>
-                      )
-                    }
-                    value={feeToInterestRate(p.seniorInterestRate || new BN(0))}
-                  />
-                </LoadingValue>
-              </DataCol>
+                      )}
+                      precision={0}
+                      value={baseToDisplay(p.capacityGivenMaxDropRatio || new BN(0), 18)}
+                    />
+                  </DataCol>
+                </>
+              )}
+
+              {!capacity && (
+                <>
+                  <DataCol>
+                    <LoadingValue done={!subgraphIsLoading} height={28}>
+                      <NumberDisplay
+                        precision={0}
+                        render={(v) =>
+                          v === '0' ? (
+                            <Dash></Dash>
+                          ) : (
+                            <>
+                              <Number>{v}</Number> <Unit>{p.currency}</Unit>
+                            </>
+                          )
+                        }
+                        value={baseToDisplay((p.reserve || new BN(0)).add(p.assetValue || new BN(0)), 18)}
+                      />
+                    </LoadingValue>
+                  </DataCol>
+                  <DataCol>
+                    <LoadingValue done={!subgraphIsLoading} height={28}>
+                      <NumberDisplay
+                        render={(v) =>
+                          v === '0.00' ? (
+                            <Dash>-</Dash>
+                          ) : p.isUpcoming ||
+                            (!p.assetValue && !p.reserve) ||
+                            (p.assetValue?.isZero() && p.reserve?.isZero()) ||
+                            !p.seniorYield30Days ? (
+                            <SubNumber>Expected: {v} % APR</SubNumber>
+                          ) : (
+                            <>
+                              <Number>{getDropAPY(p.seniorYield30Days)}</Number> <Unit>%</Unit>
+                            </>
+                          )
+                        }
+                        value={feeToInterestRate(p.seniorInterestRate || new BN(0))}
+                      />
+                    </LoadingValue>
+                  </DataCol>
+                </>
+              )}
               {showAll && (
                 <DataCol>
                   {p.juniorYield90Days === null ? (

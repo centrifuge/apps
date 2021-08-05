@@ -215,15 +215,22 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     {props.selectedPool.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </Heading>
-                <span>
+                <span style={{ textAlign: 'right' }}>
                   <LoadingValue done={poolData?.senior !== undefined} height={21}>
                     Current token price:{' '}
                     {poolData?.senior &&
                       addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 4))}
                   </LoadingValue>
                 </span>
-                <Box margin={{ left: 'auto' }} direction="row">
-                  {dropYield} % APY (30 days)
+                <Box margin={{ left: 'auto' }} style={{ textAlign: 'right' }} direction="row">
+                  {dropYield && !(pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero()) && (
+                    <>Current DROP yield (30d APY): {dropYield} %</>
+                  )}
+                  {(!dropYield || (pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero())) && (
+                    <>
+                      Fixed DROP rate (APR): {toPrecision(feeToInterestRate(poolData?.senior?.interestRate || '0'), 2)}%
+                    </>
+                  )}
                 </Box>
               </Box>
             </Box>

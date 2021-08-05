@@ -49,6 +49,8 @@ export interface PoolData {
   seniorTokenPrice?: BN | null
   currency: string
   capacity?: BN
+  capacityGivenMaxReserve?: BN
+  capacityGivenMaxDropRatio?: BN
   shortName: string
 }
 
@@ -147,6 +149,11 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
             call: ['maxSeniorRatio()(uint256)'],
             returns: [[`${pool.addresses.ROOT_CONTRACT}.maxSeniorRatio`, toBN]],
           },
+          {
+            target: pool.addresses.ASSESSOR,
+            call: ['seniorRatio()(uint256)'],
+            returns: [[`${pool.addresses.ROOT_CONTRACT}.seniorRatio`, toBN]],
+          },
         ],
       ]
 
@@ -156,8 +163,18 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
           ...[
             {
               target: pool.addresses.CLERK,
+              call: ['debt()(uint)'],
+              returns: [[`${pool.addresses.ROOT_CONTRACT}.usedCreditline`, toBN]],
+            },
+            {
+              target: pool.addresses.CLERK,
               call: ['remainingCredit()(uint256)'],
-              returns: [[`${pool.addresses.ROOT_CONTRACT}.remainingCredit`, toBN]],
+              returns: [[`${pool.addresses.ROOT_CONTRACT}.unusedCreditline`, toBN]],
+            },
+            {
+              target: pool.addresses.CLERK,
+              call: ['creditline()(uint256)'],
+              returns: [[`${pool.addresses.ROOT_CONTRACT}.availableCreditline`, toBN]],
             },
             {
               target: pool.addresses.ASSESSOR,
@@ -171,7 +188,7 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
             },
             {
               target: pool.addresses.ASSESSOR,
-              call: ['seniorBalance()(uint256)'],
+              call: ['seniorBalance_()(uint256)'],
               returns: [[`${pool.addresses.ROOT_CONTRACT}.seniorBalance`, toBN]],
             },
           ],
@@ -212,8 +229,26 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
         })
 
         const capacityPerPool: { [key: string]: BN } = {}
+        const capacityGivenMaxReservePerPool: { [key: string]: BN } = {}
+        const capacityGivenMaxDropRatioPerPool: { [key: string]: BN } = {}
         Object.keys(updatesPerPool).forEach((poolId: string) => {
           const state: State = updatesPerPool[poolId]
+
+          // Investments will reduce the creditline and therefore reduce the senior debt
+          const newUsedCreditline = state.unusedCreditline
+            ? BN.max(
+                new BN(0),
+                (state.usedCreditline || new BN(0))
+                  .sub(state.pendingSeniorInvestments)
+                  .sub(state.pendingJuniorInvestments)
+                  .add(state.pendingSeniorRedemptions)
+                  .add(state.pendingJuniorRedemptions)
+              )
+            : new BN(0)
+
+          const newUnusedCreditline = state.unusedCreditline
+            ? state.availableCreditline?.sub(newUsedCreditline)
+            : new BN(0)
 
           const newReserve = BN.max(
             new BN(0),
@@ -222,27 +257,77 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
               .add(state.pendingJuniorInvestments)
               .sub(state.pendingSeniorRedemptions)
               .sub(state.pendingJuniorRedemptions)
+              .sub(newUsedCreditline)
           )
+
+          // console.log(poolId)
+          // console.log(
+          //   `newReserve: ${parseFloat(state.reserve.toString()) / 10 ** 24}M + ${
+          //     parseFloat(state.pendingSeniorInvestments.toString()) / 10 ** 24
+          //   }M + ${parseFloat(state.pendingJuniorInvestments.toString()) / 10 ** 24}M - ${
+          //     parseFloat(state.pendingSeniorRedemptions.toString()) / 10 ** 24
+          //   }M - ${parseFloat(state.pendingJuniorRedemptions.toString()) / 10 ** 24}M`
+          // )
+
+          // console.log(
+          //   ` - capacityGivenMaxReserve: ${parseFloat(state.maxReserve.toString()) / 10 ** 24}M - ${
+          //     parseFloat(newReserve.toString()) / 10 ** 24
+          //   }M- ${parseFloat((newUnusedCreditline || new BN(0)).toString()) / 10 ** 24}M`
+          // )
 
           const capacityGivenMaxReserve = BN.max(
             new BN(0),
-            state.maxReserve.sub(newReserve).sub(state.remainingCredit || new BN(0))
+            state.maxReserve.sub(newReserve).sub(newUnusedCreditline || new BN(0))
           )
 
-          const newSeniorAsset = state.seniorDebt
-            .add(state.seniorBalance)
+          // senior debt is reduced by any increase in the used creditline or increased by any decrease in the used creditline
+          const newSeniorDebt = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
+            ? state.seniorDebt.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
+            : state.seniorDebt.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
+
+          // TODO: the change in senior balance should be multiplied by the mat here
+          const newSeniorBalance = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
+            ? state.seniorBalance.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
+            : state.seniorBalance.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
+
+          // console.log(` - oldSeniorDebt: ${parseFloat(state.seniorDebt.toString()) / 10 ** 24}M `)
+          // console.log(` - newSeniorDebt: ${parseFloat(newSeniorDebt.toString()) / 10 ** 24}M `)
+          // console.log(` - oldSeniorBalance: ${parseFloat(state.seniorBalance.toString()) / 10 ** 24}M `)
+          // console.log(` - newSeniorBalance: ${parseFloat(newSeniorBalance.toString()) / 10 ** 24}M `)
+
+          const newSeniorAsset = newSeniorDebt
+            .add(newSeniorBalance)
             .add(state.pendingSeniorInvestments)
             .sub(state.pendingSeniorRedemptions)
-          const capacityGivenMaxDropRatio = BN.max(
-            new BN(0),
-            state.maxSeniorRatio.mul(state.netAssetValue.add(newReserve)).div(Fixed27Base).sub(newSeniorAsset)
-          )
+
+          const maxSeniorAsset = state.maxSeniorRatio.mul(state.netAssetValue.add(newReserve)).div(Fixed27Base)
+
+          const capacityGivenMaxDropRatio = BN.max(new BN(0), maxSeniorAsset.sub(newSeniorAsset))
+
+          // console.log(
+          //   ` - capacityGivenMaxDropRatioPerPool: ${parseFloat(state.maxSeniorRatio.toString()) / 10 ** 27}% * (${
+          //     parseFloat(state.netAssetValue.toString()) / 10 ** 24
+          //   }M +  ${parseFloat(newReserve.toString()) / 10 ** 24}M) -  ${
+          //     parseFloat(newSeniorAsset.toString()) / 10 ** 24
+          //   }M`
+          // )
+          // console.log('\n\n')
+          // console.log('\n\n')
 
           capacityPerPool[poolId] = BN.min(capacityGivenMaxReserve, capacityGivenMaxDropRatio)
+          capacityGivenMaxReservePerPool[poolId] = capacityGivenMaxReserve
+          capacityGivenMaxDropRatioPerPool[poolId] = capacityGivenMaxDropRatio
         })
 
         const poolsWithCapacity = poolsData.pools.map((pool: PoolData) => {
-          if (pool.id in capacityPerPool) return { ...pool, capacity: capacityPerPool[pool.id] }
+          if (pool.id in capacityPerPool) {
+            return {
+              ...pool,
+              capacity: capacityPerPool[pool.id],
+              capacityGivenMaxReserve: capacityGivenMaxReservePerPool[pool.id],
+              capacityGivenMaxDropRatio: capacityGivenMaxDropRatioPerPool[pool.id],
+            }
+          }
           return pool
         })
         dispatch({ data: { ...poolsData, pools: poolsWithCapacity }, type: RECEIVE_POOLS })
@@ -273,5 +358,8 @@ interface State {
   seniorDebt: BN
   seniorBalance: BN
   maxSeniorRatio: BN
-  remainingCredit?: BN
+  seniorRatio: BN
+  usedCreditline?: BN
+  availableCreditline?: BN
+  unusedCreditline?: BN
 }

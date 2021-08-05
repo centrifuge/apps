@@ -112,7 +112,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         justify="center"
       >
         <Box>
-          <AxisTooltip title="The annualized CFG reward rate for investments, based on the current CFG token market price and the daily reward rate">
+          <AxisTooltip title="Tinlake investments earns daily rewards in Centrifuge's native token (CFG). The CFG reward rate is an annualized representation of these rewards based on the current CFG token price. Rewards are independent from the pool's issuer and not guaranteed - please see Investment disclaimer for more details.">
             <>
               <Cont style={{ marginTop: '8px' }}>
                 <TokenLogo src={`/static/cfg-white.svg`} />

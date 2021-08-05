@@ -21,7 +21,7 @@ export const PoolCapacityLabel: React.FC<Props> = ({ pool }) => {
     return <Label>Archived</Label>
   }
 
-  if (isOversubscribed) {
+  if (isOversubscribed || pool.capacity?.isZero()) {
     return <Label orange>Oversubscribed</Label>
   }
 
