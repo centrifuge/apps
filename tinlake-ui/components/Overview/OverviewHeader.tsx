@@ -147,11 +147,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
             )}
             <Unit>{props.selectedPool.metadata.currencySymbol}</Unit>
           </Heading>
-          <Type>
-            <Tooltip id="poolValue" underline>
-              Pool Value
-            </Tooltip>
-          </Type>
+          <Type>Pool Value</Type>
         </HeaderBox>
         <HeaderBox style={{ borderRight: 'none' }}>
           {'addresses' in props.selectedPool &&

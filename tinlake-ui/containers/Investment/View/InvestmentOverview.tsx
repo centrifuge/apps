@@ -209,9 +209,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               <Box direction="column">
                 <Heading level="5" margin={{ bottom: 'xsmall', top: '0' }}>
                   <TokenLogo src={`/static/DROP_final.svg`} />
-                  <Tooltip id="dropValue" underline>
-                    DROP Tranche Value
-                  </Tooltip>
+                  DROP Tranche Value
                 </Heading>
                 <TrancheNote>Senior tranche</TrancheNote>
                 <TrancheNote>Lower risk, stable return</TrancheNote>
@@ -263,9 +261,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               <Box direction="column">
                 <Heading level="5" margin={{ bottom: 'xsmall', top: '0' }}>
                   <TokenLogo src={`/static/TIN_final.svg`} />
-                  <Tooltip id="tinValue" underline>
-                    TIN Tranche Value
-                  </Tooltip>
+                  TIN Tranche Value
                 </Heading>
                 <TrancheNote>Junior tranche</TrancheNote>
                 <TrancheNote>Higher risk, variable return</TrancheNote>
