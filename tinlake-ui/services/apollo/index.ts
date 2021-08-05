@@ -460,9 +460,11 @@ class Apollo {
               id
               symbol
             }
-            balanceAmount
             totalValue
+            balanceAmount
+            balanceValue
             supplyAmount
+            supplyValue
             pendingSupplyCurrency
           }
         }
