@@ -188,7 +188,7 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
             },
             {
               target: pool.addresses.ASSESSOR,
-              call: ['seniorBalance()(uint256)'],
+              call: ['seniorBalance_()(uint256)'],
               returns: [[`${pool.addresses.ROOT_CONTRACT}.seniorBalance`, toBN]],
             },
           ],
@@ -323,13 +323,14 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
         })
 
         const poolsWithCapacity = poolsData.pools.map((pool: PoolData) => {
-          if (pool.id in capacityPerPool)
+          if (pool.id in capacityPerPool) {
             return {
               ...pool,
               capacity: capacityPerPool[pool.id],
               capacityGivenMaxReserve: capacityGivenMaxReservePerPool[pool.id],
               capacityGivenMaxDropRatio: capacityGivenMaxDropRatioPerPool[pool.id],
             }
+          }
           return pool
         })
         dispatch({ data: { ...poolsData, pools: poolsWithCapacity }, type: RECEIVE_POOLS })

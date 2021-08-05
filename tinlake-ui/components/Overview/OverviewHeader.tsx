@@ -126,7 +126,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
             <Type>Asset maturity</Type>
           </HeaderBox>
         </Tooltip>
-        <Tooltip id="dropApy">
+        <Tooltip id={dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? 'dropApy' : 'dropApr'}>
           <HeaderBox>
             <Heading level="4">
               <TokenLogo src={`/static/DROP_final.svg`} />

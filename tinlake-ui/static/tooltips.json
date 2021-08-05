@@ -98,7 +98,7 @@
     "description": "The 30d DROP yield is the effective annualized return of the pool's DROP token over the last 30 days."
   },
   "dropApr": {
-    "title": "DROP APY",
+    "title": "DROP APR",
     "description": "DROP tokens earn yield on the outstanding assets at the DROP APR. The effective APY may deviate due to compounding effects or unused liquidity in the pool reserve."
   },
   "dropInvestment": {
