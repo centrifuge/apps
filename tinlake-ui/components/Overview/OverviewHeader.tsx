@@ -130,17 +130,17 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           <HeaderBox>
             <Heading level="4">
               <TokenLogo src={`/static/DROP_final.svg`} />
-              {dropYield && poolData?.netAssetValue.gtn(0) && poolData?.reserve.gtn(0)
+              {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
                 ? dropYield
                 : toPrecision(feeToInterestRate(dropRate || '0'), 2)}
               <Unit>%</Unit>
             </Heading>
-            {dropYield && poolData?.netAssetValue.gtn(0) && poolData?.reserve.gtn(0) && (
+            {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) && (
               <Box>
                 <Type>DROP APY (30 days)</Type>
               </Box>
             )}
-            {!(dropYield && poolData?.netAssetValue.gtn(0) && poolData?.reserve.gtn(0)) && (
+            {!(dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))) && (
               <Box>
                 <Type>Fixed DROP rate (APR)</Type>
               </Box>
