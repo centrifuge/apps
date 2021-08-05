@@ -126,7 +126,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
             <Type>Asset maturity</Type>
           </HeaderBox>
         </Tooltip>
-        <Tooltip id="dropAPR">
+        <Tooltip id="dropApy">
           <HeaderBox>
             <Heading level="4">
               <TokenLogo src={`/static/DROP_final.svg`} />
@@ -138,12 +138,11 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
             {dropYield && poolData?.netAssetValue.gtn(0) && poolData?.reserve.gtn(0) && (
               <Box>
                 <Type>DROP APY (30 days)</Type>
-                <Type>{toPrecision(feeToInterestRate(dropRate || '0'), 2)}% DROP APR</Type>
               </Box>
             )}
             {!(dropYield && poolData?.netAssetValue.gtn(0) && poolData?.reserve.gtn(0)) && (
               <Box>
-                <Type>Expected DROP APR</Type>
+                <Type>Fixed DROP rate (APR)</Type>
               </Box>
             )}
           </HeaderBox>

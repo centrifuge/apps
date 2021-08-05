@@ -209,7 +209,6 @@ class PoolList extends React.Component<Props> {
                           ) : (
                             <>
                               {getDropAPY(p.seniorYield30Days)} <Unit>%</Unit>
-                              <SubNumber>{v} % APR</SubNumber>
                             </>
                           )
                         }

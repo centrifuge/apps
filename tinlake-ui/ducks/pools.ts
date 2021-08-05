@@ -297,10 +297,11 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
             .add(newSeniorBalance)
             .add(state.pendingSeniorInvestments)
             .sub(state.pendingSeniorRedemptions)
-          const capacityGivenMaxDropRatio = BN.max(
-            new BN(0),
-            state.maxSeniorRatio.mul(state.netAssetValue.add(newReserve)).div(Fixed27Base).sub(newSeniorAsset)
-          )
+
+          const maxSeniorAsset = state.maxSeniorRatio.mul(state.netAssetValue.add(newReserve)).div(Fixed27Base)
+
+          // maxDropRatio * (NAV + new reserve) - newSeniorAsset = what can still be invested in DROP
+          const capacityGivenMaxDropRatio = BN.max(new BN(0), maxSeniorAsset.sub(newSeniorAsset))
 
           // console.log(
           //   ` - capacityGivenMaxDropRatioPerPool: ${parseFloat(state.maxSeniorRatio.toString()) / 10 ** 27}% * (${
