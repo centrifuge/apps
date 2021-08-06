@@ -62,7 +62,7 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
 
   return (
     <Box direction="row" width="100%" gap="medium">
-      <Box basis="1/3" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
+      <Box basis="1/2" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
         {isMakerIntegrated && (
           <Table margin={{ bottom: '0' }}>
             <TableBody>
@@ -95,6 +95,24 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
                   <LoadingValue done={poolData?.maker.creditline !== undefined}>
                     {addThousandsSeparators(
                       toPrecision(baseToDisplay(poolData?.maker?.creditline || new BN(0), 18 + 6), 1)
+                    )}
+                    M DAI
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell
+                  scope="row"
+                  style={{ alignItems: 'start', justifyContent: 'center' }}
+                  pad={{ vertical: '6px' }}
+                  border={{ color: 'transparent' }}
+                >
+                  — Available Credit Line
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
+                  <LoadingValue done={poolData?.maker.line !== undefined}>
+                    {addThousandsSeparators(
+                      toPrecision(baseToDisplay(poolData?.maker?.remainingCredit || new BN(0), 18 + 6), 1)
                     )}
                     M DAI
                   </LoadingValue>
@@ -139,8 +157,116 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
             </TableRow>
           </TableBody>
         </Table>
+        {isMakerIntegrated && (
+          <Table margin={{ top: 'medium', bottom: '0' }}>
+            <TableBody>
+              <TableRow>
+                <TableCell
+                  scope="row"
+                  style={{ alignItems: 'start', justifyContent: 'center' }}
+                  pad={{ vertical: '6px' }}
+                  border={{ color: 'transparent' }}
+                >
+                  TIN Tranche Value
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
+                  <LoadingValue done={poolData?.maker.line !== undefined}>
+                    {addThousandsSeparators(
+                      toPrecision(
+                        baseToDisplay(
+                          poolData?.junior.totalSupply.mul(poolData?.junior.tokenPrice) || new BN(0),
+                          27 + 18 + 6
+                        ),
+                        1
+                      )
+                    )}
+                    M DAI
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell
+                  scope="row"
+                  style={{ alignItems: 'start', justifyContent: 'center' }}
+                  pad={{ vertical: '6px' }}
+                  border={{ color: 'transparent' }}
+                >
+                  — Locked for min TIN risk buffer
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
+                  <LoadingValue done={poolData?.maker.creditline !== undefined}>
+                    {addThousandsSeparators(
+                      toPrecision(
+                        baseToDisplay(
+                          poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.minJuniorRatio) || new BN(0),
+                          27 + 18 + 6
+                        ),
+                        1
+                      )
+                    )}
+                    M DAI
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell
+                  scope="row"
+                  style={{ alignItems: 'start', justifyContent: 'center' }}
+                  pad={{ vertical: '6px' }}
+                  border={{ color: 'transparent' }}
+                >
+                  — Locked for Maker Credit Line
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
+                  <LoadingValue done={poolData?.maker.line !== undefined}>
+                    {addThousandsSeparators(
+                      toPrecision(
+                        baseToDisplay(
+                          poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.maker?.mat.sub(Fixed27Base)) ||
+                            new BN(0),
+                          27 + 18 + 6
+                        ),
+                        1
+                      )
+                    )}
+                    M DAI
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell
+                  scope="row"
+                  style={{ alignItems: 'start', justifyContent: 'center' }}
+                  pad={{ vertical: '6px' }}
+                  border={{ color: 'transparent' }}
+                >
+                  — Unlocked
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
+                  <LoadingValue done={poolData?.maker.line !== undefined}>
+                    {addThousandsSeparators(
+                      toPrecision(
+                        baseToDisplay(
+                          poolData?.junior.totalSupply
+                            .mul(poolData?.junior.tokenPrice)
+                            ?.sub(poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.minJuniorRatio))
+                            .sub(
+                              poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.maker?.mat.sub(Fixed27Base))
+                            ) || new BN(0),
+                          27 + 18 + 6
+                        ),
+                        1
+                      )
+                    )}
+                    M DAI
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        )}
       </Box>
-      <Box basis="1/3" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
+      <Box basis="1/2" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
         <TokenInput
           label="Maker Capacity"
           token={props.activePool?.metadata.currencySymbol || 'DAI'}
@@ -149,10 +275,15 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
           maxValue={(maxCreditline.lt(debtCeiling) ? maxCreditline : debtCeiling).toString()}
         />
         <br />
+        <br />
         <TokenInput
           label="External Investor Capacity"
           token={props.activePool?.metadata.currencySymbol || 'DAI'}
-          value={externalCapacity === undefined ? poolData?.maxReserve.toString() || '0' : externalCapacity}
+          value={
+            externalCapacity === undefined
+              ? poolData?.maxReserve?.sub(poolData?.maker?.remainingCredit).toString() || '0'
+              : externalCapacity
+          }
           onChange={onChangeExternalCapacity}
         />
 
