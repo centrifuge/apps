@@ -17,6 +17,16 @@ const multicallConfig = {
 const LOAD_PORTFOLIO = 'tinlake-ui/pools/LOAD_PORTFOLIO'
 const RECEIVE_PORTFOLIO = 'tinlake-ui/pools/RECEIVE_PORTFOLIO'
 
+interface TokenResult {
+  symbol: string
+  price: BN
+  balance: BN
+  payoutCurrencyAmount: BN
+  payoutTokenAmount: BN
+  remainingSupplyCurrency: BN
+  remainingRedeemToken: BN
+}
+
 export interface TokenBalance {
   id: string
   symbol: string
@@ -28,7 +38,7 @@ export interface TokenBalance {
 export interface PortfolioState {
   state: null | 'loading' | 'found'
   data: TokenBalance[]
-  lastMulticallResult: null | any
+  lastMulticallResult: null | { [key: string]: TokenResult }
   address: null | string
   totalValue: null | BN
 }
@@ -145,9 +155,9 @@ export function loadPortfolio(
 
       const prevState = (getState() as any).portfolio as PortfolioState
       const prevResult = prevState.address === address ? prevState.lastMulticallResult : {}
-      const newResult = mergeResult(prevResult, newPartialResult)
+      const newResult = mergeResult(prevResult || {}, newPartialResult)
 
-      const updatedTokenBalances = Object.entries(newResult).map(([tokenId, tokenResult]: [string, any]) => {
+      const updatedTokenBalances = Object.entries(newResult).map(([tokenId, tokenResult]) => {
         const newBalance = new BN(tokenResult.balance).add(new BN(tokenResult.payoutTokenAmount))
         const newPrice = new BN(tokenResult.price)
         const newValue = newBalance.mul(newPrice).div(new BN(10).pow(new BN(27)))
@@ -162,7 +172,7 @@ export function loadPortfolio(
   }
 }
 
-function mergeResult<T extends object>(old: T, partialNew: Partial<T>) {
+function mergeResult<T extends object>(old: T, partialNew: Partial<T>): T {
   const newObj = { ...partialNew, ...old }
   for (const key in newObj) {
     newObj[key] = {
