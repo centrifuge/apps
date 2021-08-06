@@ -77,7 +77,7 @@ export function loadPortfolio(
   ipfsPools: IpfsPools
 ): ThunkAction<Promise<void>, PortfolioState, undefined, Action> {
   return async (dispatch, getState) => {
-    dispatch({ type: LOAD_PORTFOLIO, address })
+    dispatch({ address, type: LOAD_PORTFOLIO })
 
     const toBN = (val: BigNumber) => new BN(val.toString())
 
@@ -155,7 +155,7 @@ export function loadPortfolio(
         return { id: tokenId, symbol: tokenResult.symbol, price: newPrice, value: newValue, balance: newBalance }
       })
 
-      dispatch({ data: updatedTokenBalances, multicallResult: newResult, address: address, type: RECEIVE_PORTFOLIO })
+      dispatch({ address, data: updatedTokenBalances, multicallResult: newResult, type: RECEIVE_PORTFOLIO })
     })
 
     watcher.start()
