@@ -87,10 +87,10 @@ export class UserRepo {
     // We make sure a field cannot set to blank after it's already been set once, it can only be updated
     const [updatedUser] = await this.db.sql`
       update users
-      set email = ${email.length > 0 ? email : prevUser.email},
-      country_code = ${countryCode.length > 0 ? countryCode : prevUser.countryCode},
-      full_name = ${fullName.length > 0 ? fullName : prevUser.fullName},
-      entity_name = ${entityName.length > 0 ? entityName : prevUser.entityName}
+      set email = ${email?.length > 0 ? email : prevUser.email},
+      country_code = ${countryCode?.length > 0 ? countryCode : prevUser.countryCode},
+      full_name = ${fullName?.length > 0 ? fullName : prevUser.fullName},
+      entity_name = ${entityName?.length > 0 ? entityName : prevUser.entityName}
       where id = ${userId}
 
       returning *
