@@ -30,10 +30,10 @@ const Dashboard: React.FC<Props> = (props: Props) => {
       ) : (
         pools.data && (
           <Box basis={'full'}>
-            <Box margin={{ top: 'medium', bottom: 'none' }} direction="row">
+            <Box margin={{ top: 'large', bottom: 'none' }} direction="row">
               <TinlakeExplainer />
             </Box>
-            <Box direction="row" gap="large" margin={{ bottom: 'medium', top: 'medium' }} justify="center" wrap>
+            <Box direction="row" gap="large" margin={{ bottom: 'medium', top: 'large' }} justify="center" wrap>
               <PoolsMetrics pools={pools.data} tinlake={props.tinlake} />
             </Box>
             <PoolList poolsData={pools.data} />

@@ -1,9 +1,5 @@
 import styled from 'styled-components'
 
-export const Container = styled.div`
-  padding-bottom: 12px;
-`
-
 export const Row = styled.div`
   cursor: pointer;
   display: flex;

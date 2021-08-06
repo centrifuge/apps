@@ -140,7 +140,9 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
-                    <Tooltip id="financingFee">Average Financing Fee</Tooltip>
+                    <Tooltip id="financingFee" underline>
+                      Average Financing Fee
+                    </Tooltip>
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
                     <LoadingValue done={avgInterestRate !== undefined}>
