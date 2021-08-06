@@ -70,10 +70,13 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
       ? poolData?.maker?.dropBalance.mul(poolData.senior!.tokenPrice).div(new BN(10).pow(new BN(27)))
       : undefined
 
-  const makerOvercollateralization = makerDropCollateralValue
-    .mul(new BN(10).pow(new BN(18)))
-    .div(poolData?.maker.debt)
-    .div(new BN(10).pow(new BN(16)))
+  const makerOvercollateralization =
+    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
+      ? makerDropCollateralValue
+          .mul(new BN(10).pow(new BN(18)))
+          .div(poolData?.maker.debt)
+          .div(new BN(10).pow(new BN(16)))
+      : new BN(0)
 
   const makerDropShare =
     isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
