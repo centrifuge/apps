@@ -46,7 +46,7 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
       pad="medium"
       style={{ zIndex: 3 }}
     >
-      <HeaderBox style={{ borderRight: 'none' }}>
+      <HeaderBox style={{ borderRight: 'none' }} margin={{ left: 'large' }}>
         <Heading level="4">
           <TokenLogo src={`/static/currencies/${props.activePool.metadata.currencySymbol}.svg`} />
           {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || new BN(0), 18), 0))}

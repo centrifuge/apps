@@ -37,7 +37,9 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
         <>
           <AOMetrics activePool={props.activePool} />
 
-          <Heading level="4">Funding Needs</Heading>
+          <Heading level="4" margin={{ top: 'large' }}>
+            Funding Needs
+          </Heading>
           <FundingNeeds activePool={props.activePool} />
 
           <Heading level="4">Investor Whitelisting</Heading>
