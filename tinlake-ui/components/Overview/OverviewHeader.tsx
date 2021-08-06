@@ -16,6 +16,7 @@ import styled from 'styled-components'
 import config, { Pool } from '../../config'
 import { ensureAuthed } from '../../ducks/auth'
 import { PoolData, PoolState } from '../../ducks/pool'
+import { useTrancheYield } from '../../utils/hooks'
 import InvestAction from '../InvestAction'
 import { Tooltip } from '../Tooltip'
 
@@ -30,6 +31,9 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
   const pool = useSelector<any, PoolState>((state) => state.pool)
+
+  const { dropYield } = useTrancheYield()
+
   const poolData = pool?.data as PoolData | undefined
 
   const dropRate = poolData?.senior?.interestRate || undefined
@@ -118,23 +122,30 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
         </HeaderBox>
         <HeaderBox>
           <Heading level="4">{props.selectedPool.metadata.assetMaturity}</Heading>
-          <Type>
-            <Tooltip id="assetMaturity" underline>
-              Asset maturity
-            </Tooltip>
-          </Type>
+          <Tooltip id="assetMaturity" underline>
+            <Type>Asset maturity</Type>
+          </Tooltip>
         </HeaderBox>
         <HeaderBox>
           <Heading level="4">
             <TokenLogo src={`/static/DROP_final.svg`} />
-            {toPrecision(feeToInterestRate(dropRate || '0'), 2)}
+            {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
+              ? dropYield
+              : toPrecision(feeToInterestRate(dropRate || '0'), 2)}
             <Unit>%</Unit>
           </Heading>
-          <Type>
-            <Tooltip id="dropAPR" underline>
-              DROP APR
-            </Tooltip>
-          </Type>
+          <Box>
+            {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) && (
+              <Tooltip id="dropApy" underline>
+                <Type>DROP APY (30 days)</Type>
+              </Tooltip>
+            )}
+            {!(dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))) && (
+              <Tooltip id="dropApr" underline>
+                <Type>Fixed DROP rate (APR)</Type>
+              </Tooltip>
+            )}
+          </Box>
         </HeaderBox>
         <HeaderBox style={{ borderRight: 'none' }}>
           <Heading level="4">
@@ -337,8 +348,8 @@ const HeaderBox = styled(Box)<{ width?: string }>`
 
 const Type = styled.div`
   font-weight: 500;
-  font-size: 13px;
-  line-height: 14px;
+  font-size: 12px;
+  line-height: 20px;
   color: #979797;
 `
 

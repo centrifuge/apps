@@ -10,6 +10,7 @@ import { Pool, UpcomingPool } from '../../../config'
 import { loadLoans, LoansState, SortableLoan } from '../../../ducks/loans'
 import { PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { useTrancheYield } from '../../../utils/hooks'
 import { toPrecision } from '../../../utils/toPrecision'
 import {
   BalanceSheetDiagram,
@@ -72,13 +73,13 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
   const poolData = pool?.data as PoolData | undefined
 
-  const dropRate = poolData?.senior?.interestRate || undefined
-
   const dropTotalValue = poolData?.senior ? poolData?.senior.totalSupply.mul(poolData.senior!.tokenPrice) : undefined
   const tinTotalValue = poolData ? poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice) : undefined
 
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
+
+  const { dropYield } = useTrancheYield()
 
   const reserveRatio =
     poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
@@ -103,8 +104,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           round="xsmall"
           margin={{ bottom: 'medium' }}
           background="white"
-          flex="grow"
-          basis="auto"
+          style={{ flex: '1 1 40%' }}
         >
           <Box>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
@@ -203,7 +203,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           <BalanceSheetDiagramRight>&nbsp;</BalanceSheetDiagramRight>
         </BalanceSheetDiagram>
 
-        <Box direction="column" justify="between">
+        <Box direction="column" justify="between" style={{ flex: '1 1 35%' }}>
           <Box pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'small' }} background="white">
             <Box direction="row" margin={{ top: '0', bottom: '0' }}>
               <Box direction="column">
@@ -221,15 +221,22 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     {props.selectedPool.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </Heading>
-                <span>
+                <span style={{ textAlign: 'right' }}>
                   <LoadingValue done={poolData?.senior !== undefined} height={21}>
                     Current token price:{' '}
                     {poolData?.senior &&
                       addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 4))}
                   </LoadingValue>
                 </span>
-                <Box margin={{ left: 'auto' }} direction="row">
-                  {toPrecision(feeToInterestRate(dropRate || '0'), 2)}% APR
+                <Box margin={{ left: 'auto' }} style={{ textAlign: 'right' }} direction="row">
+                  {dropYield && !(pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero()) && (
+                    <>Current DROP yield (30d APY): {dropYield} %</>
+                  )}
+                  {(!dropYield || (pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero())) && (
+                    <>
+                      Fixed DROP rate (APR): {toPrecision(feeToInterestRate(poolData?.senior?.interestRate || '0'), 2)}%
+                    </>
+                  )}
                 </Box>
               </Box>
             </Box>
