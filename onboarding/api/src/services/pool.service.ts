@@ -4,7 +4,6 @@ import { ethers } from 'ethers'
 import config from '../config'
 import { Tranche } from '../controllers/types'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
-import { AgreementRepo } from '../repos/agreement.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
 import { User, UserRepo } from '../repos/user.repo'
 import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
@@ -28,8 +27,7 @@ export class PoolService {
   constructor(
     private readonly addressRepo: AddressRepo,
     private readonly investmentRepo: InvestmentRepo,
-    private readonly userRepo: UserRepo,
-    private readonly agreementRepo: AgreementRepo
+    private readonly userRepo: UserRepo
   ) {
     this.loadFromIPFS()
   }
@@ -102,9 +100,8 @@ export class PoolService {
       throw new Error(`Failed to find user for id ${userId}`)
     }
 
-    const agreement = await this.agreementRepo.find(agreementId)
-    if (!agreement || !agreement.signedAt || !agreement.counterSignedAt || agreement.userId !== userId) {
-      throw new Error(`Failed to find valid & signed agreement for id ${agreementId} & user ${userId}`)
+    if (agreementId.length === 0) {
+      throw new Error(`Invalid agreement ${agreementId}`)
     }
 
     if (user.entityName?.length === 0 && user.fullName?.length === 0) {
