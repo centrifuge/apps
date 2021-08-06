@@ -1,20 +1,24 @@
 import { TokenInput } from '@centrifuge/axis-token-input'
-import { baseToDisplay } from '@centrifuge/tinlake-js'
+import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import { Box, Button, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import Alert from '../../components/Alert'
 import { LoadingValue } from '../../components/LoadingValue'
-import { Pool } from '../../config'
-import { PoolData, PoolState } from '../../ducks/pool'
+import { LoadPool, Pool } from '../../config'
+import { loadPool, PoolData, PoolState } from '../../ducks/pool'
 import { PoolsState } from '../../ducks/pools'
+import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { Fixed27Base } from '../../utils/ratios'
 import { toPrecision } from '../../utils/toPrecision'
 
-interface Props {
+interface Props extends TransactionProps {
   activePool: Pool
+  tinlake: ITinlake
+  loadPool?: LoadPool
 }
 
 const FundingNeeds: React.FC<Props> = (props: Props) => {
@@ -85,6 +89,52 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
           .div(poolData?.senior?.totalSupply)
           .div(new BN(10).pow(new BN(16)))
       : undefined
+
+  const changedExternalCapacity = externalCapacity && externalCapacity !== (poolData?.reserve || new BN(0)).toString()
+  const changedMakerCapacity = makerCapacity && mat && makerCapacity !== poolData?.maker?.creditline?.toString()
+
+  const [status, , setTxId] = useTransactionState()
+  const [creditlineStatus, , setCreditlineTxId] = useTransactionState()
+
+  const save = async () => {
+    if (changedExternalCapacity && externalCapacity) {
+      const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [
+        props.tinlake,
+        externalCapacity.toString(),
+      ])
+      setTxId(txId)
+    }
+
+    if (changedMakerCapacity && makerCapacity) {
+      const currentCreditline = poolData?.maker?.creditline?.toString()
+      const amount = new BN(makerCapacity).gt(new BN(currentCreditline))
+        ? new BN(makerCapacity).sub(new BN(currentCreditline))
+        : new BN(currentCreditline).sub(new BN(makerCapacity))
+      const valueToDecimal = new Decimal(baseToDisplay(makerCapacity, 18)).toDecimalPlaces(4)
+      const formatted = addThousandsSeparators(valueToDecimal.toString())
+
+      if (new BN(makerCapacity).gt(new BN(currentCreditline))) {
+        const txId = await props.createTransaction(`Increase credit line to ${formatted}`, 'raiseCreditline', [
+          props.tinlake,
+          amount.toString(),
+        ])
+        setCreditlineTxId(txId)
+      } else {
+        const txId = await props.createTransaction(`Lower credit line to ${formatted}`, 'sinkCreditline', [
+          props.tinlake,
+          amount.toString(),
+        ])
+        setCreditlineTxId(txId)
+      }
+    }
+  }
+
+  React.useEffect(() => {
+    if (status === 'succeeded') {
+      props.loadPool && props.loadPool(props.tinlake, props.activePool?.metadata.maker?.ilk)
+    }
+  }, [status])
+
   return (
     <Box direction="row" width="100%" gap="medium">
       {isMakerIntegrated && (
@@ -370,11 +420,23 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
         )}
 
         <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-          <Button primary label="Save" />
+          <Button
+            primary
+            label="Save"
+            onClick={save}
+            disabled={
+              (!changedExternalCapacity && !changedMakerCapacity) ||
+              (changedExternalCapacity && (status === 'pending' || status === 'unconfirmed')) ||
+              (changedMakerCapacity &&
+                (creditlineStatus === 'pending' ||
+                  creditlineStatus === 'unconfirmed' ||
+                  (makerCapacity ? new BN(makerCapacity).gt(debtCeiling) : true)))
+            }
+          />
         </Box>
       </Box>
     </Box>
   )
 }
 
-export default FundingNeeds
+export default connect((state) => state, { loadPool, createTransaction })(FundingNeeds)

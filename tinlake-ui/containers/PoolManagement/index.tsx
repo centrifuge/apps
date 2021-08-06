@@ -40,7 +40,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
           <Heading level="4" margin={{ top: 'large' }}>
             Funding Needs
           </Heading>
-          <FundingNeeds activePool={props.activePool} />
+          <FundingNeeds activePool={props.activePool} tinlake={props.tinlake} />
 
           <Heading level="4">Investor Whitelisting</Heading>
           <Memberlist tinlake={props.tinlake} />
