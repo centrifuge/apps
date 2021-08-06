@@ -122,9 +122,11 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
         </HeaderBox>
         <HeaderBox>
           <Heading level="4">{props.selectedPool.metadata.assetMaturity}</Heading>
-          <Tooltip id="assetMaturity" underline>
-            <Type>Asset maturity</Type>
-          </Tooltip>
+          <Type>
+            <Tooltip id="assetMaturity" underline>
+              Asset maturity
+            </Tooltip>
+          </Type>
         </HeaderBox>
         <HeaderBox>
           <Heading level="4">
@@ -135,16 +137,18 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
             <Unit>%</Unit>
           </Heading>
           <Box>
-            {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) && (
-              <Tooltip id="dropApy" underline>
-                <Type>DROP APY (30 days)</Type>
-              </Tooltip>
-            )}
-            {!(dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))) && (
-              <Tooltip id="dropApr" underline>
-                <Type>Fixed DROP rate (APR)</Type>
-              </Tooltip>
-            )}
+            <Type>
+              {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) && (
+                <Tooltip id="dropApy" underline>
+                  DROP APY (30 days)
+                </Tooltip>
+              )}
+              {!(dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))) && (
+                <Tooltip id="dropApr" underline>
+                  Fixed DROP rate (APR)
+                </Tooltip>
+              )}
+            </Type>
           </Box>
         </HeaderBox>
         <HeaderBox style={{ borderRight: 'none' }}>

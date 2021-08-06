@@ -41,7 +41,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         round="xsmall"
         background="white"
         margin={{ horizontal: '16px', top: 'medium' }}
-        style={{ flex: '1 1 300px', maxWidth: '430px' }}
+        style={{ flex: '1 1 300px', maxWidth: '440px' }}
         direction="row"
         pad="medium"
       >
@@ -106,7 +106,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         round="xsmall"
         background="white"
         margin={{ horizontal: '16px', top: 'medium' }}
-        style={{ flex: '1 1 300px', maxWidth: '430px' }}
+        style={{ flex: '1 1 300px', maxWidth: '440px' }}
         direction="row"
         pad="medium"
         justify="center"
