@@ -1,5 +1,4 @@
 import { addThousandsSeparators, baseToDisplay, toPrecision } from '@centrifuge/tinlake-js'
-import BN from 'bn.js'
 import * as React from 'react'
 import styled from 'styled-components'
 import { PoolData } from '../../ducks/pools'
@@ -25,9 +24,13 @@ export const PoolCapacityLabel: React.FC<Props> = ({ pool }) => {
     return <Label orange>Oversubscribed</Label>
   }
 
+  if (capacity == null) {
+    return null
+  }
+
   return (
     <Label green>
-      {addThousandsSeparators(toPrecision(baseToDisplay(capacity || new BN(0), 21), 0))}K {currency}
+      {addThousandsSeparators(toPrecision(baseToDisplay(capacity, 21), 0))}K {currency}
     </Label>
   )
 }

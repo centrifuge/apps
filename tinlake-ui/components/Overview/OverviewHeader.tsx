@@ -151,7 +151,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
             </Type>
           </Box>
         </HeaderBox>
-        <HeaderBox style={{ borderRight: 'none' }}>
+        <HeaderBox width="220px" style={{ borderRight: 'none' }}>
           <Heading level="4">
             <TokenLogo src={`/static/currencies/${props.selectedPool.metadata.currencySymbol}.svg`} />
             {addThousandsSeparators(

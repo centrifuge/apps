@@ -104,7 +104,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           round="xsmall"
           margin={{ bottom: 'medium' }}
           background="white"
-          style={{ flex: '1 1 40%' }}
+          style={{ flex: '1 1 35%' }}
         >
           <Box>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
