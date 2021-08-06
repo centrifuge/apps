@@ -81,6 +81,10 @@
     "title": "Financing Fee",
     "description": "Annual interest rate (APR) at which the interest for the outstanding financing is accrued with compounding per second."
   },
+  "reserve": {
+    "title": "Reserve",
+    "description": "The Reserve is the current liquidity in the pool that is not deployed to finance assets. It is available for redemption by investors and asset originations by the Asset Originator."
+  },
   "reserveRatio": {
     "title": "Reserve Ratio",
     "description": "The Reserve Ratio expresses the reserve in relation to the pool value and gives an indication of the current liquidity of the pool. A high reserve ration indicates high liquidity of the pool which fosters immediate redemptions for investors but may also drag down effective returns."

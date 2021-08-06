@@ -165,7 +165,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                <Tooltip id="poolValue" underline>
+                <Tooltip id="reserve" underline>
                   Reserve
                 </Tooltip>
               </Heading>
