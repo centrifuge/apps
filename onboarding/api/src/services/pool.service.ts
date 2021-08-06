@@ -4,8 +4,9 @@ import { ethers } from 'ethers'
 import config from '../config'
 import { Tranche } from '../controllers/types'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
+import { AgreementRepo } from '../repos/agreement.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
-import { UserRepo } from '../repos/user.repo'
+import { User, UserRepo } from '../repos/user.repo'
 import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
 import contractAbiMemberlist from '../utils/Memberlist.abi'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
@@ -27,7 +28,8 @@ export class PoolService {
   constructor(
     private readonly addressRepo: AddressRepo,
     private readonly investmentRepo: InvestmentRepo,
-    private readonly userRepo: UserRepo
+    private readonly userRepo: UserRepo,
+    private readonly agreementRepo: AgreementRepo
   ) {
     this.loadFromIPFS()
   }
@@ -93,6 +95,22 @@ export class PoolService {
     const pool = await this.get(poolId)
     if (!pool) throw new Error(`Failed to get pool ${poolId} when adding to memberlist`)
 
+    // A lot of the checks below are redundant, and should have already been checked, but it can't hurt
+    // to check again since these constraints cannot be broken in any case.
+    const user = await this.userRepo.find(userId)
+    if (!user) {
+      throw new Error(`Failed to find user for id ${userId}`)
+    }
+
+    const agreement = await this.agreementRepo.find(agreementId)
+    if (!agreement || !agreement.signedAt || !agreement.counterSignedAt || agreement.userId !== userId) {
+      throw new Error(`Failed to find valid & signed agreement for id ${agreementId} & user ${userId}`)
+    }
+
+    if (user.entityName?.length === 0 && user.fullName?.length === 0) {
+      throw new Error(`Name for user ${userId} is empty, cannot whitelist without this`)
+    }
+
     this.logger.log(`Adding user ${userId} to pool ${poolId}`)
     const memberAdmin = new ethers.Contract(config.memberAdminContractAddress, contractAbiMemberAdmin, this.signer)
     const memberlistAddress = tranche === 'senior' ? pool.addresses.SENIOR_MEMBERLIST : pool.addresses.JUNIOR_MEMBERLIST
@@ -116,7 +134,7 @@ export class PoolService {
       this.logger.log(`${tx.hash} (nonce=${tx.nonce}) completed`)
 
       for (let address of addresses) {
-        await this.checkMemberlist(memberlistAddress, address, pool, tranche, agreementId)
+        await this.checkMemberlist(memberlistAddress, address, user, pool, tranche, agreementId)
       }
     } catch (e) {
       console.error(`Failed to add ${ethAddresses.join(',')} to ${memberlistAddress}: ${e}`)
@@ -127,6 +145,7 @@ export class PoolService {
   async checkMemberlist(
     memberlistAddress: string,
     address: AddressEntity,
+    user: User,
     pool: Pool,
     tranche: Tranche,
     agreementId: string
@@ -140,12 +159,6 @@ export class PoolService {
 
       if (isWhitelisted) {
         this.logger.log(`${address.address} is a member of ${pool.metadata.name} - ${tranche}`)
-        const user = await this.userRepo.findByAddress(address.address)
-
-        if (!user) {
-          throw new Error(`Failed to find user for whitelisting of address ${address.address}`)
-        }
-
         this.investmentRepo.upsert(
           address.id,
           pool.addresses.ROOT_CONTRACT,
