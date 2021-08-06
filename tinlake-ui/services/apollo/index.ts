@@ -9,7 +9,6 @@ import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsDailyData, PoolsData } from '../../ducks/pools'
-import { TokenBalance } from '../../ducks/portfolio'
 import { RewardsData } from '../../ducks/rewards'
 import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
@@ -465,53 +464,6 @@ class Apollo {
       .sort((a: PoolsDailyData, b: PoolsDailyData) => a.day - b.day)
 
     return poolsDailyData
-  }
-
-  async getPortfolio(address: string): Promise<TokenBalance[]> {
-    let result
-    try {
-      result = await this.client.query({
-        query: gql`
-        {
-          tokenBalances(where: { owner: "${address.toLowerCase()}" }) {
-            token {
-              id
-              symbol
-            }
-            totalValue
-            balanceAmount
-            balanceValue
-            supplyAmount
-            supplyValue
-            pendingSupplyCurrency
-          }
-        }
-        `,
-      })
-    } catch (err) {
-      console.error(`error occured while fetching portfolio data from apollo ${err}`)
-      return []
-    }
-
-    if (!result.data) return []
-
-    return result.data.tokenBalances.map(
-      (tokenBalance: {
-        token: any
-        totalValue: string
-        balanceAmount: string
-        supplyAmount: string
-        pendingSupplyCurrency: string
-      }) => {
-        return {
-          token: tokenBalance.token,
-          totalValue: new BN(tokenBalance.totalValue),
-          balanceAmount: new BN(tokenBalance.balanceAmount),
-          supplyAmount: new BN(tokenBalance.supplyAmount),
-          pendingSupplyCurrency: new BN(tokenBalance.pendingSupplyCurrency),
-        }
-      }
-    )
   }
 
   async getProxies(user: string) {
