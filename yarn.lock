@@ -2425,15 +2425,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@centrifuge/axis-tooltip@npm:0.4.2-develop.6d6e183.148":
-  version: 0.4.2-develop.6d6e183.148
-  resolution: "@centrifuge/axis-tooltip@npm:0.4.2-develop.6d6e183.148"
+"@centrifuge/axis-tooltip@npm:0.4.2-develop.3ad09d7.144+3ad09d7":
+  version: 0.4.2-develop.3ad09d7.144
+  resolution: "@centrifuge/axis-tooltip@npm:0.4.2-develop.3ad09d7.144"
   peerDependencies:
     grommet: 2.7.x
     react: ">= 16.6.1"
     react-dom: ">= 16.6.1"
     styled-components: ">= 4.x"
-  checksum: 4788979abccf83ce98f61810aff526d13cc1e777f255cffec06b1150d28dcdea525d679c2f9958cb242990bbb2dcf00f2e7a5f5de7c8d51145ef10ab16a5226d
+  checksum: 31e3bb401ca73ca3ddf8f2f97bfd456279b437490c9c85e9759d034267d7a9a11519ac1c9c8e4b7293fbd45425b2eaec686e67eddfd325f55b5a9a85c830403e
   languageName: node
   linkType: hard
 
@@ -2763,7 +2763,7 @@ __metadata:
     "@centrifuge/axis-spinner": 0.4.2-develop.109
     "@centrifuge/axis-theme": 0.4.2-develop.145
     "@centrifuge/axis-token-input": 0.4.1-develop.c79e643.146+c79e643
-    "@centrifuge/axis-tooltip": 0.4.2-develop.6d6e183.148
+    "@centrifuge/axis-tooltip": 0.4.2-develop.3ad09d7.144+3ad09d7
     "@centrifuge/axis-utils": 0.4.2-develop.109
     "@centrifuge/onboarding-api": "workspace:*"
     "@centrifuge/tinlake-js": "workspace:*"
