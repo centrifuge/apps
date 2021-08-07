@@ -5,6 +5,7 @@ import * as React from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Pool } from '../../config'
+import { LoansState, SortableLoan } from '../../ducks/loans'
 import { PoolData, PoolState } from '../../ducks/pool'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { toPrecision } from '../../utils/toPrecision'
@@ -23,6 +24,15 @@ const parseRatio = (num: BN): number => {
 const AOMetrics: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
+  const loans = useSelector<any, LoansState>((state) => state.loans)
+
+  const totalOutstanding = loans?.loans
+    ? loans?.loans
+        .filter((loan) => loan.status && loan.status === 'ongoing')
+        .reduce((prev: BN, loan: SortableLoan) => {
+          return prev.add(loan.debt)
+        }, new BN(0))
+    : new BN(0)
 
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
@@ -46,39 +56,47 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
       pad="medium"
       style={{ zIndex: 3 }}
     >
-      <HeaderBox style={{ borderRight: 'none' }} margin={{ left: 'large' }}>
+      <HeaderBox margin={{ left: 'medium' }} style={{ borderRight: 'none' }}>
         <Heading level="4">
-          <TokenLogo src={`/static/currencies/${props.activePool.metadata.currencySymbol}.svg`} />
+          {addThousandsSeparators(toPrecision(baseToDisplay(totalOutstanding, 18), 0))}
+          <Unit>{props.activePool.metadata.currencySymbol}</Unit>
+        </Heading>
+        <Type>Total Outstanding Debt</Type>
+      </HeaderBox>
+      <HeaderBox>
+        <Heading level="4">
           {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || new BN(0), 18), 0))}
           <Unit>{props.activePool.metadata.currencySymbol}</Unit>
         </Heading>
-        <Type>Asset Value</Type>
+        <Type>Asset Value (NAV)</Type>
       </HeaderBox>
-      <HeaderBox style={{ borderRight: 'none' }}>
+      <HeaderBox style={{ borderRight: 'none' }} width="120px">
         <Heading level="4">
-          <TokenLogo src={`/static/currencies/${props.activePool.metadata.currencySymbol}.svg`} />
           {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || new BN(0), 18), 0))}
           <Unit>{props.activePool.metadata.currencySymbol}</Unit>
         </Heading>
         <Type>Reserve</Type>
-        <Type>Cash drag: {parseFloat(reserveRatio.toString()) / 100} %</Type>
+      </HeaderBox>
+      <HeaderBox width="120px">
+        <Heading level="4">
+          {parseFloat(reserveRatio.toString()) / 100}
+          <Unit>%</Unit>
+        </Heading>
+        <Type>Cash Drag</Type>
       </HeaderBox>
       <HeaderBox style={{ borderRight: 'none' }}>
         <Heading level="4">
-          <TokenLogo src={`/static/TIN_final.svg`} />
           {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}
           <Unit>%</Unit>
         </Heading>
         <Type>Current TIN Risk Buffer</Type>
-        <Type>Minimum: {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)} %</Type>
       </HeaderBox>
       <HeaderBox style={{ borderRight: 'none' }}>
         <Heading level="4">
-          <TokenLogo src={`/static/currencies/${props.activePool.metadata.currencySymbol}.svg`} />
-          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || new BN(0), 18), 0))}
-          <Unit>{props.activePool.metadata.currencySymbol}</Unit>
+          {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}
+          <Unit>%</Unit>
         </Heading>
-        <Type>Available for Originations</Type>
+        <Type>Minimum TIN Risk Buffer</Type>
       </HeaderBox>
     </Card>
   )

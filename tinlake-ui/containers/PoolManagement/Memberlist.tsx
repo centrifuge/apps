@@ -85,7 +85,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
       {pool && pool.data && (
         <Box direction="row" gap="medium">
           <Box
-            width="420px"
+            width="medium"
             pad="medium"
             elevation="small"
             round="xsmall"
@@ -128,7 +128,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
           <Box
-            width="420px"
+            width="medium"
             pad="medium"
             elevation="small"
             round="xsmall"

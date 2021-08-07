@@ -104,21 +104,6 @@ const LoanList: React.FC<Props> = (props: Props) => {
                 ),
               },
               {
-                header: `Interest Paid (${props.activePool?.metadata.currencySymbol || 'DAI'})`,
-                property: 'amountNum',
-                align: 'end',
-                render: (l: SortableLoan) =>
-                  l.status !== 'ongoing' ? (
-                    '-'
-                  ) : (
-                    <NumberDisplay
-                      suffix=""
-                      precision={0}
-                      value={baseToDisplay(l.repaysAggregatedAmount || new BN(0), 18)}
-                    />
-                  ),
-              },
-              {
                 header: <HeaderCell text={'Financing Fee'}></HeaderCell>,
                 property: 'interestRateNum',
                 align: 'end',
