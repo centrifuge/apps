@@ -4,15 +4,18 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Box, Button, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import { connect, useSelector } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
+import styled from 'styled-components'
 import Alert from '../../components/Alert'
 import { LoadingValue } from '../../components/LoadingValue'
 import { LoadPool, Pool } from '../../config'
-import { loadPool, PoolData, PoolState } from '../../ducks/pool'
+import { loadLoans, LoansState, SortableLoan } from '../../ducks/loans'
+import { EpochData, loadPool, PoolData, PoolState } from '../../ducks/pool'
 import { PoolsState } from '../../ducks/pools'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { Fixed27Base } from '../../utils/ratios'
+import { secondsToHms } from '../../utils/time'
 import { toPrecision } from '../../utils/toPrecision'
 
 interface Props extends TransactionProps {
@@ -24,6 +27,7 @@ interface Props extends TransactionProps {
 const FundingNeeds: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
+  const epochData = pool?.epoch as EpochData | undefined
 
   const pools = useSelector<any, PoolsState>((state) => state.pools)
   const poolListData = pools.data?.pools.find((p) => p.id === props.activePool.addresses.ROOT_CONTRACT)
@@ -129,11 +133,29 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
     }
   }
 
+  const dispatch = useDispatch()
+
   React.useEffect(() => {
     if (status === 'succeeded') {
       props.loadPool && props.loadPool(props.tinlake, props.activePool?.metadata.maker?.ilk)
     }
   }, [status])
+
+  React.useEffect(() => {
+    dispatch(loadLoans(props.tinlake))
+  }, [props.activePool])
+
+  const loans = useSelector<any, LoansState>((state) => state.loans)
+  const ongoingAssets = loans?.loans
+    ? loans?.loans.filter((loan) => loan.status && loan.status === 'ongoing')
+    : undefined
+  const maxSingleLoan = ongoingAssets
+    ? ongoingAssets
+        .filter((loan) => loan.maturityDate && loan.financingDate)
+        .reduce((currentMax: BN, loan: SortableLoan) => {
+          return loan.debt.gt(currentMax) ? loan.debt : currentMax
+        }, new BN(0))
+    : new BN(0)
 
   return (
     <Box direction="row" width="100%" gap="medium">
@@ -251,11 +273,26 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
                   style={{ alignItems: 'start', justifyContent: 'center' }}
                   pad={{ vertical: '6px' }}
                 >
-                  Non-Maker DROP holders' share
+                  Co-investors ratio
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                   <LoadingValue done={makerDropShare !== undefined}>
-                    {100 - parseFloat(makerDropShare || new BN(0).toString())} % &nbsp; &gt; &nbsp; 25%
+                    {100 - parseFloat(makerDropShare || new BN(0).toString())} % &nbsp; &ge; &nbsp; 25%
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell
+                  scope="row"
+                  style={{ alignItems: 'start', justifyContent: 'center' }}
+                  pad={{ vertical: '6px' }}
+                >
+                  Overcollateralization
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                  <LoadingValue done={makerDropShare !== undefined}>
+                    {parseFloat((makerOvercollateralization || new BN(0)).toString())} % &nbsp; &ge;{' '}
+                    {parseFloat((mat || new BN(0)).div(new BN(10).pow(new BN(25)))).toString()} %
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -266,11 +303,11 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
                   pad={{ vertical: '6px' }}
                   border={{ color: 'transparent' }}
                 >
-                  Overcollateralization
+                  Maximum single loan
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
-                  <LoadingValue done={makerDropShare !== undefined}>
-                    {parseFloat((makerOvercollateralization || new BN(0)).toString())} % &nbsp; &gt; 105%
+                  <LoadingValue done={maxSingleLoan !== undefined}>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(maxSingleLoan, 18 + 3), 0))}K DAI
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -383,10 +420,90 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
         </Box>
       )}
       <Box width="420px" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
+        <Table margin={{ bottom: 'medium' }}>
+          <TableBody>
+            <TableRow style={{ fontWeight: 'bold' }}>
+              <TableCell
+                scope="row"
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
+                border={{ color: 'transparent' }}
+              >
+                Available for Originations
+              </TableCell>
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
+                <LoadingValue done={poolData?.availableFunds !== undefined}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || new BN(0), 18), 0))} DAI
+                </LoadingValue>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell
+                scope="row"
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
+              >
+                <span>
+                  <InlineIcon src={`/static/plus.svg`} /> Investment Orders
+                </span>
+              </TableCell>
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                <LoadingValue done={poolData?.senior?.pendingInvestments !== undefined}>
+                  {addThousandsSeparators(
+                    toPrecision(
+                      baseToDisplay(
+                        (poolData?.senior?.pendingInvestments || new BN(0)).add(
+                          poolData?.junior?.pendingInvestments || new BN(0)
+                        ),
+                        18
+                      ),
+                      0
+                    )
+                  )}{' '}
+                  DAI
+                </LoadingValue>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell
+                scope="row"
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
+              >
+                <span>
+                  <InlineIcon src={`/static/min.svg`} /> Redemption Orders
+                </span>
+              </TableCell>
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                <LoadingValue done={poolData?.totalRedemptionsCurrency !== undefined}>
+                  {addThousandsSeparators(
+                    toPrecision(baseToDisplay(poolData?.totalRedemptionsCurrency || new BN(0), 18), 0)
+                  )}{' '}
+                  DAI
+                </LoadingValue>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell
+                scope="row"
+                style={{ alignItems: 'start', justifyContent: 'center' }}
+                pad={{ vertical: '6px' }}
+                border={{ color: 'transparent' }}
+              >
+                Epoch can be closed in
+              </TableCell>
+              <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
+                <LoadingValue done={epochData?.minimumEpochTimeLeft !== undefined}>
+                  {secondsToHms(epochData?.minimumEpochTimeLeft || 0)}
+                </LoadingValue>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
         {isMakerIntegrated && (
-          <Box margin={{ bottom: 'medium' }}>
+          <Box margin={{ top: '0', bottom: 'medium' }}>
             <TokenInput
-              label="Maker Capacity"
+              label="Locked Credit Line"
               token={props.activePool?.metadata.currencySymbol || 'DAI'}
               value={makerCapacity === undefined ? poolData?.maker?.creditline?.toString() || '0' : makerCapacity}
               onChange={onChangeMakerCapacity}
@@ -440,3 +557,12 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
 }
 
 export default connect((state) => state, { loadPool, createTransaction })(FundingNeeds)
+
+const InlineIcon = styled.img`
+  vertical-align: middle;
+  margin: 0 4px 0 0;
+  width: 16px;
+  height: 16px;
+  position: relative;
+  top: -2px;
+`
