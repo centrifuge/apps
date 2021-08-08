@@ -181,7 +181,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                     <LoadingValue done={reserveRatio !== undefined}>
-                      {parseFloat(reserveRatio.toString()) / 100} %
+                      {parseFloat(reserveRatio.toString()) / 100}%
                     </LoadingValue>
                   </TableCell>
                 </TableRow>

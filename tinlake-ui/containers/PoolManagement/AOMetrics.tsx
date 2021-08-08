@@ -1,13 +1,13 @@
-import { baseToDisplay } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Heading } from 'grommet'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Pool } from '../../config'
-import { LoansState, SortableLoan } from '../../ducks/loans'
 import { PoolData, PoolState } from '../../ducks/pool'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
+import { useTrancheYield } from '../../utils/hooks'
 import { toPrecision } from '../../utils/toPrecision'
 
 interface Props {
@@ -24,18 +24,9 @@ const parseRatio = (num: BN): number => {
 const AOMetrics: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
-  const loans = useSelector<any, LoansState>((state) => state.loans)
 
-  const totalOutstanding = loans?.loans
-    ? loans?.loans
-        .filter((loan) => loan.status && loan.status === 'ongoing')
-        .reduce((prev: BN, loan: SortableLoan) => {
-          return prev.add(loan.debt)
-        }, new BN(0))
-    : new BN(0)
-
-  const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
-  const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
+  const { dropYield, tinYield } = useTrancheYield()
+  const dropRate = poolData?.senior?.interestRate || undefined
 
   const reserveRatio =
     poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
@@ -51,52 +42,67 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
       round="xsmall"
       background="white"
       direction="row"
-      justify="between"
-      gap="medium"
+      justify="center"
       pad="medium"
       style={{ zIndex: 3 }}
     >
-      <HeaderBox margin={{ left: 'medium' }} style={{ borderRight: 'none' }}>
-        <Heading level="4">
-          {addThousandsSeparators(toPrecision(baseToDisplay(totalOutstanding, 18), 0))}
-          <Unit>{props.activePool.metadata.currencySymbol}</Unit>
-        </Heading>
-        <Type>Total Outstanding Debt</Type>
-      </HeaderBox>
       <HeaderBox>
         <Heading level="4">
-          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || new BN(0), 18), 0))}
+          <TokenLogo src={`/static/currencies/${props.activePool.metadata.currencySymbol}.svg`} />
+          {addThousandsSeparators(
+            toPrecision(
+              baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18),
+              0
+            )
+          )}
           <Unit>{props.activePool.metadata.currencySymbol}</Unit>
         </Heading>
-        <Type>Asset Value (NAV)</Type>
+        <Type>Pool Value</Type>
       </HeaderBox>
-      <HeaderBox style={{ borderRight: 'none' }} width="120px">
+      <HeaderBox style={tinYield ? { borderRight: 'none' } : undefined}>
+        <Heading level="4">
+          <TokenLogo src={`/static/DROP_final.svg`} />
+          {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
+            ? dropYield
+            : toPrecision(feeToInterestRate(dropRate || '0'), 2)}
+          <Unit>%</Unit>
+        </Heading>
+        {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) && (
+          <Box>
+            <Type>DROP APY (30 days)</Type>
+          </Box>
+        )}
+        {!(dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))) && (
+          <Box>
+            <Type>Fixed DROP rate (APR)</Type>
+          </Box>
+        )}
+      </HeaderBox>
+      {tinYield && (
+        <HeaderBox pad={{ right: 'large' }}>
+          <Heading level="4">
+            <TokenLogo src={`/static/TIN_final.svg`} />
+            {tinYield}
+            <Unit>%</Unit>
+          </Heading>
+          <Box>
+            <Type>TIN APY (3 months)</Type>
+          </Box>
+        </HeaderBox>
+      )}
+      <HeaderBox style={{ borderRight: 'none' }}>
         <Heading level="4">
           {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || new BN(0), 18), 0))}
           <Unit>{props.activePool.metadata.currencySymbol}</Unit>
         </Heading>
         <Type>Reserve</Type>
       </HeaderBox>
-      <HeaderBox width="120px">
+      <HeaderBox style={{ borderRight: 'none' }}>
         <Heading level="4">
           {parseFloat(reserveRatio.toString()) / 100}
           <Unit>%</Unit>
         </Heading>
         <Type>Cash Drag</Type>
-      </HeaderBox>
-      <HeaderBox style={{ borderRight: 'none' }}>
-        <Heading level="4">
-          {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}
-          <Unit>%</Unit>
-        </Heading>
-        <Type>Current TIN Risk Buffer</Type>
-      </HeaderBox>
-      <HeaderBox style={{ borderRight: 'none' }}>
-        <Heading level="4">
-          {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}
-          <Unit>%</Unit>
-        </Heading>
-        <Type>Minimum TIN Risk Buffer</Type>
       </HeaderBox>
     </Card>
   )
@@ -113,7 +119,7 @@ const Card = styled(Box)`
 const HeaderBox = styled(Box)<{ width?: string }>`
   text-align: center;
   border-right: 1px solid #dadada;
-  width: ${(props) => props.width || '200px'};
+  width: ${(props) => props.width || '260px'};
   flex-direction: column;
   justify-content: center;
   padding: 10px 20px 10px 0;
@@ -147,6 +153,14 @@ const Type = styled.div`
   color: #979797;
 `
 
+const Unit = styled.span`
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 28px;
+  margin-left: 4px;
+  color: #333;
+`
+
 const TokenLogo = styled.img`
   vertical-align: middle;
   margin: 0 8px 0 0;
@@ -154,12 +168,4 @@ const TokenLogo = styled.img`
   height: 20px;
   position: relative;
   top: -2px;
-`
-
-const Unit = styled.span`
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 28px;
-  margin-left: 4px;
-  color: #333;
 `
