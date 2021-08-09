@@ -2779,6 +2779,7 @@ __metadata:
     "@types/bn.js": 4.11.6
     "@types/jest": 24.9.1
     "@types/jsonp": ^0.2.0
+    "@types/lodash": ^4
     "@types/next": 9.0.0
     "@types/node-fetch": 2.5.7
     "@types/react": 16.9.34
@@ -2805,6 +2806,7 @@ __metadata:
     http-proxy-middleware: 1.0.5
     husky: 4.2.5
     jest: 26.6.3
+    lodash: ^4.17.21
     merkletreejs: ^0.2.12
     netlify-lambda: 2.0.1
     next: 9.5.5
@@ -6969,6 +6971,13 @@ __metadata:
     "@types/koa-compose": "*"
     "@types/node": "*"
   checksum: ba0ccaecc7132b6bdbf83da2f40456f935d04e2eb4270b2c69fc79eee5ab1dc06c9fa08525b6e4bebacc9432cbab918a00102a5f92f210a7c7e50c7b035fca78
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:^4":
+  version: 4.14.172
+  resolution: "@types/lodash@npm:4.14.172"
+  checksum: d4b9c66aa1775ca9105f95fdaf92b8c7ee646fcb75fa8c0617020456470b140f9204335a66e152f269f9cd531634ac3d0caa3f85ce3acdad9bc6951aa6e89aae
   languageName: node
   linkType: hard
 
