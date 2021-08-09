@@ -3,7 +3,7 @@ import BN from 'bn.js'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { Area, AreaChart, Tooltip } from 'recharts'
 import {
   ChartTooltip,
   ChartTooltipColor,
@@ -11,6 +11,7 @@ import {
   ChartTooltipLine,
   ChartTooltipTitle,
   ChartTooltipValue,
+  StyledResponsiveContainer,
 } from '../../../components/Chart/styles'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Pool } from '../../../config'
@@ -258,7 +259,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
             </Heading>
           </Box>
           {assetDataWithToday.length > 0 && (
-            <ResponsiveContainer>
+            <StyledResponsiveContainer>
               <AreaChart data={assetDataWithToday} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
                 <defs>
                   <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
@@ -293,7 +294,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   name="Reserve"
                 />
               </AreaChart>
-            </ResponsiveContainer>
+            </StyledResponsiveContainer>
           )}
         </Box>
       </Box>

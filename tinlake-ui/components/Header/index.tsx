@@ -1,4 +1,3 @@
-import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { Box, Button, Layer } from 'grommet'
 import { Close as CloseIcon, Menu as MenuIcon } from 'grommet-icons'
@@ -19,6 +18,7 @@ import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
 import { useCFGRewards } from '../../utils/useCFGRewards'
 import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
+import { Tooltip } from '../Tooltip'
 import { Web3Wallet } from '../Web3Wallet'
 
 const { isDemo } = config
@@ -159,11 +159,11 @@ const Header: React.FC<Props> = (props: Props) => {
       <AccountWrapper align="center" direction="row">
         <Holdings>
           <Box pad={{ left: '14px', right: '14px' }}>
-            <AxisTooltip title="View your rewards">{rewardsLink}</AxisTooltip>
+            <Tooltip title="View your rewards">{rewardsLink}</Tooltip>
           </Box>
           {address && (
             <Box pad={{ left: '14px', right: '14px' }}>
-              <AxisTooltip title="View your investment portfolio">{portfolioLink}</AxisTooltip>
+              <Tooltip title="View your investment portfolio">{portfolioLink}</Tooltip>
             </Box>
           )}
         </Holdings>

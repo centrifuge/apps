@@ -1,14 +1,14 @@
-import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
-import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts'
+import { Area, AreaChart, ResponsiveContainer, Tooltip as ChartTooltip, YAxis } from 'recharts'
 import { PoolsDailyData, PoolsData } from '../../ducks/pools'
 import { dateToYMD } from '../../utils/date'
 import { useCFGYield } from '../../utils/hooks'
 import NumberDisplay from '../NumberDisplay'
+import { Tooltip } from '../Tooltip'
 import { Cont, Label, TokenLogo, Unit, Value } from './styles'
 
 interface Props {
@@ -40,8 +40,8 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         elevation="small"
         round="xsmall"
         background="white"
-        margin={{ horizontal: '16px', top: 'medium' }}
-        style={{ flex: '1 1 300px', maxWidth: '430px' }}
+        margin={{ horizontal: '16px' }}
+        style={{ flex: '1 1 300px', maxWidth: '440px' }}
         direction="row"
         pad="medium"
       >
@@ -67,7 +67,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
                   <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <Tooltip content={<></>} />
+              <ChartTooltip content={<></>} />
               <YAxis type="number" domain={[0, maxPoolValue]} hide />
               {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMD(val)} /> */}
               <Area
@@ -105,26 +105,29 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         elevation="small"
         round="xsmall"
         background="white"
-        margin={{ horizontal: '16px', top: 'medium' }}
-        style={{ flex: '1 1 300px', maxWidth: '430px' }}
+        margin={{ horizontal: '16px' }}
+        style={{ flex: '1 1 300px', maxWidth: '440px' }}
         direction="row"
         pad="medium"
         justify="center"
       >
         <Box>
-          <AxisTooltip title="Tinlake investments earns daily rewards in Centrifuge's native token (CFG). The CFG reward rate is an annualized representation of these rewards based on the current CFG token price. Rewards are independent from the pool's issuer and not guaranteed - please see Investment disclaimer for more details.">
-            <>
-              <Cont style={{ marginTop: '8px' }}>
-                <TokenLogo src={`/static/cfg-white.svg`} />
-                <Value>
-                  <NumberDisplay value={cfgYield} precision={2} />
-                </Value>{' '}
-                <Unit>%</Unit>
-              </Cont>
+          <>
+            <Cont style={{ marginTop: '8px' }}>
+              <TokenLogo src={`/static/cfg-white.svg`} />
+              <Value>
+                <NumberDisplay value={cfgYield} precision={2} />
+              </Value>{' '}
+              <Unit>%</Unit>
+            </Cont>
 
+            <Tooltip
+              title="Tinlake investments earns daily rewards in Centrifuge's native token (CFG). The CFG reward rate is an annualized representation of these rewards based on the current CFG token price. Rewards are independent from the pool's issuer and not guaranteed - please see Investment disclaimer for more details."
+              underline
+            >
               <Label>Reward Rate (APR)</Label>
-            </>
-          </AxisTooltip>
+            </Tooltip>
+          </>
         </Box>
         <Box margin={{ left: 'large' }} justify="center">
           <Button label="Claim CFG" primary onClick={goToRewards} />

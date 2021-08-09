@@ -104,12 +104,14 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           round="xsmall"
           margin={{ bottom: 'medium' }}
           background="white"
-          style={{ flex: '1 1 40%' }}
+          style={{ flex: '1 1 35%' }}
         >
           <Box>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                <Tooltip id="assetValue">Asset Value</Tooltip>
+                <Tooltip id="assetValue" underline>
+                  Asset Value
+                </Tooltip>
               </Heading>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
                 <LoadingValue done={poolData?.netAssetValue !== undefined}>
@@ -138,7 +140,9 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 </TableRow>
                 <TableRow>
                   <TableCell scope="row">
-                    <Tooltip id="financingFee">Average Financing Fee</Tooltip>
+                    <Tooltip id="financingFee" underline>
+                      Average Financing Fee
+                    </Tooltip>
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }}>
                     <LoadingValue done={avgInterestRate !== undefined}>
@@ -163,7 +167,9 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                <Tooltip id="poolValue">Reserve</Tooltip>
+                <Tooltip id="reserve" underline>
+                  Reserve
+                </Tooltip>
               </Heading>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
                 <LoadingValue done={poolData?.reserve !== undefined}>
@@ -177,7 +183,9 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               <TableBody>
                 <TableRow>
                   <TableCell scope="row" border={{ color: 'transparent' }}>
-                    <Tooltip id="reserveRatio">Reserve Ratio</Tooltip>
+                    <Tooltip id="reserveRatio" underline>
+                      Reserve Ratio
+                    </Tooltip>
                   </TableCell>
                   <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
                     <LoadingValue done={reserveRatio !== undefined}>
@@ -203,7 +211,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               <Box direction="column">
                 <Heading level="5" margin={{ bottom: 'xsmall', top: '0' }}>
                   <TokenLogo src={`/static/DROP_final.svg`} />
-                  <Tooltip id="dropValue">DROP Tranche Value</Tooltip>
+                  DROP Tranche Value
                 </Heading>
                 <TrancheNote>Senior tranche</TrancheNote>
                 <TrancheNote>Lower risk, stable return</TrancheNote>
@@ -242,13 +250,14 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
           <Box margin={{ top: 'small', bottom: 'medium' }} style={{ textAlign: 'center' }}>
             <div>
-              <Tooltip id="tinRiskBuffer">
-                DROP is currently protected by a<br />
-                <span style={{ fontWeight: 'bold' }}>
-                  {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}% TIN buffer
-                </span>{' '}
-                (min: {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}%)
-              </Tooltip>
+              DROP is currently protected by a<br />
+              <span style={{ fontWeight: 'bold' }}>
+                {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}%{' '}
+                <Tooltip id="tinRiskBuffer" underline>
+                  TIN buffer
+                </Tooltip>
+              </span>{' '}
+              (min: {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}%)
             </div>
           </Box>
 
@@ -261,7 +270,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               <Box direction="column">
                 <Heading level="5" margin={{ bottom: 'xsmall', top: '0' }}>
                   <TokenLogo src={`/static/TIN_final.svg`} />
-                  <Tooltip id="tinValue">TIN Tranche Value</Tooltip>
+                  TIN Tranche Value
                 </Heading>
                 <TrancheNote>Junior tranche</TrancheNote>
                 <TrancheNote>Higher risk, variable return</TrancheNote>

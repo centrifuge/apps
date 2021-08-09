@@ -1,4 +1,3 @@
-import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
@@ -9,6 +8,7 @@ import styled from 'styled-components'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { PoolLink } from '../../../components/PoolLink'
+import { Tooltip } from '../../../components/Tooltip'
 import config, { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadPool, PoolState } from '../../../ducks/pool'
@@ -315,7 +315,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT))) && (
           <>
             <Info>
-              <AxisTooltip title="DROP tokens earn yield on the outstanding assets at the fixed DROP rate (APR). The current yield may deviate due to compounding effects or unused liquidity in the pool reserve. The current 30d DROP APY is the annualized return of the pool's DROP token over the last 30 days.">
+              <Tooltip title="DROP tokens earn yield on the outstanding assets at the fixed DROP rate (APR). The current yield may deviate due to compounding effects or unused liquidity in the pool reserve. The current 30d DROP APY is the annualized return of the pool's DROP token over the last 30 days.">
                 {dropYield && !(pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero()) && (
                   <>
                     Current DROP yield (30d APY): <b>{dropYield}%</b>
@@ -326,7 +326,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 <b>{toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2)}%</b>
                 <br />
                 Minimum investment amount: <b>5000 {props.pool?.metadata.currencySymbol || 'DAI'}</b>
-              </AxisTooltip>
+              </Tooltip>
             </Info>
             <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
               <PoolLink href={'/onboarding'}>
