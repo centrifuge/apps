@@ -210,9 +210,9 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                           .mul(poolData?.junior.tokenPrice)
                           ?.sub(poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.minJuniorRatio))
                           .sub(
-                            poolData?.netAssetValue
-                              .add(poolData?.reserve)
-                              .mul((poolData?.maker?.mat || Fixed27Base).sub(Fixed27Base))
+                            (poolData?.maker?.creditline || new BN(0)).mul(
+                              (poolData?.maker?.mat || Fixed27Base).sub(Fixed27Base)
+                            )
                           ) || new BN(0),
                         27 + 18 + 6
                       ),
