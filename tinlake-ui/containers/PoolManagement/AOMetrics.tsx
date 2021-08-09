@@ -5,6 +5,7 @@ import * as React from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Pool } from '../../config'
+import { LoansState, SortableLoan } from '../../ducks/loans'
 import { PoolData, PoolState } from '../../ducks/pool'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { useTrancheYield } from '../../utils/hooks'
@@ -30,6 +31,27 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
           .div(poolData.reserve.add(poolData.netAssetValue))
           .div(new BN('10').pow(new BN('14')))
       : new BN(0)
+
+  const loans = useSelector<any, LoansState>((state) => state.loans)
+  const ongoingAssets = loans?.loans
+    ? loans?.loans.filter((loan) => loan.status && loan.status === 'ongoing')
+    : undefined
+  const outstandingDebt = ongoingAssets
+    ? ongoingAssets
+        .filter((loan) => loan.maturityDate && loan.financingDate)
+        .reduce((current: BN, loan: SortableLoan) => {
+          return current.add(loan.debt)
+        }, new BN(0))
+    : new BN(0)
+  const repaymentsDue = ongoingAssets
+    ? ongoingAssets
+        .filter((loan) => loan.maturityDate && loan.financingDate)
+        .reduce((current: BN, loan: SortableLoan) => {
+          return loan.maturityDate && loan.maturityDate <= new Date().setDate(new Date().getDate() + 7) / 1000
+            ? current.add(loan.debt)
+            : current
+        }, new BN(0))
+    : new BN(0)
 
   return (
     <Card
@@ -87,17 +109,17 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
       )}
       <HeaderBox style={{ borderRight: 'none' }}>
         <Heading level="4">
-          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || new BN(0), 18), 0))}
+          {addThousandsSeparators(toPrecision(baseToDisplay(outstandingDebt, 18), 0))}
           <Unit>{props.activePool.metadata.currencySymbol}</Unit>
         </Heading>
-        <Type>Reserve</Type>
+        <Type>Outstanding Debt</Type>
       </HeaderBox>
       <HeaderBox style={{ borderRight: 'none' }}>
         <Heading level="4">
-          {parseFloat(reserveRatio.toString()) / 100}
-          <Unit>%</Unit>
+          {addThousandsSeparators(toPrecision(baseToDisplay(repaymentsDue, 18), 0))}
+          <Unit>{props.activePool.metadata.currencySymbol}</Unit>
         </Heading>
-        <Type>Cash Drag</Type>
+        <Type>Repayments Due (7 days)</Type>
       </HeaderBox>
     </Card>
   )

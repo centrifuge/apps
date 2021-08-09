@@ -3,6 +3,7 @@ import BN from 'bn.js'
 import { Box, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import styled from 'styled-components'
 import { LoadingValue } from '../../components/LoadingValue'
 import { Pool } from '../../config'
 import { loadLoans, LoansState, SortableLoan } from '../../ducks/loans'
@@ -15,6 +16,8 @@ interface Props {
   activePool: Pool
   tinlake: ITinlake
 }
+
+const e18 = new BN(10).pow(new BN(18))
 
 const parseRatio = (num: BN): number => {
   const base = new BN(10).pow(new BN(20))
@@ -72,6 +75,14 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
 
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
+
+  const reserveRatio =
+    poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
+      ? poolData.reserve
+          .mul(e18)
+          .div(poolData.reserve.add(poolData.netAssetValue))
+          .div(new BN('10').pow(new BN('14')))
+      : new BN(0)
 
   return (
     <Box direction="row" width="100%" gap="medium" margin={{ top: 'medium' }}>
@@ -251,7 +262,12 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                   <LoadingValue done={makerDropShare !== undefined}>
-                    {100 - parseFloat(makerDropShare || new BN(0).toString())}% &nbsp; &ge; &nbsp; 25%
+                    {100 - parseFloat(makerDropShare || new BN(0).toString())}%
+                  </LoadingValue>
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                  <LoadingValue done={makerDropShare !== undefined}>
+                    <SubNote>Min: 25%</SubNote>
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -265,8 +281,12 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                   <LoadingValue done={makerOvercollateralization !== undefined}>
-                    {parseFloat((makerOvercollateralization || new BN(0)).toString())}% &nbsp; &ge;{' '}
-                    {parseFloat((mat || new BN(0)).div(new BN(10).pow(new BN(25)))).toString()}%
+                    {parseFloat((makerOvercollateralization || new BN(0)).toString())}%
+                  </LoadingValue>
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                  <LoadingValue done={makerOvercollateralization !== undefined}>
+                    <SubNote>Min: {parseFloat((mat || new BN(0)).div(new BN(10).pow(new BN(25)))).toString()}%</SubNote>
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -289,8 +309,52 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
           </Table>
         </Box>
       )}
+
+      {!isMakerIntegrated && (
+        <Box basis="1/2" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
+          <Table margin={{ top: '0', bottom: '0' }}>
+            <TableBody>
+              <TableRow style={{ fontWeight: 'bold' }}>
+                <TableCell
+                  scope="row"
+                  style={{ alignItems: 'start', justifyContent: 'center' }}
+                  pad={{ vertical: '6px' }}
+                  border={{ color: 'transparent' }}
+                >
+                  Reserve
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || new BN(0), 18), 0))} DAI
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell
+                  scope="row"
+                  style={{ alignItems: 'start', justifyContent: 'center' }}
+                  pad={{ vertical: '6px' }}
+                  border={{ color: 'transparent' }}
+                >
+                  Reserve ratio
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
+                  <LoadingValue done={reserveRatio !== undefined}>
+                    {parseFloat(reserveRatio.toString()) / 100}%
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </Box>
+      )}
     </Box>
   )
 }
 
 export default PoolStatus
+
+const SubNote = styled.span`
+  font-weight: 500;
+  font-size: 12px;
+  margin-left: 6px;
+  color: #979797;
+`
