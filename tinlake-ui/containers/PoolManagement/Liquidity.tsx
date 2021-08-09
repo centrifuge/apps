@@ -78,10 +78,8 @@ const Liquidity: React.FC<Props> = (props: Props) => {
 
   const save = async () => {
     if (changedExternalCapacity && externalCapacity) {
-      const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [
-        props.tinlake,
-        externalCapacity.toString(),
-      ])
+      const maxReserve = new BN(externalCapacity).add(poolData?.maker?.remainingCredit || new BN(0)).toString()
+      const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [props.tinlake, maxReserve])
       setTxId(txId)
     }
 
