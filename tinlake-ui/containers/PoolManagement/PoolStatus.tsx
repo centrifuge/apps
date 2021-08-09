@@ -32,8 +32,6 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
     props.activePool.addresses.CLERK !== undefined && props.activePool.metadata.maker?.ilk !== ''
 
   // TODO: refactor
-  const mat = poolData?.maker?.mat
-
   const makerDropCollateralValue =
     isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
       ? poolData?.maker?.dropBalance.mul(poolData.senior!.tokenPrice).div(new BN(10).pow(new BN(27)))
