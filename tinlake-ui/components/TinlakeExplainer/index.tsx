@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import InvestmentDisclaimer from '../Footer/InvestmentDisclaimer'
-import { Container, Primer, Row, Text } from './styles'
+import { Primer, Row, Text } from './styles'
 
 const LearnMore = styled.span`
   text-decoration: underline;
@@ -20,7 +20,7 @@ const TinlakeExplainer: React.FC = () => {
   const [open, setOpen] = React.useState(false)
 
   return (
-    <Container>
+    <div>
       <Row onClick={() => setOpen(!open)} role="button">
         <Primer>
           Tinlake is an open market place of real-world asset pools. Investments earn rewards in CFG token.{' '}
@@ -48,7 +48,7 @@ const TinlakeExplainer: React.FC = () => {
       )}
 
       <InvestmentDisclaimer isOpen={modalIsOpen} onClose={closeModal} />
-    </Container>
+    </div>
   )
 }
 

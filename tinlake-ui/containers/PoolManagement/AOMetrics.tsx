@@ -15,22 +15,12 @@ interface Props {
   activePool: Pool
 }
 
-const e18 = new BN(10).pow(new BN(18))
-
 const AOMetrics: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
 
   const { dropYield, tinYield } = useTrancheYield()
   const dropRate = poolData?.senior?.interestRate || undefined
-
-  const reserveRatio =
-    poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
-      ? poolData.reserve
-          .mul(e18)
-          .div(poolData.reserve.add(poolData.netAssetValue))
-          .div(new BN('10').pow(new BN('14')))
-      : new BN(0)
 
   const loans = useSelector<any, LoansState>((state) => state.loans)
   const ongoingAssets = loans?.loans

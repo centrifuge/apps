@@ -1,4 +1,10 @@
+import { ResponsiveContainer } from 'recharts'
 import styled from 'styled-components'
+
+export const StyledResponsiveContainer = styled(ResponsiveContainer)`
+  width: calc(100% + 8px) !important;
+  margin-left: -4px;
+`
 export const ChartTooltip = styled.div`
   padding: 12px 16px;
   font-size: 12px;

@@ -1,5 +1,4 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
-import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button, Heading } from 'grommet'
@@ -24,6 +23,7 @@ import {
   Unit,
 } from '../../components/PoolList/styles'
 import { Cont, Label as MetricLabel, TokenLogo, Value } from '../../components/PoolsMetrics/styles'
+import { Tooltip } from '../../components/Tooltip'
 import { IpfsPools, Pool } from '../../config'
 import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
 import { loadPortfolio, PortfolioState, TokenBalance } from '../../ducks/portfolio'
@@ -39,13 +39,11 @@ const Portfolio: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
   const pools = useSelector<any, PoolsState>((state) => state.pools)
   const portfolio = useSelector<any, PortfolioState>((state) => state.portfolio)
-
   const connectedAddress = useSelector<any, string | null>((state) => state.auth.address)
   const address = useQueryDebugEthAddress() || connectedAddress
 
   React.useEffect(() => {
     dispatch(loadPools(props.ipfsPools))
-    if (address) dispatch(loadPortfolio(address, props.ipfsPools))
   }, [])
 
   React.useEffect(() => {
@@ -55,8 +53,8 @@ const Portfolio: React.FC<Props> = (props: Props) => {
   const getPool = (tokenBalance: TokenBalance) => {
     const ipfsPool = props.ipfsPools.active.find((pool: Pool) => {
       return (
-        pool.addresses.JUNIOR_TOKEN.toLowerCase() === tokenBalance.token.id.toLowerCase() ||
-        pool.addresses.SENIOR_TOKEN.toLowerCase() === tokenBalance.token.id.toLowerCase()
+        pool.addresses.JUNIOR_TOKEN.toLowerCase() === tokenBalance.id.toLowerCase() ||
+        pool.addresses.SENIOR_TOKEN.toLowerCase() === tokenBalance.id.toLowerCase()
       )
     })
 
@@ -81,12 +79,12 @@ const Portfolio: React.FC<Props> = (props: Props) => {
   }
   const totalDropValue =
     portfolio.data?.reduce((prev, tokenBalance) => {
-      return tokenBalance.token.symbol.substr(-3) === 'DRP' ? prev.add(tokenBalance.totalValue) : prev
+      return tokenBalance.symbol.substr(-3) === 'DRP' ? prev.add(tokenBalance.value) : prev
     }, new BN(0)) || new BN(0)
 
   const totalTinValue =
     portfolio.data?.reduce((prev, tokenBalance) => {
-      return tokenBalance.token.symbol.substr(-3) === 'TIN' ? prev.add(tokenBalance.totalValue) : prev
+      return tokenBalance.symbol.substr(-3) === 'TIN' ? prev.add(tokenBalance.value) : prev
     }, new BN(0)) || new BN(0)
 
   return (
@@ -151,7 +149,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
         </Box>
       </Box>
 
-      {portfolio.data?.filter((tokenBalance) => !tokenBalance.balanceAmount.isZero()).length > 0 && (
+      {portfolio.data?.filter((tokenBalance) => !tokenBalance.balance.isZero()).length > 0 ? (
         <>
           <Header>
             <Desc>
@@ -162,7 +160,9 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             </HeaderCol>
             <HeaderCol>
               <HeaderTitle>
-                <AxisTooltip title="Token prices for this overview are updated daily">Current Price</AxisTooltip>
+                <Tooltip underline title="Token prices for this overview are updated daily">
+                  Current Price
+                </Tooltip>
               </HeaderTitle>
             </HeaderCol>
             <HeaderCol>
@@ -170,20 +170,20 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             </HeaderCol>
           </Header>
           {portfolio.data
-            ?.filter((tokenBalance) => !tokenBalance.balanceAmount.isZero())
-            .sort((a, b) => parseFloat(b.totalValue.sub(a.totalValue).toString()))
+            ?.filter((tokenBalance) => !tokenBalance.balance.isZero())
+            .sort((a, b) => parseFloat(b.value.sub(a.value).toString()))
             .map((tokenBalance) => (
-              <PoolRow key={tokenBalance.token.id} onClick={() => clickToken(tokenBalance)}>
+              <PoolRow key={tokenBalance.id} onClick={() => clickToken(tokenBalance)}>
                 <Icon
                   src={
                     getPool(tokenBalance)?.pool.metadata.media![
-                      tokenBalance.token.symbol.substr(-3) === 'DRP' ? 'drop' : 'tin'
+                      tokenBalance.symbol.substr(-3) === 'DRP' ? 'drop' : 'tin'
                     ]
                   }
                 />
                 <Desc>
                   <Name>{getPool(tokenBalance)?.pool.metadata.name}</Name>
-                  <Type>{tokenBalance.token.symbol}</Type>
+                  <Type>{tokenBalance.symbol}</Type>
                 </Desc>
                 <DataCol>
                   <NumberDisplay
@@ -197,7 +197,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                         </>
                       )
                     }
-                    value={baseToDisplay(tokenBalance.balanceAmount, 18)}
+                    value={baseToDisplay(tokenBalance.balance, 18)}
                   />
                 </DataCol>
 
@@ -230,7 +230,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
                         </>
                       )
                     }
-                    value={baseToDisplay(tokenBalance.totalValue, 18)}
+                    value={baseToDisplay(tokenBalance.value, 18)}
                   />
                 </DataCol>
               </PoolRow>
@@ -242,8 +242,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             </Link>
           </Box>
         </>
-      )}
-      {portfolio.data?.filter((tokenBalance) => !tokenBalance.balanceAmount.isZero()).length === 0 && (
+      ) : (
         <EmptyParagraph>
           You do not have any investments.
           <br />
