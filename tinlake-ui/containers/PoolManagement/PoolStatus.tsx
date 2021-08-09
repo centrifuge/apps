@@ -233,9 +233,11 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                       ) -
                         (minJuniorRatio || 0) -
                         parseRatio(
-                          (poolData?.maker?.creditline.mul(poolData?.maker?.mat.sub(Fixed27Base)) || new BN(0)).div(
-                            poolData?.netAssetValue.add(poolData?.reserve) || new BN(0)
-                          )
+                          (
+                            (poolData?.maker?.creditline || new BN(0)).mul(
+                              (poolData?.maker?.mat || Fixed27Base).sub(Fixed27Base)
+                            ) || new BN(0)
+                          ).div(poolData?.netAssetValue.add(poolData?.reserve) || new BN(0))
                         )) *
                         10000
                     ) / 100
