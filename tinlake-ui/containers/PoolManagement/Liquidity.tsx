@@ -4,12 +4,11 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Box, Button, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import { connect, useDispatch, useSelector } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import Alert from '../../components/Alert'
 import { LoadingValue } from '../../components/LoadingValue'
 import { LoadPool, Pool } from '../../config'
-import { loadLoans, LoansState, SortableLoan } from '../../ducks/loans'
 import { loadPool, PoolData, PoolState } from '../../ducks/pool'
 import { PoolsState } from '../../ducks/pools'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
@@ -23,7 +22,7 @@ interface Props extends TransactionProps {
   loadPool?: LoadPool
 }
 
-const FundingNeeds: React.FC<Props> = (props: Props) => {
+const Liquidity: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
 
@@ -71,27 +70,6 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
 
   const maxCreditline = (poolData?.maker?.creditline || new BN(0)).add(maxRaise)
 
-  const makerDropCollateralValue =
-    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
-      ? poolData?.maker?.dropBalance.mul(poolData.senior!.tokenPrice).div(new BN(10).pow(new BN(27)))
-      : undefined
-
-  const makerOvercollateralization =
-    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
-      ? makerDropCollateralValue
-          .mul(new BN(10).pow(new BN(18)))
-          .div(poolData?.maker.debt)
-          .div(new BN(10).pow(new BN(16)))
-      : new BN(0)
-
-  const makerDropShare =
-    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
-      ? poolData?.maker?.dropBalance
-          .mul(new BN(10).pow(new BN(18)))
-          .div(poolData?.senior?.totalSupply)
-          .div(new BN(10).pow(new BN(16)))
-      : undefined
-
   const changedExternalCapacity = externalCapacity && externalCapacity !== (poolData?.reserve || new BN(0)).toString()
   const changedMakerCapacity = makerCapacity && mat && makerCapacity !== poolData?.maker?.creditline?.toString()
 
@@ -131,29 +109,11 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
     }
   }
 
-  const dispatch = useDispatch()
-
   React.useEffect(() => {
     if (status === 'succeeded') {
       props.loadPool && props.loadPool(props.tinlake, props.activePool?.metadata.maker?.ilk)
     }
   }, [status])
-
-  React.useEffect(() => {
-    dispatch(loadLoans(props.tinlake))
-  }, [props.activePool])
-
-  const loans = useSelector<any, LoansState>((state) => state.loans)
-  const ongoingAssets = loans?.loans
-    ? loans?.loans.filter((loan) => loan.status && loan.status === 'ongoing')
-    : undefined
-  const maxSingleLoan = ongoingAssets
-    ? ongoingAssets
-        .filter((loan) => loan.maturityDate && loan.financingDate)
-        .reduce((currentMax: BN, loan: SortableLoan) => {
-          return loan.debt.gt(currentMax) ? loan.debt : currentMax
-        }, new BN(0))
-    : new BN(0)
 
   return (
     <Box direction="row" width="100%" gap="medium">
@@ -402,7 +362,7 @@ const FundingNeeds: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadPool, createTransaction })(FundingNeeds)
+export default connect((state) => state, { loadPool, createTransaction })(Liquidity)
 
 const InlineIcon = styled.img`
   vertical-align: middle;

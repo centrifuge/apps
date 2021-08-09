@@ -16,11 +16,6 @@ interface Props {
 
 const e18 = new BN(10).pow(new BN(18))
 
-const parseRatio = (num: BN): number => {
-  const base = new BN(10).pow(new BN(20))
-  return num.div(base).toNumber() / 10 ** 7
-}
-
 const AOMetrics: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined

@@ -8,7 +8,7 @@ import { AuthState } from '../../ducks/auth'
 import { loadPool, PoolData, PoolState } from '../../ducks/pool'
 import EpochOverview from '../Investment/View/EpochOverview'
 import AOMetrics from './AOMetrics'
-import FundingNeeds from './FundingNeeds'
+import Liquidity from './Liquidity'
 import Memberlist from './Memberlist'
 import Parameters from './Parameters'
 import PoolStatus from './PoolStatus'
@@ -43,7 +43,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
           <Heading level="4" margin={{ top: 'medium' }}>
             Liquidity Management
           </Heading>
-          <FundingNeeds activePool={props.activePool} tinlake={props.tinlake} />
+          <Liquidity activePool={props.activePool} tinlake={props.tinlake} />
 
           <EpochOverview tinlake={props.tinlake} activePool={props.activePool} />
 
