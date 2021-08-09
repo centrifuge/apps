@@ -336,6 +336,11 @@ export function loadPool(
           },
           {
             target: tinlake.contractAddresses.CLERK,
+            call: ['matBuffer()(uint)'],
+            returns: [[`maker.matBuffer`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.CLERK,
             call: ['mat()(uint)'],
             returns: [[`maker.mat`, toBN]],
           },

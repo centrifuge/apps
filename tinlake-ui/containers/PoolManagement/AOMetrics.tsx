@@ -53,7 +53,7 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
       pad="medium"
       style={{ zIndex: 3 }}
     >
-      <HeaderBox>
+      <HeaderBox style={{ borderRight: 'none' }}>
         <Heading level="4">
           <TokenLogo src={`/static/currencies/${props.activePool.metadata.currencySymbol}.svg`} />
           {addThousandsSeparators(
@@ -65,6 +65,14 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
           <Unit>{props.activePool.metadata.currencySymbol}</Unit>
         </Heading>
         <Type>Pool Value</Type>
+      </HeaderBox>
+      <HeaderBox>
+        <Heading level="4">
+          <TokenLogo src={`/static/currencies/${props.activePool.metadata.currencySymbol}.svg`} />
+          {addThousandsSeparators(toPrecision(baseToDisplay(outstandingDebt, 18), 0))}
+          <Unit>{props.activePool.metadata.currencySymbol}</Unit>
+        </Heading>
+        <Type>Outstanding Debt</Type>
       </HeaderBox>
       <HeaderBox style={tinYield ? { borderRight: 'none' } : undefined}>
         <Heading level="4">
@@ -99,13 +107,7 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
       )}
       <HeaderBox style={{ borderRight: 'none' }}>
         <Heading level="4">
-          {addThousandsSeparators(toPrecision(baseToDisplay(outstandingDebt, 18), 0))}
-          <Unit>{props.activePool.metadata.currencySymbol}</Unit>
-        </Heading>
-        <Type>Outstanding Debt</Type>
-      </HeaderBox>
-      <HeaderBox style={{ borderRight: 'none' }}>
-        <Heading level="4">
+          <TokenLogo src={`/static/currencies/${props.activePool.metadata.currencySymbol}.svg`} />
           {addThousandsSeparators(toPrecision(baseToDisplay(repaymentsDue, 18), 0))}
           <Unit>{props.activePool.metadata.currencySymbol}</Unit>
         </Heading>
@@ -129,7 +131,7 @@ const HeaderBox = styled(Box)<{ width?: string }>`
   width: ${(props) => props.width || '260px'};
   flex-direction: column;
   justify-content: center;
-  padding: 10px 20px 10px 0;
+  padding: 10px 0 10px 0;
   height: 80px;
 
   h3,

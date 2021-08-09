@@ -74,7 +74,6 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
     : new BN(0)
 
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
-  const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
   const reserveRatio =
     poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
@@ -109,11 +108,23 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                       1
                     )
                   )}
-                  M DAI
+                  M {props.activePool?.metadata.currencySymbol || 'DAI'}
                 </LoadingValue>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
-                {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}%
+                {toPrecision(
+                  (
+                    Math.round(
+                      parseRatio(
+                        (poolData?.junior.totalSupply.mul(poolData?.junior.tokenPrice) || new BN(0)).div(
+                          poolData?.netAssetValue.add(poolData?.reserve) || new BN(0)
+                        )
+                      ) * 10000
+                    ) / 100
+                  ).toString(),
+                  2
+                )}
+                %
               </TableCell>
             </TableRow>
             <TableRow>
@@ -122,7 +133,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                 style={{ alignItems: 'start', justifyContent: 'center' }}
                 pad={{ vertical: '6px' }}
               >
-                Locked for Min TIN Risk Buffer
+                Min TIN Risk Buffer
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                 <LoadingValue done={poolData?.netAssetValue !== undefined}>
@@ -135,7 +146,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                       1
                     )
                   )}
-                  M DAI
+                  M {props.activePool?.metadata.currencySymbol || 'DAI'}
                 </LoadingValue>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
@@ -150,7 +161,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                   style={{ alignItems: 'start', justifyContent: 'center' }}
                   pad={{ vertical: '6px' }}
                 >
-                  Locked for Maker Overcollateralization
+                  Staked for Maker Overcollateralization
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                   <LoadingValue done={poolData?.maker?.mat !== undefined}>
@@ -163,7 +174,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                         1
                       )
                     )}
-                    M DAI
+                    M {props.activePool?.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
@@ -210,26 +221,30 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                       1
                     )
                   )}
-                  M DAI
+                  M {props.activePool?.metadata.currencySymbol || 'DAI'}
                 </LoadingValue>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
-                {/* {toPrecision(
+                {toPrecision(
                   (
                     Math.round(
-                      (currentJuniorRatio && minJuniorRatio
-                        ? currentJuniorRatio -
-                          minJuniorRatio -
-                          parseRatio(
-                            (poolData?.maker?.creditline.mul(poolData?.maker?.mat.sub(Fixed27Base)) || new BN(0)).div(
-                              poolData?.netAssetValue.add(poolData?.reserve) || new BN(0)
-                            )
+                      (parseRatio(
+                        (poolData?.junior.totalSupply.mul(poolData?.junior.tokenPrice) || new BN(0)).div(
+                          poolData?.netAssetValue.add(poolData?.reserve) || new BN(0)
+                        )
+                      ) -
+                        (minJuniorRatio || 0) -
+                        parseRatio(
+                          (poolData?.maker?.creditline.mul(poolData?.maker?.mat.sub(Fixed27Base)) || new BN(0)).div(
+                            poolData?.netAssetValue.add(poolData?.reserve) || new BN(0)
                           )
-                        : 0) * 10000
+                        )) *
+                        10000
                     ) / 100
                   ).toString(),
                   2
-                )} */}
+                )}
+                %
               </TableCell>
             </TableRow>
           </TableBody>
@@ -277,7 +292,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                   style={{ alignItems: 'start', justifyContent: 'center' }}
                   pad={{ vertical: '6px' }}
                 >
-                  Overcollateralization
+                  Vault Overcollateralization
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                   <LoadingValue done={makerOvercollateralization !== undefined}>
@@ -286,7 +301,15 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                   <LoadingValue done={makerOvercollateralization !== undefined}>
-                    <SubNote>Min: {parseFloat((mat || new BN(0)).div(new BN(10).pow(new BN(25)))).toString()}%</SubNote>
+                    <SubNote>
+                      Min:{' '}
+                      {parseFloat(
+                        (poolData?.maker?.mat || new BN(0))
+                          .sub(poolData?.maker?.matBuffer)
+                          .div(new BN(10).pow(new BN(25)))
+                      ).toString()}
+                      %
+                    </SubNote>
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -301,7 +324,8 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                   <LoadingValue done={maxSingleLoan !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(maxSingleLoan, 18 + 3), 0))}K DAI
+                    {addThousandsSeparators(toPrecision(baseToDisplay(maxSingleLoan, 18 + 3), 0))}K{' '}
+                    {props.activePool?.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -324,7 +348,22 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                   Reserve
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || new BN(0), 18), 0))} DAI
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || new BN(0), 18), 0))}{' '}
+                  {props.activePool?.metadata.currencySymbol || 'DAI'}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell
+                  scope="row"
+                  style={{ alignItems: 'start', justifyContent: 'center' }}
+                  pad={{ vertical: '6px' }}
+                >
+                  Reserve ratio
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                  <LoadingValue done={reserveRatio !== undefined}>
+                    {parseFloat(reserveRatio.toString()) / 100}%
+                  </LoadingValue>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -334,11 +373,12 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                   pad={{ vertical: '6px' }}
                   border={{ color: 'transparent' }}
                 >
-                  Reserve ratio
+                  Max reserve
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
-                  <LoadingValue done={reserveRatio !== undefined}>
-                    {parseFloat(reserveRatio.toString()) / 100}%
+                  <LoadingValue done={poolData?.maxReserve !== undefined}>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || new BN(0), 18 + 6), 1))}M{' '}
+                    {props.activePool?.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </TableCell>
               </TableRow>

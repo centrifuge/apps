@@ -313,7 +313,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
           </Box>
         )}
         <TokenInput
-          label="External Investor Capacity"
+          label={isMakerIntegrated ? 'External Investor Capacity' : 'Maximum reserve'}
           token={props.activePool?.metadata.currencySymbol || 'DAI'}
           value={
             externalCapacity === undefined
