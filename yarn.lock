@@ -2779,7 +2779,7 @@ __metadata:
     "@types/bn.js": 4.11.6
     "@types/jest": 24.9.1
     "@types/jsonp": ^0.2.0
-    "@types/lodash": ^4
+    "@types/lodash": ^4.14.172
     "@types/next": 9.0.0
     "@types/node-fetch": 2.5.7
     "@types/react": 16.9.34
@@ -6974,7 +6974,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4":
+"@types/lodash@npm:^4.14.172":
   version: 4.14.172
   resolution: "@types/lodash@npm:4.14.172"
   checksum: d4b9c66aa1775ca9105f95fdaf92b8c7ee646fcb75fa8c0617020456470b140f9204335a66e152f269f9cd531634ac3d0caa3f85ce3acdad9bc6951aa6e89aae
