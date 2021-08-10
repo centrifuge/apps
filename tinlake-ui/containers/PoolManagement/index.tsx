@@ -1,5 +1,6 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Heading } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import PageTitle from '../../components/PageTitle'
@@ -23,19 +24,21 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
   const pool = useSelector<any, PoolState>((state) => state.pool)
   const poolData = pool?.data as PoolData | undefined
 
+  const router = useRouter()
   const dispatch = useDispatch()
 
   React.useEffect(() => {
     dispatch(loadPool(props.tinlake, props.activePool?.metadata.maker?.ilk))
   }, [props.tinlake.signer])
 
+  const isAdmin = poolData?.isPoolAdmin || 'admin' in router.query
   const canManageParameters = auth?.permissions?.canSetMinimumJuniorRatio
 
   return (
     <Box margin={{ top: 'medium' }}>
       <PageTitle pool={props.activePool} page="Pool Management" />
 
-      {poolData?.isPoolAdmin && (
+      {isAdmin && (
         <>
           <AOMetrics activePool={props.activePool} />
           <PoolStatus activePool={props.activePool} tinlake={props.tinlake} />
@@ -59,7 +62,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
         </>
       )}
 
-      {!poolData?.isPoolAdmin && <>You need to be a pool admin.</>}
+      {!isAdmin && <>You need to be a pool admin.</>}
     </Box>
   )
 }
