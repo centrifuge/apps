@@ -1,4 +1,4 @@
-import { createWatcher } from '@makerdao/multicall'
+import { aggregate } from '@makerdao/multicall'
 import BN from 'bn.js'
 import { BigNumber } from 'ethers'
 import { HYDRATE } from 'next-redux-wrapper'
@@ -78,9 +78,6 @@ const initialState: PoolsState = {
   poolsDailyData: [],
 }
 
-const watcher: any = createWatcher([], multicallConfig)
-watcher.onError((err: Error) => console.error(`Pool multicall error: ${err}`))
-
 export default function reducer(state: PoolsState = initialState, action: AnyAction = { type: '' }): PoolsState {
   switch (action.type) {
     case HYDRATE:
@@ -99,20 +96,13 @@ export default function reducer(state: PoolsState = initialState, action: AnyAct
 export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools: PoolsState }, undefined, Action> {
   return async (dispatch) => {
     dispatch({ type: LOAD_POOLS })
-    // Load ipfs data only
-    const initialPoolsData = await Apollo.getInitialPools(pools)
-    dispatch({ data: initialPoolsData, type: RECEIVE_POOLS })
-
-    // Load with subgraph data
-    const poolsData = await Apollo.getPools(pools)
-    dispatch({ data: poolsData, type: RECEIVE_POOLS })
 
     const toBN = (val: BigNumber) => new BN(val.toString())
 
-    let watchers: any[] = []
+    let calls: any[] = []
     pools.active.forEach((pool: Pool) => {
-      watchers = [
-        ...watchers,
+      calls = [
+        ...calls,
         ...[
           {
             target: pool.addresses.ASSESSOR,
@@ -158,8 +148,8 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
       ]
 
       if (pool.addresses.CLERK !== undefined && pool.metadata.maker?.ilk !== '') {
-        watchers = [
-          ...watchers,
+        calls = [
+          ...calls,
           ...[
             {
               target: pool.addresses.CLERK,
@@ -194,8 +184,8 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
           ],
         ]
       } else {
-        watchers = [
-          ...watchers,
+        calls = [
+          ...calls,
           ...[
             {
               target: pool.addresses.RESERVE,
@@ -216,126 +206,128 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
         ]
       }
     })
-    watcher.recreate(watchers, multicallConfig)
 
     try {
-      watcher.batch().subscribe((updates: any[]) => {
-        const updatesPerPool: any = {}
-        updates.forEach((update: any) => {
-          const poolId = update.type.split('.')[0]
-          const key = update.type.split('.')[1]
-          if (!(poolId in updatesPerPool)) updatesPerPool[poolId] = {}
-          updatesPerPool[poolId][key] = update.value
-        })
+      const [
+        poolsData,
+        {
+          results: { transformed: multicallData },
+        },
+      ] = await Promise.all([Apollo.getPools(pools), aggregate(calls, multicallConfig)])
 
-        const capacityPerPool: { [key: string]: BN } = {}
-        const capacityGivenMaxReservePerPool: { [key: string]: BN } = {}
-        const capacityGivenMaxDropRatioPerPool: { [key: string]: BN } = {}
-        Object.keys(updatesPerPool).forEach((poolId: string) => {
-          const state: State = updatesPerPool[poolId]
-
-          // Investments will reduce the creditline and therefore reduce the senior debt
-          const newUsedCreditline = state.unusedCreditline
-            ? BN.max(
-                new BN(0),
-                (state.usedCreditline || new BN(0))
-                  .sub(state.pendingSeniorInvestments)
-                  .sub(state.pendingJuniorInvestments)
-                  .add(state.pendingSeniorRedemptions)
-                  .add(state.pendingJuniorRedemptions)
-              )
-            : new BN(0)
-
-          const newUnusedCreditline = state.unusedCreditline
-            ? state.availableCreditline?.sub(newUsedCreditline)
-            : new BN(0)
-
-          const newReserve = BN.max(
-            new BN(0),
-            state.reserve
-              .add(state.pendingSeniorInvestments)
-              .add(state.pendingJuniorInvestments)
-              .sub(state.pendingSeniorRedemptions)
-              .sub(state.pendingJuniorRedemptions)
-              .sub(newUsedCreditline)
-          )
-
-          // console.log(poolId)
-          // console.log(
-          //   `newReserve: ${parseFloat(state.reserve.toString()) / 10 ** 24}M + ${
-          //     parseFloat(state.pendingSeniorInvestments.toString()) / 10 ** 24
-          //   }M + ${parseFloat(state.pendingJuniorInvestments.toString()) / 10 ** 24}M - ${
-          //     parseFloat(state.pendingSeniorRedemptions.toString()) / 10 ** 24
-          //   }M - ${parseFloat(state.pendingJuniorRedemptions.toString()) / 10 ** 24}M`
-          // )
-
-          // console.log(
-          //   ` - capacityGivenMaxReserve: ${parseFloat(state.maxReserve.toString()) / 10 ** 24}M - ${
-          //     parseFloat(newReserve.toString()) / 10 ** 24
-          //   }M- ${parseFloat((newUnusedCreditline || new BN(0)).toString()) / 10 ** 24}M`
-          // )
-
-          const capacityGivenMaxReserve = BN.max(
-            new BN(0),
-            state.maxReserve.sub(newReserve).sub(newUnusedCreditline || new BN(0))
-          )
-
-          // senior debt is reduced by any increase in the used creditline or increased by any decrease in the used creditline
-          const newSeniorDebt = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
-            ? state.seniorDebt.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
-            : state.seniorDebt.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
-
-          // TODO: the change in senior balance should be multiplied by the mat here
-          const newSeniorBalance = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
-            ? state.seniorBalance.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
-            : state.seniorBalance.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
-
-          // console.log(` - oldSeniorDebt: ${parseFloat(state.seniorDebt.toString()) / 10 ** 24}M `)
-          // console.log(` - newSeniorDebt: ${parseFloat(newSeniorDebt.toString()) / 10 ** 24}M `)
-          // console.log(` - oldSeniorBalance: ${parseFloat(state.seniorBalance.toString()) / 10 ** 24}M `)
-          // console.log(` - newSeniorBalance: ${parseFloat(newSeniorBalance.toString()) / 10 ** 24}M `)
-
-          const newSeniorAsset = newSeniorDebt
-            .add(newSeniorBalance)
-            .add(state.pendingSeniorInvestments)
-            .sub(state.pendingSeniorRedemptions)
-
-          const maxSeniorAsset = state.maxSeniorRatio.mul(state.netAssetValue.add(newReserve)).div(Fixed27Base)
-
-          const capacityGivenMaxDropRatio = BN.max(new BN(0), maxSeniorAsset.sub(newSeniorAsset))
-
-          // console.log(
-          //   ` - capacityGivenMaxDropRatioPerPool: ${parseFloat(state.maxSeniorRatio.toString()) / 10 ** 27}% * (${
-          //     parseFloat(state.netAssetValue.toString()) / 10 ** 24
-          //   }M +  ${parseFloat(newReserve.toString()) / 10 ** 24}M) -  ${
-          //     parseFloat(newSeniorAsset.toString()) / 10 ** 24
-          //   }M`
-          // )
-          // console.log('\n\n')
-          // console.log('\n\n')
-
-          capacityPerPool[poolId] = BN.min(capacityGivenMaxReserve, capacityGivenMaxDropRatio)
-          capacityGivenMaxReservePerPool[poolId] = capacityGivenMaxReserve
-          capacityGivenMaxDropRatioPerPool[poolId] = capacityGivenMaxDropRatio
-        })
-
-        const poolsWithCapacity = poolsData.pools.map((pool: PoolData) => {
-          if (pool.id in capacityPerPool) {
-            const capacity = capacityPerPool[pool.id]
-            return {
-              ...pool,
-              order: capacity ? capacity.div(UintBase).toNumber() : pool.isOversubscribed ? -1 : -2,
-              capacity,
-              capacityGivenMaxReserve: capacityGivenMaxReservePerPool[pool.id],
-              capacityGivenMaxDropRatio: capacityGivenMaxDropRatioPerPool[pool.id],
-            }
-          }
-          return pool
-        })
-        dispatch({ data: { ...poolsData, pools: poolsWithCapacity }, type: RECEIVE_POOLS })
+      const updatesPerPool: any = {}
+      Object.entries(multicallData).forEach(([type, value]) => {
+        const poolId = type.split('.')[0]
+        const key = type.split('.')[1]
+        if (!(poolId in updatesPerPool)) updatesPerPool[poolId] = {}
+        updatesPerPool[poolId][key] = value
       })
 
-      watcher.start()
+      const capacityPerPool: { [key: string]: BN } = {}
+      const capacityGivenMaxReservePerPool: { [key: string]: BN } = {}
+      const capacityGivenMaxDropRatioPerPool: { [key: string]: BN } = {}
+      Object.keys(updatesPerPool).forEach((poolId: string) => {
+        const state: State = updatesPerPool[poolId]
+
+        // Investments will reduce the creditline and therefore reduce the senior debt
+        const newUsedCreditline = state.unusedCreditline
+          ? BN.max(
+              new BN(0),
+              (state.usedCreditline || new BN(0))
+                .sub(state.pendingSeniorInvestments)
+                .sub(state.pendingJuniorInvestments)
+                .add(state.pendingSeniorRedemptions)
+                .add(state.pendingJuniorRedemptions)
+            )
+          : new BN(0)
+
+        const newUnusedCreditline = state.unusedCreditline
+          ? state.availableCreditline?.sub(newUsedCreditline)
+          : new BN(0)
+
+        const newReserve = BN.max(
+          new BN(0),
+          state.reserve
+            .add(state.pendingSeniorInvestments)
+            .add(state.pendingJuniorInvestments)
+            .sub(state.pendingSeniorRedemptions)
+            .sub(state.pendingJuniorRedemptions)
+            .sub(newUsedCreditline)
+        )
+
+        // console.log(poolId)
+        // console.log(
+        //   `newReserve: ${parseFloat(state.reserve.toString()) / 10 ** 24}M + ${
+        //     parseFloat(state.pendingSeniorInvestments.toString()) / 10 ** 24
+        //   }M + ${parseFloat(state.pendingJuniorInvestments.toString()) / 10 ** 24}M - ${
+        //     parseFloat(state.pendingSeniorRedemptions.toString()) / 10 ** 24
+        //   }M - ${parseFloat(state.pendingJuniorRedemptions.toString()) / 10 ** 24}M`
+        // )
+
+        // console.log(
+        //   ` - capacityGivenMaxReserve: ${parseFloat(state.maxReserve.toString()) / 10 ** 24}M - ${
+        //     parseFloat(newReserve.toString()) / 10 ** 24
+        //   }M- ${parseFloat((newUnusedCreditline || new BN(0)).toString()) / 10 ** 24}M`
+        // )
+
+        const capacityGivenMaxReserve = BN.max(
+          new BN(0),
+          state.maxReserve.sub(newReserve).sub(newUnusedCreditline || new BN(0))
+        )
+
+        // senior debt is reduced by any increase in the used creditline or increased by any decrease in the used creditline
+        const newSeniorDebt = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
+          ? state.seniorDebt.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
+          : state.seniorDebt.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
+
+        // TODO: the change in senior balance should be multiplied by the mat here
+        const newSeniorBalance = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
+          ? state.seniorBalance.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
+          : state.seniorBalance.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
+
+        // console.log(` - oldSeniorDebt: ${parseFloat(state.seniorDebt.toString()) / 10 ** 24}M `)
+        // console.log(` - newSeniorDebt: ${parseFloat(newSeniorDebt.toString()) / 10 ** 24}M `)
+        // console.log(` - oldSeniorBalance: ${parseFloat(state.seniorBalance.toString()) / 10 ** 24}M `)
+        // console.log(` - newSeniorBalance: ${parseFloat(newSeniorBalance.toString()) / 10 ** 24}M `)
+
+        const newSeniorAsset = newSeniorDebt
+          .add(newSeniorBalance)
+          .add(state.pendingSeniorInvestments)
+          .sub(state.pendingSeniorRedemptions)
+
+        const maxSeniorAsset = state.maxSeniorRatio.mul(state.netAssetValue.add(newReserve)).div(Fixed27Base)
+
+        const capacityGivenMaxDropRatio = BN.max(new BN(0), maxSeniorAsset.sub(newSeniorAsset))
+
+        // console.log(
+        //   ` - capacityGivenMaxDropRatioPerPool: ${parseFloat(state.maxSeniorRatio.toString()) / 10 ** 27}% * (${
+        //     parseFloat(state.netAssetValue.toString()) / 10 ** 24
+        //   }M +  ${parseFloat(newReserve.toString()) / 10 ** 24}M) -  ${
+        //     parseFloat(newSeniorAsset.toString()) / 10 ** 24
+        //   }M`
+        // )
+        // console.log('\n\n')
+        // console.log('\n\n')
+
+        capacityPerPool[poolId] = BN.min(capacityGivenMaxReserve, capacityGivenMaxDropRatio)
+        capacityGivenMaxReservePerPool[poolId] = capacityGivenMaxReserve
+        capacityGivenMaxDropRatioPerPool[poolId] = capacityGivenMaxDropRatio
+      })
+
+      const poolsWithCapacity = poolsData.pools.map((pool: PoolData) => {
+        if (pool.id in capacityPerPool) {
+          const capacity = capacityPerPool[pool.id]
+          return {
+            ...pool,
+            order: capacity ? capacity.div(UintBase).toNumber() : pool.isOversubscribed ? -1 : -2,
+            capacity,
+            capacityGivenMaxReserve: capacityGivenMaxReservePerPool[pool.id],
+            capacityGivenMaxDropRatio: capacityGivenMaxDropRatioPerPool[pool.id],
+          }
+        }
+        return pool
+      })
+      dispatch({ data: { ...poolsData, pools: poolsWithCapacity }, type: RECEIVE_POOLS })
     } catch (e) {
       console.error(e)
     }
