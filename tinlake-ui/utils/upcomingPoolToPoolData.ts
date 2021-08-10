@@ -25,6 +25,7 @@ const emptyPoolData: PoolData = {
   totalRedemptionsCurrency: new BN(0),
   netAssetValue: new BN(0),
   reserve: new BN(0),
+  reserveAtLastEpochClose: new BN(0),
 }
 
 export function upcomingPoolToPooldata(p: UpcomingPool): PoolData {

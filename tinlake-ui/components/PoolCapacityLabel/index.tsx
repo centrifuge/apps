@@ -30,7 +30,7 @@ export const PoolCapacityLabel: React.FC<Props> = ({ pool }) => {
 
   return (
     <Label green>
-      {addThousandsSeparators(toPrecision(baseToDisplay(capacity, 21), 0))}K {currency}
+      {capacity ? `${addThousandsSeparators(toPrecision(baseToDisplay(capacity, 21), 0))}K ${currency}` : '...'}
     </Label>
   )
 }

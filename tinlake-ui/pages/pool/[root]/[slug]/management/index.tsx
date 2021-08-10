@@ -25,7 +25,7 @@ class ManagementPage extends React.Component<Props> {
     return (
       <WithFooter>
         <Head>
-          <title>Management: {pool.metadata.name} | Tinlake | Centrifuge</title>
+          <title>Pool Management: {pool.metadata.name} | Tinlake | Centrifuge</title>
         </Head>
         <Header
           ipfsPools={ipfsPools}

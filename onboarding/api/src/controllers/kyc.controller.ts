@@ -37,7 +37,9 @@ export class KycController {
     // TODO: redirect to app?
     if (!kycInfo.providerAccountId) {
       this.logger.warn('Securitize code has already been used')
-      const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding`
+      const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${
+        params.tranche || 'senior'
+      }`
       return res.redirect(redirectUrl)
     }
 
@@ -77,7 +79,9 @@ export class KycController {
     // Create session and redirect user
     const session = this.sessionService.create(userId)
 
-    const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?session=${session}`
+    const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${
+      pool.metadata.slug
+    }/onboarding?session=${session}&tranche=${params.tranche || 'senior'}`
     return res.redirect(redirectUrl)
   }
 

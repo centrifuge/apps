@@ -40,6 +40,7 @@ export interface PoolData {
   currentJuniorRatio: BN
   netAssetValue: BN
   reserve: BN
+  reserveAtLastEpochClose: BN
   maxJuniorRatio: BN
   maxReserve: BN
   outstandingVolume: BN
@@ -189,6 +190,11 @@ export function loadPool(
         returns: [[`reserve`, toBN]],
       },
       {
+        target: tinlake.contractAddresses.COORDINATOR,
+        call: ['epochReserve()(uint256)'],
+        returns: [[`reserveAtLastEpochClose`, toBN]],
+      },
+      {
         target: tinlake.contractAddresses.ASSESSOR,
         call: ['maxSeniorRatio()(uint256)'],
         returns: [[`minJuniorRatio`, (val: BigNumber) => seniorToJuniorRatio(toBN(val))]],
@@ -322,6 +328,16 @@ export function loadPool(
             target: tinlake.contractAddresses.CLERK,
             call: ['remainingCredit()(uint)'],
             returns: [[`maker.remainingCredit`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.CLERK,
+            call: ['remainingOvercollCredit()(uint)'],
+            returns: [[`maker.remainingOvercollCredit`, toBN]],
+          },
+          {
+            target: tinlake.contractAddresses.CLERK,
+            call: ['matBuffer()(uint)'],
+            returns: [[`maker.matBuffer`, toBN]],
           },
           {
             target: tinlake.contractAddresses.CLERK,

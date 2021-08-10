@@ -6,9 +6,12 @@ import PageTitle from '../../components/PageTitle'
 import { Pool } from '../../config'
 import { AuthState } from '../../ducks/auth'
 import { loadPool, PoolData, PoolState } from '../../ducks/pool'
-import FundingNeeds from './FundingNeeds'
+import EpochOverview from '../Investment/View/EpochOverview'
+import AOMetrics from './AOMetrics'
+import Liquidity from './Liquidity'
 import Memberlist from './Memberlist'
 import Parameters from './Parameters'
+import PoolStatus from './PoolStatus'
 
 interface Props {
   activePool: Pool
@@ -34,14 +37,22 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
 
       {poolData?.isPoolAdmin && (
         <>
-          <FundingNeeds activePool={props.activePool} />
+          <AOMetrics activePool={props.activePool} />
+          <PoolStatus activePool={props.activePool} tinlake={props.tinlake} />
 
-          <Heading level="4">Manage members</Heading>
+          <Heading level="4" margin={{ top: 'medium' }}>
+            Liquidity Management
+          </Heading>
+          <Liquidity activePool={props.activePool} tinlake={props.tinlake} />
+
+          <EpochOverview tinlake={props.tinlake} activePool={props.activePool} />
+
+          <Heading level="4">Investor Whitelisting</Heading>
           <Memberlist tinlake={props.tinlake} />
 
           {canManageParameters && (
             <>
-              <Heading level="4">Update pool parameters</Heading>
+              <Heading level="4">Pool Parameters</Heading>
               <Parameters tinlake={props.tinlake} />
             </>
           )}
