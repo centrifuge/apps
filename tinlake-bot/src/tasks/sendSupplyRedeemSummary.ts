@@ -16,7 +16,7 @@ const e18 = new BN('10').pow(new BN('18'))
 
 const toBN = (val: BigNumber) => new BN(val.toString())
 
-const toPrecision = (val, precision) => new Decimal(val.toString()).toFixed(precision)
+const toPrecision = (val: any, precision: number) => new Decimal(val.toString()).toFixed(precision)
 
 const format21 = (val: any) => addThousandsSeparators(toPrecision(baseToDisplay(val, 21), 0))
 
@@ -85,7 +85,7 @@ export const sendSupplyRedeemSummary = async (
 
   const blocks = await Promise.all(
     Object.entries(pools).map(async ([poolId, pool]) => {
-      const tinlake: any = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
+      const tinlake = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
       const state = await tinlake.getCurrentEpochState()
       const poolData = dataPerPool[poolId]
       const hasSignificantOrders = [
