@@ -55,16 +55,6 @@ export const sendSupplyRedeemSummary = async (
         target: pool.addresses.JUNIOR_TRANCHE,
         call: ['totalRedeem()(uint256)'],
         returns: [[`${pool.addresses.ROOT_CONTRACT}.juniorRedeem`, toBN]],
-      },
-      {
-        target: pool.addresses.RESERVE,
-        call: ['totalBalance()(uint256)'],
-        returns: [[`${pool.addresses.ROOT_CONTRACT}.reserve`, toBN]],
-      },
-      {
-        target: pool.addresses.ASSESSOR,
-        call: ['maxReserve()(uint256)'],
-        returns: [[`${pool.addresses.ROOT_CONTRACT}.maxReserve`, toBN]],
       }
     )
   })
