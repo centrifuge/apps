@@ -319,8 +319,8 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
           const capacity = capacityPerPool[pool.id]
           return {
             ...pool,
-            order: capacity ? capacity.div(UintBase).toNumber() : pool.isOversubscribed ? -1 : -2,
             capacity,
+            order: capacity ? capacity.div(UintBase).toNumber() : pool.isOversubscribed ? -1 : -2,
             capacityGivenMaxReserve: capacityGivenMaxReservePerPool[pool.id],
             capacityGivenMaxDropRatio: capacityGivenMaxDropRatioPerPool[pool.id],
           }
