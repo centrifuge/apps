@@ -31,9 +31,8 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
     dispatch(loadPool(props.tinlake, props.activePool?.metadata.maker?.ilk))
   }, [props.tinlake.signer])
 
-  const canManageParameters = auth?.permissions?.canSetMinimumJuniorRatio
-
   const isAdmin = poolData?.isPoolAdmin || 'admin' in router.query
+  const canManageParameters = auth?.permissions?.canSetMinimumJuniorRatio
 
   return (
     <Box margin={{ top: 'medium' }}>
