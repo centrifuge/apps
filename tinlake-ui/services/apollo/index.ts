@@ -73,9 +73,6 @@ class Apollo {
 
       const reserve = (pool && new BN(pool.reserve)) || undefined
       const assetValue = (pool && new BN(pool.assetValue)) || undefined
-      const poolValueNum =
-        parseInt((reserve || new BN(0)).div(UintBase).toString(), 10) +
-        parseInt((assetValue || new BN(0)).div(UintBase).toString(), 10)
 
       const poolData = {
         reserve,
@@ -90,7 +87,6 @@ class Apollo {
         totalRepaysAggregatedAmountNum,
         weightedInterestRateNum,
         seniorInterestRateNum,
-        order: poolValueNum,
         isUpcoming: false, // TODO: poolConfig?.metadata?.isUpcoming || false
         isArchived: false,
         isOversubscribed:

@@ -6,7 +6,7 @@ import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { IpfsPools, multicallConfig, Pool } from '../config'
 import Apollo from '../services/apollo'
-import { Fixed27Base } from '../utils/ratios'
+import { Fixed27Base, UintBase } from '../utils/ratios'
 import { PoolStatus } from './pool'
 
 // Actions
@@ -31,7 +31,7 @@ export interface PoolData {
   weightedInterestRateNum: number
   seniorInterestRate?: BN
   seniorInterestRateNum: number
-  order: number
+  order?: number
   version: number
   totalFinancedCurrency: BN
   financingsCount?: number
@@ -321,9 +321,11 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
 
         const poolsWithCapacity = poolsData.pools.map((pool: PoolData) => {
           if (pool.id in capacityPerPool) {
+            const capacity = capacityPerPool[pool.id]
             return {
               ...pool,
-              capacity: capacityPerPool[pool.id],
+              order: capacity ? capacity.div(UintBase).toNumber() : pool.isOversubscribed ? -1 : -2,
+              capacity,
               capacityGivenMaxReserve: capacityGivenMaxReservePerPool[pool.id],
               capacityGivenMaxDropRatio: capacityGivenMaxDropRatioPerPool[pool.id],
             }
