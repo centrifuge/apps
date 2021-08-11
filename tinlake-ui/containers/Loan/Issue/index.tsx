@@ -7,7 +7,7 @@ import Alert from '../../../components/Alert'
 import NftData from '../../../components/NftData'
 import { PoolLink } from '../../../components/PoolLink'
 import { Pool } from '../../../config'
-import { AuthState, ensureAuthed, loadProxies } from '../../../ducks/auth'
+import { AuthState, ensureAuthed } from '../../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { getNFT as getNFTAction } from '../../../services/tinlake/actions'
 import LoanView from '../View'
@@ -16,7 +16,6 @@ interface Props extends TransactionProps {
   tinlake: any
   poolConfig: Pool
   auth: AuthState
-  loadProxies?: () => Promise<void>
   ensureAuthed?: () => Promise<void>
 }
 
@@ -45,14 +44,12 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
   }
 
   const getNFT = async (currentRegistry: string, currentTokenId: string) => {
-    console.log('getnft', currentRegistry, currentTokenId)
     if (currentTokenId && currentTokenId.length > 0) {
       setNft(null)
       setNftError('')
       const promise = getNFTAction(currentRegistry, props.tinlake, currentTokenId)
       inFlight.current = promise
       const result = await promise
-      console.log('result', result)
       const { nft, error } = result as Partial<{ tokenId: string; nft: NFT; error: string }>
       if (inFlight.current !== promise) {
         return
@@ -80,10 +77,8 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
-      console.log('result', result)
       const loanId = result.data
       setLoanId(loanId)
-      props.loadProxies && props.loadProxies()
     }
   }, [status])
 
@@ -160,4 +155,4 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadProxies, ensureAuthed, createTransaction })(IssueLoan)
+export default connect((state) => state, { ensureAuthed, createTransaction })(IssueLoan)
