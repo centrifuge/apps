@@ -31,14 +31,23 @@ type Serializable = SerializableScalar & SerializableObject & SerializableArray
 export type TinlakeAction = (tinlake: ITinlake, ...args: Serializable[]) => Promise<PendingTransaction>
 
 export async function getNFT(registry: string, tinlake: ITinlake, tokenId: string) {
-  let nftOwner: string
+  let nftOwner: string | null = null
   let nftData: any
   let maturityDate: number = 0
 
   try {
     nftOwner = (await tinlake.getOwnerOfCollateral(registry, tokenId)).toString()
   } catch (e) {
-    return loggedError(e, 'Could not get NFT owner for NFT ID', tokenId)
+    if (e.message.match(/invalid address/i)) {
+      return loggedError(e, 'Invalid address', tokenId)
+    }
+    if (e.message.match(/call revert exception/i)) {
+      return loggedError(e, 'Address is not a registry', tokenId)
+    }
+    if (e.data?.match(/reverted/i)) {
+      return loggedError(e, 'NFT does not exist in registry', tokenId)
+    }
+    return loggedError(e, 'Could not get NFT owner', tokenId)
   }
 
   if (!nftOwner) {
@@ -663,5 +672,6 @@ function loggedError(error: any, message: string, id: string): PendingTransactio
   return {
     status: 0,
     error: message,
+    id,
   } as any
 }
