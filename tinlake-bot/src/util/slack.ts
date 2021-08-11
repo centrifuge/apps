@@ -49,6 +49,11 @@ export const pushNotificationToSlack = async (
   if (!response.ok) {
     const body = await response.text()
     console.error(`${response.statusText}: ${body}`)
+  } else {
+    const body = await response.json()
+    if (!body.ok) {
+      console.error(`Slack API error: ${JSON.stringify(body)}`)
+    }
   }
 }
 
