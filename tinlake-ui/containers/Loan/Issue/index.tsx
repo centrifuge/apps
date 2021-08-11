@@ -140,7 +140,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
         </Box>
 
         {nftError && <Alert type="error">{nftError}</Alert>}
-        {!disabled && wrongOwner && <Alert type="error">NFT isn't owned by connected address</Alert>}
+        {!disabled && wrongOwner && <Alert type="error">NFT not held in your wallet</Alert>}
       </Box>
 
       {loanId ? (

@@ -51,7 +51,7 @@ export async function getNFT(registry: string, tinlake: ITinlake, tokenId: strin
   }
 
   if (!nftOwner) {
-    return loggedError({}, 'Could not get NFT owner for NFT ID', tokenId)
+    return loggedError({}, 'Could not get NFT owner', tokenId)
   }
 
   try {
