@@ -260,7 +260,7 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
               .sub(newUsedCreditline)
           )
 
-          // console.log(poolId)
+          console.log(poolId)
           // console.log(
           //   `newReserve: ${parseFloat(state.reserve.toString()) / 10 ** 24}M + ${
           //     parseFloat(state.pendingSeniorInvestments.toString()) / 10 ** 24
@@ -300,7 +300,20 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
             .add(state.pendingSeniorInvestments)
             .sub(state.pendingSeniorRedemptions)
 
-          const maxSeniorAsset = state.maxSeniorRatio.mul(state.netAssetValue.add(newReserve)).div(Fixed27Base)
+          const newJuniorAsset = state.netAssetValue.add(newReserve).sub(newSeniorAsset)
+          const maxPoolSize = newJuniorAsset
+            .mul(Fixed27Base.mul(new BN(10).pow(new BN(6))).div(Fixed27Base.sub(state.maxSeniorRatio)))
+            .div(new BN(10).pow(new BN(6)))
+
+          console.log(` - newJuniorAsset: ${parseFloat(newJuniorAsset.toString()) / 10 ** 24}M `)
+          console.log(
+            ` - mul: ${Fixed27Base.mul(new BN(10).pow(new BN(6)))
+              .div(Fixed27Base.sub(state.maxSeniorRatio))
+              .toString()}`
+          )
+          console.log(` - maxPoolSize: ${parseFloat(maxPoolSize.toString()) / 10 ** 24}M `)
+
+          const maxSeniorAsset = maxPoolSize.sub(newJuniorAsset)
 
           const capacityGivenMaxDropRatio = BN.max(new BN(0), maxSeniorAsset.sub(newSeniorAsset))
 
@@ -311,8 +324,8 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
           //     parseFloat(newSeniorAsset.toString()) / 10 ** 24
           //   }M`
           // )
-          // console.log('\n\n')
-          // console.log('\n\n')
+          console.log('\n\n')
+          console.log('\n\n')
 
           capacityPerPool[poolId] = BN.min(capacityGivenMaxReserve, capacityGivenMaxDropRatio)
           capacityGivenMaxReservePerPool[poolId] = capacityGivenMaxReserve
