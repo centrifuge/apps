@@ -670,8 +670,8 @@ function loggedError(error: any, message: string, id: string): PendingTransactio
   console.error(`${message} ${id}`, error)
   // TODO: same as line 549
   return {
+    id,
     status: 0,
     error: message,
-    id,
   } as any
 }
