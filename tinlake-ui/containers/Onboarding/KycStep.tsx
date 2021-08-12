@@ -78,7 +78,8 @@ const KycStep: React.FC<Props> = (props: Props) => {
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             Your KYC submission has been verified, but you still need to finish accreditation as a US tax resident. To
             complete this step, please submit your accreditation information on InvestReady. Make sure you use the same
-            email address here that you entered on Securitize.
+            email address here that you entered on Securitize. If you experience any issues, please contact{' '}
+            <a href="mailto:support@centrifuge.io">support@centrifuge.io</a>.
           </Paragraph>
           <div>
             <Button
