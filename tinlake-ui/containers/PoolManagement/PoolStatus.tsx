@@ -38,7 +38,11 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
       : undefined
 
   const makerOvercollateralization =
-    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
+    isMakerIntegrated &&
+    poolData?.maker &&
+    poolData?.maker?.dropBalance &&
+    poolData.senior &&
+    poolData?.maker.debt.gtn(0)
       ? makerDropCollateralValue
           .mul(new BN(10).pow(new BN(18)))
           .div(poolData?.maker.debt)
@@ -46,7 +50,11 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
       : new BN(0)
 
   const makerDropShare =
-    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
+    isMakerIntegrated &&
+    poolData?.maker &&
+    poolData?.maker?.dropBalance &&
+    poolData.senior &&
+    poolData?.senior?.totalSupply.gtn(0)
       ? poolData?.maker?.dropBalance
           .mul(new BN(10).pow(new BN(18)))
           .div(poolData?.senior?.totalSupply)
