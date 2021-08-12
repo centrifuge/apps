@@ -2666,6 +2666,7 @@ __metadata:
   dependencies:
     "@centrifuge/tinlake-js": "workspace:*"
     "@ethersproject/experimental": ^5.0.9
+    "@makerdao/multicall": ^0.12.0
     "@types/cron": ^1
     "@types/node": ^14.14.10
     "@types/node-fetch": ^2
@@ -2673,6 +2674,7 @@ __metadata:
     "@vercel/fetch-retry": ^5.0.3
     bignumber.js: ^9.0.0
     cron: ^1.8.2
+    decimal.js-light: ^2.5.1
     ethers: 5.0.23
     log-timestamp: ^0.3.0
     node-fetch: ^2.6.1
@@ -13863,7 +13865,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"decimal.js-light@npm:2.5.1, decimal.js-light@npm:^2.4.1":
+"decimal.js-light@npm:2.5.1, decimal.js-light@npm:^2.4.1, decimal.js-light@npm:^2.5.1":
   version: 2.5.1
   resolution: "decimal.js-light@npm:2.5.1"
   checksum: 9f2b981ebffaae84dfb2a886c9db34b80e0bebca0dc2762e1a516804f8f3714a3f8356d23ecdf9443aadc01c39ae4fc9563cb4e3140b5a6eb21bf475becc63fb

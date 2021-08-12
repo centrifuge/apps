@@ -38,7 +38,11 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
       : undefined
 
   const makerOvercollateralization =
-    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
+    isMakerIntegrated &&
+    poolData?.maker &&
+    poolData?.maker?.dropBalance &&
+    poolData.senior &&
+    poolData?.maker.debt.gtn(0)
       ? makerDropCollateralValue
           .mul(new BN(10).pow(new BN(18)))
           .div(poolData?.maker.debt)
@@ -46,7 +50,11 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
       : new BN(0)
 
   const makerDropShare =
-    isMakerIntegrated && poolData?.maker && poolData?.maker?.dropBalance && poolData.senior
+    isMakerIntegrated &&
+    poolData?.maker &&
+    poolData?.maker?.dropBalance &&
+    poolData.senior &&
+    poolData?.senior?.totalSupply.gtn(0)
       ? poolData?.maker?.dropBalance
           .mul(new BN(10).pow(new BN(18)))
           .div(poolData?.senior?.totalSupply)
@@ -114,9 +122,12 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                   (
                     Math.round(
                       parseRatio(
-                        (poolData?.junior.totalSupply.mul(poolData?.junior.tokenPrice) || new BN(0)).div(
-                          poolData?.netAssetValue.add(poolData?.reserve) || new BN(0)
-                        )
+                        !(poolData?.netAssetValue && poolData?.reserve) ||
+                          (poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
+                          ? new BN(0)
+                          : (poolData?.junior.totalSupply || new BN(0))
+                              .mul(poolData?.junior.tokenPrice || new BN(0))
+                              .div((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)))
                       ) * 10000
                     ) / 100
                   ).toString(),
@@ -180,9 +191,11 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                     (
                       Math.round(
                         parseRatio(
-                          (poolData?.maker?.creditline.mul(poolData?.maker?.mat.sub(Fixed27Base)) || new BN(0)).div(
-                            poolData?.netAssetValue.add(poolData?.reserve) || new BN(0)
-                          )
+                          poolData?.maker?.creditline && poolData?.netAssetValue.add(poolData?.reserve).gtn(0)
+                            ? (poolData?.maker?.creditline.mul(poolData?.maker?.mat.sub(Fixed27Base)) || new BN(0)).div(
+                                poolData?.netAssetValue.add(poolData?.reserve) || new BN(0)
+                              )
+                            : new BN(0)
                         ) * 10000
                       ) / 100
                     ).toString(),
@@ -224,24 +237,27 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                 {toPrecision(
-                  (
-                    Math.round(
-                      (parseRatio(
-                        (poolData?.junior.totalSupply.mul(poolData?.junior.tokenPrice) || new BN(0)).div(
-                          poolData?.netAssetValue.add(poolData?.reserve) || new BN(0)
-                        )
-                      ) -
-                        (minJuniorRatio || 0) -
-                        parseRatio(
-                          (
-                            (poolData?.maker?.creditline || new BN(0)).mul(
-                              (poolData?.maker?.mat || Fixed27Base).sub(Fixed27Base)
-                            ) || new BN(0)
-                          ).div(poolData?.netAssetValue.add(poolData?.reserve) || new BN(0))
-                        )) *
-                        10000
-                    ) / 100
-                  ).toString(),
+                  !(poolData?.netAssetValue && poolData?.reserve) ||
+                    (poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
+                    ? '0'
+                    : (
+                        Math.round(
+                          (parseRatio(
+                            (poolData?.junior.totalSupply.mul(poolData?.junior.tokenPrice) || new BN(0)).div(
+                              poolData?.netAssetValue.add(poolData?.reserve) || new BN(0)
+                            )
+                          ) -
+                            (minJuniorRatio || 0) -
+                            parseRatio(
+                              (
+                                (poolData?.maker?.creditline || new BN(0)).mul(
+                                  (poolData?.maker?.mat || Fixed27Base).sub(Fixed27Base)
+                                ) || new BN(0)
+                              ).div(poolData?.netAssetValue.add(poolData?.reserve) || new BN(0))
+                            )) *
+                            10000
+                        ) / 100
+                      ).toString(),
                   2
                 )}
                 %
@@ -305,7 +321,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                       Min:{' '}
                       {parseFloat(
                         (poolData?.maker?.mat || new BN(0))
-                          .sub(poolData?.maker?.matBuffer)
+                          .sub(poolData?.maker?.matBuffer || new BN(0))
                           .div(new BN(10).pow(new BN(25)))
                       ).toString()}
                       %
