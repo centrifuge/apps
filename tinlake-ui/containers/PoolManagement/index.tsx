@@ -39,7 +39,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
   const exportData = () => {
     if (!poolData) return
 
-    let data: any[] = []
+    const data: any[] = []
     Object.keys(poolData).forEach((key: string) => {
       const value = (poolData as any)[key]
       if (key === 'junior' || key === 'senior' || key === 'maker') {
