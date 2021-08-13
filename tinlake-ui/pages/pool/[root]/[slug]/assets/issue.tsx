@@ -1,6 +1,6 @@
 import { Box } from 'grommet'
 import { GetStaticProps } from 'next'
-import withRouter, { WithRouterProps } from 'next/dist/client/with-router'
+import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
 import * as React from 'react'
 import Auth from '../../../../../components/Auth'
@@ -22,7 +22,6 @@ interface Props extends WithRouterProps {
 class LoanIssuePage extends React.Component<Props> {
   render() {
     const { pool, ipfsPools } = this.props
-    const { tokenId, registry }: { tokenId: string; registry: string } = this.props.router.query as any
 
     return (
       <WithFooter>
@@ -48,13 +47,7 @@ class LoanIssuePage extends React.Component<Props> {
                       <Box margin={{ top: 'medium' }}>
                         <PageTitle pool={pool} page={`Lock NFT`} parentPage="Assets" parentPageHref="/assets" />
 
-                        <IssueLoan
-                          tinlake={tinlake}
-                          poolConfig={pool}
-                          auth={auth}
-                          tokenId={tokenId}
-                          registry={registry}
-                        />
+                        <IssueLoan tinlake={tinlake} poolConfig={pool} auth={auth} />
                       </Box>
                     )}
                   />
@@ -90,4 +83,4 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 }
 
-export default withRouter(LoanIssuePage)
+export default LoanIssuePage
