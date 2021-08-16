@@ -221,5 +221,3 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
     }
   }
 }
-
-function shouldClose() {}
