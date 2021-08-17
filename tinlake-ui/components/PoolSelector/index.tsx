@@ -42,7 +42,7 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
   }
 
   const getLivePools = () => {
-    return pools.data?.pools.filter((p) => !p.isArchived).sort((a, b) => b.order - a.order) || []
+    return pools.data?.pools.filter((p) => !p.isArchived).sort((a, b) => (b.order ? b.order - a.order! : 1)) || []
   }
 
   const filterPools = () => {
