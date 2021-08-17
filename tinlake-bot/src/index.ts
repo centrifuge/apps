@@ -4,6 +4,7 @@ import config from './config'
 import { checkDueAssets } from './tasks/checkDueAssets'
 import { closePools } from './tasks/closePools'
 import { executePools } from './tasks/executePools'
+import { sendSupplyRedeemSummary } from './tasks/sendSupplyRedeemSummary'
 import { submitSolutions } from './tasks/submitSolutions'
 import { writeoffAssets } from './tasks/writeoffAssets'
 import { TransactionManager } from './tx-manager'
@@ -63,6 +64,12 @@ const run = async () => {
     await writeoffAssets(pools)
   })
   cronJobs.set('writeoffAssets', writeoffAssetsTask)
+
+  let sendSupplyRedeemSummaryTask = new CronJob('0 9 * * *', async () => {
+    // Sends supply and redeem summary to Slack every day at 10am CET (9am UTC)
+    await sendSupplyRedeemSummary(pools, provider, signer)
+  })
+  cronJobs.set('sendSupplyRedeemSummary', sendSupplyRedeemSummaryTask)
 
   cronJobs.forEach((task, _) => task.start())
 }

@@ -214,13 +214,13 @@ export function loadLoan(
         data.ownerOf = await tinlake.getOwnerOfLoan(loanId)
 
         // TODO: load getOwnerOfCollateral using multicall
-        if (
+        if (data.ownerOf === ZERO_ADDRESS) {
+          data.status = 'closed'
+        } else if (
           (await tinlake.getOwnerOfCollateral(data.registry, data.tokenId)).toString() ===
           tinlake.contractAddresses.SHELF
         ) {
           data.status = 'ongoing'
-        } else if (data.ownerOf === ZERO_ADDRESS) {
-          data.status = 'closed'
         } else {
           data.status = 'NFT locked'
         }
