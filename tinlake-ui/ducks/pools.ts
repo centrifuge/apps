@@ -215,19 +215,26 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
         },
       ] = await Promise.all([Apollo.getPools(pools), aggregate(calls, multicallConfig)])
 
-      const updatesPerPool: any = {}
-      Object.entries(multicallData).forEach(([type, value]) => {
-        const poolId = type.split('.')[0]
-        const key = type.split('.')[1]
-        if (!(poolId in updatesPerPool)) updatesPerPool[poolId] = {}
-        updatesPerPool[poolId][key] = value
-      })
+      const updatesPerPool: { [key: string]: State } = Object.entries(multicallData).reduce(
+        (updates: any, [type, value]) => {
+          const [poolId, key] = type.split('.')
+
+          if (!(poolId in updates)) {
+            updates[poolId] = {}
+          }
+
+          updates[poolId][key] = value
+
+          return updates
+        },
+        {}
+      )
 
       const capacityPerPool: { [key: string]: BN } = {}
       const capacityGivenMaxReservePerPool: { [key: string]: BN } = {}
       const capacityGivenMaxDropRatioPerPool: { [key: string]: BN } = {}
       Object.keys(updatesPerPool).forEach((poolId: string) => {
-        const state: State = updatesPerPool[poolId]
+        const state = updatesPerPool[poolId]
 
         // Investments will reduce the creditline and therefore reduce the senior debt
         const newUsedCreditline = state.unusedCreditline
