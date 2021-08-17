@@ -120,10 +120,16 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     updateJuniorMemberList = async (user: string, validUntil: number) => {
+      if (this.contract('POOL_ADMIN')) {
+        return this.pending(this.contract('POOL_ADMIN').updateJuniorMember(user, validUntil, this.overrides))
+      }
       return this.pending(this.contract('JUNIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
     }
 
     updateSeniorMemberList = async (user: string, validUntil: number) => {
+      if (this.contract('POOL_ADMIN')) {
+        return this.pending(this.contract('POOL_ADMIN').updateSeniorMember(user, validUntil, this.overrides))
+      }
       return this.pending(this.contract('SENIOR_MEMBERLIST').updateMember(user, validUntil, this.overrides))
     }
 
