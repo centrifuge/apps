@@ -66,11 +66,10 @@ class PoolList extends React.Component<Props> {
 
     const pools = poolsData?.pools?.filter((p) => showArchived || !p.isArchived)
     pools?.sort((a, b) => {
-      if (a.order === b.order) return 0 // order doesnt matter
-      if (a.order > b.order) return -1 // only a has status, comes first
-      return 1 // only b has status, comes first
+      if (!a.order || !b.order || a.order === b.order) return 0
+      if (a.order > b.order) return -1
+      return 1
     })
-    console.log(pools?.map((p) => [p.name, p.order]))
     return (
       <Box>
         <Header>
