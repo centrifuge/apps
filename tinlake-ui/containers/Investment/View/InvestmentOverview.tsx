@@ -33,6 +33,7 @@ interface Props {
 const SecondsInDay = 60 * 60 * 24
 
 const e18 = new BN(10).pow(new BN(18))
+const e45 = new BN(10).pow(new BN(45))
 
 const parseRatio = (num: BN): number => {
   const base = new BN(10).pow(new BN(20))
@@ -76,8 +77,12 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const dropTotalValue = poolData?.senior ? poolData?.senior.totalSupply.mul(poolData.senior!.tokenPrice) : undefined
   const tinTotalValue = poolData ? poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice) : undefined
 
+  const currentJuniorRatio =
+    tinTotalValue && dropTotalValue
+      ? ((tinTotalValue.div(e45).toNumber() / dropTotalValue.div(e45).toNumber()) * 100).toFixed(2)
+      : ''
+
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
-  const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
   const { dropYield } = useTrancheYield()
 
@@ -252,7 +257,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             <div>
               DROP is currently protected by a<br />
               <span style={{ fontWeight: 'bold' }}>
-                {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}%{' '}
+                {currentJuniorRatio}%{' '}
                 <Tooltip id="tinRiskBuffer" underline>
                   TIN buffer
                 </Tooltip>
