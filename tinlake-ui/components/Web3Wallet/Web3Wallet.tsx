@@ -14,7 +14,6 @@ interface Props {
   onDisconnect: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
   transactions: WalletTransaction[]
   getAddressLink: (address: string) => string
-  kycStatus: 'none' | 'created' | 'pending' | 'verified'
 }
 
 export const Web3Wallet: React.FunctionComponent<Props> = ({
@@ -24,7 +23,6 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
   onDisconnect,
   transactions,
   getAddressLink,
-  kycStatus,
   ...rest
 }) => {
   const [open, setOpen] = useState(false)
@@ -49,8 +47,6 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
         <InnerWallet>
           <IdenticonSmall>
             <img src={toDataUrl(address)} width={24} height={24} />
-            {/* TODO: these icons should be updated still */}
-            {kycStatus === 'verified' && <Overlay>✓</Overlay>}
           </IdenticonSmall>
           <StatusAddrSmall>
             <Addr>{shorten(address, 4)}</Addr>

@@ -28,7 +28,9 @@ const RewardsPage: React.FC<Props> = (props: Props) => {
               addresses={{
                 CLAIM_CFG: config.claimCFGContractAddress,
               }}
-              render={(tinlake) => <Auth tinlake={tinlake} render={() => <UserRewards tinlake={tinlake} />} />}
+              render={(tinlake) => (
+                <Auth tinlake={tinlake} render={() => <UserRewards tinlake={tinlake} ipfsPools={props.ipfsPools} />} />
+              )}
             />
           </Box>
         </Box>

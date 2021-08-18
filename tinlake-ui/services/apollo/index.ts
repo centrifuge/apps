@@ -9,10 +9,16 @@ import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
 import { PoolData, PoolsDailyData, PoolsData } from '../../ducks/pools'
-import { RewardsData } from '../../ducks/rewards'
 import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
+
+export interface RewardsData {
+  toDateRewardAggregateValue: BN
+  toDateAORewardAggregateValue: BN
+  rewardRate: Decimal
+  todayReward: BN
+}
 
 const OversubscribedBuffer = new BN(5000).mul(new BN(10).pow(new BN(18))) // 5k DAI
 

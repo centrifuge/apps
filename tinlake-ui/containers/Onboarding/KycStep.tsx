@@ -1,16 +1,15 @@
-import { KycStatusLabel } from '@centrifuge/onboarding-api/src/controllers/types'
+import { AddressStatus, KycStatusLabel } from '@centrifuge/onboarding-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
 import config, { Pool } from '../../config'
-import { OnboardingState } from '../../ducks/onboarding'
 import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool
   tinlake: ITinlake
   active: boolean
-  onboarding: OnboardingState
+  onboardingData: AddressStatus | undefined
   kycStatus: KycStatusLabel | 'requires-signin' | undefined
   accreditationStatus: boolean
 }
@@ -99,7 +98,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
             To continue with onboarding, you need to sign in again with your Securitize iD.
           </Paragraph>
           <div>
-            <Button primary label={`Sign in with Securitize`} href={props.onboarding.data?.kyc?.url} fill={false} />
+            <Button primary label={`Sign in with Securitize`} href={props.onboardingData?.kyc?.url} fill={false} />
           </div>
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>

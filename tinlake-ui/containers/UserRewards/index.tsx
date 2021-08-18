@@ -9,34 +9,35 @@ import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import PageTitle from '../../components/PageTitle'
 import { Cont, Label, TokenLogo, Unit, Value } from '../../components/PoolsMetrics/styles'
+import { IpfsPools } from '../../config'
 import { AuthState, ensureAuthed } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
-import { PortfolioState } from '../../ducks/portfolio'
-import { maybeLoadRewards, RewardsState } from '../../ducks/rewards'
 import { maybeLoadUserRewards, UserRewardsData, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { shortAddr } from '../../utils/shortAddr'
 import { dynamicPrecision, toDynamicPrecision } from '../../utils/toDynamicPrecision'
 import { toPrecision } from '../../utils/toPrecision'
+import { useGlobalRewards } from '../../utils/useGlobalRewards'
+import { usePortfolio } from '../../utils/usePortfolio'
 import CentChainWalletDialog from '../CentChainWalletDialog'
 import ClaimRewards from '../ClaimRewards'
 import SetCentAccount from '../SetCentAccount'
 
 interface Props {
   tinlake: ITinlake
+  ipfsPools: IpfsPools
 }
 
-const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
+const UserRewards: React.FC<Props> = ({ tinlake, ipfsPools }) => {
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
-  const { totalValue: portfolioValue } = useSelector<any, PortfolioState>((state) => state.portfolio)
-  const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
+  const rewards = useGlobalRewards()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
+  const portfolio = usePortfolio(ipfsPools)
+  const portfolioValue = portfolio.data?.totalValue
   const dispatch = useDispatch()
-  React.useEffect(() => {
-    dispatch(maybeLoadRewards())
-  }, [])
+
   React.useEffect(() => {
     if (ethAddr) {
       dispatch(maybeLoadUserRewards(ethAddr))
@@ -196,7 +197,9 @@ const UserRewards: React.FC<Props> = ({ tinlake }: Props) => {
                 </Box>
                 <RewardRecipients recipients={data?.links} />
               </Box>
-              {showClaimStripe(data) && <ClaimRewards activeLink={data.links[data.links.length - 1]} />}
+              {showClaimStripe(data) && (
+                <ClaimRewards activeLink={data.links[data.links.length - 1]} portfolioValue={portfolioValue} />
+              )}
             </Card>
           )}
         </ColLeft>

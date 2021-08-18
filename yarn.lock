@@ -2146,6 +2146,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.6.2":
+  version: 7.15.3
+  resolution: "@babel/runtime@npm:7.15.3"
+  dependencies:
+    regenerator-runtime: ^0.13.4
+  checksum: dfb5ba324d36b141f3ed5a6af8a4c03b6b5c94cc2453b265dbdd56ae3b5c28c1a44640b31fa9d7462d8278c7c8af967be8004024a87c795175c724cd77c5cce1
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.12.13, @babel/template@npm:^7.3.3, @babel/template@npm:^7.4.0, @babel/template@npm:^7.7.4, @babel/template@npm:^7.8.6":
   version: 7.12.13
   resolution: "@babel/template@npm:7.12.13"
@@ -2819,6 +2828,7 @@ __metadata:
     react: 16.13.1
     react-dom: 16.13.1
     react-number-format: 4.4.1
+    react-query: ^3.19.6
     react-redux: 7.2.0
     react-test-renderer: 16.13.1
     react-twitter-embed: ^3.0.3
@@ -10705,6 +10715,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"big-integer@npm:^1.6.16":
+  version: 1.6.48
+  resolution: "big-integer@npm:1.6.48"
+  checksum: 311f86a45e28513ddb12415082c5f437b868d80914bff71689a99e16f597beee5c0f12b0c9e65713b70b0516e6ed27f4006e256ea5393bfcf68bb18dc453f976
+  languageName: node
+  linkType: hard
+
 "big.js@npm:^5.2.2":
   version: 5.2.2
   resolution: "big.js@npm:5.2.2"
@@ -11005,6 +11022,22 @@ __metadata:
   dependencies:
     fill-range: ^7.0.1
   checksum: f3493181c3e91a1333d3c9afc9b3263a3f62f4ced0b033c372efc1373b48a7699557f4e04026b232a8556e043ca5360a9d3008c33852350138d4b0ea57558b8d
+  languageName: node
+  linkType: hard
+
+"broadcast-channel@npm:^3.4.1":
+  version: 3.7.0
+  resolution: "broadcast-channel@npm:3.7.0"
+  dependencies:
+    "@babel/runtime": ^7.7.2
+    detect-node: ^2.1.0
+    js-sha3: 0.8.0
+    microseconds: 0.2.0
+    nano-time: 1.0.0
+    oblivious-set: 1.0.0
+    rimraf: 3.0.2
+    unload: 2.2.0
+  checksum: 1f04130dcd08bd1cf922b2f069d1a356fd121e7512cd60dae3adf1086258c70e0552618a46fe9d3c4254cf362a8838cd2e2a0fd42b63dea453ac64906cdd7ee2
   languageName: node
   linkType: hard
 
@@ -14183,6 +14216,13 @@ __metadata:
   version: 2.0.5
   resolution: "detect-node@npm:2.0.5"
   checksum: 115f61555576f872c1ce2882da2d2366f36dc73b2fadd9a0a63bf84c4ebf5e46e97a76845fcddcdfb8b7b389a924baf0e0505ed8dd024019d2ba09aab57bf7bb
+  languageName: node
+  linkType: hard
+
+"detect-node@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "detect-node@npm:2.1.0"
+  checksum: 5100c924d74bdc2cf861af88dce6618abbbb95e3b71047f1eac7e475981416aa2c208c7153fd830df372f8ce324a207adb1c9f56884fa94bcb820b8406dd9e6f
   languageName: node
   linkType: hard
 
@@ -22709,6 +22749,16 @@ fsevents@2.1.2:
   languageName: node
   linkType: hard
 
+"match-sorter@npm:^6.0.2":
+  version: 6.3.0
+  resolution: "match-sorter@npm:6.3.0"
+  dependencies:
+    "@babel/runtime": ^7.12.5
+    remove-accents: 0.4.2
+  checksum: ca6374d80266756e1fccae74da7b76cbb4f5b938e294ef875a6e176bd185f5d7a9f8e06e1bd105682a2da3e80aae3a63c3d7ea5aa53070c02cc447a5a59543bf
+  languageName: node
+  linkType: hard
+
 "math-expression-evaluator@npm:^1.2.14":
   version: 1.3.7
   resolution: "math-expression-evaluator@npm:1.3.7"
@@ -23003,6 +23053,13 @@ fsevents@2.1.2:
     braces: ^3.0.1
     picomatch: ^2.2.3
   checksum: bc522ad93c086aa176f50fea2dc8060a8f7d7a621c811cf9ba02a1912577cc100190508166d721231465f10a575a40ec8a1bffc23bbc2c0108fcbf02e4be04ed
+  languageName: node
+  linkType: hard
+
+"microseconds@npm:0.2.0":
+  version: 0.2.0
+  resolution: "microseconds@npm:0.2.0"
+  checksum: eec9a89f0eaa6c68fb90bc8cf3171924fbfd752d90df22b80660b1b31657817e123658e8a3f5522cf05ac3d3801bdd65a830ef17f7ceed94b4ed9f2467ee7c60
   languageName: node
   linkType: hard
 
@@ -23574,6 +23631,15 @@ fsevents@2.1.2:
   dependencies:
     node-gyp: latest
   checksum: 36349b2e5df4182aa0d0cc43fcd6cc782ca560a83c2764743d80c14ba5028d0c54041a2f464b8d4cb18a884e04415034a0a764c745e1d5502ea34a5cb6470a39
+  languageName: node
+  linkType: hard
+
+"nano-time@npm:1.0.0":
+  version: 1.0.0
+  resolution: "nano-time@npm:1.0.0"
+  dependencies:
+    big-integer: ^1.6.16
+  checksum: 1389727cb8b6043e11212d2bdb65368050d7423eab95fc70fbc5276c1bf5417d725eb541c4ba4c1ef535c1d26f2e665c389fc4fc2f7a3f7bd05d88f0a9014d5c
   languageName: node
   linkType: hard
 
@@ -24609,6 +24675,13 @@ fsevents@2.1.2:
     es-abstract: ^1.18.0-next.2
     has: ^1.0.3
   checksum: 31111fe8b8dfe7c3326ae8729eae542dc32d5705339b9b63d89d4a2f766641bfe8989744bd4771c65a7ca0dff281800e99640262c2e82daa97079143a86b3e0b
+  languageName: node
+  linkType: hard
+
+"oblivious-set@npm:1.0.0":
+  version: 1.0.0
+  resolution: "oblivious-set@npm:1.0.0"
+  checksum: 8309f38148ac63b3b421759d490afb613ea2375b2c55b9acffa62382b012fe768c88bb1e63ff068dd225a9153e3e684f9964c03f08bec06347cc17b6800dc7e9
   languageName: node
   linkType: hard
 
@@ -27657,6 +27730,24 @@ fsevents@2.1.2:
   languageName: node
   linkType: hard
 
+"react-query@npm:^3.19.6":
+  version: 3.19.6
+  resolution: "react-query@npm:3.19.6"
+  dependencies:
+    "@babel/runtime": ^7.5.5
+    broadcast-channel: ^3.4.1
+    match-sorter: ^6.0.2
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+    react-native:
+      optional: true
+  checksum: d43822fbce40ede7741bf78c7ca2abc4119478b4e544165f681a7980ea0083d2ee7b95c6f750cddb10b5887c37d92ee25507f00679c90862c6d8c24a0c2c9992
+  languageName: node
+  linkType: hard
+
 "react-redux@npm:7.2.0":
   version: 7.2.0
   resolution: "react-redux@npm:7.2.0"
@@ -28466,6 +28557,13 @@ fsevents@2.1.2:
     superagent: ^6.1.0
     superagent-proxy: ^2.1.0
   checksum: 862f2e095e860fe3bd49c7ccc76e957cfbed945d92ecef9e69dae9826cc2426d23201c595695322b53fdd25da9b3167a7c6556411c5ec0d39190da61ae15aede
+  languageName: node
+  linkType: hard
+
+"remove-accents@npm:0.4.2":
+  version: 0.4.2
+  resolution: "remove-accents@npm:0.4.2"
+  checksum: 54fd27e4b0df03e7827c49721113a99b51292dcd23233d65ef89aa2b73e4d96f071eaf11ff58cfec22cab0ad711ba60914749c57e4f37f799c2bf22b78be7992
   languageName: node
   linkType: hard
 
@@ -32473,6 +32571,16 @@ resolve@1.15.0:
   version: 2.0.0
   resolution: "universalify@npm:2.0.0"
   checksum: 36bfbdc97bd4b483596e66ea65e20663f5ab9ec3650157d99b075b7f97afcdefe46bbb23f89171dd75595d398cea3769a5b6d7130f5c66cae2a0f00904780f62
+  languageName: node
+  linkType: hard
+
+"unload@npm:2.2.0":
+  version: 2.2.0
+  resolution: "unload@npm:2.2.0"
+  dependencies:
+    "@babel/runtime": ^7.6.2
+    detect-node: ^2.0.4
+  checksum: 618ba99792546b1cef7abe8e8a100a6ed0a34d3a5a64908857b065eabc427c80e2e70eaf5d70d36842efe9654682423719b1e8c3de72dbe720b1a0a074cfe0ae
   languageName: node
   linkType: hard
 

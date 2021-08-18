@@ -26,8 +26,8 @@ import { Cont, Label as MetricLabel, TokenLogo, Value } from '../../components/P
 import { Tooltip } from '../../components/Tooltip'
 import { IpfsPools, Pool } from '../../config'
 import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
-import { loadPortfolio, PortfolioState, TokenBalance } from '../../ducks/portfolio'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
+import { TokenBalance, usePortfolio } from '../../utils/usePortfolio'
 import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
 
 interface Props {
@@ -38,17 +38,13 @@ const Portfolio: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const dispatch = useDispatch()
   const pools = useSelector<any, PoolsState>((state) => state.pools)
-  const portfolio = useSelector<any, PortfolioState>((state) => state.portfolio)
   const connectedAddress = useSelector<any, string | null>((state) => state.auth.address)
   const address = useQueryDebugEthAddress() || connectedAddress
+  const portfolio = usePortfolio(props.ipfsPools, address)
 
   React.useEffect(() => {
     dispatch(loadPools(props.ipfsPools))
   }, [])
-
-  React.useEffect(() => {
-    if (address) dispatch(loadPortfolio(address, props.ipfsPools))
-  }, [address])
 
   const getPool = (tokenBalance: TokenBalance) => {
     const ipfsPool = props.ipfsPools.active.find((pool: Pool) => {
@@ -78,14 +74,16 @@ const Portfolio: React.FC<Props> = (props: Props) => {
     })
   }
   const totalDropValue =
-    portfolio.data?.reduce((prev, tokenBalance) => {
+    portfolio.data?.tokenBalances.reduce((prev, tokenBalance) => {
       return tokenBalance.symbol.substr(-3) === 'DRP' ? prev.add(tokenBalance.value) : prev
     }, new BN(0)) || new BN(0)
 
   const totalTinValue =
-    portfolio.data?.reduce((prev, tokenBalance) => {
+    portfolio.data?.tokenBalances.reduce((prev, tokenBalance) => {
       return tokenBalance.symbol.substr(-3) === 'TIN' ? prev.add(tokenBalance.value) : prev
     }, new BN(0)) || new BN(0)
+
+  const hasBalance = portfolio.data?.totalValue && !portfolio.data.totalValue.isZero()
 
   return (
     <Box margin={{ top: 'medium' }}>
@@ -149,7 +147,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
         </Box>
       </Box>
 
-      {portfolio.data?.filter((tokenBalance) => !tokenBalance.balance.isZero()).length > 0 ? (
+      {hasBalance ? (
         <>
           <Header>
             <Desc>
@@ -169,8 +167,8 @@ const Portfolio: React.FC<Props> = (props: Props) => {
               <HeaderTitle>Current Value</HeaderTitle>
             </HeaderCol>
           </Header>
-          {portfolio.data
-            ?.filter((tokenBalance) => !tokenBalance.balance.isZero())
+          {portfolio.data?.tokenBalances
+            .filter((tokenBalance) => !tokenBalance.balance.isZero())
             .sort((a, b) => parseFloat(b.value.sub(a.value).toString()))
             .map((tokenBalance) => (
               <PoolRow key={tokenBalance.id} onClick={() => clickToken(tokenBalance)}>

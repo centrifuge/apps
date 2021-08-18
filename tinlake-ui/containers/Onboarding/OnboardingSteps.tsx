@@ -4,12 +4,11 @@ import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import PageTitle from '../../components/PageTitle'
 import { PoolLink } from '../../components/PoolLink'
 import config, { Pool } from '../../config'
-import { loadOnboardingStatus, OnboardingState } from '../../ducks/onboarding'
-import { useInterval } from '../../utils/hooks'
+import { useOnboardingState } from '../../utils/useOnboardingState'
 import { ExplainerCard } from '../Investment/View/styles'
 import AgreementStep from './AgreementStep'
 import ConnectStep from './ConnectStep'
@@ -34,14 +33,14 @@ const deleteMyAccount = async (address: string, session: string) => {
 }
 
 const OnboardingSteps: React.FC<Props> = (props: Props) => {
-  const dispatch = useDispatch()
   const router = useRouter()
   const session = 'session' in router.query ? router.query.session : ''
   const trancheOverride = router.query.tranche as Tranche | undefined
   const tranche = trancheOverride || DefaultTranche
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
-  const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
+  const onboarding = useOnboardingState(props.activePool)
+
   const kycStatus = onboarding.data?.kyc?.requiresSignin ? 'requires-signin' : onboarding.data?.kyc?.status
   const accreditationStatus = onboarding.data?.kyc?.isUsaTaxResident ? onboarding.data?.kyc?.accredited || false : true
   const agreement = (onboarding.data?.agreements || []).filter(
@@ -57,14 +56,6 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
     : agreement?.signed
     ? 'signed'
     : 'none'
-
-  useInterval(() => {
-    dispatch(loadOnboardingStatus(props.activePool))
-  }, 60000)
-
-  React.useEffect(() => {
-    dispatch(loadOnboardingStatus(props.activePool))
-  }, [address, props.activePool])
 
   React.useEffect(() => {
     if (!address) setActiveSteps(1)
@@ -105,7 +96,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
       <Box direction="row" gap="medium">
         <Box basis="2/3">
           <Box pad="medium" elevation="small" round="xsmall" background="white">
-            {address && onboarding.state !== 'found' ? (
+            {address && !onboarding.data ? (
               <Spinner height={'400px'} message={'Loading...'} />
             ) : (
               <>
@@ -116,17 +107,17 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
                 )}
 
                 <ConnectStep {...props} />
-                <LinkStep {...props} onboarding={onboarding} linked={!!kycStatus} active={activeSteps >= 2} />
+                <LinkStep {...props} onboardingData={onboarding.data} linked={!!kycStatus} active={activeSteps >= 2} />
                 <KycStep
                   {...props}
-                  onboarding={onboarding}
+                  onboardingData={onboarding.data}
                   kycStatus={kycStatus}
                   accreditationStatus={accreditationStatus}
                   active={activeSteps >= 3}
                 />
                 <AgreementStep
                   {...props}
-                  onboarding={onboarding}
+                  onboardingData={onboarding.data}
                   agreement={agreement}
                   agreementStatus={agreementStatus}
                   whitelistStatus={whitelistStatus}

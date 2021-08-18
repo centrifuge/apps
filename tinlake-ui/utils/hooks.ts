@@ -3,8 +3,8 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { PoolState } from '../ducks/pool'
 import { PoolsState } from '../ducks/pools'
-import { maybeLoadRewards, RewardsState } from '../ducks/rewards'
 import { getWCFGPrice } from '../ducks/userRewards'
+import { useGlobalRewards } from './useGlobalRewards'
 
 // Source: https://www.30secondsofcode.org/react/s/use-interval
 export const useInterval = (callback: any, delay: number) => {
@@ -48,13 +48,12 @@ export const useTrancheYield = () => {
 }
 
 export const useCFGYield = (tinlake: ITinlake) => {
-  const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
+  const rewards = useGlobalRewards()
   const wCFGPrice = useSelector<any, number>((state: any) => state.userRewards.wCFGPrice)
 
   const dispatch = useDispatch()
 
   React.useEffect(() => {
-    dispatch(maybeLoadRewards())
     if (tinlake) {
       dispatch(getWCFGPrice(tinlake))
     }
