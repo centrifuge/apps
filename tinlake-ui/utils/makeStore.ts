@@ -4,7 +4,6 @@ import thunk from 'redux-thunk'
 import config from '../config'
 import authReducer from '../ducks/auth'
 import centChainWalletReducer from '../ducks/centChainWallet'
-import investmentsReducer from '../ducks/investments'
 import loansReducer from '../ducks/loans'
 import poolReducer from '../ducks/pool'
 import poolsReducer from '../ducks/pools'
@@ -29,7 +28,6 @@ const makeStore = () => {
       sentryReduxEnhancer,
       pools: poolsReducer,
       loans: loansReducer,
-      investments: investmentsReducer,
       pool: poolReducer,
       auth: authReducer,
       transactions: transactionReducer,
