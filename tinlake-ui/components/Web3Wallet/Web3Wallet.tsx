@@ -142,17 +142,6 @@ const IdenticonSmall = styled.div`
   text-align: left;
 `
 
-const Overlay = styled.div`
-  display: inline;
-  position: relative;
-  left: -6px;
-  background: white;
-  font-size: 10px;
-  border-radius: 8px;
-  top: 2px;
-  padding: 0px 0 0 2px;
-`
-
 const StatusAddrSmall = styled.div`
   margin-left: 6px;
   @media (max-width: 1199px) {
