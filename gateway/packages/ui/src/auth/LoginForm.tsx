@@ -10,6 +10,15 @@ interface LoginProps {
   error?: Error
 }
 
+function getErrorMessage(error: Error) {
+  switch (error.message) {
+    case 'logout':
+      return "You've been automatically logged out. Please log in again."
+    default:
+      return 'Failed to login! Wrong username or password!'
+  }
+}
+
 class LoginForm extends React.Component<LoginProps> {
   onSubmit = (values) => {
     this.props.onSubmit(values as User)
@@ -47,7 +56,7 @@ class LoginForm extends React.Component<LoginProps> {
                 <TextInput type="password" name="password" value={values.password || ''} onChange={handleChange} />
               </FormField>
 
-              {error && <Text color={'status-error'}>Failed to login! Wrong username or password!</Text>}
+              {error && <Text color={'status-error'}>{getErrorMessage(error)}</Text>}
 
               <Text>
                 Not registered yet? <Link to={routes.register}>Register</Link>

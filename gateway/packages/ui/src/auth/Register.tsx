@@ -4,7 +4,7 @@ import { parse } from 'query-string'
 import React, { FunctionComponent, useContext, useState } from 'react'
 import { RouteComponentProps, withRouter } from 'react-router'
 import { AuthContext } from '../auth/Auth'
-import { httpClient } from '../http-client'
+import { useHttpClient } from '../http-client'
 import { goToHomePage } from '../utils/goToHomePage'
 import QrCode from './QrCode'
 import RegisterForm from './RegisterForm'
@@ -17,6 +17,7 @@ type Props = {
 } & RouteComponentProps
 
 const Register: FunctionComponent<Props> = (props: Props) => {
+  const httpClient = useHttpClient()
   const queryParams = parse(props.location.search, { decode: true })
   const email: string = queryParams.email
     ? Array.isArray(queryParams.email)

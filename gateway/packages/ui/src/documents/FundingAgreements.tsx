@@ -14,7 +14,7 @@ import { AuthContext } from '../auth/Auth'
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
 import { Section } from '../components/Section'
 import { useMergeState } from '../hooks'
-import { httpClient } from '../http-client'
+import { useHttpClient } from '../http-client'
 import { goToHomePage } from '../utils/goToHomePage'
 import FundingRequestForm from './FundingAgreementForm'
 import { FundingStatus, FUNDING_STATUS } from './FundingStatus'
@@ -36,6 +36,7 @@ type State = {
 }
 
 export const FundingAgreements: FunctionComponent<Props> = (props) => {
+  const httpClient = useHttpClient()
   const [{ modalOpened, selectedFundingAgreement, isViewMode }, setState] = useMergeState<State>({
     modalOpened: false,
     selectedFundingAgreement: new FundingAgreement(),

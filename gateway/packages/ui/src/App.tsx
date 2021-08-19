@@ -5,10 +5,10 @@ import { User } from '@centrifuge/gateway-lib/models/user'
 import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants'
 import { getAddressLink } from '@centrifuge/gateway-lib/utils/etherscan'
 import { Anchor, Box, Image, Text } from 'grommet'
-import React, { FunctionComponent } from 'react'
+import React, { FunctionComponent, useContext } from 'react'
 import { RouteComponentProps, withRouter } from 'react-router'
 import logo from './assets/logo.png'
-import { Auth } from './auth/Auth'
+import { AuthContext } from './auth/Auth'
 import { NotificationProvider } from './components/NotificationContext'
 import Contacts from './contacts/ViewContacts'
 import CreateDocument from './documents/CreateDocument'
@@ -26,64 +26,65 @@ const App: FunctionComponent<RouteComponentProps> = (props: RouteComponentProps)
     location: { pathname },
     history: { push },
   } = props
+  const { user, setUser, setToken } = useContext(AuthContext)
+
+  function logout() {
+    setUser(null)
+    setToken(null)
+  }
+
+  const [menuItems, routeItems] = menuAndRouteItems(user, logout)
 
   return (
     <div className="App">
       <AxisTheme theme={theme} full={true}>
-        <Auth>
-          {(user, logout) => {
-            const [menuItems, routeItems] = menuAndRouteItems(user, logout)
-            return (
-              <NotificationProvider>
-                <Box align="center">
-                  <NavBar
-                    width={'xxlarge'}
-                    logo={
-                      <Anchor href="/">
-                        <Image src={logo} />
-                      </Anchor>
-                    }
-                    selectedRoute={pathname}
-                    menuLabel={user ? user.email : ''}
-                    menuItems={menuItems.reverse()}
-                    onRouteClick={(item) => {
-                      if (item.onClick) {
-                        item.onClick()
-                      } else if (item.external) {
-                        window.location.replace(item.route)
-                      } else {
-                        push(item.route)
-                      }
-                    }}
-                  >
-                    {user && (
-                      <Box direction="row" gap={'medium'} align={'center'} justify="end">
-                        <Box direction="row" align="center" gap={'xsmall'}>
-                          <Text>Centrifuge ID: </Text>
-                          <Box width={'160px'}>
-                            <DisplayField
-                              copy={true}
-                              link={{
-                                href: getAddressLink(user.account),
-                                target: '_blank',
-                              }}
-                              value={user.account}
-                            />
-                          </Box>
-                        </Box>
-                      </Box>
-                    )}
-                  </NavBar>
-                  <Box justify="center" direction="row">
-                    <Box width="xxlarge">
-                      <Routing routes={routeItems} />
+        <NotificationProvider>
+          <Box align="center">
+            <NavBar
+              width={'xxlarge'}
+              logo={
+                <Anchor href="/">
+                  <Image src={logo} />
+                </Anchor>
+              }
+              selectedRoute={pathname}
+              menuLabel={user ? user.email : ''}
+              menuItems={menuItems.reverse()}
+              onRouteClick={(item) => {
+                if (item.onClick) {
+                  item.onClick()
+                } else if (item.external) {
+                  window.location.replace(item.route)
+                } else {
+                  push(item.route)
+                }
+              }}
+            >
+              {user && (
+                <Box direction="row" gap={'medium'} align={'center'} justify="end">
+                  <Box direction="row" align="center" gap={'xsmall'}>
+                    <Text>Centrifuge ID: </Text>
+                    <Box width={'160px'}>
+                      <DisplayField
+                        copy={true}
+                        link={{
+                          href: getAddressLink(user.account),
+                          target: '_blank',
+                        }}
+                        value={user.account}
+                      />
                     </Box>
                   </Box>
                 </Box>
-              </NotificationProvider>
-            )
-          }}
-        </Auth>
+              )}
+            </NavBar>
+            <Box justify="center" direction="row">
+              <Box width="xxlarge">
+                <Routing routes={routeItems} />
+              </Box>
+            </Box>
+          </Box>
+        </NotificationProvider>
       </AxisTheme>
     </div>
   )

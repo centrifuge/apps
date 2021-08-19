@@ -1,13 +1,13 @@
 import { User } from '@centrifuge/gateway-lib/models/user'
-import React, { createContext, FC, ReactNode, useEffect, useState } from 'react'
-import { httpClient } from '../http-client'
+import React, { createContext, FC, useEffect, useState } from 'react'
+import { createHttpClient } from '../http-client'
 import { useJWT } from './useJWT'
 
 interface AuthContextData {
   user: User | null
-  setUser: (user: User) => void
+  setUser: (user: User | null) => void
   token: string | null
-  setToken: (token: string) => void
+  setToken: (token: string | null) => void
 }
 
 export const AuthContext = createContext<AuthContextData>({
@@ -17,11 +17,9 @@ export const AuthContext = createContext<AuthContextData>({
   setToken: () => undefined,
 })
 
-interface Props {
-  children: (user: null | User, logout: () => void) => ReactNode
-}
+const httpClient = createHttpClient()
 
-export const Auth: FC<Props> = ({ children }) => {
+export const Auth: FC = ({ children }) => {
   const [userLoaded, setUserLoaded] = useState(false)
   const [user, setUser] = useState<null | User>(null)
   const [token, setToken] = useJWT()
@@ -58,12 +56,6 @@ export const Auth: FC<Props> = ({ children }) => {
 
   if (!userLoaded) return null
 
-  return (
-    <AuthContext.Provider value={{ user, setUser, token, setToken }}>
-      {children(user, () => {
-        setToken(null)
-        setUser(null)
-      })}
-    </AuthContext.Provider>
-  )
+
+  return <AuthContext.Provider value={{ user, setUser, token, setToken }}>{children}</AuthContext.Provider>
 }

@@ -12,7 +12,7 @@ import { PageError } from '../components/PageError'
 import { Preloader } from '../components/Preloader'
 import { SecondaryHeader } from '../components/SecondaryHeader'
 import { useMergeState } from '../hooks'
-import { httpClient } from '../http-client'
+import { useHttpClient } from '../http-client'
 import { goToHomePage } from '../utils/goToHomePage'
 import SchemaForm from './SchemaForm'
 
@@ -72,6 +72,7 @@ const formModePropMapping = {
 }
 
 const SchemaList: FunctionComponent = () => {
+  const httpClient = useHttpClient()
   const [{ loadingMessage, selectedSchema, schemas, formMode, openedSchemaForm, showArchive, error }, setState] =
     useMergeState<State>({
       loadingMessage: 'Loading',
@@ -110,7 +111,7 @@ const SchemaList: FunctionComponent = () => {
     } catch (e) {
       displayPageError(e)
     }
-  }, [setState, displayPageError, token])
+  }, [setState, httpClient, token, displayPageError])
 
   useEffect(() => {
     loadData()

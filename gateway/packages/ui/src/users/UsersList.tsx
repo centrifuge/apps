@@ -18,7 +18,7 @@ import { PageError } from '../components/PageError'
 import { Preloader } from '../components/Preloader'
 import { SecondaryHeader } from '../components/SecondaryHeader'
 import { useMergeState } from '../hooks'
-import { httpClient } from '../http-client'
+import { useHttpClient } from '../http-client'
 import { goToHomePage } from '../utils/goToHomePage'
 import UserForm from './UserForm'
 
@@ -34,6 +34,7 @@ type State = {
 }
 
 const UsersList: FunctionComponent = () => {
+  const httpClient = useHttpClient()
   const [
     { loadingMessage, userFormOpened, confirmDeleteOpened, users, schemas, selectedUser, error, organizations },
     setState,
@@ -95,7 +96,7 @@ const UsersList: FunctionComponent = () => {
     } catch (e) {
       displayPageError(e)
     }
-  }, [setState, displayPageError, token])
+  }, [setState, displayPageError, httpClient, token])
 
   useEffect(() => {
     loadData()

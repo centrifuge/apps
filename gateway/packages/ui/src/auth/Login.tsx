@@ -1,18 +1,25 @@
 import { TwoFaType, User } from '@centrifuge/gateway-lib/models/user'
 import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants'
 import { Box } from 'grommet'
-import React, { FunctionComponent, useContext, useState } from 'react'
+import React, { FunctionComponent, useContext, useEffect, useState } from 'react'
 import { Redirect, RouteComponentProps, withRouter } from 'react-router'
 import { AuthContext } from '../auth/Auth'
-import { httpClient } from '../http-client'
+import { useHttpClient } from '../http-client'
 import routes from '../routes'
 import LoginForm from './LoginForm'
 import TwoFAForm from './TwoFAForm'
 
-type Props = {} & RouteComponentProps
+type Props = {} & RouteComponentProps<any, any, { initialError?: string }>
 
 const LoginPage: FunctionComponent<Props> = (props) => {
+  const httpClient = useHttpClient()
+  const initialError = props.location.state?.initialError
   const [error, setError] = useState<Error>()
+
+  useEffect(() => {
+    if (initialError) setError(new Error(initialError))
+  }, [initialError])
+
   const [loginCandidate, setLoginCandidate] = useState<User>()
   const { user, setUser, setToken } = useContext(AuthContext)
 

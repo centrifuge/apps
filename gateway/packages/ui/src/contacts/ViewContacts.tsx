@@ -4,7 +4,7 @@ import { AuthContext } from '../auth/Auth'
 import { PageError } from '../components/PageError'
 import { Preloader } from '../components/Preloader'
 import { useMergeState } from '../hooks'
-import { httpClient } from '../http-client'
+import { useHttpClient } from '../http-client'
 import { goToHomePage } from '../utils/goToHomePage'
 import ContactList from './ContactList'
 
@@ -20,7 +20,7 @@ const ViewContacts: FunctionComponent = () => {
     error: null,
     contacts: [],
   })
-
+  const httpClient = useHttpClient()
   const { user, token } = useContext(AuthContext)
 
   const displayPageError = useCallback(
@@ -75,7 +75,7 @@ const ViewContacts: FunctionComponent = () => {
     } catch (e) {
       displayPageError(e)
     }
-  }, [displayPageError, setState, token])
+  }, [displayPageError, httpClient, setState, token])
 
   useEffect(() => {
     loadContacts()

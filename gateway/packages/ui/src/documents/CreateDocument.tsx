@@ -14,7 +14,7 @@ import { NOTIFICATION, NotificationContext } from '../components/NotificationCon
 import { PageError } from '../components/PageError'
 import { SecondaryHeader } from '../components/SecondaryHeader'
 import { useMergeState } from '../hooks'
-import { httpClient } from '../http-client'
+import { useHttpClient } from '../http-client'
 import { goToHomePage } from '../utils/goToHomePage'
 import DocumentForm from './DocumentForm'
 import documentRoutes from './routes'
@@ -42,6 +42,7 @@ function templateEmpty(template: string | undefined): boolean {
 }
 
 export const CreateDocument: FunctionComponent<Props> = (props) => {
+  const httpClient = useHttpClient()
   const [{ defaultDocument, contacts, schemas, error }, setState] = useMergeState<State>({
     defaultDocument: {
       attributes: {},
@@ -86,7 +87,7 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
     } catch (e) {
       displayPageError(e)
     }
-  }, [setState, displayPageError, token])
+  }, [setState, displayPageError, httpClient, token])
 
   useEffect(() => {
     loadData()

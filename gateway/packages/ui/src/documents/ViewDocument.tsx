@@ -14,7 +14,7 @@ import { PageError } from '../components/PageError'
 import { Preloader } from '../components/Preloader'
 import { SecondaryHeader } from '../components/SecondaryHeader'
 import { useMergeState } from '../hooks'
-import { httpClient } from '../http-client'
+import { useHttpClient } from '../http-client'
 import routes from '../routes'
 import { goToHomePage } from '../utils/goToHomePage'
 import DocumentForm from './DocumentForm'
@@ -33,6 +33,7 @@ type State = {
 }
 
 export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
+  const httpClient = useHttpClient()
   const [{ loadingMessage, contacts, document, schemas, error }, setState] = useMergeState<State>({
     loadingMessage: 'Loading',
     contacts: [],
@@ -92,7 +93,7 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
     } catch (e) {
       displayPageError(e)
     }
-  }, [id, setState, displayPageError, token])
+  }, [id, setState, displayPageError, httpClient, token])
 
   useEffect(() => {
     loadData()

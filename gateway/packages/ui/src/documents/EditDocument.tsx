@@ -14,7 +14,7 @@ import { PageError } from '../components/PageError'
 import { Preloader } from '../components/Preloader'
 import { SecondaryHeader } from '../components/SecondaryHeader'
 import { useMergeState } from '../hooks'
-import { httpClient } from '../http-client'
+import { useHttpClient } from '../http-client'
 import { goToHomePage } from '../utils/goToHomePage'
 import DocumentForm from './DocumentForm'
 import { FundingAgreements } from './FundingAgreements'
@@ -32,6 +32,7 @@ type State = {
 }
 
 export const EditDocument: FunctionComponent<Props> = (props: Props) => {
+  const httpClient = useHttpClient()
   const {
     history: { push },
     match: {
@@ -74,7 +75,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
     } catch (e) {
       displayPageError(e)
     }
-  }, [id, setState, displayPageError, token])
+  }, [setState, httpClient, token, id, displayPageError])
 
   useEffect(() => {
     loadData()

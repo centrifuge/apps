@@ -17,7 +17,7 @@ import { Preloader } from '../components/Preloader'
 import { SecondaryHeader } from '../components/SecondaryHeader'
 import { POLLING_INTERVAL } from '../constants'
 import { useMergeState } from '../hooks'
-import { httpClient } from '../http-client'
+import { useHttpClient } from '../http-client'
 import { goToHomePage } from '../utils/goToHomePage'
 import documentRoutes from './routes'
 
@@ -33,6 +33,7 @@ type State = {
 let timeoutRef
 
 export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
+  const httpClient = useHttpClient()
   const {
     history: { push },
   } = props
@@ -78,7 +79,7 @@ export const ListDocuments: FunctionComponent<Props> = (props: Props) => {
         loadData(true)
       }, POLLING_INTERVAL)
     },
-    [setState, displayPageError, token]
+    [setState, httpClient, token, displayPageError]
   )
 
   const getFilteredDocuments = () => {

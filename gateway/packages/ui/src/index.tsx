@@ -1,20 +1,20 @@
-import { createBrowserHistory } from 'history'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Route, Router } from 'react-router'
+import { Router } from 'react-router'
 import App from './App'
+import { Auth } from './auth/Auth'
+import { history } from './history'
+import HttpClient from './http-client'
 import * as serviceWorker from './serviceWorker'
-
-const customHistory = createBrowserHistory()
 
 const runApplication = () => {
   ReactDOM.render(
-    <Router history={customHistory}>
-      <Route
-        render={() => {
-          return <App />
-        }}
-      />
+    <Router history={history}>
+      <Auth>
+        <HttpClient>
+          <App />
+        </HttpClient>
+      </Auth>
     </Router>,
     document.getElementById('root')
   )

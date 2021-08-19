@@ -12,7 +12,7 @@ import { AuthContext } from '../auth/Auth'
 import { DataTableWithDynamicHeight } from '../components/DataTableWithDynamicHeight'
 import { Section } from '../components/Section'
 import { useMergeState } from '../hooks'
-import { httpClient } from '../http-client'
+import { useHttpClient } from '../http-client'
 import { goToHomePage } from '../utils/goToHomePage'
 import MintNftForm, { MintNftFormData } from './MintNftForm'
 
@@ -35,6 +35,7 @@ type State = {
 }
 
 export const Nfts: FunctionComponent<Props> = (props) => {
+  const httpClient = useHttpClient()
   const [{ mintModalOpened }, setState] = useMergeState<State>({
     mintModalOpened: false,
     transferModalOpened: false,
