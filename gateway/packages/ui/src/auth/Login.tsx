@@ -1,7 +1,7 @@
 import { TwoFaType, User } from '@centrifuge/gateway-lib/models/user'
 import { PERMISSIONS } from '@centrifuge/gateway-lib/utils/constants'
 import { Box } from 'grommet'
-import React, { FunctionComponent, useContext, useEffect, useState } from 'react'
+import React, { FunctionComponent, useContext, useLayoutEffect, useState } from 'react'
 import { Redirect, RouteComponentProps, withRouter } from 'react-router'
 import { AuthContext } from '../auth/Auth'
 import { useHttpClient } from '../http-client'
@@ -16,7 +16,7 @@ const LoginPage: FunctionComponent<Props> = (props) => {
   const initialError = props.location.state?.initialError
   const [error, setError] = useState<Error>()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (initialError) setError(new Error(initialError))
   }, [initialError])
 

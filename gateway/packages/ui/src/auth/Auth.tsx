@@ -54,8 +54,18 @@ export const Auth: FC = ({ children }) => {
     })()
   }, [token, user, setUserLoaded, setUser, setToken])
 
+  const ctx = React.useMemo(
+    () => ({
+      user,
+      setUser,
+      token,
+      setToken,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [token, user]
+  )
+
   if (!userLoaded) return null
 
-
-  return <AuthContext.Provider value={{ user, setUser, token, setToken }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={ctx}>{children}</AuthContext.Provider>
 }
