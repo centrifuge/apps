@@ -336,11 +336,15 @@ export function loadPools(pools: IpfsPools): ThunkAction<Promise<void>, { pools:
 
       const poolsWithCapacity = poolsData.pools.map((pool: PoolData) => {
         if (pool.id in capacityPerPool) {
+          const isUpcoming =
+            pool.isUpcoming ||
+            (!pool.assetValue && !pool.reserve) ||
+            (pool.assetValue?.isZero() && pool.reserve?.isZero())
           const capacity = capacityPerPool[pool.id]
           return {
             ...pool,
             capacity,
-            order: capacity ? capacity.div(UintBase).toNumber() : pool.isOversubscribed ? -1 : -2,
+            order: isUpcoming ? -2 : pool.isOversubscribed || !capacity ? -1 : capacity.div(UintBase).toNumber(),
             capacityGivenMaxReserve: capacityGivenMaxReservePerPool[pool.id],
             capacityGivenMaxDropRatio: capacityGivenMaxDropRatioPerPool[pool.id],
           }
