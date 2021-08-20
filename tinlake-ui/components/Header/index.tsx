@@ -9,12 +9,12 @@ import styled from 'styled-components'
 import { PoolSelector } from '../../components/PoolSelector'
 import config, { IpfsPools } from '../../config'
 import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
-import { PoolData, PoolState } from '../../ducks/pool'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
 import { useCFGRewards } from '../../utils/useCFGRewards'
+import { usePool } from '../../utils/usePool'
 import { usePortfolio } from '../../utils/usePortfolio'
 import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
 import { Tooltip } from '../Tooltip'
@@ -37,11 +37,12 @@ interface Props {
 }
 
 const Header: React.FC<Props> = (props: Props) => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolData | undefined
+  const router = useRouter()
+  const { root, slug } = router.query
+
+  const { data: poolData } = usePool(root as string)
 
   const { poolTitle, selectedRoute, menuItems } = props
-  const router = useRouter()
 
   const transactions = useSelector<any, TransactionState>((state) => state.transactions)
 
@@ -71,7 +72,6 @@ const Header: React.FC<Props> = (props: Props) => {
 
   const pushWithPrefixIfInPool = (item: MenuItem) => {
     if (item.inPool) {
-      const { root, slug } = router.query
       const route = item.route === '/' ? '' : item.route
 
       if (slug === undefined) {

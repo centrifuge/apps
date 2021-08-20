@@ -1,14 +1,9 @@
-import { aggregate } from '@makerdao/multicall'
 import BN from 'bn.js'
 import { BigNumber } from 'ethers'
 import { useQuery } from 'react-query'
 import { useSelector } from 'react-redux'
-import config, { IpfsPools } from '../config'
-
-const multicallConfig = {
-  rpcUrl: config.rpcUrl,
-  multicallAddress: config.multicallContractAddress,
-}
+import { IpfsPools } from '../config'
+import { multicall } from './multicall'
 
 interface TokenResult {
   symbol: string
@@ -38,13 +33,7 @@ export function usePortfolio(ipfsPools: IpfsPools, addressOverride?: string | nu
   const address = addressOverride || addressState
   const query = useQuery(['portfolio', address], () => getPortfolio(ipfsPools, address!), {
     enabled: !!address,
-    onError: (e) => {
-      console.log('EREREORE')
-      console.error(e)
-    },
   })
-
-  console.log('query', query.error, !!query.isFetched, query.data)
 
   return query
 }
@@ -105,26 +94,7 @@ async function getPortfolio(ipfsPools: IpfsPools, address: string) {
     },
   ])
 
-  const {
-    results: { transformed: multicallData },
-  } = await aggregate(calls, multicallConfig)
-
-  const updatesPerToken: { [key: string]: TokenResult } = Object.entries(multicallData).reduce(
-    (updates: any, [type, value]) => {
-      const [tokenId, key] = type.split('.')
-
-      if (!(tokenId in updates)) {
-        updates[tokenId] = {}
-      }
-
-      updates[tokenId][key] = value
-
-      return updates
-    },
-    {}
-  )
-
-  console.log('multicallData', multicallData)
+  const updatesPerToken = await multicall<{ [key: string]: TokenResult }>(calls)
 
   const tokenBalances = Object.entries(updatesPerToken).map(([tokenId, tokenResult]) => {
     const newBalance = new BN(tokenResult.balance).add(new BN(tokenResult.payoutTokenAmount))

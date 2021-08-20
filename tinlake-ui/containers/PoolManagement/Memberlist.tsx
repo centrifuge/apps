@@ -1,14 +1,13 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, FormField, Heading, TextInput } from 'grommet'
 import * as React from 'react'
-import { connect, useSelector } from 'react-redux'
-import { loadPool, PoolState } from '../../ducks/pool'
+import { connect } from 'react-redux'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
+import { usePool } from '../../utils/usePool'
 const web3 = require('web3-utils')
 
 interface Props extends TransactionProps {
   tinlake: ITinlake
-  loadPool?: (tinlake: any) => Promise<void>
 }
 
 type Tranche = 'junior' | 'senior'
@@ -16,7 +15,7 @@ type Tranche = 'junior' | 'senior'
 const getActionName = (tranche: Tranche) => (tranche === 'senior' ? 'updateSeniorMemberList' : 'updateJuniorMemberList')
 
 const ManageMemberlist: React.FC<Props> = (props: Props) => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [juniorAddress, setJuniorAddress] = React.useState('')
   const [seniorAddress, setSeniorAddress] = React.useState('')
@@ -82,7 +81,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      {pool && pool.data && (
+      {poolData && (
         <Box direction="row" gap="medium">
           <Box
             width="medium"
@@ -176,4 +175,4 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadPool, createTransaction })(ManageMemberlist)
+export default connect((state) => state, { createTransaction })(ManageMemberlist)

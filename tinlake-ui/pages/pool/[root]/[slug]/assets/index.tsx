@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux'
 import Auth from '../../../../../components/Auth'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
+import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
 import PageTitle from '../../../../../components/PageTitle'
 import { PoolLink } from '../../../../../components/PoolLink'
 import WithFooter from '../../../../../components/WithFooter'
@@ -16,8 +17,8 @@ import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import LoanList from '../../../../../containers/Loan/List'
 import LoanOverview from '../../../../../containers/Loan/Overview/index'
 import { AuthState } from '../../../../../ducks/auth'
-import { PoolData } from '../../../../../ducks/pool'
 import { menuItems } from '../../../../../menuItems'
+import { usePool } from '../../../../../utils/usePool'
 
 interface Props extends WithRouterProps {
   root: string
@@ -28,61 +29,63 @@ interface Props extends WithRouterProps {
 const LoanListPage: React.FC<Props> = (props) => {
   const { pool, ipfsPools } = props
 
-  const poolData = useSelector<any, PoolData>((state) => state.pool?.data)
+  const { data: poolData } = usePool(pool.addresses.ROOT_CONTRACT)
   const auth = useSelector<any, AuthState>((state) => state.auth)
   const router = useRouter()
   const isBorrower = poolData?.isPoolAdmin || (auth?.proxies && auth?.proxies.length > 0) || 'lockNFT' in router.query
 
   return (
-    <WithFooter>
-      <Head>
-        <title>Assets: {pool.metadata.name} | Tinlake | Centrifuge</title>
-      </Head>
-      <Header
-        ipfsPools={ipfsPools}
-        poolTitle={pool.metadata.shortName || pool.metadata.name}
-        selectedRoute={'/assets'}
-        menuItems={menuItems}
-      />
-      <Container>
-        <Box justify="evenly" direction="row">
-          <Box width="xlarge" gap="medium">
-            <WithTinlake
-              addresses={pool.addresses}
-              contractConfig={pool.contractConfig}
-              render={(tinlake) => (
-                <Auth
-                  tinlake={tinlake}
-                  render={(auth) => (
-                    <Box>
-                      <Box direction="row" margin={{ top: 'medium' }} justify="between">
-                        <PageTitle pool={props.pool} page="Assets" />
+    <IpfsPoolsProvider value={ipfsPools}>
+      <WithFooter>
+        <Head>
+          <title>Assets: {pool.metadata.name} | Tinlake | Centrifuge</title>
+        </Head>
+        <Header
+          ipfsPools={ipfsPools}
+          poolTitle={pool.metadata.shortName || pool.metadata.name}
+          selectedRoute={'/assets'}
+          menuItems={menuItems}
+        />
+        <Container>
+          <Box justify="evenly" direction="row">
+            <Box width="xlarge" gap="medium">
+              <WithTinlake
+                addresses={pool.addresses}
+                contractConfig={pool.contractConfig}
+                render={(tinlake) => (
+                  <Auth
+                    tinlake={tinlake}
+                    render={(auth) => (
+                      <Box>
+                        <Box direction="row" margin={{ top: 'medium' }} justify="between">
+                          <PageTitle pool={props.pool} page="Assets" />
 
-                        <Box pad={{ top: 'small' }}>
-                          {isBorrower && (
-                            <PoolLink href={'/assets/issue'}>
-                              <Button primary label="Lock NFT" />
-                            </PoolLink>
-                          )}
+                          <Box pad={{ top: 'small' }}>
+                            {isBorrower && (
+                              <PoolLink href={'/assets/issue'}>
+                                <Button primary label="Lock NFT" />
+                              </PoolLink>
+                            )}
+                          </Box>
                         </Box>
-                      </Box>
 
-                      <LoanOverview tinlake={tinlake} auth={auth} selectedPool={props.pool} />
-                      <Box direction="row" justify="between">
-                        <Heading level="4" margin={{ bottom: 'medium' }}>
-                          Asset List
-                        </Heading>
+                        <LoanOverview tinlake={tinlake} auth={auth} selectedPool={props.pool} />
+                        <Box direction="row" justify="between">
+                          <Heading level="4" margin={{ bottom: 'medium' }}>
+                            Asset List
+                          </Heading>
+                        </Box>
+                        <LoanList tinlake={tinlake} auth={auth} hideMetrics={true} activePool={props.pool} />
                       </Box>
-                      <LoanList tinlake={tinlake} auth={auth} hideMetrics={true} activePool={props.pool} />
-                    </Box>
-                  )}
-                />
-              )}
-            />
+                    )}
+                  />
+                )}
+              />
+            </Box>
           </Box>
-        </Box>
-      </Container>
-    </WithFooter>
+        </Container>
+      </WithFooter>
+    </IpfsPoolsProvider>
   )
 }
 

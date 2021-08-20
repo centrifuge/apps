@@ -2,9 +2,9 @@ import { Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import { Pool, UpcomingPool } from '../../config'
-import { PoolData as PoolDataV3, PoolState } from '../../ducks/pool'
 import { PoolData, PoolsState } from '../../ducks/pools'
 import { getPoolStatus } from '../../utils/pool'
+import { usePool } from '../../utils/usePool'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
 
@@ -22,8 +22,9 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   const investDisabled = props.pool?.isUpcoming || !props.pool?.metadata.securitize?.issuerId
 
   const pools = useSelector<any, PoolsState>((state) => state.pools)
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolDataV3 | undefined
+  const { data: poolData } = usePool(
+    props.pool && 'addresses' in props.pool ? props.pool.addresses.ROOT_CONTRACT : undefined
+  )
 
   const [status, setStatus] = React.useState('Open')
 

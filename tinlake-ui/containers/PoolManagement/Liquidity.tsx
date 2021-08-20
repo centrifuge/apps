@@ -8,23 +8,21 @@ import { connect, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import Alert from '../../components/Alert'
 import { LoadingValue } from '../../components/LoadingValue'
-import { LoadPool, Pool } from '../../config'
-import { loadPool, PoolData, PoolState } from '../../ducks/pool'
+import { Pool } from '../../config'
 import { PoolsState } from '../../ducks/pools'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { Fixed27Base } from '../../utils/ratios'
 import { toPrecision } from '../../utils/toPrecision'
+import { usePool } from '../../utils/usePool'
 
 interface Props extends TransactionProps {
   activePool: Pool
   tinlake: ITinlake
-  loadPool?: LoadPool
 }
 
 const Liquidity: React.FC<Props> = (props: Props) => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolData | undefined
+  const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const pools = useSelector<any, PoolsState>((state) => state.pools)
   const poolListData = pools.data?.pools.find((p) => p.id === props.activePool.addresses.ROOT_CONTRACT)
@@ -109,7 +107,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
-      props.loadPool && props.loadPool(props.tinlake, props.activePool?.metadata.maker?.ilk)
+      refetchPoolData()
     }
   }, [status])
 
@@ -355,7 +353,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadPool, createTransaction })(Liquidity)
+export default connect((state) => state, { createTransaction })(Liquidity)
 
 const InlineIcon = styled.img`
   vertical-align: middle;

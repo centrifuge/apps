@@ -1,7 +1,6 @@
 import { baseToDisplay, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { PoolState } from '../ducks/pool'
 import { PoolsState } from '../ducks/pools'
 import { getWCFGPrice } from '../ducks/userRewards'
 import { useGlobalRewards } from './useGlobalRewards'
@@ -25,13 +24,12 @@ export const useInterval = (callback: any, delay: number) => {
   }, [delay])
 }
 
-export const useTrancheYield = () => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
+export const useTrancheYield = (poolId?: string | undefined) => {
   const pools = useSelector<any, PoolsState>((state) => state.pools)
 
   return React.useMemo(() => {
-    if (pools.data?.pools && pool.poolId) {
-      const poolData = pools.data.pools.find((singlePool) => singlePool.id === pool.poolId)
+    if (pools.data?.pools && poolId) {
+      const poolData = pools.data.pools.find((singlePool) => singlePool.id === poolId)
       if (poolData?.seniorYield30Days && poolData?.juniorYield30Days) {
         return {
           dropYield: toPrecision(baseToDisplay(poolData.seniorYield30Days.muln(100), 27), 2),
@@ -44,7 +42,7 @@ export const useTrancheYield = () => {
       dropYield: '',
       tinYield: '',
     }
-  }, [pool, pools])
+  }, [poolId, pools])
 }
 
 export const useCFGYield = (tinlake: ITinlake) => {

@@ -1,4 +1,4 @@
-import { PoolStatus } from '../ducks/pool'
+import { PoolStatus } from '../config'
 import { PoolData } from '../ducks/pools'
 
 export const getPoolStatus = (pool: PoolData): PoolStatus => {

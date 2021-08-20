@@ -1,9 +1,7 @@
-import { ITinlake } from '@centrifuge/tinlake-js'
 import contractAbiPoolRegistry from '@centrifuge/tinlake-js/src/abi/PoolRegistry.abi.json'
 import BN from 'bn.js'
 import { ethers } from 'ethers'
 import * as yup from 'yup'
-import { PoolStatus } from './ducks/pool'
 import { networkUrlToName } from './utils/networkNameResolver'
 
 interface SecuritizeData {
@@ -48,15 +46,19 @@ export interface UpcomingPool extends BasePool {
   }
 }
 
+export type PoolStatus = 'Upcoming' | 'Active' | 'Deployed' | 'Closed'
+
+export interface ArchivedPoolData {
+  status: PoolStatus
+  legacyLink: string
+  totalFinancedCurrency: string
+  financingsCount: string
+  seniorInterestRate: string
+}
+
 export interface ArchivedPool extends BasePool {
   isArchived: true
-  archivedValues: {
-    status: PoolStatus
-    legacyLink: string
-    totalFinancedCurrency: string
-    financingsCount: string
-    seniorInterestRate: string
-  }
+  archivedValues: ArchivedPoolData
 }
 
 export interface Pool extends BasePool {
@@ -74,6 +76,14 @@ export interface Pool extends BasePool {
     SENIOR_TRANCHE: string
     JUNIOR_TRANCHE: string
     FEED: string
+    POOL_ADMIN?: string
+    SENIOR_MEMBERLIST: string
+    JUNIOR_MEMBERLIST: string
+    COORDINATOR: string
+    PILE: string
+    MCD_VAT?: string
+    MCD_JUG?: string
+    MAKER_MGR?: string
   }
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
@@ -117,8 +127,6 @@ export interface IpfsPools {
   archived: ArchivedPool[]
   upcoming: UpcomingPool[]
 }
-
-export type LoadPool = (tinlake: ITinlake, ilk?: string, forceReload?: boolean) => Promise<void>
 
 const contractAddressesSchema = yup.object().shape({
   ROOT_CONTRACT: yup
