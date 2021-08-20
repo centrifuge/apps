@@ -8,16 +8,21 @@ import { DocumentNode } from 'graphql'
 import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
-import { PoolData, PoolsDailyData, PoolsData } from '../../ducks/pools'
 import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
+import { PoolData, PoolsData } from '../../utils/usePools'
 
 export interface RewardsData {
   toDateRewardAggregateValue: BN
   toDateAORewardAggregateValue: BN
   rewardRate: Decimal
   todayReward: BN
+}
+
+export interface PoolsDailyData {
+  day: number
+  poolValue: number
 }
 
 const OversubscribedBuffer = new BN(5000).mul(new BN(10).pow(new BN(18))) // 5k DAI
@@ -438,7 +443,7 @@ class Apollo {
   }
 
   // TODO: expand this to work beyond ~3 years (1000 days), if needed
-  async getPoolsDailyData() {
+  async getPoolsDailyData(): Promise<PoolsDailyData[]> {
     let result
     try {
       result = await this.client.query({

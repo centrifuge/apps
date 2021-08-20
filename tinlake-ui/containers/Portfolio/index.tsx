@@ -5,7 +5,7 @@ import { Box, Button, Heading } from 'grommet'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import NumberDisplay from '../../components/NumberDisplay'
 import {
   Dash,
@@ -25,8 +25,8 @@ import {
 import { Cont, Label as MetricLabel, TokenLogo, Value } from '../../components/PoolsMetrics/styles'
 import { Tooltip } from '../../components/Tooltip'
 import { IpfsPools, Pool } from '../../config'
-import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
+import { usePools } from '../../utils/usePools'
 import { TokenBalance, usePortfolio } from '../../utils/usePortfolio'
 import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
 
@@ -36,15 +36,10 @@ interface Props {
 
 const Portfolio: React.FC<Props> = (props: Props) => {
   const router = useRouter()
-  const dispatch = useDispatch()
-  const pools = useSelector<any, PoolsState>((state) => state.pools)
+  const pools = usePools()
   const connectedAddress = useSelector<any, string | null>((state) => state.auth.address)
   const address = useQueryDebugEthAddress() || connectedAddress
   const portfolio = usePortfolio(props.ipfsPools, address)
-
-  React.useEffect(() => {
-    dispatch(loadPools(props.ipfsPools))
-  }, [])
 
   const getPool = (tokenBalance: TokenBalance) => {
     const ipfsPool = props.ipfsPools.active.find((pool: Pool) => {
@@ -56,7 +51,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
 
     if (!ipfsPool) return undefined
 
-    const data = pools.data?.pools.find((pool: PoolData) => {
+    const data = pools.data?.pools.find((pool) => {
       return pool.id === ipfsPool.addresses.ROOT_CONTRACT
     })
 

@@ -4,8 +4,8 @@ import { Box } from 'grommet'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Router, { withRouter } from 'next/router'
 import * as React from 'react'
-import { PoolData, PoolsData } from '../../ducks/pools'
 import { toPrecision } from '../../utils/toPrecision'
+import { PoolData, PoolsData } from '../../utils/usePools'
 import { LoadingValue } from '../LoadingValue'
 import NumberDisplay from '../NumberDisplay'
 import { PoolCapacityLabel } from '../PoolCapacityLabel'
@@ -61,8 +61,6 @@ class PoolList extends React.Component<Props> {
         query: { showAll, showArchived, capacity },
       },
     } = this.props
-
-    const subgraphIsLoading = this.props.poolsData?.totalValue.isZero()
 
     return (
       <Box>
@@ -134,7 +132,9 @@ class PoolList extends React.Component<Props> {
                 </DataCol>
               )}
 
-              <DataCol>{!subgraphIsLoading && <PoolCapacityLabel pool={p} />}</DataCol>
+              <DataCol>
+                <PoolCapacityLabel pool={p} />
+              </DataCol>
 
               {capacity && (
                 <>
@@ -166,7 +166,7 @@ class PoolList extends React.Component<Props> {
               {!capacity && (
                 <>
                   <DataCol>
-                    <LoadingValue done={!subgraphIsLoading} height={28}>
+                    <LoadingValue done={!!poolsData} height={28}>
                       <NumberDisplay
                         precision={0}
                         render={(v) =>
@@ -183,7 +183,7 @@ class PoolList extends React.Component<Props> {
                     </LoadingValue>
                   </DataCol>
                   <DataCol>
-                    <LoadingValue done={!subgraphIsLoading} height={28}>
+                    <LoadingValue done={!!poolsData} height={28}>
                       <NumberDisplay
                         render={(v) =>
                           v === '0.00' ? (

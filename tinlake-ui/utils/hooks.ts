@@ -1,9 +1,9 @@
 import { baseToDisplay, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { PoolsState } from '../ducks/pools'
 import { getWCFGPrice } from '../ducks/userRewards'
 import { useGlobalRewards } from './useGlobalRewards'
+import { usePools } from './usePools'
 
 // Source: https://www.30secondsofcode.org/react/s/use-interval
 export const useInterval = (callback: any, delay: number) => {
@@ -25,7 +25,7 @@ export const useInterval = (callback: any, delay: number) => {
 }
 
 export const useTrancheYield = (poolId?: string | undefined) => {
-  const pools = useSelector<any, PoolsState>((state) => state.pools)
+  const pools = usePools()
 
   return React.useMemo(() => {
     if (pools.data?.pools && poolId) {

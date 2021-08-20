@@ -1,7 +1,7 @@
 import { addThousandsSeparators, baseToDisplay, toPrecision } from '@centrifuge/tinlake-js'
 import * as React from 'react'
 import styled from 'styled-components'
-import { PoolData } from '../../ducks/pools'
+import { PoolData } from '../../utils/usePools'
 
 interface Props {
   pool: PoolData

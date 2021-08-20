@@ -4,17 +4,17 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Box, Button, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import { connect, useSelector } from 'react-redux'
+import { connect } from 'react-redux'
 import styled from 'styled-components'
 import Alert from '../../components/Alert'
 import { LoadingValue } from '../../components/LoadingValue'
 import { Pool } from '../../config'
-import { PoolsState } from '../../ducks/pools'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { Fixed27Base } from '../../utils/ratios'
 import { toPrecision } from '../../utils/toPrecision'
 import { usePool } from '../../utils/usePool'
+import { usePools } from '../../utils/usePools'
 
 interface Props extends TransactionProps {
   activePool: Pool
@@ -24,7 +24,7 @@ interface Props extends TransactionProps {
 const Liquidity: React.FC<Props> = (props: Props) => {
   const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
-  const pools = useSelector<any, PoolsState>((state) => state.pools)
+  const pools = usePools()
   const poolListData = pools.data?.pools.find((p) => p.id === props.activePool.addresses.ROOT_CONTRACT)
 
   const isMakerIntegrated =

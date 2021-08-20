@@ -1,10 +1,9 @@
 import { Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
 import { Pool, UpcomingPool } from '../../config'
-import { PoolData, PoolsState } from '../../ducks/pools'
 import { getPoolStatus } from '../../utils/pool'
 import { usePool } from '../../utils/usePool'
+import { usePools } from '../../utils/usePools'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
 
@@ -21,7 +20,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
 
   const investDisabled = props.pool?.isUpcoming || !props.pool?.metadata.securitize?.issuerId
 
-  const pools = useSelector<any, PoolsState>((state) => state.pools)
+  const { data: poolsData } = usePools()
   const { data: poolData } = usePool(
     props.pool && 'addresses' in props.pool ? props.pool.addresses.ROOT_CONTRACT : undefined
   )
@@ -30,13 +29,13 @@ const InvestAction: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (props.pool) {
-      const pool = pools.data?.pools.find((pool: PoolData) => {
+      const pool = poolsData?.pools.find((pool) => {
         return 'addresses' in props.pool! && pool.id === (props.pool as Pool).addresses.ROOT_CONTRACT.toLowerCase()
       })
 
       if (pool) setStatus(getPoolStatus(pool))
     }
-  }, [pools])
+  }, [poolsData])
 
   // TODO: remove hardcoded exception for PC2
   const isClosed = (status === 'Deployed' || status === 'Closed') && !(props.pool?.metadata.slug === 'paperchain-2')

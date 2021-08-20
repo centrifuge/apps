@@ -2,9 +2,8 @@ import { Drop, TextInput } from 'grommet'
 import { FormSearch } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { IpfsPools } from '../../config'
-import { loadPools, PoolData, PoolsState } from '../../ducks/pools'
+import { PoolData, usePools } from '../../utils/usePools'
 import { Button, Caret, Icon, PoolLink, PoolList, SearchField, Title, Wrapper } from './styles'
 
 interface Props {
@@ -15,8 +14,7 @@ interface Props {
 export const PoolSelector: React.FC<Props> = (props: Props) => {
   const router = useRouter()
 
-  const pools = useSelector<any, PoolsState>((state: any) => state.pools)
-  const dispatch = useDispatch()
+  const pools = usePools()
 
   const poolRef = React.useRef<HTMLDivElement>(null)
 
@@ -32,10 +30,6 @@ export const PoolSelector: React.FC<Props> = (props: Props) => {
       setTimeout(() => setJustClosed(false), 0)
     }
   }
-
-  React.useEffect(() => {
-    dispatch(loadPools(props.ipfsPools))
-  }, [router.query])
 
   const onChangeSearchQuery = (event: React.FormEvent<HTMLInputElement>) => {
     setSearchQuery(event.currentTarget.value)

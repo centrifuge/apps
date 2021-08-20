@@ -1,24 +1,24 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
 import { Area, AreaChart, ResponsiveContainer, Tooltip as ChartTooltip, YAxis } from 'recharts'
-import { PoolsDailyData, PoolsData } from '../../ducks/pools'
 import { dateToYMD } from '../../utils/date'
 import { useCFGYield } from '../../utils/hooks'
+import { useDailyTVL } from '../../utils/useDailyTVL'
 import NumberDisplay from '../NumberDisplay'
 import { Tooltip } from '../Tooltip'
 import { Cont, Label, TokenLogo, Unit, Value } from './styles'
 
 interface Props {
-  pools: PoolsData
+  totalValue?: BN
   tinlake: ITinlake
 }
 
 const PoolsMetrics: React.FC<Props> = (props: Props) => {
   const router = useRouter()
-  const poolsDailyData = useSelector<any, PoolsDailyData[]>((state) => state.pools.poolsDailyData)
+  const { data: dailyTVL = [] } = useDailyTVL()
 
   const [hoveredPoolValue, setHoveredPoolValue] = React.useState<number | undefined>(undefined)
   const [hoveredDay, setHoveredDay] = React.useState<number | undefined>(undefined)
@@ -27,7 +27,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
 
   const maxPoolValue = Math.max.apply(
     Math,
-    poolsDailyData.map((o) => {
+    dailyTVL.map((o) => {
       return o.poolValue
     })
   )
@@ -48,7 +48,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         <Box width="250px" height="80px" pad={{ left: 'small' }} margin={{ left: '0' }}>
           <ResponsiveContainer>
             <AreaChart
-              data={poolsDailyData}
+              data={dailyTVL}
               margin={{ top: 4, right: 4, left: 4, bottom: 4 }}
               onMouseMove={(val: any) => {
                 if (val.activePayload) {
@@ -92,7 +92,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
             <TokenLogo src={`/static/dai.svg`} />
             <Value>
               <NumberDisplay
-                value={hoveredPoolValue?.toString() || baseToDisplay(props.pools.totalValue, 18)}
+                value={hoveredPoolValue?.toString() || baseToDisplay(props.totalValue || new BN(0), 18)}
                 precision={0}
               />
             </Value>{' '}

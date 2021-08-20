@@ -5,7 +5,6 @@ import config from '../config'
 import authReducer from '../ducks/auth'
 import centChainWalletReducer from '../ducks/centChainWallet'
 import loansReducer from '../ducks/loans'
-import poolsReducer from '../ducks/pools'
 import transactionReducer from '../ducks/transactions'
 import userRewardsReducer from '../ducks/userRewards'
 
@@ -25,7 +24,6 @@ const makeStore = () => {
   return createStore(
     combineReducers({
       sentryReduxEnhancer,
-      pools: poolsReducer,
       loans: loansReducer,
       auth: authReducer,
       transactions: transactionReducer,
