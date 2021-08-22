@@ -13,7 +13,7 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
   for (let pool of Object.values(pools)) {
     try {
       if (!pool.addresses) continue
-      const tinlake: any = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
+      const tinlake = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
       const id = await tinlake.getCurrentEpochId()
       const state = await tinlake.getCurrentEpochState()
       const name = pool.metadata.shortName || pool.metadata.name
@@ -59,7 +59,23 @@ export const closePools = async (pools: PoolMap, provider: ethers.providers.Prov
 
       const currencySymbol = pool.metadata.currencySymbol || 'DAI'
 
-      if (solutionSum.eq(orderSum)) {
+      function shouldClose() {
+        if (solutionSum.eq(orderSum)) {
+          return true
+        }
+        if (
+          orders.tinInvest.lt(e18) &&
+          orders.tinRedeem.lt(e18) &&
+          orders.dropRedeem.gt(e18) &&
+          orders.dropRedeem.eq(solution.dropRedeem)
+        ) {
+          return true
+        }
+
+        return false
+      }
+
+      if (shouldClose()) {
         // If 100% fulfillment is possible, close the epoch
         const closeTx = await tinlake.closeEpoch()
         console.log(`Closing ${name} with tx: ${closeTx.hash}`)
