@@ -476,7 +476,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                       ? '0'
                       : parseFloat(
                           (solution?.dropRedeem || new BN(0))
-                            .add(solution?.tinInvest || new BN(0))
+                            .add(solution?.tinRedeem || new BN(0))
                             .mul(new BN(10).pow(new BN(18)))
                             .div(
                               (poolData?.senior?.pendingRedemptions || new BN(1)).add(

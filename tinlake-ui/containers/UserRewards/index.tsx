@@ -362,7 +362,7 @@ const Explainer = () => (
     >
       How are CFG rewards calculated?
     </Anchor>
-    <Anchor href="https://centrifuge.io/products/chain/" target="_blank">
+    <Anchor href="https://docs.centrifuge.io/build/cent-chain/" target="_blank">
       What is Centrifuge Chain?
     </Anchor>
   </Box>
