@@ -14,7 +14,12 @@ import { ViewDocument } from '../ViewDocument'
 const ViewDocumentDynamicProps: any = ViewDocument
 
 describe('View Document', () => {
+  let location = ''
   let httpClient
+
+  const push = (path) => {
+    location = path
+  }
 
   const document = {
     header: {
