@@ -17,8 +17,6 @@ export const AuthContext = createContext<AuthContextData>({
   setToken: () => undefined,
 })
 
-const httpClient = createHttpClient()
-
 export const Auth: FC = ({ children }) => {
   const [userLoaded, setUserLoaded] = useState(false)
   const [user, setUser] = useState<null | User>(null)
@@ -26,6 +24,7 @@ export const Auth: FC = ({ children }) => {
 
   useEffect(() => {
     ;(async () => {
+      const httpClient = createHttpClient()
       // if auto login should happen
       if (!user && !token && process.env.REACT_APP_ADMIN_USER) {
         const res = await httpClient.user.login({

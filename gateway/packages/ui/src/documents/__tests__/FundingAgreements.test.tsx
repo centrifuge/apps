@@ -8,9 +8,6 @@ import { withAllProvidersAndContexts } from '../../test-utilities/test-providers
 import FundingAgreementForm from '../FundingAgreementForm'
 import { FundingAgreements } from '../FundingAgreements'
 
-jest.mock('../../http-client')
-const httpClient = require('../../http-client').httpClient
-
 describe('Funding Agreements', () => {
   const document = {
     _id: 'first_id',
@@ -236,6 +233,10 @@ describe('Funding Agreements', () => {
   })
 
   it('Should request a funding agreement successfully ', async () => {
+    const httpClient = {
+      funding: { create: async () => ({ data: 'Custom Payload' }) },
+    }
+
     //FundingAgrement form has DatePicker and it will not find
     // the theme definition
     const component = mount(
@@ -248,13 +249,10 @@ describe('Funding Agreements', () => {
           user={defaultUser}
           viewMode={false}
           contacts={defaultContacts}
-        />
+        />,
+        { httpClient }
       )
     )
-
-    httpClient.funding.create.mockImplementation(async () => {
-      return { data: 'Custom Payload' }
-    })
 
     const fundingAction = component.find(Button).findWhere((node) => node.key() === 'create-funding-agreement')
     fundingAction.simulate('click')
@@ -266,6 +264,15 @@ describe('Funding Agreements', () => {
   })
 
   it('Should fail to request  a funding agreement', async () => {
+    const error = new Error('Some Error')
+    const httpClient = {
+      funding: {
+        create: async () => {
+          throw error
+        },
+      },
+    }
+
     //FundingAgrement form has DatePicker and it will not find
     // the theme definition
     const component = mount(
@@ -278,13 +285,10 @@ describe('Funding Agreements', () => {
           user={defaultUser}
           viewMode={false}
           contacts={defaultContacts}
-        />
+        />,
+        { httpClient }
       )
     )
-    const error = new Error('Some Error')
-    httpClient.funding.create.mockImplementation(async () => {
-      throw error
-    })
 
     const fundingAction = component.find(Button).findWhere((node) => node.key() === 'create-funding-agreement')
     fundingAction.simulate('click')
@@ -325,6 +329,9 @@ describe('Funding Agreements', () => {
   })
 
   it('Should sign an agreement', async () => {
+    const httpClient = {
+      funding: { sign: async () => ({ data: 'Custom Payload' }) },
+    }
     const component = mount(
       withAllProvidersAndContexts(
         <FundingAgreements
@@ -338,13 +345,10 @@ describe('Funding Agreements', () => {
             account: '0xSomeFunderId',
           }}
           contacts={defaultContacts}
-        />
+        />,
+        { httpClient }
       )
     )
-
-    httpClient.funding.sign.mockImplementation(async (data) => {
-      return { data: 'Custom Payload' }
-    })
 
     const signAction = component.find('tbody tr').at(1).find('.actions').find(Anchor).at(1)
     await signAction.prop('onClick')()
@@ -354,6 +358,14 @@ describe('Funding Agreements', () => {
   })
 
   it('Should not sign an agreement', async () => {
+    const error = new Error('Some Error')
+    const httpClient = {
+      funding: {
+        sign: async () => {
+          throw error
+        },
+      },
+    }
     const component = mount(
       withAllProvidersAndContexts(
         <FundingAgreements
@@ -367,14 +379,10 @@ describe('Funding Agreements', () => {
             account: '0xSomeFunderId',
           }}
           contacts={defaultContacts}
-        />
+        />,
+        { httpClient }
       )
     )
-
-    const error = new Error('Some Error')
-    httpClient.funding.sign.mockImplementation(async (data) => {
-      throw error
-    })
 
     const signAction = component.find('tbody tr').at(1).find('.actions').find(Anchor).at(1)
     await signAction.prop('onClick')()

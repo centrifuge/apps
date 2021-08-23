@@ -6,9 +6,6 @@ import { withAllProvidersAndContexts } from '../../test-utilities/test-providers
 import MintNftForm from '../MintNftForm'
 import { Nfts } from '../Nfts'
 
-jest.mock('../../http-client')
-const httpClient = require('../../http-client').httpClient
-
 describe('Nfts', () => {
   const template = '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef'
 
@@ -132,6 +129,13 @@ describe('Nfts', () => {
   })
 
   it('Should mint a nft successfully ', async () => {
+    const httpClient = {
+      nfts: {
+        mint: async () => {
+          return { data: 'Custom Payload' }
+        },
+      },
+    }
     const component = mount(
       withAllProvidersAndContexts(
         <Nfts
@@ -145,13 +149,10 @@ describe('Nfts', () => {
           user={defaultUser}
           registries={registries}
           template={template}
-        />
+        />,
+        { httpClient }
       )
     )
-
-    httpClient.nfts.mint.mockImplementation(async () => {
-      return { data: 'Custom Payload' }
-    })
 
     const mintAction = component.find(Button).findWhere((node) => node.key() === 'mint-nft')
     mintAction.simulate('click')
@@ -163,6 +164,14 @@ describe('Nfts', () => {
   })
 
   it('Should fail to mint a nft ', async () => {
+    const error = new Error('Some Error')
+    const httpClient = {
+      nfts: {
+        mint: async () => {
+          throw error
+        },
+      },
+    }
     const component = mount(
       withAllProvidersAndContexts(
         <Nfts
@@ -176,13 +185,10 @@ describe('Nfts', () => {
           user={defaultUser}
           registries={registries}
           template={template}
-        />
+        />,
+        { httpClient }
       )
     )
-    const error = new Error('Some Error')
-    httpClient.nfts.mint.mockImplementation(async () => {
-      throw error
-    })
 
     const mintAction = component.find(Button).findWhere((node) => node.key() === 'mint-nft')
     mintAction.simulate('click')

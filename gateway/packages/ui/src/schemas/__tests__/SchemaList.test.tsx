@@ -8,10 +8,9 @@ import { withAllProvidersAndContexts } from '../../test-utilities/test-providers
 import SchemaForm from '../SchemaForm'
 import SchemaList from '../SchemaList'
 
-jest.mock('../../http-client')
-const httpClient = require('../../http-client').httpClient
-
 describe('Schema List', () => {
+  let httpClient
+
   const schemas = [
     {
       ...Schema.getDefaultValues(),
@@ -27,21 +26,19 @@ describe('Schema List', () => {
       archived: true,
     },
   ]
-
   beforeEach(() => {
-    httpClient.schemas.list.mockImplementation(async (data) => {
-      return { data: schemas }
-    })
+    httpClient = {
+      schemas: { list: async () => ({ data: schemas }) },
+    }
   })
 
   it('should display a page Error', async () => {
     await act(async () => {
       const error = new Error('Failed to load!')
-      httpClient.schemas.list.mockImplementation(async (data) => {
+      httpClient.schemas.list = async () => {
         throw error
-      })
-
-      const component = mount(withAllProvidersAndContexts(<SchemaList />))
+      }
+      const component = mount(withAllProvidersAndContexts(<SchemaList />, { httpClient }))
 
       await new Promise((r) => setTimeout(r, 0))
       component.update()
@@ -51,7 +48,7 @@ describe('Schema List', () => {
 
   it('Should render 2 unarchived schemas with the propper actions', async () => {
     await act(async () => {
-      const component = mount(withAllProvidersAndContexts(<SchemaList />))
+      const component = mount(withAllProvidersAndContexts(<SchemaList />, { httpClient }))
 
       await new Promise((r) => setTimeout(r, 0))
       component.update()
@@ -69,7 +66,7 @@ describe('Schema List', () => {
 
   it('Should switch to archived and render one item', async () => {
     await act(async () => {
-      const component = mount(withAllProvidersAndContexts(<SchemaList />))
+      const component = mount(withAllProvidersAndContexts(<SchemaList />, { httpClient }))
 
       await new Promise((r) => setTimeout(r, 0))
       component.update()
@@ -91,7 +88,7 @@ describe('Schema List', () => {
 
   it('Should open schema modal when clicking view', async () => {
     await act(async () => {
-      const component = mount(withAllProvidersAndContexts(<SchemaList />))
+      const component = mount(withAllProvidersAndContexts(<SchemaList />, { httpClient }))
 
       await new Promise((r) => setTimeout(r, 0))
       component.update()
@@ -111,7 +108,7 @@ describe('Schema List', () => {
 
   it('Should open schema modal when clicking edit', async () => {
     await act(async () => {
-      const component = mount(withAllProvidersAndContexts(<SchemaList />))
+      const component = mount(withAllProvidersAndContexts(<SchemaList />, { httpClient }))
 
       await new Promise((r) => setTimeout(r, 0))
       component.update()
@@ -131,7 +128,7 @@ describe('Schema List', () => {
 
   it('Should open schema modal when clicking create', async () => {
     await act(async () => {
-      const component = mount(withAllProvidersAndContexts(<SchemaList />))
+      const component = mount(withAllProvidersAndContexts(<SchemaList />, { httpClient }))
 
       await new Promise((r) => setTimeout(r, 0))
       component.update()

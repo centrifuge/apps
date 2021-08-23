@@ -2,7 +2,6 @@ import { extendContactsWithUsers } from '@centrifuge/gateway-lib/models/contact'
 import { mount } from 'enzyme'
 import React from 'react'
 import { act } from 'react-dom/test-utils'
-import { MemoryRouter } from 'react-router'
 import { PageError } from '../../components/PageError'
 import { Preloader } from '../../components/Preloader'
 import { defaultContacts, defaultSchemas, defaultUser } from '../../test-utilities/default-data'
@@ -12,17 +11,11 @@ import { FundingAgreements } from '../FundingAgreements'
 import { Nfts } from '../Nfts'
 import { ViewDocument } from '../ViewDocument'
 
-jest.mock('../../http-client')
-const httpClient = require('../../http-client').httpClient
-
 const ViewDocumentDynamicProps: any = ViewDocument
 
 describe('View Document', () => {
-  let location = ''
+  let httpClient
 
-  const push = (path) => {
-    location = path
-  }
   const document = {
     header: {
       write_access: [defaultUser.account],
@@ -41,38 +34,31 @@ describe('View Document', () => {
     },
   }
   beforeEach(() => {
-    httpClient.contacts.list.mockImplementation(async (data) => {
-      return { data: defaultContacts }
-    })
-
-    httpClient.schemas.list.mockImplementation(async (data) => {
-      return { data: defaultSchemas }
-    })
-
-    httpClient.documents.getById.mockImplementation(async (id) => {
-      return {
-        data: document,
-      }
-    })
+    httpClient = {
+      schemas: { list: async () => ({ data: defaultSchemas }) },
+      contacts: { list: async () => ({ data: defaultContacts }) },
+      documents: { getById: async () => ({ data: document }) },
+    }
   })
 
   it('Should render the preloader', async () => {
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <ViewDocumentDynamicProps
-              history={push}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <ViewDocumentDynamicProps
+            history={push}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[0].name],
+            },
+            httpClient,
           }
         )
       )
@@ -88,19 +74,20 @@ describe('View Document', () => {
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <ViewDocumentDynamicProps
-              history={push}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <ViewDocumentDynamicProps
+            history={push}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[0].name],
+            },
+            httpClient,
           }
         )
       )
@@ -124,7 +111,7 @@ describe('View Document', () => {
   })
 
   it('Should not render funding agreements', async () => {
-    httpClient.documents.getById.mockImplementation(async (id) => {
+    httpClient.documents.getById = async (id) => {
       return {
         data: {
           ...document,
@@ -138,24 +125,25 @@ describe('View Document', () => {
           },
         },
       }
-    })
+    }
 
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <ViewDocumentDynamicProps
-              history={push}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <ViewDocumentDynamicProps
+            history={push}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[1].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[1].name],
+            },
+            httpClient,
           }
         )
       )
@@ -170,26 +158,27 @@ describe('View Document', () => {
 
   it('Should render an error if it fails to load schemas', async () => {
     const error = new Error('Can not load lists')
-    httpClient.schemas.list.mockImplementation(async (data) => {
+    httpClient.schemas.list = async (data) => {
       throw error
-    })
+    }
 
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <ViewDocumentDynamicProps
-              history={push}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <ViewDocumentDynamicProps
+            history={push}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[0].name],
+            },
+            httpClient,
           }
         )
       )
@@ -205,26 +194,27 @@ describe('View Document', () => {
 
   it('Should render an error if it fails to load contacts', async () => {
     const error = new Error('Can not load contacts')
-    httpClient.contacts.list.mockImplementation(async (data) => {
+    httpClient.contacts.list = async (data) => {
       throw error
-    })
+    }
 
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <ViewDocumentDynamicProps
-              history={push}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <ViewDocumentDynamicProps
+            history={push}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[0].name],
+            },
+            httpClient,
           }
         )
       )
@@ -240,26 +230,27 @@ describe('View Document', () => {
 
   it('Should render an error if it fails to load the document', async () => {
     const error = new Error('Can not load document')
-    httpClient.documents.getById.mockImplementation(async (data) => {
+    httpClient.documents.getById = async (data) => {
       throw error
-    })
+    }
 
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <ViewDocumentDynamicProps
-              history={push}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <ViewDocumentDynamicProps
+            history={push}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[0].name],
+            },
+            httpClient,
           }
         )
       )

@@ -98,9 +98,9 @@ const authHeader = (token: string) => ({
   headers: { Authorization: `Bearer ${token}` },
 })
 
-type HttpClientContextData = ReturnType<typeof createHttpClient>
+export type HttpClient = ReturnType<typeof createHttpClient>
 
-const HttpClientContext = React.createContext<HttpClientContextData>({} as any)
+export const HttpClientContext = React.createContext<HttpClient>({} as any)
 
 export const useHttpClient = () => React.useContext(HttpClientContext)
 

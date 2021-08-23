@@ -2,7 +2,6 @@ import { mount } from 'enzyme'
 import { createMemoryHistory } from 'history'
 import React from 'react'
 import { act } from 'react-dom/test-utils'
-import { MemoryRouter, Router } from 'react-router'
 import { PageError } from '../../components/PageError'
 import { defaultContacts, defaultSchemas, defaultUser } from '../../test-utilities/default-data'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
@@ -12,32 +11,27 @@ import { FundingAgreements } from '../FundingAgreements'
 import { Nfts } from '../Nfts'
 import routes from '../routes'
 
-jest.mock('../../http-client')
-const httpClient = require('../../http-client').httpClient
-
 describe('Create Document', () => {
-  beforeEach(() => {
-    httpClient.contacts.list.mockImplementation(async (data) => {
-      return { data: defaultContacts }
-    })
+  let httpClient
 
-    httpClient.schemas.list.mockImplementation(async (data) => {
-      return { data: defaultSchemas }
-    })
+  beforeEach(() => {
+    httpClient = {
+      schemas: { list: async () => ({ data: defaultSchemas }) },
+      contacts: { list: async () => ({ data: defaultContacts }) },
+      documents: {},
+    }
   })
 
   it('Should load the data and render the page', async () => {
     await act(async () => {
       const component = mount(
-        withAllProvidersAndContexts(
-          <MemoryRouter>
-            <CreateDocument />
-          </MemoryRouter>,
-          {
+        withAllProvidersAndContexts(<CreateDocument />, {
+          user: {
             ...defaultUser,
             schemas: [defaultSchemas[0].name],
-          }
-        )
+          },
+          httpClient,
+        })
       )
 
       //Wait for use effect and update the dom of the component
@@ -56,21 +50,19 @@ describe('Create Document', () => {
 
   it('Should render an error if it fails to load schemas', async () => {
     const error = new Error('Can not load lists')
-    httpClient.schemas.list.mockImplementation(async (data) => {
+    httpClient.schemas.list = async () => {
       throw error
-    })
+    }
 
     await act(async () => {
       const component = mount(
-        withAllProvidersAndContexts(
-          <MemoryRouter>
-            <CreateDocument />
-          </MemoryRouter>,
-          {
+        withAllProvidersAndContexts(<CreateDocument />, {
+          user: {
             ...defaultUser,
             schemas: [defaultSchemas[0].name],
-          }
-        )
+          },
+          httpClient,
+        })
       )
 
       //Wait for use effect and update the dom of the component
@@ -84,21 +76,19 @@ describe('Create Document', () => {
 
   it('Should render an error if it fails to load contacts', async () => {
     const error = new Error('Can not load contacts')
-    httpClient.contacts.list.mockImplementation(async (data) => {
+    httpClient.contacts.list = async () => {
       throw error
-    })
+    }
 
     await act(async () => {
       const component = mount(
-        withAllProvidersAndContexts(
-          <MemoryRouter>
-            <CreateDocument />
-          </MemoryRouter>,
-          {
+        withAllProvidersAndContexts(<CreateDocument />, {
+          user: {
             ...defaultUser,
             schemas: [defaultSchemas[0].name],
-          }
-        )
+          },
+          httpClient,
+        })
       )
 
       //Wait for use effect and update the dom of the component
@@ -113,21 +103,20 @@ describe('Create Document', () => {
   it('Should create a document', async () => {
     const history = createMemoryHistory()
 
-    httpClient.documents.create.mockImplementation(async (data) => {
+    httpClient.documents.create = async () => {
       return { data: { _id: 'new_document' } }
-    })
+    }
 
     await act(async () => {
       const component = mount(
-        withAllProvidersAndContexts(
-          <Router history={history}>
-            <CreateDocument />
-          </Router>,
-          {
+        withAllProvidersAndContexts(<CreateDocument />, {
+          user: {
             ...defaultUser,
             schemas: [defaultSchemas[0].name],
-          }
-        )
+          },
+          httpClient,
+          history,
+        })
       )
 
       //Wait for use effect and update the dom of the component

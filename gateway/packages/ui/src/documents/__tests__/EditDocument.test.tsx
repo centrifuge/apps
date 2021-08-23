@@ -6,7 +6,6 @@ import { Heading, Paragraph } from 'grommet'
 import { createMemoryHistory } from 'history'
 import React from 'react'
 import { act } from 'react-dom/test-utils'
-import { MemoryRouter } from 'react-router'
 import { PageError } from '../../components/PageError'
 import { Preloader } from '../../components/Preloader'
 import { defaultContacts, defaultSchemas, defaultUser } from '../../test-utilities/default-data'
@@ -16,12 +15,11 @@ import { EditDocument } from '../EditDocument'
 import { FundingAgreements } from '../FundingAgreements'
 import { Nfts } from '../Nfts'
 
-jest.mock('../../http-client')
-const httpClient = require('../../http-client').httpClient
-
 const EditDocumentDynamicProps: any = EditDocument
 
 describe('Edit Document', () => {
+  let httpClient
+
   const document = {
     nft_status: NftStatus.NoNft,
     document_status: DocumentStatus.Created,
@@ -37,41 +35,33 @@ describe('Edit Document', () => {
       },
     },
   }
+
   beforeEach(() => {
-    httpClient.contacts.list.mockImplementation(async (data) => {
-      return { data: defaultContacts }
-    })
-
-    httpClient.schemas.list.mockImplementation(async (data) => {
-      return { data: defaultSchemas }
-    })
-
-    httpClient.documents.getById.mockImplementation(async (id) => {
-      return {
-        data: document,
-      }
-    })
+    httpClient = {
+      schemas: { list: async () => ({ data: defaultSchemas }) },
+      contacts: { list: async () => ({ data: defaultContacts }) },
+      documents: { getById: async () => ({ data: document }) },
+    }
   })
-
   it('Should render the preloader', async () => {
     const history = createMemoryHistory()
-
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <EditDocumentDynamicProps
-              history={history}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <EditDocumentDynamicProps
+            history={history}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[0].name],
+            },
+            httpClient,
           }
         )
       )
@@ -89,19 +79,20 @@ describe('Edit Document', () => {
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <EditDocumentDynamicProps
-              history={history}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <EditDocumentDynamicProps
+            history={history}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[0].name],
+            },
+            httpClient,
           }
         )
       )
@@ -126,28 +117,28 @@ describe('Edit Document', () => {
 
   it('Should render an error if it fails to load schemas', async () => {
     const history = createMemoryHistory()
-
-    const error = new Error('Can not load lists')
-    httpClient.schemas.list.mockImplementation(async (data) => {
+    const error = new Error()
+    httpClient.schemas.list = async () => {
       throw error
-    })
+    }
 
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <EditDocumentDynamicProps
-              history={history}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <EditDocumentDynamicProps
+            history={history}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[0].name],
+            },
+            httpClient,
           }
         )
       )
@@ -163,28 +154,29 @@ describe('Edit Document', () => {
 
   it('Should render an error if it fails to load contacts', async () => {
     const error = new Error('Can not load contacts')
-    httpClient.contacts.list.mockImplementation(async (data) => {
+    httpClient.contacts.list = async () => {
       throw error
-    })
+    }
 
     const history = createMemoryHistory()
 
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <EditDocumentDynamicProps
-              history={history}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <EditDocumentDynamicProps
+            history={history}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[0].name],
+            },
+            httpClient,
           }
         )
       )
@@ -200,28 +192,29 @@ describe('Edit Document', () => {
 
   it('Should render an error if it fails to load the document', async () => {
     const error = new Error('Can not load document')
-    httpClient.documents.getById.mockImplementation(async (data) => {
+    httpClient.documents.getById = async () => {
       throw error
-    })
+    }
 
     const history = createMemoryHistory()
 
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <EditDocumentDynamicProps
-              history={history}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <EditDocumentDynamicProps
+            history={history}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[0].name],
+            },
+            httpClient,
           }
         )
       )
@@ -236,31 +229,28 @@ describe('Edit Document', () => {
   })
 
   it('Should update a document', async () => {
-    httpClient.documents.create.mockImplementation(async (doc) => {
-      return { data: doc }
-    })
-    httpClient.documents.commit.mockImplementation(async (id) => {
-      return { data: id }
-    })
+    httpClient.documents.create = async (doc) => ({ data: doc })
+    httpClient.documents.commit = async (id) => ({ data: id })
 
     const history = createMemoryHistory()
 
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <EditDocumentDynamicProps
-              history={history}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <EditDocumentDynamicProps
+            history={history}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[0].name],
+            },
+            httpClient,
           }
         )
       )
@@ -288,26 +278,28 @@ describe('Edit Document', () => {
         },
       },
     }
-    httpClient.documents.create.mockImplementation(async (data) => {
+
+    httpClient.documents.create = async () => {
       throw error
-    })
+    }
 
     await act(async () => {
       const component = mount(
         withAllProvidersAndContexts(
-          <MemoryRouter>
-            <EditDocumentDynamicProps
-              history={history}
-              match={{
-                params: {
-                  id: '100',
-                },
-              }}
-            />
-          </MemoryRouter>,
+          <EditDocumentDynamicProps
+            history={history}
+            match={{
+              params: {
+                id: '100',
+              },
+            }}
+          />,
           {
-            ...defaultUser,
-            schemas: [defaultSchemas[0].name],
+            user: {
+              ...defaultUser,
+              schemas: [defaultSchemas[0].name],
+            },
+            httpClient,
           }
         )
       )

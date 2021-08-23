@@ -2,7 +2,6 @@ import { mount } from 'enzyme'
 import { DataTable } from 'grommet'
 import React from 'react'
 import { act } from 'react-dom/test-utils'
-import { MemoryRouter } from 'react-router'
 import { Link } from 'react-router-dom'
 import { PageError } from '../../components/PageError'
 import { defaultSchemas, defaultUser } from '../../test-utilities/default-data'
@@ -10,10 +9,9 @@ import { withAllProvidersAndContexts } from '../../test-utilities/test-providers
 import { ListDocuments } from '../ListDocuments'
 import documentRoutes from '../routes'
 
-jest.mock('../../http-client')
-const httpClient = require('../../http-client').httpClient
-
 describe('List Documents', () => {
+  let httpClient
+
   const documents = [
     {
       _id: '1',
@@ -70,28 +68,20 @@ describe('List Documents', () => {
 
   beforeEach(() => {
     push.mockClear()
-    httpClient.documents.list.mockImplementation(async (data) => {
-      return { data: documents }
-    })
-    httpClient.schemas.list.mockImplementation(async (data) => {
-      return { data: defaultSchemas }
-    })
+    httpClient = {
+      schemas: { list: async () => ({ data: defaultSchemas }) },
+      documents: { list: async () => ({ data: documents }) },
+    }
   })
 
   it('should display a page Error', async () => {
     await act(async () => {
       const error = new Error('Failed to load!')
-      httpClient.documents.list.mockImplementation(async (data) => {
+      httpClient.documents.list = async (data) => {
         throw error
-      })
+      }
 
-      const component = mount(
-        withAllProvidersAndContexts(
-          <MemoryRouter>
-            <ListDocuments history={{ push } as any} />
-          </MemoryRouter>
-        )
-      )
+      const component = mount(withAllProvidersAndContexts(<ListDocuments history={{ push } as any} />, { httpClient }))
 
       await new Promise((r) => setTimeout(r, 0))
       component.update()
@@ -101,13 +91,7 @@ describe('List Documents', () => {
 
   it('Should render the received documents', async () => {
     await act(async () => {
-      const component = mount(
-        withAllProvidersAndContexts(
-          <MemoryRouter>
-            <ListDocuments history={{ push } as any} />
-          </MemoryRouter>
-        )
-      )
+      const component = mount(withAllProvidersAndContexts(<ListDocuments history={{ push } as any} />, { httpClient }))
 
       await new Promise((r) => setTimeout(r, 0))
       component.update()
@@ -122,13 +106,7 @@ describe('List Documents', () => {
 
   it('Should open document when clicking on row', async () => {
     await act(async () => {
-      const component = mount(
-        withAllProvidersAndContexts(
-          <MemoryRouter>
-            <ListDocuments history={{ push } as any} />
-          </MemoryRouter>
-        )
-      )
+      const component = mount(withAllProvidersAndContexts(<ListDocuments history={{ push } as any} />, { httpClient }))
 
       await new Promise((r) => setTimeout(r, 0))
       component.update()
@@ -143,13 +121,7 @@ describe('List Documents', () => {
 
   it('Should create document when clicking create button', async () => {
     await act(async () => {
-      const component = mount(
-        withAllProvidersAndContexts(
-          <MemoryRouter>
-            <ListDocuments history={{ push } as any} />
-          </MemoryRouter>
-        )
-      )
+      const component = mount(withAllProvidersAndContexts(<ListDocuments history={{ push } as any} />, { httpClient }))
 
       await new Promise((r) => setTimeout(r, 0))
       component.update()
