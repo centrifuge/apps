@@ -1,3 +1,4 @@
+import throttle from 'lodash/throttle'
 import * as React from 'react'
 import { history } from '../history'
 
@@ -50,7 +51,7 @@ function useIdleTimeout(token: any, clearToken: () => void) {
     throttle(() => {
       sessionStorage.setItem(key, new Date().toISOString())
       forceRender()
-    }, 1000),
+    }, 2000),
     []
   )
 
@@ -76,17 +77,4 @@ function useIdleTimeout(token: any, clearToken: () => void) {
       document.removeEventListener('keydown', reset)
     }
   }, [reset])
-}
-
-function throttle(callback: (...args: any[]) => any, ms: number) {
-  let waiting = false
-  return (...args: any[]) => {
-    if (!waiting) {
-      callback(...args)
-      waiting = true
-      setTimeout(() => {
-        waiting = false
-      }, ms)
-    }
-  }
 }
