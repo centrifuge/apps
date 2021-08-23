@@ -65,6 +65,6 @@ export const useCFGYield = (tinlake: ITinlake) => {
       return (DAYS * rewardRate * wCFGPrice * 100).toString()
     }
 
-    return '0'
+    return null
   }, [wCFGPrice, rewards.data?.rewardRate])
 }

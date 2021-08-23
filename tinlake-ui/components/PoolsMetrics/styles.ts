@@ -4,6 +4,13 @@ export const Cont = styled.div`
   text-align: center;
 `
 
+export const ValueWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+`
+
 export const Value = styled.span`
   font-weight: 500;
   font-size: 24px;
@@ -24,6 +31,12 @@ export const Label = styled.div`
   font-size: 13px;
   line-height: 14px;
   color: #979797;
+`
+
+export const ValueIcon = styled.img`
+  margin: 0 8px 0 0;
+  width: 24px;
+  height: 24px;
 `
 
 export const TokenLogo = styled.img`

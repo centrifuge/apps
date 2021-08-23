@@ -7,9 +7,10 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip as ChartTooltip, YAxis } 
 import { dateToYMD } from '../../utils/date'
 import { useCFGYield } from '../../utils/hooks'
 import { useDailyTVL } from '../../utils/useDailyTVL'
+import { LoadingValue } from '../LoadingValue'
 import NumberDisplay from '../NumberDisplay'
 import { Tooltip } from '../Tooltip'
-import { Cont, Label, TokenLogo, Unit, Value } from './styles'
+import { Label, Unit, Value, ValueIcon, ValueWrapper } from './styles'
 
 interface Props {
   totalValue?: BN
@@ -88,16 +89,16 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
           margin={{ left: 'medium' }}
           style={{ borderLeft: '1px solid #D8D8D8' }}
         >
-          <Cont>
-            <TokenLogo src={`/static/dai.svg`} />
+          <ValueWrapper>
+            <ValueIcon src={`/static/dai.svg`} />
             <Value>
               <NumberDisplay
                 value={hoveredPoolValue?.toString() || baseToDisplay(props.totalValue || new BN(0), 18)}
                 precision={0}
-              />
-            </Value>{' '}
-            <Unit>DAI</Unit>
-          </Cont>
+              />{' '}
+              <Unit>DAI</Unit>
+            </Value>
+          </ValueWrapper>
           <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
         </Box>
       </Box>
@@ -113,13 +114,14 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
       >
         <Box>
           <>
-            <Cont style={{ marginTop: '8px' }}>
-              <TokenLogo src={`/static/cfg-white.svg`} />
-              <Value>
-                <NumberDisplay value={cfgYield} precision={2} />
-              </Value>{' '}
-              <Unit>%</Unit>
-            </Cont>
+            <ValueWrapper style={{ marginTop: '8px' }}>
+              <ValueIcon src={`/static/cfg-white.svg`} />
+              <LoadingValue done={!!cfgYield} width={75} height={28}>
+                <Value>
+                  <NumberDisplay value={cfgYield as string} precision={2} /> <Unit>%</Unit>
+                </Value>
+              </LoadingValue>
+            </ValueWrapper>
 
             <Tooltip
               title="Tinlake investments earns daily rewards in Centrifuge's native token (CFG). The CFG reward rate is an annualized representation of these rewards based on the current CFG token price. Rewards are independent from the pool's issuer and not guaranteed - please see Investment disclaimer for more details."
