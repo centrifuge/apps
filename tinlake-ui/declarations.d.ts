@@ -13,3 +13,10 @@ declare module 'ethereum-blockies'
 declare module 'web3-utils'
 declare module '@makerdao/multicall'
 declare module 'react-twitter-embed'
+
+import 'styled-components'
+import { Theme } from './theme'
+
+declare module 'styled-components' {
+  export interface DefaultTheme extends Theme {}
+}
