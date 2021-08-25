@@ -6,20 +6,19 @@ import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Pool } from '../../config'
 import { LoansState, SortableLoan } from '../../ducks/loans'
-import { PoolData, PoolState } from '../../ducks/pool'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { useTrancheYield } from '../../utils/hooks'
 import { toPrecision } from '../../utils/toPrecision'
+import { usePool } from '../../utils/usePool'
 
 interface Props {
   activePool: Pool
 }
 
 const AOMetrics: React.FC<Props> = (props: Props) => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolData | undefined
+  const { data: poolData } = usePool(props.activePool.addresses.ROOT_CONTRACT)
 
-  const { dropYield, tinYield } = useTrancheYield()
+  const { dropYield, tinYield } = useTrancheYield(props.activePool.addresses.ROOT_CONTRACT)
   const dropRate = poolData?.senior?.interestRate || undefined
 
   const loans = useSelector<any, LoansState>((state) => state.loans)

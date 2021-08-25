@@ -7,6 +7,7 @@ import Auth from '../../../../../components/Auth'
 import { BackLink } from '../../../../../components/BackLink'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
+import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
 import ValueNFT from '../../../../../components/ValueNFT'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
@@ -19,12 +20,11 @@ interface Props extends WithRouterProps {
   ipfsPools: IpfsPools
 }
 
-class ValueNFTPage extends React.Component<Props> {
-  render() {
-    const { pool, ipfsPools } = this.props
-    const { tokenId, registry }: { tokenId: string; registry: string } = this.props.router.query as any
+const ValueNFTPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
+  const { tokenId, registry }: { tokenId: string; registry: string } = router.query as any
 
-    return (
+  return (
+    <IpfsPoolsProvider value={ipfsPools}>
       <WithFooter>
         <Head>
           <title>Value NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>
@@ -60,8 +60,8 @@ class ValueNFTPage extends React.Component<Props> {
           </Box>
         </Container>
       </WithFooter>
-    )
-  }
+    </IpfsPoolsProvider>
+  )
 }
 
 export async function getStaticPaths() {

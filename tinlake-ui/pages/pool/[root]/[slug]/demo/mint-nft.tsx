@@ -6,6 +6,7 @@ import * as React from 'react'
 import Auth from '../../../../../components/Auth'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
+import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
 import MintNFT from '../../../../../components/MintNFT'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
@@ -18,11 +19,9 @@ interface Props extends WithRouterProps {
   ipfsPools: IpfsPools
 }
 
-class MintNFTPage extends React.Component<Props> {
-  render() {
-    const { pool, ipfsPools } = this.props
-
-    return (
+const MintNFTPage: React.FC<Props> = ({ pool, ipfsPools }) => {
+  return (
+    <IpfsPoolsProvider value={ipfsPools}>
       <WithFooter>
         <Head>
           <title>Mint NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>
@@ -45,8 +44,8 @@ class MintNFTPage extends React.Component<Props> {
           </Box>
         </Container>
       </WithFooter>
-    )
-  }
+    </IpfsPoolsProvider>
+  )
 }
 
 export async function getStaticPaths() {

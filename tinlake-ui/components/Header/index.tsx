@@ -9,14 +9,13 @@ import styled from 'styled-components'
 import { PoolSelector } from '../../components/PoolSelector'
 import config, { IpfsPools } from '../../config'
 import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
-import { OnboardingState } from '../../ducks/onboarding'
-import { PoolData, PoolState } from '../../ducks/pool'
-import { loadPortfolio, PortfolioState } from '../../ducks/portfolio'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
 import { useCFGRewards } from '../../utils/useCFGRewards'
+import { usePool } from '../../utils/usePool'
+import { usePortfolio } from '../../utils/usePortfolio'
 import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
 import { Tooltip } from '../Tooltip'
 import { Web3Wallet } from '../Web3Wallet'
@@ -38,26 +37,22 @@ interface Props {
 }
 
 const Header: React.FC<Props> = (props: Props) => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolData | undefined
+  const router = useRouter()
+  const { root, slug } = router.query
+
+  const { data: poolData } = usePool(root as string)
 
   const { poolTitle, selectedRoute, menuItems } = props
-  const router = useRouter()
 
-  const onboarding = useSelector<any, OnboardingState>((state) => state.onboarding)
-  const portfolio = useSelector<any, PortfolioState>((state) => state.portfolio)
   const transactions = useSelector<any, TransactionState>((state) => state.transactions)
 
   const auth = useSelector<any, AuthState>((state) => state.auth)
   const connectedAddress = auth.address
   const address = useQueryDebugEthAddress() || connectedAddress
   const { formattedAmount: CFGRewardFormatted, amount: CFGRewardAmount } = useCFGRewards(address)
+  const portfolio = usePortfolio(props.ipfsPools, address)
   const dispatch = useDispatch()
   const [menuOpen, setMenuOpen] = React.useState(false)
-
-  React.useEffect(() => {
-    if (address) dispatch(loadPortfolio(address, props.ipfsPools))
-  }, [address])
 
   const connectAccount = async () => {
     try {
@@ -77,7 +72,6 @@ const Header: React.FC<Props> = (props: Props) => {
 
   const pushWithPrefixIfInPool = (item: MenuItem) => {
     if (item.inPool) {
-      const { root, slug } = router.query
       const route = item.route === '/' ? '' : item.route
 
       if (slug === undefined) {
@@ -108,14 +102,14 @@ const Header: React.FC<Props> = (props: Props) => {
     />
   ))
 
-  const portfolioIsNonZero = portfolio.totalValue && !portfolio.totalValue.isZero()
+  const portfolioIsNonZero = portfolio.data?.totalValue && !portfolio.data?.totalValue.isZero()
   const portfolioLink = (
     <Link href="/portfolio">
       <Box as="a" direction="row" align="center">
         <Icon src="/static/DAI.svg" />
         <HoldingValue>
           {portfolioIsNonZero
-            ? addThousandsSeparators(toDynamicPrecision(baseToDisplay(portfolio.totalValue || '0', 18)))
+            ? addThousandsSeparators(toDynamicPrecision(baseToDisplay(portfolio.data?.totalValue || '0', 18)))
             : 'Portfolio'}
         </HoldingValue>
         <Unit>{!portfolioIsNonZero && '0 '}DAI</Unit>
@@ -177,7 +171,6 @@ const Header: React.FC<Props> = (props: Props) => {
               onDisconnect={() => dispatch(clear())}
               transactions={selectWalletTransactions(transactions)}
               getAddressLink={getAddressLink}
-              kycStatus={onboarding.data?.kyc?.status === 'verified' ? 'verified' : 'none'}
             />
           )}
         </WalletNav>

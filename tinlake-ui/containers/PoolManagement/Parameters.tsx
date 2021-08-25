@@ -1,35 +1,29 @@
 import { baseToDisplay, displayToBase, ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, FormField, Heading } from 'grommet'
 import * as React from 'react'
-import { connect, useSelector } from 'react-redux'
+import { connect } from 'react-redux'
 import NumberInput from '../../components/NumberInput'
-import { LoadPool } from '../../config'
-import { loadPool, PoolData, PoolState } from '../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { toPrecision } from '../../utils/toPrecision'
+import { usePool } from '../../utils/usePool'
 
 interface Props extends TransactionProps {
   tinlake: ITinlake
-  loadPool?: LoadPool
 }
 
 const AdminActions: React.FC<Props> = (props: Props) => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [minJuniorRatio, setMinJuniorRatio] = React.useState('0')
   const [maxJuniorRatio, setMaxJuniorRatio] = React.useState('0')
 
   React.useEffect(() => {
-    if (pool && pool.data) {
-      setMinJuniorRatio(pool.data.minJuniorRatio.toString())
-      setMaxJuniorRatio((pool.data as PoolData).maxJuniorRatio.toString())
+    if (poolData) {
+      setMinJuniorRatio(poolData.minJuniorRatio.toString())
+      setMaxJuniorRatio(poolData.maxJuniorRatio.toString())
     }
-  }, [pool?.data])
-
-  React.useEffect(() => {
-    props.loadPool && props.loadPool(props.tinlake)
-  }, [props.tinlake])
+  }, [poolData])
 
   const [minRatioStatus, , setMinRatioTxId] = useTransactionState()
 
@@ -53,19 +47,19 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (minRatioStatus === 'succeeded') {
-      props.loadPool && props.loadPool(props.tinlake)
+      refetchPoolData()
     }
   }, [minRatioStatus])
 
   React.useEffect(() => {
     if (maxRatioStatus === 'succeeded') {
-      props.loadPool && props.loadPool(props.tinlake)
+      refetchPoolData()
     }
   }, [maxRatioStatus])
 
   return (
     <>
-      {pool && pool.data && (
+      {poolData && (
         <Box direction="row" gap="medium">
           <Box
             width="medium"
@@ -80,7 +74,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 Min TIN risk buffer
               </Heading>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(pool.data.minJuniorRatio, 25), 2))}%
+                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.minJuniorRatio, 25), 2))}%
               </Heading>
             </Box>
 
@@ -101,7 +95,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 disabled={
                   minRatioStatus === 'unconfirmed' ||
                   minRatioStatus === 'pending' ||
-                  minJuniorRatio === pool.data.minJuniorRatio.toString()
+                  minJuniorRatio === poolData.minJuniorRatio.toString()
                 }
               />
             </Box>
@@ -120,7 +114,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 Max TIN risk buffer
               </Heading>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay((pool.data as PoolData).maxJuniorRatio, 25), 2))}%
+                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.maxJuniorRatio, 25), 2))}%
               </Heading>
             </Box>
 
@@ -141,7 +135,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 disabled={
                   maxRatioStatus === 'unconfirmed' ||
                   maxRatioStatus === 'pending' ||
-                  maxJuniorRatio === (pool.data as PoolData).maxJuniorRatio.toString()
+                  maxJuniorRatio === poolData.maxJuniorRatio.toString()
                 }
               />
             </Box>
@@ -152,4 +146,4 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadPool, createTransaction })(AdminActions)
+export default connect((state) => state, { createTransaction })(AdminActions)

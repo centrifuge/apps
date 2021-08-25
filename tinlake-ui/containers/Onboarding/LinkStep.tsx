@@ -3,8 +3,8 @@ import { ITinlake } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, CheckBox, Heading, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import * as React from 'react'
+import { AddressStatus } from '../../../onboarding/api/src/controllers/types'
 import { Pool } from '../../config'
-import { OnboardingState } from '../../ducks/onboarding'
 import { FormFieldWithoutBorder, LegalCopy, Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
   tinlake: ITinlake
   active: boolean
   linked: boolean
-  onboarding: OnboardingState
+  onboardingData: AddressStatus | undefined
 }
 
 const LinkStep: React.FC<Props> = (props: Props) => {
@@ -70,7 +70,7 @@ const LinkStep: React.FC<Props> = (props: Props) => {
               <Button
                 primary
                 label={`Link Securitize account`}
-                href={`${props.onboarding.data?.kyc?.url}&registration=true`}
+                href={`${props.onboardingData?.kyc?.url}&registration=true`}
                 onClick={(event: any) => {
                   if (!checked) {
                     event.preventDefault()

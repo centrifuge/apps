@@ -15,8 +15,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import config, { Pool } from '../../config'
 import { ensureAuthed } from '../../ducks/auth'
-import { PoolData, PoolState } from '../../ducks/pool'
 import { useTrancheYield } from '../../utils/hooks'
+import { usePool } from '../../utils/usePool'
 import InvestAction from '../InvestAction'
 import { Tooltip } from '../Tooltip'
 
@@ -30,11 +30,9 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
-  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const { data: poolData } = usePool(props.selectedPool.addresses.ROOT_CONTRACT)
 
-  const { dropYield } = useTrancheYield()
-
-  const poolData = pool?.data as PoolData | undefined
+  const { dropYield } = useTrancheYield(props.selectedPool.addresses.ROOT_CONTRACT)
 
   const dropRate = poolData?.senior?.interestRate || undefined
 

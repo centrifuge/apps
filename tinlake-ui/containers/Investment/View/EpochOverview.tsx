@@ -4,19 +4,20 @@ import { Box, Button, Table, TableBody, TableCell, TableHeader, TableRow } from 
 import { FormDown } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { connect, useSelector } from 'react-redux'
+import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { SolverResult } from '../../../../tinlake.js/dist/services/solver/solver'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Tooltip } from '../../../components/Tooltip'
 import { Pool } from '../../../config'
 import { AuthState } from '../../../ducks/auth'
-import { EpochData, PoolData, PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { Fixed27Base } from '../../../utils/ratios'
 import { secondsToHms } from '../../../utils/time'
 import { toPrecision } from '../../../utils/toPrecision'
+import { useEpoch } from '../../../utils/useEpoch'
+import { usePool } from '../../../utils/usePool'
 import { HelpIcon } from '../../Onboarding/styles'
 import { Caret } from './styles'
 
@@ -28,10 +29,10 @@ interface Props extends TransactionProps {
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const router = useRouter()
+  const { root } = router.query
 
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolData | undefined
-  const epochData = pool?.epoch as EpochData | undefined
+  const { data: poolData } = usePool(root as string)
+  const { data: epochData } = useEpoch(root as string)
 
   const [status, , setTxId] = useTransactionState()
 

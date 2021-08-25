@@ -1,24 +1,25 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
 import { Area, AreaChart, ResponsiveContainer, Tooltip as ChartTooltip, YAxis } from 'recharts'
-import { PoolsDailyData, PoolsData } from '../../ducks/pools'
 import { dateToYMD } from '../../utils/date'
 import { useCFGYield } from '../../utils/hooks'
+import { useDailyTVL } from '../../utils/useDailyTVL'
+import { LoadingValue } from '../LoadingValue'
 import NumberDisplay from '../NumberDisplay'
 import { Tooltip } from '../Tooltip'
-import { Cont, Label, TokenLogo, Unit, Value } from './styles'
+import { Label, Unit, Value, ValueIcon, ValueWrapper } from './styles'
 
 interface Props {
-  pools: PoolsData
+  totalValue?: BN
   tinlake: ITinlake
 }
 
 const PoolsMetrics: React.FC<Props> = (props: Props) => {
   const router = useRouter()
-  const poolsDailyData = useSelector<any, PoolsDailyData[]>((state) => state.pools.poolsDailyData)
+  const { data: dailyTVL = [] } = useDailyTVL()
 
   const [hoveredPoolValue, setHoveredPoolValue] = React.useState<number | undefined>(undefined)
   const [hoveredDay, setHoveredDay] = React.useState<number | undefined>(undefined)
@@ -27,7 +28,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
 
   const maxPoolValue = Math.max.apply(
     Math,
-    poolsDailyData.map((o) => {
+    dailyTVL.map((o) => {
       return o.poolValue
     })
   )
@@ -48,7 +49,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         <Box width="250px" height="80px" pad={{ left: 'small' }} margin={{ left: '0' }}>
           <ResponsiveContainer>
             <AreaChart
-              data={poolsDailyData}
+              data={dailyTVL}
               margin={{ top: 4, right: 4, left: 4, bottom: 4 }}
               onMouseMove={(val: any) => {
                 if (val.activePayload) {
@@ -88,16 +89,16 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
           margin={{ left: 'medium' }}
           style={{ borderLeft: '1px solid #D8D8D8' }}
         >
-          <Cont>
-            <TokenLogo src={`/static/dai.svg`} />
+          <ValueWrapper>
+            <ValueIcon src={`/static/dai.svg`} />
             <Value>
               <NumberDisplay
-                value={hoveredPoolValue?.toString() || baseToDisplay(props.pools.totalValue, 18)}
+                value={hoveredPoolValue?.toString() || baseToDisplay(props.totalValue || new BN(0), 18)}
                 precision={0}
-              />
-            </Value>{' '}
-            <Unit>DAI</Unit>
-          </Cont>
+              />{' '}
+              <Unit>DAI</Unit>
+            </Value>
+          </ValueWrapper>
           <Label>{hoveredDay ? `TVL on ${dateToYMD(hoveredDay)}` : 'Total Value Locked'}</Label>
         </Box>
       </Box>
@@ -113,13 +114,14 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
       >
         <Box>
           <>
-            <Cont style={{ marginTop: '8px' }}>
-              <TokenLogo src={`/static/cfg-white.svg`} />
-              <Value>
-                <NumberDisplay value={cfgYield} precision={2} />
-              </Value>{' '}
-              <Unit>%</Unit>
-            </Cont>
+            <ValueWrapper style={{ marginTop: '8px' }}>
+              <ValueIcon src={`/static/cfg-white.svg`} />
+              <LoadingValue done={!!cfgYield} width={75} height={28}>
+                <Value>
+                  <NumberDisplay value={cfgYield as string} precision={2} /> <Unit>%</Unit>
+                </Value>
+              </LoadingValue>
+            </ValueWrapper>
 
             <Tooltip
               title="Tinlake investments earns daily rewards in Centrifuge's native token (CFG). The CFG reward rate is an annualized representation of these rewards based on the current CFG token price. Rewards are independent from the pool's issuer and not guaranteed - please see Investment disclaimer for more details."

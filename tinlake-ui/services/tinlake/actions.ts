@@ -1,6 +1,5 @@
 import { ITinlake, Loan, NFT, PendingTransaction } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { EpochData } from '../../ducks/pool'
 import { maxUint256 } from '../../utils/maxUint256'
 import { getAddressMemory, setAddressMemory } from './address-memory'
 
@@ -514,7 +513,20 @@ export async function updateSeniorMemberList(
   return tinlake.updateSeniorMemberList(user, validUntil)
 }
 
-export async function getEpoch(tinlake: ITinlake, address?: string): Promise<EpochData | undefined> {
+export type EpochData = {
+  id: number
+  state: 'open' | 'can-be-closed' | 'in-submission-period' | 'in-challenge-period' | 'challenge-period-ended'
+  isBlockedState: boolean
+  minimumEpochTime: number
+  challengeTime: number
+  minimumEpochTimeLeft: number
+  minChallengePeriodEnd: number
+  lastEpochClosed: number
+  latestBlockTimestamp: number
+  seniorOrderedInEpoch: number
+  juniorOrderedInEpoch: number
+}
+export async function getEpoch(tinlake: ITinlake, address?: string): Promise<EpochData> {
   const signerAddress = address || (await tinlake.signer?.getAddress())
   const state = await tinlake.getCurrentEpochState()
 

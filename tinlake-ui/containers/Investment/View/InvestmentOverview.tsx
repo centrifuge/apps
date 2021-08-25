@@ -8,10 +8,10 @@ import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Tooltip } from '../../../components/Tooltip'
 import { Pool, UpcomingPool } from '../../../config'
 import { loadLoans, LoansState, SortableLoan } from '../../../ducks/loans'
-import { PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { useTrancheYield } from '../../../utils/hooks'
 import { toPrecision } from '../../../utils/toPrecision'
+import { usePool } from '../../../utils/usePool'
 import {
   BalanceSheetDiagram,
   BalanceSheetDiagramLeft,
@@ -40,7 +40,7 @@ const parseRatio = (num: BN): number => {
 }
 
 const InvestmentOverview: React.FC<Props> = (props: Props) => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
   const loans = useSelector<any, LoansState>((state) => state.loans)
 
   const ongoingAssets = loans?.loans
@@ -71,7 +71,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
     : undefined
 
   const dispatch = useDispatch()
-  const poolData = pool?.data as PoolData | undefined
 
   const dropTotalValue = poolData?.senior ? poolData?.senior.totalSupply.mul(poolData.senior!.tokenPrice) : undefined
   const tinTotalValue = poolData ? poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice) : undefined
@@ -79,7 +78,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
-  const { dropYield } = useTrancheYield()
+  const { dropYield } = useTrancheYield(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const reserveRatio =
     poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
@@ -231,10 +230,10 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   </LoadingValue>
                 </span>
                 <Box margin={{ left: 'auto' }} style={{ textAlign: 'right' }} direction="row">
-                  {dropYield && !(pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero()) && (
+                  {dropYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero()) && (
                     <>Current DROP yield (30d APY): {dropYield} %</>
                   )}
-                  {(!dropYield || (pool?.data?.netAssetValue.isZero() && pool?.data?.reserve.isZero())) && (
+                  {(!dropYield || (poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())) && (
                     <>
                       Fixed DROP rate (APR): {toPrecision(feeToInterestRate(poolData?.senior?.interestRate || '0'), 2)}%
                     </>

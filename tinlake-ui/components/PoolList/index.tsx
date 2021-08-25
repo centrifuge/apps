@@ -4,8 +4,8 @@ import { Box } from 'grommet'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Router, { withRouter } from 'next/router'
 import * as React from 'react'
-import { PoolData, PoolsData } from '../../ducks/pools'
 import { toPrecision } from '../../utils/toPrecision'
+import { PoolData, PoolsData } from '../../utils/usePools'
 import { LoadingValue } from '../LoadingValue'
 import NumberDisplay from '../NumberDisplay'
 import { PoolCapacityLabel } from '../PoolCapacityLabel'
@@ -62,8 +62,6 @@ class PoolList extends React.Component<Props> {
       },
     } = this.props
 
-    const subgraphIsLoading = this.props.poolsData?.totalValue.isZero()
-
     const pools = poolsData?.pools?.filter((p) => showArchived || !p.isArchived)
     pools?.sort((a, b) => {
       if (a.order === undefined || b.order === undefined || a.order === b.order) return 0
@@ -117,7 +115,7 @@ class PoolList extends React.Component<Props> {
             </HeaderCol>
           )}
         </Header>
-        {pools?.map((p: PoolData) => (
+        {pools?.map((p) => (
           <PoolRow key={p.id} onClick={() => this.clickPool(p)}>
             <Icon src={p.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'} />
             <Desc>
@@ -138,7 +136,9 @@ class PoolList extends React.Component<Props> {
               </DataCol>
             )}
 
-            <DataCol>{!subgraphIsLoading && <PoolCapacityLabel pool={p} />}</DataCol>
+            <DataCol>
+              <PoolCapacityLabel pool={p} />
+            </DataCol>
 
             {capacity && (
               <>
@@ -153,24 +153,13 @@ class PoolList extends React.Component<Props> {
                     value={baseToDisplay(p.capacityGivenMaxReserve || new BN(0), 18)}
                   />
                 </DataCol>
-                <DataCol>
-                  <NumberDisplay
-                    render={(v) => (
-                      <>
-                        <Number>{v}</Number> <Unit>{p.currency}</Unit>
-                      </>
-                    )}
-                    precision={0}
-                    value={baseToDisplay(p.capacityGivenMaxDropRatio || new BN(0), 18)}
-                  />
-                </DataCol>
               </>
             )}
 
             {!capacity && (
               <>
                 <DataCol>
-                  <LoadingValue done={!subgraphIsLoading} height={28}>
+                  <LoadingValue done={!!poolsData} height={28}>
                     <NumberDisplay
                       precision={0}
                       render={(v) =>
@@ -187,7 +176,7 @@ class PoolList extends React.Component<Props> {
                   </LoadingValue>
                 </DataCol>
                 <DataCol>
-                  <LoadingValue done={!subgraphIsLoading} height={28}>
+                  <LoadingValue done={!!poolsData} height={28}>
                     <NumberDisplay
                       render={(v) =>
                         v === '0.00' ? (

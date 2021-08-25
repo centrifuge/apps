@@ -1,10 +1,9 @@
 import { LinkPrevious } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Pool, UpcomingPool } from '../../config'
-import { PoolsState } from '../../ducks/pools'
+import { usePools } from '../../utils/usePools'
 import { PoolCapacityLabel } from '../PoolCapacityLabel'
 import { PoolLink } from '../PoolLink'
 
@@ -19,12 +18,8 @@ interface Props {
 
 const PageTitle: React.FC<Props> = (props: Props) => {
   const router = useRouter()
-
-  // TODO: This doesn't fetch the pools data itself, but gets the data because the PoolSelector fetches it.
-  // Ideally, we don't want to rely on this data coincidentally being fetched elsewhere.
-  const pools = useSelector<any, PoolsState>((state) => state.pools)
+  const pools = usePools()
   const poolData = pools.data?.pools.find((p) => p.id === router.query.root)
-  const subgraphIsLoading = pools.data?.totalValue.isZero()
 
   return (
     <Wrapper>
@@ -44,7 +39,7 @@ const PageTitle: React.FC<Props> = (props: Props) => {
         {props.pool && (
           <PoolName>
             {props.pool.metadata.name}
-            <PoolLabel>{poolData && !subgraphIsLoading && <PoolCapacityLabel pool={poolData} />}</PoolLabel>
+            <PoolLabel>{poolData && <PoolCapacityLabel pool={poolData} />}</PoolLabel>
           </PoolName>
         )}
         {!props.pool && <PoolName>Tinlake</PoolName>}

@@ -1,5 +1,5 @@
 import { TokenInput } from '@centrifuge/axis-token-input'
-import { baseToDisplay, Loan } from '@centrifuge/tinlake-js'
+import { baseToDisplay, ITinlake, Loan } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
@@ -9,26 +9,23 @@ import { connect } from 'react-redux'
 import { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { loadLoan } from '../../../ducks/loans'
-import { loadPool, PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { useEpoch } from '../../../utils/useEpoch'
+import { usePool } from '../../../utils/usePool'
 
 interface Props extends TransactionProps {
   loan: Loan
-  tinlake: any
+  tinlake: ITinlake
   poolConfig: Pool
   loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
-  loadPool?: (tinlake: any) => Promise<void>
-  pool?: PoolState
   ensureAuthed?: () => Promise<void>
 }
 
 const LoanBorrow: React.FC<Props> = (props: Props) => {
+  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const { data: epochData } = useEpoch(props.tinlake.contractAddresses.ROOT_CONTRACT)
   const [borrowAmount, setBorrowAmount] = React.useState<string>('')
-
-  React.useEffect(() => {
-    props.loadPool && props.loadPool(props.tinlake)
-  }, [])
 
   const router = useRouter()
   const allowMultipleBorrow = 'allowMultipleBorrow' in router.query
@@ -77,11 +74,11 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   }, [closeStatus])
 
   const ceilingSet = props.loan.principal.toString() !== '0'
-  const availableFunds = (props.pool && props.pool.data && props.pool.data.availableFunds.toString()) || '0'
+  const availableFunds = (poolData && poolData.availableFunds.toString()) || '0'
   const borrowedAlready =
     !allowMultipleBorrow && (new BN(props.loan.debt).isZero() === false || props.loan.status !== 'NFT locked')
 
-  const isBlockedState = props.pool ? props.pool?.epoch?.isBlockedState : false
+  const isBlockedState = epochData ? epochData.isBlockedState : false
 
   const [error, setError] = React.useState<string | undefined>(undefined)
   const borrowEnabled = ceilingSet && !borrowedAlready && !isBlockedState
@@ -141,7 +138,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
       </Box>
       <Box align="start">
         <Box direction="row" gap="small">
-          {props.pool?.epoch && borrowEnabled && (
+          {epochData && borrowEnabled && (
             <Button
               onClick={borrow}
               primary
@@ -171,4 +168,4 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadLoan, createTransaction, loadPool, ensureAuthed })(LoanBorrow)
+export default connect((state) => state, { loadLoan, createTransaction, ensureAuthed })(LoanBorrow)

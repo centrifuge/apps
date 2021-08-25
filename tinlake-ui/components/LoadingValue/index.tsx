@@ -4,6 +4,7 @@ import styled, { keyframes } from 'styled-components'
 interface BaseProps {
   done: boolean
   maxWidth?: number
+  width?: number
   alignRight?: boolean
   height?: number
 }
@@ -25,13 +26,13 @@ const loadingAnimation = keyframes`
   }
 `
 
-const Wrapper = styled.div<{ width?: number; verticalMargin?: number; alignRight?: boolean }>`
+const Wrapper = styled.div<{ width?: number; verticalMargin?: number; height?: number; alignRight?: boolean }>`
   display: inline-block;
   vertical-align: middle;
   background: #eee;
   border-radius: 6px;
   width: ${(props) => (props.width ? `${props.width}px` : '80px')};
-  height: 17px;
+  height: ${(props) => (props.height ? `${props.height}px` : '17px')};
   margin: ${(props) =>
     props.verticalMargin
       ? `${2 + props.verticalMargin}px 0 ${2 + props.verticalMargin}px ${props.alignRight ? 'auto' : '0'}`
@@ -63,7 +64,8 @@ export const LoadingValue = (props: PropsWithChildren | PropsWithRender) => {
     <>{isPropsWithRender(props) ? props.render() : props.children}</>
   ) : (
     <Wrapper
-      width={width}
+      width={props.width || width}
+      height={props.height}
       verticalMargin={((props.height || 21) - 21) / 2}
       alignRight={props.alignRight === undefined ? true : props.alignRight}
     >

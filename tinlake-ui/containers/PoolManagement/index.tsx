@@ -2,12 +2,12 @@ import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import PageTitle from '../../components/PageTitle'
 import { Pool } from '../../config'
 import { AuthState } from '../../ducks/auth'
-import { loadPool, PoolState } from '../../ducks/pool'
 import { downloadCSV } from '../../utils/export'
+import { usePool } from '../../utils/usePool'
 import { csvName } from '../DataQuery/queries'
 import EpochOverview from '../Investment/View/EpochOverview'
 import AOMetrics from './AOMetrics'
@@ -23,15 +23,9 @@ interface Props {
 
 const PoolManagement: React.FC<Props> = (props: Props) => {
   const auth = useSelector<any, AuthState>((state) => state.auth)
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data
+  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const router = useRouter()
-  const dispatch = useDispatch()
-
-  React.useEffect(() => {
-    dispatch(loadPool(props.tinlake, props.activePool?.metadata.maker?.ilk))
-  }, [props.tinlake.signer])
 
   const isAdmin = poolData?.isPoolAdmin || 'admin' in router.query
   const canManageParameters = auth?.permissions?.canSetMinimumJuniorRatio

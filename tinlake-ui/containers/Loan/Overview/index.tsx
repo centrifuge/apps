@@ -17,11 +17,11 @@ import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
 import { AssetData, loadAssetData } from '../../../ducks/loans'
-import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { dateToYMD } from '../../../utils/date'
 import { UintBase } from '../../../utils/ratios'
 import { toPrecision } from '../../../utils/toPrecision'
+import { usePool } from '../../../utils/usePool'
 import MaxReserveForm from './MaxReserveForm'
 import { Sidenote } from './styles'
 
@@ -64,8 +64,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 }
 
 const LoanOverview: React.FC<Props> = (props: Props) => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolData | undefined
+  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const assetData = useSelector<any, AssetData[]>((state) => state.loans.assetData)
 
@@ -73,7 +72,6 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
   React.useEffect(() => {
-    dispatch(loadPool(props.tinlake, props.selectedPool?.metadata.maker?.ilk))
     dispatch(loadAssetData(props.tinlake))
   }, [address])
 

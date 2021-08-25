@@ -6,12 +6,10 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
-import { PoolState } from '../../ducks/pool'
 import PageTitle from '../PageTitle'
 import OverviewHeader from './OverviewHeader'
 
 interface Props {
-  pool?: PoolState
   selectedPool: Pool | UpcomingPool
   tinlake: ITinlake
 }

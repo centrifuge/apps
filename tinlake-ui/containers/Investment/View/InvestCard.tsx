@@ -7,9 +7,9 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import config, { Pool } from '../../../config'
-import { PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { usePool } from '../../../utils/usePool'
 import { Warning } from './styles'
 import { Card } from './TrancheOverview'
 
@@ -37,11 +37,12 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const authProvider = useSelector<any, string | null>((state) => state.auth.providerName)
   const [hasInvested, setHasInvested] = React.useState<boolean | undefined>(undefined)
 
-  const pool = useSelector<any, PoolState>((state) => state.pool)
+  const pool = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+
   const isOversubscribed =
-    (pool?.data &&
-      new BN(pool?.data.maxReserve).lte(
-        new BN(pool?.data.reserve).add(pool?.data.maker?.remainingCredit || new BN(0)).add(OversubscribedBuffer)
+    (pool.data &&
+      new BN(pool.data.maxReserve).lte(
+        new BN(pool.data.reserve).add(pool.data.maker?.remainingCredit || new BN(0)).add(OversubscribedBuffer)
       )) ||
     false
 

@@ -1,13 +1,13 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
-import { connect, useSelector } from 'react-redux'
+import { connect } from 'react-redux'
 import { Pool } from '../../../config'
-import { PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { secondsToHms } from '../../../utils/time'
 import { toMaxPrecision } from '../../../utils/toPrecision'
+import { useEpoch } from '../../../utils/useEpoch'
 import { Description, Info, MinTimeRemaining, OrderSteps, Warning } from './styles'
 import { Card } from './TrancheOverview'
 
@@ -22,8 +22,7 @@ interface Props extends TransactionProps {
 }
 
 const OrderCard: React.FC<Props> = (props: Props) => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const epochData = pool?.epoch || undefined
+  const { data: epochData } = useEpoch(props.selectedPool?.addresses.ROOT_CONTRACT)
 
   const type = props.disbursements.remainingSupplyCurrency.isZero() ? 'Redeem' : 'Invest'
   const token =

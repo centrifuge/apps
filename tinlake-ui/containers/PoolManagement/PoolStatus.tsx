@@ -7,10 +7,10 @@ import styled from 'styled-components'
 import { LoadingValue } from '../../components/LoadingValue'
 import { Pool } from '../../config'
 import { loadLoans, LoansState, SortableLoan } from '../../ducks/loans'
-import { PoolData, PoolState } from '../../ducks/pool'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { Fixed27Base } from '../../utils/ratios'
 import { toPrecision } from '../../utils/toPrecision'
+import { usePool } from '../../utils/usePool'
 
 interface Props {
   activePool: Pool
@@ -25,8 +25,7 @@ const parseRatio = (num: BN): number => {
 }
 
 const PoolStatus: React.FC<Props> = (props: Props) => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolData | undefined
+  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const isMakerIntegrated =
     props.activePool.addresses.CLERK !== undefined && props.activePool.metadata.maker?.ilk !== ''

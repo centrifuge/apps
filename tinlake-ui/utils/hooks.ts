@@ -1,10 +1,9 @@
 import { baseToDisplay, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { PoolState } from '../ducks/pool'
-import { PoolsState } from '../ducks/pools'
-import { maybeLoadRewards, RewardsState } from '../ducks/rewards'
 import { getWCFGPrice } from '../ducks/userRewards'
+import { useGlobalRewards } from './useGlobalRewards'
+import { usePools } from './usePools'
 
 // Source: https://www.30secondsofcode.org/react/s/use-interval
 export const useInterval = (callback: any, delay: number) => {
@@ -25,13 +24,12 @@ export const useInterval = (callback: any, delay: number) => {
   }, [delay])
 }
 
-export const useTrancheYield = () => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const pools = useSelector<any, PoolsState>((state) => state.pools)
+export const useTrancheYield = (poolId?: string | undefined) => {
+  const pools = usePools()
 
   return React.useMemo(() => {
-    if (pools.data?.pools && pool.poolId) {
-      const poolData = pools.data.pools.find((singlePool) => singlePool.id === pool.poolId)
+    if (pools.data?.pools && poolId) {
+      const poolData = pools.data.pools.find((singlePool) => singlePool.id === poolId)
       if (poolData?.seniorYield30Days && poolData?.juniorYield30Days) {
         return {
           dropYield: toPrecision(baseToDisplay(poolData.seniorYield30Days.muln(100), 27), 2),
@@ -44,17 +42,16 @@ export const useTrancheYield = () => {
       dropYield: '',
       tinYield: '',
     }
-  }, [pool, pools])
+  }, [poolId, pools])
 }
 
 export const useCFGYield = (tinlake: ITinlake) => {
-  const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
+  const rewards = useGlobalRewards()
   const wCFGPrice = useSelector<any, number>((state: any) => state.userRewards.wCFGPrice)
 
   const dispatch = useDispatch()
 
   React.useEffect(() => {
-    dispatch(maybeLoadRewards())
     if (tinlake) {
       dispatch(getWCFGPrice(tinlake))
     }
@@ -68,6 +65,6 @@ export const useCFGYield = (tinlake: ITinlake) => {
       return (DAYS * rewardRate * wCFGPrice * 100).toString()
     }
 
-    return '0'
+    return null
   }, [wCFGPrice, rewards.data?.rewardRate])
 }
