@@ -33,7 +33,7 @@ interface Props {
 export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
 
 function useTrancheData(tinlake: ITinlake, tranche: 'senior' | 'junior', address?: string | null) {
-  return useQuery(['trancheData', tranche, address], async () => {
+  return useQuery(['trancheData', tinlake.contractAddresses.ROOT_CONTRACT, tranche, address], async () => {
     const tokenPrice = (
       tranche === 'senior' ? await tinlake.getTokenPriceSenior() : await tinlake.getTokenPriceJunior()
     ).toString()
