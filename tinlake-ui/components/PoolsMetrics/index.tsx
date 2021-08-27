@@ -42,7 +42,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
 
   const TVLElement = (
     <Shelf justifyContent="center" p="medium" gap="xlarge" flexWrap={['wrap', 'nowrap']}>
-      <Box height={80} flex="1">
+      <Box height={80} flex="1 0 130px">
         <ResponsiveContainer>
           <AreaChart
             data={dailyTVL}

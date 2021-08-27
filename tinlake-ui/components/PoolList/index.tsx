@@ -9,6 +9,7 @@ import { toPrecision } from '../../utils/toPrecision'
 import { useMedia } from '../../utils/useMedia'
 import { PoolData, PoolsData } from '../../utils/usePools'
 import { Divider } from '../Divider'
+import { SectionHeading } from '../Heading'
 import { Shelf, Stack, Wrap } from '../Layout'
 import NumberDisplay from '../NumberDisplay'
 import { PoolCapacityLabel } from '../PoolCapacityLabel'
@@ -180,7 +181,9 @@ const PoolList: React.FC<Props> = (props) => {
 
   return (
     <Stack gap="small">
-      {!isMobile && (
+      {isMobile ? (
+        <SectionHeading>Asset Pools</SectionHeading>
+      ) : (
         <Header>
           <Desc>
             <HeaderTitle>Pool</HeaderTitle>
@@ -245,7 +248,7 @@ export const Row: React.FC<DetailsProps & PropsOf<typeof PoolRow>> = ({
     <PoolRow {...rest}>
       {isMobile ? (
         <Stack gap="small">
-          <Shelf gap="small">
+          <Shelf gap="xsmall">
             {poolIcon}
             {poolTitle}
           </Shelf>
