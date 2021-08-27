@@ -27,9 +27,11 @@ interface Tooltip {
 type Props = PropsWithID | PropsWithoutID
 
 const Wrapper = styled.span<{ underline?: boolean; fix?: boolean }>`
-  [data-tip] > *,
-  [data-tip] {
-    border-bottom: ${(props) => (props.underline ? '1px dotted #bbbbbb' : undefined)};
+  @media (pointer: fine) {
+    [data-tip] > *,
+    [data-tip] {
+      border-bottom: ${(props) => (props.underline ? '1px dotted #bbbbbb' : undefined)};
+    }
   }
   /* react-tooltip doesn't play nice with SSR, so this dirty fix prevents a black line from showing on tooltip buttons */
   .__react_component_tooltip {

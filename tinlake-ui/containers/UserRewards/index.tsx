@@ -8,7 +8,7 @@ import styled from 'styled-components'
 import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import PageTitle from '../../components/PageTitle'
-import { Cont, Label, TokenLogo, Unit, Value } from '../../components/PoolsMetrics/styles'
+import { ValueDisplay } from '../../components/ValueDisplay'
 import { IpfsPools } from '../../config'
 import { AuthState, ensureAuthed } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
@@ -428,22 +428,18 @@ const Metric = ({
   label: string
   borderRight?: boolean
 }) => {
-  console.log('showing metric for', label, value, precision)
   return (
     <Box pad={{ horizontal: 'medium' }} style={{ borderRight: borderRight ? '1px solid #f2f2f2' : undefined }}>
-      <Cont>
-        <TokenLogo src={{ DAI: `/static/dai.svg`, CFG: `/static/cfg-white.svg` }[token]} />
-        <Value>
-          <LoadingValue
-            done={!loading}
-            render={() => (
-              <NumberDisplay value={value} precision={precision || (token === 'CFG' ? dynamicPrecision(value) : 0)} />
-            )}
-          ></LoadingValue>
-        </Value>{' '}
-        <Unit>{{ DAI: 'DAI', CFG: 'CFG' }[token]}</Unit>
-      </Cont>
-      <Label>{label}</Label>
+      <ValueDisplay
+        icon={{ DAI: `/static/dai.svg`, CFG: `/static/cfg-white.svg` }[token]}
+        value={
+          loading ? null : (
+            <NumberDisplay value={value} precision={precision || (token === 'CFG' ? dynamicPrecision(value) : 0)} />
+          )
+        }
+        unit={{ DAI: 'DAI', CFG: 'CFG' }[token]}
+        label={label}
+      />
     </Box>
   )
 }

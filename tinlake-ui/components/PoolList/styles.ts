@@ -1,30 +1,28 @@
 import styled from 'styled-components'
+import { Card } from '../Card'
 
 export const Header = styled.div`
-  padding: 16px;
+  padding: 0 16px;
+  gap: 16px;
   display: flex;
 `
 
-export const PoolRow = styled.div`
+export const PoolRow = styled(Card)`
   padding: 16px;
-  display: flex;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px #00000030;
-  background: white;
-  margin-bottom: 16px;
-  cursor: pointer;
+  text-decoration: none;
   transition: all 100ms linear 0s;
 
-  &:hover {
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 2px 6px;
-    transform: scale(1.01);
+  @media (pointer: fine) {
+    &:hover {
+      box-shadow: rgba(0, 0, 0, 0.24) 0px 2px 6px;
+      transform: scale(1.01);
+    }
   }
 `
 
 export const Icon = styled.img`
   width: 40px;
   height: 40px;
-  margin-right: 16px;
 `
 
 export const Desc = styled.div`
@@ -49,7 +47,6 @@ export const Type = styled.p`
 
 export const HeaderCol = styled.div`
   width: 160px;
-  margin-left: 16px;
   text-align: right;
 `
 
@@ -86,15 +83,19 @@ export const HeaderTitle = styled.h4`
   margin: 0;
   font-weight: 500;
   font-size: 16px;
-  line-height: 20px;
+  line-height: 1.5;
   color: #777;
+
+  @media (max-width: 899px) {
+    font-size: 14px;
+  }
 `
 
 export const HeaderSub = styled.p`
   margin: 0;
   font-weight: 500;
   font-size: 11px;
-  line-height: 14px;
+  line-height: 1.2;
   color: #979797;
 `
 

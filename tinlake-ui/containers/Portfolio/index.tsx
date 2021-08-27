@@ -22,8 +22,8 @@ import {
   Type,
   Unit,
 } from '../../components/PoolList/styles'
-import { Cont, Label as MetricLabel, TokenLogo, Value } from '../../components/PoolsMetrics/styles'
 import { Tooltip } from '../../components/Tooltip'
+import { ValueDisplay } from '../../components/ValueDisplay'
 import { IpfsPools, Pool } from '../../config'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { usePools } from '../../utils/usePools'
@@ -114,14 +114,12 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           background="white"
           margin={{ horizontal: '16px' }}
         >
-          <Cont>
-            <TokenLogo src={`/static/DROP_final.svg`} />
-            <Value>
-              <NumberDisplay value={baseToDisplay(totalDropValue, 18)} precision={0} />
-            </Value>{' '}
-            <Unit>DAI</Unit>
-          </Cont>
-          <MetricLabel>Total DROP Value</MetricLabel>
+          <ValueDisplay
+            icon="/static/DROP_final.svg"
+            value={<NumberDisplay value={baseToDisplay(totalDropValue, 18)} precision={0} />}
+            unit="DAI"
+            label="Total DROP Value"
+          />
         </Box>
         <Box
           width="256px"
@@ -131,14 +129,12 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           background="white"
           margin={{ horizontal: '16px' }}
         >
-          <Cont>
-            <TokenLogo src={`/static/TIN_final.svg`} />
-            <Value>
-              <NumberDisplay value={baseToDisplay(totalTinValue, 18)} precision={0} />
-            </Value>{' '}
-            <Unit>DAI</Unit>
-          </Cont>
-          <MetricLabel>Total TIN Value</MetricLabel>
+          <ValueDisplay
+            icon="/static/TIN_final.svg"
+            value={<NumberDisplay value={baseToDisplay(totalTinValue, 18)} precision={0} />}
+            unit="DAI"
+            label="Total TIN Value"
+          />
         </Box>
       </Box>
 

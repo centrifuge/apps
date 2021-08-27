@@ -1,16 +1,19 @@
 import { axisThemeConfig } from '@centrifuge/axis-theme'
 
-const space = [0, 8, 16, 24, 32, 40]
+const breakpoints = ['600px', '900px', '1200px', '1500px'] as string[] & { [key: string]: string }
+breakpoints.small = breakpoints[0]
+breakpoints.medium = breakpoints[1]
+breakpoints.large = breakpoints[2]
+breakpoints.xlarge = breakpoints[3]
 
 const baseTheme = {
-  breakpoints: ['600px', '900px', '1200px', '1500px'],
+  breakpoints,
   space: {
-    ...space,
-    xsmall: space[1],
-    small: space[2],
-    medium: space[3],
-    large: space[4],
-    xlarge: space[5],
+    xsmall: 8,
+    small: 16,
+    medium: 24,
+    large: 32,
+    xlarge: 40,
   },
 }
 
