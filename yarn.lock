@@ -2786,6 +2786,7 @@ __metadata:
     "@sendgrid/mail": 7.1.1
     "@sentry/react": ^5.26.0
     "@sentry/tracing": ^5.26.0
+    "@styled-system/css": ^5.1.5
     "@styled-system/should-forward-prop": ^5.1.5
     "@types/aws-lambda": 8.10.59
     "@types/bn.js": 4.11.6
