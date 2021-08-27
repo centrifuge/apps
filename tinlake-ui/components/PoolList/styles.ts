@@ -33,16 +33,16 @@ export const Name = styled.h3`
   margin: 0;
   font-weight: 500;
   font-size: 16px;
-  line-height: 28px;
-  color: #333;
+  line-height: 1.2;
+  color: #0828be;
 `
 
 export const Type = styled.p`
   margin: 0;
   font-weight: 500;
-  font-size: 13px;
-  line-height: 14px;
-  color: #979797;
+  font-size: 12px;
+  line-height: 1.2;
+  color: #777777;
 `
 
 export const HeaderCol = styled.div`

@@ -4,6 +4,7 @@ import { WithRouterProps } from 'next/dist/client/with-router'
 import Link from 'next/link'
 import { withRouter } from 'next/router'
 import * as React from 'react'
+import { PropsOf } from '../../helpers'
 import { toPrecision } from '../../utils/toPrecision'
 import { useMedia } from '../../utils/useMedia'
 import { PoolData, PoolsData } from '../../utils/usePools'
@@ -35,7 +36,7 @@ interface Props extends WithRouterProps {
 
 interface Column {
   header: string | JSX.Element
-  cell: (p: PoolData) => JSX.Element
+  cell: (row: any) => JSX.Element
   subHeader?: string
 }
 
@@ -193,10 +194,22 @@ const PoolList: React.FC<Props> = (props) => {
         </Header>
       )}
       {pools?.map((p) => (
-        <Link href={p.isUpcoming || p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`} shallow passHref>
-          <PoolRow as="a" key={p.id} interactive>
-            <PoolDetails pool={p} columns={dataColumns} isMobile={isMobile as boolean} />
-          </PoolRow>
+        <Link
+          href={p.isUpcoming || p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`}
+          shallow
+          passHref
+          key={p.id}
+        >
+          <Row
+            row={p}
+            columns={dataColumns}
+            isMobile={isMobile as boolean}
+            icon={p.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'}
+            title={p.name}
+            type={p.asset}
+            as="a"
+            interactive
+          />
         </Link>
       ))}
     </Stack>
@@ -206,44 +219,59 @@ const PoolList: React.FC<Props> = (props) => {
 interface DetailsProps {
   isMobile: boolean
   columns: Column[]
-  pool: PoolData
+  row: any
+  icon?: string
+  title?: string
+  type?: string
 }
 
-const PoolDetails: React.FC<DetailsProps> = ({ isMobile, columns, pool }) => {
-  const poolIcon = <Icon src={pool.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'} />
+export const Row: React.FC<DetailsProps & PropsOf<typeof PoolRow>> = ({
+  isMobile,
+  columns,
+  row,
+  icon,
+  title,
+  type,
+  ...rest
+}) => {
+  const poolIcon = <Icon src={icon} />
   const poolTitle = (
-    <Desc>
-      <Name>{pool.name}</Name>
-      <Type>{pool.asset}</Type>
-    </Desc>
-  )
-  return isMobile ? (
-    <Stack gap="small">
-      <Shelf gap="small">
-        {poolIcon}
-        {poolTitle}
-      </Shelf>
-      <Divider />
-      <Stack gap="xsmall">
-        {columns.map((col) => (
-          <Shelf justifyContent="space-between">
-            <Wrap gap="xsmall" rowGap={0}>
-              <HeaderTitle>{col.header}</HeaderTitle>
-              {col.subHeader && <HeaderSub>{col.subHeader}</HeaderSub>}
-            </Wrap>
-            <div>{col.cell(pool)}</div>
-          </Shelf>
-        ))}
-      </Stack>
+    <Stack gap="xsmall" flex="1 1 auto">
+      <Name>{title}</Name>
+      <Type>{type}</Type>
     </Stack>
-  ) : (
-    <Shelf gap="small">
-      {poolIcon}
-      {poolTitle}
-      {columns.map((col) => (
-        <DataCol>{col.cell(pool)}</DataCol>
-      ))}
-    </Shelf>
+  )
+  return (
+    <PoolRow {...rest}>
+      {isMobile ? (
+        <Stack gap="small">
+          <Shelf gap="small">
+            {poolIcon}
+            {poolTitle}
+          </Shelf>
+          <Divider />
+          <Stack gap="xsmall">
+            {columns.map((col) => (
+              <Shelf justifyContent="space-between">
+                <Wrap gap="xsmall" rowGap={0}>
+                  <HeaderTitle>{col.header}</HeaderTitle>
+                  {col.subHeader && <HeaderSub>{col.subHeader}</HeaderSub>}
+                </Wrap>
+                <div>{col.cell(row)}</div>
+              </Shelf>
+            ))}
+          </Stack>
+        </Stack>
+      ) : (
+        <Shelf gap="small">
+          {poolIcon}
+          {poolTitle}
+          {columns.map((col) => (
+            <DataCol>{col.cell(row)}</DataCol>
+          ))}
+        </Shelf>
+      )}
+    </PoolRow>
   )
 }
 
