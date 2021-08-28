@@ -12,6 +12,8 @@ import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
 import { TransactionManager } from '../utils/tx-manager'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
+export const customPools: { [key: string]: string[] } = { mainnet: ['aave'] }
+
 @Injectable()
 export class PoolService {
   private readonly logger = new Logger(PoolService.name)
@@ -61,6 +63,16 @@ export class PoolService {
         if (profile) poolsWithProfiles[pool.addresses.ROOT_CONTRACT] = { ...pool, profile }
       })
     )
+
+    console.log(`Network: ${this.provider.network.name}`)
+    console.log(`Custom pools: ${customPools[this.provider.network.name].join(', ')}`)
+
+    customPools[this.provider.network.name].forEach(async (poolId: string) => {
+      const profile = await this.getPoolProfile(poolId)
+      if (profile) {
+        poolsWithProfiles[poolId] = { profile, metadata: {}, addresses: {}, network: this.provider.network.name }
+      }
+    })
 
     this.pools = poolsWithProfiles
     const newPools = prevPools.length - Object.keys(poolsWithProfiles).length
@@ -175,7 +187,8 @@ export interface ProfileAgreement {
   provider: 'docusign'
   providerTemplateId: string
   tranche: 'senior' | 'junior'
-  country: 'us' | 'non-us'
+  country?: 'us' | 'non-us'
+  target?: 'individual' | 'entity'
 }
 
 export interface Profile {
