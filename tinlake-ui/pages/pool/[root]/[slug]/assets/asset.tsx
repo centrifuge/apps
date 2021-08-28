@@ -7,6 +7,7 @@ import * as React from 'react'
 import Auth from '../../../../../components/Auth'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
+import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
 import PageTitle from '../../../../../components/PageTitle'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
@@ -20,12 +21,11 @@ interface Props extends WithRouterProps {
   ipfsPools: IpfsPools
 }
 
-class LoanPage extends React.Component<Props> {
-  render() {
-    const { pool, ipfsPools } = this.props
-    const { assetId }: { assetId: string } = this.props.router.query as any
+const LoanPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
+  const { assetId }: { assetId: string } = router.query as any
 
-    return (
+  return (
+    <IpfsPoolsProvider value={ipfsPools}>
       <WithFooter>
         <Head>
           <title>
@@ -73,8 +73,8 @@ class LoanPage extends React.Component<Props> {
           </Box>
         </Container>
       </WithFooter>
-    )
-  }
+    </IpfsPoolsProvider>
+  )
 }
 
 export async function getStaticPaths() {

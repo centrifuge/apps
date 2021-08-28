@@ -39,8 +39,15 @@ const assembleIpfsUrl = async (rpcProvider: ethers.providers.JsonRpcProvider): P
 
 export type PoolMap = { [key: string]: Pool }
 
+interface PoolMetadata {
+  name: string
+  shortName?: string
+  slug: string
+  currencySymbol?: string
+}
+
 export interface Pool {
-  metadata: any
+  metadata: PoolMetadata
   addresses: { [key: string]: string }
   network: 'mainnet' | 'kovan'
   profile?: Profile

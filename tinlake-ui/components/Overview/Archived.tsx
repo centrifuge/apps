@@ -3,9 +3,8 @@ import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'gro
 import Link from 'next/link'
 import * as React from 'react'
 import { LoadingValue } from '../../components/LoadingValue/index'
-import { ArchivedPool } from '../../config'
+import { ArchivedPool, ArchivedPoolData } from '../../config'
 import { ExplainerCard } from '../../containers/Investment/View/styles'
-import { ArchivedPoolData } from '../../ducks/pool'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { toPrecision } from '../../utils/toPrecision'
 

@@ -1,19 +1,18 @@
 import { Modal } from '@centrifuge/axis-modal'
-import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
+import { AddressStatus, AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { Anchor, Box, Button, CheckBox, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import config, { Pool } from '../../config'
-import { OnboardingState } from '../../ducks/onboarding'
 import { FormFieldWithoutBorder, LegalCopy, Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool?: Pool
   active: boolean
   tranche?: 'senior' | 'junior'
-  onboarding: OnboardingState
+  onboardingData: AddressStatus | undefined
   agreement: AgreementsStatus | undefined
   agreementStatus: 'none' | 'signed' | 'countersigned' | 'declined' | 'voided'
   whitelistStatus: boolean
@@ -37,7 +36,7 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
     setNonSolicitationModalIsOpen(false)
   }
 
-  const isRestricted = props.onboarding.data?.restrictedGlobal || props.onboarding.data?.restrictedPool
+  const isRestricted = props.onboardingData?.restrictedGlobal || props.onboardingData?.restrictedPool
 
   return (
     <Step>
@@ -77,14 +76,14 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
               Securitize iD.`}
             </Paragraph>
             <div>
-              <Button primary label={'Sign in with Securitize'} href={props.onboarding.data?.kyc?.url} fill={false} />
+              <Button primary label={'Sign in with Securitize'} href={props.onboardingData?.kyc?.url} fill={false} />
             </div>
             <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
           </StepBody>
         )}
       {props.active && isRestricted && (
         <StepBody>
-          {props.onboarding.data?.restrictedGlobal && (
+          {props.onboardingData?.restrictedGlobal && (
             <Paragraph>
               You are located in or are a resident of a country that is blocked from investment in Tinlake for
               regulatory reasons. Please find more information on regulatory restrictions{' '}
@@ -94,7 +93,7 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
               .
             </Paragraph>
           )}
-          {!props.onboarding.data?.restrictedGlobal && (
+          {!props.onboardingData?.restrictedGlobal && (
             <>
               <Paragraph>
                 You are located in or are a resident of a country that has been blocked by the issuer for regulatory
@@ -130,7 +129,7 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
                   } for ${poolName}. Note that the minimum investment
             amount for this pool is 5000 ${props.activePool?.metadata.currencySymbol || 'DAI'}.`}
             </Paragraph>
-            {props.onboarding.data?.showNonSolicitationNotice && (
+            {props.onboardingData?.showNonSolicitationNotice && (
               <Box margin={{ right: 'auto', bottom: 'medium' }}>
                 <FormFieldWithoutBorder error={error}>
                   <CheckBox
@@ -165,7 +164,7 @@ const AgreementStep: React.FC<Props> = (props: Props) => {
                   props.agreement?.provider
                 }/${props.agreement?.providerTemplateId}/redirect?session=${session}`}
                 onClick={(event: any) => {
-                  if (props.onboarding.data?.showNonSolicitationNotice && !checked) {
+                  if (props.onboardingData?.showNonSolicitationNotice && !checked) {
                     event.preventDefault()
                     setError('This needs to be checked to proceed.')
                   }

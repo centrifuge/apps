@@ -4,24 +4,22 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
-import { connect, useSelector } from 'react-redux'
-import { LoadPool, Pool } from '../../../config'
-import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
+import { connect } from 'react-redux'
+import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
+import { usePool } from '../../../utils/usePool'
 import { Description } from './styles'
 
 interface Props extends TransactionProps {
   tinlake: ITinlake
   selectedPool?: Pool
-  loadPool?: LoadPool
   setShowMaxReserveForm: (value: boolean) => void
 }
 
 const e27 = new BN(10).pow(new BN(27))
 
 const MaxReserveForm: React.FC<Props> = (props: Props) => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolData | undefined
+  const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [value, setValue] = React.useState<string | undefined>(undefined)
 
@@ -75,7 +73,7 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
-      props.loadPool && props.loadPool(props.tinlake, props.selectedPool?.metadata.maker?.ilk)
+      refetchPoolData()
       props.setShowMaxReserveForm(false)
     }
   }, [status])
@@ -163,4 +161,4 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadPool, createTransaction })(MaxReserveForm)
+export default connect((state) => state, { createTransaction })(MaxReserveForm)

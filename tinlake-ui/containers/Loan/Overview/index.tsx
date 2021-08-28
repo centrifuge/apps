@@ -3,7 +3,7 @@ import BN from 'bn.js'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
-import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { Area, AreaChart, Tooltip } from 'recharts'
 import {
   ChartTooltip,
   ChartTooltipColor,
@@ -11,16 +11,17 @@ import {
   ChartTooltipLine,
   ChartTooltipTitle,
   ChartTooltipValue,
+  StyledResponsiveContainer,
 } from '../../../components/Chart/styles'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
 import { AssetData, loadAssetData } from '../../../ducks/loans'
-import { loadPool, PoolData, PoolState } from '../../../ducks/pool'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { dateToYMD } from '../../../utils/date'
 import { UintBase } from '../../../utils/ratios'
 import { toPrecision } from '../../../utils/toPrecision'
+import { usePool } from '../../../utils/usePool'
 import MaxReserveForm from './MaxReserveForm'
 import { Sidenote } from './styles'
 
@@ -63,8 +64,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 }
 
 const LoanOverview: React.FC<Props> = (props: Props) => {
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolData | undefined
+  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const assetData = useSelector<any, AssetData[]>((state) => state.loans.assetData)
 
@@ -72,7 +72,6 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   const address = useSelector<any, string | null>((state) => state.auth.address)
 
   React.useEffect(() => {
-    dispatch(loadPool(props.tinlake, props.selectedPool?.metadata.maker?.ilk))
     dispatch(loadAssetData(props.tinlake))
   }, [address])
 
@@ -258,8 +257,8 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
             </Heading>
           </Box>
           {assetDataWithToday.length > 0 && (
-            <ResponsiveContainer>
-              <AreaChart data={assetDataWithToday} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <StyledResponsiveContainer>
+              <AreaChart data={assetDataWithToday} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
                 <defs>
                   <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
@@ -293,7 +292,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   name="Reserve"
                 />
               </AreaChart>
-            </ResponsiveContainer>
+            </StyledResponsiveContainer>
           )}
         </Box>
       </Box>

@@ -1,28 +1,27 @@
-import { Tooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Alert from '../../components/Alert'
-import { PortfolioState } from '../../ducks/portfolio'
-import { RewardsState } from '../../ducks/rewards'
+import { Tooltip } from '../../components/Tooltip'
 import { TransactionStatus } from '../../ducks/transactions'
 import { loadCentChain, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { centChainService } from '../../services/centChain'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { createBufferProofFromClaim, createTree, newClaim } from '../../utils/cfgRewardProofs'
 import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
+import { useGlobalRewards } from '../../utils/useGlobalRewards'
 import { RewardStripe, Small } from './styles'
 
 interface Props {
   activeLink: UserRewardsLink
+  portfolioValue: BN | undefined
 }
 
-const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
+const ClaimRewards: React.FC<Props> = ({ activeLink, portfolioValue }) => {
   const { data, claims } = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
-  const { totalValue: portfolioValue } = useSelector<any, PortfolioState>((state) => state.portfolio)
-  const rewards = useSelector<any, RewardsState>((state: any) => state.rewards)
+  const rewards = useGlobalRewards()
   const dispatch = useDispatch()
 
   const [claimExtHash, setClaimExtHash] = React.useState<null | string>(null)
@@ -89,6 +88,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
                     description={`Your unclaimed rewards on this Centrifuge Chain account can be higher than the rewards you earned on the connected
                       Ethereum account if you have set this Centrifuge Chain account as recipient for multiple
                       Ethereum accounts.`}
+                    underline
                   >
                     <Small>
                       Your unclaimed rewards are higher than the rewards on the connected Ethereum account. Learn why...
@@ -139,6 +139,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink }: Props) => {
                   description={`Your claimed rewards on this Centrifuge Chain account can be higher than the rewards you earned on the connected Ethereum
                       account if you have set this Centrifuge Chain account as recipient for multiple Ethereum
                       accounts.`}
+                  underline
                 >
                   <Small>
                     Your claimed rewards are higher than the rewards on the connected Ethereum account. Learn why...

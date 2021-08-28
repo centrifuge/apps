@@ -1,11 +1,10 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Heading } from 'grommet'
 import * as React from 'react'
-import { connect, useDispatch, useSelector } from 'react-redux'
+import { connect } from 'react-redux'
 import PageTitle from '../../../components/PageTitle'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
-import { loadPool } from '../../../ducks/pool'
 import AdminActions from './AdminActions'
 import EpochOverview from './EpochOverview'
 import ManageMemberlist from './ManageMemberlist'
@@ -22,15 +21,6 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
   const canManagePermissions =
     (props.auth?.permissions as PermissionsV3 | undefined)?.canAddToJuniorMemberList ||
     (props.auth?.permissions as PermissionsV3 | undefined)?.canAddToSeniorMemberList
-
-  const dispatch = useDispatch()
-  const address = useSelector<any, string | null>((state) => state.auth.address)
-  const activeTransactions = useSelector<any, string | null>((state) => state.transactions.active)
-  const portfolioData = useSelector<any, string | null>((state) => state.portfolio.data)
-
-  React.useEffect(() => {
-    dispatch(loadPool(props.tinlake, '', true))
-  }, [props.tinlake.signer, address, activeTransactions, portfolioData])
 
   return (
     <Box margin={{ top: 'medium' }}>

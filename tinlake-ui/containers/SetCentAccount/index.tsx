@@ -1,10 +1,10 @@
-import { Tooltip } from '@centrifuge/axis-tooltip'
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Select } from 'grommet'
 import { CircleAlert } from 'grommet-icons'
 import * as React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
+import { Tooltip } from '../../components/Tooltip'
 import { AuthState } from '../../ducks/auth'
 import { CentChainWalletState, InjectedAccount } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
@@ -109,6 +109,7 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
         <Tooltip
           title="Why so slow?"
           description={`Communication between the Ethereum blockchain and our Centrifuge Chain is semi-automated. Every link transaction on Ethereum will be observed by a relayer, a proof will be generated, and that proof will be committed on Centrfiuge Chain. This process is running only once per day.`}
+          underline
         >
           <Small>Why so slow?</Small>
         </Tooltip>
@@ -168,6 +169,7 @@ const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) 
         description={`Your address may show up ${
           selectedCentAcc ? `as ${shortAddr(selectedCentAcc.addrInjected)}` : 'differently'
         } in the Polkadot extension. In the extension settings, change the display address format to "Centrifuge Chain" to see your address in the right format.`}
+        underline
       >
         <Small>Unexpected/wrong addresses?</Small>
       </Tooltip>

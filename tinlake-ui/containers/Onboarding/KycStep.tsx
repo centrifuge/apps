@@ -1,14 +1,13 @@
-import { KycStatusLabel } from '@centrifuge/onboarding-api/src/controllers/types'
+import { AddressStatus, KycStatusLabel } from '@centrifuge/onboarding-api/src/controllers/types'
 import { Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
 import config, { Pool } from '../../config'
-import { OnboardingState } from '../../ducks/onboarding'
 import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool
   active: boolean
-  onboarding: OnboardingState
+  onboardingData: AddressStatus | undefined
   kycStatus: KycStatusLabel | 'requires-signin' | undefined
   accreditationStatus: boolean
 }
@@ -75,13 +74,15 @@ const KycStep: React.FC<Props> = (props: Props) => {
         <StepBody>
           <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
             Your KYC submission has been verified, but you still need to finish accreditation as a US tax resident. To
-            complete this step, please finalize your accreditation information on Securitize.io.
+            complete this step, please submit your accreditation information on InvestReady. Make sure you use the same
+            email address here that you entered on Securitize. If you experience any issues, please contact{' '}
+            <a href="mailto:support@centrifuge.io">support@centrifuge.io</a>.
           </Paragraph>
           <div>
             <Button
               primary
-              label={`Complete accreditation on Securitize`}
-              href={`${config.onboardAPIHost}pools/${(props.activePool as Pool).addresses.ROOT_CONTRACT}/info-redirect`}
+              label={`Complete accreditation on InvestReady`}
+              href={'https://centrifuge.investready.com/signup?app_id=7Ja9qnS6uckhHGA9pL49P5IwMDwt02y8MJhd6ajA'}
               fill={false}
               target="_blank"
             />
@@ -95,7 +96,7 @@ const KycStep: React.FC<Props> = (props: Props) => {
             To continue with onboarding, you need to sign in again with your Securitize iD.
           </Paragraph>
           <div>
-            <Button primary label={`Sign in with Securitize`} href={props.onboarding.data?.kyc?.url} fill={false} />
+            <Button primary label={`Sign in with Securitize`} href={props.onboardingData?.kyc?.url} fill={false} />
           </div>
           <Box margin={{ bottom: 'medium' }}>&nbsp;</Box>
         </StepBody>

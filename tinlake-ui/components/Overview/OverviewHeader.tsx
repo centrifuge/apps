@@ -15,7 +15,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import config, { Pool } from '../../config'
 import { ensureAuthed } from '../../ducks/auth'
-import { PoolData, PoolState } from '../../ducks/pool'
+import { useTrancheYield } from '../../utils/hooks'
+import { usePool } from '../../utils/usePool'
 import InvestAction from '../InvestAction'
 import { Tooltip } from '../Tooltip'
 
@@ -29,8 +30,9 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch()
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolData | undefined
+  const { data: poolData } = usePool(props.selectedPool.addresses.ROOT_CONTRACT)
+
+  const { dropYield } = useTrancheYield(props.selectedPool.addresses.ROOT_CONTRACT)
 
   const dropRate = poolData?.senior?.interestRate || undefined
 
@@ -116,37 +118,50 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           <Heading level="5">{props.selectedPool.metadata.asset}</Heading>
           <Type>Asset type</Type>
         </HeaderBox>
-        <Tooltip id="assetMaturity">
-          <HeaderBox>
-            <Heading level="4">{props.selectedPool.metadata.assetMaturity}</Heading>
-            <Type>Asset maturity</Type>
-          </HeaderBox>
-        </Tooltip>
-        <Tooltip id="dropAPR">
-          <HeaderBox>
-            <Heading level="4">
-              <TokenLogo src={`/static/DROP_final.svg`} />
-              {toPrecision(feeToInterestRate(dropRate || '0'), 2)}
-              <Unit>%</Unit>
-            </Heading>
-            <Type>DROP APR</Type>
-          </HeaderBox>
-        </Tooltip>
-        <Tooltip id="poolValue">
-          <HeaderBox style={{ borderRight: 'none' }}>
-            <Heading level="4">
-              <TokenLogo src={`/static/currencies/${props.selectedPool.metadata.currencySymbol}.svg`} />
-              {addThousandsSeparators(
-                toPrecision(
-                  baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18),
-                  0
-                )
+        <HeaderBox>
+          <Heading level="4">{props.selectedPool.metadata.assetMaturity}</Heading>
+          <Type>
+            <Tooltip id="assetMaturity" underline>
+              Asset maturity
+            </Tooltip>
+          </Type>
+        </HeaderBox>
+        <HeaderBox>
+          <Heading level="4">
+            <TokenLogo src={`/static/DROP_final.svg`} />
+            {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
+              ? dropYield
+              : toPrecision(feeToInterestRate(dropRate || '0'), 2)}
+            <Unit>%</Unit>
+          </Heading>
+          <Box>
+            <Type>
+              {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) && (
+                <Tooltip id="dropApy" underline>
+                  DROP APY (30 days)
+                </Tooltip>
               )}
-              <Unit>{props.selectedPool.metadata.currencySymbol}</Unit>
-            </Heading>
-            <Type>Pool Value</Type>
-          </HeaderBox>
-        </Tooltip>
+              {!(dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))) && (
+                <Tooltip id="dropApr" underline>
+                  Fixed DROP rate (APR)
+                </Tooltip>
+              )}
+            </Type>
+          </Box>
+        </HeaderBox>
+        <HeaderBox width="220px" style={{ borderRight: 'none' }}>
+          <Heading level="4">
+            <TokenLogo src={`/static/currencies/${props.selectedPool.metadata.currencySymbol}.svg`} />
+            {addThousandsSeparators(
+              toPrecision(
+                baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18),
+                0
+              )
+            )}
+            <Unit>{props.selectedPool.metadata.currencySymbol}</Unit>
+          </Heading>
+          <Type>Pool Value</Type>
+        </HeaderBox>
         <HeaderBox style={{ borderRight: 'none' }}>
           {'addresses' in props.selectedPool &&
           config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
@@ -335,8 +350,8 @@ const HeaderBox = styled(Box)<{ width?: string }>`
 
 const Type = styled.div`
   font-weight: 500;
-  font-size: 13px;
-  line-height: 14px;
+  font-size: 12px;
+  line-height: 20px;
   color: #979797;
 `
 

@@ -1,22 +1,23 @@
-import { Tooltip } from '@centrifuge/axis-tooltip'
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button, Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
 import { FormDown } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { connect, useSelector } from 'react-redux'
+import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { SolverResult } from '../../../../tinlake.js/dist/services/solver/solver'
 import { LoadingValue } from '../../../components/LoadingValue/index'
+import { Tooltip } from '../../../components/Tooltip'
 import { Pool } from '../../../config'
 import { AuthState } from '../../../ducks/auth'
-import { EpochData, PoolData, PoolState } from '../../../ducks/pool'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { Fixed27Base } from '../../../utils/ratios'
 import { secondsToHms } from '../../../utils/time'
 import { toPrecision } from '../../../utils/toPrecision'
+import { useEpoch } from '../../../utils/useEpoch'
+import { usePool } from '../../../utils/usePool'
 import { HelpIcon } from '../../Onboarding/styles'
 import { Caret } from './styles'
 
@@ -28,10 +29,10 @@ interface Props extends TransactionProps {
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const router = useRouter()
+  const { root } = router.query
 
-  const pool = useSelector<any, PoolState>((state) => state.pool)
-  const poolData = pool?.data as PoolData | undefined
-  const epochData = pool?.epoch as EpochData | undefined
+  const { data: poolData } = usePool(root as string)
+  const { data: epochData } = useEpoch(root as string)
 
   const [status, , setTxId] = useTransactionState()
 
@@ -162,8 +163,8 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
             {epochData?.state === 'open' && (
               <Tooltip
-                title="Tinlake epochs have a minimum duration of 24 hours. Once the minimum duration has passed, the epoch will be closed and, if possible, the orders will be executed.
-              "
+                title="Tinlake epochs have a minimum duration of 24 hours. Once the minimum duration has passed, the epoch will be closed and, if possible, the orders will be executed."
+                underline
               >
                 <h5>{secondsToHms(epochData?.minimumEpochTimeLeft || 0)} until end of minimum duration</h5>
               </Tooltip>
@@ -171,34 +172,52 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             {epochData?.state === 'can-be-closed' && (
               <>
                 {getSolutionState() === 'to-be-closed' && (
-                  <Tooltip title="The minimum epoch duration has passed and will soon be closed automatically. All locked orders will be executed.">
+                  <Tooltip
+                    title="The minimum epoch duration has passed and will soon be closed automatically. All locked orders will be executed."
+                    underline
+                  >
                     <h5>To be closed</h5>
                   </Tooltip>
                 )}
                 {getSolutionState() === 'no-orders-locked' && (
-                  <Tooltip title="The minimum epoch duration has passed but currently no orders are locked. The epoch will be closed once orders are locked and can be executed.">
+                  <Tooltip
+                    title="The minimum epoch duration has passed but currently no orders are locked. The epoch will be closed once orders are locked and can be executed."
+                    underline
+                  >
                     <h5>No orders locked</h5>
                   </Tooltip>
                 )}
                 {getSolutionState() === 'no-executions' && (
-                  <Tooltip title="The minimum epoch duration has passed but the locked orders cannot be executed. This may be because the pool is oversubscribed or no liquidity is available for redemptions. The epoch will be closed and orders executed as soon as the pool state changes or liquidity is provided.">
+                  <Tooltip
+                    title="The minimum epoch duration has passed but the locked orders cannot be executed. This may be because the pool is oversubscribed or no liquidity is available for redemptions. The epoch will be closed and orders executed as soon as the pool state changes or liquidity is provided."
+                    underline
+                  >
                     <h5>Locked orders cannot be executed</h5>
                   </Tooltip>
                 )}
                 {getSolutionState() === 'partial-executions' && (
-                  <Tooltip title="The minimum epoch duration has passed but only a fraction of the locked orders could be executed. The epoch is not automatically closed to avoid unsustainable gas fees for small transaction amounts.">
+                  <Tooltip
+                    title="The minimum epoch duration has passed but only a fraction of the locked orders could be executed. The epoch is not automatically closed to avoid unsustainable gas fees for small transaction amounts."
+                    underline
+                  >
                     <h5>Locked orders can only be partially executed</h5>
                   </Tooltip>
                 )}
               </>
             )}
             {epochData?.state === 'in-submission-period' && (
-              <Tooltip title="The epoch has been closed and orders are currently being computed. After the computing period has ended the orders will be executed.">
+              <Tooltip
+                title="The epoch has been closed and orders are currently being computed. After the computing period has ended the orders will be executed."
+                underline
+              >
                 <h5>Minimum {secondsToHms(epochData?.challengeTime || 0)} remaining</h5>
               </Tooltip>
             )}
             {epochData?.state === 'in-challenge-period' && (
-              <Tooltip title="The epoch has been closed and orders are currently being computed. After the computing period has ended the orders will be executed.">
+              <Tooltip
+                title="The epoch has been closed and orders are currently being computed. After the computing period has ended the orders will be executed."
+                underline
+              >
                 <h5>
                   {secondsToHms((epochData?.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000)}{' '}
                   remaining...
@@ -206,7 +225,10 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
               </Tooltip>
             )}
             {epochData?.state === 'challenge-period-ended' && (
-              <Tooltip title="The epoch has been closed and orders have been computed. The orders will be executed shortly.">
+              <Tooltip
+                title="The epoch has been closed and orders have been computed. The orders will be executed shortly."
+                underline
+              >
                 <h5>To be closed</h5>
               </Tooltip>
             )}
@@ -454,7 +476,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                       ? '0'
                       : parseFloat(
                           (solution?.dropRedeem || new BN(0))
-                            .add(solution?.tinInvest || new BN(0))
+                            .add(solution?.tinRedeem || new BN(0))
                             .mul(new BN(10).pow(new BN(18)))
                             .div(
                               (poolData?.senior?.pendingRedemptions || new BN(1)).add(
@@ -506,7 +528,6 @@ const EpochState = styled.div`
     font-size: 14px;
     margin: 0 0 0 14px;
     color: #777777;
-    border-bottom: 1px dotted #777777;
   }
 `
 

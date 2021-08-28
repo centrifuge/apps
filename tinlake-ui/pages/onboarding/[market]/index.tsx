@@ -16,7 +16,7 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
   return (
     <WithFooter hideHelpMenu={true}>
       <Head>
-        <title>Investor Onboarding for ${props.market} | Tinlake | Centrifuge</title>
+        <title>Investor Onboarding for {props.market} | Tinlake | Centrifuge</title>
       </Head>
       <Header
         ipfsPools={{ active: [], archived: [], upcoming: [] }}

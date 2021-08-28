@@ -8,12 +8,22 @@ import { DocumentNode } from 'graphql'
 import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
-import { PoolData, PoolsDailyData, PoolsData } from '../../ducks/pools'
-import { TokenBalance } from '../../ducks/portfolio'
-import { RewardsData } from '../../ducks/rewards'
 import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
+import { PoolData, PoolsData } from '../../utils/usePools'
+
+export interface RewardsData {
+  toDateRewardAggregateValue: BN
+  toDateAORewardAggregateValue: BN
+  rewardRate: Decimal
+  todayReward: BN
+}
+
+export interface PoolsDailyData {
+  day: number
+  poolValue: number
+}
 
 const OversubscribedBuffer = new BN(5000).mul(new BN(10).pow(new BN(18))) // 5k DAI
 
@@ -74,9 +84,6 @@ class Apollo {
 
       const reserve = (pool && new BN(pool.reserve)) || undefined
       const assetValue = (pool && new BN(pool.assetValue)) || undefined
-      const poolValueNum =
-        parseInt((reserve || new BN(0)).div(UintBase).toString(), 10) +
-        parseInt((assetValue || new BN(0)).div(UintBase).toString(), 10)
 
       const poolData = {
         reserve,
@@ -91,7 +98,6 @@ class Apollo {
         totalRepaysAggregatedAmountNum,
         weightedInterestRateNum,
         seniorInterestRateNum,
-        order: poolValueNum,
         isUpcoming: false, // TODO: poolConfig?.metadata?.isUpcoming || false
         isArchived: false,
         isOversubscribed:
@@ -103,10 +109,15 @@ class Apollo {
         version: Number(pool?.version || 3),
         juniorYield14Days: (pool?.juniorYield14Days && new BN(pool.juniorYield14Days)) || null,
         seniorYield14Days: (pool?.seniorYield14Days && new BN(pool.seniorYield14Days)) || null,
+        juniorYield30Days: (pool?.juniorYield30Days && new BN(pool.juniorYield30Days)) || null,
+        seniorYield30Days: (pool?.seniorYield30Days && new BN(pool.seniorYield30Days)) || null,
+        juniorYield90Days: (pool?.juniorYield90Days && new BN(pool.juniorYield90Days)) || null,
+        seniorYield90Days: (pool?.seniorYield90Days && new BN(pool.seniorYield90Days)) || null,
         juniorTokenPrice: (pool?.juniorTokenPrice && new BN(pool.juniorTokenPrice)) || null,
         seniorTokenPrice: (pool?.seniorTokenPrice && new BN(pool.seniorTokenPrice)) || null,
         icon: poolConfig.metadata.media?.icon || null,
         currency: poolConfig.metadata.currencySymbol || 'DAI',
+        shortName: '',
       }
 
       return { ...poolData, status: getPoolStatus(poolData) }
@@ -145,6 +156,11 @@ class Apollo {
       seniorYield14Days: null,
       icon: p.metadata.media?.icon || null,
       currency: p.metadata.currencySymbol || 'DAI',
+      shortName: '',
+      seniorYield30Days: null,
+      seniorYield90Days: null,
+      juniorYield30Days: null,
+      juniorYield90Days: null,
     }))
   }
 
@@ -180,6 +196,11 @@ class Apollo {
       seniorYield14Days: null,
       icon: p.metadata.media?.icon || null,
       currency: p.metadata.currencySymbol || 'DAI',
+      shortName: '',
+      seniorYield30Days: null,
+      seniorYield90Days: null,
+      juniorYield30Days: null,
+      juniorYield90Days: null,
     }))
   }
 
@@ -220,8 +241,11 @@ class Apollo {
               reserve
               maxReserve
               assetValue
-              juniorYield14Days
-              seniorYield14Days
+              shortName
+              seniorYield30Days
+              seniorYield90Days
+              juniorYield30Days
+              juniorYield90Days
               juniorTokenPrice
               seniorTokenPrice
             }
@@ -419,7 +443,7 @@ class Apollo {
   }
 
   // TODO: expand this to work beyond ~3 years (1000 days), if needed
-  async getPoolsDailyData() {
+  async getPoolsDailyData(): Promise<PoolsDailyData[]> {
     let result
     try {
       result = await this.client.query({
@@ -447,51 +471,6 @@ class Apollo {
       .sort((a: PoolsDailyData, b: PoolsDailyData) => a.day - b.day)
 
     return poolsDailyData
-  }
-
-  async getPortfolio(address: string): Promise<TokenBalance[]> {
-    let result
-    try {
-      result = await this.client.query({
-        query: gql`
-        {
-          tokenBalances(where: { owner: "${address.toLowerCase()}" }) {
-            token {
-              id
-              symbol
-            }
-            balanceAmount
-            totalValue
-            supplyAmount
-            pendingSupplyCurrency
-          }
-        }
-        `,
-      })
-    } catch (err) {
-      console.error(`error occured while fetching portfolio data from apollo ${err}`)
-      return []
-    }
-
-    if (!result.data) return []
-
-    return result.data.tokenBalances.map(
-      (tokenBalance: {
-        token: any
-        totalValue: string
-        balanceAmount: string
-        supplyAmount: string
-        pendingSupplyCurrency: string
-      }) => {
-        return {
-          token: tokenBalance.token,
-          totalValue: new BN(tokenBalance.totalValue),
-          balanceAmount: new BN(tokenBalance.balanceAmount),
-          supplyAmount: new BN(tokenBalance.supplyAmount),
-          pendingSupplyCurrency: new BN(tokenBalance.pendingSupplyCurrency),
-        }
-      }
-    )
   }
 
   async getProxies(user: string) {

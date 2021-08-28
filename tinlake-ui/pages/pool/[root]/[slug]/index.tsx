@@ -5,10 +5,11 @@ import * as React from 'react'
 import Auth from '../../../../components/Auth'
 import Container from '../../../../components/Container'
 import Header from '../../../../components/Header'
+import { IpfsPoolsProvider } from '../../../../components/IpfsPoolsProvider'
+import Overview from '../../../../components/Overview'
 import WithFooter from '../../../../components/WithFooter'
 import WithTinlake from '../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool as IPool } from '../../../../config'
-import Overview from '../../../../containers/Overview'
 import { menuItems } from '../../../../menuItems'
 
 interface Props {
@@ -18,11 +19,9 @@ interface Props {
   key: string
 }
 
-class Pool extends React.Component<Props> {
-  render() {
-    const { pool, ipfsPools } = this.props
-
-    return (
+const Pool: React.FC<Props> = ({ pool, ipfsPools }) => {
+  return (
+    <IpfsPoolsProvider value={ipfsPools}>
       <WithFooter>
         <Head>
           <title>Pool Overview: {pool.metadata.name} | Tinlake | Centrifuge</title>
@@ -47,8 +46,8 @@ class Pool extends React.Component<Props> {
           </Box>
         </Container>
       </WithFooter>
-    )
-  }
+    </IpfsPoolsProvider>
+  )
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {

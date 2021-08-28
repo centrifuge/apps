@@ -109,6 +109,8 @@ export default class Tinlake {
   }
 
   setContracts = () => {
+    // Tinlake instance might be reused, so clear previous contracts
+    this.contracts = {}
     // set root & proxy contracts
     contractNames.forEach((name) => {
       if (this.contractAbis[name] && this.contractAddresses[name]) {
