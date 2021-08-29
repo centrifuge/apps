@@ -24,6 +24,10 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
         menuItems={[]}
         secondaryContent={<Button label="Return to Aave" primary />}
       />
+      ROOT_CONTRACT: string ACTIONS: string PROXY_REGISTRY: string COLLATERAL_NFT: string SENIOR_TOKEN: string
+      JUNIOR_TOKEN: string CLERK?: string ASSESSOR: string RESERVE: string SENIOR_TRANCHE: string JUNIOR_TRANCHE: string
+      FEED: string POOL_ADMIN?: string SENIOR_MEMBERLIST: string JUNIOR_MEMBERLIST: string COORDINATOR: string PILE:
+      string MCD_VAT?: string MCD_JUG?: string MAKER_MGR?: string
       <Container>
         <Box justify="center" direction="row">
           <Box width="xlarge">
@@ -41,11 +45,17 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
                     COLLATERAL_NFT: '0x0',
                     SENIOR_TOKEN: '0x0',
                     JUNIOR_TOKEN: '0x0',
+                    CLERK: '0x0',
                     ASSESSOR: '0x0',
                     RESERVE: '0x0',
                     SENIOR_TRANCHE: '0x0',
                     JUNIOR_TRANCHE: '0x0',
                     FEED: '0x0',
+                    POOL_ADMIN: '0x0',
+                    SENIOR_MEMBERLIST: '0x0',
+                    JUNIOR_MEMBERLIST: '0x0',
+                    COORDINATOR: '0x0',
+                    PILE: '0x0',
                   },
                   metadata: { name: 'Aave', slug: 'aave', asset: '-' },
                 }}
