@@ -94,7 +94,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
       {!props.hidePageTitle && (
         <PageTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
       )}
-      <Box direction="row" gap="medium" margin={props.hidePageTitle ? { top: '120px' } : {}}>
+      <Box direction="row" gap="medium" margin={props.hidePageTitle ? { top: '60px' } : {}}>
         <Box basis="2/3">
           <Box pad="medium" elevation="small" round="xsmall" background="white">
             {address && !onboarding.data ? (
