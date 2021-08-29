@@ -64,13 +64,15 @@ export class PoolService {
       })
     )
 
-    console.log(`Network: ${this.provider.network.name}`)
-    console.log(`Custom pools: ${customPools[this.provider.network.name].join(', ')}`)
+    const network = this.provider.network.name === 'homestead' ? 'mainnet' : this.provider.network.name
 
-    customPools[this.provider.network.name].forEach(async (poolId: string) => {
+    this.logger.log(`Network: ${network}`)
+    this.logger.log(`Custom pools: ${customPools[network].join(', ')}`)
+
+    customPools[network].forEach(async (poolId: string) => {
       const profile = await this.getPoolProfile(poolId)
       if (profile) {
-        poolsWithProfiles[poolId] = { profile, metadata: {}, addresses: {}, network: this.provider.network.name }
+        poolsWithProfiles[poolId] = { profile, metadata: {}, addresses: {}, network: network }
       }
     })
 
