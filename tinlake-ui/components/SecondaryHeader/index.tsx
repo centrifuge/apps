@@ -1,6 +1,6 @@
-import { Box } from 'grommet'
+import { Box, BoxProps } from 'grommet'
 import React from 'react'
-import styled, { withTheme } from 'styled-components'
+import styled from 'styled-components'
 
 const StyledSecondaryHeader = styled(Box)`
   position: sticky;
@@ -8,14 +8,12 @@ const StyledSecondaryHeader = styled(Box)`
   z-index: 1;
 `
 
-const SecondaryHeader = withTheme((props) => {
-  const { children, ...rest } = props
-
+const SecondaryHeader: React.FC<BoxProps> = ({ children, ...rest }) => {
   return (
     <StyledSecondaryHeader background="rgb(249, 249, 249)" justify="between" direction="row" align="center" {...rest}>
       {children}
     </StyledSecondaryHeader>
   )
-})
+}
 
 export default SecondaryHeader

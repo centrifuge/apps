@@ -182,7 +182,7 @@ const PoolList: React.FC<Props> = (props) => {
   return (
     <Stack gap="small">
       {isMobile ? (
-        <SectionHeading>Asset Pools</SectionHeading>
+        <SectionHeading>Pools</SectionHeading>
       ) : (
         <Header>
           <Desc>
