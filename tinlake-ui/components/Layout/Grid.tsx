@@ -42,7 +42,7 @@ export const Grid: React.FC<Props> = ({
 }
 
 function toPx(n: number | string) {
-  return typeof n === 'number' ? n + 'px' : n
+  return typeof n === 'number' ? `${n}px` : n
 }
 
 function widthToColumns(width: ResponsiveValue<number>, equalColumns: boolean) {
