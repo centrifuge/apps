@@ -1,7 +1,8 @@
 import { Drop } from 'grommet'
 import React from 'react'
 import { preload } from '../../utils/images'
-import { HelpMenuWrapper, InnerMenu, MenuItem, Name, Title } from './styles'
+import { Card } from '../Card'
+import { HelpMenuWrapper, MenuItem, Name, Title } from './styles'
 
 const HelpMenu: React.FC<{}> = () => {
   const ref = React.useRef<HTMLDivElement>(null)
@@ -54,7 +55,7 @@ const HelpMenu: React.FC<{}> = () => {
           onClickOutside={onClickOutside}
           onEsc={() => setOpen(false)}
         >
-          <InnerMenu width="200px" elevation="small" round="xsmall" background="white">
+          <Card width="200px" p="small">
             <Title>Need help?</Title>
             <MenuItem href="https://t.me/centrifuge_chat" target="_blank" icon="telegram">
               <Name>Telegram</Name>
@@ -72,7 +73,7 @@ const HelpMenu: React.FC<{}> = () => {
             >
               <Name>Documentation</Name>
             </MenuItem>
-          </InnerMenu>
+          </Card>
         </Drop>
       )}
     </>

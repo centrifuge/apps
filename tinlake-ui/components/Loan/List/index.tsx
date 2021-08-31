@@ -11,6 +11,7 @@ import { SortableLoan } from '../../../ducks/loans'
 import { dateToYMD } from '../../../utils/date'
 import { hexToInt } from '../../../utils/etherscanLinkGenerator'
 import { saveAsCSV } from '../../../utils/export'
+import { Card } from '../../Card'
 import ChevronRight from '../../ChevronRight'
 import LoanLabel from '../Label'
 
@@ -35,15 +36,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <Box
-        width="100%"
-        elevation="small"
-        round="xsmall"
-        pad={{ top: 'xsmall' }}
-        margin={{ bottom: 'medium' }}
-        background="white"
-        overflow="auto"
-      >
+      <Card interactive width="100%" pt="xsmall" mb="medium">
         {props.loans.length > 0 && (
           <DataTable
             style={{ tableLayout: 'auto' }}
@@ -135,7 +128,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
           />
         )}
         {props.loans.length === 0 && <Text margin="medium">No assets have been originated.</Text>}
-      </Box>
+      </Card>
       {'export' in router.query && (
         <Box justify="end">
           <ExportLink onClick={() => saveAsCSV(props.loans)}>Export Asset List as CSV</ExportLink>

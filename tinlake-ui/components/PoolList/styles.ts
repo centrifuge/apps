@@ -34,7 +34,11 @@ export const Name = styled.h3`
   font-weight: 500;
   font-size: 16px;
   line-height: 1.2;
-  color: #0828be;
+  color: #333333;
+
+  @media (max-width: 899px) {
+    color: #0828be;
+  }
 `
 
 export const Type = styled.p`

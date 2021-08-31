@@ -7,6 +7,7 @@ import { ensureAuthed } from '../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import Alert from '../Alert'
 import { BackLink } from '../BackLink'
+import { Card } from '../Card'
 import NumberInput from '../NumberInput'
 import { PoolLink } from '../PoolLink'
 
@@ -120,13 +121,7 @@ const MintNFT: React.FC<Props> = (props: Props) => {
             </Alert>
           )}
 
-          <Box
-            pad="medium"
-            elevation="small"
-            round="xsmall"
-            margin={{ top: 'medium', bottom: 'medium' }}
-            background="white"
-          >
+          <Card p="medium" my="medium">
             <Box direction="row" gap="large" margin={{ bottom: 'large' }}>
               <b>Please specify metadata of NFT:</b>
             </Box>
@@ -152,7 +147,7 @@ const MintNFT: React.FC<Props> = (props: Props) => {
               </FormField>
               <Button primary onClick={mint} label="Mint NFT" disabled={status === 'succeeded'} />
             </Box>
-          </Box>
+          </Card>
         </Box>
       )}
     </Box>

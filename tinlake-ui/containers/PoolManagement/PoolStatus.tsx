@@ -4,6 +4,7 @@ import { Box, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
+import { Card } from '../../components/Card'
 import { LoadingValue } from '../../components/LoadingValue'
 import { Pool } from '../../config'
 import { loadLoans, LoansState, SortableLoan } from '../../ducks/loans'
@@ -90,7 +91,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
 
   return (
     <Box direction="row" width="100%" gap="medium" margin={{ top: 'medium' }}>
-      <Box basis="1/2" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
+      <Card flexBasis="50%" p="medium" mb="medium">
         <Table margin={{ top: '0', bottom: '0' }}>
           <TableBody>
             <TableRow style={{ fontWeight: 'bold' }}>
@@ -264,9 +265,9 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
             </TableRow>
           </TableBody>
         </Table>
-      </Box>
+      </Card>
       {isMakerIntegrated && (
-        <Box basis="1/2" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
+        <Card flexBasis="50%" p="medium" mb="medium">
           <Table margin={{ top: '0', bottom: '0' }}>
             <TableBody>
               <TableRow style={{ fontWeight: 'bold' }}>
@@ -346,11 +347,11 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
               </TableRow>
             </TableBody>
           </Table>
-        </Box>
+        </Card>
       )}
 
       {!isMakerIntegrated && (
-        <Box basis="1/2" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
+        <Card flexBasis="50%" p="medium" mb="medium">
           <Table margin={{ top: '0', bottom: '0' }}>
             <TableBody>
               <TableRow style={{ fontWeight: 'bold' }}>
@@ -399,7 +400,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
               </TableRow>
             </TableBody>
           </Table>
-        </Box>
+        </Card>
       )}
     </Box>
   )

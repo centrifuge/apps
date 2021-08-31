@@ -1,4 +1,3 @@
-import { Box } from 'grommet'
 import styled from 'styled-components'
 
 export const HelpMenuWrapper = styled.div`
@@ -19,10 +18,6 @@ export const HelpMenuWrapper = styled.div`
   @media (max-width: 899px) {
     display: none;
   }
-`
-
-export const InnerMenu = styled(Box)`
-  padding: 16px;
 `
 
 export const Title = styled.div`

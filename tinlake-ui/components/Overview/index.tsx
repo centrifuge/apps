@@ -6,6 +6,8 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
+import { Card } from '../Card'
+import { Grid, Stack, Wrap } from '../Layout'
 import PageTitle from '../PageTitle'
 import OverviewHeader from './OverviewHeader'
 
@@ -41,63 +43,51 @@ const Overview: React.FC<Props> = (props: Props) => {
       <Heading level="4">
         {isUpcoming ? `Upcoming Pool: ${props.selectedPool.metadata.name}` : 'Asset Originator Details'}
       </Heading>
-      <Box
-        direction="column"
-        justify="start"
-        gap="medium"
-        elevation="small"
-        round="xsmall"
-        pad={{ horizontal: 'medium', top: 'medium', bottom: '0' }}
-        margin={{ bottom: 'large' }}
-        width="100%"
-        background="white"
-      >
-        <div>
-          <img src={props.selectedPool.metadata.media?.logo} style={{ maxHeight: '60px', maxWidth: '30%' }} />
-        </div>
-        <p style={{ margin: '0' }}>{props.selectedPool.metadata.description}</p>
+      <Card p="small">
+        <Stack gap="medium">
+          <div>
+            <img src={props.selectedPool.metadata.media?.logo} style={{ maxHeight: '60px', maxWidth: '30%' }} />
+          </div>
+          <p style={{ margin: '0' }}>{props.selectedPool.metadata.description}</p>
 
-        <div>
-          {props.selectedPool.metadata.attributes &&
-            Object.keys(props.selectedPool.metadata.attributes).map((key: string) => (
-              <Box key={key} direction="row" gap="medium" height="44px">
-                <Type>{key}</Type>
-                {typeof props.selectedPool.metadata.attributes![key] === 'string' && (
-                  <Heading level="6" margin={'0'}>
-                    {props.selectedPool.metadata.attributes![key]}
-                  </Heading>
-                )}
-                {typeof props.selectedPool.metadata.attributes![key] !== 'string' && (
-                  <div style={{ position: 'relative', top: '-8px' }}>
-                    {Object.keys(props.selectedPool.metadata.attributes![key]).map((label: string) => (
-                      <>
-                        {label === 'Executive Summary' && (
-                          <AttributeLink
-                            onClick={() => openModal((props.selectedPool.metadata.attributes![key] as any)[label])}
-                          >
-                            <ButtonWithIcon label={label} icon={<Catalog />} size="small" />
-                          </AttributeLink>
-                        )}
-                        {label !== 'Executive Summary' && (
-                          <AttributeLink
-                            href={(props.selectedPool.metadata.attributes![key] as any)[label]}
-                            target="_blank"
-                          >
+          <Grid gap="large" rowGap="medium" gridTemplateColumns="80px auto">
+            {props.selectedPool.metadata.attributes &&
+              Object.entries(props.selectedPool.metadata.attributes).map(([key, attribute]) => (
+                <>
+                  <Type>{key}</Type>
+                  {typeof attribute === 'string' ? (
+                    <Heading level="6" margin={'0'}>
+                      {attribute}
+                    </Heading>
+                  ) : (
+                    <Wrap gap="small" rowGap="xsmall" mt={-4}>
+                      {Object.entries(attribute).map(([label, value]) => (
+                        <>
+                          {label === 'Executive Summary' ? (
                             <ButtonWithIcon
                               label={label}
-                              icon={label.includes('Discussion') ? <Chat /> : <Globe />}
+                              icon={<Catalog />}
                               size="small"
+                              onClick={() => openModal(value)}
                             />
-                          </AttributeLink>
-                        )}
-                      </>
-                    ))}
-                  </div>
-                )}
-              </Box>
-            ))}
-        </div>
-      </Box>
+                          ) : (
+                            <a href={value} target="_blank">
+                              <ButtonWithIcon
+                                label={label}
+                                icon={label.includes('Discussion') ? <Chat /> : <Globe />}
+                                size="small"
+                              />
+                            </a>
+                          )}
+                        </>
+                      ))}
+                    </Wrap>
+                  )}
+                </>
+              ))}
+          </Grid>
+        </Stack>
+      </Card>
       {/* </Box>{' '} */}
       {/* <Box basis="1/3">
           <Heading level="4">Tweets by @NewSilverLend</Heading>
@@ -172,9 +162,4 @@ const Type = styled.div`
   line-height: 18px;
   color: #979797;
   width: 80px;
-`
-
-const AttributeLink = styled.a`
-  display: inline-block;
-  margin: 0 20px 20px 0;
 `

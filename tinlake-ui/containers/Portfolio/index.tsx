@@ -5,6 +5,7 @@ import { Box, Button, Heading } from 'grommet'
 import Link from 'next/link'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
+import { Card } from '../../components/Card'
 import { Stack } from '../../components/Layout'
 import NumberDisplay from '../../components/NumberDisplay'
 import { Row } from '../../components/PoolList'
@@ -155,36 +156,22 @@ const Portfolio: React.FC<Props> = (props: Props) => {
         </Box>
       </Box>
       <Box direction="row" gap="small" margin={{ bottom: 'large' }} justify="center">
-        <Box
-          width="256px"
-          pad="medium"
-          elevation="small"
-          round="xsmall"
-          background="white"
-          margin={{ horizontal: '16px' }}
-        >
+        <Card width="256px" p="medium" mx="small">
           <ValueDisplay
             icon="/static/DROP_final.svg"
             value={<NumberDisplay value={baseToDisplay(totalDropValue, 18)} precision={0} />}
             unit="DAI"
             label="Total DROP Value"
           />
-        </Box>
-        <Box
-          width="256px"
-          pad="medium"
-          elevation="small"
-          round="xsmall"
-          background="white"
-          margin={{ horizontal: '16px' }}
-        >
+        </Card>
+        <Card width="256px" p="medium" mx="small">
           <ValueDisplay
             icon="/static/TIN_final.svg"
             value={<NumberDisplay value={baseToDisplay(totalTinValue, 18)} precision={0} />}
             unit="DAI"
             label="Total TIN Value"
           />
-        </Box>
+        </Card>
       </Box>
 
       {hasBalance ? (

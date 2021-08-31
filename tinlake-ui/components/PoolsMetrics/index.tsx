@@ -134,7 +134,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
       {APRElement}
     </Card>
   ) : (
-    <Shelf gap="medium" alignItems="stretch">
+    <Shelf gap="medium" alignItems="stretch" justifyContent="center">
       <Card flex="1 1 300px" maxWidth="440px">
         {TVLElement}
       </Card>

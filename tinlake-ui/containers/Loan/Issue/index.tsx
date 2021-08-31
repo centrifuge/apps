@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import Alert from '../../../components/Alert'
+import { Card } from '../../../components/Card'
 import NftData from '../../../components/NftData'
 import { PoolLink } from '../../../components/PoolLink'
 import { Pool } from '../../../config'
@@ -113,7 +114,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
           </p>
         </Alert>
       )}
-      <Box pad="medium" elevation="small" round="xsmall" background="white">
+      <Card p="medium">
         <Box>
           <Box direction="row" gap="medium" margin={{ top: 'medium' }}>
             <b>Please paste your Token ID and corresponding registry address below to finance an asset:</b>
@@ -141,7 +142,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
 
         {nftError && <Alert type="error">{nftError}</Alert>}
         {!disabled && wrongOwner && <Alert type="error">NFT not held in your wallet</Alert>}
-      </Box>
+      </Card>
 
       {loanId ? (
         <Box margin={{ bottom: 'medium', top: 'large' }}>

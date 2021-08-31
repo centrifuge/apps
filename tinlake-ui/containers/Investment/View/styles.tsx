@@ -136,13 +136,13 @@ export const BalanceSheetDiagramRight = styled(Box)`
 export const DividerTop = styled.div`
   border-bottom: 1px solid #d8d8d8;
   max-width: 80%;
-  margin: 0 0 12px 10%;
+  margin: 0 0 16px 10%;
 `
 
 export const DividerBottom = styled.div`
   border-top: 1px solid #d8d8d8;
   max-width: 80%;
-  margin: 0 0 12px 10%;
+  margin: 0 0 16px 10%;
 `
 
 export const DividerInner = styled.div`
@@ -176,6 +176,5 @@ export const Caret = styled.div`
   margin-left: 10px;
   svg {
     transition: 200ms;
-    transform-style: preserve-3d;
   }
 `

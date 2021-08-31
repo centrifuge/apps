@@ -6,6 +6,7 @@ import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
+import { Card } from '../../../components/Card'
 import InvestAction from '../../../components/InvestAction'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { PoolLink } from '../../../components/PoolLink'
@@ -138,14 +139,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   }, [hasPendingCollection, hasPendingOrder])
 
   return (
-    <Box
-      pad="24px"
-      elevation="small"
-      round="xsmall"
-      margin={{ bottom: 'medium' }}
-      style={{ flex: '1 1 400px', maxWidth: '420px' }}
-      background="white"
-    >
+    <Card p={24} mb="medium" flex="1 1 400px" maxWidth="420px">
       <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
         <Heading level="5" margin={'0'}>
           <TokenLogo src={`/static/${token}_final.svg`} />
@@ -377,7 +371,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             )}
           </>
         )}
-    </Box>
+    </Card>
   )
 }
 
