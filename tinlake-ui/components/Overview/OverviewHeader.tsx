@@ -311,12 +311,6 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 
 export default OverviewHeader
 
-// const Card = styled(Box)`
-//   @media (max-width: 899px) {
-//     flex-direction: column;
-//   }
-// `
-
 const HeaderBox = styled(Box)<{ width?: string }>`
   text-align: center;
   border-right: 1px solid #dadada;
