@@ -31,63 +31,65 @@ const Overview: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box margin={{ bottom: 'large', top: 'medium' }}>
+    <Stack gap="xlarge" mt="large">
       {!isUpcoming && (
-        <>
+        <div>
           <PageTitle pool={props.selectedPool} page="Overview" />
           <OverviewHeader selectedPool={props.selectedPool as Pool} tinlake={props.tinlake} />
-        </>
+        </div>
       )}
       {/* <Box direction="row" gap="small">
         <Box basis="2/3"> */}
-      <Heading level="4">
-        {isUpcoming ? `Upcoming Pool: ${props.selectedPool.metadata.name}` : 'Asset Originator Details'}
-      </Heading>
-      <Card p="small">
-        <Stack gap="medium">
-          <div>
-            <img src={props.selectedPool.metadata.media?.logo} style={{ maxHeight: '60px', maxWidth: '30%' }} />
-          </div>
-          <p style={{ margin: '0' }}>{props.selectedPool.metadata.description}</p>
+      <div>
+        <Heading level="4">
+          {isUpcoming ? `Upcoming Pool: ${props.selectedPool.metadata.name}` : 'Asset Originator Details'}
+        </Heading>
+        <Card p="medium">
+          <Stack gap="medium">
+            <div>
+              <img src={props.selectedPool.metadata.media?.logo} style={{ maxHeight: '60px', maxWidth: '30%' }} />
+            </div>
+            <p style={{ margin: '0' }}>{props.selectedPool.metadata.description}</p>
 
-          <Grid gap="large" rowGap="medium" gridTemplateColumns="80px auto">
-            {props.selectedPool.metadata.attributes &&
-              Object.entries(props.selectedPool.metadata.attributes).map(([key, attribute]) => (
-                <>
-                  <Type>{key}</Type>
-                  {typeof attribute === 'string' ? (
-                    <Heading level="6" margin={'0'}>
-                      {attribute}
-                    </Heading>
-                  ) : (
-                    <Wrap gap="small" rowGap="xsmall" mt={-4}>
-                      {Object.entries(attribute).map(([label, value]) => (
-                        <>
-                          {label === 'Executive Summary' ? (
-                            <ButtonWithIcon
-                              label={label}
-                              icon={<Catalog />}
-                              size="small"
-                              onClick={() => openModal(value)}
-                            />
-                          ) : (
-                            <a href={value} target="_blank">
+            <Grid gap="large" rowGap="medium" gridTemplateColumns="minmax(60px, min-content) auto">
+              {props.selectedPool.metadata.attributes &&
+                Object.entries(props.selectedPool.metadata.attributes).map(([key, attribute]) => (
+                  <>
+                    <Type>{key}</Type>
+                    {typeof attribute === 'string' ? (
+                      <Heading level="6" margin={'0'}>
+                        {attribute}
+                      </Heading>
+                    ) : (
+                      <Wrap gap="small" rowGap="xsmall" mt={-4}>
+                        {Object.entries(attribute).map(([label, value]) => (
+                          <>
+                            {label === 'Executive Summary' ? (
                               <ButtonWithIcon
                                 label={label}
-                                icon={label.includes('Discussion') ? <Chat /> : <Globe />}
+                                icon={<Catalog />}
                                 size="small"
+                                onClick={() => openModal(value)}
                               />
-                            </a>
-                          )}
-                        </>
-                      ))}
-                    </Wrap>
-                  )}
-                </>
-              ))}
-          </Grid>
-        </Stack>
-      </Card>
+                            ) : (
+                              <a href={value} target="_blank">
+                                <ButtonWithIcon
+                                  label={label}
+                                  icon={label.includes('Discussion') ? <Chat /> : <Globe />}
+                                  size="small"
+                                />
+                              </a>
+                            )}
+                          </>
+                        ))}
+                      </Wrap>
+                    )}
+                  </>
+                ))}
+            </Grid>
+          </Stack>
+        </Card>
+      </div>
       {/* </Box>{' '} */}
       {/* <Box basis="1/3">
           <Heading level="4">Tweets by @NewSilverLend</Heading>
@@ -111,9 +113,10 @@ const Overview: React.FC<Props> = (props: Props) => {
           </Box>
         </Box>
       </Box> */}
-
-      <Heading level="4">Pool Balance</Heading>
-      <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
+      <div>
+        <Heading level="4">Pool Balance</Heading>
+        <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
+      </div>
 
       <Modal
         opened={modalIsOpen}
@@ -138,7 +141,7 @@ const Overview: React.FC<Props> = (props: Props) => {
           </Box>
         </Box>
       </Modal>
-    </Box>
+    </Stack>
   )
 }
 
@@ -161,5 +164,4 @@ const Type = styled.div`
   font-size: 13px;
   line-height: 18px;
   color: #979797;
-  width: 80px;
 `

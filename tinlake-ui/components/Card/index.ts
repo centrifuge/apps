@@ -7,7 +7,10 @@ interface Props {
 
 export const Card = styled(Box)<Props>`
   border-radius: 8px;
-  background-color: white;
   box-shadow: ${(props) => (props.interactive ? '0px 1px 5px rgba(0, 0, 0, 0.2)' : '0 0 0 1px #eeeeee')};
   cursor: ${(props) => (props.interactive ? 'pointer' : undefined)};
 `
+
+Card.defaultProps = {
+  background: 'white',
+}

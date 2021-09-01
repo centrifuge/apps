@@ -105,8 +105,8 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box margin={{ bottom: 'large' }}>
-      <Card p="small">
+    <div>
+      <Card p="small" position="relative" zIndex={1}>
         <Shelf
           gap={[0, 0, 'medium']}
           flexDirection={['column', 'column', 'row']}
@@ -173,7 +173,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
         </Shelf>
       </Card>
       {isMakerIntegrated && (
-        <MakerBox round="xsmall" gap="small" elevation="small" background="#1AAB9B">
+        <MakerBox interactive background="#1AAB9B">
           <Box direction="row" wrap style={{ gap: '16px' }}>
             <Box direction="row" style={{ flex: '100 1 500px' }}>
               <MakerLogo>
@@ -305,7 +305,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           )}
         </MakerBox>
       )}
-    </Box>
+    </div>
   )
 }
 
@@ -364,7 +364,7 @@ const Unit = styled.span`
   margin-left: 4px;
   color: #333;
 `
-const MakerBox = styled(Box)`
+const MakerBox = styled(Card)`
   color: #fff;
   position: relative;
   top: -10px;

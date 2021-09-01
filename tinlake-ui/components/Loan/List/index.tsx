@@ -36,7 +36,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <Card interactive width="100%" pt="xsmall" mb="medium">
+      <Card width="100%" pt="xsmall" mb="medium">
         {props.loans.length > 0 && (
           <DataTable
             style={{ tableLayout: 'auto' }}
