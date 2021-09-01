@@ -4,6 +4,8 @@ import { Box, Heading } from 'grommet'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
+import { Card } from '../../components/Card'
+import { Shelf } from '../../components/Layout'
 import { Pool } from '../../config'
 import { LoansState, SortableLoan } from '../../ducks/loans'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
@@ -43,14 +45,12 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
     : new BN(0)
 
   return (
-    <Card
-      elevation="small"
-      round="xsmall"
-      background="white"
-      direction="row"
-      justify="center"
-      pad="medium"
-      style={{ zIndex: 3 }}
+    <Shelf
+      p="small"
+      as={Card}
+      gap={[0, 0, 'medium']}
+      flexDirection={['column', 'column', 'row']}
+      alignItems={['flex-start', 'flex-start', 'center']}
     >
       <HeaderBox style={{ borderRight: 'none' }}>
         <Heading level="4">
@@ -112,17 +112,11 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
         </Heading>
         <Type>Repayments Due (7 days)</Type>
       </HeaderBox>
-    </Card>
+    </Shelf>
   )
 }
 
 export default AOMetrics
-
-const Card = styled(Box)`
-  @media (max-width: 899px) {
-    flex-direction: column;
-  }
-`
 
 const HeaderBox = styled(Box)<{ width?: string }>`
   text-align: center;

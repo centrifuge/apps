@@ -2,6 +2,7 @@ import { baseToDisplay, displayToBase, ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, FormField, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { Card } from '../../components/Card'
 import NumberInput from '../../components/NumberInput'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
@@ -61,14 +62,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
     <>
       {poolData && (
         <Box direction="row" gap="medium">
-          <Box
-            width="medium"
-            pad="medium"
-            elevation="small"
-            round="xsmall"
-            margin={{ bottom: 'medium' }}
-            background="white"
-          >
+          <Card width="400px" p="medium" mb="medium">
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
                 Min TIN risk buffer
@@ -99,16 +93,9 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 }
               />
             </Box>
-          </Box>
+          </Card>
 
-          <Box
-            width="medium"
-            pad="medium"
-            elevation="small"
-            round="xsmall"
-            margin={{ bottom: 'medium' }}
-            background="white"
-          >
+          <Card width="400px" p="medium" mb="medium">
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
                 Max TIN risk buffer
@@ -139,7 +126,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 }
               />
             </Box>
-          </Box>
+          </Card>
         </Box>
       )}
     </>

@@ -5,6 +5,7 @@ import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
+import { Card } from '../../components/Card'
 import PageTitle from '../../components/PageTitle'
 import { PoolLink } from '../../components/PoolLink'
 import config, { Pool } from '../../config'
@@ -95,7 +96,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
       <PageTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
       <Box direction="row" gap="medium">
         <Box basis="2/3">
-          <Box pad="medium" elevation="small" round="xsmall" background="white">
+          <Card p="medium">
             {address && !onboarding.data ? (
               <Spinner height={'400px'} message={'Loading...'} />
             ) : (
@@ -147,7 +148,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
                 </Step>
               </>
             )}
-          </Box>
+          </Card>
         </Box>
         <Box basis="1/3">
           <InfoBox activePool={props.activePool} />

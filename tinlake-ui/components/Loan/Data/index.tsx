@@ -13,6 +13,8 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { dateToYMD } from '../../../utils/date'
 import { getAddressLink } from '../../../utils/etherscanLinkGenerator'
 import { toPrecision } from '../../../utils/toPrecision'
+import { Card } from '../../Card'
+import { Stack } from '../../Layout'
 import { LoadingValue } from '../../LoadingValue'
 import LoanLabel from '../Label'
 
@@ -46,7 +48,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box gap="medium" pad="medium" elevation="small" round="xsmall" background="white" width="80%">
+    <Stack as={Card} gap="medium" p="medium" width="80%">
       <Box direction="row">
         <span
           style={{
@@ -150,7 +152,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
           )}
         </Box>
       </Box>
-    </Box>
+    </Stack>
   )
 }
 

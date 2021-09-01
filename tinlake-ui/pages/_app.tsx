@@ -8,6 +8,7 @@ import React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { StyledApp } from '../components/StyledApp'
 import config from '../config'
+import { theme } from '../theme'
 import makeStore from '../utils/makeStore'
 
 require('regenerator-runtime/runtime')
@@ -42,7 +43,7 @@ class MyApp extends App {
 
     return (
       <QueryClientProvider client={queryClient}>
-        <AxisTheme full={true}>
+        <AxisTheme full={true} theme={theme}>
           <Head>
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             <title>Tinlake | Centrifuge | Decentralized Asset Financing</title>

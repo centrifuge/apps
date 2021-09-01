@@ -3,6 +3,7 @@ import { bnToHex, NFT } from '@centrifuge/tinlake-js'
 import { Box, Heading } from 'grommet'
 import * as React from 'react'
 import { getAddressLink, getNFTLink, hexToInt } from '../../utils/etherscanLinkGenerator'
+import { Card } from '../Card'
 import { LoadingValue } from '../LoadingValue'
 
 interface Props {
@@ -15,7 +16,7 @@ const NftData: React.FC<Props> = (props: Props) => {
       <Heading margin={{ top: 'large' }} level="5">
         NFT Data
       </Heading>
-      <Box pad="medium" elevation="small" round="xsmall" background="white" width="80%">
+      <Card p="medium" width="80%">
         <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'medium' }}>
           <Box basis={'1/3'} gap="medium">
             <LoadingValue
@@ -70,7 +71,7 @@ const NftData: React.FC<Props> = (props: Props) => {
             </LoadingValue>
           </Box>
         </Box>
-      </Box>
+      </Card>
     </>
   )
 }

@@ -5,10 +5,12 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
+import { Card } from '../../components/Card'
+import { Shelf } from '../../components/Layout'
 import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import PageTitle from '../../components/PageTitle'
-import { Cont, Label, TokenLogo, Unit, Value } from '../../components/PoolsMetrics/styles'
+import { ValueDisplay } from '../../components/ValueDisplay'
 import { IpfsPools } from '../../config'
 import { AuthState, ensureAuthed } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
@@ -61,14 +63,13 @@ const UserRewards: React.FC<Props> = ({ tinlake, ipfsPools }) => {
       <Box direction="row" align="start" justify="between" wrap>
         <ColLeft flex>
           {ethAddr && (
-            <Box
-              pad="medium"
-              elevation="small"
-              round="xsmall"
-              background="white"
-              margin={{ bottom: 'large' }}
-              direction="row"
-              justify="center"
+            <Shelf
+              as={Card}
+              rowGap="medium"
+              flexDirection={['column', 'row']}
+              p="medium"
+              mb="large"
+              justifyContent="center"
             >
               <Metric
                 loading={!data || !portfolioValue}
@@ -93,7 +94,7 @@ const UserRewards: React.FC<Props> = ({ tinlake, ipfsPools }) => {
                 label="Your Earned Rewards"
                 token="CFG"
               />
-            </Box>
+            </Shelf>
           )}
 
           {!ethAddr && (
@@ -151,7 +152,7 @@ const UserRewards: React.FC<Props> = ({ tinlake, ipfsPools }) => {
             ))}
 
           {debug && (
-            <Card margin={{ bottom: 'large' }} background="neutral-3">
+            <Box margin={{ bottom: 'large' }} round="xsmall" background="neutral-3">
               <Box pad="medium">
                 <h3>Debug:</h3>
                 <ul>
@@ -184,7 +185,7 @@ const UserRewards: React.FC<Props> = ({ tinlake, ipfsPools }) => {
                   ))}
                 </ul>
               </Box>
-            </Card>
+            </Box>
           )}
 
           {ethAddr && data?.links && data.links.length > 0 && (
@@ -204,7 +205,7 @@ const UserRewards: React.FC<Props> = ({ tinlake, ipfsPools }) => {
           )}
         </ColLeft>
         <ColRight margin={{ left: 'xlarge' }}>
-          <Card margin={{ bottom: 'large' }}>
+          <Card mb="large">
             <Box direction="row" background="#FCBA59" style={{ borderRadius: '6px 6px 0 0' }} pad={'14px 24px'}>
               <TokenLogoBig src="/static/cfg-white.svg" />
               <h3 style={{ margin: 0 }}>System-wide Rewards</h3>
@@ -323,12 +324,6 @@ function showClaimStripe(data: UserRewardsData | null): boolean {
   return false
 }
 
-const Card = ({ children, ...rest }: React.PropsWithChildren<any>) => (
-  <Box width="100%" pad="none" elevation="small" round="xsmall" background="white" {...rest}>
-    {children}
-  </Box>
-)
-
 const Head = ({ children }: React.PropsWithChildren<{}>) => (
   <Heading level="5" margin={{ top: 'xxsmall', bottom: 'small' }}>
     {children}
@@ -428,22 +423,18 @@ const Metric = ({
   label: string
   borderRight?: boolean
 }) => {
-  console.log('showing metric for', label, value, precision)
   return (
     <Box pad={{ horizontal: 'medium' }} style={{ borderRight: borderRight ? '1px solid #f2f2f2' : undefined }}>
-      <Cont>
-        <TokenLogo src={{ DAI: `/static/dai.svg`, CFG: `/static/cfg-white.svg` }[token]} />
-        <Value>
-          <LoadingValue
-            done={!loading}
-            render={() => (
-              <NumberDisplay value={value} precision={precision || (token === 'CFG' ? dynamicPrecision(value) : 0)} />
-            )}
-          ></LoadingValue>
-        </Value>{' '}
-        <Unit>{{ DAI: 'DAI', CFG: 'CFG' }[token]}</Unit>
-      </Cont>
-      <Label>{label}</Label>
+      <ValueDisplay
+        icon={{ DAI: `/static/dai.svg`, CFG: `/static/cfg-white.svg` }[token]}
+        value={
+          loading ? null : (
+            <NumberDisplay value={value} precision={precision || (token === 'CFG' ? dynamicPrecision(value) : 0)} />
+          )
+        }
+        unit={{ DAI: 'DAI', CFG: 'CFG' }[token]}
+        label={label}
+      />
     </Box>
   )
 }

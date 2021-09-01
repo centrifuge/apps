@@ -8,6 +8,7 @@ import { AuthState, ensureAuthed, loadProxies } from '../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { getNFT as getNFTAction } from '../../services/tinlake/actions'
 import Alert from '../Alert'
+import { Card } from '../Card'
 import NftData from '../NftData'
 import NumberInput from '../NumberInput'
 import { PoolLink } from '../PoolLink'
@@ -125,13 +126,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
           <p>You need to be an admin to value NFTs.</p>
         </Alert>
       ) : (
-        <Box
-          pad="medium"
-          elevation="small"
-          round="xsmall"
-          margin={{ top: 'medium', bottom: 'medium' }}
-          background="white"
-        >
+        <Card p="medium" py="medium">
           <Box direction="row" gap="large">
             <b>Please paste your Token ID and corresponding registry address below to value an NFT:</b>
           </Box>
@@ -246,7 +241,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
               <p> Your NFT ID will automatically be pasted in the respective field.</p>
             </Alert>
           )}
-        </Box>
+        </Card>
       )}
 
       <Box>

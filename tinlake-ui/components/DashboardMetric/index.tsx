@@ -1,5 +1,7 @@
-import { Box, Text } from 'grommet'
+import { Text } from 'grommet'
 import { FunctionComponent } from 'react'
+import { Card } from '../Card'
+import { Stack } from '../Layout'
 
 interface Props {
   label: string
@@ -7,7 +9,7 @@ interface Props {
 
 const DashboardMetric: FunctionComponent<Props> = ({ label, children }) => {
   return (
-    <Box pad="medium" background="white" elevation="small" gap="xsmall" margin="small">
+    <Stack as={Card} p="medium" gap="xsmall">
       <Text
         textAlign="center"
         truncate={true}
@@ -16,7 +18,7 @@ const DashboardMetric: FunctionComponent<Props> = ({ label, children }) => {
         {children}
       </Text>
       <Text textAlign="center">{label}</Text>
-    </Box>
+    </Stack>
   )
 }
 
