@@ -44,14 +44,14 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   return (
     <>
       {props.pool && (poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
-        <Box margin={{ left: 'auto' }}>
+        <Box>
           <PoolLink href={'/investments'}>
-            <Button primary label="Invest" fill={false} />
+            <Button as="span" primary label="Invest" fill={false} />
           </PoolLink>
         </Box>
       )}
       {props.pool && !(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
-        <Box margin={{ left: 'auto' }}>
+        <Box>
           <Button primary label="Invest" fill={false} onClick={onOpen} />
         </Box>
       )}

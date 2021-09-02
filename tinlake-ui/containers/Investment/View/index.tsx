@@ -1,7 +1,8 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { Box, Heading } from 'grommet'
+import { Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { Box, Wrap } from '../../../components/Layout'
 import PageTitle from '../../../components/PageTitle'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
@@ -23,13 +24,17 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
     (props.auth?.permissions as PermissionsV3 | undefined)?.canAddToSeniorMemberList
 
   return (
-    <Box margin={{ top: 'medium' }}>
+    <Box mt="large">
       <PageTitle pool={props.activePool} page="Investments" />
 
-      <Box direction="row" justify="between" gap="medium" margin={{ bottom: 'large' }} wrap align="start">
-        <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="senior" />
-        <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="junior" />
-      </Box>
+      <Wrap gap="medium" alignItems="flex-start" justifyContent="space-between">
+        <Box flex="1 1 400px" maxWidth={['100%', '100%', '420px']}>
+          <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="senior" />
+        </Box>
+        <Box flex="1 1 400px" maxWidth={['100%', '100%', '420px']}>
+          <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="junior" />
+        </Box>
+      </Wrap>
 
       <EpochOverview tinlake={props.tinlake} activePool={props.activePool} />
 

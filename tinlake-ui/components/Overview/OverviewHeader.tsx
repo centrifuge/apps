@@ -7,7 +7,7 @@ import {
   toPrecision,
 } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import { FormDown } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
@@ -19,7 +19,7 @@ import { useTrancheYield } from '../../utils/hooks'
 import { usePool } from '../../utils/usePool'
 import { Card } from '../Card'
 import InvestAction from '../InvestAction'
-import { Shelf } from '../Layout'
+import { Shelf, Stack } from '../Layout'
 import { Tooltip } from '../Tooltip'
 
 interface Props {
@@ -106,9 +106,9 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 
   return (
     <div>
-      <Card p="small" position="relative" zIndex={1}>
+      <Card p="medium" position="relative" zIndex={1}>
         <Shelf
-          gap={[0, 0, 'medium']}
+          gap="medium"
           flexDirection={['column', 'column', 'row']}
           alignItems={['flex-start', 'flex-start', 'center']}
         >
@@ -162,10 +162,9 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           </HeaderBox>
           <HeaderBox style={{ borderRight: 'none' }}>
             {'addresses' in props.selectedPool &&
-            config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
-              <Anchor>
-                <Button label="Invest" primary onClick={invest} />
-              </Anchor>
+            config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) &&
+            false ? (
+              <Button label="Invest" primary onClick={invest} />
             ) : (
               <InvestAction pool={props.selectedPool} />
             )}
@@ -174,135 +173,138 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
       </Card>
       {isMakerIntegrated && (
         <MakerBox interactive background="#1AAB9B">
-          <Box direction="row" wrap style={{ gap: '16px' }}>
-            <Box direction="row" style={{ flex: '100 1 500px' }}>
-              <MakerLogo>
-                <img src="/static/maker-logo.svg" />
-              </MakerLogo>
-              <Box pad={{ top: '8px;' }} style={{ fontWeight: 'bold' }} direction="row">
-                This pool is directly integrated with a Maker vault for liquidity. &nbsp;
-                <Details onClick={() => setOpen(!open)} direction="row">
-                  <h2>Show details</h2>
-                  <Caret>
-                    <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
-                  </Caret>
-                </Details>
-              </Box>
-            </Box>
-            <Box direction="row" style={{ flex: '1 1 33%' }}>
-              <MakerMetric style={{ borderRight: '1px solid #fff' }}>
-                <h3>Current Debt</h3>
-                <h2>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.debt || new BN(0), 18 + 6), 1))}M{' '}
-                  <MakerUnit>DAI</MakerUnit>{' '}
-                </h2>
-              </MakerMetric>
-              <MakerMetric style={{ borderRight: '1px solid #fff' }}>
-                <h3>Debt Ceiling</h3>
-                <h2>
-                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.line || new BN(0), 45 + 6), 1))}M{' '}
-                  <MakerUnit>DAI</MakerUnit>
-                </h2>
-              </MakerMetric>
-              <MakerMetric>
-                <h3>Stability Fee (APY)</h3>
-                <h2>
-                  {toPrecision(feeToInterestRateCompounding(poolData?.maker?.duty || '0'), 2)} <MakerUnit>%</MakerUnit>
-                </h2>
-              </MakerMetric>
-            </Box>
-          </Box>
-          {open && (
-            <Box direction="row" margin={{ bottom: 'small' }} style={{ gap: '16px' }} wrap>
+          <Stack gap="xlarge">
+            <Box direction="row" wrap style={{ gap: '16px' }}>
               <Box direction="row" style={{ flex: '100 1 500px' }}>
-                <div style={{ width: '60%', lineHeight: '1.8em' }}>
-                  For this pool Maker provides a revolving line of credit against real-world assets as collateral. The
-                  direct integration allows the Asset Originator to lock up DROP as collateral in a Maker vault, draw
-                  DAI in return and use it to finance new originations. The credit line is capped at the debt ceiling
-                  set by Maker governance. This provides instant liquidity for the Asset Originator. &nbsp; &nbsp;
-                  <a
-                    href="https://medium.com/centrifuge/defi-2-0-first-real-world-loan-is-financed-on-maker-fbe24675428f"
-                    target="_blank"
-                  >
-                    Read more
-                  </a>
-                </div>
-                <Box></Box>
+                <MakerLogo>
+                  <img src="/static/maker-logo.svg" />
+                </MakerLogo>
+                <Box pad={{ top: '8px;' }} style={{ fontWeight: 'bold' }} direction="row">
+                  This pool is directly integrated with a Maker vault for liquidity. &nbsp;
+                  <Details onClick={() => setOpen(!open)} direction="row">
+                    <h2>Show details</h2>
+                    <Caret>
+                      <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
+                    </Caret>
+                  </Details>
+                </Box>
               </Box>
-              <Box margin={{ top: 'xsmall' }} style={{ flex: '1 1 33%' }}>
-                <Table>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell
-                        scope="row"
-                        pad={{ top: '0', bottom: '12px' }}
-                        border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
-                      >
-                        Collateral Balance
-                      </TableCell>
-                      <TableCell
-                        style={{ textAlign: 'end' }}
-                        border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
-                        pad={{ top: '0', bottom: '12px' }}
-                      >
-                        {addThousandsSeparators(
-                          toPrecision(baseToDisplay(poolData?.maker?.dropBalance || new BN(0), 18), 0)
-                        )}{' '}
-                        DROP
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell
-                        scope="row"
-                        border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
-                        pad={{ vertical: '12px' }}
-                      >
-                        Collateral Value
-                      </TableCell>
-                      <TableCell
-                        style={{ textAlign: 'end' }}
-                        border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
-                        pad={{ vertical: '12px' }}
-                      >
-                        {addThousandsSeparators(
-                          toPrecision(baseToDisplay(makerDropCollateralValue || new BN(0), 18), 0)
-                        )}{' '}
-                        DAI
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell
-                        scope="row"
-                        border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
-                        pad={{ vertical: '12px' }}
-                      >
-                        Debt Utilization
-                      </TableCell>
-                      <TableCell
-                        style={{ textAlign: 'end' }}
-                        border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
-                        pad={{ vertical: '12px' }}
-                      >
-                        {parseFloat((makerDebtUtilization || new BN(0)).toString())} %
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell scope="row" border={{ color: 'transparent' }} pad={{ vertical: '12px' }}>
-                        Maker DROP Share
-                      </TableCell>
-                      <TableCell
-                        style={{ textAlign: 'end' }}
-                        border={{ color: 'transparent' }}
-                        pad={{ vertical: '12px' }}
-                      >
-                        {parseFloat((makerDropShare || new BN(0)).toString())} %
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+              <Box direction="row" style={{ flex: '1 1 33%' }}>
+                <MakerMetric style={{ borderRight: '1px solid #fff' }}>
+                  <h3>Current Debt</h3>
+                  <h2>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.debt || new BN(0), 18 + 6), 1))}M{' '}
+                    <MakerUnit>DAI</MakerUnit>{' '}
+                  </h2>
+                </MakerMetric>
+                <MakerMetric style={{ borderRight: '1px solid #fff' }}>
+                  <h3>Debt Ceiling</h3>
+                  <h2>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.line || new BN(0), 45 + 6), 1))}M{' '}
+                    <MakerUnit>DAI</MakerUnit>
+                  </h2>
+                </MakerMetric>
+                <MakerMetric>
+                  <h3>Stability Fee (APY)</h3>
+                  <h2>
+                    {toPrecision(feeToInterestRateCompounding(poolData?.maker?.duty || '0'), 2)}{' '}
+                    <MakerUnit>%</MakerUnit>
+                  </h2>
+                </MakerMetric>
               </Box>
             </Box>
-          )}
+            {open && (
+              <Box direction="row" margin={{ bottom: 'small' }} style={{ gap: '16px' }} wrap>
+                <Box direction="row" style={{ flex: '100 1 500px' }}>
+                  <div style={{ width: '60%', lineHeight: '1.8em' }}>
+                    For this pool Maker provides a revolving line of credit against real-world assets as collateral. The
+                    direct integration allows the Asset Originator to lock up DROP as collateral in a Maker vault, draw
+                    DAI in return and use it to finance new originations. The credit line is capped at the debt ceiling
+                    set by Maker governance. This provides instant liquidity for the Asset Originator. &nbsp; &nbsp;
+                    <a
+                      href="https://medium.com/centrifuge/defi-2-0-first-real-world-loan-is-financed-on-maker-fbe24675428f"
+                      target="_blank"
+                    >
+                      Read more
+                    </a>
+                  </div>
+                  <Box></Box>
+                </Box>
+                <Box margin={{ top: 'xsmall' }} style={{ flex: '1 1 33%' }}>
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell
+                          scope="row"
+                          pad={{ top: '0', bottom: '12px' }}
+                          border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
+                        >
+                          Collateral Balance
+                        </TableCell>
+                        <TableCell
+                          style={{ textAlign: 'end' }}
+                          border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
+                          pad={{ top: '0', bottom: '12px' }}
+                        >
+                          {addThousandsSeparators(
+                            toPrecision(baseToDisplay(poolData?.maker?.dropBalance || new BN(0), 18), 0)
+                          )}{' '}
+                          DROP
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell
+                          scope="row"
+                          border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
+                          pad={{ vertical: '12px' }}
+                        >
+                          Collateral Value
+                        </TableCell>
+                        <TableCell
+                          style={{ textAlign: 'end' }}
+                          border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
+                          pad={{ vertical: '12px' }}
+                        >
+                          {addThousandsSeparators(
+                            toPrecision(baseToDisplay(makerDropCollateralValue || new BN(0), 18), 0)
+                          )}{' '}
+                          DAI
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell
+                          scope="row"
+                          border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
+                          pad={{ vertical: '12px' }}
+                        >
+                          Debt Utilization
+                        </TableCell>
+                        <TableCell
+                          style={{ textAlign: 'end' }}
+                          border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
+                          pad={{ vertical: '12px' }}
+                        >
+                          {parseFloat((makerDebtUtilization || new BN(0)).toString())} %
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell scope="row" border={{ color: 'transparent' }} pad={{ vertical: '12px' }}>
+                          Maker DROP Share
+                        </TableCell>
+                        <TableCell
+                          style={{ textAlign: 'end' }}
+                          border={{ color: 'transparent' }}
+                          pad={{ vertical: '12px' }}
+                        >
+                          {parseFloat((makerDropShare || new BN(0)).toString())} %
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </Box>
+              </Box>
+            )}
+          </Stack>
         </MakerBox>
       )}
     </div>
@@ -317,8 +319,7 @@ const HeaderBox = styled(Box)<{ width?: string }>`
   width: ${(props) => props.width || '200px'};
   flex-direction: column;
   justify-content: center;
-  padding: 10px 20px 10px 0;
-  height: 80px;
+  padding-right: 20px;
 
   h3,
   h4,

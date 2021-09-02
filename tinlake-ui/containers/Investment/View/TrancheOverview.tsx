@@ -1,6 +1,6 @@
 import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Anchor, Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Anchor, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useQuery } from 'react-query'
@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Card } from '../../../components/Card'
 import InvestAction from '../../../components/InvestAction'
+import { Box, Flex, Shelf } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { PoolLink } from '../../../components/PoolLink'
 import { Tooltip } from '../../../components/Tooltip'
@@ -139,14 +140,14 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   }, [hasPendingCollection, hasPendingOrder])
 
   return (
-    <Card p={24} mb="medium" flex="1 1 400px" maxWidth="420px">
-      <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+    <Card p={24}>
+      <Shelf gap="xsmall" mb="xsmall">
+        <TokenLogo src={`/static/${token}_final.svg`} />
         <Heading level="5" margin={'0'}>
-          <TokenLogo src={`/static/${token}_final.svg`} />
           {token} Token
         </Heading>
-      </Box>
-      <Box margin={{ bottom: 'medium' }}>
+      </Shelf>
+      <Box mb="medium">
         <TrancheNote>
           {props.tranche === 'senior' ? 'Senior tranche' : 'Junior tranche'} —{' '}
           {props.tranche === 'senior' ? 'Lower risk, stable return' : 'Higher risk, variable return'}
@@ -242,7 +243,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 )}
 
                 {!epochData?.isBlockedState && (
-                  <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                  <Shelf gap="small" justifyContent="flex-end" mt="small">
                     <Button
                       primary
                       label="Invest"
@@ -255,7 +256,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                       onClick={() => setCard('redeem')}
                       disabled={balance?.isZero() || epochData?.isBlockedState === true}
                     />
-                  </Box>
+                  </Shelf>
                 )}
               </>
             )}
@@ -325,13 +326,13 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 Minimum investment amount: <b>5000 {props.pool?.metadata.currencySymbol || 'DAI'}</b>
               </Tooltip>
             </Info>
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+            <Flex justifyContent={['center', 'flex-end']} mt="medium">
               <PoolLink href={'/onboarding'}>
                 <Anchor>
-                  <Button label="Invest" primary />
+                  <Button as="span" label="Invest" primary />
                 </Anchor>
               </PoolLink>
-            </Box>
+            </Flex>
           </>
         )}
 
@@ -351,9 +352,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                     Interested in investing?
                   </Heading>
                   If you want to learn more get started with your onboarding process.
-                  <Box justify="end" margin={{ top: 'small' }}>
+                  <Flex justifyContent={['center', 'flex-end']} mt="small">
                     <InvestAction pool={props.pool} />
-                  </Box>
+                  </Flex>
                 </>
               </Info>
             )}
@@ -364,9 +365,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                   Interested in investing?
                 </Heading>
                 Connect your wallet to start the process.
-                <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                <Flex justifyContent={['center', 'flex-end']} mt="small">
                   <Button primary label="Connect" onClick={connect} />
-                </Box>
+                </Flex>
               </Info>
             )}
           </>
