@@ -1,11 +1,12 @@
 import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Anchor, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
+import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Card } from '../../../components/Card'
 import InvestAction from '../../../components/InvestAction'
 import { Box, Flex, Shelf } from '../../../components/Layout'
@@ -243,7 +244,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 )}
 
                 {!epochData?.isBlockedState && (
-                  <Shelf gap="small" justifyContent="flex-end" mt="small">
+                  <ButtonGroup mt="small">
                     <Button
                       primary
                       label="Invest"
@@ -256,7 +257,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                       onClick={() => setCard('redeem')}
                       disabled={balance?.isZero() || epochData?.isBlockedState === true}
                     />
-                  </Shelf>
+                  </ButtonGroup>
                 )}
               </>
             )}
@@ -326,13 +327,11 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                 Minimum investment amount: <b>5000 {props.pool?.metadata.currencySymbol || 'DAI'}</b>
               </Tooltip>
             </Info>
-            <Flex justifyContent={['center', 'flex-end']} mt="medium">
+            <ButtonGroup mt="medium">
               <PoolLink href={'/onboarding'}>
-                <Anchor>
-                  <Button as="span" label="Invest" primary />
-                </Anchor>
+                <Button as="a" label="Invest" primary />
               </PoolLink>
-            </Flex>
+            </ButtonGroup>
           </>
         )}
 
@@ -365,9 +364,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                   Interested in investing?
                 </Heading>
                 Connect your wallet to start the process.
-                <Flex justifyContent={['center', 'flex-end']} mt="small">
+                <ButtonGroup mt="small">
                   <Button primary label="Connect" onClick={connect} />
-                </Flex>
+                </ButtonGroup>
               </Info>
             )}
           </>

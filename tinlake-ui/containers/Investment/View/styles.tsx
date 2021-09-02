@@ -29,8 +29,6 @@ export const ExplainerCard = styled(Box)`
 export const TokenLogo = styled.img`
   width: 24px;
   height: 24px;
-  position: relative;
-  top: -2px;
 `
 
 export const OrderSteps = styled.img`

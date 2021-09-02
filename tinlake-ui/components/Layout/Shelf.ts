@@ -20,6 +20,6 @@ Shelf.defaultProps = {
   alignItems: 'center',
 }
 
-export const Wrap = styled(Shelf)({
-  flexWrap: 'wrap',
-})
+export const Wrap = styled(Shelf)`
+  flex-wrap: wrap;
+`
