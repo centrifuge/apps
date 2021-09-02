@@ -33,7 +33,7 @@ interface PoolMetadata {
 }
 
 export interface BasePool {
-  network: 'mainnet' | 'kovan'
+  network: 'mainnet' | 'kovan' | 'goerli'
   version: 2 | 3
   metadata: PoolMetadata
 }
@@ -107,7 +107,7 @@ interface Config {
   transactionTimeout: number
   tinlakeDataBackendUrl: string
   isDemo: boolean
-  network: 'Mainnet' | 'Kovan'
+  network: 'Mainnet' | 'Kovan' | 'Goerli'
   portisApiKey: string
   infuraKey: string
   gasLimit: number
@@ -207,7 +207,7 @@ const metadataSchema = yup.object().shape({
 })
 
 const poolSchema = yup.object().shape({
-  network: yup.string().oneOf(['mainnet', 'kovan']).required('poolSchema.network is required'),
+  network: yup.string().oneOf(['mainnet', 'kovan', 'goerli']).required('poolSchema.network is required'),
   version: yup.number().oneOf([2, 3]).required('poolSchema.version is required'),
   addresses: contractAddressesSchema.required('poolSchema.addresses is required'),
   contractConfig: contractConfigSchema.default(undefined),
@@ -215,7 +215,7 @@ const poolSchema = yup.object().shape({
 })
 
 const upcomingPoolSchema = yup.object().shape({
-  network: yup.string().oneOf(['mainnet', 'kovan']).required('poolSchema.network is required'),
+  network: yup.string().oneOf(['mainnet', 'kovan', 'goerli']).required('poolSchema.network is required'),
   version: yup.number().oneOf([2, 3]).required('poolSchema.version is required'),
   metadata: metadataSchema.required('poolSchema.metadata is required'),
   presetValues: yup.object().shape({
@@ -231,7 +231,7 @@ const upcomingPoolSchema = yup.object().shape({
 })
 
 const archivedPoolSchema = yup.object().shape({
-  network: yup.string().oneOf(['mainnet', 'kovan']).required('poolSchema.network is required'),
+  network: yup.string().oneOf(['mainnet', 'kovan', 'goerli']).required('poolSchema.network is required'),
   version: yup.number().oneOf([2, 3]).required('poolSchema.version is required'),
   metadata: metadataSchema.required('poolSchema.metadata is required'),
   archivedValues: yup.object().shape({
@@ -316,9 +316,9 @@ const config: Config = {
     .validateSync(process.env.NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL),
   isDemo: yup.string().required('NEXT_PUBLIC_ENV is required').validateSync(process.env.NEXT_PUBLIC_ENV) === 'demo',
   network: yup
-    .mixed<'Mainnet' | 'Kovan'>()
+    .mixed<'Mainnet' | 'Kovan' | 'Goerli'>()
     .required('NEXT_PUBLIC_RPC_URL is required')
-    .oneOf(['Mainnet', 'Kovan'])
+    .oneOf(['Mainnet', 'Kovan', 'Goerli'])
     .validateSync(networkUrlToName(process.env.NEXT_PUBLIC_RPC_URL || '')),
   portisApiKey: yup
     .string()
