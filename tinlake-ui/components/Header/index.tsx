@@ -108,9 +108,8 @@ const Header: React.FC<Props> = (props: Props) => {
       <Box as="a" direction="row" align="center">
         <Icon src="/static/DAI.svg" />
         <HoldingValue>
-          {portfolioIsNonZero
-            ? addThousandsSeparators(toDynamicPrecision(baseToDisplay(portfolio.data?.totalValue || '0', 18)))
-            : 'Portfolio'}
+          {portfolioIsNonZero &&
+            addThousandsSeparators(toDynamicPrecision(baseToDisplay(portfolio.data?.totalValue || '0', 18)))}
         </HoldingValue>
         <Unit>{!portfolioIsNonZero && '0 '}DAI</Unit>
       </Box>
@@ -122,7 +121,7 @@ const Header: React.FC<Props> = (props: Props) => {
     <Link href="/rewards">
       <Box as="a" direction="row" align="center">
         <Icon src="/static/cfg-white.svg" />
-        <HoldingValue>{address && rewardsIsNonZero ? CFGRewardFormatted : 'Rewards'}</HoldingValue>
+        <HoldingValue>{address && rewardsIsNonZero && CFGRewardFormatted}</HoldingValue>
         {address && <Unit>{!rewardsIsNonZero && '0 '}CFG</Unit>}
       </Box>
     </Link>
