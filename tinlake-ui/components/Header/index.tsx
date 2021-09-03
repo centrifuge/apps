@@ -102,27 +102,25 @@ const Header: React.FC<Props> = (props: Props) => {
     />
   ))
 
-  const portfolioIsNonZero = portfolio.data?.totalValue && !portfolio.data?.totalValue.isZero()
+  const portfolioFormatted =
+    portfolio.data?.totalValue && !portfolio.data?.totalValue.isZero()
+      ? addThousandsSeparators(toDynamicPrecision(baseToDisplay(portfolio.data?.totalValue || '0', 18)))
+      : '0'
   const portfolioLink = (
     <Link href="/portfolio">
       <Box as="a" direction="row" align="center">
         <Icon src="/static/DAI.svg" />
-        <HoldingValue>
-          {portfolioIsNonZero &&
-            addThousandsSeparators(toDynamicPrecision(baseToDisplay(portfolio.data?.totalValue || '0', 18)))}
-        </HoldingValue>
-        <Unit>{!portfolioIsNonZero && '0 '}DAI</Unit>
+        <HoldingValue>{portfolioFormatted} DAI</HoldingValue>
       </Box>
     </Link>
   )
 
-  const rewardsIsNonZero = address && CFGRewardAmount && !CFGRewardAmount.isZero()
+  const rewardsFormatted = address && CFGRewardAmount && !CFGRewardAmount.isZero() ? CFGRewardFormatted : '0'
   const rewardsLink = (
     <Link href="/rewards">
       <Box as="a" direction="row" align="center">
         <Icon src="/static/cfg-white.svg" />
-        <HoldingValue>{address && rewardsIsNonZero && CFGRewardFormatted}</HoldingValue>
-        {address && <Unit>{!rewardsIsNonZero && '0 '}CFG</Unit>}
+        <HoldingValue>{rewardsFormatted} CFG</HoldingValue>
       </Box>
     </Link>
   )
@@ -152,7 +150,7 @@ const Header: React.FC<Props> = (props: Props) => {
       <AccountWrapper align="center" direction="row">
         <Holdings>
           <Box pad={{ left: '14px', right: '14px' }}>
-            <Tooltip title="View your rewards">{rewardsLink}</Tooltip>
+            <Tooltip title="View your rewards">{address ? rewardsLink : 'Rewards'}</Tooltip>
           </Box>
           {address && (
             <Box pad={{ left: '14px', right: '14px' }}>
@@ -280,14 +278,6 @@ const HoldingValue = styled.div`
   font-size: 14px;
 `
 
-const Unit = styled.div`
-  font-weight: 500;
-  font-size: 11px;
-  margin-left: 5px;
-  position: relative;
-  top: 2px;
-`
-
 const Icon = styled.img`
   width: 24px;
   height: 24px;
@@ -306,7 +296,7 @@ const Holdings = styled.div`
     ${Icon} {
       margin-right: 0;
     }
-    ${Unit}, ${HoldingValue} {
+    ${HoldingValue} {
       display: none;
     }
   }
