@@ -306,8 +306,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         <Box mt="medium">
           {isMobile ? (
             <Stack gap="medium">
-              <Divider width="auto" bleedX={['small', 'medium']} />
-              {/* width="calc(100% + 48px)" ml="-24px" */}
+              <Divider width="auto" bleedX="medium" />
               <Stack gap="small">
                 <SectionHeading>Investments</SectionHeading>
                 <div>
