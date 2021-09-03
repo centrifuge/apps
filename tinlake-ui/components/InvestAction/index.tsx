@@ -1,9 +1,10 @@
-import { Box, Button, Paragraph } from 'grommet'
+import { Box, Paragraph } from 'grommet'
 import * as React from 'react'
 import { Pool, UpcomingPool } from '../../config'
 import { getPoolStatus } from '../../utils/pool'
 import { usePool } from '../../utils/usePool'
 import { usePools } from '../../utils/usePools'
+import { Button } from '../Button'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
 
@@ -44,14 +45,14 @@ const InvestAction: React.FC<Props> = (props: Props) => {
   return (
     <>
       {props.pool && (poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
-        <Box margin={{ left: 'auto' }}>
+        <Box>
           <PoolLink href={'/investments'}>
-            <Button primary label="Invest" fill={false} />
+            <Button as="span" primary label="Invest" fill={false} />
           </PoolLink>
         </Box>
       )}
       {props.pool && !(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
-        <Box margin={{ left: 'auto' }}>
+        <Box>
           <Button primary label="Invest" fill={false} onClick={onOpen} />
         </Box>
       )}

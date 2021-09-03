@@ -1,13 +1,18 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Button, Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
+import { Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
 import { FormDown } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
+import { useQuery } from 'react-query'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
-import { SolverResult } from '../../../../tinlake.js/dist/services/solver/solver'
+import { Button } from '../../../components/Button'
+import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Card } from '../../../components/Card'
+import { Divider } from '../../../components/Divider'
+import { SectionHeading } from '../../../components/Heading'
+import { Box, Stack, Wrap } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Tooltip } from '../../../components/Tooltip'
 import { Pool } from '../../../config'
@@ -18,8 +23,8 @@ import { Fixed27Base } from '../../../utils/ratios'
 import { secondsToHms } from '../../../utils/time'
 import { toPrecision } from '../../../utils/toPrecision'
 import { useEpoch } from '../../../utils/useEpoch'
+import { useMedia } from '../../../utils/useMedia'
 import { usePool } from '../../../utils/usePool'
-import { HelpIcon } from '../../Onboarding/styles'
 import { Caret } from './styles'
 
 interface Props extends TransactionProps {
@@ -28,12 +33,19 @@ interface Props extends TransactionProps {
   activePool?: Pool
 }
 
+const percentFormatter = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+})
+
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const { root } = router.query
 
   const { data: poolData } = usePool(root as string)
   const { data: epochData } = useEpoch(root as string)
+
+  const isMobile = useMedia({ below: 'medium' })
 
   const [status, , setTxId] = useTransactionState()
 
@@ -56,7 +68,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
     [epochData, poolData, router.query]
   )
 
-  const EpochButton = React.useCallback(() => {
+  const epochButtonElement = React.useMemo(() => {
     switch (epochData?.state) {
       case 'can-be-closed':
         return (
@@ -82,7 +94,23 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
     }
   }, [disabled, epochData, poolData, router.query])
 
-  const [solution, setSolution] = React.useState(undefined as SolverResult | undefined)
+  const { data: solution } = useQuery(
+    ['epochSolution', root],
+    async () => {
+      const epochState = await props.tinlake.getEpochState(true)
+      const orders = {
+        tinRedeem: poolData?.junior?.pendingRedemptions || new BN(0),
+        dropRedeem: poolData?.senior?.pendingRedemptions || new BN(0),
+        tinInvest: poolData?.junior?.pendingInvestments || new BN(0),
+        dropInvest: poolData?.senior?.pendingInvestments || new BN(0),
+      }
+      const solution = await props.tinlake.runSolver(epochState, orders)
+      return solution
+    },
+    {
+      enabled: !!(poolData?.senior && poolData?.junior),
+    }
+  )
 
   const getSolutionState = () => {
     const orders = {
@@ -103,59 +131,100 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
     return 'to-be-closed'
   }
 
-  const updateSolution = async () => {
-    const epochState = await props.tinlake.getEpochState(true)
-    const orders = {
-      tinRedeem: poolData?.junior?.pendingRedemptions || new BN(0),
-      dropRedeem: poolData?.senior?.pendingRedemptions || new BN(0),
-      tinInvest: poolData?.junior?.pendingInvestments || new BN(0),
-      dropInvest: poolData?.senior?.pendingInvestments || new BN(0),
-    }
-    const solution = await props.tinlake.runSolver(epochState, orders)
-    setSolution(solution)
-  }
-
-  React.useEffect(() => {
-    if (poolData?.senior && poolData?.junior) {
-      updateSolution()
-    }
-  }, [poolData?.senior, poolData?.junior])
+  const solutionState = getSolutionState()
 
   const formatCurrencyAmount = (bn: BN | undefined) => {
     if (!bn) return ''
-    return `${addThousandsSeparators(toPrecision(baseToDisplay(bn || '0', 18), 0))} ${
+    // lose some precision to get rid of dust
+    bn = bn.div(new BN(1e6))
+    return `${addThousandsSeparators(toPrecision(baseToDisplay(bn || '0', 12), 0))} ${
       props.activePool?.metadata.currencySymbol || 'DAI'
     }`
   }
 
-  return (
-    <Card interactive px={24} pb="xsmall">
-      <Box
-        direction="row"
-        focusIndicator={false}
-        pad={'26px 0 20px 0'}
-        onClick={() => setOpen(!open)}
-        style={{ cursor: 'pointer' }}
-      >
-        {epochData?.state === 'open' && <HelpIcon src="/static/clock.svg" />}
-        {epochData?.state === 'can-be-closed' && getSolutionState() !== 'to-be-closed' && (
-          <HelpIcon src="/static/help-circle.svg" />
-        )}
-        {((epochData?.state === 'can-be-closed' && getSolutionState() === 'to-be-closed') ||
-          epochData?.state === 'challenge-period-ended') && <HelpIcon src="/static/circle-checked.svg" />}
-        {(epochData?.state === 'in-submission-period' || epochData?.state === 'in-challenge-period') && (
-          <HelpIcon src="/static/clock.svg" />
-        )}
-        <EpochState>
-          <LoadingValue done={epochData?.state !== undefined} maxWidth={120}>
-            <h3>Epoch {epochData?.id}</h3>
+  const formatPercentage = (a: BN | undefined, b: BN | undefined) => {
+    if (!a || !b) return ''
+    b = b.div(new BN(1e6))
+    b = b.isZero() ? new BN(1) : b
+    const percentage = (parseInt(a.div(new BN(1e6)).toString()) / parseInt(b.toString())) * 100
+    return `${percentFormatter.format(percentage)}%`
+  }
 
+  const tableData = {
+    dropInvestLocked: formatCurrencyAmount(poolData?.senior?.pendingInvestments),
+    dropInvestTBE: formatCurrencyAmount(solution?.dropInvest),
+    dropInvestTBEPercent: formatPercentage(solution?.dropInvest, poolData?.senior?.pendingInvestments),
+    tinInvestLocked: formatCurrencyAmount(poolData?.junior?.pendingInvestments),
+    tinInvestTBE: formatCurrencyAmount(solution?.tinInvest),
+    tinInvestTBEPercent: formatPercentage(solution?.tinInvest, poolData?.junior?.pendingInvestments),
+    totalInvestLocked: formatCurrencyAmount(poolData?.totalPendingInvestments),
+    totalInvestTBE: formatCurrencyAmount(solution?.dropInvest.add(solution.tinInvest)),
+    totalInvestTBEPercent: formatPercentage(
+      solution?.dropInvest.add(solution?.tinInvest),
+      poolData?.totalPendingInvestments
+    ),
+    dropRedeemLocked: formatCurrencyAmount(
+      poolData?.senior.pendingRedemptions?.mul(poolData?.senior.tokenPrice).div(Fixed27Base)
+    ),
+    dropRedeemTBE: formatCurrencyAmount(
+      poolData && solution?.dropRedeem.mul(poolData.senior.tokenPrice).div(Fixed27Base)
+    ),
+    dropRedeemTBEPercent: formatPercentage(solution?.dropRedeem, poolData?.senior?.pendingRedemptions),
+    tinRedeemLocked: formatCurrencyAmount(
+      poolData?.junior.pendingRedemptions &&
+        poolData.junior.pendingRedemptions.mul(poolData.junior.tokenPrice).div(Fixed27Base)
+    ),
+    tinRedeemTBE: formatCurrencyAmount(
+      poolData && solution?.tinRedeem.mul(poolData.junior.tokenPrice).div(Fixed27Base)
+    ),
+    tinRedeemTBEPercent: formatPercentage(solution?.tinRedeem, poolData?.junior?.pendingRedemptions),
+    totalRedeemLocked: formatCurrencyAmount(poolData?.totalRedemptionsCurrency),
+    totalRedeemTBE: formatCurrencyAmount(
+      solution &&
+        poolData &&
+        solution.dropRedeem
+          .mul(poolData.senior.tokenPrice)
+          .div(Fixed27Base)
+          .add(solution.tinRedeem.mul(poolData.junior.tokenPrice).div(Fixed27Base))
+    ),
+    totalRedeemTBEPercent: formatPercentage(
+      poolData &&
+        solution?.dropRedeem
+          .mul(poolData.senior.tokenPrice)
+          .div(Fixed27Base)
+          .add(solution.tinRedeem.mul(poolData.junior.tokenPrice).div(Fixed27Base)),
+      poolData?.totalRedemptionsCurrency
+    ),
+  }
+
+  return (
+    <Card interactive p={24}>
+      <Wrap gap="small" onClick={() => setOpen(!open)} style={{ cursor: 'pointer' }}>
+        {epochData?.state === 'open' && <EpochIcon src="/static/clock.svg" />}
+        {epochData?.state === 'can-be-closed' && solutionState !== 'to-be-closed' && (
+          <EpochIcon src="/static/help-circle.svg" />
+        )}
+        {((epochData?.state === 'can-be-closed' && solutionState === 'to-be-closed') ||
+          epochData?.state === 'challenge-period-ended') && <EpochIcon src="/static/circle-checked.svg" />}
+        {(epochData?.state === 'in-submission-period' || epochData?.state === 'in-challenge-period') && (
+          <EpochIcon src="/static/clock.svg" />
+        )}
+
+        <SectionHeading>Epoch {epochData?.id}</SectionHeading>
+        <EpochState
+          gap="small"
+          rowGap={0}
+          alignItems="baseline"
+          flexDirection={['column', 'row']}
+          order={[3, 'initial']}
+          flexBasis={['100%', 'auto']}
+        >
+          <LoadingValue done={epochData?.state !== undefined} alignRight={false} maxWidth={120}>
             {epochData?.state === 'open' && <h4>Ongoing</h4>}
             {epochData?.state === 'can-be-closed' && <h4>Minimum duration ended</h4>}
             {epochData?.state === 'in-submission-period' && <h4>Computing orders</h4>}
             {epochData?.state === 'in-challenge-period' && <h4>Computing orders</h4>}
             {epochData?.state === 'challenge-period-ended' && <h4>Orders computed</h4>}
-
             {epochData?.state === 'open' && (
               <Tooltip
                 title="Tinlake epochs have a minimum duration of 24 hours. Once the minimum duration has passed, the epoch will be closed and, if possible, the orders will be executed."
@@ -166,7 +235,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
             )}
             {epochData?.state === 'can-be-closed' && (
               <>
-                {getSolutionState() === 'to-be-closed' && (
+                {solutionState === 'to-be-closed' && (
                   <Tooltip
                     title="The minimum epoch duration has passed and will soon be closed automatically. All locked orders will be executed."
                     underline
@@ -174,7 +243,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     <h5>To be closed</h5>
                   </Tooltip>
                 )}
-                {getSolutionState() === 'no-orders-locked' && (
+                {solutionState === 'no-orders-locked' && (
                   <Tooltip
                     title="The minimum epoch duration has passed but currently no orders are locked. The epoch will be closed once orders are locked and can be executed."
                     underline
@@ -182,7 +251,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     <h5>No orders locked</h5>
                   </Tooltip>
                 )}
-                {getSolutionState() === 'no-executions' && (
+                {solutionState === 'no-executions' && (
                   <Tooltip
                     title="The minimum epoch duration has passed but the locked orders cannot be executed. This may be because the pool is oversubscribed or no liquidity is available for redemptions. The epoch will be closed and orders executed as soon as the pool state changes or liquidity is provided."
                     underline
@@ -190,7 +259,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     <h5>Locked orders cannot be executed</h5>
                   </Tooltip>
                 )}
-                {getSolutionState() === 'partial-executions' && (
+                {solutionState === 'partial-executions' && (
                   <Tooltip
                     title="The minimum epoch duration has passed but only a fraction of the locked orders could be executed. The epoch is not automatically closed to avoid unsustainable gas fees for small transaction amounts."
                     underline
@@ -232,303 +301,234 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         <Caret style={{ marginLeft: 'auto', position: 'relative', top: '0' }}>
           <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
         </Caret>
-      </Box>
+      </Wrap>
       {open && (
-        <TableWrapper>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableCell size="40%">Investments</TableCell>
-                <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
-                  Locked
-                </TableCell>
-                <TableCell size="30%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
-                  To be executed
-                </TableCell>
-                <TableCell size="10%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
-                  In %
-                </TableCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell>DROP investments</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>
-                  <LoadingValue done={poolData?.senior?.pendingInvestments !== undefined}>
-                    {formatCurrencyAmount(poolData?.senior?.pendingInvestments)}
-                  </LoadingValue>
-                </TableCell>
-                <TableCell style={{ textAlign: 'right' }}>
-                  <LoadingValue done={solution?.dropInvest !== undefined}>
-                    {formatCurrencyAmount(solution?.dropInvest)}
-                  </LoadingValue>
-                </TableCell>
-                <TableCell style={{ textAlign: 'right' }}>
-                  <LoadingValue
-                    done={poolData?.senior?.pendingInvestments !== undefined && solution?.dropInvest !== undefined}
-                  >
-                    {(poolData?.senior?.pendingInvestments || new BN(0)).isZero()
-                      ? '0'
-                      : parseFloat(
-                          (solution?.dropInvest || new BN(0))
-                            .mul(new BN(10).pow(new BN(18)))
-                            .div(poolData?.senior?.pendingInvestments || new BN(1))
-                            .div(new BN(10).pow(new BN(16)))
-                            .toString()
-                        )}
-                    %
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>TIN investments</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>
-                  <LoadingValue done={poolData?.junior?.pendingInvestments !== undefined}>
-                    {formatCurrencyAmount(poolData?.junior?.pendingInvestments)}
-                  </LoadingValue>
-                </TableCell>
-                <TableCell style={{ textAlign: 'right' }}>
-                  <LoadingValue done={solution?.tinInvest !== undefined}>
-                    {formatCurrencyAmount(solution?.tinInvest)}
-                  </LoadingValue>
-                </TableCell>
-                <TableCell style={{ textAlign: 'right' }}>
-                  <LoadingValue
-                    done={poolData?.junior?.pendingInvestments !== undefined && solution?.tinInvest !== undefined}
-                  >
-                    {(poolData?.junior?.pendingInvestments || new BN(0)).isZero()
-                      ? '0'
-                      : parseFloat(
-                          (solution?.tinInvest || new BN(0))
-                            .mul(new BN(10).pow(new BN(18)))
-                            .div(poolData?.junior?.pendingInvestments || new BN(1))
-                            .div(new BN(10).pow(new BN(16)))
-                            .toString()
-                        )}
-                    %
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-              <TableRow style={{ fontWeight: 'bold' }}>
-                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }}>
-                  Total pending investments
-                </TableCell>
-                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
-                  <LoadingValue done={poolData?.totalPendingInvestments !== undefined}>
-                    {formatCurrencyAmount(poolData?.totalPendingInvestments)}
-                  </LoadingValue>
-                </TableCell>
-                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
-                  <LoadingValue done={solution?.tinInvest !== undefined}>
-                    {formatCurrencyAmount((solution?.dropInvest || new BN(0)).add(solution?.tinInvest || new BN(0)))}
-                  </LoadingValue>
-                </TableCell>
-                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
-                  <LoadingValue
-                    done={poolData?.senior?.pendingInvestments !== undefined && solution?.dropInvest !== undefined}
-                  >
-                    {(poolData?.senior?.pendingInvestments || new BN(0)).isZero() &&
-                    (poolData?.junior?.pendingInvestments || new BN(0)).isZero()
-                      ? '0'
-                      : parseFloat(
-                          (solution?.dropInvest || new BN(0))
-                            .add(solution?.tinInvest || new BN(0))
-                            .mul(new BN(10).pow(new BN(18)))
-                            .div(
-                              (poolData?.senior?.pendingInvestments || new BN(1)).add(
-                                poolData?.junior?.pendingInvestments || new BN(1)
-                              )
-                            )
-                            .div(new BN(10).pow(new BN(16)))
-                            .toString()
-                        )}
-                    %
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <br />
-          <br />
+        <Box mt="medium">
+          {isMobile ? (
+            <Stack gap="medium">
+              <Divider width="auto" bleedX="medium" />
+              <Stack gap="small">
+                <SectionHeading>Investments</SectionHeading>
+                <div>
+                  <MobileTable
+                    title="DROP Investments"
+                    locked={tableData.dropInvestLocked}
+                    tbe={tableData.dropInvestTBE}
+                    percent={tableData.dropInvestTBEPercent}
+                  />
+                  <MobileTable
+                    title="TIN Investments"
+                    locked={tableData.tinInvestLocked}
+                    tbe={tableData.tinInvestTBE}
+                    percent={tableData.tinInvestTBEPercent}
+                  />
+                </div>
+              </Stack>
+              <Stack gap="small">
+                <SectionHeading>Redemptions</SectionHeading>
+                <div>
+                  <MobileTable
+                    title="DROP Redemptions"
+                    locked={tableData.dropRedeemLocked}
+                    tbe={tableData.dropRedeemTBE}
+                    percent={tableData.dropRedeemTBEPercent}
+                  />
+                  <MobileTable
+                    title="TIN Redemptions"
+                    locked={tableData.tinRedeemLocked}
+                    tbe={tableData.tinRedeemTBE}
+                    percent={tableData.tinRedeemTBEPercent}
+                  />
+                </div>
+              </Stack>
+            </Stack>
+          ) : (
+            <TableWrapper>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableCell size="40%">Investments</TableCell>
+                    <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
+                      Locked
+                    </TableCell>
+                    <TableCell size="30%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
+                      To be executed
+                    </TableCell>
+                    <TableCell size="10%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
+                      In %
+                    </TableCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>DROP investments</TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.dropInvestLocked}>{tableData.dropInvestLocked}</LoadingValue>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.dropInvestTBE}>{tableData.dropInvestTBE}</LoadingValue>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.dropInvestTBEPercent}>
+                        {tableData.dropInvestTBEPercent}
+                      </LoadingValue>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>TIN investments</TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.tinInvestLocked}>{tableData.tinInvestLocked}</LoadingValue>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.tinInvestTBE}>{tableData.tinInvestTBE}</LoadingValue>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.tinInvestTBEPercent}>
+                        {tableData.tinInvestTBEPercent}
+                      </LoadingValue>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ fontWeight: 'bold' }}>
+                    <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }}>
+                      Total pending investments
+                    </TableCell>
+                    <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.totalInvestLocked}>{tableData.totalInvestLocked}</LoadingValue>
+                    </TableCell>
+                    <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.totalInvestTBE}>{tableData.totalInvestTBE}</LoadingValue>
+                    </TableCell>
+                    <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.totalInvestTBEPercent}>
+                        {tableData.totalInvestTBEPercent}
+                      </LoadingValue>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+              <br />
+              <br />
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableCell size="40%">Redemptions</TableCell>
-                <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
-                  Locked
-                </TableCell>
-                <TableCell size="30%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
-                  To be executed
-                </TableCell>
-                <TableCell size="10%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
-                  In %
-                </TableCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell>DROP redemptions</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>
-                  <LoadingValue done={poolData?.senior?.pendingRedemptions !== undefined}>
-                    {formatCurrencyAmount(
-                      (poolData?.senior?.pendingRedemptions || new BN(1))
-                        .mul(poolData?.senior?.tokenPrice || new BN(0))
-                        .div(Fixed27Base)
-                    )}
-                  </LoadingValue>
-                </TableCell>
-                <TableCell style={{ textAlign: 'right' }}>
-                  <LoadingValue done={solution?.dropRedeem !== undefined}>
-                    {formatCurrencyAmount(
-                      (solution?.dropRedeem || new BN(1))
-                        .mul(poolData?.senior?.tokenPrice || new BN(0))
-                        .div(Fixed27Base)
-                    )}
-                  </LoadingValue>
-                </TableCell>
-                <TableCell style={{ textAlign: 'right' }}>
-                  <LoadingValue
-                    done={poolData?.senior?.pendingRedemptions !== undefined && solution?.dropRedeem !== undefined}
-                  >
-                    {(poolData?.senior?.pendingRedemptions || new BN(0)).isZero()
-                      ? '0'
-                      : parseFloat(
-                          (solution?.dropRedeem || new BN(0))
-                            .mul(new BN(10).pow(new BN(18)))
-                            .div(poolData?.senior?.pendingRedemptions || new BN(1))
-                            .div(new BN(10).pow(new BN(16)))
-                            .toString()
-                        )}
-                    %
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>TIN redemptions</TableCell>
-                <TableCell style={{ textAlign: 'right' }}>
-                  <LoadingValue done={poolData?.junior?.pendingRedemptions !== undefined}>
-                    {formatCurrencyAmount(
-                      (poolData?.junior?.pendingRedemptions || new BN(1))
-                        .mul(poolData?.junior?.tokenPrice || new BN(0))
-                        .div(Fixed27Base)
-                    )}
-                  </LoadingValue>
-                </TableCell>
-                <TableCell style={{ textAlign: 'right' }}>
-                  <LoadingValue done={solution?.tinRedeem !== undefined}>
-                    {formatCurrencyAmount(
-                      (solution?.tinRedeem || new BN(1)).mul(poolData?.senior?.tokenPrice || new BN(0)).div(Fixed27Base)
-                    )}
-                  </LoadingValue>
-                </TableCell>
-                <TableCell style={{ textAlign: 'right' }}>
-                  <LoadingValue
-                    done={poolData?.junior?.pendingRedemptions !== undefined && solution?.tinRedeem !== undefined}
-                  >
-                    {(poolData?.junior?.pendingRedemptions || new BN(0)).isZero()
-                      ? '0'
-                      : parseFloat(
-                          (solution?.tinRedeem || new BN(0))
-                            .mul(new BN(10).pow(new BN(18)))
-                            .div(poolData?.junior?.pendingRedemptions || new BN(1))
-                            .div(new BN(10).pow(new BN(16)))
-                            .toString()
-                        )}
-                    %
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-              <TableRow style={{ fontWeight: 'bold' }}>
-                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }}>
-                  Total pending redemptions
-                </TableCell>
-                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
-                  <LoadingValue done={poolData?.totalRedemptionsCurrency !== undefined}>
-                    {formatCurrencyAmount(poolData?.totalRedemptionsCurrency)}
-                  </LoadingValue>
-                </TableCell>
-                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
-                  <LoadingValue done={solution?.tinInvest !== undefined}>
-                    {formatCurrencyAmount(
-                      (solution?.dropRedeem || new BN(0))
-                        .mul(poolData?.senior?.tokenPrice || new BN(0))
-                        .div(Fixed27Base)
-                        .add(
-                          (solution?.tinRedeem || new BN(0))
-                            .mul(poolData?.junior?.tokenPrice || new BN(0))
-                            .div(Fixed27Base)
-                        )
-                    )}
-                  </LoadingValue>
-                </TableCell>
-                <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
-                  <LoadingValue
-                    done={poolData?.senior?.pendingRedemptions !== undefined && solution?.dropRedeem !== undefined}
-                  >
-                    {(poolData?.senior?.pendingRedemptions || new BN(0)).isZero() &&
-                    (poolData?.junior?.pendingRedemptions || new BN(0)).isZero()
-                      ? '0'
-                      : parseFloat(
-                          (solution?.dropRedeem || new BN(0))
-                            .add(solution?.tinRedeem || new BN(0))
-                            .mul(new BN(10).pow(new BN(18)))
-                            .div(
-                              (poolData?.senior?.pendingRedemptions || new BN(1)).add(
-                                poolData?.junior?.pendingRedemptions || new BN(1)
-                              )
-                            )
-                            .div(new BN(10).pow(new BN(16)))
-                            .toString()
-                        )}
-                    %
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <br />
-          {showEpochButton && (
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'xsmall', bottom: 'medium' }}>
-              <EpochButton />
-            </Box>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableCell size="40%">Redemptions</TableCell>
+                    <TableCell size="20%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
+                      Locked
+                    </TableCell>
+                    <TableCell size="30%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
+                      To be executed
+                    </TableCell>
+                    <TableCell size="10%" style={{ textAlign: 'right' }} pad={{ vertical: '6px' }}>
+                      In %
+                    </TableCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>DROP redemptions</TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.dropRedeemLocked}>{tableData.dropRedeemLocked}</LoadingValue>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.dropRedeemTBE}>{tableData.dropRedeemTBE}</LoadingValue>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.dropRedeemTBEPercent}>
+                        {tableData.dropRedeemTBEPercent}
+                      </LoadingValue>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>TIN redemptions</TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.tinRedeemLocked}>{tableData.tinRedeemLocked}</LoadingValue>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.tinRedeemTBE}>{tableData.tinRedeemTBE}</LoadingValue>
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.tinRedeemTBEPercent}>
+                        {tableData.tinRedeemTBEPercent}
+                      </LoadingValue>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow style={{ fontWeight: 'bold' }}>
+                    <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }}>
+                      Total pending redemptions
+                    </TableCell>
+                    <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.totalRedeemLocked}>{tableData.totalRedeemLocked}</LoadingValue>
+                    </TableCell>
+                    <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.totalRedeemTBE}>{tableData.totalRedeemTBE}</LoadingValue>
+                    </TableCell>
+                    <TableCell border={{ side: 'bottom', color: 'rgba(0, 0, 0, 0.8)' }} style={{ textAlign: 'right' }}>
+                      <LoadingValue done={!!tableData.totalRedeemTBEPercent}>
+                        {tableData.totalRedeemTBEPercent}
+                      </LoadingValue>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableWrapper>
           )}
-        </TableWrapper>
+
+          {showEpochButton && <ButtonGroup mb="medium">{epochButtonElement}</ButtonGroup>}
+        </Box>
       )}
     </Card>
   )
 }
 
-const EpochState = styled.div`
-  display: flex;
-  direction: row;
-  margin: 2px 0 0 0;
-  align-items: baseline;
+const MobileTable = ({ title, locked, tbe, percent }: any) => (
+  <div>
+    <MobileTableHeading>{title}</MobileTableHeading>
+    <Table>
+      <TableBody>
+        <TableRow>
+          <TableCell>Locked</TableCell>
+          <TableCell style={{ textAlign: 'right' }}>
+            <LoadingValue done={!!locked}>{locked}</LoadingValue>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell border={{ color: 'transparent' }}>To be executed</TableCell>
+          <TableCell border={{ color: 'transparent' }} style={{ textAlign: 'right' }}>
+            <LoadingValue done={!!tbe}>
+              {tbe}
+              <br /> <span style={{ fontSize: '12px' }}>({percent})</span>
+            </LoadingValue>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </div>
+)
 
-  h3 {
-    line-height: 22px;
-    font-size: 16px;
-    margin: 0;
-  }
-
-  h4 {
-    line-height: 22px;
-    font-size: 14px;
-    margin: 0 0 0 14px;
-    color: #777777;
-  }
-
+const EpochState = styled(Wrap)`
+  h4,
   h5 {
-    line-height: 22px;
+    line-height: 24px;
     font-size: 14px;
-    margin: 0 0 0 14px;
+    margin: 0;
     color: #777777;
   }
 `
 
 const TableWrapper = styled.div`
-  margin-left: 44px;
-  margin-bottom: 42px;
+  margin-left: 40px;
+  margin-bottom: 24px;
+`
+
+const MobileTableHeading = styled.div`
+  font-size: 14px;
+  font-weight: 500;
+`
+
+const EpochIcon = styled.img`
+  width: 24px;
+  height: 24px;
 `
 
 export default connect((state) => state, { createTransaction })(EpochOverview)
