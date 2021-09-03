@@ -1,15 +1,16 @@
 import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
+import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Card } from '../../../components/Card'
 import InvestAction from '../../../components/InvestAction'
-import { Box, Flex, Shelf } from '../../../components/Layout'
+import { Box, Shelf } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { PoolLink } from '../../../components/PoolLink'
 import { Tooltip } from '../../../components/Tooltip'
@@ -301,7 +302,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             )}
 
             {card === 'home' && trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
-              <AddWalletLink onClick={addToWallet}>Display {trancheData?.token} in your wallet</AddWalletLink>
+              <Box mt="small">
+                <AddWalletLink onClick={addToWallet}>Display {trancheData?.token} in your wallet</AddWalletLink>
+              </Box>
             )}
           </>
         )}
@@ -351,9 +354,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                     Interested in investing?
                   </Heading>
                   If you want to learn more get started with your onboarding process.
-                  <Flex justifyContent={['center', 'flex-end']} mt="small">
+                  <ButtonGroup mt="small">
                     <InvestAction pool={props.pool} />
-                  </Flex>
+                  </ButtonGroup>
                 </>
               </Info>
             )}

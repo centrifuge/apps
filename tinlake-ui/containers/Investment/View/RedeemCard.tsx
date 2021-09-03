@@ -2,11 +2,13 @@ import { TokenInput } from '@centrifuge/axis-token-input'
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
-import { Box, Button, Heading } from 'grommet'
+import { Heading } from 'grommet'
 import { CircleAlert } from 'grommet-icons'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import styled from 'styled-components'
+import { Button } from '../../../components/Button'
+import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -96,7 +98,7 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
     }
   }
   return (
-    <Box>
+    <div>
       <Heading level="6" margin={{ top: 'medium', bottom: 'xsmall' }}>
         Enter your redemption amount below
       </Heading>
@@ -114,11 +116,11 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
         <HelpTitle>No Centrifuge Chain Account Linked</HelpTitle>
         <HelpText>To claim rewards, link your Centrifuge Chain account before redeeming your investment</HelpText>
       </Warning>
-      <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+      <ButtonGroup mt="medium">
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
-        <Button primary label={'Redeem'} onClick={submit} disabled={error !== undefined || disabled} />
-      </Box>
-    </Box>
+        <Button primary label="Redeem" onClick={submit} disabled={error !== undefined || disabled} />
+      </ButtonGroup>
+    </div>
   )
 }
 

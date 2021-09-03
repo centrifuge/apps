@@ -1,9 +1,10 @@
-import { Box, Button, Paragraph } from 'grommet'
+import { Box, Paragraph } from 'grommet'
 import * as React from 'react'
 import { Pool, UpcomingPool } from '../../config'
 import { getPoolStatus } from '../../utils/pool'
 import { usePool } from '../../utils/usePool'
 import { usePools } from '../../utils/usePools'
+import { Button } from '../Button'
 import { PoolLink } from '../PoolLink'
 import { FormModal, InvestmentSteps } from './styles'
 
