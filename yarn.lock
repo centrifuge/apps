@@ -2381,15 +2381,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@centrifuge/axis-theme@npm:0.4.2-develop.145":
-  version: 0.4.2-develop.145
-  resolution: "@centrifuge/axis-theme@npm:0.4.2-develop.145"
+"@centrifuge/axis-theme@npm:0.4.2-develop.46eb94b.141+46eb94b":
+  version: 0.4.2-develop.46eb94b.141
+  resolution: "@centrifuge/axis-theme@npm:0.4.2-develop.46eb94b.141"
   peerDependencies:
     grommet: 2.7.x
     react: ">= 16.6.1"
     react-dom: ">= 16.6.1"
     styled-components: ">= 4.x"
-  checksum: 4d5d416980701da64bb6a0ff33036a1ab39ede11c7b44030fba662ea5a887889523d31e41f1de76f29637540193685487139b45c1b27c91699c172b8642f7d4f
+  checksum: eb0091d80c7cd62e8e3d19af7c426ab96a7647ff765eb0dc04124a46de52571a3ca48e3437fcdc727ae43c8631e9a5cf8fb960a003e20b248bd0809399225992
   languageName: node
   linkType: hard
 
@@ -2772,7 +2772,7 @@ __metadata:
     "@centrifuge/axis-modal": 0.1.1-develop.57
     "@centrifuge/axis-ratio-bar": 0.4.2-develop.137
     "@centrifuge/axis-spinner": 0.4.2-develop.109
-    "@centrifuge/axis-theme": 0.4.2-develop.145
+    "@centrifuge/axis-theme": 0.4.2-develop.46eb94b.141+46eb94b
     "@centrifuge/axis-token-input": 0.4.1-develop.c79e643.146+c79e643
     "@centrifuge/axis-tooltip": 0.4.2-develop.3ad09d7.144+3ad09d7
     "@centrifuge/axis-utils": 0.4.2-develop.109
@@ -2818,7 +2818,7 @@ __metadata:
     express: 4.17.1
     graphql: 15.0.0
     graphql-tag: 2.10.3
-    grommet: 2.15.0
+    grommet: 2.17.5
     grommet-icons: ^4.6.0
     http-proxy-middleware: 1.0.5
     husky: 4.2.5
@@ -18289,6 +18289,19 @@ fsevents@2.1.2:
   languageName: node
   linkType: hard
 
+"grommet-icons@npm:^4.6.2":
+  version: 4.6.2
+  resolution: "grommet-icons@npm:4.6.2"
+  dependencies:
+    grommet-styles: ^0.2.0
+  peerDependencies:
+    react: ">= 16.6.0"
+    react-dom: ">= 16.6.0"
+    styled-components: ">= 5.x"
+  checksum: 40532b30d90034d87e6ced9297db7b362cc29fd28ece77fe3db1602492c5ac7b11848dd3b65103aa7acd56bfcd517ec200aeb111f64823cbff695e00c2a61b9b
+  languageName: node
+  linkType: hard
+
 "grommet-styles@npm:^0.2.0":
   version: 0.2.0
   resolution: "grommet-styles@npm:0.2.0"
@@ -18315,6 +18328,22 @@ fsevents@2.1.2:
     react-dom: ">= 16.6.1"
     styled-components: ">= 5.1"
   checksum: 94b290841cf0ca70070d9080eaebb1b8e0ebf800bfccb5f20a2043c9a3733780b2897a18de6ffb366a1e3d4a7d2be73795e39a4db3acd0462ea9d886b69b46a6
+  languageName: node
+  linkType: hard
+
+"grommet@npm:2.17.5":
+  version: 2.17.5
+  resolution: "grommet@npm:2.17.5"
+  dependencies:
+    grommet-icons: ^4.6.2
+    hoist-non-react-statics: ^3.2.0
+    markdown-to-jsx: ^7.1.3
+    prop-types: ^15.7.2
+  peerDependencies:
+    react: ^16.6.1 || ^17.0.0
+    react-dom: ^16.6.1 || ^17.0.0
+    styled-components: ">= 5.1"
+  checksum: 79bc7a50450361ef133214224a57739a8f09f5447a84299cdd23437a654c3015c07caff2b4673c276eef5b3981b2b3eeea8cee297471190014565f6c1380d2bc
   languageName: node
   linkType: hard
 
@@ -22903,6 +22932,15 @@ fsevents@2.1.2:
   peerDependencies:
     react: ">= 0.14.0"
   checksum: d3a830400eb171c0c879bdff50b1246075f5493185a6bf2b18b156fcab1f179ad53a5bc3061e291651170708dbcc4fe9381e4c1153337a2b8d591cf8f0296c88
+  languageName: node
+  linkType: hard
+
+"markdown-to-jsx@npm:^7.1.3":
+  version: 7.1.3
+  resolution: "markdown-to-jsx@npm:7.1.3"
+  peerDependencies:
+    react: ">= 0.14.0"
+  checksum: db5580aa747e78fd729a210d4a57ae4d3bdb31d2b3cbe513c449e46a2d779019d254ed745d7f9963ea490878c87460fda519f3d468173b765007b50c840bf52f
   languageName: node
   linkType: hard
 

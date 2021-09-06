@@ -332,7 +332,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </Info>
             <ButtonGroup mt="medium">
               <PoolLink href={'/onboarding'}>
-                <Button as="a" label="Invest" primary />
+                <Button label="Invest" primary />
               </PoolLink>
             </ButtonGroup>
           </>
