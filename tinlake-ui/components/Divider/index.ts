@@ -9,3 +9,7 @@ export const Divider = styled(Hr)`
   border-top-style: solid;
   border-top-color: #eeeeee;
 `
+
+Divider.defaultProps = {
+  width: '100%',
+}
