@@ -136,17 +136,17 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   const formatCurrencyAmount = (bn: BN | undefined) => {
     if (!bn) return ''
     // lose some precision to get rid of dust
-    bn = bn.div(new BN(1e6))
-    return `${addThousandsSeparators(toPrecision(baseToDisplay(bn || '0', 12), 0))} ${
+    const n = bn.div(new BN(1e6))
+    return `${addThousandsSeparators(toPrecision(baseToDisplay(n || '0', 12), 0))} ${
       props.activePool?.metadata.currencySymbol || 'DAI'
     }`
   }
 
-  const formatPercentage = (a: BN | undefined, b: BN | undefined) => {
-    if (!a || !b) return ''
-    b = b.div(new BN(1e6))
-    b = b.isZero() ? new BN(1) : b
-    const percentage = (parseInt(a.div(new BN(1e6)).toString()) / parseInt(b.toString())) * 100
+  const formatPercentage = (numerator: BN | undefined, denominator: BN | undefined) => {
+    if (!numerator || !denominator) return ''
+    const a = numerator.div(new BN(1e6))
+    const b = denominator.isZero() ? new BN(1) : denominator
+    const percentage = (parseInt(a.div(new BN(1e6)).toString(), 10) / parseInt(b.toString()), 10) * 100
     return `${percentFormatter.format(percentage)}%`
   }
 
