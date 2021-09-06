@@ -47,7 +47,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
       {props.pool && (poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
         <Box>
           <PoolLink href={'/investments'}>
-            <Button as="span" primary label="Invest" fill={false} />
+            <Button primary label="Invest" fill={false} />
           </PoolLink>
         </Box>
       )}
