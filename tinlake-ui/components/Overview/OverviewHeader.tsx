@@ -162,8 +162,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           </HeaderBox>
           <HeaderBox style={{ borderRight: 'none' }}>
             {'addresses' in props.selectedPool &&
-            config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) &&
-            false ? (
+            config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
               <Button label="Invest" primary onClick={invest} />
             ) : (
               <InvestAction pool={props.selectedPool} />
