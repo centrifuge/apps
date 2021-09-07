@@ -37,8 +37,6 @@ export const PoolCapacityLabel: React.FC<Props> = ({ pool }) => {
 
 const Label = styled.div<{ green?: true; blue?: true; orange?: true }>`
   margin-left: 13px;
-  position: relative;
-  top: -2px;
   display: inline-block;
   height: 20px;
   font-weight: 500;

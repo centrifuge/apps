@@ -16,6 +16,9 @@ const baseTheme = {
     xlarge: 40,
     xxlarge: 64,
   },
+  sizes: {
+    container: 1152,
+  },
 }
 
 export const theme = {
