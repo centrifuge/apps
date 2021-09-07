@@ -199,8 +199,8 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Card interactive p={24}>
-      <Wrap gap="small" onClick={() => setOpen(!open)} style={{ cursor: 'pointer' }}>
+    <Card interactive>
+      <Wrap p={24} gap="small" onClick={() => setOpen(!open)} style={{ cursor: 'pointer' }}>
         {epochData?.state === 'open' && <EpochIcon src="/static/clock.svg" />}
         {epochData?.state === 'can-be-closed' && solutionState !== 'to-be-closed' && (
           <EpochIcon src="/static/help-circle.svg" />
@@ -304,7 +304,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         </Caret>
       </Wrap>
       {open && (
-        <Box mt="medium">
+        <Box px={24} pb={24}>
           {isMobile ? (
             <Stack gap="medium">
               <Divider width="auto" bleedX="medium" />
