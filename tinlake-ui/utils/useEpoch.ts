@@ -11,7 +11,7 @@ export function useEpoch(poolId?: string) {
   const query = useQuery(
     ['epoch', poolId, address],
     () => {
-      const pool = ipfsPools.active.find((p) => p.addresses.ROOT_CONTRACT === poolId)
+      const pool = ipfsPools.active.find((p) => p.addresses.ROOT_CONTRACT.toLowerCase() === poolId!.toLowerCase())
       const tinlake = initTinlake({ addresses: pool?.addresses, contractConfig: pool?.contractConfig })
       return getEpoch(tinlake, address!)
     },
