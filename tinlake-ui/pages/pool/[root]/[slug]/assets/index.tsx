@@ -1,4 +1,4 @@
-import { Box, Button, Heading } from 'grommet'
+import { Button } from 'grommet'
 import { GetStaticProps } from 'next'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
@@ -6,9 +6,11 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import Auth from '../../../../../components/Auth'
-import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
+import { SectionHeading } from '../../../../../components/Heading'
 import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
+import { Box, Stack } from '../../../../../components/Layout'
+import { PageContainer } from '../../../../../components/PageContainer'
 import PageTitle from '../../../../../components/PageTitle'
 import { PoolLink } from '../../../../../components/PoolLink'
 import WithFooter from '../../../../../components/WithFooter'
@@ -46,44 +48,41 @@ const LoanListPage: React.FC<Props> = (props) => {
           selectedRoute={'/assets'}
           menuItems={menuItems}
         />
-        <Container>
-          <Box justify="evenly" direction="row">
-            <Box width="xlarge" gap="medium">
-              <WithTinlake
-                addresses={pool.addresses}
-                contractConfig={pool.contractConfig}
-                render={(tinlake) => (
-                  <Auth
-                    tinlake={tinlake}
-                    render={(auth) => (
-                      <Box>
-                        <Box direction="row" margin={{ top: 'medium' }} justify="between">
-                          <PageTitle pool={props.pool} page="Assets" />
-
-                          <Box pad={{ top: 'small' }}>
-                            {isBorrower && (
-                              <PoolLink href={'/assets/issue'}>
-                                <Button primary label="Lock NFT" />
-                              </PoolLink>
-                            )}
+        <PageContainer>
+          <WithTinlake
+            addresses={pool.addresses}
+            contractConfig={pool.contractConfig}
+            render={(tinlake) => (
+              <Auth
+                tinlake={tinlake}
+                render={(auth) => (
+                  <>
+                    <PageTitle
+                      pool={props.pool}
+                      page="Assets"
+                      rightContent={
+                        isBorrower && (
+                          <Box display={['none', 'block']}>
+                            <PoolLink href={'/assets/issue'}>
+                              <Button primary label="Lock NFT" />
+                            </PoolLink>
                           </Box>
-                        </Box>
-
-                        <LoanOverview tinlake={tinlake} auth={auth} selectedPool={props.pool} />
-                        <Box direction="row" justify="between">
-                          <Heading level="4" margin={{ bottom: 'medium' }}>
-                            Asset List
-                          </Heading>
-                        </Box>
-                        <LoanList tinlake={tinlake} auth={auth} hideMetrics={true} activePool={props.pool} />
-                      </Box>
-                    )}
-                  />
+                        )
+                      }
+                    />
+                    <Stack gap="xlarge">
+                      <LoanOverview tinlake={tinlake} auth={auth} selectedPool={props.pool} />
+                      <Stack gap="small">
+                        <SectionHeading>Asset List</SectionHeading>
+                        <LoanList tinlake={tinlake} auth={auth} activePool={props.pool} />
+                      </Stack>
+                    </Stack>
+                  </>
                 )}
               />
-            </Box>
-          </Box>
-        </Container>
+            )}
+          />
+        </PageContainer>
       </WithFooter>
     </IpfsPoolsProvider>
   )

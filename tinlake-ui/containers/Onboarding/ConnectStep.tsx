@@ -1,4 +1,3 @@
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -8,7 +7,6 @@ import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool
-  tinlake: ITinlake
 }
 
 const ConnectStep: React.FC<Props> = () => {

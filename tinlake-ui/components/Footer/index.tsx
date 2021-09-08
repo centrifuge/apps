@@ -3,7 +3,11 @@ import React from 'react'
 import HelpMenu from '../HelpMenu'
 import InvestmentDisclaimer from './InvestmentDisclaimer'
 
-const Footer: React.FC<{}> = () => {
+interface Props {
+  hideHelpMenu?: boolean
+}
+
+const Footer: React.FC<Props> = (props: Props) => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
 
   const openModal = () => {
@@ -42,7 +46,7 @@ const Footer: React.FC<{}> = () => {
 
       <InvestmentDisclaimer isOpen={modalIsOpen} onClose={closeModal} />
 
-      <HelpMenu />
+      {!props.hideHelpMenu && <HelpMenu />}
     </Box>
   )
 }

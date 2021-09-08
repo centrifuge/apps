@@ -128,11 +128,11 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
   )
 
   return isMobile ? (
-    <Card as={Stack}>
+    <Stack as={Card}>
       {TVLElement}
       <Divider />
       {APRElement}
-    </Card>
+    </Stack>
   ) : (
     <Shelf gap="medium" alignItems="stretch" justifyContent="center">
       <Card flex="1 1 300px" maxWidth="440px">

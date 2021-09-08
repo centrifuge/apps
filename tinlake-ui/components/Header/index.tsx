@@ -34,6 +34,8 @@ interface Props {
   poolTitle?: string
   selectedRoute: string
   menuItems: MenuItem[]
+  logoUrl?: string
+  hideHoldings?: boolean
 }
 
 const Header: React.FC<Props> = (props: Props) => {
@@ -85,7 +87,7 @@ const Header: React.FC<Props> = (props: Props) => {
   }
 
   const { network, providerName } = auth!
-  const logoUrl = (isDemo && '/static/demo_logo.svg') || '/static/logo.svg'
+  const logoUrl = props.logoUrl || (isDemo && '/static/demo_logo.svg') || '/static/logo.svg'
 
   const filtMenuItems = menuItems
     .filter((item) => ((isDemo && item.env === 'demo') || item.env !== 'demo') && !item.secondary)
@@ -148,16 +150,18 @@ const Header: React.FC<Props> = (props: Props) => {
         {filtMenuItems.length > 0 && <DesktopNav>{menuButtons}</DesktopNav>}
       </NavWrapper>
       <AccountWrapper align="center" direction="row">
-        <Holdings>
-          <Box pad={{ left: '14px', right: '14px' }}>
-            <Tooltip title="View your rewards">{address ? rewardsLink : 'Rewards'}</Tooltip>
-          </Box>
-          {address && (
+        {!props.hideHoldings && (
+          <Holdings>
             <Box pad={{ left: '14px', right: '14px' }}>
-              <Tooltip title="View your investment portfolio">{portfolioLink}</Tooltip>
+              <Tooltip title="View your rewards">{address ? rewardsLink : 'Rewards'}</Tooltip>
             </Box>
-          )}
-        </Holdings>
+            {address && (
+              <Box pad={{ left: '14px', right: '14px' }}>
+                <Tooltip title="View your investment portfolio">{portfolioLink}</Tooltip>
+              </Box>
+            )}
+          </Holdings>
+        )}
         <WalletNav style={{ flex: '0 0 auto', paddingLeft: 16 }}>
           {!address && <ConnectButton onClick={connectAccount} label="Connect" />}
           {address && (
@@ -200,10 +204,12 @@ const Header: React.FC<Props> = (props: Props) => {
                   </Box>
                 )}
 
-                <Box gap="large">
-                  {rewardsLink}
-                  {address && portfolioLink}
-                </Box>
+                {!props.hideHoldings && (
+                  <Box gap="large">
+                    {rewardsLink}
+                    {address && portfolioLink}
+                  </Box>
+                )}
                 <Box gap="medium" margin={{ top: 'auto' }}>
                   <SocialLink href="https://t.me/centrifuge_chat" target="_blank">
                     <Icon src="/static/help/telegram.svg" />

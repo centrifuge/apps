@@ -14,7 +14,9 @@ import {
   ChartTooltipValue,
   StyledResponsiveContainer,
 } from '../../../components/Chart/styles'
-import { Stack } from '../../../components/Layout'
+import { Divider } from '../../../components/Divider'
+import { SectionHeading } from '../../../components/Heading'
+import { Shelf, Stack } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
@@ -23,6 +25,7 @@ import { dateToYMD } from '../../../utils/date'
 import { UintBase } from '../../../utils/ratios'
 import { toPrecision } from '../../../utils/toPrecision'
 import { useDailyAssetsValue } from '../../../utils/useDailyAssetsValue'
+import { useMedia } from '../../../utils/useMedia'
 import { usePool } from '../../../utils/usePool'
 import MaxReserveForm from './MaxReserveForm'
 import { Sidenote } from './styles'
@@ -88,200 +91,203 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
         ]
       : []
 
-  return (
-    <Box margin={{ bottom: 'medium' }}>
-      <Box direction="row" justify="between" gap="medium" wrap>
-        <Card p="medium" mb="medium" flex="1 1 420px" maxWidth="420px">
-          {!showMaxReserveForm && (
-            <>
-              <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-                <Heading level="5" margin={'0'}>
-                  Asset Value
-                </Heading>
-                <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                  <LoadingValue done={poolData?.outstandingVolume !== undefined} height={22}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))}{' '}
+  const reserveElement = showMaxReserveForm ? (
+    <MaxReserveForm
+      tinlake={props.tinlake}
+      setShowMaxReserveForm={setShowMaxReserveForm}
+      selectedPool={props.selectedPool}
+    />
+  ) : (
+    <>
+      <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+        <SectionHeading>Asset Value</SectionHeading>
+        <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+          <LoadingValue done={poolData?.outstandingVolume !== undefined} height={22}>
+            {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))}{' '}
+            {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+          </LoadingValue>
+        </Heading>
+      </Box>
+
+      <Table margin={{ bottom: '0' }}>
+        <TableBody>
+          <TableRow>
+            <TableCell
+              scope="row"
+              style={{ alignItems: 'start', justifyContent: 'center', verticalAlign: 'top' }}
+              pad={{ vertical: '6px' }}
+              border={isAdmin ? undefined : { color: 'transparent' }}
+            >
+              <span>Pool reserve</span>
+            </TableCell>
+            <TableCell
+              style={{ textAlign: 'end' }}
+              pad={{ vertical: '6px' }}
+              border={isAdmin ? undefined : { color: 'transparent' }}
+            >
+              <LoadingValue done={poolData?.reserve !== undefined} height={39}>
+                <>
+                  {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))}{' '}
+                  {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                  <Sidenote>
+                    Max: {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 0))}{' '}
+                    {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                  </Sidenote>
+                </>
+              </LoadingValue>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+
+      {isAdmin && (
+        <>
+          <Table>
+            <TableBody>
+              <TableRow>
+                <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+                  <span>Available funds for Financing</span>
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  <LoadingValue done={poolData?.reserve !== undefined}>
+                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 0))}{' '}
                     {props.selectedPool?.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
-                </Heading>
-              </Box>
-
-              <Table margin={{ bottom: '0' }}>
-                <TableBody>
-                  <TableRow>
-                    <TableCell
-                      scope="row"
-                      style={{ alignItems: 'start', justifyContent: 'center' }}
-                      pad={{ vertical: '6px' }}
-                      border={isAdmin ? undefined : { color: 'transparent' }}
-                    >
-                      <span>Pool reserve</span>
-                    </TableCell>
-                    <TableCell
-                      style={{ textAlign: 'end' }}
-                      pad={{ vertical: '6px' }}
-                      border={isAdmin ? undefined : { color: 'transparent' }}
-                    >
-                      <LoadingValue done={poolData?.reserve !== undefined} height={39}>
-                        <>
-                          {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))}{' '}
+                </TableCell>
+              </TableRow>
+              {poolData?.maker?.line && (
+                <TableRow>
+                  <TableCell
+                    scope="row"
+                    style={{ alignItems: 'start', justifyContent: 'center' }}
+                    pad={{ vertical: '6px' }}
+                  >
+                    <span>Maker credit line</span>
+                  </TableCell>
+                  <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+                    <LoadingValue done={poolData?.reserve !== undefined} height={39}>
+                      <>
+                        {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.creditline || '0', 18), 0))}{' '}
+                        {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                        <Sidenote>
+                          Remaining:{' '}
+                          {addThousandsSeparators(
+                            toPrecision(baseToDisplay(poolData?.maker?.remainingCredit || '0', 18), 0)
+                          )}{' '}
                           {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                          <Sidenote>
-                            Max:{' '}
-                            {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maxReserve || '0', 18), 0))}{' '}
-                            {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                          </Sidenote>
-                        </>
-                      </LoadingValue>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-
-              {isAdmin && (
-                <>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
-                          <span>Available funds for Financing</span>
-                        </TableCell>
-                        <TableCell style={{ textAlign: 'end' }}>
-                          <LoadingValue done={poolData?.reserve !== undefined}>
-                            {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.availableFunds || '0', 18), 0))}{' '}
-                            {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                          </LoadingValue>
-                        </TableCell>
-                      </TableRow>
-                      {poolData?.maker?.line && (
-                        <TableRow>
-                          <TableCell
-                            scope="row"
-                            style={{ alignItems: 'start', justifyContent: 'center' }}
-                            pad={{ vertical: '6px' }}
-                          >
-                            <span>Maker credit line</span>
-                          </TableCell>
-                          <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
-                            <LoadingValue done={poolData?.reserve !== undefined} height={39}>
-                              <>
-                                {addThousandsSeparators(
-                                  toPrecision(baseToDisplay(poolData?.maker?.creditline || '0', 18), 0)
-                                )}{' '}
-                                {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                                <Sidenote>
-                                  Remaining:{' '}
-                                  {addThousandsSeparators(
-                                    toPrecision(baseToDisplay(poolData?.maker?.remainingCredit || '0', 18), 0)
-                                  )}{' '}
-                                  {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                                </Sidenote>
-                              </>
-                            </LoadingValue>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                      <TableRow>
-                        <TableCell
-                          scope="row"
-                          style={{ alignItems: 'start', justifyContent: 'center' }}
-                          border={{ color: 'transparent' }}
-                          pad={{ top: '15px' }}
-                        >
-                          <span>Repaid this epoch</span>
-                        </TableCell>
-                        <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }} pad={{ top: '15px' }}>
-                          <LoadingValue done={poolData?.reserve !== undefined}>
-                            {addThousandsSeparators(
-                              toPrecision(
-                                baseToDisplay(
-                                  (poolData?.reserve || new BN(0))
-                                    .add(poolData?.maker?.remainingCredit || new BN(0))
-                                    .sub(poolData?.availableFunds || new BN(0)),
-                                  18
-                                ),
-                                0
-                              )
-                            )}{' '}
-                            {props.selectedPool?.metadata.currencySymbol || 'DAI'}
-                          </LoadingValue>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-
-                  {isAdmin && (
-                    <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-                      <Button label="Manage" onClick={() => setShowMaxReserveForm(true)} disabled={!poolData} />
-                    </Box>
-                  )}
-                </>
+                        </Sidenote>
+                      </>
+                    </LoadingValue>
+                  </TableCell>
+                </TableRow>
               )}
-            </>
-          )}
-          {showMaxReserveForm && (
-            <MaxReserveForm
-              tinlake={props.tinlake}
-              setShowMaxReserveForm={setShowMaxReserveForm}
-              selectedPool={props.selectedPool}
-            />
-          )}
-        </Card>
+              <TableRow>
+                <TableCell
+                  scope="row"
+                  style={{ alignItems: 'start', justifyContent: 'center' }}
+                  border={{ color: 'transparent' }}
+                  pad={{ top: '15px' }}
+                >
+                  <span>Repaid this epoch</span>
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }} pad={{ top: '15px' }}>
+                  <LoadingValue done={poolData?.reserve !== undefined}>
+                    {addThousandsSeparators(
+                      toPrecision(
+                        baseToDisplay(
+                          (poolData?.reserve || new BN(0))
+                            .add(poolData?.maker?.remainingCredit || new BN(0))
+                            .sub(poolData?.availableFunds || new BN(0)),
+                          18
+                        ),
+                        0
+                      )
+                    )}{' '}
+                    {props.selectedPool?.metadata.currencySymbol || 'DAI'}
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
 
-        <Card mb="medium" flex="1 1 480px" maxWidth="480px" height="200px">
-          <Stack height="100%">
-            <Box direction="row" justify="between">
-              <Heading level="5" margin={{ top: 'medium', left: 'medium', bottom: '0' }}>
-                Pool Value
-              </Heading>
-              <Heading level="5" margin={{ top: 'medium', right: 'medium', bottom: '0' }} color="#9f9f9f">
-                {assetDataWithToday.length > 0 && dateToYMD(assetDataWithToday[0].day)} - present
-              </Heading>
+          {isAdmin && (
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+              <Button label="Manage" onClick={() => setShowMaxReserveForm(true)} disabled={!poolData} />
             </Box>
-            {assetDataWithToday.length > 0 && (
-              <div style={{ flex: '1 0 auto' }}>
-                <StyledResponsiveContainer>
-                  <AreaChart data={assetDataWithToday} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
-                    <defs>
-                      <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
-                        <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="colorReserve" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ccc" stopOpacity={0.2} />
-                        <stop offset="50%" stopColor="#ccc" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <Tooltip content={<CustomTooltip />} offset={20} />
-                    {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMD(val)} /> */}
-                    <Area
-                      type="monotone"
-                      stackId={1}
-                      dataKey="assetValue"
-                      stroke="#0828BE"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#colorAssetValue)"
-                      name="Asset Value"
-                    />
-                    <Area
-                      type="monotone"
-                      stackId={1}
-                      dataKey="reserve"
-                      stroke="#ccc"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#colorReserve)"
-                      name="Reserve"
-                    />
-                  </AreaChart>
-                </StyledResponsiveContainer>
-              </div>
-            )}
-          </Stack>
-        </Card>
-      </Box>
-    </Box>
+          )}
+        </>
+      )}
+    </>
+  )
+
+  const graphElement = (
+    <Stack height="100%" gap="small">
+      <Shelf justifyContent="space-between" pt="medium" px={[0, 0, 'medium']}>
+        <SectionHeading>Pool Value</SectionHeading>
+        <Heading level="5" margin="none" color="#777777">
+          {assetDataWithToday.length > 0 && dateToYMD(assetDataWithToday[0].day)} - present
+        </Heading>
+      </Shelf>
+      {assetDataWithToday.length > 0 && (
+        <div style={{ flex: '1 0 auto' }}>
+          <StyledResponsiveContainer>
+            <AreaChart data={assetDataWithToday} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
+              <defs>
+                <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorReserve" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ccc" stopOpacity={0.2} />
+                  <stop offset="50%" stopColor="#ccc" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Tooltip content={<CustomTooltip />} offset={20} />
+              {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMD(val)} /> */}
+              <Area
+                type="monotone"
+                stackId={1}
+                dataKey="assetValue"
+                stroke="#0828BE"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorAssetValue)"
+                name="Asset Value"
+              />
+              <Area
+                type="monotone"
+                stackId={1}
+                dataKey="reserve"
+                stroke="#ccc"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorReserve)"
+                name="Reserve"
+              />
+            </AreaChart>
+          </StyledResponsiveContainer>
+        </div>
+      )}
+    </Stack>
+  )
+
+  const isMobile = useMedia({ below: 'medium' })
+
+  return isMobile ? (
+    <Stack as={Card} p="medium" gap="medium">
+      <div>{reserveElement}</div>
+      <Divider bleedX="medium" width="auto" />
+      <Box height="140px">{graphElement}</Box>
+    </Stack>
+  ) : (
+    <Shelf gap="medium" alignItems="stretch">
+      <Card p="medium" flex="1 1 420px" maxWidth="420px">
+        {reserveElement}
+      </Card>
+      <Card flex="1 1 480px" maxWidth="480px" height="200px">
+        {graphElement}
+      </Card>
+    </Shelf>
   )
 }
 

@@ -1,6 +1,5 @@
 import { Spinner } from '@centrifuge/axis-spinner'
 import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
@@ -20,7 +19,7 @@ import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool
-  tinlake: ITinlake
+  hidePageTitle?: boolean
 }
 
 type Tranche = 'junior' | 'senior'
@@ -93,8 +92,10 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      <PageTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
-      <Box direction="row" gap="medium">
+      {!props.hidePageTitle && (
+        <PageTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
+      )}
+      <Box direction="row" gap="medium" margin={props.hidePageTitle ? { top: '60px' } : {}}>
         <Box basis="2/3">
           <Card p="medium">
             {address && !onboarding.data ? (

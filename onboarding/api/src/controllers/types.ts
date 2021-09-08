@@ -1,6 +1,7 @@
 export type KycStatusLabel = 'none' | 'processing' | 'updates-required' | 'verified' | 'rejected' | 'expired'
 
 export interface KycStatus {
+  isEntity?: boolean
   isUsaTaxResident?: boolean
   url?: string
   status?: KycStatusLabel

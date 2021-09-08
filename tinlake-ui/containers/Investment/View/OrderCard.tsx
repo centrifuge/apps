@@ -1,7 +1,9 @@
 import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
-import { Box, Button, Heading } from 'grommet'
+import { Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { Button } from '../../../components/Button'
+import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -68,7 +70,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
   const disabled = status === 'pending' || status === 'unconfirmed' || epochData?.isBlockedState
 
   return (
-    <Box>
+    <div>
       {!confirmCancellation && (
         <Info>
           <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
@@ -116,9 +118,9 @@ const OrderCard: React.FC<Props> = (props: Props) => {
       )}
 
       {!epochData?.isBlockedState && !confirmCancellation && (
-        <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+        <ButtonGroup mt="medium">
           <Button primary label="Cancel Order" onClick={() => setConfirmCancellation(true)} disabled={disabled} />
-        </Box>
+        </ButtonGroup>
       )}
       {!confirmCancellation && epochData?.isBlockedState && (
         <Warning>
@@ -145,13 +147,13 @@ const OrderCard: React.FC<Props> = (props: Props) => {
             back to your wallet.
           </Warning>
 
-          <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+          <ButtonGroup mt="medium">
             <Button label="Back" onClick={() => setConfirmCancellation(false)} />
             <Button primary label="Confirm Cancellation" onClick={cancel} disabled={disabled} />
-          </Box>
+          </ButtonGroup>
         </>
       )}
-    </Box>
+    </div>
   )
 }
 

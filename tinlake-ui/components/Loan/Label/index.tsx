@@ -7,9 +7,10 @@ type MinimalAsset = Pick<Asset, 'status' | 'maturityDate'>
 
 interface Props {
   loan: MinimalAsset
+  dot?: boolean
 }
 
-const LoanLabel: React.FC<Props> = (props: Props) => {
+const LoanLabel: React.FC<Props> = ({ loan, dot }) => {
   const getLabelType = (l: MinimalAsset): LabelType => {
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
@@ -34,12 +35,16 @@ const LoanLabel: React.FC<Props> = (props: Props) => {
     return l.status
   }
 
-  return <StatusLabel type={getLabelType(props.loan)}>{getLabelText(props.loan)}</StatusLabel>
+  const type = getLabelType(loan)
+  const text = getLabelText(loan)
+
+  return dot ? <StatusDot type={type} aria-label={text} /> : <StatusLabel type={type}>{text}</StatusLabel>
 }
 
 export default LoanLabel
 
 type LabelType = 'plain' | 'info' | 'success' | 'warning' | 'error'
+
 const StatusLabel = styled.div<{ type: LabelType }>`
   background: ${(props) =>
     props.type === 'success'
@@ -60,4 +65,20 @@ const StatusLabel = styled.div<{ type: LabelType }>`
   font-weight: bold;
   width: 120px;
   text-align: center;
+`
+
+const StatusDot = styled.div<{ type: LabelType }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${(props) =>
+    props.type === 'success'
+      ? '#7ED321'
+      : props.type === 'warning'
+      ? '#fcba59'
+      : props.type === 'error'
+      ? '#F44E72'
+      : props.type === 'plain'
+      ? '#aaa'
+      : '#636363'};
 `

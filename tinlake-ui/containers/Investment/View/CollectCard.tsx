@@ -1,8 +1,11 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { Decimal } from 'decimal.js-light'
-import { Box, Button, Heading } from 'grommet'
+import { Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { Button } from '../../../components/Button'
+import { ButtonGroup } from '../../../components/ButtonGroup'
+import { Box } from '../../../components/Layout'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -58,7 +61,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
   const disabled = status === 'unconfirmed' || status === 'pending'
 
   return (
-    <Box>
+    <div>
       <Info>
         <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
           {addThousandsSeparators(toMaxPrecision(baseToDisplay(amount, 18), 4))}{' '}
@@ -82,7 +85,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
             : props.selectedPool?.metadata.currencySymbol || 'DAI'}{' '}
           at your convenience to transfer them to your ETH account.{' '}
           {remaining.gtn(0) && (
-            <Box margin={{ top: 'small' }}>
+            <Box mt="small">
               The remaining {addThousandsSeparators(toMaxPrecision(baseToDisplay(remaining, 18), 4))}{' '}
               {type === 'Redeem'
                 ? props.tranche === 'senior'
@@ -108,10 +111,10 @@ const CollectCard: React.FC<Props> = (props: Props) => {
         />
       </Info>
 
-      <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
+      <ButtonGroup mt="medium">
         <Button primary label="Collect" onClick={collect} disabled={disabled} />
-      </Box>
-    </Box>
+      </ButtonGroup>
+    </div>
   )
 }
 
