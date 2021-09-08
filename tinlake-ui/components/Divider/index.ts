@@ -1,10 +1,15 @@
 import styled from 'styled-components'
 import { Box } from '../Layout'
 
-export const Divider = styled(Box)`
-  margin: 0;
+const Hr = Box.withComponent('hr')
+
+export const Divider = styled(Hr)`
   border: none;
   border-top-width: 1px;
   border-top-style: solid;
   border-top-color: #eeeeee;
-`.withComponent('hr')
+`
+
+Divider.defaultProps = {
+  width: '100%',
+}

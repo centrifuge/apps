@@ -65,7 +65,7 @@
     "ethereum-blockies": "github:MyEtherWallet/blockies",
     "graphql": "15.0.0",
     "graphql-tag": "2.10.3",
-    "grommet": "2.15.0",
+    "grommet": "2.17.5",
     "grommet-icons": "^4.6.0",
     "lodash": "^4.17.21",
     "merkletreejs": "^0.2.12",

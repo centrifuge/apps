@@ -4,6 +4,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Pool, UpcomingPool } from '../../config'
 import { usePools } from '../../utils/usePools'
+import { Box, Shelf } from '../Layout'
 import { PoolCapacityLabel } from '../PoolCapacityLabel'
 import { PoolLink } from '../PoolLink'
 
@@ -22,13 +23,12 @@ const PageTitle: React.FC<Props> = (props: Props) => {
   const poolData = pools.data?.pools.find((p) => p.id === router.query.root)
 
   return (
-    <Wrapper>
-      {props.return && (
+    <Shelf justifyContent="space-between" mb="xlarge">
+      {props.return ? (
         <BackLink onClick={() => router.back()}>
           <LinkPrevious style={{ cursor: 'pointer' }} />
         </BackLink>
-      )}
-      {!props.return && (
+      ) : (
         <Icon
           src={
             props.pool?.metadata.media?.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'
@@ -36,13 +36,18 @@ const PageTitle: React.FC<Props> = (props: Props) => {
         />
       )}
       <Title>
-        {props.pool && (
-          <PoolName>
-            {props.pool.metadata.name}
-            <PoolLabel>{poolData && <PoolCapacityLabel pool={poolData} />}</PoolLabel>
-          </PoolName>
+        {props.pool ? (
+          <Shelf gap="xsmall">
+            <PoolName>{props.pool.metadata.name}</PoolName>
+            {poolData && (
+              <Box ml={['auto', 0]}>
+                <PoolCapacityLabel pool={poolData} />
+              </Box>
+            )}
+          </Shelf>
+        ) : (
+          <PoolName>Tinlake</PoolName>
         )}
-        {!props.pool && <PoolName>Tinlake</PoolName>}
         <PageName>
           {props.parentPage && props.parentPageHref && (
             <>
@@ -52,18 +57,12 @@ const PageTitle: React.FC<Props> = (props: Props) => {
           {props.page}
         </PageName>
       </Title>
-      {props.rightContent && <RightContent>{props.rightContent}</RightContent>}
-    </Wrapper>
+      {props.rightContent && <Box>{props.rightContent}</Box>}
+    </Shelf>
   )
 }
 
 export default PageTitle
-
-const Wrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  margin: 12px 0 36px 8px;
-`
 
 const BackLink = styled.div`
   margin: 14px 20px 0 18px;
@@ -76,19 +75,19 @@ const BackLink = styled.div`
 const Icon = styled.img`
   width: 40px;
   height: 40px;
-  margin: 4px 16px 0 0;
+  margin-right: 16px;
 `
 
 const Title = styled.div`
   display: flex;
   flex-direction: column;
-  width: 100%;
+  flex-grow: 1;
 `
 
 const PoolName = styled.h2`
   font-size: 13px;
   font-weight: bold;
-  margin: 4px 0 0 0;
+  margin: 0;
   color: #979797;
 `
 
@@ -111,14 +110,4 @@ const Arrow = styled.span`
   top: -1px;
   color: #979797;
   margin: 0 4px;
-`
-
-const PoolLabel = styled.div`
-  margin-left: 8px;
-  display: inline-block;
-`
-
-const RightContent = styled.div`
-  margin-left: auto;
-  flex: 1;
 `

@@ -21,7 +21,7 @@ export interface PoolTranche extends Tranche {
 
 export interface PoolData {
   junior: PoolTranche
-  senior?: PoolTranche
+  senior: PoolTranche
   maker?: any
   availableFunds: BN
   minJuniorRatio: BN
@@ -329,20 +329,20 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
 
   const data = await multicall<PoolData>(calls)
 
-  data.junior!.availableFunds = (data.reserve || new BN(0)).sub(data.senior!.availableFunds || new BN(0))
-  data.totalPendingInvestments = (data.senior!.pendingInvestments || new BN(0)).add(
-    data.junior!.pendingInvestments || new BN(0)
+  data.junior.availableFunds = (data.reserve || new BN(0)).sub(data.senior.availableFunds || new BN(0))
+  data.totalPendingInvestments = (data.senior.pendingInvestments || new BN(0)).add(
+    data.junior.pendingInvestments || new BN(0)
   )
 
-  data.senior!.address = pool.addresses['SENIOR_TOKEN']
-  data.junior!.address = pool.addresses['JUNIOR_TOKEN']
+  data.senior.address = pool.addresses['SENIOR_TOKEN']
+  data.junior.address = pool.addresses['JUNIOR_TOKEN']
 
-  const juniorRedemptionsCurrency = (data.junior?.pendingRedemptions || new BN(0))
-    .mul(data.junior?.tokenPrice || new BN(0))
+  const juniorRedemptionsCurrency = (data.junior.pendingRedemptions || new BN(0))
+    .mul(data.junior.tokenPrice || new BN(0))
     .div(Fixed27Base)
 
-  const seniorRedemptionsCurrency = (data.senior?.pendingRedemptions || new BN(0))
-    .mul(data.senior?.tokenPrice || new BN(0))
+  const seniorRedemptionsCurrency = (data.senior.pendingRedemptions || new BN(0))
+    .mul(data.senior.tokenPrice || new BN(0))
     .div(Fixed27Base)
 
   data.totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)

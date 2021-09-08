@@ -14,6 +14,10 @@ const baseTheme = {
     medium: 24,
     large: 32,
     xlarge: 40,
+    xxlarge: 64,
+  },
+  sizes: {
+    container: 1152,
   },
 }
 

@@ -198,10 +198,12 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
         <Stack flex="1 1 35%" justifyContent="space-between">
           <Card p="medium" mb="small">
             <Shelf justifyContent="space-between">
-              <Heading level="5" margin={{ bottom: 'xsmall', top: '0' }}>
+              <Shelf gap="xsmall" mb="xsmall">
                 <Box as={TokenLogo} src={`/static/DROP_final.svg`} display={['none', 'inline']} />
-                DROP Tranche
-              </Heading>
+                <Heading level="5" margin={'0'}>
+                  DROP Tranche
+                </Heading>
+              </Shelf>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: 'xsmall' }}>
                 <LoadingValue done={dropTotalValue !== undefined} height={22}>
                   {dropTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 0))}{' '}
@@ -265,10 +267,12 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
           <Card p="medium">
             <Shelf justifyContent="space-between">
-              <Heading level="5" margin={{ bottom: 'xsmall', top: '0' }}>
+              <Shelf gap="xsmall" mb="xsmall">
                 <Box as={TokenLogo} src={`/static/TIN_final.svg`} display={['none', 'inline']} />
-                TIN Tranche
-              </Heading>
+                <Heading level="5" margin={'0'}>
+                  TIN Tranche
+                </Heading>
+              </Shelf>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: 'xsmall' }}>
                 <LoadingValue done={tinTotalValue !== undefined} height={22}>
                   {tinTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 0))}{' '}
