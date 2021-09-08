@@ -1,4 +1,4 @@
-import { ITinlake, Loan } from '@centrifuge/tinlake-js'
+import { ITinlake, Loan, NFT } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { BigNumber } from 'ethers'
 import { useQuery } from 'react-query'
@@ -21,6 +21,33 @@ export interface SortableLoan extends Loan {
   repaysAggregatedAmountNum: number
 }
 
+interface MulticallData {
+  registry: string
+  tokenId: BN
+  principal: BN
+  interestRate: BN
+  debt: BN
+  threshold: BN
+  price: BN
+  scoreCard: {
+    thresholdRatio: BN
+    ceilingRatio: BN
+    interestRate: BN
+    recoveryRatePD: BN
+  }
+}
+
+export interface Asset extends MulticallData {
+  loanId: string
+  riskGroup: number
+  status?: string
+  nft?: NFT
+  borrower?: string
+  proxyOwner: BN
+  ownerOf: string
+  maturityDate?: number
+}
+
 export function useAsset(poolId: string, loanId: string) {
   const ipfsPools = useIpfsPools()
   const query = useQuery(['asset', poolId, loanId], () => {
@@ -32,11 +59,11 @@ export function useAsset(poolId: string, loanId: string) {
   return query
 }
 
-async function getAsset(tinlake: ITinlake, loanId: string) {
+async function getAsset(tinlake: ITinlake, loanId: string): Promise<Asset> {
   if (loanId === '0') throw new Error('Loan not found')
 
   // TODO: load riskGroup using multicall
-  const riskGroup = (await tinlake.getRiskGroup(loanId)).toString()
+  const riskGroup = (await tinlake.getRiskGroup(loanId)).toNumber()
 
   const toBN = (val: BigNumber) => new BN(val.toString())
 
@@ -44,7 +71,7 @@ async function getAsset(tinlake: ITinlake, loanId: string) {
     {
       target: tinlake.contractAddresses.SHELF!,
       call: ['shelf(uint256)(address,uint256)', loanId],
-      returns: [[`registry`], [`tokenId`]],
+      returns: [[`registry`], [`tokenId`, toBN]],
     },
     {
       target: tinlake.contractAddresses.FEED!,
@@ -54,7 +81,7 @@ async function getAsset(tinlake: ITinlake, loanId: string) {
     {
       target: tinlake.contractAddresses.PILE!,
       call: ['rates(uint256)(uint256,uint256,uint256,uint48,uint256)', riskGroup],
-      returns: [[`rates.pie`], [`rates.chi`], [`rates.interestRate`], [`rates.lastUpdated`], [`rates.fixedRate`]],
+      returns: [[`rates.pie`], [`rates.chi`], [`interestRate`, toBN], [`rates.lastUpdated`], [`rates.fixedRate`]],
     },
     {
       target: tinlake.contractAddresses.PILE!,
@@ -78,13 +105,16 @@ async function getAsset(tinlake: ITinlake, loanId: string) {
     },
   ]
 
-  const [multicallData, ownerOf] = await Promise.all([multicall<Loan>(calls), tinlake.getOwnerOfLoan(loanId)])
+  const [multicallData, ownerOf, proxyOwner] = await Promise.all([
+    multicall<MulticallData>(calls),
+    tinlake.getOwnerOfLoan(loanId),
+    tinlake.getProxyOwnerByLoan(loanId),
+  ])
 
   // TODO: load data using multicall
-  const [ownerOfCollateral, proxy, proxyOwner, nftData] = await Promise.all([
+  const [ownerOfCollateral, proxy, nftData] = await Promise.all([
     tinlake.getOwnerOfCollateral(multicallData.registry, multicallData.tokenId.toString()),
     Apollo.getProxyOwner(ownerOf.toString().toLowerCase()),
-    tinlake.getProxyOwnerByLoan(loanId),
     getNFT(multicallData.registry, tinlake, multicallData.tokenId.toString()),
   ])
 
@@ -99,13 +129,17 @@ async function getAsset(tinlake: ITinlake, loanId: string) {
 
   const borrower = proxy?.owner ? web3.toChecksumAddress(proxy.owner) : undefined
 
-  const nft = (nftData && (nftData as any).nft) || {}
+  const nft = 'nft' in nftData ? nftData.nft : undefined
 
   return {
+    loanId,
+    riskGroup,
+    status,
     nft,
     borrower,
     proxyOwner,
     ownerOf,
+    maturityDate: nft?.maturityDate,
     ...multicallData,
-  } as Loan
+  }
 }

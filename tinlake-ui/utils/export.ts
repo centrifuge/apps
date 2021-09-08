@@ -1,7 +1,7 @@
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { SortableLoan } from '../ducks/loans'
 import { dateToYMDTechnical } from './date'
+import { SortableLoan } from './useAssets'
 
 export const saveAsCSV = (loans: SortableLoan[]) => {
   const rows = [

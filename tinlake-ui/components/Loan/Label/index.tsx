@@ -1,14 +1,16 @@
-import { Loan } from '@centrifuge/tinlake-js'
 import * as React from 'react'
 import styled from 'styled-components'
 import { daysBetween } from '../../../utils/date'
+import { Asset } from '../../../utils/useAsset'
+
+type MinimalAsset = Pick<Asset, 'status' | 'maturityDate'>
 
 interface Props {
-  loan: Loan
+  loan: MinimalAsset
 }
 
 const LoanLabel: React.FC<Props> = (props: Props) => {
-  const getLabelType = (l: Loan): LabelType => {
+  const getLabelType = (l: MinimalAsset): LabelType => {
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
     const days = daysBetween(today.getTime() / 1000, Number(l.maturityDate))
@@ -20,7 +22,7 @@ const LoanLabel: React.FC<Props> = (props: Props) => {
     return 'success'
   }
 
-  const getLabelText = (l: Loan) => {
+  const getLabelText = (l: MinimalAsset) => {
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
     const days = daysBetween(today.getTime() / 1000, Number(l.maturityDate))

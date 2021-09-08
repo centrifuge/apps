@@ -1,5 +1,5 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
-import { baseToDisplay, feeToInterestRate, ITinlake, Loan } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button, Table, TableBody, TableCell, TableRow } from 'grommet'
 import { useRouter } from 'next/router'
@@ -7,21 +7,20 @@ import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { Pool } from '../../../config'
-import { AuthState } from '../../../ducks/auth'
 import { createTransaction, TransactionProps } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { dateToYMD } from '../../../utils/date'
 import { getAddressLink } from '../../../utils/etherscanLinkGenerator'
 import { toPrecision } from '../../../utils/toPrecision'
+import { Asset } from '../../../utils/useAsset'
 import { Card } from '../../Card'
 import { Stack } from '../../Layout'
 import { LoadingValue } from '../../LoadingValue'
 import LoanLabel from '../Label'
 
 interface Props extends TransactionProps {
-  loan: Loan
+  loan?: Asset
   tinlake: ITinlake
-  auth?: AuthState
   poolConfig: Pool
 }
 
@@ -38,7 +37,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
   const availableForFinancing = props.loan?.debt.isZero() ? props.loan?.principal || new BN(0) : new BN(0)
 
   const proxyTransfer = async () => {
-    if (!props.loan.borrower) throw new Error('Borrower field missing')
+    if (!props.loan?.borrower) throw new Error('Borrower field missing')
 
     await props.createTransaction(`Transfer currency from proxy`, 'proxyTransferCurrency', [
       props.tinlake,
@@ -84,7 +83,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
                 <TableCell scope="row">Outstanding</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
                   <LoadingValue done={props.loan?.debt !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(props.loan?.debt || 0, 18), 2))}{' '}
+                    {addThousandsSeparators(toPrecision(baseToDisplay(props.loan?.debt || new BN(0), 18), 2))}{' '}
                     {props.poolConfig.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </TableCell>
@@ -116,7 +115,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
                 <TableCell scope="row">Financing fee</TableCell>
                 <TableCell style={{ textAlign: 'end' }}>
                   <LoadingValue done={props.loan?.interestRate !== undefined}>
-                    {toPrecision(feeToInterestRate(props.loan?.interestRate || 0), 2)} %
+                    {toPrecision(feeToInterestRate(props.loan?.interestRate || new BN(0)), 2)} %
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -156,4 +155,4 @@ const LoanData: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { createTransaction })(LoanData)
+export default connect(null, { createTransaction })(LoanData)
