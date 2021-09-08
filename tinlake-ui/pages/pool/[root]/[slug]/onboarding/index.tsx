@@ -43,7 +43,7 @@ const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
                     tinlake={tinlake}
                     render={() => (
                       <Box>
-                        <OnboardingSteps activePool={pool} tinlake={tinlake} />
+                        <OnboardingSteps activePool={pool} />
                       </Box>
                     )}
                   />

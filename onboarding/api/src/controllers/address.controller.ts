@@ -42,6 +42,8 @@ export class AddressController {
     if (kyc) {
       let status: KycStatusLabel = kyc.status
 
+      const isEntity = user.entityName?.length > 0
+
       if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) {
         const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
 
@@ -68,10 +70,13 @@ export class AddressController {
         }
       }
 
-      // Filter profile agreements by country
+      // Filter profile agreements by country & investor type
       const profileAgreements = pool.profile?.agreements
         .filter((pa: ProfileAgreement) => {
           return !pa.country || (kyc.usaTaxResident ? pa.country === 'us' : pa.country === 'non-us')
+        })
+        .filter((pa: ProfileAgreement) => {
+          return !pa.target || (isEntity ? pa.target === 'entity' : pa.target === 'individual')
         })
         .map((pa: ProfileAgreement) => {
           return {
@@ -82,7 +87,7 @@ export class AddressController {
           }
         })
 
-      // Retrieve
+      // Retrieve status for agreements
       const agreementLinks = await this.agreementRepo.getStatusForProfileAgreements(
         user.id,
         params.poolId,
@@ -116,6 +121,7 @@ export class AddressController {
         kyc: {
           status,
           isWhitelisted,
+          isEntity,
           url: authorizationLink,
           isUsaTaxResident: kyc.usaTaxResident,
           accredited: kyc.accredited,
