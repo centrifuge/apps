@@ -23,4 +23,5 @@ yarn-error.log
 .env*.local
 .env*
 !.env.kovan-example
+!.env.goerli-example
 !.env.mainnet-example
