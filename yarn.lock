@@ -2233,16 +2233,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@centrifuge/axis-display-field@npm:0.4.2-develop.109":
-  version: 0.4.2-develop.109
-  resolution: "@centrifuge/axis-display-field@npm:0.4.2-develop.109"
+"@centrifuge/axis-display-field@npm:0.4.2-develop.7a59cce.142+7a59cce":
+  version: 0.4.2-develop.7a59cce.142
+  resolution: "@centrifuge/axis-display-field@npm:0.4.2-develop.7a59cce.142"
   peerDependencies:
     "@centrifuge/axis-utils": ">= 0.x"
     grommet: 2.7.x
     react: ">= 16.6.1"
     react-dom: ">= 16.6.1"
     styled-components: ">= 4.x"
-  checksum: bcf7ffd016ab8a2749e99f5e241c2f27ab5486e38797e634d9a0c774448c1b7c2c1c0f00bdd1c8fb450c699832a3df44100a02f77f3579354f3b5fbcd7233912
+  checksum: ced943c4fb5102bb490c6b5025e49772cc97bb6538cd6ddcd183e54d099264557565fca3e60f21bf0c19b7cea9e806537511cc5bc325f67bdce966eff6271031
   languageName: node
   linkType: hard
 
@@ -2768,7 +2768,7 @@ __metadata:
   dependencies:
     "@babel/plugin-transform-runtime": 7.10.5
     "@babel/preset-typescript": 7.10.4
-    "@centrifuge/axis-display-field": 0.4.2-develop.109
+    "@centrifuge/axis-display-field": 0.4.2-develop.7a59cce.142+7a59cce
     "@centrifuge/axis-modal": 0.1.1-develop.57
     "@centrifuge/axis-ratio-bar": 0.4.2-develop.137
     "@centrifuge/axis-spinner": 0.4.2-develop.109
