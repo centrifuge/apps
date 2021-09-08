@@ -4,6 +4,7 @@ import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'gro
 import * as React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { Area, AreaChart, Tooltip } from 'recharts'
+import { Card } from '../../../components/Card'
 import {
   ChartTooltip,
   ChartTooltipColor,
@@ -13,6 +14,7 @@ import {
   ChartTooltipValue,
   StyledResponsiveContainer,
 } from '../../../components/Chart/styles'
+import { Stack } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
@@ -96,14 +98,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   return (
     <Box margin={{ bottom: 'medium' }}>
       <Box direction="row" justify="between" gap="medium" wrap>
-        <Box
-          pad="medium"
-          elevation="small"
-          round="xsmall"
-          margin={{ bottom: 'medium' }}
-          style={{ flex: '1 1 420px', maxWidth: '420px' }}
-          background="white"
-        >
+        <Card p="medium" mb="medium" flex="1 1 420px" maxWidth="420px">
           {!showMaxReserveForm && (
             <>
               <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
@@ -238,63 +233,60 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
               selectedPool={props.selectedPool}
             />
           )}
-        </Box>
+        </Card>
 
-        <Box
-          height="200px"
-          elevation="small"
-          round="xsmall"
-          margin={{ bottom: 'medium' }}
-          style={{ flex: '1 1 480px', maxWidth: '480px' }}
-          background="white"
-        >
-          <Box direction="row" justify="between">
-            <Heading level="5" margin={{ top: 'medium', left: 'medium', bottom: '0' }}>
-              Pool Value
-            </Heading>
-            <Heading level="5" margin={{ top: 'medium', right: 'medium' }} color="#9f9f9f">
-              {assetDataWithToday.length > 0 && dateToYMD(assetDataWithToday[0].day)} - present
-            </Heading>
-          </Box>
-          {assetDataWithToday.length > 0 && (
-            <StyledResponsiveContainer>
-              <AreaChart data={assetDataWithToday} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
-                <defs>
-                  <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorReserve" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ccc" stopOpacity={0.2} />
-                    <stop offset="50%" stopColor="#ccc" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <Tooltip content={<CustomTooltip />} offset={20} />
-                {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMD(val)} /> */}
-                <Area
-                  type="monotone"
-                  stackId={1}
-                  dataKey="assetValue"
-                  stroke="#0828BE"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorAssetValue)"
-                  name="Asset Value"
-                />
-                <Area
-                  type="monotone"
-                  stackId={1}
-                  dataKey="reserve"
-                  stroke="#ccc"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorReserve)"
-                  name="Reserve"
-                />
-              </AreaChart>
-            </StyledResponsiveContainer>
-          )}
-        </Box>
+        <Card mb="medium" flex="1 1 480px" maxWidth="480px" height="200px">
+          <Stack height="100%">
+            <Box direction="row" justify="between">
+              <Heading level="5" margin={{ top: 'medium', left: 'medium', bottom: '0' }}>
+                Pool Value
+              </Heading>
+              <Heading level="5" margin={{ top: 'medium', right: 'medium', bottom: '0' }} color="#9f9f9f">
+                {assetDataWithToday.length > 0 && dateToYMD(assetDataWithToday[0].day)} - present
+              </Heading>
+            </Box>
+            {assetDataWithToday.length > 0 && (
+              <div style={{ flex: '1 0 auto' }}>
+                <StyledResponsiveContainer>
+                  <AreaChart data={assetDataWithToday} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
+                    <defs>
+                      <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorReserve" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ccc" stopOpacity={0.2} />
+                        <stop offset="50%" stopColor="#ccc" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <Tooltip content={<CustomTooltip />} offset={20} />
+                    {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMD(val)} /> */}
+                    <Area
+                      type="monotone"
+                      stackId={1}
+                      dataKey="assetValue"
+                      stroke="#0828BE"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorAssetValue)"
+                      name="Asset Value"
+                    />
+                    <Area
+                      type="monotone"
+                      stackId={1}
+                      dataKey="reserve"
+                      stroke="#ccc"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorReserve)"
+                      name="Reserve"
+                    />
+                  </AreaChart>
+                </StyledResponsiveContainer>
+              </div>
+            )}
+          </Stack>
+        </Card>
       </Box>
     </Box>
   )

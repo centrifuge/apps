@@ -29,7 +29,7 @@ export const useTrancheYield = (poolId?: string | undefined) => {
 
   return React.useMemo(() => {
     if (pools.data?.pools && poolId) {
-      const poolData = pools.data.pools.find((singlePool) => singlePool.id === poolId)
+      const poolData = pools.data.pools.find((singlePool) => singlePool.id.toLowerCase() === poolId.toLowerCase())
       if (poolData?.seniorYield30Days && poolData?.juniorYield30Days) {
         return {
           dropYield: toPrecision(baseToDisplay(poolData.seniorYield30Days.muln(100), 27), 2),

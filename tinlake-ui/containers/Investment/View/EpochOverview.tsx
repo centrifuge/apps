@@ -7,6 +7,7 @@ import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { SolverResult } from '../../../../tinlake.js/dist/services/solver/solver'
+import { Card } from '../../../components/Card'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Tooltip } from '../../../components/Tooltip'
 import { Pool } from '../../../config'
@@ -128,13 +129,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box
-      background="white"
-      elevation="small"
-      pad={{ horizontal: '24px', bottom: 'xsmall' }}
-      round="xsmall"
-      margin={{ bottom: 'medium' }}
-    >
+    <Card interactive px={24} pb="xsmall">
       <Box
         direction="row"
         focusIndicator={false}
@@ -500,7 +495,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
           )}
         </TableWrapper>
       )}
-    </Box>
+    </Card>
   )
 }
 

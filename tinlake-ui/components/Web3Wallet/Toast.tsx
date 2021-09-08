@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { ThemeProps as StyledThemeProps, withTheme } from 'styled-components'
 import { WalletTransaction } from '../../ducks/transactions'
 import { Spinner } from './Spinner'
 import { Action, Content, Description, FailedReason, Icon, MainToastCard, Title, ToastCard } from './styles'
@@ -26,13 +25,9 @@ const statusConfig = {
   pending: { title: 'Transaction pending', color: '#999', background: '#fff', icon: 'spinner' },
 }
 
-interface ThemeProps {
-  global: any
-}
+interface Props extends WalletTransaction {}
 
-interface Props extends WalletTransaction, StyledThemeProps<ThemeProps> {}
-
-const ToastWrapperInner: React.FC<Props> = (props: Props) => {
+export const ToastWrapper: React.FC<Props> = (props: Props) => {
   const config = statusConfig[props.status]
 
   return (
@@ -59,5 +54,3 @@ const ToastWrapperInner: React.FC<Props> = (props: Props) => {
     </ToastCard>
   )
 }
-
-export const ToastWrapper = withTheme(ToastWrapperInner)

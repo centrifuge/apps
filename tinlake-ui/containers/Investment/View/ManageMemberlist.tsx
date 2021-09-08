@@ -2,6 +2,7 @@ import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, FormField, Heading, TextInput } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { Card } from '../../../components/Card'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { usePool } from '../../../utils/usePool'
 const web3 = require('web3-utils')
@@ -84,14 +85,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
     <>
       {pool.data && (
         <Box direction="row" gap="medium">
-          <Box
-            width="medium"
-            pad="medium"
-            elevation="small"
-            round="xsmall"
-            margin={{ bottom: 'medium' }}
-            background="white"
-          >
+          <Card width="400px" p="medium" mb="medium">
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
                 Add/Remove TIN member
@@ -126,16 +120,9 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
                 disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
               />
             </Box>
-          </Box>
+          </Card>
 
-          <Box
-            width="medium"
-            pad="medium"
-            elevation="small"
-            round="xsmall"
-            margin={{ bottom: 'medium' }}
-            background="white"
-          >
+          <Card width="400px" p="medium" mb="medium">
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
                 Add/Remove DROP member
@@ -170,7 +157,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
                 disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
               />
             </Box>
-          </Box>
+          </Card>
         </Box>
       )}
     </>

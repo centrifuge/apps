@@ -7,6 +7,7 @@ import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 import Alert from '../../components/Alert'
+import { Card } from '../../components/Card'
 import { LoadingValue } from '../../components/LoadingValue'
 import { Pool } from '../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
@@ -113,7 +114,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
 
   return (
     <Box direction="row" width="100%" gap="medium">
-      <Box basis="1/2" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
+      <Card flexBasis="50%" p="medium" mb="medium">
         <Table margin={{ bottom: 'medium' }}>
           <TableBody>
             <TableRow style={{ fontWeight: 'bold' }}>
@@ -295,8 +296,8 @@ const Liquidity: React.FC<Props> = (props: Props) => {
             </TableBody>
           </Table>
         )}
-      </Box>
-      <Box basis="1/2" pad="medium" elevation="small" round="xsmall" margin={{ bottom: 'medium' }} background="white">
+      </Card>
+      <Card flexBasis="50%" p="medium" mb="medium">
         {isMakerIntegrated && (
           <Box margin={{ top: '0', bottom: 'medium' }}>
             <TokenInput
@@ -348,7 +349,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
             }
           />
         </Box>
-      </Box>
+      </Card>
     </Box>
   )
 }

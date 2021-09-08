@@ -17,7 +17,9 @@ import config, { Pool } from '../../config'
 import { ensureAuthed } from '../../ducks/auth'
 import { useTrancheYield } from '../../utils/hooks'
 import { usePool } from '../../utils/usePool'
+import { Card } from '../Card'
 import InvestAction from '../InvestAction'
+import { Shelf } from '../Layout'
 import { Tooltip } from '../Tooltip'
 
 interface Props {
@@ -103,78 +105,75 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box margin={{ bottom: 'large' }}>
-      <Card
-        elevation="small"
-        round="xsmall"
-        background="white"
-        direction="row"
-        justify="between"
-        gap="medium"
-        pad="medium"
-        style={{ zIndex: 3 }}
-      >
-        <HeaderBox width="400px">
-          <Heading level="5">{props.selectedPool.metadata.asset}</Heading>
-          <Type>Asset type</Type>
-        </HeaderBox>
-        <HeaderBox>
-          <Heading level="4">{props.selectedPool.metadata.assetMaturity}</Heading>
-          <Type>
-            <Tooltip id="assetMaturity" underline>
-              Asset maturity
-            </Tooltip>
-          </Type>
-        </HeaderBox>
-        <HeaderBox>
-          <Heading level="4">
-            <TokenLogo src={`/static/DROP_final.svg`} />
-            {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
-              ? dropYield
-              : toPrecision(feeToInterestRate(dropRate || '0'), 2)}
-            <Unit>%</Unit>
-          </Heading>
-          <Box>
+    <div>
+      <Card p="small" position="relative" zIndex={1}>
+        <Shelf
+          gap={[0, 0, 'medium']}
+          flexDirection={['column', 'column', 'row']}
+          alignItems={['flex-start', 'flex-start', 'center']}
+        >
+          <HeaderBox width="400px">
+            <Heading level="5">{props.selectedPool.metadata.asset}</Heading>
+            <Type>Asset type</Type>
+          </HeaderBox>
+          <HeaderBox>
+            <Heading level="4">{props.selectedPool.metadata.assetMaturity}</Heading>
             <Type>
-              {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) && (
-                <Tooltip id="dropApy" underline>
-                  DROP APY (30 days)
-                </Tooltip>
-              )}
-              {!(dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))) && (
-                <Tooltip id="dropApr" underline>
-                  Fixed DROP rate (APR)
-                </Tooltip>
-              )}
+              <Tooltip id="assetMaturity" underline>
+                Asset maturity
+              </Tooltip>
             </Type>
-          </Box>
-        </HeaderBox>
-        <HeaderBox width="220px" style={{ borderRight: 'none' }}>
-          <Heading level="4">
-            <TokenLogo src={`/static/currencies/${props.selectedPool.metadata.currencySymbol}.svg`} />
-            {addThousandsSeparators(
-              toPrecision(
-                baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18),
-                0
-              )
+          </HeaderBox>
+          <HeaderBox>
+            <Heading level="4">
+              <TokenLogo src={`/static/DROP_final.svg`} />
+              {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
+                ? dropYield
+                : toPrecision(feeToInterestRate(dropRate || '0'), 2)}
+              <Unit>%</Unit>
+            </Heading>
+            <Box>
+              <Type>
+                {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) && (
+                  <Tooltip id="dropApy" underline>
+                    DROP APY (30 days)
+                  </Tooltip>
+                )}
+                {!(dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))) && (
+                  <Tooltip id="dropApr" underline>
+                    Fixed DROP rate (APR)
+                  </Tooltip>
+                )}
+              </Type>
+            </Box>
+          </HeaderBox>
+          <HeaderBox width="220px" style={{ borderRight: 'none' }}>
+            <Heading level="4">
+              <TokenLogo src={`/static/currencies/${props.selectedPool.metadata.currencySymbol}.svg`} />
+              {addThousandsSeparators(
+                toPrecision(
+                  baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18),
+                  0
+                )
+              )}
+              <Unit>{props.selectedPool.metadata.currencySymbol}</Unit>
+            </Heading>
+            <Type>Pool Value</Type>
+          </HeaderBox>
+          <HeaderBox style={{ borderRight: 'none' }}>
+            {'addresses' in props.selectedPool &&
+            config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
+              <Anchor>
+                <Button label="Invest" primary onClick={invest} />
+              </Anchor>
+            ) : (
+              <InvestAction pool={props.selectedPool} />
             )}
-            <Unit>{props.selectedPool.metadata.currencySymbol}</Unit>
-          </Heading>
-          <Type>Pool Value</Type>
-        </HeaderBox>
-        <HeaderBox style={{ borderRight: 'none' }}>
-          {'addresses' in props.selectedPool &&
-          config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
-            <Anchor>
-              <Button label="Invest" primary onClick={invest} />
-            </Anchor>
-          ) : (
-            <InvestAction pool={props.selectedPool} />
-          )}
-        </HeaderBox>
+          </HeaderBox>
+        </Shelf>
       </Card>
       {isMakerIntegrated && (
-        <MakerBox round="xsmall" gap="small" elevation="small" background="#1AAB9B">
+        <MakerBox interactive background="#1AAB9B">
           <Box direction="row" wrap style={{ gap: '16px' }}>
             <Box direction="row" style={{ flex: '100 1 500px' }}>
               <MakerLogo>
@@ -306,17 +305,11 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           )}
         </MakerBox>
       )}
-    </Box>
+    </div>
   )
 }
 
 export default OverviewHeader
-
-const Card = styled(Box)`
-  @media (max-width: 899px) {
-    flex-direction: column;
-  }
-`
 
 const HeaderBox = styled(Box)<{ width?: string }>`
   text-align: center;
@@ -371,7 +364,7 @@ const Unit = styled.span`
   margin-left: 4px;
   color: #333;
 `
-const MakerBox = styled(Box)`
+const MakerBox = styled(Card)`
   color: #fff;
   position: relative;
   top: -10px;

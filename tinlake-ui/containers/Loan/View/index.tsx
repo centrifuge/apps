@@ -3,6 +3,8 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import Alert from '../../../components/Alert'
+import { Card } from '../../../components/Card'
+import { Shelf } from '../../../components/Layout'
 import LoanData from '../../../components/Loan/Data'
 import NftData from '../../../components/NftData'
 import { Pool } from '../../../config'
@@ -59,19 +61,12 @@ const LoanView: React.FC<Props> = (props: Props) => {
               <Heading level="5" margin={{ top: 'large', bottom: 'medium' }}>
                 Finance / Repay{' '}
               </Heading>
-              <Box
-                width="80%"
-                justify="between"
-                gap="medium"
-                pad="medium"
-                elevation="small"
-                round="xsmall"
-                background="white"
-                direction="row"
-              >
-                <LoanBorrow loan={loan} tinlake={tinlake} poolConfig={props.poolConfig} />
-                <LoanRepay loan={loan} tinlake={tinlake} poolConfig={props.poolConfig} />
-              </Box>
+              <Card width="80%" p="medium">
+                <Shelf gap="medium" justifyContent="space-between" alignItems="flex-start">
+                  <LoanBorrow loan={loan} tinlake={tinlake} poolConfig={props.poolConfig} />
+                  <LoanRepay loan={loan} tinlake={tinlake} poolConfig={props.poolConfig} />
+                </Shelf>
+              </Card>
             </>
           )}
         </Box>
