@@ -8,7 +8,7 @@ type Return = [string] | [string, PostProcess]
 
 export interface Call {
   target: string
-  call: [string, ...any]
+  call: (string | number)[]
   returns: Return[]
 }
 
