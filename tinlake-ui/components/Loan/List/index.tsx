@@ -1,7 +1,7 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { baseToDisplay, bnToHex, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, DataTable, Text } from 'grommet'
+import { DataTable, Text } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import styled from 'styled-components'
@@ -12,8 +12,10 @@ import { dateToYMD } from '../../../utils/date'
 import { hexToInt } from '../../../utils/etherscanLinkGenerator'
 import { saveAsCSV } from '../../../utils/export'
 import { useMedia } from '../../../utils/useMedia'
+import { ButtonGroup } from '../../ButtonGroup'
 import { Card } from '../../Card'
 import ChevronRight from '../../ChevronRight'
+import { Box } from '../../Layout'
 import LoanLabel from '../Label'
 
 interface Props {
@@ -71,7 +73,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
               ),
             },
             {
-              header: <HeaderCell text={'Financing Fee'}></HeaderCell>,
+              header: 'Financing Fee',
               property: 'interestRateNum',
               align: 'end',
               sortable: false,
@@ -151,7 +153,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
               ),
             },
             {
-              header: <HeaderCell text={'Financing Fee'}></HeaderCell>,
+              header: 'Financing Fee',
               property: 'interestRateNum',
               align: 'end',
               render: (l: SortableLoan) =>
@@ -185,7 +187,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
   return (
     <>
       <StyledCard bleedX={['12px', 0]} width="auto" pt="xsmall" mb="medium" borderRadius={[0, '8px']}>
-        {props.loans.length > 0 && (
+        {props.loans.length > 0 ? (
           <DataTable
             style={{ tableLayout: 'auto' }}
             data={props.loans}
@@ -195,23 +197,20 @@ const LoanList: React.FC<Props> = (props: Props) => {
             onClickRow={clickRow as any}
             columns={columns as any}
           />
+        ) : (
+          <Box px="small" pb="small" pt="xsmall">
+            <Text>No assets have been originated.</Text>
+          </Box>
         )}
-        {props.loans.length === 0 && <Text margin="medium">No assets have been originated.</Text>}
       </StyledCard>
       {'export' in router.query && (
-        <Box justify="end">
+        <ButtonGroup>
           <ExportLink onClick={() => saveAsCSV(props.loans)}>Export Asset List as CSV</ExportLink>
-        </Box>
+        </ButtonGroup>
       )}
     </>
   )
 }
-
-const HeaderCell = (props: { text: string }) => (
-  <Box pad={{ left: 'small' }}>
-    <Text>{props.text}</Text>
-  </Box>
-)
 
 const StyledCard = styled(Card)`
   thead {

@@ -229,7 +229,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
 
   const graphElement = (
     <Stack height="100%" gap="small">
-      <Shelf justifyContent="space-between" pt="medium" px={[0, 0, 'medium']}>
+      <Shelf justifyContent="space-between">
         <SectionHeading>Pool Value</SectionHeading>
         <Heading level="5" margin="none" color="#777777">
           {assetDataWithToday.length > 0 && dateToYMD(assetDataWithToday[0].day)} - present
@@ -291,7 +291,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
       <Card p="medium" flex="1 1 420px" maxWidth="420px">
         {reserveElement}
       </Card>
-      <Card flex="1 1 480px" maxWidth="480px" height="200px">
+      <Card p="medium" flex="1 1 480px" maxWidth="480px" height="200px">
         {graphElement}
       </Card>
     </Shelf>
