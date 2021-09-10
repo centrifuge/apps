@@ -59,6 +59,7 @@ export function useAsset(poolId: string, loanId: string) {
     },
     {
       refetchInterval: 60000,
+      staleTime: 60000,
     }
   )
 
