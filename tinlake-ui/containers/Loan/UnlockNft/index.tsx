@@ -1,8 +1,9 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { ensureAuthed } from '../../../ducks/auth'
+import { AuthState, ensureAuthed } from '../../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { Asset } from '../../../utils/useAsset'
 
@@ -10,6 +11,7 @@ type MinimalAsset = Pick<Asset, 'loanId' | 'ownerOf' | 'status'>
 
 interface Props extends TransactionProps {
   asset: MinimalAsset
+  auth: AuthState
   refetch: () => void
   tinlake: ITinlake
   ensureAuthed: () => Promise<void>
@@ -17,6 +19,15 @@ interface Props extends TransactionProps {
 
 const UnlockNft: React.FC<Props> = (props: Props) => {
   const [closeStatus, , setCloseTxId] = useTransactionState()
+
+  const router = useRouter()
+
+  const hasBorrowerPermissions =
+    (props.asset &&
+      props.auth?.proxies
+        ?.map((proxy: string) => proxy.toLowerCase())
+        .includes(props.asset.ownerOf.toString().toLowerCase())) ||
+    'borrower' in router.query
 
   const close = async () => {
     await props.ensureAuthed!()
@@ -36,7 +47,7 @@ const UnlockNft: React.FC<Props> = (props: Props) => {
 
   return (
     <Box>
-      {props.asset.status! === 'NFT locked' && (
+      {hasBorrowerPermissions && props.asset.status! === 'NFT locked' && (
         <Button
           onClick={close}
           secondary

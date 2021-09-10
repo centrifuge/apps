@@ -56,25 +56,26 @@ const LoanPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
                 render={(tinlake) => (
-                  <>
-                    <PageTitle
-                      pool={pool}
-                      page={`Asset ${assetId}`}
-                      parentPage="Assets"
-                      parentPageHref="/assets"
-                      rightContent={asset && <UnlockNft tinlake={tinlake} asset={asset} refetch={refetchAsset} />}
-                    />
-
-                    <Auth
-                      tinlake={tinlake}
-                      render={(auth) => (
+                  <Auth
+                    tinlake={tinlake}
+                    render={(auth) => (
+                      <>
+                        <PageTitle
+                          pool={pool}
+                          page={`Asset ${assetId}`}
+                          parentPage="Assets"
+                          parentPageHref="/assets"
+                          rightContent={
+                            asset && <UnlockNft tinlake={tinlake} auth={auth} asset={asset} refetch={refetchAsset} />
+                          }
+                        />
                         <Box>
                           {assetId && <LoanView auth={auth} tinlake={tinlake} poolConfig={pool} loanId={assetId} />}
                           {!assetId && <div>Loading...</div>}
                         </Box>
-                      )}
-                    />
-                  </>
+                      </>
+                    )}
+                  />
                 )}
               />
             </Box>
