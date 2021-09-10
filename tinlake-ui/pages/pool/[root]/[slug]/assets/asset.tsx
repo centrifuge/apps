@@ -27,13 +27,7 @@ const LoanPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
   const { assetId }: { assetId: string } = router.query as any
 
   const poolId = pool.addresses.ROOT_CONTRACT
-  const { data: asset, refetch: refetchAsset, error } = useAsset(poolId, assetId)
-
-  React.useEffect(() => {
-    if (error) {
-      refetchAsset()
-    }
-  }, [error])
+  const { data: asset, refetch: refetchAsset } = useAsset(poolId, assetId)
 
   return (
     <IpfsPoolsProvider value={ipfsPools}>
