@@ -4,7 +4,7 @@ import { BigNumber } from 'ethers'
 import { useQuery } from 'react-query'
 import { useIpfsPools } from '../components/IpfsPoolsProvider'
 import Apollo from '../services/apollo'
-import { initTinlake } from '../services/tinlake'
+import { createTinlakeInstance } from '../services/tinlake'
 import { getNFT } from '../services/tinlake/actions'
 import { Call, multicall } from './multicall'
 const web3 = require('web3-utils')
@@ -54,7 +54,8 @@ export function useAsset(poolId: string, loanId: string) {
     ['asset', poolId, loanId],
     () => {
       const pool = ipfsPools.active.find((p) => p.addresses.ROOT_CONTRACT.toLowerCase() === poolId.toLowerCase())
-      const tinlake = initTinlake({ addresses: pool?.addresses, contractConfig: pool?.contractConfig })
+      if (!pool) return
+      const tinlake = createTinlakeInstance({ addresses: pool.addresses, contractConfig: pool.contractConfig })
       return getAsset(tinlake, loanId)
     },
     {

@@ -58,21 +58,6 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
-  const [closeStatus, , setCloseTxId] = useTransactionState()
-
-  const close = async () => {
-    await props.ensureAuthed!()
-
-    const txId = await props.createTransaction(`Close Asset ${props.loan.loanId}`, 'close', [props.tinlake, props.loan])
-    setCloseTxId(txId)
-  }
-
-  React.useEffect(() => {
-    if (closeStatus === 'succeeded') {
-      props.refetch()
-    }
-  }, [closeStatus])
-
   const ceilingSet = props.loan.principal.toString() !== '0'
   const availableFunds = (poolData && poolData.availableFunds.toString()) || '0'
   const borrowedAlready =
@@ -146,14 +131,6 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
               disabled={
                 new BN(borrowAmount).isZero() || error !== undefined || status === 'unconfirmed' || status === 'pending'
               }
-            />
-          )}
-          {props.loan.status === 'NFT locked' && (
-            <Button
-              onClick={close}
-              secondary
-              label="Unlock NFT"
-              disabled={status === 'unconfirmed' || status === 'pending'}
             />
           )}
         </Box>

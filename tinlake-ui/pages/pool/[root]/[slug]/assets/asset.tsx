@@ -12,8 +12,10 @@ import PageTitle from '../../../../../components/PageTitle'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
+import UnlockNft from '../../../../../containers/Loan/UnlockNft'
 import LoanView from '../../../../../containers/Loan/View'
 import { menuItems } from '../../../../../menuItems'
+import { useAsset } from '../../../../../utils/useAsset'
 
 interface Props extends WithRouterProps {
   root: string
@@ -23,6 +25,9 @@ interface Props extends WithRouterProps {
 
 const LoanPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
   const { assetId }: { assetId: string } = router.query as any
+
+  const poolId = pool.addresses.ROOT_CONTRACT
+  const { data: asset, refetch: refetchAsset, error } = useAsset(poolId, assetId)
 
   return (
     <IpfsPoolsProvider value={ipfsPools}>
@@ -41,32 +46,29 @@ const LoanPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge" margin={{ top: 'medium' }}>
-              <PageTitle
-                pool={pool}
-                page={`Asset ${assetId}`}
-                parentPage="Assets"
-                parentPageHref="/assets"
-                // rightContent={
-                //   <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-                //     <Button secondary size="small" label="Previous" />
-                //     <ChevronRight />
-                //   </Box>
-                // }
-              />
-
               <WithTinlake
                 addresses={pool.addresses}
                 contractConfig={pool.contractConfig}
                 render={(tinlake) => (
-                  <Auth
-                    tinlake={tinlake}
-                    render={(auth) => (
-                      <Box>
-                        {assetId && <LoanView auth={auth} tinlake={tinlake} poolConfig={pool} loanId={assetId} />}
-                        {!assetId && <div>Loading...</div>}
-                      </Box>
-                    )}
-                  />
+                  <>
+                    <PageTitle
+                      pool={pool}
+                      page={`Asset ${assetId}`}
+                      parentPage="Assets"
+                      parentPageHref="/assets"
+                      rightContent={asset && <UnlockNft tinlake={tinlake} asset={asset} refetch={refetchAsset} />}
+                    />
+
+                    <Auth
+                      tinlake={tinlake}
+                      render={(auth) => (
+                        <Box>
+                          {assetId && <LoanView auth={auth} tinlake={tinlake} poolConfig={pool} loanId={assetId} />}
+                          {!assetId && <div>Loading...</div>}
+                        </Box>
+                      )}
+                    />
+                  </>
                 )}
               />
             </Box>
