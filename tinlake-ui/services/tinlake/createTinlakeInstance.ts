@@ -15,9 +15,9 @@ export function createTinlakeInstance({
   const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
   return new Tinlake({
     transactionTimeout,
+    contractConfig,
     overrides: {},
     provider: rpcProvider,
     contractAddresses: addresses,
-    contractConfig,
   }) as ITinlake
 }
