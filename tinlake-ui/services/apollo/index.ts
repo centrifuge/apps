@@ -25,6 +25,14 @@ export interface PoolsDailyData {
   poolValue: number
 }
 
+export interface AssetData {
+  day: number
+  assetValue: number
+  reserve: number
+  seniorTokenPrice: number
+  juniorTokenPrice: number
+}
+
 const OversubscribedBuffer = new BN(5000).mul(new BN(10).pow(new BN(18))) // 5k DAI
 
 const { tinlakeDataBackendUrl } = config
@@ -275,10 +283,8 @@ class Apollo {
   }
 
   async getLoans(root: string) {
-    let result
-    try {
-      result = await this.client.query({
-        query: gql`
+    const result = await this.client.query({
+      query: gql`
         {
           pools (where : {id: "${root.toLowerCase()}"}){
             id
@@ -307,17 +313,12 @@ class Apollo {
           }
         }
         `,
-      })
-    } catch (err) {
-      console.error(`error occured while fetching loans from apollo ${err}`)
-      return {
-        data: [],
-      }
-    }
+    })
+
     if (!result.data?.pools) return { data: [] }
 
     const pool = result.data.pools[0]
-    const tinlakeLoans = (pool && toTinlakeLoans(pool.loans)) || []
+    const tinlakeLoans = pool ? toTinlakeLoans(pool.loans) : { data: [] }
     return tinlakeLoans
   }
 
@@ -401,11 +402,9 @@ class Apollo {
   }
 
   async getAssetData(root: string) {
-    let result
-    try {
-      // TODO: root should be root.toLowerCase() once we add lowercasing to the subgraph code (after AssemblyScript is updated)
-      result = await this.client.query({
-        query: gql`
+    // TODO: root should be root.toLowerCase() once we add lowercasing to the subgraph code (after AssemblyScript is updated)
+    const result = await this.client.query({
+      query: gql`
         {
           dailyPoolDatas(first: 1000, where:{ pool: "${root.toLowerCase()}" }) {
            day {
@@ -418,14 +417,8 @@ class Apollo {
           }
         }
         `,
-      })
-    } catch (err) {
-      console.error(`error occured while fetching asset data from apollo ${err}`)
-      return {
-        data: [],
-      }
-    }
-    const assetData = result.data.dailyPoolDatas.map((item: any) => {
+    })
+    const assetData: AssetData[] = result.data.dailyPoolDatas.map((item: any) => {
       return {
         day: Number(item.day.id),
         assetValue: parseFloat(new BN(item.assetValue).div(UintBase).toString()),

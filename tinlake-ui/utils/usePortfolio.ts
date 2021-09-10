@@ -3,7 +3,7 @@ import { BigNumber } from 'ethers'
 import { useQuery } from 'react-query'
 import { useSelector } from 'react-redux'
 import { IpfsPools } from '../config'
-import { multicall } from './multicall'
+import { Call, multicall } from './multicall'
 
 interface TokenResult {
   symbol: string
@@ -41,7 +41,7 @@ export function usePortfolio(ipfsPools: IpfsPools, addressOverride?: string | nu
 async function getPortfolio(ipfsPools: IpfsPools, address: string) {
   const toBN = (val: BigNumber) => new BN(val.toString())
 
-  const calls = ipfsPools.active.flatMap((pool) => [
+  const calls: Call[] = ipfsPools.active.flatMap((pool) => [
     {
       target: pool.addresses.ASSESSOR,
       call: ['calcJuniorTokenPrice()(uint256)'],

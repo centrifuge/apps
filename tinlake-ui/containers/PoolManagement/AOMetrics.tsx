@@ -2,15 +2,14 @@ import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Heading } from 'grommet'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Card } from '../../components/Card'
 import { Shelf } from '../../components/Layout'
 import { Pool } from '../../config'
-import { LoansState, SortableLoan } from '../../ducks/loans'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { useTrancheYield } from '../../utils/hooks'
 import { toPrecision } from '../../utils/toPrecision'
+import { useAssets } from '../../utils/useAssets'
 import { usePool } from '../../utils/usePool'
 
 interface Props {
@@ -23,23 +22,21 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
   const { dropYield, tinYield } = useTrancheYield(props.activePool.addresses.ROOT_CONTRACT)
   const dropRate = poolData?.senior?.interestRate || undefined
 
-  const loans = useSelector<any, LoansState>((state) => state.loans)
-  const ongoingAssets = loans?.loans
-    ? loans?.loans.filter((loan) => loan.status && loan.status === 'ongoing')
-    : undefined
+  const { data: assets } = useAssets(props.activePool.addresses.ROOT_CONTRACT)
+  const ongoingAssets = assets ? assets.filter((asset) => asset.status && asset.status === 'ongoing') : undefined
   const outstandingDebt = ongoingAssets
     ? ongoingAssets
-        .filter((loan) => loan.maturityDate && loan.financingDate)
-        .reduce((current: BN, loan: SortableLoan) => {
-          return current.add(loan.debt)
+        .filter((asset) => asset.maturityDate && asset.financingDate)
+        .reduce((current: BN, asset) => {
+          return current.add(asset.debt)
         }, new BN(0))
     : new BN(0)
   const repaymentsDue = ongoingAssets
     ? ongoingAssets
-        .filter((loan) => loan.maturityDate && loan.financingDate)
-        .reduce((current: BN, loan: SortableLoan) => {
-          return loan.maturityDate && loan.maturityDate <= new Date().setDate(new Date().getDate() + 7) / 1000
-            ? current.add(loan.debt)
+        .filter((asset) => asset.maturityDate && asset.financingDate)
+        .reduce((current: BN, asset) => {
+          return asset.maturityDate && asset.maturityDate <= new Date().setDate(new Date().getDate() + 7) / 1000
+            ? current.add(asset.debt)
             : current
         }, new BN(0))
     : new BN(0)

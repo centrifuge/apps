@@ -2,17 +2,16 @@ import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-
 import BN from 'bn.js'
 import { Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Card } from '../../../components/Card'
 import { Box, Shelf, Stack } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Tooltip } from '../../../components/Tooltip'
 import { Pool, UpcomingPool } from '../../../config'
-import { loadLoans, LoansState, SortableLoan } from '../../../ducks/loans'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { useTrancheYield } from '../../../utils/hooks'
 import { toPrecision } from '../../../utils/toPrecision'
+import { useAssets } from '../../../utils/useAssets'
 import { usePool } from '../../../utils/usePool'
 import {
   BalanceSheetDiagram,
@@ -43,36 +42,32 @@ const parseRatio = (num: BN): number => {
 
 const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
-  const loans = useSelector<any, LoansState>((state) => state.loans)
+  const { data: assets } = useAssets(props.tinlake.contractAddresses.ROOT_CONTRACT!)
 
-  const ongoingAssets = loans?.loans
-    ? loans?.loans.filter((loan) => loan.status && loan.status === 'ongoing')
-    : undefined
+  const ongoingAssets = assets ? assets.filter((asset) => asset.status && asset.status === 'ongoing') : undefined
   const avgAmount = ongoingAssets
     ? ongoingAssets
-        .filter((loan) => loan.debt)
-        .reduce((sum: BN, loan: SortableLoan) => {
-          return sum.add(new BN(loan.debt!))
+        .filter((asset) => asset.debt)
+        .reduce((sum: BN, asset) => {
+          return sum.add(new BN(asset.debt!))
         }, new BN(0))
         .divn(ongoingAssets.length)
     : undefined
   const avgInterestRate = ongoingAssets
     ? ongoingAssets
-        .filter((loan) => loan.interestRate)
-        .reduce((sum: BN, loan: SortableLoan) => {
-          return sum.add(new BN(loan.interestRate!))
+        .filter((asset) => asset.interestRate)
+        .reduce((sum: BN, asset) => {
+          return sum.add(new BN(asset.interestRate!))
         }, new BN(0))
         .divn(ongoingAssets.length)
     : undefined
   const avgMaturity = ongoingAssets
     ? ongoingAssets
-        .filter((loan) => loan.maturityDate && loan.financingDate)
-        .reduce((sum: number, loan: SortableLoan) => {
-          return sum + (loan.maturityDate! - loan.financingDate!) / SecondsInDay
+        .filter((asset) => asset.maturityDate && asset.financingDate)
+        .reduce((sum: number, asset) => {
+          return sum + (asset.maturityDate! - asset.financingDate!) / SecondsInDay
         }, 0) / ongoingAssets.length
     : undefined
-
-  const dispatch = useDispatch()
 
   const dropTotalValue = poolData?.senior ? poolData?.senior.totalSupply.mul(poolData.senior!.tokenPrice) : undefined
   const tinTotalValue = poolData ? poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice) : undefined
@@ -89,10 +84,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           .div(poolData.reserve.add(poolData.netAssetValue))
           .div(new BN('10').pow(new BN('14')))
       : new BN(0)
-
-  React.useEffect(() => {
-    dispatch(loadLoans(props.tinlake))
-  }, [props.selectedPool])
 
   return (
     <>

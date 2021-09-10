@@ -1,6 +1,7 @@
 import { ITinlake, Loan, NFT, PendingTransaction } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { maxUint256 } from '../../utils/maxUint256'
+import { Asset } from '../../utils/useAsset'
 import { getAddressMemory, setAddressMemory } from './address-memory'
 
 export type TrancheType = 'junior' | 'senior'
@@ -551,7 +552,7 @@ export async function getEpoch(tinlake: ITinlake, address?: string): Promise<Epo
   }
 }
 
-export async function lockBorrowWithdraw(tinlake: ITinlake, loan: Loan, amount: string): Promise<PendingTransaction> {
+export async function lockBorrowWithdraw(tinlake: ITinlake, loan: Asset, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -570,7 +571,7 @@ export async function lockBorrowWithdraw(tinlake: ITinlake, loan: Loan, amount: 
   return tinlake.proxyLockBorrowWithdraw(proxy.toString(), loanId, amount, address!)
 }
 
-export async function borrowWithdraw(tinlake: ITinlake, loan: Loan, amount: string): Promise<PendingTransaction> {
+export async function borrowWithdraw(tinlake: ITinlake, loan: Asset, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -590,7 +591,7 @@ export async function borrowWithdraw(tinlake: ITinlake, loan: Loan, amount: stri
 }
 
 // repay partial loan debt
-export async function repay(tinlake: ITinlake, loan: Loan, amount: string): Promise<PendingTransaction> {
+export async function repay(tinlake: ITinlake, loan: Asset, amount: string): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -617,7 +618,7 @@ export async function repay(tinlake: ITinlake, loan: Loan, amount: string): Prom
 }
 
 // repay full loan debt
-export async function repayFull(tinlake: ITinlake, loan: Loan): Promise<PendingTransaction> {
+export async function repayFull(tinlake: ITinlake, loan: Asset): Promise<PendingTransaction> {
   if (!tinlake.signer) {
     throw new Error('Missing tinlake signer')
   }
@@ -644,7 +645,10 @@ export async function repayFull(tinlake: ITinlake, loan: Loan): Promise<PendingT
   return tinlake.proxyRepayUnlockClose(proxy.toString(), loan.tokenId.toString(), loanId, loan.registry)
 }
 
-export const close = async (tinlake: ITinlake, loan: Loan): Promise<PendingTransaction> => {
+export const close = async (
+  tinlake: ITinlake,
+  loan: { loanId: string; ownerOf: string }
+): Promise<PendingTransaction> => {
   const { loanId } = loan
   const proxy = loan.ownerOf
   return tinlake.proxyClose(proxy.toString(), loanId)

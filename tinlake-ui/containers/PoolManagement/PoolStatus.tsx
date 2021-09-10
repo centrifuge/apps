@@ -2,15 +2,14 @@ import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Card } from '../../components/Card'
 import { LoadingValue } from '../../components/LoadingValue'
 import { Pool } from '../../config'
-import { loadLoans, LoansState, SortableLoan } from '../../ducks/loans'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { Fixed27Base } from '../../utils/ratios'
 import { toPrecision } from '../../utils/toPrecision'
+import { useAssets } from '../../utils/useAssets'
 import { usePool } from '../../utils/usePool'
 
 interface Props {
@@ -61,21 +60,13 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
           .div(new BN(10).pow(new BN(16)))
       : undefined
 
-  const dispatch = useDispatch()
-
-  React.useEffect(() => {
-    dispatch(loadLoans(props.tinlake))
-  }, [props.activePool])
-
-  const loans = useSelector<any, LoansState>((state) => state.loans)
-  const ongoingAssets = loans?.loans
-    ? loans?.loans.filter((loan) => loan.status && loan.status === 'ongoing')
-    : undefined
+  const { data: assets } = useAssets(props.tinlake.contractAddresses.ROOT_CONTRACT!)
+  const ongoingAssets = assets ? assets.filter((asset) => asset.status && asset.status === 'ongoing') : undefined
   const maxSingleLoan = ongoingAssets
     ? ongoingAssets
-        .filter((loan) => loan.maturityDate && loan.financingDate)
-        .reduce((currentMax: BN, loan: SortableLoan) => {
-          return loan.debt.gt(currentMax) ? loan.debt : currentMax
+        .filter((asset) => asset.maturityDate && asset.financingDate)
+        .reduce((currentMax: BN, asset) => {
+          return asset.debt.gt(currentMax) ? asset.debt : currentMax
         }, new BN(0))
     : new BN(0)
 

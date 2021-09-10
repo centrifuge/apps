@@ -66,12 +66,7 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
     }
 
     getOwnerOfLoan = async (loanId: string): Promise<string> => {
-      let address
-      try {
-        address = await this.contract('TITLE').ownerOf(loanId)
-      } catch (e) {
-        address = ZERO_ADDRESS
-      }
+      const address = await this.contract('TITLE').ownerOf(loanId)
       return address
     }
 
