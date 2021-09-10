@@ -29,6 +29,12 @@ const LoanPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
   const poolId = pool.addresses.ROOT_CONTRACT
   const { data: asset, refetch: refetchAsset, error } = useAsset(poolId, assetId)
 
+  React.useEffect(() => {
+    if (error) {
+      refetchAsset()
+    }
+  }, [error])
+
   return (
     <IpfsPoolsProvider value={ipfsPools}>
       <WithFooter>
