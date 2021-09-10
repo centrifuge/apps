@@ -65,7 +65,7 @@ jobs:
           NEXT_PUBLIC_TRANSACTION_TIMEOUT: '3600'
 
       - name: Deploy To Netlify
-        uses: nwtgck/actions-netlify@v1.1
+        uses: nwtgck/actions-netlify@v1.2.0
         with:
           alias: pr-${{ github.event.pull_request.number }}
           deploy-message: ${{ github.event.commit.message }}
@@ -73,7 +73,6 @@ jobs:
           functions-dir: ./tinlake-ui/functions
           github-token: ${{ secrets.GITHUB_TOKEN }}
           netlify-config-path: ./tinlake-ui/netlify.toml
-          overwrites-pull-request-comment: false
           publish-dir: ./tinlake-ui/out
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
@@ -138,7 +137,7 @@ jobs:
           NEXT_PUBLIC_TRANSACTION_TIMEOUT: '3600'
 
       - name: Deploy To Netlify
-        uses: nwtgck/actions-netlify@v1.1
+        uses: nwtgck/actions-netlify@v1.2.0
         with:
           alias: pr-${{ github.event.pull_request.number }}
           deploy-message: ${{ github.event.commit.message }}
@@ -146,7 +145,6 @@ jobs:
           functions-dir: ./tinlake-ui/functions
           github-token: ${{ secrets.GITHUB_TOKEN }}
           netlify-config-path: ./tinlake-ui/netlify.toml
-          overwrites-pull-request-comment: false
           publish-dir: ./tinlake-ui/out
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
