@@ -3,6 +3,7 @@ import { Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
+import styled from 'styled-components'
 import PageTitle from '../../components/PageTitle'
 import { Pool } from '../../config'
 import { AuthState } from '../../ducks/auth'
@@ -30,6 +31,8 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
   const isAdmin = poolData?.isPoolAdmin || 'admin' in router.query
   const canManageParameters = auth?.permissions?.canSetMinimumJuniorRatio
 
+  const [view, setView] = React.useState('Liquidity')
+
   const exportData = () => {
     if (!poolData) return
 
@@ -50,9 +53,48 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
 
   return (
     <Box margin={{ top: 'medium' }}>
-      <PageTitle pool={props.activePool} page="Pool Management" />
+      <PageTitle
+        pool={props.activePool}
+        page="Pool Management"
+        rightContent={
+          <Menu direction="row">
+            <MenuItem
+              primary={view === 'Liquidity'}
+              plain={view !== 'Liquidity'}
+              onClick={() => setView('Liquidity')}
+              label="Liquidity"
+              size="small"
+              focusIndicator={false}
+            />
+            <MenuItem
+              primary={view === 'Investors'}
+              plain={view !== 'Investors'}
+              onClick={() => setView('Investors')}
+              label="Investors"
+              size="small"
+              focusIndicator={false}
+            />
+            <MenuItem
+              primary={view === 'Risk'}
+              plain={view !== 'Risk'}
+              onClick={() => setView('Risk')}
+              label="Risk"
+              size="small"
+              focusIndicator={false}
+            />
+            <MenuItem
+              primary={view === 'Settings'}
+              plain={view !== 'Settings'}
+              onClick={() => setView('Settings')}
+              label="Settings"
+              size="small"
+              focusIndicator={false}
+            />
+          </Menu>
+        }
+      />
 
-      {isAdmin && (
+      {isAdmin && view === 'Liquidity' && (
         <>
           <AOMetrics activePool={props.activePool} />
           <PoolStatus activePool={props.activePool} tinlake={props.tinlake} />
@@ -63,22 +105,23 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
             </div>
           )}
 
-          <Heading level="4" margin={{ top: 'medium' }}>
-            Liquidity Management
-          </Heading>
           <Liquidity activePool={props.activePool} tinlake={props.tinlake} />
 
           <EpochOverview tinlake={props.tinlake} activePool={props.activePool} />
+        </>
+      )}
 
+      {isAdmin && view === 'Investors' && (
+        <>
           <Heading level="4">Investor Whitelisting</Heading>
           <Memberlist tinlake={props.tinlake} />
+        </>
+      )}
 
-          {canManageParameters && (
-            <>
-              <Heading level="4">Pool Parameters</Heading>
-              <Parameters tinlake={props.tinlake} />
-            </>
-          )}
+      {isAdmin && view === 'Settings' && (
+        <>
+          <Heading level="4">Pool Settings</Heading>
+          <Parameters tinlake={props.tinlake} />
         </>
       )}
 
@@ -88,3 +131,15 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
 }
 
 export default PoolManagement
+
+const Menu = styled(Box)`
+  border: 1px solid #000;
+  border-radius: 18px;
+`
+
+const MenuItem = styled(Button)`
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: bold;
+  padding: 4px 20px;
+`

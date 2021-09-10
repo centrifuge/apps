@@ -31,11 +31,11 @@ export interface PoolData {
   reserveAtLastEpochClose: BN
   maxJuniorRatio: BN
   maxReserve: BN
-  outstandingVolume: BN
   totalPendingInvestments: BN
   totalRedemptionsCurrency: BN
   isPoolAdmin?: boolean
   reserveAndRemainingCredit?: BN
+  discountRate: BN
 }
 
 export type EpochData = {
@@ -122,11 +122,6 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
       returns: [[`netAssetValue`, toBN]],
     },
     {
-      target: pool.addresses.PILE,
-      call: ['total()(uint256)'],
-      returns: [[`outstandingVolume`, toBN]],
-    },
-    {
       target: pool.addresses.SENIOR_TRANCHE,
       call: ['totalSupply()(uint256)'],
       returns: [[`senior.pendingInvestments`, toBN]],
@@ -206,9 +201,15 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
       call: ['decimals()(uint8)'],
       returns: [[`junior.decimals`]],
     },
+    {
+      target: pool.addresses.FEED,
+      call: ['discountRate()(uint256)'],
+      returns: [[`discountRate`]],
+    },
   ]
 
   if (address) {
+    // TODO: differentiate isPoolAdmin call based on POOL_ADMIN contract version
     calls.push(
       ...(pool.addresses.POOL_ADMIN
         ? ([
@@ -224,8 +225,8 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
             },
             {
               target: pool.addresses.POOL_ADMIN,
-              call: ['admins(address)(uint256)', address || '0'],
-              returns: [[`isPoolAdmin`, (num: BigNumber) => toBN(num).toNumber() === 1]],
+              call: ['admin_level(address)(uint256)', address || '0'],
+              returns: [[`isPoolAdmin`, (num: BigNumber) => toBN(num).toNumber() >= 1]],
             },
           ] as Call[])
         : ([
@@ -328,6 +329,7 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
   }
 
   const data = await multicall<PoolData>(calls)
+  console.log(data)
 
   data.junior.availableFunds = (data.reserve || new BN(0)).sub(data.senior.availableFunds || new BN(0))
   data.totalPendingInvestments = (data.senior.pendingInvestments || new BN(0)).add(

@@ -272,11 +272,16 @@ export function getWCFGPrice(
     const uniswapPoolAbi = ['function observe(uint32[] secondsAgos) external view returns (int56[], uint160[])']
 
     const poolContract = new ethers.Contract(usdcWcfgPool, uniswapPoolAbi, tinlake.provider)
-    const observations = (await poolContract.observe([0, 1]))[0]
-    const first = new Decimal(observations[0].toString())
-    const second = new Decimal(observations[1].toString())
-    const price = new Decimal(1.0001).toPower(second.sub(first)).times(new Decimal(10).toPower(12)).toNumber()
+    try {
+      const observations = (await poolContract.observe([0, 1]))[0]
+      const first = new Decimal(observations[0].toString())
+      const second = new Decimal(observations[1].toString())
+      const price = new Decimal(1.0001).toPower(second.sub(first)).times(new Decimal(10).toPower(12)).toNumber()
 
-    dispatch({ data: price, type: RECEIVE_WCFG_PRICE })
+      dispatch({ data: price, type: RECEIVE_WCFG_PRICE })
+    } catch (e) {
+      console.error(`Failed to grab wCFG price: ${e}`)
+      dispatch({ data: 0, type: RECEIVE_WCFG_PRICE })
+    }
   }
 }

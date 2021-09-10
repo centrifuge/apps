@@ -1,4 +1,4 @@
-import { baseToDisplay, displayToBase, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay, displayToBase, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, FormField, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
@@ -7,6 +7,7 @@ import NumberInput from '../../components/NumberInput'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { toPrecision } from '../../utils/toPrecision'
+import { useEpoch } from '../../utils/useEpoch'
 import { usePool } from '../../utils/usePool'
 
 interface Props extends TransactionProps {
@@ -15,14 +16,23 @@ interface Props extends TransactionProps {
 
 const AdminActions: React.FC<Props> = (props: Props) => {
   const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const { data: epochData, refetch: refetchEpochData } = useEpoch(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [minJuniorRatio, setMinJuniorRatio] = React.useState('0')
   const [maxJuniorRatio, setMaxJuniorRatio] = React.useState('0')
+  const [seniorInterestRate, setSeniorInterestRate] = React.useState('0')
+  const [discountRate, setDiscountRate] = React.useState('0')
+  const [minimumEpochTime, setMinimumEpochTime] = React.useState('0')
+  const [challengeTime, setChallengeTime] = React.useState('0')
 
   React.useEffect(() => {
     if (poolData) {
       setMinJuniorRatio(poolData.minJuniorRatio.toString())
       setMaxJuniorRatio(poolData.maxJuniorRatio.toString())
+      setSeniorInterestRate(poolData.senior?.interestRate?.toString() || '0')
+      setDiscountRate(poolData.discountRate.toString())
+      setMinimumEpochTime(epochData?.minimumEpochTime?.toString() || '0')
+      setChallengeTime(epochData?.challengeTime?.toString() || '0')
     }
   }, [poolData])
 
@@ -44,6 +54,26 @@ const AdminActions: React.FC<Props> = (props: Props) => {
       maxJuniorRatio.toString(),
     ])
     setMaxRatioTxId(txId)
+  }
+
+  const [seniorInterestRateStatus, , setSeniorInterestRateTxId] = useTransactionState()
+
+  const saveSeniorInterestRate = async () => {
+    // const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
+    //   props.tinlake,
+    //   maxJuniorRatio.toString(),
+    // ])
+    // setMaxRatioTxId(txId)
+  }
+
+  const [discountRateStatus, , setDiscountRateTxId] = useTransactionState()
+
+  const saveDiscountRate = async () => {
+    // const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
+    //   props.tinlake,
+    //   maxJuniorRatio.toString(),
+    // ])
+    // setMaxRatioTxId(txId)
   }
 
   React.useEffect(() => {
@@ -123,6 +153,72 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                   maxRatioStatus === 'unconfirmed' ||
                   maxRatioStatus === 'pending' ||
                   maxJuniorRatio === poolData.maxJuniorRatio.toString()
+                }
+              />
+            </Box>
+          </Card>
+
+          <Card width="400px" p="medium" mb="medium">
+            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+              <Heading level="5" margin={'0'}>
+                DROP APR
+              </Heading>
+              <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.senior?.interestRate || '0', 25), 2))}%
+              </Heading>
+            </Box>
+
+            <FormField label="Set DROP APR">
+              <NumberInput
+                value={toPrecision(feeToInterestRate(seniorInterestRate || '0'), 2)}
+                precision={2}
+                onValueChange={({ value }) => setSeniorInterestRate(displayToBase(value, 25))}
+                disabled={seniorInterestRateStatus === 'unconfirmed' || seniorInterestRateStatus === 'pending'}
+              />
+            </FormField>
+
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+              <Button
+                primary
+                label="Apply"
+                onClick={saveSeniorInterestRate}
+                disabled={
+                  seniorInterestRateStatus === 'unconfirmed' ||
+                  seniorInterestRateStatus === 'pending' ||
+                  seniorInterestRate === (poolData.senior?.interestRate?.toString() || '0')
+                }
+              />
+            </Box>
+          </Card>
+
+          <Card width="400px" p="medium" mb="medium">
+            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+              <Heading level="5" margin={'0'}>
+                Discount rate
+              </Heading>
+              <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
+                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.discountRate, 25), 2))}%
+              </Heading>
+            </Box>
+
+            <FormField label="Set discount rate">
+              <NumberInput
+                value={toPrecision(feeToInterestRate(discountRate || '0'), 2)}
+                precision={2}
+                onValueChange={({ value }) => setDiscountRate(displayToBase(value, 25))}
+                disabled={discountRateStatus === 'unconfirmed' || discountRateStatus === 'pending'}
+              />
+            </FormField>
+
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+              <Button
+                primary
+                label="Apply"
+                onClick={saveSeniorInterestRate}
+                disabled={
+                  discountRateStatus === 'unconfirmed' ||
+                  discountRateStatus === 'pending' ||
+                  discountRate === poolData.discountRate.toString()
                 }
               />
             </Box>
