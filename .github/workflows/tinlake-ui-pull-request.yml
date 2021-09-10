@@ -71,10 +71,9 @@ jobs:
           deploy-message: ${{ github.event.commit.message }}
           enable-pull-request-comment: true
           functions-dir: ./tinlake-ui/functions
-          github-deployment-environment: test-environment-kovan
-          github-deployment-description: test-description-kovan
           github-token: ${{ secrets.GITHUB_TOKEN }}
           netlify-config-path: ./tinlake-ui/netlify.toml
+          overwrites-pull-request-comment: false
           publish-dir: ./tinlake-ui/out
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
@@ -145,10 +144,9 @@ jobs:
           deploy-message: ${{ github.event.commit.message }}
           enable-pull-request-comment: true
           functions-dir: ./tinlake-ui/functions
-          github-deployment-environment: test-environment-mainnet
-          github-deployment-description: test-description-mainnet
           github-token: ${{ secrets.GITHUB_TOKEN }}
           netlify-config-path: ./tinlake-ui/netlify.toml
+          overwrites-pull-request-comment: false
           publish-dir: ./tinlake-ui/out
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
