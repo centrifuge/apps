@@ -9,11 +9,13 @@ import { downloadCSV } from '../../utils/export'
 import { usePool } from '../../utils/usePool'
 import { csvName } from '../DataQuery/queries'
 import EpochOverview from '../Investment/View/EpochOverview'
+import Access from './Admins'
 import AOMetrics from './AOMetrics'
 import Liquidity from './Liquidity'
 import Memberlist from './Memberlist'
 import Parameters from './Parameters'
 import PoolStatus from './PoolStatus'
+import Risk from './Risk'
 
 interface Props {
   activePool: Pool
@@ -78,10 +80,10 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
               focusIndicator={false}
             />
             <MenuItem
-              secondary={view === 'Admins'}
-              plain={view !== 'Admins'}
-              onClick={() => setView('Admins')}
-              label="Admins"
+              secondary={view === 'Access'}
+              plain={view !== 'Access'}
+              onClick={() => setView('Access')}
+              label="Access"
               size="small"
               focusIndicator={false}
             />
@@ -94,7 +96,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
               focusIndicator={false}
             />
           </Menu>
-          <Box>
+          <Box width="100%">
             {view === 'Liquidity' && (
               <>
                 <AOMetrics activePool={props.activePool} />
@@ -113,6 +115,10 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
             )}
 
             {view === 'Investors' && <Memberlist tinlake={props.tinlake} />}
+
+            {view === 'Risk' && <Risk tinlake={props.tinlake} />}
+
+            {view === 'Access' && <Access tinlake={props.tinlake} />}
 
             {view === 'Settings' && <Parameters tinlake={props.tinlake} />}
           </Box>

@@ -19,6 +19,24 @@ export interface PoolTranche extends Tranche {
   balance?: BN
 }
 
+export interface RiskGroup {
+  ceilingRatio: BN
+  thresholdRatio: BN
+  rate: {
+    pie: BN
+    chi: BN
+    ratePerSecond: BN
+    lastUpdated: BN
+    fixedRate: BN
+  }
+  recoveryRatePD: BN
+}
+
+export interface WriteOffGroup {
+  percentage: BN
+  overdueDays: BN
+}
+
 export interface PoolData {
   junior: PoolTranche
   senior: PoolTranche
@@ -36,6 +54,8 @@ export interface PoolData {
   isPoolAdmin?: boolean
   reserveAndRemainingCredit?: BN
   discountRate: BN
+  risk?: RiskGroup[]
+  writeOffGroups?: WriteOffGroup[]
 }
 
 export type EpochData = {
@@ -204,9 +224,53 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
     {
       target: pool.addresses.FEED,
       call: ['discountRate()(uint256)'],
-      returns: [[`discountRate`]],
+      returns: [[`discountRate`, toBN]],
     },
   ]
+
+  const maxRiskGroups = 10
+  for (let i = 0; i < maxRiskGroups; i++) {
+    calls.push(
+      {
+        target: pool.addresses.FEED,
+        call: ['ceilingRatio(uint256)(uint256)', i],
+        returns: [[`risk[${i}].ceilingRatio`, toBN]],
+      },
+      {
+        target: pool.addresses.FEED,
+        call: ['thresholdRatio(uint256)(uint256)', i],
+        returns: [[`risk[${i}].thresholdRatio`, toBN]],
+      },
+      {
+        target: pool.addresses.PILE,
+        call: ['rates(uint256)(uint256,uint256,uint256,uint48,uint256)', i],
+        returns: [
+          [`risk[${i}].rate.pie`, toBN],
+          [`risk[${i}].rate.chi`, toBN],
+          [`risk[${i}].rate.ratePerSecond`, toBN],
+          [`risk[${i}].rate.lastUpdated`, toBN],
+          [`risk[${i}].rate.fixedRate`, toBN],
+        ],
+      },
+      {
+        target: pool.addresses.FEED,
+        call: ['recoveryRatePD(uint256)(uint256)', i],
+        returns: [[`risk[${i}].recoveryRatePD`, toBN]],
+      }
+    )
+  }
+
+  const maxWriteOffGroups = 1
+  for (let i = 0; i < maxWriteOffGroups; i++) {
+    calls.push({
+      target: pool.addresses.FEED,
+      call: ['writeOffGroups(uint256)(uint128,uint128)', i],
+      returns: [
+        [`writeOffGroups[${i}].percentage`, toBN],
+        [`writeOffGroups[${i}].overdueDays`, toBN],
+      ],
+    })
+  }
 
   if (address) {
     // TODO: differentiate isPoolAdmin call based on POOL_ADMIN contract version
@@ -329,7 +393,7 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
   }
 
   const data = await multicall<PoolData>(calls)
-  console.log(data)
+  console.log(data.risk)
 
   data.junior.availableFunds = (data.reserve || new BN(0)).sub(data.senior.availableFunds || new BN(0))
   data.totalPendingInvestments = (data.senior.pendingInvestments || new BN(0)).add(
