@@ -1,4 +1,5 @@
 import { baseToDisplay, displayToBase, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { Box, Button, FormField, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
@@ -30,7 +31,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
       setMinJuniorRatio(poolData.minJuniorRatio.toString())
       setMaxJuniorRatio(poolData.maxJuniorRatio.toString())
       setSeniorInterestRate(poolData.senior?.interestRate?.toString() || '0')
-      setDiscountRate(poolData.discountRate.toString())
+      setDiscountRate(feeToInterestRate(poolData.discountRate))
       setMinimumEpochTime(epochData?.minimumEpochTime?.toString() || '0')
       setChallengeTime(epochData?.challengeTime?.toString() || '0')
     }
@@ -91,8 +92,8 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   return (
     <>
       {poolData && (
-        <Box direction="row" gap="medium">
-          <Card width="400px" p="medium" mb="medium">
+        <Card p="medium" mb="medium" style={{ width: '600px' }}>
+          <Box margin={{ bottom: 'medium' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
                 Min TIN risk buffer
@@ -123,9 +124,9 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 }
               />
             </Box>
-          </Card>
+          </Box>
 
-          <Card width="400px" p="medium" mb="medium">
+          <Box margin={{ bottom: 'medium' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
                 Max TIN risk buffer
@@ -156,21 +157,21 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 }
               />
             </Box>
-          </Card>
+          </Box>
 
-          <Card width="400px" p="medium" mb="medium">
+          <Box margin={{ bottom: 'medium' }}>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
                 DROP APR
               </Heading>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.senior?.interestRate || '0', 25), 2))}%
+                {toPrecision(feeToInterestRate(poolData.senior?.interestRate || '0'), 2)}%
               </Heading>
             </Box>
 
             <FormField label="Set DROP APR">
               <NumberInput
-                value={toPrecision(feeToInterestRate(seniorInterestRate || '0'), 2)}
+                value={toPrecision(feeToInterestRate(new BN(seniorInterestRate || '0')), 2)}
                 precision={2}
                 onValueChange={({ value }) => setSeniorInterestRate(displayToBase(value, 25))}
                 disabled={seniorInterestRateStatus === 'unconfirmed' || seniorInterestRateStatus === 'pending'}
@@ -189,21 +190,21 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 }
               />
             </Box>
-          </Card>
+          </Box>
 
-          <Card width="400px" p="medium" mb="medium">
+          <Box>
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
                 Discount rate
               </Heading>
               <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.discountRate, 25), 2))}%
+                {toPrecision(feeToInterestRate(poolData.discountRate), 2)}%
               </Heading>
             </Box>
 
             <FormField label="Set discount rate">
               <NumberInput
-                value={toPrecision(feeToInterestRate(discountRate || '0'), 2)}
+                value={baseToDisplay(discountRate, 25)}
                 precision={2}
                 onValueChange={({ value }) => setDiscountRate(displayToBase(value, 25))}
                 disabled={discountRateStatus === 'unconfirmed' || discountRateStatus === 'pending'}
@@ -222,8 +223,8 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 }
               />
             </Box>
-          </Card>
-        </Box>
+          </Box>
+        </Card>
       )}
     </>
   )
