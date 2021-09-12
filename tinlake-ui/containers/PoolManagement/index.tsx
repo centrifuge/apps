@@ -11,6 +11,7 @@ import { csvName } from '../DataQuery/queries'
 import EpochOverview from '../Investment/View/EpochOverview'
 import Access from './Admins'
 import AOMetrics from './AOMetrics'
+import AuditLog from './AuditLog'
 import Liquidity from './Liquidity'
 import Memberlist from './Memberlist'
 import Parameters from './Parameters'
@@ -95,6 +96,14 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
               size="small"
               focusIndicator={false}
             />
+            <MenuItem
+              secondary={view === 'Audit Log'}
+              plain={view !== 'Audit Log'}
+              onClick={() => setView('Audit Log')}
+              label="Audit Log"
+              size="small"
+              focusIndicator={false}
+            />
           </Menu>
           <Box width="100%">
             {view === 'Liquidity' && (
@@ -121,6 +130,8 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
             {view === 'Access' && <Access tinlake={props.tinlake} />}
 
             {view === 'Settings' && <Parameters tinlake={props.tinlake} />}
+
+            {view === 'Audit Log' && <AuditLog tinlake={props.tinlake} />}
           </Box>
         </Box>
       )}

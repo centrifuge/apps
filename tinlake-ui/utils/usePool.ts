@@ -52,6 +52,7 @@ export interface PoolData {
   totalPendingInvestments: BN
   totalRedemptionsCurrency: BN
   isPoolAdmin?: boolean
+  adminLevel?: number
   reserveAndRemainingCredit?: BN
   discountRate: BN
   risk?: RiskGroup[]
@@ -275,7 +276,7 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
   if (address) {
     // TODO: differentiate isPoolAdmin call based on POOL_ADMIN contract version
     calls.push(
-      ...(pool.addresses.POOL_ADMIN
+      ...(pool.addresses.POOL_ADMIN && pool.versions?.POOL_ADMIN && pool.versions?.POOL_ADMIN >= 2
         ? ([
             {
               target: pool.addresses.SENIOR_MEMBERLIST,
@@ -291,6 +292,29 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
               target: pool.addresses.POOL_ADMIN,
               call: ['admin_level(address)(uint256)', address || '0'],
               returns: [[`isPoolAdmin`, (num: BigNumber) => toBN(num).toNumber() >= 1]],
+            },
+            {
+              target: pool.addresses.POOL_ADMIN,
+              call: ['admin_level(address)(uint256)', address || '0'],
+              returns: [[`adminLevel`, (num: BigNumber) => toBN(num).toNumber()]],
+            },
+          ] as Call[])
+        : pool.addresses.POOL_ADMIN
+        ? ([
+            {
+              target: pool.addresses.SENIOR_MEMBERLIST,
+              call: ['hasMember(address)(bool)', address || '0'],
+              returns: [[`senior.inMemberlist`]],
+            },
+            {
+              target: pool.addresses.JUNIOR_MEMBERLIST,
+              call: ['hasMember(address)(bool)', address || '0'],
+              returns: [[`junior.inMemberlist`]],
+            },
+            {
+              target: pool.addresses.POOL_ADMIN,
+              call: ['admins(address)(uint256)', address || '0'],
+              returns: [[`isPoolAdmin`, (num: BigNumber) => toBN(num).toNumber() === 1]],
             },
           ] as Call[])
         : ([
@@ -393,7 +417,6 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
   }
 
   const data = await multicall<PoolData>(calls)
-  console.log(data.risk)
 
   data.junior.availableFunds = (data.reserve || new BN(0)).sub(data.senior.availableFunds || new BN(0))
   data.totalPendingInvestments = (data.senior.pendingInvestments || new BN(0)).add(

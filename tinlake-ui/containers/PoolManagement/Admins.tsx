@@ -54,6 +54,7 @@ const Admins: React.FC<Props> = (props: Props) => {
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setLevel1Address(event.currentTarget.value)
                 }}
+                disabled={!poolData?.adminLevel || poolData.adminLevel < 3}
               />
             </FormField>
 
@@ -82,6 +83,7 @@ const Admins: React.FC<Props> = (props: Props) => {
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setLevel2Address(event.currentTarget.value)
                 }}
+                disabled={!poolData?.adminLevel || poolData.adminLevel < 3}
               />
             </FormField>
 

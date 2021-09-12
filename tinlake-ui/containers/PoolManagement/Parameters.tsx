@@ -6,7 +6,6 @@ import { connect } from 'react-redux'
 import { Card } from '../../components/Card'
 import NumberInput from '../../components/NumberInput'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
-import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { toPrecision } from '../../utils/toPrecision'
 import { useEpoch } from '../../utils/useEpoch'
 import { usePool } from '../../utils/usePool'
@@ -17,7 +16,7 @@ interface Props extends TransactionProps {
 
 const AdminActions: React.FC<Props> = (props: Props) => {
   const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
-  const { data: epochData, refetch: refetchEpochData } = useEpoch(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const { data: epochData } = useEpoch(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [minJuniorRatio, setMinJuniorRatio] = React.useState('0')
   const [maxJuniorRatio, setMaxJuniorRatio] = React.useState('0')
@@ -92,137 +91,108 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   return (
     <>
       {poolData && (
-        <Card p="medium" mb="medium" style={{ width: '600px' }}>
-          <Box margin={{ bottom: 'medium' }}>
-            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-              <Heading level="5" margin={'0'}>
+        <Card p="medium" mb="medium" width="700px">
+          <Box direction="row" margin={{ bottom: 'medium' }} justify="between">
+            <Box margin={{ top: 'small', bottom: 'small' }}>
+              <Heading level="5" margin={{ top: '0' }}>
                 Min TIN risk buffer
-              </Heading>
-              <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.minJuniorRatio, 25), 2))}%
               </Heading>
             </Box>
 
-            <FormField label="Set minimum TIN risk buffer">
+            <FormField width="240px">
               <NumberInput
                 value={baseToDisplay(minJuniorRatio, 25)}
                 precision={2}
                 onValueChange={({ value }) => setMinJuniorRatio(displayToBase(value, 25))}
-                disabled={minRatioStatus === 'unconfirmed' || minRatioStatus === 'pending'}
-              />
-            </FormField>
-
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button
-                primary
-                label="Apply"
-                onClick={saveMinJuniorRatio}
                 disabled={
+                  !poolData?.adminLevel ||
+                  poolData.adminLevel < 3 ||
                   minRatioStatus === 'unconfirmed' ||
-                  minRatioStatus === 'pending' ||
-                  minJuniorRatio === poolData.minJuniorRatio.toString()
+                  minRatioStatus === 'pending'
                 }
               />
-            </Box>
+            </FormField>
           </Box>
 
-          <Box margin={{ bottom: 'medium' }}>
-            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-              <Heading level="5" margin={'0'}>
+          <Box direction="row" margin={{ bottom: 'medium' }} justify="between">
+            <Box margin={{ top: 'small', bottom: 'small' }}>
+              <Heading level="5" margin={{ top: '0' }}>
                 Max TIN risk buffer
-              </Heading>
-              <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData.maxJuniorRatio, 25), 2))}%
               </Heading>
             </Box>
 
-            <FormField label="Set maximum TIN risk buffer">
+            <FormField width="240px">
               <NumberInput
                 value={baseToDisplay(maxJuniorRatio, 25)}
                 precision={2}
                 onValueChange={({ value }) => setMaxJuniorRatio(displayToBase(value, 25))}
-                disabled={maxRatioStatus === 'unconfirmed' || maxRatioStatus === 'pending'}
-              />
-            </FormField>
-
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button
-                primary
-                label="Apply"
-                onClick={saveMaxJuniorRatio}
                 disabled={
+                  !poolData?.adminLevel ||
+                  poolData.adminLevel < 3 ||
                   maxRatioStatus === 'unconfirmed' ||
-                  maxRatioStatus === 'pending' ||
-                  maxJuniorRatio === poolData.maxJuniorRatio.toString()
+                  maxRatioStatus === 'pending'
                 }
               />
-            </Box>
+            </FormField>
           </Box>
 
-          <Box margin={{ bottom: 'medium' }}>
-            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-              <Heading level="5" margin={'0'}>
+          <Box direction="row" margin={{ bottom: 'medium' }} justify="between">
+            <Box margin={{ top: 'small', bottom: 'small' }}>
+              <Heading level="5" margin={{ top: '0' }}>
                 DROP APR
-              </Heading>
-              <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {toPrecision(feeToInterestRate(poolData.senior?.interestRate || '0'), 2)}%
               </Heading>
             </Box>
 
-            <FormField label="Set DROP APR">
+            <FormField width="240px">
               <NumberInput
                 value={toPrecision(feeToInterestRate(new BN(seniorInterestRate || '0')), 2)}
                 precision={2}
                 onValueChange={({ value }) => setSeniorInterestRate(displayToBase(value, 25))}
-                disabled={seniorInterestRateStatus === 'unconfirmed' || seniorInterestRateStatus === 'pending'}
-              />
-            </FormField>
-
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button
-                primary
-                label="Apply"
-                onClick={saveSeniorInterestRate}
                 disabled={
+                  !poolData?.adminLevel ||
+                  poolData.adminLevel < 3 ||
                   seniorInterestRateStatus === 'unconfirmed' ||
-                  seniorInterestRateStatus === 'pending' ||
-                  seniorInterestRate === (poolData.senior?.interestRate?.toString() || '0')
+                  seniorInterestRateStatus === 'pending'
                 }
               />
-            </Box>
+            </FormField>
           </Box>
 
-          <Box>
-            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-              <Heading level="5" margin={'0'}>
+          <Box direction="row" justify="between">
+            <Box margin={{ top: 'small', bottom: 'small' }}>
+              <Heading level="5" margin={{ top: '0' }}>
                 Discount rate
-              </Heading>
-              <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-                {toPrecision(feeToInterestRate(poolData.discountRate), 2)}%
               </Heading>
             </Box>
 
-            <FormField label="Set discount rate">
+            <FormField width="240px">
               <NumberInput
                 value={baseToDisplay(discountRate, 25)}
                 precision={2}
                 onValueChange={({ value }) => setDiscountRate(displayToBase(value, 25))}
-                disabled={discountRateStatus === 'unconfirmed' || discountRateStatus === 'pending'}
-              />
-            </FormField>
-
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button
-                primary
-                label="Apply"
-                onClick={saveSeniorInterestRate}
                 disabled={
+                  !poolData?.adminLevel ||
+                  poolData.adminLevel < 3 ||
                   discountRateStatus === 'unconfirmed' ||
-                  discountRateStatus === 'pending' ||
-                  discountRate === poolData.discountRate.toString()
+                  discountRateStatus === 'pending'
                 }
               />
-            </Box>
+            </FormField>
+          </Box>
+
+          <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+            <Button
+              primary
+              label="Update"
+              onClick={saveSeniorInterestRate}
+              disabled={
+                !poolData?.adminLevel ||
+                poolData.adminLevel < 3 ||
+                discountRateStatus === 'unconfirmed' ||
+                discountRateStatus === 'pending' ||
+                discountRate === poolData.discountRate.toString()
+              }
+            />
           </Box>
         </Card>
       )}

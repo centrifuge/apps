@@ -6,6 +6,10 @@ export const getAddressLink = (address: string) => {
   return `${etherscanUrl}/address/${address}`
 }
 
+export const getTransactionLink = (hash: string) => {
+  return `${etherscanUrl}/tx/${hash}`
+}
+
 export const getNFTLink = (tokenId: string, registyAddress: string) => {
   return `${etherscanUrl}/token/${registyAddress}?a=${tokenId}`
 }
