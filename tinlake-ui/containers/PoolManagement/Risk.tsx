@@ -1,10 +1,17 @@
-import { baseToDisplay, feeToInterestRate, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
+import {
+  baseToDisplay,
+  displayToBase,
+  feeToInterestRate,
+  interestRateToFee,
+  ITinlake,
+  toPrecision,
+} from '@centrifuge/tinlake-js'
 import { IRiskGroup } from '@centrifuge/tinlake-js/dist/actions/admin'
 import BN from 'bn.js'
-import { ethers } from 'ethers'
 import { Box, Button, FormField, Heading, Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import Alert from '../../components/Alert'
 import { Card } from '../../components/Card'
 import NumberInput from '../../components/NumberInput'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
@@ -16,7 +23,7 @@ interface Props extends TransactionProps {
 }
 
 const Risk: React.FC<Props> = (props: Props) => {
-  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [riskGroups, setRiskGroups] = React.useState([] as IRiskGroup[])
 
@@ -27,54 +34,36 @@ const Risk: React.FC<Props> = (props: Props) => {
   const [riskGroupStatus, , setRiskGroupTxId] = useTransactionState()
 
   const add = () => {
-    let newRiskGroups = riskGroups
-    newRiskGroups[riskGroups.length] = {
-      id: existingRiskGroups.length,
+    const newRiskGroup = {
+      id: existingRiskGroups.length + riskGroups.length,
       ceilingRatio: new BN(0),
-      rate: new BN(0),
+      rate: new BN('1000000002378234398782343987'),
       recoveryRatePD: new BN(0),
       thresholdRatio: new BN(0),
     }
-    setRiskGroups(newRiskGroups)
+    setRiskGroups([...riskGroups, newRiskGroup])
   }
 
   const update = (group: number, key: 'ceilingRatio' | 'recoveryRatePD' | 'rate' | 'thresholdRatio', value: string) => {
     let newRiskGroups = riskGroups
-    newRiskGroups[group][key] = new BN(value).mul(new BN(10)).pow(new BN(25))
+    newRiskGroups[group][key] = key === 'rate' ? new BN(interestRateToFee(value)) : new BN(displayToBase(value, 25))
     setRiskGroups(newRiskGroups)
   }
 
   const save = async () => {
-    const txId = await props.createTransaction(`Add risk groups`, 'addRiskGroups', [
-      props.tinlake,
-      JSON.parse(JSON.stringify(riskGroups)),
-    ])
+    const txId = await props.createTransaction(
+      `Save ${riskGroups.length} risk group${riskGroups.length > 1 ? 's' : ''}`,
+      'addRiskGroups',
+      [props.tinlake, [...riskGroups]]
+    )
     setRiskGroupTxId(txId)
   }
 
-  const getEvents = async () => {
-    console.log('get events')
-    const poolAdmin = props.tinlake.contract('POOL_ADMIN')
-    console.log(poolAdmin.filters)
-    const eventFilter = poolAdmin.filters.AddRiskGroup()
-    const events = await poolAdmin.queryFilter(eventFilter)
-
-    events
-      .filter((e) => e !== undefined)
-      .map((log) => {
-        return poolAdmin.interface.parseLog(log)
-      })
-      .forEach((log: ethers.utils.LogDescription) => {
-        console.log(`${log.name}`)
-        log.args.forEach((arg: any) => {
-          console.log(`- ${arg.toString()}`)
-        })
-      })
-  }
-
   React.useEffect(() => {
-    getEvents()
-  }, [])
+    if (riskGroupStatus === 'succeeded') {
+      refetchPoolData()
+    }
+  }, [riskGroupStatus])
 
   return poolData && poolData.risk && poolData.writeOffGroups ? (
     <Box>
@@ -115,71 +104,79 @@ const Risk: React.FC<Props> = (props: Props) => {
               </TableRow>
             ))}
 
-            {poolData?.adminLevel && poolData.adminLevel >= 2 && riskGroups[0] && (
-              <TableRow>
-                <TableCell>{existingRiskGroups.length}</TableCell>
-                <TableCell>
-                  <FormField margin={{ right: 'small' }}>
-                    <NumberInput
-                      value={baseToDisplay(riskGroups[0]?.ceilingRatio || new BN(0), 25)}
-                      suffix="%"
-                      max={100}
-                      precision={0}
-                      onValueChange={({ value }) => update(0, 'ceilingRatio', value)}
-                      plain
-                    />
-                  </FormField>
-                </TableCell>
-                <TableCell>
-                  <FormField margin={{ right: 'small' }}>
-                    <NumberInput
-                      value={baseToDisplay(riskGroups[0]?.rate || new BN(0), 25)}
-                      suffix="%"
-                      max={100}
-                      precision={2}
-                      onValueChange={({ value }) => update(0, 'rate', value)}
-                      plain
-                    />
-                  </FormField>
-                </TableCell>
-                <TableCell>
-                  <FormField margin={{ right: 'small' }}>
-                    <NumberInput
-                      value={baseToDisplay(riskGroups[0]?.recoveryRatePD || new BN(0), 25)}
-                      suffix="%"
-                      max={100}
-                      precision={3}
-                      onValueChange={({ value }) => update(0, 'recoveryRatePD', value)}
-                      plain
-                    />
-                  </FormField>
-                </TableCell>
-                <TableCell>
-                  <FormField margin={{ right: 'small' }}>
-                    <NumberInput
-                      value={baseToDisplay(riskGroups[0]?.thresholdRatio || new BN(0), 25)}
-                      suffix="%"
-                      max={100}
-                      precision={0}
-                      onValueChange={({ value }) => update(0, 'thresholdRatio', value)}
-                      plain
-                    />
-                  </FormField>
-                </TableCell>
-              </TableRow>
+            {poolData?.adminLevel && poolData.adminLevel >= 2 && (
+              <>
+                {riskGroups.map((riskGroup: IRiskGroup, id: number) => (
+                  <TableRow>
+                    <TableCell>{riskGroup.id}</TableCell>
+                    <TableCell>
+                      <FormField margin={{ right: 'small' }}>
+                        <NumberInput
+                          value={baseToDisplay(riskGroup.ceilingRatio || new BN(0), 25)}
+                          suffix="%"
+                          max={100}
+                          precision={0}
+                          onValueChange={({ value }) => update(id, 'ceilingRatio', value)}
+                          plain
+                        />
+                      </FormField>
+                    </TableCell>
+                    <TableCell>
+                      <FormField margin={{ right: 'small' }}>
+                        <NumberInput
+                          value={feeToInterestRate((riskGroup.rate || new BN(0)).toString())}
+                          suffix="%"
+                          max={100}
+                          precision={2}
+                          onValueChange={({ value }) => update(id, 'rate', value)}
+                          plain
+                        />
+                      </FormField>
+                    </TableCell>
+                    <TableCell>
+                      <FormField margin={{ right: 'small' }}>
+                        <NumberInput
+                          value={baseToDisplay(riskGroup.recoveryRatePD || new BN(0), 25)}
+                          suffix="%"
+                          max={100}
+                          precision={3}
+                          onValueChange={({ value }) => update(id, 'recoveryRatePD', value)}
+                          plain
+                        />
+                      </FormField>
+                    </TableCell>
+                    <TableCell>
+                      <FormField margin={{ right: 'small' }}>
+                        <NumberInput
+                          value={baseToDisplay(riskGroup.thresholdRatio || new BN(0), 25)}
+                          suffix="%"
+                          max={100}
+                          precision={0}
+                          onValueChange={({ value }) => update(id, 'thresholdRatio', value)}
+                          plain
+                        />
+                      </FormField>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
             )}
           </TableBody>
         </Table>
 
+        <Alert margin={{ top: 'medium' }} type="info">
+          Note: risk groups &amp; write-off groups can only be added, they cannot be edited or removed.
+        </Alert>
+
         {poolData?.adminLevel && poolData.adminLevel >= 2 && (
           <Box margin={{ top: 'medium' }}>
             <div style={{ marginLeft: 'auto' }}>
-              <Button secondary label="Add" onClick={() => add()} margin={{ right: '24px' }} />
+              <Button secondary label="Add another" onClick={() => add()} margin={{ right: '24px' }} />
               <Button
                 primary
-                label="Save risk groups"
+                label={`Save ${riskGroups.length} risk group${riskGroups.length !== 1 ? 's' : ''}`}
                 onClick={() => save()}
-                disabled={riskGroupStatus === 'unconfirmed' || riskGroupStatus === 'pending'}
+                disabled={riskGroups.length === 0 || riskGroupStatus === 'unconfirmed' || riskGroupStatus === 'pending'}
               />
             </div>
           </Box>

@@ -14,6 +14,8 @@ interface Props extends TransactionProps {
   tinlake: ITinlake
 }
 
+const ignoredEvents = ['Rely', 'Deny', 'Depend']
+
 const AuditLog: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
@@ -22,8 +24,15 @@ const AuditLog: React.FC<Props> = (props: Props) => {
 
   const getEvents = async () => {
     const poolAdmin = props.tinlake.contract('POOL_ADMIN')
-    const eventFilter = poolAdmin.filters.AddRiskGroup()
-    const newEvents = (await poolAdmin.queryFilter(eventFilter)).filter((e) => e !== undefined)
+    const eventFilter = {
+      address: poolAdmin.address,
+      fromBlock: props.tinlake.provider.getBlockNumber().then((b) => b - 10000),
+      toBlock: 'latest',
+    }
+    const newEvents = (await poolAdmin.queryFilter(eventFilter))
+      .filter((e) => e !== undefined)
+      .filter((e) => e.event && !ignoredEvents.includes(e.event))
+      .reverse()
 
     setEvents(newEvents)
 
@@ -47,11 +56,11 @@ const AuditLog: React.FC<Props> = (props: Props) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableCell size="30%">#</TableCell>
+              <TableCell size="5%">#</TableCell>
               <TableCell size="30%" pad={{ vertical: '6px' }}>
                 Event
               </TableCell>
-              <TableCell size="30%" pad={{ vertical: '6px' }}>
+              <TableCell size="30%" pad={{ vertical: '6px' }} style={{ textAlign: 'right' }}>
                 Transaction
               </TableCell>
             </TableRow>
@@ -60,8 +69,8 @@ const AuditLog: React.FC<Props> = (props: Props) => {
             {logs.map((log: ethers.utils.LogDescription, id: number) => (
               <TableRow>
                 <TableCell>{logs.length - id}</TableCell>
-                <TableCell>{log.name}</TableCell>
-                <TableCell>
+                <TableCell>{truncateString(`${log.name}(${log.args.join(',')})`, 75)}</TableCell>
+                <TableCell style={{ textAlign: 'right' }}>
                   <DisplayFieldWrapper>
                     <DisplayField
                       copy={true}
@@ -88,7 +97,16 @@ export default connect((state) => state, { createTransaction })(AuditLog)
 const DisplayFieldWrapper = styled.div`
   width: 100%;
   max-width: 200px;
+  margin-left: auto;
   > div {
     padding: 0;
   }
 `
+
+const truncateString = (txt: string, num: number) => {
+  if (txt.length > num) {
+    return txt.slice(0, num) + '...'
+  } else {
+    return txt
+  }
+}

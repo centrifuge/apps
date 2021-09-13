@@ -246,7 +246,9 @@ export function selectWalletTransactions(state?: TransactionState): WalletTransa
     .sort(sortByMostRecent)
     .map((tx: Transaction) => {
       const externalLink = tx.hash
-        ? `https://${config.network === 'Kovan' ? 'kovan.' : ''}etherscan.io/tx/${tx.hash}`
+        ? `https://${
+            config.network === 'Kovan' ? 'kovan.' : config.network === 'Goerli' ? 'goerli.' : ''
+          }etherscan.io/tx/${tx.hash}`
         : undefined
 
       return {

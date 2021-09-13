@@ -91,8 +91,8 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   return (
     <>
       {poolData && (
-        <Card p="medium" mb="medium" width="700px">
-          <Box direction="row" margin={{ bottom: 'medium' }} justify="between">
+        <Card p="medium" mb="medium">
+          <Box direction="row" margin={{ bottom: 'medium' }} justify="between" width="700px">
             <Box margin={{ top: 'small', bottom: 'small' }}>
               <Heading level="5" margin={{ top: '0' }}>
                 Min TIN risk buffer
@@ -114,7 +114,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
             </FormField>
           </Box>
 
-          <Box direction="row" margin={{ bottom: 'medium' }} justify="between">
+          <Box direction="row" margin={{ bottom: 'medium' }} justify="between" width="700px">
             <Box margin={{ top: 'small', bottom: 'small' }}>
               <Heading level="5" margin={{ top: '0' }}>
                 Max TIN risk buffer
@@ -136,7 +136,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
             </FormField>
           </Box>
 
-          <Box direction="row" margin={{ bottom: 'medium' }} justify="between">
+          <Box direction="row" margin={{ bottom: 'medium' }} justify="between" width="700px">
             <Box margin={{ top: 'small', bottom: 'small' }}>
               <Heading level="5" margin={{ top: '0' }}>
                 DROP APR
@@ -158,7 +158,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
             </FormField>
           </Box>
 
-          <Box direction="row" justify="between">
+          <Box direction="row" justify="between" width="700px">
             <Box margin={{ top: 'small', bottom: 'small' }}>
               <Heading level="5" margin={{ top: '0' }}>
                 Discount rate
