@@ -10,7 +10,6 @@ import { Shelf } from '../../components/Layout'
 import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import PageTitle from '../../components/PageTitle'
-import { useTinlake } from '../../components/TinlakeProvider'
 import { ValueDisplay } from '../../components/ValueDisplay'
 import { IpfsPools } from '../../config'
 import { AuthState, ensureAuthed } from '../../ducks/auth'
@@ -32,7 +31,6 @@ interface Props {
 }
 
 const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
-  const tinlake = useTinlake()
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const rewards = useGlobalRewards()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
@@ -145,7 +143,7 @@ const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
                   <Card>
                     <Box pad="medium">
                       <Head>Link Your Centrifuge Chain Account</Head>
-                      <SetCentAccount tinlake={tinlake} />
+                      <SetCentAccount />
                     </Box>
                   </Card>
                 )}
