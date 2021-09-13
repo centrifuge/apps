@@ -42,7 +42,6 @@ const ManagementPage: React.FC<Props> = ({ pool, ipfsPools }) => {
                   contractConfig={pool.contractConfig}
                   render={(tinlake) => (
                     <Auth
-                      tinlake={tinlake}
                       render={() => (
                         <Box>
                           <PoolManagement tinlake={tinlake} activePool={pool} />

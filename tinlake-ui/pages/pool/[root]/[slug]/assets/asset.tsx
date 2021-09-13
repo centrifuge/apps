@@ -53,7 +53,6 @@ const LoanPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
                   contractConfig={pool.contractConfig}
                   render={(tinlake) => (
                     <Auth
-                      tinlake={tinlake}
                       render={(auth) => (
                         <>
                           <PageTitle

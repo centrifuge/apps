@@ -46,7 +46,6 @@ const Pool: React.FC<Props> = ({ pool, ipfsPools }) => {
                   contractConfig={'contractConfig' in pool ? pool.contractConfig : undefined}
                   render={(tinlake) => (
                     <Auth
-                      tinlake={tinlake}
                       render={() =>
                         'isArchived' in pool ? (
                           <Archived selectedPool={pool} />

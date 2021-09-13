@@ -45,7 +45,6 @@ const ValueNFTPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
                   contractConfig={pool.contractConfig}
                   render={(tinlake) => (
                     <Auth
-                      tinlake={tinlake}
                       render={(auth) => (
                         <Box>
                           <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>

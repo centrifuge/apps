@@ -56,7 +56,6 @@ const LoanListPage: React.FC<Props> = (props) => {
               contractConfig={pool.contractConfig}
               render={(tinlake) => (
                 <Auth
-                  tinlake={tinlake}
                   render={(auth) => (
                     <>
                       <PageTitle

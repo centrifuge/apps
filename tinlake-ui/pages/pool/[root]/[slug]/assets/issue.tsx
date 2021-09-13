@@ -43,7 +43,6 @@ const LoanIssuePage: React.FC<Props> = ({ pool, ipfsPools }) => {
                   contractConfig={pool.contractConfig}
                   render={(tinlake) => (
                     <Auth
-                      tinlake={tinlake}
                       render={(auth) => (
                         <Box margin={{ top: 'medium' }}>
                           <PageTitle pool={pool} page={`Lock NFT`} parentPage="Assets" parentPageHref="/assets" />

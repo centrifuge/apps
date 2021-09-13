@@ -7,7 +7,6 @@ import Header from '../components/Header'
 import { IpfsPoolsProvider } from '../components/IpfsPoolsProvider'
 import { TinlakeProvider } from '../components/TinlakeProvider'
 import WithFooter from '../components/WithFooter'
-import WithTinlake from '../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS } from '../config'
 import DataQuery from '../containers/DataQuery'
 
@@ -24,7 +23,7 @@ const Query: React.FC<Props> = (props: Props) => {
           <Container style={{ backgroundColor: '#f9f9f9' }}>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <WithTinlake render={(tinlake) => <Auth tinlake={tinlake} render={() => <DataQuery />} />} />
+                <Auth render={() => <DataQuery />} />
               </Box>
             </Box>
           </Container>
