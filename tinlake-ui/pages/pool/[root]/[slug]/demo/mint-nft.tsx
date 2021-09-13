@@ -10,7 +10,6 @@ import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
 import MintNFT from '../../../../../components/MintNFT'
 import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
-import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import { menuItems } from '../../../../../menuItems'
 
@@ -37,11 +36,7 @@ const MintNFTPage: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <WithTinlake
-                  addresses={pool.addresses}
-                  contractConfig={pool.contractConfig}
-                  render={(tinlake) => <Auth render={() => <MintNFT tinlake={tinlake} />} />}
-                />
+                <Auth render={() => <MintNFT />} />
               </Box>
             </Box>
           </Container>
