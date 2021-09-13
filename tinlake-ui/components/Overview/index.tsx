@@ -1,5 +1,4 @@
 import { Modal } from '@centrifuge/axis-modal'
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Heading, Paragraph } from 'grommet'
 import { Catalog, Chat, Globe, StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import * as React from 'react'
@@ -13,7 +12,6 @@ import OverviewHeader from './OverviewHeader'
 
 interface Props {
   selectedPool: Pool | UpcomingPool
-  tinlake: ITinlake
 }
 
 const Overview: React.FC<Props> = (props: Props) => {
@@ -35,7 +33,7 @@ const Overview: React.FC<Props> = (props: Props) => {
       {!isUpcoming && (
         <div>
           <PageTitle pool={props.selectedPool} page="Overview" />
-          <OverviewHeader selectedPool={props.selectedPool as Pool} tinlake={props.tinlake} />
+          <OverviewHeader selectedPool={props.selectedPool as Pool} />
         </div>
       )}
       {/* <Box direction="row" gap="small">
@@ -115,7 +113,7 @@ const Overview: React.FC<Props> = (props: Props) => {
       </Box> */}
       <div>
         <Heading level="4">Pool Balance</Heading>
-        <InvestmentOverview selectedPool={props.selectedPool} tinlake={props.tinlake} />
+        <InvestmentOverview selectedPool={props.selectedPool} />
       </div>
 
       <Modal

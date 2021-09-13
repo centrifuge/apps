@@ -10,7 +10,6 @@ import Overview from '../../../components/Overview'
 import Archived from '../../../components/Overview/Archived'
 import { TinlakeProvider } from '../../../components/TinlakeProvider'
 import WithFooter from '../../../components/WithFooter'
-import WithTinlake from '../../../components/WithTinlake'
 import { ArchivedPool, IpfsPools, loadPoolsFromIPFS, Pool as LivePool, UpcomingPool } from '../../../config'
 import { menuItems, noDemo } from '../../../menuItems'
 
@@ -41,20 +40,10 @@ const Pool: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <WithTinlake
-                  addresses={'addresses' in pool ? pool.addresses : undefined}
-                  contractConfig={'contractConfig' in pool ? pool.contractConfig : undefined}
-                  render={(tinlake) => (
-                    <Auth
-                      render={() =>
-                        'isArchived' in pool ? (
-                          <Archived selectedPool={pool} />
-                        ) : (
-                          <Overview tinlake={tinlake} selectedPool={pool} />
-                        )
-                      }
-                    />
-                  )}
+                <Auth
+                  render={() =>
+                    'isArchived' in pool ? <Archived selectedPool={pool} /> : <Overview selectedPool={pool} />
+                  }
                 />
               </Box>
             </Box>
