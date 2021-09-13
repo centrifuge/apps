@@ -13,6 +13,7 @@ import InvestAction from '../../../components/InvestAction'
 import { Box, Shelf } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { PoolLink } from '../../../components/PoolLink'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
 import config, { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
@@ -31,7 +32,6 @@ import { AddWalletLink, Info, MinTimeRemaining, Sidenote, TokenLogo, Warning } f
 interface Props {
   pool?: Pool
   tranche: 'senior' | 'junior'
-  tinlake: ITinlake
 }
 
 export type Card = 'home' | 'collect' | 'order' | 'invest' | 'redeem'
@@ -70,8 +70,9 @@ function useTrancheData(tinlake: ITinlake, tranche: 'senior' | 'junior', address
 }
 
 const TrancheOverview: React.FC<Props> = (props: Props) => {
-  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
-  const { data: epochData } = useEpoch(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const tinlake = useTinlake()
+  const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
+  const { data: epochData } = useEpoch(tinlake.contractAddresses.ROOT_CONTRACT)
   const trancheData = props.tranche === 'senior' ? poolData?.senior : poolData?.junior
 
   const router = useRouter()
@@ -81,7 +82,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const {
     data: { balance, tokenPrice, disbursements, hasPendingOrder, hasPendingCollection } = {},
     refetch: refetchTrancheData,
-  } = useTrancheData(props.tinlake, props.tranche, address)
+  } = useTrancheData(tinlake, props.tranche, address)
 
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
 
@@ -103,7 +104,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   const dispatch = useDispatch()
 
-  const { dropYield } = useTrancheYield(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const { dropYield } = useTrancheYield(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const connect = () => {
     dispatch(ensureAuthed())
@@ -266,7 +267,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               <OrderCard
                 {...props}
                 selectedPool={props.pool}
-                tinlake={props.tinlake}
                 setCard={setCard}
                 disbursements={disbursements}
                 tokenPrice={tokenPrice || '0'}
@@ -287,7 +287,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               <InvestCard
                 selectedPool={props.pool}
                 tranche={props.tranche}
-                tinlake={props.tinlake}
                 setCard={setCard}
                 updateTrancheData={refetchTrancheData}
               />

@@ -6,6 +6,7 @@ import { connect } from 'react-redux'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Box } from '../../../components/Layout'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -19,11 +20,11 @@ interface Props extends TransactionProps {
   setCard: (card: Card) => void
   disbursements: any
   tokenPrice: string
-  tinlake: any
   updateTrancheData: () => void
 }
 
 const CollectCard: React.FC<Props> = (props: Props) => {
+  const tinlake = useTinlake()
   const type = props.disbursements.payoutCurrencyAmount.isZero() ? 'Invest' : 'Redeem'
   const token =
     type === 'Invest'
@@ -48,7 +49,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
     const formatted = addThousandsSeparators(valueToDecimal.toString())
 
     const method = props.tranche === 'senior' ? 'disburseSenior' : 'disburseJunior'
-    const txId = await props.createTransaction(`Collect ${formatted} ${token}`, method, [props.tinlake])
+    const txId = await props.createTransaction(`Collect ${formatted} ${token}`, method, [tinlake])
     setTxId(txId)
   }
 

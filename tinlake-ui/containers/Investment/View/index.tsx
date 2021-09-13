@@ -1,4 +1,3 @@
-import { ITinlake } from '@centrifuge/tinlake-js'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { SectionHeading } from '../../../components/Heading'
@@ -13,7 +12,6 @@ import TrancheOverview from './TrancheOverview'
 
 interface Props {
   activePool: Pool
-  tinlake: ITinlake
   auth?: AuthState
 }
 
@@ -29,10 +27,10 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
       <Stack gap={['medium', 'xxlarge']}>
         <Wrap gap="medium" alignItems="flex-start" justifyContent="space-between">
           <Box flex="1 1 400px" maxWidth={['100%', '100%', '420px']}>
-            <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="senior" />
+            <TrancheOverview pool={props.activePool} tranche="senior" />
           </Box>
           <Box flex="1 1 400px" maxWidth={['100%', '100%', '420px']}>
-            <TrancheOverview pool={props.activePool} tinlake={props.tinlake} tranche="junior" />
+            <TrancheOverview pool={props.activePool} tranche="junior" />
           </Box>
         </Wrap>
 
@@ -41,14 +39,14 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
         {canManagePermissions && (
           <Stack gap="medium">
             <SectionHeading>Manage members for {props.activePool?.metadata.name}</SectionHeading>
-            <ManageMemberlist tinlake={props.tinlake} />
+            <ManageMemberlist />
           </Stack>
         )}
 
         {isAdmin && (
           <Stack gap="medium">
             <SectionHeading>Admin actions for {props.activePool?.metadata.name}</SectionHeading>
-            <AdminActions tinlake={props.tinlake} />
+            <AdminActions />
           </Stack>
         )}
       </Stack>

@@ -1,5 +1,5 @@
 import { TokenInput } from '@centrifuge/axis-token-input'
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Heading } from 'grommet'
@@ -9,6 +9,7 @@ import { connect, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -35,11 +36,11 @@ interface Props extends TransactionProps {
   selectedPool?: Pool
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
-  tinlake: ITinlake
   updateTrancheData: () => void
 }
 
 const RedeemCard: React.FC<Props> = (props: Props) => {
+  const tinlake = useTinlake()
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
   const [tokenValue, setTokenValue] = React.useState('0')
 
@@ -48,18 +49,18 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     async function getLimit() {
-      const user = await props.tinlake.signer?.getAddress()
+      const user = await tinlake.signer?.getAddress()
       if (user) {
         // TODO: get token balance
         const balance =
           props.tranche === 'senior'
-            ? await props.tinlake.getSeniorTokenBalance(user)
-            : await props.tinlake.getJuniorTokenBalance(user)
+            ? await tinlake.getSeniorTokenBalance(user)
+            : await tinlake.getJuniorTokenBalance(user)
         setLimit(balance.toString())
       }
     }
     getLimit()
-  }, [props.tinlake])
+  }, [tinlake])
 
   const [status, , setTxId] = useTransactionState()
 
@@ -70,7 +71,7 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
     const method = props.tranche === 'senior' ? 'submitSeniorRedeemOrder' : 'submitJuniorRedeemOrder'
     const skipSigning = authProvider !== 'MetaMask' // Ledger & Portis don't support EIP-712
     const txId = await props.createTransaction(`Lock ${formatted} ${token} for redemption`, method, [
-      props.tinlake,
+      tinlake,
       tokenValue,
       skipSigning,
     ])
