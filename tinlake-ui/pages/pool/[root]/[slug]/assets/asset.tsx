@@ -11,7 +11,6 @@ import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
 import PageTitle from '../../../../../components/PageTitle'
 import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
-import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import LoanView from '../../../../../containers/Loan/View'
 import { menuItems } from '../../../../../menuItems'
@@ -56,18 +55,12 @@ const LoanPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
                   // }
                 />
 
-                <WithTinlake
-                  addresses={pool.addresses}
-                  contractConfig={pool.contractConfig}
-                  render={(tinlake) => (
-                    <Auth
-                      render={(auth) => (
-                        <Box>
-                          {assetId && <LoanView auth={auth} tinlake={tinlake} poolConfig={pool} loanId={assetId} />}
-                          {!assetId && <div>Loading...</div>}
-                        </Box>
-                      )}
-                    />
+                <Auth
+                  render={(auth) => (
+                    <Box>
+                      {assetId && <LoanView auth={auth} poolConfig={pool} loanId={assetId} />}
+                      {!assetId && <div>Loading...</div>}
+                    </Box>
                   )}
                 />
               </Box>
