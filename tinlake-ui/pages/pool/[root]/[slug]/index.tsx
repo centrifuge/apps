@@ -40,9 +40,7 @@ const Pool: React.FC<Props> = ({ pool, ipfsPools }) => {
                 <WithTinlake
                   addresses={pool.addresses}
                   contractConfig={pool.contractConfig}
-                  render={(tinlake) => (
-                    <Auth tinlake={tinlake} render={() => <Overview tinlake={tinlake} selectedPool={pool} />} />
-                  )}
+                  render={(tinlake) => <Auth render={() => <Overview tinlake={tinlake} selectedPool={pool} />} />}
                 />
               </Box>
             </Box>

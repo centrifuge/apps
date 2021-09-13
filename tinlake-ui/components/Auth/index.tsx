@@ -4,17 +4,18 @@ import { connect } from 'react-redux'
 import config from '../../config'
 import { AuthState, load } from '../../ducks/auth'
 import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
+import { useTinlake } from '../TinlakeProvider'
 import WrongNetwork from '../WrongNetwork'
 
 interface Props {
-  tinlake: ITinlake
   render: (auth: AuthState) => JSX.Element
   auth?: AuthState
   load?: (tinlake: ITinlake, debugAddress: string | null) => Promise<void>
 }
 
-const Auth = ({ auth, load, render, tinlake }: Props): JSX.Element => {
+const Auth = ({ auth, load, render }: Props): JSX.Element => {
   const debugAddress = useQueryDebugEthAddress()
+  const tinlake = useTinlake()
 
   React.useEffect(() => {
     load!(tinlake, debugAddress)

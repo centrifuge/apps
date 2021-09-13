@@ -8,7 +8,6 @@ import Container from '../../../components/Container'
 import Header from '../../../components/Header'
 import { TinlakeProvider } from '../../../components/TinlakeProvider'
 import WithFooter from '../../../components/WithFooter'
-import WithTinlake from '../../../components/WithTinlake'
 import { loadPoolsFromIPFS, Pool } from '../../../config'
 import OnboardingSteps from '../../../containers/Onboarding/OnboardingSteps'
 
@@ -34,42 +33,35 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
         <Container>
           <Box justify="center" direction="row">
             <Box width="xlarge">
-              <WithTinlake
-                addresses={props.pool.addresses}
-                contractConfig={props.pool.contractConfig}
-                render={(tinlake) => (
-                  <Auth
-                    tinlake={tinlake}
-                    render={() => (
-                      <OnboardingSteps
-                        hidePageTitle={true}
-                        activePool={{
-                          network: 'mainnet',
-                          version: 3,
-                          isUpcoming: false,
-                          addresses: {
-                            ROOT_CONTRACT: props.market,
-                            ACTIONS: '0x0',
-                            PROXY_REGISTRY: '0x0',
-                            COLLATERAL_NFT: '0x0',
-                            SENIOR_TOKEN: '0x0',
-                            JUNIOR_TOKEN: '0x0',
-                            CLERK: '0x0',
-                            ASSESSOR: '0x0',
-                            RESERVE: '0x0',
-                            SENIOR_TRANCHE: '0x0',
-                            JUNIOR_TRANCHE: '0x0',
-                            FEED: '0x0',
-                            POOL_ADMIN: '0x0',
-                            SENIOR_MEMBERLIST: '0x0',
-                            JUNIOR_MEMBERLIST: '0x0',
-                            COORDINATOR: '0x0',
-                            PILE: '0x0',
-                          },
-                          metadata: { name: 'Aave', slug: 'aave', asset: '-' },
-                        }}
-                      />
-                    )}
+              <Auth
+                render={() => (
+                  <OnboardingSteps
+                    hidePageTitle={true}
+                    activePool={{
+                      network: 'mainnet',
+                      version: 3,
+                      isUpcoming: false,
+                      addresses: {
+                        ROOT_CONTRACT: props.market,
+                        ACTIONS: '0x0',
+                        PROXY_REGISTRY: '0x0',
+                        COLLATERAL_NFT: '0x0',
+                        SENIOR_TOKEN: '0x0',
+                        JUNIOR_TOKEN: '0x0',
+                        CLERK: '0x0',
+                        ASSESSOR: '0x0',
+                        RESERVE: '0x0',
+                        SENIOR_TRANCHE: '0x0',
+                        JUNIOR_TRANCHE: '0x0',
+                        FEED: '0x0',
+                        POOL_ADMIN: '0x0',
+                        SENIOR_MEMBERLIST: '0x0',
+                        JUNIOR_MEMBERLIST: '0x0',
+                        COORDINATOR: '0x0',
+                        PILE: '0x0',
+                      },
+                      metadata: { name: 'Aave', slug: 'aave', asset: '-' },
+                    }}
                   />
                 )}
               />

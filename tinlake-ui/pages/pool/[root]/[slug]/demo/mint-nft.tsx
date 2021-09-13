@@ -40,7 +40,7 @@ const MintNFTPage: React.FC<Props> = ({ pool, ipfsPools }) => {
                 <WithTinlake
                   addresses={pool.addresses}
                   contractConfig={pool.contractConfig}
-                  render={(tinlake) => <Auth tinlake={tinlake} render={() => <MintNFT tinlake={tinlake} />} />}
+                  render={(tinlake) => <Auth render={() => <MintNFT tinlake={tinlake} />} />}
                 />
               </Box>
             </Box>

@@ -26,10 +26,7 @@ const Home: React.FC<Props> = (props: Props) => {
               <Box width="xlarge">
                 <WithTinlake
                   render={(tinlake) => (
-                    <Auth
-                      tinlake={tinlake}
-                      render={() => <Dashboard ipfsPools={props.ipfsPools} tinlake={tinlake} />}
-                    />
+                    <Auth render={() => <Dashboard ipfsPools={props.ipfsPools} tinlake={tinlake} />} />
                   )}
                 />
               </Box>

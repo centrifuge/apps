@@ -42,7 +42,6 @@ const InvestmentPage: React.FC<Props> = ({ pool, ipfsPools }) => {
                   contractConfig={pool.contractConfig}
                   render={(tinlake) => (
                     <Auth
-                      tinlake={tinlake}
                       render={() => (
                         <Box>
                           <InvestmentsView activePool={pool} tinlake={tinlake} />
