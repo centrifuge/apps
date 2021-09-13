@@ -9,7 +9,6 @@ import { IpfsPoolsProvider } from '../../../../components/IpfsPoolsProvider'
 import Overview from '../../../../components/Overview'
 import { TinlakeProvider } from '../../../../components/TinlakeProvider'
 import WithFooter from '../../../../components/WithFooter'
-import WithTinlake from '../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool as IPool } from '../../../../config'
 import { menuItems } from '../../../../menuItems'
 
@@ -37,11 +36,7 @@ const Pool: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <WithTinlake
-                  addresses={pool.addresses}
-                  contractConfig={pool.contractConfig}
-                  render={(tinlake) => <Auth render={() => <Overview tinlake={tinlake} selectedPool={pool} />} />}
-                />
+                <Auth render={() => <Overview selectedPool={pool} />} />
               </Box>
             </Box>
           </Container>
