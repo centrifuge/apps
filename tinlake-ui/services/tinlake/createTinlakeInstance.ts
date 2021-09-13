@@ -9,7 +9,7 @@ export function createTinlakeInstance({
   addresses,
   contractConfig,
 }: {
-  addresses: ContractAddresses
+  addresses?: ContractAddresses
   contractConfig?: any | null
 }): ITinlake {
   const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
