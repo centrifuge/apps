@@ -11,7 +11,6 @@ import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
 import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import ValueNFT from '../../../../../components/ValueNFT'
 import WithFooter from '../../../../../components/WithFooter'
-import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import { menuItems } from '../../../../../menuItems'
 
@@ -40,21 +39,15 @@ const ValueNFTPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <WithTinlake
-                  addresses={pool.addresses}
-                  contractConfig={pool.contractConfig}
-                  render={(tinlake) => (
-                    <Auth
-                      render={(auth) => (
-                        <Box>
-                          <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
-                            <BackLink href={'/assets'} />
-                            <Heading level="4">Value NFT</Heading>
-                          </Box>
-                          <ValueNFT tinlake={tinlake} auth={auth} tokenId={tokenId} registry={registry} />
-                        </Box>
-                      )}
-                    />
+                <Auth
+                  render={(auth) => (
+                    <Box>
+                      <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
+                        <BackLink href={'/assets'} />
+                        <Heading level="4">Value NFT</Heading>
+                      </Box>
+                      <ValueNFT auth={auth} tokenId={tokenId} registry={registry} />
+                    </Box>
                   )}
                 />
               </Box>

@@ -1,5 +1,5 @@
 import { Spinner } from '@centrifuge/axis-spinner'
-import { baseToDisplay, displayToBase, ITinlake, NFT } from '@centrifuge/tinlake-js'
+import { baseToDisplay, displayToBase, NFT } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, DateInput, FormField, TextInput } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
@@ -12,9 +12,9 @@ import { Card } from '../Card'
 import NftData from '../NftData'
 import NumberInput from '../NumberInput'
 import { PoolLink } from '../PoolLink'
+import { useTinlake } from '../TinlakeProvider'
 
 interface Props extends TransactionProps {
-  tinlake: ITinlake
   tokenId: string
   registry: string
   auth: AuthState
@@ -25,6 +25,7 @@ interface Props extends TransactionProps {
 const DAYS = 24 * 60 * 60 * 1000
 
 const ValueNFT: React.FC<Props> = (props: Props) => {
+  const tinlake = useTinlake()
   const [registry, setRegistry] = React.useState('')
   const [tokenId, setTokenId] = React.useState('')
   const [value, setValue] = React.useState('800000000000000000000')
@@ -53,7 +54,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
 
   const getNFT = async (currentRegistry: string, currentTokenId: string) => {
     if (currentTokenId && currentTokenId.length > 0) {
-      const result = await getNFTAction(currentRegistry, props.tinlake, currentTokenId)
+      const result = await getNFTAction(currentRegistry, tinlake, currentTokenId)
       const { tokenId, nft, errorMessage } = result as Partial<{ tokenId: string; nft: NFT; errorMessage: string }>
       if (tokenId !== currentTokenId) {
         return
@@ -72,10 +73,10 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   const valueNFT = async () => {
     await props.ensureAuthed!()
 
-    const nftFeedId = await props.tinlake.getNftFeedId(registry, tokenId)
+    const nftFeedId = await tinlake.getNftFeedId(registry, tokenId)
 
     const txId = await props.createTransaction(`Value NFT ${tokenId.slice(0, 4)}...`, 'updateNftFeed', [
-      props.tinlake,
+      tinlake,
       nftFeedId,
       value,
       riskGroup,
@@ -86,12 +87,12 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   const updateMaturityDate = async () => {
     await props.ensureAuthed!()
 
-    const nftFeedId = await props.tinlake.getNftFeedId(registry, tokenId)
+    const nftFeedId = await tinlake.getNftFeedId(registry, tokenId)
 
     const txId = await props.createTransaction(
       `Set maturity date for NFT ${tokenId.slice(0, 4)}...`,
       'setMaturityDate',
-      [props.tinlake, nftFeedId, Math.floor(new Date(maturityDate).getTime() / 1000)]
+      [tinlake, nftFeedId, Math.floor(new Date(maturityDate).getTime() / 1000)]
     )
     setTxIdSetMat(txId)
   }
