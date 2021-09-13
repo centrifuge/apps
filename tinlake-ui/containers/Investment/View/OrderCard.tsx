@@ -1,9 +1,10 @@
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import { Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -19,11 +20,11 @@ interface Props extends TransactionProps {
   setCard: (card: Card) => void
   disbursements: any
   tokenPrice: string
-  tinlake: ITinlake
   updateTrancheData: () => void
 }
 
 const OrderCard: React.FC<Props> = (props: Props) => {
+  const tinlake = useTinlake()
   const { data: epochData } = useEpoch(props.selectedPool?.addresses.ROOT_CONTRACT)
 
   const type = props.disbursements.remainingSupplyCurrency.isZero() ? 'Redeem' : 'Invest'
@@ -50,7 +51,7 @@ const OrderCard: React.FC<Props> = (props: Props) => {
     const txId = await props.createTransaction(
       `Cancel ${props.tranche === 'senior' ? 'DROP' : 'TIN'} ${type.toLowerCase()} order`,
       method,
-      [props.tinlake]
+      [tinlake]
     )
     setTxId(txId)
   }

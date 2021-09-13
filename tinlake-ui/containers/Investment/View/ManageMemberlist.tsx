@@ -1,4 +1,3 @@
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { FormField, Heading, TextInput } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
@@ -6,13 +5,13 @@ import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Card } from '../../../components/Card'
 import { Stack, Wrap } from '../../../components/Layout'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { usePool } from '../../../utils/usePool'
 
 const web3 = require('web3-utils')
 
 interface Props extends TransactionProps {
-  tinlake: ITinlake
   loadPool?: (tinlake: any) => Promise<void>
 }
 
@@ -21,7 +20,8 @@ type Tranche = 'junior' | 'senior'
 const getActionName = (tranche: Tranche) => (tranche === 'senior' ? 'updateSeniorMemberList' : 'updateJuniorMemberList')
 
 const ManageMemberlist: React.FC<Props> = (props: Props) => {
-  const pool = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const tinlake = useTinlake()
+  const pool = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [juniorAddress, setJuniorAddress] = React.useState('')
   const [seniorAddress, setSeniorAddress] = React.useState('')
@@ -39,11 +39,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
 
     const description = `Add ${address.substring(0, 8)}... to ${tranche === 'senior' ? 'DROP' : 'TIN'}`
 
-    const txId = await props.createTransaction(description, getActionName(tranche), [
-      props.tinlake,
-      address,
-      validUntil,
-    ])
+    const txId = await props.createTransaction(description, getActionName(tranche), [tinlake, address, validUntil])
 
     if (tranche === 'senior') setSeniorTxId(txId)
     else setJuniorTxId(txId)
@@ -63,11 +59,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
 
     const description = `Remove ${address.substring(0, 8)}... from ${tranche === 'senior' ? 'DROP' : 'TIN'}`
 
-    const txId = await props.createTransaction(description, getActionName(tranche), [
-      props.tinlake,
-      address,
-      validUntil,
-    ])
+    const txId = await props.createTransaction(description, getActionName(tranche), [tinlake, address, validUntil])
 
     if (tranche === 'senior') setSeniorTxId(txId)
     else setJuniorTxId(txId)

@@ -1,5 +1,5 @@
 import { TokenInput } from '@centrifuge/axis-token-input'
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Heading } from 'grommet'
@@ -8,6 +8,7 @@ import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import config, { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -19,7 +20,6 @@ interface Props extends TransactionProps {
   selectedPool?: Pool
   tranche: 'senior' | 'junior'
   setCard: (card: Card) => void
-  tinlake: ITinlake
   updateTrancheData: () => void
 }
 
@@ -27,6 +27,7 @@ const MinInvestment = new BN(config.network === 'Mainnet' ? 5000 : 10).mul(new B
 const OversubscribedBuffer = new BN(5000).mul(new BN(10).pow(new BN(18))) // 5k DAI
 
 const InvestCard: React.FC<Props> = (props: Props) => {
+  const tinlake = useTinlake()
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
   const [daiValue, setDaiValue] = React.useState('0')
 
@@ -39,7 +40,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   const authProvider = useSelector<any, string | null>((state) => state.auth.providerName)
   const [hasInvested, setHasInvested] = React.useState<boolean | undefined>(undefined)
 
-  const pool = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const pool = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const isOversubscribed =
     (pool.data &&
@@ -52,15 +53,15 @@ const InvestCard: React.FC<Props> = (props: Props) => {
     if (address) {
       setHasInvested(
         props.tranche === 'senior'
-          ? await props.tinlake.checkHasInvestedInSenior(address)
-          : await props.tinlake.checkHasInvestedInJunior(address)
+          ? await tinlake.checkHasInvestedInSenior(address)
+          : await tinlake.checkHasInvestedInJunior(address)
       )
     }
   }
 
   const getLimit = async () => {
     if (address) {
-      const balance = await props.tinlake.getCurrencyBalance(address)
+      const balance = await tinlake.getCurrencyBalance(address)
       setLimit(balance.toString())
     }
   }
@@ -68,7 +69,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     loadHasInvested()
     getLimit()
-  }, [props.tinlake.signer, address])
+  }, [tinlake.signer, address])
 
   const [status, , setTxId] = useTransactionState()
 
@@ -81,7 +82,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
     const txId = await props.createTransaction(
       `Lock ${formatted} ${props.selectedPool?.metadata.currencySymbol || 'DAI'} for ${token} investment`,
       method,
-      [props.tinlake, daiValue, skipSigning]
+      [tinlake, daiValue, skipSigning]
     )
     setTxId(txId)
   }
