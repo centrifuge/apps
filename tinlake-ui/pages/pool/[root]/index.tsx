@@ -8,6 +8,7 @@ import Header from '../../../components/Header'
 import { IpfsPoolsProvider } from '../../../components/IpfsPoolsProvider'
 import Overview from '../../../components/Overview'
 import Archived from '../../../components/Overview/Archived'
+import { TinlakeProvider } from '../../../components/TinlakeProvider'
 import WithFooter from '../../../components/WithFooter'
 import WithTinlake from '../../../components/WithTinlake'
 import { ArchivedPool, IpfsPools, loadPoolsFromIPFS, Pool as LivePool, UpcomingPool } from '../../../config'
@@ -23,39 +24,44 @@ interface Props {
 const Pool: React.FC<Props> = ({ pool, ipfsPools }) => {
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <WithFooter>
-        <Head>
-          <title>Pool Overview: {pool.metadata.name} | Tinlake | Centrifuge</title>
-        </Head>
-        <Header
-          ipfsPools={ipfsPools}
-          poolTitle={pool.metadata.shortName || pool.metadata.name}
-          selectedRoute={'/'}
-          menuItems={'isArchived' in pool || !('addresses' in pool) ? [] : menuItems.filter(noDemo)}
-        />
-        <Container>
-          <Box justify="center" direction="row">
-            <Box width="xlarge">
-              <WithTinlake
-                addresses={'addresses' in pool ? pool.addresses : undefined}
-                contractConfig={'contractConfig' in pool ? pool.contractConfig : undefined}
-                render={(tinlake) => (
-                  <Auth
-                    tinlake={tinlake}
-                    render={() =>
-                      'isArchived' in pool ? (
-                        <Archived selectedPool={pool} />
-                      ) : (
-                        <Overview tinlake={tinlake} selectedPool={pool} />
-                      )
-                    }
-                  />
-                )}
-              />
+      <TinlakeProvider
+        addresses={'addresses' in pool ? pool.addresses : undefined}
+        contractConfig={'contractConfig' in pool ? pool.contractConfig : undefined}
+      >
+        <WithFooter>
+          <Head>
+            <title>Pool Overview: {pool.metadata.name} | Tinlake | Centrifuge</title>
+          </Head>
+          <Header
+            ipfsPools={ipfsPools}
+            poolTitle={pool.metadata.shortName || pool.metadata.name}
+            selectedRoute={'/'}
+            menuItems={'isArchived' in pool || !('addresses' in pool) ? [] : menuItems.filter(noDemo)}
+          />
+          <Container>
+            <Box justify="center" direction="row">
+              <Box width="xlarge">
+                <WithTinlake
+                  addresses={'addresses' in pool ? pool.addresses : undefined}
+                  contractConfig={'contractConfig' in pool ? pool.contractConfig : undefined}
+                  render={(tinlake) => (
+                    <Auth
+                      tinlake={tinlake}
+                      render={() =>
+                        'isArchived' in pool ? (
+                          <Archived selectedPool={pool} />
+                        ) : (
+                          <Overview tinlake={tinlake} selectedPool={pool} />
+                        )
+                      }
+                    />
+                  )}
+                />
+              </Box>
             </Box>
-          </Box>
-        </Container>
-      </WithFooter>
+          </Container>
+        </WithFooter>
+      </TinlakeProvider>
     </IpfsPoolsProvider>
   )
 }
