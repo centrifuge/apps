@@ -1,4 +1,4 @@
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
 import { FormDown } from 'grommet-icons'
@@ -14,6 +14,7 @@ import { Divider } from '../../../components/Divider'
 import { SectionHeading } from '../../../components/Heading'
 import { Box, Stack, Wrap } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
 import { Pool } from '../../../config'
 import { AuthState } from '../../../ducks/auth'
@@ -28,7 +29,6 @@ import { usePool } from '../../../utils/usePool'
 import { Caret } from './styles'
 
 interface Props extends TransactionProps {
-  tinlake: ITinlake
   auth?: AuthState
   activePool?: Pool
 }
@@ -40,6 +40,7 @@ const percentFormatter = new Intl.NumberFormat('en-US', {
 
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const router = useRouter()
+  const tinlake = useTinlake()
   const { root } = router.query
 
   const { data: poolData } = usePool(root as string)
@@ -50,12 +51,12 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   const [status, , setTxId] = useTransactionState()
 
   const solve = async () => {
-    const txId = await props.createTransaction(`Close epoch ${epochData?.id}`, 'solveEpoch', [props.tinlake])
+    const txId = await props.createTransaction(`Close epoch ${epochData?.id}`, 'solveEpoch', [tinlake])
     setTxId(txId)
   }
 
   const execute = async () => {
-    const txId = await props.createTransaction(`Execute epoch ${epochData?.id}`, 'executeEpoch', [props.tinlake])
+    const txId = await props.createTransaction(`Execute epoch ${epochData?.id}`, 'executeEpoch', [tinlake])
     setTxId(txId)
   }
 
@@ -97,14 +98,14 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   const { data: solution } = useQuery(
     ['epochSolution', root],
     async () => {
-      const epochState = await props.tinlake.getEpochState(true)
+      const epochState = await tinlake.getEpochState(true)
       const orders = {
         tinRedeem: poolData?.junior?.pendingRedemptions || new BN(0),
         dropRedeem: poolData?.senior?.pendingRedemptions || new BN(0),
         tinInvest: poolData?.junior?.pendingInvestments || new BN(0),
         dropInvest: poolData?.senior?.pendingInvestments || new BN(0),
       }
-      const solution = await props.tinlake.runSolver(epochState, orders)
+      const solution = await tinlake.runSolver(epochState, orders)
       return solution
     },
     {

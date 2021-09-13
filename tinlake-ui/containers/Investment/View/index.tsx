@@ -36,7 +36,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
           </Box>
         </Wrap>
 
-        <EpochOverview tinlake={props.tinlake} activePool={props.activePool} />
+        <EpochOverview activePool={props.activePool} />
 
         {canManagePermissions && (
           <Stack gap="medium">

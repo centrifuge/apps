@@ -1,5 +1,5 @@
 import { TokenInput } from '@centrifuge/axis-token-input'
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Box, Button, Table, TableBody, TableCell, TableRow } from 'grommet'
@@ -9,6 +9,7 @@ import styled from 'styled-components'
 import Alert from '../../components/Alert'
 import { Card } from '../../components/Card'
 import { LoadingValue } from '../../components/LoadingValue'
+import { useTinlake } from '../../components/TinlakeProvider'
 import { Pool } from '../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
@@ -19,11 +20,11 @@ import { usePools } from '../../utils/usePools'
 
 interface Props extends TransactionProps {
   activePool: Pool
-  tinlake: ITinlake
 }
 
 const Liquidity: React.FC<Props> = (props: Props) => {
-  const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const tinlake = useTinlake()
+  const { data: poolData, refetch: refetchPoolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const pools = usePools()
   const poolListData = pools.data?.pools.find((p) => p.id === props.activePool.addresses.ROOT_CONTRACT)
@@ -78,7 +79,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
   const save = async () => {
     if (changedExternalCapacity && externalCapacity) {
       const maxReserve = new BN(externalCapacity).add(poolData?.maker?.remainingCredit || new BN(0)).toString()
-      const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [props.tinlake, maxReserve])
+      const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [tinlake, maxReserve])
       setTxId(txId)
     }
 
@@ -92,13 +93,13 @@ const Liquidity: React.FC<Props> = (props: Props) => {
 
       if (new BN(makerCapacity).gt(new BN(currentCreditline))) {
         const txId = await props.createTransaction(`Increase credit line to ${formatted}`, 'raiseCreditline', [
-          props.tinlake,
+          tinlake,
           amount.toString(),
         ])
         setCreditlineTxId(txId)
       } else {
         const txId = await props.createTransaction(`Lower credit line to ${formatted}`, 'sinkCreditline', [
-          props.tinlake,
+          tinlake,
           amount.toString(),
         ])
         setCreditlineTxId(txId)
