@@ -7,7 +7,8 @@ import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { Card } from '../../components/Card'
 import { createTransaction, TransactionProps } from '../../ducks/transactions'
-import { getTransactionLink } from '../../utils/etherscanLinkGenerator'
+import { dateToYMD } from '../../utils/date'
+import { getAddressLink, getTransactionLink } from '../../utils/etherscanLinkGenerator'
 import { formatAddress } from '../../utils/formatAddress'
 import { usePool } from '../../utils/usePool'
 
@@ -17,13 +18,15 @@ interface Props extends TransactionProps {
 
 const ignoredEvents = ['Depend']
 
-const logsPerPage = 10
+const logsPerPage = 8
 
 const AuditLog: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [events, setEvents] = React.useState([] as ethers.Event[])
   const [logs, setLogs] = React.useState([] as ethers.utils.LogDescription[])
+  const [transactions, setTransactions] = React.useState([] as ethers.providers.TransactionResponse[])
+  const [blocks, setBlocks] = React.useState([] as ethers.providers.Block[])
   const [start, setStart] = React.useState(0)
 
   const getEvents = async () => {
@@ -45,6 +48,12 @@ const AuditLog: React.FC<Props> = (props: Props) => {
         return poolAdmin.interface.parseLog(event)
       })
     )
+
+    const newTransactions = await Promise.all(events.map((e) => e.getTransaction()))
+    setTransactions(newTransactions)
+
+    const newBlocks = await Promise.all(events.map((e) => e.getBlock()))
+    setBlocks(newBlocks)
   }
 
   React.useEffect(() => {
@@ -60,32 +69,39 @@ const AuditLog: React.FC<Props> = (props: Props) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableCell size="5%">#</TableCell>
-              <TableCell size="30%" pad={{ vertical: '6px' }}>
+              <TableCell size="12%">Date</TableCell>
+              <TableCell size="14%">From</TableCell>
+              <TableCell size="66%" pad={{ vertical: '6px' }}>
                 Event
               </TableCell>
-              <TableCell size="30%" pad={{ vertical: '6px' }} style={{ textAlign: 'right' }}>
-                Transaction
+              <TableCell size="8%" pad={{ vertical: '6px' }} style={{ textAlign: 'right' }}>
+                &nbsp;
               </TableCell>
             </TableRow>
           </TableHeader>
           <TableBody>
             {logs.slice(start, start + logsPerPage).map((log: ethers.utils.LogDescription, id: number) => (
               <TableRow>
-                <TableCell>{logs.length - start - id}</TableCell>
+                <TableCell>{start + id in blocks && dateToYMD(blocks[start + id].timestamp)} &nbsp;</TableCell>
+                <TableCell>
+                  {start + id in transactions && (
+                    <DisplayFieldWrapper>
+                      <DisplayField
+                        as={'span'}
+                        value={formatAddress(transactions[start + id].from)}
+                        link={{
+                          href: getAddressLink(transactions[start + id].from),
+                          target: '_blank',
+                        }}
+                      />
+                    </DisplayFieldWrapper>
+                  )}
+                </TableCell>
                 <TableCell>{truncateString(generateLogName(log), 80)}</TableCell>
                 <TableCell style={{ textAlign: 'right' }}>
-                  <DisplayFieldWrapper>
-                    <DisplayField
-                      copy={true}
-                      as={'span'}
-                      value={events[id].transactionHash}
-                      link={{
-                        href: getTransactionLink(events[id].transactionHash),
-                        target: '_blank',
-                      }}
-                    />
-                  </DisplayFieldWrapper>
+                  <a href={getTransactionLink(events[start + id].transactionHash)} target="_blank">
+                    <img src="/static/wallet/external-link.svg" alt="View on Etherscan" />
+                  </a>
                 </TableCell>
               </TableRow>
             ))}
@@ -121,8 +137,7 @@ export default connect((state) => state, { createTransaction })(AuditLog)
 
 const DisplayFieldWrapper = styled.div`
   width: 100%;
-  max-width: 200px;
-  margin-left: auto;
+  max-width: 100px;
   > div {
     padding: 0;
   }
