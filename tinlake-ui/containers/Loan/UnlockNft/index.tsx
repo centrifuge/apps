@@ -1,8 +1,8 @@
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { AuthState, ensureAuthed } from '../../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { Asset } from '../../../utils/useAsset'
@@ -13,7 +13,6 @@ interface Props extends TransactionProps {
   asset: MinimalAsset
   auth: AuthState
   refetch: () => void
-  tinlake: ITinlake
   ensureAuthed: () => Promise<void>
 }
 
@@ -21,6 +20,7 @@ const UnlockNft: React.FC<Props> = (props: Props) => {
   const [closeStatus, , setCloseTxId] = useTransactionState()
 
   const router = useRouter()
+  const tinlake = useTinlake()
 
   const hasBorrowerPermissions =
     (props.asset &&
@@ -32,10 +32,7 @@ const UnlockNft: React.FC<Props> = (props: Props) => {
   const close = async () => {
     await props.ensureAuthed!()
 
-    const txId = await props.createTransaction(`Close Asset ${props.asset.loanId}`, 'close', [
-      props.tinlake,
-      props.asset,
-    ])
+    const txId = await props.createTransaction(`Close Asset ${props.asset.loanId}`, 'close', [tinlake, props.asset])
     setCloseTxId(txId)
   }
 
