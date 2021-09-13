@@ -7,6 +7,7 @@ import Container from '../../../../components/Container'
 import Header from '../../../../components/Header'
 import { IpfsPoolsProvider } from '../../../../components/IpfsPoolsProvider'
 import Overview from '../../../../components/Overview'
+import { TinlakeProvider } from '../../../../components/TinlakeProvider'
 import WithFooter from '../../../../components/WithFooter'
 import WithTinlake from '../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool as IPool } from '../../../../config'
@@ -22,30 +23,32 @@ interface Props {
 const Pool: React.FC<Props> = ({ pool, ipfsPools }) => {
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <WithFooter>
-        <Head>
-          <title>Pool Overview: {pool.metadata.name} | Tinlake | Centrifuge</title>
-        </Head>
-        <Header
-          poolTitle={pool.metadata.shortName || pool.metadata.name}
-          selectedRoute={'/'}
-          menuItems={menuItems}
-          ipfsPools={ipfsPools}
-        />
-        <Container>
-          <Box justify="center" direction="row">
-            <Box width="xlarge">
-              <WithTinlake
-                addresses={pool.addresses}
-                contractConfig={pool.contractConfig}
-                render={(tinlake) => (
-                  <Auth tinlake={tinlake} render={() => <Overview tinlake={tinlake} selectedPool={pool} />} />
-                )}
-              />
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+        <WithFooter>
+          <Head>
+            <title>Pool Overview: {pool.metadata.name} | Tinlake | Centrifuge</title>
+          </Head>
+          <Header
+            poolTitle={pool.metadata.shortName || pool.metadata.name}
+            selectedRoute={'/'}
+            menuItems={menuItems}
+            ipfsPools={ipfsPools}
+          />
+          <Container>
+            <Box justify="center" direction="row">
+              <Box width="xlarge">
+                <WithTinlake
+                  addresses={pool.addresses}
+                  contractConfig={pool.contractConfig}
+                  render={(tinlake) => (
+                    <Auth tinlake={tinlake} render={() => <Overview tinlake={tinlake} selectedPool={pool} />} />
+                  )}
+                />
+              </Box>
             </Box>
-          </Box>
-        </Container>
-      </WithFooter>
+          </Container>
+        </WithFooter>
+      </TinlakeProvider>
     </IpfsPoolsProvider>
   )
 }

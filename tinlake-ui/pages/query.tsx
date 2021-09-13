@@ -5,6 +5,7 @@ import Auth from '../components/Auth'
 import Container from '../components/Container'
 import Header from '../components/Header'
 import { IpfsPoolsProvider } from '../components/IpfsPoolsProvider'
+import { TinlakeProvider } from '../components/TinlakeProvider'
 import WithFooter from '../components/WithFooter'
 import WithTinlake from '../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS } from '../config'
@@ -17,16 +18,18 @@ interface Props {
 const Query: React.FC<Props> = (props: Props) => {
   return (
     <IpfsPoolsProvider value={props.ipfsPools}>
-      <WithFooter>
-        <Header selectedRoute={''} menuItems={[]} ipfsPools={props.ipfsPools} />
-        <Container style={{ backgroundColor: '#f9f9f9' }}>
-          <Box justify="center" direction="row">
-            <Box width="xlarge">
-              <WithTinlake render={(tinlake) => <Auth tinlake={tinlake} render={() => <DataQuery />} />} />
+      <TinlakeProvider>
+        <WithFooter>
+          <Header selectedRoute={''} menuItems={[]} ipfsPools={props.ipfsPools} />
+          <Container style={{ backgroundColor: '#f9f9f9' }}>
+            <Box justify="center" direction="row">
+              <Box width="xlarge">
+                <WithTinlake render={(tinlake) => <Auth tinlake={tinlake} render={() => <DataQuery />} />} />
+              </Box>
             </Box>
-          </Box>
-        </Container>
-      </WithFooter>
+          </Container>
+        </WithFooter>
+      </TinlakeProvider>
     </IpfsPoolsProvider>
   )
 }

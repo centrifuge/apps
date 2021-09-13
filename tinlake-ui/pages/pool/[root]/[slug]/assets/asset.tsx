@@ -9,6 +9,7 @@ import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
 import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
 import PageTitle from '../../../../../components/PageTitle'
+import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
@@ -31,51 +32,53 @@ const LoanPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
 
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <WithFooter>
-        <Head>
-          <title>
-            Asset {assetId}: {pool.metadata.name} | Tinlake | Centrifuge | Decentralized Asset Financing
-          </title>
-        </Head>
-        <Header
-          ipfsPools={ipfsPools}
-          poolTitle={pool.metadata.shortName || pool.metadata.name}
-          selectedRoute={'/assets/asset'}
-          menuItems={menuItems}
-        />
-        <Container>
-          <Box justify="center" direction="row">
-            <Box width="xlarge" margin={{ top: 'medium' }}>
-              <WithTinlake
-                addresses={pool.addresses}
-                contractConfig={pool.contractConfig}
-                render={(tinlake) => (
-                  <Auth
-                    tinlake={tinlake}
-                    render={(auth) => (
-                      <>
-                        <PageTitle
-                          pool={pool}
-                          page={`Asset ${assetId}`}
-                          parentPage="Assets"
-                          parentPageHref="/assets"
-                          rightContent={
-                            asset && <UnlockNft tinlake={tinlake} auth={auth} asset={asset} refetch={refetchAsset} />
-                          }
-                        />
-                        <Box>
-                          {assetId && <LoanView auth={auth} tinlake={tinlake} poolConfig={pool} loanId={assetId} />}
-                          {!assetId && <div>Loading...</div>}
-                        </Box>
-                      </>
-                    )}
-                  />
-                )}
-              />
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+        <WithFooter>
+          <Head>
+            <title>
+              Asset {assetId}: {pool.metadata.name} | Tinlake | Centrifuge | Decentralized Asset Financing
+            </title>
+          </Head>
+          <Header
+            ipfsPools={ipfsPools}
+            poolTitle={pool.metadata.shortName || pool.metadata.name}
+            selectedRoute={'/assets/asset'}
+            menuItems={menuItems}
+          />
+          <Container>
+            <Box justify="center" direction="row">
+              <Box width="xlarge" margin={{ top: 'medium' }}>
+                <WithTinlake
+                  addresses={pool.addresses}
+                  contractConfig={pool.contractConfig}
+                  render={(tinlake) => (
+                    <Auth
+                      tinlake={tinlake}
+                      render={(auth) => (
+                        <>
+                          <PageTitle
+                            pool={pool}
+                            page={`Asset ${assetId}`}
+                            parentPage="Assets"
+                            parentPageHref="/assets"
+                            rightContent={
+                              asset && <UnlockNft tinlake={tinlake} auth={auth} asset={asset} refetch={refetchAsset} />
+                            }
+                          />
+                          <Box>
+                            {assetId && <LoanView auth={auth} tinlake={tinlake} poolConfig={pool} loanId={assetId} />}
+                            {!assetId && <div>Loading...</div>}
+                          </Box>
+                        </>
+                      )}
+                    />
+                  )}
+                />
+              </Box>
             </Box>
-          </Box>
-        </Container>
-      </WithFooter>
+          </Container>
+        </WithFooter>
+      </TinlakeProvider>
     </IpfsPoolsProvider>
   )
 }

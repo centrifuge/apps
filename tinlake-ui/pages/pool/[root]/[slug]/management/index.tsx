@@ -7,6 +7,7 @@ import Auth from '../../../../../components/Auth'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
 import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
+import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
 import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
@@ -22,37 +23,39 @@ interface Props extends WithRouterProps {
 const ManagementPage: React.FC<Props> = ({ pool, ipfsPools }) => {
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <WithFooter>
-        <Head>
-          <title>Pool Management: {pool.metadata.name} | Tinlake | Centrifuge</title>
-        </Head>
-        <Header
-          ipfsPools={ipfsPools}
-          poolTitle={pool.metadata.shortName || pool.metadata.name}
-          selectedRoute={'/management'}
-          menuItems={menuItems}
-        />
-        <Container>
-          <Box justify="center" direction="row">
-            <Box width="xlarge">
-              <WithTinlake
-                addresses={pool.addresses}
-                contractConfig={pool.contractConfig}
-                render={(tinlake) => (
-                  <Auth
-                    tinlake={tinlake}
-                    render={() => (
-                      <Box>
-                        <PoolManagement tinlake={tinlake} activePool={pool} />
-                      </Box>
-                    )}
-                  />
-                )}
-              />
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+        <WithFooter>
+          <Head>
+            <title>Pool Management: {pool.metadata.name} | Tinlake | Centrifuge</title>
+          </Head>
+          <Header
+            ipfsPools={ipfsPools}
+            poolTitle={pool.metadata.shortName || pool.metadata.name}
+            selectedRoute={'/management'}
+            menuItems={menuItems}
+          />
+          <Container>
+            <Box justify="center" direction="row">
+              <Box width="xlarge">
+                <WithTinlake
+                  addresses={pool.addresses}
+                  contractConfig={pool.contractConfig}
+                  render={(tinlake) => (
+                    <Auth
+                      tinlake={tinlake}
+                      render={() => (
+                        <Box>
+                          <PoolManagement tinlake={tinlake} activePool={pool} />
+                        </Box>
+                      )}
+                    />
+                  )}
+                />
+              </Box>
             </Box>
-          </Box>
-        </Container>
-      </WithFooter>
+          </Container>
+        </WithFooter>
+      </TinlakeProvider>
     </IpfsPoolsProvider>
   )
 }
