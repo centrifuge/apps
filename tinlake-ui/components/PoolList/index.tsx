@@ -10,12 +10,12 @@ import { useMedia } from '../../utils/useMedia'
 import { PoolData, PoolsData } from '../../utils/usePools'
 import { Divider } from '../Divider'
 import { SectionHeading } from '../Heading'
-import { Shelf, Stack, Wrap } from '../Layout'
-import NumberDisplay from '../NumberDisplay'
+import { Shelf, Stack } from '../Layout'
 import { PoolCapacityLabel } from '../PoolCapacityLabel'
 import { Tooltip } from '../Tooltip'
+import { Value } from '../Value'
+import { ValuePairList } from '../ValuePairList'
 import {
-  Dash,
   DataCol,
   Desc,
   Header,
@@ -24,11 +24,9 @@ import {
   HeaderTitle,
   Icon,
   Name,
-  Number,
   PoolRow,
   SubNumber,
   Type,
-  Unit,
 } from './styles'
 
 interface Props extends WithRouterProps {
@@ -45,6 +43,10 @@ const getDropAPY = (dropAPY: BN | null) => {
   if (dropAPY) {
     return toPrecision(baseToDisplay(dropAPY.muln(100), 27), 2)
   }
+}
+
+const toNumber = (value: BN | undefined, decimals: number) => {
+  return value ? parseInt(value.toString(), 10) / 10 ** decimals : 0
 }
 
 const PoolList: React.FC<Props> = (props) => {
@@ -66,17 +68,7 @@ const PoolList: React.FC<Props> = (props) => {
   const dataColumns = [
     showAll && {
       header: 'Total Financed',
-      cell: (p: PoolData) => (
-        <NumberDisplay
-          render={(v) => (
-            <>
-              <Number>{v}</Number> <Unit>{p.currency}</Unit>
-            </>
-          )}
-          precision={0}
-          value={baseToDisplay(p.totalFinancedCurrency, 18)}
-        />
-      ),
+      cell: (p: PoolData) => <Value value={toNumber(p.totalFinancedCurrency, 18)} unit={p.currency} />,
     },
     {
       header: 'Investment Capacity',
@@ -87,75 +79,37 @@ const PoolList: React.FC<Props> = (props) => {
           {
             header: 'DROP Capacity',
             subHeader: 'Given max reserve',
-            cell: (p: PoolData) => (
-              <NumberDisplay
-                render={(v) => (
-                  <>
-                    <Number>{v}</Number> <Unit>{p.currency}</Unit>
-                  </>
-                )}
-                precision={0}
-                value={baseToDisplay(p.capacityGivenMaxReserve || new BN(0), 18)}
-              />
-            ),
+            cell: (p: PoolData) => <Value value={toNumber(p.capacityGivenMaxReserve, 18)} unit={p.currency} />,
           },
           {
             header: 'DROP Capacity',
             subHeader: 'Given min TIN risk buffer',
-            cell: (p: PoolData) => (
-              <NumberDisplay
-                render={(v) => (
-                  <>
-                    <Number>{v}</Number> <Unit>{p.currency}</Unit>
-                  </>
-                )}
-                precision={0}
-                value={baseToDisplay(p.capacityGivenMaxDropRatio || new BN(0), 18)}
-              />
-            ),
+            cell: (p: PoolData) => <Value value={toNumber(p.capacityGivenMaxDropRatio, 18)} unit={p.currency} />,
           },
         ]
       : [
           {
             header: 'Pool Value',
             cell: (p: PoolData) => (
-              <NumberDisplay
-                precision={0}
-                render={(v) =>
-                  v === '0' ? (
-                    <Dash></Dash>
-                  ) : (
-                    <>
-                      <Number>{v}</Number> <Unit>{p.currency}</Unit>
-                    </>
-                  )
-                }
-                value={baseToDisplay((p.reserve || new BN(0)).add(p.assetValue || new BN(0)), 18)}
-              />
+              <Value value={toNumber((p.reserve || new BN(0)).add(p.assetValue || new BN(0)), 18)} unit={p.currency} />
             ),
           },
           {
             header: <Tooltip id="dropApy">DROP APY</Tooltip>,
             subHeader: '30 days',
-            cell: (p: PoolData) => (
-              <NumberDisplay
-                render={(v) =>
-                  v === '0.00' ? (
-                    <Dash>-</Dash>
-                  ) : p.isUpcoming ||
-                    (!p.assetValue && !p.reserve) ||
-                    (p.assetValue?.isZero() && p.reserve?.isZero()) ||
-                    !p.seniorYield30Days ? (
-                    <SubNumber>Expected: {v} % APR</SubNumber>
-                  ) : (
-                    <>
-                      <Number>{getDropAPY(p.seniorYield30Days)}</Number> <Unit>%</Unit>
-                    </>
-                  )
-                }
-                value={feeToInterestRate(p.seniorInterestRate || new BN(0))}
-              />
-            ),
+            cell: (p: PoolData) => {
+              const v = feeToInterestRate(p.seniorInterestRate || new BN(0))
+              return v === '0.00' ? (
+                <Value value="" unit="-" />
+              ) : p.isUpcoming ||
+                (!p.assetValue && !p.reserve) ||
+                (p.assetValue?.isZero() && p.reserve?.isZero()) ||
+                !p.seniorYield30Days ? (
+                <SubNumber>Expected: {v} % APR</SubNumber>
+              ) : (
+                <Value value={parseFloat(getDropAPY(p.seniorYield30Days) || '0')} unit="%" />
+              )
+            },
           },
         ],
     showAll && {
@@ -163,16 +117,9 @@ const PoolList: React.FC<Props> = (props) => {
       subHeader: '3 months',
       cell: (p: PoolData) =>
         p.juniorYield90Days === null ? (
-          <Unit>N/A</Unit>
+          <Value value="" unit="N/A" />
         ) : (
-          <NumberDisplay
-            render={(v) => (
-              <>
-                <Number>{v}</Number> <Unit>%</Unit>
-              </>
-            )}
-            value={baseToDisplay(p.juniorYield90Days.muln(100), 27)}
-          />
+          <Value value={toNumber(p.juniorYield90Days.muln(100), 27)} unit="%" />
         ),
     },
   ]
@@ -252,18 +199,11 @@ export const Row: React.FC<DetailsProps & PropsOf<typeof PoolRow>> = ({
             {poolIcon}
             {poolTitle}
           </Shelf>
-          <Divider />
-          <Stack gap="xsmall">
-            {columns.map((col) => (
-              <Shelf justifyContent="space-between">
-                <Wrap gap="xsmall" rowGap={0}>
-                  <HeaderTitle>{col.header}</HeaderTitle>
-                  {col.subHeader && <HeaderSub>{col.subHeader}</HeaderSub>}
-                </Wrap>
-                <div>{col.cell(row)}</div>
-              </Shelf>
-            ))}
-          </Stack>
+          <Divider bleedX="small" width="auto" />
+          <ValuePairList
+            variant="primary"
+            items={columns.map((col) => ({ term: col.header, termSuffix: col.subHeader, value: col.cell(row) }))}
+          />
         </Stack>
       ) : (
         <Shelf gap="small">

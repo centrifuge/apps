@@ -6,11 +6,11 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Card } from '../../components/Card'
+import { LabeledValue } from '../../components/LabeledValue'
 import { Shelf } from '../../components/Layout'
 import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import PageTitle from '../../components/PageTitle'
-import { ValueDisplay } from '../../components/ValueDisplay'
 import { IpfsPools } from '../../config'
 import { AuthState, ensureAuthed } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
@@ -425,7 +425,8 @@ const Metric = ({
 }) => {
   return (
     <Box pad={{ horizontal: 'medium' }} style={{ borderRight: borderRight ? '1px solid #f2f2f2' : undefined }}>
-      <ValueDisplay
+      <LabeledValue
+        variant="large"
         icon={{ DAI: `/static/dai.svg`, CFG: `/static/cfg-white.svg` }[token]}
         value={
           loading ? null : (

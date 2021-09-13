@@ -33,10 +33,6 @@ const Wrapper = styled.div<{ width?: number; verticalMargin?: number; height?: n
   border-radius: 6px;
   width: ${(props) => (props.width ? `${props.width}px` : '80px')};
   height: ${(props) => (props.height ? `${props.height}px` : '17px')};
-  margin: ${(props) =>
-    props.verticalMargin
-      ? `${2 + props.verticalMargin}px 0 ${2 + props.verticalMargin}px ${props.alignRight ? 'auto' : '0'}`
-      : `2px 0 2px ${props.alignRight ? 'auto' : '0'}`};
   overflow: hidden;
   position: relative;
 
@@ -66,7 +62,6 @@ export const LoadingValue = (props: PropsWithChildren | PropsWithRender) => {
     <Wrapper
       width={props.width || width}
       height={props.height}
-      verticalMargin={((props.height || 21) - 21) / 2}
       alignRight={props.alignRight === undefined ? true : props.alignRight}
     >
       &nbsp;
