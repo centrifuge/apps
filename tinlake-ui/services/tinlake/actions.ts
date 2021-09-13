@@ -1,5 +1,5 @@
 import { ITinlake, Loan, NFT, PendingTransaction } from '@centrifuge/tinlake-js'
-import { IRiskGroup } from '@centrifuge/tinlake-js/dist/actions/admin'
+import { IRiskGroup, IWriteOffGroup } from '@centrifuge/tinlake-js/dist/actions/admin'
 import BN from 'bn.js'
 import { maxUint256 } from '../../utils/maxUint256'
 import { Asset } from '../../utils/useAsset'
@@ -685,6 +685,13 @@ export async function updateClaimCFGAccountID(tinlake: ITinlake, centAddress: st
 
 export async function addRiskGroups(tinlake: ITinlake, riskGroups: IRiskGroup[]): Promise<PendingTransaction> {
   return tinlake.addRiskGroups(riskGroups)
+}
+
+export async function addWriteOffGroups(
+  tinlake: ITinlake,
+  writeOffGroups: IWriteOffGroup[]
+): Promise<PendingTransaction> {
+  return tinlake.addWriteOffGroups(writeOffGroups)
 }
 
 function loggedError(error: any, message: string, id: string): PendingTransaction {

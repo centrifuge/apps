@@ -184,6 +184,17 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         )
       )
     }
+
+    addWriteOffGroups = async (writeOffGroups: IWriteOffGroup[]) => {
+      return this.pending(
+        this.contract('POOL_ADMIN').addWriteOffGroups(
+          writeOffGroups.map((g) => g.rate.toString()),
+          writeOffGroups.map((g) => g.writeOffPercentage.toString()),
+          writeOffGroups.map((g) => g.overdueDays.toString()),
+          this.overrides
+        )
+      )
+    }
   }
 }
 
@@ -193,6 +204,12 @@ export type IRiskGroup = {
   thresholdRatio: BN
   rate: BN
   recoveryRatePD: BN
+}
+
+export type IWriteOffGroup = {
+  rate: BN
+  writeOffPercentage: BN
+  overdueDays: BN
 }
 
 export type IAdminActions = {
@@ -222,6 +239,7 @@ export type IAdminActions = {
   getNftFeedValue(tokenId: string): Promise<BN>
   getNftMaturityDate(tokenId: string): Promise<BN>
   addRiskGroups(riskGroups: IRiskGroup[]): Promise<PendingTransaction>
+  addWriteOffGroups(writeOffGroups: IWriteOffGroup[]): Promise<PendingTransaction>
 }
 
 export default AdminActions

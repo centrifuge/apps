@@ -6,7 +6,7 @@ import {
   ITinlake,
   toPrecision,
 } from '@centrifuge/tinlake-js'
-import { IRiskGroup } from '@centrifuge/tinlake-js/dist/actions/admin'
+import { IRiskGroup, IWriteOffGroup } from '@centrifuge/tinlake-js/dist/actions/admin'
 import BN from 'bn.js'
 import { Box, Button, FormField, Heading, Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
 import * as React from 'react'
@@ -26,14 +26,19 @@ const Risk: React.FC<Props> = (props: Props) => {
   const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [riskGroups, setRiskGroups] = React.useState([] as IRiskGroup[])
+  const [writeOffGroups, setWriteOffGroups] = React.useState([] as IWriteOffGroup[])
 
   const existingRiskGroups = poolData?.risk
     ? poolData.risk.filter((riskGroup) => riskGroup.ceilingRatio && !riskGroup.ceilingRatio.isZero())
     : []
 
+  const existingWriteOffGroups = poolData?.writeOffGroups
+    ? poolData.writeOffGroups.filter((writeOffGroup) => writeOffGroup.percentage && !writeOffGroup.percentage.isZero())
+    : []
+
   const [riskGroupStatus, , setRiskGroupTxId] = useTransactionState()
 
-  const add = () => {
+  const addRiskGroup = () => {
     const newRiskGroup = {
       id: existingRiskGroups.length + riskGroups.length,
       ceilingRatio: new BN(0),
@@ -44,13 +49,13 @@ const Risk: React.FC<Props> = (props: Props) => {
     setRiskGroups([...riskGroups, newRiskGroup])
   }
 
-  const update = (group: number, key: 'ceilingRatio' | 'recoveryRatePD' | 'rate', value: string) => {
+  const updateRiskGroup = (group: number, key: 'ceilingRatio' | 'recoveryRatePD' | 'rate', value: string) => {
     let newRiskGroups = riskGroups
     newRiskGroups[group][key] = key === 'rate' ? new BN(interestRateToFee(value)) : new BN(displayToBase(value, 25))
     setRiskGroups(newRiskGroups)
   }
 
-  const save = async () => {
+  const saveRiskGroups = async () => {
     const txId = await props.createTransaction(
       `Save ${riskGroups.length} risk group${riskGroups.length > 1 ? 's' : ''}`,
       'addRiskGroups',
@@ -64,6 +69,38 @@ const Risk: React.FC<Props> = (props: Props) => {
       refetchPoolData()
     }
   }, [riskGroupStatus])
+
+  const [writeOffGroupStatus, , setWriteOffGroupTxId] = useTransactionState()
+
+  const addWriteOffGroup = () => {
+    const newWriteOffGroup = {
+      rate: new BN('1000000002378234398782343987'),
+      writeOffPercentage: new BN(0),
+      overdueDays: new BN(0),
+    }
+    setWriteOffGroups([...writeOffGroups, newWriteOffGroup])
+  }
+
+  const updateWriteOffGroup = (group: number, key: 'writeOffPercentage' | 'rate' | 'overdueDays', value: string) => {
+    let newWriteOffGroups = writeOffGroups
+    newWriteOffGroups[group][key] =
+      key === 'rate'
+        ? new BN(interestRateToFee(value))
+        : key === 'overdueDays'
+        ? new BN(value)
+        : Fixed27Base.sub(new BN(displayToBase(value, 25)))
+    setWriteOffGroups(newWriteOffGroups)
+  }
+
+  const saveWriteOffGroups = async () => {
+    console.log(writeOffGroups[0].writeOffPercentage.toString())
+    const txId = await props.createTransaction(
+      `Save ${writeOffGroups.length} write-off group${writeOffGroups.length > 1 ? 's' : ''}`,
+      'addWriteOffGroups',
+      [props.tinlake, [...writeOffGroups]]
+    )
+    setRiskGroupTxId(txId)
+  }
 
   return poolData && poolData.risk && poolData.writeOffGroups ? (
     <Box>
@@ -110,7 +147,7 @@ const Risk: React.FC<Props> = (props: Props) => {
                           suffix="%"
                           max={100}
                           precision={0}
-                          onValueChange={({ value }) => update(id, 'ceilingRatio', value)}
+                          onValueChange={({ value }) => updateRiskGroup(id, 'ceilingRatio', value)}
                           plain
                         />
                       </FormField>
@@ -122,7 +159,7 @@ const Risk: React.FC<Props> = (props: Props) => {
                           suffix="%"
                           max={100}
                           precision={2}
-                          onValueChange={({ value }) => update(id, 'rate', value)}
+                          onValueChange={({ value }) => updateRiskGroup(id, 'rate', value)}
                           plain
                         />
                       </FormField>
@@ -134,7 +171,7 @@ const Risk: React.FC<Props> = (props: Props) => {
                           suffix="%"
                           max={100}
                           precision={3}
-                          onValueChange={({ value }) => update(id, 'recoveryRatePD', value)}
+                          onValueChange={({ value }) => updateRiskGroup(id, 'recoveryRatePD', value)}
                           plain
                         />
                       </FormField>
@@ -153,11 +190,11 @@ const Risk: React.FC<Props> = (props: Props) => {
         {poolData?.adminLevel && poolData.adminLevel >= 2 && (
           <Box margin={{ top: 'medium' }}>
             <div style={{ marginLeft: 'auto' }}>
-              <Button secondary label="Add another" onClick={() => add()} margin={{ right: '24px' }} />
+              <Button secondary label="Add another" onClick={() => addRiskGroup()} margin={{ right: '24px' }} />
               <Button
                 primary
-                label={`Save ${riskGroups.length} risk group${riskGroups.length !== 1 ? 's' : ''}`}
-                onClick={() => save()}
+                label={`Save ${riskGroups.length || ''} risk group${riskGroups.length !== 1 ? 's' : ''}`}
+                onClick={() => saveRiskGroups()}
                 disabled={riskGroups.length === 0 || riskGroupStatus === 'unconfirmed' || riskGroupStatus === 'pending'}
               />
             </div>
@@ -185,25 +222,85 @@ const Risk: React.FC<Props> = (props: Props) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {poolData.writeOffGroups
-              .filter((writeOffGroup) => writeOffGroup.percentage && !writeOffGroup.percentage.isZero())
-              .map((writeOffGroup: WriteOffGroup, index: number) => (
-                <TableRow>
-                  <TableCell>{index}</TableCell>
-                  <TableCell>
-                    {parseFloat(
-                      Fixed27Base.sub(writeOffGroup.percentage)
-                        .div(new BN(10).pow(new BN(25)))
-                        .toString()
-                    )}
-                    %
-                  </TableCell>
-                  <TableCell>0.00%</TableCell>
-                  <TableCell>{writeOffGroup.overdueDays.toString()}</TableCell>
-                </TableRow>
-              ))}
+            {existingWriteOffGroups.map((writeOffGroup: WriteOffGroup, index: number) => (
+              <TableRow>
+                <TableCell>{index}</TableCell>
+                <TableCell>
+                  {parseFloat(
+                    Fixed27Base.sub(writeOffGroup.percentage)
+                      .div(new BN(10).pow(new BN(25)))
+                      .toString()
+                  )}
+                  %
+                </TableCell>
+                <TableCell>0.00%</TableCell>
+                <TableCell>{writeOffGroup.overdueDays.toString()}</TableCell>
+              </TableRow>
+            ))}
+
+            {poolData?.adminLevel && poolData.adminLevel >= 2 && (
+              <>
+                {writeOffGroups.map((writeOffGroup: IWriteOffGroup, id: number) => (
+                  <TableRow>
+                    <TableCell>{existingWriteOffGroups.length + id}</TableCell>
+                    <TableCell>
+                      <FormField margin={{ right: 'small' }}>
+                        <NumberInput
+                          value={baseToDisplay(Fixed27Base.sub(writeOffGroup.writeOffPercentage || new BN(0)), 25)}
+                          suffix="%"
+                          max={100}
+                          precision={0}
+                          onValueChange={({ value }) => updateWriteOffGroup(id, 'writeOffPercentage', value)}
+                          plain
+                        />
+                      </FormField>
+                    </TableCell>
+                    <TableCell>
+                      <FormField margin={{ right: 'small' }}>
+                        <NumberInput
+                          value={feeToInterestRate((writeOffGroup.rate || new BN(0)).toString())}
+                          suffix="%"
+                          max={100}
+                          precision={2}
+                          onValueChange={({ value }) => updateWriteOffGroup(id, 'rate', value)}
+                          plain
+                        />
+                      </FormField>
+                    </TableCell>
+                    <TableCell>
+                      <FormField margin={{ right: 'small' }}>
+                        <NumberInput
+                          value={(writeOffGroup.overdueDays || new BN(0)).toString()}
+                          precision={0}
+                          onValueChange={({ value }) => updateWriteOffGroup(id, 'overdueDays', value)}
+                          plain
+                        />
+                      </FormField>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
+            )}
           </TableBody>
         </Table>
+
+        {poolData?.adminLevel && poolData.adminLevel >= 2 && (
+          <Box margin={{ top: 'medium' }}>
+            <div style={{ marginLeft: 'auto' }}>
+              <Button secondary label="Add another" onClick={() => addWriteOffGroup()} margin={{ right: '24px' }} />
+              <Button
+                primary
+                label={`Save ${writeOffGroups.length || ''} write-off group${writeOffGroups.length !== 1 ? 's' : ''}`}
+                onClick={saveWriteOffGroups}
+                disabled={
+                  writeOffGroups.length === 0 ||
+                  writeOffGroupStatus === 'unconfirmed' ||
+                  writeOffGroupStatus === 'pending'
+                }
+              />
+            </div>
+          </Box>
+        )}
       </Card>
     </Box>
   ) : null
