@@ -7,6 +7,7 @@ import Alert from '../../../components/Alert'
 import { Card } from '../../../components/Card'
 import NftData from '../../../components/NftData'
 import { PoolLink } from '../../../components/PoolLink'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { AuthState, ensureAuthed } from '../../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -14,7 +15,6 @@ import { getNFT as getNFTAction } from '../../../services/tinlake/actions'
 import LoanView from '../View'
 
 interface Props extends TransactionProps {
-  tinlake: any
   poolConfig: Pool
   auth: AuthState
   ensureAuthed?: () => Promise<void>
@@ -22,6 +22,7 @@ interface Props extends TransactionProps {
 
 const IssueLoan: React.FC<Props> = (props: Props) => {
   const router = useRouter()
+  const tinlake = useTinlake()
   const { tokenId: tokenIdParam, registry: registryParam }: { tokenId?: string; registry?: string } =
     router.query as any
   const [registry, setRegistry] = React.useState('')
@@ -48,7 +49,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
     if (currentTokenId && currentTokenId.length > 0) {
       setNft(null)
       setNftError('')
-      const promise = getNFTAction(currentRegistry, props.tinlake, currentTokenId)
+      const promise = getNFTAction(currentRegistry, tinlake, currentTokenId)
       inFlight.current = promise
       const result = await promise
       const { nft, error } = result as Partial<{ tokenId: string; nft: NFT; error: string }>
@@ -69,7 +70,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
     await props.ensureAuthed!()
 
     const txId = await props.createTransaction(`Lock NFT ${tokenId.slice(0, 4)}...`, 'issue', [
-      props.tinlake,
+      tinlake,
       tokenId,
       registry,
     ])
@@ -147,7 +148,7 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
       {loanId ? (
         <Box margin={{ bottom: 'medium', top: 'large' }}>
           {' '}
-          <LoanView tinlake={props.tinlake} poolConfig={props.poolConfig} loanId={loanId} />
+          <LoanView poolConfig={props.poolConfig} loanId={loanId} />
         </Box>
       ) : (
         <Box>{nft && <NftData data={nft} />}</Box>

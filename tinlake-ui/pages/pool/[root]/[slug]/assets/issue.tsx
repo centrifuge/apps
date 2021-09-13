@@ -10,7 +10,6 @@ import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
 import PageTitle from '../../../../../components/PageTitle'
 import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
-import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import IssueLoan from '../../../../../containers/Loan/Issue'
 import { menuItems } from '../../../../../menuItems'
@@ -38,19 +37,13 @@ const LoanIssuePage: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <WithTinlake
-                  addresses={pool.addresses}
-                  contractConfig={pool.contractConfig}
-                  render={(tinlake) => (
-                    <Auth
-                      render={(auth) => (
-                        <Box margin={{ top: 'medium' }}>
-                          <PageTitle pool={pool} page={`Lock NFT`} parentPage="Assets" parentPageHref="/assets" />
+                <Auth
+                  render={(auth) => (
+                    <Box margin={{ top: 'medium' }}>
+                      <PageTitle pool={pool} page={`Lock NFT`} parentPage="Assets" parentPageHref="/assets" />
 
-                          <IssueLoan tinlake={tinlake} poolConfig={pool} auth={auth} />
-                        </Box>
-                      )}
-                    />
+                      <IssueLoan poolConfig={pool} auth={auth} />
+                    </Box>
                   )}
                 />
               </Box>

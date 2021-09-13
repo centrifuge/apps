@@ -7,6 +7,7 @@ import { Card } from '../../../components/Card'
 import { Shelf } from '../../../components/Layout'
 import LoanData from '../../../components/Loan/Data'
 import NftData from '../../../components/NftData'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { AuthState, loadProxies } from '../../../ducks/auth'
 import { TransactionState } from '../../../ducks/transactions'
@@ -15,7 +16,6 @@ import LoanBorrow from '../Borrow'
 import LoanRepay from '../Repay'
 
 interface Props {
-  tinlake: any
   loanId: string
   poolConfig: Pool
   auth?: AuthState
@@ -26,18 +26,19 @@ interface Props {
 // on state change tokenId --> load nft data for asset collateral
 const LoanView: React.FC<Props> = (props: Props) => {
   const router = useRouter()
+  const tinlake = useTinlake()
   const {
     data: assetData,
     refetch: refetchAsset,
     error,
-  } = useAsset(props.tinlake.contractAddresses.ROOT_CONTRACT, props.loanId)
+  } = useAsset(tinlake.contractAddresses.ROOT_CONTRACT as string, props.loanId)
 
   React.useEffect(() => {
     const { loadProxies } = props
     loadProxies && loadProxies()
   }, [])
 
-  const { loanId, tinlake, auth } = props
+  const { loanId, auth } = props
 
   if (error) {
     return (
@@ -66,8 +67,8 @@ const LoanView: React.FC<Props> = (props: Props) => {
               </Heading>
               <Card width="80%" p="medium">
                 <Shelf gap="medium" justifyContent="space-between" alignItems="flex-start">
-                  <LoanBorrow loan={assetData} refetch={refetchAsset} tinlake={tinlake} poolConfig={props.poolConfig} />
-                  <LoanRepay loan={assetData} refetch={refetchAsset} tinlake={tinlake} poolConfig={props.poolConfig} />
+                  <LoanBorrow loan={assetData} refetch={refetchAsset} poolConfig={props.poolConfig} />
+                  <LoanRepay loan={assetData} refetch={refetchAsset} poolConfig={props.poolConfig} />
                 </Shelf>
               </Card>
             </>

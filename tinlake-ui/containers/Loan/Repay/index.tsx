@@ -1,10 +1,11 @@
 import { TokenInput } from '@centrifuge/axis-token-input'
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -14,12 +15,12 @@ import { Asset } from '../../../utils/useAsset'
 interface Props extends TransactionProps {
   loan: Asset
   refetch: () => void
-  tinlake: ITinlake
   poolConfig: Pool
   ensureAuthed?: () => Promise<void>
 }
 
 const LoanRepay: React.FC<Props> = (props: Props) => {
+  const tinlake = useTinlake()
   const [repayAmount, setRepayAmount] = React.useState<string>('')
   const debt = props.loan.debt?.toString() || '0'
 
@@ -38,14 +39,14 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
       txId = await props.createTransaction(
         `Repay Asset ${props.loan.loanId} (${formatted} ${props.poolConfig.metadata.currencySymbol || 'DAI'})`,
         'repayFull',
-        [props.tinlake, props.loan]
+        [tinlake, props.loan]
       )
     } else {
       // partial repay
       txId = await props.createTransaction(
         `Repay Asset ${props.loan.loanId} (${formatted} ${props.poolConfig.metadata.currencySymbol || 'DAI'})`,
         'repay',
-        [props.tinlake, props.loan, repayAmount]
+        [tinlake, props.loan, repayAmount]
       )
     }
 
@@ -62,7 +63,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
         return
       }
 
-      const balance = await props.tinlake.getCurrencyBalance(address)
+      const balance = await tinlake.getCurrencyBalance(address)
       setBalance(balance.toString())
     })()
   }, [address])
