@@ -57,7 +57,7 @@ const LoanView: React.FC<Props> = (props: Props) => {
 
   return (
     <Box>
-      <LoanData loan={assetData} tinlake={tinlake} poolConfig={props.poolConfig} />
+      <LoanData loan={assetData} poolConfig={props.poolConfig} />
       {assetData && assetData?.status !== 'closed' && (
         <Box>
           {hasBorrowerPermissions && (

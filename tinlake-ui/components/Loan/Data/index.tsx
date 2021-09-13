@@ -1,5 +1,5 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
-import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button, Table, TableBody, TableCell, TableRow } from 'grommet'
 import { useRouter } from 'next/router'
@@ -16,11 +16,11 @@ import { Asset } from '../../../utils/useAsset'
 import { Card } from '../../Card'
 import { Stack } from '../../Layout'
 import { LoadingValue } from '../../LoadingValue'
+import { useTinlake } from '../../TinlakeProvider'
 import LoanLabel from '../Label'
 
 interface Props extends TransactionProps {
   loan?: Asset
-  tinlake: ITinlake
   poolConfig: Pool
 }
 
@@ -34,13 +34,14 @@ const DisplayFieldWrapper = styled.div`
 
 const LoanData: React.FC<Props> = (props: Props) => {
   const router = useRouter()
+  const tinlake = useTinlake()
   const availableForFinancing = props.loan?.debt.isZero() ? props.loan?.principal || new BN(0) : new BN(0)
 
   const proxyTransfer = async () => {
     if (!props.loan?.borrower) throw new Error('Borrower field missing')
 
     await props.createTransaction(`Transfer currency from proxy`, 'proxyTransferCurrency', [
-      props.tinlake,
+      tinlake,
       props.loan.ownerOf,
       props.loan.borrower,
     ])
