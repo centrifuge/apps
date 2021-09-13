@@ -1,21 +1,20 @@
 import { Spinner } from '@centrifuge/axis-spinner'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { ITinlake } from '../../../../tinlake.js/dist'
 import LoanListData from '../../../components/Loan/List'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { AuthState } from '../../../ducks/auth'
 import { useAssets } from '../../../utils/useAssets'
 
 interface Props {
-  tinlake: ITinlake
   auth?: AuthState
   activePool?: Pool
 }
 
 const LoanList: React.FC<Props> = (props) => {
-  const { tinlake, auth, activePool } = props
-
+  const { auth, activePool } = props
+  const tinlake = useTinlake()
   const { data: assetsData, isLoading } = useAssets(tinlake.contractAddresses.ROOT_CONTRACT!)
 
   if (isLoading) {

@@ -15,7 +15,6 @@ import PageTitle from '../../../../../components/PageTitle'
 import { PoolLink } from '../../../../../components/PoolLink'
 import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
-import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import LoanList from '../../../../../containers/Loan/List'
 import LoanOverview from '../../../../../containers/Loan/Overview/index'
@@ -51,36 +50,30 @@ const LoanListPage: React.FC<Props> = (props) => {
             menuItems={menuItems}
           />
           <PageContainer>
-            <WithTinlake
-              addresses={pool.addresses}
-              contractConfig={pool.contractConfig}
-              render={(tinlake) => (
-                <Auth
-                  render={(auth) => (
-                    <>
-                      <PageTitle
-                        pool={props.pool}
-                        page="Assets"
-                        rightContent={
-                          isBorrower && (
-                            <Box display={['none', 'block']}>
-                              <PoolLink href={'/assets/issue'}>
-                                <Button primary label="Lock NFT" />
-                              </PoolLink>
-                            </Box>
-                          )
-                        }
-                      />
-                      <Stack gap="xlarge">
-                        <LoanOverview tinlake={tinlake} auth={auth} selectedPool={props.pool} />
-                        <Stack gap="small">
-                          <SectionHeading>Asset List</SectionHeading>
-                          <LoanList tinlake={tinlake} auth={auth} activePool={props.pool} />
-                        </Stack>
-                      </Stack>
-                    </>
-                  )}
-                />
+            <Auth
+              render={(auth) => (
+                <>
+                  <PageTitle
+                    pool={props.pool}
+                    page="Assets"
+                    rightContent={
+                      isBorrower && (
+                        <Box display={['none', 'block']}>
+                          <PoolLink href={'/assets/issue'}>
+                            <Button primary label="Lock NFT" />
+                          </PoolLink>
+                        </Box>
+                      )
+                    }
+                  />
+                  <Stack gap="xlarge">
+                    <LoanOverview auth={auth} selectedPool={props.pool} />
+                    <Stack gap="small">
+                      <SectionHeading>Asset List</SectionHeading>
+                      <LoanList auth={auth} activePool={props.pool} />
+                    </Stack>
+                  </Stack>
+                </>
               )}
             />
           </PageContainer>
