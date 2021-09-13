@@ -39,12 +39,12 @@ const Risk: React.FC<Props> = (props: Props) => {
       ceilingRatio: new BN(0),
       rate: new BN('1000000002378234398782343987'),
       recoveryRatePD: new BN(0),
-      thresholdRatio: new BN(0),
+      thresholdRatio: Fixed27Base,
     }
     setRiskGroups([...riskGroups, newRiskGroup])
   }
 
-  const update = (group: number, key: 'ceilingRatio' | 'recoveryRatePD' | 'rate' | 'thresholdRatio', value: string) => {
+  const update = (group: number, key: 'ceilingRatio' | 'recoveryRatePD' | 'rate', value: string) => {
     let newRiskGroups = riskGroups
     newRiskGroups[group][key] = key === 'rate' ? new BN(interestRateToFee(value)) : new BN(displayToBase(value, 25))
     setRiskGroups(newRiskGroups)
@@ -84,9 +84,6 @@ const Risk: React.FC<Props> = (props: Props) => {
               <TableCell size="20%" pad={{ vertical: '6px' }}>
                 Term Recovery Rate
               </TableCell>
-              <TableCell size="20%" pad={{ vertical: '6px' }}>
-                Threshold Rate
-              </TableCell>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -97,9 +94,6 @@ const Risk: React.FC<Props> = (props: Props) => {
                 <TableCell>{toPrecision(feeToInterestRate(riskGroup.rate.ratePerSecond), 2)}%</TableCell>
                 <TableCell>
                   {parseFloat(riskGroup.recoveryRatePD.div(new BN(10).pow(new BN(22))).toString()) / 1000}%
-                </TableCell>
-                <TableCell>
-                  {parseFloat(riskGroup.thresholdRatio.div(new BN(10).pow(new BN(22))).toString()) / 1000}%
                 </TableCell>
               </TableRow>
             ))}
@@ -141,18 +135,6 @@ const Risk: React.FC<Props> = (props: Props) => {
                           max={100}
                           precision={3}
                           onValueChange={({ value }) => update(id, 'recoveryRatePD', value)}
-                          plain
-                        />
-                      </FormField>
-                    </TableCell>
-                    <TableCell>
-                      <FormField margin={{ right: 'small' }}>
-                        <NumberInput
-                          value={baseToDisplay(riskGroup.thresholdRatio || new BN(0), 25)}
-                          suffix="%"
-                          max={100}
-                          precision={0}
-                          onValueChange={({ value }) => update(id, 'thresholdRatio', value)}
                           plain
                         />
                       </FormField>

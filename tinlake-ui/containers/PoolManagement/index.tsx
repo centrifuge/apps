@@ -89,10 +89,10 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
               focusIndicator={false}
             />
             <MenuItem
-              secondary={view === 'Settings'}
-              plain={view !== 'Settings'}
-              onClick={() => setView('Settings')}
-              label="Settings"
+              secondary={view === 'Parameters'}
+              plain={view !== 'Parameters'}
+              onClick={() => setView('Parameters')}
+              label="Parameters"
               size="small"
               focusIndicator={false}
             />
@@ -127,9 +127,9 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
 
             {view === 'Risk' && <Risk tinlake={props.tinlake} />}
 
-            {view === 'Access' && <Access tinlake={props.tinlake} />}
+            {view === 'Parameters' && <Parameters tinlake={props.tinlake} />}
 
-            {view === 'Settings' && <Parameters tinlake={props.tinlake} />}
+            {view === 'Access' && <Access tinlake={props.tinlake} />}
 
             {view === 'Audit Log' && <AuditLog tinlake={props.tinlake} />}
           </Box>

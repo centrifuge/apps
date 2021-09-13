@@ -22,8 +22,8 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   const [maxJuniorRatio, setMaxJuniorRatio] = React.useState('0')
   const [seniorInterestRate, setSeniorInterestRate] = React.useState('0')
   const [discountRate, setDiscountRate] = React.useState('0')
-  const [minimumEpochTime, setMinimumEpochTime] = React.useState('0')
-  const [challengeTime, setChallengeTime] = React.useState('0')
+  const [, setMinimumEpochTime] = React.useState('0')
+  const [, setChallengeTime] = React.useState('0')
 
   React.useEffect(() => {
     if (poolData) {
@@ -36,27 +36,27 @@ const AdminActions: React.FC<Props> = (props: Props) => {
     }
   }, [poolData])
 
-  const [minRatioStatus, , setMinRatioTxId] = useTransactionState()
+  const [minRatioStatus, ,] = useTransactionState()
 
-  const saveMinJuniorRatio = async () => {
-    const txId = await props.createTransaction(`Set min TIN risk buffer`, 'setMinJuniorRatio', [
-      props.tinlake,
-      minJuniorRatio.toString(),
-    ])
-    setMinRatioTxId(txId)
-  }
+  // const saveMinJuniorRatio = async () => {
+  //   const txId = await props.createTransaction(`Set min TIN risk buffer`, 'setMinJuniorRatio', [
+  //     props.tinlake,
+  //     minJuniorRatio.toString(),
+  //   ])
+  //   setMinRatioTxId(txId)
+  // }
 
-  const [maxRatioStatus, , setMaxRatioTxId] = useTransactionState()
+  const [maxRatioStatus, ,] = useTransactionState()
 
-  const saveMaxJuniorRatio = async () => {
-    const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
-      props.tinlake,
-      maxJuniorRatio.toString(),
-    ])
-    setMaxRatioTxId(txId)
-  }
+  // const saveMaxJuniorRatio = async () => {
+  //   const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
+  //     props.tinlake,
+  //     maxJuniorRatio.toString(),
+  //   ])
+  //   setMaxRatioTxId(txId)
+  // }
 
-  const [seniorInterestRateStatus, , setSeniorInterestRateTxId] = useTransactionState()
+  const [seniorInterestRateStatus, ,] = useTransactionState()
 
   const saveSeniorInterestRate = async () => {
     // const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
@@ -66,15 +66,15 @@ const AdminActions: React.FC<Props> = (props: Props) => {
     // setMaxRatioTxId(txId)
   }
 
-  const [discountRateStatus, , setDiscountRateTxId] = useTransactionState()
+  const [discountRateStatus, ,] = useTransactionState()
 
-  const saveDiscountRate = async () => {
-    // const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
-    //   props.tinlake,
-    //   maxJuniorRatio.toString(),
-    // ])
-    // setMaxRatioTxId(txId)
-  }
+  // const saveDiscountRate = async () => {
+  // const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
+  //   props.tinlake,
+  //   maxJuniorRatio.toString(),
+  // ])
+  // setMaxRatioTxId(txId)
+  // }
 
   React.useEffect(() => {
     if (minRatioStatus === 'succeeded') {

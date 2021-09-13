@@ -17,8 +17,8 @@ const Admins: React.FC<Props> = (props: Props) => {
   const [level1Address, setLevel1Address] = React.useState('')
   const [level2Address, setLevel2Address] = React.useState('')
 
-  const [juniorStatus, , setJuniorTxId] = useTransactionState()
-  const [seniorStatus, , setSeniorTxId] = useTransactionState()
+  const [juniorStatus, ,] = useTransactionState()
+  const [seniorStatus, ,] = useTransactionState()
 
   const add = async (level: number) => {
     console.log(level)
