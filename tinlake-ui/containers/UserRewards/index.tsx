@@ -1,4 +1,4 @@
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
@@ -10,6 +10,7 @@ import { Shelf } from '../../components/Layout'
 import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import PageTitle from '../../components/PageTitle'
+import { useTinlake } from '../../components/TinlakeProvider'
 import { ValueDisplay } from '../../components/ValueDisplay'
 import { IpfsPools } from '../../config'
 import { AuthState, ensureAuthed } from '../../ducks/auth'
@@ -27,11 +28,11 @@ import ClaimRewards from '../ClaimRewards'
 import SetCentAccount from '../SetCentAccount'
 
 interface Props {
-  tinlake: ITinlake
   ipfsPools: IpfsPools
 }
 
-const UserRewards: React.FC<Props> = ({ tinlake, ipfsPools }) => {
+const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
+  const tinlake = useTinlake()
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const rewards = useGlobalRewards()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
