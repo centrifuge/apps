@@ -85,15 +85,14 @@ const Title = styled.div`
 `
 
 const PoolName = styled.h2`
-  font-size: 13px;
-  font-weight: bold;
+  font-size: 16px;
+  font-weight: 500;
   margin: 0;
-  color: #979797;
 `
 
 const PageName = styled.h1`
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 16px;
+  font-weight: 600;
   margin: 0;
   a {
     color: #000;

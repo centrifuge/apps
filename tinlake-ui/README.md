@@ -70,13 +70,15 @@ There are a few flags you can use in your url query string to debug Tinlake:
 
 ### Environments
 
-| Name            | Description                                                                                              | Domain                                                                                        |
-| --------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Pull Request    | <ul><li>Deploys from a pull request</li><li>Points to Kovan testnet</li><li>Unstable</li></ul>           | `pr-<pull-request-number>--dev-tinlake.netlify.app`                                           |
-| Dev             | <ul><li>Deploys from the `main` branch</li><li>Points to Kovan testnet</li><li>Unstable</li></ul>        | <a href="https://dev.tinlake.centrifuge.io">dev.tinlake.centrifuge.io</a>                     |
-| Kovan Staging   | <ul><li>Deploys from a release candidate branch</li><li>Points to Kovan testnet</li><li>Stable</li></ul> | <a href="https://kovan.staging.tinlake.centrifuge.io">kovan.staging.tinlake.centrifuge.io</a> |
-| Mainnet Staging | <ul><li>Deploys from a release candidate branch</li><li>Points to mainnet</li><li>Stable</li></ul>       | <a href="https://staging.tinlake.centrifuge.io">staging.tinlake.centrifuge.io</a>             |
-| Prod            | <ul><li>Deploys from a release tag</li><li>Points to mainnet</li><li>Production environment</li></ul>    | <a href="https://tinlake.centrifuge.io">tinlake.centrifuge.io</a>                             |
+| Name                 | Description                                                                                              | Domain                                                                                        |
+| -------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Kovan Pull Request   | <ul><li>Deploys from a pull request</li><li>Points to Kovan testnet</li><li>Unstable</li></ul>           | `pr-<pull-request-number>--kovan-dev-tinlake.netlify.app`                                     |
+| Mainnet Pull Request | <ul><li>Deploys from a pull request</li><li>Points to mainnet</li><li>Unstable</li></ul>                 | `pr-<pull-request-number>--dev-tinlake.netlify.app`                                           |
+| Kovan Dev            | <ul><li>Deploys from the `main` branch</li><li>Points to Kovan testnet</li><li>Unstable</li></ul>        | <a href="https://kovan.dev.tinlake.centrifuge.io">kovan.dev.tinlake.centrifuge.io</a>         |
+| Mainnet Dev          | <ul><li>Deploys from the `main` branch</li><li>Points to mainnet</li><li>Unstable</li></ul>              | <a href="https://dev.tinlake.centrifuge.io">dev.tinlake.centrifuge.io</a>                     |
+| Kovan Staging        | <ul><li>Deploys from a release candidate branch</li><li>Points to Kovan testnet</li><li>Stable</li></ul> | <a href="https://kovan.staging.tinlake.centrifuge.io">kovan.staging.tinlake.centrifuge.io</a> |
+| Mainnet Staging      | <ul><li>Deploys from a release candidate branch</li><li>Points to mainnet</li><li>Stable</li></ul>       | <a href="https://staging.tinlake.centrifuge.io">staging.tinlake.centrifuge.io</a>             |
+| Prod                 | <ul><li>Deploys from a release tag</li><li>Points to mainnet</li><li>Production environment</li></ul>    | <a href="https://tinlake.centrifuge.io">tinlake.centrifuge.io</a>                             |
 
 ### Release
 
@@ -84,17 +86,17 @@ There are a few flags you can use in your url query string to debug Tinlake:
 
 Here is a visual of the software development lifecycle for `tinlake-ui`:
 
-<img src="https://i.imgur.com/WY3BH8C.png" alt="proposed-process-diagram" width="575">
+<img src="https://i.imgur.com/7dDsHig.png" alt="proposed-process-diagram" width="575">
 
 Below is the flow for a typical release:
 
 ##### Deploy Pull Requests
 
-Deploys to `pr-<pull-request-number>--dev-tinlake.netlify.app` are automatically triggered when a pull request is submitted that contains changes to the `tinlake-ui` subdirectory
+Deploys to `pr-<pull-request-number>--kovan.dev-tinlake.netlify.app` and `pr-<pull-request-number>--dev-tinlake.netlify.app` are automatically triggered when a pull request is submitted that contains changes to the `tinlake-ui` subdirectory
 
 ##### Deploy To Development
 
-Deploys to <a href="https://dev.tinlake.centrifuge.io">dev.tinlake.centrifuge.io</a> are automatically triggered when changes are push/merged to the `main` branch that contains changes to the `tinlake-ui` subdirectory
+Deploys to <a href="https://kovan.dev.tinlake.centrifuge.io">kovan.dev.tinlake.centrifuge.io</a> and <a href="https://dev.tinlake.centrifuge.io">dev.tinlake.centrifuge.io</a> are automatically triggered when changes are push/merged to the `main` branch that contains changes to the `tinlake-ui` subdirectory
 
 ##### Deploy To Staging
 
