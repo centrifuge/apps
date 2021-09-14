@@ -2,6 +2,7 @@ import { ITinlake } from '@centrifuge/tinlake-js'
 import * as Sentry from '@sentry/react'
 import { ethers } from 'ethers'
 import { HYDRATE } from 'next-redux-wrapper'
+import { useSelector } from 'react-redux'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import config from '../config'
@@ -441,3 +442,6 @@ export function clear(): ThunkAction<Promise<void>, { auth: AuthState }, undefin
     dispatch({ type: CLEAR })
   }
 }
+
+// Hooks
+export const useAuth = (): AuthState => useSelector<any, AuthState>((state) => state.auth)

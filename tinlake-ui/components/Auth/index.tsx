@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import config from '../../config'
-import { AuthState, load } from '../../ducks/auth'
+import { AuthState, load, useAuth } from '../../ducks/auth'
 import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
 import { useTinlake } from '../TinlakeProvider'
 import WrongNetwork from '../WrongNetwork'
@@ -13,7 +13,7 @@ interface Props {
 const Auth: React.FC<Props> = ({ render, children }) => {
   const debugAddress = useQueryDebugEthAddress()
   const tinlake = useTinlake()
-  const auth = useSelector<any, AuthState>((state) => state.auth)
+  const auth = useAuth()
   const dispatch = useDispatch()
 
   React.useEffect(() => {

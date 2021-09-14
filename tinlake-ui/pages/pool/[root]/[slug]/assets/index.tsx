@@ -4,7 +4,6 @@ import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
 import Auth from '../../../../../components/Auth'
 import Header from '../../../../../components/Header'
 import { SectionHeading } from '../../../../../components/Heading'
@@ -18,7 +17,7 @@ import WithFooter from '../../../../../components/WithFooter'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import LoanList from '../../../../../containers/Loan/List'
 import LoanOverview from '../../../../../containers/Loan/Overview/index'
-import { AuthState } from '../../../../../ducks/auth'
+import { useAuth } from '../../../../../ducks/auth'
 import { menuItems } from '../../../../../menuItems'
 import { usePool } from '../../../../../utils/usePool'
 
@@ -32,7 +31,7 @@ const LoanListPage: React.FC<Props> = (props) => {
   const { pool, ipfsPools } = props
 
   const { data: poolData } = usePool(pool.addresses.ROOT_CONTRACT)
-  const auth = useSelector<any, AuthState>((state) => state.auth)
+  const auth = useAuth()
   const router = useRouter()
   const isBorrower = poolData?.isPoolAdmin || (auth?.proxies && auth?.proxies.length > 0) || 'lockNFT' in router.query
 

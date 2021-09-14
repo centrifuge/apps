@@ -1,11 +1,10 @@
 import { Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
 import PageTitle from '../../components/PageTitle'
 import { useTinlake } from '../../components/TinlakeProvider'
 import { Pool } from '../../config'
-import { AuthState } from '../../ducks/auth'
+import { useAuth } from '../../ducks/auth'
 import { downloadCSV } from '../../utils/export'
 import { usePool } from '../../utils/usePool'
 import { csvName } from '../DataQuery/queries'
@@ -21,7 +20,7 @@ interface Props {
 }
 
 const PoolManagement: React.FC<Props> = (props: Props) => {
-  const auth = useSelector<any, AuthState>((state) => state.auth)
+  const auth = useAuth()
   const tinlake = useTinlake()
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 

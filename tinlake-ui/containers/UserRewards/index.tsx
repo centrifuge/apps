@@ -12,7 +12,7 @@ import NumberDisplay from '../../components/NumberDisplay'
 import PageTitle from '../../components/PageTitle'
 import { ValueDisplay } from '../../components/ValueDisplay'
 import { IpfsPools } from '../../config'
-import { AuthState, ensureAuthed } from '../../ducks/auth'
+import { ensureAuthed, useAuth } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { maybeLoadUserRewards, UserRewardsData, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
@@ -34,7 +34,7 @@ const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const rewards = useGlobalRewards()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
-  const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
+  const { address: ethAddr } = useAuth()
   const portfolio = usePortfolio(ipfsPools)
   const portfolioValue = portfolio.data?.totalValue
   const dispatch = useDispatch()
