@@ -5,32 +5,28 @@ import { ITinlake } from '../../../../tinlake.js/dist'
 import LoanListData from '../../../components/Loan/List'
 import { Pool } from '../../../config'
 import { AuthState } from '../../../ducks/auth'
-import { loadLoans, LoansState } from '../../../ducks/loans'
+import { useAssets } from '../../../utils/useAssets'
 
 interface Props {
   tinlake: ITinlake
-  loans?: LoansState
-  loadLoans?: (tinlake: any) => Promise<void>
   auth?: AuthState
   activePool?: Pool
 }
 
 const LoanList: React.FC<Props> = (props) => {
-  const { loadLoans, tinlake, loans, auth, activePool } = props
+  const { tinlake, auth, activePool } = props
 
-  React.useEffect(() => {
-    loadLoans && loadLoans(tinlake)
-  }, [])
+  const { data: assetsData, isLoading } = useAssets(tinlake.contractAddresses.ROOT_CONTRACT!)
 
-  if (loans!.loansState === 'loading') {
+  if (isLoading) {
     return <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />
   }
 
   return (
-    <LoanListData activePool={activePool} loans={(loans && loans.loans) || []} userAddress={auth?.address || ''}>
+    <LoanListData activePool={activePool} loans={assetsData || []} userAddress={auth?.address || ''}>
       {' '}
     </LoanListData>
   )
 }
 
-export default connect((state) => state, { loadLoans })(LoanList)
+export default connect((state) => state)(LoanList)

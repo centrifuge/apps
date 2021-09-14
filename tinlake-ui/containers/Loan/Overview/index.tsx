@@ -2,7 +2,7 @@ import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
-import { connect, useDispatch, useSelector } from 'react-redux'
+import { connect } from 'react-redux'
 import { Area, AreaChart, Tooltip } from 'recharts'
 import { Card } from '../../../components/Card'
 import {
@@ -20,11 +20,11 @@ import { Shelf, Stack } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
-import { AssetData, loadAssetData } from '../../../ducks/loans'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { dateToYMD } from '../../../utils/date'
 import { UintBase } from '../../../utils/ratios'
 import { toPrecision } from '../../../utils/toPrecision'
+import { useDailyAssetsValue } from '../../../utils/useDailyAssetsValue'
 import { useMedia } from '../../../utils/useMedia'
 import { usePool } from '../../../utils/usePool'
 import MaxReserveForm from './MaxReserveForm'
@@ -71,14 +71,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 const LoanOverview: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
-  const assetData = useSelector<any, AssetData[]>((state) => state.loans.assetData)
-
-  const dispatch = useDispatch()
-  const address = useSelector<any, string | null>((state) => state.auth.address)
-
-  React.useEffect(() => {
-    dispatch(loadAssetData(props.tinlake))
-  }, [address])
+  const { data: assetData } = useDailyAssetsValue(props.tinlake.contractAddresses.ROOT_CONTRACT!)
 
   const isAdmin =
     poolData?.isPoolAdmin || (props.auth?.permissions && (props.auth?.permissions as PermissionsV3).canSetMaxReserve)
@@ -86,7 +79,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   const [showMaxReserveForm, setShowMaxReserveForm] = React.useState(false)
 
   const assetDataWithToday =
-    assetData.length > 0
+    assetData && assetData.length > 0
       ? [
           ...assetData,
           {

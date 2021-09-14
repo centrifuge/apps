@@ -211,7 +211,7 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
   if (address) {
     calls.push(
       ...(pool.addresses.POOL_ADMIN
-        ? [
+        ? ([
             {
               target: pool.addresses.SENIOR_MEMBERLIST,
               call: ['hasMember(address)(bool)', address || '0'],
@@ -227,8 +227,8 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
               call: ['admins(address)(uint256)', address || '0'],
               returns: [[`isPoolAdmin`, (num: BigNumber) => toBN(num).toNumber() === 1]],
             },
-          ]
-        : [
+          ] as Call[])
+        : ([
             {
               target: pool.addresses.SENIOR_MEMBERLIST,
               call: ['hasMember(address)(bool)', address || '0'],
@@ -239,7 +239,7 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
               call: ['hasMember(address)(bool)', address || '0'],
               returns: [[`junior.inMemberlist`]],
             },
-          ])
+          ] as Call[]))
     )
   }
 

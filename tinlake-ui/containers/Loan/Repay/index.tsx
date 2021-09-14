@@ -1,5 +1,5 @@
 import { TokenInput } from '@centrifuge/axis-token-input'
-import { baseToDisplay, ITinlake, Loan } from '@centrifuge/tinlake-js'
+import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
@@ -7,15 +7,15 @@ import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
-import { loadLoan } from '../../../ducks/loans'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { Asset } from '../../../utils/useAsset'
 
 interface Props extends TransactionProps {
-  loan: Loan
+  loan: Asset
+  refetch: () => void
   tinlake: ITinlake
   poolConfig: Pool
-  loadLoan?: (tinlake: any, loanId: string, refresh?: boolean) => Promise<void>
   ensureAuthed?: () => Promise<void>
 }
 
@@ -80,7 +80,7 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
 
   React.useEffect(() => {
     if (status === 'succeeded') {
-      props.loadLoan && props.loadLoan(props.tinlake, props.loan.loanId)
+      props.refetch()
     }
   }, [status])
 
@@ -133,4 +133,4 @@ const LoanRepay: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadLoan, createTransaction, ensureAuthed })(LoanRepay)
+export default connect(null, { createTransaction, ensureAuthed })(LoanRepay)
