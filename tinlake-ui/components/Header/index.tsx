@@ -152,13 +152,15 @@ const Header: React.FC<Props> = (props: Props) => {
       <AccountWrapper align="center" direction="row">
         {!props.hideHoldings && (
           <Holdings>
-            <Box pad={{ left: '14px', right: '14px' }}>
-              <Tooltip title="View your rewards">{address ? rewardsLink : 'Rewards'}</Tooltip>
-            </Box>
             {address && (
-              <Box pad={{ left: '14px', right: '14px' }}>
-                <Tooltip title="View your investment portfolio">{portfolioLink}</Tooltip>
-              </Box>
+              <>
+                <Box pad={{ left: '14px', right: '14px' }}>
+                  <Tooltip title="View your rewards">{rewardsLink}</Tooltip>
+                </Box>
+                <Box pad={{ left: '14px', right: '14px' }}>
+                  <Tooltip title="View your investment portfolio">{portfolioLink}</Tooltip>
+                </Box>
+              </>
             )}
           </Holdings>
         )}
@@ -206,7 +208,7 @@ const Header: React.FC<Props> = (props: Props) => {
 
                 {!props.hideHoldings && (
                   <Box gap="large">
-                    {rewardsLink}
+                    {address && rewardsLink}
                     {address && portfolioLink}
                   </Box>
                 )}
