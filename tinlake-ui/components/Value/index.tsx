@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { typography, TypographyProps } from 'styled-system'
-import { Shelf } from '../Layout'
+import { Flex, Shelf } from '../Layout'
 import { LoadingValue } from '../LoadingValue'
 
 export type Variant = 'default' | 'large' | 'sectionHeading' | 'primaryList' | 'secondaryList' | 'tertiaryList'
@@ -11,7 +11,7 @@ export interface Props {
   /**
    * Shows loading box when value == null
    */
-  value: React.ReactChild | null
+  value: React.ReactNode
   icon?: React.ReactNode
   unit?: React.ReactNode
 }
@@ -65,8 +65,14 @@ export const Value: React.FC<Props> = ({ variant: variantProp, value, icon, unit
   }
 
   return (
-    <Shelf gap={gap}>
-      {typeof icon === 'string' ? <Icon size={iconSize} src={icon} /> : icon}
+    <Shelf gap={gap} alignItems="baseline">
+      {icon && (
+        // Needed to align the value with the term correctly in a ValuePairList when there's an icon
+        // Will also cause margins to push against the text and ignore icon
+        <Flex alignSelf="center" bleedY={20}>
+          {typeof icon === 'string' ? <Icon size={iconSize} src={icon} /> : icon}
+        </Flex>
+      )}
       <Shelf gap={gap} alignItems="baseline">
         <LoadingValue done={value != null} width={75} height={valueFontSize}>
           <Text fontSize={valueFontSize} fontWeight={valueFontWeight} lineHeight={1}>

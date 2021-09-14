@@ -278,9 +278,3 @@ export default InvestmentOverview
 const TrancheNote = styled.div`
   color: #777;
 `
-
-const TrancheText = styled.div`
-  color: #777;
-  font-weight: 500;
-  line-height: 24px;
-`

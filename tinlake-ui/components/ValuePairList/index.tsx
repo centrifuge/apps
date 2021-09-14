@@ -12,6 +12,7 @@ interface Item {
   value: ValueProps['value']
   valueIcon?: ValueProps['icon']
   valueUnit?: ValueProps['unit']
+  valueSuffix?: React.ReactNode
 }
 
 interface Props {
@@ -38,17 +39,18 @@ export const ValuePairList: React.FC<Props> = ({ variant = 'primary', items }) =
 
   return (
     <ValueVariantContext.Provider value={variantMap[variant]}>
-      <Stack gap={gap} as="dl" margin={0}>
+      <Stack as="dl" gap={gap} margin={0}>
         {items.map((item, i) => (
           <>
-            <Shelf justifyContent="space-between">
-              <Wrap alignItems="baseline" gap="xsmall">
+            <Shelf justifyContent="space-between" alignItems="baseline">
+              <Wrap as="dt" alignItems="baseline" gap="xsmall" rowGap={0}>
                 <Term fontWeight={termFontWeight}>{item.term}</Term>
                 {item.termSuffix && <TermSuffix>{item.termSuffix}</TermSuffix>}
               </Wrap>
-              <dd>
+              <Stack as="dd" alignItems="flex-end">
                 <Value value={item.value} icon={item.valueIcon} unit={item.valueUnit} />
-              </dd>
+                {item.valueSuffix && <Value value={item.valueSuffix} />}
+              </Stack>
             </Shelf>
             {variant === 'secondary' && i < items.length - 1 && <Divider />}
           </>
@@ -58,7 +60,7 @@ export const ValuePairList: React.FC<Props> = ({ variant = 'primary', items }) =
   )
 }
 
-const Term = styled.dt<{ fontWeight: number }>`
+const Term = styled.span<{ fontWeight: number }>`
   font-weight: ${(props) => props.fontWeight};
   color: black;
 `
