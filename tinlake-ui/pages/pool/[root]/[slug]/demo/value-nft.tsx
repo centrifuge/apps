@@ -39,17 +39,15 @@ const ValueNFTPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <Auth
-                  render={(auth) => (
-                    <Box>
-                      <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
-                        <BackLink href={'/assets'} />
-                        <Heading level="4">Value NFT</Heading>
-                      </Box>
-                      <ValueNFT auth={auth} tokenId={tokenId} registry={registry} />
+                <Auth>
+                  <Box>
+                    <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
+                      <BackLink href={'/assets'} />
+                      <Heading level="4">Value NFT</Heading>
                     </Box>
-                  )}
-                />
+                    <ValueNFT tokenId={tokenId} registry={registry} />
+                  </Box>
+                </Auth>
               </Box>
             </Box>
           </Container>

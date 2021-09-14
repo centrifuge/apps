@@ -36,13 +36,11 @@ const InvestmentPage: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <Auth
-                  render={() => (
-                    <Box>
-                      <InvestmentsView activePool={pool} />
-                    </Box>
-                  )}
-                />
+                <Auth>
+                  <Box>
+                    <InvestmentsView activePool={pool} />
+                  </Box>
+                </Auth>
               </Box>
             </Box>
           </Container>

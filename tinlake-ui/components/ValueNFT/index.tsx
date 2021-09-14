@@ -4,7 +4,7 @@ import { Anchor, Box, Button, DateInput, FormField, TextInput } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
-import { AuthState, ensureAuthed, loadProxies } from '../../ducks/auth'
+import { ensureAuthed, loadProxies, useAuth } from '../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { getNFT as getNFTAction } from '../../services/tinlake/actions'
 import Alert from '../Alert'
@@ -17,7 +17,6 @@ import { useTinlake } from '../TinlakeProvider'
 interface Props extends TransactionProps {
   tokenId: string
   registry: string
-  auth: AuthState
   loadProxies?: () => Promise<void>
   ensureAuthed?: () => Promise<void>
 }
@@ -26,6 +25,7 @@ const DAYS = 24 * 60 * 60 * 1000
 
 const ValueNFT: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
+  const auth = useAuth()
   const [registry, setRegistry] = React.useState('')
   const [tokenId, setTokenId] = React.useState('')
   const [value, setValue] = React.useState('800000000000000000000')
@@ -122,7 +122,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
         </p>
       </Alert>
 
-      {!props.auth.permissions?.canSetRiskScore ? (
+      {!auth.permissions?.canSetRiskScore ? (
         <Alert margin={{ top: 'medium' }} pad={{ horizontal: 'medium' }} type="error">
           <p>You need to be an admin to value NFTs.</p>
         </Alert>
@@ -257,7 +257,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadProxies, ensureAuthed, createTransaction })(ValueNFT)
+export default connect(null, { loadProxies, ensureAuthed, createTransaction })(ValueNFT)
 
 const Col = styled.div`
   flex: 1 0 0;

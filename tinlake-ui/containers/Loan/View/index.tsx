@@ -8,8 +8,7 @@ import { Stack, Wrap } from '../../../components/Layout'
 import LoanData from '../../../components/Loan/Data'
 import NftData from '../../../components/NftData'
 import { Pool } from '../../../config'
-import { AuthState, loadProxies } from '../../../ducks/auth'
-import { TransactionState } from '../../../ducks/transactions'
+import { loadProxies, useAuth } from '../../../ducks/auth'
 import { useAsset } from '../../../utils/useAsset'
 import LoanBorrow from '../Borrow'
 import LoanRepay from '../Repay'
@@ -17,8 +16,6 @@ import LoanRepay from '../Repay'
 interface Props {
   loanId: string
   poolConfig: Pool
-  auth?: AuthState
-  transactions?: TransactionState
   loadProxies?: () => Promise<void>
 }
 
@@ -32,7 +29,8 @@ const LoanView: React.FC<Props> = (props: Props) => {
     loadProxies && loadProxies()
   }, [])
 
-  const { loanId, auth } = props
+  const { loanId } = props
+  const auth = useAuth()
 
   if (error) {
     return (
@@ -68,4 +66,4 @@ const LoanView: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadProxies })(LoanView)
+export default connect(null, { loadProxies })(LoanView)

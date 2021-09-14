@@ -9,20 +9,20 @@ import NftData from '../../../components/NftData'
 import { PoolLink } from '../../../components/PoolLink'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
-import { AuthState, ensureAuthed } from '../../../ducks/auth'
+import { ensureAuthed, useAuth } from '../../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { getNFT as getNFTAction } from '../../../services/tinlake/actions'
 import LoanView from '../View'
 
 interface Props extends TransactionProps {
   poolConfig: Pool
-  auth: AuthState
   ensureAuthed?: () => Promise<void>
 }
 
 const IssueLoan: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const tinlake = useTinlake()
+  const auth = useAuth()
   const { tokenId: tokenIdParam, registry: registryParam }: { tokenId?: string; registry?: string } =
     router.query as any
   const [registry, setRegistry] = React.useState('')
@@ -99,8 +99,8 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
   }, [registry, tokenId])
 
   const disabled = status === 'unconfirmed' || status === 'pending' || status === 'succeeded'
-  const wrongOwner = props.auth.address && nft && props.auth.address.toLowerCase() !== nft.nftOwner.toLowerCase()
-  const canLockNFT = !disabled && nft && (!props.auth.address || !wrongOwner)
+  const wrongOwner = auth.address && nft && auth.address.toLowerCase() !== nft.nftOwner.toLowerCase()
+  const canLockNFT = !disabled && nft && (!auth.address || !wrongOwner)
 
   return (
     <Box>
@@ -157,4 +157,4 @@ const IssueLoan: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { ensureAuthed, createTransaction })(IssueLoan)
+export default connect(null, { ensureAuthed, createTransaction })(IssueLoan)

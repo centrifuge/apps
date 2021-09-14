@@ -36,7 +36,9 @@ const Pool: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <Auth render={() => <Overview selectedPool={pool} />} />
+                <Auth>
+                  <Overview selectedPool={pool} />
+                </Auth>
               </Box>
             </Box>
           </Container>

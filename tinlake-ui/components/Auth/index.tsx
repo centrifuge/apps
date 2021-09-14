@@ -1,16 +1,12 @@
 import * as React from 'react'
 import { useDispatch } from 'react-redux'
 import config from '../../config'
-import { AuthState, load, useAuth } from '../../ducks/auth'
+import { load, useAuth } from '../../ducks/auth'
 import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
 import { useTinlake } from '../TinlakeProvider'
 import WrongNetwork from '../WrongNetwork'
 
-interface Props {
-  render?: (auth: AuthState) => JSX.Element
-}
-
-const Auth: React.FC<Props> = ({ render, children }) => {
+const Auth: React.FC = ({ children }) => {
   const debugAddress = useQueryDebugEthAddress()
   const tinlake = useTinlake()
   const auth = useAuth()
@@ -24,7 +20,7 @@ const Auth: React.FC<Props> = ({ render, children }) => {
     return <WrongNetwork expected={config.network} actual={auth!.network} />
   }
 
-  return render ? render(auth!) : <>{children}</>
+  return <>{children}</>
 }
 
 export default Auth

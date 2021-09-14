@@ -49,32 +49,28 @@ const LoanListPage: React.FC<Props> = (props) => {
             menuItems={menuItems}
           />
           <PageContainer>
-            <Auth
-              render={(auth) => (
-                <>
-                  <PageTitle
-                    pool={props.pool}
-                    page="Assets"
-                    rightContent={
-                      isBorrower && (
-                        <Box display={['none', 'block']}>
-                          <PoolLink href={'/assets/issue'}>
-                            <Button primary label="Lock NFT" />
-                          </PoolLink>
-                        </Box>
-                      )
-                    }
-                  />
-                  <Stack gap="xlarge">
-                    <LoanOverview auth={auth} selectedPool={props.pool} />
-                    <Stack gap="small">
-                      <SectionHeading>Asset List</SectionHeading>
-                      <LoanList auth={auth} activePool={props.pool} />
-                    </Stack>
-                  </Stack>
-                </>
-              )}
-            />
+            <Auth>
+              <PageTitle
+                pool={props.pool}
+                page="Assets"
+                rightContent={
+                  isBorrower && (
+                    <Box display={['none', 'block']}>
+                      <PoolLink href={'/assets/issue'}>
+                        <Button primary label="Lock NFT" />
+                      </PoolLink>
+                    </Box>
+                  )
+                }
+              />
+              <Stack gap="xlarge">
+                <LoanOverview auth={auth} selectedPool={props.pool} />
+                <Stack gap="small">
+                  <SectionHeading>Asset List</SectionHeading>
+                  <LoanList auth={auth} activePool={props.pool} />
+                </Stack>
+              </Stack>
+            </Auth>
           </PageContainer>
         </WithFooter>
       </TinlakeProvider>

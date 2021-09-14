@@ -23,7 +23,9 @@ const Query: React.FC<Props> = (props: Props) => {
           <Container style={{ backgroundColor: '#f9f9f9' }}>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <Auth render={() => <DataQuery />} />
+                <Auth>
+                  <DataQuery />
+                </Auth>
               </Box>
             </Box>
           </Container>

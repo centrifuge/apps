@@ -23,7 +23,9 @@ const Home: React.FC<Props> = (props: Props) => {
           <Container style={{ backgroundColor: '#f9f9f9' }}>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <Auth render={() => <Dashboard ipfsPools={props.ipfsPools} />} />
+                <Auth>
+                  <Dashboard ipfsPools={props.ipfsPools} />
+                </Auth>
               </Box>
             </Box>
           </Container>

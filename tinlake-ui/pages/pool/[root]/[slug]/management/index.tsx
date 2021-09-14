@@ -36,13 +36,11 @@ const ManagementPage: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <Auth
-                  render={() => (
-                    <Box>
-                      <PoolManagement activePool={pool} />
-                    </Box>
-                  )}
-                />
+                <Auth>
+                  <Box>
+                    <PoolManagement activePool={pool} />
+                  </Box>
+                </Auth>
               </Box>
             </Box>
           </Container>

@@ -36,13 +36,11 @@ const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <Auth
-                  render={() => (
-                    <Box>
-                      <OnboardingSteps activePool={pool} />
-                    </Box>
-                  )}
-                />
+                <Auth>
+                  <Box>
+                    <OnboardingSteps activePool={pool} />
+                  </Box>
+                </Auth>
               </Box>
             </Box>
           </Container>

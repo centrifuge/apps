@@ -36,7 +36,9 @@ const MintNFTPage: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <Auth render={() => <MintNFT />} />
+                <Auth>
+                  <MintNFT />
+                </Auth>
               </Box>
             </Box>
           </Container>

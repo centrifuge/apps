@@ -40,11 +40,9 @@ const Pool: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <Auth
-                  render={() =>
-                    'isArchived' in pool ? <Archived selectedPool={pool} /> : <Overview selectedPool={pool} />
-                  }
-                />
+                <Auth>
+                  {'isArchived' in pool ? <Archived selectedPool={pool} /> : <Overview selectedPool={pool} />}
+                </Auth>
               </Box>
             </Box>
           </Container>

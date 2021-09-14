@@ -55,14 +55,12 @@ const LoanPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
                   // }
                 />
 
-                <Auth
-                  render={(auth) => (
-                    <Box>
-                      {assetId && <LoanView auth={auth} poolConfig={pool} loanId={assetId} />}
-                      {!assetId && <div>Loading...</div>}
-                    </Box>
-                  )}
-                />
+                <Auth>
+                  <Box>
+                    {assetId && <LoanView poolConfig={pool} loanId={assetId} />}
+                    {!assetId && <div>Loading...</div>}
+                  </Box>
+                </Auth>
               </Box>
             </Box>
           </Container>

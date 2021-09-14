@@ -37,15 +37,12 @@ const LoanIssuePage: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Container>
             <Box justify="center" direction="row">
               <Box width="xlarge">
-                <Auth
-                  render={(auth) => (
-                    <Box margin={{ top: 'medium' }}>
-                      <PageTitle pool={pool} page={`Lock NFT`} parentPage="Assets" parentPageHref="/assets" />
-
-                      <IssueLoan poolConfig={pool} auth={auth} />
-                    </Box>
-                  )}
-                />
+                <Auth>
+                  <Box margin={{ top: 'medium' }}>
+                    <PageTitle pool={pool} page={`Lock NFT`} parentPage="Assets" parentPageHref="/assets" />
+                    <IssueLoan poolConfig={pool} />
+                  </Box>
+                </Auth>
               </Box>
             </Box>
           </Container>
