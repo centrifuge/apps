@@ -252,7 +252,7 @@ export const Row: React.FC<DetailsProps & PropsOf<typeof PoolRow>> = ({
             {poolIcon}
             {poolTitle}
           </Shelf>
-          <Divider />
+          <Divider width="auto" bleedX="small" />
           <Stack gap="xsmall">
             {columns.map((col) => (
               <Shelf justifyContent="space-between">

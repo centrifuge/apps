@@ -3,14 +3,16 @@ import { useTheme } from 'styled-components'
 
 type Breakpoint = 'small' | 'medium' | 'large' | 'xlarge'
 
-type Options = { below: Breakpoint } | { above: Breakpoint }
+type Options = string | { below: Breakpoint } | { above: Breakpoint }
 
 let serverHandoffComplete = false
 
 export function useMedia(options: Options) {
   const theme = useTheme()
   const query =
-    'above' in options
+    typeof options === 'string'
+      ? options
+      : 'above' in options
       ? `(min-width: ${theme.breakpoints[options.above]})`
       : `(max-width: ${theme.breakpoints[options.below]})`
   const [state, setState] = React.useState(() => (serverHandoffComplete ? window.matchMedia(query).matches : null))
