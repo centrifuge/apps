@@ -1,7 +1,6 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
 import * as Sentry from '@sentry/react'
 import { ethers } from 'ethers'
-import { HYDRATE } from 'next-redux-wrapper'
 import { useSelector } from 'react-redux'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
@@ -82,8 +81,6 @@ const initialState: AuthState = {
 // Reducer
 export default function reducer(state: AuthState = initialState, action: AnyAction = { type: '' }): AuthState {
   switch (action.type) {
-    case HYDRATE:
-      return { ...state, ...(action.payload.auth || {}) }
     case SET_AUTH_STATE:
       return { ...state, authState: action.authState }
     case RECEIVE_ADDRESS:
