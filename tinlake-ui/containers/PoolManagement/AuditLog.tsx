@@ -23,10 +23,13 @@ const logsPerPage = 8
 const AuditLog: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
-  const [events, setEvents] = React.useState([] as ethers.Event[])
-  const [logs, setLogs] = React.useState([] as ethers.utils.LogDescription[])
-  const [transactions, setTransactions] = React.useState([] as ethers.providers.TransactionResponse[])
-  const [blocks, setBlocks] = React.useState([] as ethers.providers.Block[])
+  const [{ events, logs, transactions, blocks }, setData] = React.useState({
+    events: [] as ethers.Event[],
+    logs: [] as ethers.utils.LogDescription[],
+    transactions: [] as ethers.providers.TransactionResponse[],
+    blocks: [] as ethers.providers.Block[],
+  })
+
   const [start, setStart] = React.useState(0)
 
   const getEvents = async () => {
@@ -41,19 +44,14 @@ const AuditLog: React.FC<Props> = (props: Props) => {
       .filter((e) => e.event && !ignoredEvents.includes(e.event))
       .reverse()
 
-    setEvents(newEvents)
-
-    setLogs(
-      newEvents.map((event) => {
-        return poolAdmin.interface.parseLog(event)
-      })
-    )
+    const newLogs = newEvents.map((event) => {
+      return poolAdmin.interface.parseLog(event)
+    })
 
     const newTransactions = await Promise.all(events.map((e) => e.getTransaction()))
-    setTransactions(newTransactions)
-
     const newBlocks = await Promise.all(events.map((e) => e.getBlock()))
-    setBlocks(newBlocks)
+    const newData = { events: newEvents, logs: newLogs, transactions: newTransactions, blocks: newBlocks }
+    setData(newData)
   }
 
   React.useEffect(() => {
@@ -82,20 +80,18 @@ const AuditLog: React.FC<Props> = (props: Props) => {
           <TableBody>
             {logs.slice(start, start + logsPerPage).map((log: ethers.utils.LogDescription, id: number) => (
               <TableRow>
-                <TableCell>{start + id in blocks && dateToYMD(blocks[start + id].timestamp)} &nbsp;</TableCell>
+                <TableCell>{dateToYMD(blocks[start + id]?.timestamp || 0)}&nbsp;</TableCell>
                 <TableCell>
-                  {start + id in transactions && (
-                    <DisplayFieldWrapper>
-                      <DisplayField
-                        as={'span'}
-                        value={formatAddress(transactions[start + id].from)}
-                        link={{
-                          href: getAddressLink(transactions[start + id].from),
-                          target: '_blank',
-                        }}
-                      />
-                    </DisplayFieldWrapper>
-                  )}
+                  <DisplayFieldWrapper>
+                    <DisplayField
+                      as={'span'}
+                      value={formatAddress(transactions[start + id]?.from || '0x0')}
+                      link={{
+                        href: getAddressLink(transactions[start + id]?.from || '0x0'),
+                        target: '_blank',
+                      }}
+                    />
+                  </DisplayFieldWrapper>
                 </TableCell>
                 <TableCell>{truncateString(generateLogName(log), 80)}</TableCell>
                 <TableCell style={{ textAlign: 'right' }}>

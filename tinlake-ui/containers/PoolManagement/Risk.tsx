@@ -70,7 +70,7 @@ const Risk: React.FC<Props> = (props: Props) => {
     }
   }, [riskGroupStatus])
 
-  const [writeOffGroupStatus, , setWriteOffGroupTxId] = useTransactionState()
+  const [writeOffGroupStatus, ,] = useTransactionState()
 
   const addWriteOffGroup = () => {
     const newWriteOffGroup = {
@@ -217,7 +217,7 @@ const Risk: React.FC<Props> = (props: Props) => {
                 Financing Fee (APR)
               </TableCell>
               <TableCell size="20%" pad={{ vertical: '6px' }}>
-                Overdue days
+                Write-off schedule
               </TableCell>
             </TableRow>
           </TableHeader>
@@ -234,7 +234,9 @@ const Risk: React.FC<Props> = (props: Props) => {
                   %
                 </TableCell>
                 <TableCell>0.00%</TableCell>
-                <TableCell>{writeOffGroup.overdueDays.toString()}</TableCell>
+                <TableCell>
+                  {writeOffGroup.overdueDays.toString()} day{writeOffGroup.overdueDays.eqn(1) ? '' : 's'} after maturity
+                </TableCell>
               </TableRow>
             ))}
 
@@ -272,6 +274,7 @@ const Risk: React.FC<Props> = (props: Props) => {
                         <NumberInput
                           value={(writeOffGroup.overdueDays || new BN(0)).toString()}
                           precision={0}
+                          suffix=" days"
                           onValueChange={({ value }) => updateWriteOffGroup(id, 'overdueDays', value)}
                           plain
                         />
