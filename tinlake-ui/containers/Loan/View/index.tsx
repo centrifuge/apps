@@ -7,7 +7,6 @@ import { SectionHeading } from '../../../components/Heading'
 import { Stack, Wrap } from '../../../components/Layout'
 import LoanData from '../../../components/Loan/Data'
 import NftData from '../../../components/NftData'
-import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { AuthState, loadProxies } from '../../../ducks/auth'
 import { TransactionState } from '../../../ducks/transactions'
@@ -26,12 +25,7 @@ interface Props {
 // on state change tokenId --> load nft data for asset collateral
 const LoanView: React.FC<Props> = (props: Props) => {
   const router = useRouter()
-  const tinlake = useTinlake()
-  const {
-    data: assetData,
-    refetch: refetchAsset,
-    error,
-  } = useAsset(tinlake.contractAddresses.ROOT_CONTRACT as string, props.loanId)
+  const { data: assetData, refetch: refetchAsset, error } = useAsset(props.loanId)
 
   React.useEffect(() => {
     const { loadProxies } = props

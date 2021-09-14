@@ -44,7 +44,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   const { root } = router.query
 
   const { data: poolData } = usePool(root as string)
-  const { data: epochData } = useEpoch(root as string)
+  const { data: epochData } = useEpoch()
 
   const isMobile = useMedia({ below: 'medium' })
 

@@ -25,7 +25,7 @@ interface Props extends TransactionProps {
 const LoanBorrow: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
-  const { data: epochData } = useEpoch(tinlake.contractAddresses.ROOT_CONTRACT)
+  const { data: epochData } = useEpoch()
   const [borrowAmount, setBorrowAmount] = React.useState<string>('')
 
   const router = useRouter()
@@ -64,7 +64,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const close = async () => {
     await props.ensureAuthed!()
 
-    const txId = await props.createTransaction(`Close Asset ${props.loan.loanId}`, 'close', [props.tinlake, props.loan])
+    const txId = await props.createTransaction(`Close Asset ${props.loan.loanId}`, 'close', [tinlake, props.loan])
     setCloseTxId(txId)
   }
 

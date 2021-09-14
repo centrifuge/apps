@@ -72,7 +72,7 @@ function useTrancheData(tinlake: ITinlake, tranche: 'senior' | 'junior', address
 const TrancheOverview: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
-  const { data: epochData } = useEpoch(tinlake.contractAddresses.ROOT_CONTRACT)
+  const { data: epochData } = useEpoch()
   const trancheData = props.tranche === 'senior' ? poolData?.senior : poolData?.junior
 
   const router = useRouter()

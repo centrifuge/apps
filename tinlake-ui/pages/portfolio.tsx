@@ -22,9 +22,11 @@ const Home: React.FC<Props> = (props: Props) => {
           <Header selectedRoute={''} menuItems={[]} ipfsPools={props.ipfsPools} />
           <Container style={{ backgroundColor: '#f9f9f9' }}>
             <Box justify="center" direction="row">
-              <Box width="xlarge">
-                <Auth render={() => <Portfolio ipfsPools={props.ipfsPools} />} />
-              </Box>
+              <Auth>
+                <Box width="xlarge">
+                  <Portfolio ipfsPools={props.ipfsPools} />
+                </Box>
+              </Auth>
             </Box>
           </Container>
         </WithFooter>

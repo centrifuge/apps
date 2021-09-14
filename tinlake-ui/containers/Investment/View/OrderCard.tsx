@@ -25,7 +25,7 @@ interface Props extends TransactionProps {
 
 const OrderCard: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
-  const { data: epochData } = useEpoch(props.selectedPool?.addresses.ROOT_CONTRACT)
+  const { data: epochData } = useEpoch()
 
   const type = props.disbursements.remainingSupplyCurrency.isZero() ? 'Redeem' : 'Invest'
   const token =

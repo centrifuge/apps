@@ -2,9 +2,8 @@ import { ITinlake, Loan, NFT } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { BigNumber } from 'ethers'
 import { useQuery } from 'react-query'
-import { useIpfsPools } from '../components/IpfsPoolsProvider'
+import { useTinlake } from '../components/TinlakeProvider'
 import Apollo from '../services/apollo'
-import { initTinlake } from '../services/tinlake'
 import { getNFT } from '../services/tinlake/actions'
 import { Call, multicall } from './multicall'
 const web3 = require('web3-utils')
@@ -48,13 +47,11 @@ export interface Asset extends MulticallData {
   maturityDate?: number
 }
 
-export function useAsset(poolId: string, loanId: string) {
-  const ipfsPools = useIpfsPools()
+export function useAsset(loanId: string) {
+  const tinlake = useTinlake()
   const query = useQuery(
-    ['asset', poolId, loanId],
+    ['asset', tinlake.contractAddresses.ROOT_CONTRACT, loanId],
     () => {
-      const pool = ipfsPools.active.find((p) => p.addresses.ROOT_CONTRACT.toLowerCase() === poolId.toLowerCase())
-      const tinlake = initTinlake({ addresses: pool?.addresses, contractConfig: pool?.contractConfig })
       return getAsset(tinlake, loanId)
     },
     {

@@ -1,6 +1,6 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 import { ContractAddresses, ITinlake } from '../../../tinlake.js/dist'
-import { createTinlakeInstance } from '../../services/tinlake'
+import { initTinlake } from '../../services/tinlake'
 
 interface TinlakeProviderProps {
   addresses?: ContractAddresses
@@ -10,34 +10,16 @@ interface TinlakeProviderProps {
   }
 }
 
-interface ITinlakeContext {
-  tinlake: ITinlake | null
-  setTinlake: (t: ITinlake) => void
-}
+const TinlakeContext = createContext<ITinlake | null>(null)
 
-const TinlakeContext = createContext<ITinlakeContext>({
-  tinlake: null,
-  setTinlake: () => {},
-})
-
-export const useTinlake = (arg?: TinlakeProviderProps): ITinlake => {
+export const useTinlake = (): ITinlake => {
   const ctx = useContext(TinlakeContext)
-
   if (!ctx) throw new Error('useTinlake must be used within TinlakeProvider')
-
-  if (arg) {
-    const tinlake = createTinlakeInstance(arg)
-    ctx.setTinlake(tinlake)
-    return tinlake
-  }
-
-  if (!ctx.tinlake) throw Error('TinlakeContext was not initialized')
-  return ctx.tinlake
+  return ctx
 }
 
 export const TinlakeProvider: React.FC<TinlakeProviderProps> = ({ children, addresses, contractConfig }) => {
-  const [tinlake, setTinlake] = useState<ITinlake>(createTinlakeInstance({ addresses, contractConfig }))
+  const tinlake = useMemo(() => initTinlake({ addresses, contractConfig }), [addresses, contractConfig])
 
-  const value = { tinlake, setTinlake }
-  return <TinlakeContext.Provider value={value}>{children}</TinlakeContext.Provider>
+  return <TinlakeContext.Provider value={tinlake}>{children}</TinlakeContext.Provider>
 }
