@@ -327,7 +327,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                   pad={{ vertical: '6px' }}
                   border={{ color: 'transparent' }}
                 >
-                  Maximum single loan
+                  Largest outstanding loan
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                   <LoadingValue done={maxSingleLoan !== undefined}>

@@ -121,10 +121,9 @@ const DisplayFieldWrapper = styled.div`
 
 const truncateString = (txt: string, num: number) => {
   if (txt.length > num) {
-    return txt.slice(0, num) + '...'
-  } else {
-    return txt
+    return `${txt.slice(0, num)}...`
   }
+  return txt
 }
 
 const generateLogName = (log: ethers.utils.LogDescription) => {

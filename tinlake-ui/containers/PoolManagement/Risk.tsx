@@ -50,7 +50,7 @@ const Risk: React.FC<Props> = (props: Props) => {
   }
 
   const updateRiskGroup = (group: number, key: 'ceilingRatio' | 'recoveryRatePD' | 'rate', value: string) => {
-    let newRiskGroups = riskGroups
+    const newRiskGroups = riskGroups
     newRiskGroups[group][key] = key === 'rate' ? new BN(interestRateToFee(value)) : new BN(displayToBase(value, 25))
     setRiskGroups(newRiskGroups)
   }
@@ -82,7 +82,7 @@ const Risk: React.FC<Props> = (props: Props) => {
   }
 
   const updateWriteOffGroup = (group: number, key: 'writeOffPercentage' | 'rate' | 'overdueDays', value: string) => {
-    let newWriteOffGroups = writeOffGroups
+    const newWriteOffGroups = writeOffGroups
     newWriteOffGroups[group][key] =
       key === 'rate'
         ? new BN(interestRateToFee(value))

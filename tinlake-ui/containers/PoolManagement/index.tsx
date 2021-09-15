@@ -80,14 +80,16 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
               size="small"
               focusIndicator={false}
             />
-            <MenuItem
-              secondary={view === 'Access'}
-              plain={view !== 'Access'}
-              onClick={() => setView('Access')}
-              label="Access"
-              size="small"
-              focusIndicator={false}
-            />
+            {poolData?.adminLevel && poolData.adminLevel >= 3 && (
+              <MenuItem
+                secondary={view === 'Access'}
+                plain={view !== 'Access'}
+                onClick={() => setView('Access')}
+                label="Access"
+                size="small"
+                focusIndicator={false}
+              />
+            )}
             <MenuItem
               secondary={view === 'Parameters'}
               plain={view !== 'Parameters'}
