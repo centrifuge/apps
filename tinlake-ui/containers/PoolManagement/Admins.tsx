@@ -16,6 +16,7 @@ const Admins: React.FC<Props> = (props: Props) => {
 
   const [level1Address, setLevel1Address] = React.useState('')
   const [level2Address, setLevel2Address] = React.useState('')
+  const [level3Address, setLevel3Address] = React.useState('')
 
   const [juniorStatus, ,] = useTransactionState()
   const [seniorStatus, ,] = useTransactionState()
@@ -39,49 +40,80 @@ const Admins: React.FC<Props> = (props: Props) => {
   return (
     <>
       {poolData && (
-        <Box direction="row" gap="medium">
+        <Box>
+          <Box direction="row" gap="medium">
+            <Card width="400px" p="medium" mb="medium">
+              <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+                <Heading level="5" margin={'0'}>
+                  Add level 1 admin
+                </Heading>
+              </Box>
+
+              <FormField label="Address">
+                <TextInput
+                  value={level1Address}
+                  placeholder="0x..."
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setLevel1Address(event.currentTarget.value)
+                  }}
+                  disabled={!poolData?.adminLevel || poolData.adminLevel < 3}
+                />
+              </FormField>
+
+              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                <Button
+                  primary
+                  label="Add"
+                  onClick={() => {
+                    add(1)
+                  }}
+                  disabled={!level1Address || !web3.isAddress(level1Address)}
+                />
+              </Box>
+            </Card>
+            <Card width="400px" p="medium" mb="medium">
+              <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+                <Heading level="5" margin={'0'}>
+                  Add level 2 admin
+                </Heading>
+              </Box>
+
+              <FormField label="Address">
+                <TextInput
+                  value={level2Address}
+                  placeholder="0x..."
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setLevel2Address(event.currentTarget.value)
+                  }}
+                  disabled={!poolData?.adminLevel || poolData.adminLevel < 3}
+                />
+              </FormField>
+
+              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                <Button
+                  primary
+                  label="Add"
+                  onClick={() => {
+                    add(2)
+                  }}
+                  disabled={!level2Address || !web3.isAddress(level2Address)}
+                />
+              </Box>
+            </Card>
+          </Box>
           <Card width="400px" p="medium" mb="medium">
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                Add level 1 admin
+                Add level 3 admin
               </Heading>
             </Box>
 
             <FormField label="Address">
               <TextInput
-                value={level1Address}
+                value={level3Address}
                 placeholder="0x..."
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setLevel1Address(event.currentTarget.value)
-                }}
-                disabled={!poolData?.adminLevel || poolData.adminLevel < 3}
-              />
-            </FormField>
-
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button
-                primary
-                label="Add"
-                onClick={() => {
-                  add(1)
-                }}
-                disabled={!level1Address || !web3.isAddress(level1Address)}
-              />
-            </Box>
-          </Card>
-          <Card width="400px" p="medium" mb="medium">
-            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-              <Heading level="5" margin={'0'}>
-                Add level 2 admin
-              </Heading>
-            </Box>
-
-            <FormField label="Address">
-              <TextInput
-                value={level2Address}
-                placeholder="0x..."
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setLevel2Address(event.currentTarget.value)
+                  setLevel3Address(event.currentTarget.value)
                 }}
                 disabled={!poolData?.adminLevel || poolData.adminLevel < 3}
               />
@@ -94,7 +126,7 @@ const Admins: React.FC<Props> = (props: Props) => {
                 onClick={() => {
                   add(2)
                 }}
-                disabled={!level2Address || !web3.isAddress(level2Address)}
+                disabled={!level3Address || !web3.isAddress(level3Address)}
               />
             </Box>
           </Card>

@@ -1,6 +1,8 @@
+import { Modal } from '@centrifuge/axis-modal'
 import { baseToDisplay, displayToBase, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Button, FormField, Heading, TextInput } from 'grommet'
+import { Box, Button, CheckBox, FormField, Heading, Paragraph } from 'grommet'
+import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
@@ -89,6 +91,16 @@ const AdminActions: React.FC<Props> = (props: Props) => {
     }
   }, [maxRatioStatus])
 
+  const [modalIsOpen, setModalIsOpen] = React.useState(false)
+  const [checked, setChecked] = React.useState(false)
+
+  const openModal = () => {
+    setModalIsOpen(true)
+  }
+  const closeModal = () => {
+    setModalIsOpen(false)
+  }
+
   return (
     <>
       {poolData && (
@@ -140,10 +152,10 @@ const AdminActions: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
 
-          <Paragraph>
+          <Explanation>
             The minimum TIN risk buffer indicates the lower limit and ensures that DROP investors are protected by a
             certain amount of TIN invested in the pool at any time.
-          </Paragraph>
+          </Explanation>
 
           <Box direction="row" gap="medium">
             <Box basis="1/2">
@@ -192,10 +204,10 @@ const AdminActions: React.FC<Props> = (props: Props) => {
             </Box>
           </Box>
 
-          <Paragraph>
+          <Explanation>
             DROP tokens earn yield on the outstanding assets at the DROP APR. The effective APY may deviate due to
             compounding effects or unused liquidity in the pool reserve.
-          </Paragraph>
+          </Explanation>
 
           <Box direction="row" gap="medium">
             <Box basis="1/2">
@@ -205,9 +217,18 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 </Heading>
               </Box>
 
-              <FormField>
-                <TextInput value={'24 hours'} />
-              </FormField>
+              <Box direction="row" gap="medium">
+                <Box basis="1/2">
+                  <FormField>
+                    <NumberInput value={'23'} precision={0} suffix=" hours" />
+                  </FormField>
+                </Box>
+                <Box basis="1/2">
+                  <FormField>
+                    <NumberInput value={'50'} precision={0} suffix=" minutes" />
+                  </FormField>
+                </Box>
+              </Box>
             </Box>
             <Box basis="1/2">
               <Box margin={{ vertical: '0' }}>
@@ -217,21 +238,21 @@ const AdminActions: React.FC<Props> = (props: Props) => {
               </Box>
 
               <FormField>
-                <TextInput value={'30 minutes'} />
+                <NumberInput value={'30'} precision={0} suffix=" minutes" />
               </FormField>
             </Box>
           </Box>
 
-          <Paragraph>
+          <Explanation>
             Minimum time per epoch for this pool during which invest and redeem orders can be locked. At the end of the
             epoch, the locked orders will be executed by the smart contracts. An epoch can also take longer if no
             outstanding orders are locked.
-          </Paragraph>
+          </Explanation>
           <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
             <Button
               primary
               label="Update"
-              onClick={saveSeniorInterestRate}
+              onClick={() => setModalIsOpen(true)}
               disabled={
                 !poolData?.adminLevel ||
                 poolData.adminLevel < 3 ||
@@ -241,6 +262,37 @@ const AdminActions: React.FC<Props> = (props: Props) => {
               }
             />
           </Box>
+
+          <Modal
+            opened={modalIsOpen}
+            title={'Advance notice confirmation.'}
+            style={{ maxWidth: '800px' }}
+            headingProps={{ style: { maxWidth: '100%', display: 'flex' } }}
+            titleIcon={<StatusInfoIcon />}
+            onClose={closeModal}
+          >
+            <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
+              Per the Subscription Agreement, you need to communicate any parameter changes to your Tinlake pool to the
+              investors 14 days in advance.
+            </Paragraph>
+
+            <FormFieldWithoutBorder>
+              <CheckBox
+                checked={checked}
+                label={
+                  <div style={{ lineHeight: '24px' }}>
+                    I confirm that 14 days have passed since I have communicated this parameter change to the investors.
+                  </div>
+                }
+                onChange={(event) => setChecked(event.target.checked)}
+              />
+            </FormFieldWithoutBorder>
+            <Box direction="row" justify="end" margin={{ top: 'medium' }}>
+              <Box basis={'1/5'}>
+                <Button primary onClick={closeModal} label="OK" fill={true} />
+              </Box>
+            </Box>
+          </Modal>
         </Card>
       )}
     </>
@@ -249,7 +301,19 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
 export default connect((state) => state, { createTransaction })(AdminActions)
 
-const Paragraph = styled.div`
+const Explanation = styled.div`
   color: #666;
   margin: 24px 0 48px 0;
+`
+
+export const FormFieldWithoutBorder = styled(FormField)`
+  > div {
+    border-bottom-color: rgba(0, 0, 0, 0);
+    padding: 0;
+  }
+
+  > span {
+    margin: 12px 0 0 34px;
+    font-weight: bold;
+  }
 `

@@ -1,22 +1,58 @@
+import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { ITinlake } from '@centrifuge/tinlake-js'
-import { Box, Button, FormField, Heading, TextInput } from 'grommet'
+import { Box, Button, FormField, Heading, Table, TableBody, TableCell, TableRow, TextInput } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { Card } from '../../components/Card'
+import { Pool } from '../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
+import { useOnboardingState } from '../../utils/useOnboardingState'
 import { usePool } from '../../utils/usePool'
 const web3 = require('web3-utils')
 
 interface Props extends TransactionProps {
   tinlake: ITinlake
+  activePool: Pool
 }
 
 type Tranche = 'junior' | 'senior'
 
 const getActionName = (tranche: Tranche) => (tranche === 'senior' ? 'updateSeniorMemberList' : 'updateJuniorMemberList')
 
+const pool: Pool = {
+  network: 'mainnet',
+  version: 3,
+  isUpcoming: false,
+  addresses: {
+    ROOT_CONTRACT: 'aave',
+    ACTIONS: '0x0',
+    PROXY_REGISTRY: '0x0',
+    COLLATERAL_NFT: '0x0',
+    SENIOR_TOKEN: '0x0',
+    JUNIOR_TOKEN: '0x0',
+    CLERK: '0x0',
+    ASSESSOR: '0x0',
+    RESERVE: '0x0',
+    SENIOR_TRANCHE: '0x0',
+    JUNIOR_TRANCHE: '0x0',
+    FEED: '0x0',
+    POOL_ADMIN: '0x0',
+    SENIOR_MEMBERLIST: '0x0',
+    JUNIOR_MEMBERLIST: '0x0',
+    COORDINATOR: '0x0',
+    PILE: '0x0',
+  },
+  metadata: { name: 'Aave', slug: 'aave', asset: '-' },
+}
+
 const ManageMemberlist: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+
+  const [onboardingAddress, setOnboardingAddress] = React.useState(undefined as string | undefined)
+  const { data: onboardingData } = useOnboardingState(
+    pool,
+    onboardingAddress && web3.isAddress(onboardingAddress) ? onboardingAddress : undefined
+  )
 
   const [juniorAddress, setJuniorAddress] = React.useState('')
   const [seniorAddress, setSeniorAddress] = React.useState('')
@@ -83,78 +119,130 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
   return (
     <>
       {poolData && (
-        <Box direction="row" gap="medium">
+        <Box>
+          <Box direction="row" gap="medium">
+            <Card width="400px" p="medium" mb="medium">
+              <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+                <Heading level="5" margin={'0'}>
+                  Add/Remove DROP member
+                </Heading>
+              </Box>
+
+              <FormField label="Address">
+                <TextInput
+                  value={seniorAddress}
+                  placeholder="0x..."
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setSeniorAddress(event.currentTarget.value)
+                  }}
+                />
+              </FormField>
+
+              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                <Button
+                  secondary
+                  label="Remove"
+                  onClick={() => {
+                    remove('senior')
+                  }}
+                  disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
+                />
+                <Button
+                  primary
+                  label="Add"
+                  onClick={() => {
+                    add('senior')
+                  }}
+                  disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
+                />
+              </Box>
+            </Card>
+            <Card width="400px" p="medium" mb="medium">
+              <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+                <Heading level="5" margin={'0'}>
+                  Add/Remove TIN member
+                </Heading>
+              </Box>
+
+              <FormField label="Address">
+                <TextInput
+                  value={juniorAddress}
+                  placeholder="0x..."
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setJuniorAddress(event.currentTarget.value)
+                  }}
+                />
+              </FormField>
+
+              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                <Button
+                  secondary
+                  label="Remove"
+                  onClick={() => {
+                    remove('junior')
+                  }}
+                  disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
+                />
+                <Button
+                  primary
+                  label="Add"
+                  onClick={() => {
+                    add('junior')
+                  }}
+                  disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
+                />
+              </Box>
+            </Card>
+          </Box>
           <Card width="400px" p="medium" mb="medium">
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                Add/Remove DROP member
+                Check onboarding status
               </Heading>
             </Box>
 
             <FormField label="Address">
               <TextInput
-                value={seniorAddress}
+                value={onboardingAddress}
                 placeholder="0x..."
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setSeniorAddress(event.currentTarget.value)
+                  setOnboardingAddress(event.currentTarget.value)
                 }}
               />
             </FormField>
 
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button
-                secondary
-                label="Remove"
-                onClick={() => {
-                  remove('senior')
-                }}
-                disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
-              />
-              <Button
-                primary
-                label="Add"
-                onClick={() => {
-                  add('senior')
-                }}
-                disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
-              />
-            </Box>
-          </Card>
-          <Card width="400px" p="medium" mb="medium">
-            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-              <Heading level="5" margin={'0'}>
-                Add/Remove TIN member
-              </Heading>
-            </Box>
-
-            <FormField label="Address">
-              <TextInput
-                value={juniorAddress}
-                placeholder="0x..."
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setJuniorAddress(event.currentTarget.value)
-                }}
-              />
-            </FormField>
-
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button
-                secondary
-                label="Remove"
-                onClick={() => {
-                  remove('junior')
-                }}
-                disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
-              />
-              <Button
-                primary
-                label="Add"
-                onClick={() => {
-                  add('junior')
-                }}
-                disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
-              />
-            </Box>
+            {onboardingAddress && web3.isAddress(onboardingAddress) && onboardingData && (
+              <Table margin={{ top: 'small' }}>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>KYC status</TableCell>
+                    <TableCell>{onboardingData.kyc.status}</TableCell>
+                  </TableRow>
+                  {onboardingData.kyc.isUsaTaxResident && (
+                    <TableRow>
+                      <TableCell>Accreditation passed</TableCell>
+                      <TableCell>{onboardingData.kyc.accredited ? 'yes' : 'no'}</TableCell>
+                    </TableRow>
+                  )}
+                  {onboardingData.agreements.map((agreement: AgreementsStatus) => (
+                    <TableRow>
+                      <TableCell>{agreement.name}</TableCell>
+                      <TableCell>
+                        {agreement.counterSigned
+                          ? 'completed'
+                          : agreement.signed
+                          ? 'awaiting countersignature'
+                          : agreement.declined
+                          ? 'declined'
+                          : agreement.voided
+                          ? 'voided'
+                          : 'awaiting signature'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </Card>
         </Box>
       )}
