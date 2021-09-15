@@ -671,6 +671,22 @@ export async function setMaxReserve(tinlake: ITinlake, ratio: string): Promise<P
   return tinlake.setMaximumReserve(ratio)
 }
 
+export async function setDiscountRate(tinlake: ITinlake, rate: string): Promise<PendingTransaction> {
+  return tinlake.setDiscountRate(rate)
+}
+
+export async function setSeniorInterestRate(tinlake: ITinlake, rate: string): Promise<PendingTransaction> {
+  return tinlake.setSeniorInterestRate(rate)
+}
+
+export async function setMinimumEpochTime(tinlake: ITinlake, rate: string): Promise<PendingTransaction> {
+  return tinlake.setMinimumEpochTime(rate)
+}
+
+export async function setChallengeTime(tinlake: ITinlake, rate: string): Promise<PendingTransaction> {
+  return tinlake.setChallengeTime(rate)
+}
+
 export async function raiseCreditline(tinlake: ITinlake, amount: string): Promise<PendingTransaction> {
   return tinlake.raiseCreditline(amount)
 }

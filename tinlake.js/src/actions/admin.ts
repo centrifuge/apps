@@ -148,10 +148,19 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     setDiscountRate = async (rate: string) => {
-      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-      return this.pending(
-        this.contract('FEED').file(web3.fromAscii('discountRate').padEnd(66, '0'), rate, this.overrides)
-      )
+      return this.pending(this.contract('POOL_ADMIN').setDiscountRate(rate, this.overrides))
+    }
+
+    setSeniorInterestRate = async (rate: string) => {
+      return this.pending(this.contract('POOL_ADMIN').setSeniorInterestRate(rate, this.overrides))
+    }
+
+    setMinimumEpochTime = async (value: string) => {
+      return this.pending(this.contract('POOL_ADMIN').setMinimumEpochTime(value, this.overrides))
+    }
+
+    setChallengeTime = async (value: string) => {
+      return this.pending(this.contract('POOL_ADMIN').setChallengeTime(value, this.overrides))
     }
 
     updateNftFeed = async (nftId: string, value: string, riskGroup?: string) => {
@@ -232,7 +241,10 @@ export type IAdminActions = {
   raiseCreditline(amount: string): Promise<PendingTransaction>
   sinkCreditline(amount: string): Promise<PendingTransaction>
   setSeniorTrancheInterest(amount: string): Promise<PendingTransaction>
-  setDiscountRate(amount: string): Promise<PendingTransaction>
+  setDiscountRate(rate: string): Promise<PendingTransaction>
+  setSeniorInterestRate(rate: string): Promise<PendingTransaction>
+  setMinimumEpochTime(value: string): Promise<PendingTransaction>
+  setChallengeTime(value: string): Promise<PendingTransaction>
   setMaturityDate(nftId: string, timestampSecs: number): Promise<PendingTransaction>
   updateNftFeed(nftId: string, value: string, riskGroup?: string): Promise<PendingTransaction>
   getNftFeedId(registry: string, tokenId: string): Promise<string>

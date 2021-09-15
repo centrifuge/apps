@@ -1,6 +1,5 @@
 import { Modal } from '@centrifuge/axis-modal'
-import { baseToDisplay, displayToBase, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
-import BN from 'bn.js'
+import { baseToDisplay, displayToBase, feeToInterestRate, interestRateToFee, ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, CheckBox, FormField, Heading, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import * as React from 'react'
@@ -9,7 +8,6 @@ import styled from 'styled-components'
 import { Card } from '../../components/Card'
 import NumberInput from '../../components/NumberInput'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
-import { toPrecision } from '../../utils/toPrecision'
 import { useEpoch } from '../../utils/useEpoch'
 import { usePool } from '../../utils/usePool'
 
@@ -23,8 +21,8 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
   const [minJuniorRatio, setMinJuniorRatio] = React.useState('0')
   const [maxJuniorRatio, setMaxJuniorRatio] = React.useState('0')
-  const [, setSeniorInterestRate] = React.useState('0')
-  const [discountRate, setDiscountRate] = React.useState('0')
+  const [seniorInterestRate, setSeniorInterestRate] = React.useState('0')
+  const [discountRate, setDiscountRate] = React.useState('0.0')
   const [, setMinimumEpochTime] = React.useState('0')
   const [, setChallengeTime] = React.useState('0')
 
@@ -32,64 +30,73 @@ const AdminActions: React.FC<Props> = (props: Props) => {
     if (poolData) {
       setMinJuniorRatio(poolData.minJuniorRatio.toString())
       setMaxJuniorRatio(poolData.maxJuniorRatio.toString())
-      setSeniorInterestRate(poolData.senior?.interestRate?.toString() || '0')
+      setSeniorInterestRate(poolData.senior?.interestRate ? feeToInterestRate(poolData.senior?.interestRate) : '0.0')
       setDiscountRate(feeToInterestRate(poolData.discountRate))
       setMinimumEpochTime(epochData?.minimumEpochTime?.toString() || '0')
       setChallengeTime(epochData?.challengeTime?.toString() || '0')
     }
   }, [poolData])
 
-  const [minRatioStatus, ,] = useTransactionState()
+  const [minJuniorRatioStatus, , setMinJuniorRatioTxId] = useTransactionState()
+  const [maxJuniorRatioStatus, , setMaxJuniorRatioTxId] = useTransactionState()
+  const [discountRateStatus, , setDiscountRateTxId] = useTransactionState()
+  const [seniorInterestRateStatus, , setSeniorInterestRateTxId] = useTransactionState()
+  const [minimumEpochTimeStatus, ,] = useTransactionState()
+  const [challengeTimeStatus, ,] = useTransactionState()
 
-  // const saveMinJuniorRatio = async () => {
-  //   const txId = await props.createTransaction(`Set min TIN risk buffer`, 'setMinJuniorRatio', [
-  //     props.tinlake,
-  //     minJuniorRatio.toString(),
-  //   ])
-  //   setMinRatioTxId(txId)
-  // }
+  const changedMinJuniorRatio =
+    minJuniorRatio && poolData?.minJuniorRatio && minJuniorRatio !== poolData.minJuniorRatio.toString()
 
-  const [maxRatioStatus, ,] = useTransactionState()
+  const changedMaxJuniorRatio =
+    maxJuniorRatio && poolData?.maxJuniorRatio && maxJuniorRatio !== poolData.maxJuniorRatio.toString()
 
-  // const saveMaxJuniorRatio = async () => {
-  //   const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
-  //     props.tinlake,
-  //     maxJuniorRatio.toString(),
-  //   ])
-  //   setMaxRatioTxId(txId)
-  // }
+  const changedDiscountRate =
+    discountRate && poolData?.discountRate && discountRate !== feeToInterestRate(poolData.discountRate)
 
-  const [seniorInterestRateStatus, ,] = useTransactionState()
+  const changedSeniorInterestRate =
+    seniorInterestRate &&
+    poolData?.senior?.interestRate &&
+    seniorInterestRate !== feeToInterestRate(poolData.senior?.interestRate)
 
-  const saveSeniorInterestRate = async () => {
-    // const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
-    //   props.tinlake,
-    //   maxJuniorRatio.toString(),
-    // ])
-    // setMaxRatioTxId(txId)
+  const update = async () => {
+    if (changedMinJuniorRatio && minJuniorRatio) {
+      const txId = await props.createTransaction(`Set min TIN ratio`, 'setMinJuniorRatio', [
+        props.tinlake,
+        minJuniorRatio.toString(),
+      ])
+      setMinJuniorRatioTxId(txId)
+    }
+
+    if (changedMaxJuniorRatio && maxJuniorRatio) {
+      const txId = await props.createTransaction(`Set max TIN ratio`, 'setMaxJuniorRatio', [
+        props.tinlake,
+        maxJuniorRatio.toString(),
+      ])
+      setMaxJuniorRatioTxId(txId)
+    }
+
+    if (changedDiscountRate && discountRate) {
+      const txId = await props.createTransaction(`Set discount rate`, 'setDiscountRate', [
+        props.tinlake,
+        interestRateToFee(discountRate),
+      ])
+      setDiscountRateTxId(txId)
+    }
+
+    if (changedSeniorInterestRate && seniorInterestRate) {
+      const txId = await props.createTransaction(`Set DROP APR`, 'setSeniorInterestRate', [
+        props.tinlake,
+        interestRateToFee(seniorInterestRate),
+      ])
+      setSeniorInterestRateTxId(txId)
+    }
   }
 
-  const [discountRateStatus, ,] = useTransactionState()
-
-  // const saveDiscountRate = async () => {
-  // const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
-  //   props.tinlake,
-  //   maxJuniorRatio.toString(),
-  // ])
-  // setMaxRatioTxId(txId)
-  // }
-
   React.useEffect(() => {
-    if (minRatioStatus === 'succeeded') {
+    if (status === 'succeeded') {
       refetchPoolData()
     }
-  }, [minRatioStatus])
-
-  React.useEffect(() => {
-    if (maxRatioStatus === 'succeeded') {
-      refetchPoolData()
-    }
-  }, [maxRatioStatus])
+  }, [status])
 
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
   const [checked, setChecked] = React.useState(false)
@@ -122,8 +129,8 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                   disabled={
                     !poolData?.adminLevel ||
                     poolData.adminLevel < 3 ||
-                    minRatioStatus === 'unconfirmed' ||
-                    minRatioStatus === 'pending'
+                    minJuniorRatioStatus === 'unconfirmed' ||
+                    minJuniorRatioStatus === 'pending'
                   }
                 />
               </FormField>
@@ -144,8 +151,8 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                   disabled={
                     !poolData?.adminLevel ||
                     poolData.adminLevel < 3 ||
-                    maxRatioStatus === 'unconfirmed' ||
-                    maxRatioStatus === 'pending'
+                    maxJuniorRatioStatus === 'unconfirmed' ||
+                    maxJuniorRatioStatus === 'pending'
                   }
                 />
               </FormField>
@@ -167,9 +174,9 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
               <FormField>
                 <NumberInput
-                  value={toPrecision(feeToInterestRate(new BN(poolData?.senior.interestRate || '0')), 2)}
+                  value={seniorInterestRate ? seniorInterestRate : '0.0'}
                   precision={2}
-                  onValueChange={({ value }) => setSeniorInterestRate(displayToBase(value, 25))}
+                  onValueChange={({ value }) => setSeniorInterestRate(value)}
                   suffix="%"
                   disabled={
                     !poolData?.adminLevel ||
@@ -189,9 +196,9 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
               <FormField>
                 <NumberInput
-                  value={baseToDisplay(poolData?.discountRate || new BN(0), 25)}
+                  value={discountRate ? discountRate : '0.0'}
                   precision={2}
-                  onValueChange={({ value }) => setDiscountRate(displayToBase(value, 25))}
+                  onValueChange={({ value }) => setDiscountRate(value)}
                   suffix="%"
                   disabled={
                     !poolData?.adminLevel ||
@@ -220,12 +227,32 @@ const AdminActions: React.FC<Props> = (props: Props) => {
               <Box direction="row" gap="medium">
                 <Box basis="1/2">
                   <FormField>
-                    <NumberInput value={'23'} precision={0} suffix=" hours" />
+                    <NumberInput
+                      value={'23'}
+                      precision={0}
+                      suffix=" hours"
+                      disabled={
+                        !poolData?.adminLevel ||
+                        poolData.adminLevel < 3 ||
+                        minimumEpochTimeStatus === 'unconfirmed' ||
+                        minimumEpochTimeStatus === 'pending'
+                      }
+                    />
                   </FormField>
                 </Box>
                 <Box basis="1/2">
                   <FormField>
-                    <NumberInput value={'50'} precision={0} suffix=" minutes" />
+                    <NumberInput
+                      value={'50'}
+                      precision={0}
+                      suffix=" minutes"
+                      disabled={
+                        !poolData?.adminLevel ||
+                        poolData.adminLevel < 3 ||
+                        minimumEpochTimeStatus === 'unconfirmed' ||
+                        minimumEpochTimeStatus === 'pending'
+                      }
+                    />
                   </FormField>
                 </Box>
               </Box>
@@ -238,7 +265,17 @@ const AdminActions: React.FC<Props> = (props: Props) => {
               </Box>
 
               <FormField>
-                <NumberInput value={'30'} precision={0} suffix=" minutes" />
+                <NumberInput
+                  value={'30'}
+                  precision={0}
+                  suffix=" minutes"
+                  disabled={
+                    !poolData?.adminLevel ||
+                    poolData.adminLevel < 3 ||
+                    challengeTimeStatus === 'unconfirmed' ||
+                    challengeTimeStatus === 'pending'
+                  }
+                />
               </FormField>
             </Box>
           </Box>
@@ -252,12 +289,12 @@ const AdminActions: React.FC<Props> = (props: Props) => {
             <Button
               primary
               label="Update"
-              onClick={() => setModalIsOpen(true)}
+              onClick={openModal}
               disabled={
                 !poolData?.adminLevel ||
                 poolData.adminLevel < 3 ||
-                discountRateStatus === 'unconfirmed' ||
-                discountRateStatus === 'pending' ||
+                status === 'unconfirmed' ||
+                status === 'pending' ||
                 discountRate === poolData.discountRate.toString()
               }
             />
@@ -289,7 +326,15 @@ const AdminActions: React.FC<Props> = (props: Props) => {
             </FormFieldWithoutBorder>
             <Box direction="row" justify="end" margin={{ top: 'medium' }}>
               <Box basis={'1/5'}>
-                <Button primary onClick={closeModal} label="OK" fill={true} />
+                <Button
+                  primary
+                  onClick={() => {
+                    update()
+                    closeModal()
+                  }}
+                  label="OK"
+                  fill={true}
+                />
               </Box>
             </Box>
           </Modal>
