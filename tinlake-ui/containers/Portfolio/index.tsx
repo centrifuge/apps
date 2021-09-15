@@ -6,21 +6,13 @@ import Link from 'next/link'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import { Card } from '../../components/Card'
+import { LabeledValue } from '../../components/LabeledValue'
 import { Stack } from '../../components/Layout'
 import NumberDisplay from '../../components/NumberDisplay'
 import { Row } from '../../components/PoolList'
-import {
-  Dash,
-  Desc,
-  EmptyParagraph,
-  Header,
-  HeaderCol,
-  HeaderTitle,
-  Number,
-  Unit,
-} from '../../components/PoolList/styles'
+import { Desc, EmptyParagraph, Header, HeaderCol, HeaderTitle } from '../../components/PoolList/styles'
 import { Tooltip } from '../../components/Tooltip'
-import { ValueDisplay } from '../../components/ValueDisplay'
+import { Value } from '../../components/Value'
 import { IpfsPools, Pool } from '../../config'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { useMedia } from '../../utils/useMedia'
@@ -30,6 +22,10 @@ import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
 
 interface Props {
   ipfsPools: IpfsPools
+}
+
+const toNumber = (value: BN | undefined, decimals: number) => {
+  return value ? parseInt(value.toString(), 10) / 10 ** decimals : 0
 }
 
 const Portfolio: React.FC<Props> = (props: Props) => {
@@ -61,33 +57,19 @@ const Portfolio: React.FC<Props> = (props: Props) => {
   const totalDropValue =
     portfolio.data?.tokenBalances.reduce((prev, tokenBalance) => {
       return tokenBalance.symbol.substr(-3) === 'DRP' ? prev.add(tokenBalance.value) : prev
-    }, new BN(0)) || new BN(0)
+    }, new BN(0)) || null
 
   const totalTinValue =
     portfolio.data?.tokenBalances.reduce((prev, tokenBalance) => {
       return tokenBalance.symbol.substr(-3) === 'TIN' ? prev.add(tokenBalance.value) : prev
-    }, new BN(0)) || new BN(0)
+    }, new BN(0)) || null
 
   const hasBalance = portfolio.data?.totalValue && !portfolio.data.totalValue.isZero()
 
   const dataColumns = [
     {
       header: 'Current Balance',
-      cell: (tokenBalance: TokenBalance) => (
-        <NumberDisplay
-          precision={0}
-          render={(v) =>
-            v === '0' ? (
-              <Dash>-</Dash>
-            ) : (
-              <>
-                <Number>{v}</Number>
-              </>
-            )
-          }
-          value={baseToDisplay(tokenBalance.balance, 18)}
-        />
-      ),
+      cell: (tokenBalance: TokenBalance) => <Value value={toNumber(tokenBalance.balance, 18) || '-'} />,
     },
     {
       header: (
@@ -96,36 +78,23 @@ const Portfolio: React.FC<Props> = (props: Props) => {
         </Tooltip>
       ),
       cell: (tokenBalance: TokenBalance) => (
-        <NumberDisplay
-          precision={4}
-          render={(v) =>
-            v === '0' ? (
-              <Dash>-</Dash>
-            ) : (
-              <>
-                <Number>{v}</Number>
-              </>
-            )
+        <Value
+          value={
+            <NumberDisplay
+              precision={4}
+              render={(v) => <>{v === '0' ? '-' : v}</>}
+              value={baseToDisplay(tokenBalance.price, 27)}
+            />
           }
-          value={baseToDisplay(tokenBalance.price, 27)}
         />
       ),
     },
     {
       header: 'Current Value',
       cell: (tokenBalance: TokenBalance) => (
-        <NumberDisplay
-          precision={0}
-          render={(v) =>
-            v === '0' ? (
-              <Dash>-</Dash>
-            ) : (
-              <>
-                <Number>{v}</Number> <Unit>{getPool(tokenBalance)?.pool.metadata.currencySymbol || 'DAI'}</Unit>
-              </>
-            )
-          }
-          value={baseToDisplay(tokenBalance.value, 18)}
+        <Value
+          value={toNumber(tokenBalance.value, 18) || '-'}
+          unit={getPool(tokenBalance)?.pool.metadata.currencySymbol || 'DAI'}
         />
       ),
     },
@@ -157,17 +126,19 @@ const Portfolio: React.FC<Props> = (props: Props) => {
       </Box>
       <Box direction="row" gap="small" margin={{ bottom: 'large' }} justify="center">
         <Card width="256px" p="medium" mx="small">
-          <ValueDisplay
+          <LabeledValue
+            variant="large"
             icon="/static/DROP_final.svg"
-            value={<NumberDisplay value={baseToDisplay(totalDropValue, 18)} precision={0} />}
+            value={totalDropValue && toNumber(totalDropValue, 18)}
             unit="DAI"
             label="Total DROP Value"
           />
         </Card>
         <Card width="256px" p="medium" mx="small">
-          <ValueDisplay
+          <LabeledValue
+            variant="large"
             icon="/static/TIN_final.svg"
-            value={<NumberDisplay value={baseToDisplay(totalTinValue, 18)} precision={0} />}
+            value={totalTinValue && toNumber(totalTinValue, 18)}
             unit="DAI"
             label="Total TIN Value"
           />

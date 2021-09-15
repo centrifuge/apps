@@ -2381,15 +2381,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@centrifuge/axis-theme@npm:0.4.2-develop.145":
-  version: 0.4.2-develop.145
-  resolution: "@centrifuge/axis-theme@npm:0.4.2-develop.145"
+"@centrifuge/axis-theme@npm:0.4.2-develop.c4f03d8.139+c4f03d8":
+  version: 0.4.2-develop.c4f03d8.139
+  resolution: "@centrifuge/axis-theme@npm:0.4.2-develop.c4f03d8.139"
   peerDependencies:
     grommet: 2.7.x
     react: ">= 16.6.1"
     react-dom: ">= 16.6.1"
     styled-components: ">= 4.x"
-  checksum: 4d5d416980701da64bb6a0ff33036a1ab39ede11c7b44030fba662ea5a887889523d31e41f1de76f29637540193685487139b45c1b27c91699c172b8642f7d4f
+  checksum: edb8103a5edc932c45dc12d9d57d5aad154fd3bb6211fbffc955a9d460f7cd13e63e82fe498b2ed7a323f8bab349d29d6b500a8eac2546eb600b49c5b62b92f2
   languageName: node
   linkType: hard
 
@@ -2772,7 +2772,7 @@ __metadata:
     "@centrifuge/axis-modal": 0.1.1-develop.57
     "@centrifuge/axis-ratio-bar": 0.4.2-develop.137
     "@centrifuge/axis-spinner": 0.4.2-develop.109
-    "@centrifuge/axis-theme": 0.4.2-develop.145
+    "@centrifuge/axis-theme": 0.4.2-develop.c4f03d8.139+c4f03d8
     "@centrifuge/axis-token-input": 0.4.1-develop.c79e643.146+c79e643
     "@centrifuge/axis-tooltip": 0.4.2-develop.3ad09d7.144+3ad09d7
     "@centrifuge/axis-utils": 0.4.2-develop.109

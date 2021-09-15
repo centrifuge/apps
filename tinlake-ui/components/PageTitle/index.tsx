@@ -37,7 +37,7 @@ const PageTitle: React.FC<Props> = (props: Props) => {
       )}
       <Title>
         {props.pool ? (
-          <Shelf gap="xsmall">
+          <Shelf gap="small">
             <PoolName>{props.pool.metadata.name}</PoolName>
             {poolData && (
               <Box ml={['auto', 0]}>

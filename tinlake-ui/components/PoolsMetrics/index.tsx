@@ -11,10 +11,10 @@ import { useDailyTVL } from '../../utils/useDailyTVL'
 import { useMedia } from '../../utils/useMedia'
 import { Card } from '../Card'
 import { Divider } from '../Divider'
+import { LabeledValue } from '../LabeledValue'
 import { Box, Center, Shelf, Stack } from '../Layout'
 import NumberDisplay from '../NumberDisplay'
 import { Tooltip } from '../Tooltip'
-import { ValueDisplay } from '../ValueDisplay'
 
 interface Props {
   totalValue: BN
@@ -84,12 +84,14 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
           Rendering the TVL twice. Always rendering the total value invisibly to fix the width of the element.
           This way we can stretch the graph without it changing width when the TVL changes on hover.
         */}
-        <ValueDisplay
+        <LabeledValue
+          variant="large"
           icon="/static/dai.svg"
           value={<NumberDisplay value={baseToDisplay(props.totalValue || new BN(0), 18)} precision={0} />}
           unit="DAI"
         />
-        <ValueDisplay
+        <LabeledValue
+          variant="large"
           icon="/static/dai.svg"
           value={
             <NumberDisplay
@@ -107,7 +109,8 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
   const APRElement = (
     <Shelf p="medium" gap="xlarge" flexDirection={['column', 'row']} alignSelf="center">
       <Stack alignItems="center">
-        <ValueDisplay
+        <LabeledValue
+          variant="large"
           icon="/static/cfg-white.svg"
           value={cfgYield && <NumberDisplay value={cfgYield as string} precision={2} />}
           unit="%"
