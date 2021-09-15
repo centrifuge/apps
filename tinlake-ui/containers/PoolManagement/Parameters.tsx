@@ -23,8 +23,9 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   const [maxJuniorRatio, setMaxJuniorRatio] = React.useState('0')
   const [seniorInterestRate, setSeniorInterestRate] = React.useState('0')
   const [discountRate, setDiscountRate] = React.useState('0.0')
-  const [, setMinimumEpochTime] = React.useState('0')
-  const [, setChallengeTime] = React.useState('0')
+  const [epochTimeHours, setEpochTimeHours] = React.useState(0)
+  const [epochTimeMinutes, setEpochTimeMinutes] = React.useState(0)
+  const [challengeTime, setChallengeTime] = React.useState('0')
 
   React.useEffect(() => {
     if (poolData) {
@@ -32,7 +33,13 @@ const AdminActions: React.FC<Props> = (props: Props) => {
       setMaxJuniorRatio(poolData.maxJuniorRatio.toString())
       setSeniorInterestRate(poolData.senior?.interestRate ? feeToInterestRate(poolData.senior?.interestRate) : '0.0')
       setDiscountRate(feeToInterestRate(poolData.discountRate))
-      setMinimumEpochTime(epochData?.minimumEpochTime?.toString() || '0')
+
+      const seconds = epochData?.minimumEpochTime ? Number(epochData?.minimumEpochTime.toString()) : 0
+      const hours = Math.floor(seconds / 60 / 60)
+      setEpochTimeHours(hours)
+      const minutes = Math.round((seconds / 60 / 60 - hours) * 60)
+      setEpochTimeMinutes(minutes)
+
       setChallengeTime(epochData?.challengeTime?.toString() || '0')
     }
   }, [poolData])
@@ -228,9 +235,10 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 <Box basis="1/2">
                   <FormField>
                     <NumberInput
-                      value={'23'}
+                      value={epochTimeHours.toString()}
                       precision={0}
                       suffix=" hours"
+                      onValueChange={({ value }) => setEpochTimeHours(Number(value))}
                       disabled={
                         !poolData?.adminLevel ||
                         poolData.adminLevel < 3 ||
@@ -243,9 +251,10 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 <Box basis="1/2">
                   <FormField>
                     <NumberInput
-                      value={'50'}
+                      value={epochTimeMinutes.toString()}
                       precision={0}
                       suffix=" minutes"
+                      onValueChange={({ value }) => setEpochTimeMinutes(Number(value))}
                       disabled={
                         !poolData?.adminLevel ||
                         poolData.adminLevel < 3 ||
@@ -266,9 +275,10 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
               <FormField>
                 <NumberInput
-                  value={'30'}
+                  value={(Number(challengeTime) / 60).toString()}
                   precision={0}
                   suffix=" minutes"
+                  onValueChange={({ value }) => setChallengeTime((Number(value) * 60).toString())}
                   disabled={
                     !poolData?.adminLevel ||
                     poolData.adminLevel < 3 ||
@@ -285,20 +295,17 @@ const AdminActions: React.FC<Props> = (props: Props) => {
             epoch, the locked orders will be executed by the smart contracts. An epoch can also take longer if no
             outstanding orders are locked.
           </Explanation>
-          <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-            <Button
-              primary
-              label="Update"
-              onClick={openModal}
-              disabled={
-                !poolData?.adminLevel ||
-                poolData.adminLevel < 3 ||
-                status === 'unconfirmed' ||
-                status === 'pending' ||
-                discountRate === poolData.discountRate.toString()
-              }
-            />
-          </Box>
+
+          {poolData?.adminLevel && poolData.adminLevel >= 3 && (
+            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+              <Button
+                primary
+                label="Update"
+                onClick={openModal}
+                disabled={!poolData?.adminLevel || poolData.adminLevel < 3}
+              />
+            </Box>
+          )}
 
           <Modal
             opened={modalIsOpen}

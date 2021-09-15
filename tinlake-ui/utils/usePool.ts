@@ -261,7 +261,7 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
     )
   }
 
-  const maxWriteOffGroups = 3
+  const maxWriteOffGroups = 0
   for (let i = 0; i < maxWriteOffGroups; i++) {
     calls.push({
       target: pool.addresses.FEED,

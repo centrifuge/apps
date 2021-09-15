@@ -1,5 +1,5 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
-import { baseToDisplay, feeToInterestRate, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
+import { addThousandsSeparators, baseToDisplay, feeToInterestRate, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
 import { ethers } from 'ethers'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
 import * as React from 'react'
@@ -58,7 +58,7 @@ const AuditLog: React.FC<Props> = (props: Props) => {
     getEvents()
   }, [])
 
-  return poolData && poolData.risk && poolData.writeOffGroups ? (
+  return poolData ? (
     <Box>
       <Card p="medium" mb="medium">
         <Heading level="5" margin={{ top: '0' }}>
@@ -160,11 +160,29 @@ const generateLogName = (log: ethers.utils.LogDescription) => {
       0
     )}% write-off percentage, ${log.args[2].toString()} overdue days`
   }
+  if (log.name === 'SetMaxReserve') {
+    return `Set max reserve to ${addThousandsSeparators(toPrecision(baseToDisplay(log.args[0], 18), 0))} DAI`
+  }
+  if (log.name === 'RaiseCreditline') {
+    return `Increase credit line by ${addThousandsSeparators(toPrecision(baseToDisplay(log.args[0], 18), 0))} DAI`
+  }
+  if (log.name === 'SinkCreditline') {
+    return `Decrease credit line by ${addThousandsSeparators(toPrecision(baseToDisplay(log.args[0], 18), 0))} DAI`
+  }
+  if (log.name === 'UpdateSeniorMember') {
+    return `Add ${formatAddress(log.args[0])} as DROP investor`
+  }
+  if (log.name === 'UpdateJuniorMember') {
+    return `Add ${formatAddress(log.args[0])} as TIN investor`
+  }
   if (log.name === 'Rely') {
     return `Rely ${formatAddress(log.args[0])} as level ${log.args[1]} admin`
   }
   if (log.name === 'Deny') {
     return `Deny ${formatAddress(log.args[0])} as admin`
+  }
+  if (log.name === 'HealCreditline') {
+    return `Heal credit line overcollateralization`
   }
 
   return `${log.name}(${log.args.join(',')})`
