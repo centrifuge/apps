@@ -1,4 +1,5 @@
 import BN from 'bn.js'
+import ethers from 'ethers'
 import { ZERO_ADDRESS } from '../services/ethereum'
 import { Constructor, ContractName, PendingTransaction, TinlakeParams } from '../Tinlake'
 const web3 = require('web3-utils')
@@ -204,6 +205,28 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
         )
       )
     }
+
+    getAuditLog = async (ignoredEvents: string[]): Promise<IAuditLog> => {
+      const poolAdmin = this.contract('POOL_ADMIN')
+      const eventFilter = {
+        address: poolAdmin.address,
+        fromBlock: this.provider.getBlockNumber().then((b) => b - 10000),
+        toBlock: 'latest',
+      }
+      const events = (await poolAdmin.queryFilter(eventFilter))
+        .filter((e) => e !== undefined)
+        .filter((e) => e.event && !ignoredEvents.includes(e.event))
+        .reverse()
+
+      const logs = events.map((event) => {
+        return poolAdmin.interface.parseLog(event)
+      })
+
+      const transactions = await Promise.all(events.map((e) => e.getTransaction()))
+      const blocks = await Promise.all(events.map((e) => e.getBlock()))
+
+      return { events, logs, transactions, blocks }
+    }
   }
 }
 
@@ -219,6 +242,13 @@ export type IWriteOffGroup = {
   rate: BN
   writeOffPercentage: BN
   overdueDays: BN
+}
+
+export type IAuditLog = {
+  events: ethers.Event[]
+  logs: ethers.utils.LogDescription[]
+  transactions: ethers.providers.TransactionResponse[]
+  blocks: ethers.providers.Block[]
 }
 
 export type IAdminActions = {
@@ -252,6 +282,7 @@ export type IAdminActions = {
   getNftMaturityDate(tokenId: string): Promise<BN>
   addRiskGroups(riskGroups: IRiskGroup[]): Promise<PendingTransaction>
   addWriteOffGroups(writeOffGroups: IWriteOffGroup[]): Promise<PendingTransaction>
+  getAuditLog(ignoredEvents: string[]): Promise<IAuditLog>
 }
 
 export default AdminActions
