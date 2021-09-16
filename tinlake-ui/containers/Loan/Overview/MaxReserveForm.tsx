@@ -1,17 +1,17 @@
 import { TokenInput } from '@centrifuge/axis-token-input'
-import { addThousandsSeparators, baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { addThousandsSeparators, baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Box, Button, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { usePool } from '../../../utils/usePool'
 import { Description } from './styles'
 
 interface Props extends TransactionProps {
-  tinlake: ITinlake
   selectedPool?: Pool
   setShowMaxReserveForm: (value: boolean) => void
 }
@@ -19,7 +19,8 @@ interface Props extends TransactionProps {
 const e27 = new BN(10).pow(new BN(27))
 
 const MaxReserveForm: React.FC<Props> = (props: Props) => {
-  const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const tinlake = useTinlake()
+  const { data: poolData, refetch: refetchPoolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [value, setValue] = React.useState<string | undefined>(undefined)
 
@@ -43,7 +44,7 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
 
   const save = async () => {
     if (changedMaxReserve && value) {
-      const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [props.tinlake, value.toString()])
+      const txId = await props.createTransaction(`Set max reserve`, 'setMaxReserve', [tinlake, value.toString()])
       setTxId(txId)
     }
 
@@ -57,13 +58,13 @@ const MaxReserveForm: React.FC<Props> = (props: Props) => {
 
       if (new BN(creditlineValue).gt(new BN(currentCreditline))) {
         const txId = await props.createTransaction(`Increase credit line to ${formatted}`, 'raiseCreditline', [
-          props.tinlake,
+          tinlake,
           amount.toString(),
         ])
         setCreditlineTxId(txId)
       } else {
         const txId = await props.createTransaction(`Lower credit line to ${formatted}`, 'sinkCreditline', [
-          props.tinlake,
+          tinlake,
           amount.toString(),
         ])
         setCreditlineTxId(txId)

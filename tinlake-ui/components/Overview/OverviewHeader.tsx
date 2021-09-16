@@ -3,7 +3,6 @@ import {
   baseToDisplay,
   feeToInterestRate,
   feeToInterestRateCompounding,
-  ITinlake,
   toPrecision,
 } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
@@ -24,17 +23,18 @@ import { SectionHeading } from '../Heading'
 import InvestAction from '../InvestAction'
 import { LabeledValue } from '../LabeledValue'
 import { Box, Flex, Shelf, Stack } from '../Layout'
+import { useTinlake } from '../TinlakeProvider'
 import { Tooltip } from '../Tooltip'
 import { ValuePairList } from '../ValuePairList'
 
 interface Props {
-  tinlake: ITinlake
   selectedPool: Pool
 }
 
 const OverviewHeader: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const dispatch = useDispatch()
+  const tinlake = useTinlake()
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
   const { data: poolData } = usePool(props.selectedPool.addresses.ROOT_CONTRACT)
@@ -73,9 +73,9 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     if (address && awaitingConnect) {
       ;(async () => {
-        const inAMemberlist = (await props.tinlake.checkSeniorTokenMemberlist(address))
+        const inAMemberlist = (await tinlake.checkSeniorTokenMemberlist(address))
           ? true
-          : await props.tinlake.checkJuniorTokenMemberlist(address)
+          : await tinlake.checkJuniorTokenMemberlist(address)
 
         if (inAMemberlist) {
           router.push(
@@ -90,7 +90,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
 
       setAwaitingConnect(false)
     }
-  }, [address, props.tinlake])
+  }, [address, tinlake])
 
   const invest = () => {
     if (address) {

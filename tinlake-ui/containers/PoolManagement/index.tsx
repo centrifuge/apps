@@ -1,11 +1,10 @@
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
 import PageTitle from '../../components/PageTitle'
+import { useTinlake } from '../../components/TinlakeProvider'
 import { Pool } from '../../config'
-import { AuthState } from '../../ducks/auth'
+import { useAuth } from '../../ducks/auth'
 import { downloadCSV } from '../../utils/export'
 import { usePool } from '../../utils/usePool'
 import { csvName } from '../DataQuery/queries'
@@ -18,12 +17,12 @@ import PoolStatus from './PoolStatus'
 
 interface Props {
   activePool: Pool
-  tinlake: ITinlake
 }
 
 const PoolManagement: React.FC<Props> = (props: Props) => {
-  const auth = useSelector<any, AuthState>((state) => state.auth)
-  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const auth = useAuth()
+  const tinlake = useTinlake()
+  const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const router = useRouter()
 
@@ -55,7 +54,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
       {isAdmin && (
         <>
           <AOMetrics activePool={props.activePool} />
-          <PoolStatus activePool={props.activePool} tinlake={props.tinlake} />
+          <PoolStatus activePool={props.activePool} />
 
           {'export' in router.query && (
             <div>
@@ -66,17 +65,17 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
           <Heading level="4" margin={{ top: 'medium' }}>
             Liquidity Management
           </Heading>
-          <Liquidity activePool={props.activePool} tinlake={props.tinlake} />
+          <Liquidity activePool={props.activePool} />
 
-          <EpochOverview tinlake={props.tinlake} activePool={props.activePool} />
+          <EpochOverview activePool={props.activePool} />
 
           <Heading level="4">Investor Whitelisting</Heading>
-          <Memberlist tinlake={props.tinlake} />
+          <Memberlist />
 
           {canManageParameters && (
             <>
               <Heading level="4">Pool Parameters</Heading>
-              <Parameters tinlake={props.tinlake} />
+              <Parameters />
             </>
           )}
         </>

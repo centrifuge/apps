@@ -1,4 +1,4 @@
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Button } from 'grommet'
 import { useRouter } from 'next/router'
@@ -14,22 +14,23 @@ import { Divider } from '../Divider'
 import { LabeledValue } from '../LabeledValue'
 import { Box, Center, Shelf, Stack } from '../Layout'
 import NumberDisplay from '../NumberDisplay'
+import { useTinlake } from '../TinlakeProvider'
 import { Tooltip } from '../Tooltip'
 
 interface Props {
   totalValue: BN
-  tinlake: ITinlake
 }
 
 const PoolsMetrics: React.FC<Props> = (props: Props) => {
   const router = useRouter()
+  const tinlake = useTinlake()
   const { data: dailyTVL = [] } = useDailyTVL()
   const isMobile = useMedia({ below: 'medium' })
 
   const [hoveredPoolValue, setHoveredPoolValue] = React.useState<number | undefined>(undefined)
   const [hoveredDay, setHoveredDay] = React.useState<number | undefined>(undefined)
 
-  const cfgYield = useCFGYield(props.tinlake)
+  const cfgYield = useCFGYield(tinlake)
 
   const maxPoolValue = Math.max.apply(
     Math,

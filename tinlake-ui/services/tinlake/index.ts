@@ -1,6 +1,7 @@
 import Tinlake, { ContractAddresses, ITinlake } from '@centrifuge/tinlake-js'
 import { ethers } from 'ethers'
 import config from '../../config'
+export { createTinlakeInstance } from './createTinlakeInstance'
 
 let tinlake: ITinlake | null = null
 let currentAddresses: null | ContractAddresses = null
@@ -17,7 +18,7 @@ export function initTinlake({
     // const overrides = config.network === 'Kovan' ? { gasLimit: config.gasLimit } : {}
     const overrides = {}
 
-    tinlake = new Tinlake({ transactionTimeout, overrides, provider: rpcProvider }) as unknown as ITinlake
+    tinlake = new Tinlake({ transactionTimeout, overrides, provider: rpcProvider }) as ITinlake
   }
 
   let resetContractAddresses = false

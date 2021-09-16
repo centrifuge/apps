@@ -8,36 +8,29 @@ import { Stack, Wrap } from '../../../components/Layout'
 import LoanData from '../../../components/Loan/Data'
 import NftData from '../../../components/NftData'
 import { Pool } from '../../../config'
-import { AuthState, loadProxies } from '../../../ducks/auth'
-import { TransactionState } from '../../../ducks/transactions'
+import { loadProxies, useAuth } from '../../../ducks/auth'
 import { useAsset } from '../../../utils/useAsset'
 import LoanBorrow from '../Borrow'
 import LoanRepay from '../Repay'
 
 interface Props {
-  tinlake: any
   loanId: string
   poolConfig: Pool
-  auth?: AuthState
-  transactions?: TransactionState
   loadProxies?: () => Promise<void>
 }
 
 // on state change tokenId --> load nft data for asset collateral
 const LoanView: React.FC<Props> = (props: Props) => {
   const router = useRouter()
-  const {
-    data: assetData,
-    refetch: refetchAsset,
-    error,
-  } = useAsset(props.tinlake.contractAddresses.ROOT_CONTRACT, props.loanId)
+  const { data: assetData, refetch: refetchAsset, error } = useAsset(props.loanId)
 
   React.useEffect(() => {
     const { loadProxies } = props
     loadProxies && loadProxies()
   }, [])
 
-  const { loanId, tinlake, auth } = props
+  const { loanId } = props
+  const auth = useAuth()
 
   if (error) {
     return (
@@ -56,14 +49,14 @@ const LoanView: React.FC<Props> = (props: Props) => {
 
   return (
     <Stack gap="xlarge">
-      <LoanData loan={assetData} tinlake={tinlake} poolConfig={props.poolConfig} />
+      <LoanData loan={assetData} poolConfig={props.poolConfig} />
       {assetData && assetData.status !== 'closed' && hasBorrowerPermissions && (
         <Stack gap="medium">
           <SectionHeading>Finance / Repay</SectionHeading>
           <Card maxWidth={{ medium: 900 }} p="medium">
             <Wrap gap="medium" justifyContent="space-between" alignItems="flex-start">
-              <LoanBorrow loan={assetData} refetch={refetchAsset} tinlake={tinlake} poolConfig={props.poolConfig} />
-              <LoanRepay loan={assetData} refetch={refetchAsset} tinlake={tinlake} poolConfig={props.poolConfig} />
+              <LoanBorrow loan={assetData} refetch={refetchAsset} poolConfig={props.poolConfig} />
+              <LoanRepay loan={assetData} refetch={refetchAsset} poolConfig={props.poolConfig} />
             </Wrap>
           </Card>
         </Stack>
@@ -73,4 +66,4 @@ const LoanView: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadProxies })(LoanView)
+export default connect(null, { loadProxies })(LoanView)

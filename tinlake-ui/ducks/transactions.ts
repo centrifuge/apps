@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import config from '../config'
-import { initTinlake } from '../services/tinlake'
+import { getTinlake } from '../services/tinlake'
 import * as actions from '../services/tinlake/actions'
 
 export interface WalletTransaction {
@@ -143,7 +143,7 @@ export function createTransaction<A extends TransactionAction>(
   }
 }
 
-export function processTransaction(
+function processTransaction(
   unconfirmedTx: Transaction
 ): ThunkAction<Promise<void>, { transactions: TransactionState }, undefined, Action> {
   return async (dispatch) => {
@@ -151,7 +151,7 @@ export function processTransaction(
     dispatch({ id, transaction: unconfirmedTx, type: SET_ACTIVE_TRANSACTION })
 
     // Start transaction
-    const tinlake = initTinlake(unconfirmedTx.tinlakeConfig)
+    const tinlake = getTinlake()
 
     const outcomeTx: Transaction = {
       ...unconfirmedTx,
@@ -174,7 +174,7 @@ export function processTransaction(
         }
         await dispatch({ id, transaction: pendingTx, dontChangeUpdatedAt: true, type: SET_ACTIVE_TRANSACTION })
 
-        const receipt = await tinlake.getTransactionReceipt(tx)
+        const receipt = await tinlake!.getTransactionReceipt(tx)
 
         const outcome = receipt.status === 1
         outcomeTx.status = outcome ? 'succeeded' : 'failed'

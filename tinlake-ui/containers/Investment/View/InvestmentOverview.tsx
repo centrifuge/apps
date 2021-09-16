@@ -1,10 +1,11 @@
-import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Card } from '../../../components/Card'
 import { SectionHeading } from '../../../components/Heading'
 import { Box, Shelf, Stack } from '../../../components/Layout'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
 import { Value } from '../../../components/Value'
 import { ValuePairList } from '../../../components/ValuePairList'
@@ -29,7 +30,6 @@ import {
 
 interface Props {
   selectedPool: Pool | UpcomingPool
-  tinlake: ITinlake
 }
 
 const SecondsInDay = 60 * 60 * 24
@@ -42,8 +42,9 @@ const parseRatio = (num: BN): number => {
 }
 
 const InvestmentOverview: React.FC<Props> = (props: Props) => {
-  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
-  const { data: assets } = useAssets(props.tinlake.contractAddresses.ROOT_CONTRACT!)
+  const tinlake = useTinlake()
+  const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
+  const { data: assets } = useAssets(tinlake.contractAddresses.ROOT_CONTRACT!)
 
   const ongoingAssets = assets ? assets.filter((asset) => asset.status && asset.status === 'ongoing') : undefined
   const avgAmount = ongoingAssets
@@ -76,7 +77,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
-  const { dropYield } = useTrancheYield(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const { dropYield } = useTrancheYield(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const reserveRatio =
     poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()

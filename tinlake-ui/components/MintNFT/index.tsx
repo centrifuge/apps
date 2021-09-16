@@ -10,11 +10,11 @@ import { BackLink } from '../BackLink'
 import { Card } from '../Card'
 import NumberInput from '../NumberInput'
 import { PoolLink } from '../PoolLink'
+import { useTinlake } from '../TinlakeProvider'
 
 const NFT_REGISTRY = '0xac0c1ef395290288028a0a9fdfc8fdebebe54a24'
 
 interface Props extends TransactionProps {
-  tinlake: any
   ensureAuthed?: () => Promise<void>
 }
 
@@ -27,6 +27,7 @@ const generateTokenId = (): string => {
 }
 
 const MintNFT: React.FC<Props> = (props: Props) => {
+  const tinlake = useTinlake()
   const [tokenId, setTokenId] = React.useState(generateTokenId())
   const [referenceId, setReferenceId] = React.useState<string>('')
   const amount = '1000.00'
@@ -38,10 +39,12 @@ const MintNFT: React.FC<Props> = (props: Props) => {
   const mint = async () => {
     await props.ensureAuthed!()
     const base = displayToBase(baseToDisplay(amount, 2), 2)
-    const address = await props.tinlake.signer.getAddress()
+    const address = await tinlake.signer?.getAddress()
+
+    if (!address) throw new Error('tinlake.signer is undefined')
 
     const txId = await props.createTransaction(`Mint NFT ${referenceId}`, 'mintNFT', [
-      props.tinlake,
+      tinlake,
       registry,
       address,
       tokenId,

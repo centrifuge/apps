@@ -4,7 +4,6 @@ import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
 import Auth from '../../../../../components/Auth'
 import Header from '../../../../../components/Header'
 import { SectionHeading } from '../../../../../components/Heading'
@@ -13,12 +12,12 @@ import { Box, Stack } from '../../../../../components/Layout'
 import { PageContainer } from '../../../../../components/PageContainer'
 import PageTitle from '../../../../../components/PageTitle'
 import { PoolLink } from '../../../../../components/PoolLink'
+import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
-import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import LoanList from '../../../../../containers/Loan/List'
 import LoanOverview from '../../../../../containers/Loan/Overview/index'
-import { AuthState } from '../../../../../ducks/auth'
+import { useAuth } from '../../../../../ducks/auth'
 import { menuItems } from '../../../../../menuItems'
 import { usePool } from '../../../../../utils/usePool'
 
@@ -32,58 +31,49 @@ const LoanListPage: React.FC<Props> = (props) => {
   const { pool, ipfsPools } = props
 
   const { data: poolData } = usePool(pool.addresses.ROOT_CONTRACT)
-  const auth = useSelector<any, AuthState>((state) => state.auth)
+  const auth = useAuth()
   const router = useRouter()
   const isBorrower = poolData?.isPoolAdmin || (auth?.proxies && auth?.proxies.length > 0) || 'lockNFT' in router.query
 
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <WithFooter>
-        <Head>
-          <title>Assets: {pool.metadata.name} | Tinlake | Centrifuge</title>
-        </Head>
-        <Header
-          ipfsPools={ipfsPools}
-          poolTitle={pool.metadata.shortName || pool.metadata.name}
-          selectedRoute={'/assets'}
-          menuItems={menuItems}
-        />
-        <PageContainer>
-          <WithTinlake
-            addresses={pool.addresses}
-            contractConfig={pool.contractConfig}
-            render={(tinlake) => (
-              <Auth
-                tinlake={tinlake}
-                render={(auth) => (
-                  <>
-                    <PageTitle
-                      pool={props.pool}
-                      page="Assets"
-                      rightContent={
-                        isBorrower && (
-                          <Box display={['none', 'block']}>
-                            <PoolLink href={'/assets/issue'}>
-                              <Button primary label="Lock NFT" />
-                            </PoolLink>
-                          </Box>
-                        )
-                      }
-                    />
-                    <Stack gap="xlarge">
-                      <LoanOverview tinlake={tinlake} auth={auth} selectedPool={props.pool} />
-                      <Stack gap="small">
-                        <SectionHeading>Asset List</SectionHeading>
-                        <LoanList tinlake={tinlake} auth={auth} activePool={props.pool} />
-                      </Stack>
-                    </Stack>
-                  </>
-                )}
-              />
-            )}
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+        <WithFooter>
+          <Head>
+            <title>Assets: {pool.metadata.name} | Tinlake | Centrifuge</title>
+          </Head>
+          <Header
+            ipfsPools={ipfsPools}
+            poolTitle={pool.metadata.shortName || pool.metadata.name}
+            selectedRoute={'/assets'}
+            menuItems={menuItems}
           />
-        </PageContainer>
-      </WithFooter>
+          <PageContainer>
+            <Auth>
+              <PageTitle
+                pool={props.pool}
+                page="Assets"
+                rightContent={
+                  isBorrower && (
+                    <Box display={['none', 'block']}>
+                      <PoolLink href={'/assets/issue'}>
+                        <Button primary label="Lock NFT" />
+                      </PoolLink>
+                    </Box>
+                  )
+                }
+              />
+              <Stack gap="xlarge">
+                <LoanOverview auth={auth} selectedPool={props.pool} />
+                <Stack gap="small">
+                  <SectionHeading>Asset List</SectionHeading>
+                  <LoanList auth={auth} activePool={props.pool} />
+                </Stack>
+              </Stack>
+            </Auth>
+          </PageContainer>
+        </WithFooter>
+      </TinlakeProvider>
     </IpfsPoolsProvider>
   )
 }
