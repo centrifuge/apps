@@ -13,5 +13,5 @@ const queries: { [name: string]: PoolQuery } = {
 export default queries
 
 export function csvName(name: string) {
-  return `${name.replace(/#\w/g, '').toLowerCase()}_${Math.round(Date.now() / 1000)}.csv`
+  return `${name.replaceAll(' ', '-').toLowerCase()}_${Math.round(Date.now() / 1000)}.csv`
 }
