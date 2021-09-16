@@ -10,7 +10,7 @@ type StyledStackProps = {
 
 export const Stack = styled(Flex)<StyledStackProps>((props) =>
   css({
-    rowGap: props.gap,
+    gap: props.gap,
   })
 )
 
