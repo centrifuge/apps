@@ -19,7 +19,7 @@ export function useAssets(poolId: string) {
   return query
 }
 
-async function getAssets(poolId: string) {
+export async function getAssets(poolId: string) {
   const result = await Apollo.getLoans(poolId)
 
   const loans: SortableLoan[] = result.data.map((l) => ({

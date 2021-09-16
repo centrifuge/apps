@@ -53,10 +53,8 @@ const AuditLog: React.FC<Props> = (props: Props) => {
               <TableRow>
                 <TableCell size="12%">Date</TableCell>
                 <TableCell size="14%">From</TableCell>
-                <TableCell size="66%" pad={{ vertical: '6px' }}>
-                  Event
-                </TableCell>
-                <TableCell size="8%" pad={{ vertical: '6px' }} style={{ textAlign: 'right' }}>
+                <TableCell size="66%">Event</TableCell>
+                <TableCell size="8%" style={{ textAlign: 'right' }}>
                   &nbsp;
                 </TableCell>
               </TableRow>
@@ -172,7 +170,7 @@ const generateLogName = (log: ethers.utils.LogDescription) => {
     const seconds = Number(log.args[0].toString())
     const hours = Math.floor(seconds / 60 / 60)
     const minutes = Math.round((seconds / 60 / 60 - hours) * 60)
-    return `Set minimum epoch time to ${hours} hours and ${minutes} minutes`
+    return `Set minimum epoch time to ${hours > 0 ? `${hours} hours and ${minutes}` : minutes} minutes`
   }
   if (log.name === 'SetChallengeTime') {
     const minutes = Math.round(Number(log.args[0].toString()) / 60)

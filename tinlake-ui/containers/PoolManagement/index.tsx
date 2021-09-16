@@ -12,6 +12,7 @@ import EpochOverview from '../Investment/View/EpochOverview'
 // import Access from './Admins'
 import AOMetrics from './AOMetrics'
 import AuditLog from './AuditLog'
+import DataExport from './DataExport'
 import Liquidity from './Liquidity'
 import Memberlist from './Memberlist'
 import Parameters from './Parameters'
@@ -106,6 +107,14 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
               size="small"
               focusIndicator={false}
             />
+            <MenuItem
+              secondary={view === 'Data Export'}
+              plain={view !== 'Data Export'}
+              onClick={() => setView('Data Export')}
+              label="Data Export"
+              size="small"
+              focusIndicator={false}
+            />
           </Menu>
           <Box width="100%">
             {view === 'Liquidity' && (
@@ -134,6 +143,8 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
             {/* {view === 'Access' && <Access tinlake={props.tinlake} />} */}
 
             {view === 'Audit Log' && <AuditLog tinlake={props.tinlake} />}
+
+            {view === 'Data Export' && <DataExport tinlake={props.tinlake} activePool={props.activePool} />}
           </Box>
         </Box>
       )}

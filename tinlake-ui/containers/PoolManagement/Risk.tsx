@@ -22,8 +22,12 @@ interface Props extends TransactionProps {
   tinlake: ITinlake
 }
 
+const riskGroupsPerPage = 8
+
 const Risk: React.FC<Props> = (props: Props) => {
   const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+
+  const [start, setStart] = React.useState(0)
 
   const [riskGroups, setRiskGroups] = React.useState([] as IRiskGroup[])
   const [writeOffGroups, setWriteOffGroups] = React.useState([] as IWriteOffGroup[])
@@ -112,21 +116,15 @@ const Risk: React.FC<Props> = (props: Props) => {
           <TableHeader>
             <TableRow>
               <TableCell size="5%">#</TableCell>
-              <TableCell size="20%" pad={{ vertical: '6px' }}>
-                Max Advance Rate
-              </TableCell>
-              <TableCell size="20%" pad={{ vertical: '6px' }}>
-                Financing Fee (APR)
-              </TableCell>
-              <TableCell size="20%" pad={{ vertical: '6px' }}>
-                Term Recovery Rate
-              </TableCell>
+              <TableCell size="20%">Max Advance Rate</TableCell>
+              <TableCell size="20%">Financing Fee (APR)</TableCell>
+              <TableCell size="20%">Term Recovery Rate</TableCell>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {existingRiskGroups.map((riskGroup: RiskGroup, index: number) => (
+            {existingRiskGroups.slice(start, start + riskGroupsPerPage).map((riskGroup: RiskGroup, index: number) => (
               <TableRow>
-                <TableCell>{index}</TableCell>
+                <TableCell>{start + index}</TableCell>
                 <TableCell>{parseFloat(riskGroup.ceilingRatio.div(new BN(10).pow(new BN(25))).toString())}%</TableCell>
                 <TableCell>{toPrecision(feeToInterestRate(riskGroup.rate.ratePerSecond), 2)}%</TableCell>
                 <TableCell>
@@ -183,6 +181,27 @@ const Risk: React.FC<Props> = (props: Props) => {
           </TableBody>
         </Table>
 
+        <Box direction="row" justify="center" margin={{ top: 'medium' }} gap="medium">
+          <div>
+            <Button
+              size="small"
+              primary
+              label="Previous"
+              onClick={() => setStart(start - riskGroupsPerPage < 0 ? 0 : start - riskGroupsPerPage)}
+              disabled={start === 0}
+            />
+          </div>
+          <div>
+            <Button
+              size="small"
+              primary
+              label="Next"
+              onClick={() => setStart(start + riskGroupsPerPage)}
+              disabled={existingRiskGroups.length < start + riskGroupsPerPage}
+            />
+          </div>
+        </Box>
+
         {poolData?.adminLevel && poolData.adminLevel >= 2 && (
           <>
             <Alert margin={{ top: 'medium' }} type="info">
@@ -215,15 +234,9 @@ const Risk: React.FC<Props> = (props: Props) => {
             <TableHeader>
               <TableRow>
                 <TableCell size="5%">#</TableCell>
-                <TableCell size="20%" pad={{ vertical: '6px' }}>
-                  Write-off percentage
-                </TableCell>
-                <TableCell size="20%" pad={{ vertical: '6px' }}>
-                  Financing Fee (APR)
-                </TableCell>
-                <TableCell size="20%" pad={{ vertical: '6px' }}>
-                  Write-off schedule
-                </TableCell>
+                <TableCell size="20%">Write-off percentage</TableCell>
+                <TableCell size="20%">Financing Fee (APR)</TableCell>
+                <TableCell size="20%">Write-off schedule</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -199,6 +199,24 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       )
     }
 
+    getWriteOffGroups = async (): Promise<IWriteOffGroup[]> => {
+      const navFeed = this.contract('FEED')
+      const groups: IWriteOffGroup[] = []
+      let i = 0
+      const maxWriteOffGroups = 100
+      while (i < maxWriteOffGroups) {
+        try {
+          const group = await navFeed.writeOffGroups(i)
+          groups.push(group)
+          i += 1
+        } catch (e) {
+          console.log(`Oops: ${e}`)
+          return groups
+        }
+      }
+      return groups
+    }
+
     getAuditLog = async (ignoredEvents: string[]): Promise<IAuditLog> => {
       const poolAdmin = this.contract('POOL_ADMIN')
       const eventFilter = {
@@ -276,6 +294,7 @@ export type IAdminActions = {
   addRiskGroups(riskGroups: IRiskGroup[]): Promise<PendingTransaction>
   addWriteOffGroups(writeOffGroups: IWriteOffGroup[]): Promise<PendingTransaction>
   getAuditLog(ignoredEvents: string[]): Promise<IAuditLog>
+  getWriteOffGroups(): Promise<IWriteOffGroup[]>
 }
 
 export default AdminActions
