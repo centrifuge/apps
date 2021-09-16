@@ -1,7 +1,5 @@
-import { Modal } from '@centrifuge/axis-modal'
 import { baseToDisplay, displayToBase, feeToInterestRate, interestRateToFee, ITinlake } from '@centrifuge/tinlake-js'
-import { Box, Button, CheckBox, FormField, Heading, Paragraph } from 'grommet'
-import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
+import { Box, Button, FormField, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
@@ -131,20 +129,40 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   }
 
   React.useEffect(() => {
-    if (status === 'succeeded') {
+    if (minJuniorRatioStatus === 'succeeded') {
       refetchPoolData()
     }
-  }, [status])
+  }, [minJuniorRatioStatus])
 
-  const [modalIsOpen, setModalIsOpen] = React.useState(false)
-  const [checked, setChecked] = React.useState(false)
+  React.useEffect(() => {
+    if (maxJuniorRatioStatus === 'succeeded') {
+      refetchPoolData()
+    }
+  }, [maxJuniorRatioStatus])
 
-  const openModal = () => {
-    setModalIsOpen(true)
-  }
-  const closeModal = () => {
-    setModalIsOpen(false)
-  }
+  React.useEffect(() => {
+    if (discountRateStatus === 'succeeded') {
+      refetchPoolData()
+    }
+  }, [discountRateStatus])
+
+  React.useEffect(() => {
+    if (seniorInterestRateStatus === 'succeeded') {
+      refetchPoolData()
+    }
+  }, [seniorInterestRateStatus])
+
+  React.useEffect(() => {
+    if (minimumEpochTimeStatus === 'succeeded') {
+      refetchPoolData()
+    }
+  }, [minimumEpochTimeStatus])
+
+  React.useEffect(() => {
+    if (challengeTimeStatus === 'succeeded') {
+      refetchPoolData()
+    }
+  }, [challengeTimeStatus])
 
   return (
     <>
@@ -332,51 +350,11 @@ const AdminActions: React.FC<Props> = (props: Props) => {
               <Button
                 primary
                 label="Update"
-                onClick={openModal}
+                onClick={update}
                 disabled={!anyChanges || !poolData?.adminLevel || poolData.adminLevel < 3}
               />
             </Box>
           )}
-
-          <Modal
-            opened={modalIsOpen}
-            title={'Advance notice confirmation.'}
-            style={{ maxWidth: '800px' }}
-            headingProps={{ style: { maxWidth: '100%', display: 'flex' } }}
-            titleIcon={<StatusInfoIcon />}
-            onClose={closeModal}
-          >
-            <Paragraph margin={{ top: 'medium', bottom: 'medium' }}>
-              Per the Subscription Agreement, you need to communicate any parameter changes to your Tinlake pool to the
-              investors 14 days in advance.
-            </Paragraph>
-
-            <FormFieldWithoutBorder>
-              <CheckBox
-                checked={checked}
-                label={
-                  <div style={{ lineHeight: '24px' }}>
-                    I confirm that 14 days have passed since I have communicated this parameter change to the investors.
-                  </div>
-                }
-                onChange={(event) => setChecked(event.target.checked)}
-              />
-            </FormFieldWithoutBorder>
-            <Box direction="row" justify="end" margin={{ top: 'medium' }}>
-              <Box basis={'1/5'}>
-                <Button
-                  primary
-                  onClick={() => {
-                    update()
-                    closeModal()
-                  }}
-                  disabled={!checked}
-                  label="OK"
-                  fill={true}
-                />
-              </Box>
-            </Box>
-          </Modal>
         </Card>
       )}
     </>

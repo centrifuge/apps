@@ -23,7 +23,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [onboardingAddress, setOnboardingAddress] = React.useState(undefined as string | undefined)
-  const { data: onboardingData } = useOnboardingState(
+  const { data: onboardingData, isError: onboardingError } = useOnboardingState(
     props.activePool,
     onboardingAddress && web3.isAddress(onboardingAddress) ? onboardingAddress : undefined
   )
@@ -185,7 +185,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
               />
             </FormField>
 
-            {onboardingAddress && web3.isAddress(onboardingAddress) && onboardingData && (
+            {onboardingAddress && web3.isAddress(onboardingAddress) && onboardingData && onboardingData?.kyc && (
               <Table margin={{ top: 'small' }}>
                 <TableBody>
                   <TableRow>
@@ -217,6 +217,8 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
                 </TableBody>
               </Table>
             )}
+
+            {onboardingError && 'Not found'}
           </Card>
         </Box>
       )}

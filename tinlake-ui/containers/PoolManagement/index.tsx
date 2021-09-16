@@ -9,7 +9,7 @@ import { downloadCSV } from '../../utils/export'
 import { usePool } from '../../utils/usePool'
 import { csvName } from '../DataQuery/queries'
 import EpochOverview from '../Investment/View/EpochOverview'
-import Access from './Admins'
+// import Access from './Admins'
 import AOMetrics from './AOMetrics'
 import AuditLog from './AuditLog'
 import Liquidity from './Liquidity'
@@ -80,7 +80,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
               size="small"
               focusIndicator={false}
             />
-            {poolData?.adminLevel && poolData.adminLevel >= 3 && (
+            {/* {poolData?.adminLevel && poolData.adminLevel >= 3 && (
               <MenuItem
                 secondary={view === 'Access'}
                 plain={view !== 'Access'}
@@ -89,7 +89,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
                 size="small"
                 focusIndicator={false}
               />
-            )}
+            )} */}
             <MenuItem
               secondary={view === 'Parameters'}
               plain={view !== 'Parameters'}
@@ -131,7 +131,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
 
             {view === 'Parameters' && <Parameters tinlake={props.tinlake} />}
 
-            {view === 'Access' && <Access tinlake={props.tinlake} />}
+            {/* {view === 'Access' && <Access tinlake={props.tinlake} />} */}
 
             {view === 'Audit Log' && <AuditLog tinlake={props.tinlake} />}
           </Box>
