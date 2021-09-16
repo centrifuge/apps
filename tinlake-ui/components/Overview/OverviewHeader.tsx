@@ -194,7 +194,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           <Shelf justifyContent="space-evenly">
             {poolStats.map((item, i) => (
               <>
-                <Box p="small" minWidth={130}>
+                <Box p="small" minWidth={160}>
                   <LabeledValue
                     value={item.value}
                     icon={item.valueIcon}
