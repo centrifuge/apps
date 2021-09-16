@@ -38,6 +38,11 @@ const AuditLog: React.FC<Props> = (props: Props) => {
 
   return poolData ? (
     <Box>
+      {!(logs && events && transactions && blocks) && (
+        <Card p="medium" mb="medium">
+          Loading...
+        </Card>
+      )}
       {logs && events && transactions && blocks && (
         <Card p="medium" mb="medium">
           <Heading level="5" margin={{ top: '0' }}>
@@ -128,16 +133,16 @@ const truncateString = (txt: string, num: number) => {
 
 const generateLogName = (log: ethers.utils.LogDescription) => {
   if (log.name === 'AddRiskGroup') {
-    return `Add risk group ${log.args[0]}, ${toPrecision(
+    return `Add risk group ${log.args[0]} (${toPrecision(
       baseToDisplay(log.args[2], 25),
       0
-    )}% Max Advance Rate, ${toPrecision(feeToInterestRate(log.args[3]), 2)}% Financing Fee`
+    )}% Max Advance Rate, ${toPrecision(feeToInterestRate(log.args[3]), 2)}% Financing Fee)`
   }
   if (log.name === 'AddWriteOffGroup') {
-    return `Add write-off group, ${toPrecision(
+    return `Add write-off group (${toPrecision(
       baseToDisplay(log.args[1], 25),
       0
-    )}% write-off percentage, ${log.args[2].toString()} overdue days`
+    )}% write-off percentage, ${log.args[2].toString()} overdue days)`
   }
   if (log.name === 'SetMaxReserve') {
     return `Set max reserve to ${addThousandsSeparators(toPrecision(baseToDisplay(log.args[0], 18), 0))} DAI`
@@ -162,6 +167,32 @@ const generateLogName = (log: ethers.utils.LogDescription) => {
   }
   if (log.name === 'HealCreditline') {
     return `Heal credit line overcollateralization`
+  }
+  if (log.name === 'SetMinimumEpochTime') {
+    const seconds = Number(log.args[0].toString())
+    const hours = Math.floor(seconds / 60 / 60)
+    const minutes = Math.round((seconds / 60 / 60 - hours) * 60)
+    return `Set minimum epoch time to ${hours} hours and ${minutes} minutes`
+  }
+  if (log.name === 'SetChallengeTime') {
+    const minutes = Math.round(Number(log.args[0].toString()) / 60)
+    return `Set challenge time to ${minutes} minutes`
+  }
+  if (log.name === 'SetDiscountRate') {
+    return `Set discount rate to ${toPrecision(feeToInterestRate(log.args[0]), 2)}%`
+  }
+  if (log.name === 'UpdateNFTMaturityDate') {
+    return `Update maturity date for NFT ${formatAddress(log.args[0])} to ${dateToYMD(log.args[1])}`
+  }
+  if (log.name === 'UpdateNFTValue') {
+    return `Update value for NFT ${formatAddress(log.args[0])} to ${addThousandsSeparators(
+      toPrecision(baseToDisplay(log.args[1], 18), 0)
+    )} DAI`
+  }
+  if (log.name === 'UpdateNFTValue') {
+    return `Update risk group & value for NFT ${formatAddress(log.args[0])} to ${
+      log.args[1]
+    } and ${addThousandsSeparators(toPrecision(baseToDisplay(log.args[2], 18), 0))} DAI`
   }
 
   return `${log.name}(${log.args.join(',')})`

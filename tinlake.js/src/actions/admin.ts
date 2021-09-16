@@ -166,20 +166,13 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     updateNftFeed = async (nftId: string, value: string, riskGroup?: string) => {
       if (!riskGroup) {
-        return this.pending(this.contract('FEED')['update(bytes32,uint256)'](nftId, value, this.overrides))
+        return this.pending(this.contract('POOL_ADMIN').updateNFTValue(nftId, value, this.overrides))
       }
-      return this.pending(
-        this.contract('FEED')['update(bytes32,uint256,uint256)'](nftId, value, riskGroup, this.overrides)
-      )
+      return this.pending(this.contract('POOL_ADMIN').updateNFTValueRisk(nftId, value, riskGroup, this.overrides))
     }
+
     setMaturityDate = async (nftId: string, timestampSecs: number) => {
-      return this.pending(
-        this.contract('FEED')['file(bytes32,bytes32,uint256)'](
-          web3.fromAscii('maturityDate').padEnd(66, '0'),
-          nftId,
-          timestampSecs
-        )
-      )
+      return this.pending(this.contract('POOL_ADMIN').updateNFTMaturityDate(nftId, timestampSecs, this.overrides))
     }
 
     addRiskGroups = async (riskGroups: IRiskGroup[]) => {

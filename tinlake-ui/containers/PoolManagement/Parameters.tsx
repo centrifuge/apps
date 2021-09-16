@@ -48,8 +48,8 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   const [maxJuniorRatioStatus, , setMaxJuniorRatioTxId] = useTransactionState()
   const [discountRateStatus, , setDiscountRateTxId] = useTransactionState()
   const [seniorInterestRateStatus, , setSeniorInterestRateTxId] = useTransactionState()
-  const [minimumEpochTimeStatus, ,] = useTransactionState()
-  const [challengeTimeStatus, ,] = useTransactionState()
+  const [minimumEpochTimeStatus, , setMinimumEpochTimeTxId] = useTransactionState()
+  const [challengeTimeStatus, , setChallengeTimeTxId] = useTransactionState()
 
   const changedMinJuniorRatio =
     minJuniorRatio && poolData?.minJuniorRatio && minJuniorRatio !== poolData.minJuniorRatio.toString()
@@ -58,12 +58,27 @@ const AdminActions: React.FC<Props> = (props: Props) => {
     maxJuniorRatio && poolData?.maxJuniorRatio && maxJuniorRatio !== poolData.maxJuniorRatio.toString()
 
   const changedDiscountRate =
-    discountRate && poolData?.discountRate && discountRate !== feeToInterestRate(poolData.discountRate)
+    discountRate && poolData?.discountRate && interestRateToFee(discountRate) !== poolData.discountRate.toString()
 
   const changedSeniorInterestRate =
     seniorInterestRate &&
     poolData?.senior?.interestRate &&
-    seniorInterestRate !== feeToInterestRate(poolData.senior?.interestRate)
+    interestRateToFee(seniorInterestRate) !== poolData.senior.interestRate.toString()
+
+  const newMinimumEpochTime = epochTimeHours * 60 * 60 + epochTimeMinutes * 60
+  const changedMinimumEpochTime =
+    epochData?.minimumEpochTime && newMinimumEpochTime !== Number(epochData?.minimumEpochTime.toString())
+
+  const changedChallengeTime =
+    epochData?.challengeTime && challengeTime.toString() !== epochData?.challengeTime.toString()
+
+  const anyChanges =
+    changedMinJuniorRatio ||
+    changedMaxJuniorRatio ||
+    changedDiscountRate ||
+    changedSeniorInterestRate ||
+    changedMinimumEpochTime ||
+    changedChallengeTime
 
   const update = async () => {
     if (changedMinJuniorRatio && minJuniorRatio) {
@@ -96,6 +111,22 @@ const AdminActions: React.FC<Props> = (props: Props) => {
         interestRateToFee(seniorInterestRate),
       ])
       setSeniorInterestRateTxId(txId)
+    }
+
+    if (changedMinimumEpochTime) {
+      const txId = await props.createTransaction(`Set min epoch time`, 'setMinimumEpochTime', [
+        props.tinlake,
+        newMinimumEpochTime.toString(),
+      ])
+      setMinimumEpochTimeTxId(txId)
+    }
+
+    if (changedChallengeTime) {
+      const txId = await props.createTransaction(`Set challenge time`, 'setChallengeTime', [
+        props.tinlake,
+        challengeTime.toString(),
+      ])
+      setChallengeTimeTxId(txId)
     }
   }
 
@@ -302,7 +333,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                 primary
                 label="Update"
                 onClick={openModal}
-                disabled={!poolData?.adminLevel || poolData.adminLevel < 3}
+                disabled={!anyChanges || !poolData?.adminLevel || poolData.adminLevel < 3}
               />
             </Box>
           )}
@@ -339,6 +370,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
                     update()
                     closeModal()
                   }}
+                  disabled={!checked}
                   label="OK"
                   fill={true}
                 />
