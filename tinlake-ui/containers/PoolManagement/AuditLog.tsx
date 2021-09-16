@@ -189,7 +189,7 @@ const generateLogName = (log: ethers.utils.LogDescription) => {
       toPrecision(baseToDisplay(log.args[1], 18), 0)
     )} DAI`
   }
-  if (log.name === 'UpdateNFTValue') {
+  if (log.name === 'UpdateNFTValueRisk') {
     return `Update risk group & value for NFT ${formatAddress(log.args[0])} to ${
       log.args[1]
     } and ${addThousandsSeparators(toPrecision(baseToDisplay(log.args[2], 18), 0))} DAI`

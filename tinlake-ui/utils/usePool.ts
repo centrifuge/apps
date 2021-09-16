@@ -229,7 +229,7 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
     },
   ]
 
-  const maxRiskGroups = 50
+  const maxRiskGroups = 100
   for (let i = 0; i < maxRiskGroups; i += 1) {
     calls.push(
       {

@@ -19,38 +19,12 @@ type Tranche = 'junior' | 'senior'
 
 const getActionName = (tranche: Tranche) => (tranche === 'senior' ? 'updateSeniorMemberList' : 'updateJuniorMemberList')
 
-const pool: Pool = {
-  network: 'mainnet',
-  version: 3,
-  isUpcoming: false,
-  addresses: {
-    ROOT_CONTRACT: 'aave',
-    ACTIONS: '0x0',
-    PROXY_REGISTRY: '0x0',
-    COLLATERAL_NFT: '0x0',
-    SENIOR_TOKEN: '0x0',
-    JUNIOR_TOKEN: '0x0',
-    CLERK: '0x0',
-    ASSESSOR: '0x0',
-    RESERVE: '0x0',
-    SENIOR_TRANCHE: '0x0',
-    JUNIOR_TRANCHE: '0x0',
-    FEED: '0x0',
-    POOL_ADMIN: '0x0',
-    SENIOR_MEMBERLIST: '0x0',
-    JUNIOR_MEMBERLIST: '0x0',
-    COORDINATOR: '0x0',
-    PILE: '0x0',
-  },
-  metadata: { name: 'Aave', slug: 'aave', asset: '-' },
-}
-
 const ManageMemberlist: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [onboardingAddress, setOnboardingAddress] = React.useState(undefined as string | undefined)
   const { data: onboardingData } = useOnboardingState(
-    pool,
+    props.activePool,
     onboardingAddress && web3.isAddress(onboardingAddress) ? onboardingAddress : undefined
   )
 
