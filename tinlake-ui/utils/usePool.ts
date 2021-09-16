@@ -208,7 +208,7 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
     },
   ]
 
-  // TODO: Make separate query for pool address related data
+  // TODO: Make separate query for user address related data
   // Now it's fetching all pool data again when the address is set
   // Which can cause it to load twice on page load
   if (address) {
