@@ -6,21 +6,26 @@ import {
   toPrecision,
 } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import { FormDown } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import styled from 'styled-components'
 import config, { Pool } from '../../config'
 import { ensureAuthed } from '../../ducks/auth'
 import { useTrancheYield } from '../../utils/hooks'
+import { useMedia } from '../../utils/useMedia'
 import { usePool } from '../../utils/usePool'
+import { Button } from '../Button'
+import { ButtonGroup } from '../ButtonGroup'
 import { Card } from '../Card'
+import { Divider } from '../Divider'
+import { SectionHeading } from '../Heading'
 import InvestAction from '../InvestAction'
-import { Shelf, Stack } from '../Layout'
+import { LabeledValue } from '../LabeledValue'
+import { Box, Flex, Shelf, Stack } from '../Layout'
 import { useTinlake } from '../TinlakeProvider'
 import { Tooltip } from '../Tooltip'
+import { ValuePairList } from '../ValuePairList'
 
 interface Props {
   selectedPool: Pool
@@ -104,333 +109,205 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
     }
   }
 
+  const isMobile = useMedia({ below: 'medium' })
+
+  const poolStats = [
+    {
+      term: 'Asset type',
+      value: props.selectedPool.metadata.asset,
+    },
+    {
+      term: (
+        <Tooltip id="assetMaturity" underline>
+          Asset maturity
+        </Tooltip>
+      ),
+      value: props.selectedPool.metadata.assetMaturity,
+    },
+    {
+      term:
+        dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? (
+          <Tooltip id="dropApy" underline>
+            DROP APY {!isMobile && '(30 days)'}
+          </Tooltip>
+        ) : (
+          <Tooltip id="dropApr" underline>
+            Fixed DROP rate {!isMobile && '(APR)'}
+          </Tooltip>
+        ),
+      termSuffix: isMobile
+        ? dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
+          ? '(30 days)'
+          : '(APR)'
+        : undefined,
+      valueIcon: '/static/DROP_final.svg',
+      value:
+        dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
+          ? dropYield
+          : toPrecision(feeToInterestRate(dropRate || '0'), 2),
+      valueUnit: '%',
+    },
+    {
+      term: 'Pool value',
+      valueIcon: isMobile ? undefined : `/static/currencies/${props.selectedPool.metadata.currencySymbol}.svg`,
+      value: addThousandsSeparators(
+        toPrecision(baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18), 0)
+      ),
+      valueUnit: props.selectedPool.metadata.currencySymbol,
+    },
+  ]
+
+  const makerStats = [
+    {
+      term: 'Debt Ceiling',
+      value: `${addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.line || new BN(0), 45 + 6), 1))}M`,
+      valueUnit: 'DAI',
+    },
+    {
+      term: 'Current Debt',
+      value: `${addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.debt || new BN(0), 18 + 6), 1))}M`,
+      valueUnit: 'DAI',
+    },
+    {
+      term: 'Stability Fee (APY)',
+      value: toPrecision(feeToInterestRateCompounding(poolData?.maker?.duty || '0'), 2),
+      valueUnit: '%',
+    },
+  ]
+
   return (
-    <div>
+    <Stack gap="small">
       <Card p="medium" position="relative" zIndex={1}>
-        <Shelf
-          gap="medium"
-          flexDirection={['column', 'column', 'row']}
-          alignItems={['flex-start', 'flex-start', 'center']}
-        >
-          <HeaderBox width="400px">
-            <Heading level="5">{props.selectedPool.metadata.asset}</Heading>
-            <Type>Asset type</Type>
-          </HeaderBox>
-          <HeaderBox>
-            <Heading level="4">{props.selectedPool.metadata.assetMaturity}</Heading>
-            <Type>
-              <Tooltip id="assetMaturity" underline>
-                Asset maturity
-              </Tooltip>
-            </Type>
-          </HeaderBox>
-          <HeaderBox>
-            <Heading level="4">
-              <TokenLogo src={`/static/DROP_final.svg`} />
-              {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
-                ? dropYield
-                : toPrecision(feeToInterestRate(dropRate || '0'), 2)}
-              <Unit>%</Unit>
-            </Heading>
-            <Box>
-              <Type>
-                {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) && (
-                  <Tooltip id="dropApy" underline>
-                    DROP APY (30 days)
-                  </Tooltip>
-                )}
-                {!(dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))) && (
-                  <Tooltip id="dropApr" underline>
-                    Fixed DROP rate (APR)
-                  </Tooltip>
-                )}
-              </Type>
-            </Box>
-          </HeaderBox>
-          <HeaderBox width="220px" style={{ borderRight: 'none' }}>
-            <Heading level="4">
-              <TokenLogo src={`/static/currencies/${props.selectedPool.metadata.currencySymbol}.svg`} />
-              {addThousandsSeparators(
-                toPrecision(
-                  baseToDisplay((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)), 18),
-                  0
-                )
+        {isMobile ? (
+          <Stack gap="medium">
+            <ValuePairList items={poolStats} />
+            <ButtonGroup>
+              {'addresses' in props.selectedPool &&
+              config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
+                <Button label="Invest" primary onClick={invest} />
+              ) : (
+                <InvestAction pool={props.selectedPool} />
               )}
-              <Unit>{props.selectedPool.metadata.currencySymbol}</Unit>
-            </Heading>
-            <Type>Pool Value</Type>
-          </HeaderBox>
-          <HeaderBox style={{ borderRight: 'none' }}>
-            {'addresses' in props.selectedPool &&
-            config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
-              <Button label="Invest" primary onClick={invest} />
-            ) : (
-              <InvestAction pool={props.selectedPool} />
-            )}
-          </HeaderBox>
-        </Shelf>
-      </Card>
-      {isMakerIntegrated && (
-        <MakerBox interactive background="#1AAB9B">
-          <Stack gap="xlarge">
-            <Box direction="row" wrap style={{ gap: '16px' }}>
-              <Box direction="row" style={{ flex: '100 1 500px' }}>
-                <MakerLogo>
-                  <img src="/static/maker-logo.svg" />
-                </MakerLogo>
-                <Box pad={{ top: '8px;' }} style={{ fontWeight: 'bold' }} direction="row">
-                  This pool is directly integrated with a Maker vault for liquidity. &nbsp;
-                  <Details onClick={() => setOpen(!open)} direction="row">
-                    <h2>Show details</h2>
-                    <Caret>
-                      <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
-                    </Caret>
-                  </Details>
-                </Box>
-              </Box>
-              <Box direction="row" style={{ flex: '1 1 33%' }}>
-                <MakerMetric style={{ borderRight: '1px solid #fff' }}>
-                  <h3>Current Debt</h3>
-                  <h2>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.debt || new BN(0), 18 + 6), 1))}M{' '}
-                    <MakerUnit>DAI</MakerUnit>{' '}
-                  </h2>
-                </MakerMetric>
-                <MakerMetric style={{ borderRight: '1px solid #fff' }}>
-                  <h3>Debt Ceiling</h3>
-                  <h2>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.line || new BN(0), 45 + 6), 1))}M{' '}
-                    <MakerUnit>DAI</MakerUnit>
-                  </h2>
-                </MakerMetric>
-                <MakerMetric>
-                  <h3>Stability Fee (APY)</h3>
-                  <h2>
-                    {toPrecision(feeToInterestRateCompounding(poolData?.maker?.duty || '0'), 2)}{' '}
-                    <MakerUnit>%</MakerUnit>
-                  </h2>
-                </MakerMetric>
-              </Box>
-            </Box>
-            {open && (
-              <Box direction="row" margin={{ bottom: 'small' }} style={{ gap: '16px' }} wrap>
-                <Box direction="row" style={{ flex: '100 1 500px' }}>
-                  <div style={{ width: '60%', lineHeight: '1.8em' }}>
-                    For this pool Maker provides a revolving line of credit against real-world assets as collateral. The
-                    direct integration allows the Asset Originator to lock up DROP as collateral in a Maker vault, draw
-                    DAI in return and use it to finance new originations. The credit line is capped at the debt ceiling
-                    set by Maker governance. This provides instant liquidity for the Asset Originator. &nbsp; &nbsp;
-                    <a
-                      href="https://medium.com/centrifuge/defi-2-0-first-real-world-loan-is-financed-on-maker-fbe24675428f"
-                      target="_blank"
-                    >
-                      Read more
-                    </a>
-                  </div>
-                  <Box></Box>
-                </Box>
-                <Box margin={{ top: 'xsmall' }} style={{ flex: '1 1 33%' }}>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell
-                          scope="row"
-                          pad={{ top: '0', bottom: '12px' }}
-                          border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
-                        >
-                          Collateral Balance
-                        </TableCell>
-                        <TableCell
-                          style={{ textAlign: 'end' }}
-                          border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
-                          pad={{ top: '0', bottom: '12px' }}
-                        >
-                          {addThousandsSeparators(
-                            toPrecision(baseToDisplay(poolData?.maker?.dropBalance || new BN(0), 18), 0)
-                          )}{' '}
-                          DROP
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell
-                          scope="row"
-                          border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
-                          pad={{ vertical: '12px' }}
-                        >
-                          Collateral Value
-                        </TableCell>
-                        <TableCell
-                          style={{ textAlign: 'end' }}
-                          border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
-                          pad={{ vertical: '12px' }}
-                        >
-                          {addThousandsSeparators(
-                            toPrecision(baseToDisplay(makerDropCollateralValue || new BN(0), 18), 0)
-                          )}{' '}
-                          DAI
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell
-                          scope="row"
-                          border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
-                          pad={{ vertical: '12px' }}
-                        >
-                          Debt Utilization
-                        </TableCell>
-                        <TableCell
-                          style={{ textAlign: 'end' }}
-                          border={{ side: 'bottom', color: 'rgba(255, 255, 255, 0.3)' }}
-                          pad={{ vertical: '12px' }}
-                        >
-                          {parseFloat((makerDebtUtilization || new BN(0)).toString())} %
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell scope="row" border={{ color: 'transparent' }} pad={{ vertical: '12px' }}>
-                          Maker DROP Share
-                        </TableCell>
-                        <TableCell
-                          style={{ textAlign: 'end' }}
-                          border={{ color: 'transparent' }}
-                          pad={{ vertical: '12px' }}
-                        >
-                          {parseFloat((makerDropShare || new BN(0)).toString())} %
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </Box>
-              </Box>
-            )}
+            </ButtonGroup>
           </Stack>
-        </MakerBox>
+        ) : (
+          <Shelf justifyContent="space-evenly">
+            {poolStats.map((item, i) => (
+              <>
+                <Box p="small" minWidth={160}>
+                  <LabeledValue
+                    value={item.value}
+                    icon={item.valueIcon}
+                    unit={item.valueUnit}
+                    label={item.term}
+                    variant="primaryList"
+                  />
+                </Box>
+                {i < poolStats.length - 1 && <Box width="1px" alignSelf="stretch" borderLeft="1px solid #eee" />}
+              </>
+            ))}
+          </Shelf>
+        )}
+      </Card>
+
+      {isMakerIntegrated && (
+        <>
+          <Card interactive>
+            <Shelf
+              p="medium"
+              justifyContent="space-between"
+              onClick={() => setOpen(!open)}
+              style={{ cursor: 'pointer' }}
+            >
+              <Shelf gap="small" alignSelf="baseline" alignItems="baseline">
+                <Box
+                  as="img"
+                  src="/static/maker-logo.svg"
+                  width="24px"
+                  height="24px"
+                  alignSelf="flex-start"
+                  mt="-2px"
+                />
+                <Stack gap="4px">
+                  <SectionHeading>Maker Integrated</SectionHeading>
+                  {!isMobile && <span>This pool is directly integrated with a Maker vault for liquidity</span>}
+                </Stack>
+              </Shelf>
+              <Shelf gap="small" flex={{ medium: '0 0 45%' }}>
+                {!isMobile && (
+                  <Shelf justifyContent="space-between" alignSelf="baseline" alignItems="baseline" flexGrow={1}>
+                    {makerStats.map((item) => (
+                      <LabeledValue value={item.value} unit={item.valueUnit} label={item.term} variant="primaryList" />
+                    ))}
+                  </Shelf>
+                )}
+                <Flex alignSelf={{ medium: 'flex-start' }} my={['-20px', '-20px', '-2px']} ml="auto">
+                  <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
+                </Flex>
+              </Shelf>
+            </Shelf>
+            {open && (
+              <>
+                <Divider />
+                <Stack p="medium" gap="medium">
+                  {isMobile && (
+                    <>
+                      <ValuePairList items={makerStats} />
+                      <Divider />
+                    </>
+                  )}
+                  <Stack
+                    gap={['medium', 'medium', 72]}
+                    flexDirection={['column', 'column', 'row']}
+                    alignItems="stretch"
+                  >
+                    <Box pl={{ medium: 40 }}>
+                      For this pool Maker provides a revolving line of credit against real-world assets as collateral.
+                      The direct integration allows the Asset Originator to lock up DROP as collateral in a Maker vault,
+                      draw DAI in return and use it to finance new originations. The credit line is capped at the debt
+                      ceiling set by Maker governance. This provides instant liquidity for the Asset Originator.
+                    </Box>
+
+                    <Box flex={{ medium: '0 0 45%' }} pr={{ medium: 40 }}>
+                      <ValuePairList
+                        variant="secondary"
+                        items={[
+                          {
+                            term: 'Collateral Balance',
+                            value: addThousandsSeparators(
+                              toPrecision(baseToDisplay(poolData?.maker?.dropBalance || new BN(0), 18), 0)
+                            ),
+                            valueUnit: 'DROP',
+                          },
+                          {
+                            term: 'Collateral Value',
+                            value: addThousandsSeparators(
+                              toPrecision(baseToDisplay(makerDropCollateralValue || new BN(0), 18), 0)
+                            ),
+                            valueUnit: 'DAI',
+                          },
+                          {
+                            term: 'Debt Utilization',
+                            value: parseFloat((makerDebtUtilization || new BN(0)).toString()),
+                            valueUnit: '%',
+                          },
+                          {
+                            term: 'Maker DROP Share',
+                            value: parseFloat((makerDropShare || new BN(0)).toString()),
+                            valueUnit: '%',
+                          },
+                        ]}
+                      />
+                    </Box>
+                  </Stack>
+                </Stack>
+              </>
+            )}
+          </Card>
+        </>
       )}
-    </div>
+    </Stack>
   )
 }
 
 export default OverviewHeader
-
-const HeaderBox = styled(Box)<{ width?: string }>`
-  text-align: center;
-  border-right: 1px solid #dadada;
-  width: ${(props) => props.width || '200px'};
-  flex-direction: column;
-  justify-content: center;
-  padding-right: 20px;
-
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin: 0 4px 4px 4px;
-  }
-
-  @media (max-width: 899px) {
-    border-right: none;
-    flex-direction: column-reverse;
-    text-align: left;
-
-    h3,
-    h4,
-    h5,
-    h6 {
-      margin: 4px 0 0 0;
-    }
-  }
-`
-
-const Type = styled.div`
-  font-weight: 500;
-  font-size: 12px;
-  line-height: 20px;
-  color: #979797;
-`
-
-const TokenLogo = styled.img`
-  vertical-align: middle;
-  margin: 0 8px 0 0;
-  width: 20px;
-  height: 20px;
-  position: relative;
-  top: -2px;
-`
-
-const Unit = styled.span`
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 28px;
-  margin-left: 4px;
-  color: #333;
-`
-const MakerBox = styled(Card)`
-  color: #fff;
-  position: relative;
-  top: -10px;
-  padding: 22px 24px 10px 24px;
-
-  a {
-    color: #fff;
-  }
-`
-
-const MakerLogo = styled.div`
-  margin-top: 4px;
-  width: 40px;
-
-  img {
-    width: 28px;
-    height: 28px;
-  }
-`
-
-const MakerMetric = styled(Box)`
-  padding: 0 26px 0 12px;
-  h3 {
-    margin: 0;
-    font-size: 12px;
-  }
-  h2 {
-    margin: 0;
-    font-size: 16px;
-  }
-
-  &:first-child {
-    padding-left: 0;
-  }
-
-  &:last-child {
-    padding-right: 0;
-  }
-`
-
-const MakerUnit = styled.div`
-  display: inline-block;
-  font-size: 13px;
-  font-weight: normal;
-`
-
-const Details = styled(Box)`
-  h2 {
-    margin: 0 0 0 10px;
-    font-size: 14px;
-    font-weight: normal;
-    text-decoration: underline;
-  }
-`
-
-const Caret = styled.div`
-  position: relative;
-  display: inline;
-  height: 16px;
-  margin-left: 10px;
-
-  svg {
-    transition: 200ms;
-    stroke: #fff;
-    transform-style: preserve-3d;
-    width: 20px;
-    height: 20px;
-  }
-`

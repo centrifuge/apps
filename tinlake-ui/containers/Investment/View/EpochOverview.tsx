@@ -391,14 +391,14 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     </TableCell>
                   </TableRow>
                   <TableRow style={{ fontWeight: 'bold' }}>
-                    <TableCell border={{ side: 'bottom', color: '#dedede' }}>Total pending investments</TableCell>
-                    <TableCell border={{ side: 'bottom', color: '#dedede' }} style={{ textAlign: 'right' }}>
+                    <TableCell border={{ side: 'bottom', color: '#eeeeee' }}>Total pending investments</TableCell>
+                    <TableCell border={{ side: 'bottom', color: '#eeeeee' }} style={{ textAlign: 'right' }}>
                       <LoadingValue done={!!tableData.totalInvestLocked}>{tableData.totalInvestLocked}</LoadingValue>
                     </TableCell>
-                    <TableCell border={{ side: 'bottom', color: '#dedede' }} style={{ textAlign: 'right' }}>
+                    <TableCell border={{ side: 'bottom', color: '#eeeeee' }} style={{ textAlign: 'right' }}>
                       <LoadingValue done={!!tableData.totalInvestTBE}>{tableData.totalInvestTBE}</LoadingValue>
                     </TableCell>
-                    <TableCell border={{ side: 'bottom', color: '#dedede' }} style={{ textAlign: 'right' }}>
+                    <TableCell border={{ side: 'bottom', color: '#eeeeee' }} style={{ textAlign: 'right' }}>
                       <LoadingValue done={!!tableData.totalInvestTBEPercent}>
                         {tableData.totalInvestTBEPercent}
                       </LoadingValue>
@@ -454,14 +454,14 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
                     </TableCell>
                   </TableRow>
                   <TableRow style={{ fontWeight: 'bold' }}>
-                    <TableCell border={{ side: 'bottom', color: '#dedede' }}>Total pending redemptions</TableCell>
-                    <TableCell border={{ side: 'bottom', color: '#dedede' }} style={{ textAlign: 'right' }}>
+                    <TableCell border={{ side: 'bottom', color: '#eeeeee' }}>Total pending redemptions</TableCell>
+                    <TableCell border={{ side: 'bottom', color: '#eeeeee' }} style={{ textAlign: 'right' }}>
                       <LoadingValue done={!!tableData.totalRedeemLocked}>{tableData.totalRedeemLocked}</LoadingValue>
                     </TableCell>
-                    <TableCell border={{ side: 'bottom', color: '#dedede' }} style={{ textAlign: 'right' }}>
+                    <TableCell border={{ side: 'bottom', color: '#eeeeee' }} style={{ textAlign: 'right' }}>
                       <LoadingValue done={!!tableData.totalRedeemTBE}>{tableData.totalRedeemTBE}</LoadingValue>
                     </TableCell>
-                    <TableCell border={{ side: 'bottom', color: '#dedede' }} style={{ textAlign: 'right' }}>
+                    <TableCell border={{ side: 'bottom', color: '#eeeeee' }} style={{ textAlign: 'right' }}>
                       <LoadingValue done={!!tableData.totalRedeemTBEPercent}>
                         {tableData.totalRedeemTBEPercent}
                       </LoadingValue>
