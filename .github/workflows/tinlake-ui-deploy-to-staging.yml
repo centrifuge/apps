@@ -64,7 +64,7 @@ jobs:
           NEXT_PUBLIC_TRANSACTION_TIMEOUT: '3600'
 
       - name: Deploy To Netlify
-        uses: nwtgck/actions-netlify@v1.1
+        uses: nwtgck/actions-netlify@v1.2.0
         with:
           deploy-message: ${{ github.event.head_commit.message }}
           enable-commit-comment: false
@@ -136,7 +136,7 @@ jobs:
           NEXT_PUBLIC_TRANSACTION_TIMEOUT: '3600'
 
       - name: Deploy To Netlify
-        uses: nwtgck/actions-netlify@v1.1
+        uses: nwtgck/actions-netlify@v1.2.0
         with:
           deploy-message: ${{ github.event.head_commit.message }}
           enable-commit-comment: false

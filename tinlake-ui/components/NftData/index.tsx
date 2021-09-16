@@ -1,9 +1,10 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { bnToHex, NFT } from '@centrifuge/tinlake-js'
-import { Box, Heading } from 'grommet'
 import * as React from 'react'
 import { getAddressLink, getNFTLink, hexToInt } from '../../utils/etherscanLinkGenerator'
 import { Card } from '../Card'
+import { SectionHeading } from '../Heading'
+import { Box, Grid, Stack } from '../Layout'
 import { LoadingValue } from '../LoadingValue'
 
 interface Props {
@@ -12,13 +13,11 @@ interface Props {
 
 const NftData: React.FC<Props> = (props: Props) => {
   return (
-    <>
-      <Heading margin={{ top: 'large' }} level="5">
-        NFT Data
-      </Heading>
-      <Card p="medium" width="80%">
-        <Box direction="row" gap="medium" margin={{ bottom: 'medium', top: 'medium' }}>
-          <Box basis={'1/3'} gap="medium">
+    <Stack gap="medium">
+      <SectionHeading>NFT Data</SectionHeading>
+      <Card p="medium" maxWidth={{ medium: 900 }}>
+        <Grid columns={[1, 3]} gap="medium" justifyItems="start" equalColumns>
+          <Box minWidth={0} maxWidth="100%">
             <LoadingValue
               alignRight={false}
               height={49}
@@ -38,7 +37,7 @@ const NftData: React.FC<Props> = (props: Props) => {
               )}
             </LoadingValue>
           </Box>
-          <Box basis={'1/3'} gap="medium">
+          <Box minWidth={0} maxWidth="100%">
             <LoadingValue alignRight={false} height={49} done={props.data?.registry !== undefined}>
               {props.data?.registry && (
                 <DisplayField
@@ -54,7 +53,7 @@ const NftData: React.FC<Props> = (props: Props) => {
               )}
             </LoadingValue>
           </Box>
-          <Box basis={'1/3'} gap="medium">
+          <Box minWidth={0} maxWidth="100%">
             <LoadingValue alignRight={false} height={49} done={props.data?.nftOwner !== undefined}>
               {props.data?.nftOwner && (
                 <DisplayField
@@ -70,9 +69,9 @@ const NftData: React.FC<Props> = (props: Props) => {
               )}
             </LoadingValue>
           </Box>
-        </Box>
+        </Grid>
       </Card>
-    </>
+    </Stack>
   )
 }
 

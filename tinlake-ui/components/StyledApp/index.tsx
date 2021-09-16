@@ -9,6 +9,10 @@ export const StyledApp = createGlobalStyle`
     opacity: 0.5;
   }
 
+  hr {
+    margin: 0;
+  }
+
   .bn-onboard-custom.bn-onboard-modal {
     z-index: 8;
   }
@@ -17,11 +21,11 @@ export const StyledApp = createGlobalStyle`
     font-family: AvenirNextLTW01, 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
       sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   }
-  
+
   .bn-onboard-custom.bn-onboard-modal-content-header-heading, .bn-onboard-custom.bn-onboard-icon-button {
     color: #000;
   }
-  
+
   .bn-onboard-custom.bn-onboard-select-wallet-info {
     color: #2762FF !important;
     font-size: 14px !important;

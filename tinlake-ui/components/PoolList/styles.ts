@@ -55,14 +55,9 @@ export const HeaderCol = styled.div`
 `
 
 export const DataCol = styled(HeaderCol)`
+  display: flex;
+  justify-content: flex-end;
   align-self: center;
-`
-
-export const Number = styled.span`
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 28px;
-  color: #333;
 `
 
 export const SubNumber = styled.span`
@@ -70,17 +65,6 @@ export const SubNumber = styled.span`
   font-weight: 500;
   font-size: 10px;
   color: #777777;
-`
-
-export const Unit = styled.span`
-  font-weight: 500;
-  font-size: 11px;
-  line-height: 14px;
-  color: #979797;
-`
-
-export const Dash = styled(Number)`
-  color: #979797;
 `
 
 export const HeaderTitle = styled.h4`

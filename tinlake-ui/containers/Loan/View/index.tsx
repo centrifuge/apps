@@ -1,10 +1,10 @@
-import { Box, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import Alert from '../../../components/Alert'
 import { Card } from '../../../components/Card'
-import { Shelf } from '../../../components/Layout'
+import { SectionHeading } from '../../../components/Heading'
+import { Stack, Wrap } from '../../../components/Layout'
 import LoanData from '../../../components/Loan/Data'
 import NftData from '../../../components/NftData'
 import { Pool } from '../../../config'
@@ -55,27 +55,21 @@ const LoanView: React.FC<Props> = (props: Props) => {
     'borrower' in router.query
 
   return (
-    <Box>
+    <Stack gap="xlarge">
       <LoanData loan={assetData} tinlake={tinlake} poolConfig={props.poolConfig} />
-      {assetData && assetData?.status !== 'closed' && (
-        <Box>
-          {hasBorrowerPermissions && (
-            <>
-              <Heading level="5" margin={{ top: 'large', bottom: 'medium' }}>
-                Finance / Repay{' '}
-              </Heading>
-              <Card width="80%" p="medium">
-                <Shelf gap="medium" justifyContent="space-between" alignItems="flex-start">
-                  <LoanBorrow loan={assetData} refetch={refetchAsset} tinlake={tinlake} poolConfig={props.poolConfig} />
-                  <LoanRepay loan={assetData} refetch={refetchAsset} tinlake={tinlake} poolConfig={props.poolConfig} />
-                </Shelf>
-              </Card>
-            </>
-          )}
-        </Box>
+      {assetData && assetData.status !== 'closed' && hasBorrowerPermissions && (
+        <Stack gap="medium">
+          <SectionHeading>Finance / Repay</SectionHeading>
+          <Card maxWidth={{ medium: 900 }} p="medium">
+            <Wrap gap="medium" justifyContent="space-between" alignItems="flex-start">
+              <LoanBorrow loan={assetData} refetch={refetchAsset} tinlake={tinlake} poolConfig={props.poolConfig} />
+              <LoanRepay loan={assetData} refetch={refetchAsset} tinlake={tinlake} poolConfig={props.poolConfig} />
+            </Wrap>
+          </Card>
+        </Stack>
       )}
       <NftData data={assetData?.nft} />
-    </Box>
+    </Stack>
   )
 }
 

@@ -1,12 +1,13 @@
 import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Card } from '../../../components/Card'
+import { SectionHeading } from '../../../components/Heading'
 import { Box, Shelf, Stack } from '../../../components/Layout'
-import { LoadingValue } from '../../../components/LoadingValue/index'
 import { Tooltip } from '../../../components/Tooltip'
+import { Value } from '../../../components/Value'
+import { ValuePairList } from '../../../components/ValuePairList'
 import { Pool, UpcomingPool } from '../../../config'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { useTrancheYield } from '../../../utils/hooks'
@@ -89,94 +90,79 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
     <>
       <FlexWrapper>
         <Card p="medium" flex="1 1 35%">
-          <Shelf mb="small">
-            <Heading level="5" margin={'0'}>
+          <Shelf mb="small" justifyContent="space-between">
+            <SectionHeading>
               <Tooltip id="assetValue" underline>
                 Asset Value
               </Tooltip>
-            </Heading>
-            <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-              <LoadingValue done={poolData?.netAssetValue !== undefined}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))}{' '}
-                {props.selectedPool.metadata.currencySymbol || 'DAI'}
-              </LoadingValue>
-            </Heading>
+            </SectionHeading>
+            <Value
+              variant="sectionHeading"
+              value={
+                poolData?.netAssetValue
+                  ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))
+                  : null
+              }
+              unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
+            />
           </Shelf>
+          <Box mb="xlarge">
+            <ValuePairList
+              variant="secondary"
+              items={[
+                {
+                  term: 'Number of Assets',
+                  value: ongoingAssets?.length ?? null,
+                },
+                {
+                  term: 'Number of Assets',
+                  value: avgAmount ? addThousandsSeparators(toPrecision(baseToDisplay(avgAmount, 18), 0)) : null,
+                  valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
+                },
+                {
+                  term: 'Average Financing Fee',
+                  value: avgInterestRate ? toPrecision(feeToInterestRate(avgInterestRate), 2) : null,
+                  valueUnit: '%',
+                },
+                {
+                  term: 'Average Maturity',
+                  value: !avgMaturity
+                    ? null
+                    : avgMaturity > 90
+                    ? `${Math.round(((avgMaturity || 0) / (365 / 12)) * 10) / 10} months`
+                    : `${Math.round((avgMaturity || 0) * 10) / 10} days`,
+                },
+              ]}
+            />
+          </Box>
 
-          <Table margin={{ bottom: 'large' }}>
-            <TableBody>
-              <TableRow>
-                <TableCell scope="row">Number of Assets</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={ongoingAssets !== undefined}>{ongoingAssets?.length || 0}</LoadingValue>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell scope="row">Average Outstanding Amount</TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={avgAmount !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(avgAmount || new BN(0), 18), 0))}{' '}
-                    {props.selectedPool.metadata.currencySymbol || 'DAI'}
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell scope="row">
-                  <Tooltip id="financingFee" underline>
-                    Average Financing Fee
-                  </Tooltip>
-                </TableCell>
-                <TableCell style={{ textAlign: 'end' }}>
-                  <LoadingValue done={avgInterestRate !== undefined}>
-                    {toPrecision(feeToInterestRate(avgInterestRate || new BN(0)), 2)}%
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell scope="row" border={{ color: 'transparent' }}>
-                  Average Maturity
-                </TableCell>
-                <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                  <LoadingValue done={avgMaturity !== undefined}>
-                    {avgMaturity! > 90
-                      ? `${Math.round(((avgMaturity || 0) / (365 / 12)) * 10) / 10} months`
-                      : `${Math.round((avgMaturity || 0) * 10) / 10} days`}
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-
-          <Shelf mb="small">
-            <Heading level="5" margin={'0'}>
+          <Shelf mb="small" justifyContent="space-between">
+            <SectionHeading>
               <Tooltip id="reserve" underline>
                 Reserve
               </Tooltip>
-            </Heading>
-            <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-              <LoadingValue done={poolData?.reserve !== undefined}>
-                {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))}{' '}
-                {props.selectedPool.metadata.currencySymbol || 'DAI'}
-              </LoadingValue>
-            </Heading>
+            </SectionHeading>
+            <Value
+              variant="sectionHeading"
+              value={
+                poolData?.reserve
+                  ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))
+                  : null
+              }
+              unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
+            />
           </Shelf>
 
-          <Table>
-            <TableBody>
-              <TableRow>
-                <TableCell scope="row" border={{ color: 'transparent' }}>
-                  <Tooltip id="reserveRatio" underline>
-                    Reserve Ratio
-                  </Tooltip>
-                </TableCell>
-                <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
-                  <LoadingValue done={reserveRatio !== undefined}>
-                    {parseFloat(reserveRatio.toString()) / 100}%
-                  </LoadingValue>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+          <ValuePairList
+            variant="secondary"
+            items={[
+              {
+                term: 'Reserve Ratio',
+                value: reserveRatio ? parseFloat(reserveRatio.toString()) / 100 : null,
+                valueUnit: '%',
+              },
+            ]}
+          />
         </Card>
         <BalanceSheetDiagram direction="row">
           <BalanceSheetDiagramLeft>
@@ -190,48 +176,43 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           <Card p="medium" mb="small">
             <Shelf justifyContent="space-between">
               <Shelf gap="xsmall" mb="xsmall">
-                <Box as={TokenLogo} src={`/static/DROP_final.svg`} display={['none', 'inline']} />
-                <Heading level="5" margin={'0'}>
-                  DROP Tranche
-                </Heading>
+                <Box as={TokenLogo} src="/static/DROP_final.svg" display={['none', 'inline']} />
+                <SectionHeading>DROP Tranche</SectionHeading>
               </Shelf>
-              <Heading level="5" margin={{ left: 'auto', top: '0', bottom: 'xsmall' }}>
-                <LoadingValue done={dropTotalValue !== undefined} height={22}>
-                  {dropTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 0))}{' '}
-                  {props.selectedPool.metadata.currencySymbol || 'DAI'}
-                </LoadingValue>
-              </Heading>
+              <Value
+                variant="sectionHeading"
+                value={
+                  dropTotalValue ? addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 0)) : null
+                }
+                unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
+              />
             </Shelf>
             <Stack gap="small">
               <TrancheNote>Senior tranche &mdash; Lower risk, stable return</TrancheNote>
-              <div>
-                <Shelf justifyContent="space-between">
-                  <TrancheText>Current token price</TrancheText>
-                  <LoadingValue done={poolData?.senior !== undefined} height={18}>
-                    <TrancheText>
-                      {poolData?.senior &&
-                        addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 4))}
-                    </TrancheText>
-                  </LoadingValue>
-                </Shelf>
 
-                <Shelf justifyContent="space-between">
-                  {dropYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero()) && (
-                    <>
-                      <TrancheText>Current DROP yield (30d APY)</TrancheText>
-                      <TrancheText>{dropYield} %</TrancheText>
-                    </>
-                  )}
-                  {(!dropYield || (poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())) && (
-                    <>
-                      <TrancheText>Fixed DROP rate (APR)</TrancheText>
-                      <TrancheText>
-                        {toPrecision(feeToInterestRate(poolData?.senior?.interestRate || '0'), 2)}%
-                      </TrancheText>
-                    </>
-                  )}
-                </Shelf>
-              </div>
+              <ValuePairList
+                variant="tertiary"
+                items={[
+                  {
+                    term: 'Current token price',
+                    value: poolData?.senior
+                      ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 4))
+                      : null,
+                    valueUnit: '%',
+                  },
+                  dropYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
+                    ? {
+                        term: 'Current DROP yield (30d APY)',
+                        value: dropYield,
+                        valueUnit: '%',
+                      }
+                    : {
+                        term: 'Fixed DROP rate (APR)',
+                        value: toPrecision(feeToInterestRate(poolData?.senior?.interestRate || '0'), 2),
+                        valueUnit: '%',
+                      },
+                ]}
+              />
             </Stack>
           </Card>
 
@@ -259,28 +240,31 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           <Card p="medium">
             <Shelf justifyContent="space-between">
               <Shelf gap="xsmall" mb="xsmall">
-                <Box as={TokenLogo} src={`/static/TIN_final.svg`} display={['none', 'inline']} />
-                <Heading level="5" margin={'0'}>
-                  TIN Tranche
-                </Heading>
+                <Box as={TokenLogo} src="/static/TIN_final.svg" display={['none', 'inline']} />
+                <SectionHeading>Tin Tranche</SectionHeading>
               </Shelf>
-              <Heading level="5" margin={{ left: 'auto', top: '0', bottom: 'xsmall' }}>
-                <LoadingValue done={tinTotalValue !== undefined} height={22}>
-                  {tinTotalValue && addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 0))}{' '}
-                  {props.selectedPool.metadata.currencySymbol || 'DAI'}
-                </LoadingValue>
-              </Heading>
+              <Value
+                variant="sectionHeading"
+                value={
+                  tinTotalValue ? addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 0)) : null
+                }
+                unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
+              />
             </Shelf>
             <Stack gap="small">
               <TrancheNote>Junior tranche &mdash; Higher risk, variable return</TrancheNote>
-              <Shelf justifyContent="space-between">
-                <TrancheText>Current token price</TrancheText>
-                <LoadingValue done={poolData?.senior !== undefined} height={18}>
-                  <TrancheText>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.tokenPrice || '0', 27), 4))}
-                  </TrancheText>
-                </LoadingValue>
-              </Shelf>
+
+              <ValuePairList
+                variant="tertiary"
+                items={[
+                  {
+                    term: 'Current token price',
+                    value: poolData?.senior
+                      ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.tokenPrice || '0', 27), 4))
+                      : null,
+                  },
+                ]}
+              />
             </Stack>
           </Card>
         </Stack>
@@ -293,10 +277,4 @@ export default InvestmentOverview
 
 const TrancheNote = styled.div`
   color: #777;
-`
-
-const TrancheText = styled.div`
-  color: #777;
-  font-weight: 500;
-  line-height: 24px;
 `
