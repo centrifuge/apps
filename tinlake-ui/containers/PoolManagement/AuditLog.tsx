@@ -1,5 +1,6 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { addThousandsSeparators, baseToDisplay, feeToInterestRate, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { ethers } from 'ethers'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
 import * as React from 'react'
@@ -11,6 +12,7 @@ import { createTransaction, TransactionProps } from '../../ducks/transactions'
 import { dateToYMD } from '../../utils/date'
 import { getAddressLink, getTransactionLink } from '../../utils/etherscanLinkGenerator'
 import { formatAddress } from '../../utils/formatAddress'
+import { Fixed27Base } from '../../utils/ratios'
 import { usePool } from '../../utils/usePool'
 
 interface Props extends TransactionProps {
@@ -138,7 +140,7 @@ const generateLogName = (log: ethers.utils.LogDescription) => {
   }
   if (log.name === 'AddWriteOffGroup') {
     return `Add write-off group (${toPrecision(
-      baseToDisplay(log.args[1], 25),
+      baseToDisplay(Fixed27Base.sub(new BN(log.args[1].toString())), 25),
       0
     )}% write-off percentage, ${log.args[2].toString()} overdue days)`
   }

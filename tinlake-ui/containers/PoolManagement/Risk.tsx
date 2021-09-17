@@ -37,7 +37,9 @@ const Risk: React.FC<Props> = (props: Props) => {
     : []
 
   const existingWriteOffGroups = poolData?.writeOffGroups
-    ? poolData.writeOffGroups.filter((writeOffGroup) => writeOffGroup.percentage && !writeOffGroup.percentage.isZero())
+    ? poolData.writeOffGroups.filter(
+        (writeOffGroup) => writeOffGroup.overdueDays && !writeOffGroup.overdueDays.isZero()
+      )
     : []
 
   const [riskGroupStatus, , setRiskGroupTxId] = useTransactionState()
@@ -225,106 +227,104 @@ const Risk: React.FC<Props> = (props: Props) => {
         )}
       </Card>
 
-      {poolData.writeOffGroups && (
-        <Card width="100%" p="medium" mb="medium">
-          <Heading level="5" margin={{ top: '0' }}>
-            Write-off groups
-          </Heading>
-          <Table>
-            <TableHeader>
+      <Card width="100%" p="medium" mb="medium">
+        <Heading level="5" margin={{ top: '0' }}>
+          Write-off groups
+        </Heading>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableCell size="5%">#</TableCell>
+              <TableCell size="20%">Write-off percentage</TableCell>
+              <TableCell size="20%">Financing Fee (APR)</TableCell>
+              <TableCell size="20%">Write-off schedule</TableCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {existingWriteOffGroups.map((writeOffGroup: WriteOffGroup, index: number) => (
               <TableRow>
-                <TableCell size="5%">#</TableCell>
-                <TableCell size="20%">Write-off percentage</TableCell>
-                <TableCell size="20%">Financing Fee (APR)</TableCell>
-                <TableCell size="20%">Write-off schedule</TableCell>
+                <TableCell>{index}</TableCell>
+                <TableCell>
+                  {parseFloat(
+                    Fixed27Base.sub(writeOffGroup.percentage)
+                      .div(new BN(10).pow(new BN(25)))
+                      .toString()
+                  )}
+                  %
+                </TableCell>
+                <TableCell>0.00%</TableCell>
+                <TableCell>
+                  {writeOffGroup.overdueDays.toString()} day{writeOffGroup.overdueDays.eqn(1) ? '' : 's'} after maturity
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {existingWriteOffGroups.map((writeOffGroup: WriteOffGroup, index: number) => (
-                <TableRow>
-                  <TableCell>{index}</TableCell>
-                  <TableCell>
-                    {parseFloat(
-                      Fixed27Base.sub(writeOffGroup.percentage)
-                        .div(new BN(10).pow(new BN(25)))
-                        .toString()
-                    )}
-                    %
-                  </TableCell>
-                  <TableCell>0.00%</TableCell>
-                  <TableCell>
-                    {writeOffGroup.overdueDays.toString()} day{writeOffGroup.overdueDays.eqn(1) ? '' : 's'} after
-                    maturity
-                  </TableCell>
-                </TableRow>
-              ))}
+            ))}
 
-              {poolData?.adminLevel && poolData.adminLevel >= 2 && (
-                <>
-                  {writeOffGroups.map((writeOffGroup: IWriteOffGroup, id: number) => (
-                    <TableRow>
-                      <TableCell>{existingWriteOffGroups.length + id}</TableCell>
-                      <TableCell>
-                        <FormField margin={{ right: 'small' }}>
-                          <NumberInput
-                            value={baseToDisplay(Fixed27Base.sub(writeOffGroup.writeOffPercentage || new BN(0)), 25)}
-                            suffix="%"
-                            max={100}
-                            precision={0}
-                            onValueChange={({ value }) => updateWriteOffGroup(id, 'writeOffPercentage', value)}
-                            plain
-                          />
-                        </FormField>
-                      </TableCell>
-                      <TableCell>
-                        <FormField margin={{ right: 'small' }}>
-                          <NumberInput
-                            value={feeToInterestRate((writeOffGroup.rate || new BN(0)).toString())}
-                            suffix="%"
-                            max={100}
-                            precision={2}
-                            onValueChange={({ value }) => updateWriteOffGroup(id, 'rate', value)}
-                            plain
-                          />
-                        </FormField>
-                      </TableCell>
-                      <TableCell>
-                        <FormField margin={{ right: 'small' }}>
-                          <NumberInput
-                            value={(writeOffGroup.overdueDays || new BN(0)).toString()}
-                            precision={0}
-                            suffix=" days"
-                            onValueChange={({ value }) => updateWriteOffGroup(id, 'overdueDays', value)}
-                            plain
-                          />
-                        </FormField>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </>
-              )}
-            </TableBody>
-          </Table>
+            {poolData?.adminLevel && poolData.adminLevel >= 2 && (
+              <>
+                {writeOffGroups.map((writeOffGroup: IWriteOffGroup, id: number) => (
+                  <TableRow>
+                    <TableCell>{existingWriteOffGroups.length + id}</TableCell>
+                    <TableCell>
+                      <FormField margin={{ right: 'small' }}>
+                        <NumberInput
+                          value={baseToDisplay(Fixed27Base.sub(writeOffGroup.writeOffPercentage || new BN(0)), 25)}
+                          suffix="%"
+                          max={100}
+                          precision={0}
+                          onValueChange={({ value }) => updateWriteOffGroup(id, 'writeOffPercentage', value)}
+                          plain
+                        />
+                      </FormField>
+                    </TableCell>
+                    <TableCell>
+                      <FormField margin={{ right: 'small' }}>
+                        <NumberInput
+                          value={feeToInterestRate((writeOffGroup.rate || new BN(0)).toString())}
+                          suffix="%"
+                          max={100}
+                          precision={2}
+                          onValueChange={({ value }) => updateWriteOffGroup(id, 'rate', value)}
+                          plain
+                        />
+                      </FormField>
+                    </TableCell>
+                    <TableCell>
+                      <FormField margin={{ right: 'small' }}>
+                        <NumberInput
+                          value={(writeOffGroup.overdueDays || new BN(0)).toString()}
+                          precision={0}
+                          min={1}
+                          suffix=" days"
+                          onValueChange={({ value }) => updateWriteOffGroup(id, 'overdueDays', value)}
+                          plain
+                        />
+                      </FormField>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
+            )}
+          </TableBody>
+        </Table>
 
-          {poolData?.adminLevel && poolData.adminLevel >= 2 && (
-            <Box margin={{ top: 'medium' }}>
-              <div style={{ marginLeft: 'auto' }}>
-                <Button secondary label="Add another" onClick={() => addWriteOffGroup()} margin={{ right: '24px' }} />
-                <Button
-                  primary
-                  label={`Save ${writeOffGroups.length || ''} write-off group${writeOffGroups.length !== 1 ? 's' : ''}`}
-                  onClick={saveWriteOffGroups}
-                  disabled={
-                    writeOffGroups.length === 0 ||
-                    writeOffGroupStatus === 'unconfirmed' ||
-                    writeOffGroupStatus === 'pending'
-                  }
-                />
-              </div>
-            </Box>
-          )}
-        </Card>
-      )}
+        {poolData?.adminLevel && poolData.adminLevel >= 2 && (
+          <Box margin={{ top: 'medium' }}>
+            <div style={{ marginLeft: 'auto' }}>
+              <Button secondary label="Add another" onClick={() => addWriteOffGroup()} margin={{ right: '24px' }} />
+              <Button
+                primary
+                label={`Save ${writeOffGroups.length || ''} write-off group${writeOffGroups.length !== 1 ? 's' : ''}`}
+                onClick={saveWriteOffGroups}
+                disabled={
+                  writeOffGroups.length === 0 ||
+                  writeOffGroupStatus === 'unconfirmed' ||
+                  writeOffGroupStatus === 'pending'
+                }
+              />
+            </div>
+          </Box>
+        )}
+      </Card>
     </Box>
   ) : null
 }

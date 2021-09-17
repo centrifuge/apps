@@ -261,16 +261,20 @@ export async function getPool(ipfsPools: IpfsPools, poolId: string, address?: st
     )
   }
 
-  const maxWriteOffGroups = 0
+  const maxWriteOffGroups = 10
   for (let i = 0; i < maxWriteOffGroups; i += 1) {
-    calls.push({
-      target: pool.addresses.FEED,
-      call: ['writeOffGroups(uint256)(uint128,uint128)', i],
-      returns: [
-        [`writeOffGroups[${i}].percentage`, toBN],
-        [`writeOffGroups[${i}].overdueDays`, toBN],
-      ],
-    })
+    if (pool.versions?.POOL_ADMIN && pool.versions?.POOL_ADMIN >= 2) {
+      calls.push({
+        target: pool.addresses.FEED,
+        call: ['writeOffGroups(uint256)(uint128,uint128)', i],
+        returns: [
+          [`writeOffGroups[${i}].percentage`, toBN],
+          [`writeOffGroups[${i}].overdueDays`, toBN],
+        ],
+      })
+    }
+
+    // TODO: load for v1 NAV feed, which doesn't have the overdueDays prop
   }
 
   // TODO: Make separate query for user address related data
