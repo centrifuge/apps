@@ -42,7 +42,7 @@ export interface Asset extends MulticallData {
   status?: string
   nft?: NFT
   borrower?: string
-  proxyOwner: BN
+  proxyOwner: string
   ownerOf: string
   maturityDate?: number
   rateGroup?: number
@@ -132,8 +132,8 @@ async function getAsset(tinlake: ITinlake, loanId: string): Promise<Asset> {
 
   const [multicallData, ownerOf, proxyOwner] = await Promise.all([
     multicall<MulticallData>(calls),
-    tinlake.getOwnerOfLoan(loanId),
-    tinlake.getProxyOwnerByLoan(loanId),
+    tinlake.getOwnerOfLoan(loanId).catch(() => ZERO_ADDRESS),
+    tinlake.getProxyOwnerByLoan(loanId).catch(() => ZERO_ADDRESS),
   ])
 
   // TODO: load data using multicall

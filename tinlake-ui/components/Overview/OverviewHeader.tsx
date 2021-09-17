@@ -7,43 +7,31 @@ import {
 } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { FormDown } from 'grommet-icons'
-import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import config, { Pool } from '../../config'
-import { ensureAuthed } from '../../ducks/auth'
+import { Pool } from '../../config'
 import { useTrancheYield } from '../../utils/hooks'
 import { useMedia } from '../../utils/useMedia'
 import { usePool } from '../../utils/usePool'
-import { Button } from '../Button'
 import { ButtonGroup } from '../ButtonGroup'
 import { Card } from '../Card'
 import { Divider } from '../Divider'
 import { SectionHeading } from '../Heading'
-import InvestAction from '../InvestAction'
 import { LabeledValue } from '../LabeledValue'
 import { Box, Flex, Shelf, Stack } from '../Layout'
-import { useTinlake } from '../TinlakeProvider'
 import { Tooltip } from '../Tooltip'
 import { ValuePairList } from '../ValuePairList'
 
 interface Props {
   selectedPool: Pool
+  investButton: React.ReactElement
 }
 
 const OverviewHeader: React.FC<Props> = (props: Props) => {
-  const router = useRouter()
-  const dispatch = useDispatch()
-  const tinlake = useTinlake()
-
-  const address = useSelector<any, string | null>((state) => state.auth.address)
   const { data: poolData } = usePool(props.selectedPool.addresses.ROOT_CONTRACT)
 
   const { dropYield } = useTrancheYield(props.selectedPool.addresses.ROOT_CONTRACT)
 
   const dropRate = poolData?.senior?.interestRate || undefined
-
-  const [awaitingConnect, setAwaitingConnect] = React.useState(false)
 
   const isMakerIntegrated =
     props.selectedPool.addresses.CLERK !== undefined && props.selectedPool.metadata.maker?.ilk !== ''
@@ -69,45 +57,6 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           .div(poolData?.senior?.totalSupply)
           .div(new BN(10).pow(new BN(16)))
       : undefined
-
-  React.useEffect(() => {
-    if (address && awaitingConnect) {
-      ;(async () => {
-        const inAMemberlist = (await tinlake.checkSeniorTokenMemberlist(address))
-          ? true
-          : await tinlake.checkJuniorTokenMemberlist(address)
-
-        if (inAMemberlist) {
-          router.push(
-            `/pool/${props.selectedPool.addresses.ROOT_CONTRACT}/${props.selectedPool.metadata.slug}/investments`
-          )
-        } else {
-          router.push(
-            `/pool/${props.selectedPool.addresses.ROOT_CONTRACT}/${props.selectedPool.metadata.slug}/onboarding`
-          )
-        }
-      })()
-
-      setAwaitingConnect(false)
-    }
-  }, [address, tinlake])
-
-  const invest = () => {
-    if (address) {
-      if (poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) {
-        router.push(
-          `/pool/${props.selectedPool.addresses.ROOT_CONTRACT}/${props.selectedPool.metadata.slug}/investments`
-        )
-      } else {
-        router.push(
-          `/pool/${props.selectedPool.addresses.ROOT_CONTRACT}/${props.selectedPool.metadata.slug}/onboarding`
-        )
-      }
-    } else {
-      setAwaitingConnect(true)
-      dispatch(ensureAuthed())
-    }
-  }
 
   const isMobile = useMedia({ below: 'medium' })
 
@@ -182,12 +131,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           <Stack gap="medium">
             <ValuePairList items={poolStats} />
             <ButtonGroup>
-              {'addresses' in props.selectedPool &&
-              config.featureFlagNewOnboardingPools.includes(props.selectedPool.addresses.ROOT_CONTRACT) ? (
-                <Button label="Invest" primary onClick={invest} />
-              ) : (
-                <InvestAction pool={props.selectedPool} />
-              )}
+              <Box display={{ small: 'none' }}>{props.investButton}</Box>
             </ButtonGroup>
           </Stack>
         ) : (
