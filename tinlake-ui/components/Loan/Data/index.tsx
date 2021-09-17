@@ -94,7 +94,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
             </TableBody>
           </Table>
         </Box>
-        <Divider display={{ medium: 'none' }} m={0} borderColor="#bdbdbd" />
+        <Divider display={{ medium: 'none' }} m={0} />
         <Box maxWidth={{ medium: 360 }} flex="1">
           <Table>
             <TableBody>
