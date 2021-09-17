@@ -218,7 +218,7 @@ const Header: React.FC<Props> = (props: Props) => {
                     <span>Telegram</span>
                   </SocialLink>
                   <SocialLink href="https://centrifuge.io/discord" target="_blank">
-                    <Icon src="/static/help/slack.svg" />
+                    <Icon src="/static/help/discord.svg" />
                     <span>Discord</span>
                   </SocialLink>
                   <SocialLink href="mailto:support@centrifuge.io" target="_blank">
