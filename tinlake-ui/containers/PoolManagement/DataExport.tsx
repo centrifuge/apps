@@ -22,7 +22,7 @@ const DataExport: React.FC<Props> = (props: Props) => {
     if (!poolData || !props.tinlake.contractAddresses.ROOT_CONTRACT) return
     setLoading(name)
     setTimeout(async () => {
-      await queries[name]({ poolData: poolData, poolId: props.tinlake.contractAddresses.ROOT_CONTRACT! })
+      await queries[name]({ poolData, poolId: props.tinlake.contractAddresses.ROOT_CONTRACT! })
       setLoading('')
     }, 1)
   }

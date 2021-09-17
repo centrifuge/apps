@@ -11,9 +11,8 @@ export async function rawPoolData({ poolData }: { poolId: string; poolData: Pool
       Object.keys(value).forEach((subKey: string) => {
         if (key === 'risk') {
           return
-        } else {
-          rows.push([`${key}.${subKey}`, value[subKey].toString()])
         }
+        rows.push([`${key}.${subKey}`, value[subKey].toString()])
       })
     } else {
       rows.push([key, value.toString()])
