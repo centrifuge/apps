@@ -21,7 +21,9 @@
     "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs yarn lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add",
     "dev:lambda": "netlify-lambda serve lambda",
     "build:lambda": "netlify-lambda build lambda",
-    "build:deps": "cd ../tinlake.js && yarn build && cd ../tinlake-ui"
+    "build:deps:tinlake.js": "cd ../tinlake.js && yarn build && cd ../tinlake-ui",
+    "build:deps:ui-lib": "cd ../ui-lib && yarn build && cd ../tinlake-ui",
+    "build:deps": "yarn build:deps:tinlake.js && yarn build:deps:ui-lib"
   },
   "repository": {
     "type": "git",
@@ -46,6 +48,7 @@
     "@centrifuge/tinlake-js": "workspace:*",
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.6",
     "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.20",
+    "@centrifuge/ui-lib": "workspace:*",
     "@makerdao/multicall": "^0.12.0",
     "@polkadot/api": "^3.1.1",
     "@polkadot/extension-dapp": "^0.35.1",
@@ -82,7 +85,7 @@
     "recharts": "^1.8.5",
     "redux": "4.0.5",
     "redux-thunk": "2.3.0",
-    "styled-components": "5.1.1",
+    "styled-components": "5.3.1",
     "styled-system": "^5.1.5",
     "web3-utils": "1.2.7",
     "yup": "0.28.5"
