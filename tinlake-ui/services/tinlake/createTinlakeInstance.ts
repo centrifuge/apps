@@ -19,5 +19,5 @@ export function createTinlakeInstance({
     overrides: {},
     provider: rpcProvider,
     contractAddresses: addresses,
-  }) as unknown as ITinlake
+  }) as ITinlake
 }

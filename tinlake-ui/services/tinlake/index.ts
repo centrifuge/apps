@@ -1,4 +1,4 @@
-import Tinlake, { ContractAddresses, ITinlake } from '@centrifuge/tinlake-js'
+import Tinlake, { ContractAddresses, ContractVersions, ITinlake } from '@centrifuge/tinlake-js'
 import { ethers } from 'ethers'
 import config from '../../config'
 export { createTinlakeInstance } from './createTinlakeInstance'
@@ -6,19 +6,24 @@ export { createTinlakeInstance } from './createTinlakeInstance'
 let tinlake: ITinlake | null = null
 let currentAddresses: null | ContractAddresses = null
 let currentContractConfig: null | any = null
+let currentContractVersions: null | ContractVersions = null
 
 // initTinlake returns a singleton tinlake. Tinlake is re-intialized if addresses or contractConfig has been changed.
 export function initTinlake({
   addresses,
+  contractVersions,
   contractConfig,
-}: { addresses?: ContractAddresses | null; contractConfig?: any | null } = {}): ITinlake {
+}: {
+  addresses?: ContractAddresses | null
+  contractConfig?: any | null
+  contractVersions?: ContractVersions | null
+} = {}): ITinlake {
   if (tinlake === null) {
     const { transactionTimeout } = config
     const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
-    // const overrides = config.network === 'Kovan' ? { gasLimit: config.gasLimit } : {}
     const overrides = {}
 
-    tinlake = new Tinlake({ transactionTimeout, overrides, provider: rpcProvider }) as unknown as ITinlake
+    tinlake = new Tinlake({ transactionTimeout, overrides, provider: rpcProvider }) as ITinlake
   }
 
   let resetContractAddresses = false
@@ -31,6 +36,12 @@ export function initTinlake({
   if (!deepEqual(contractConfig || null, currentContractConfig)) {
     currentContractConfig = contractConfig || null
     tinlake!.contractConfig = currentContractConfig || {}
+    resetContractAddresses = true
+  }
+
+  if (!deepEqual(contractVersions || null, currentContractVersions)) {
+    currentContractVersions = contractVersions || null
+    tinlake!.contractVersions = currentContractVersions || {}
     resetContractAddresses = true
   }
 

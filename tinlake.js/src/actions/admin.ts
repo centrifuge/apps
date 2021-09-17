@@ -217,6 +217,14 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return groups
     }
 
+    getRateGroup = async (loanId: number) => {
+      return await this.toBN(this.contract('PILE').loanRates(loanId))
+    }
+
+    writeOff = async (loanId: number) => {
+      return this.pending(this.contract('FEED').writeOff(loanId, this.overrides))
+    }
+
     getAuditLog = async (ignoredEvents: string[]): Promise<IAuditLog> => {
       const poolAdmin = this.contract('POOL_ADMIN')
       const eventFilter = {
@@ -295,6 +303,8 @@ export type IAdminActions = {
   addWriteOffGroups(writeOffGroups: IWriteOffGroup[]): Promise<PendingTransaction>
   getAuditLog(ignoredEvents: string[]): Promise<IAuditLog>
   getWriteOffGroups(): Promise<IWriteOffGroup[]>
+  writeOff(loanId: number): Promise<PendingTransaction>
+  getRateGroup(loanId: number): Promise<BN>
 }
 
 export default AdminActions

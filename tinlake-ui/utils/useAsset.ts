@@ -45,6 +45,9 @@ export interface Asset extends MulticallData {
   proxyOwner: BN
   ownerOf: string
   maturityDate?: number
+  rateGroup?: number
+  currentValidWriteOffGroup?: number
+  writeOffRateGroupStart?: number
 }
 
 export function useAsset(loanId: string) {
@@ -71,7 +74,7 @@ async function getAsset(tinlake: ITinlake, loanId: string): Promise<Asset> {
 
   const toBN = (val: BigNumber) => new BN(val.toString())
 
-  const calls: Call[] = [
+  let calls: Call[] = [
     {
       target: tinlake.contractAddresses.SHELF!,
       call: ['shelf(uint256)(address,uint256)', loanId],
@@ -93,6 +96,11 @@ async function getAsset(tinlake: ITinlake, loanId: string): Promise<Asset> {
       returns: [[`debt`, toBN]],
     },
     {
+      target: tinlake.contractAddresses.PILE!,
+      call: ['loanRates(uint256)(uint256)', loanId],
+      returns: [[`rateGroup`, (val: string) => Number(val.toString())]],
+    },
+    {
       target: tinlake.contractAddresses.FEED!,
       call: ['thresholdRatio(uint256)(uint256)', riskGroup],
       returns: [[`scoreCard.thresholdRatio`, toBN]],
@@ -108,6 +116,19 @@ async function getAsset(tinlake: ITinlake, loanId: string): Promise<Asset> {
       returns: [[`scoreCard.recoveryRatePD`, toBN]],
     },
   ]
+
+  if (tinlake.contractVersions['FEED'] === 2) {
+    calls.push({
+      target: tinlake.contractAddresses.FEED!,
+      call: ['currentValidWriteOffGroup(uint256)(uint256)', loanId],
+      returns: [[`currentValidWriteOffGroup`, (val: string) => Number(val.toString())]],
+    })
+    calls.push({
+      target: tinlake.contractAddresses.FEED!,
+      call: ['WRITEOFF_RATE_GROUP_START()(uint256)'],
+      returns: [[`writeOffRateGroupStart`, (val: string) => Number(val.toString())]],
+    })
+  }
 
   const [multicallData, ownerOf, proxyOwner] = await Promise.all([
     multicall<MulticallData>(calls),

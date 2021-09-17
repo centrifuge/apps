@@ -22,7 +22,7 @@ interface Props extends WithRouterProps {
 const MintNFTPage: React.FC<Props> = ({ pool, ipfsPools }) => {
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig} contractVersions={pool.versions}>
         <WithFooter>
           <Head>
             <title>Mint NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>

@@ -23,17 +23,6 @@ export class AddressController {
     private readonly sessionService: SessionService
   ) {}
 
-  @Get('investor-check')
-  async getInvestorCheck(): Promise<true> {
-    const kyc2 = await this.kycRepo.find('a2b432e9-078f-4a54-b355-3c541b867ad1')
-    console.log(kyc2)
-
-    const investor2 = await this.securitizeService.getInvestor(kyc2.userId, kyc2.providerAccountId, kyc2.digest)
-    console.log(investor2)
-
-    return true
-  }
-
   @Get('pools/:poolId/addresses/:address')
   async getStatus(@Param() params): Promise<AddressStatus> {
     const pool = await this.poolService.get(params.poolId)

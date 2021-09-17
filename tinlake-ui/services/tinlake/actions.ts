@@ -710,6 +710,10 @@ export async function addWriteOffGroups(
   return tinlake.addWriteOffGroups(writeOffGroups)
 }
 
+export async function writeOff(tinlake: ITinlake, loanId: number): Promise<PendingTransaction> {
+  return tinlake.writeOff(loanId)
+}
+
 function loggedError(error: any, message: string, id: string): PendingTransaction {
   console.error(`${message} ${id}`, error)
   // TODO: same as line 549

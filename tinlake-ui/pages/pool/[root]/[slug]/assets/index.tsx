@@ -37,7 +37,7 @@ const LoanListPage: React.FC<Props> = (props) => {
 
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig} contractVersions={pool.versions}>
         <WithFooter>
           <Head>
             <title>Assets: {pool.metadata.name} | Tinlake | Centrifuge</title>
