@@ -9,7 +9,7 @@ interface Props extends ValueProps {
 
 export const LabeledValue: React.FC<Props> = ({ variant, icon, value, unit, label }) => {
   return (
-    <Stack gap="xsmall" alignItems="center">
+    <Stack gap="12px" alignItems="center">
       <Value variant={variant} value={value} icon={icon} unit={unit} />
       {label && <Label>{label}</Label>}
     </Stack>

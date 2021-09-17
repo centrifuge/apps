@@ -1,10 +1,11 @@
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Card } from '../../components/Card'
 import { LoadingValue } from '../../components/LoadingValue'
+import { useTinlake } from '../../components/TinlakeProvider'
 import { Pool } from '../../config'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { Fixed27Base } from '../../utils/ratios'
@@ -14,7 +15,6 @@ import { usePool } from '../../utils/usePool'
 
 interface Props {
   activePool: Pool
-  tinlake: ITinlake
 }
 
 const e18 = new BN(10).pow(new BN(18))
@@ -25,7 +25,8 @@ const parseRatio = (num: BN): number => {
 }
 
 const PoolStatus: React.FC<Props> = (props: Props) => {
-  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const tinlake = useTinlake()
+  const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const isMakerIntegrated =
     props.activePool.addresses.CLERK !== undefined && props.activePool.metadata.maker?.ilk !== ''
@@ -60,7 +61,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
           .div(new BN(10).pow(new BN(16)))
       : undefined
 
-  const { data: assets } = useAssets(props.tinlake.contractAddresses.ROOT_CONTRACT!)
+  const { data: assets } = useAssets(tinlake.contractAddresses.ROOT_CONTRACT!)
   const ongoingAssets = assets ? assets.filter((asset) => asset.status && asset.status === 'ongoing') : undefined
   const maxSingleLoan = ongoingAssets
     ? ongoingAssets

@@ -6,8 +6,8 @@ import * as React from 'react'
 import Auth from '../../../components/Auth'
 import Container from '../../../components/Container'
 import Header from '../../../components/Header'
+import { TinlakeProvider } from '../../../components/TinlakeProvider'
 import WithFooter from '../../../components/WithFooter'
-import WithTinlake from '../../../components/WithTinlake'
 import { loadPoolsFromIPFS, Pool } from '../../../config'
 import OnboardingSteps from '../../../containers/Onboarding/OnboardingSteps'
 
@@ -18,63 +18,56 @@ interface Props extends WithRouterProps {
 
 const OnboardingPage: React.FC<Props> = (props: Props) => {
   return (
-    <WithFooter hideHelpMenu={true}>
-      <Head>
-        <title>Investor Onboarding for {capitalizeFirstLetter(props.market)} | Tinlake | Centrifuge</title>
-      </Head>
-      <Header
-        ipfsPools={{ active: [], archived: [], upcoming: [] }}
-        selectedRoute={'/onboarding'}
-        menuItems={[]}
-        logoUrl="/static/aave-centrifuge-market.svg"
-        hideHoldings
-      />
-      <Container>
-        <Box justify="center" direction="row">
-          <Box width="xlarge">
-            <WithTinlake
-              addresses={props.pool.addresses}
-              contractConfig={props.pool.contractConfig}
-              render={(tinlake) => (
-                <Auth
-                  tinlake={tinlake}
-                  render={() => (
-                    <OnboardingSteps
-                      hidePageTitle={true}
-                      activePool={{
-                        network: 'mainnet',
-                        version: 3,
-                        isUpcoming: false,
-                        addresses: {
-                          ROOT_CONTRACT: props.market,
-                          ACTIONS: '0x0',
-                          PROXY_REGISTRY: '0x0',
-                          COLLATERAL_NFT: '0x0',
-                          SENIOR_TOKEN: '0x0',
-                          JUNIOR_TOKEN: '0x0',
-                          CLERK: '0x0',
-                          ASSESSOR: '0x0',
-                          RESERVE: '0x0',
-                          SENIOR_TRANCHE: '0x0',
-                          JUNIOR_TRANCHE: '0x0',
-                          FEED: '0x0',
-                          POOL_ADMIN: '0x0',
-                          SENIOR_MEMBERLIST: '0x0',
-                          JUNIOR_MEMBERLIST: '0x0',
-                          COORDINATOR: '0x0',
-                          PILE: '0x0',
-                        },
-                        metadata: { name: 'Aave', slug: 'aave', asset: '-' },
-                      }}
-                    />
-                  )}
+    <TinlakeProvider addresses={props.pool.addresses} contractConfig={props.pool.contractConfig}>
+      <WithFooter hideHelpMenu={true}>
+        <Head>
+          <title>Investor Onboarding for {capitalizeFirstLetter(props.market)} | Tinlake | Centrifuge</title>
+        </Head>
+        <Header
+          ipfsPools={{ active: [], archived: [], upcoming: [] }}
+          selectedRoute={'/onboarding'}
+          menuItems={[]}
+          logoUrl="/static/aave-centrifuge-market.svg"
+          hideHoldings
+        />
+        <Container>
+          <Box justify="center" direction="row">
+            <Box width="xlarge">
+              <Auth>
+                <OnboardingSteps
+                  hidePageTitle={true}
+                  activePool={{
+                    network: 'mainnet',
+                    version: 3,
+                    isUpcoming: false,
+                    addresses: {
+                      ROOT_CONTRACT: props.market,
+                      ACTIONS: '0x0',
+                      PROXY_REGISTRY: '0x0',
+                      COLLATERAL_NFT: '0x0',
+                      SENIOR_TOKEN: '0x0',
+                      JUNIOR_TOKEN: '0x0',
+                      CLERK: '0x0',
+                      ASSESSOR: '0x0',
+                      RESERVE: '0x0',
+                      SENIOR_TRANCHE: '0x0',
+                      JUNIOR_TRANCHE: '0x0',
+                      FEED: '0x0',
+                      POOL_ADMIN: '0x0',
+                      SENIOR_MEMBERLIST: '0x0',
+                      JUNIOR_MEMBERLIST: '0x0',
+                      COORDINATOR: '0x0',
+                      PILE: '0x0',
+                    },
+                    metadata: { name: 'Aave', slug: 'aave', asset: '-' },
+                  }}
                 />
-              )}
-            />
+              </Auth>
+            </Box>
           </Box>
-        </Box>
-      </Container>
-    </WithFooter>
+        </Container>
+      </WithFooter>
+    </TinlakeProvider>
   )
 }
 

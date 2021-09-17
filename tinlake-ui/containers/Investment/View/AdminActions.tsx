@@ -1,4 +1,4 @@
-import { baseToDisplay, displayToBase, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay, displayToBase } from '@centrifuge/tinlake-js'
 import { FormField, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
@@ -7,17 +7,15 @@ import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Card } from '../../../components/Card'
 import { Shelf, Stack, Wrap } from '../../../components/Layout'
 import NumberInput from '../../../components/NumberInput'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { toPrecision } from '../../../utils/toPrecision'
 import { usePool } from '../../../utils/usePool'
 
-interface Props extends TransactionProps {
-  tinlake: ITinlake
-}
-
-const AdminActions: React.FC<Props> = (props: Props) => {
-  const pool = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+const AdminActions: React.FC<TransactionProps> = (props: TransactionProps) => {
+  const tinlake = useTinlake()
+  const pool = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [minJuniorRatio, setMinJuniorRatio] = React.useState('0')
   const [maxJuniorRatio, setMaxJuniorRatio] = React.useState('0')
@@ -33,7 +31,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
   const saveMinJuniorRatio = async () => {
     const txId = await props.createTransaction(`Set min TIN risk buffer`, 'setMinJuniorRatio', [
-      props.tinlake,
+      tinlake,
       minJuniorRatio.toString(),
     ])
     setMinRatioTxId(txId)
@@ -43,7 +41,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
   const saveMaxJuniorRatio = async () => {
     const txId = await props.createTransaction(`Set max TIN risk buffer`, 'setMaxJuniorRatio', [
-      props.tinlake,
+      tinlake,
       maxJuniorRatio.toString(),
     ])
     setMaxRatioTxId(txId)

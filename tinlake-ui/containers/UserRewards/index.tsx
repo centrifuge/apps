@@ -1,4 +1,4 @@
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
@@ -12,7 +12,7 @@ import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import PageTitle from '../../components/PageTitle'
 import { IpfsPools } from '../../config'
-import { AuthState, ensureAuthed } from '../../ducks/auth'
+import { ensureAuthed, useAuth } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { maybeLoadUserRewards, UserRewardsData, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
@@ -27,15 +27,14 @@ import ClaimRewards from '../ClaimRewards'
 import SetCentAccount from '../SetCentAccount'
 
 interface Props {
-  tinlake: ITinlake
   ipfsPools: IpfsPools
 }
 
-const UserRewards: React.FC<Props> = ({ tinlake, ipfsPools }) => {
+const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const rewards = useGlobalRewards()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
-  const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
+  const { address: ethAddr } = useAuth()
   const portfolio = usePortfolio(ipfsPools)
   const portfolioValue = portfolio.data?.totalValue
   const dispatch = useDispatch()
@@ -144,7 +143,7 @@ const UserRewards: React.FC<Props> = ({ tinlake, ipfsPools }) => {
                   <Card>
                     <Box pad="medium">
                       <Head>Link Your Centrifuge Chain Account</Head>
-                      <SetCentAccount tinlake={tinlake} />
+                      <SetCentAccount />
                     </Box>
                   </Card>
                 )}

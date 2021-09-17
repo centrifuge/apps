@@ -6,8 +6,8 @@ import Auth from '../components/Auth'
 import Container from '../components/Container'
 import Header from '../components/Header'
 import { IpfsPoolsProvider } from '../components/IpfsPoolsProvider'
+import { TinlakeProvider } from '../components/TinlakeProvider'
 import WithFooter from '../components/WithFooter'
-import WithTinlake from '../components/WithTinlake'
 import config, { IpfsPools, loadPoolsFromIPFS } from '../config'
 import UserRewards from '../containers/UserRewards'
 
@@ -18,29 +18,27 @@ interface Props {
 const RewardsPage: React.FC<Props> = (props: Props) => {
   return (
     <IpfsPoolsProvider value={props.ipfsPools}>
-      <WithFooter>
-        <Head>
-          <title>CFG Rewards | Tinlake | Centrifuge</title>
-        </Head>
-        <Header selectedRoute={''} menuItems={[]} ipfsPools={props.ipfsPools} />
-        <Container style={{ backgroundColor: '#f9f9f9' }}>
-          <Box justify="center" direction="row">
-            <Box width="xlarge">
-              <WithTinlake
-                addresses={{
-                  CLAIM_CFG: config.claimCFGContractAddress,
-                }}
-                render={(tinlake) => (
-                  <Auth
-                    tinlake={tinlake}
-                    render={() => <UserRewards tinlake={tinlake} ipfsPools={props.ipfsPools} />}
-                  />
-                )}
-              />
+      <TinlakeProvider
+        addresses={{
+          CLAIM_CFG: config.claimCFGContractAddress,
+        }}
+      >
+        <WithFooter>
+          <Head>
+            <title>CFG Rewards | Tinlake | Centrifuge</title>
+          </Head>
+          <Header selectedRoute={''} menuItems={[]} ipfsPools={props.ipfsPools} />
+          <Container style={{ backgroundColor: '#f9f9f9' }}>
+            <Box justify="center" direction="row">
+              <Box width="xlarge">
+                <Auth>
+                  <UserRewards ipfsPools={props.ipfsPools} />
+                </Auth>
+              </Box>
             </Box>
-          </Box>
-        </Container>
-      </WithFooter>
+          </Container>
+        </WithFooter>
+      </TinlakeProvider>
     </IpfsPoolsProvider>
   )
 }

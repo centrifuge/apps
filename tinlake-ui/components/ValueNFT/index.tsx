@@ -1,10 +1,10 @@
 import { Spinner } from '@centrifuge/axis-spinner'
-import { baseToDisplay, displayToBase, ITinlake, NFT } from '@centrifuge/tinlake-js'
+import { baseToDisplay, displayToBase, NFT } from '@centrifuge/tinlake-js'
 import { Anchor, Box, Button, DateInput, FormField, TextInput } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
-import { AuthState, ensureAuthed, loadProxies } from '../../ducks/auth'
+import { ensureAuthed, loadProxies, useAuth } from '../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { getNFT as getNFTAction } from '../../services/tinlake/actions'
 import { usePool } from '../../utils/usePool'
@@ -13,12 +13,11 @@ import { Card } from '../Card'
 import NftData from '../NftData'
 import NumberInput from '../NumberInput'
 import { PoolLink } from '../PoolLink'
+import { useTinlake } from '../TinlakeProvider'
 
 interface Props extends TransactionProps {
-  tinlake: ITinlake
   tokenId: string
   registry: string
-  auth: AuthState
   loadProxies?: () => Promise<void>
   ensureAuthed?: () => Promise<void>
 }
@@ -26,7 +25,9 @@ interface Props extends TransactionProps {
 const DAYS = 24 * 60 * 60 * 1000
 
 const ValueNFT: React.FC<Props> = (props: Props) => {
-  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const tinlake = useTinlake()
+  const auth = useAuth()
+  const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [registry, setRegistry] = React.useState('')
   const [tokenId, setTokenId] = React.useState('')
@@ -56,7 +57,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
 
   const getNFT = async (currentRegistry: string, currentTokenId: string) => {
     if (currentTokenId && currentTokenId.length > 0) {
-      const result = await getNFTAction(currentRegistry, props.tinlake, currentTokenId)
+      const result = await getNFTAction(currentRegistry, tinlake, currentTokenId)
       const { tokenId, nft, errorMessage } = result as Partial<{ tokenId: string; nft: NFT; errorMessage: string }>
       if (tokenId !== currentTokenId) {
         return
@@ -75,10 +76,10 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   const valueNFT = async () => {
     await props.ensureAuthed!()
 
-    const nftFeedId = await props.tinlake.getNftFeedId(registry, tokenId)
+    const nftFeedId = await tinlake.getNftFeedId(registry, tokenId)
 
     const txId = await props.createTransaction(`Value NFT ${tokenId.slice(0, 4)}...`, 'updateNftFeed', [
-      props.tinlake,
+      tinlake,
       nftFeedId,
       value,
       riskGroup,
@@ -89,12 +90,12 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   const updateMaturityDate = async () => {
     await props.ensureAuthed!()
 
-    const nftFeedId = await props.tinlake.getNftFeedId(registry, tokenId)
+    const nftFeedId = await tinlake.getNftFeedId(registry, tokenId)
 
     const txId = await props.createTransaction(
       `Set maturity date for NFT ${tokenId.slice(0, 4)}...`,
       'setMaturityDate',
-      [props.tinlake, nftFeedId, Math.floor(new Date(maturityDate).getTime() / 1000)]
+      [tinlake, nftFeedId, Math.floor(new Date(maturityDate).getTime() / 1000)]
     )
     setTxIdSetMat(txId)
   }
@@ -124,7 +125,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
         </p>
       </Alert>
 
-      {!props.auth.permissions?.canSetRiskScore && !(poolData?.adminLevel && poolData.adminLevel >= 2) ? (
+      {!auth.permissions?.canSetRiskScore && !(poolData?.adminLevel && poolData.adminLevel >= 2) ? (
         <Alert margin={{ top: 'medium' }} pad={{ horizontal: 'medium' }} type="error">
           <p>You need to be an admin to value NFTs.</p>
         </Alert>
@@ -259,7 +260,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { loadProxies, ensureAuthed, createTransaction })(ValueNFT)
+export default connect(null, { loadProxies, ensureAuthed, createTransaction })(ValueNFT)
 
 const Col = styled.div`
   flex: 1 0 0;

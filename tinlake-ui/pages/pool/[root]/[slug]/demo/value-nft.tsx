@@ -8,9 +8,9 @@ import { BackLink } from '../../../../../components/BackLink'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
 import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
+import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import ValueNFT from '../../../../../components/ValueNFT'
 import WithFooter from '../../../../../components/WithFooter'
-import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import { menuItems } from '../../../../../menuItems'
 
@@ -25,41 +25,34 @@ const ValueNFTPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
 
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <WithFooter>
-        <Head>
-          <title>Value NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>
-        </Head>
-        <Header
-          ipfsPools={ipfsPools}
-          poolTitle={pool.metadata.shortName || pool.metadata.name}
-          selectedRoute={'/demo/value-nft'}
-          menuItems={menuItems}
-        />
-        <Container>
-          <Box justify="center" direction="row">
-            <Box width="xlarge">
-              <WithTinlake
-                addresses={pool.addresses}
-                contractConfig={pool.contractConfig}
-                render={(tinlake) => (
-                  <Auth
-                    tinlake={tinlake}
-                    render={(auth) => (
-                      <Box>
-                        <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
-                          <BackLink href={'/assets'} />
-                          <Heading level="4">Value NFT</Heading>
-                        </Box>
-                        <ValueNFT tinlake={tinlake} auth={auth} tokenId={tokenId} registry={registry} />
-                      </Box>
-                    )}
-                  />
-                )}
-              />
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+        <WithFooter>
+          <Head>
+            <title>Value NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>
+          </Head>
+          <Header
+            ipfsPools={ipfsPools}
+            poolTitle={pool.metadata.shortName || pool.metadata.name}
+            selectedRoute={'/demo/value-nft'}
+            menuItems={menuItems}
+          />
+          <Container>
+            <Box justify="center" direction="row">
+              <Box width="xlarge">
+                <Auth>
+                  <Box>
+                    <Box direction="row" gap="small" align="center" margin={{ top: 'medium' }}>
+                      <BackLink href={'/assets'} />
+                      <Heading level="4">Value NFT</Heading>
+                    </Box>
+                    <ValueNFT tokenId={tokenId} registry={registry} />
+                  </Box>
+                </Auth>
+              </Box>
             </Box>
-          </Box>
-        </Container>
-      </WithFooter>
+          </Container>
+        </WithFooter>
+      </TinlakeProvider>
     </IpfsPoolsProvider>
   )
 }

@@ -1,24 +1,15 @@
 import { useQuery } from 'react-query'
 import { useSelector } from 'react-redux'
-import { useIpfsPools } from '../components/IpfsPoolsProvider'
-import { initTinlake } from '../services/tinlake'
+import { useTinlake } from '../components/TinlakeProvider'
 import { getEpoch } from '../services/tinlake/actions'
 
-export function useEpoch(poolId?: string) {
-  const ipfsPools = useIpfsPools()
+export function useEpoch() {
+  const tinlake = useTinlake()
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
-  const query = useQuery(
-    ['epoch', poolId, address],
-    () => {
-      const pool = ipfsPools.active.find((p) => p.addresses.ROOT_CONTRACT.toLowerCase() === poolId!.toLowerCase())
-      const tinlake = initTinlake({ addresses: pool?.addresses, contractConfig: pool?.contractConfig })
-      return getEpoch(tinlake, address!)
-    },
-    {
-      enabled: !!poolId,
-    }
-  )
+  const query = useQuery(['epoch', tinlake.contractAddresses.ROOT_CONTRACT, address], () => {
+    return getEpoch(tinlake, address!)
+  })
 
   return query
 }

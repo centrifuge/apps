@@ -1,5 +1,4 @@
 import { Spinner } from '@centrifuge/axis-spinner'
-import { ITinlake } from '@centrifuge/tinlake-js'
 import * as React from 'react'
 import { Box, Stack } from '../../components/Layout'
 import PoolList from '../../components/PoolList'
@@ -10,10 +9,9 @@ import { usePools } from '../../utils/usePools'
 
 interface Props {
   ipfsPools: IpfsPools
-  tinlake: ITinlake
 }
 
-const Dashboard: React.FC<Props> = (props: Props) => {
+const Dashboard: React.FC<Props> = () => {
   const pools = usePools()
 
   return !pools.data ? (
@@ -23,7 +21,7 @@ const Dashboard: React.FC<Props> = (props: Props) => {
       <Box display={['none', 'block']}>
         <TinlakeExplainer />
       </Box>
-      <PoolsMetrics totalValue={pools.data.totalValue} tinlake={props.tinlake} />
+      <PoolsMetrics totalValue={pools.data.totalValue} />
       <PoolList poolsData={pools.data} />
     </Stack>
   )

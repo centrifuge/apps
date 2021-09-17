@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { PoolSelector } from '../../components/PoolSelector'
 import config, { IpfsPools } from '../../config'
-import { AuthState, clear, ensureAuthed } from '../../ducks/auth'
+import { clear, ensureAuthed, useAuth } from '../../ducks/auth'
 import { selectWalletTransactions, TransactionState } from '../../ducks/transactions'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
@@ -48,7 +48,7 @@ const Header: React.FC<Props> = (props: Props) => {
 
   const transactions = useSelector<any, TransactionState>((state) => state.transactions)
 
-  const auth = useSelector<any, AuthState>((state) => state.auth)
+  const auth = useAuth()
   const connectedAddress = auth.address
   const address = useQueryDebugEthAddress() || connectedAddress
   const { formattedAmount: CFGRewardFormatted, amount: CFGRewardAmount } = useCFGRewards(address)

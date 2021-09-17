@@ -1,11 +1,11 @@
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, Select } from 'grommet'
 import { CircleAlert } from 'grommet-icons'
 import * as React from 'react'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
+import { useTinlake } from '../../components/TinlakeProvider'
 import { Tooltip } from '../../components/Tooltip'
-import { AuthState } from '../../ducks/auth'
+import { useAuth } from '../../ducks/auth'
 import { CentChainWalletState, InjectedAccount } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { loadEthLink, loadSubgraph, UserRewardsState } from '../../ducks/userRewards'
@@ -30,16 +30,13 @@ const LinkingWarning = styled(Warning)`
   margin-bottom: 16px;
 `
 
-interface Props extends TransactionProps {
-  tinlake: ITinlake
-}
-
 let interval: ReturnType<typeof setTimeout> | null = null
 
-const SetCentAccount: React.FC<Props> = ({ createTransaction, tinlake }: Props) => {
+const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: TransactionProps) => {
+  const tinlake = useTinlake()
   const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
-  const { address: ethAddr } = useSelector<any, AuthState>((state: any) => state.auth)
+  const { address: ethAddr } = useAuth()
   const [selectedCentAcc, selectCentAcc] = React.useState<InjectedAccount>()
 
   React.useEffect(() => {

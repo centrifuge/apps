@@ -1,9 +1,9 @@
 import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button, FormField, Heading, Table, TableBody, TableCell, TableRow, TextInput } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { Card } from '../../components/Card'
+import { useTinlake } from '../../components/TinlakeProvider'
 import { Pool } from '../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { useOnboardingState } from '../../utils/useOnboardingState'
@@ -11,7 +11,6 @@ import { usePool } from '../../utils/usePool'
 const web3 = require('web3-utils')
 
 interface Props extends TransactionProps {
-  tinlake: ITinlake
   activePool: Pool
 }
 
@@ -20,7 +19,8 @@ type Tranche = 'junior' | 'senior'
 const getActionName = (tranche: Tranche) => (tranche === 'senior' ? 'updateSeniorMemberList' : 'updateJuniorMemberList')
 
 const ManageMemberlist: React.FC<Props> = (props: Props) => {
-  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const tinlake = useTinlake()
+  const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [onboardingAddress, setOnboardingAddress] = React.useState(undefined as string | undefined)
   const { data: onboardingData, isError: onboardingError } = useOnboardingState(
@@ -44,11 +44,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
 
     const description = `Add ${address.substring(0, 8)}... to ${tranche === 'senior' ? 'DROP' : 'TIN'}`
 
-    const txId = await props.createTransaction(description, getActionName(tranche), [
-      props.tinlake,
-      address,
-      validUntil,
-    ])
+    const txId = await props.createTransaction(description, getActionName(tranche), [tinlake, address, validUntil])
 
     if (tranche === 'senior') setSeniorTxId(txId)
     else setJuniorTxId(txId)
@@ -68,11 +64,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
 
     const description = `Remove ${address.substring(0, 8)}... from ${tranche === 'senior' ? 'DROP' : 'TIN'}`
 
-    const txId = await props.createTransaction(description, getActionName(tranche), [
-      props.tinlake,
-      address,
-      validUntil,
-    ])
+    const txId = await props.createTransaction(description, getActionName(tranche), [tinlake, address, validUntil])
 
     if (tranche === 'senior') setSeniorTxId(txId)
     else setJuniorTxId(txId)

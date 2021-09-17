@@ -1,4 +1,4 @@
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
@@ -18,6 +18,7 @@ import { Divider } from '../../../components/Divider'
 import { SectionHeading } from '../../../components/Heading'
 import { Shelf, Stack } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -32,7 +33,6 @@ import { Sidenote } from './styles'
 
 interface Props {
   selectedPool?: Pool
-  tinlake: ITinlake
   auth?: AuthState
 }
 
@@ -69,9 +69,10 @@ const CustomTooltip = ({ active, payload }: any) => {
 }
 
 const LoanOverview: React.FC<Props> = (props: Props) => {
-  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const tinlake = useTinlake()
+  const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
-  const { data: assetData } = useDailyAssetsValue(props.tinlake.contractAddresses.ROOT_CONTRACT!)
+  const { data: assetData } = useDailyAssetsValue(tinlake.contractAddresses.ROOT_CONTRACT!)
 
   const isAdmin =
     poolData?.isPoolAdmin || (props.auth?.permissions && (props.auth?.permissions as PermissionsV3).canSetMaxReserve)
@@ -92,11 +93,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
       : []
 
   const reserveElement = showMaxReserveForm ? (
-    <MaxReserveForm
-      tinlake={props.tinlake}
-      setShowMaxReserveForm={setShowMaxReserveForm}
-      selectedPool={props.selectedPool}
-    />
+    <MaxReserveForm setShowMaxReserveForm={setShowMaxReserveForm} selectedPool={props.selectedPool} />
   ) : (
     <>
       <Box direction="row" margin={{ top: '0', bottom: 'small' }}>

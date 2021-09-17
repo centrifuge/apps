@@ -1,11 +1,12 @@
 import { TokenInput } from '@centrifuge/axis-token-input'
-import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -17,14 +18,14 @@ import { usePool } from '../../../utils/usePool'
 interface Props extends TransactionProps {
   loan: Asset
   refetch: () => void
-  tinlake: ITinlake
   poolConfig: Pool
   ensureAuthed: () => Promise<void>
 }
 
 const LoanBorrow: React.FC<Props> = (props: Props) => {
-  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
-  const { data: epochData } = useEpoch(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const tinlake = useTinlake()
+  const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
+  const { data: epochData } = useEpoch()
   const [borrowAmount, setBorrowAmount] = React.useState<string>('')
 
   const router = useRouter()
@@ -47,7 +48,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
     const txId = await props.createTransaction(
       `Finance Asset ${props.loan.loanId} (${formatted} ${props.poolConfig.metadata.currencySymbol || 'DAI'})`,
       action,
-      [props.tinlake, props.loan, borrowAmount]
+      [tinlake, props.loan, borrowAmount]
     )
     setTxId(txId)
   }
@@ -63,7 +64,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const close = async () => {
     await props.ensureAuthed!()
 
-    const txId = await props.createTransaction(`Close Asset ${props.loan.loanId}`, 'close', [props.tinlake, props.loan])
+    const txId = await props.createTransaction(`Close Asset ${props.loan.loanId}`, 'close', [tinlake, props.loan])
     setCloseTxId(txId)
   }
 

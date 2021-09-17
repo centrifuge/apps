@@ -8,8 +8,8 @@ import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
 import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
 import PageTitle from '../../../../../components/PageTitle'
+import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
-import WithTinlake from '../../../../../components/WithTinlake'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import IssueLoan from '../../../../../containers/Loan/Issue'
 import { menuItems } from '../../../../../menuItems'
@@ -23,39 +23,31 @@ interface Props extends WithRouterProps {
 const LoanIssuePage: React.FC<Props> = ({ pool, ipfsPools }) => {
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <WithFooter>
-        <Head>
-          <title>Lock NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>
-        </Head>
-        <Header
-          ipfsPools={ipfsPools}
-          poolTitle={pool.metadata.shortName || pool.metadata.name}
-          selectedRoute={'/assets/issue'}
-          menuItems={menuItems}
-        />
-        <Container>
-          <Box justify="center" direction="row">
-            <Box width="xlarge">
-              <WithTinlake
-                addresses={pool.addresses}
-                contractConfig={pool.contractConfig}
-                render={(tinlake) => (
-                  <Auth
-                    tinlake={tinlake}
-                    render={(auth) => (
-                      <Box margin={{ top: 'medium' }}>
-                        <PageTitle pool={pool} page={`Lock NFT`} parentPage="Assets" parentPageHref="/assets" />
-
-                        <IssueLoan tinlake={tinlake} poolConfig={pool} auth={auth} />
-                      </Box>
-                    )}
-                  />
-                )}
-              />
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+        <WithFooter>
+          <Head>
+            <title>Lock NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>
+          </Head>
+          <Header
+            ipfsPools={ipfsPools}
+            poolTitle={pool.metadata.shortName || pool.metadata.name}
+            selectedRoute={'/assets/issue'}
+            menuItems={menuItems}
+          />
+          <Container>
+            <Box justify="center" direction="row">
+              <Box width="xlarge">
+                <Auth>
+                  <Box margin={{ top: 'medium' }}>
+                    <PageTitle pool={pool} page={`Lock NFT`} parentPage="Assets" parentPageHref="/assets" />
+                    <IssueLoan poolConfig={pool} />
+                  </Box>
+                </Auth>
+              </Box>
             </Box>
-          </Box>
-        </Container>
-      </WithFooter>
+          </Container>
+        </WithFooter>
+      </TinlakeProvider>
     </IpfsPoolsProvider>
   )
 }

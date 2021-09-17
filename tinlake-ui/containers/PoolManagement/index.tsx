@@ -1,9 +1,9 @@
-import { ITinlake } from '@centrifuge/tinlake-js'
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import styled from 'styled-components'
 import PageTitle from '../../components/PageTitle'
+import { useTinlake } from '../../components/TinlakeProvider'
 import { Pool } from '../../config'
 import { downloadCSV } from '../../utils/export'
 import { usePool } from '../../utils/usePool'
@@ -21,11 +21,11 @@ import Risk from './Risk'
 
 interface Props {
   activePool: Pool
-  tinlake: ITinlake
 }
 
 const PoolManagement: React.FC<Props> = (props: Props) => {
-  const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
+  const tinlake = useTinlake()
+  const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const router = useRouter()
   const isAdmin = poolData?.isPoolAdmin || 'admin' in router.query
@@ -120,7 +120,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
             {view === 'Liquidity' && (
               <>
                 <AOMetrics activePool={props.activePool} />
-                <PoolStatus activePool={props.activePool} tinlake={props.tinlake} />
+                <PoolStatus activePool={props.activePool} />
 
                 {'export' in router.query && (
                   <div>
@@ -128,23 +128,23 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
                   </div>
                 )}
 
-                <Liquidity activePool={props.activePool} tinlake={props.tinlake} />
+                <Liquidity activePool={props.activePool} />
 
-                <EpochOverview tinlake={props.tinlake} activePool={props.activePool} />
+                <EpochOverview activePool={props.activePool} />
               </>
             )}
 
-            {view === 'Investors' && <Memberlist tinlake={props.tinlake} activePool={props.activePool} />}
+            {view === 'Investors' && <Memberlist activePool={props.activePool} />}
 
-            {view === 'Risk' && <Risk tinlake={props.tinlake} />}
+            {view === 'Risk' && <Risk tinlake={tinlake} />}
 
-            {view === 'Parameters' && <Parameters tinlake={props.tinlake} />}
+            {view === 'Parameters' && <Parameters />}
 
-            {/* {view === 'Access' && <Access tinlake={props.tinlake} />} */}
+            {/* {view === 'Access' && <Access tinlake={tinlake} />} */}
 
-            {view === 'Audit Log' && <AuditLog tinlake={props.tinlake} />}
+            {view === 'Audit Log' && <AuditLog tinlake={tinlake} />}
 
-            {view === 'Data Export' && <DataExport tinlake={props.tinlake} activePool={props.activePool} />}
+            {view === 'Data Export' && <DataExport tinlake={tinlake} activePool={props.activePool} />}
           </Box>
         </Box>
       )}

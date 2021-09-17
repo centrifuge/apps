@@ -1,21 +1,19 @@
-import { baseToDisplay, displayToBase, feeToInterestRate, interestRateToFee, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay, displayToBase, feeToInterestRate, interestRateToFee } from '@centrifuge/tinlake-js'
 import { Box, Button, FormField, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { Card } from '../../components/Card'
 import NumberInput from '../../components/NumberInput'
+import { useTinlake } from '../../components/TinlakeProvider'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { useEpoch } from '../../utils/useEpoch'
 import { usePool } from '../../utils/usePool'
 
-interface Props extends TransactionProps {
-  tinlake: ITinlake
-}
-
-const AdminActions: React.FC<Props> = (props: Props) => {
-  const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
-  const { data: epochData } = useEpoch(props.tinlake.contractAddresses.ROOT_CONTRACT)
+const Parameters: React.FC<TransactionProps> = (props: TransactionProps) => {
+  const tinlake = useTinlake()
+  const { data: poolData, refetch: refetchPoolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
+  const { data: epochData } = useEpoch()
 
   const [minJuniorRatio, setMinJuniorRatio] = React.useState('0')
   const [maxJuniorRatio, setMaxJuniorRatio] = React.useState('0')
@@ -81,7 +79,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   const update = async () => {
     if (changedMinJuniorRatio && minJuniorRatio) {
       const txId = await props.createTransaction(`Set min TIN ratio`, 'setMinJuniorRatio', [
-        props.tinlake,
+        tinlake,
         minJuniorRatio.toString(),
       ])
       setMinJuniorRatioTxId(txId)
@@ -89,7 +87,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
     if (changedMaxJuniorRatio && maxJuniorRatio) {
       const txId = await props.createTransaction(`Set max TIN ratio`, 'setMaxJuniorRatio', [
-        props.tinlake,
+        tinlake,
         maxJuniorRatio.toString(),
       ])
       setMaxJuniorRatioTxId(txId)
@@ -97,7 +95,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
     if (changedDiscountRate && discountRate) {
       const txId = await props.createTransaction(`Set discount rate`, 'setDiscountRate', [
-        props.tinlake,
+        tinlake,
         interestRateToFee(discountRate),
       ])
       setDiscountRateTxId(txId)
@@ -105,7 +103,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
     if (changedSeniorInterestRate && seniorInterestRate) {
       const txId = await props.createTransaction(`Set DROP APR`, 'setSeniorInterestRate', [
-        props.tinlake,
+        tinlake,
         interestRateToFee(seniorInterestRate),
       ])
       setSeniorInterestRateTxId(txId)
@@ -113,7 +111,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
     if (changedMinimumEpochTime) {
       const txId = await props.createTransaction(`Set min epoch time`, 'setMinimumEpochTime', [
-        props.tinlake,
+        tinlake,
         newMinimumEpochTime.toString(),
       ])
       setMinimumEpochTimeTxId(txId)
@@ -121,7 +119,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
 
     if (changedChallengeTime) {
       const txId = await props.createTransaction(`Set challenge time`, 'setChallengeTime', [
-        props.tinlake,
+        tinlake,
         challengeTime.toString(),
       ])
       setChallengeTimeTxId(txId)
@@ -361,7 +359,7 @@ const AdminActions: React.FC<Props> = (props: Props) => {
   )
 }
 
-export default connect((state) => state, { createTransaction })(AdminActions)
+export default connect((state) => state, { createTransaction })(Parameters)
 
 const Explanation = styled.div`
   color: #666;
