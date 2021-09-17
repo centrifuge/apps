@@ -1,24 +1,74 @@
 import { Modal } from '@centrifuge/axis-modal'
-import { Box, Button, Heading, Paragraph } from 'grommet'
+import { Heading, Paragraph } from 'grommet'
 import { Catalog, Chat, Globe, StatusInfo as StatusInfoIcon } from 'grommet-icons'
+import { useRouter } from 'next/router'
 import * as React from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
-import { Pool, UpcomingPool } from '../../config'
+import config, { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
+import { ensureAuthed } from '../../ducks/auth'
+import { usePool } from '../../utils/usePool'
+import { Button } from '../Button'
+import { ButtonGroup } from '../ButtonGroup'
 import { Card } from '../Card'
-import { Grid, Stack, Wrap } from '../Layout'
+import InvestAction from '../InvestAction'
+import { Box, Grid, Stack, Wrap } from '../Layout'
 import PageTitle from '../PageTitle'
+import { useTinlake } from '../TinlakeProvider'
 import OverviewHeader from './OverviewHeader'
 
 interface Props {
   selectedPool: Pool | UpcomingPool
 }
 
-const Overview: React.FC<Props> = (props: Props) => {
-  const isUpcoming = props.selectedPool?.isUpcoming === true
+function isUpcomingPool(pool: Pool | UpcomingPool): pool is UpcomingPool {
+  return pool.isUpcoming === true
+}
+
+const Overview: React.FC<Props> = ({ selectedPool }) => {
+  const tinlake = useTinlake()
+  const router = useRouter()
+  const dispatch = useDispatch()
+  const address = useSelector<any, string | null>((state) => state.auth.address)
+
+  const { data: poolData } = usePool(!isUpcomingPool(selectedPool) ? selectedPool.addresses.ROOT_CONTRACT : undefined)
+
+  const [awaitingConnect, setAwaitingConnect] = React.useState(false)
 
   const [modalLink, setModalLink] = React.useState('')
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    if (address && awaitingConnect && !isUpcomingPool(selectedPool)) {
+      ;(async () => {
+        const inAMemberlist = (await tinlake.checkSeniorTokenMemberlist(address))
+          ? true
+          : await tinlake.checkJuniorTokenMemberlist(address)
+
+        if (inAMemberlist) {
+          router.push(`/pool/${selectedPool.addresses.ROOT_CONTRACT}/${selectedPool.metadata.slug}/investments`)
+        } else {
+          router.push(`/pool/${selectedPool.addresses.ROOT_CONTRACT}/${selectedPool.metadata.slug}/onboarding`)
+        }
+      })()
+
+      setAwaitingConnect(false)
+    }
+  }, [address, tinlake])
+
+  const invest = () => {
+    if (address && !isUpcomingPool(selectedPool)) {
+      if (poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) {
+        router.push(`/pool/${selectedPool.addresses.ROOT_CONTRACT}/${selectedPool.metadata.slug}/investments`)
+      } else {
+        router.push(`/pool/${selectedPool.addresses.ROOT_CONTRACT}/${selectedPool.metadata.slug}/onboarding`)
+      }
+    } else {
+      setAwaitingConnect(true)
+      dispatch(ensureAuthed())
+    }
+  }
 
   const openModal = (link: string) => {
     setModalLink(link)
@@ -28,30 +78,42 @@ const Overview: React.FC<Props> = (props: Props) => {
     setModalIsOpen(false)
   }
 
+  const investButton =
+    'addresses' in selectedPool &&
+    config.featureFlagNewOnboardingPools.includes(selectedPool.addresses.ROOT_CONTRACT) ? (
+      <Button label="Invest" primary onClick={invest} />
+    ) : (
+      <InvestAction pool={selectedPool} />
+    )
+
   return (
     <Stack gap="xlarge" mt="large">
-      {!isUpcoming && (
+      {!isUpcomingPool(selectedPool) && (
         <div>
-          <PageTitle pool={props.selectedPool} page="Overview" />
-          <OverviewHeader selectedPool={props.selectedPool as Pool} />
+          <PageTitle
+            pool={selectedPool}
+            page="Overview"
+            rightContent={<Box display={['none', 'block']}>{investButton}</Box>}
+          />
+          <OverviewHeader selectedPool={selectedPool as Pool} investButton={investButton} />
         </div>
       )}
       {/* <Box direction="row" gap="small">
         <Box basis="2/3"> */}
       <div>
         <Heading level="4">
-          {isUpcoming ? `Upcoming Pool: ${props.selectedPool.metadata.name}` : 'Asset Originator Details'}
+          {isUpcomingPool(selectedPool) ? `Upcoming Pool: ${selectedPool.metadata.name}` : 'Asset Originator Details'}
         </Heading>
         <Card p="medium">
           <Stack gap="medium">
             <div>
-              <img src={props.selectedPool.metadata.media?.logo} style={{ maxHeight: '60px', maxWidth: '30%' }} />
+              <img src={selectedPool.metadata.media?.logo} style={{ maxHeight: '60px', maxWidth: '30%' }} />
             </div>
-            <p style={{ margin: '0' }}>{props.selectedPool.metadata.description}</p>
+            <p style={{ margin: '0' }}>{selectedPool.metadata.description}</p>
 
             <Grid gap="large" rowGap="medium" gridTemplateColumns="minmax(60px, min-content) auto">
-              {props.selectedPool.metadata.attributes &&
-                Object.entries(props.selectedPool.metadata.attributes).map(([key, attribute]) => (
+              {selectedPool.metadata.attributes &&
+                Object.entries(selectedPool.metadata.attributes).map(([key, attribute]) => (
                   <>
                     <Type>{key}</Type>
                     {typeof attribute === 'string' ? (
@@ -113,7 +175,7 @@ const Overview: React.FC<Props> = (props: Props) => {
       </Box> */}
       <div>
         <Heading level="4">Pool Balance</Heading>
-        <InvestmentOverview selectedPool={props.selectedPool} />
+        <InvestmentOverview selectedPool={selectedPool} />
       </div>
 
       <Modal
@@ -129,15 +191,13 @@ const Overview: React.FC<Props> = (props: Props) => {
         <Paragraph margin={{ top: 'medium', bottom: 'large' }}>
           By clicking on the button below, you are confirming that you are requesting the executive summary without
           having being solicited or approached, directly or indirectly by the issuer of{' '}
-          {props.selectedPool.metadata.shortName || props.selectedPool.metadata.name} or any affiliate.&nbsp;
+          {selectedPool.metadata.shortName || selectedPool.metadata.name} or any affiliate.&nbsp;
         </Paragraph>
-        <Box direction="row" justify="end">
-          <Box basis={'1/5'}>
-            <a href={modalLink} target="_blank">
-              <Button primary onClick={closeModal} label="View the Executive Summary" fill={true} />
-            </a>
-          </Box>
-        </Box>
+        <ButtonGroup>
+          <a href={modalLink} target="_blank">
+            <Button primary onClick={closeModal} label="View the Executive Summary" fill={true} />
+          </a>
+        </ButtonGroup>
       </Modal>
     </Stack>
   )
