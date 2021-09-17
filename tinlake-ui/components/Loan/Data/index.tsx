@@ -60,7 +60,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
         </LoadingValue>
       </Shelf>
       <Flex flexDirection={['column', 'column', 'row']} justifyContent="space-between">
-        <Box maxWidth={{ medium: 360 }}>
+        <Box maxWidth={{ medium: 360 }} flex="1">
           <Table>
             <TableBody>
               <TableRow>
@@ -95,7 +95,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
           </Table>
         </Box>
         <Divider display={{ medium: 'none' }} m={0} borderColor="#bdbdbd" />
-        <Box maxWidth={{ medium: 360 }}>
+        <Box maxWidth={{ medium: 360 }} flex="1">
           <Table>
             <TableBody>
               <TableRow>
