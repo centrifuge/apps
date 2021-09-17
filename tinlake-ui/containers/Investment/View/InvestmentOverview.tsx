@@ -127,11 +127,12 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 },
                 {
                   term: 'Average Maturity',
-                  value: !avgMaturity
-                    ? null
-                    : avgMaturity > 90
-                    ? `${Math.round(((avgMaturity || 0) / (365 / 12)) * 10) / 10} months`
-                    : `${Math.round((avgMaturity || 0) * 10) / 10} days`,
+                  value:
+                    avgMaturity == null
+                      ? null
+                      : avgMaturity > 90
+                      ? `${Math.round(((avgMaturity || 0) / (365 / 12)) * 10) / 10} months`
+                      : `${Math.round((avgMaturity || 0) * 10) / 10} days`,
                 },
               ]}
             />
