@@ -4,7 +4,7 @@ import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
 
 export function ProxyActions<ActionsBase extends Constructor<TinlakeParams>>(Base: ActionsBase) {
   return class extends Base implements IProxyActions {
-    getProxyAccessTokenOwner = async (tokenId: string): Promise<BN> => {
+    getProxyAccessTokenOwner = async (tokenId: string): Promise<string> => {
       return this.contract('PROXY_REGISTRY').ownerOf(tokenId)
     }
 
@@ -192,9 +192,9 @@ export type IProxyActions = {
   getProxy(accessTokenId: string): Promise<string>
   proxyCount(): Promise<BN>
   getProxyAccessToken(proxyAddr: string): Promise<number>
-  getProxyAccessTokenOwner(tokenId: string): Promise<BN>
-  getProxyOwnerByLoan(loanId: string): Promise<BN>
-  getProxyOwnerByAddress(proxyAddr: string): Promise<BN>
+  getProxyAccessTokenOwner(tokenId: string): Promise<string>
+  getProxyOwnerByLoan(loanId: string): Promise<string>
+  getProxyOwnerByAddress(proxyAddr: string): Promise<string>
   proxyCreateNew(address: string): Promise<string>
   proxyIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>
   proxyTransferIssue(proxyAddr: string, nftRegistryAddr: string, tokenId: string): Promise<PendingTransaction>
