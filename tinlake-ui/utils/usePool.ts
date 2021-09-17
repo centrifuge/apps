@@ -82,7 +82,7 @@ export function usePool(poolId?: string) {
   return query
 }
 
-async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | null) {
+export async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | null) {
   const pool = ipfsPools.active.find((p) => p.addresses.ROOT_CONTRACT.toLowerCase() === poolId.toLowerCase())
 
   if (!pool) throw new Error(`Pool not found: ${poolId}`)

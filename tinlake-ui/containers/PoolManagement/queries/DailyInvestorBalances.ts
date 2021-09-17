@@ -1,6 +1,7 @@
 import gql from 'graphql-tag'
 import Apollo from '../../../services/apollo'
 import { downloadCSV } from '../../../utils/export'
+import { PoolData } from '../../../utils/usePool'
 import { csvName } from './index'
 
 interface IDaily {
@@ -49,7 +50,7 @@ const fetch = async (poolId: string, skip: number, first: number, blockHash: str
     `)
 }
 
-export async function dailyInvestorBalances(poolId: string) {
+export async function dailyInvestorBalances({ poolId }: { poolId: string; poolData: PoolData }) {
   let start = 0
   const limit = 1000
 
@@ -85,7 +86,7 @@ export async function dailyInvestorBalances(poolId: string) {
     ]),
   ]
 
-  downloadCSV(data, csvName(`Daily Investor Balances`))
+  downloadCSV(data, csvName(`Daily investor balances`))
 
   return true
 }

@@ -3,6 +3,7 @@ import BN from 'bn.js'
 import gql from 'graphql-tag'
 import Apollo from '../../../services/apollo'
 import { downloadCSV } from '../../../utils/export'
+import { PoolData } from '../../../utils/usePool'
 import { csvName } from './index'
 
 interface DailyPoolData {
@@ -41,7 +42,7 @@ const fetch = async (poolId: string, skip: number, first: number, blockHash: str
     `)
 }
 
-export async function dailyTokenPrices(poolId: string) {
+export async function dailyTokenPrices({ poolId }: { poolId: string; poolData: PoolData }) {
   let start = 0
   const limit = 1000
 

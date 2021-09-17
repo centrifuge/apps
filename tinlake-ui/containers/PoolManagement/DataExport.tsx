@@ -19,9 +19,10 @@ const DataExport: React.FC<Props> = (props: Props) => {
   const [loading, setLoading] = React.useState('' as string | number)
 
   const download = async (name: keyof typeof queries) => {
+    if (!poolData || !props.tinlake.contractAddresses.ROOT_CONTRACT) return
     setLoading(name)
     setTimeout(async () => {
-      await queries[name](props.tinlake.contractAddresses.ROOT_CONTRACT!)
+      await queries[name]({ poolData: poolData, poolId: props.tinlake.contractAddresses.ROOT_CONTRACT! })
       setLoading('')
     }, 1)
   }

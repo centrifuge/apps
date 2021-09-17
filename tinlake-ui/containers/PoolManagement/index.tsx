@@ -5,9 +5,7 @@ import styled from 'styled-components'
 import PageTitle from '../../components/PageTitle'
 import { useTinlake } from '../../components/TinlakeProvider'
 import { Pool } from '../../config'
-import { downloadCSV } from '../../utils/export'
 import { usePool } from '../../utils/usePool'
-import { csvName } from '../DataQuery/queries'
 import EpochOverview from '../Investment/View/EpochOverview'
 // import Access from './Admins'
 import AOMetrics from './AOMetrics'
@@ -31,24 +29,6 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
   const isAdmin = poolData?.isPoolAdmin || 'admin' in router.query
 
   const [view, setView] = React.useState('Liquidity')
-
-  const exportData = () => {
-    if (!poolData) return
-
-    const data: any[] = []
-    Object.keys(poolData).forEach((key: string) => {
-      const value = (poolData as any)[key]
-      if (key === 'junior' || key === 'senior' || key === 'maker') {
-        Object.keys(value).forEach((subKey: string) => {
-          data.push([`${key}.${subKey}`, value[subKey].toString()])
-        })
-      } else {
-        data.push([key, value.toString()])
-      }
-    })
-
-    downloadCSV(data, csvName(props.activePool?.metadata.slug))
-  }
 
   return (
     <Box margin={{ top: 'medium' }}>
@@ -121,15 +101,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
               <>
                 <AOMetrics activePool={props.activePool} />
                 <PoolStatus activePool={props.activePool} />
-
-                {'export' in router.query && (
-                  <div>
-                    <Button primary onClick={exportData} label="Export pool data" />
-                  </div>
-                )}
-
                 <Liquidity activePool={props.activePool} />
-
                 <EpochOverview activePool={props.activePool} />
               </>
             )}

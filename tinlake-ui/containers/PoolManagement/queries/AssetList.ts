@@ -3,9 +3,10 @@ import BN from 'bn.js'
 import { dateToYMDTechnical } from '../../../utils/date'
 import { downloadCSV } from '../../../utils/export'
 import { getAssets, SortableLoan } from '../../../utils/useAssets'
+import { PoolData } from '../../../utils/usePool'
 import { csvName } from './index'
 
-export async function assetList(poolId: string) {
+export async function assetList({ poolId }: { poolId: string; poolData: PoolData }) {
   const loans = await getAssets(poolId)
 
   const rows = [
@@ -35,6 +36,6 @@ export async function assetList(poolId: string) {
     }),
   ]
 
-  downloadCSV(rows, csvName(`Asset List`))
+  downloadCSV(rows, csvName(`Asset list`))
   return true
 }
