@@ -1,25 +1,14 @@
 import BN from 'bn.js'
-import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { baseToDisplay } from '../../tinlake.js/dist'
-import { maybeLoadUserRewards, UserRewardsState } from '../ducks/userRewards'
 import { addThousandsSeparators } from './addThousandsSeparators'
 import { toDynamicPrecision } from './toDynamicPrecision'
+import { useUserRewards } from './useUserRewards'
 
-export function useCFGRewards(address?: string | null) {
-  const userRewards = useSelector<any, UserRewardsState>((state) => state.userRewards)
-  const dispatch = useDispatch()
-
-  React.useEffect(() => {
-    if (address) {
-      dispatch(maybeLoadUserRewards(address))
-    }
-  }, [address])
+export function useCFGRewards(addressOverride?: string | null) {
+  const { data } = useUserRewards(addressOverride)
 
   return {
-    formattedAmount: addThousandsSeparators(
-      toDynamicPrecision(baseToDisplay(userRewards.data?.totalEarnedRewards || '0', 18))
-    ),
-    amount: userRewards.data?.totalEarnedRewards || new BN(0),
+    formattedAmount: addThousandsSeparators(toDynamicPrecision(baseToDisplay(data?.totalEarnedRewards || '0', 18))),
+    amount: data?.totalEarnedRewards || new BN(0),
   }
 }

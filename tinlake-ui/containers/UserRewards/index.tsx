@@ -14,7 +14,6 @@ import PageTitle from '../../components/PageTitle'
 import { IpfsPools } from '../../config'
 import { ensureAuthed, useAuth } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
-import { maybeLoadUserRewards, UserRewardsData, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { shortAddr } from '../../utils/shortAddr'
@@ -22,6 +21,7 @@ import { dynamicPrecision, toDynamicPrecision } from '../../utils/toDynamicPreci
 import { toPrecision } from '../../utils/toPrecision'
 import { useGlobalRewards } from '../../utils/useGlobalRewards'
 import { usePortfolio } from '../../utils/usePortfolio'
+import { UserRewardsData, UserRewardsLink, useUserRewards } from '../../utils/useUserRewards'
 import CentChainWalletDialog from '../CentChainWalletDialog'
 import ClaimRewards from '../ClaimRewards'
 import SetCentAccount from '../SetCentAccount'
@@ -31,7 +31,7 @@ interface Props {
 }
 
 const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
-  const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
+  const { data } = useUserRewards()
   const rewards = useGlobalRewards()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { address: ethAddr } = useAuth()
@@ -39,11 +39,6 @@ const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
   const portfolioValue = portfolio.data?.totalValue
   const dispatch = useDispatch()
 
-  React.useEffect(() => {
-    if (ethAddr) {
-      dispatch(maybeLoadUserRewards(ethAddr))
-    }
-  }, [ethAddr])
   const [showLink, setShowLink] = React.useState(false)
   const router = useRouter()
 
@@ -52,8 +47,6 @@ const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
   } = useRouter()
 
   const connect = () => dispatch(ensureAuthed())
-
-  const data = userRewards.data
 
   return (
     <Box margin={{ top: 'medium' }}>
