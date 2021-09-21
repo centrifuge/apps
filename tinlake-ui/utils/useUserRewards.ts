@@ -84,9 +84,9 @@ export function useUserRewards(addressOverride?: string | null) {
   const ethAddr = addressOverride || addressState
 
   const claimsQuery = useRewardClaims()
-  const subgraphQuery = useQuery(['userRewardsSubgraph', ethAddr], () => Apollo.getUserRewards(ethAddr!), {
-    enabled: !!ethAddr,
-  })
+
+  const subgraphQuery = useUserRewardsSubgraph(ethAddr)
+
   const centChainQuery = useQuery(
     ['userRewardsCentChain', ethAddr],
     () => getCentChainData(subgraphQuery.data!, claimsQuery.data!),
@@ -98,13 +98,18 @@ export function useUserRewards(addressOverride?: string | null) {
   return {
     ...centChainQuery,
     data: centChainQuery.data || subgraphQuery.data,
-    refetchSubgraph: subgraphQuery.refetch,
     refetchCentChain: centChainQuery.refetch,
     refetch: async () => {
       await subgraphQuery.refetch()
       centChainQuery.refetch()
     },
   }
+}
+
+export function useUserRewardsSubgraph(ethAddr?: string | null) {
+  return useQuery(['userRewardsSubgraph', ethAddr], () => Apollo.getUserRewards(ethAddr!), {
+    enabled: !!ethAddr,
+  })
 }
 
 export function useRewardClaims() {

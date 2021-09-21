@@ -393,8 +393,6 @@ class Apollo {
       transformed.links = (rewardBalance.links as any[]).map((link: any) => ({
         centAccountID: link.centAddress,
         earned: new BN(new Decimal(link.rewardsAccumulated).toFixed(0)),
-        claimable: undefined,
-        claimed: undefined,
       }))
     }
 

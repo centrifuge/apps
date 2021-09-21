@@ -14,7 +14,7 @@ import { isCentChainAddr } from '../../services/centChain/isCentChainAddr'
 import { useInterval } from '../../utils/hooks'
 import { shortAddr } from '../../utils/shortAddr'
 import { useEthLink } from '../../utils/useEthLink'
-import { useUserRewards } from '../../utils/useUserRewards'
+import { useUserRewardsSubgraph } from '../../utils/useUserRewards'
 import { Warning } from '../Investment/View/styles'
 
 const LinkingAlert = styled(CircleAlert)`
@@ -34,7 +34,7 @@ const LinkingWarning = styled(Warning)`
 
 const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: TransactionProps) => {
   const tinlake = useTinlake()
-  const { refetchSubgraph } = useUserRewards()
+  const { refetch } = useUserRewardsSubgraph()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { address: ethAddr } = useAuth()
   const { data: ethLink, refetch: refetchEthLink } = useEthLink(ethAddr)
@@ -58,7 +58,7 @@ const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: Trans
     setTxId(txId)
   }
 
-  useInterval(refetchSubgraph, status === 'succeeded' && ethAddr ? 5000 : null)
+  useInterval(refetch, status === 'succeeded' && ethAddr ? 5000 : null)
 
   React.useEffect(() => {
     if (status === 'succeeded') {
