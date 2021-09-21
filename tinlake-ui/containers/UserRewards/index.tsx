@@ -31,7 +31,7 @@ interface Props {
 }
 
 const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
-  const { data } = useUserRewards()
+  const { data: userRewards } = useUserRewards()
   const rewards = useGlobalRewards()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { address: ethAddr } = useAuth()
@@ -64,14 +64,14 @@ const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
               justifyContent="center"
             >
               <Metric
-                loading={!data || !portfolioValue}
+                loading={!userRewards || !portfolioValue}
                 value={baseToDisplay(portfolioValue || '0', 18)}
                 label="Your Investment"
                 token="DAI"
                 borderRight
               />
               <Metric
-                loading={!rewards.data || !data || !portfolioValue}
+                loading={!rewards.data || !userRewards || !portfolioValue}
                 value={baseToDisplay(
                   rewards.data?.rewardRate?.mul(portfolioValue?.toString() || 0).toFixed(0) || '0',
                   18
@@ -81,8 +81,8 @@ const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
                 borderRight
               />
               <Metric
-                loading={!data}
-                value={baseToDisplay(data?.totalEarnedRewards || '0', 18)}
+                loading={!userRewards}
+                value={baseToDisplay(userRewards?.totalEarnedRewards || '0', 18)}
                 label="Your Earned Rewards"
                 token="CFG"
               />
@@ -100,9 +100,9 @@ const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
           )}
 
           {ethAddr &&
-            data?.links &&
-            data.links.length === 0 &&
-            (data?.totalEarnedRewards?.isZero() && !showLink ? (
+            userRewards?.links &&
+            userRewards.links.length === 0 &&
+            (userRewards?.totalEarnedRewards?.isZero() && !showLink ? (
               <Card>
                 <Box pad="medium">
                   <Head>Start Investing to Earn Rewards</Head>
@@ -148,18 +148,18 @@ const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
               <Box pad="medium">
                 <h3>Debug:</h3>
                 <ul>
-                  <li>Non-zero investment since: {data?.nonZeroInvestmentSince?.toString() || 'null'}</li>
+                  <li>Non-zero investment since: {userRewards?.nonZeroInvestmentSince?.toString() || 'null'}</li>
                   <li>
                     Total earned rewards:{' '}
-                    {data ? `${toPrecision(baseToDisplay(data?.totalEarnedRewards, 18), 4)} CFG` : 'null'}
+                    {userRewards ? `${toPrecision(baseToDisplay(userRewards?.totalEarnedRewards, 18), 4)} CFG` : 'null'}
                   </li>
                   <li>
                     Unlinked rewards:{' '}
-                    {data ? `${toPrecision(baseToDisplay(data?.unlinkedRewards, 18), 4)} CFG` : 'null'}
+                    {userRewards ? `${toPrecision(baseToDisplay(userRewards?.unlinkedRewards, 18), 4)} CFG` : 'null'}
                   </li>
-                  {data?.links.map((c, i) => (
+                  {userRewards?.links.map((c, i) => (
                     <li key={c.centAccountID}>
-                      Link {i + 1} {i === data.links.length - 1 && '(Active)'}
+                      Link {i + 1} {i === userRewards.links.length - 1 && '(Active)'}
                       <ul>
                         <li>Centrifuge Chain Address: {accountIdToCentChainAddr(c.centAccountID)}</li>
                         <li>Centrifuge Chain Account ID: {c.centAccountID}</li>
@@ -180,18 +180,21 @@ const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
             </Box>
           )}
 
-          {ethAddr && data?.links && data.links.length > 0 && (
+          {ethAddr && userRewards?.links && userRewards.links.length > 0 && (
             <Card>
               <Box direction="row" pad={{ horizontal: 'medium', top: 'medium', bottom: 'medium' }}>
                 <Box flex={true}>
                   <Head>Claim Your CFG Rewards</Head>
 
-                  {comebackDate(data?.nonZeroInvestmentSince)}
+                  {comebackDate(userRewards?.nonZeroInvestmentSince)}
                 </Box>
-                <RewardRecipients recipients={data?.links} />
+                <RewardRecipients recipients={userRewards?.links} />
               </Box>
-              {showClaimStripe(data) && (
-                <ClaimRewards activeLink={data.links[data.links.length - 1]} portfolioValue={portfolioValue} />
+              {showClaimStripe(userRewards) && (
+                <ClaimRewards
+                  activeLink={userRewards.links[userRewards.links.length - 1]}
+                  portfolioValue={portfolioValue}
+                />
               )}
             </Card>
           )}
