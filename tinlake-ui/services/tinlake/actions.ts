@@ -1,11 +1,11 @@
 import { ITinlake, Loan, NFT, PendingTransaction } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
+import { ZERO_ADDRESS } from '../../constants'
 import { maxUint256 } from '../../utils/maxUint256'
 import { Asset } from '../../utils/useAsset'
 import { getAddressMemory, setAddressMemory } from './address-memory'
 
 export type TrancheType = 'junior' | 'senior'
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 export interface TinlakeResult {
   data?: any

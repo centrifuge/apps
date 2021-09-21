@@ -1,12 +1,14 @@
 import { baseToDisplay, ITinlake, toPrecision } from '@centrifuge/tinlake-js'
+import { Decimal } from 'decimal.js-light'
+import { ethers } from 'ethers'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { getWCFGPrice } from '../ducks/userRewards'
+import { useQuery } from 'react-query'
+import { useTinlake } from '../components/TinlakeProvider'
 import { useGlobalRewards } from './useGlobalRewards'
 import { usePools } from './usePools'
 
 // Source: https://www.30secondsofcode.org/react/s/use-interval
-export const useInterval = (callback: any, delay: number) => {
+export const useInterval = (callback: any, delay?: number | null) => {
   const savedCallback = React.useRef()
 
   React.useEffect(() => {
@@ -17,7 +19,7 @@ export const useInterval = (callback: any, delay: number) => {
     function tick() {
       if (savedCallback.current) (savedCallback as any).current()
     }
-    if (delay !== null) {
+    if (delay != null) {
       const id = setInterval(tick, delay)
       return () => clearInterval(id)
     }
@@ -45,17 +47,10 @@ export const useTrancheYield = (poolId?: string | undefined) => {
   }, [poolId, pools])
 }
 
-export const useCFGYield = (tinlake: ITinlake) => {
+export const useCFGYield = () => {
   const rewards = useGlobalRewards()
-  const wCFGPrice = useSelector<any, number>((state: any) => state.userRewards.wCFGPrice)
-
-  const dispatch = useDispatch()
-
-  React.useEffect(() => {
-    if (tinlake) {
-      dispatch(getWCFGPrice(tinlake))
-    }
-  }, [tinlake])
+  const tinlake = useTinlake()
+  const { data: wCFGPrice } = useQuery('wCFGPrice', () => getWCFGPrice(tinlake))
 
   return React.useMemo(() => {
     if (wCFGPrice && rewards.data?.rewardRate) {
@@ -67,4 +62,16 @@ export const useCFGYield = (tinlake: ITinlake) => {
 
     return null
   }, [wCFGPrice, rewards.data?.rewardRate])
+}
+
+async function getWCFGPrice(tinlake: ITinlake) {
+  const usdcWcfgPool = '0x7270233cCAE676e776a659AFfc35219e6FCfbB10'
+  const uniswapPoolAbi = ['function observe(uint32[] secondsAgos) external view returns (int56[], uint160[])']
+
+  const poolContract = new ethers.Contract(usdcWcfgPool, uniswapPoolAbi, tinlake.provider)
+  const observations = (await poolContract.observe([0, 1]))[0]
+  const first = new Decimal(observations[0].toString())
+  const second = new Decimal(observations[1].toString())
+  const price = new Decimal(1.0001).toPower(second.sub(first)).times(new Decimal(10).toPower(12)).toNumber()
+  return price
 }

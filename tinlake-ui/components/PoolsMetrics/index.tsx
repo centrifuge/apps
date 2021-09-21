@@ -14,7 +14,6 @@ import { Divider } from '../Divider'
 import { LabeledValue } from '../LabeledValue'
 import { Box, Center, Shelf, Stack } from '../Layout'
 import NumberDisplay from '../NumberDisplay'
-import { useTinlake } from '../TinlakeProvider'
 import { Tooltip } from '../Tooltip'
 
 interface Props {
@@ -23,14 +22,13 @@ interface Props {
 
 const PoolsMetrics: React.FC<Props> = (props: Props) => {
   const router = useRouter()
-  const tinlake = useTinlake()
   const { data: dailyTVL = [] } = useDailyTVL()
   const isMobile = useMedia({ below: 'medium' })
 
   const [hoveredPoolValue, setHoveredPoolValue] = React.useState<number | undefined>(undefined)
   const [hoveredDay, setHoveredDay] = React.useState<number | undefined>(undefined)
 
-  const cfgYield = useCFGYield(tinlake)
+  const cfgYield = useCFGYield()
 
   const maxPoolValue = Math.max.apply(
     Math,

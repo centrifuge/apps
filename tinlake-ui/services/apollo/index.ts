@@ -8,10 +8,10 @@ import { DocumentNode } from 'graphql'
 import gql from 'graphql-tag'
 import fetch from 'node-fetch'
 import config, { ArchivedPool, IpfsPools, Pool, UpcomingPool } from '../../config'
-import { UserRewardsData } from '../../ducks/userRewards'
 import { getPoolStatus } from '../../utils/pool'
 import { UintBase } from '../../utils/ratios'
 import { PoolData, PoolsData } from '../../utils/usePools'
+import { UserRewardsData } from '../../utils/useUserRewards'
 
 export interface RewardsData {
   toDateRewardAggregateValue: BN
@@ -354,7 +354,7 @@ class Apollo {
     }
   }
 
-  async getUserRewards(user: string): Promise<UserRewardsData | null> {
+  async getUserRewards(user: string) {
     let result
     try {
       result = await this.client.query({
@@ -374,7 +374,7 @@ class Apollo {
       })
     } catch (err) {
       console.error(`error occurred while fetching user rewards for user ${user} from apollo ${err}`)
-      return null
+      throw err
     }
 
     const transformed: UserRewardsData = {
@@ -393,8 +393,6 @@ class Apollo {
       transformed.links = (rewardBalance.links as any[]).map((link: any) => ({
         centAccountID: link.centAddress,
         earned: new BN(new Decimal(link.rewardsAccumulated).toFixed(0)),
-        claimable: null,
-        claimed: null,
       }))
     }
 

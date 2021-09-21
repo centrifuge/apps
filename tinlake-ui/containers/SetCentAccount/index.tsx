@@ -1,18 +1,20 @@
 import { Box, Button, Select } from 'grommet'
 import { CircleAlert } from 'grommet-icons'
 import * as React from 'react'
-import { connect, useDispatch, useSelector } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { useTinlake } from '../../components/TinlakeProvider'
 import { Tooltip } from '../../components/Tooltip'
 import { useAuth } from '../../ducks/auth'
 import { CentChainWalletState, InjectedAccount } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
-import { loadEthLink, loadSubgraph, UserRewardsState } from '../../ducks/userRewards'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { centChainAddrToAccountId } from '../../services/centChain/centChainAddrToAccountId'
 import { isCentChainAddr } from '../../services/centChain/isCentChainAddr'
+import { useInterval } from '../../utils/hooks'
 import { shortAddr } from '../../utils/shortAddr'
+import { useEthLink } from '../../utils/useEthLink'
+import { useUserRewardsSubgraph } from '../../utils/useUserRewards'
 import { Warning } from '../Investment/View/styles'
 
 const LinkingAlert = styled(CircleAlert)`
@@ -30,20 +32,17 @@ const LinkingWarning = styled(Warning)`
   margin-bottom: 16px;
 `
 
-let interval: ReturnType<typeof setTimeout> | null = null
-
 const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: TransactionProps) => {
   const tinlake = useTinlake()
-  const userRewards = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
+  const { refetch } = useUserRewardsSubgraph()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { address: ethAddr } = useAuth()
+  const { data: ethLink, refetch: refetchEthLink } = useEthLink(ethAddr)
   const [selectedCentAcc, selectCentAcc] = React.useState<InjectedAccount>()
 
   React.useEffect(() => {
     selectCentAcc(cWallet.accounts[0])
   }, [cWallet.accounts[0]?.addrCentChain])
-
-  const dispatch = useDispatch()
 
   const [status, , setTxId] = useTransactionState()
 
@@ -59,45 +58,23 @@ const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: Trans
     setTxId(txId)
   }
 
+  useInterval(refetch, status === 'succeeded' && ethAddr ? 5000 : null)
+
   React.useEffect(() => {
     if (status === 'succeeded') {
-      if (!ethAddr) {
-        throw new Error('ethAddr is required to update cent chain account')
-      }
-
-      // poll changes
-      dispatch(loadEthLink(ethAddr, tinlake))
-      dispatch(loadSubgraph(ethAddr))
-      if (!interval) {
-        interval = setInterval(async () => {
-          dispatch(loadSubgraph(ethAddr))
-        }, 2000)
-      }
+      refetchEthLink()
     }
-  }, [status, ethAddr])
+  }, [status])
 
-  React.useEffect(() => {
-    if (ethAddr) {
-      dispatch(loadEthLink(ethAddr, tinlake))
-    }
-
-    return function cleanup() {
-      if (interval) {
-        clearInterval(interval)
-        interval = null
-      }
-    }
-  }, [ethAddr])
-
-  if (userRewards.ethLinkState !== 'found') {
+  if (ethLink === undefined) {
     return null
   }
 
-  if (userRewards.ethLinkState === 'found' && userRewards.ethLink) {
+  if (ethLink) {
     return (
       <div>
-        Your Centrifuge Chain account {accountIdToCentChainAddr(userRewards.ethLink)} has been successfully linked to
-        your Ethereum account.
+        Your Centrifuge Chain account {accountIdToCentChainAddr(ethLink)} has been successfully linked to your Ethereum
+        account.
         <br />
         <br />
         It may take a few minutes for that information to load. This page will automatically refresh once done.
