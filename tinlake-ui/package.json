@@ -69,7 +69,7 @@
     "grommet-icons": "^4.6.0",
     "lodash": "^4.17.21",
     "merkletreejs": "^0.2.12",
-    "next": "9.5.5",
+    "next": "^10.2.3",
     "next-redux-wrapper": "6.0.0",
     "node-fetch": "2.6.1",
     "prop-types": "15.7.2",
