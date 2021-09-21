@@ -4,6 +4,7 @@ import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
 import * as React from 'react'
 import Auth from '../../../../../components/Auth'
+import { ClientOnlyRender } from '../../../../../components/ClientOnlyRender'
 import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
 import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
@@ -38,7 +39,9 @@ const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
               <Box width="xlarge">
                 <Auth>
                   <Box>
-                    <OnboardingSteps activePool={pool} />
+                    <ClientOnlyRender>
+                      <OnboardingSteps activePool={pool} />
+                    </ClientOnlyRender>
                   </Box>
                 </Auth>
               </Box>
