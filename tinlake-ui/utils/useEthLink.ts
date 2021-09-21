@@ -1,6 +1,7 @@
 import { useQuery } from 'react-query'
 import { useSelector } from 'react-redux'
 import config from '../config'
+import { ZERO_BYTES_32 } from '../constants'
 import { multicall } from './multicall'
 
 export function useEthLink(addressOverride?: string | null) {
@@ -16,7 +17,7 @@ export function useEthLink(addressOverride?: string | null) {
           returns: [['link']],
         },
       ])
-      return link !== '0x0000000000000000000000000000000000000000000000000000000000000000' ? link : null
+      return link !== ZERO_BYTES_32 ? link : null
     },
     {
       enabled: !!ethAddr,
