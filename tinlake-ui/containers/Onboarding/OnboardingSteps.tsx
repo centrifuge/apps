@@ -3,11 +3,11 @@ import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/typ
 import { Box, Button } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useSelector } from 'react-redux'
 import { Card } from '../../components/Card'
 import PageTitle from '../../components/PageTitle'
 import { PoolLink } from '../../components/PoolLink'
 import config, { Pool } from '../../config'
+import { useAddress } from '../../utils/useAddress'
 import { useOnboardingState } from '../../utils/useOnboardingState'
 import { ExplainerCard } from '../Investment/View/styles'
 import AgreementStep from './AgreementStep'
@@ -38,7 +38,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
   const trancheOverride = router.query.tranche as Tranche | undefined
   const tranche = trancheOverride || DefaultTranche
 
-  const address = useSelector<any, string | null>((state) => state.auth.address)
+  const address = useAddress()
   const onboarding = useOnboardingState(props.activePool)
 
   const kycStatus = onboarding.data?.kyc?.requiresSignin ? 'requires-signin' : onboarding.data?.kyc?.status

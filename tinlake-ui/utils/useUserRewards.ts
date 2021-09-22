@@ -1,9 +1,9 @@
 import BN from 'bn.js'
 import { useQuery } from 'react-query'
-import { useSelector } from 'react-redux'
 import config from '../config'
 import Apollo from '../services/apollo'
 import { centChainService } from '../services/centChain'
+import { useAddress } from './useAddress'
 
 // just used for readability
 type AccountIDString = string
@@ -79,9 +79,8 @@ export interface RewardClaim {
   balance: string
 }
 
-export function useUserRewards(addressOverride?: string | null) {
-  const addressState = useSelector<any, string | null>((state) => state.auth.address)
-  const ethAddr = addressOverride || addressState
+export function useUserRewards() {
+  const ethAddr = useAddress()
 
   const claimsQuery = useRewardClaims()
 

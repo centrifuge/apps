@@ -2,12 +2,12 @@ import * as React from 'react'
 import { useDispatch } from 'react-redux'
 import config from '../../config'
 import { load, useAuth } from '../../ducks/auth'
-import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
+import { useDebugFlags } from '../DebugFlags'
 import { useTinlake } from '../TinlakeProvider'
 import WrongNetwork from '../WrongNetwork'
 
 const Auth: React.FC = ({ children }) => {
-  const debugAddress = useQueryDebugEthAddress()
+  const debugAddress = useDebugFlags().address
   const tinlake = useTinlake()
   const auth = useAuth()
   const dispatch = useDispatch()

@@ -32,7 +32,7 @@ const RewardsPage: React.FC<Props> = (props: Props) => {
             <Box justify="center" direction="row">
               <Box width="xlarge">
                 <Auth>
-                  <UserRewards ipfsPools={props.ipfsPools} />
+                  <UserRewards />
                 </Auth>
               </Box>
             </Box>
