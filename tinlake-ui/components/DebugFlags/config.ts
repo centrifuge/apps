@@ -1,7 +1,9 @@
+import { AddressStatus } from '@centrifuge/onboarding-api/src/controllers/types'
+
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug = params.get('debug') != null
 
-const addressStatusPermutations = {
+const addressStatusPermutations: { [key: string]: AddressStatus | null } = {
   'Real data': null,
   'Needs to KYC': {
     kyc: {

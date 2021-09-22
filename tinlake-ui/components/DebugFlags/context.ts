@@ -2,7 +2,11 @@ import * as React from 'react'
 import { debug, flagsConfig } from './config'
 
 export type Key = keyof typeof flagsConfig
-export type Flags = { [key in Key]: any }
+export type Flags = {
+  [T in Key]: typeof flagsConfig[T] extends { options: { [key: string]: infer Y } }
+    ? Y
+    : typeof flagsConfig[T]['default']
+}
 
 interface Context {
   flags: Flags
