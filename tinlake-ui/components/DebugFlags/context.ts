@@ -1,10 +1,11 @@
+// eslint-disable no-plus-plus
 import * as React from 'react'
 import { debug, flagsConfig } from './config'
 
 export type Key = keyof typeof flagsConfig
 export type Flags = { [key in Key]: any }
 
-export interface Context {
+interface Context {
   flags: Flags
   register: (id: number, keys: string[]) => void
   unregister: (id: number) => void
@@ -19,6 +20,11 @@ export const DebugFlagsContext = React.createContext<Context>({ flags: defaultFl
 
 let i = 0
 
+/**
+ * On first render the Proxy in this hooks tracks which properties are being accessed
+ * After mounting it registers these properties with the DebugFlags provider,
+ * so the provider knows which flags are being used on the page and can enable those in the debug panel
+ */
 export function useDebugFlags() {
   const [id] = React.useState(() => ++i)
   const ctx = React.useContext(DebugFlagsContext)
