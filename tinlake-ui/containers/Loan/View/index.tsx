@@ -1,8 +1,8 @@
-import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import Alert from '../../../components/Alert'
 import { Card } from '../../../components/Card'
+import { useDebugFlags } from '../../../components/DebugFlags'
 import { SectionHeading } from '../../../components/Heading'
 import { Stack, Wrap } from '../../../components/Layout'
 import LoanData from '../../../components/Loan/Data'
@@ -21,8 +21,8 @@ interface Props {
 
 // on state change tokenId --> load nft data for asset collateral
 const LoanView: React.FC<Props> = (props: Props) => {
-  const router = useRouter()
   const { data: assetData, refetch: refetchAsset, error } = useAsset(props.loanId)
+  const { showBorrower } = useDebugFlags()
 
   React.useEffect(() => {
     const { loadProxies } = props
@@ -45,7 +45,7 @@ const LoanView: React.FC<Props> = (props: Props) => {
       auth?.proxies
         ?.map((proxy: string) => proxy.toLowerCase())
         .includes(assetData.ownerOf.toString().toLowerCase())) ||
-    'borrower' in router.query
+    showBorrower
 
   return (
     <Stack gap="xlarge">

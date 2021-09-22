@@ -179,23 +179,55 @@ const addressStatusPermutations = {
 export const flagsConfig = {
   address: {
     type: 'text',
-    default: '',
+    default: params.get('address') || params.get('debug_eth_address') || '',
   },
   showAll: {
     type: 'checkbox',
-    default: false,
+    default: params.get('showAll') != null,
   },
   showCapacity: {
     type: 'checkbox',
-    default: false,
+    default: params.get('capacity') != null,
   },
   showArchived: {
     type: 'checkbox',
-    default: false,
+    default: params.get('showArchived') != null,
   },
   showRewardsInfo: {
     type: 'checkbox',
-    default: false,
+    default: params.get('debug') === 'true',
+  },
+  showAdmin: {
+    type: 'checkbox',
+    default: params.get('admin') != null,
+  },
+  showBorrower: {
+    type: 'checkbox',
+    default: params.get('borrower') != null,
+  },
+  showExport: {
+    type: 'checkbox',
+    default: params.get('export') != null,
+  },
+  showLockNFT: {
+    type: 'checkbox',
+    default: params.get('lockNFT') != null,
+  },
+  showTransferCurrency: {
+    type: 'checkbox',
+    default: params.get('transferCurrency') != null,
+  },
+  showCloseEpoch: {
+    type: 'checkbox',
+    default: params.get('show_close_epoch') != null,
+  },
+  allowMultipleBorrow: {
+    type: 'checkbox',
+    default: params.get('allowMultipleBorrow') != null,
+  },
+  disableInvestLimit: {
+    type: 'checkbox',
+    default: params.get('disableLimit') != null,
   },
   onboardingState: {
     type: 'select',

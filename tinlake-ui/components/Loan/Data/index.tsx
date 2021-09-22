@@ -2,7 +2,6 @@ import { DisplayField } from '@centrifuge/axis-display-field'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Table, TableBody, TableCell, TableRow } from 'grommet'
-import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
@@ -16,6 +15,7 @@ import { Asset } from '../../../utils/useAsset'
 import { Button } from '../../Button'
 import { ButtonGroup } from '../../ButtonGroup'
 import { Card } from '../../Card'
+import { useDebugFlags } from '../../DebugFlags'
 import { Divider } from '../../Divider'
 import { SectionHeading } from '../../Heading'
 import { Box, Flex, Shelf, Stack } from '../../Layout'
@@ -37,8 +37,8 @@ const DisplayFieldWrapper = styled.div`
 `
 
 const LoanData: React.FC<Props> = (props: Props) => {
-  const router = useRouter()
   const tinlake = useTinlake()
+  const { showTransferCurrency } = useDebugFlags()
   const availableForFinancing = props.loan?.debt.isZero() ? props.loan?.principal || new BN(0) : new BN(0)
 
   const proxyTransfer = async () => {
@@ -138,7 +138,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
           </Table>
         </Box>
       </Flex>
-      {props.loan?.ownerOf && props.loan?.borrower && 'transferCurrency' in router.query && (
+      {props.loan?.ownerOf && props.loan?.borrower && showTransferCurrency && (
         <ButtonGroup>
           <Button label="Transfer currency from proxy" size="small" onClick={() => proxyTransfer()}></Button>
         </ButtonGroup>

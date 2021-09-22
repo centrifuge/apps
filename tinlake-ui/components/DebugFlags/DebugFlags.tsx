@@ -56,7 +56,7 @@ const DebugFlagsImpl: React.FC = ({ children }) => {
 }
 
 const Panel: React.FC = ({ children }) => {
-  const [open, setOpen] = React.useState(true)
+  const [open, setOpen] = React.useState(false)
   return (
     <StyledPanel position="fixed" bottom={0} right={0}>
       <Center

@@ -1,6 +1,6 @@
 import { Box, Button, Heading } from 'grommet'
-import { useRouter } from 'next/router'
 import * as React from 'react'
+import { useDebugFlags } from '../../components/DebugFlags'
 import PageTitle from '../../components/PageTitle'
 import { useTinlake } from '../../components/TinlakeProvider'
 import { Pool } from '../../config'
@@ -24,9 +24,9 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
-  const router = useRouter()
+  const { showExport, showAdmin } = useDebugFlags()
 
-  const isAdmin = poolData?.isPoolAdmin || 'admin' in router.query
+  const isAdmin = showAdmin || poolData?.isPoolAdmin
   const canManageParameters = auth?.permissions?.canSetMinimumJuniorRatio
 
   const exportData = () => {
@@ -56,7 +56,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
           <AOMetrics activePool={props.activePool} />
           <PoolStatus activePool={props.activePool} />
 
-          {'export' in router.query && (
+          {showExport && (
             <div>
               <Button primary onClick={exportData} label="Export pool data" />
             </div>

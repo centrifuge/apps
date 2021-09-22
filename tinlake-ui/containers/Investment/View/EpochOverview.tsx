@@ -10,6 +10,7 @@ import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Card } from '../../../components/Card'
+import { useDebugFlags } from '../../../components/DebugFlags'
 import { Divider } from '../../../components/Divider'
 import { SectionHeading } from '../../../components/Heading'
 import { Box, Stack, Wrap } from '../../../components/Layout'
@@ -41,6 +42,7 @@ const percentFormatter = new Intl.NumberFormat('en-US', {
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const tinlake = useTinlake()
+  const { showCloseEpoch } = useDebugFlags()
   const { root } = router.query
 
   const { data: poolData } = usePool(root as string)
@@ -64,10 +66,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
 
   const [open, setOpen] = React.useState(false)
 
-  const showEpochButton = React.useMemo(
-    () => epochData && (poolData?.isPoolAdmin || router.query.show_close_epoch === 'true'),
-    [epochData, poolData, router.query]
-  )
+  const showEpochButton = epochData && (poolData?.isPoolAdmin || showCloseEpoch)
 
   const epochButtonElement = React.useMemo(() => {
     switch (epochData?.state) {
