@@ -17,9 +17,11 @@ import { Value } from '../Value'
 import { ValuePairList } from '../ValuePairList'
 import {
   DataCol,
+  DataColLeft,
   Desc,
   Header,
   HeaderCol,
+  HeaderColLeft,
   HeaderSub,
   HeaderTitle,
   Icon,
@@ -35,6 +37,7 @@ interface Props extends WithRouterProps {
 
 interface Column {
   header: string | JSX.Element
+  alignLeft: boolean
   cell: (row: any) => JSX.Element
   subHeader?: string
 }
@@ -72,6 +75,7 @@ const PoolList: React.FC<Props> = (props) => {
     },
     {
       header: 'Investment Capacity',
+      alignLeft: true,
       cell: (p: PoolData) => <PoolCapacityLabel pool={p} />,
     },
     capacity
@@ -135,12 +139,15 @@ const PoolList: React.FC<Props> = (props) => {
           <Desc>
             <HeaderTitle>Pool</HeaderTitle>
           </Desc>
-          {dataColumns.map((col) => (
-            <HeaderCol>
-              <HeaderTitle>{col.header}</HeaderTitle>
-              {col.subHeader && <HeaderSub>{col.subHeader}</HeaderSub>}
-            </HeaderCol>
-          ))}
+          {dataColumns.map((col) => {
+            const Col = col.alignLeft ? HeaderColLeft : HeaderCol
+            return (
+              <Col>
+                <HeaderTitle>{col.header}</HeaderTitle>
+                {col.subHeader && <HeaderSub>{col.subHeader}</HeaderSub>}
+              </Col>
+            )
+          })}
         </Header>
       )}
       {pools?.map((p) => (
@@ -209,9 +216,10 @@ export const Row: React.FC<DetailsProps & PropsOf<typeof PoolRow>> = ({
         <Shelf gap="small">
           {poolIcon}
           {poolTitle}
-          {columns.map((col) => (
-            <DataCol>{col.cell(row)}</DataCol>
-          ))}
+          {columns.map((col) => {
+            const Col = col.alignLeft ? DataColLeft : DataCol
+            return <Col>{col.cell(row)}</Col>
+          })}
         </Shelf>
       )}
     </PoolRow>

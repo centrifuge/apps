@@ -54,9 +54,20 @@ export const HeaderCol = styled.div`
   text-align: right;
 `
 
+export const HeaderColLeft = styled.div`
+  width: 160px;
+  text-align: left;
+`
+
 export const DataCol = styled(HeaderCol)`
   display: flex;
   justify-content: flex-end;
+  align-self: center;
+`
+
+export const DataColLeft = styled(HeaderColLeft)`
+  display: flex;
+  justify-content: flex-start;
   align-self: center;
 `
 
