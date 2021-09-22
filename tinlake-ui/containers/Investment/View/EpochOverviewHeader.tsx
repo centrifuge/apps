@@ -18,20 +18,44 @@ interface Props extends TransactionProps {
   solutionState: string
 }
 
+// Epoch icon
+const ICON_PATH = {
+  clock: '/static/clock.svg',
+  help: '/static/help-circle.svg',
+  checked: '/static/circle-checked.svg',
+}
+
+const getEpochIconPath = (epochState?: string, solutionState?: string): string => {
+  switch (epochState || '') {
+    case 'open':
+    case 'in-submission-period':
+    case 'in-challenge-period':
+      return ICON_PATH.clock
+    case 'challenge-period-ended':
+      return ICON_PATH.checked
+    case 'can-be-closed':
+      switch (solutionState || '') {
+        case 'to-be-closed':
+          return ICON_PATH.checked
+        default:
+          return ICON_PATH.help
+      }
+    default:
+      return ''
+  }
+}
+
+const EpochIcon = (props: { epochState?: string; solutionState?: string }) => {
+  const imgSrc = getEpochIconPath(props.epochState, props.solutionState)
+  return imgSrc ? <EpochImg src={imgSrc} /> : null
+}
+
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const { epochData, solutionState } = props
 
   return (
     <Wrap p={24} gap="small" style={{ cursor: 'pointer' }} onClick={(ev) => props.onClick!(ev)}>
-      {epochData?.state === 'open' && <EpochIcon src="/static/clock.svg" />}
-      {epochData?.state === 'can-be-closed' && solutionState !== 'to-be-closed' && (
-        <EpochIcon src="/static/help-circle.svg" />
-      )}
-      {((epochData?.state === 'can-be-closed' && solutionState === 'to-be-closed') ||
-        epochData?.state === 'challenge-period-ended') && <EpochIcon src="/static/circle-checked.svg" />}
-      {(epochData?.state === 'in-submission-period' || epochData?.state === 'in-challenge-period') && (
-        <EpochIcon src="/static/clock.svg" />
-      )}
+      <EpochIcon epochState={epochData?.state} solutionState={solutionState} />
 
       <SectionHeading>Epoch {epochData?.id}</SectionHeading>
       <EpochState
@@ -137,7 +161,7 @@ const EpochState = styled(Wrap)`
   }
 `
 
-const EpochIcon = styled.img`
+const EpochImg = styled.img`
   width: 24px;
   height: 24px;
 `
