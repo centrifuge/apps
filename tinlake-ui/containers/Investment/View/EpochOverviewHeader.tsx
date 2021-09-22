@@ -69,11 +69,6 @@ const getEpochStateLabel = (epochState?: string): string => {
   }
 }
 
-const EpochStateLabel = (props: { epochState?: string }) => {
-  const label = getEpochStateLabel(props.epochState)
-  return label ? <h4>{label}</h4> : null
-}
-
 // Epoch state description
 
 const getTooltipText = (epochState?: string, solutionState?: string): string => {
@@ -135,8 +130,8 @@ const EpochDescription = (props: { epochData?: EpochData; solutionState?: string
   const tooltipText = getTooltipText(props.epochData?.state, props.solutionState)
   const descriptionText = getDescriptionText(props.epochData, props.solutionState)
   return tooltipText && descriptionText ? (
-    <Tooltip title={tooltipText} underline>
-      <h5>{descriptionText}</h5>
+    <Tooltip title={tooltipText}>
+      <EpochStatusDescrText>{descriptionText}</EpochStatusDescrText>
     </Tooltip>
   ) : null
 }
@@ -144,12 +139,16 @@ const EpochDescription = (props: { epochData?: EpochData; solutionState?: string
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const { epochData, solutionState } = props
 
+  const epochStateLabel = React.useMemo(() => getEpochStateLabel(epochData?.state), [epochData?.state])
+
   return (
     <Wrap p={24} gap="small" style={{ cursor: 'pointer' }} onClick={(ev) => props.onClick!(ev)}>
       <EpochIcon epochState={epochData?.state} solutionState={solutionState} />
 
-      <SectionHeading>Epoch {epochData?.id}</SectionHeading>
-      <EpochState
+      <SectionHeading>
+        Epoch {epochData?.id} — {epochStateLabel}
+      </SectionHeading>
+      <Wrap
         gap="small"
         rowGap={0}
         alignItems="baseline"
@@ -157,11 +156,10 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         order={[3, 'initial']}
         flexBasis={['100%', 'auto']}
       >
-        <LoadingValue done={epochData?.state !== undefined} alignRight={false} maxWidth={120}>
-          <EpochStateLabel epochState={epochData?.state} />
+        <LoadingValue done={!!(epochData?.state && solutionState)} alignRight={false} maxWidth={120}>
           <EpochDescription epochData={epochData} solutionState={solutionState} />
         </LoadingValue>
-      </EpochState>
+      </Wrap>
       <Caret style={{ marginLeft: 'auto', position: 'relative', top: '0' }}>
         <FormDown style={{ transform: props.isOpen ? 'rotate(-180deg)' : '' }} />
       </Caret>
@@ -169,14 +167,11 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   )
 }
 
-const EpochState = styled(Wrap)`
-  h4,
-  h5 {
-    line-height: 24px;
-    font-size: 14px;
-    margin: 0;
-    color: #777777;
-  }
+const EpochStatusDescrText = styled.h5`
+  line-height: 24px;
+  font-size: 14px;
+  margin: 0;
+  color: #555;
 `
 
 const EpochImg = styled.img`
