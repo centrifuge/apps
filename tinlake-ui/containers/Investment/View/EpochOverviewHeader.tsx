@@ -74,6 +74,73 @@ const EpochStateLabel = (props: { epochState?: string }) => {
   return label ? <h4>{label}</h4> : null
 }
 
+// Epoch state description
+
+const getTooltipText = (epochState?: string, solutionState?: string): string => {
+  switch (epochState || '') {
+    case 'open':
+      return 'Tinlake epochs have a minimum duration of 24 hours. Once the minimum duration has passed, the epoch will be closed and, if possible, the orders will be executed.'
+    case 'in-submission-period':
+    case 'in-challenge-period':
+      return 'The epoch has been closed and orders are currently being computed. After the computing period has ended the orders will be executed.'
+    case 'challenge-period-ended':
+      return 'The epoch has been closed and orders have been computed. The orders will be executed shortly.'
+    case 'can-be-closed':
+      switch (solutionState || '') {
+        case 'to-be-closed':
+          return 'The minimum epoch duration has passed and will soon be closed automatically. All locked orders will be executed.'
+        case 'no-orders-locked':
+          return 'The minimum epoch duration has passed but currently no orders are locked. The epoch will be closed once orders are locked and can be executed.'
+        case 'no-executions':
+          return 'The minimum epoch duration has passed but the locked orders cannot be executed. This may be because the pool is oversubscribed or no liquidity is available for redemptions. The epoch will be closed and orders executed as soon as the pool state changes or liquidity is provided.'
+        case 'partial-executions':
+          return 'The minimum epoch duration has passed but only a fraction of the locked orders could be executed. The epoch is not automatically closed to avoid unsustainable gas fees for small transaction amounts.'
+        default:
+          return ''
+      }
+    default:
+      return ''
+  }
+}
+
+const getDescriptionText = (epochData?: EpochData, solutionState?: string): string => {
+  switch (epochData?.state || '') {
+    case 'open':
+      return `${secondsToHms(epochData?.minimumEpochTimeLeft || 0)} until end of minimum duration`
+    case 'in-submission-period':
+      return `Minimum ${secondsToHms(epochData?.challengeTime || 0)} remaining`
+    case 'in-challenge-period':
+      return `${secondsToHms((epochData?.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000)} remaining...`
+    case 'challenge-period-ended':
+      return 'To be closed'
+    case 'can-be-closed':
+      switch (solutionState || '') {
+        case 'to-be-closed':
+          return 'To be closed'
+        case 'no-orders-locked':
+          return 'No orders locked'
+        case 'no-executions':
+          return 'Locked orders cannot be executed'
+        case 'partial-executions':
+          return 'Locked orders can only be partially executed'
+        default:
+          return ''
+      }
+    default:
+      return ''
+  }
+}
+
+const EpochDescription = (props: { epochData?: EpochData; solutionState?: string }) => {
+  const tooltipText = getTooltipText(props.epochData?.state, props.solutionState)
+  const descriptionText = getDescriptionText(props.epochData, props.solutionState)
+  return tooltipText && descriptionText ? (
+    <Tooltip title={tooltipText} underline>
+      <h5>{descriptionText}</h5>
+    </Tooltip>
+  ) : null
+}
+
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const { epochData, solutionState } = props
 
@@ -92,76 +159,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
       >
         <LoadingValue done={epochData?.state !== undefined} alignRight={false} maxWidth={120}>
           <EpochStateLabel epochState={epochData?.state} />
-          {epochData?.state === 'open' && (
-            <Tooltip
-              title="Tinlake epochs have a minimum duration of 24 hours. Once the minimum duration has passed, the epoch will be closed and, if possible, the orders will be executed."
-              underline
-            >
-              <h5>{secondsToHms(epochData?.minimumEpochTimeLeft || 0)} until end of minimum duration</h5>
-            </Tooltip>
-          )}
-          {epochData?.state === 'can-be-closed' && (
-            <>
-              {solutionState === 'to-be-closed' && (
-                <Tooltip
-                  title="The minimum epoch duration has passed and will soon be closed automatically. All locked orders will be executed."
-                  underline
-                >
-                  <h5>To be closed</h5>
-                </Tooltip>
-              )}
-              {solutionState === 'no-orders-locked' && (
-                <Tooltip
-                  title="The minimum epoch duration has passed but currently no orders are locked. The epoch will be closed once orders are locked and can be executed."
-                  underline
-                >
-                  <h5>No orders locked</h5>
-                </Tooltip>
-              )}
-              {solutionState === 'no-executions' && (
-                <Tooltip
-                  title="The minimum epoch duration has passed but the locked orders cannot be executed. This may be because the pool is oversubscribed or no liquidity is available for redemptions. The epoch will be closed and orders executed as soon as the pool state changes or liquidity is provided."
-                  underline
-                >
-                  <h5>Locked orders cannot be executed</h5>
-                </Tooltip>
-              )}
-              {solutionState === 'partial-executions' && (
-                <Tooltip
-                  title="The minimum epoch duration has passed but only a fraction of the locked orders could be executed. The epoch is not automatically closed to avoid unsustainable gas fees for small transaction amounts."
-                  underline
-                >
-                  <h5>Locked orders can only be partially executed</h5>
-                </Tooltip>
-              )}
-            </>
-          )}
-          {epochData?.state === 'in-submission-period' && (
-            <Tooltip
-              title="The epoch has been closed and orders are currently being computed. After the computing period has ended the orders will be executed."
-              underline
-            >
-              <h5>Minimum {secondsToHms(epochData?.challengeTime || 0)} remaining</h5>
-            </Tooltip>
-          )}
-          {epochData?.state === 'in-challenge-period' && (
-            <Tooltip
-              title="The epoch has been closed and orders are currently being computed. After the computing period has ended the orders will be executed."
-              underline
-            >
-              <h5>
-                {secondsToHms((epochData?.minChallengePeriodEnd || 0) + 60 - new Date().getTime() / 1000)} remaining...
-              </h5>
-            </Tooltip>
-          )}
-          {epochData?.state === 'challenge-period-ended' && (
-            <Tooltip
-              title="The epoch has been closed and orders have been computed. The orders will be executed shortly."
-              underline
-            >
-              <h5>To be closed</h5>
-            </Tooltip>
-          )}
+          <EpochDescription epochData={epochData} solutionState={solutionState} />
         </LoadingValue>
       </EpochState>
       <Caret style={{ marginLeft: 'auto', position: 'relative', top: '0' }}>
