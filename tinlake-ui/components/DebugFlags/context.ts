@@ -7,6 +7,9 @@ export type Flags = {
     ? Y
     : typeof flagsConfig[T]['default']
 }
+export type FlagsState = {
+  [T in Key]: typeof flagsConfig[T]['default']
+}
 
 interface Context {
   flags: Flags
@@ -14,7 +17,12 @@ interface Context {
   unregister: (id: number) => void
 }
 
-export const defaultFlags = Object.entries(flagsConfig).reduce((obj, [k, v]) => {
+export const defaultFlags: Flags = Object.entries(flagsConfig).reduce((obj, [k, v]) => {
+  obj[k] = 'options' in v ? v.options[v.default] : v.default
+  return obj
+}, {} as any)
+
+export const initialFlagsState: FlagsState = Object.entries(flagsConfig).reduce((obj, [k, v]) => {
   obj[k] = v.default
   return obj
 }, {} as any)

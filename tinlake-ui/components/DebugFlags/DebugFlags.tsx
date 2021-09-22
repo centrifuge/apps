@@ -1,19 +1,20 @@
 import * as React from 'react'
 import ControlPanel, { Checkbox, Select, Text } from 'react-control-panel'
 import styled from 'styled-components'
+import { initialFlagsState } from '.'
 import { Box, Center } from '../Layout'
 import { flagsConfig } from './config'
-import { DebugFlagsContext, defaultFlags, Flags, Key } from './context'
+import { DebugFlagsContext, Key } from './context'
 
 const DebugFlagsImpl: React.FC = ({ children }) => {
-  const [state, setState] = React.useState<Flags>(defaultFlags)
+  const [state, setState] = React.useState(initialFlagsState)
   const [tracked, setTracked] = React.useState({})
 
   const ctx = React.useMemo(
     () => ({
       flags: Object.entries(state).reduce((obj, [key, value]) => {
         const conf = flagsConfig[key as Key]
-        obj[key] = 'options' in conf ? (conf.options as any)[value] : value
+        obj[key] = 'options' in conf ? conf.options[value as string] : value
         return obj
       }, {} as any),
       register(id: number, keys: string[]) {
