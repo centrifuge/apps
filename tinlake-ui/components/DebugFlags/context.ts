@@ -20,8 +20,8 @@ export const DebugFlagsContext = React.createContext<Context>({ flags: defaultFl
 let i = 0
 
 /**
- * On first render the Proxy in this hooks tracks which properties are being accessed
- * After mounting it registers these properties with the DebugFlags provider,
+ * On render the Proxy in this hook tracks which properties are being accessed.
+ * After mounting, it registers these properties with the DebugFlags provider,
  * so the provider knows which flags are being used on the page and can enable those in the debug panel
  */
 export function useDebugFlags() {
