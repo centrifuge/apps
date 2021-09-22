@@ -8,6 +8,7 @@ import { PropsOf } from '../../helpers'
 import { toPrecision } from '../../utils/toPrecision'
 import { useMedia } from '../../utils/useMedia'
 import { PoolData, PoolsData } from '../../utils/usePools'
+import { useDebugFlags } from '../DebugFlags'
 import { Divider } from '../Divider'
 import { SectionHeading } from '../Heading'
 import { Shelf, Stack } from '../Layout'
@@ -49,13 +50,8 @@ const toNumber = (value: BN | undefined, decimals: number) => {
   return value ? parseInt(value.toString(), 10) / 10 ** decimals : 0
 }
 
-const PoolList: React.FC<Props> = (props) => {
-  const {
-    poolsData,
-    router: {
-      query: { showAll, showArchived, capacity },
-    },
-  } = props
+const PoolList: React.FC<Props> = ({ poolsData }) => {
+  const { showAll, showArchived, showCapacity } = useDebugFlags()
   const isMobile = useMedia({ below: 'medium' })
 
   const pools = poolsData?.pools?.filter((p) => showArchived || !p.isArchived)
@@ -74,7 +70,7 @@ const PoolList: React.FC<Props> = (props) => {
       header: 'Investment Capacity',
       cell: (p: PoolData) => <PoolCapacityLabel pool={p} />,
     },
-    capacity
+    showCapacity
       ? [
           {
             header: 'DROP Capacity',

@@ -6,12 +6,12 @@ import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Card } from '../../components/Card'
+import { useDebugFlags } from '../../components/DebugFlags'
 import { LabeledValue } from '../../components/LabeledValue'
 import { Shelf } from '../../components/Layout'
 import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import PageTitle from '../../components/PageTitle'
-import { IpfsPools } from '../../config'
 import { ensureAuthed, useAuth } from '../../ducks/auth'
 import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
@@ -26,25 +26,19 @@ import CentChainWalletDialog from '../CentChainWalletDialog'
 import ClaimRewards from '../ClaimRewards'
 import SetCentAccount from '../SetCentAccount'
 
-interface Props {
-  ipfsPools: IpfsPools
-}
-
-const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
+const UserRewards: React.FC = () => {
   const { data: userRewards } = useUserRewards()
   const rewards = useGlobalRewards()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { address: ethAddr } = useAuth()
-  const portfolio = usePortfolio(ipfsPools)
+  const portfolio = usePortfolio()
   const portfolioValue = portfolio.data?.totalValue
   const dispatch = useDispatch()
 
   const [showLink, setShowLink] = React.useState(false)
   const router = useRouter()
 
-  const {
-    query: { debug },
-  } = useRouter()
+  const { showRewardsInfo } = useDebugFlags()
 
   const connect = () => dispatch(ensureAuthed())
 
@@ -143,7 +137,7 @@ const UserRewards: React.FC<Props> = ({ ipfsPools }) => {
               </>
             ))}
 
-          {debug && (
+          {showRewardsInfo && (
             <Box margin={{ bottom: 'large' }} round="xsmall" background="neutral-3">
               <Box pad="medium">
                 <h3>Debug:</h3>

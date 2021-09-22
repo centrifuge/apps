@@ -5,7 +5,6 @@ import { connect, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { useTinlake } from '../../components/TinlakeProvider'
 import { Tooltip } from '../../components/Tooltip'
-import { useAuth } from '../../ducks/auth'
 import { CentChainWalletState, InjectedAccount } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
@@ -13,6 +12,7 @@ import { centChainAddrToAccountId } from '../../services/centChain/centChainAddr
 import { isCentChainAddr } from '../../services/centChain/isCentChainAddr'
 import { useInterval } from '../../utils/hooks'
 import { shortAddr } from '../../utils/shortAddr'
+import { useAddress } from '../../utils/useAddress'
 import { useEthLink } from '../../utils/useEthLink'
 import { useUserRewardsSubgraph } from '../../utils/useUserRewards'
 import { Warning } from '../Investment/View/styles'
@@ -36,8 +36,8 @@ const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: Trans
   const tinlake = useTinlake()
   const { refetch } = useUserRewardsSubgraph()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
-  const { address: ethAddr } = useAuth()
-  const { data: ethLink, refetch: refetchEthLink } = useEthLink(ethAddr)
+  const ethAddr = useAddress()
+  const { data: ethLink, refetch: refetchEthLink } = useEthLink()
   const [selectedCentAcc, selectCentAcc] = React.useState<InjectedAccount>()
 
   React.useEffect(() => {

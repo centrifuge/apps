@@ -15,6 +15,7 @@ import { useMedia } from '../../../utils/useMedia'
 import { ButtonGroup } from '../../ButtonGroup'
 import { Card } from '../../Card'
 import ChevronRight from '../../ChevronRight'
+import { useDebugFlags } from '../../DebugFlags'
 import { Box } from '../../Layout'
 import LoanLabel from '../Label'
 
@@ -26,6 +27,7 @@ interface Props {
 
 const LoanList: React.FC<Props> = (props: Props) => {
   const router = useRouter()
+  const { showExport } = useDebugFlags()
 
   const clickRow = React.useCallback(
     ({ datum }: { datum?: SortableLoan; index?: number }) => {
@@ -203,7 +205,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
           </Box>
         )}
       </StyledCard>
-      {'export' in router.query && (
+      {showExport && (
         <ButtonGroup>
           <ExportLink onClick={() => saveAsCSV(props.loans)}>Export Asset List as CSV</ExportLink>
         </ButtonGroup>

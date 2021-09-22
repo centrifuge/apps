@@ -1,7 +1,7 @@
 import { Box, Button } from 'grommet'
-import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { useDebugFlags } from '../../../components/DebugFlags'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { ensureAuthed, useAuth } from '../../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -17,13 +17,13 @@ const UnlockNft: React.FC<Props> = (props: Props) => {
   const auth = useAuth()
   const [closeStatus, , setCloseTxId] = useTransactionState()
 
-  const router = useRouter()
   const { data: asset, refetch } = useAsset(props.assetId)
+  const { showBorrower } = useDebugFlags()
 
   const hasBorrowerPermissions =
     (asset &&
       auth.proxies?.map((proxy: string) => proxy.toLowerCase()).includes(asset.ownerOf.toString().toLowerCase())) ||
-    'borrower' in router.query
+    showBorrower
 
   const close = async () => {
     if (!asset) return

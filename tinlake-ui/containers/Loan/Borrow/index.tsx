@@ -3,9 +3,9 @@ import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
-import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { useDebugFlags } from '../../../components/DebugFlags'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
@@ -28,8 +28,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const { data: epochData } = useEpoch()
   const [borrowAmount, setBorrowAmount] = React.useState<string>('')
 
-  const router = useRouter()
-  const allowMultipleBorrow = 'allowMultipleBorrow' in router.query
+  const { allowMultipleBorrow } = useDebugFlags()
 
   const [status, , setTxId] = useTransactionState()
 

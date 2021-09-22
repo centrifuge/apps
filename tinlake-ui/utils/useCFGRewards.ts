@@ -4,8 +4,8 @@ import { addThousandsSeparators } from './addThousandsSeparators'
 import { toDynamicPrecision } from './toDynamicPrecision'
 import { useUserRewards } from './useUserRewards'
 
-export function useCFGRewards(addressOverride?: string | null) {
-  const { data: userRewards } = useUserRewards(addressOverride)
+export function useCFGRewards() {
+  const { data: userRewards } = useUserRewards()
 
   return {
     formattedAmount: addThousandsSeparators(
