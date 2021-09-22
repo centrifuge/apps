@@ -1,4 +1,3 @@
-// eslint-disable no-plus-plus
 import * as React from 'react'
 import { debug, flagsConfig } from './config'
 
@@ -26,7 +25,7 @@ let i = 0
  * so the provider knows which flags are being used on the page and can enable those in the debug panel
  */
 export function useDebugFlags() {
-  const [id] = React.useState(() => ++i)
+  const [id] = React.useState(() => (i += 1))
   const ctx = React.useContext(DebugFlagsContext)
   const tracked = React.useRef<any>({})
   const stateRef = React.useRef(ctx.flags)
