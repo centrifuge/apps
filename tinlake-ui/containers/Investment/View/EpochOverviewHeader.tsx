@@ -19,6 +19,7 @@ interface Props extends TransactionProps {
 }
 
 // Epoch icon
+
 const ICON_PATH = {
   clock: '/static/clock.svg',
   help: '/static/help-circle.svg',
@@ -50,6 +51,29 @@ const EpochIcon = (props: { epochState?: string; solutionState?: string }) => {
   return imgSrc ? <EpochImg src={imgSrc} /> : null
 }
 
+// Epoch state label
+
+const getEpochStateLabel = (epochState?: string): string => {
+  switch (epochState || '') {
+    case 'open':
+      return 'Ongoing'
+    case 'can-be-closed':
+      return 'Minimum duration ended'
+    case 'in-submission-period':
+    case 'in-challenge-period':
+      return 'Computing orders'
+    case 'challenge-period-ended':
+      return 'Orders computed'
+    default:
+      return ''
+  }
+}
+
+const EpochStateLabel = (props: { epochState?: string }) => {
+  const label = getEpochStateLabel(props.epochState)
+  return label ? <h4>{label}</h4> : null
+}
+
 const EpochOverview: React.FC<Props> = (props: Props) => {
   const { epochData, solutionState } = props
 
@@ -67,11 +91,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
         flexBasis={['100%', 'auto']}
       >
         <LoadingValue done={epochData?.state !== undefined} alignRight={false} maxWidth={120}>
-          {epochData?.state === 'open' && <h4>Ongoing</h4>}
-          {epochData?.state === 'can-be-closed' && <h4>Minimum duration ended</h4>}
-          {epochData?.state === 'in-submission-period' && <h4>Computing orders</h4>}
-          {epochData?.state === 'in-challenge-period' && <h4>Computing orders</h4>}
-          {epochData?.state === 'challenge-period-ended' && <h4>Orders computed</h4>}
+          <EpochStateLabel epochState={epochData?.state} />
           {epochData?.state === 'open' && (
             <Tooltip
               title="Tinlake epochs have a minimum duration of 24 hours. Once the minimum duration has passed, the epoch will be closed and, if possible, the orders will be executed."
