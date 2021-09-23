@@ -1,10 +1,26 @@
 import { AddressStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
-export const debug = params.get('debug') != null
+export const debug = process.env.NODE_ENV === 'development' || params.get('debug') != null
 
 const addressStatusPermutations: { [key: string]: AddressStatus | null } = {
   'Real data': null,
+  'Needs Securitize link': {
+    kyc: {
+      url: 'https://www.google.com/',
+    },
+    agreements: [],
+    linkedAddresses: [],
+  },
+  'Needs Securitize sign-in': {
+    kyc: {
+      requiresSignin: true,
+      status: 'none',
+      url: 'https://www.google.com/',
+    },
+    agreements: [],
+    linkedAddresses: [],
+  },
   'Needs to KYC': {
     kyc: {
       status: 'none',
@@ -223,6 +239,10 @@ export const flagsConfig = {
     type: 'checkbox',
     default: params.get('show_close_epoch') != null,
   },
+  newOnboarding: {
+    type: 'checkbox',
+    default: debug,
+  },
   allowMultipleBorrow: {
     type: 'checkbox',
     default: params.get('allowMultipleBorrow') != null,
@@ -235,5 +255,9 @@ export const flagsConfig = {
     type: 'select',
     default: 'Real data',
     options: addressStatusPermutations,
+  },
+  showUnusedFlags: {
+    type: 'checkbox',
+    default: false,
   },
 }
