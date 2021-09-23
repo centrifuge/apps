@@ -130,8 +130,8 @@ const EpochDescription = (props: { epochData?: EpochData; solutionState?: string
   const tooltipText = getTooltipText(props.epochData?.state, props.solutionState)
   const descriptionText = getDescriptionText(props.epochData, props.solutionState)
   return tooltipText && descriptionText ? (
-    <Tooltip title={tooltipText}>
-      <EpochStatusDescrText>{descriptionText}</EpochStatusDescrText>
+    <Tooltip title={tooltipText} underline>
+      <EpochDescriptionText>{descriptionText}</EpochDescriptionText>
     </Tooltip>
   ) : null
 }
@@ -167,10 +167,11 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   )
 }
 
-const EpochStatusDescrText = styled.h5`
+const EpochDescriptionText = styled.h4`
   line-height: 24px;
   font-size: 14px;
   margin: 0;
+  padding-top: 4px;
   color: #555;
 `
 
