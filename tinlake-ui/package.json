@@ -1,7 +1,7 @@
 {
   "name": "@centrifuge/tinlake-ui",
   "private": true,
-  "description": "",
+  "description": " ",
   "main": "index.js",
   "browser": {
     "child_process": false,
