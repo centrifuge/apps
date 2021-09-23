@@ -17,7 +17,8 @@ const baseTheme = {
     xxlarge: 64,
   },
   sizes: {
-    container: 1152,
+    page: 1152,
+    pageNarrow: 760,
   },
 }
 
