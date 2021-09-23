@@ -130,7 +130,7 @@ const EpochDescription = (props: { epochData?: EpochData; solutionState?: string
   const tooltipText = getTooltipText(props.epochData?.state, props.solutionState)
   const descriptionText = getDescriptionText(props.epochData, props.solutionState)
   return tooltipText && descriptionText ? (
-    <Tooltip title={tooltipText}>
+    <Tooltip title={tooltipText} underline>
       <EpochStatusDescrText>{descriptionText}</EpochStatusDescrText>
     </Tooltip>
   ) : null
@@ -171,6 +171,7 @@ const EpochStatusDescrText = styled.h5`
   line-height: 24px;
   font-size: 14px;
   margin: 0;
+  padding-top: 4px;
   color: #555;
 `
 
