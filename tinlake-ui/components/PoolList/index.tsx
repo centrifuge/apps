@@ -38,7 +38,6 @@ interface Props extends WithRouterProps {
 
 interface Column {
   header: string | JSX.Element
-  alignLeft: boolean
   cell: (row: any) => JSX.Element
   subHeader?: string
 }
@@ -52,6 +51,8 @@ const getDropAPY = (dropAPY: BN | null) => {
 const toNumber = (value: BN | undefined, decimals: number) => {
   return value ? parseInt(value.toString(), 10) / 10 ** decimals : 0
 }
+
+const isAlignedLeft = (c: Column) => c.header === 'Investment Capacity'
 
 const PoolList: React.FC<Props> = ({ poolsData }) => {
   const { showAll, showArchived, showCapacity } = useDebugFlags()
@@ -71,7 +72,6 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
     },
     {
       header: 'Investment Capacity',
-      alignLeft: true,
       cell: (p: PoolData) => <PoolCapacityLabel pool={p} />,
     },
     showCapacity
@@ -136,7 +136,7 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
             <HeaderTitle>Pool</HeaderTitle>
           </Desc>
           {dataColumns.map((col) => {
-            const Col = col.alignLeft ? HeaderColLeft : HeaderCol
+            const Col = isAlignedLeft(col) ? HeaderColLeft : HeaderCol
             return (
               <Col>
                 <HeaderTitle>{col.header}</HeaderTitle>
@@ -213,7 +213,7 @@ export const Row: React.FC<DetailsProps & PropsOf<typeof PoolRow>> = ({
           {poolIcon}
           {poolTitle}
           {columns.map((col) => {
-            const Col = col.alignLeft ? DataColLeft : DataCol
+            const Col = isAlignedLeft(col) ? DataColLeft : DataCol
             return <Col>{col.cell(row)}</Col>
           })}
         </Shelf>
