@@ -1,7 +1,7 @@
 import * as React from 'react'
 import ControlPanel, { Checkbox, Select, Text } from 'react-control-panel'
 import styled from 'styled-components'
-import { initialFlagsState } from '.'
+import { FlagsState, initialFlagsState, useDebugFlags } from '.'
 import { Box, Center } from '../Layout'
 import { flagsConfig } from './config'
 import { DebugFlagsContext, Key } from './context'
@@ -27,37 +27,27 @@ const DebugFlagsImpl: React.FC = ({ children }) => {
     [state]
   )
 
-  const visibleKeys = new Set(Object.values(tracked).flat())
+  const usedKeys = new Set(Object.values(tracked).flat())
 
   return (
     <DebugFlagsContext.Provider value={ctx}>
       {children}
-      <Panel>
-        <ControlPanel
-          state={state}
-          onChange={(key: Key, val: any) => setState((prev) => ({ ...prev, [key]: val }))}
-          width={400}
-        >
-          {Object.entries(flagsConfig).map(([key, obj]) => {
-            let el
-            if (obj.type === 'checkbox') {
-              el = <Checkbox label={key} />
-            } else if (obj.type === 'select' && 'options' in obj) {
-              el = <Select label={key} options={Object.keys(obj.options)} />
-            } else {
-              el = <Text label={key} />
-            }
-
-            return <VisibilityWrapper visible={visibleKeys.has(key)}>{el}</VisibilityWrapper>
-          })}
-        </ControlPanel>
-      </Panel>
+      <Panel
+        state={state}
+        usedKeys={usedKeys}
+        onChange={(key: Key, val: any) => setState((prev) => ({ ...prev, [key]: val }))}
+      />
     </DebugFlagsContext.Provider>
   )
 }
 
-const Panel: React.FC = ({ children }) => {
+const Panel: React.FC<{ state: FlagsState; usedKeys: Set<any>; onChange: (key: Key, val: any) => void }> = ({
+  state,
+  usedKeys,
+  onChange,
+}) => {
   const [open, setOpen] = React.useState(false)
+  const { showUnusedFlags } = useDebugFlags()
   return (
     <StyledPanel position="fixed" bottom={0} right={0}>
       <Center
@@ -72,7 +62,28 @@ const Panel: React.FC = ({ children }) => {
       >
         {open ? 'close' : 'open'} debug panel
       </Center>
-      {open && children}
+      {open && (
+        <ControlPanel state={state} onChange={onChange} width={400}>
+          {Object.entries(flagsConfig).map(([key, obj]) => {
+            let el
+            if (obj.type === 'checkbox') {
+              el = <Checkbox label={key} />
+            } else if (obj.type === 'select' && 'options' in obj) {
+              el = <Select label={key} options={Object.keys(obj.options)} />
+            } else {
+              el = <Text label={key} />
+            }
+
+            const used = usedKeys.has(key)
+
+            return used || showUnusedFlags ? (
+              <VisibilityWrapper visible={used} key={key}>
+                {el}
+              </VisibilityWrapper>
+            ) : null
+          })}
+        </ControlPanel>
+      )}
     </StyledPanel>
   )
 }
@@ -85,10 +96,13 @@ const StyledPanel = styled(Box)`
 `
 
 const VisibilityWrapper = styled.label<{ visible: boolean }>`
-  opacity: ${(props) => (props.visible ? 1 : 0.4)};
   pointer-events: ${(props) => (props.visible ? 'initial' : 'none')};
 
-  .control-panel & input:checked + label {
+  div {
+    opacity: ${(props) => (props.visible ? 1 : 0.4)};
+  }
+
+  input:checked + label {
     box-sizing: content-box;
     background-color: #eee !important;
   }
