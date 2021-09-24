@@ -385,6 +385,20 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             )}
           </>
         )}
+      {props.tranche === 'junior' &&
+        balance?.isZero() &&
+        !hasPendingOrder &&
+        props.pool &&
+        props.pool?.metadata.issuerEmail && (
+          <Info>
+            <Heading level="6" margin={{ bottom: 'xsmall' }}>
+              Interested in investing?
+            </Heading>
+            TIN tokens usually have higher yet more volatile returns, limited liquidity and require a minimum investment
+            amount of 50k DAI. If you are interested in investing in TIN, please{' '}
+            <DarkLink href={`mailto:${props.pool?.metadata.issuerEmail}`}>contact the issuer</DarkLink>.
+          </Info>
+        )}
     </Card>
   )
 }
@@ -393,4 +407,8 @@ export default TrancheOverview
 
 const TrancheNote = styled.div`
   color: #777;
+`
+
+const DarkLink = styled.a`
+  color: #000;
 `

@@ -30,6 +30,7 @@ interface PoolMetadata {
   currencySymbol?: string
   isUpcoming?: boolean
   maker?: { ilk: string }
+  issuerEmail?: string
 }
 
 export interface BasePool {
