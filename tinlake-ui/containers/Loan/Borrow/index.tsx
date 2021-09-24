@@ -66,7 +66,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const isBlockedState = epochData ? epochData.isBlockedState : false
 
   const [error, setError] = React.useState<string | undefined>(undefined)
-  const borrowEnabled = ceilingSet && !borrowedAlready && !isBlockedState
+  const borrowEnabled = (ceilingSet && !borrowedAlready && !isBlockedState) || !!epochData
 
   React.useEffect(() => {
     if (!borrowEnabled && borrowAmount === '') setBorrowAmount('0')
@@ -123,16 +123,19 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
       </Box>
       <Box align="start">
         <Box direction="row" gap="small">
-          {epochData && borrowEnabled && (
-            <Button
-              onClick={borrow}
-              primary
-              label="Finance Asset"
-              disabled={
-                new BN(borrowAmount).isZero() || error !== undefined || status === 'unconfirmed' || status === 'pending'
-              }
-            />
-          )}
+          <Button
+            onClick={borrow}
+            primary
+            label={epochData ? 'Finance Asset' : 'loading...'}
+            disabled={
+              !epochData ||
+              !borrowEnabled ||
+              new BN(borrowAmount).isZero() ||
+              error !== undefined ||
+              status === 'unconfirmed' ||
+              status === 'pending'
+            }
+          />
         </Box>
         {isBlockedState && (
           <Box margin={{ top: 'small' }}>
