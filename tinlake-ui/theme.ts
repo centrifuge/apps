@@ -14,11 +14,12 @@ const baseTheme = {
     medium: 24,
     large: 32,
     xlarge: 40,
-    xxlarge: 64,
+    xxlarge: 48,
+    xxxlarge: 64,
   },
   sizes: {
     page: 1152,
-    pageNarrow: 760,
+    funnel: 760,
   },
 }
 

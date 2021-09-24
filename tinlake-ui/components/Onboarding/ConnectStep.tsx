@@ -1,41 +1,31 @@
-import { Box, Button, Paragraph } from 'grommet'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Pool } from '../../config'
+import { useDispatch } from 'react-redux'
 import { ensureAuthed } from '../../ducks/auth'
-import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
+import { useAddress } from '../../utils/useAddress'
+import { Button } from '../Button'
+import { Step } from './Step'
+import { StepParagraph } from './StepParagraph'
 
 interface Props {
-  activePool: Pool
+  state: 'active' | 'todo' | 'done'
 }
 
-const ConnectStep: React.FC<Props> = () => {
-  const address = useSelector<any, string | null>((state) => state.auth.address)
-
+const ConnectStep: React.FC<Props> = ({ state }) => {
+  const address = useAddress()
   const dispatch = useDispatch()
 
-  const connect = () => {
+  function connect() {
     dispatch(ensureAuthed())
   }
 
   return (
-    <Step>
-      <StepHeader>
-        <StepIcon checked={!!address} />
-        <StepTitle>Connect your wallet</StepTitle>
-      </StepHeader>
+    <Step title="Connect wallet" state={state}>
       {!address && (
-        <StepBody>
-          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
-            Please connect with the wallet you want to use for investment.
-          </Paragraph>
-          <div>
-            <Button primary label={`Connect`} onClick={connect} fill={false} />
-          </div>
-          <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
-        </StepBody>
+        <>
+          <StepParagraph>Please connect with the wallet you want to use for investment.</StepParagraph>
+          <Button largeOnMobile={false} primary label="Connect" onClick={connect} />
+        </>
       )}
-      {address && <StepBody>&nbsp;</StepBody>}
     </Step>
   )
 }

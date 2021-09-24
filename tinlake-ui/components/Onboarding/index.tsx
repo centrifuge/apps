@@ -1,20 +1,24 @@
 import { Spinner } from '@centrifuge/axis-spinner'
 import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
-import { Button } from 'grommet'
+import { Anchor } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import config, { Pool } from '../../config'
 import { ExplainerCard } from '../../containers/Investment/View/styles'
 import { useAddress } from '../../utils/useAddress'
 import { useOnboardingState } from '../../utils/useOnboardingState'
+import { Button } from '../Button'
 import { Card } from '../Card'
-import { Box, Center } from '../Layout'
+import { Box, Center, Stack } from '../Layout'
 import { PoolLink } from '../PoolLink'
+import { Text } from '../Text'
 import AgreementStep from './AgreementStep'
 import ConnectStep from './ConnectStep'
+import { Header } from './Header'
 import KycStep from './KycStep'
 import LinkStep from './LinkStep'
-import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
+import { Step } from './Step'
+import { StepParagraph } from './StepParagraph'
 
 interface Props {
   activePool: Pool
@@ -31,14 +35,20 @@ const deleteMyAccount = async (address: string, session: string) => {
   window.location.reload()
 }
 
-export const PoolOnboarding: React.FC<Props> = (props) => {
+function getState(step: number, activeStep: number) {
+  if (activeStep === step) return 'active'
+  if (activeStep > step) return 'done'
+  return 'todo'
+}
+
+export const PoolOnboarding: React.FC<Props> = ({ activePool }) => {
   const router = useRouter()
   const session = 'session' in router.query ? router.query.session : ''
   const trancheOverride = router.query.tranche as Tranche | undefined
   const tranche = trancheOverride || DefaultTranche
 
   const address = useAddress()
-  const onboarding = useOnboardingState(props.activePool)
+  const onboarding = useOnboardingState(activePool)
 
   const kycStatus = onboarding.data?.kyc?.requiresSignin ? 'requires-signin' : onboarding.data?.kyc?.status
   const accreditationStatus = onboarding.data?.kyc?.isUsaTaxResident ? onboarding.data?.kyc?.accredited || false : true
@@ -57,11 +67,11 @@ export const PoolOnboarding: React.FC<Props> = (props) => {
     : 'none'
 
   React.useEffect(() => {
-    if (!address) setActiveSteps(1)
+    if (!address) setActiveStep(1)
     else if (whitelistStatus === true) {
-      setActiveSteps(5)
+      setActiveStep(5)
     } else if (!kycStatus) {
-      setActiveSteps(2)
+      setActiveStep(2)
     } else if (
       kycStatus === 'none' ||
       kycStatus === 'requires-signin' ||
@@ -69,85 +79,96 @@ export const PoolOnboarding: React.FC<Props> = (props) => {
       kycStatus === 'rejected' ||
       kycStatus === 'expired'
     ) {
-      setActiveSteps(3)
+      setActiveStep(3)
     } else if (kycStatus === 'verified' && !accreditationStatus) {
-      setActiveSteps(3)
+      setActiveStep(3)
     } else if (agreementStatus === 'none') {
-      setActiveSteps(4)
+      setActiveStep(4)
     } else if (kycStatus === 'processing' && !whitelistStatus) {
-      setActiveSteps(4)
+      setActiveStep(4)
     } else if (kycStatus === 'processing' && agreementStatus === 'signed') {
-      setActiveSteps(4)
+      setActiveStep(4)
     } else if (kycStatus === 'processing' && agreementStatus === 'countersigned') {
-      setActiveSteps(3)
+      setActiveStep(3)
     } else if ((kycStatus === 'verified' && agreementStatus === 'signed') || !whitelistStatus) {
-      setActiveSteps(4)
+      setActiveStep(4)
     } else {
-      setActiveSteps(5)
+      setActiveStep(5)
     }
   }, [address, kycStatus, agreementStatus])
 
-  const [activeSteps, setActiveSteps] = React.useState(0)
+  const [activeStep, setActiveStep] = React.useState(0)
 
   return (
     <>
-      <Card p="large">
-        {address && !onboarding.data ? (
-          <Spinner height={'400px'} message={'Loading...'} />
-        ) : (
-          <>
-            <Center>
-              <Box as="img" src="/static/logo.svg" width={130} mb="xlarge" />
-            </Center>
-            {onboarding.data?.linkedAddresses && onboarding.data?.linkedAddresses.length > 0 && (
-              <ExplainerCard margin={{ bottom: 'medium' }}>
-                Your Securitize account is linked to {onboarding.data?.linkedAddresses.join(', ')} and {address}.
-              </ExplainerCard>
-            )}
-
-            <ConnectStep {...props} />
-            <LinkStep {...props} onboardingData={onboarding.data} linked={!!kycStatus} active={activeSteps >= 2} />
-            <KycStep
-              {...props}
-              onboardingData={onboarding.data}
-              kycStatus={kycStatus}
-              accreditationStatus={accreditationStatus}
-              active={activeSteps >= 3}
+      <Card px={['medium', 'xxlarge']} py={['medium', 'large']}>
+        <Stack gap="large">
+          <Stack alignItems="center">
+            <Box as="img" src="/static/logo.svg" height={16} mb="medium" />
+            <Header
+              title={`${activePool.metadata.name} ${tranche === 'senior' ? 'DROP' : 'TIN'}`}
+              subtitle="Onboard to token"
             />
-            <AgreementStep
-              {...props}
-              onboardingData={onboarding.data}
-              agreement={agreement}
-              agreementStatus={agreementStatus}
-              whitelistStatus={whitelistStatus}
-              active={activeSteps >= 4}
-            />
-            <Step>
-              <StepHeader>
-                <StepIcon inactive={activeSteps < 5} />
-                <StepTitle inactive={activeSteps < 5}>Ready to invest in {props.activePool.metadata.name}</StepTitle>
-              </StepHeader>
-              {activeSteps >= 5 && (
-                <StepBody>
-                  <Box py="large">
-                    You have completed onboarding and are now ready to invest in {props.activePool.metadata.name}!
-                  </Box>
-                  <Box>
-                    <div>
-                      <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
-                        <Button primary label={'Invest'} fill={false} />
-                      </PoolLink>
-                    </div>
-                  </Box>
-                </StepBody>
+          </Stack>
+          {address && !onboarding.data ? (
+            <Spinner height={'400px'} message={'Loading...'} />
+          ) : (
+            <>
+              {onboarding.data?.linkedAddresses && onboarding.data?.linkedAddresses.length > 0 && (
+                <ExplainerCard>
+                  Your Securitize account is linked to {onboarding.data?.linkedAddresses.join(', ')} and {address}.
+                </ExplainerCard>
               )}
-            </Step>
-          </>
-        )}
+              <div>
+                <ConnectStep state={getState(1, activeStep)} />
+                <LinkStep state={getState(2, activeStep)} onboardingData={onboarding.data} />
+                <KycStep
+                  state={getState(3, activeStep)}
+                  onboardingData={onboarding.data}
+                  kycStatus={kycStatus}
+                  accreditationStatus={accreditationStatus}
+                />
+                <AgreementStep
+                  state={getState(4, activeStep)}
+                  activePool={activePool}
+                  onboardingData={onboarding.data}
+                  agreement={agreement}
+                  agreementStatus={agreementStatus}
+                  whitelistStatus={whitelistStatus}
+                />
+                <Step title="Invest in token" state={getState(5, activeStep)} last>
+                  {activeStep === 5 && (
+                    <>
+                      <StepParagraph>
+                        Congratulations, you’ve successfully onboarded to the token! <br />
+                        Your are now ready to invest.
+                      </StepParagraph>
+                      <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
+                        <Button primary label={'Invest'} largeOnMobile={false} />
+                      </PoolLink>
+                    </>
+                  )}
+                </Step>
+              </div>
+            </>
+          )}
+          <Center mt="xlarge">
+            <Text color="#777777" fontSize="14px">
+              Need help?{' '}
+              <Anchor
+                color="#777777"
+                href="https://docs.centrifuge.io/use/invest/#onboarding-guide"
+                target="_blank"
+                label="Read the onboarding guide"
+                style={{ display: 'inline' }}
+              />
+            </Text>
+          </Center>
+        </Stack>
       </Card>
 
       {address && kycStatus && session && config.isDemo && (
-        <Box mt="large" ml="audo">
+        <Box mt="large" ml="auto">
           <div>
             <Button
               label="Delete my account"

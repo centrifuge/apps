@@ -11,7 +11,7 @@ import { useAddress } from '../../utils/useAddress'
 import { Box, Shelf } from '../Layout'
 import { Web3Wallet } from '../Web3Wallet'
 
-export const BackButtonHeader: React.FC = () => {
+export const FunnelHeader: React.FC = () => {
   const router = useRouter()
   const address = useAddress()
   const dispatch = useDispatch()
@@ -30,9 +30,9 @@ export const BackButtonHeader: React.FC = () => {
 
   return (
     <Shelf position="sticky" top={0} height={56} zIndex={6} justifyContent="space-between" px={[12, 24]}>
-      <BackLink onClick={() => router.back()} gap="xsmall">
-        <LinkPrevious style={{ cursor: 'pointer' }} />
-        <span>Back</span>
+      <BackLink onClick={() => router.back()} gap="xsmall" style={{ cursor: 'pointer' }}>
+        <LinkPrevious />
+        <Box display={['none', 'block']}>Back</Box>
       </BackLink>
       <Box>
         {address ? (

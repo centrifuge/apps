@@ -1,10 +1,9 @@
 import { GetStaticProps } from 'next'
-import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
 import * as React from 'react'
 import Auth from '../../../../../components/Auth'
-import { BackButtonHeader } from '../../../../../components/BackButtonHeader'
 import { useDebugFlags } from '../../../../../components/DebugFlags'
+import { FunnelHeader } from '../../../../../components/FunnelHeader'
 import Header from '../../../../../components/Header'
 import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
 import { PoolOnboarding } from '../../../../../components/Onboarding'
@@ -15,7 +14,7 @@ import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import OnboardingSteps from '../../../../../containers/Onboarding/OnboardingSteps'
 import { menuItems } from '../../../../../menuItems'
 
-interface Props extends WithRouterProps {
+interface Props {
   root: string
   pool: Pool
   ipfsPools: IpfsPools
@@ -31,7 +30,7 @@ const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
             <title>Investor Onboarding: {pool.metadata.name} | Tinlake | Centrifuge</title>
           </Head>
           {newOnboarding ? (
-            <BackButtonHeader />
+            <FunnelHeader />
           ) : (
             <Header
               ipfsPools={ipfsPools}
@@ -42,7 +41,7 @@ const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
           )}
           <Auth>
             {newOnboarding ? (
-              <PageContainer width="pageNarrow" noMargin>
+              <PageContainer width="funnel" noMargin>
                 <PoolOnboarding activePool={pool} />
               </PageContainer>
             ) : (

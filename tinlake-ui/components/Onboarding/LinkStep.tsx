@@ -1,21 +1,20 @@
 import { Modal } from '@centrifuge/axis-modal'
 import { AddressStatus } from '@centrifuge/onboarding-api/src/controllers/types'
-import { Anchor, Box, Button, CheckBox, Heading, Paragraph } from 'grommet'
+import { Anchor, Box, Button, Heading, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import * as React from 'react'
-import { Pool } from '../../config'
-import { FormFieldWithoutBorder, LegalCopy, Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
+import { Checkbox } from '../Checkbox'
+import { Step } from './Step'
+import { StepParagraph } from './StepParagraph'
+import { LegalCopy } from './styles'
 
 interface Props {
-  activePool: Pool
-  active: boolean
-  linked: boolean
+  state: 'active' | 'todo' | 'done'
   onboardingData: AddressStatus | undefined
 }
 
-const LinkStep: React.FC<Props> = (props: Props) => {
+const LinkStep: React.FC<Props> = ({ state, onboardingData }) => {
   const [checked, setChecked] = React.useState(false)
-  const [error, setError] = React.useState('')
 
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
 
@@ -27,63 +26,44 @@ const LinkStep: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Step>
-      <StepHeader>
-        <StepIcon inactive={!props.active} checked={props.linked} />
-        <StepTitle inactive={!props.active}>Link Securitize account</StepTitle>
-      </StepHeader>
-      {props.active && !props.linked && (
-        <StepBody>
-          <Paragraph margin={{ bottom: 'medium' }} style={{ width: '100%' }}>
-            Tinlake has integrated Securitize’s automated KYC process for investor onboarding. Please set-up a new
-            Securitize account or link an existing Securitize account to your connected Ethereum address. This is a
-            one-time step.
-          </Paragraph>
-          <Box margin={{ top: 'medium', left: 'auto', right: 'auto', bottom: 'medium' }}>
-            <FormFieldWithoutBorder error={error}>
-              <CheckBox
-                checked={checked}
-                label={
-                  <div style={{ lineHeight: '24px' }}>
-                    I consent to share personal information with Securitize, which Securitize may transfer to Centrifuge
-                    and issuers I (the investor) have identified and I consent to Centrifuge's Privacy Policy and Terms
-                    and Conditions. &nbsp;
-                    <Anchor
-                      onClick={(event: any) => {
-                        openModal()
-                        event.preventDefault()
-                      }}
-                      style={{}}
-                      label="View more"
-                    />
-                    .
-                  </div>
-                }
-                onChange={(event) => setChecked(event.target.checked)}
-              />
-            </FormFieldWithoutBorder>
-          </Box>
-          <div>
-            <Box direction="row" gap="small">
-              <Button
-                primary
-                label={`Link Securitize account`}
-                href={`${props.onboardingData?.kyc?.url}&registration=true`}
-                onClick={(event: any) => {
-                  if (!checked) {
-                    event.preventDefault()
-                    setError('This needs to be checked to proceed.')
-                  }
-                }}
-                fill={false}
-              />
-            </Box>
-          </div>
-          <Box margin={{ bottom: 'small' }}>&nbsp;</Box>
-        </StepBody>
-      )}
-      {props.active && !!props.linked && <StepBody>&nbsp;</StepBody>}
-      {!props.active && <StepBody inactive>&nbsp;</StepBody>}
+    <>
+      <Step title="Link Securitize account" state={state}>
+        {state === 'active' && (
+          <>
+            <StepParagraph>
+              Tinlake has integrated Securitize’s automated KYC process for investor onboarding. Please set-up a new
+              Securitize account or link an existing Securitize account to your connected Ethereum address. This is a
+              one-time step.
+            </StepParagraph>
+            <Checkbox
+              checked={checked}
+              label={
+                <>
+                  I consent to share personal information with Securitize, which Securitize may transfer to Centrifuge
+                  and issuers I (the investor) have identified and I consent to Centrifuge's Privacy Policy and Terms
+                  and Conditions. &nbsp;
+                  <Anchor
+                    onClick={(event: any) => {
+                      openModal()
+                      event.preventDefault()
+                    }}
+                    style={{}}
+                    label="View more"
+                  />
+                  .
+                </>
+              }
+              onChange={(event) => setChecked(event.target.checked)}
+            />
+            <Button
+              primary
+              label={`Link Securitize account`}
+              href={`${onboardingData?.kyc?.url}&registration=true`}
+              disabled={!checked}
+            />
+          </>
+        )}
+      </Step>
 
       <Modal
         opened={modalIsOpen}
@@ -258,7 +238,7 @@ const LinkStep: React.FC<Props> = (props: Props) => {
           </Box>
         </Box>
       </Modal>
-    </Step>
+    </>
   )
 }
 
