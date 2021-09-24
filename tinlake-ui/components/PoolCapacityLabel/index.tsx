@@ -12,9 +12,9 @@ const ONE_MILLION = new BN('1000000000000000000000000')
 
 const formatCapacity = (capacity: BN): string => {
   if (capacity.gte(ONE_MILLION)) {
-    return addThousandsSeparators(toPrecision(baseToDisplay(capacity, 24), 2)) + 'M'
+    return `${addThousandsSeparators(toPrecision(baseToDisplay(capacity, 24), 2))}M`
   }
-  return addThousandsSeparators(toPrecision(baseToDisplay(capacity, 21), 0)) + 'K'
+  return `${addThousandsSeparators(toPrecision(baseToDisplay(capacity, 21), 0))}K`
 }
 
 export const PoolCapacityLabel: React.FC<Props> = ({ pool }) => {
