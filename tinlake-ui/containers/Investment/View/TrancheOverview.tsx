@@ -28,7 +28,7 @@ import CollectCard from './CollectCard'
 import InvestCard from './InvestCard'
 import OrderCard from './OrderCard'
 import RedeemCard from './RedeemCard'
-import { AddWalletLink, Info, MinTimeRemaining, Sidenote, TokenLogo, Warning } from './styles'
+import { Info, MinTimeRemaining, Sidenote, TokenLogo, Warning } from './styles'
 
 interface Props {
   pool?: Pool
@@ -242,11 +242,12 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             <>
               {epochData?.isBlockedState && (
                 <Warning>
-                  <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                  <BlackHeading>
+                    <AlertIcon src="/static/help-circle.svg" />
                     Computing orders
-                  </Heading>
-                  The Epoch has just been closed and the order executions are currently being computed. Until the next
-                  Epoch opens, you cannot submit new orders.
+                  </BlackHeading>
+                  The Epoch has closed and orders are now executed. No new order can be submitted until the start of the
+                  next Epoch.
                   {epochData?.minChallengePeriodEnd !== 0 && (
                     <MinTimeRemaining>
                       Minimum time remaining:{' '}
@@ -308,11 +309,12 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
           {card === 'home' && trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
             <Box mt="small">
-              <AddWalletLink onClick={addToWallet}>Display {trancheData?.token} in your wallet</AddWalletLink>
+              <Button secondary onClick={addToWallet} label={`Display ${trancheData?.token} in wallet`} />
             </Box>
           )}
         </>
       )}
+
       {props.pool &&
         !isMaintainanceMode &&
         props.tranche === 'senior' &&
@@ -351,7 +353,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </ButtonGroup>
           </Box>
         )}
-
       {props.pool &&
         !isMaintainanceMode &&
         !(isOnboard || isNewOnboardingPool) &&
@@ -412,5 +413,20 @@ const TrancheNote = styled.div`
 `
 
 const DarkLink = styled.a`
+  color: #000;
+`
+
+const AlertIcon = styled.img`
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+`
+
+const BlackHeading = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
   color: #000;
 `
