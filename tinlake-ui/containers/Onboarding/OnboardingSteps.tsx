@@ -91,7 +91,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
   const [activeSteps, setActiveSteps] = React.useState(0)
 
   return (
-    <Box margin={{ top: 'medium' }}>
+    <Box>
       {!props.hidePageTitle && (
         <PageTitle pool={props.activePool} page="Onboarding" parentPage="Investments" parentPageHref="/investments" />
       )}
