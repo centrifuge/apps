@@ -7,12 +7,12 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import config, { Pool } from '../../config'
 import { Checkbox } from '../Checkbox'
-import { Step } from './Step'
+import { Step, StepProps } from './Step'
 import { StepParagraph } from './StepParagraph'
 import { LegalCopy } from './styles'
 
 interface Props {
-  state: 'active' | 'todo' | 'done'
+  state: StepProps['state']
   activePool?: Pool
   onboardingData: AddressStatus | undefined
   agreement: AgreementsStatus | undefined
@@ -46,6 +46,7 @@ const AgreementStep: React.FC<Props> = ({
   }
 
   const isRestricted = onboardingData?.restrictedGlobal || onboardingData?.restrictedPool
+  const isAgreementStatusNegative = ['none', 'declined', 'voided'].includes(agreementStatus)
 
   return (
     <>
@@ -53,30 +54,26 @@ const AgreementStep: React.FC<Props> = ({
         state={state}
         icon={agreementStatus === 'countersigned' && whitelistStatus === true ? 'check' : undefined}
         title={
-          agreementStatus === 'none' || agreementStatus === 'declined' || agreementStatus === 'voided'
+          isAgreementStatusNegative
             ? `Sign the Subscription Agreement`
             : agreementStatus === 'countersigned'
             ? `${agreement?.name} signed`
             : `${agreement?.name} status: awaiting Issuer signature`
         }
       >
-        {active &&
-          !isRestricted &&
-          (agreementStatus === 'none' || agreementStatus === 'declined' || agreementStatus === 'voided') &&
-          agreement &&
-          !session && (
-            <>
-              <StepParagraph>
-                {agreementStatus === 'declined'
-                  ? `The issuer has declined signing your subscription agreement. This may be due to missing or incorrect information provided in the subscription agreement. Please check your email inbox for further feedback and instructions. To continue, sign in again with Securitize, then complete and sign a new subscription agreement to finalize your onboarding process.`
-                  : agreementStatus === 'voided'
-                  ? `The agreement has expired. To continue, sign in again with Securitize, then complete and sign a new subscription agreement to finalize your onboarding process.`
-                  : `Start the final step of signing the ${agreement.name} for ${poolName} by signing in with your
+        {active && !isRestricted && isAgreementStatusNegative && agreement && !session && (
+          <>
+            <StepParagraph>
+              {agreementStatus === 'declined'
+                ? `The issuer has declined signing your subscription agreement. This may be due to missing or incorrect information provided in the subscription agreement. Please check your email inbox for further feedback and instructions. To continue, sign in again with Securitize, then complete and sign a new subscription agreement to finalize your onboarding process.`
+                : agreementStatus === 'voided'
+                ? `The agreement has expired. To continue, sign in again with Securitize, then complete and sign a new subscription agreement to finalize your onboarding process.`
+                : `Start the final step of signing the ${agreement.name} for ${poolName} by signing in with your
               Securitize iD.`}
-              </StepParagraph>
-              <Button primary label={'Sign in with Securitize'} href={onboardingData?.kyc?.url} fill={false} />
-            </>
-          )}
+            </StepParagraph>
+            <Button primary label={'Sign in with Securitize'} href={onboardingData?.kyc?.url} fill={false} />
+          </>
+        )}
         {active && isRestricted && (
           <>
             {onboardingData?.restrictedGlobal && (
@@ -112,54 +109,50 @@ const AgreementStep: React.FC<Props> = ({
             )}
           </>
         )}
-        {active &&
-          !isRestricted &&
-          (agreementStatus === 'none' || agreementStatus === 'declined' || agreementStatus === 'voided') &&
-          agreement &&
-          session && (
-            <>
-              <StepParagraph>
-                {agreementStatus === 'declined'
-                  ? `The issuer has declined signing your subscription agreement. This may be due to missing or incorrect information provided in the subscription agreement. Please check your email inbox for further feedback and instructions. Please click the button below to complete a new subscription agreement to finalize your onboarding process.`
-                  : agreementStatus === 'voided'
-                  ? `The agreement has expired. Please click the button below to complete a new subscription agreement to finalize your onboarding process.`
-                  : `Finalize onboarding by signing the ${
-                      agreement.name
-                    } for ${poolName}. Note that the minimum investment
+        {active && !isRestricted && isAgreementStatusNegative && agreement && session && (
+          <>
+            <StepParagraph>
+              {agreementStatus === 'declined'
+                ? `The issuer has declined signing your subscription agreement. This may be due to missing or incorrect information provided in the subscription agreement. Please check your email inbox for further feedback and instructions. Please click the button below to complete a new subscription agreement to finalize your onboarding process.`
+                : agreementStatus === 'voided'
+                ? `The agreement has expired. Please click the button below to complete a new subscription agreement to finalize your onboarding process.`
+                : `Finalize onboarding by signing the ${
+                    agreement.name
+                  } for ${poolName}. Note that the minimum investment
             amount for this pool is 5000 ${activePool?.metadata.currencySymbol || 'DAI'}.`}
-              </StepParagraph>
-              {onboardingData?.showNonSolicitationNotice && (
-                <Checkbox
-                  checked={checked}
-                  label={
-                    <>
-                      I confirm that I am requesting the subscription agreement and further investment information
-                      without having being solicited or approached, directly or indirectly by the issuer of{' '}
-                      {activePool?.metadata.shortName || activePool?.metadata.name} or any affiliate.&nbsp;
-                      <Anchor
-                        onClick={(event: any) => {
-                          openNonSolicitationModal()
-                          event.preventDefault()
-                        }}
-                        style={{ display: 'inline' }}
-                        label="View more"
-                      />
-                      .
-                    </>
-                  }
-                  onChange={(event) => setChecked(event.target.checked)}
-                />
-              )}
-              <Button
-                primary
-                label="Sign Subscription Agreement"
-                href={`${config.onboardAPIHost}pools/${(activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
-                  agreement?.provider
-                }/${agreement?.providerTemplateId}/redirect?session=${session}`}
-                disabled={onboardingData?.showNonSolicitationNotice && !checked}
+            </StepParagraph>
+            {onboardingData?.showNonSolicitationNotice && (
+              <Checkbox
+                checked={checked}
+                label={
+                  <>
+                    I confirm that I am requesting the subscription agreement and further investment information without
+                    having being solicited or approached, directly or indirectly by the issuer of{' '}
+                    {activePool?.metadata.shortName || activePool?.metadata.name} or any affiliate.&nbsp;
+                    <Anchor
+                      onClick={(event: any) => {
+                        openNonSolicitationModal()
+                        event.preventDefault()
+                      }}
+                      style={{ display: 'inline' }}
+                      label="View more"
+                    />
+                    .
+                  </>
+                }
+                onChange={(event) => setChecked(event.target.checked)}
               />
-            </>
-          )}
+            )}
+            <Button
+              primary
+              label="Sign Subscription Agreement"
+              href={`${config.onboardAPIHost}pools/${(activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
+                agreement?.provider
+              }/${agreement?.providerTemplateId}/redirect?session=${session}`}
+              disabled={onboardingData?.showNonSolicitationNotice && !checked}
+            />
+          </>
+        )}
         {active && !isRestricted && agreement && agreementStatus === 'signed' && (
           <StepParagraph icon="clock">
             The Issuer will counter-sign your {agreement.name} for {poolName} soon. If KYC is verified, you will be

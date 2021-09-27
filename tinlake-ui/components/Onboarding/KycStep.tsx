@@ -3,11 +3,11 @@ import { Anchor } from 'grommet'
 import * as React from 'react'
 import config from '../../config'
 import { Button } from '../Button'
-import { Step } from './Step'
+import { Step, StepProps } from './Step'
 import { StepParagraph } from './StepParagraph'
 
 interface Props {
-  state: 'active' | 'todo' | 'done'
+  state: StepProps['state']
   onboardingData: AddressStatus | undefined
   kycStatus: KycStatusLabel | 'requires-signin' | undefined
   accreditationStatus: boolean

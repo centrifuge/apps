@@ -72,13 +72,7 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool }) => {
       setActiveStep(5)
     } else if (!kycStatus) {
       setActiveStep(2)
-    } else if (
-      kycStatus === 'none' ||
-      kycStatus === 'requires-signin' ||
-      kycStatus === 'updates-required' ||
-      kycStatus === 'rejected' ||
-      kycStatus === 'expired'
-    ) {
+    } else if (['none', 'requires-signin', 'updates-required', 'rejected', 'expired'].includes(kycStatus)) {
       setActiveStep(3)
     } else if (kycStatus === 'verified' && !accreditationStatus) {
       setActiveStep(3)

@@ -5,14 +5,14 @@ import { Heading } from '../Text'
 import { CheckIcon } from './CheckIcon'
 import { ClockIcon } from './ClockIcon'
 
-interface Props {
+export interface StepProps {
   title: string
   state: 'active' | 'todo' | 'done'
   icon?: 'clock' | 'check'
   last?: boolean
 }
 
-export const Step: React.FC<Props> = ({
+export const Step: React.FC<StepProps> = ({
   title,
   state,
   icon = state === 'done' ? 'check' : undefined,

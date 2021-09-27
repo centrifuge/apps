@@ -3,11 +3,11 @@ import { useDispatch } from 'react-redux'
 import { ensureAuthed } from '../../ducks/auth'
 import { useAddress } from '../../utils/useAddress'
 import { Button } from '../Button'
-import { Step } from './Step'
+import { Step, StepProps } from './Step'
 import { StepParagraph } from './StepParagraph'
 
 interface Props {
-  state: 'active' | 'todo' | 'done'
+  state: StepProps['state']
 }
 
 const ConnectStep: React.FC<Props> = ({ state }) => {

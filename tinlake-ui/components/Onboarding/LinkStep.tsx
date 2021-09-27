@@ -4,12 +4,12 @@ import { Anchor, Box, Button, Heading, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import * as React from 'react'
 import { Checkbox } from '../Checkbox'
-import { Step } from './Step'
+import { Step, StepProps } from './Step'
 import { StepParagraph } from './StepParagraph'
 import { LegalCopy } from './styles'
 
 interface Props {
-  state: 'active' | 'todo' | 'done'
+  state: StepProps['state']
   onboardingData: AddressStatus | undefined
 }
 
@@ -41,13 +41,13 @@ const LinkStep: React.FC<Props> = ({ state, onboardingData }) => {
                 <>
                   I consent to share personal information with Securitize, which Securitize may transfer to Centrifuge
                   and issuers I (the investor) have identified and I consent to Centrifuge's Privacy Policy and Terms
-                  and Conditions. &nbsp;
+                  and Conditions.{' '}
                   <Anchor
-                    onClick={(event: any) => {
+                    onClick={(event) => {
                       openModal()
                       event.preventDefault()
                     }}
-                    style={{}}
+                    style={{ display: 'inline' }}
                     label="View more"
                   />
                   .
