@@ -39,7 +39,26 @@ const addressStatusPermutations: { [key: string]: AddressStatus | null } = {
     showNonSolicitationNotice: true,
     linkedAddresses: [],
   },
-  'Verified, awaiting signature': {
+  'Awaiting KYC, sign agreement': {
+    kyc: {
+      status: 'processing',
+    },
+    agreements: [
+      {
+        name: 'DROP Subscription Agreement',
+        tranche: 'senior',
+        provider: 'docusign',
+        providerTemplateId: 'abc',
+        signed: false,
+        counterSigned: false,
+        declined: false,
+        voided: false,
+      },
+    ],
+    showNonSolicitationNotice: true,
+    linkedAddresses: [],
+  },
+  'Verified, awaiting counter-signature': {
     kyc: {
       status: 'verified',
     },
@@ -173,6 +192,24 @@ const addressStatusPermutations: { [key: string]: AddressStatus | null } = {
     showNonSolicitationNotice: true,
     linkedAddresses: [],
   },
+  'Country blocked for legal reasons': {
+    kyc: {
+      status: 'verified',
+    },
+    agreements: [],
+    showNonSolicitationNotice: true,
+    linkedAddresses: [],
+    restrictedGlobal: true,
+  },
+  'Country blocked by issuer': {
+    kyc: {
+      status: 'verified',
+    },
+    agreements: [],
+    showNonSolicitationNotice: true,
+    linkedAddresses: [],
+    restrictedPool: true,
+  },
   'Has >1 addresses': {
     kyc: {
       status: 'verified',
@@ -191,6 +228,29 @@ const addressStatusPermutations: { [key: string]: AddressStatus | null } = {
     ],
     showNonSolicitationNotice: true,
     linkedAddresses: ['0x0A735602a357802f553113F5831FE2fbf2F0E2e0'],
+  },
+  Completed: {
+    kyc: {
+      status: 'verified',
+      isWhitelisted: {
+        senior: true,
+        junior: false,
+      },
+    },
+    agreements: [
+      {
+        name: 'DROP Subscription Agreement',
+        tranche: 'senior',
+        provider: 'docusign',
+        providerTemplateId: 'abc',
+        signed: true,
+        counterSigned: true,
+        declined: false,
+        voided: false,
+      },
+    ],
+    showNonSolicitationNotice: true,
+    linkedAddresses: [],
   },
 }
 

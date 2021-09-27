@@ -99,7 +99,7 @@ const VisibilityWrapper = styled.label<{ visible: boolean }>`
   pointer-events: ${(props) => (props.visible ? 'initial' : 'none')};
 
   div {
-    opacity: ${(props) => (props.visible ? 1 : 0.4)};
+    opacity: ${(props) => (props.visible ? 1 : 0.6)};
   }
 
   input:checked + label {
