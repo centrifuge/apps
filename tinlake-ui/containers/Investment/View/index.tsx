@@ -24,7 +24,7 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
   return (
     <Box mt="xlarge">
       <PageTitle pool={props.activePool} page="Investments" />
-      <Stack gap={['medium', 'xxlarge']}>
+      <Stack gap={['medium', 'xxxlarge']}>
         <Wrap gap="medium" alignItems="flex-start" justifyContent="space-between">
           <Box flex="1 1 400px" maxWidth={['100%', '100%', '420px']}>
             <TrancheOverview pool={props.activePool} tranche="senior" />
