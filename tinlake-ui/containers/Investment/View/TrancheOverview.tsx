@@ -144,6 +144,12 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   }
 
   React.useEffect(() => {
+    if (props.pool?.metadata && !props.pool.metadata.issuerEmail) {
+      console.warn('The "issuerEmail" field is blank for pool ', props.pool.metadata.name)
+    }
+  }, [props.pool?.metadata])
+
+  React.useEffect(() => {
     if (hasPendingCollection) setCard('collect')
     else if (hasPendingOrder) setCard('order')
     else setCard('home')
