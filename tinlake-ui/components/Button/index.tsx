@@ -9,10 +9,8 @@ interface OwnProps {
 type Props = OwnProps & ButtonType
 
 const StyledButton = styled(GrommetButton)<OwnProps>`
-  min-width: max-content;
-
   @media (max-width: 599px) {
-    width: ${(props) => (props.largeOnMobile ? '220px' : 0)};
+    min-width: ${(props) => (props.largeOnMobile ? '220px' : 0)};
   }
 `
 
