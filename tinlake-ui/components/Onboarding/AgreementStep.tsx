@@ -50,17 +50,7 @@ const AgreementStep: React.FC<Props> = ({
 
   return (
     <>
-      <Step
-        state={state}
-        icon={agreementStatus === 'countersigned' && whitelistStatus === true ? 'check' : undefined}
-        title={
-          isAgreementStatusNegative
-            ? `Sign the Subscription Agreement`
-            : agreementStatus === 'countersigned'
-            ? `${agreement?.name} signed`
-            : `${agreement?.name} status: awaiting Issuer signature`
-        }
-      >
+      <Step state={state} title="Sign the Subscription Agreement">
         {active && !isRestricted && isAgreementStatusNegative && agreement && !session && (
           <>
             <StepParagraph>
@@ -154,10 +144,13 @@ const AgreementStep: React.FC<Props> = ({
           </>
         )}
         {active && !isRestricted && agreement && agreementStatus === 'signed' && (
-          <StepParagraph icon="clock">
-            The Issuer will counter-sign your {agreement.name} for {poolName} soon. If KYC is verified, you will be
-            ready to invest in this pool upon their signature.
-          </StepParagraph>
+          <>
+            <StepParagraph icon="check">You’ve successfully signed the subscription agreement</StepParagraph>
+            <StepParagraph>
+              The subscription still needs to be countersigned by the issuer. You will be notified once the token is
+              ready for investment.
+            </StepParagraph>
+          </>
         )}
         {active && !isRestricted && agreement && agreementStatus === 'countersigned' && whitelistStatus === false && (
           <StepParagraph icon="clock">

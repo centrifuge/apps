@@ -8,13 +8,13 @@ import { StepParagraph } from './StepParagraph'
 
 interface Props {
   state: StepProps['state']
-  onboardingData: AddressStatus | undefined
+  onboardingData: Pick<AddressStatus, 'kyc'> | undefined
   kycStatus: KycStatusLabel | 'requires-signin' | undefined
   accreditationStatus: boolean
 }
 
 // TODO: Redirect to onboard API URL that isn't pool dependant
-const placeholderPoolId = '0xc5BfCcBe24b037459922F70ADA6706638A550338'
+const placeholderPoolId = '0x560Ac248ce28972083B718778EEb0dbC2DE55740'
 const onboardURL = `${config.onboardAPIHost}pools/${placeholderPoolId}/info-redirect`
 
 const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditationStatus }) => {
@@ -22,20 +22,14 @@ const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditat
 
   return (
     <Step
-      state={state}
-      title={
-        !kycStatus || kycStatus === 'none' || kycStatus === 'requires-signin' || kycStatus === 'updates-required'
-          ? 'Submit KYC information'
-          : kycStatus === 'rejected'
-          ? 'KYC rejected'
-          : kycStatus === 'verified'
-          ? accreditationStatus
-            ? 'KYC status: verified'
-            : 'Submit accreditation info'
-          : 'KYC status: processing'
-      }
+      state={state === 'done' && kycStatus === 'processing' ? 'todo' : state}
+      title="Verify KYC"
+      subtitle={kycStatus === 'processing' ? 'In progress' : undefined}
       icon={kycStatus === 'processing' ? 'clock' : undefined}
     >
+      {active && kycStatus === 'processing' && (
+        <StepParagraph icon="clock">Submitted KYC is being verified</StepParagraph>
+      )}
       {active && kycStatus && (kycStatus === 'none' || kycStatus === 'updates-required' || kycStatus === 'expired') && (
         <>
           <StepParagraph>

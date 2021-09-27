@@ -19,3 +19,21 @@ export function useOnboardingState(pool: Pool | UpcomingPool) {
 
   return debugValue ? { ...query, data: debugValue } : query
 }
+
+// TODO: Call onboard API URL that isn't pool dependant
+const placeholderPoolId = '0x560Ac248ce28972083B718778EEb0dbC2DE55740'
+
+export function useInvestorOnboardingState() {
+  const debugValue = useDebugFlags().onboardingState
+  const address = useAddress()
+  const query = useQuery<Omit<AddressStatus, 'agreements' | 'restrictedPool'>>(
+    ['onboarding', address],
+    () => fetch(`${config.onboardAPIHost}pools/${placeholderPoolId}/addresses/${address}`).then((res) => res.json()),
+    {
+      enabled: !!address,
+      staleTime: 60000,
+    }
+  )
+
+  return debugValue ? { ...query, data: debugValue } : query
+}
