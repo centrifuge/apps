@@ -383,7 +383,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       {props.pool &&
         props.tranche === 'junior' &&
         !isMaintainanceMode &&
-        !(isOnboard || isNewOnboardingPool) &&
+        !isOnboard &&
         (!trancheData?.inMemberlist || !address) &&
         props.pool.metadata.issuerEmail && (
           <Info>
