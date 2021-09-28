@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: test-changelog
       - uses: heinrichreimer/github-changelog-generator-action@v2.2
         with:
           user: centrifuge
