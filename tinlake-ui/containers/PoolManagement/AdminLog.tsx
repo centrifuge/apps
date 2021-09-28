@@ -23,16 +23,16 @@ const ignoredEvents = ['Depend']
 
 const logsPerPage = 8
 
-export function useAuditLog(tinlake: ITinlake, poolId: string, ignoredEvents: string[]) {
-  return useQuery(['auditLog', poolId], () => tinlake.getAuditLog(ignoredEvents))
+export function useAdminLog(tinlake: ITinlake, poolId: string, ignoredEvents: string[]) {
+  return useQuery(['adminLog', poolId], () => tinlake.getAuditLog(ignoredEvents))
 }
 
-const AuditLog: React.FC<Props> = (props: Props) => {
+const AdminLog: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
   const [start, setStart] = React.useState(0)
 
-  const { data: { events, logs, transactions, blocks } = {} } = useAuditLog(
+  const { data: { events, logs, transactions, blocks } = {} } = useAdminLog(
     props.tinlake,
     props.tinlake.contractAddresses.ROOT_CONTRACT!,
     ignoredEvents
@@ -48,7 +48,7 @@ const AuditLog: React.FC<Props> = (props: Props) => {
       {logs && events && transactions && blocks && (
         <Card p="medium" mb="medium">
           <Heading level="5" margin={{ top: '0' }}>
-            Audit Log
+            List of all pool admin transactions
           </Heading>
           <Table>
             <TableHeader>
@@ -114,7 +114,7 @@ const AuditLog: React.FC<Props> = (props: Props) => {
   ) : null
 }
 
-export default connect((state) => state, { createTransaction })(AuditLog)
+export default connect((state) => state, { createTransaction })(AdminLog)
 
 const DisplayFieldWrapper = styled.div`
   width: 100%;

@@ -7,9 +7,9 @@ import { useTinlake } from '../../components/TinlakeProvider'
 import { Pool } from '../../config'
 import { usePool } from '../../utils/usePool'
 import EpochOverview from '../Investment/View/EpochOverview'
+import AdminLog from './AdminLog'
 // import Access from './Admins'
 import AOMetrics from './AOMetrics'
-import AuditLog from './AuditLog'
 import DataExport from './DataExport'
 import Liquidity from './Liquidity'
 import Memberlist from './Memberlist'
@@ -81,10 +81,10 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
               focusIndicator={false}
             />
             <MenuItem
-              secondary={view === 'Audit Log'}
-              plain={view !== 'Audit Log'}
-              onClick={() => setView('Audit Log')}
-              label="Audit Log"
+              secondary={view === 'Admin Log'}
+              plain={view !== 'Admin Log'}
+              onClick={() => setView('Admin Log')}
+              label="Admin Log"
               size="small"
               focusIndicator={false}
             />
@@ -115,7 +115,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
 
             {/* {view === 'Access' && <Access tinlake={tinlake} />} */}
 
-            {view === 'Audit Log' && <AuditLog tinlake={tinlake} />}
+            {view === 'Admin Log' && <AdminLog tinlake={tinlake} />}
 
             {view === 'Data Export' && <DataExport tinlake={tinlake} activePool={props.activePool} />}
           </Box>

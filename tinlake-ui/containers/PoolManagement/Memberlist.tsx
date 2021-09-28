@@ -90,7 +90,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
             <Card width="400px" p="medium" mb="medium">
               <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
                 <Heading level="5" margin={'0'}>
-                  Add/Remove DROP member
+                  Add/Remove DROP investor
                 </Heading>
               </Box>
 
@@ -126,7 +126,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
             <Card width="400px" p="medium" mb="medium">
               <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
                 <Heading level="5" margin={'0'}>
-                  Add/Remove TIN member
+                  Add/Remove TIN investor
                 </Heading>
               </Box>
 
@@ -163,7 +163,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
           <Card width="400px" p="medium" mb="medium">
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                Check onboarding status
+                Check investor onboarding status
               </Heading>
             </Box>
 
@@ -197,12 +197,12 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
                         {agreement.counterSigned
                           ? 'completed'
                           : agreement.signed
-                          ? 'awaiting countersignature'
+                          ? 'awaiting issuer signature'
                           : agreement.declined
                           ? 'declined'
                           : agreement.voided
                           ? 'voided'
-                          : 'awaiting signature'}
+                          : 'awaiting investor signature'}
                       </TableCell>
                     </TableRow>
                   ))}
