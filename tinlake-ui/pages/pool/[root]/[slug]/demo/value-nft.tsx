@@ -25,7 +25,7 @@ const ValueNFTPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
 
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig} contractVersions={pool.versions}>
         <WithFooter>
           <Head>
             <title>Value NFT: {pool.metadata.name} | Tinlake | Centrifuge</title>

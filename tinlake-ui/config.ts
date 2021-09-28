@@ -86,6 +86,10 @@ export interface Pool extends BasePool {
     MCD_JUG?: string
     MAKER_MGR?: string
   }
+  versions?: {
+    FEED?: number
+    POOL_ADMIN?: number
+  }
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'
     SENIOR_OPERATOR: 'ALLOWANCE_OPERATOR' | 'PROPORTIONAL_OPERATOR'

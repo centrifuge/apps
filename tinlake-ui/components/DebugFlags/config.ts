@@ -320,4 +320,8 @@ export const flagsConfig = {
     type: 'checkbox',
     default: false,
   },
+  showWriteOff: {
+    type: 'checkbox',
+    default: params.get('writeoff') != null,
+  },
 }

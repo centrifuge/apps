@@ -7,11 +7,14 @@ import { SectionHeading } from '../../../components/Heading'
 import { Stack, Wrap } from '../../../components/Layout'
 import LoanData from '../../../components/Loan/Data'
 import NftData from '../../../components/NftData'
+import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { loadProxies, useAuth } from '../../../ducks/auth'
 import { useAsset } from '../../../utils/useAsset'
+import { usePool } from '../../../utils/usePool'
 import LoanBorrow from '../Borrow'
 import LoanRepay from '../Repay'
+import LoanWriteOff from '../WriteOff'
 
 interface Props {
   loanId: string
@@ -21,8 +24,10 @@ interface Props {
 
 // on state change tokenId --> load nft data for asset collateral
 const LoanView: React.FC<Props> = (props: Props) => {
+  const { showWriteOff, showBorrower } = useDebugFlags()
+  const tinlake = useTinlake()
+  const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
   const { data: assetData, refetch: refetchAsset, error } = useAsset(props.loanId)
-  const { showBorrower } = useDebugFlags()
 
   React.useEffect(() => {
     const { loadProxies } = props
@@ -58,6 +63,14 @@ const LoanView: React.FC<Props> = (props: Props) => {
               <LoanBorrow loan={assetData} refetch={refetchAsset} poolConfig={props.poolConfig} />
               <LoanRepay loan={assetData} refetch={refetchAsset} poolConfig={props.poolConfig} />
             </Wrap>
+          </Card>
+        </Stack>
+      )}
+      {((poolData?.adminLevel && poolData.adminLevel >= 2) || showWriteOff) && assetData && (
+        <Stack gap="medium">
+          <SectionHeading>Write-off</SectionHeading>
+          <Card maxWidth={{ medium: 900 }} p="medium">
+            <LoanWriteOff loan={assetData} refetch={refetchAsset} poolConfig={props.poolConfig} />
           </Card>
         </Stack>
       )}

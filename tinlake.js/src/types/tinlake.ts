@@ -1,6 +1,6 @@
 import BN from 'bn.js'
 import { TinlakeActions } from '../actions'
-import Tinlake, { ContractAbis, ContractAddresses, Contracts, PendingTransaction } from '../Tinlake'
+import Tinlake, { ContractAbis, ContractAddresses, Contracts, ContractVersions, PendingTransaction } from '../Tinlake'
 
 export type ScoreCard = {
   thresholdRatio: BN
@@ -83,4 +83,4 @@ export type ERC2612PermitMessage = RSV & {
 export type PermitMessage = DaiPermitMessage | ERC2612PermitMessage
 
 export type ITinlake = TinlakeActions & Tinlake
-export { PendingTransaction, ContractAddresses, ContractAbis, Contracts }
+export { PendingTransaction, ContractAddresses, ContractVersions, ContractAbis, Contracts }

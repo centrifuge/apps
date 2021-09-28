@@ -24,6 +24,15 @@ const parseRatio = (num: BN): number => {
   return num.div(base).toNumber() / 10 ** 7
 }
 
+const ONE_MILLION = new BN('1000000000000000000000000')
+
+const formatAmount = (amount: BN): string => {
+  if (amount.gte(ONE_MILLION)) {
+    return `${addThousandsSeparators(toPrecision(baseToDisplay(amount, 24), 2))}M`
+  }
+  return `${addThousandsSeparators(toPrecision(baseToDisplay(amount, 21), 0))}K`
+}
+
 const PoolStatus: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
@@ -204,7 +213,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                 pad={{ vertical: '6px' }}
                 border={{ color: 'transparent' }}
               >
-                Unlocked
+                Available TIN
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={poolData?.junior.totalSupply !== undefined}>
@@ -328,12 +337,11 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                   pad={{ vertical: '6px' }}
                   border={{ color: 'transparent' }}
                 >
-                  Maximum single loan
+                  Largest outstanding loan
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                   <LoadingValue done={maxSingleLoan !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(maxSingleLoan, 18 + 3), 0))}K{' '}
-                    {props.activePool?.metadata.currencySymbol || 'DAI'}
+                    {formatAmount(maxSingleLoan)} {props.activePool?.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </TableCell>
               </TableRow>

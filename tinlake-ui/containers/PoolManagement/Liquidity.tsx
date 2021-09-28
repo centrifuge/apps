@@ -341,6 +341,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
             label="Update"
             onClick={save}
             disabled={
+              !poolData?.isPoolAdmin ||
               (!changedExternalCapacity && !changedMakerCapacity) ||
               (changedExternalCapacity && (status === 'pending' || status === 'unconfirmed')) ||
               (changedMakerCapacity &&

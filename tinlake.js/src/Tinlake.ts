@@ -48,11 +48,15 @@ export type Contracts = {
 }
 
 export type ContractAbis = {
-  [key in ContractName]?: ethers.ContractInterface
+  [key: string]: ethers.ContractInterface
 }
 
 export type ContractAddresses = {
   [key in ContractName]?: string
+}
+
+export type ContractVersions = {
+  [key in ContractName]?: number
 }
 
 export type TinlakeParams = {
@@ -62,6 +66,7 @@ export type TinlakeParams = {
   transactionTimeout?: number
   contractAddresses?: ContractAddresses | {}
   contractAbis?: ContractAbis | {}
+  contractVersions?: ContractVersions | {}
   overrides?: ethers.providers.TransactionRequest
   contracts?: Contracts | {}
   contractConfig?: any | {}
@@ -84,6 +89,7 @@ export default class Tinlake {
   public contracts: Contracts = {}
   public contractAbis: ContractAbis = {}
   public contractConfig: any = {}
+  public contractVersions: ContractVersions = {}
   public readonly version: number = 3
 
   constructor(params: TinlakeParams) {
@@ -96,6 +102,7 @@ export default class Tinlake {
       contractAbis,
       overrides,
       contractConfig,
+      contractVersions,
     } = params
     this.contractAbis = contractAbis || abiDefinitions
     this.contractConfig = contractConfig || {}
@@ -105,6 +112,7 @@ export default class Tinlake {
     this.provider = provider
     this.signer = signer
     this.legacyWeb3Provider = legacyWeb3Provider
+    this.contractVersions = contractVersions || {}
     this.setContracts()
   }
 
@@ -130,6 +138,13 @@ export default class Tinlake {
   }
 
   createContract(address: string, abiName: ContractName) {
+    if (abiName in this.contractVersions) {
+      return new ethers.Contract(
+        address,
+        this.contractAbis[`${abiName}_V${this.contractVersions[abiName]}`]!,
+        this.provider
+      )
+    }
     return new ethers.Contract(address, this.contractAbis[abiName]!, this.provider)
   }
 
@@ -222,18 +237,6 @@ export default class Tinlake {
         return reject()
       }
     })
-  }
-
-  // TODO: remove this with admin
-  getOperatorType = (tranche: string) => {
-    switch (tranche) {
-      case 'senior':
-        return this.contractConfig['SENIOR_OPERATOR']
-      case 'junior':
-        return this.contractConfig['JUNIOR_OPERATOR']
-      default:
-        return '_OPERATOR'
-    }
   }
 
   toBN = async (num: Promise<ethers.BigNumber>): Promise<BN> => {

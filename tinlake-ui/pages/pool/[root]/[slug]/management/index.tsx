@@ -22,7 +22,7 @@ interface Props extends WithRouterProps {
 const ManagementPage: React.FC<Props> = ({ pool, ipfsPools }) => {
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig} contractVersions={pool.versions}>
         <WithFooter>
           <Head>
             <title>Pool Management: {pool.metadata.name} | Tinlake | Centrifuge</title>
