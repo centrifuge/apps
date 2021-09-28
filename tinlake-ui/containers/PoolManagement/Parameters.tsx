@@ -166,7 +166,7 @@ const Parameters: React.FC<TransactionProps> = (props: TransactionProps) => {
     <>
       {poolData && (
         <Card p="medium" mb="medium">
-          <Box direction="row" gap="medium">
+          <Box direction="row" gap="medium" margin={{ bottom: 'large' }}>
             <Box basis="1/2">
               <Box margin={{ vertical: '0' }}>
                 <Heading level="5" margin={{ vertical: '0' }}>
@@ -213,12 +213,7 @@ const Parameters: React.FC<TransactionProps> = (props: TransactionProps) => {
             </Box>
           </Box>
 
-          <Explanation>
-            The minimum TIN risk buffer indicates the lower limit and ensures that DROP investors are protected by a
-            certain amount of TIN invested in the pool at any time.
-          </Explanation>
-
-          <Box direction="row" gap="medium">
+          <Box direction="row" gap="medium" margin={{ bottom: 'large' }}>
             <Box basis="1/2">
               <Box margin={{ vertical: '0' }}>
                 <Heading level="5" margin={{ vertical: '0' }}>
@@ -264,11 +259,6 @@ const Parameters: React.FC<TransactionProps> = (props: TransactionProps) => {
               </FormField>
             </Box>
           </Box>
-
-          <Explanation>
-            DROP tokens earn yield on the outstanding assets at the DROP APR. The effective APY may deviate due to
-            compounding effects or unused liquidity in the pool reserve.
-          </Explanation>
 
           <Box direction="row" gap="medium">
             <Box basis="1/2">
@@ -337,12 +327,6 @@ const Parameters: React.FC<TransactionProps> = (props: TransactionProps) => {
             </Box>
           </Box>
 
-          <Explanation>
-            Minimum time per epoch for this pool during which invest and redeem orders can be locked. At the end of the
-            epoch, the locked orders will be executed by the smart contracts. An epoch can also take longer if no
-            outstanding orders are locked.
-          </Explanation>
-
           {poolData?.adminLevel && poolData.adminLevel >= 3 && (
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
               <Button
@@ -360,11 +344,6 @@ const Parameters: React.FC<TransactionProps> = (props: TransactionProps) => {
 }
 
 export default connect((state) => state, { createTransaction })(Parameters)
-
-const Explanation = styled.div`
-  color: #666;
-  margin: 24px 0 48px 0;
-`
 
 export const FormFieldWithoutBorder = styled(FormField)`
   > div {

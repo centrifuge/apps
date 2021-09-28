@@ -213,7 +213,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                 pad={{ vertical: '6px' }}
                 border={{ color: 'transparent' }}
               >
-                Unlocked
+                Available TIN
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={poolData?.junior.totalSupply !== undefined}>
