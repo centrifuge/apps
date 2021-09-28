@@ -19,20 +19,19 @@ jobs:
           user: centrifuge
           project: apps
           token: ${{ secrets.GITHUB_TOKEN }}
-          sinceTag: tinlake-ui/release-30
           excludeTagsRegex: 'v\d+\.\d+\.\d+'
 
       - name: check for changes
         run: git status
-      # - name: Commit files # transfer the new html files back into the repository
-      #   run: |
-      #     git config --local user.name "changelog-generator"
-      #     git add .
-      #     git commit -m "chore: update changelog"
-      # - name: fetch from main
-      #   run: git fetch origin main
-      # - name: Push changes
-      #   uses: ad-m/github-push-action@master
-      #   with:
-      #     # github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     branch: ${{ github.ref }}
+      - name: Commit files # transfer the new html files back into the repository
+        run: |
+          git config --local user.name "changelog-generator"
+          git add .
+          git commit -m "chore: update changelog"
+      - name: fetch from main
+        run: git fetch origin main
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          # github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
