@@ -24,7 +24,7 @@ jobs:
         uses: scottbrenner/generate-changelog-action@master
         id: Changelog
         with:
-          from-tag: v1.0
+          from-tag: tiblake-ui/release-10
           to-tag: HEAD
 
       - name: check for changes
