@@ -16,7 +16,7 @@ jobs:
         with:
           user: centrifuge
           project: apps
-          token: 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 # will be invalidated after test
+          token: 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 # will be invalidated after test
 
       - name: check for changes
         run: git status
