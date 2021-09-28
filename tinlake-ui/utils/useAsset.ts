@@ -73,7 +73,7 @@ async function getAsset(tinlake: ITinlake, loanId: string): Promise<Asset> {
 
   const toBN = (val: BigNumber) => new BN(val.toString())
 
-  let calls: Call[] = [
+  const calls: Call[] = [
     {
       target: tinlake.contractAddresses.SHELF!,
       call: ['shelf(uint256)(address,uint256)', loanId],
