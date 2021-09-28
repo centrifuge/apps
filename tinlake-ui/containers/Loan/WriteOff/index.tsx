@@ -38,7 +38,7 @@ const LoanWriteOff: React.FC<Props> = (props: Props) => {
   const isWrittenOff =
     props.loan.rateGroup &&
     props.loan.writeOffRateGroupStart &&
-    props.loan.rateGroup > props.loan.writeOffRateGroupStart
+    props.loan.rateGroup >= props.loan.writeOffRateGroupStart
 
   const isOverdue = props.loan.maturityDate && props.loan.maturityDate > Date.now()
 
