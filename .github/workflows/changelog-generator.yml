@@ -1,0 +1,17 @@
+name: 'tinlake-ui Update changelog'
+on:
+  push:
+    branches:
+      - test-changelog
+    paths:
+      - 'tinlake-ui/**'
+      - '.github/workflows/changelog-generator.yml'
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      uses: heinrichreimer/github-changelog-generator-action@v2.2
+      with:
+        user: centrifuge
+        project: apps
