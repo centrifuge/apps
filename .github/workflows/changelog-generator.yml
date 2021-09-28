@@ -14,12 +14,18 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: test-changelog
-      - uses: heinrichreimer/github-changelog-generator-action@v2.2
+      # - uses: heinrichreimer/github-changelog-generator-action@v2.2
+      #   with:
+      #     user: centrifuge
+      #     project: apps
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     sinceTag: tinlake-ui/release-20
+      - name: Changelog
+        uses: scottbrenner/generate-changelog-action@master
+        id: Changelog
         with:
-          user: centrifuge
-          project: apps
-          token: ${{ secrets.GITHUB_TOKEN }}
-          sinceTag: tinlake-ui/release-20
+          from-tag: v1.0
+          to-tag: HEAD
 
       - name: check for changes
         run: git status
