@@ -11,7 +11,25 @@ jobs:
   update-changelog:
     runs-on: ubuntu-latest
     steps:
-      uses: heinrichreimer/github-changelog-generator-action@v2.2
-      with:
-        user: centrifuge
-        project: apps
+      - uses: actions/checkout@v2
+      - uses: heinrichreimer/github-changelog-generator-action@v2.2
+        with:
+          user: centrifuge
+          project: apps
+
+      - name: switching from HTTPS to SSH
+        run: git remote set-url origin ${{ secrets.ssh }}
+      - name: check for changes
+        run: git status
+      - name: Commit files # transfer the new html files back into the repository
+        run: |
+          git config --local user.name "changelog-generator"
+          git add .
+          git commit -m "chore: update changelog"
+      - name: fetch from main
+        run: git fetch origin main
+      - name: Push changes
+        uses: ad-m/github-push-action@0.6.0
+        with:
+          # github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
