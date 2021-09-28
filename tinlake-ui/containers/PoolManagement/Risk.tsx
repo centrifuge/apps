@@ -24,6 +24,10 @@ interface Props extends TransactionProps {
 
 const riskGroupsPerPage = 8
 
+const isValidRatePerSecond = (rate: BN): boolean => {
+  return rate.gt(new BN(interestRateToFee('0'))) && rate.lt(new BN(interestRateToFee('100')))
+}
+
 const Risk: React.FC<Props> = (props: Props) => {
   const { data: poolData, refetch: refetchPoolData } = usePool(props.tinlake.contractAddresses.ROOT_CONTRACT)
 
@@ -128,7 +132,11 @@ const Risk: React.FC<Props> = (props: Props) => {
               <TableRow>
                 <TableCell>{start + index}</TableCell>
                 <TableCell>{parseFloat(riskGroup.ceilingRatio.div(new BN(10).pow(new BN(25))).toString())}%</TableCell>
-                <TableCell>{toPrecision(feeToInterestRate(riskGroup.rate.ratePerSecond), 2)}%</TableCell>
+                <TableCell>
+                  {isValidRatePerSecond(riskGroup.rate.ratePerSecond)
+                    ? `${toPrecision(feeToInterestRate(riskGroup.rate.ratePerSecond), 2)}%`
+                    : 'N/A'}
+                </TableCell>
                 <TableCell>
                   {parseFloat(riskGroup.recoveryRatePD.div(new BN(10).pow(new BN(22))).toString()) / 1000}%
                 </TableCell>
