@@ -20,6 +20,8 @@ jobs:
           project: apps
           token: ${{ secrets.GITHUB_TOKEN }}
           excludeTagsRegex: 'v\d+\.\d+\.\d+'
+          maxIssues: 1000
+          sinceTag: tinlake-ui/release-25
 
       - name: check for changes
         run: git status
