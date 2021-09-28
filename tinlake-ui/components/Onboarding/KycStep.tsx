@@ -24,24 +24,39 @@ const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditat
     <Step
       state={state === 'done' && kycStatus === 'processing' ? 'todo' : state}
       title="Verify KYC"
-      subtitle={state === 'done' && kycStatus === 'processing' ? 'In progress' : undefined}
+      subtitle={
+        state === 'done' && kycStatus === 'processing'
+          ? 'In progress'
+          : kycStatus === 'verified' && !accreditationStatus
+          ? 'Submit accreditation'
+          : kycStatus === 'expired'
+          ? 'Expired'
+          : kycStatus === 'rejected'
+          ? 'Rejected'
+          : undefined
+      }
       icon={kycStatus === 'processing' ? 'clock' : undefined}
     >
       {active && kycStatus === 'processing' && (
         <StepParagraph icon="clock">Submitted KYC is being verified</StepParagraph>
       )}
-      {active && kycStatus && (kycStatus === 'none' || kycStatus === 'updates-required' || kycStatus === 'expired') && (
+      {active && kycStatus && ['none', 'updates-required', 'expired'].includes(kycStatus) && (
         <>
           <StepParagraph>
             Submit your KYC information through Securitize for verification. This is a one time process to become an
             eligible investor for all Tinlake pools.
           </StepParagraph>
-          <Button primary label={`Complete KYC on Securitize`} href={onboardURL} target="_blank" />
+          <Button
+            primary
+            label={kycStatus === 'none' ? 'Submit KYC on Securitize' : 'Complete on Securitize'}
+            href={onboardURL}
+            target="_blank"
+          />
         </>
       )}
       {active && kycStatus && kycStatus === 'rejected' && (
         <StepParagraph icon={kycStatus === 'rejected' ? 'alert' : undefined}>
-          Your KYC application was declined, please reach out to{' '}
+          Your KYC application was declined. Please reach out to{' '}
           <Anchor href="mailto:support@centrifuge.io" style={{ display: 'inline' }} label="support@centrifuge.io" /> for
           help.
         </StepParagraph>
@@ -57,7 +72,7 @@ const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditat
           <Button
             primary
             largeOnMobile={false}
-            label={`Complete accreditation on InvestReady`}
+            label="Submit accreditation on InvestReady"
             href={'https://centrifuge.investready.com/signup?app_id=7Ja9qnS6uckhHGA9pL49P5IwMDwt02y8MJhd6ajA'}
             target="_blank"
           />

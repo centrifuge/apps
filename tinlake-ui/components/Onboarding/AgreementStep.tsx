@@ -50,7 +50,21 @@ const AgreementStep: React.FC<Props> = ({
 
   return (
     <>
-      <Step state={state} title="Sign the Subscription Agreement">
+      <Step
+        state={state}
+        title="Sign Subscription Agreement"
+        subtitle={
+          agreementStatus === 'signed'
+            ? 'Awaiting Issuer signature'
+            : agreementStatus === 'voided'
+            ? 'Agreement expired'
+            : agreementStatus === 'declined'
+            ? 'Agreement declined'
+            : agreementStatus === 'countersigned'
+            ? 'Signed'
+            : undefined
+        }
+      >
         {active && !isRestricted && isAgreementStatusNegative && agreement && !session && (
           <>
             <StepParagraph>
@@ -135,7 +149,7 @@ const AgreementStep: React.FC<Props> = ({
             )}
             <Button
               primary
-              label="Sign Subscription Agreement"
+              label={['voided', 'declined'].includes(agreementStatus) ? 'Sign new agreement' : 'Sign agreement'}
               href={`${config.onboardAPIHost}pools/${(activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
                 agreement?.provider
               }/${agreement?.providerTemplateId}/redirect?session=${session}`}
@@ -145,10 +159,9 @@ const AgreementStep: React.FC<Props> = ({
         )}
         {active && !isRestricted && agreement && agreementStatus === 'signed' && (
           <>
-            <StepParagraph icon="check">You’ve successfully signed the subscription agreement</StepParagraph>
-            <StepParagraph>
-              The subscription still needs to be countersigned by the issuer. You will be notified once the token is
-              ready for investment.
+            <StepParagraph icon="clock">
+              The Issuer will counter-sign your DROP Subscription Agreement for Branch Series 3 soon. If KYC is
+              verified, you will be ready to invest in this pool upon their signature.
             </StepParagraph>
           </>
         )}
