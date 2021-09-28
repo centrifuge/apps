@@ -41,7 +41,7 @@ export const ValuePairList: React.FC<Props> = ({ variant = 'primary', items }) =
     <ValueVariantContext.Provider value={variantMap[variant]}>
       <Stack as="dl" gap={gap} margin={0}>
         {items.map((item, i) => (
-          <>
+          <React.Fragment key={i}>
             <Shelf justifyContent="space-between" alignItems="baseline">
               <Wrap as="dt" alignItems="baseline" gap="xsmall" rowGap={0}>
                 <Term fontWeight={termFontWeight}>{item.term}</Term>
@@ -53,7 +53,7 @@ export const ValuePairList: React.FC<Props> = ({ variant = 'primary', items }) =
               </Stack>
             </Shelf>
             {variant === 'secondary' && i < items.length - 1 && <Divider />}
-          </>
+          </React.Fragment>
         ))}
       </Stack>
     </ValueVariantContext.Provider>

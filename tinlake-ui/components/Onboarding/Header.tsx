@@ -9,10 +9,10 @@ interface Props {
 
 export const Header: React.FC<Props> = ({ title, subtitle }) => {
   return (
-    <Stack alignItems="center">
+    <Stack alignItems="center" gap="xsmall">
       <Heading fontSize={[16, 24]}>{title}</Heading>
       {subtitle && (
-        <Text fontSize={14} color="#2762ff" fontWeight={500}>
+        <Text fontSize={16} color="#2762ff" fontWeight={500}>
           {subtitle}
         </Text>
       )}

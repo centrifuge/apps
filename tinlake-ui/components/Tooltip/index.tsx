@@ -1,7 +1,7 @@
 import { Tooltip as AxisTooltip } from '@centrifuge/axis-tooltip'
 import * as React from 'react'
 import styled from 'styled-components'
-import tooltips from '../../static/tooltips.json'
+import tooltips from '../../public/static/tooltips.json'
 
 interface BaseProps {
   children: React.ReactNode
