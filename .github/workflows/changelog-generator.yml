@@ -14,12 +14,13 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: test-changelog
-      - uses: heinrichreimer/github-changelog-generator-action@v2.1.1
+      - uses: heinrichreimer/github-changelog-generator-action@v2.2
         with:
           user: centrifuge
           project: apps
           token: ${{ secrets.GITHUB_TOKEN }}
           sinceTag: tinlake-ui/release-30
+          excludeTagsRegex: 'v\d+\.\d+\.\d+'
 
       - name: check for changes
         run: git status
