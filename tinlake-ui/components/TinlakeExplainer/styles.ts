@@ -6,13 +6,6 @@ export const Row = styled.div`
   width: fit-content;
 `
 
-export const Primer = styled.div`
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 24px;
-  color: #0828be;
-`
-
 export const Btn = styled.div`
   margin-left: auto;
   display: flex;
@@ -31,12 +24,4 @@ export const Caret = styled.div`
     transition: 200ms;
     transform-style: preserve-3d;
   }
-`
-
-export const Text = styled.div`
-  margin-top: 16px;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 24px;
-  color: #333;
 `

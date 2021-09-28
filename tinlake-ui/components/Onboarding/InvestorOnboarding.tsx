@@ -40,12 +40,13 @@ export const InvestorOnboarding: React.FC<Props> = () => {
   const address = useAddress()
   const onboarding = useInvestorOnboardingState()
 
-  const kycStatus = onboarding.data?.kyc?.requiresSignin ? 'requires-signin' : onboarding.data?.kyc?.status
-  const accreditationStatus = onboarding.data?.kyc?.isUsaTaxResident ? onboarding.data?.kyc?.accredited || false : true
+  const completed = onboarding.data?.completed
+  const kycStatus = onboarding.data?.kycStatus
+  const accreditationStatus = onboarding.data?.accreditationStatus ?? true
 
   React.useEffect(() => {
     if (!address) setActiveStep(1)
-    else if (kycStatus === 'verified' && accreditationStatus) {
+    else if (completed) {
       setActiveStep(4)
     } else if (!kycStatus) {
       setActiveStep(2)
@@ -58,7 +59,7 @@ export const InvestorOnboarding: React.FC<Props> = () => {
     } else {
       setActiveStep(4)
     }
-  }, [address, kycStatus])
+  }, [address, kycStatus, accreditationStatus, completed])
 
   const [activeStep, setActiveStep] = React.useState(0)
 
@@ -110,7 +111,7 @@ export const InvestorOnboarding: React.FC<Props> = () => {
               Need help?{' '}
               <Anchor
                 color="#777777"
-                href="https://docs.centrifuge.io/use/invest/#onboarding-guide"
+                href="https://docs.centrifuge.io/use/onboarding/"
                 target="_blank"
                 label="Read the onboarding guide"
                 style={{ display: 'inline' }}

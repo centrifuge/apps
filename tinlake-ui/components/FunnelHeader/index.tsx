@@ -45,7 +45,7 @@ export const FunnelHeader: React.FC = () => {
             getAddressLink={getAddressLink}
           />
         ) : (
-          <Button onClick={connectAccount} label="Connect" />
+          <Button primary onClick={connectAccount} label="Connect Wallet" />
         )}
       </Box>
     </Shelf>

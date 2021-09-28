@@ -150,7 +150,7 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool }) => {
               Need help?{' '}
               <Anchor
                 color="#777777"
-                href="https://docs.centrifuge.io/use/invest/#onboarding-guide"
+                href="https://docs.centrifuge.io/use/onboarding/"
                 target="_blank"
                 label="Read the onboarding guide"
                 style={{ display: 'inline' }}

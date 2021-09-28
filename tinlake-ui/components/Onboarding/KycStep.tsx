@@ -24,7 +24,7 @@ const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditat
     <Step
       state={state === 'done' && kycStatus === 'processing' ? 'todo' : state}
       title="Verify KYC"
-      subtitle={kycStatus === 'processing' ? 'In progress' : undefined}
+      subtitle={state === 'done' && kycStatus === 'processing' ? 'In progress' : undefined}
       icon={kycStatus === 'processing' ? 'clock' : undefined}
     >
       {active && kycStatus === 'processing' && (
