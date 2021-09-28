@@ -6,13 +6,16 @@ import { useAddress } from './useAddress'
 
 export function useOnboardingState(pool: Pool | UpcomingPool, overrideAddress?: string) {
   const debugValue = useDebugFlags().onboardingState
-  const address = overrideAddress || useAddress()
+  const address = useAddress()
   const poolId = (pool as Pool).addresses?.ROOT_CONTRACT
   const query = useQuery<AddressStatus>(
-    ['onboarding', poolId, address],
-    () => fetch(`${config.onboardAPIHost}pools/${poolId}/addresses/${address}`).then((res) => res.json()),
+    ['onboarding', poolId, overrideAddress || address],
+    () =>
+      fetch(`${config.onboardAPIHost}pools/${poolId}/addresses/${overrideAddress || address}`).then((res) =>
+        res.json()
+      ),
     {
-      enabled: !!poolId && !!address,
+      enabled: !!poolId && !!(overrideAddress || address),
       staleTime: 60000,
     }
   )

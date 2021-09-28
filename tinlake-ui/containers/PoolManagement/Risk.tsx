@@ -235,7 +235,7 @@ const Risk: React.FC<Props> = (props: Props) => {
         )}
       </Card>
 
-      {existingWriteOffGroups && (
+      {existingWriteOffGroups && existingWriteOffGroups.length > 0 && (
         <Card width="100%" p="medium" mb="medium">
           <Heading level="5" margin={{ top: '0' }}>
             Write-off groups
