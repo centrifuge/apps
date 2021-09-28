@@ -1,7 +1,7 @@
 import { Box, Button } from 'grommet'
-import { useRouter } from 'next/router'
 import * as React from 'react'
 import styled from 'styled-components'
+import { useDebugFlags } from '../../components/DebugFlags'
 import PageTitle from '../../components/PageTitle'
 import { useTinlake } from '../../components/TinlakeProvider'
 import { Pool } from '../../config'
@@ -25,8 +25,9 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
-  const router = useRouter()
-  const isAdmin = poolData?.isPoolAdmin || 'admin' in router.query
+  const { showAdmin } = useDebugFlags()
+
+  const isAdmin = showAdmin || poolData?.isPoolAdmin
 
   const [view, setView] = React.useState('Liquidity')
 

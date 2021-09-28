@@ -3,9 +3,9 @@ import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Box, Button } from 'grommet'
-import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { useDebugFlags } from '../../../components/DebugFlags'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
@@ -28,8 +28,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const { data: epochData } = useEpoch()
   const [borrowAmount, setBorrowAmount] = React.useState<string>('')
 
-  const router = useRouter()
-  const allowMultipleBorrow = 'allowMultipleBorrow' in router.query
+  const { allowMultipleBorrow } = useDebugFlags()
 
   const [status, , setTxId] = useTransactionState()
 
@@ -59,21 +58,6 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
     }
   }, [status])
 
-  const [closeStatus, , setCloseTxId] = useTransactionState()
-
-  const close = async () => {
-    await props.ensureAuthed!()
-
-    const txId = await props.createTransaction(`Close Asset ${props.loan.loanId}`, 'close', [tinlake, props.loan])
-    setCloseTxId(txId)
-  }
-
-  React.useEffect(() => {
-    if (closeStatus === 'succeeded') {
-      props.refetch()
-    }
-  }, [closeStatus])
-
   const ceilingSet = props.loan.principal.toString() !== '0'
   const availableFunds = (poolData && poolData.availableFunds.toString()) || '0'
   const borrowedAlready =
@@ -82,7 +66,7 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
   const isBlockedState = epochData ? epochData.isBlockedState : false
 
   const [error, setError] = React.useState<string | undefined>(undefined)
-  const borrowEnabled = ceilingSet && !borrowedAlready && !isBlockedState
+  const borrowEnabled = (ceilingSet && !borrowedAlready && !isBlockedState) || !!epochData
 
   React.useEffect(() => {
     if (!borrowEnabled && borrowAmount === '') setBorrowAmount('0')
@@ -139,24 +123,19 @@ const LoanBorrow: React.FC<Props> = (props: Props) => {
       </Box>
       <Box align="start">
         <Box direction="row" gap="small">
-          {epochData && borrowEnabled && (
-            <Button
-              onClick={borrow}
-              primary
-              label="Finance Asset"
-              disabled={
-                new BN(borrowAmount).isZero() || error !== undefined || status === 'unconfirmed' || status === 'pending'
-              }
-            />
-          )}
-          {props.loan.status === 'NFT locked' && (
-            <Button
-              onClick={close}
-              secondary
-              label="Unlock NFT"
-              disabled={status === 'unconfirmed' || status === 'pending'}
-            />
-          )}
+          <Button
+            onClick={borrow}
+            primary
+            label={epochData ? 'Finance Asset' : 'loading...'}
+            disabled={
+              !epochData ||
+              !borrowEnabled ||
+              new BN(borrowAmount).isZero() ||
+              error !== undefined ||
+              status === 'unconfirmed' ||
+              status === 'pending'
+            }
+          />
         </Box>
         {isBlockedState && (
           <Box margin={{ top: 'small' }}>

@@ -22,11 +22,11 @@ const HelpMenu: React.FC<{}> = () => {
 
   const loadImages = () => {
     preload([
-      '/static/help/slack.svg',
+      '/static/help/discord.svg',
       '/static/help/telegram.svg',
       '/static/help/email.svg',
       '/static/help/documentation.svg',
-      '/static/help/slack-hover.svg',
+      '/static/help/discord-hover.svg',
       '/static/help/telegram-hover.svg',
       '/static/help/email-hover.svg',
       '/static/help/documentation-hover.svg',
@@ -60,7 +60,7 @@ const HelpMenu: React.FC<{}> = () => {
             <MenuItem href="https://t.me/centrifuge_chat" target="_blank" icon="telegram">
               <Name>Telegram</Name>
             </MenuItem>
-            <MenuItem href="https://centrifuge.io/discord" target="_blank" icon="slack">
+            <MenuItem href="https://centrifuge.io/discord" target="_blank" icon="discord">
               <Name>Discord</Name>
             </MenuItem>
             <MenuItem href="mailto:support@centrifuge.io" target="_blank" icon="email">

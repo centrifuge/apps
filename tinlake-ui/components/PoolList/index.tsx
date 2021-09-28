@@ -8,6 +8,7 @@ import { PropsOf } from '../../helpers'
 import { toPrecision } from '../../utils/toPrecision'
 import { useMedia } from '../../utils/useMedia'
 import { PoolData, PoolsData } from '../../utils/usePools'
+import { useDebugFlags } from '../DebugFlags'
 import { Divider } from '../Divider'
 import { SectionHeading } from '../Heading'
 import { Shelf, Stack } from '../Layout'
@@ -17,9 +18,11 @@ import { Value } from '../Value'
 import { ValuePairList } from '../ValuePairList'
 import {
   DataCol,
+  DataColLeft,
   Desc,
   Header,
   HeaderCol,
+  HeaderColLeft,
   HeaderSub,
   HeaderTitle,
   Icon,
@@ -49,13 +52,10 @@ const toNumber = (value: BN | undefined, decimals: number) => {
   return value ? parseInt(value.toString(), 10) / 10 ** decimals : 0
 }
 
-const PoolList: React.FC<Props> = (props) => {
-  const {
-    poolsData,
-    router: {
-      query: { showAll, showArchived, capacity },
-    },
-  } = props
+const isAlignedLeft = (c: Column) => c.header === 'Investment Capacity'
+
+const PoolList: React.FC<Props> = ({ poolsData }) => {
+  const { showAll, showArchived, showCapacity } = useDebugFlags()
   const isMobile = useMedia({ below: 'medium' })
 
   const pools = poolsData?.pools?.filter((p) => showArchived || !p.isArchived)
@@ -74,7 +74,7 @@ const PoolList: React.FC<Props> = (props) => {
       header: 'Investment Capacity',
       cell: (p: PoolData) => <PoolCapacityLabel pool={p} />,
     },
-    capacity
+    showCapacity
       ? [
           {
             header: 'DROP Capacity',
@@ -135,12 +135,15 @@ const PoolList: React.FC<Props> = (props) => {
           <Desc>
             <HeaderTitle>Pool</HeaderTitle>
           </Desc>
-          {dataColumns.map((col) => (
-            <HeaderCol>
-              <HeaderTitle>{col.header}</HeaderTitle>
-              {col.subHeader && <HeaderSub>{col.subHeader}</HeaderSub>}
-            </HeaderCol>
-          ))}
+          {dataColumns.map((col) => {
+            const Col = isAlignedLeft(col) ? HeaderColLeft : HeaderCol
+            return (
+              <Col>
+                <HeaderTitle>{col.header}</HeaderTitle>
+                {col.subHeader && <HeaderSub>{col.subHeader}</HeaderSub>}
+              </Col>
+            )
+          })}
         </Header>
       )}
       {pools?.map((p) => (
@@ -209,9 +212,10 @@ export const Row: React.FC<DetailsProps & PropsOf<typeof PoolRow>> = ({
         <Shelf gap="small">
           {poolIcon}
           {poolTitle}
-          {columns.map((col) => (
-            <DataCol>{col.cell(row)}</DataCol>
-          ))}
+          {columns.map((col) => {
+            const Col = isAlignedLeft(col) ? DataColLeft : DataCol
+            return <Col>{col.cell(row)}</Col>
+          })}
         </Shelf>
       )}
     </PoolRow>

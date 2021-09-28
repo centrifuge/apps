@@ -15,10 +15,10 @@ import { Tooltip } from '../../components/Tooltip'
 import { Value } from '../../components/Value'
 import { IpfsPools, Pool } from '../../config'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
+import { useAddress } from '../../utils/useAddress'
 import { useMedia } from '../../utils/useMedia'
 import { usePools } from '../../utils/usePools'
 import { TokenBalance, usePortfolio } from '../../utils/usePortfolio'
-import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
 
 interface Props {
   ipfsPools: IpfsPools
@@ -31,8 +31,8 @@ const toNumber = (value: BN | undefined, decimals: number) => {
 const Portfolio: React.FC<Props> = (props: Props) => {
   const pools = usePools()
   const connectedAddress = useSelector<any, string | null>((state) => state.auth.address)
-  const address = useQueryDebugEthAddress() || connectedAddress
-  const portfolio = usePortfolio(props.ipfsPools, address)
+  const address = useAddress()
+  const portfolio = usePortfolio()
   const isMobile = useMedia({ below: 'medium' })
 
   const getPool = (tokenBalance: TokenBalance) => {

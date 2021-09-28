@@ -1,7 +1,6 @@
 import Tinlake, { ContractAddresses, ContractVersions, ITinlake } from '@centrifuge/tinlake-js'
 import { ethers } from 'ethers'
 import config from '../../config'
-export { createTinlakeInstance } from './createTinlakeInstance'
 
 let tinlake: ITinlake | null = null
 let currentAddresses: null | ContractAddresses = null

@@ -3,12 +3,11 @@ import BN from 'bn.js'
 import { BigNumber } from 'ethers'
 import { useQuery } from 'react-query'
 import { useTinlake } from '../components/TinlakeProvider'
+import { ZERO_ADDRESS } from '../constants'
 import Apollo from '../services/apollo'
 import { getNFT } from '../services/tinlake/actions'
 import { Call, multicall } from './multicall'
 const web3 = require('web3-utils')
-
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 // SortableLoan adds properties of number type that support sorting in numerical order for grommet DataTable
 export interface SortableLoan extends Loan {

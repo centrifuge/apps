@@ -2,16 +2,15 @@ import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Anchor, Box, Button } from 'grommet'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import Alert from '../../components/Alert'
 import { Tooltip } from '../../components/Tooltip'
 import { TransactionStatus } from '../../ducks/transactions'
-import { loadCentChain, UserRewardsLink, UserRewardsState } from '../../ducks/userRewards'
 import { centChainService } from '../../services/centChain'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { createBufferProofFromClaim, createTree, newClaim } from '../../utils/cfgRewardProofs'
 import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
 import { useGlobalRewards } from '../../utils/useGlobalRewards'
+import { useRewardClaims, UserRewardsLink, useUserRewards } from '../../utils/useUserRewards'
 import { RewardStripe, Small } from './styles'
 
 interface Props {
@@ -20,9 +19,9 @@ interface Props {
 }
 
 const ClaimRewards: React.FC<Props> = ({ activeLink, portfolioValue }) => {
-  const { data, claims } = useSelector<any, UserRewardsState>((state: any) => state.userRewards)
+  const { data, refetchCentChain } = useUserRewards()
+  const { data: claims } = useRewardClaims()
   const rewards = useGlobalRewards()
-  const dispatch = useDispatch()
 
   const [claimExtHash, setClaimExtHash] = React.useState<null | string>(null)
   const [status, setStatus] = React.useState<null | TransactionStatus>(null)
@@ -47,7 +46,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink, portfolioValue }) => {
     try {
       const hash = await centChainService().claimCFGRewards(claim.accountID, claim.balance, proof)
       setClaimExtHash(hash)
-      await dispatch(loadCentChain())
+      await refetchCentChain()
       setStatus('succeeded')
     } catch (e) {
       setStatus('failed')
@@ -55,7 +54,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink, portfolioValue }) => {
     }
   }
 
-  if (activeLink.claimable === null || activeLink.claimed === null || claims === null) {
+  if (activeLink.claimable == null || activeLink.claimed == null || claims == null) {
     return <Box pad="medium">Loading claimable rewards...</Box>
   }
 

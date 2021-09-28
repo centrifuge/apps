@@ -1,8 +1,8 @@
 import { Modal } from '@centrifuge/axis-modal'
+import { AddressStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { Anchor, Box, Button, CheckBox, Heading, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import * as React from 'react'
-import { AddressStatus } from '../../../onboarding/api/src/controllers/types'
 import { Pool } from '../../config'
 import { FormFieldWithoutBorder, LegalCopy, Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
@@ -47,13 +47,13 @@ const LinkStep: React.FC<Props> = (props: Props) => {
                   <div style={{ lineHeight: '24px' }}>
                     I consent to share personal information with Securitize, which Securitize may transfer to Centrifuge
                     and issuers I (the investor) have identified and I consent to Centrifuge's Privacy Policy and Terms
-                    and Conditions. &nbsp;
+                    and Conditions.{' '}
                     <Anchor
-                      onClick={(event: any) => {
+                      onClick={(event) => {
                         openModal()
                         event.preventDefault()
                       }}
-                      style={{}}
+                      style={{ display: 'inline ' }}
                       label="View more"
                     />
                     .

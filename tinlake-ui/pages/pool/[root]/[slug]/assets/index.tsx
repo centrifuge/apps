@@ -2,9 +2,9 @@ import { Button } from 'grommet'
 import { GetStaticProps } from 'next'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
-import { useRouter } from 'next/router'
 import * as React from 'react'
 import Auth from '../../../../../components/Auth'
+import { useDebugFlags } from '../../../../../components/DebugFlags'
 import Header from '../../../../../components/Header'
 import { SectionHeading } from '../../../../../components/Heading'
 import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
@@ -32,8 +32,8 @@ const LoanListPage: React.FC<Props> = (props) => {
 
   const { data: poolData } = usePool(pool.addresses.ROOT_CONTRACT)
   const auth = useAuth()
-  const router = useRouter()
-  const isBorrower = poolData?.isPoolAdmin || (auth?.proxies && auth?.proxies.length > 0) || 'lockNFT' in router.query
+  const { showLockNFT } = useDebugFlags()
+  const isBorrower = poolData?.isPoolAdmin || (auth?.proxies && auth?.proxies.length > 0) || showLockNFT
 
   return (
     <IpfsPoolsProvider value={ipfsPools}>
