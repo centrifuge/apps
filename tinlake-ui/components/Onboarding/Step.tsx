@@ -1,12 +1,13 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { Shelf, Stack } from '../Layout'
-import { Heading } from '../Text'
+import { Heading, Text } from '../Text'
 import { CheckIcon } from './CheckIcon'
 import { ClockIcon } from './ClockIcon'
 
 export interface StepProps {
   title: string
+  subtitle?: string
   state: 'active' | 'todo' | 'done'
   icon?: 'clock' | 'check'
   last?: boolean
@@ -14,12 +15,13 @@ export interface StepProps {
 
 export const Step: React.FC<StepProps> = ({
   title,
+  subtitle,
   state,
   icon = state === 'done' ? 'check' : undefined,
   children,
   last,
 }) => {
-  const color = state === 'done' ? '#bbbbbb' : 'black'
+  const color = state === 'active' ? 'black' : '#bbbbbb'
   const iconEl =
     state === 'active' ? (
       <Circle filled />
@@ -37,9 +39,16 @@ export const Step: React.FC<StepProps> = ({
         {!last && <Line />}
       </Stack>
       <Stack gap="small" pb={!last ? 'medium' : undefined}>
-        <Heading lineHeight="24px" color={color}>
-          {title}
-        </Heading>
+        <Shelf gap="xsmall" alignItems="baseline">
+          <Heading lineHeight="24px" color={color}>
+            {title}
+          </Heading>
+          {subtitle && (
+            <Text fontSize="14px" color="#777777" fontWeight={500}>
+              {subtitle}
+            </Text>
+          )}
+        </Shelf>
         <MaybeEmptyStack gap="medium" alignItems="flex-start" pb="medium">
           {children}
         </MaybeEmptyStack>

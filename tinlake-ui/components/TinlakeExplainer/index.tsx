@@ -1,7 +1,8 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import InvestmentDisclaimer from '../Footer/InvestmentDisclaimer'
-import { Primer, Row, Text } from './styles'
+import { Text } from '../Text'
+import { Row } from './styles'
 
 const LearnMore = styled.span`
   text-decoration: underline;
@@ -22,13 +23,13 @@ const TinlakeExplainer: React.FC = () => {
   return (
     <div>
       <Row onClick={() => setOpen(!open)} role="button">
-        <Primer>
+        <Text fontSize="14px" fontWeight={500}>
           Tinlake is an open market place of real-world asset pools. Investments earn rewards in CFG token.{' '}
           <LearnMore>Learn more</LearnMore>
-        </Primer>
+        </Text>
       </Row>
       {open && (
-        <Text>
+        <Text fontSize="14px" fontWeight={500}>
           Tinlake allows DeFi investors to invest in pools of real-world assets, such as invoices, trade receivables or
           residential real estate loans. These assets create a stable yield for DeFi investors and DeFi protocols who
           provide the liquidity. Tinlake investments also earn daily rewards in Centrifuge's native token (CFG). These

@@ -4,9 +4,10 @@ import { Flex, Shelf } from '../Layout'
 import { Text } from '../Text'
 import { AlertIcon } from './AlertIcon'
 import { ClockIcon } from './ClockIcon'
+import { PlainCheckIcon } from './PlainCheckIcon'
 
 interface Props {
-  icon?: 'alert' | 'clock'
+  icon?: 'alert' | 'clock' | 'check'
 }
 
 export const StepParagraph: React.FC<Props> = ({ icon, children }) => {
@@ -14,7 +15,7 @@ export const StepParagraph: React.FC<Props> = ({ icon, children }) => {
     <Shelf as={Text} gap="xsmall" alignItems="baseline">
       {icon && (
         <FirstLineAlignedIcon minWidth="24px" flex="0 0 24px">
-          {icon === 'alert' ? <AlertIcon /> : <ClockIcon />}
+          {icon === 'alert' ? <AlertIcon /> : icon === 'check' ? <PlainCheckIcon /> : <ClockIcon />}
         </FirstLineAlignedIcon>
       )}
       <Text>{children}</Text>
