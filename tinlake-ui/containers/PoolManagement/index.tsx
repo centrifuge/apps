@@ -2,7 +2,6 @@ import { Box, Button } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
 import { useDebugFlags } from '../../components/DebugFlags'
-import PageTitle from '../../components/PageTitle'
 import { useTinlake } from '../../components/TinlakeProvider'
 import { Pool } from '../../config'
 import { usePool } from '../../utils/usePool'
@@ -32,15 +31,14 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
   const [view, setView] = React.useState('Liquidity')
 
   return (
-    <Box margin={{ top: 'medium' }}>
-      <PageTitle pool={props.activePool} page="Pool Management" />
-
+    <Box>
       {isAdmin && (
-        <Box direction="row">
-          <Menu>
+        <Box>
+          <Menu direction="row">
             <MenuItem
               secondary={view === 'Liquidity'}
-              plain={view !== 'Liquidity'}
+              plain
+              color={view === 'Liquidity' ? 'selected' : undefined}
               onClick={() => setView('Liquidity')}
               label="Liquidity"
               size="small"
@@ -48,7 +46,8 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
             />
             <MenuItem
               secondary={view === 'Investors'}
-              plain={view !== 'Investors'}
+              plain
+              color={view === 'Investors' ? 'selected' : undefined}
               onClick={() => setView('Investors')}
               label="Investors"
               size="small"
@@ -56,7 +55,8 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
             />
             <MenuItem
               secondary={view === 'Risk'}
-              plain={view !== 'Risk'}
+              plain
+              color={view === 'Risk' ? 'selected' : undefined}
               onClick={() => setView('Risk')}
               label="Risk"
               size="small"
@@ -74,7 +74,8 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
             )} */}
             <MenuItem
               secondary={view === 'Parameters'}
-              plain={view !== 'Parameters'}
+              plain
+              color={view === 'Parameters' ? 'selected' : undefined}
               onClick={() => setView('Parameters')}
               label="Parameters"
               size="small"
@@ -82,7 +83,8 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
             />
             <MenuItem
               secondary={view === 'Admin Log'}
-              plain={view !== 'Admin Log'}
+              plain
+              color={view === 'Admin Log' ? 'selected' : undefined}
               onClick={() => setView('Admin Log')}
               label="Admin Log"
               size="small"
@@ -90,7 +92,8 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
             />
             <MenuItem
               secondary={view === 'Data Export'}
-              plain={view !== 'Data Export'}
+              plain
+              color={view === 'Data Export' ? 'selected' : undefined}
               onClick={() => setView('Data Export')}
               label="Data Export"
               size="small"
@@ -130,16 +133,13 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
 export default PoolManagement
 
 const Menu = styled(Box)`
-  margin: 4px 48px 0 0;
-  width: 140px;
+  margin: 0 48px 24px 0;
 `
 
 const MenuItem = styled(Button)`
-  font-size: 12px;
-  text-transform: uppercase;
+  font-size: 14px;
   font-weight: bold;
-  padding: 4px 20px;
+  padding: 0 12px;
   text-align: left;
-  width: 140px;
   margin: 4px 0;
 `

@@ -1,6 +1,6 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Box, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Card } from '../../components/Card'
@@ -102,7 +102,9 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                 pad={{ vertical: '6px' }}
                 border={{ color: 'transparent' }}
               >
-                TIN Tranche Value
+                <Heading level="5" margin={{ top: '0', bottom: '0' }}>
+                  TIN Tranche Value
+                </Heading>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={poolData?.junior.totalSupply !== undefined}>
@@ -278,7 +280,9 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                   pad={{ vertical: '6px' }}
                   border={{ color: 'transparent' }}
                 >
-                  Maker Covenants
+                  <Heading level="5" margin={{ top: '0', bottom: '0' }}>
+                    Maker Covenants
+                  </Heading>
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                   &nbsp;
