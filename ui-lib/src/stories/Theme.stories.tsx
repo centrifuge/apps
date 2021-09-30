@@ -1,5 +1,6 @@
 import { ComponentMeta } from '@storybook/react'
 import React from 'react'
+import * as icons from '../icon'
 import { theme } from '../theme'
 
 export default {
@@ -7,12 +8,21 @@ export default {
   //component: () => null,
 } as ComponentMeta<React.FC>
 
+const bpAliases = Object.entries(theme.breakpoints).reduce((acc, [key, value]) => {
+  if (!acc[value]) {
+    acc[value] = `${key}`
+  } else {
+    acc[value] += `, ${key}`
+  }
+  return acc
+}, {} as Record<string, string>)
+
 export const Breakpoints = () => (
   <table>
-    {Object.entries(theme.breakpoints).map(([key, val]) => (
+    {Object.entries(bpAliases).map(([value, aliases]) => (
       <tr>
-        <td>{key}</td>
-        <td>{val}</td>
+        <td>{aliases}</td>
+        <td>{value}</td>
       </tr>
     ))}
   </table>
@@ -42,5 +52,20 @@ export const Spacing = () => (
         </td>
       </tr>
     ))}
+  </table>
+)
+
+export const Icons = () => (
+  <table>
+    {Object.entries(icons)
+      .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
+      .map(([iconName, IconComponent]) => (
+        <tr>
+          <td>{iconName}</td>
+          <td>
+            <IconComponent />
+          </td>
+        </tr>
+      ))}
   </table>
 )
