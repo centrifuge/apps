@@ -6,12 +6,11 @@ import App from 'next/app'
 import Head from 'next/head'
 import React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
+import { DebugFlags } from '../components/DebugFlags'
 import { StyledApp } from '../components/StyledApp'
 import config from '../config'
 import { theme } from '../theme'
 import makeStore from '../utils/makeStore'
-
-require('regenerator-runtime/runtime')
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,18 +64,20 @@ class MyApp extends App {
               />
             )}
           </Head>
-          {config.enableErrorLogging && (
-            <Sentry.ErrorBoundary fallback={'An error has occured'}>
-              <StyledApp />
-              <Component {...pageProps} />
-            </Sentry.ErrorBoundary>
-          )}
-          {!config.enableErrorLogging && (
-            <>
-              <StyledApp />
-              <Component {...pageProps} />
-            </>
-          )}
+          <DebugFlags>
+            {config.enableErrorLogging && (
+              <Sentry.ErrorBoundary fallback={'An error has occured'}>
+                <StyledApp />
+                <Component {...pageProps} />
+              </Sentry.ErrorBoundary>
+            )}
+            {!config.enableErrorLogging && (
+              <>
+                <StyledApp />
+                <Component {...pageProps} />
+              </>
+            )}
+          </DebugFlags>
         </AxisTheme>
       </QueryClientProvider>
     )

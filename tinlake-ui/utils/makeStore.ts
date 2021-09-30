@@ -5,7 +5,6 @@ import config from '../config'
 import authReducer from '../ducks/auth'
 import centChainWalletReducer from '../ducks/centChainWallet'
 import transactionReducer from '../ducks/transactions'
-import userRewardsReducer from '../ducks/userRewards'
 
 const sentryReduxEnhancer = config.enableErrorLogging ? Sentry.createReduxEnhancer({}) : {}
 
@@ -25,7 +24,6 @@ const makeStore = () => {
       sentryReduxEnhancer,
       auth: authReducer,
       transactions: transactionReducer,
-      userRewards: userRewardsReducer,
       centChainWallet: centChainWalletReducer,
     }),
     composeEnhancers(applyMiddleware(thunk))

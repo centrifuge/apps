@@ -1,5 +1,6 @@
 import { Box } from 'grommet'
 import React, { PropsWithChildren } from 'react'
+import { ClientOnlyRender } from '../ClientOnlyRender'
 
 class Container extends React.Component<PropsWithChildren<{ [k: string]: any }>> {
   render() {
@@ -7,7 +8,7 @@ class Container extends React.Component<PropsWithChildren<{ [k: string]: any }>>
 
     return (
       <Box align="center" pad={{ horizontal: 'medium' }} {...rest} style={{ background: 'rgb(249, 249, 249)' }}>
-        {this.props.children}
+        <ClientOnlyRender>{this.props.children}</ClientOnlyRender>
       </Box>
     )
   }

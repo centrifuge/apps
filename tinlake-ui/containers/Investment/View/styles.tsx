@@ -146,20 +146,6 @@ export const DividerInner = styled.div`
   width: 50%;
 `
 
-export const AddWalletLink = styled.a`
-  color: #333;
-  text-decoration: underline;
-  margin-top: 16px;
-  font-size: 12px;
-  cursor: pointer;
-  text-align: right;
-
-  &:hover,
-  &:focus {
-    color: #000;
-  }
-`
-
 export const MinTimeRemaining = styled.div`
   margin-top: 12px;
 `

@@ -12,6 +12,7 @@ import PageTitle from '../../../../../components/PageTitle'
 import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
+import UnlockNft from '../../../../../containers/Loan/UnlockNft'
 import LoanView from '../../../../../containers/Loan/View'
 import { menuItems } from '../../../../../menuItems'
 
@@ -26,7 +27,7 @@ const LoanPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
 
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig} contractVersions={pool.versions}>
         <WithFooter>
           <Head>
             <title>
@@ -47,12 +48,7 @@ const LoanPage: React.FC<Props> = ({ pool, ipfsPools, router }) => {
                   page={`Asset ${assetId}`}
                   parentPage="Assets"
                   parentPageHref="/assets"
-                  // rightContent={
-                  //   <Box gap="small" justify="end" direction="row" margin={{ top: 'medium' }}>
-                  //     <Button secondary size="small" label="Previous" />
-                  //     <ChevronRight />
-                  //   </Box>
-                  // }
+                  rightContent={<UnlockNft assetId={assetId} />}
                 />
 
                 <Auth>

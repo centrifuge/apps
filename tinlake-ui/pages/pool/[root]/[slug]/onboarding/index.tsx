@@ -1,49 +1,55 @@
-import { Box } from 'grommet'
 import { GetStaticProps } from 'next'
-import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
 import * as React from 'react'
 import Auth from '../../../../../components/Auth'
-import Container from '../../../../../components/Container'
+import { useDebugFlags } from '../../../../../components/DebugFlags'
+import { FunnelHeader } from '../../../../../components/FunnelHeader'
 import Header from '../../../../../components/Header'
 import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
+import { PoolOnboarding } from '../../../../../components/Onboarding'
+import { PageContainer } from '../../../../../components/PageContainer'
 import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
 import OnboardingSteps from '../../../../../containers/Onboarding/OnboardingSteps'
 import { menuItems } from '../../../../../menuItems'
 
-interface Props extends WithRouterProps {
+interface Props {
   root: string
   pool: Pool
   ipfsPools: IpfsPools
 }
 
 const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
+  const { newOnboarding } = useDebugFlags()
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig} contractVersions={pool.versions}>
         <WithFooter>
           <Head>
             <title>Investor Onboarding: {pool.metadata.name} | Tinlake | Centrifuge</title>
           </Head>
-          <Header
-            ipfsPools={ipfsPools}
-            poolTitle={pool.metadata.shortName || pool.metadata.name}
-            selectedRoute={'/onboarding'}
-            menuItems={menuItems}
-          />
-          <Container>
-            <Box justify="center" direction="row">
-              <Box width="xlarge">
-                <Auth>
-                  <Box>
-                    <OnboardingSteps activePool={pool} />
-                  </Box>
-                </Auth>
-              </Box>
-            </Box>
-          </Container>
+          {newOnboarding ? (
+            <FunnelHeader />
+          ) : (
+            <Header
+              ipfsPools={ipfsPools}
+              poolTitle={pool.metadata.shortName || pool.metadata.name}
+              selectedRoute={'/onboarding'}
+              menuItems={menuItems}
+            />
+          )}
+          <Auth>
+            {newOnboarding ? (
+              <PageContainer width="funnel" noMargin>
+                <PoolOnboarding activePool={pool} />
+              </PageContainer>
+            ) : (
+              <PageContainer>
+                <OnboardingSteps activePool={pool} />
+              </PageContainer>
+            )}
+          </Auth>
         </WithFooter>
       </TinlakeProvider>
     </IpfsPoolsProvider>

@@ -18,7 +18,11 @@ interface Props extends WithRouterProps {
 
 const OnboardingPage: React.FC<Props> = (props: Props) => {
   return (
-    <TinlakeProvider addresses={props.pool.addresses} contractConfig={props.pool.contractConfig}>
+    <TinlakeProvider
+      addresses={props.pool.addresses}
+      contractConfig={props.pool.contractConfig}
+      contractVersions={props.pool.versions}
+    >
       <WithFooter hideHelpMenu={true}>
         <Head>
           <title>Investor Onboarding for {capitalizeFirstLetter(props.market)} | Tinlake | Centrifuge</title>

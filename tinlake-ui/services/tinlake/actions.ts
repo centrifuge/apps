@@ -1,11 +1,12 @@
 import { ITinlake, Loan, NFT, PendingTransaction } from '@centrifuge/tinlake-js'
+import { IRiskGroup, IWriteOffGroup } from '@centrifuge/tinlake-js/dist/actions/admin'
 import BN from 'bn.js'
+import { ZERO_ADDRESS } from '../../constants'
 import { maxUint256 } from '../../utils/maxUint256'
 import { Asset } from '../../utils/useAsset'
 import { getAddressMemory, setAddressMemory } from './address-memory'
 
 export type TrancheType = 'junior' | 'senior'
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 export interface TinlakeResult {
   data?: any
@@ -670,6 +671,22 @@ export async function setMaxReserve(tinlake: ITinlake, ratio: string): Promise<P
   return tinlake.setMaximumReserve(ratio)
 }
 
+export async function setDiscountRate(tinlake: ITinlake, rate: string): Promise<PendingTransaction> {
+  return tinlake.setDiscountRate(rate)
+}
+
+export async function setSeniorInterestRate(tinlake: ITinlake, rate: string): Promise<PendingTransaction> {
+  return tinlake.setSeniorInterestRate(rate)
+}
+
+export async function setMinimumEpochTime(tinlake: ITinlake, rate: string): Promise<PendingTransaction> {
+  return tinlake.setMinimumEpochTime(rate)
+}
+
+export async function setChallengeTime(tinlake: ITinlake, rate: string): Promise<PendingTransaction> {
+  return tinlake.setChallengeTime(rate)
+}
+
 export async function raiseCreditline(tinlake: ITinlake, amount: string): Promise<PendingTransaction> {
   return tinlake.raiseCreditline(amount)
 }
@@ -680,6 +697,21 @@ export async function sinkCreditline(tinlake: ITinlake, amount: string): Promise
 
 export async function updateClaimCFGAccountID(tinlake: ITinlake, centAddress: string): Promise<PendingTransaction> {
   return tinlake.updateClaimCFGAccountID(centAddress)
+}
+
+export async function addRiskGroups(tinlake: ITinlake, riskGroups: IRiskGroup[]): Promise<PendingTransaction> {
+  return tinlake.addRiskGroups(riskGroups)
+}
+
+export async function addWriteOffGroups(
+  tinlake: ITinlake,
+  writeOffGroups: IWriteOffGroup[]
+): Promise<PendingTransaction> {
+  return tinlake.addWriteOffGroups(writeOffGroups)
+}
+
+export async function writeOff(tinlake: ITinlake, loanId: number): Promise<PendingTransaction> {
+  return tinlake.writeOff(loanId)
 }
 
 function loggedError(error: any, message: string, id: string): PendingTransaction {

@@ -7,6 +7,7 @@ import styled from 'styled-components'
 import { ensureAuthed, loadProxies, useAuth } from '../../ducks/auth'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { getNFT as getNFTAction } from '../../services/tinlake/actions'
+import { usePool } from '../../utils/usePool'
 import Alert from '../Alert'
 import { Card } from '../Card'
 import NftData from '../NftData'
@@ -26,6 +27,8 @@ const DAYS = 24 * 60 * 60 * 1000
 const ValueNFT: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const auth = useAuth()
+  const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
+
   const [registry, setRegistry] = React.useState('')
   const [tokenId, setTokenId] = React.useState('')
   const [value, setValue] = React.useState('800000000000000000000')
@@ -122,7 +125,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
         </p>
       </Alert>
 
-      {!auth.permissions?.canSetRiskScore ? (
+      {!auth.permissions?.canSetRiskScore && !(poolData?.adminLevel && poolData.adminLevel >= 2) ? (
         <Alert margin={{ top: 'medium' }} pad={{ horizontal: 'medium' }} type="error">
           <p>You need to be an admin to value NFTs.</p>
         </Alert>
@@ -205,11 +208,12 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
 
           <Box direction="row" gap="large" margin={{ vertical: 'large' }} align="center">
             <Col>
+              {maturityDate}
               <FormField label="Maturity Date">
                 <DateInput
                   value={maturityDate}
-                  format="YYYY-MM-DD"
                   onChange={(event: any) => {
+                    console.log(event.value)
                     setMaturityDate(event.value)
                   }}
                   // disabled={status === 'unconfirmed' || status === 'pending'}
@@ -244,7 +248,6 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
           )}
         </Card>
       )}
-
       <Box>
         {nftError && (
           <Alert type="error" margin={{ vertical: 'large' }}>

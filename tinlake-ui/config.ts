@@ -30,6 +30,7 @@ interface PoolMetadata {
   currencySymbol?: string
   isUpcoming?: boolean
   maker?: { ilk: string }
+  issuerEmail?: string
 }
 
 export interface BasePool {
@@ -84,6 +85,10 @@ export interface Pool extends BasePool {
     MCD_VAT?: string
     MCD_JUG?: string
     MAKER_MGR?: string
+  }
+  versions?: {
+    FEED?: number
+    POOL_ADMIN?: number
   }
   contractConfig?: {
     JUNIOR_OPERATOR: 'ALLOWANCE_OPERATOR'

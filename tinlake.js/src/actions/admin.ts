@@ -1,4 +1,5 @@
 import BN from 'bn.js'
+import ethers from 'ethers'
 import { ZERO_ADDRESS } from '../services/ethereum'
 import { Constructor, ContractName, PendingTransaction, TinlakeParams } from '../Tinlake'
 const web3 = require('web3-utils')
@@ -148,30 +149,125 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     setDiscountRate = async (rate: string) => {
-      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
-      return this.pending(
-        this.contract('FEED').file(web3.fromAscii('discountRate').padEnd(66, '0'), rate, this.overrides)
-      )
+      return this.pending(this.contract('POOL_ADMIN').setDiscountRate(rate, this.overrides))
+    }
+
+    setSeniorInterestRate = async (rate: string) => {
+      return this.pending(this.contract('POOL_ADMIN').setSeniorInterestRate(rate, this.overrides))
+    }
+
+    setMinimumEpochTime = async (value: string) => {
+      return this.pending(this.contract('POOL_ADMIN').setMinimumEpochTime(value, this.overrides))
+    }
+
+    setChallengeTime = async (value: string) => {
+      return this.pending(this.contract('POOL_ADMIN').setChallengeTime(value, this.overrides))
     }
 
     updateNftFeed = async (nftId: string, value: string, riskGroup?: string) => {
       if (!riskGroup) {
-        return this.pending(this.contract('FEED')['update(bytes32,uint256)'](nftId, value, this.overrides))
+        return this.pending(this.contract('POOL_ADMIN').updateNFTValue(nftId, value, this.overrides))
       }
-      return this.pending(
-        this.contract('FEED')['update(bytes32,uint256,uint256)'](nftId, value, riskGroup, this.overrides)
-      )
+      return this.pending(this.contract('POOL_ADMIN').updateNFTValueRisk(nftId, value, riskGroup, this.overrides))
     }
+
     setMaturityDate = async (nftId: string, timestampSecs: number) => {
+      return this.pending(this.contract('POOL_ADMIN').updateNFTMaturityDate(nftId, timestampSecs, this.overrides))
+    }
+
+    addRiskGroups = async (riskGroups: IRiskGroup[]) => {
       return this.pending(
-        this.contract('FEED')['file(bytes32,bytes32,uint256)'](
-          web3.fromAscii('maturityDate').padEnd(66, '0'),
-          nftId,
-          timestampSecs
+        this.contract('POOL_ADMIN').addRiskGroups(
+          riskGroups.map((g) => g.id),
+          riskGroups.map((g) => g.thresholdRatio.toString()),
+          riskGroups.map((g) => g.ceilingRatio.toString()),
+          riskGroups.map((g) => g.rate.toString()),
+          riskGroups.map((g) => g.recoveryRatePD.toString()),
+          this.overrides
         )
       )
     }
+
+    addWriteOffGroups = async (writeOffGroups: IWriteOffGroup[]) => {
+      return this.pending(
+        this.contract('POOL_ADMIN').addWriteOffGroups(
+          writeOffGroups.map((g) => g.rate.toString()),
+          writeOffGroups.map((g) => g.writeOffPercentage.toString()),
+          writeOffGroups.map((g) => g.overdueDays.toString()),
+          this.overrides
+        )
+      )
+    }
+
+    getWriteOffGroups = async (): Promise<IWriteOffGroup[]> => {
+      const navFeed = this.contract('FEED')
+      const groups: IWriteOffGroup[] = []
+      let i = 0
+      const maxWriteOffGroups = 100
+      while (i < maxWriteOffGroups) {
+        try {
+          const group = await navFeed.writeOffGroups(i)
+          groups.push(group)
+          i += 1
+        } catch (e) {
+          console.log(`Oops: ${e}`)
+          return groups
+        }
+      }
+      return groups
+    }
+
+    getRateGroup = async (loanId: number) => {
+      return await this.toBN(this.contract('PILE').loanRates(loanId))
+    }
+
+    writeOff = async (loanId: number) => {
+      return this.pending(this.contract('FEED').writeOff(loanId, this.overrides))
+    }
+
+    getAuditLog = async (ignoredEvents: string[]): Promise<IAuditLog> => {
+      const poolAdmin = this.contract('POOL_ADMIN')
+      const eventFilter = {
+        address: poolAdmin.address,
+        fromBlock: this.provider.getBlockNumber().then((b) => b - 10000),
+        toBlock: 'latest',
+      }
+      const events = (await poolAdmin.queryFilter(eventFilter))
+        .filter((e) => e !== undefined)
+        .filter((e) => e.event && !ignoredEvents.includes(e.event))
+        .reverse()
+
+      const logs = events.map((event) => {
+        return poolAdmin.interface.parseLog(event)
+      })
+
+      const transactions = await Promise.all(events.map((e) => e.getTransaction()))
+      const blocks = await Promise.all(events.map((e) => e.getBlock()))
+
+      return { events, logs, transactions, blocks }
+    }
   }
+}
+
+export type IRiskGroup = {
+  id: number
+  ceilingRatio: BN
+  thresholdRatio: BN
+  rate: BN
+  recoveryRatePD: BN
+}
+
+export type IWriteOffGroup = {
+  rate: BN
+  writeOffPercentage: BN
+  overdueDays: BN
+}
+
+export type IAuditLog = {
+  events: ethers.Event[]
+  logs: ethers.utils.LogDescription[]
+  transactions: ethers.providers.TransactionResponse[]
+  blocks: ethers.providers.Block[]
 }
 
 export type IAdminActions = {
@@ -194,12 +290,21 @@ export type IAdminActions = {
   raiseCreditline(amount: string): Promise<PendingTransaction>
   sinkCreditline(amount: string): Promise<PendingTransaction>
   setSeniorTrancheInterest(amount: string): Promise<PendingTransaction>
-  setDiscountRate(amount: string): Promise<PendingTransaction>
+  setDiscountRate(rate: string): Promise<PendingTransaction>
+  setSeniorInterestRate(rate: string): Promise<PendingTransaction>
+  setMinimumEpochTime(value: string): Promise<PendingTransaction>
+  setChallengeTime(value: string): Promise<PendingTransaction>
   setMaturityDate(nftId: string, timestampSecs: number): Promise<PendingTransaction>
   updateNftFeed(nftId: string, value: string, riskGroup?: string): Promise<PendingTransaction>
   getNftFeedId(registry: string, tokenId: string): Promise<string>
   getNftFeedValue(tokenId: string): Promise<BN>
   getNftMaturityDate(tokenId: string): Promise<BN>
+  addRiskGroups(riskGroups: IRiskGroup[]): Promise<PendingTransaction>
+  addWriteOffGroups(writeOffGroups: IWriteOffGroup[]): Promise<PendingTransaction>
+  getAuditLog(ignoredEvents: string[]): Promise<IAuditLog>
+  getWriteOffGroups(): Promise<IWriteOffGroup[]>
+  writeOff(loanId: number): Promise<PendingTransaction>
+  getRateGroup(loanId: number): Promise<BN>
 }
 
 export default AdminActions

@@ -3,12 +3,11 @@ import BN from 'bn.js'
 import { BigNumber } from 'ethers'
 import { useQuery } from 'react-query'
 import { useTinlake } from '../components/TinlakeProvider'
+import { ZERO_ADDRESS } from '../constants'
 import Apollo from '../services/apollo'
 import { getNFT } from '../services/tinlake/actions'
 import { Call, multicall } from './multicall'
 const web3 = require('web3-utils')
-
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 // SortableLoan adds properties of number type that support sorting in numerical order for grommet DataTable
 export interface SortableLoan extends Loan {
@@ -42,9 +41,12 @@ export interface Asset extends MulticallData {
   status?: string
   nft?: NFT
   borrower?: string
-  proxyOwner: BN
+  proxyOwner: string
   ownerOf: string
   maturityDate?: number
+  rateGroup?: number
+  currentValidWriteOffGroup?: number
+  writeOffRateGroupStart?: number
 }
 
 export function useAsset(loanId: string) {
@@ -93,6 +95,11 @@ async function getAsset(tinlake: ITinlake, loanId: string): Promise<Asset> {
       returns: [[`debt`, toBN]],
     },
     {
+      target: tinlake.contractAddresses.PILE!,
+      call: ['loanRates(uint256)(uint256)', loanId],
+      returns: [[`rateGroup`, (val: string) => Number(val.toString())]],
+    },
+    {
       target: tinlake.contractAddresses.FEED!,
       call: ['thresholdRatio(uint256)(uint256)', riskGroup],
       returns: [[`scoreCard.thresholdRatio`, toBN]],
@@ -109,10 +116,23 @@ async function getAsset(tinlake: ITinlake, loanId: string): Promise<Asset> {
     },
   ]
 
+  if (tinlake.contractVersions['FEED'] === 2) {
+    calls.push({
+      target: tinlake.contractAddresses.FEED!,
+      call: ['currentValidWriteOffGroup(uint256)(uint256)', loanId],
+      returns: [[`currentValidWriteOffGroup`, (val: string) => Number(val.toString())]],
+    })
+    calls.push({
+      target: tinlake.contractAddresses.FEED!,
+      call: ['WRITEOFF_RATE_GROUP_START()(uint256)'],
+      returns: [[`writeOffRateGroupStart`, (val: string) => Number(val.toString())]],
+    })
+  }
+
   const [multicallData, ownerOf, proxyOwner] = await Promise.all([
     multicall<MulticallData>(calls),
-    tinlake.getOwnerOfLoan(loanId),
-    tinlake.getProxyOwnerByLoan(loanId),
+    tinlake.getOwnerOfLoan(loanId).catch(() => ZERO_ADDRESS),
+    tinlake.getProxyOwnerByLoan(loanId).catch(() => ZERO_ADDRESS),
   ])
 
   // TODO: load data using multicall

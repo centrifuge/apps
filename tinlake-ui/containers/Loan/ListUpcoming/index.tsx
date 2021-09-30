@@ -5,7 +5,7 @@ import DashboardMetric from '../../../components/DashboardMetric'
 import ERC20Display from '../../../components/ERC20Display'
 import LoanListData from '../../../components/Loan/List'
 import { AuthState } from '../../../ducks/auth'
-import DAI from '../../../static/dai.json'
+import DAI from '../../../public/static/dai.json'
 
 interface Props {
   auth?: AuthState

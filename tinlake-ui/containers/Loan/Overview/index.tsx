@@ -99,7 +99,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
       <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
         <SectionHeading>Asset Value</SectionHeading>
         <Heading level="5" margin={{ left: 'auto', top: '0', bottom: '0' }}>
-          <LoadingValue done={poolData?.outstandingVolume !== undefined} height={22}>
+          <LoadingValue done={poolData?.netAssetValue !== undefined} height={22}>
             {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))}{' '}
             {props.selectedPool?.metadata.currencySymbol || 'DAI'}
           </LoadingValue>

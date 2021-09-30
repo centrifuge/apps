@@ -19,6 +19,24 @@ export interface PoolTranche extends Tranche {
   balance?: BN
 }
 
+export interface RiskGroup {
+  ceilingRatio: BN
+  thresholdRatio: BN
+  rate: {
+    pie: BN
+    chi: BN
+    ratePerSecond: BN
+    lastUpdated: BN
+    fixedRate: BN
+  }
+  recoveryRatePD: BN
+}
+
+export interface WriteOffGroup {
+  percentage: BN
+  overdueDays: BN
+}
+
 export interface PoolData {
   junior: PoolTranche
   senior: PoolTranche
@@ -31,11 +49,14 @@ export interface PoolData {
   reserveAtLastEpochClose: BN
   maxJuniorRatio: BN
   maxReserve: BN
-  outstandingVolume: BN
   totalPendingInvestments: BN
   totalRedemptionsCurrency: BN
   isPoolAdmin?: boolean
+  adminLevel?: number
   reserveAndRemainingCredit?: BN
+  discountRate: BN
+  risk?: RiskGroup[]
+  writeOffGroups?: WriteOffGroup[]
 }
 
 export type EpochData = {
@@ -61,7 +82,7 @@ export function usePool(poolId?: string) {
   return query
 }
 
-async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | null) {
+export async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | null) {
   const pool = ipfsPools.active.find((p) => p.addresses.ROOT_CONTRACT.toLowerCase() === poolId.toLowerCase())
 
   if (!pool) throw new Error(`Pool not found: ${poolId}`)
@@ -120,11 +141,6 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
       target: pool.addresses.FEED,
       call: ['currentNAV()(uint256)'],
       returns: [[`netAssetValue`, toBN]],
-    },
-    {
-      target: pool.addresses.PILE,
-      call: ['total()(uint256)'],
-      returns: [[`outstandingVolume`, toBN]],
     },
     {
       target: pool.addresses.SENIOR_TRANCHE,
@@ -206,14 +222,90 @@ async function getPool(ipfsPools: IpfsPools, poolId: string, address?: string | 
       call: ['decimals()(uint8)'],
       returns: [[`junior.decimals`]],
     },
+    {
+      target: pool.addresses.FEED,
+      call: ['discountRate()(uint256)'],
+      returns: [[`discountRate`, toBN]],
+    },
   ]
+
+  const maxRiskGroups = 100
+  for (let i = 0; i < maxRiskGroups; i += 1) {
+    calls.push(
+      {
+        target: pool.addresses.FEED,
+        call: ['ceilingRatio(uint256)(uint256)', i],
+        returns: [[`risk[${i}].ceilingRatio`, toBN]],
+      },
+      {
+        target: pool.addresses.FEED,
+        call: ['thresholdRatio(uint256)(uint256)', i],
+        returns: [[`risk[${i}].thresholdRatio`, toBN]],
+      },
+      {
+        target: pool.addresses.PILE,
+        call: ['rates(uint256)(uint256,uint256,uint256,uint48,uint256)', i],
+        returns: [
+          [`risk[${i}].rate.pie`, toBN],
+          [`risk[${i}].rate.chi`, toBN],
+          [`risk[${i}].rate.ratePerSecond`, toBN],
+          [`risk[${i}].rate.lastUpdated`, toBN],
+          [`risk[${i}].rate.fixedRate`, toBN],
+        ],
+      },
+      {
+        target: pool.addresses.FEED,
+        call: ['recoveryRatePD(uint256)(uint256)', i],
+        returns: [[`risk[${i}].recoveryRatePD`, toBN]],
+      }
+    )
+  }
+
+  if (pool.versions?.POOL_ADMIN && pool.versions?.POOL_ADMIN >= 2) {
+    const maxWriteOffGroups = 0
+    for (let i = 0; i < maxWriteOffGroups; i += 1) {
+      calls.push({
+        target: pool.addresses.FEED,
+        call: ['writeOffGroups(uint256)(uint128,uint128)', i],
+        returns: [
+          [`writeOffGroups[${i}].percentage`, toBN],
+          [`writeOffGroups[${i}].overdueDays`, toBN],
+        ],
+      })
+
+      // TODO: load for v1 NAV feed, which doesn't have the overdueDays prop
+    }
+  }
 
   // TODO: Make separate query for user address related data
   // Now it's fetching all pool data again when the address is set
   // Which can cause it to load twice on page load
   if (address) {
     calls.push(
-      ...(pool.addresses.POOL_ADMIN
+      ...(pool.addresses.POOL_ADMIN && pool.versions?.POOL_ADMIN && pool.versions?.POOL_ADMIN >= 2
+        ? ([
+            {
+              target: pool.addresses.SENIOR_MEMBERLIST,
+              call: ['hasMember(address)(bool)', address || '0'],
+              returns: [[`senior.inMemberlist`]],
+            },
+            {
+              target: pool.addresses.JUNIOR_MEMBERLIST,
+              call: ['hasMember(address)(bool)', address || '0'],
+              returns: [[`junior.inMemberlist`]],
+            },
+            {
+              target: pool.addresses.POOL_ADMIN,
+              call: ['admin_level(address)(uint256)', address || '0'],
+              returns: [[`isPoolAdmin`, (num: BigNumber) => toBN(num).toNumber() >= 1]],
+            },
+            {
+              target: pool.addresses.POOL_ADMIN,
+              call: ['admin_level(address)(uint256)', address || '0'],
+              returns: [[`adminLevel`, (num: BigNumber) => toBN(num).toNumber()]],
+            },
+          ] as Call[])
+        : pool.addresses.POOL_ADMIN
         ? ([
             {
               target: pool.addresses.SENIOR_MEMBERLIST,

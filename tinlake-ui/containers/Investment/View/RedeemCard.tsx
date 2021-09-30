@@ -13,6 +13,7 @@ import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { useEthLink } from '../../../utils/useEthLink'
 import { Warning } from './styles'
 import { Card } from './TrancheOverview'
 
@@ -41,6 +42,7 @@ interface Props extends TransactionProps {
 
 const RedeemCard: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
+  const { data: ethLink } = useEthLink()
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
   const [tokenValue, setTokenValue] = React.useState('0')
 
@@ -98,6 +100,7 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
       setError(undefined)
     }
   }
+
   return (
     <div>
       <Heading level="6" margin={{ top: 'medium', bottom: 'xsmall' }}>
@@ -112,11 +115,13 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
         onChange={onChange}
         disabled={disabled}
       />
-      <Warning>
-        <LinkingAlert />
-        <HelpTitle>No Centrifuge Chain Account Linked</HelpTitle>
-        <HelpText>To claim rewards, link your Centrifuge Chain account before redeeming your investment</HelpText>
-      </Warning>
+      {ethLink === null && (
+        <Warning>
+          <LinkingAlert />
+          <HelpTitle>No Centrifuge Chain Account Linked</HelpTitle>
+          <HelpText>To claim rewards, link your Centrifuge Chain account before redeeming your investment</HelpText>
+        </Warning>
+      )}
       <ButtonGroup mt="medium">
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
         <Button primary label="Redeem" onClick={submit} disabled={error !== undefined || disabled} />

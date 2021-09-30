@@ -2,7 +2,6 @@ import { DisplayField } from '@centrifuge/axis-display-field'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Table, TableBody, TableCell, TableRow } from 'grommet'
-import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
@@ -16,6 +15,7 @@ import { Asset } from '../../../utils/useAsset'
 import { Button } from '../../Button'
 import { ButtonGroup } from '../../ButtonGroup'
 import { Card } from '../../Card'
+import { useDebugFlags } from '../../DebugFlags'
 import { Divider } from '../../Divider'
 import { SectionHeading } from '../../Heading'
 import { Box, Flex, Shelf, Stack } from '../../Layout'
@@ -37,8 +37,8 @@ const DisplayFieldWrapper = styled.div`
 `
 
 const LoanData: React.FC<Props> = (props: Props) => {
-  const router = useRouter()
   const tinlake = useTinlake()
+  const { showTransferCurrency } = useDebugFlags()
   const availableForFinancing = props.loan?.debt.isZero() ? props.loan?.principal || new BN(0) : new BN(0)
 
   const proxyTransfer = async () => {
@@ -60,7 +60,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
         </LoadingValue>
       </Shelf>
       <Flex flexDirection={['column', 'column', 'row']} justifyContent="space-between">
-        <Box maxWidth={{ medium: 360 }}>
+        <Box maxWidth={{ medium: 360 }} flex="1">
           <Table>
             <TableBody>
               <TableRow>
@@ -94,8 +94,8 @@ const LoanData: React.FC<Props> = (props: Props) => {
             </TableBody>
           </Table>
         </Box>
-        <Divider display={{ medium: 'none' }} m={0} borderColor="#bdbdbd" />
-        <Box maxWidth={{ medium: 360 }}>
+        <Divider display={{ medium: 'none' }} m={0} />
+        <Box maxWidth={{ medium: 360 }} flex="1">
           <Table>
             <TableBody>
               <TableRow>
@@ -117,7 +117,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
                   Financed by
                 </TableCell>
                 <TableCell style={{ textAlign: 'end', float: 'right' }} border={{ color: 'transparent' }}>
-                  <LoadingValue done={props.loan?.borrower !== undefined} height={24}>
+                  <LoadingValue done={!!props.loan} height={24}>
                     {props.loan?.borrower && (
                       <DisplayFieldWrapper>
                         <DisplayField
@@ -138,7 +138,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
           </Table>
         </Box>
       </Flex>
-      {props.loan?.ownerOf && props.loan?.borrower && 'transferCurrency' in router.query && (
+      {props.loan?.ownerOf && props.loan?.borrower && showTransferCurrency && (
         <ButtonGroup>
           <Button label="Transfer currency from proxy" size="small" onClick={() => proxyTransfer()}></Button>
         </ButtonGroup>

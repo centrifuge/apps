@@ -3,11 +3,11 @@ import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Heading } from 'grommet'
-import { useRouter } from 'next/router'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
+import { useDebugFlags } from '../../../components/DebugFlags'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import config, { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -33,8 +33,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
 
   const [limit, setLimit] = React.useState<string | undefined>(undefined)
 
-  const router = useRouter()
-  const disableLimit = 'disableLimit' in router.query
+  const { disableInvestLimit } = useDebugFlags()
 
   const address = useSelector<any, string | null>((state) => state.auth.address)
   const authProvider = useSelector<any, string | null>((state) => state.auth.providerName)
@@ -99,7 +98,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
 
   const onChange = (newValue: string) => {
     setDaiValue(newValue)
-    if (disableLimit === false && hasInvested === false && new BN(newValue).lt(MinInvestment)) {
+    if (!disableInvestLimit && hasInvested === false && new BN(newValue).lt(MinInvestment)) {
       setError(
         `Minimum investment: ${config.network === 'Mainnet' ? '5.000' : '10'} ${
           props.selectedPool?.metadata.currencySymbol || 'DAI'

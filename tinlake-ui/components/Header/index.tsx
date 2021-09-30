@@ -13,10 +13,10 @@ import { selectWalletTransactions, TransactionState } from '../../ducks/transact
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { getAddressLink } from '../../utils/etherscanLinkGenerator'
 import { toDynamicPrecision } from '../../utils/toDynamicPrecision'
+import { useAddress } from '../../utils/useAddress'
 import { useCFGRewards } from '../../utils/useCFGRewards'
 import { usePool } from '../../utils/usePool'
 import { usePortfolio } from '../../utils/usePortfolio'
-import { useQueryDebugEthAddress } from '../../utils/useQueryDebugEthAddress'
 import { Tooltip } from '../Tooltip'
 import { Web3Wallet } from '../Web3Wallet'
 
@@ -49,10 +49,9 @@ const Header: React.FC<Props> = (props: Props) => {
   const transactions = useSelector<any, TransactionState>((state) => state.transactions)
 
   const auth = useAuth()
-  const connectedAddress = auth.address
-  const address = useQueryDebugEthAddress() || connectedAddress
-  const { formattedAmount: CFGRewardFormatted, amount: CFGRewardAmount } = useCFGRewards(address)
-  const portfolio = usePortfolio(props.ipfsPools, address)
+  const address = useAddress()
+  const { formattedAmount: CFGRewardFormatted, amount: CFGRewardAmount } = useCFGRewards()
+  const portfolio = usePortfolio()
   const dispatch = useDispatch()
   const [menuOpen, setMenuOpen] = React.useState(false)
 
@@ -218,7 +217,7 @@ const Header: React.FC<Props> = (props: Props) => {
                     <span>Telegram</span>
                   </SocialLink>
                   <SocialLink href="https://centrifuge.io/discord" target="_blank">
-                    <Icon src="/static/help/slack.svg" />
+                    <Icon src="/static/help/discord.svg" />
                     <span>Discord</span>
                   </SocialLink>
                   <SocialLink href="mailto:support@centrifuge.io" target="_blank">

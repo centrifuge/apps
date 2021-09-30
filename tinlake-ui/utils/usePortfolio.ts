@@ -1,9 +1,10 @@
 import BN from 'bn.js'
 import { BigNumber } from 'ethers'
 import { useQuery } from 'react-query'
-import { useSelector } from 'react-redux'
+import { useIpfsPools } from '../components/IpfsPoolsProvider'
 import { IpfsPools } from '../config'
 import { Call, multicall } from './multicall'
+import { useAddress } from './useAddress'
 
 interface TokenResult {
   symbol: string
@@ -28,9 +29,9 @@ export interface PortfolioData {
   totalValue: BN
 }
 
-export function usePortfolio(ipfsPools: IpfsPools, addressOverride?: string | null) {
-  const addressState = useSelector<any, string | null>((state) => state.auth.address)
-  const address = addressOverride || addressState
+export function usePortfolio() {
+  const ipfsPools = useIpfsPools()
+  const address = useAddress()
   const query = useQuery(['portfolio', address], () => getPortfolio(ipfsPools, address!), {
     enabled: !!address,
   })
