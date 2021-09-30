@@ -357,6 +357,9 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
 
       {!isMakerIntegrated && (
         <Card flexBasis="50%" p="medium" mb="medium">
+          <Heading level="5" margin={{ top: '0', bottom: '0' }}>
+            Pool Reserve
+          </Heading>
           <Table margin={{ top: '0', bottom: '0' }}>
             <TableBody>
               <TableRow style={{ fontWeight: 'bold' }}>
@@ -366,7 +369,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                   pad={{ vertical: '6px' }}
                   border={{ color: 'transparent' }}
                 >
-                  Reserve
+                  Current reserve
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || new BN(0), 18), 0))}{' '}
