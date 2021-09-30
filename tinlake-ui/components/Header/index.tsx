@@ -166,7 +166,7 @@ const Header: React.FC<Props> = (props: Props) => {
             </Holdings>
           )}
           <WalletNav style={{ flex: '0 0 auto', paddingLeft: 16 }}>
-            {!address && <ConnectButton primary onClick={connectAccount} label="Connect Wallet" />}
+            {!address && <ConnectButton primary onClick={connectAccount} label="Connect wallet" />}
             {address && (
               <Web3Wallet
                 address={address}
