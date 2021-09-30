@@ -272,23 +272,11 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
       </Card>
       {isMakerIntegrated && (
         <Card flexBasis="50%" p="medium" mb="medium">
+          <Heading level="5" margin={{ top: '0', bottom: 'small' }}>
+            Maker Covenants
+          </Heading>
           <Table margin={{ top: '0', bottom: '0' }}>
             <TableBody>
-              <TableRow style={{ fontWeight: 'bold' }}>
-                <TableCell
-                  scope="row"
-                  style={{ alignItems: 'start', justifyContent: 'center' }}
-                  pad={{ vertical: '6px' }}
-                  border={{ color: 'transparent' }}
-                >
-                  <Heading level="5" margin={{ top: '0', bottom: '0' }}>
-                    Maker Covenants
-                  </Heading>
-                </TableCell>
-                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
-                  &nbsp;
-                </TableCell>
-              </TableRow>
               <TableRow>
                 <TableCell
                   scope="row"
@@ -357,7 +345,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
 
       {!isMakerIntegrated && (
         <Card flexBasis="50%" p="medium" mb="medium">
-          <Heading level="5" margin={{ top: '0', bottom: '0' }}>
+          <Heading level="5" margin={{ top: '0', bottom: 'small' }}>
             Pool Reserve
           </Heading>
           <Table margin={{ top: '0', bottom: '0' }}>
