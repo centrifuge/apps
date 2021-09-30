@@ -1,2 +1,2 @@
 
-module.exports = require('./lib/cjs')
+module.exports = require('./dist')

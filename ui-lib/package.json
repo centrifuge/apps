@@ -2,8 +2,8 @@
   "name": "@centrifuge/ui-lib",
   "version": "1.0.0",
   "description": "",
-  "main": "./lib/cjs/index.js",
-  "types": "./lib/cjs/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "yarn build:icons && tsc",
     "storybook": "start-storybook -p 6006",
