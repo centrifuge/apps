@@ -8,12 +8,12 @@ export default {
   //component: () => null,
 } as ComponentMeta<React.FC>
 
-export const Icons = () => (
+export const Icons: React.FC = () => (
   <Table>
     {Object.entries(icons)
       .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
       .map(([iconName, IconComponent]) => (
-        <tr>
+        <tr key={iconName}>
           <td>{iconName}</td>
           <td>
             <IconComponent style={{ fontSize: 24, marginLeft: 24 }} />

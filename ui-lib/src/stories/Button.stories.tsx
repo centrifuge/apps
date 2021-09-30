@@ -7,20 +7,22 @@ export default {
   component: Button,
 } as ComponentMeta<typeof Button>
 
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args}>Connect</Button>
+type ButtonStory = ComponentStory<typeof Button>
 
-export const DefaultBackground = Template.bind({})
+const Template: ButtonStory = (args) => <Button {...args}>Connect</Button>
+
+export const DefaultBackground: ButtonStory = Template.bind({})
 DefaultBackground.args = {
   m: 'large',
 }
 
-export const CentrifugeBlue = Template.bind({})
+export const CentrifugeBlue: ButtonStory = Template.bind({})
 CentrifugeBlue.args = {
   m: 'large',
   bg: 'centrifugeBlue',
 }
 
-export const AltairYellow = Template.bind({})
+export const AltairYellow: ButtonStory = Template.bind({})
 AltairYellow.args = {
   m: 'xxlarge',
   bg: 'altairYellow',

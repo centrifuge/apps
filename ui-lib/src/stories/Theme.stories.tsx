@@ -17,10 +17,10 @@ const bpAliases = Object.entries(theme.breakpoints).reduce((acc, [key, value]) =
   return acc
 }, {} as Record<string, string>)
 
-export const Breakpoints = () => (
+export const Breakpoints: React.FC = () => (
   <Table>
     {Object.entries(bpAliases).map(([value, aliases]) => (
-      <tr>
+      <tr key={value}>
         <td>{aliases}</td>
         <td>{value}</td>
       </tr>
@@ -28,10 +28,10 @@ export const Breakpoints = () => (
   </Table>
 )
 
-export const Colors = () => (
+export const Colors: React.FC = () => (
   <Table>
     {Object.entries(theme.colors).map(([colorName, colorCode]) => (
-      <tr>
+      <tr key={colorName}>
         <td>{colorName}</td>
         <td>{colorCode}</td>
         <td style={{ minWidth: 50, backgroundColor: colorCode }}></td>
@@ -40,10 +40,10 @@ export const Colors = () => (
   </Table>
 )
 
-export const Spacing = () => (
+export const Spacing: React.FC = () => (
   <Table>
     {Object.entries(theme.space).map(([key, val]) => (
-      <tr>
+      <tr key={key}>
         <td>{key}</td>
         <td>{val}</td>
 
