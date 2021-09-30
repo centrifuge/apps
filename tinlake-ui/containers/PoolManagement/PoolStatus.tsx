@@ -93,6 +93,9 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
   return (
     <Box direction="row" width="100%" gap="medium" margin={{ top: 'medium' }}>
       <Card flexBasis="50%" p="medium" mb="medium">
+        <Heading level="5" margin={{ top: '0', bottom: 'small' }}>
+          TIN breakdown
+        </Heading>
         <Table margin={{ top: '0', bottom: '0' }}>
           <TableBody>
             <TableRow style={{ fontWeight: 'bold' }}>
@@ -102,9 +105,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                 pad={{ vertical: '6px' }}
                 border={{ color: 'transparent' }}
               >
-                <Heading level="5" margin={{ top: '0', bottom: '0' }}>
-                  TIN Tranche Value
-                </Heading>
+                Total TIN Tranche Value
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={poolData?.junior.totalSupply !== undefined}>

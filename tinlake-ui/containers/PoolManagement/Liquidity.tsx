@@ -117,7 +117,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
     <Box direction="row" width="100%" gap="medium">
       <Card flexBasis="50%" p="medium" mb="medium">
         <Heading level="5" margin={{ top: '0', bottom: 'small' }}>
-          Capital Availability
+          Pool Liquidity
         </Heading>
         <Table margin={{ bottom: 'medium' }}>
           <TableBody>
@@ -303,7 +303,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
       </Card>
       <Card flexBasis="50%" p="medium" mb="medium">
         <Heading level="5" margin={{ top: '0', bottom: 'small' }}>
-          Change Capacity &amp; Credit Line
+          Liquidity Management
         </Heading>
         {isMakerIntegrated && (
           <Box margin={{ top: 'medium', bottom: 'medium' }}>
