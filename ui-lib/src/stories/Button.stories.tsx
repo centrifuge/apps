@@ -14,14 +14,14 @@ DefaultBackground.args = {
   m: 'large',
 }
 
-export const Lime = Template.bind({})
-Lime.args = {
+export const CentrifugeBlue = Template.bind({})
+CentrifugeBlue.args = {
   m: 'large',
-  bg: 'brandLime',
+  bg: 'centrifugeBlue',
 }
 
-export const Blue = Template.bind({})
-Blue.args = {
+export const AltairYellow = Template.bind({})
+AltairYellow.args = {
   m: 'xxlarge',
-  bg: 'brandBlue',
+  bg: 'altairYellow',
 }

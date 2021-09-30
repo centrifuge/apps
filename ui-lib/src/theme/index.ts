@@ -24,8 +24,13 @@ export const theme = {
     container: 1152,
   },
   colors: {
-    brandLime: 'lime',
-    brandBlue: 'blue',
+    altairYellow: '#FAB961',
+    centrifugeBlue: '#2762FF',
+    centrifugeOrange: '#FCBA59',
+    statusCritical: '#F44E72',
+    statusOk: '#7ED321',
+    statusUnknown: '#D8D8D8',
+    statusWarning: '#FCBA59',
   },
 }
 
