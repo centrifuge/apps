@@ -1,8 +1,7 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
-import styled from 'styled-components'
 import { SectionHeading } from '../../../components/Heading'
-import { Box, Stack } from '../../../components/Layout'
+import { Box, Grid, Stack } from '../../../components/Layout'
 import PageTitle from '../../../components/PageTitle'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
@@ -26,14 +25,14 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
     <Box mt="xlarge">
       <PageTitle pool={props.activePool} page="Investments" />
       <Stack gap={['medium', 'xxxlarge']}>
-        <GridCol2>
+        <Grid equalColumns minColumnWidth={['100%', 466]} gap="small">
           <Box flex="1">
             <TrancheOverview pool={props.activePool} tranche="senior" />
           </Box>
           <Box flex="1">
             <TrancheOverview pool={props.activePool} tranche="junior" />
           </Box>
-        </GridCol2>
+        </Grid>
 
         <EpochOverview activePool={props.activePool} />
 
@@ -54,16 +53,5 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
     </Box>
   )
 }
-
-const GridCol2 = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(466px, 1fr));
-  justify-content: space-between;
-  gap: ${(p) => p.theme.space.medium}px;
-
-  @media (max-width: ${(p) => p.theme.breakpoints.small}) {
-    grid-template-columns: repeat(auto-fill, 100%);
-  }
-`
 
 export default connect((state) => state)(InvestmentsView)

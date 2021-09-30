@@ -11,7 +11,7 @@ interface OwnProps {
   equalRows?: boolean
   equalColumns?: boolean
   columns?: ResponsiveValue<number>
-  minColumnWidth?: ResponsiveValue<number>
+  minColumnWidth?: ResponsiveValue<TLengthStyledSystem>
 }
 
 type Props = OwnProps & PropsOf<typeof Box>
@@ -45,7 +45,7 @@ function toPx(n: number | string) {
   return typeof n === 'number' ? `${n}px` : n
 }
 
-function widthToColumns(width: ResponsiveValue<number>, equalColumns: boolean) {
+function widthToColumns(width: ResponsiveValue<TLengthStyledSystem>, equalColumns: boolean) {
   return mapResponsive(width, (value) => `repeat(auto-fit, minmax(${toPx(value)}, ${equalColumns ? '1fr' : 'auto'}))`)
 }
 
