@@ -8,6 +8,7 @@ import contractAbiDistributor from './Distributor.abi.json'
 import contractAbiEpochCoordinator from './EpochCoordinator.abi.json'
 import contractAbiMemberlist from './Memberlist.abi.json'
 import contractAbiNavFeed from './NAVFeed.abi.json'
+import contractAbiNavFeed_V2 from './NAVFeed_V2.abi.json'
 import contractAbiOperator from './Operator.abi.json'
 import contractAbiPile from './Pile.abi.json'
 import contractAbiPoolAdmin from './PoolAdmin.abi.json'
@@ -50,4 +51,6 @@ export default {
   POOL_REGISTRY: contractAbiPoolRegistry,
   POOL_ADMIN: contractAbiPoolAdmin,
   CLAIM_CFG: contractAbiClaimCFG,
+  FEED_V2: contractAbiNavFeed_V2,
+  POOL_ADMIN_V2: contractAbiPoolAdmin,
 } as ContractAbis

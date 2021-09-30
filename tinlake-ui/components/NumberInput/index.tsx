@@ -7,11 +7,22 @@ interface Props {
   precision?: number
   prefix?: string
   suffix?: string
+  max?: number
+  plain?: boolean | 'full'
   onValueChange?: (values: NumberFormatValues) => void
   [key: string]: any
 }
 
-const NumberInput: React.FC<Props> = ({ value, precision, prefix, suffix, onValueChange, ...rest }: Props) => {
+const NumberInput: React.FC<Props> = ({
+  value,
+  precision,
+  prefix,
+  suffix,
+  plain,
+  max,
+  onValueChange,
+  ...rest
+}: Props) => {
   return (
     <NumberFormat
       thousandSeparator=","
@@ -22,6 +33,7 @@ const NumberInput: React.FC<Props> = ({ value, precision, prefix, suffix, onValu
       suffix={suffix}
       customInput={TextInput}
       value={value}
+      isAllowed={(val) => !max || (val.floatValue ? val.floatValue <= max : false)}
       onValueChange={onValueChange}
       {...rest}
     />

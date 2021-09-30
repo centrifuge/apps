@@ -24,7 +24,7 @@ const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
   const { newOnboarding } = useDebugFlags()
   return (
     <IpfsPoolsProvider value={ipfsPools}>
-      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig}>
+      <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig} contractVersions={pool.versions}>
         <WithFooter>
           <Head>
             <title>Investor Onboarding: {pool.metadata.name} | Tinlake | Centrifuge</title>

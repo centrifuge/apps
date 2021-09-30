@@ -25,6 +25,7 @@ const Pool: React.FC<Props> = ({ pool, ipfsPools }) => {
     <IpfsPoolsProvider value={ipfsPools}>
       <TinlakeProvider
         addresses={'addresses' in pool ? pool.addresses : undefined}
+        contractVersions={'versions' in pool ? pool.versions : undefined}
         contractConfig={'contractConfig' in pool ? pool.contractConfig : undefined}
       >
         <WithFooter>
