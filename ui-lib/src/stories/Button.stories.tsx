@@ -3,7 +3,7 @@ import React from 'react'
 import { Button } from '../components/Button'
 
 export default {
-  title: 'Test/Button',
+  title: 'Components/Button',
   component: Button,
 } as ComponentMeta<typeof Button>
 
