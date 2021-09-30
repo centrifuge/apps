@@ -1,4 +1,3 @@
-import { Button } from '@centrifuge/ui-lib'
 import { Box } from 'grommet'
 import { GetStaticProps } from 'next'
 import { WithRouterProps } from 'next/dist/client/with-router'
@@ -39,7 +38,6 @@ const InvestmentPage: React.FC<Props> = ({ pool, ipfsPools }) => {
               <Box width="xlarge">
                 <Auth>
                   <Box>
-                    <Button>CIAO</Button>
                     <InvestmentsView activePool={pool} />
                   </Box>
                 </Auth>
