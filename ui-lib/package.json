@@ -5,9 +5,10 @@
   "main": "./lib/cjs/index.js",
   "types": "./lib/cjs/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "yarn build:icons && tsc",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "build:icons": "npx @svgr/cli -d ./src/icon ./src/icon-svg"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +20,7 @@
     "@storybook/addon-essentials": "^6.3.8",
     "@storybook/addon-links": "^6.3.8",
     "@storybook/react": "^6.3.8",
+    "@svgr/cli": "^5.5.0",
     "@types/babel__core": "^7",
     "@types/mdx-js__react": "^1",
     "@types/react": "^17.0.21",
@@ -31,5 +33,13 @@
     "react-dom": "^16.13.1",
     "styled-components": "^5.1.1",
     "styled-system": "^5.1.5"
+  },
+  "svgr": {
+    "icon": true,
+    "typescript": true,
+    "replaceAttrValues": {
+      "black": "currentColor",
+      "#000": "currentColor"
+    }
   }
 }
