@@ -1,5 +1,6 @@
 import { ComponentMeta } from '@storybook/react'
 import React from 'react'
+import styled from 'styled-components'
 import * as icons from '../icon'
 
 export default {
@@ -8,16 +9,26 @@ export default {
 } as ComponentMeta<React.FC>
 
 export const Icons = () => (
-  <table>
+  <Table>
     {Object.entries(icons)
       .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
       .map(([iconName, IconComponent]) => (
         <tr>
           <td>{iconName}</td>
           <td>
-            <IconComponent />
+            <IconComponent style={{ fontSize: 24, marginLeft: 24 }} />
           </td>
         </tr>
       ))}
-  </table>
+  </Table>
 )
+
+const Table = styled.table`
+  font-family: sans-serif;
+  font-size: 16px;
+
+  > tr > td {
+    padding: 8px;
+    border-bottom: 1px solid #dedede;
+  }
+`

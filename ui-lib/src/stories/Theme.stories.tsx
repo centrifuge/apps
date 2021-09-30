@@ -1,6 +1,6 @@
 import { ComponentMeta } from '@storybook/react'
 import React from 'react'
-import * as icons from '../icon'
+import styled from 'styled-components'
 import { theme } from '../theme'
 
 export default {
@@ -18,18 +18,18 @@ const bpAliases = Object.entries(theme.breakpoints).reduce((acc, [key, value]) =
 }, {} as Record<string, string>)
 
 export const Breakpoints = () => (
-  <table>
+  <Table>
     {Object.entries(bpAliases).map(([value, aliases]) => (
       <tr>
         <td>{aliases}</td>
         <td>{value}</td>
       </tr>
     ))}
-  </table>
+  </Table>
 )
 
 export const Colors = () => (
-  <table>
+  <Table>
     {Object.entries(theme.colors).map(([colorName, colorCode]) => (
       <tr>
         <td>{colorName}</td>
@@ -37,11 +37,11 @@ export const Colors = () => (
         <td style={{ minWidth: 50, backgroundColor: colorCode }}></td>
       </tr>
     ))}
-  </table>
+  </Table>
 )
 
 export const Spacing = () => (
-  <table>
+  <Table>
     {Object.entries(theme.space).map(([key, val]) => (
       <tr>
         <td>{key}</td>
@@ -52,20 +52,15 @@ export const Spacing = () => (
         </td>
       </tr>
     ))}
-  </table>
+  </Table>
 )
 
-export const Icons = () => (
-  <table>
-    {Object.entries(icons)
-      .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
-      .map(([iconName, IconComponent]) => (
-        <tr>
-          <td>{iconName}</td>
-          <td>
-            <IconComponent />
-          </td>
-        </tr>
-      ))}
-  </table>
-)
+const Table = styled.table`
+  font-family: sans-serif;
+  font-size: 16px;
+
+  > tr > td {
+    padding: 8px;
+    border-bottom: 1px solid #dedede;
+  }
+`
