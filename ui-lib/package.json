@@ -6,10 +6,13 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "yarn build:icons && tsc",
-    "storybook": "start-storybook -p 6006",
+    "storybook": "yarn build:icons --ignore-existing && start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "build:icons": "npx @svgr/cli -d ./src/icon ./src/icon-svg",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test": "loki test",
+    "approve": "loki approve",
+    "ci:loki": "build-storybook && loki --requireReference --reactUri file:./storybook-static"
   },
   "author": "",
   "license": "ISC",
@@ -34,6 +37,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "loki": "^0.28.1",
     "prettier": "^2.4.1",
     "typescript": "^4.4.3"
   },
@@ -49,6 +53,17 @@
     "replaceAttrValues": {
       "black": "currentColor",
       "#000": "currentColor"
+    }
+  },
+  "loki": {
+    "configurations": {
+      "chrome.laptop": {
+        "target": "chrome.docker",
+        "width": 1366,
+        "height": 768,
+        "deviceScaleFactor": 1,
+        "mobile": false
+      }
     }
   }
 }

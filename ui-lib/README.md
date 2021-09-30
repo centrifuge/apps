@@ -56,3 +56,22 @@ $ yarn build --watch
 ```
 
 Will build locally and listen for changes, allowing to see the changes directly when working on `tinlake-ui`, for example
+
+## Visual regression testing
+
+This package uses [Loki](https://loki.js.org/) for visual regression testing.
+
+To execute visual regression tests locally:
+
+```sh
+yarn storybook # starts storybook, needed for Loki locally to be able to operate on stories
+
+yarn test
+```
+
+If the test fails (differences were spotted between the `reference` and `current` snapshots), the diff images will be
+created in `.loki/difference`. If all the changes were expected, the reference snapshots can be approved:
+
+```sh
+yarn approve
+```
