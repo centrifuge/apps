@@ -124,7 +124,7 @@ const PoolsMetrics: React.FC<Props> = (props: Props) => {
         />
       </Stack>
       <Box display={['none', 'block']}>
-        <Button label="Claim CFG" primary onClick={goToRewards} />
+        <Button label="Claim CFG" secondary onClick={goToRewards} />
       </Box>
     </Shelf>
   )

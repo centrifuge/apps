@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { SectionHeading } from '../../../components/Heading'
-import { Box, Stack, Wrap } from '../../../components/Layout'
+import { Box, Grid, Stack } from '../../../components/Layout'
 import PageTitle from '../../../components/PageTitle'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
@@ -25,14 +25,11 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
     <Box mt="xlarge">
       <PageTitle pool={props.activePool} page="Investments" />
       <Stack gap={['medium', 'xxxlarge']}>
-        <Wrap gap="medium" alignItems="flex-start" justifyContent="space-between">
-          <Box flex="1 1 400px" maxWidth={['100%', '100%', '420px']}>
-            <TrancheOverview pool={props.activePool} tranche="senior" />
-          </Box>
-          <Box flex="1 1 400px" maxWidth={['100%', '100%', '420px']}>
-            <TrancheOverview pool={props.activePool} tranche="junior" />
-          </Box>
-        </Wrap>
+        <Grid equalColumns minColumnWidth={['100%', 466]} gap="large">
+          <TrancheOverview pool={props.activePool} tranche="senior" />
+
+          <TrancheOverview pool={props.activePool} tranche="junior" />
+        </Grid>
 
         <EpochOverview activePool={props.activePool} />
 

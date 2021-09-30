@@ -10,7 +10,7 @@ import { LegalCopy } from './styles'
 
 interface Props {
   state: StepProps['state']
-  onboardingData: AddressStatus | undefined
+  onboardingData: Pick<AddressStatus, 'kyc'> | undefined
 }
 
 const LinkStep: React.FC<Props> = ({ state, onboardingData }) => {

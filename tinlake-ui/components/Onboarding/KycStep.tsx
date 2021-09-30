@@ -8,13 +8,13 @@ import { StepParagraph } from './StepParagraph'
 
 interface Props {
   state: StepProps['state']
-  onboardingData: AddressStatus | undefined
+  onboardingData: Pick<AddressStatus, 'kyc'> | undefined
   kycStatus: KycStatusLabel | 'requires-signin' | undefined
   accreditationStatus: boolean
 }
 
 // TODO: Redirect to onboard API URL that isn't pool dependant
-const placeholderPoolId = '0xc5BfCcBe24b037459922F70ADA6706638A550338'
+const placeholderPoolId = '0x560Ac248ce28972083B718778EEb0dbC2DE55740'
 const onboardURL = `${config.onboardAPIHost}pools/${placeholderPoolId}/info-redirect`
 
 const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditationStatus }) => {
@@ -22,32 +22,41 @@ const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditat
 
   return (
     <Step
-      state={state}
-      title={
-        !kycStatus || kycStatus === 'none' || kycStatus === 'requires-signin' || kycStatus === 'updates-required'
-          ? 'Submit KYC information'
+      state={state === 'done' && kycStatus === 'processing' ? 'todo' : state}
+      title="Verify KYC"
+      subtitle={
+        state === 'done' && kycStatus === 'processing'
+          ? 'In progress'
+          : kycStatus === 'verified' && !accreditationStatus
+          ? 'Submit accreditation'
+          : kycStatus === 'expired'
+          ? 'Expired'
           : kycStatus === 'rejected'
-          ? 'KYC rejected'
-          : kycStatus === 'verified'
-          ? accreditationStatus
-            ? 'KYC status: verified'
-            : 'Submit accreditation info'
-          : 'KYC status: processing'
+          ? 'Rejected'
+          : undefined
       }
       icon={kycStatus === 'processing' ? 'clock' : undefined}
     >
-      {active && kycStatus && (kycStatus === 'none' || kycStatus === 'updates-required' || kycStatus === 'expired') && (
+      {active && kycStatus === 'processing' && (
+        <StepParagraph icon="clock">Submitted KYC is being verified</StepParagraph>
+      )}
+      {active && kycStatus && ['none', 'updates-required', 'expired'].includes(kycStatus) && (
         <>
           <StepParagraph>
             Submit your KYC information through Securitize for verification. This is a one time process to become an
             eligible investor for all Tinlake pools.
           </StepParagraph>
-          <Button primary label={`Complete KYC on Securitize`} href={onboardURL} target="_blank" />
+          <Button
+            primary
+            label={kycStatus === 'none' ? 'Submit KYC on Securitize' : 'Complete on Securitize'}
+            href={onboardURL}
+            target="_blank"
+          />
         </>
       )}
       {active && kycStatus && kycStatus === 'rejected' && (
         <StepParagraph icon={kycStatus === 'rejected' ? 'alert' : undefined}>
-          Your KYC application was declined, please reach out to{' '}
+          Your KYC application was declined. Please reach out to{' '}
           <Anchor href="mailto:support@centrifuge.io" style={{ display: 'inline' }} label="support@centrifuge.io" /> for
           help.
         </StepParagraph>
@@ -63,7 +72,7 @@ const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditat
           <Button
             primary
             largeOnMobile={false}
-            label={`Complete accreditation on InvestReady`}
+            label="Submit accreditation on InvestReady"
             href={'https://centrifuge.investready.com/signup?app_id=7Ja9qnS6uckhHGA9pL49P5IwMDwt02y8MJhd6ajA'}
             target="_blank"
           />

@@ -25,6 +25,7 @@ import { toMaxPrecision, toPrecision } from '../../../utils/toPrecision'
 import { useEpoch } from '../../../utils/useEpoch'
 import { usePool } from '../../../utils/usePool'
 import CollectCard from './CollectCard'
+import { EyeIcon } from './EyeIcon'
 import InvestCard from './InvestCard'
 import OrderCard from './OrderCard'
 import RedeemCard from './RedeemCard'
@@ -143,6 +144,17 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     }
   }
 
+  const displayInWalletBtn = card === 'home' &&
+    trancheData?.token &&
+    trancheData.token.length > 0 &&
+    trancheData.token.length < 7 && (
+      <TextButton onClick={addToWallet}>
+        <div>
+          <EyeIcon /> Display in wallet
+        </div>
+      </TextButton>
+    )
+
   React.useEffect(() => {
     if (props.pool?.metadata && !props.pool.metadata.issuerEmail) {
       console.warn('The "issuerEmail" field is blank for pool ', props.pool.metadata.name)
@@ -156,7 +168,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   }, [hasPendingCollection, hasPendingOrder])
 
   return (
-    <Card p={24}>
+    <Card p={24} height="100%" display="flex" flexDirection="column">
       <Shelf gap="xsmall" mb="xsmall">
         <TokenLogo src={`/static/${token}_final.svg`} />
         <Heading level="5" margin={'0'}>
@@ -241,37 +253,47 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           {card === 'home' && (
             <>
               {epochData?.isBlockedState && (
-                <Warning>
-                  <BlackHeading>
-                    <AlertIcon src="/static/help-circle.svg" />
-                    Computing orders
-                  </BlackHeading>
-                  The Epoch has closed and orders are now executed. No new order can be submitted until the start of the
-                  next Epoch.
-                  {epochData?.minChallengePeriodEnd !== 0 && (
-                    <MinTimeRemaining>
-                      Minimum time remaining:{' '}
-                      {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
-                    </MinTimeRemaining>
-                  )}
-                </Warning>
+                <>
+                  <Warning>
+                    <BlackHeading>
+                      <AlertIcon src="/static/help-circle.svg" />
+                      Computing orders
+                    </BlackHeading>
+                    The Epoch has closed and orders are now executed. No new order can be submitted until the start of
+                    the next Epoch.
+                    {epochData?.minChallengePeriodEnd !== 0 && (
+                      <MinTimeRemaining>
+                        Minimum time remaining:{' '}
+                        {secondsToHms(epochData.minChallengePeriodEnd + 60 - new Date().getTime() / 1000)}
+                      </MinTimeRemaining>
+                    )}
+                  </Warning>
+                  <BottomCardToolbar>{displayInWalletBtn}</BottomCardToolbar>
+                </>
               )}
 
               {!epochData?.isBlockedState && (
-                <ButtonGroup mt="small">
-                  <Button
-                    primary
-                    label="Invest"
-                    onClick={() => setCard('invest')}
-                    disabled={epochData?.isBlockedState === true}
-                  />
-                  <Button
-                    primary
-                    label="Redeem"
-                    onClick={() => setCard('redeem')}
-                    disabled={balance?.isZero() || epochData?.isBlockedState === true}
-                  />
-                </ButtonGroup>
+                <BottomCardToolbar>
+                  <Box mt="small" display="flex" flex="1">
+                    <ButtonGroup justifyContent="flex-end" flex="1" flexDirection={['column-reverse', 'row']}>
+                      <Box display="flex" justifyContent="flex-start" flex="1">
+                        {displayInWalletBtn}
+                      </Box>
+                      <Button
+                        secondary
+                        label="Redeem"
+                        onClick={() => setCard('redeem')}
+                        disabled={balance?.isZero() || epochData?.isBlockedState === true}
+                      />
+                      <Button
+                        primary
+                        label="Invest"
+                        onClick={() => setCard('invest')}
+                        disabled={epochData?.isBlockedState === true}
+                      />
+                    </ButtonGroup>
+                  </Box>
+                </BottomCardToolbar>
               )}
             </>
           )}
@@ -305,12 +327,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           )}
           {card === 'redeem' && (
             <RedeemCard {...props} selectedPool={props.pool} setCard={setCard} updateTrancheData={refetchTrancheData} />
-          )}
-
-          {card === 'home' && trancheData?.token && trancheData.token.length > 0 && trancheData.token.length < 7 && (
-            <Box mt="small">
-              <Button secondary onClick={addToWallet} label={`Display ${trancheData?.token} in wallet`} />
-            </Box>
           )}
         </>
       )}
@@ -431,4 +447,35 @@ const BlackHeading = styled.div`
   font-size: 14px;
   font-weight: 600;
   color: #000;
+`
+
+const TextButton = styled.div`
+  display: inline-block;
+
+  > div {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 8px 0;
+    white-space: nowrap;
+    cursor: pointer;
+
+    > svg {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+    }
+  }
+
+  :hover {
+    color: #2762ff;
+  }
+`
+
+const BottomCardToolbar = styled.div`
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  margin-top: ${(p) => p.theme.space.small}px;
 `

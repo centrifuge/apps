@@ -1,12 +1,13 @@
-import { Box } from 'grommet'
 import { GetStaticProps } from 'next'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
 import * as React from 'react'
 import Auth from '../../../../../components/Auth'
-import Container from '../../../../../components/Container'
 import Header from '../../../../../components/Header'
 import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
+import { Stack } from '../../../../../components/Layout'
+import { PageContainer } from '../../../../../components/PageContainer'
+import PageTitle from '../../../../../components/PageTitle'
 import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
@@ -33,17 +34,14 @@ const ManagementPage: React.FC<Props> = ({ pool, ipfsPools }) => {
             selectedRoute={'/management'}
             menuItems={menuItems}
           />
-          <Container>
-            <Box justify="center" direction="row">
-              <Box width="xlarge">
-                <Auth>
-                  <Box>
-                    <PoolManagement activePool={pool} />
-                  </Box>
-                </Auth>
-              </Box>
-            </Box>
-          </Container>
+          <PageContainer>
+            <Auth>
+              <PageTitle pool={pool} page="Pool Management" />
+              <Stack gap="xlarge">
+                <PoolManagement activePool={pool} />
+              </Stack>
+            </Auth>
+          </PageContainer>
         </WithFooter>
       </TinlakeProvider>
     </IpfsPoolsProvider>

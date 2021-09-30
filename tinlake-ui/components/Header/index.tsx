@@ -17,6 +17,7 @@ import { useAddress } from '../../utils/useAddress'
 import { useCFGRewards } from '../../utils/useCFGRewards'
 import { usePool } from '../../utils/usePool'
 import { usePortfolio } from '../../utils/usePortfolio'
+import { ClientOnlyRender } from '../ClientOnlyRender'
 import { Tooltip } from '../Tooltip'
 import { Web3Wallet } from '../Web3Wallet'
 
@@ -127,114 +128,116 @@ const Header: React.FC<Props> = (props: Props) => {
   )
 
   return (
-    <HeaderBar
-      style={{ position: 'sticky', top: 0, height: '56px', zIndex: 6, boxShadow: '0 0 4px 0px #00000075' }}
-      background="white"
-      justify="between"
-      align="center"
-      direction="row"
-      fill="horizontal"
-      pad={{ horizontal: 'medium' }}
-    >
-      <LogoWrapper>
-        <Link href="/" shallow>
-          <a title="Tinlake" style={{ display: 'block' }}>
-            <DesktopLogo hasPoolSelector={!!poolTitle} src={logoUrl} />
-            <MobileLogo hasPoolSelector={!!poolTitle} src="/static/tinlake-logo-icon-only.svg" />
-          </a>
-        </Link>
-      </LogoWrapper>
-      <NavWrapper align="center" direction="row" style={{ flex: '1 1 auto' }}>
-        {poolTitle && <PoolSelector title={poolTitle} ipfsPools={props.ipfsPools} />}
-        {filtMenuItems.length > 0 && <DesktopNav>{menuButtons}</DesktopNav>}
-      </NavWrapper>
-      <AccountWrapper align="center" direction="row">
-        {!props.hideHoldings && (
-          <Holdings>
-            {address && (
-              <>
-                <Box pad={{ left: '14px', right: '14px' }}>
-                  <Tooltip title="View your rewards">{rewardsLink}</Tooltip>
-                </Box>
-                <Box pad={{ left: '14px', right: '14px' }}>
-                  <Tooltip title="View your investment portfolio">{portfolioLink}</Tooltip>
-                </Box>
-              </>
-            )}
-          </Holdings>
-        )}
-        <WalletNav style={{ flex: '0 0 auto', paddingLeft: 16 }}>
-          {!address && <ConnectButton onClick={connectAccount} label="Connect" />}
-          {address && (
-            <Web3Wallet
-              address={address}
-              providerName={providerName!}
-              networkName={network}
-              onDisconnect={() => dispatch(clear())}
-              transactions={selectWalletTransactions(transactions)}
-              getAddressLink={getAddressLink}
-            />
+    <ClientOnlyRender>
+      <HeaderBar
+        style={{ position: 'sticky', top: 0, height: '56px', zIndex: 6, boxShadow: '0 0 4px 0px #00000075' }}
+        background="white"
+        justify="between"
+        align="center"
+        direction="row"
+        fill="horizontal"
+        pad={{ horizontal: 'medium' }}
+      >
+        <LogoWrapper>
+          <Link href="/" shallow>
+            <a title="Tinlake" style={{ display: 'block' }}>
+              <DesktopLogo hasPoolSelector={!!poolTitle} src={logoUrl} />
+              <MobileLogo hasPoolSelector={!!poolTitle} src="/static/tinlake-logo-icon-only.svg" />
+            </a>
+          </Link>
+        </LogoWrapper>
+        <NavWrapper align="center" direction="row" style={{ flex: '1 1 auto' }}>
+          {poolTitle && <PoolSelector title={poolTitle} ipfsPools={props.ipfsPools} />}
+          {filtMenuItems.length > 0 && <DesktopNav>{menuButtons}</DesktopNav>}
+        </NavWrapper>
+        <AccountWrapper align="center" direction="row">
+          {!props.hideHoldings && (
+            <Holdings>
+              {address && (
+                <>
+                  <Box pad={{ left: '14px', right: '14px' }}>
+                    <Tooltip title="View your rewards">{rewardsLink}</Tooltip>
+                  </Box>
+                  <Box pad={{ left: '14px', right: '14px' }}>
+                    <Tooltip title="View your investment portfolio">{portfolioLink}</Tooltip>
+                  </Box>
+                </>
+              )}
+            </Holdings>
           )}
-        </WalletNav>
-      </AccountWrapper>
-      <MobileNav>
-        <Box pad={{ left: '24px' }}>
-          <MenuIcon size="24px" onClick={() => setMenuOpen(true)} />
-        </Box>
-        {menuOpen && (
-          <Layer
-            position="right"
-            full="vertical"
-            responsive={false}
-            animate={true}
-            onClickOutside={() => setMenuOpen(false)}
-            onEsc={() => setMenuOpen(false)}
-            style={{ borderRadius: 0 }}
-          >
-            <Box pad="40px" width="300px" height="100%">
-              <CloseButton onClick={() => setMenuOpen(false)}>
-                <CloseIcon size="16px" />
-              </CloseButton>
-              <Box gap="xlarge" height="100%">
-                {poolTitle && filtMenuItems.length > 0 && (
-                  <Box gap="medium">
-                    <div>{poolTitle}</div>
-                    <Box gap="medium" pad={{ left: 'small' }}>
-                      {menuButtons}
+          <WalletNav style={{ flex: '0 0 auto', paddingLeft: 16 }}>
+            {!address && <ConnectButton primary onClick={connectAccount} label="Connect wallet" />}
+            {address && (
+              <Web3Wallet
+                address={address}
+                providerName={providerName!}
+                networkName={network}
+                onDisconnect={() => dispatch(clear())}
+                transactions={selectWalletTransactions(transactions)}
+                getAddressLink={getAddressLink}
+              />
+            )}
+          </WalletNav>
+        </AccountWrapper>
+        <MobileNav>
+          <Box pad={{ left: '24px' }}>
+            <MenuIcon size="24px" onClick={() => setMenuOpen(true)} />
+          </Box>
+          {menuOpen && (
+            <Layer
+              position="right"
+              full="vertical"
+              responsive={false}
+              animate={true}
+              onClickOutside={() => setMenuOpen(false)}
+              onEsc={() => setMenuOpen(false)}
+              style={{ borderRadius: 0 }}
+            >
+              <Box pad="40px" width="300px" height="100%">
+                <CloseButton onClick={() => setMenuOpen(false)}>
+                  <CloseIcon size="16px" />
+                </CloseButton>
+                <Box gap="xlarge" height="100%">
+                  {poolTitle && filtMenuItems.length > 0 && (
+                    <Box gap="medium">
+                      <div>{poolTitle}</div>
+                      <Box gap="medium" pad={{ left: 'small' }}>
+                        {menuButtons}
+                      </Box>
                     </Box>
-                  </Box>
-                )}
+                  )}
 
-                {!props.hideHoldings && (
-                  <Box gap="large">
-                    {address && rewardsLink}
-                    {address && portfolioLink}
+                  {!props.hideHoldings && (
+                    <Box gap="large">
+                      {address && rewardsLink}
+                      {address && portfolioLink}
+                    </Box>
+                  )}
+                  <Box gap="medium" margin={{ top: 'auto' }}>
+                    <SocialLink href="https://t.me/centrifuge_chat" target="_blank">
+                      <Icon src="/static/help/telegram.svg" />
+                      <span>Telegram</span>
+                    </SocialLink>
+                    <SocialLink href="https://centrifuge.io/discord" target="_blank">
+                      <Icon src="/static/help/discord.svg" />
+                      <span>Discord</span>
+                    </SocialLink>
+                    <SocialLink href="mailto:support@centrifuge.io" target="_blank">
+                      <Icon src="/static/help/email.svg" />
+                      <span>Email</span>
+                    </SocialLink>
+                    <SocialLink href="https://docs.centrifuge.io/tinlake/overview/introduction/" target="_blank">
+                      <Icon src="/static/help/documentation.svg" />
+                      <span>Documentation</span>
+                    </SocialLink>
                   </Box>
-                )}
-                <Box gap="medium" margin={{ top: 'auto' }}>
-                  <SocialLink href="https://t.me/centrifuge_chat" target="_blank">
-                    <Icon src="/static/help/telegram.svg" />
-                    <span>Telegram</span>
-                  </SocialLink>
-                  <SocialLink href="https://centrifuge.io/discord" target="_blank">
-                    <Icon src="/static/help/discord.svg" />
-                    <span>Discord</span>
-                  </SocialLink>
-                  <SocialLink href="mailto:support@centrifuge.io" target="_blank">
-                    <Icon src="/static/help/email.svg" />
-                    <span>Email</span>
-                  </SocialLink>
-                  <SocialLink href="https://docs.centrifuge.io/tinlake/overview/introduction/" target="_blank">
-                    <Icon src="/static/help/documentation.svg" />
-                    <span>Documentation</span>
-                  </SocialLink>
                 </Box>
               </Box>
-            </Box>
-          </Layer>
-        )}
-      </MobileNav>
-    </HeaderBar>
+            </Layer>
+          )}
+        </MobileNav>
+      </HeaderBar>
+    </ClientOnlyRender>
   )
 }
 
