@@ -25,13 +25,10 @@ const InvestmentsView: React.FC<Props> = (props: Props) => {
     <Box mt="xlarge">
       <PageTitle pool={props.activePool} page="Investments" />
       <Stack gap={['medium', 'xxxlarge']}>
-        <Grid equalColumns minColumnWidth={['100%', 466]} gap="small">
-          <Box flex="1">
-            <TrancheOverview pool={props.activePool} tranche="senior" />
-          </Box>
-          <Box flex="1">
-            <TrancheOverview pool={props.activePool} tranche="junior" />
-          </Box>
+        <Grid equalColumns minColumnWidth={['100%', 466]} gap="large">
+          <TrancheOverview pool={props.activePool} tranche="senior" />
+
+          <TrancheOverview pool={props.activePool} tranche="junior" />
         </Grid>
 
         <EpochOverview activePool={props.activePool} />
