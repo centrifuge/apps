@@ -1,5 +1,5 @@
 import { Button } from 'grommet'
-import { LinkPrevious } from 'grommet-icons'
+import { Close } from 'grommet-icons'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -31,8 +31,8 @@ export const FunnelHeader: React.FC = () => {
   return (
     <Shelf position="sticky" top={0} height={56} zIndex={6} justifyContent="space-between" px={[12, 24]}>
       <BackLink onClick={() => router.back()} gap="xsmall" style={{ cursor: 'pointer' }}>
-        <LinkPrevious />
-        <Box display={['none', 'block']}>Back</Box>
+        <Close />
+        <Box display={['none', 'block']}>Close</Box>
       </BackLink>
       <Box>
         {address ? (

@@ -21,7 +21,7 @@ export const Step: React.FC<StepProps> = ({
   children,
   last,
 }) => {
-  const color = state === 'done' ? '#bbbbbb' : 'black'
+  const color = state === 'active' ? 'black' : '#bbbbbb'
   const iconEl =
     state === 'active' ? (
       <Circle filled />
