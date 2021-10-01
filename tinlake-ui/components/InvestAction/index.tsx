@@ -30,7 +30,7 @@ const InvestAction: React.FC<Props> = (props) => {
   const onOpen = () => setModalIsOpen(true)
   const onClose = () => setModalIsOpen(false)
 
-  const { data: poolData, ...rest } = usePool(
+  const { data: poolData } = usePool(
     props.pool && 'addresses' in props.pool ? props.pool.addresses.ROOT_CONTRACT : undefined
   )
 
@@ -38,9 +38,7 @@ const InvestAction: React.FC<Props> = (props) => {
   const hasUserData = address ? !!investorOnboardingData : true
   const hasData = hasPoolData && hasUserData
 
-  console.log('hasPoolData', poolData, rest)
-
-  const isUpcoming = poolData?.isUpcoming
+  const isUpcoming = poolData?.isUpcoming || true
   const hasDoneKYC = investorOnboardingData?.completed
   const canInvestInPool =
     props.pool && props.tranche
