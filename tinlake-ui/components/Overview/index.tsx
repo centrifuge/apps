@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
-import config, { Pool, UpcomingPool } from '../../config'
+import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
 import { ensureAuthed } from '../../ducks/auth'
 import { usePool } from '../../utils/usePool'
@@ -78,13 +78,13 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
     setModalIsOpen(false)
   }
 
-  const investButton =
-    'addresses' in selectedPool &&
-    config.featureFlagNewOnboardingPools.includes(selectedPool.addresses.ROOT_CONTRACT) ? (
-      <Button label="Invest" primary onClick={invest} />
-    ) : (
-      <InvestAction pool={selectedPool} />
-    )
+  const investButton = <InvestAction pool={selectedPool} />
+  // 'addresses' in selectedPool &&
+  // config.featureFlagNewOnboardingPools.includes(selectedPool.addresses.ROOT_CONTRACT) ? (
+  //   <Button label="Invest" primary onClick={invest} />
+  // ) : (
+  //   <InvestAction pool={selectedPool} />
+  // )
 
   return (
     <Stack gap="xlarge" mt="large">

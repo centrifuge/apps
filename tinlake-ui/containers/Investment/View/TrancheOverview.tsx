@@ -12,7 +12,6 @@ import { Card } from '../../../components/Card'
 import InvestAction from '../../../components/InvestAction'
 import { Box, Shelf } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
-import { PoolLink } from '../../../components/PoolLink'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
 import { ValuePairList } from '../../../components/ValuePairList'
@@ -91,9 +90,11 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   const isMaintainanceMode =
     props.pool && config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT)
-  const isOnboard = 'onboard' in router.query
-  const isNewOnboardingPool =
-    props.pool?.addresses && config.featureFlagNewOnboardingPools.includes(props.pool.addresses.ROOT_CONTRACT)
+
+  const isUpcoming = poolData?.isUpcoming
+  const forumLink = Object.entries((props.pool?.metadata.attributes as any)?.Links ?? {}).find(([key]) =>
+    /discussion/i.test(key)
+  )?.[1] as string | undefined
 
   React.useEffect(() => {
     if ('invest' in router.query && router.query.invest === props.tranche) {
@@ -319,7 +320,44 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         !isMaintainanceMode &&
         props.tranche === 'senior' &&
         !trancheData?.inMemberlist &&
-        (isOnboard || isNewOnboardingPool) && (
+        (isUpcoming ? (
+          <>
+            {address && (
+              <Info>
+                <>
+                  <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                    Interested in investing?
+                  </Heading>
+                  This upcoming pool is not open for investments yet.{' '}
+                  {forumLink && (
+                    <>
+                      Please follow the{' '}
+                      <DarkLink href={forumLink} target="_blank">
+                        Forum
+                      </DarkLink>{' '}
+                      for announcements.
+                    </>
+                  )}
+                  <ButtonGroup mt="small">
+                    <InvestAction pool={props.pool} tranche="senior" />
+                  </ButtonGroup>
+                </>
+              </Info>
+            )}
+
+            {!address && (
+              <Info>
+                <Heading level="6" margin={{ bottom: 'xsmall' }}>
+                  Interested in investing?
+                </Heading>
+                Connect your wallet to start the process.
+                <ButtonGroup mt="small">
+                  <Button primary label="Connect" onClick={connect} />
+                </ButtonGroup>
+              </Info>
+            )}
+          </>
+        ) : (
           <>
             <Info>
               <Tooltip title="DROP tokens earn yield on the outstanding assets at the fixed DROP rate (APR). The current yield may deviate due to compounding effects or unused liquidity in the pool reserve. The current 30d DROP APY is the annualized return of the pool's DROP token over the last 30 days.">
@@ -349,50 +387,14 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               </Tooltip>
             </Info>
             <ButtonGroup mt="medium">
-              <PoolLink href={'/onboarding'}>
-                <Button label="Invest" primary />
-              </PoolLink>
+              <InvestAction pool={props.pool} tranche="senior" />
             </ButtonGroup>
           </>
-        )}
-      {props.pool &&
-        !isMaintainanceMode &&
-        !(isOnboard || isNewOnboardingPool) &&
-        props.tranche === 'senior' &&
-        !trancheData?.inMemberlist && (
-          <>
-            {address && (
-              <Info>
-                <>
-                  <Heading level="6" margin={{ bottom: 'xsmall' }}>
-                    Interested in investing?
-                  </Heading>
-                  If you want to learn more get started with your onboarding process.
-                  <ButtonGroup mt="small">
-                    <InvestAction pool={props.pool} />
-                  </ButtonGroup>
-                </>
-              </Info>
-            )}
-
-            {!address && (
-              <Info>
-                <Heading level="6" margin={{ bottom: 'xsmall' }}>
-                  Interested in investing?
-                </Heading>
-                Connect your wallet to start the process.
-                <ButtonGroup mt="small">
-                  <Button primary label="Connect" onClick={connect} />
-                </ButtonGroup>
-              </Info>
-            )}
-          </>
-        )}
+        ))}
 
       {props.pool &&
         props.tranche === 'junior' &&
         !isMaintainanceMode &&
-        !isOnboard &&
         (!trancheData?.inMemberlist || !address) &&
         props.pool.metadata.issuerEmail && (
           <Info>

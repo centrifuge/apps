@@ -1,60 +1,120 @@
 import { Box, Paragraph } from 'grommet'
+import { useRouter } from 'next/router'
 import * as React from 'react'
+import { useDispatch } from 'react-redux'
 import { Pool, UpcomingPool } from '../../config'
-import { getPoolStatus } from '../../utils/pool'
+import { ensureAuthed } from '../../ducks/auth'
+import { useAddress } from '../../utils/useAddress'
+import { useInvestorOnboardingState } from '../../utils/useOnboardingState'
 import { usePool } from '../../utils/usePool'
-import { usePools } from '../../utils/usePools'
 import { Button } from '../Button'
+import { useDebugFlags } from '../DebugFlags'
 import { PoolLink } from '../PoolLink'
+import { Tooltip } from '../Tooltip'
 import { FormModal, InvestmentSteps } from './styles'
 
 interface Props {
-  anchor?: React.ReactNode
-  pool?: Pool | UpcomingPool
+  pool: Pool | UpcomingPool
+  tranche?: 'junior' | 'senior'
 }
 
-const InvestAction: React.FC<Props> = (props: Props) => {
+const InvestAction: React.FC<Props> = (props) => {
+  const { newOnboarding } = useDebugFlags()
+  const { data: investorOnboardingData } = useInvestorOnboardingState()
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
+  const [awaitingConnectAndData, setAwaitingConnectAndData] = React.useState(false)
+  const address = useAddress()
+  const router = useRouter()
+  const dispatch = useDispatch()
 
   const onOpen = () => setModalIsOpen(true)
   const onClose = () => setModalIsOpen(false)
 
-  const investDisabled = props.pool?.isUpcoming || !props.pool?.metadata.securitize?.issuerId
-
-  const { data: poolsData } = usePools()
-  const { data: poolData } = usePool(
+  const { data: poolData, ...rest } = usePool(
     props.pool && 'addresses' in props.pool ? props.pool.addresses.ROOT_CONTRACT : undefined
   )
 
-  const [status, setStatus] = React.useState('Open')
+  const hasPoolData = props.pool ? !!poolData : true
+  const hasUserData = address ? !!investorOnboardingData : true
+  const hasData = hasPoolData && hasUserData
+
+  console.log('hasPoolData', poolData, rest)
+
+  const isUpcoming = poolData?.isUpcoming
+  const hasDoneKYC = investorOnboardingData?.completed
+  const canInvestInPool =
+    props.pool && props.tranche
+      ? poolData?.[props.tranche]?.inMemberlist
+      : poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist
+
+  function navigate() {
+    if (isUpcoming) {
+      if (!hasDoneKYC) {
+        router.push('/onboarding')
+      }
+    } else {
+      const basePath = `/pool/${(props.pool as Pool).addresses.ROOT_CONTRACT}/${props.pool?.metadata.slug}`
+      if (canInvestInPool) {
+        router.push(`${basePath}/investments`)
+      } else {
+        router.push(`${basePath}/onboarding`)
+      }
+    }
+  }
+
+  async function connectAndNavigate() {
+    if (!address) {
+      setAwaitingConnectAndData(true)
+      try {
+        await dispatch(ensureAuthed())
+      } catch (e) {
+        console.log('caught', e)
+        setAwaitingConnectAndData(false)
+      }
+      return
+    }
+    if (!hasData) {
+      setAwaitingConnectAndData(true)
+      return
+    }
+
+    navigate()
+  }
 
   React.useEffect(() => {
-    if (props.pool) {
-      const pool = poolsData?.pools.find((pool) => {
-        return 'addresses' in props.pool! && pool.id === (props.pool as Pool).addresses.ROOT_CONTRACT.toLowerCase()
-      })
-
-      if (pool) setStatus(getPoolStatus(pool))
+    if (awaitingConnectAndData && address && hasData) {
+      setAwaitingConnectAndData(false)
+      navigate()
     }
-  }, [poolsData])
+  }, [address, hasData, awaitingConnectAndData])
 
-  // TODO: remove hardcoded exception for PC2
-  const isClosed = (status === 'Deployed' || status === 'Closed') && !(props.pool?.metadata.slug === 'paperchain-2')
-  const isUpcoming = !isClosed && (props.pool?.isUpcoming || !props.pool?.metadata.securitize?.issuerId)
+  const buttonLabel = isUpcoming && address && !hasDoneKYC ? 'Onboard as investor' : 'Invest'
 
   return (
     <>
-      {props.pool && (poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
-        <Box>
-          <PoolLink href={'/investments'}>
-            <Button primary label="Invest" fill={false} />
-          </PoolLink>
-        </Box>
-      )}
-      {props.pool && !(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
-        <Box>
-          <Button primary label="Invest" fill={false} onClick={onOpen} />
-        </Box>
+      {newOnboarding ? (
+        isUpcoming && address && hasDoneKYC ? (
+          <Tooltip title="Upcoming pool" description="This upcoming pool is not open for investments yet">
+            <Button primary label="Invest" disabled />
+          </Tooltip>
+        ) : (
+          <Button primary label={buttonLabel} onClick={connectAndNavigate} />
+        )
+      ) : (
+        <>
+          {props.pool && (poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
+            <Box>
+              <PoolLink href="/investments">
+                <Button primary label="Invest" fill={false} />
+              </PoolLink>
+            </Box>
+          )}
+          {props.pool && !(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
+            <Box>
+              <Button primary label="Invest" fill={false} onClick={onOpen} />
+            </Box>
+          )}
+        </>
       )}
 
       <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose} style={{ width: '800px' }}>
@@ -102,10 +162,9 @@ const InvestAction: React.FC<Props> = (props: Props) => {
           {!isUpcoming && props.pool && (
             <Box flex={true} justify="between">
               {isUpcoming && <Paragraph>This pool is not open for investments yet</Paragraph>}
-              {!investDisabled && (
+              {!isUpcoming && (
                 <Paragraph>Already an eligible investor? Sign the pool issuers Subscription Agreement.</Paragraph>
               )}
-              {isClosed && <Paragraph>This pool is closed for investments.</Paragraph>}
               {(props.pool as Pool)?.metadata.securitize?.issuerId && (
                 <Button
                   primary
@@ -117,7 +176,7 @@ const InvestAction: React.FC<Props> = (props: Props) => {
                     (props.pool as Pool).metadata.securitize?.slug
                   }.invest.securitize.io/%23/authorize`}
                   target="_blank"
-                  disabled={investDisabled}
+                  disabled={isUpcoming}
                 />
               )}
             </Box>
