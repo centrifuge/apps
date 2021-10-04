@@ -1,7 +1,7 @@
 {
   "private": true,
   "workspaces": [
-    "plasma",
+    "fabric",
     "tinlake-bot",
     "e2e-tests",
     "onboarding/api",
