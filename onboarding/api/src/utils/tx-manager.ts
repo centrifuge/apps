@@ -2,7 +2,7 @@ import { ethers } from 'ethers'
 
 const DEFAULT_CONFIG: TransactionManagerConfig = {
   transactionTimeout: 5 * 60 * 1000, // 5 minutes
-  maxFeePerGas: 600,
+  maxFeePerGas: 200,
   initialPriorityFeePerGas: 2,
   maxPriorityFeePerGas: 20,
   priorityFeeIncrease: 1,
@@ -133,7 +133,7 @@ class TransactionManager extends ethers.Signer {
   }
 
   connect(provider: ethers.providers.Provider): TransactionManager {
-    return new TransactionManager(this.signer.connect(provider))
+    return new TransactionManager(this.signer.connect(provider), this.config)
   }
 
   getAddress(): Promise<string> {
