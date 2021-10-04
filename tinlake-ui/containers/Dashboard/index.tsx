@@ -29,29 +29,25 @@ const Dashboard: React.FC<Props> = () => {
     <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />
   ) : (
     <Stack gap="xlarge" pt="xlarge">
-      {newOnboarding ? (
-        address ? (
-          data &&
-          !data.completed && (
-            <Wrap gap="medium" justifyContent="space-between" flexDirection={['column', 'row']}>
-              <Text fontSize="14px" fontWeight={500}>
-                Onboard as investor by verifying KYC and subscribing to pools.{' '}
-                <Anchor
-                  label="Read Onboarding Guide"
-                  href="https://docs.centrifuge.io/use/invest/#onboarding-guide"
-                  target="_blank"
-                  style={{ display: 'inline' }}
-                />
-              </Text>
-              <ButtonGroup bleedY={[0, '10px']}>
-                <Link href="/onboarding">
-                  <Button primary label="Onboard As Investor" />
-                </Link>
-              </ButtonGroup>
-            </Wrap>
-          )
-        ) : (
-          <TinlakeExplainer />
+      {newOnboarding && address ? (
+        data &&
+        !data.completed && (
+          <Wrap gap="medium" justifyContent="space-between" flexDirection={['column', 'row']}>
+            <Text fontSize="14px" fontWeight={500}>
+              Onboard as investor by verifying KYC and subscribing to pools.{' '}
+              <Anchor
+                label="Read Onboarding Guide"
+                href="https://docs.centrifuge.io/use/onboarding/"
+                target="_blank"
+                style={{ display: 'inline' }}
+              />
+            </Text>
+            <ButtonGroup bleedY={[0, '10px']}>
+              <Link href="/onboarding">
+                <Button primary label="Onboard As Investor" />
+              </Link>
+            </ButtonGroup>
+          </Wrap>
         )
       ) : (
         <Box display={['none', 'block']}>

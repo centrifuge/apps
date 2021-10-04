@@ -2,7 +2,7 @@ import BN from 'bn.js'
 import { BigNumber } from 'ethers'
 import { useQuery } from 'react-query'
 import { useIpfsPools } from '../components/IpfsPoolsProvider'
-import { IpfsPools, Pool, PoolStatus } from '../config'
+import config, { IpfsPools, Pool, PoolStatus } from '../config'
 import Apollo from '../services/apollo'
 import { Call, multicall } from './multicall'
 import { Fixed27Base, UintBase } from './ratios'
@@ -269,13 +269,20 @@ async function getPools(ipfsPools: IpfsPools): Promise<PoolsData> {
   })
 
   const poolsWithCapacity = poolsData.pools.map((pool: PoolData) => {
+    const poolConfig = ipfsPools.active.find((p) => p.addresses.ROOT_CONTRACT.toLowerCase() === pool.id.toLowerCase())!
     if (pool.id in capacityPerPool) {
       const isUpcoming =
-        pool.isUpcoming || (!pool.assetValue && !pool.reserve) || (pool.assetValue?.isZero() && pool.reserve?.isZero())
+        pool.isUpcoming ||
+        poolConfig.metadata.isUpcoming ||
+        (!pool.assetValue && !pool.reserve) ||
+        (pool.assetValue?.isZero() && pool.reserve?.isZero()) ||
+        !config.featureFlagNewOnboardingPools.includes(pool.id)
+
       const capacity = capacityPerPool[pool.id]
       return {
         ...pool,
         capacity,
+        isUpcoming: !!isUpcoming,
         order: isUpcoming ? -2 : pool.isOversubscribed || !capacity ? -1 : capacity.div(UintBase).toNumber(),
         capacityGivenMaxReserve: capacityGivenMaxReservePerPool[pool.id],
         capacityGivenMaxDropRatio: capacityGivenMaxDropRatioPerPool[pool.id],

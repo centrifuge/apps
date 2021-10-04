@@ -4,10 +4,10 @@ import { useDebugFlags } from '../components/DebugFlags'
 import config, { Pool, UpcomingPool } from '../config'
 import { useAddress } from './useAddress'
 
-export function useOnboardingState(pool: Pool | UpcomingPool, overrideAddress?: string) {
+export function useOnboardingState(pool?: Pool | UpcomingPool, overrideAddress?: string) {
   const debugValue = useDebugFlags().onboardingState
   const address = useAddress()
-  const poolId = (pool as Pool).addresses?.ROOT_CONTRACT
+  const poolId = (pool as Pool)?.addresses?.ROOT_CONTRACT
   const query = useQuery<AddressStatus>(
     ['onboarding', poolId, overrideAddress || address, debugValue],
     async () =>

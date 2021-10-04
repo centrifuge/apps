@@ -147,12 +147,7 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
         </Header>
       )}
       {pools?.map((p) => (
-        <Link
-          href={p.isUpcoming || p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`}
-          shallow
-          passHref
-          key={p.id}
-        >
+        <Link href={p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`} shallow passHref key={p.id}>
           <Row
             row={p}
             columns={dataColumns}
