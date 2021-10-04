@@ -22,8 +22,8 @@
     "dev:lambda": "netlify-lambda serve lambda",
     "build:lambda": "netlify-lambda build lambda",
     "build:deps:tinlake.js": "cd ../tinlake.js && yarn build && cd ../tinlake-ui",
-    "build:deps:ui-lib": "cd ../ui-lib && yarn build && cd ../tinlake-ui",
-    "build:deps": "yarn build:deps:tinlake.js && yarn build:deps:ui-lib"
+    "build:deps:plasma": "cd ../plasma && yarn build && cd ../tinlake-ui",
+    "build:deps": "yarn build:deps:tinlake.js && yarn build:deps:plasma"
   },
   "repository": {
     "type": "git",
@@ -48,7 +48,7 @@
     "@centrifuge/tinlake-js": "workspace:*",
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.6",
     "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.20",
-    "@centrifuge/ui-lib": "workspace:*",
+    "@centrifuge/plasma": "workspace:*",
     "@makerdao/multicall": "^0.12.0",
     "@polkadot/api": "^3.1.1",
     "@polkadot/extension-dapp": "^0.35.1",
