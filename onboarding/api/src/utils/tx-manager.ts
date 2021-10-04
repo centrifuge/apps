@@ -49,7 +49,7 @@ class TransactionManager extends ethers.Signer {
       this.queue.push(key)
 
       if (this.queue.length === 1) {
-        console.log(`Procesisng ${key} immediately`)
+        console.log(`Processing ${key} immediately`)
         this.process(key)
       } else {
         console.log(`Adding ${key} to the queue`)
