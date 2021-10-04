@@ -19,7 +19,7 @@
     "bignumber.js": "^9.0.0",
     "cron": "^1.8.2",
     "decimal.js-light": "^2.5.1",
-    "ethers": "5.0.23",
+    "ethers": "5.4.7",
     "log-timestamp": "^0.3.0",
     "node-fetch": "^2.6.1",
     "ws": "^7.4.5"
