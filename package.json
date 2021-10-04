@@ -1,7 +1,7 @@
 {
   "private": true,
   "workspaces": [
-    "ui-lib",
+    "plasma",
     "tinlake-bot",
     "e2e-tests",
     "onboarding/api",

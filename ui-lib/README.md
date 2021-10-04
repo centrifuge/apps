@@ -1,22 +1,11 @@
-# Centrifuge Design System UI package
+# Plasma - Centrifuge Design System UI package
 
-<style>
-   .red-banner {
-      padding: 1rem;
-      border: 1px solid red;
-      border-radius: 4px;
-      color: red;
-      background-color: rgba(255,0,0,.1);
-   }
-</style>
-<p class="red-banner">
-This package is temporarily named `ui-lib` and it's waiting for better naming. It will sit in its own branch and won't be merged in main until an official name has been decided.
-</p>
+This package contains the implementation of the Centrifuge design system. It is home to:
 
-## TODO
-
-- Linter - formatter
-- Testing (Storybook + Loki for Visual Regression Tests)
+- Color definitions
+- Spacing units
+- Icon components
+- UI components (e.g. buttons, input controls, panels etc.)
 
 ## Integration in the monorepo
 
@@ -25,7 +14,7 @@ This package is temporarily named `ui-lib` and it's waiting for better naming. I
 - Declare the module in `apps/tinlake-ui/declarations.d.ts`
 - Add the dependency to `apps/tinlake-ui/package.json`:
   ```
-  "@centrifuge/ui-lib": "workspace:*",
+  "@centrifuge/plasma": "workspace:*",
   ```
 - Change the `build:deps` script in `apps/tinlake-ui/package.json`:
   - from
@@ -35,8 +24,8 @@ This package is temporarily named `ui-lib` and it's waiting for better naming. I
   - to
     ```
     "build:deps:tinlake.js": "cd ../tinlake.js && yarn build && cd ../tinlake-ui",
-    "build:deps:ui-lib": "cd ../ui-lib && yarn build && cd ../tinlake-ui",
-    "build:deps": "yarn build:deps:tinlake.js && yarn build:deps:ui-lib"
+    "build:deps:plasma": "cd ../plasma && yarn build && cd ../tinlake-ui",
+    "build:deps": "yarn build:deps:tinlake.js && yarn build:deps:plasma"
     ```
 
 ## Development
