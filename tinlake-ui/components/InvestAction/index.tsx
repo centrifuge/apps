@@ -9,7 +9,7 @@ import { useInvestorOnboardingState } from '../../utils/useOnboardingState'
 import { usePool } from '../../utils/usePool'
 import { Button } from '../Button'
 import { useDebugFlags } from '../DebugFlags'
-import { PoolLink } from '../PoolLink'
+import { Center } from '../Layout'
 import { Tooltip } from '../Tooltip'
 import { FormModal, InvestmentSteps } from './styles'
 
@@ -38,7 +38,7 @@ const InvestAction: React.FC<Props> = (props) => {
   const hasUserData = address ? !!investorOnboardingData : true
   const hasData = hasPoolData && hasUserData
 
-  const isUpcoming = poolData?.isUpcoming || true
+  const isUpcoming = poolData?.isUpcoming
   const hasDoneKYC = investorOnboardingData?.completed
   const canInvestInPool =
     props.pool && props.tranche
@@ -48,7 +48,11 @@ const InvestAction: React.FC<Props> = (props) => {
   function navigate() {
     if (isUpcoming) {
       if (!hasDoneKYC) {
-        router.push('/onboarding')
+        if (newOnboarding) {
+          router.push('/onboarding')
+        } else {
+          onOpen()
+        }
       }
     } else {
       const basePath = `/pool/${(props.pool as Pool).addresses.ROOT_CONTRACT}/${props.pool?.metadata.slug}`
@@ -90,29 +94,12 @@ const InvestAction: React.FC<Props> = (props) => {
 
   return (
     <>
-      {newOnboarding ? (
-        isUpcoming && address && hasDoneKYC ? (
-          <Tooltip title="Upcoming pool" description="This upcoming pool is not open for investments yet">
-            <Button primary label="Invest" disabled />
-          </Tooltip>
-        ) : (
-          <Button primary label={buttonLabel} onClick={connectAndNavigate} />
-        )
+      {isUpcoming && address && hasDoneKYC ? (
+        <Tooltip title="Upcoming pool" description="This upcoming pool is not open for investments yet">
+          <Button primary label="Invest" disabled />
+        </Tooltip>
       ) : (
-        <>
-          {props.pool && (poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
-            <Box>
-              <PoolLink href="/investments">
-                <Button primary label="Invest" fill={false} />
-              </PoolLink>
-            </Box>
-          )}
-          {props.pool && !(poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) && (
-            <Box>
-              <Button primary label="Invest" fill={false} onClick={onOpen} />
-            </Box>
-          )}
-        </>
+        <Button primary label={buttonLabel} onClick={connectAndNavigate} />
       )}
 
       <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose} style={{ width: '800px' }}>
@@ -135,27 +122,6 @@ const InvestAction: React.FC<Props> = (props) => {
         >
           <Box flex={true} justify="between">
             <Paragraph>Start your KYC process to become to become an eligible investor.</Paragraph>
-            {(props.pool as Pool)?.metadata.securitize?.issuerId ? (
-              <Button
-                primary
-                label={`Onboard as an investor`}
-                fill={false}
-                href={`https://id.securitize.io/#/authorize?registration=true&issuerId=${
-                  (props.pool as Pool).metadata.securitize?.issuerId
-                }&scope=info%20details%20verification&redirecturl=https://${
-                  (props.pool as Pool).metadata.securitize?.slug
-                }.invest.securitize.io/%23/authorize`}
-                target="_blank"
-              />
-            ) : (
-              <Button
-                primary
-                label={`Onboard as an investor`}
-                href={`https://id.securitize.io/#/authorize?issuerId=4d11b353-a327-49ab-b45b-ae5be60697c6&scope=info%20details%20verification&registration=true&redirecturl=https://centrifuge.invest.securitize.io/#/authorize`}
-                fill={false}
-                target="_blank"
-              />
-            )}
           </Box>
           {!isUpcoming && props.pool && (
             <Box flex={true} justify="between">
@@ -180,6 +146,29 @@ const InvestAction: React.FC<Props> = (props) => {
             </Box>
           )}
         </Box>
+        <Center>
+          {(props.pool as Pool)?.metadata.securitize?.issuerId ? (
+            <Button
+              primary
+              label={`Onboard as an investor`}
+              fill={false}
+              href={`https://id.securitize.io/#/authorize?registration=true&issuerId=${
+                (props.pool as Pool).metadata.securitize?.issuerId
+              }&scope=info%20details%20verification&redirecturl=https://${
+                (props.pool as Pool).metadata.securitize?.slug
+              }.invest.securitize.io/%23/authorize`}
+              target="_blank"
+            />
+          ) : (
+            <Button
+              primary
+              label={`Onboard as an investor`}
+              href={`https://id.securitize.io/#/authorize?issuerId=4d11b353-a327-49ab-b45b-ae5be60697c6&scope=info%20details%20verification&registration=true&redirecturl=https://centrifuge.invest.securitize.io/#/authorize`}
+              fill={false}
+              target="_blank"
+            />
+          )}
+        </Center>
 
         {props.pool && (
           <Paragraph
