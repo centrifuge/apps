@@ -1,21 +1,16 @@
 import { Modal } from '@centrifuge/axis-modal'
 import { Heading, Paragraph } from 'grommet'
 import { Catalog, Chat, Globe, StatusInfo as StatusInfoIcon } from 'grommet-icons'
-import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
-import config, { Pool, UpcomingPool } from '../../config'
+import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
-import { ensureAuthed } from '../../ducks/auth'
-import { usePool } from '../../utils/usePool'
 import { Button } from '../Button'
 import { ButtonGroup } from '../ButtonGroup'
 import { Card } from '../Card'
 import InvestAction from '../InvestAction'
 import { Box, Grid, Stack, Wrap } from '../Layout'
 import PageTitle from '../PageTitle'
-import { useTinlake } from '../TinlakeProvider'
 import OverviewHeader from './OverviewHeader'
 
 interface Props {
@@ -27,48 +22,8 @@ function isUpcomingPool(pool: Pool | UpcomingPool): pool is UpcomingPool {
 }
 
 const Overview: React.FC<Props> = ({ selectedPool }) => {
-  const tinlake = useTinlake()
-  const router = useRouter()
-  const dispatch = useDispatch()
-  const address = useSelector<any, string | null>((state) => state.auth.address)
-
-  const { data: poolData } = usePool(!isUpcomingPool(selectedPool) ? selectedPool.addresses.ROOT_CONTRACT : undefined)
-
-  const [awaitingConnect, setAwaitingConnect] = React.useState(false)
-
   const [modalLink, setModalLink] = React.useState('')
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
-
-  React.useEffect(() => {
-    if (address && awaitingConnect && !isUpcomingPool(selectedPool)) {
-      ;(async () => {
-        const inAMemberlist = (await tinlake.checkSeniorTokenMemberlist(address))
-          ? true
-          : await tinlake.checkJuniorTokenMemberlist(address)
-
-        if (inAMemberlist) {
-          router.push(`/pool/${selectedPool.addresses.ROOT_CONTRACT}/${selectedPool.metadata.slug}/investments`)
-        } else {
-          router.push(`/pool/${selectedPool.addresses.ROOT_CONTRACT}/${selectedPool.metadata.slug}/onboarding`)
-        }
-      })()
-
-      setAwaitingConnect(false)
-    }
-  }, [address, tinlake])
-
-  const invest = () => {
-    if (address && !isUpcomingPool(selectedPool)) {
-      if (poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist) {
-        router.push(`/pool/${selectedPool.addresses.ROOT_CONTRACT}/${selectedPool.metadata.slug}/investments`)
-      } else {
-        router.push(`/pool/${selectedPool.addresses.ROOT_CONTRACT}/${selectedPool.metadata.slug}/onboarding`)
-      }
-    } else {
-      setAwaitingConnect(true)
-      dispatch(ensureAuthed())
-    }
-  }
 
   const openModal = (link: string) => {
     setModalLink(link)
@@ -78,14 +33,6 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
     setModalIsOpen(false)
   }
 
-  const investButton =
-    'addresses' in selectedPool &&
-    config.featureFlagNewOnboardingPools.includes(selectedPool.addresses.ROOT_CONTRACT) ? (
-      <Button label="Invest" primary onClick={invest} />
-    ) : (
-      <InvestAction pool={selectedPool} />
-    )
-
   return (
     <Stack gap="xlarge" mt="large">
       {!isUpcomingPool(selectedPool) && (
@@ -93,9 +40,9 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
           <PageTitle
             pool={selectedPool}
             page="Overview"
-            rightContent={<Box display={['none', 'block']}>{investButton}</Box>}
+            rightContent={<Box display={['none', 'block']}>{<InvestAction pool={selectedPool} />}</Box>}
           />
-          <OverviewHeader selectedPool={selectedPool as Pool} investButton={investButton} />
+          <OverviewHeader selectedPool={selectedPool as Pool} investButton={<InvestAction pool={selectedPool} />} />
         </div>
       )}
       {/* <Box direction="row" gap="small">
