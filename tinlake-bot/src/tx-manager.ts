@@ -2,7 +2,7 @@ import { ethers } from 'ethers'
 
 const DEFAULT_CONFIG: TransactionManagerConfig = {
   transactionTimeout: 5 * 60 * 1000, // 5 minutes
-  maxFeePerGas: 100,
+  maxFeePerGas: 300,
   initialPriorityFeePerGas: 2,
   maxPriorityFeePerGas: 20,
   priorityFeeIncrease: 1,
