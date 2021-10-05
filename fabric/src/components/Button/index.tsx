@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { color, layout, space } from 'styled-system'
-import { Theme } from '../../theme'
+import { FabricTheme } from '../../theme'
 
 const buttonColor =
   (colorName: string) =>
@@ -76,7 +76,7 @@ export const Button = styled.button<Props>`
 `
 
 type Props = {
-  theme: Theme
+  theme: FabricTheme
   contained?: boolean
   outlined?: boolean
   text?: boolean

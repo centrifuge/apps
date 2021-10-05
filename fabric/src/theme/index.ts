@@ -1,25 +1,13 @@
+import breakpoints from './breakpoints'
 import colors from './colors'
-
-const breakpoints = ['600px', '900px', '1200px', '1500px'] as string[] & { [key: string]: string }
-breakpoints.small = breakpoints[0]
-breakpoints.medium = breakpoints[1]
-breakpoints.large = breakpoints[2]
-breakpoints.xlarge = breakpoints[3]
+import space from './space'
+import typography from './typography'
 
 export const theme = {
   breakpoints,
-  space: {
-    xsmall: 8,
-    small: 16,
-    medium: 24,
-    large: 32,
-    xlarge: 40,
-    xxlarge: 64,
-  },
-  sizes: {
-    container: 1152,
-  },
+  typography,
+  space,
   colors,
 }
 
-export type Theme = typeof theme
+export type FabricTheme = typeof theme
