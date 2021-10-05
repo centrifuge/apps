@@ -7,7 +7,6 @@ import { SectionHeading } from '../../../components/Heading'
 import { Box, Shelf, Stack } from '../../../components/Layout'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
-import { Value } from '../../../components/Value'
 import { ValuePairList } from '../../../components/ValuePairList'
 import { Pool, UpcomingPool } from '../../../config'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -15,7 +14,7 @@ import { useTrancheYield } from '../../../utils/hooks'
 import { toPrecision } from '../../../utils/toPrecision'
 import { useAssets } from '../../../utils/useAssets'
 import { usePool } from '../../../utils/usePool'
-import { DividerBottom, DividerInner, DividerTop, FlexWrapper, TokenLogo } from './styles'
+import { DividerInner, FlexWrapper, TokenLogo } from './styles'
 
 interface Props {
   selectedPool: Pool | UpcomingPool
@@ -151,19 +150,12 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           />
         </Card>
         <Stack flex="1 1 35%" justifyContent="space-between">
-          <Card p="medium" mb="small">
+          <Card p="medium">
             <Shelf justifyContent="space-between">
               <Shelf gap="xsmall" mb="xsmall">
                 <Box as={TokenLogo} src="/static/DROP_final.svg" display={['none', 'inline']} />
                 <SectionHeading>DROP Tranche</SectionHeading>
               </Shelf>
-              <Value
-                variant="sectionHeading"
-                value={
-                  dropTotalValue ? addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 0)) : null
-                }
-                unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
-              />
             </Shelf>
             <Stack gap="small">
               <TrancheNote>Senior tranche &mdash; Lower risk, stable return</TrancheNote>
@@ -176,7 +168,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     value: poolData?.senior
                       ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 4))
                       : null,
-                    valueUnit: '%',
                   },
                   dropYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
                     ? {
@@ -194,26 +185,21 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             </Stack>
           </Card>
 
-          <DividerTop>
-            <DividerInner>&nbsp;</DividerInner>
-          </DividerTop>
+          <DividerInner>&nbsp;</DividerInner>
 
-          <Box mt="xsmall" mb="medium" textAlign="center">
+          <Box mt="xsmall" mb="xsmall" textAlign="center">
             <div>
-              DROP is currently protected by a<br />
-              <span style={{ fontWeight: 'bold' }}>
-                {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}%{' '}
-                <Tooltip id="tinRiskBuffer" underline>
-                  TIN buffer
-                </Tooltip>
-              </span>{' '}
+              DROP is currently protected by a{' '}
+              <Tooltip id="tinRiskBuffer" underline>
+                <span style={{ fontWeight: 'bold' }}>
+                  {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}% TIN buffer
+                </span>
+              </Tooltip>{' '}
               (min: {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}%)
             </div>
           </Box>
 
-          <DividerBottom>
-            <DividerInner>&nbsp;</DividerInner>
-          </DividerBottom>
+          <DividerInner>&nbsp;</DividerInner>
 
           <Card p="medium">
             <Shelf justifyContent="space-between">
@@ -221,13 +207,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 <Box as={TokenLogo} src="/static/TIN_final.svg" display={['none', 'inline']} />
                 <SectionHeading>Tin Tranche</SectionHeading>
               </Shelf>
-              <Value
-                variant="sectionHeading"
-                value={
-                  tinTotalValue ? addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 0)) : null
-                }
-                unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
-              />
             </Shelf>
             <Stack gap="small">
               <TrancheNote>Junior tranche &mdash; Higher risk, variable return</TrancheNote>

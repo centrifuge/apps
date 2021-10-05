@@ -95,20 +95,8 @@ export const PoolValueLineRight = styled.div`
   margin-top: 40px;
 `
 
-export const DividerTop = styled.div`
-  border-bottom: 1px solid #d8d8d8;
-  max-width: 80%;
-  margin: 0 0 16px 10%;
-`
-
-export const DividerBottom = styled.div`
-  border-top: 1px solid #d8d8d8;
-  max-width: 80%;
-  margin: 0 0 16px 10%;
-`
-
 export const DividerInner = styled.div`
-  border-right: 1px solid #d8d8d8;
+  border-right: 1px solid #e0e0e0;
   width: 50%;
 `
 
