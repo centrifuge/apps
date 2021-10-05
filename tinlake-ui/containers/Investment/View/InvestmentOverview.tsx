@@ -186,7 +186,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
           <Box mt="xsmall" mb="xsmall" textAlign="center">
             <div>
-              DROP is currently protected by a{' '}
+              DROP is protected by a{' '}
               <Tooltip id="tinRiskBuffer" underline>
                 <span style={{ fontWeight: 'bold' }}>
                   {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}% TIN buffer
