@@ -53,6 +53,9 @@ export default {
   ...backgroundColors,
   ...statusColors,
 
+  black: 'black',
+  white: 'white',
+
   altairYellow: '#FAB961',
   centrifugeBlue: '#2762FF',
   centrifugeOrange: '#FCBA59',

@@ -11,19 +11,32 @@ type ButtonStory = ComponentStory<typeof Button>
 
 const Template: ButtonStory = (args) => <Button {...args}>Connect</Button>
 
-export const DefaultBackground: ButtonStory = Template.bind({})
-DefaultBackground.args = {
-  m: 'large',
+export const DefaultType: ButtonStory = Template.bind({})
+DefaultType.args = {}
+
+export const Contained: ButtonStory = Template.bind({})
+Contained.args = {
+  contained: true,
 }
 
-export const CentrifugeBlue: ButtonStory = Template.bind({})
-CentrifugeBlue.args = {
-  m: 'large',
-  bg: 'centrifugeBlue',
+export const Outlined: ButtonStory = Template.bind({})
+Outlined.args = {
+  outlined: true,
 }
 
-export const AltairYellow: ButtonStory = Template.bind({})
-AltairYellow.args = {
-  m: 'xxlarge',
-  bg: 'altairYellow',
+export const Text: ButtonStory = Template.bind({})
+Text.args = {
+  text: true,
+}
+
+export const ContainedSmall: ButtonStory = Template.bind({})
+ContainedSmall.args = {
+  contained: true,
+  small: true,
+}
+
+export const ContainedDisabled: ButtonStory = Template.bind({})
+ContainedDisabled.args = {
+  contained: true,
+  disabled: true,
 }
