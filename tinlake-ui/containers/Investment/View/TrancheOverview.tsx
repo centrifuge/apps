@@ -97,12 +97,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     /discussion/i.test(key)
   )?.[1] as string | undefined
 
-  React.useEffect(() => {
-    if ('invest' in router.query && router.query.invest === props.tranche) {
-      setCard('invest')
-    }
-  }, [router.query])
-
   const value =
     balance && tokenPrice
       ? new BN(balance)
@@ -165,8 +159,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     if (hasPendingCollection) setCard('collect')
     else if (hasPendingOrder) setCard('order')
+    else if ('invest' in router.query && router.query.invest === props.tranche) setCard('invest')
     else setCard('home')
-  }, [hasPendingCollection, hasPendingOrder])
+  }, [hasPendingCollection, hasPendingOrder, router.query])
 
   return (
     <Card p={24} height="100%" display="flex" flexDirection="column">
