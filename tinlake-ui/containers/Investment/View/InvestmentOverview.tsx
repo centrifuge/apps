@@ -36,14 +36,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const { data: assets } = useAssets(tinlake.contractAddresses.ROOT_CONTRACT!)
 
   const ongoingAssets = assets ? assets.filter((asset) => asset.status && asset.status === 'ongoing') : undefined
-  const avgAmount = ongoingAssets
-    ? ongoingAssets
-        .filter((asset) => asset.debt)
-        .reduce((sum: BN, asset) => {
-          return sum.add(new BN(asset.debt!))
-        }, new BN(0))
-        .divn(ongoingAssets.length)
-    : undefined
+
   const avgInterestRate = ongoingAssets
     ? ongoingAssets
         .filter((asset) => asset.interestRate)
@@ -76,46 +69,46 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           .div(new BN('10').pow(new BN('14')))
       : new BN(0)
 
+  const isMaker = !!poolData?.maker
+
+  const availableLiquidityVal = isMaker
+    ? poolData?.reserve.add(poolData?.maker?.creditline || new BN(0))
+    : poolData?.reserve
+
   return (
     <>
       <FlexWrapper>
         <Card p="medium" flex="1 1 35%" mr={['0', '0', 'medium']}>
           <Shelf mb="small" justifyContent="space-between">
-            <SectionHeading>
-              <Tooltip id="assetValue" underline>
-                Asset Value
-              </Tooltip>
-            </SectionHeading>
-            <Value
-              variant="sectionHeading"
-              value={
-                poolData?.netAssetValue
-                  ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))
-                  : null
-              }
-              unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
-            />
+            <SectionHeading>Assets</SectionHeading>
           </Shelf>
           <Box mb="xlarge">
             <ValuePairList
               variant="secondary"
               items={[
                 {
-                  term: 'Number of Assets',
-                  value: ongoingAssets?.length ?? null,
-                },
-                {
-                  term: 'Number of Assets',
-                  value: avgAmount ? addThousandsSeparators(toPrecision(baseToDisplay(avgAmount, 18), 0)) : null,
+                  term: (
+                    <Tooltip id="assetValue" underline>
+                      Asset value
+                    </Tooltip>
+                  ),
+                  value: poolData?.netAssetValue
+                    ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.netAssetValue || '0', 18), 0))
+                    : null,
                   valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
                 },
                 {
-                  term: 'Average Financing Fee',
+                  term: 'Number of assets',
+                  value: ongoingAssets?.length ?? null,
+                },
+
+                {
+                  term: 'Average financing fee',
                   value: avgInterestRate ? toPrecision(feeToInterestRate(avgInterestRate), 2) : null,
                   valueUnit: '%',
                 },
                 {
-                  term: 'Average Maturity',
+                  term: 'Average maturity',
                   value:
                     avgMaturity == null
                       ? null
@@ -128,27 +121,29 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           </Box>
 
           <Shelf mb="small" justifyContent="space-between">
-            <SectionHeading>
-              <Tooltip id="reserve" underline>
-                Reserve
-              </Tooltip>
-            </SectionHeading>
-            <Value
-              variant="sectionHeading"
-              value={
-                poolData?.reserve
-                  ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))
-                  : null
-              }
-              unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
-            />
+            <SectionHeading>Reserve</SectionHeading>
           </Shelf>
 
           <ValuePairList
             variant="secondary"
             items={[
               {
-                term: 'Reserve Ratio',
+                term: (
+                  <Tooltip id={isMaker ? 'availableLiquidityMaker' : 'availableLiquidity'} underline>
+                    Available liquidity
+                  </Tooltip>
+                ),
+                value: availableLiquidityVal
+                  ? addThousandsSeparators(toPrecision(baseToDisplay(availableLiquidityVal || '0', 18), 0))
+                  : null,
+                valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
+              },
+              {
+                term: (
+                  <Tooltip id="cashDrag" underline>
+                    Cash drag
+                  </Tooltip>
+                ),
                 value: reserveRatio ? parseFloat(reserveRatio.toString()) / 100 : null,
                 valueUnit: '%',
               },

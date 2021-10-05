@@ -108,5 +108,17 @@
   "dropInvestment": {
     "title": "DROP Investment",
     "description": "DROP tokens earn yield on the outstanding assets at the DROP APR. The effective APY may deviate due to compounding effects or unused liquidity in the pool reserve. The 30d DROP APY is the effective annualized return of the pool's DROP token over the last 30 days."
+  },
+  "availableLiquidity": {
+    "title": "Available liquidity",
+    "description": "Liquidity of the pool reserve available for redemptions by investors and originations by the Issuer."
+  },
+  "availableLiquidityMaker": {
+    "title": "Available liquidity",
+    "description": "Liquidity from the pool’s reserve or Maker vault available for redemptions by investors and originations by the Issuer."
+  },
+  "cashDrag": {
+    "title": "Cash drag",
+    "description": "Share of the pool’s investments that is currently in the pool’s reserve and not financing assets. Liquidity in the pool’s reserve does not earn yield and thus drags down investor’s returns."
   }
 }
