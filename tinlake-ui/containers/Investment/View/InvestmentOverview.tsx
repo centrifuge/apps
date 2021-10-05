@@ -214,7 +214,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 variant="tertiary"
                 items={[
                   {
-                    term: 'Current token price',
+                    term: 'Token price',
                     value: poolData?.senior
                       ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.tokenPrice || '0', 27), 4))
                       : null,
