@@ -99,7 +99,7 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
       </div>
 
       <div>
-        <Heading level="4">Pool Balance</Heading>
+        <Heading level="4">Pool Status</Heading>
         <InvestmentOverview selectedPool={selectedPool} />
       </div>
 
