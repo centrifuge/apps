@@ -33,6 +33,10 @@
     "description": "The TIN risk buffer is the current value of the junior tranche (TIN) in relation to the pool value. It denotes how much of the pool is currently protected by the junior tranche.",
     "link": "https://developer.centrifuge.io/tinlake/overview/tranches/"
   },
+  "minimumTinRiskBuffer": {
+    "title": "Minimum TIN risk buffer",
+    "description": "The TIN risk buffer is the current value of the junior tranche (TIN) in relation to the pool value. The minimum TIN risk buffer indicates the lower limit and ensures that senior investors in DROP are protected by a certain amount of TIN invested in the pool at any time."
+  },
   "outstandingVolume": {
     "title": "Outstanding Volume",
     "description": "Sum of current outstanding financings by the asset originator. This deviates from the asset value, which considers expected repayments and risk-adjustments."

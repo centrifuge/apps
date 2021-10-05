@@ -68,7 +68,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const isMaker = !!poolData?.maker
 
   const availableLiquidityVal = isMaker
-    ? poolData?.reserve.add(poolData?.maker?.creditline || new BN(0))
+    ? poolData?.reserve.add(poolData?.maker?.remainingCredit || new BN(0))
     : poolData?.reserve
 
   return (
@@ -192,7 +192,9 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}% TIN buffer
                 </span>
               </Tooltip>{' '}
-              (min: {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}%)
+              <Tooltip id="minimumTinRiskBuffer" underline>
+                (min: {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}%)
+              </Tooltip>
             </div>
           </Box>
 
@@ -202,7 +204,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             <Shelf justifyContent="space-between">
               <Shelf gap="xsmall" mb="xsmall">
                 <Box as={TokenLogo} src="/static/TIN_final.svg" display={['none', 'inline']} />
-                <SectionHeading>Tin Tranche</SectionHeading>
+                <SectionHeading>TIN Tranche</SectionHeading>
               </Shelf>
             </Shelf>
             <Stack gap="small">
