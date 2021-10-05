@@ -15,18 +15,7 @@ import { useTrancheYield } from '../../../utils/hooks'
 import { toPrecision } from '../../../utils/toPrecision'
 import { useAssets } from '../../../utils/useAssets'
 import { usePool } from '../../../utils/usePool'
-import {
-  BalanceSheetDiagram,
-  BalanceSheetDiagramLeft,
-  BalanceSheetDiagramRight,
-  BalanceSheetFiller,
-  BalanceSheetMidLine,
-  DividerBottom,
-  DividerInner,
-  DividerTop,
-  FlexWrapper,
-  TokenLogo,
-} from './styles'
+import { DividerBottom, DividerInner, DividerTop, FlexWrapper, TokenLogo } from './styles'
 
 interface Props {
   selectedPool: Pool | UpcomingPool
@@ -90,7 +79,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   return (
     <>
       <FlexWrapper>
-        <Card p="medium" flex="1 1 35%">
+        <Card p="medium" flex="1 1 35%" mr={['0', '0', 'medium']}>
           <Shelf mb="small" justifyContent="space-between">
             <SectionHeading>
               <Tooltip id="assetValue" underline>
@@ -166,14 +155,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             ]}
           />
         </Card>
-        <BalanceSheetDiagram direction="row">
-          <BalanceSheetDiagramLeft>
-            <BalanceSheetMidLine>&nbsp;</BalanceSheetMidLine>
-            <BalanceSheetFiller>&nbsp;</BalanceSheetFiller>
-          </BalanceSheetDiagramLeft>
-          <BalanceSheetDiagramRight>&nbsp;</BalanceSheetDiagramRight>
-        </BalanceSheetDiagram>
-
         <Stack flex="1 1 35%" justifyContent="space-between">
           <Card p="medium" mb="small">
             <Shelf justifyContent="space-between">
