@@ -161,14 +161,14 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 variant="tertiary"
                 items={[
                   {
-                    term: 'Current token price',
+                    term: 'Token price',
                     value: poolData?.senior
                       ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 4))
                       : null,
                   },
                   dropYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
                     ? {
-                        term: 'Current DROP yield (30d APY)',
+                        term: 'DROP yield (30d APY)',
                         value: dropYield,
                         valueUnit: '%',
                       }
