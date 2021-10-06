@@ -1,19 +1,32 @@
-import { Box, Button, FormField, Heading, TextInput } from 'grommet'
+import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
+import { Box, Button, FormField, Heading, Table, TableBody, TableCell, TableRow, TextInput } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import { Card } from '../../components/Card'
 import { useTinlake } from '../../components/TinlakeProvider'
+import { Pool } from '../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
+import { useOnboardingState } from '../../utils/useOnboardingState'
 import { usePool } from '../../utils/usePool'
 const web3 = require('web3-utils')
+
+interface Props extends TransactionProps {
+  activePool: Pool
+}
 
 type Tranche = 'junior' | 'senior'
 
 const getActionName = (tranche: Tranche) => (tranche === 'senior' ? 'updateSeniorMemberList' : 'updateJuniorMemberList')
 
-const ManageMemberlist: React.FC<TransactionProps> = (props: TransactionProps) => {
+const ManageMemberlist: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
+
+  const [onboardingAddress, setOnboardingAddress] = React.useState(undefined as string | undefined)
+  const { data: onboardingData, isError: onboardingError } = useOnboardingState(
+    props.activePool,
+    onboardingAddress && web3.isAddress(onboardingAddress) ? onboardingAddress : undefined
+  )
 
   const [juniorAddress, setJuniorAddress] = React.useState('')
   const [seniorAddress, setSeniorAddress] = React.useState('')
@@ -72,78 +85,132 @@ const ManageMemberlist: React.FC<TransactionProps> = (props: TransactionProps) =
   return (
     <>
       {poolData && (
-        <Box direction="row" gap="medium">
+        <Box>
+          <Box direction="row" gap="medium">
+            <Card width="400px" p="medium" mb="medium">
+              <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+                <Heading level="5" margin={'0'}>
+                  Add/Remove DROP investor
+                </Heading>
+              </Box>
+
+              <FormField label="Address">
+                <TextInput
+                  value={seniorAddress}
+                  placeholder="0x..."
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setSeniorAddress(event.currentTarget.value)
+                  }}
+                />
+              </FormField>
+
+              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                <Button
+                  secondary
+                  label="Remove"
+                  onClick={() => {
+                    remove('senior')
+                  }}
+                  disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
+                />
+                <Button
+                  primary
+                  label="Add"
+                  onClick={() => {
+                    add('senior')
+                  }}
+                  disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
+                />
+              </Box>
+            </Card>
+            <Card width="400px" p="medium" mb="medium">
+              <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
+                <Heading level="5" margin={'0'}>
+                  Add/Remove TIN investor
+                </Heading>
+              </Box>
+
+              <FormField label="Address">
+                <TextInput
+                  value={juniorAddress}
+                  placeholder="0x..."
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setJuniorAddress(event.currentTarget.value)
+                  }}
+                />
+              </FormField>
+
+              <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
+                <Button
+                  secondary
+                  label="Remove"
+                  onClick={() => {
+                    remove('junior')
+                  }}
+                  disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
+                />
+                <Button
+                  primary
+                  label="Add"
+                  onClick={() => {
+                    add('junior')
+                  }}
+                  disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
+                />
+              </Box>
+            </Card>
+          </Box>
           <Card width="400px" p="medium" mb="medium">
             <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
               <Heading level="5" margin={'0'}>
-                Add/Remove DROP member
+                Check investor onboarding status
               </Heading>
             </Box>
 
             <FormField label="Address">
               <TextInput
-                value={seniorAddress}
+                value={onboardingAddress}
                 placeholder="0x..."
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setSeniorAddress(event.currentTarget.value)
+                  setOnboardingAddress(event.currentTarget.value)
                 }}
               />
             </FormField>
 
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button
-                secondary
-                label="Remove"
-                onClick={() => {
-                  remove('senior')
-                }}
-                disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
-              />
-              <Button
-                primary
-                label="Add"
-                onClick={() => {
-                  add('senior')
-                }}
-                disabled={!seniorAddress || !web3.isAddress(seniorAddress)}
-              />
-            </Box>
-          </Card>
-          <Card width="400px" p="medium" mb="medium">
-            <Box direction="row" margin={{ top: '0', bottom: 'small' }}>
-              <Heading level="5" margin={'0'}>
-                Add/Remove TIN member
-              </Heading>
-            </Box>
+            {onboardingAddress && web3.isAddress(onboardingAddress) && onboardingData && onboardingData?.kyc && (
+              <Table margin={{ top: 'small' }}>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>KYC status</TableCell>
+                    <TableCell>{onboardingData.kyc.status}</TableCell>
+                  </TableRow>
+                  {onboardingData.kyc.isUsaTaxResident && (
+                    <TableRow>
+                      <TableCell>Accreditation passed</TableCell>
+                      <TableCell>{onboardingData.kyc.accredited ? 'yes' : 'no'}</TableCell>
+                    </TableRow>
+                  )}
+                  {onboardingData.agreements.map((agreement: AgreementsStatus) => (
+                    <TableRow>
+                      <TableCell>{agreement.name}</TableCell>
+                      <TableCell>
+                        {agreement.counterSigned
+                          ? 'completed'
+                          : agreement.signed
+                          ? 'awaiting issuer signature'
+                          : agreement.declined
+                          ? 'declined'
+                          : agreement.voided
+                          ? 'voided'
+                          : 'awaiting investor signature'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
 
-            <FormField label="Address">
-              <TextInput
-                value={juniorAddress}
-                placeholder="0x..."
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setJuniorAddress(event.currentTarget.value)
-                }}
-              />
-            </FormField>
-
-            <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button
-                secondary
-                label="Remove"
-                onClick={() => {
-                  remove('junior')
-                }}
-                disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
-              />
-              <Button
-                primary
-                label="Add"
-                onClick={() => {
-                  add('junior')
-                }}
-                disabled={!juniorAddress || !web3.isAddress(juniorAddress)}
-              />
-            </Box>
+            {onboardingError && 'Not found'}
           </Card>
         </Box>
       )}

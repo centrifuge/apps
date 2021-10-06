@@ -52,13 +52,17 @@ const AgreementStep: React.FC<Props> = ({
     <>
       <Step
         state={state}
-        icon={agreementStatus === 'countersigned' && whitelistStatus === true ? 'check' : undefined}
-        title={
-          isAgreementStatusNegative
-            ? `Sign the Subscription Agreement`
+        title="Sign Subscription Agreement"
+        subtitle={
+          agreementStatus === 'signed'
+            ? 'Awaiting Issuer signature'
+            : agreementStatus === 'voided'
+            ? 'Agreement expired'
+            : agreementStatus === 'declined'
+            ? 'Agreement declined'
             : agreementStatus === 'countersigned'
-            ? `${agreement?.name} signed`
-            : `${agreement?.name} status: awaiting Issuer signature`
+            ? 'Signed'
+            : undefined
         }
       >
         {active && !isRestricted && isAgreementStatusNegative && agreement && !session && (
@@ -145,7 +149,7 @@ const AgreementStep: React.FC<Props> = ({
             )}
             <Button
               primary
-              label="Sign Subscription Agreement"
+              label={['voided', 'declined'].includes(agreementStatus) ? 'Sign new agreement' : 'Sign agreement'}
               href={`${config.onboardAPIHost}pools/${(activePool as Pool).addresses.ROOT_CONTRACT}/agreements/${
                 agreement?.provider
               }/${agreement?.providerTemplateId}/redirect?session=${session}`}
@@ -154,10 +158,12 @@ const AgreementStep: React.FC<Props> = ({
           </>
         )}
         {active && !isRestricted && agreement && agreementStatus === 'signed' && (
-          <StepParagraph icon="clock">
-            The Issuer will counter-sign your {agreement.name} for {poolName} soon. If KYC is verified, you will be
-            ready to invest in this pool upon their signature.
-          </StepParagraph>
+          <>
+            <StepParagraph icon="clock">
+              The Issuer will counter-sign your DROP Subscription Agreement for Branch Series 3 soon. If KYC is
+              verified, you will be ready to invest in this pool upon their signature.
+            </StepParagraph>
+          </>
         )}
         {active && !isRestricted && agreement && agreementStatus === 'countersigned' && whitelistStatus === false && (
           <StepParagraph icon="clock">

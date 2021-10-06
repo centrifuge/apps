@@ -1,6 +1,6 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Box, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Card } from '../../components/Card'
@@ -22,6 +22,15 @@ const e18 = new BN(10).pow(new BN(18))
 const parseRatio = (num: BN): number => {
   const base = new BN(10).pow(new BN(20))
   return num.div(base).toNumber() / 10 ** 7
+}
+
+const ONE_MILLION = new BN('1000000000000000000000000')
+
+const formatAmount = (amount: BN): string => {
+  if (amount.gte(ONE_MILLION)) {
+    return `${addThousandsSeparators(toPrecision(baseToDisplay(amount, 24), 2))}M`
+  }
+  return `${addThousandsSeparators(toPrecision(baseToDisplay(amount, 21), 0))}K`
 }
 
 const PoolStatus: React.FC<Props> = (props: Props) => {
@@ -84,6 +93,9 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
   return (
     <Box direction="row" width="100%" gap="medium" margin={{ top: 'medium' }}>
       <Card flexBasis="50%" p="medium" mb="medium">
+        <Heading level="5" margin={{ top: '0', bottom: 'small' }}>
+          TIN breakdown
+        </Heading>
         <Table margin={{ top: '0', bottom: '0' }}>
           <TableBody>
             <TableRow style={{ fontWeight: 'bold' }}>
@@ -93,7 +105,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                 pad={{ vertical: '6px' }}
                 border={{ color: 'transparent' }}
               >
-                TIN Tranche Value
+                Total TIN Tranche Value
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={poolData?.junior.totalSupply !== undefined}>
@@ -204,7 +216,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                 pad={{ vertical: '6px' }}
                 border={{ color: 'transparent' }}
               >
-                Unlocked
+                Available TIN
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={poolData?.junior.totalSupply !== undefined}>
@@ -260,21 +272,11 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
       </Card>
       {isMakerIntegrated && (
         <Card flexBasis="50%" p="medium" mb="medium">
+          <Heading level="5" margin={{ top: '0', bottom: 'small' }}>
+            Maker Covenants
+          </Heading>
           <Table margin={{ top: '0', bottom: '0' }}>
             <TableBody>
-              <TableRow style={{ fontWeight: 'bold' }}>
-                <TableCell
-                  scope="row"
-                  style={{ alignItems: 'start', justifyContent: 'center' }}
-                  pad={{ vertical: '6px' }}
-                  border={{ color: 'transparent' }}
-                >
-                  Maker Covenants
-                </TableCell>
-                <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
-                  &nbsp;
-                </TableCell>
-              </TableRow>
               <TableRow>
                 <TableCell
                   scope="row"
@@ -328,12 +330,11 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                   pad={{ vertical: '6px' }}
                   border={{ color: 'transparent' }}
                 >
-                  Maximum single loan
+                  Largest outstanding loan
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                   <LoadingValue done={maxSingleLoan !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(maxSingleLoan, 18 + 3), 0))}K{' '}
-                    {props.activePool?.metadata.currencySymbol || 'DAI'}
+                    {formatAmount(maxSingleLoan)} {props.activePool?.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -344,6 +345,9 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
 
       {!isMakerIntegrated && (
         <Card flexBasis="50%" p="medium" mb="medium">
+          <Heading level="5" margin={{ top: '0', bottom: 'small' }}>
+            Pool Reserve
+          </Heading>
           <Table margin={{ top: '0', bottom: '0' }}>
             <TableBody>
               <TableRow style={{ fontWeight: 'bold' }}>
@@ -353,7 +357,7 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                   pad={{ vertical: '6px' }}
                   border={{ color: 'transparent' }}
                 >
-                  Reserve
+                  Current reserve
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                   {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || new BN(0), 18), 0))}{' '}

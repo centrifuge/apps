@@ -2,7 +2,7 @@ import { TokenInput } from '@centrifuge/axis-token-input'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
-import { Box, Button, Table, TableBody, TableCell, TableRow } from 'grommet'
+import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
@@ -116,6 +116,9 @@ const Liquidity: React.FC<Props> = (props: Props) => {
   return (
     <Box direction="row" width="100%" gap="medium">
       <Card flexBasis="50%" p="medium" mb="medium">
+        <Heading level="5" margin={{ top: '0', bottom: 'small' }}>
+          Pool Liquidity
+        </Heading>
         <Table margin={{ bottom: 'medium' }}>
           <TableBody>
             <TableRow style={{ fontWeight: 'bold' }}>
@@ -299,8 +302,11 @@ const Liquidity: React.FC<Props> = (props: Props) => {
         )}
       </Card>
       <Card flexBasis="50%" p="medium" mb="medium">
+        <Heading level="5" margin={{ top: '0', bottom: 'small' }}>
+          Liquidity Management
+        </Heading>
         {isMakerIntegrated && (
-          <Box margin={{ top: '0', bottom: 'medium' }}>
+          <Box margin={{ top: 'medium', bottom: 'medium' }}>
             <TokenInput
               label="Locked Credit Line"
               token={props.activePool?.metadata.currencySymbol || 'DAI'}
@@ -311,7 +317,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
           </Box>
         )}
         <TokenInput
-          label={isMakerIntegrated ? 'External Investor Capacity' : 'Maximum reserve'}
+          label={isMakerIntegrated ? 'External Investor Capacity' : 'Max reserve'}
           token={props.activePool?.metadata.currencySymbol || 'DAI'}
           value={
             externalCapacity === undefined
@@ -341,6 +347,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
             label="Update"
             onClick={save}
             disabled={
+              !poolData?.isPoolAdmin ||
               (!changedExternalCapacity && !changedMakerCapacity) ||
               (changedExternalCapacity && (status === 'pending' || status === 'unconfirmed')) ||
               (changedMakerCapacity &&

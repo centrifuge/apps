@@ -30,8 +30,12 @@
   },
   "tinRiskBuffer": {
     "title": "TIN Risk Buffer",
-    "description": "Current amount of TIN in relation to the pool value. The minimum TIN risk buffer indicates the lower limit and ensures that DROP investors are protected by a certain amount of TIN invested in the pool at any time.",
-    "link": "https://developer.centrifuge.io/tinlake/overview/tranches/"
+    "description": "The TIN risk buffer is the current value of the junior tranche (TIN) in relation to the pool value. It denotes how much of the pool is currently protected by the junior tranche.",
+    "link": "https://docs.centrifuge.io/learn/drop-and-tin/"
+  },
+  "minimumTinRiskBuffer": {
+    "title": "Minimum TIN risk buffer",
+    "description": "The TIN risk buffer is the current value of the junior tranche (TIN) in relation to the pool value. The minimum TIN risk buffer indicates the lower limit and ensures that senior investors in DROP are protected by a certain amount of TIN invested in the pool at any time."
   },
   "outstandingVolume": {
     "title": "Outstanding Volume",
@@ -40,12 +44,12 @@
   "dropValue": {
     "title": "DROP Tranche Value",
     "description": "Total value of outstanding DROP tokens at the current DROP token price. DROP is Tinlake's senior token with a fixed interest rate (\"DROP APR\") and stable returns. DROP is protected against defaults of the underlying assets by TIN which takes losses first.",
-    "link": "https://developer.centrifuge.io/tinlake/overview/tranches/"
+    "link": "https://docs.centrifuge.io/learn/drop-and-tin/"
   },
   "tinValue": {
     "title": "TIN Tranche Value",
     "description": "Total value of outstanding TIN tokens at the current TIN token price. TIN is Tinlake's junior token. It protects DROP against defaults of the underlying assets by taking losses first. In return TIN has a higher, yet more volatile return than DROP.",
-    "link": "https://developer.centrifuge.io/tinlake/overview/tranches/"
+    "link": "https://docs.centrifuge.io/learn/drop-and-tin/"
   },
   "epochNumber": {
     "title": "Epoch #",
@@ -108,5 +112,17 @@
   "dropInvestment": {
     "title": "DROP Investment",
     "description": "DROP tokens earn yield on the outstanding assets at the DROP APR. The effective APY may deviate due to compounding effects or unused liquidity in the pool reserve. The 30d DROP APY is the effective annualized return of the pool's DROP token over the last 30 days."
+  },
+  "availableLiquidity": {
+    "title": "Available liquidity",
+    "description": "Liquidity of the pool reserve available for redemptions by investors and originations by the Issuer."
+  },
+  "availableLiquidityMaker": {
+    "title": "Available liquidity",
+    "description": "Liquidity from the pool’s reserve or Maker vault available for redemptions by investors and originations by the Issuer."
+  },
+  "cashDrag": {
+    "title": "Cash drag",
+    "description": "Share of the pool’s investments that is currently in the pool’s reserve and not financing assets. Liquidity in the pool’s reserve does not earn yield and thus drags down investor’s returns."
   }
 }
