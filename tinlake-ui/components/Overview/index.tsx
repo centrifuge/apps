@@ -34,7 +34,7 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
   }
 
   return (
-    <Stack gap="xlarge" mt="large">
+    <Stack gap="xlarge" mt="xlarge">
       {!isUpcomingPool(selectedPool) && (
         <div>
           <PageTitle
