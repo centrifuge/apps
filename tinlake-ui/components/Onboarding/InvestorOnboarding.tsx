@@ -38,6 +38,7 @@ export const InvestorOnboarding: React.FC<Props> = () => {
   const session = 'session' in router.query ? router.query.session : ''
 
   const address = useAddress()
+  const { authState } = useSelector<any, AuthState>((state) => state.auth)
   const onboarding = useInvestorOnboardingState()
 
   const completed = onboarding.data?.completed
@@ -71,7 +72,7 @@ export const InvestorOnboarding: React.FC<Props> = () => {
             <Box as="img" src="/static/logo.svg" height={16} mb="medium" />
             <Header title="Onboard as investor" />
           </Stack>
-          {address && !onboarding.data ? (
+          {authState === 'initialAuthing' || (address && !onboarding.data) ? (
             <Spinner height={'400px'} message={'Loading...'} />
           ) : (
             <>

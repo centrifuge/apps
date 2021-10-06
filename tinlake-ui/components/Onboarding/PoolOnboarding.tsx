@@ -3,8 +3,10 @@ import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/typ
 import { Anchor } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
+import { useSelector } from 'react-redux'
 import config, { Pool } from '../../config'
 import { ExplainerCard } from '../../containers/Investment/View/styles'
+import { AuthState } from '../../ducks/auth'
 import { useAddress } from '../../utils/useAddress'
 import { useOnboardingState } from '../../utils/useOnboardingState'
 import { Button } from '../Button'
@@ -47,6 +49,7 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool }) => {
   const tranche = trancheOverride || DefaultTranche
 
   const address = useAddress()
+  const { authState } = useSelector<any, AuthState>((state) => state.auth)
   const onboarding = useOnboardingState(activePool)
 
   const kycStatus = onboarding.data?.kyc?.requiresSignin ? 'requires-signin' : onboarding.data?.kyc?.status
@@ -103,7 +106,7 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool }) => {
               subtitle="Onboard to token"
             />
           </Stack>
-          {address && !onboarding.data ? (
+          {authState === 'initialAuthing' || (address && !onboarding.data) ? (
             <Spinner height={'400px'} message={'Loading...'} />
           ) : (
             <>
