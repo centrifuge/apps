@@ -20,7 +20,7 @@ jobs:
           ruby-version: 2.7
           # runs 'bundle install' and caches installed gems automatically
           bundler-cache: true
-        run: gem install github-changelog-generator
+      - run: gem install github-changelog-generator
       - run: github-changelog-generator -u centrifuge -p apps -t ${{ secrets.GITHUB_TOKEN }}
 
       # - uses: heinrichreimer/github-changelog-generator-action@v2.2
