@@ -11,6 +11,7 @@ import { Tooltip } from '../../../components/Tooltip'
 import { ValuePairList } from '../../../components/ValuePairList'
 import { Pool, UpcomingPool } from '../../../config'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { useTrancheYield } from '../../../utils/hooks'
 import { toPrecision } from '../../../utils/toPrecision'
 import { useAssets } from '../../../utils/useAssets'
 import { usePool } from '../../../utils/usePool'
@@ -55,12 +56,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
-  // const { dropYield } = useTrancheYield(tinlake.contractAddresses.ROOT_CONTRACT)
-  let dropYield = ''
-
-  setTimeout(() => {
-    dropYield = '666'
-  }, 2000)
+  const { dropYield } = useTrancheYield(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const reserveRatio =
     poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
@@ -75,10 +71,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const availableLiquidityVal = isMaker
     ? poolData?.reserve.add(poolData?.maker?.remainingCredit || new BN(0))
     : poolData?.reserve
-
-  React.useEffect(() => {
-    console.log('dropYield', dropYield)
-  }, [dropYield])
 
   return (
     <>
