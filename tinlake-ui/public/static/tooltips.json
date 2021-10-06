@@ -31,7 +31,7 @@
   "tinRiskBuffer": {
     "title": "TIN Risk Buffer",
     "description": "The TIN risk buffer is the current value of the junior tranche (TIN) in relation to the pool value. It denotes how much of the pool is currently protected by the junior tranche.",
-    "link": "https://developer.centrifuge.io/tinlake/overview/tranches/"
+    "link": "https://docs.centrifuge.io/learn/drop-and-tin/"
   },
   "minimumTinRiskBuffer": {
     "title": "Minimum TIN risk buffer",
@@ -44,12 +44,12 @@
   "dropValue": {
     "title": "DROP Tranche Value",
     "description": "Total value of outstanding DROP tokens at the current DROP token price. DROP is Tinlake's senior token with a fixed interest rate (\"DROP APR\") and stable returns. DROP is protected against defaults of the underlying assets by TIN which takes losses first.",
-    "link": "https://developer.centrifuge.io/tinlake/overview/tranches/"
+    "link": "https://docs.centrifuge.io/learn/drop-and-tin/"
   },
   "tinValue": {
     "title": "TIN Tranche Value",
     "description": "Total value of outstanding TIN tokens at the current TIN token price. TIN is Tinlake's junior token. It protects DROP against defaults of the underlying assets by taking losses first. In return TIN has a higher, yet more volatile return than DROP.",
-    "link": "https://developer.centrifuge.io/tinlake/overview/tranches/"
+    "link": "https://docs.centrifuge.io/learn/drop-and-tin/"
   },
   "epochNumber": {
     "title": "Epoch #",
