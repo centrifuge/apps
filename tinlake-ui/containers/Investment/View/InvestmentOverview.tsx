@@ -5,12 +5,12 @@ import styled from 'styled-components'
 import { Card } from '../../../components/Card'
 import { SectionHeading } from '../../../components/Heading'
 import { Box, Shelf, Stack } from '../../../components/Layout'
+import { LoadingValue } from '../../../components/LoadingValue'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
 import { ValuePairList } from '../../../components/ValuePairList'
 import { Pool, UpcomingPool } from '../../../config'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { useTrancheYield } from '../../../utils/hooks'
 import { toPrecision } from '../../../utils/toPrecision'
 import { useAssets } from '../../../utils/useAssets'
 import { usePool } from '../../../utils/usePool'
@@ -55,7 +55,12 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
-  const { dropYield } = useTrancheYield(tinlake.contractAddresses.ROOT_CONTRACT)
+  // const { dropYield } = useTrancheYield(tinlake.contractAddresses.ROOT_CONTRACT)
+  let dropYield = ''
+
+  setTimeout(() => {
+    dropYield = '666'
+  }, 2000)
 
   const reserveRatio =
     poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
@@ -70,6 +75,10 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const availableLiquidityVal = isMaker
     ? poolData?.reserve.add(poolData?.maker?.remainingCredit || new BN(0))
     : poolData?.reserve
+
+  React.useEffect(() => {
+    console.log('dropYield', dropYield)
+  }, [dropYield])
 
   return (
     <>
@@ -174,7 +183,9 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                       }
                     : {
                         term: 'Fixed DROP rate (APR)',
-                        value: toPrecision(feeToInterestRate(poolData?.senior?.interestRate || '0'), 2),
+                        value:
+                          poolData?.senior?.interestRate &&
+                          toPrecision(feeToInterestRate(poolData?.senior?.interestRate || '0'), 2),
                         valueUnit: '%',
                       },
                 ]}
@@ -189,11 +200,16 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               DROP is protected by a{' '}
               <Tooltip id="tinRiskBuffer" underline>
                 <span style={{ fontWeight: 'bold' }}>
-                  {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}% TIN buffer
+                  <LoadingValue done={!!currentJuniorRatio}>
+                    {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}%
+                  </LoadingValue>{' '}
+                  TIN buffer
                 </span>
               </Tooltip>{' '}
               <Tooltip id="minimumTinRiskBuffer" underline>
-                (min: {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}%)
+                <LoadingValue done={!!minJuniorRatio}>
+                  (min: {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}%)
+                </LoadingValue>
               </Tooltip>
             </div>
           </Box>
