@@ -95,6 +95,8 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool }) => {
 
   const [activeStep, setActiveStep] = React.useState(0)
 
+  const hideKYC = kycStatus === 'verified' && accreditationStatus
+
   return (
     <>
       <Card px={['medium', 'xxlarge']} py={['medium', 'large']}>
@@ -117,13 +119,17 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool }) => {
               )}
               <div>
                 <ConnectStep state={getState(1, activeStep)} />
-                <LinkStep state={getState(2, activeStep)} onboardingData={onboarding.data} />
-                <KycStep
-                  state={getState(3, activeStep)}
-                  onboardingData={onboarding.data}
-                  kycStatus={kycStatus}
-                  accreditationStatus={accreditationStatus}
-                />
+                {!hideKYC && (
+                  <>
+                    <LinkStep state={getState(2, activeStep)} onboardingData={onboarding.data} />
+                    <KycStep
+                      state={getState(3, activeStep)}
+                      onboardingData={onboarding.data}
+                      kycStatus={kycStatus}
+                      accreditationStatus={accreditationStatus}
+                    />
+                  </>
+                )}
                 <AgreementStep
                   state={getState(4, activeStep)}
                   activePool={activePool}
