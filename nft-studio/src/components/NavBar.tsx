@@ -3,9 +3,7 @@ import { Link } from 'react-router-dom'
 import { truncateAddress } from '../utils/web3'
 import { useWeb3Context } from './Web3Provider'
 
-interface Props {}
-
-export const NavBar: React.FC<Props> = ({}) => {
+export const NavBar: React.FC = () => {
   const { selectedAccount, connect } = useWeb3Context()
   return (
     <div>
