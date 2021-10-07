@@ -2,6 +2,7 @@ name: 'tinlake-ui Update changelog'
 on:
   push:
     branches:
+      # update changeog on new release candidate
       - rc/tinlake-ui/release-*
     paths:
       - 'tinlake-ui/**'
