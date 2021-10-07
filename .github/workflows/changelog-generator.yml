@@ -22,6 +22,7 @@ jobs:
         run: gem install github_changelog_generator
 
       - name: Run changelog generator
+        timeout-minutes: 10 # when GH API rate is exceeded, the generator hangs. Abort changelog generation in this case
         run: github_changelog_generator -u centrifuge -p apps --since-tag tinlake-ui/release-30 -t ${{ secrets.GITHUB_TOKEN }}
 
       - name: check for changes
