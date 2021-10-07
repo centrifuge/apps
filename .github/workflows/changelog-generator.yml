@@ -1,6 +1,8 @@
 name: 'tinlake-ui Update changelog'
 on:
-  pull_request:
+  push:
+    branches:
+      - rc/tinlake-ui/release-*
     paths:
       - 'tinlake-ui/**'
       - '.github/workflows/changelog-generator.yml'
@@ -38,4 +40,4 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.head_ref }}
+          branch: ${{ github.ref }}
