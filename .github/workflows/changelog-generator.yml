@@ -1,8 +1,6 @@
 name: 'tinlake-ui Update changelog'
 on:
-  push:
-    branches:
-      - main
+  pull_request:
     paths:
       - 'tinlake-ui/**'
       - '.github/workflows/changelog-generator.yml'
