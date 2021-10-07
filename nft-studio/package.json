@@ -14,6 +14,7 @@
     "@styled-system/css": "^5.1.5",
     "@styled-system/should-forward-prop": "^5.1.5",
     "cra-template-typescript": "1.1.2",
+    "polkadot-identicon": "^1.1.45",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-query": "^3.25.1",

@@ -1,3 +1,4 @@
+import Identicon from 'polkadot-identicon'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { truncateAddress } from '../utils/web3'
@@ -15,7 +16,10 @@ export const NavBar: React.FC = () => {
           Connect
         </button>
       ) : (
-        <div>{truncateAddress(selectedAccount.address)}</div>
+        <div>
+          {selectedAccount.meta.name || truncateAddress(selectedAccount.address)}{' '}
+          <Identicon account={selectedAccount.address} size={24} />
+        </div>
       )}
     </div>
   )
