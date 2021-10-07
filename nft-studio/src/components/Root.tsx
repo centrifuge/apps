@@ -1,18 +1,18 @@
 import * as React from 'react'
-import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
 import { GlobalStyle } from './GlobalStyle'
+import { NavBar } from './NavBar'
+import { Web3Provider } from './Web3Provider'
 
 export const Root: React.FC = () => {
   return (
     <>
       <GlobalStyle />
-      <Router>
-        <div>
-          <nav>
-            <Link to="/">Home</Link> <Link to="/collection/1">Collection 1</Link>
-          </nav>
+      <Web3Provider>
+        <Router>
+          <NavBar />
           <Switch>
             <Route path="/collection/:id">
               <CollectionPage />
@@ -21,8 +21,8 @@ export const Root: React.FC = () => {
               <CollectionsPage />
             </Route>
           </Switch>
-        </div>
-      </Router>
+        </Router>
+      </Web3Provider>
     </>
   )
 }
