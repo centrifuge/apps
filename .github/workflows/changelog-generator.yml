@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: test-changelog
+          ref: ${{ github.ref }}
 
       - uses: ruby/setup-ruby@v1
         with:
