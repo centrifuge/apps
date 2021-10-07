@@ -5,7 +5,7 @@ import { truncateAddress } from '../utils/web3'
 import { useWeb3Context } from './Web3Provider'
 
 export const NavBar: React.FC = () => {
-  const { selectedAccount, connect } = useWeb3Context()
+  const { selectedAccount, connect, selectAccount, accounts } = useWeb3Context()
   return (
     <div>
       <nav>
@@ -16,8 +16,17 @@ export const NavBar: React.FC = () => {
           Connect
         </button>
       ) : (
-        <div>
-          {selectedAccount.meta.name || truncateAddress(selectedAccount.address)}{' '}
+        <div title={selectedAccount.address}>
+          <select
+            onChange={(e) => selectAccount(Number(e.target.value))}
+            value={accounts.findIndex((acc) => acc.address === selectedAccount.address)}
+          >
+            {accounts.map((acc, i) => (
+              <option value={i} key={acc.address}>
+                {acc.meta.name || truncateAddress(acc.address)}
+              </option>
+            ))}
+          </select>
           <Identicon account={selectedAccount.address} size={24} />
         </div>
       )}

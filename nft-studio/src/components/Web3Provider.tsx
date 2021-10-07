@@ -13,6 +13,7 @@ type Web3ContextType = {
   isWeb3Injected: boolean
   connect: () => Promise<void>
   disconnect: () => void
+  selectAccount: (index: number) => void
 }
 
 const Web3Context = React.createContext<Web3ContextType>(null as any)
@@ -27,7 +28,7 @@ let triedEager = false
 
 export const Web3Provider: React.FC = ({ children }) => {
   const [accounts, setAccounts] = React.useState<Account[] | null>(null)
-  const [selectedAccount, setSelectedAccount] = React.useState<Account | null>(null)
+  const [selectedAccountAddress, setSelectedAccountAddress] = React.useState<string | null>(null)
   const [isConnecting, setIsConnecting] = React.useState(true)
 
   async function connect() {
@@ -46,9 +47,14 @@ export const Web3Provider: React.FC = ({ children }) => {
       )
 
       setAccounts(kusamaAccounts)
-      setSelectedAccount(kusamaAccounts[0])
+      const persistedAddress = localStorage.getItem('web3PersistedAddress')
+      const address =
+        (persistedAddress && kusamaAccounts.find((acc) => acc.address === persistedAddress)?.address) ||
+        kusamaAccounts[0]?.address
+      setSelectedAccountAddress(address)
     } catch (e) {
       localStorage.setItem('web3Persist', null)
+      localStorage.setItem('web3PersistedAddress', null)
     } finally {
       setIsConnecting(false)
     }
@@ -56,9 +62,16 @@ export const Web3Provider: React.FC = ({ children }) => {
 
   async function disconnect() {
     setAccounts(null)
-    setSelectedAccount(null)
+    setSelectedAccountAddress(null)
     setIsConnecting(false)
     localStorage.setItem('web3Persist', null)
+    localStorage.setItem('web3PersistedAddress', null)
+  }
+
+  function selectAccount(index: number) {
+    if (!accounts[index]) return
+    setSelectedAccountAddress(accounts[index].address)
+    localStorage.setItem('web3PersistedAddress', accounts[index].address)
   }
 
   React.useEffect(() => {
@@ -71,13 +84,14 @@ export const Web3Provider: React.FC = ({ children }) => {
   const ctx: Web3ContextType = React.useMemo(
     () => ({
       accounts,
-      selectedAccount,
+      selectedAccount: accounts?.find((acc) => acc.address === selectedAccountAddress),
       isConnecting,
       isWeb3Injected,
       connect,
       disconnect,
+      selectAccount,
     }),
-    [accounts, selectedAccount, isConnecting]
+    [accounts, selectedAccountAddress, isConnecting]
   )
 
   return <Web3Context.Provider value={ctx}>{children}</Web3Context.Provider>
