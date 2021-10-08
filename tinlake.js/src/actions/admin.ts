@@ -156,11 +156,12 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return this.pending(this.contract('POOL_ADMIN').setSeniorInterestRate(rate, this.overrides))
     }
 
-    setMinimumEpochTime = async (value: string) => {
+    setMinimumEpochTime = async (value: number) => {
+      console.log(`setMinimumEpochTime ${value}`)
       return this.pending(this.contract('POOL_ADMIN').setMinimumEpochTime(value, this.overrides))
     }
 
-    setChallengeTime = async (value: string) => {
+    setChallengeTime = async (value: number) => {
       return this.pending(this.contract('POOL_ADMIN').setChallengeTime(value, this.overrides))
     }
 
@@ -223,6 +224,15 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     writeOff = async (loanId: number) => {
       return this.pending(this.contract('FEED').writeOff(loanId, this.overrides))
+    }
+
+    closePool = async () => {
+      console.log('close pool')
+      return this.pending(this.contract('POOL_ADMIN').closePool(this.overrides))
+    }
+
+    unclosePool = async () => {
+      return this.pending(this.contract('POOL_ADMIN').unclosePool(this.overrides))
     }
 
     getAuditLog = async (ignoredEvents: string[]): Promise<IAuditLog> => {
@@ -292,8 +302,8 @@ export type IAdminActions = {
   setSeniorTrancheInterest(amount: string): Promise<PendingTransaction>
   setDiscountRate(rate: string): Promise<PendingTransaction>
   setSeniorInterestRate(rate: string): Promise<PendingTransaction>
-  setMinimumEpochTime(value: string): Promise<PendingTransaction>
-  setChallengeTime(value: string): Promise<PendingTransaction>
+  setMinimumEpochTime(value: number): Promise<PendingTransaction>
+  setChallengeTime(value: number): Promise<PendingTransaction>
   setMaturityDate(nftId: string, timestampSecs: number): Promise<PendingTransaction>
   updateNftFeed(nftId: string, value: string, riskGroup?: string): Promise<PendingTransaction>
   getNftFeedId(registry: string, tokenId: string): Promise<string>
@@ -305,6 +315,8 @@ export type IAdminActions = {
   getWriteOffGroups(): Promise<IWriteOffGroup[]>
   writeOff(loanId: number): Promise<PendingTransaction>
   getRateGroup(loanId: number): Promise<BN>
+  closePool(): Promise<PendingTransaction>
+  unclosePool(): Promise<PendingTransaction>
 }
 
 export default AdminActions

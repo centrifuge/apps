@@ -228,26 +228,6 @@ export function CoordinatorActions<ActionsBase extends Constructor<TinlakeParams
 
       throw new Error('Arrived at impossible current epoch state')
     }
-
-    setMinimumEpochTime = async (minEpochTime: string) => {
-      return this.pending(
-        this.contract('COORDINATOR').file(
-          web3.fromAscii('minimumEpochTime').padEnd(66, '0'),
-          minEpochTime,
-          this.overrides
-        )
-      )
-    }
-
-    setMinimumChallengeTime = async (challengeTime: string) => {
-      return this.pending(
-        this.contract('COORDINATOR').file(
-          web3.fromAscii('challengeTime').padEnd(66, '0'),
-          challengeTime,
-          this.overrides
-        )
-      )
-    }
   }
 }
 
@@ -273,8 +253,6 @@ export type ICoordinatorActions = {
   getSubmissionPeriod(): Promise<boolean>
   getChallengeTime(): Promise<number>
   getCurrentEpochState(): Promise<EpochState>
-  setMinimumEpochTime(minEpochTime: string): Promise<PendingTransaction>
-  setMinimumChallengeTime(minChallengeTime: string): Promise<PendingTransaction>
   runSolver(state: State, orders: Orders): Promise<SolverResult>
   scoreSolution(solution: SolverResult): Promise<BN>
   bestSubmissionScore(): Promise<BN>
