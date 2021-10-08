@@ -14,7 +14,6 @@
     "@polkadot/util-crypto": "^7.4.1",
     "@styled-system/css": "^5.1.5",
     "@styled-system/should-forward-prop": "^5.1.5",
-    "cra-template-typescript": "1.1.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-query": "^3.25.1",

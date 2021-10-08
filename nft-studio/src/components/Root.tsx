@@ -3,14 +3,12 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
-import { GlobalStyle } from './GlobalStyle'
 import { NavBar } from './NavBar'
 import { Web3Provider } from './Web3Provider'
 
 export const Root: React.FC = () => {
   return (
     <>
-      <GlobalStyle />
       <ThemeProvider theme={{}}>
         <Web3Provider>
           <Router>

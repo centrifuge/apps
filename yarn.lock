@@ -2885,7 +2885,6 @@ __metadata:
     "@types/styled-system": ^5
     "@types/styled-system__css": ^5.0.16
     "@types/styled-system__should-forward-prop": ^5
-    cra-template-typescript: 1.1.2
     react: ^17.0.2
     react-dom: ^17.0.2
     react-query: ^3.25.1
@@ -14205,13 +14204,6 @@ __metadata:
   version: 1.1.0
   resolution: "country-code-to-flag-emoji@npm:1.1.0"
   checksum: 84f0bf48a10d402c12740302352ff1a8b8bbe797798f210df7511148f3773f38fab5ef6f0f9c4a3e44889704e5ae66a7969ab876ecbc954804ce9136af79dfba
-  languageName: node
-  linkType: hard
-
-"cra-template-typescript@npm:1.1.2":
-  version: 1.1.2
-  resolution: "cra-template-typescript@npm:1.1.2"
-  checksum: 5ab4793ed5d2b28ac5eda3e2c7c1708bcf25a0cb62ed042f69b4d9328fab4b1c02095c85062e31d221827a66be086dc1109dcf3bfe9017364dd86279effc7b64
   languageName: node
   linkType: hard
 
