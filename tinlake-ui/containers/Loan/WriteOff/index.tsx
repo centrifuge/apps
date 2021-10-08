@@ -53,7 +53,7 @@ const LoanWriteOff: React.FC<Props> = (props: Props) => {
     props.loan.rateGroup !== undefined &&
     props.loan.currentValidWriteOffGroup !== undefined &&
     props.loan.writeOffRateGroupStart !== undefined &&
-    props.loan.currentValidWriteOffGroup != props.loan.rateGroup - props.loan.writeOffRateGroupStart
+    props.loan.currentValidWriteOffGroup !== props.loan.rateGroup - props.loan.writeOffRateGroupStart
 
   return props.loan.rateGroup !== undefined &&
     props.loan.writeOffRateGroupStart !== undefined &&
