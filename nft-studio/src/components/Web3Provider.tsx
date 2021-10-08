@@ -59,16 +59,17 @@ export const Web3Provider: React.FC = ({ children }) => {
   }, [])
 
   const connect = React.useCallback(async () => {
+    unsubscribeRef.current?.()
     setIsConnecting(true)
 
     try {
       const injected = await (web3EnablePromise || web3Enable('NFT Studio'))
-
       if (injected.length === 0) {
         // no extension installed, or the user did not accept the authorization
         // in this case we should inform the use and give a link to the extension
         throw new Error('No extension or not authorized')
       }
+
       const unsub = await web3AccountsSubscribe((allAccounts) => {
         setFilteredAccounts(allAccounts)
       })
@@ -91,9 +92,10 @@ export const Web3Provider: React.FC = ({ children }) => {
 
   React.useEffect(() => {
     if (!triedEager && localStorage.getItem('web3Persist')) {
-      triedEager = true
       connect()
     }
+    triedEager = true
+
     return () => {
       if (unsubscribeRef.current) {
         unsubscribeRef.current()
