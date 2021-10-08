@@ -1,6 +1,8 @@
 name: 'tinlake-ui Update changelog'
 on:
-  pull_request:
+  push:
+    branches:
+      - keep-changelog-in-unprotected-branch # change to main
     paths:
       - 'tinlake-ui/**'
       - '.github/workflows/changelog-generator.yml'
@@ -11,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.head_ref }}
+          ref: main
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -41,4 +43,5 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.head_ref }}
+          branch: changelog
+          force: true
