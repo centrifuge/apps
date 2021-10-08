@@ -67,12 +67,7 @@ const LoanView: React.FC<Props> = (props: Props) => {
         </Stack>
       )}
       {((poolData?.adminLevel && poolData.adminLevel >= 2) || showWriteOff) && assetData && (
-        <Stack gap="medium">
-          <SectionHeading>Write-off</SectionHeading>
-          <Card maxWidth={{ medium: 900 }} p="medium">
-            <LoanWriteOff loan={assetData} refetch={refetchAsset} poolConfig={props.poolConfig} />
-          </Card>
-        </Stack>
+        <LoanWriteOff loan={assetData} refetch={refetchAsset} poolConfig={props.poolConfig} />
       )}
       <NftData data={assetData?.nft} />
     </Stack>

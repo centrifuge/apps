@@ -157,7 +157,6 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     setMinimumEpochTime = async (value: number) => {
-      console.log(`setMinimumEpochTime ${value}`)
       return this.pending(this.contract('POOL_ADMIN').setMinimumEpochTime(value, this.overrides))
     }
 
@@ -227,7 +226,6 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     closePool = async () => {
-      console.log('close pool')
       return this.pending(this.contract('POOL_ADMIN').closePool(this.overrides))
     }
 
