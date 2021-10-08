@@ -10,6 +10,7 @@
 
 **Merged pull requests:**
 
+- Generate changelog at PR \(to be merged on protected main\) [\#438](https://github.com/centrifuge/apps/pull/438) ([alessioscalici](https://github.com/alessioscalici))
 - Fix Drop APY rounding [\#437](https://github.com/centrifuge/apps/pull/437) ([avinashega](https://github.com/avinashega))
 - Generate changelog at PR [\#436](https://github.com/centrifuge/apps/pull/436) ([alessioscalici](https://github.com/alessioscalici))
 - Test changelog [\#435](https://github.com/centrifuge/apps/pull/435) ([alessioscalici](https://github.com/alessioscalici))
