@@ -22,6 +22,10 @@ export const PoolCapacityLabel: React.FC<Props> = ({ pool }) => {
 
   const isUpcoming = pool.isUpcoming
 
+  if (pool.poolClosing) {
+    return <Label orange>Closing</Label>
+  }
+
   if (isUpcoming) {
     return <Label blue>Upcoming</Label>
   }
