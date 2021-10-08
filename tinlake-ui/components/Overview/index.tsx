@@ -34,7 +34,7 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
   }
 
   return (
-    <Stack gap="xlarge" mt="large">
+    <Stack gap="xlarge" mt="xlarge">
       {!isUpcomingPool(selectedPool) && (
         <div>
           <PageTitle
@@ -97,31 +97,9 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
           </Stack>
         </Card>
       </div>
-      {/* </Box>{' '} */}
-      {/* <Box basis="1/3">
-          <Heading level="4">Tweets by @NewSilverLend</Heading>
-          <Box
-            elevation="small"
-            round="xsmall"
-            pad="small"
-            margin={{ bottom: 'large' }}
-            width="100%"
-            height="100%"
-            background="white"
-          >
-            <TwitterTimelineEmbed
-              sourceType="profile"
-              screenName="NewSilverLend"
-              autoHeight
-              noHeader
-              noFooter
-              noBorders
-            />
-          </Box>
-        </Box>
-      </Box> */}
+
       <div>
-        <Heading level="4">Pool Balance</Heading>
+        <Heading level="4">Pool Status</Heading>
         <InvestmentOverview selectedPool={selectedPool} />
       </div>
 
