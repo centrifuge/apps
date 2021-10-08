@@ -1,12 +1,12 @@
+import Identicon from '@polkadot/react-identicon'
 import { encodeAddress } from '@polkadot/util-crypto'
-import Identicon from 'polkadot-identicon'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { truncateAddress } from '../utils/web3'
 import { useWeb3Context } from './Web3Provider'
 
 export const NavBar: React.FC = () => {
-  const { selectedAccount, connect, disconnect, selectAccount, accounts } = useWeb3Context()
+  const { selectedAccount, isConnecting, connect, disconnect, selectAccount, accounts } = useWeb3Context()
   return (
     <div>
       <nav>
@@ -21,7 +21,7 @@ export const NavBar: React.FC = () => {
               </option>
             ))}
           </select>
-          <Identicon account={selectedAccount.address} size={24} />
+          <Identicon value={selectedAccount.address} size={24} theme="polkadot" />
 
           <button type="button" onClick={disconnect}>
             Disconnect
@@ -29,6 +29,8 @@ export const NavBar: React.FC = () => {
         </div>
       ) : accounts && !accounts.length ? (
         <span>No accounts available</span>
+      ) : isConnecting ? (
+        <span>Connecting...</span>
       ) : (
         <button type="button" onClick={connect}>
           Connect

@@ -1,10 +1,4 @@
-import {
-  isWeb3Injected,
-  web3Accounts,
-  web3AccountsSubscribe,
-  web3Enable,
-  web3EnablePromise,
-} from '@polkadot/extension-dapp'
+import { isWeb3Injected, web3AccountsSubscribe, web3Enable, web3EnablePromise } from '@polkadot/extension-dapp'
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types'
 import * as React from 'react'
 
@@ -35,15 +29,12 @@ let triedEager = false
 export const Web3Provider: React.FC = ({ children }) => {
   const [accounts, setAccounts] = React.useState<Account[] | null>(null)
   const [selectedAccountAddress, setSelectedAccountAddress] = React.useState<string | null>(null)
-  const [isConnecting, setIsConnecting] = React.useState(true)
+  const [isConnecting, setIsConnecting] = React.useState(false)
   const unsubscribeRef = React.useRef<(() => void) | null>()
 
   function setFilteredAccounts(accounts: Account[]) {
     const kusamaAccounts = accounts.filter(
-      (account) =>
-        account.meta.genesisHash === KUSAMA_GENESIS_HASH ||
-        account.meta.genesisHash === '' ||
-        account.meta.genesisHash == null
+      (account) => !account.meta.genesisHash || account.meta.genesisHash === KUSAMA_GENESIS_HASH
     )
 
     setAccounts(kusamaAccounts)
@@ -55,44 +46,43 @@ export const Web3Provider: React.FC = ({ children }) => {
     localStorage.setItem('web3PersistedAddress', address ?? '')
   }
 
-  const connect = React.useCallback(async () => {
-    setIsConnecting(true)
-    try {
-      const injected = await (web3EnablePromise || web3Enable('NFT Studio'))
-      console.log('injected', injected)
-      const allAccounts = await web3Accounts()
-
-      setFilteredAccounts(allAccounts)
-
-      localStorage.setItem('web3Persist', '1')
-    } catch (e) {
-      localStorage.setItem('web3Persist', '')
-      localStorage.setItem('web3PersistedAddress', '')
-    } finally {
-      setIsConnecting(false)
-    }
-  }, [])
-
   const disconnect = React.useCallback(async () => {
     setAccounts(null)
     setSelectedAccountAddress(null)
     setIsConnecting(false)
     localStorage.setItem('web3Persist', '')
     localStorage.setItem('web3PersistedAddress', '')
-  }, [])
-
-  const connectAndListen = React.useCallback(async () => {
     if (unsubscribeRef.current) {
       unsubscribeRef.current()
       unsubscribeRef.current = null
     }
-    await connect()
-    const unsub = await web3AccountsSubscribe((allAccounts) => {
-      if (!allAccounts) disconnect()
-      setFilteredAccounts(allAccounts)
-    })
-    unsubscribeRef.current = unsub
-  }, [connect, disconnect])
+  }, [])
+
+  const connect = React.useCallback(async () => {
+    setIsConnecting(true)
+
+    try {
+      const injected = await (web3EnablePromise || web3Enable('NFT Studio'))
+
+      if (injected.length === 0) {
+        // no extension installed, or the user did not accept the authorization
+        // in this case we should inform the use and give a link to the extension
+        throw new Error('No extension or not authorized')
+      }
+      const unsub = await web3AccountsSubscribe((allAccounts) => {
+        setFilteredAccounts(allAccounts)
+      })
+      unsubscribeRef.current = unsub
+
+      localStorage.setItem('web3Persist', '1')
+    } catch (e) {
+      console.error(e)
+      localStorage.setItem('web3Persist', '')
+      localStorage.setItem('web3PersistedAddress', '')
+    } finally {
+      setIsConnecting(false)
+    }
+  }, [])
 
   const selectAccount = React.useCallback(async (address: string) => {
     setSelectedAccountAddress(address)
@@ -102,11 +92,12 @@ export const Web3Provider: React.FC = ({ children }) => {
   React.useEffect(() => {
     if (!triedEager && localStorage.getItem('web3Persist')) {
       triedEager = true
-      connectAndListen()
+      connect()
     }
     return () => {
       if (unsubscribeRef.current) {
         unsubscribeRef.current()
+        unsubscribeRef.current = null
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -118,11 +109,11 @@ export const Web3Provider: React.FC = ({ children }) => {
       selectedAccount: accounts?.find((acc) => acc.address === selectedAccountAddress) ?? null,
       isConnecting,
       isWeb3Injected,
-      connect: connectAndListen,
+      connect,
       disconnect,
       selectAccount,
     }),
-    [accounts, isConnecting, connectAndListen, disconnect, selectAccount, selectedAccountAddress]
+    [accounts, isConnecting, connect, disconnect, selectAccount, selectedAccountAddress]
   )
 
   return <Web3Context.Provider value={ctx}>{children}</Web3Context.Provider>

@@ -10,11 +10,11 @@
   "dependencies": {
     "@polkadot/api": "^6.2.1",
     "@polkadot/extension-dapp": "^0.40.3",
+    "@polkadot/react-identicon": "^0.85.4",
     "@polkadot/util-crypto": "^7.4.1",
     "@styled-system/css": "^5.1.5",
     "@styled-system/should-forward-prop": "^5.1.5",
     "cra-template-typescript": "1.1.2",
-    "polkadot-identicon": "^1.1.45",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-query": "^3.25.1",
