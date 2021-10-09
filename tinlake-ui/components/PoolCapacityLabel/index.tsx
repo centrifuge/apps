@@ -23,7 +23,7 @@ export const PoolCapacityLabel: React.FC<Props> = ({ pool }) => {
   const isUpcoming = pool.isUpcoming
 
   if (pool.poolClosing) {
-    return <Label orange>Closing</Label>
+    return <Label orange>Closing down</Label>
   }
 
   if (isUpcoming) {

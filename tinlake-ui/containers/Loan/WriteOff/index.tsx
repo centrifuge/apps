@@ -47,7 +47,7 @@ const LoanWriteOff: React.FC<Props> = (props: Props) => {
     props.loan.currentValidWriteOffGroup !== undefined &&
     props.loan.currentValidWriteOffGroup < 100000 &&
     props.loan.maturityDate &&
-    props.loan.maturityDate > Date.now()
+    props.loan.maturityDate < Date.now()
 
   const canBeWrittenOff =
     props.loan.rateGroup !== undefined &&
