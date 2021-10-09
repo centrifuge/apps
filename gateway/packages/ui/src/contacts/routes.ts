@@ -1,5 +1,7 @@
 const index = '/contacts'
 
-export default {
+const routes = {
   index,
 }
+
+export default routes
