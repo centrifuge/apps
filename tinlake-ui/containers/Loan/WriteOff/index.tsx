@@ -43,11 +43,13 @@ const LoanWriteOff: React.FC<Props> = (props: Props) => {
     props.loan.writeOffRateGroupStart !== undefined &&
     props.loan.rateGroup >= props.loan.writeOffRateGroupStart
 
+  const lastMidnight = new Date(new Date().setHours(0, 0, 0, 0)).getTime() / 1000
+
   const isOverdue =
     props.loan.currentValidWriteOffGroup !== undefined &&
     props.loan.currentValidWriteOffGroup < 100000 &&
     props.loan.maturityDate &&
-    props.loan.maturityDate < Date.now()
+    props.loan.maturityDate < lastMidnight
 
   const canBeWrittenOff =
     props.loan.rateGroup !== undefined &&
