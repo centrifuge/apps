@@ -715,7 +715,6 @@ export async function writeOff(tinlake: ITinlake, loanId: number): Promise<Pendi
 }
 
 export async function closePool(tinlake: ITinlake): Promise<PendingTransaction> {
-  console.log('actinos.closePool')
   return tinlake.closePool()
 }
 
