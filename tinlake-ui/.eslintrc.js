@@ -16,7 +16,7 @@ module.exports = {
     'prefer-arrow-callback': 'error',
     'no-new-func': 'error',
     'no-else-return': 'error',
-    'arrow-parens': ['error', 'always'],
+    'arrow-parens': 'off', // taken care of by prettier
     'brace-style': ['off', 'off'],
     'comma-dangle': 'off',
     curly: ['error', 'multi-line'],
