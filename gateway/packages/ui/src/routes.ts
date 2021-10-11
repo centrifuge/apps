@@ -3,10 +3,12 @@ import contactsRoutes from './contacts/routes'
 import documentRoutes from './documents/routes'
 import schemasRoutes from './schemas/routes'
 
-export default {
+const routes = {
   documents: documentRoutes,
   contacts: contactsRoutes,
   user: userRoutes,
   schemas: schemasRoutes,
   index: '/',
 }
+
+export default routes
