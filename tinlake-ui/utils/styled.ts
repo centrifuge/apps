@@ -4,7 +4,7 @@ function isObject(value: any): value is object {
   return value != null && !Array.isArray(value) && typeof value === 'object'
 }
 
-export function mapResponsive<ResponsiveInput, Output>(
+export function mapResponsive<ResponsiveInput extends ResponsiveValue<any>, Output>(
   prop: ResponsiveInput,
   mapper: (v: any) => Output
 ): ResponsiveValue<Output> {
