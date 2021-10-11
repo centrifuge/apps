@@ -21,9 +21,7 @@
     "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs yarn lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add",
     "dev:lambda": "netlify-lambda serve lambda",
     "build:lambda": "netlify-lambda build lambda",
-    "build:deps:tinlake.js": "cd ../tinlake.js && yarn build && cd ../tinlake-ui",
-    "build:deps:fabric": "cd ../fabric && yarn build && cd ../tinlake-ui",
-    "build:deps": "yarn build:deps:tinlake.js && yarn build:deps:fabric"
+    "build:deps": "cd ../tinlake.js && yarn build && cd ../tinlake-ui"
   },
   "repository": {
     "type": "git",
