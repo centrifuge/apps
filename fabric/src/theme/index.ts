@@ -8,6 +8,10 @@ export const theme = {
   typography,
   space,
   colors,
+  fonts: {
+    standard:
+      "AvenirNextLTW01, 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+  },
 }
 
 export type FabricTheme = typeof theme

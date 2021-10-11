@@ -1,10 +1,7 @@
-// TODO: update with official names/values from figma
+const space = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80] as number[] & { [key: string]: number }
 
-export default {
-  xsmall: '8px',
-  small: '16px',
-  medium: '24px',
-  large: '32px',
-  xlarge: '40px',
-  xxlarge: '64px',
-}
+space.gutterMobile = space[2]
+space.gutterTablet = space[2]
+space.gutterDesktop = space[3]
+
+export default space
