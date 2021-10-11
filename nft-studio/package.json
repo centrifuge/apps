@@ -1,0 +1,55 @@
+{
+  "name": "@centrifuge/nft-studio",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "@polkadot/api": "^6.2.1",
+    "@polkadot/extension-dapp": "^0.40.3",
+    "@polkadot/react-identicon": "^0.85.4",
+    "@polkadot/util-crypto": "^7.4.1",
+    "@styled-system/css": "^5.1.5",
+    "@styled-system/should-forward-prop": "^5.1.5",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-query": "^3.25.1",
+    "react-router": "^5.2.1",
+    "react-router-dom": "^5.3.0",
+    "react-scripts": "4.0.3",
+    "styled-components": "^5.3.1",
+    "styled-system": "^5.1.5"
+  },
+  "devDependencies": {
+    "@types/react": "^17",
+    "@types/react-dom": "^17",
+    "@types/react-router": "^5",
+    "@types/react-router-dom": "^5",
+    "@types/styled-components": "^5",
+    "@types/styled-system": "^5",
+    "@types/styled-system__css": "^5.0.16",
+    "@types/styled-system__should-forward-prop": "^5"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      "last 2 chrome versions",
+      "last 2 firefox versions"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version"
+    ]
+  },
+  "resolutions": {
+    "styled-components": "^5"
+  }
+}
