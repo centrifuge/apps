@@ -51,9 +51,28 @@ $ cd tinlake-ui
 $ yarn start
 ```
 
+### Development
+
+#### ESLint and VSCode
+
+To allow VSCode to correctly flag lint errors in the IDE, inform the IDE about the `tinlake-ui` workspace:
+
+- Go to VSCode settings
+- Edit the `eslint.workingDirectories` setting to include the tinlake-ui workspace:
+  ```javascript
+  "eslint.workingDirectories": [
+      // ...
+  	   { "directory": "./tinlake-ui", "changeProcessCWD": true }
+   ],
+  ```
+
 ### Debugging
 
 There are a few flags you can use in your url query string to debug Tinlake:
+
+#### Debug
+
+`?debug` will show the debug panel in the bottom-right corner. From here, it's possible to manage all available debug flags.
 
 #### General
 
