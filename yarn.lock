@@ -2850,6 +2850,8 @@ __metadata:
     "@types/styled-system__css": ^5.0.16
     "@types/styled-system__should-forward-prop": ^5
     "@types/yup": 0.28.3
+    "@typescript-eslint/eslint-plugin": 4.33.0
+    "@typescript-eslint/parser": 4.33.0
     "@zeit/next-typescript": 1.1.1
     apollo-cache-inmemory: 1.6.5
     apollo-client: 2.6.8
@@ -2860,6 +2862,9 @@ __metadata:
     csstype: ^3.0.8
     decimal.js-light: 2.5.0
     dotenv: 8.2.0
+    eslint: 7.32.0
+    eslint-config-prettier: 8.3.0
+    eslint-plugin-react: 7.21.5
     ethereum-blockies: "github:MyEtherWallet/blockies"
     express: 4.17.1
     graphql: 15.0.0
@@ -2891,9 +2896,6 @@ __metadata:
     styled-components: 5.1.1
     styled-system: ^5.1.5
     ts-jest: ^26.4.3
-    tslint: 5.20.1
-    tslint-config-airbnb: 5.11.2
-    tslint-config-prettier: 1.18.0
     web3-utils: 1.2.7
     yup: 0.28.5
   languageName: unknown
@@ -7758,7 +7760,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^4.5.0":
+"@typescript-eslint/eslint-plugin@npm:4.33.0, @typescript-eslint/eslint-plugin@npm:^4.5.0":
   version: 4.33.0
   resolution: "@typescript-eslint/eslint-plugin@npm:4.33.0"
   dependencies:
@@ -7811,7 +7813,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:^4.5.0":
+"@typescript-eslint/parser@npm:4.33.0, @typescript-eslint/parser@npm:^4.5.0":
   version: 4.33.0
   resolution: "@typescript-eslint/parser@npm:4.33.0"
   dependencies:
@@ -9573,7 +9575,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"array.prototype.flatmap@npm:^1.2.4":
+"array.prototype.flatmap@npm:^1.2.3, array.prototype.flatmap@npm:^1.2.4":
   version: 1.2.5
   resolution: "array.prototype.flatmap@npm:1.2.5"
   dependencies:
@@ -15525,6 +15527,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-config-prettier@npm:8.3.0":
+  version: 8.3.0
+  resolution: "eslint-config-prettier@npm:8.3.0"
+  peerDependencies:
+    eslint: ">=7.0.0"
+  bin:
+    eslint-config-prettier: bin/cli.js
+  checksum: 94ccbb50fb67e5e47e8ba6cfa257b5cbf53619990ab13f46b99518cfe9b900394b93bdf6ffedbde1a8e2997d301b0fbd73a6b4202146bc53475dfb30a8c812f2
+  languageName: node
+  linkType: hard
+
 "eslint-config-react-app@npm:^6.0.0":
   version: 6.0.0
   resolution: "eslint-config-react-app@npm:6.0.0"
@@ -15653,6 +15666,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-plugin-react@npm:7.21.5":
+  version: 7.21.5
+  resolution: "eslint-plugin-react@npm:7.21.5"
+  dependencies:
+    array-includes: ^3.1.1
+    array.prototype.flatmap: ^1.2.3
+    doctrine: ^2.1.0
+    has: ^1.0.3
+    jsx-ast-utils: ^2.4.1 || ^3.0.0
+    object.entries: ^1.1.2
+    object.fromentries: ^2.0.2
+    object.values: ^1.1.1
+    prop-types: ^15.7.2
+    resolve: ^1.18.1
+    string.prototype.matchall: ^4.0.2
+  peerDependencies:
+    eslint: ^3 || ^4 || ^5 || ^6 || ^7
+  checksum: a7123f6feb287ad7e15d36b1c9fda8f78a0f0d39b9ee2d6479a5f0ad0effb8f60f639ef7449cecabb711095060e487f0950b69478b22768547b909c0de4f3afd
+  languageName: node
+  linkType: hard
+
 "eslint-plugin-react@npm:^7.21.5":
   version: 7.26.1
   resolution: "eslint-plugin-react@npm:7.26.1"
@@ -15759,7 +15793,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^7.11.0":
+"eslint@npm:7.32.0, eslint@npm:^7.11.0":
   version: 7.32.0
   resolution: "eslint@npm:7.32.0"
   dependencies:
@@ -24456,7 +24490,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object.fromentries@npm:^2.0.3, object.fromentries@npm:^2.0.4":
+"object.fromentries@npm:^2.0.2, object.fromentries@npm:^2.0.3, object.fromentries@npm:^2.0.4":
   version: 2.0.5
   resolution: "object.fromentries@npm:2.0.5"
   dependencies:
@@ -30448,7 +30482,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"string.prototype.matchall@npm:^4.0.5":
+"string.prototype.matchall@npm:^4.0.2, string.prototype.matchall@npm:^4.0.5":
   version: 4.0.6
   resolution: "string.prototype.matchall@npm:4.0.6"
   dependencies:
@@ -31982,7 +32016,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tslint-config-airbnb@npm:5.11.2, tslint-config-airbnb@npm:^5.11.1":
+"tslint-config-airbnb@npm:^5.11.1":
   version: 5.11.2
   resolution: "tslint-config-airbnb@npm:5.11.2"
   dependencies:
@@ -32044,7 +32078,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tslint@npm:5.20.1, tslint@npm:^5.18.0":
+"tslint@npm:^5.18.0":
   version: 5.20.1
   resolution: "tslint@npm:5.20.1"
   dependencies:
