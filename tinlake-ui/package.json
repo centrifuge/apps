@@ -16,7 +16,6 @@
     "serve": "next start",
     "test": "jest",
     "export": "yarn build && next export",
-    "eslint": "eslint -c .eslintrc.js '*/**/*.{js,ts,tsx}'",
     "lint": "eslint -c .eslintrc.js '*/**/*.{js,ts,tsx}'",
     "lint-fix": "eslint -c .eslintrc.js '*/**/*.{js,ts,tsx}' --fix",
     "lint-fix-staged": "git diff --staged --name-only | grep -E '\\.tsx?$' | xargs yarn lint-fix && git diff --staged --name-only | grep -E '\\.tsx?$' | xargs git add",
