@@ -18,9 +18,9 @@ const formatCapacity = (capacity: BN): string => {
 }
 
 export const PoolCapacityLabel: React.FC<Props> = ({ pool }) => {
-  const { assetValue, capacity, currency, isArchived, isOversubscribed, reserve } = pool
+  const { capacity, currency, isArchived, isOversubscribed } = pool
 
-  const isUpcoming = pool.isUpcoming || (!assetValue && !reserve) || (assetValue?.isZero() && reserve?.isZero())
+  const isUpcoming = pool.isUpcoming
 
   if (isUpcoming) {
     return <Label blue>Upcoming</Label>

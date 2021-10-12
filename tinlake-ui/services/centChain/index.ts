@@ -78,8 +78,8 @@ export class CentChain {
             if (dispatchError.isModule) {
               // for module errors, we have the section indexed, lookup
               const decoded = api.registry.findMetaError(dispatchError.asModule)
-              const { documentation, name, section } = decoded
-              reject(`claim error name: ${section}.${name}: ${documentation.join(' ')}`)
+              const { docs, name, section } = decoded
+              reject(`claim error name: ${section}.${name}: ${docs.join(' ')}`)
               return
             }
             // Other, CannotLookup, BadOrigin, no extra info

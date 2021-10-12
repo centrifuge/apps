@@ -142,7 +142,7 @@ const EpochOverview: React.FC<Props> = (props: Props) => {
   const formatPercentage = (numerator: BN | undefined, denominator: BN | undefined) => {
     if (!numerator || !denominator) return ''
     const a = numerator.div(new BN(1e6))
-    let b = numerator.div(new BN(1e6))
+    let b = denominator.div(new BN(1e6))
     b = b.isZero() ? new BN(1) : b
     const percentage = (parseInt(a.toString(), 10) / parseInt(b.toString(), 10)) * 100
     return `${percentFormatter.format(percentage)}%`

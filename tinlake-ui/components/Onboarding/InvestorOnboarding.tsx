@@ -69,7 +69,7 @@ export const InvestorOnboarding: React.FC<Props> = () => {
         <Stack gap="large">
           <Stack alignItems="center">
             <Box as="img" src="/static/logo.svg" height={16} mb="medium" />
-            <Header title="Onboard As Investor" />
+            <Header title="Onboard as investor" />
           </Stack>
           {address && !onboarding.data ? (
             <Spinner height={'400px'} message={'Loading...'} />

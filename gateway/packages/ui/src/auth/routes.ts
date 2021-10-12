@@ -2,9 +2,11 @@ import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 
 const index = '/users'
 
-export default {
+const routes = {
   index,
   register: `/register`,
   invite: `${index}/invite`,
   logout: ROUTES.USERS.logout,
 }
+
+export default routes

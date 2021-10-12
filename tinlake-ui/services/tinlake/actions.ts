@@ -201,14 +201,13 @@ export async function getProxyOwner(tinlake: ITinlake, loanId: string): Promise<
 }
 
 export async function getLoan(tinlake: ITinlake, loanId: string): Promise<Loan | null> {
-  let loan
   const count = await tinlake.loanCount()
 
   if (count.toNumber() <= Number(loanId) || Number(loanId) === 0) {
     return null
   }
 
-  loan = await tinlake.getLoan(loanId)
+  const loan = await tinlake.getLoan(loanId)
   if (!loan) return null
 
   const nftData = await getNFT(loan.registry, tinlake, `${loan.tokenId}`)

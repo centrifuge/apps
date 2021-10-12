@@ -95,54 +95,8 @@ export const PoolValueLineRight = styled.div`
   margin-top: 40px;
 `
 
-export const BalanceSheetDiagram = styled(Box)`
-  flex: 1 1 10%;
-  @media (max-width: 899px) {
-    display: none;
-  }
-`
-
-export const BalanceSheetDiagramLeft = styled(Box)`
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-`
-
-export const BalanceSheetMidLine = styled.div`
-  border-bottom: 1px solid #d8d8d8;
-  flex: 1;
-`
-
-export const BalanceSheetFiller = styled.div`
-  flex: 1;
-`
-
-export const BalanceSheetDiagramRight = styled(Box)`
-  border-bottom: 1px solid #d8d8d8;
-  border-left: 1px solid #d8d8d8;
-  border-bottom-left-radius: 12px;
-  border-top-left-radius: 12px;
-  border-top: 1px solid #d8d8d8;
-  width: 50%;
-  height: 68%;
-  position: relative;
-  top: 14%;
-`
-
-export const DividerTop = styled.div`
-  border-bottom: 1px solid #d8d8d8;
-  max-width: 80%;
-  margin: 0 0 16px 10%;
-`
-
-export const DividerBottom = styled.div`
-  border-top: 1px solid #d8d8d8;
-  max-width: 80%;
-  margin: 0 0 16px 10%;
-`
-
 export const DividerInner = styled.div`
-  border-right: 1px solid #d8d8d8;
+  border-right: 1px solid #e0e0e0;
   width: 50%;
 `
 
