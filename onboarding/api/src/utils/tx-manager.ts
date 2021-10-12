@@ -1,18 +1,12 @@
 import { ethers } from 'ethers'
-import * as WebSocket from 'ws'
 
 const DEFAULT_CONFIG: TransactionManagerConfig = {
   transactionTimeout: 5 * 60 * 1000, // 5 minutes
-  gasnowWebsocketUrl: 'wss://www.gasnow.org/ws/gasprice',
-  initialSpeed: 'standard',
-  increasedSpeed: 'fast',
-  minGasPriceIncrease: 0.1, // 10%
-  maxGasPriceAge: 10 * 60 * 1000, // 10 mins
+  maxFeePerGas: 200,
+  initialPriorityFeePerGas: 2,
+  maxPriorityFeePerGas: 20,
+  priorityFeeIncrease: 1,
   filterDuplicates: true,
-  fallback: {
-    stepSize: 0.2, // 20% increase every time
-    maxIncreases: 3,
-  },
 }
 
 /**
@@ -23,8 +17,6 @@ class TransactionManager extends ethers.Signer {
   readonly signer: ethers.Signer
 
   private config: TransactionManagerConfig
-
-  latestGasPrices: GasPricesConfig | undefined = undefined
 
   transactions: {
     [key: string]:
@@ -42,15 +34,6 @@ class TransactionManager extends ethers.Signer {
     super()
     ethers.utils.defineReadOnly(this, 'signer', signer)
     this.config = { ...DEFAULT_CONFIG, ...config }
-
-    const gasnowWs = new WebSocket(this.config.gasnowWebsocketUrl)
-    gasnowWs.onmessage = (event: any) => {
-      const data = JSON.parse(event.data)
-
-      if (data.type) {
-        this.latestGasPrices = data.data
-      }
-    }
   }
 
   async sendTransaction(
@@ -62,7 +45,6 @@ class TransactionManager extends ethers.Signer {
       if (this.config.filterDuplicates && !increases && this.transactions[key]) {
         throw new Error(`Transaction ${key} already sent`)
       }
-
       this.transactions[key] = { request: transaction, resolve, reject }
       this.queue.push(key)
 
@@ -80,37 +62,23 @@ class TransactionManager extends ethers.Signer {
       ? { ...this.transactions[key].request, nonce: this.transactions[key].response.nonce }
       : this.transactions[key].request
 
-    const initialGasPrice = await this.provider.getGasPrice()
+    const maxPriorityFeePerGas = this.config.initialPriorityFeePerGas + increases * this.config.priorityFeeIncrease
 
-    /**
-     * Try to use the gasnow gas price, fallback to adding a preset step size to the initial price.
-     * If the increased speed is not more than the previous gas price, default to adding the step size.
-     */
-    const gasPrice =
-      this.latestGasPrices && Date.now() - this.latestGasPrices.timestamp < this.config.maxGasPriceAge
-        ? increases === 0
-          ? this.latestGasPrices[this.config.initialSpeed]
-          : this.latestGasPrices[this.config.increasedSpeed]
-        : initialGasPrice.add(
-            initialGasPrice
-              .div(1 / this.config.fallback.stepSize)
-              .mul(Math.min(increases + 1, this.config.fallback.maxIncreases))
-          )
-
-    if (
-      request.gasPrice &&
-      gasPrice < parseFloat(request.gasPrice.toString()) * (1 + this.config.minGasPriceIncrease)
-    ) {
-      // Don't resubmit if the new gas price isn't a significant increase
+    if (maxPriorityFeePerGas > this.config.maxPriorityFeePerGas) {
+      // Don't resubmit if the new fee is larger than then max fee
       this.watch(key, increases || 0)
       return
     }
 
-    const txWithGasPrice = { ...request, gasPrice }
-    if (increases > 0) console.log(`Resubmitting ${this.transactions[key].response.hash} with gas price of ${gasPrice}`)
+    const txWithFee = { ...request, maxFeePerGas: this.config.maxFeePerGas, maxPriorityFeePerGas }
+    console.log(`Submitting ${key} with max priority fee of ${maxPriorityFeePerGas}`)
+    if (increases > 0)
+      console.log(
+        `Resubmitting ${this.transactions[key].response.hash} with max priority fee of ${maxPriorityFeePerGas}`
+      )
 
     try {
-      const response = await super.sendTransaction({ ...txWithGasPrice, gasPrice })
+      const response = await super.sendTransaction(txWithFee)
       this.transactions[key] = { ...this.transactions[key], response }
 
       // Resolve the sendTransaction() call
@@ -120,10 +88,10 @@ class TransactionManager extends ethers.Signer {
     } catch (e) {
       if (increases > 0) {
         // Keep watching previous transaction
-        console.log(`Failed to resubmit ${this.transactions[key].response.hash} with ${gasPrice}`)
+        console.log(`Failed to resubmit ${this.transactions[key].response.hash} with ${maxPriorityFeePerGas}`)
         this.watch(key, increases || 0)
       } else {
-        throw new Error(`Failed to submit tx with ${gasPrice}: ${e}`)
+        throw new Error(`Failed to submit tx with ${maxPriorityFeePerGas}: ${e}`)
       }
     }
   }
@@ -147,9 +115,7 @@ class TransactionManager extends ethers.Signer {
 
       this.queue = this.queue.slice(1)
       this.transactions[key] = undefined
-      console.log(`Completed ${key}`)
       if (this.queue.length > 0) {
-        console.log(`Moving on to ${key}`)
         this.process(this.queue[0])
       }
     } catch (e) {
@@ -167,7 +133,7 @@ class TransactionManager extends ethers.Signer {
   }
 
   connect(provider: ethers.providers.Provider): TransactionManager {
-    return new TransactionManager(this.signer.connect(provider))
+    return new TransactionManager(this.signer.connect(provider), this.config)
   }
 
   getAddress(): Promise<string> {
@@ -183,29 +149,13 @@ class TransactionManager extends ethers.Signer {
   }
 }
 
-interface GasPrices {
-  rapid: number
-  fast: number
-  standard: number
-  slow: number
-}
-
-interface GasPricesConfig extends GasPrices {
-  timestamp: number
-}
-
 interface TransactionManagerConfig {
   transactionTimeout: number
-  gasnowWebsocketUrl: string
-  initialSpeed: keyof GasPrices
-  increasedSpeed: keyof GasPrices
-  minGasPriceIncrease: number
-  maxGasPriceAge: number
+  maxFeePerGas: number
+  initialPriorityFeePerGas: number
+  maxPriorityFeePerGas: number
+  priorityFeeIncrease: number
   filterDuplicates: boolean
-  fallback: {
-    stepSize: number
-    maxIncreases: number
-  }
 }
 
 export { TransactionManager, TransactionManagerConfig }
