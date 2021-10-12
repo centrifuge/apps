@@ -24,7 +24,7 @@ import { StepParagraph } from './StepParagraph'
 
 interface Props {
   activePool: Pool
-  hidePageTitle?: boolean
+  market?: 'aave'
 }
 
 type Tranche = 'junior' | 'senior'
@@ -42,7 +42,7 @@ function getState(step: number, activeStep: number) {
   return 'todo'
 }
 
-export const PoolOnboarding: React.FC<Props> = ({ activePool }) => {
+export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
   const router = useRouter()
   const session = 'session' in router.query ? router.query.session : ''
   const trancheOverride = router.query.tranche as Tranche | undefined
@@ -96,16 +96,19 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool }) => {
   const [activeStep, setActiveStep] = React.useState(0)
 
   const hideKYC = kycStatus === 'verified' && accreditationStatus
+  const logo = market === 'aave' ? '/static/aave-centrifuge-market.svg' : '/static/logo.svg'
+  const logoHeight = market === 'aave' ? 87 : 16
+  const logoMargin = market === 'aave' ? 'xsmall' : 'medium'
 
   return (
     <>
       <Card px={['medium', 'xxlarge']} py={['medium', 'large']}>
         <Stack gap="large">
           <Stack alignItems="center">
-            <Box as="img" src="/static/logo.svg" height={16} mb="medium" />
+            <Box as="img" src={logo} height={logoHeight} mb={logoMargin} />
             <Header
-              title={`${activePool.metadata.name} ${tranche === 'senior' ? 'DROP' : 'TIN'}`}
-              subtitle="Onboard to token"
+              title={!market ? `${activePool.metadata.name} ${tranche === 'senior' ? 'DROP' : 'TIN'}` : ''}
+              subtitle={market ? 'Onboard as investor' : 'Onboard to token'}
             />
           </Stack>
           {authState === 'initialAuthing' || (address && !onboarding.data) ? (

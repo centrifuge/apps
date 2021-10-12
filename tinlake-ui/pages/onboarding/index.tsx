@@ -17,7 +17,7 @@ interface Props {
 
 const InvestorOnboardingPage: React.FC<Props> = ({ ipfsPools }) => {
   const router = useRouter()
-  const { root, slug } = router.query
+  const { root, slug, from } = router.query
 
   return (
     <IpfsPoolsProvider value={ipfsPools}>
@@ -26,7 +26,7 @@ const InvestorOnboardingPage: React.FC<Props> = ({ ipfsPools }) => {
           <Head>
             <title>Investor Onboarding | Tinlake | Centrifuge</title>
           </Head>
-          <FunnelHeader returnPath={`/pool/${root}/${slug}/investments`} />
+          <FunnelHeader returnPath={(from as string) || `/pool/${root}/${slug}/investments`} />
           <Auth>
             <PageContainer width="funnel" noMargin>
               <InvestorOnboarding />

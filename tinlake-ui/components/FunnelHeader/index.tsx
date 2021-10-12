@@ -22,7 +22,7 @@ export const FunnelHeader: React.FC<Props> = ({ returnPath }) => {
   const auth = useAuth()
   const transactions = useSelector<any, TransactionState>((state) => state.transactions)
 
-  const connectAccount = async () => {
+  async function connectAccount() {
     try {
       await dispatch(ensureAuthed())
     } catch (e) {
