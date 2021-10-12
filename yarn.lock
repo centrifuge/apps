@@ -2712,6 +2712,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^4.32.0
     "@typescript-eslint/parser": ^4.32.0
     babel-loader: ^8.2.2
+    csstype: ^3.0.9
     eslint: ^7.32.0
     eslint-config-prettier: ^8.3.0
     eslint-plugin-prettier: ^4.0.0
@@ -15973,7 +15974,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csstype@npm:^3.0.2, csstype@npm:^3.0.8":
+"csstype@npm:^3.0.2, csstype@npm:^3.0.8, csstype@npm:^3.0.9":
   version: 3.0.9
   resolution: "csstype@npm:3.0.9"
   checksum: e5d6ebc4581d09537e620b78b6741b4b1ececc0eb3fec065be1d59d42685954276847969b9c3652e835553a33dd8a7995bbd5cc834c4142375de8b417a433880

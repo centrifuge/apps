@@ -8,6 +8,9 @@ export const theme = {
   typography,
   space,
   colors,
+  sizes: {
+    container: 1152,
+  },
   fonts: {
     standard:
       "AvenirNextLTW01, 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
