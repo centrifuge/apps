@@ -3,8 +3,10 @@ import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/typ
 import { Anchor } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
+import { useSelector } from 'react-redux'
 import config, { Pool } from '../../config'
 import { ExplainerCard } from '../../containers/Investment/View/styles'
+import { AuthState } from '../../ducks/auth'
 import { useAddress } from '../../utils/useAddress'
 import { useOnboardingState } from '../../utils/useOnboardingState'
 import { Button } from '../Button'
@@ -22,7 +24,7 @@ import { StepParagraph } from './StepParagraph'
 
 interface Props {
   activePool: Pool
-  hidePageTitle?: boolean
+  market?: 'aave'
 }
 
 type Tranche = 'junior' | 'senior'
@@ -40,13 +42,14 @@ function getState(step: number, activeStep: number) {
   return 'todo'
 }
 
-export const PoolOnboarding: React.FC<Props> = ({ activePool }) => {
+export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
   const router = useRouter()
   const session = 'session' in router.query ? router.query.session : ''
   const trancheOverride = router.query.tranche as Tranche | undefined
   const tranche = trancheOverride || DefaultTranche
 
   const address = useAddress()
+  const { authState } = useSelector<any, AuthState>((state) => state.auth)
   const onboarding = useOnboardingState(activePool)
 
   const kycStatus = onboarding.data?.kyc?.requiresSignin ? 'requires-signin' : onboarding.data?.kyc?.status
@@ -92,18 +95,23 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool }) => {
 
   const [activeStep, setActiveStep] = React.useState(0)
 
+  const hideKYC = kycStatus === 'verified' && accreditationStatus
+  const logo = market === 'aave' ? '/static/aave-centrifuge-market.svg' : '/static/logo.svg'
+  const logoHeight = market === 'aave' ? 87 : 16
+  const logoMargin = market === 'aave' ? 'xsmall' : 'medium'
+
   return (
     <>
       <Card px={['medium', 'xxlarge']} py={['medium', 'large']}>
         <Stack gap="large">
           <Stack alignItems="center">
-            <Box as="img" src="/static/logo.svg" height={16} mb="medium" />
+            <Box as="img" src={logo} height={logoHeight} mb={logoMargin} />
             <Header
-              title={`${activePool.metadata.name} ${tranche === 'senior' ? 'DROP' : 'TIN'}`}
-              subtitle="Onboard to token"
+              title={!market ? `${activePool.metadata.name} ${tranche === 'senior' ? 'DROP' : 'TIN'}` : ''}
+              subtitle={market ? 'Onboard as investor' : 'Onboard to token'}
             />
           </Stack>
-          {address && !onboarding.data ? (
+          {authState === 'initialAuthing' || (address && !onboarding.data) ? (
             <Spinner height={'400px'} message={'Loading...'} />
           ) : (
             <>
@@ -114,13 +122,17 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool }) => {
               )}
               <div>
                 <ConnectStep state={getState(1, activeStep)} />
-                <LinkStep state={getState(2, activeStep)} onboardingData={onboarding.data} />
-                <KycStep
-                  state={getState(3, activeStep)}
-                  onboardingData={onboarding.data}
-                  kycStatus={kycStatus}
-                  accreditationStatus={accreditationStatus}
-                />
+                {!hideKYC && (
+                  <>
+                    <LinkStep state={getState(2, activeStep)} onboardingData={onboarding.data} />
+                    <KycStep
+                      state={getState(3, activeStep)}
+                      onboardingData={onboarding.data}
+                      kycStatus={kycStatus}
+                      accreditationStatus={accreditationStatus}
+                    />
+                  </>
+                )}
                 <AgreementStep
                   state={getState(4, activeStep)}
                   activePool={activePool}

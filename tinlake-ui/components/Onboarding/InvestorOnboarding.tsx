@@ -3,8 +3,10 @@ import { Anchor } from 'grommet'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import * as React from 'react'
+import { useSelector } from 'react-redux'
 import config from '../../config'
 import { ExplainerCard } from '../../containers/Investment/View/styles'
+import { AuthState } from '../../ducks/auth'
 import { useAddress } from '../../utils/useAddress'
 import { useInvestorOnboardingState } from '../../utils/useOnboardingState'
 import { Button } from '../Button'
@@ -38,6 +40,7 @@ export const InvestorOnboarding: React.FC<Props> = () => {
   const session = 'session' in router.query ? router.query.session : ''
 
   const address = useAddress()
+  const { authState } = useSelector<any, AuthState>((state) => state.auth)
   const onboarding = useInvestorOnboardingState()
 
   const completed = onboarding.data?.completed
@@ -71,7 +74,7 @@ export const InvestorOnboarding: React.FC<Props> = () => {
             <Box as="img" src="/static/logo.svg" height={16} mb="medium" />
             <Header title="Onboard as investor" />
           </Stack>
-          {address && !onboarding.data ? (
+          {authState === 'initialAuthing' || (address && !onboarding.data) ? (
             <Spinner height={'400px'} message={'Loading...'} />
           ) : (
             <>

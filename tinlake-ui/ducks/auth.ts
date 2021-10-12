@@ -58,7 +58,7 @@ export type Proxies = string[]
 
 export interface AuthState {
   address: null | Address
-  authState: null | 'authing' | 'aborted' | 'authed'
+  authState: null | 'initialAuthing' | 'authing' | 'aborted' | 'authed'
   permissionsState: null | 'loading' | 'loaded'
   permissions: null | Permissions | PermissionsV3
   proxiesState: null | 'loading' | 'loaded'
@@ -199,7 +199,7 @@ export function load(
 
     // call wallet select with that value if it exists
     if (previouslySelectedWallet !== null && previouslySelectedWallet !== '') {
-      dispatch(setAuthState('authing'))
+      dispatch(setAuthState('initialAuthing'))
 
       const walletSelected = await onboard.walletSelect(previouslySelectedWallet)
       if (!walletSelected) {
@@ -307,7 +307,7 @@ export function setAddressAndLoadData(
 }
 
 export function setAuthState(
-  authState: null | 'authing' | 'aborted' | 'authed'
+  authState: null | 'initialAuthing' | 'authing' | 'aborted' | 'authed'
 ): ThunkAction<Promise<void>, { auth: AuthState }, undefined, Action> {
   return async (dispatch) => {
     dispatch({ authState, type: SET_AUTH_STATE })

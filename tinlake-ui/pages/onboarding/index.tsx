@@ -1,5 +1,6 @@
 import { GetStaticProps } from 'next'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import * as React from 'react'
 import Auth from '../../components/Auth'
 import { FunnelHeader } from '../../components/FunnelHeader'
@@ -15,6 +16,9 @@ interface Props {
 }
 
 const InvestorOnboardingPage: React.FC<Props> = ({ ipfsPools }) => {
+  const router = useRouter()
+  const { root, slug, from } = router.query
+
   return (
     <IpfsPoolsProvider value={ipfsPools}>
       <TinlakeProvider>
@@ -22,7 +26,7 @@ const InvestorOnboardingPage: React.FC<Props> = ({ ipfsPools }) => {
           <Head>
             <title>Investor Onboarding | Tinlake | Centrifuge</title>
           </Head>
-          <FunnelHeader />
+          <FunnelHeader returnPath={(from as string) || `/pool/${root}/${slug}/investments`} />
           <Auth>
             <PageContainer width="funnel" noMargin>
               <InvestorOnboarding />
