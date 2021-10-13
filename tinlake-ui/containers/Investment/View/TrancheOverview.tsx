@@ -1,4 +1,4 @@
-import { baseToDisplay, feeToInterestRate, ITinlake } from '@centrifuge/tinlake-js'
+import { baseToDisplay, ITinlake } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import { useRouter } from 'next/router'
@@ -9,12 +9,10 @@ import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Card } from '../../../components/Card'
-import InvestAction from '../../../components/InvestAction'
 import { Box, Shelf } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
+import { RewardsWarning } from '../../../components/RewardsWarning'
 import { useTinlake } from '../../../components/TinlakeProvider'
-import { Tooltip } from '../../../components/Tooltip'
-import { ValuePairList } from '../../../components/ValuePairList'
 import config, { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -267,7 +265,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                   <BottomCardToolbar>{displayInWalletBtn}</BottomCardToolbar>
                 </>
               )}
-
+              {props.tranche === 'senior' && <RewardsWarning mt="medium" bleedX="medium" />}
               {!epochData?.isBlockedState && (
                 <BottomCardToolbar>
                   <Box mt="small" display="flex" flex="1">

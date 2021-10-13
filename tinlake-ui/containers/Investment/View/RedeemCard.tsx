@@ -3,35 +3,18 @@ import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Decimal } from 'decimal.js-light'
 import { Heading } from 'grommet'
-import { CircleAlert } from 'grommet-icons'
 import * as React from 'react'
+import { useQuery } from 'react-query'
 import { connect, useSelector } from 'react-redux'
-import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
+import { RewardsWarning } from '../../../components/RewardsWarning'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
-import { useEthLink } from '../../../utils/useEthLink'
-import { Warning } from './styles'
+import { useAddress } from '../../../utils/useAddress'
 import { Card } from './TrancheOverview'
-
-const LinkingAlert = styled(CircleAlert)`
-  height: 16px;
-  width: 16px;
-  vertical-align: text-top;
-`
-
-const HelpTitle = styled.span`
-  margin-bottom: 20px;
-  padding-left: 6px;
-  font-weight: 800;
-`
-
-const HelpText = styled.div`
-  padding-top: 8px;
-`
 
 interface Props extends TransactionProps {
   selectedPool?: Pool
@@ -42,27 +25,24 @@ interface Props extends TransactionProps {
 
 const RedeemCard: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
-  const { data: ethLink } = useEthLink()
+  const address = useAddress()
   const token = props.tranche === 'senior' ? 'DROP' : 'TIN'
   const [tokenValue, setTokenValue] = React.useState('0')
 
   const authProvider = useSelector<any, string | null>((state) => state.auth.providerName)
-  const [limit, setLimit] = React.useState<string | undefined>(undefined)
-
-  React.useEffect(() => {
-    async function getLimit() {
-      const user = await tinlake.signer?.getAddress()
-      if (user) {
-        // TODO: get token balance
-        const balance =
-          props.tranche === 'senior'
-            ? await tinlake.getSeniorTokenBalance(user)
-            : await tinlake.getJuniorTokenBalance(user)
-        setLimit(balance.toString())
-      }
+  const { data: limit } = useQuery(
+    ['redeemLimit', props.tranche, address],
+    async () => {
+      const balance =
+        props.tranche === 'senior'
+          ? await tinlake.getSeniorTokenBalance(address!)
+          : await tinlake.getJuniorTokenBalance(address!)
+      return balance.toString()
+    },
+    {
+      enabled: !!address,
     }
-    getLimit()
-  }, [tinlake])
+  )
 
   const [status, , setTxId] = useTransactionState()
 
@@ -115,13 +95,7 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
         onChange={onChange}
         disabled={disabled}
       />
-      {ethLink === null && (
-        <Warning>
-          <LinkingAlert />
-          <HelpTitle>No Centrifuge Chain Account Linked</HelpTitle>
-          <HelpText>To claim rewards, link your Centrifuge Chain account before redeeming your investment</HelpText>
-        </Warning>
-      )}
+      {props.tranche === 'senior' && <RewardsWarning mt="medium" bleedX="medium" />}
       <ButtonGroup mt="medium">
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
         <Button primary label="Redeem" onClick={submit} disabled={error !== undefined || disabled} />

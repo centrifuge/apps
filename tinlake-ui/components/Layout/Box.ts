@@ -26,6 +26,7 @@ import {
   TextAlignProps,
   TLengthStyledSystem,
 } from 'styled-system'
+import { PropsOf } from '../../helpers'
 
 interface BleedProps {
   bleedX?: ResponsiveValue<CSS.Property.MarginLeft<TLengthStyledSystem>>
@@ -62,6 +63,8 @@ interface StyledBoxProps extends SystemProps {}
 export const Box = styled('div').withConfig({
   shouldForwardProp: (prop) => shouldForwardProp(prop),
 })<StyledBoxProps>(compose(space, layout, background, color, flexbox, grid, border, textAlign, position, bleed))
+
+export type BoxProps = PropsOf<typeof Box>
 
 export const Flex = styled(Box)`
   display: flex;
