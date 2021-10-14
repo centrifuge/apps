@@ -357,7 +357,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             <RedeemCard {...props} selectedPool={props.pool} setCard={setCard} updateTrancheData={refetchTrancheData} />
           )}
         </>
-      }
+      )}
       {props.pool &&
         !isMaintainanceMode &&
         props.tranche === 'senior' &&
