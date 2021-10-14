@@ -1,5 +1,6 @@
 import React from 'react'
 import { ThemeProvider } from 'styled-components'
+import { GlobalStyle } from '../src'
 import { getTheme, theme } from '../src/theme'
 
 export const parameters = {
@@ -30,6 +31,7 @@ export const decorators = [
     <ThemeProvider
       theme={getTheme(context.globals.backgrounds?.value === theme.colors.modes.dark.backgroundPage ? 'dark' : 'light')}
     >
+      <GlobalStyle />
       <Story />
     </ThemeProvider>
   ),
