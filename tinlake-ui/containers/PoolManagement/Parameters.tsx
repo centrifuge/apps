@@ -112,7 +112,6 @@ const Parameters: React.FC<TransactionProps> = (props: TransactionProps) => {
     }
 
     if (changedMinimumEpochTime) {
-      console.log(newMinimumEpochTime.toString())
       const txId = await props.createTransaction(`Set min epoch time`, 'setMinimumEpochTime', [
         tinlake,
         Number(newMinimumEpochTime.toString()),
