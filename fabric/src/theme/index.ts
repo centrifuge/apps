@@ -22,7 +22,7 @@ export const theme = {
   },
   shadows: {
     cardInteractive: '0 1px 5px rgba(0, 0, 0, 0.2)',
-    buttonFocussed: `0 4px 12px ${colors.brand}`,
+    buttonFocused: `0 4px 12px ${colors.brand}`,
   },
 }
 
