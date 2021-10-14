@@ -51,8 +51,9 @@ const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditat
       {active && kycStatus && ['none', 'updates-required', 'expired'].includes(kycStatus) && (
         <>
           <StepParagraph>
-            Submit your KYC information through Securitize for verification. This is a one time process to become an
-            eligible investor for all Tinlake pools.
+            {kycStatus === 'updates-required'
+              ? 'Your submitted KYC requires an update.'
+              : 'Submit your KYC information through Securitize for verification. This is a one time process to become an eligible investor for all Tinlake pools.'}
           </StepParagraph>
           <Button
             primary
