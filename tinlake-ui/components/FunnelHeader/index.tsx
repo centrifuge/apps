@@ -11,14 +11,18 @@ import { useAddress } from '../../utils/useAddress'
 import { Box, Shelf } from '../Layout'
 import { Web3Wallet } from '../Web3Wallet'
 
-export const FunnelHeader: React.FC = () => {
+interface Props {
+  returnPath: string
+}
+
+export const FunnelHeader: React.FC<Props> = ({ returnPath }) => {
   const router = useRouter()
   const address = useAddress()
   const dispatch = useDispatch()
   const auth = useAuth()
   const transactions = useSelector<any, TransactionState>((state) => state.transactions)
 
-  const connectAccount = async () => {
+  async function connectAccount() {
     try {
       await dispatch(ensureAuthed())
     } catch (e) {
@@ -30,7 +34,7 @@ export const FunnelHeader: React.FC = () => {
 
   return (
     <Shelf position="sticky" top={0} height={56} zIndex={6} justifyContent="space-between" px={[12, 24]}>
-      <BackLink onClick={() => router.back()} gap="xsmall" style={{ cursor: 'pointer' }}>
+      <BackLink onClick={() => router.push(returnPath)} gap="xsmall" style={{ cursor: 'pointer' }}>
         <Close />
         <Box display={['none', 'block']}>Close</Box>
       </BackLink>

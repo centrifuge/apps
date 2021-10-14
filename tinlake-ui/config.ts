@@ -125,6 +125,7 @@ interface Config {
   rewardsTreeUrl: string
   multicallContractAddress: string
   matomoSiteId: number | undefined
+  aaveOnboardingReturnUrl: string
 }
 
 export interface IpfsPools {
@@ -361,6 +362,7 @@ const config: Config = {
     .required('NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS is required')
     .validateSync(process.env.NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS),
   matomoSiteId: yup.number().optional().validateSync(process.env.NEXT_PUBLIC_MATOMO_SITE_ID),
+  aaveOnboardingReturnUrl: process.env.NEXT_PUBLIC_AAVE_ONBOARD_RETURN_URL!,
 }
 
 function between1e23and1e27(s: string): boolean {

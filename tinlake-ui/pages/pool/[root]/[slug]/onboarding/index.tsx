@@ -30,7 +30,7 @@ const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
             <title>Investor Onboarding: {pool.metadata.name} | Tinlake | Centrifuge</title>
           </Head>
           {newOnboarding ? (
-            <FunnelHeader />
+            <FunnelHeader returnPath="/" />
           ) : (
             <Header
               ipfsPools={ipfsPools}
