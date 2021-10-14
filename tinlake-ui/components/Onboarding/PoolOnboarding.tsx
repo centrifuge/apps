@@ -80,12 +80,12 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
       setActiveStep(3)
     } else if (agreementStatus === 'none') {
       setActiveStep(4)
-    } else if (kycStatus === 'processing' && !whitelistStatus) {
-      setActiveStep(4)
-    } else if (kycStatus === 'processing' && agreementStatus === 'signed') {
-      setActiveStep(4)
     } else if (kycStatus === 'processing' && agreementStatus === 'countersigned') {
       setActiveStep(3)
+    } else if (kycStatus === 'processing' && agreementStatus === 'signed') {
+      setActiveStep(4)
+    } else if (kycStatus === 'processing' && !whitelistStatus) {
+      setActiveStep(4)
     } else if ((kycStatus === 'verified' && agreementStatus === 'signed') || !whitelistStatus) {
       setActiveStep(4)
     } else {
@@ -129,6 +129,7 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
                       state={getState(3, activeStep)}
                       onboardingData={onboarding.data}
                       kycStatus={kycStatus}
+                      agreementStatus={agreementStatus}
                       accreditationStatus={accreditationStatus}
                     />
                   </>

@@ -10,6 +10,7 @@ interface Props {
   state: StepProps['state']
   onboardingData: Pick<AddressStatus, 'kyc'> | undefined
   kycStatus: KycStatusLabel | 'requires-signin' | undefined
+  agreementStatus?: 'none' | 'signed' | 'countersigned' | 'declined' | 'voided'
   accreditationStatus: boolean
 }
 
@@ -17,7 +18,7 @@ interface Props {
 const placeholderPoolId = '0x560Ac248ce28972083B718778EEb0dbC2DE55740'
 const onboardURL = `${config.onboardAPIHost}pools/${placeholderPoolId}/info-redirect`
 
-const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditationStatus }) => {
+const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditationStatus, agreementStatus }) => {
   const active = state === 'active'
 
   return (
@@ -37,9 +38,16 @@ const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditat
       }
       icon={kycStatus === 'processing' ? 'clock' : undefined}
     >
-      {active && kycStatus === 'processing' && (
-        <StepParagraph icon="clock">Submitted KYC is being verified</StepParagraph>
-      )}
+      {active &&
+        kycStatus === 'processing' &&
+        (agreementStatus === 'countersigned' ? (
+          <>
+            <StepParagraph icon="clock">KYC review is still pending. Check your account</StepParagraph>
+            <Button primary label="Check Securitize profile" href={onboardURL} target="_blank" />
+          </>
+        ) : (
+          <StepParagraph icon="clock">Submitted KYC is being verified</StepParagraph>
+        ))}
       {active && kycStatus && ['none', 'updates-required', 'expired'].includes(kycStatus) && (
         <>
           <StepParagraph>
