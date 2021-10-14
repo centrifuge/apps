@@ -116,8 +116,15 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
           ) : (
             <>
               {onboarding.data?.linkedAddresses && onboarding.data?.linkedAddresses.length > 0 && (
-                <ExplainerCard>
-                  Your Securitize account is linked to {onboarding.data?.linkedAddresses.join(', ')} and {address}.
+                <ExplainerCard gap="xsmall">
+                  <strong>Multiple Ethereum addresses to Securitize account</strong>
+                  {onboarding.data?.linkedAddresses.map((addr) => (
+                    <React.Fragment key={addr}>
+                      {addr}
+                      <br />
+                    </React.Fragment>
+                  ))}
+                  {address} (connected).
                 </ExplainerCard>
               )}
               <div>
