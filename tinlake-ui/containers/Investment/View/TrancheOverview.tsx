@@ -275,7 +275,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           back soon.
         </Warning>
       )}
-      {
+      {!isMaintainanceMode && address && trancheData?.inMemberlist === true && (
         <>
           {card === 'home' && (
             <>
