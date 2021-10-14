@@ -87,7 +87,7 @@ export const InvestorOnboarding: React.FC<Props> = () => {
                       <br />
                     </React.Fragment>
                   ))}
-                  {address} (connected).
+                  {address} (connected)
                 </ExplainerCard>
               )}
               <div>

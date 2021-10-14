@@ -124,7 +124,7 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
                       <br />
                     </React.Fragment>
                   ))}
-                  {address} (connected).
+                  {address} (connected)
                 </ExplainerCard>
               )}
               <div>
