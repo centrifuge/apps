@@ -45,6 +45,7 @@ export interface PoolData {
   capacityGivenMaxReserve?: BN
   capacityGivenMaxDropRatio?: BN
   shortName: string
+  poolClosing?: boolean
 }
 
 export interface PoolsData {
@@ -104,6 +105,11 @@ async function getPools(ipfsPools: IpfsPools): Promise<PoolsData> {
         target: pool.addresses.ASSESSOR,
         call: ['seniorRatio()(uint256)'],
         returns: [[`${pool.addresses.ROOT_CONTRACT}.seniorRatio`, toBN]],
+      },
+      {
+        target: pool.addresses.COORDINATOR,
+        call: ['poolClosing()(bool)'],
+        returns: [[`${pool.addresses.ROOT_CONTRACT}.poolClosing`]],
       }
     )
 
@@ -286,6 +292,7 @@ async function getPools(ipfsPools: IpfsPools): Promise<PoolsData> {
         order: isUpcoming ? -2 : pool.isOversubscribed || !capacity ? -1 : capacity.div(UintBase).toNumber(),
         capacityGivenMaxReserve: capacityGivenMaxReservePerPool[pool.id],
         capacityGivenMaxDropRatio: capacityGivenMaxDropRatioPerPool[pool.id],
+        poolClosing: multicallData[pool.id].poolClosing,
       }
     }
     return pool
@@ -308,4 +315,5 @@ interface State {
   usedCreditline?: BN
   availableCreditline?: BN
   unusedCreditline?: BN
+  poolClosing: boolean
 }

@@ -3,6 +3,7 @@ import { dailyTokenPrices } from './dailyTokenPrices'
 import { dailyTVL } from './dailyTVL'
 import { fortunaFiDailyInvestorBalances } from './fortunaFiDailyInvestorBalances'
 import { poolList } from './poolList'
+import { unlinkedAddresses } from './unlinkedAddresses'
 
 export type Query = () => Promise<void>
 
@@ -12,6 +13,7 @@ const queries: { [name: string]: Query } = {
   'TVL (daily)': dailyTVL,
   'TIN/DROP token prices (daily)': dailyTokenPrices,
   'FortunaFi Daily Investor Balances': fortunaFiDailyInvestorBalances,
+  'Unlinked addresses': unlinkedAddresses,
 }
 
 export default queries

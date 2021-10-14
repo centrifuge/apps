@@ -58,6 +58,7 @@ export interface PoolData {
   risk?: RiskGroup[]
   writeOffGroups?: WriteOffGroup[]
   isUpcoming: boolean
+  poolClosing?: boolean
 }
 
 export type EpochData = {
@@ -227,6 +228,11 @@ export async function getPool(ipfsPools: IpfsPools, poolId: string, address?: st
       target: pool.addresses.FEED,
       call: ['discountRate()(uint256)'],
       returns: [[`discountRate`, toBN]],
+    },
+    {
+      target: pool.addresses.COORDINATOR,
+      call: ['poolClosing()(bool)'],
+      returns: [[`poolClosing`]],
     },
   ]
 

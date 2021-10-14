@@ -678,12 +678,12 @@ export async function setSeniorInterestRate(tinlake: ITinlake, rate: string): Pr
   return tinlake.setSeniorInterestRate(rate)
 }
 
-export async function setMinimumEpochTime(tinlake: ITinlake, rate: string): Promise<PendingTransaction> {
-  return tinlake.setMinimumEpochTime(rate)
+export async function setMinimumEpochTime(tinlake: ITinlake, value: number): Promise<PendingTransaction> {
+  return tinlake.setMinimumEpochTime(value)
 }
 
-export async function setChallengeTime(tinlake: ITinlake, rate: string): Promise<PendingTransaction> {
-  return tinlake.setChallengeTime(rate)
+export async function setChallengeTime(tinlake: ITinlake, value: number): Promise<PendingTransaction> {
+  return tinlake.setChallengeTime(value)
 }
 
 export async function raiseCreditline(tinlake: ITinlake, amount: string): Promise<PendingTransaction> {
@@ -711,6 +711,14 @@ export async function addWriteOffGroups(
 
 export async function writeOff(tinlake: ITinlake, loanId: number): Promise<PendingTransaction> {
   return tinlake.writeOff(loanId)
+}
+
+export async function closePool(tinlake: ITinlake): Promise<PendingTransaction> {
+  return tinlake.closePool()
+}
+
+export async function unclosePool(tinlake: ITinlake): Promise<PendingTransaction> {
+  return tinlake.unclosePool()
 }
 
 function loggedError(error: any, message: string, id: string): PendingTransaction {

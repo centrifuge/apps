@@ -269,27 +269,42 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               )}
 
               {!epochData?.isBlockedState && (
-                <BottomCardToolbar>
-                  <Box mt="small" display="flex" flex="1">
-                    <ButtonGroup justifyContent="flex-end" flex="1" flexDirection={['column-reverse', 'row']}>
-                      <Box display="flex" justifyContent="flex-start" flex="1">
-                        {displayInWalletBtn}
-                      </Box>
-                      <Button
-                        secondary
-                        label="Redeem"
-                        onClick={() => setCard('redeem')}
-                        disabled={balance?.isZero() || epochData?.isBlockedState === true}
-                      />
-                      <Button
-                        primary
-                        label="Invest"
-                        onClick={() => setCard('invest')}
-                        disabled={epochData?.isBlockedState === true}
-                      />
-                    </ButtonGroup>
-                  </Box>
-                </BottomCardToolbar>
+                <>
+                  {poolData?.poolClosing && (
+                    <Warning>
+                      <BlackHeading>
+                        <AlertIcon src="/static/help-circle.svg" />
+                        Pool is closing
+                      </BlackHeading>
+                      The pool is closing down. No new investments are possible, only redemptions are allowed.
+                    </Warning>
+                  )}
+
+                  <BottomCardToolbar>
+                    <Box mt="small" display="flex" flex="1">
+                      <ButtonGroup justifyContent="flex-end" flex="1" flexDirection={['column-reverse', 'row']}>
+                        <Box display="flex" justifyContent="flex-start" flex="1">
+                          {displayInWalletBtn}
+                        </Box>
+                        <Button
+                          primary={poolData?.poolClosing}
+                          secondary
+                          label="Redeem"
+                          onClick={() => setCard('redeem')}
+                          disabled={balance?.isZero() || epochData?.isBlockedState === true}
+                        />
+                        {!poolData?.poolClosing && (
+                          <Button
+                            primary
+                            label="Invest"
+                            onClick={() => setCard('invest')}
+                            disabled={epochData?.isBlockedState === true}
+                          />
+                        )}
+                      </ButtonGroup>
+                    </Box>
+                  </BottomCardToolbar>
+                </>
               )}
             </>
           )}

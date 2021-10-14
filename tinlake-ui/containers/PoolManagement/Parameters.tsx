@@ -3,6 +3,7 @@ import { Box, Button, FormField, Heading } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
+import { ButtonGroup } from '../../components/ButtonGroup'
 import { Card } from '../../components/Card'
 import NumberInput from '../../components/NumberInput'
 import { useTinlake } from '../../components/TinlakeProvider'
@@ -46,6 +47,7 @@ const Parameters: React.FC<TransactionProps> = (props: TransactionProps) => {
   const [seniorInterestRateStatus, , setSeniorInterestRateTxId] = useTransactionState()
   const [minimumEpochTimeStatus, , setMinimumEpochTimeTxId] = useTransactionState()
   const [challengeTimeStatus, , setChallengeTimeTxId] = useTransactionState()
+  const [poolClosingStatus, , setPoolClosingTxId] = useTransactionState()
 
   const changedMinJuniorRatio =
     minJuniorRatio && poolData?.minJuniorRatio && minJuniorRatio !== poolData.minJuniorRatio.toString()
@@ -112,7 +114,7 @@ const Parameters: React.FC<TransactionProps> = (props: TransactionProps) => {
     if (changedMinimumEpochTime) {
       const txId = await props.createTransaction(`Set min epoch time`, 'setMinimumEpochTime', [
         tinlake,
-        newMinimumEpochTime.toString(),
+        Number(newMinimumEpochTime.toString()),
       ])
       setMinimumEpochTimeTxId(txId)
     }
@@ -120,11 +122,28 @@ const Parameters: React.FC<TransactionProps> = (props: TransactionProps) => {
     if (changedChallengeTime) {
       const txId = await props.createTransaction(`Set challenge time`, 'setChallengeTime', [
         tinlake,
-        challengeTime.toString(),
+        Number(challengeTime.toString()),
       ])
       setChallengeTimeTxId(txId)
     }
   }
+
+  const closePool = async () => {
+    console.log('Parameters.closePool')
+    const txId = await props.createTransaction(`Close pool`, 'closePool', [tinlake])
+    setPoolClosingTxId(txId)
+  }
+
+  const unclosePool = async () => {
+    const txId = await props.createTransaction(`Unclose pool`, 'unclosePool', [tinlake])
+    setPoolClosingTxId(txId)
+  }
+
+  React.useEffect(() => {
+    if (poolClosingStatus === 'succeeded') {
+      refetchPoolData()
+    }
+  }, [poolClosingStatus])
 
   React.useEffect(() => {
     if (minJuniorRatioStatus === 'succeeded') {
@@ -329,12 +348,16 @@ const Parameters: React.FC<TransactionProps> = (props: TransactionProps) => {
 
           {poolData?.adminLevel && poolData.adminLevel >= 3 && (
             <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
-              <Button
-                primary
-                label="Update"
-                onClick={update}
-                disabled={!anyChanges || !poolData?.adminLevel || poolData.adminLevel < 3}
-              />
+              <ButtonGroup mt="medium">
+                <Button
+                  secondary
+                  label={poolData.poolClosing ? 'Unclose pool' : 'Close pool'}
+                  onClick={() => {
+                    poolData.poolClosing ? unclosePool() : closePool()
+                  }}
+                />
+                <Button primary label="Save new parameters" onClick={update} disabled={!anyChanges} />
+              </ButtonGroup>
             </Box>
           )}
         </Card>
