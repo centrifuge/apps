@@ -1,5 +1,6 @@
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
+import { FormDown } from 'grommet-icons'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Card } from '../../../components/Card'
@@ -8,10 +9,12 @@ import { Box, Shelf, Stack } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
+import { Value } from '../../../components/Value'
 import { ValuePairList } from '../../../components/ValuePairList'
 import { Pool, UpcomingPool } from '../../../config'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { useTrancheYield } from '../../../utils/hooks'
+import { Fixed27Base } from '../../../utils/ratios'
 import { toPrecision } from '../../../utils/toPrecision'
 import { useAssets } from '../../../utils/useAssets'
 import { usePool } from '../../../utils/usePool'
@@ -35,6 +38,9 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
   const { data: assets } = useAssets(tinlake.contractAddresses.ROOT_CONTRACT!)
 
+  const dropTotalValue = poolData?.senior ? poolData?.senior.totalSupply.mul(poolData.senior!.tokenPrice) : undefined
+  const tinTotalValue = poolData ? poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice) : undefined
+
   const ongoingAssets = assets ? assets.filter((asset) => asset.status && asset.status === 'ongoing') : undefined
 
   const avgInterestRate = ongoingAssets
@@ -56,7 +62,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
-  const { dropYield } = useTrancheYield(tinlake.contractAddresses.ROOT_CONTRACT)
+  const { dropYield, tinYield } = useTrancheYield(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const reserveRatio =
     poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
@@ -71,6 +77,8 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const availableLiquidityVal = isMaker
     ? poolData?.reserve.add(poolData?.maker?.remainingCredit || new BN(0))
     : poolData?.reserve
+
+  const [tinDetailsOpen, setTinDetailsOpen] = React.useState(false)
 
   return (
     <>
@@ -154,6 +162,13 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 <Box as={TokenLogo} src="/static/DROP_final.svg" display={['none', 'inline']} />
                 <SectionHeading>DROP Tranche</SectionHeading>
               </Shelf>
+              <Value
+                variant="sectionHeading"
+                value={
+                  dropTotalValue ? addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 0)) : null
+                }
+                unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
+              />
             </Shelf>
             <Stack gap="small">
               <TrancheNote>Senior tranche &mdash; Lower risk, stable return</TrancheNote>
@@ -214,8 +229,79 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 <Box as={TokenLogo} src="/static/TIN_final.svg" display={['none', 'inline']} />
                 <SectionHeading>TIN Tranche</SectionHeading>
               </Shelf>
+              <Shelf
+                justifyContent="space-between"
+                style={{ marginLeft: 'auto', cursor: 'pointer' }}
+                onClick={() => {
+                  setTinDetailsOpen(!tinDetailsOpen)
+                }}
+              >
+                <Value
+                  variant="sectionHeading"
+                  value={
+                    tinTotalValue ? addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 0)) : null
+                  }
+                  unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
+                />
+                <Caret style={{ position: 'relative', top: '0' }}>
+                  <FormDown style={{ transform: tinDetailsOpen ? 'rotate(-180deg)' : '' }} />
+                </Caret>
+              </Shelf>
             </Shelf>
             <Stack gap="small">
+              {tinDetailsOpen && (
+                <ValuePairList
+                  variant="tertiary"
+                  items={[
+                    {
+                      term: '— Min TIN Risk Buffer',
+                      value: addThousandsSeparators(
+                        toPrecision(
+                          baseToDisplay(
+                            poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.minJuniorRatio) || new BN(0),
+                            27 + 18
+                          ),
+                          0
+                        )
+                      ),
+                      valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
+                    },
+                    {
+                      term: '— Staked for Maker Overcollateralization',
+                      value: addThousandsSeparators(
+                        toPrecision(
+                          baseToDisplay(
+                            poolData?.maker?.creditline.mul(poolData?.maker?.mat.sub(Fixed27Base)) || new BN(0),
+                            27 + 18
+                          ),
+                          0
+                        )
+                      ),
+                      valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
+                    },
+                    {
+                      term: '— Available TIN',
+                      value: addThousandsSeparators(
+                        toPrecision(
+                          baseToDisplay(
+                            poolData?.junior.totalSupply
+                              .mul(poolData?.junior.tokenPrice)
+                              ?.sub(poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.minJuniorRatio))
+                              .sub(
+                                (poolData?.maker?.creditline || new BN(0)).mul(
+                                  (poolData?.maker?.mat || Fixed27Base).sub(Fixed27Base)
+                                )
+                              ) || new BN(0),
+                            27 + 18
+                          ),
+                          0
+                        )
+                      ),
+                      valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
+                    },
+                  ]}
+                />
+              )}
               <TrancheNote>Junior tranche &mdash; Higher risk, variable return</TrancheNote>
 
               <ValuePairList
@@ -227,6 +313,13 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                       ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.tokenPrice || '0', 27), 4))
                       : null,
                   },
+                  tinYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
+                    ? {
+                        term: 'TIN yield (90d APY)',
+                        value: tinYield,
+                        valueUnit: '%',
+                      }
+                    : undefined,
                   {
                     term: 'Balance of Issuer',
                     value: poolData?.senior
@@ -236,7 +329,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                               poolData?.juniorInvestors
                                 ? Object.values(poolData.juniorInvestors).reduce(
                                     (prev: BN, inv: { collected: BN; uncollected: BN }) => {
-                                      return prev.add(inv.collected).add(inv.uncollected)
+                                      return prev.add(inv.collected || new BN(0)).add(inv.uncollected || new BN(0))
                                     },
                                     new BN(0)
                                   )
@@ -263,4 +356,15 @@ export default InvestmentOverview
 
 const TrancheNote = styled.div`
   color: #777;
+`
+
+const Caret = styled.div`
+  position: relative;
+  display: inline-block;
+  top: 6px;
+  height: 24px;
+  margin-left: 10px;
+  svg {
+    transition: 200ms;
+  }
 `

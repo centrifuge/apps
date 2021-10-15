@@ -17,7 +17,7 @@ interface Item {
 
 interface Props {
   variant?: Variant
-  items: Item[]
+  items: (Item | undefined)[]
 }
 
 export const ValuePairList: React.FC<Props> = ({ variant = 'primary', items }) => {
@@ -40,21 +40,23 @@ export const ValuePairList: React.FC<Props> = ({ variant = 'primary', items }) =
   return (
     <ValueVariantContext.Provider value={variantMap[variant]}>
       <Stack as="dl" gap={gap} margin={0}>
-        {items.map((item, i) => (
-          <React.Fragment key={i}>
-            <Shelf justifyContent="space-between" alignItems="baseline">
-              <Wrap as="dt" alignItems="baseline" gap="xsmall" rowGap={0}>
-                <Term fontWeight={termFontWeight}>{item.term}</Term>
-                {item.termSuffix && <TermSuffix>{item.termSuffix}</TermSuffix>}
-              </Wrap>
-              <Stack as="dd" alignItems="flex-end">
-                <Value value={item.value} icon={item.valueIcon} unit={item.valueUnit} />
-                {item.valueSuffix && <Value value={item.valueSuffix} />}
-              </Stack>
-            </Shelf>
-            {variant === 'secondary' && i < items.length - 1 && <Divider />}
-          </React.Fragment>
-        ))}
+        {items
+          .filter((item) => !!item)
+          .map((item, i) => (
+            <React.Fragment key={i}>
+              <Shelf justifyContent="space-between" alignItems="baseline">
+                <Wrap as="dt" alignItems="baseline" gap="xsmall" rowGap={0}>
+                  <Term fontWeight={termFontWeight}>{item.term}</Term>
+                  {item.termSuffix && <TermSuffix>{item.termSuffix}</TermSuffix>}
+                </Wrap>
+                <Stack as="dd" alignItems="flex-end">
+                  <Value value={item.value} icon={item.valueIcon} unit={item.valueUnit} />
+                  {item.valueSuffix && <Value value={item.valueSuffix} />}
+                </Stack>
+              </Shelf>
+              {variant === 'secondary' && i < items.length - 1 && <Divider />}
+            </React.Fragment>
+          ))}
       </Stack>
     </ValueVariantContext.Provider>
   )
