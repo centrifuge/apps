@@ -111,17 +111,17 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
               )
             },
           },
+          {
+            header: 'TIN APY',
+            subHeader: '3 months',
+            cell: (p: PoolData) =>
+              p.juniorYield90Days === null ? (
+                <Value value="" unit="N/A" />
+              ) : (
+                <Value value={toNumber(p.juniorYield90Days.muln(100), 27)} unit="%" />
+              ),
+          },
         ],
-    showAll && {
-      header: 'TIN APY',
-      subHeader: '3 months',
-      cell: (p: PoolData) =>
-        p.juniorYield90Days === null ? (
-          <Value value="" unit="N/A" />
-        ) : (
-          <Value value={toNumber(p.juniorYield90Days.muln(100), 27)} unit="%" />
-        ),
-    },
   ]
     .filter(Boolean)
     .flat() as Column[]

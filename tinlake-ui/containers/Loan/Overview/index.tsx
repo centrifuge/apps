@@ -1,4 +1,4 @@
-import { baseToDisplay } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
@@ -113,15 +113,10 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
               scope="row"
               style={{ alignItems: 'start', justifyContent: 'center', verticalAlign: 'top' }}
               pad={{ vertical: '6px' }}
-              border={isAdmin ? undefined : { color: 'transparent' }}
             >
               <span>Pool reserve</span>
             </TableCell>
-            <TableCell
-              style={{ textAlign: 'end' }}
-              pad={{ vertical: '6px' }}
-              border={isAdmin ? undefined : { color: 'transparent' }}
-            >
+            <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
               <LoadingValue done={poolData?.reserve !== undefined} height={39}>
                 <>
                   {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))}{' '}
@@ -131,6 +126,20 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                     {props.selectedPool?.metadata.currencySymbol || 'DAI'}
                   </Sidenote>
                 </>
+              </LoadingValue>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell
+              scope="row"
+              style={{ alignItems: 'start', justifyContent: 'center' }}
+              border={isAdmin ? undefined : { color: 'transparent' }}
+            >
+              <span>Discount rate</span>
+            </TableCell>
+            <TableCell style={{ textAlign: 'end' }} border={isAdmin ? undefined : { color: 'transparent' }}>
+              <LoadingValue done={poolData?.discountRate !== undefined}>
+                {toPrecision(feeToInterestRate(poolData?.discountRate || '0'), 2)}%
               </LoadingValue>
             </TableCell>
           </TableRow>

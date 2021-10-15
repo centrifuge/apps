@@ -29,7 +29,7 @@ interface Props {
 const OverviewHeader: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.selectedPool.addresses.ROOT_CONTRACT)
 
-  const { dropYield } = useTrancheYield(props.selectedPool.addresses.ROOT_CONTRACT)
+  const { dropYield, tinYield } = useTrancheYield(props.selectedPool.addresses.ROOT_CONTRACT)
 
   const dropRate = poolData?.senior?.interestRate || undefined
 
@@ -96,6 +96,28 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           : toPrecision(feeToInterestRate(dropRate || '0'), 2),
       valueUnit: '%',
     },
+    tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
+      ? {
+          term:
+            tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? (
+              <Tooltip id="dropApy" underline>
+                TIN APY {!isMobile && '(90 days)'}
+              </Tooltip>
+            ) : (
+              <Tooltip id="dropApr" underline>
+                ...
+              </Tooltip>
+            ),
+          termSuffix: isMobile
+            ? tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
+              ? '(30 days)'
+              : '(APR)'
+            : undefined,
+          valueIcon: '/static/TIN_final.svg',
+          value: tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? tinYield : '...',
+          valueUnit: '%',
+        }
+      : null,
     {
       term: 'Pool value',
       valueIcon: isMobile ? undefined : `/static/currencies/${props.selectedPool.metadata.currencySymbol}.svg`,
@@ -104,7 +126,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
       ),
       valueUnit: props.selectedPool.metadata.currencySymbol,
     },
-  ]
+  ].filter((el) => !!el)
 
   const makerStats = [
     {
