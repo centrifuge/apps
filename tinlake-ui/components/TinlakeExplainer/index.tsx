@@ -1,6 +1,8 @@
+import { Anchor } from 'grommet'
 import * as React from 'react'
 import styled from 'styled-components'
 import InvestmentDisclaimer from '../Footer/InvestmentDisclaimer'
+import { Stack } from '../Layout'
 import { Text } from '../Text'
 import { Row } from './styles'
 
@@ -21,35 +23,38 @@ const TinlakeExplainer: React.FC = () => {
   const [open, setOpen] = React.useState(false)
 
   return (
-    <div>
+    <Stack gap="xsmall">
       <Row onClick={() => setOpen(!open)} role="button">
         <Text fontSize="14px" fontWeight={500}>
-          Tinlake is an open market place of real-world asset pools. Investments earn rewards in CFG token.{' '}
-          <LearnMore>Learn more</LearnMore>
+          Tinlake is an open DeFi protocol and marketplace for real-world asset pools. Investments can earn rewards in
+          CFG tokens. <LearnMore>{open ? 'Show less' : 'Show more'}</LearnMore>
         </Text>
       </Row>
       {open && (
         <Text fontSize="14px" fontWeight={500}>
-          Tinlake allows DeFi investors to invest in pools of real-world assets, such as invoices, trade receivables or
-          residential real estate loans. These assets create a stable yield for DeFi investors and DeFi protocols who
-          provide the liquidity. Tinlake investments also earn daily rewards in Centrifuge's native token (CFG). These
-          rewards are independent from the pool's issuer and governed by the{' '}
-          <a href="https://gov.centrifuge.io/c/governance/35" target="_blank">
-            Centrifuge Community
-          </a>
-          . This is not investment advice — please see the{' '}
-          <a onClick={openModal} href="#">
+          Tinlake allows originators and owners of assets in the real world, such as trade invoices or residential
+          real-estate loans, to create a pool of their assets and offer it to DeFi investors. These assets create a
+          stable yield for DeFi investors and DeFi protocols. They provide liquidity for the issuers, who set up and
+          operate Tinlake pools, and their borrowers. Investments can also earn automatically protocol rewards in
+          Centrifuge’s native token (CFG). These rewards are independent of the Tinlake pool, its issuer, and the return
+          it’s generating. This is not investment advice — please see the{' '}
+          <Anchor onClick={openModal} target="_blank" style={{ display: 'inline' }}>
             Investment Disclaimer
-          </a>{' '}
+          </Anchor>{' '}
           for more info and have a look at the{' '}
-          <a href="https://developer.centrifuge.io/learn/understanding-tinlake/" target="_blank">
+          <Anchor
+            href="https://docs.centrifuge.io/getting-started/understanding-tinlake/"
+            target="_blank"
+            style={{ display: 'inline' }}
+          >
             Tinlake documentation
-          </a>
+          </Anchor>
+          .
         </Text>
       )}
 
       <InvestmentDisclaimer isOpen={modalIsOpen} onClose={closeModal} />
-    </div>
+    </Stack>
   )
 }
 
