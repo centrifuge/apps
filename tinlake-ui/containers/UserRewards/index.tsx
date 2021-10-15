@@ -116,7 +116,7 @@ const UserRewards: React.FC = () => {
                     Tinlake now.
                   </div>
                 )}
-                <RewardsWarning bleedX="medium" mt="small" />
+                <RewardsWarning showIfUserHasNoInvestments bleedX="medium" mt="small" />
                 <Button
                   label="Explore Pools"
                   primary

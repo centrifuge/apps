@@ -13,25 +13,37 @@ import { usePortfolio } from '../../utils/usePortfolio'
 import { Box, BoxProps, Shelf, Stack, Wrap } from '../Layout'
 import { LinkIcon } from './LinkIcon'
 
-export const RewardsWarning: React.FC<BoxProps> = (props) => {
+interface OwnProps {
+  showIfUserHasNoInvestments?: boolean
+}
+
+type Props = OwnProps & BoxProps
+
+export const RewardsWarning: React.FC<Props> = ({ showIfUserHasNoInvestments, ...boxProps }) => {
   const ethAddr = useAddress()
   const { data: ethLink } = useEthLink()
   const [showLink, setShowLink] = React.useState(false)
   const { data: investorOnboardingData } = useInvestorOnboardingState()
   const { data: portfolio } = usePortfolio()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
+  const hasInvestments = portfolio && !portfolio.totalValue.isZero()
+
   const shouldShowWarning =
-    ethAddr && ethLink === null && portfolio?.totalValue.isZero() && investorOnboardingData?.completed
+    ethAddr && ethLink === null && investorOnboardingData?.completed && (showIfUserHasNoInvestments || hasInvestments)
 
   return shouldShowWarning ? (
-    <Warning p="medium" {...props}>
+    <Warning p="medium" {...boxProps}>
       <Modal width="large" opened={showLink} title="Link Centrifuge Chain account" onClose={() => setShowLink(false)}>
         {cWallet.state === 'connected' && cWallet.accounts.length >= 1 ? <SetCentAccount /> : <CentChainWalletDialog />}
       </Modal>
       <Stack gap="xsmall">
         <HelpTitle>No Centrifuge Chain account linked</HelpTitle>
         <Wrap gap="xsmall" rowGap={0}>
-          <span>Link your Centrifuge Chain account to earn CFG rewards on investments.</span>
+          <span>
+            {hasInvestments
+              ? 'Your investment(s) in Tinlake pool are not earning any CFG rewards, since you have not linked a Centrifuge Chain account.'
+              : 'Link your Centrifuge Chain account to earn CFG rewards on investments.'}
+          </span>
           <Anchor
             href="https://docs.centrifuge.io/use/setup-wallet/"
             target="_blank"

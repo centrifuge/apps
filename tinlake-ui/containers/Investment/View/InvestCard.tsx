@@ -137,7 +137,7 @@ const InvestCard: React.FC<Props> = (props: Props) => {
           rewards once your order has been executed.
         </Warning>
       )}
-      <RewardsWarning mt="medium" bleedX="medium" />
+      {props.tranche === 'senior' && <RewardsWarning mt="medium" bleedX="medium" />}
       <ButtonGroup mt="medium">
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
         <Button

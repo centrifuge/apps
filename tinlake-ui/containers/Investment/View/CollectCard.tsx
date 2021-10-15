@@ -6,6 +6,7 @@ import { connect } from 'react-redux'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Box } from '../../../components/Layout'
+import { RewardsWarning } from '../../../components/RewardsWarning'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -25,7 +26,7 @@ interface Props extends TransactionProps {
 
 const CollectCard: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
-  const type = props.disbursements.payoutCurrencyAmount.isZero() ? 'Invest' : 'Redeem'
+  const type = props.disbursements?.payoutCurrencyAmount.isZero() ? 'Invest' : 'Redeem'
   const token =
     type === 'Invest'
       ? props.tranche === 'senior'
@@ -35,14 +36,14 @@ const CollectCard: React.FC<Props> = (props: Props) => {
 
   const [status, , setTxId] = useTransactionState()
 
-  const amount = type === 'Invest' ? props.disbursements.payoutTokenAmount : props.disbursements.payoutCurrencyAmount
+  const amount = type === 'Invest' ? props.disbursements?.payoutTokenAmount : props.disbursements?.payoutCurrencyAmount
   const remaining =
-    type === 'Invest' ? props.disbursements.remainingSupplyCurrency : props.disbursements.remainingRedeemToken
+    type === 'Invest' ? props.disbursements?.remainingSupplyCurrency : props.disbursements?.remainingRedeemToken
 
   const collect = async () => {
     const valueToDecimal = new Decimal(
       baseToDisplay(
-        type === 'Invest' ? props.disbursements.payoutTokenAmount : props.disbursements.payoutCurrencyAmount,
+        type === 'Invest' ? props.disbursements?.payoutTokenAmount : props.disbursements?.payoutCurrencyAmount,
         18
       )
     ).toFixed(4)
@@ -65,7 +66,7 @@ const CollectCard: React.FC<Props> = (props: Props) => {
     <div>
       <Info>
         <Heading level="6" margin={{ top: 'small', bottom: 'xsmall' }}>
-          {addThousandsSeparators(toMaxPrecision(baseToDisplay(amount, 18), 4))}{' '}
+          {addThousandsSeparators(toMaxPrecision(baseToDisplay(amount || '0', 18), 4))}{' '}
           {type === 'Invest'
             ? props.tranche === 'senior'
               ? 'DROP'
@@ -74,18 +75,15 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           waiting for collection
         </Heading>
         <Description>
-          Your {type === 'Invest' ? 'investment' : 'redemption'} order has been {remaining.gtn(0) && 'partially '}{' '}
-          executed.{' '}
-          {type === 'Invest' &&
-            `Your ${props.tranche === 'senior' ? 'DROP' : 'TIN'} tokens are already earning yield and CFG rewards. `}
-          Please collect your{' '}
+          Your {type === 'Invest' ? 'investment' : 'redemption'} order has been {remaining?.gtn(0) && 'partially '}{' '}
+          executed. Please collect your{' '}
           {type === 'Invest'
             ? props.tranche === 'senior'
               ? 'DROP'
               : 'TIN'
             : props.selectedPool?.metadata.currencySymbol || 'DAI'}{' '}
           at your convenience to transfer them to your ETH account.{' '}
-          {remaining.gtn(0) && (
+          {remaining?.gtn(0) && (
             <Box mt="small">
               The remaining {addThousandsSeparators(toMaxPrecision(baseToDisplay(remaining, 18), 4))}{' '}
               {type === 'Redeem'
@@ -111,6 +109,8 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           alt="Order steps"
         />
       </Info>
+
+      {props.tranche === 'senior' && type === 'Invest' && <RewardsWarning mt="medium" bleedX="medium" />}
 
       <ButtonGroup mt="medium">
         <Button primary label="Collect" onClick={collect} disabled={disabled} />

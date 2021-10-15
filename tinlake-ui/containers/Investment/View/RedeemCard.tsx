@@ -8,7 +8,6 @@ import { useQuery } from 'react-query'
 import { connect, useSelector } from 'react-redux'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
-import { RewardsWarning } from '../../../components/RewardsWarning'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -95,7 +94,6 @@ const RedeemCard: React.FC<Props> = (props: Props) => {
         onChange={onChange}
         disabled={disabled}
       />
-      {props.tranche === 'senior' && <RewardsWarning mt="medium" bleedX="medium" />}
       <ButtonGroup mt="medium">
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
         <Button primary label="Redeem" onClick={submit} disabled={error !== undefined || disabled} />
