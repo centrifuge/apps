@@ -41,7 +41,7 @@ export const RewardsWarning: React.FC<Props> = ({ showIfUserHasNoInvestments, ..
         <Wrap gap="xsmall" rowGap={0}>
           <span>
             {hasInvestments
-              ? 'Your investment(s) in Tinlake pool are not earning any CFG rewards, since you have not linked a Centrifuge Chain account.'
+              ? 'Your investment(s) in Tinlake pools are not earning any CFG rewards, since you have not linked a Centrifuge Chain account.'
               : 'Link your Centrifuge Chain account to earn CFG rewards on investments.'}
           </span>
           <Anchor
