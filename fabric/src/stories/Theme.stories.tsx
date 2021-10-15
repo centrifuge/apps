@@ -1,6 +1,7 @@
 import { ComponentMeta } from '@storybook/react'
 import React from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
+import { Text } from '../components/Text'
 import { theme } from '../theme'
 
 export default {
@@ -21,31 +22,48 @@ export const Breakpoints: React.FC = () => (
   <Table>
     {Object.entries(bpAliases).map(([value, aliases]) => (
       <tr key={value}>
-        <td>{aliases}</td>
-        <td>{value}</td>
+        <td>
+          <Text>{aliases}</Text>
+        </td>
+        <td>
+          <Text>{value}</Text>
+        </td>
       </tr>
     ))}
   </Table>
 )
 
-export const Colors: React.FC = () => (
-  <Table>
-    {Object.entries(theme.colors).map(([colorName, colorCode]) => (
-      <tr key={colorName}>
-        <td>{colorName}</td>
-        <td>{colorCode}</td>
-        <td style={{ minWidth: 50, backgroundColor: colorCode }}></td>
-      </tr>
-    ))}
-  </Table>
-)
+export const Colors: React.FC = () => {
+  const theme = useTheme()
+  return (
+    <Table>
+      {Object.entries(theme.colors)
+        .filter(([_, v]) => typeof v === 'string')
+        .map(([colorName, colorCode]: [string, string]) => (
+          <tr key={colorName}>
+            <td>
+              <Text>{colorName}</Text>
+            </td>
+            <td>
+              <Text>{colorCode}</Text>
+            </td>
+            <td style={{ minWidth: 50, backgroundColor: colorCode }}></td>
+          </tr>
+        ))}
+    </Table>
+  )
+}
 
 export const Spacing: React.FC = () => (
   <Table>
     {Object.entries(theme.space).map(([key, val]) => (
       <tr key={key}>
-        <td>{key}</td>
-        <td>{val}</td>
+        <td>
+          <Text>{key}</Text>
+        </td>
+        <td>
+          <Text>{val}</Text>
+        </td>
 
         <td>
           <div style={{ height: '1em', borderLeft: `${val}px solid grey` }}></div>
