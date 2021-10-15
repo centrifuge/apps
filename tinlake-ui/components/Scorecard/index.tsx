@@ -30,7 +30,7 @@ const Scorecard: React.FC<Props> = (props: Props) => {
 
   return (
     <Card interactive>
-      <Wrap p={24} gap="small" style={{ cursor: 'pointer' }} onClick={(ev: any) => setOpen(!open)}>
+      <Wrap p={24} gap="small" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}>
         <Risk />
         <SectionHeading>Risk Scorecard</SectionHeading>
 
@@ -69,26 +69,24 @@ const Scorecard: React.FC<Props> = (props: Props) => {
             </TableBody>
           </Table>
 
-          <Box justify="center" margin={{ top: 'medium' }} gap="medium">
-            <div>
-              <Button
-                size="small"
-                primary
-                label="Previous"
-                onClick={() => setStart(start - riskGroupsPerPage < 0 ? 0 : start - riskGroupsPerPage)}
-                disabled={start === 0}
-              />
-            </div>
-            <div>
-              <Button
-                size="small"
-                primary
-                label="Next"
-                onClick={() => setStart(start + riskGroupsPerPage)}
-                disabled={existingRiskGroups.length < start + riskGroupsPerPage}
-              />
-            </div>
-          </Box>
+          <div>
+            <Button
+              size="small"
+              primary
+              label="Previous"
+              onClick={() => setStart(start - riskGroupsPerPage < 0 ? 0 : start - riskGroupsPerPage)}
+              disabled={start === 0}
+            />
+          </div>
+          <div>
+            <Button
+              size="small"
+              primary
+              label="Next"
+              onClick={() => setStart(start + riskGroupsPerPage)}
+              disabled={existingRiskGroups.length < start + riskGroupsPerPage}
+            />
+          </div>
         </Box>
       )}
     </Card>
@@ -110,9 +108,4 @@ const Caret = styled.div`
   svg {
     transition: 200ms;
   }
-`
-
-const CardIcon = styled.img`
-  width: 24px;
-  height: 24px;
 `

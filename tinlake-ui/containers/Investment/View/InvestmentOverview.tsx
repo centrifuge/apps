@@ -227,6 +227,28 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                       ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.tokenPrice || '0', 27), 4))
                       : null,
                   },
+                  {
+                    term: 'Balance of Issuer',
+                    value: poolData?.senior
+                      ? addThousandsSeparators(
+                          toPrecision(
+                            baseToDisplay(
+                              poolData?.juniorInvestors
+                                ? Object.values(poolData.juniorInvestors).reduce(
+                                    (prev: BN, inv: { collected: BN; uncollected: BN }) => {
+                                      return prev.add(inv.collected).add(inv.uncollected)
+                                    },
+                                    new BN(0)
+                                  )
+                                : '0',
+                              18
+                            ),
+                            0
+                          )
+                        )
+                      : null,
+                    valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
+                  },
                 ]}
               />
             </Stack>

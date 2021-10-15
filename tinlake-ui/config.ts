@@ -16,6 +16,11 @@ interface PoolMedia {
   tin?: string
 }
 
+export interface JuniorInvestor {
+  name: string
+  address: string
+}
+
 interface PoolMetadata {
   name: string
   shortName?: string
@@ -31,6 +36,7 @@ interface PoolMetadata {
   isUpcoming?: boolean
   maker?: { ilk: string }
   issuerEmail?: string
+  juniorInvestors?: JuniorInvestor[]
 }
 
 export interface BasePool {
@@ -65,6 +71,7 @@ export interface ArchivedPool extends BasePool {
 export interface Pool extends BasePool {
   isUpcoming: false
   addresses: {
+    TINLAKE_CURRENCY: string
     ROOT_CONTRACT: string
     ACTIONS: string
     PROXY_REGISTRY: string
