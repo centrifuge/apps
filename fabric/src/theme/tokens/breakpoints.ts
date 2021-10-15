@@ -4,4 +4,4 @@ breakpoints.medium = breakpoints[1]
 breakpoints.large = breakpoints[2]
 breakpoints.xlarge = breakpoints[3]
 
-export default breakpoints
+export { breakpoints }

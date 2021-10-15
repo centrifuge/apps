@@ -31,7 +31,7 @@ const criticalLight = '#FFE8ED'
 const criticalPrimary = '#F44E72'
 const criticalDark = '#CA4A63'
 
-const lightMode = {
+const lightColors = {
   textPrimary: 'black',
   textSecondary: grayScale.gray600,
   textDisabled: grayScale.gray500,
@@ -60,7 +60,7 @@ const lightMode = {
   criticalDark,
 }
 
-const darkMode = {
+const darkColors = {
   textPrimary: 'white',
   textSecondary: grayScale.gray500,
   textDisabled: grayScale.gray600,
@@ -89,18 +89,14 @@ const darkMode = {
   criticalDark: criticalLight,
 }
 
-export default {
-  ...lightMode,
-  modes: {
-    light: lightMode,
-    dark: darkMode,
+export const modes = {
+  light: {
+    colors: lightColors,
   },
-  brand: '#2762FF',
-  centrifugeBlue: '#2762FF',
-  centrifugeOrange: '#FCBA59',
-  altairYellow: '#FAB961',
-  statusCritical: '#F44E72',
-  statusOk: '#7ED321',
-  statusUnknown: '#D8D8D8',
-  statusWarning: '#FCBA59',
+  dark: {
+    colors: darkColors,
+  },
 }
+
+export type ModeTheme = typeof modes.light
+export type Mode = keyof typeof modes

@@ -2,36 +2,36 @@ import { ComponentMeta } from '@storybook/react'
 import React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { Text } from '../components/Text'
-import { theme } from '../theme'
 
 export default {
   title: 'Theme',
-  //component: () => null,
 } as ComponentMeta<React.FC>
 
-const bpAliases = Object.entries(theme.breakpoints).reduce((acc, [key, value]) => {
-  if (!acc[value]) {
-    acc[value] = `${key}`
-  } else {
-    acc[value] += `, ${key}`
-  }
-  return acc
-}, {} as Record<string, string>)
-
-export const Breakpoints: React.FC = () => (
-  <Table>
-    {Object.entries(bpAliases).map(([value, aliases]) => (
-      <tr key={value}>
-        <td>
-          <Text>{aliases}</Text>
-        </td>
-        <td>
-          <Text>{value}</Text>
-        </td>
-      </tr>
-    ))}
-  </Table>
-)
+export const Breakpoints: React.FC = () => {
+  const theme = useTheme()
+  const bpAliases = Object.entries(theme.breakpoints).reduce((acc, [key, value]) => {
+    if (!acc[value]) {
+      acc[value] = `${key}`
+    } else {
+      acc[value] += `, ${key}`
+    }
+    return acc
+  }, {} as Record<string, string>)
+  return (
+    <Table>
+      {Object.entries(bpAliases).map(([value, aliases]) => (
+        <tr key={value}>
+          <td>
+            <Text>{aliases}</Text>
+          </td>
+          <td>
+            <Text>{value}</Text>
+          </td>
+        </tr>
+      ))}
+    </Table>
+  )
+}
 
 export const Colors: React.FC = () => {
   const theme = useTheme()
@@ -54,24 +54,27 @@ export const Colors: React.FC = () => {
   )
 }
 
-export const Spacing: React.FC = () => (
-  <Table>
-    {Object.entries(theme.space).map(([key, val]) => (
-      <tr key={key}>
-        <td>
-          <Text>{key}</Text>
-        </td>
-        <td>
-          <Text>{val}</Text>
-        </td>
+export const Spacing: React.FC = () => {
+  const theme = useTheme()
+  return (
+    <Table>
+      {Object.entries(theme.space).map(([key, val]) => (
+        <tr key={key}>
+          <td>
+            <Text>{key}</Text>
+          </td>
+          <td>
+            <Text>{val}</Text>
+          </td>
 
-        <td>
-          <div style={{ height: '1em', borderLeft: `${val}px solid grey` }}></div>
-        </td>
-      </tr>
-    ))}
-  </Table>
-)
+          <td>
+            <div style={{ height: '1em', borderLeft: `${val}px solid grey` }}></div>
+          </td>
+        </tr>
+      ))}
+    </Table>
+  )
+}
 
 const Table = styled.table`
   font-family: sans-serif;

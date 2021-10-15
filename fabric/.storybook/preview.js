@@ -1,7 +1,7 @@
 import React from 'react'
 import { ThemeProvider } from 'styled-components'
-import { GlobalStyle } from '../src'
-import { getTheme, theme } from '../src/theme'
+import { Box, GlobalStyle } from '../src'
+import { themes } from '../src/theme'
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
@@ -11,28 +11,30 @@ export const parameters = {
       date: /Date$/,
     },
   },
-  backgrounds: {
-    default: 'light',
-    values: [
-      {
-        name: 'light',
-        value: theme.colors.modes.light.backgroundPage,
-      },
-      {
-        name: 'dark',
-        value: theme.colors.modes.dark.backgroundPage,
-      },
-    ],
+  layout: 'fullscreen',
+  backgrounds: { disable: true, grid: { disable: true } },
+}
+
+export const globalTypes = {
+  theme: {
+    name: 'Theme',
+    description: 'Global theme for components',
+    defaultValue: 'centrifugeLight',
+    toolbar: {
+      icon: 'mirror',
+      items: Object.keys(themes),
+      showName: true,
+    },
   },
 }
 
 export const decorators = [
   (Story, context) => (
-    <ThemeProvider
-      theme={getTheme(context.globals.backgrounds?.value === theme.colors.modes.dark.backgroundPage ? 'dark' : 'light')}
-    >
+    <ThemeProvider theme={themes[context.globals.theme] || themes.centrifugeLight}>
       <GlobalStyle />
-      <Story />
+      <Box p={3} bg="backgroundPage" minHeight="100vh">
+        <Story />
+      </Box>
     </ThemeProvider>
   ),
 ]
