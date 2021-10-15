@@ -12,6 +12,8 @@ export const theme = {
   colors,
   sizes: {
     container: 1152,
+    iconSmall: 16,
+    iconMedium: 24,
   },
   radii: {
     card: 8,
