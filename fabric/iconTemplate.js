@@ -13,12 +13,12 @@ ${imports}
 import styled from 'styled-components'
 import { ResponsiveValue } from 'styled-system'
 import css from '@styled-system/css'
-import {Color} from '../utils/types'
+import { Color, Size } from '../utils/types'
 
 ${interfaces}
 
 type OwnProps = {
-  size?: ResponsiveValue<number>
+  size?: ResponsiveValue<Size>
   color?: ResponsiveValue<Color>
 }
 
