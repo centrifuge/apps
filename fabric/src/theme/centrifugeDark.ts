@@ -1,12 +1,14 @@
 import { baseTheme, FabricTheme } from './tokens/baseTheme'
 import { brandColors } from './tokens/brandColors'
-import { modes } from './tokens/modes'
+import { modeDark } from './tokens/modeDark'
 
-export const centrifugeDark: FabricTheme = {
+const centrifugeDark: FabricTheme = {
   ...baseTheme,
   colors: {
     ...baseTheme.colors,
     ...brandColors.centrifuge,
-    ...modes.dark.colors,
+    ...modeDark.colors,
   },
 }
+
+export default centrifugeDark

@@ -60,43 +60,6 @@ const lightColors = {
   criticalDark,
 }
 
-const darkColors = {
-  textPrimary: 'white',
-  textSecondary: grayScale.gray500,
-  textDisabled: grayScale.gray600,
-
-  backgroundPrimary: grayScale.gray900,
-  backgroundSecondary: grayScale.gray800,
-  backgroundPage: 'black',
-
-  borderPrimary: grayScale.gray700,
-  borderSecondary: grayScale.gray800,
-
-  defaultLight: defaultDark,
-  defaultPrimary,
-  defaultDark: defaultLight,
-  infoLight: infoDark,
-  infoPrimary,
-  infoDark: infoLight,
-  okLight: okDark,
-  okPrimary,
-  okDark: okLight,
-  warningLight: warningDark,
-  warningPrimary,
-  warningDark: warningLight,
-  criticalLight: criticalDark,
-  criticalPrimary,
-  criticalDark: criticalLight,
+export const modeLight = {
+  colors: lightColors,
 }
-
-export const modes = {
-  light: {
-    colors: lightColors,
-  },
-  dark: {
-    colors: darkColors,
-  },
-}
-
-export type ModeTheme = typeof modes.light
-export type Mode = keyof typeof modes

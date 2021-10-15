@@ -1,4 +1,6 @@
 import { FabricTheme } from '.'
 import { baseTheme } from './tokens/baseTheme'
 
-export const centrifugeLight: FabricTheme = baseTheme
+const centrifugeLight: FabricTheme = baseTheme
+
+export default centrifugeLight

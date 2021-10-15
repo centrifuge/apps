@@ -1,7 +1,7 @@
 import { baseColors } from './baseColors'
 import { brandColors } from './brandColors'
 import { breakpoints } from './breakpoints'
-import { modes } from './modes'
+import { modeLight } from './modeLight'
 import { space } from './space'
 import { typography } from './typography'
 
@@ -12,7 +12,7 @@ export const baseTheme = {
   colors: {
     ...baseColors,
     ...brandColors.centrifuge,
-    ...modes.light.colors,
+    ...modeLight.colors,
   },
   sizes: {
     container: 1152,
