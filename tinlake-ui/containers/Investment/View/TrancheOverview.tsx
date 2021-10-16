@@ -5,22 +5,35 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useDispatch, useSelector } from 'react-redux'
+import { Area, AreaChart, Tooltip as RechartsTooltip } from 'recharts'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Card } from '../../../components/Card'
+import {
+  ChartTooltip,
+  ChartTooltipColor,
+  ChartTooltipKey,
+  ChartTooltipLine,
+  ChartTooltipTitle,
+  ChartTooltipValue,
+  StyledResponsiveContainer,
+} from '../../../components/Chart/styles'
 import InvestAction from '../../../components/InvestAction'
-import { Box, Shelf } from '../../../components/Layout'
+import { Box, Shelf, Stack } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
 import { ValuePairList } from '../../../components/ValuePairList'
 import config, { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
+import { AssetData } from '../../../services/apollo'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { dateToYMD } from '../../../utils/date'
 import { useTrancheYield } from '../../../utils/hooks'
 import { secondsToHms } from '../../../utils/time'
 import { toMaxPrecision, toPrecision } from '../../../utils/toPrecision'
+import { useDailyPoolData } from '../../../utils/useDailyPoolData'
 import { useEpoch } from '../../../utils/useEpoch'
 import { usePool } from '../../../utils/usePool'
 import CollectCard from './CollectCard'
@@ -74,6 +87,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
   const { data: epochData } = useEpoch()
+  const { data: dailyPoolData } = useDailyPoolData(tinlake.contractAddresses.ROOT_CONTRACT!)
   const trancheData = props.tranche === 'senior' ? poolData?.senior : poolData?.junior
 
   const router = useRouter()
@@ -163,6 +177,65 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     else setCard('home')
   }, [hasPendingCollection, hasPendingOrder, router.query])
 
+  const CustomTooltip = ({ active, payload }: any) => {
+    return active && payload ? (
+      <ChartTooltip>
+        <ChartTooltipTitle>{dateToYMD(payload[0].payload.day)}</ChartTooltipTitle>
+        <ChartTooltipLine>
+          <ChartTooltipKey>
+            <ChartTooltipColor color="#ccc" /> {props.tranche === 'senior' ? '30d APY' : '90d APY'}:
+          </ChartTooltipKey>
+          <ChartTooltipValue>
+            {toPrecision(
+              baseToDisplay(
+                (
+                  payload[0].payload[props.tranche === 'senior' ? 'seniorYield30Days' : 'juniorYield90Days'] || '0'
+                ).muln(100),
+                27
+              ),
+              2
+            )}{' '}
+            %
+          </ChartTooltipValue>
+        </ChartTooltipLine>
+      </ChartTooltip>
+    ) : (
+      <>&nbsp;</>
+    )
+  }
+
+  const yieldProp = props.tranche === 'senior' ? 'seniorYield30Days' : 'juniorYield90Days'
+  const yieldData = dailyPoolData?.filter((val: AssetData) => val[yieldProp] !== null).slice(1)
+
+  const graphElement = (
+    <Stack height="60px" gap="small" mb="small">
+      {yieldData !== undefined && yieldData.length > 0 && (
+        <div style={{ flex: '1 0 auto' }}>
+          <StyledResponsiveContainer>
+            <AreaChart data={yieldData} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
+              <defs>
+                <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <RechartsTooltip content={<CustomTooltip />} offset={20} />
+              <Area
+                type="monotone"
+                stackId={1}
+                dataKey={yieldProp}
+                stroke="#0828BE"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorAssetValue)"
+                name="DROP APY (30d)"
+              />
+            </AreaChart>
+          </StyledResponsiveContainer>
+        </div>
+      )}
+    </Stack>
+  )
   return (
     <Card p={24} height="100%" display="flex" flexDirection="column">
       <Shelf gap="xsmall" mb="xsmall">
@@ -177,6 +250,9 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           {props.tranche === 'senior' ? 'Lower risk, stable return' : 'Higher risk, variable return'}
         </TrancheNote>
       </Box>
+
+      {graphElement}
+
       <Table>
         <TableBody>
           {(!disbursements?.payoutTokenAmount || disbursements?.payoutTokenAmount.isZero()) && (

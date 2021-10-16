@@ -160,7 +160,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             <Shelf justifyContent="space-between">
               <Shelf gap="xsmall" mb="xsmall">
                 <Box as={TokenLogo} src="/static/DROP_final.svg" display={['none', 'inline']} />
-                <SectionHeading>Senior Tranche (DROP)</SectionHeading>
+                <SectionHeading>Senior tranche</SectionHeading>
               </Shelf>
               <Value
                 variant="sectionHeading"
@@ -171,7 +171,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               />
             </Shelf>
             <Stack gap="small">
-              <TrancheNote>Lower risk, stable return</TrancheNote>
+              <TrancheNote>DROP token &mdash; Lower risk, stable return</TrancheNote>
 
               <ValuePairList
                 variant="tertiary"
@@ -181,6 +181,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     value: poolData?.senior
                       ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 4))
                       : null,
+                    valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
                   },
                   dropYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
                     ? {
@@ -204,13 +205,13 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
           <Box mt="xsmall" mb="xsmall" textAlign="center">
             <div>
-              DROP is protected by a{' '}
+              Senior is protected by a{' '}
               <Tooltip id="tinRiskBuffer" underline>
                 <span style={{ fontWeight: 'bold' }}>
                   <LoadingValue done={!!currentJuniorRatio}>
                     {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}%
                   </LoadingValue>{' '}
-                  TIN buffer
+                  risk buffer
                 </span>
               </Tooltip>{' '}
               <Tooltip id="minimumTinRiskBuffer" underline>
@@ -227,7 +228,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             <Shelf justifyContent="space-between">
               <Shelf gap="xsmall" mb="xsmall">
                 <Box as={TokenLogo} src="/static/TIN_final.svg" display={['none', 'inline']} />
-                <SectionHeading>Junior Tranche (TIN)</SectionHeading>
+                <SectionHeading>Junior tranche</SectionHeading>
               </Shelf>
               <Shelf
                 justifyContent="space-between"
@@ -249,14 +250,14 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               </Shelf>
             </Shelf>
             <Stack gap="small">
-              <TrancheNote>Higher risk, variable return</TrancheNote>
+              <TrancheNote>TIN token &mdash; Higher risk, variable return</TrancheNote>
 
               {tinDetailsOpen && (
                 <ValuePairList
                   variant="tertiary"
                   items={[
                     {
-                      term: '— Min TIN Risk Buffer',
+                      term: 'Min TIN Risk Buffer',
                       value: addThousandsSeparators(
                         toPrecision(
                           baseToDisplay(
@@ -269,7 +270,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                       valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
                     },
                     {
-                      term: '— Staked for Maker Overcollateralization',
+                      term: 'Staked for Maker Overcollateralization',
                       value: addThousandsSeparators(
                         toPrecision(
                           baseToDisplay(
@@ -282,7 +283,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                       valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
                     },
                     {
-                      term: '— Available TIN',
+                      term: 'Available TIN',
                       value: addThousandsSeparators(
                         toPrecision(
                           baseToDisplay(
@@ -312,6 +313,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     value: poolData?.senior
                       ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.tokenPrice || '0', 27), 4))
                       : null,
+                    valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
                   },
                   tinYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
                     ? {
@@ -321,7 +323,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                       }
                     : undefined,
                   {
-                    term: 'Balance of Issuer',
+                    term: 'Junior provided by Issuer',
                     value: poolData?.senior
                       ? addThousandsSeparators(
                           toPrecision(

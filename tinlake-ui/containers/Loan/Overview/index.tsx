@@ -25,7 +25,7 @@ import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { dateToYMD } from '../../../utils/date'
 import { UintBase } from '../../../utils/ratios'
 import { toPrecision } from '../../../utils/toPrecision'
-import { useDailyAssetsValue } from '../../../utils/useDailyAssetsValue'
+import { useDailyPoolData } from '../../../utils/useDailyPoolData'
 import { useMedia } from '../../../utils/useMedia'
 import { usePool } from '../../../utils/usePool'
 import MaxReserveForm from './MaxReserveForm'
@@ -72,7 +72,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
-  const { data: assetData } = useDailyAssetsValue(tinlake.contractAddresses.ROOT_CONTRACT!)
+  const { data: assetData } = useDailyPoolData(tinlake.contractAddresses.ROOT_CONTRACT!)
 
   const isAdmin =
     poolData?.isPoolAdmin || (props.auth?.permissions && (props.auth?.permissions as PermissionsV3).canSetMaxReserve)

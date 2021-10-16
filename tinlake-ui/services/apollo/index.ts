@@ -31,6 +31,10 @@ export interface AssetData {
   reserve: number
   seniorTokenPrice: number
   juniorTokenPrice: number
+  juniorYield30Days: BN | null
+  seniorYield30Days: BN | null
+  juniorYield90Days: BN | null
+  seniorYield90Days: BN | null
 }
 
 const OversubscribedBuffer = new BN(5000).mul(new BN(10).pow(new BN(18))) // 5k DAI
@@ -399,7 +403,7 @@ class Apollo {
     return transformed
   }
 
-  async getAssetData(root: string) {
+  async getDailyPoolData(root: string) {
     // TODO: root should be root.toLowerCase() once we add lowercasing to the subgraph code (after AssemblyScript is updated)
     const result = await this.client.query({
       query: gql`
@@ -412,6 +416,10 @@ class Apollo {
             reserve
             seniorTokenPrice
             juniorTokenPrice
+            seniorYield30Days
+            seniorYield90Days
+            juniorYield30Days
+            juniorYield90Days
           }
         }
         `,
@@ -423,6 +431,10 @@ class Apollo {
         reserve: parseFloat(new BN(item.reserve).div(UintBase).toString()),
         seniorTokenPrice: parseFloat(new BN(item.seniorTokenPrice).div(UintBase).toString()) / 10 ** 9,
         juniorTokenPrice: parseFloat(new BN(item.juniorTokenPrice).div(UintBase).toString()) / 10 ** 9,
+        seniorYield30Days: (item?.seniorYield30Days && new BN(item.seniorYield30Days)) || null,
+        seniorYield90Days: (item?.seniorYield90Days && new BN(item.seniorYield90Days)) || null,
+        juniorYield30Days: (item?.juniorYield30Days && new BN(item.juniorYield30Days)) || null,
+        juniorYield90Days: (item?.juniorYield90Days && new BN(item.juniorYield90Days)) || null,
       }
     })
 
