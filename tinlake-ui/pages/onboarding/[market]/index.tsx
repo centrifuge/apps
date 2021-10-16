@@ -45,6 +45,7 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
                     version: 3,
                     isUpcoming: false,
                     addresses: {
+                      TINLAKE_CURRENCY: '0x0',
                       ROOT_CONTRACT: props.market,
                       ACTIONS: '0x0',
                       PROXY_REGISTRY: '0x0',

@@ -160,7 +160,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             <Shelf justifyContent="space-between">
               <Shelf gap="xsmall" mb="xsmall">
                 <Box as={TokenLogo} src="/static/DROP_final.svg" display={['none', 'inline']} />
-                <SectionHeading>DROP Tranche</SectionHeading>
+                <SectionHeading>Senior Tranche (DROP)</SectionHeading>
               </Shelf>
               <Value
                 variant="sectionHeading"
@@ -171,7 +171,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               />
             </Shelf>
             <Stack gap="small">
-              <TrancheNote>Senior tranche &mdash; Lower risk, stable return</TrancheNote>
+              <TrancheNote>Lower risk, stable return</TrancheNote>
 
               <ValuePairList
                 variant="tertiary"
@@ -227,7 +227,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             <Shelf justifyContent="space-between">
               <Shelf gap="xsmall" mb="xsmall">
                 <Box as={TokenLogo} src="/static/TIN_final.svg" display={['none', 'inline']} />
-                <SectionHeading>TIN Tranche</SectionHeading>
+                <SectionHeading>Junior Tranche (TIN)</SectionHeading>
               </Shelf>
               <Shelf
                 justifyContent="space-between"
@@ -249,6 +249,8 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               </Shelf>
             </Shelf>
             <Stack gap="small">
+              <TrancheNote>Higher risk, variable return</TrancheNote>
+
               {tinDetailsOpen && (
                 <ValuePairList
                   variant="tertiary"
@@ -302,8 +304,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   ]}
                 />
               )}
-              <TrancheNote>Junior tranche &mdash; Higher risk, variable return</TrancheNote>
-
               <ValuePairList
                 variant="tertiary"
                 items={[

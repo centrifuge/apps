@@ -41,17 +41,17 @@ export const ValuePairList: React.FC<Props> = ({ variant = 'primary', items }) =
     <ValueVariantContext.Provider value={variantMap[variant]}>
       <Stack as="dl" gap={gap} margin={0}>
         {items
-          .filter((item) => !!item)
+          .filter((item) => item !== undefined)
           .map((item, i) => (
             <React.Fragment key={i}>
               <Shelf justifyContent="space-between" alignItems="baseline">
                 <Wrap as="dt" alignItems="baseline" gap="xsmall" rowGap={0}>
-                  <Term fontWeight={termFontWeight}>{item.term}</Term>
-                  {item.termSuffix && <TermSuffix>{item.termSuffix}</TermSuffix>}
+                  <Term fontWeight={termFontWeight}>{item!.term}</Term>
+                  {item!.termSuffix && <TermSuffix>{item!.termSuffix}</TermSuffix>}
                 </Wrap>
                 <Stack as="dd" alignItems="flex-end">
-                  <Value value={item.value} icon={item.valueIcon} unit={item.valueUnit} />
-                  {item.valueSuffix && <Value value={item.valueSuffix} />}
+                  <Value value={item!.value} icon={item!.valueIcon} unit={item!.valueUnit} />
+                  {item!.valueSuffix && <Value value={item!.valueSuffix} />}
                 </Stack>
               </Shelf>
               {variant === 'secondary' && i < items.length - 1 && <Divider />}
