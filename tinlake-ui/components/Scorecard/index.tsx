@@ -86,7 +86,7 @@ const Scorecard: React.FC<Props> = (props: Props) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {existingRiskGroups.slice(start, start + riskGroupsPerPage).map((riskGroup: RiskGroup) => (
+              {existingRiskGroups.slice(start, start + riskGroupsPerPage).map((riskGroup: RiskGroupWithId) => (
                 <TableRow>
                   <TableCell>{riskGroup.id}</TableCell>
                   <TableCell>
