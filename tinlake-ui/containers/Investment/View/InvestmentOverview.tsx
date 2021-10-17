@@ -6,7 +6,6 @@ import styled from 'styled-components'
 import { Card } from '../../../components/Card'
 import { SectionHeading } from '../../../components/Heading'
 import { Box, Shelf, Stack } from '../../../components/Layout'
-import { LoadingValue } from '../../../components/LoadingValue'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
 import { Value } from '../../../components/Value'
@@ -207,6 +206,11 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                           toPrecision(feeToInterestRate(poolData?.senior?.interestRate || '0'), 2),
                         valueUnit: '%',
                       },
+                  {
+                    term: 'Minimum risk buffer',
+                    value: toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2),
+                    valueUnit: '%',
+                  },
                 ]}
               />
             </Stack>
@@ -214,7 +218,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
           <DividerInner>&nbsp;</DividerInner>
 
-          <Box mt="xsmall" mb="xsmall" textAlign="center">
+          {/* <Box mt="xsmall" mb="xsmall" textAlign="center">
             <div>
               Senior is protected by a{' '}
               <Tooltip id="tinRiskBuffer" underline>
@@ -227,13 +231,13 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
               </Tooltip>{' '}
               <Tooltip id="minimumTinRiskBuffer" underline>
                 <LoadingValue done={!!minJuniorRatio}>
-                  (min: {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}%)
+                  ({toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}% minimum)
                 </LoadingValue>
               </Tooltip>
             </div>
           </Box>
 
-          <DividerInner>&nbsp;</DividerInner>
+          <DividerInner>&nbsp;</DividerInner> */}
 
           <Card p="medium">
             <Shelf justifyContent="space-between">
@@ -268,12 +272,12 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   variant="tertiary"
                   items={[
                     {
-                      term: 'Min TIN Risk Buffer',
+                      term: 'Locked minimum risk buffer',
                       value: toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2),
                       valueUnit: '%',
                     },
                     {
-                      term: 'Staked for Maker Overcollateralization',
+                      term: 'Locked Maker vault protection',
                       value: toPrecision(
                         (
                           Math.round(
@@ -291,7 +295,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                       valueUnit: '%',
                     },
                     {
-                      term: 'Available TIN',
+                      term: 'Excess risk buffer',
                       value: toPrecision(
                         !(poolData?.netAssetValue && poolData?.reserve) ||
                           (poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
@@ -339,7 +343,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                       }
                     : undefined,
                   {
-                    term: 'Junior provided by Issuer',
+                    term: 'TIN share provided by Issuer',
                     value: reserveRatio ? parseFloat(juniorHeldByIssuer.toString()) / 100 : null,
                     valueUnit: '%',
                   },

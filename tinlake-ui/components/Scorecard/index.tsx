@@ -1,4 +1,4 @@
-import { baseToDisplay, feeToInterestRate, interestRateToFee, toPrecision } from '@centrifuge/tinlake-js'
+import { feeToInterestRate, interestRateToFee, toPrecision } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box as GrommetBox, Button, Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
 import { FormDown, Risk } from 'grommet-icons'
@@ -10,7 +10,6 @@ import { SectionHeading } from '../../components/Heading'
 import { Box, Wrap } from '../../components/Layout'
 import { Pool } from '../../config'
 import { createTransaction, TransactionProps } from '../../ducks/transactions'
-import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { SortableLoan, useAssets } from '../../utils/useAssets'
 import { RiskGroup, usePool } from '../../utils/usePool'
 
@@ -19,6 +18,8 @@ interface Props extends TransactionProps {
 }
 
 const riskGroupsPerPage = 8
+
+const e18 = new BN(10).pow(new BN(18))
 
 const Scorecard: React.FC<Props> = (props: Props) => {
   const [open, setOpen] = React.useState(false)
@@ -62,7 +63,7 @@ const Scorecard: React.FC<Props> = (props: Props) => {
                 <TableCell size="20%">Max Advance Rate</TableCell>
                 <TableCell size="20%">Financing Fee (APR)</TableCell>
                 <TableCell size="20%">Term Recovery Rate</TableCell>
-                <TableCell size="20%">Outstanding Debt</TableCell>
+                <TableCell size="20%">Portfolio Share</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -81,10 +82,16 @@ const Scorecard: React.FC<Props> = (props: Props) => {
                     {parseFloat(riskGroup.recoveryRatePD.div(new BN(10).pow(new BN(22))).toString()) / 1000}%
                   </TableCell>
                   <TableCell>
-                    {addThousandsSeparators(
-                      toPrecision(baseToDisplay(outstandingDebtByRiskGroup(start + index), 18), 0)
-                    )}{' '}
-                    {props.activePool?.metadata.currencySymbol || 'DAI'}
+                    {parseFloat(
+                      (poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
+                        ? outstandingDebtByRiskGroup(start + index)
+                            .mul(e18)
+                            .div(poolData.reserve.add(poolData.netAssetValue))
+                            .div(new BN('10').pow(new BN('14')))
+                        : new BN(0)
+                      ).toString()
+                    ) / 100}{' '}
+                    %
                   </TableCell>
                 </TableRow>
               ))}
