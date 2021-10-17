@@ -1,15 +1,14 @@
-import { Box } from 'grommet'
 import { GetStaticProps } from 'next'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Head from 'next/head'
 import * as React from 'react'
 import Auth from '../../../components/Auth'
-import Container from '../../../components/Container'
-import Header from '../../../components/Header'
+import { FunnelHeader } from '../../../components/FunnelHeader'
+import { PoolOnboarding } from '../../../components/Onboarding'
+import { PageContainer } from '../../../components/PageContainer'
 import { TinlakeProvider } from '../../../components/TinlakeProvider'
 import WithFooter from '../../../components/WithFooter'
-import { loadPoolsFromIPFS, Pool } from '../../../config'
-import OnboardingSteps from '../../../containers/Onboarding/OnboardingSteps'
+import config, { loadPoolsFromIPFS, Pool } from '../../../config'
 
 interface Props extends WithRouterProps {
   market: 'aave'
@@ -27,50 +26,40 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
         <Head>
           <title>Investor Onboarding for {capitalizeFirstLetter(props.market)} | Tinlake | Centrifuge</title>
         </Head>
-        <Header
-          ipfsPools={{ active: [], archived: [], upcoming: [] }}
-          selectedRoute={'/onboarding'}
-          menuItems={[]}
-          logoUrl="/static/aave-centrifuge-market.svg"
-          hideHoldings
-        />
-        <Container>
-          <Box justify="center" direction="row">
-            <Box width="xlarge">
-              <Auth>
-                <OnboardingSteps
-                  hidePageTitle={true}
-                  activePool={{
-                    network: 'mainnet',
-                    version: 3,
-                    isUpcoming: false,
-                    addresses: {
-                      TINLAKE_CURRENCY: '0x0',
-                      ROOT_CONTRACT: props.market,
-                      ACTIONS: '0x0',
-                      PROXY_REGISTRY: '0x0',
-                      COLLATERAL_NFT: '0x0',
-                      SENIOR_TOKEN: '0x0',
-                      JUNIOR_TOKEN: '0x0',
-                      CLERK: '0x0',
-                      ASSESSOR: '0x0',
-                      RESERVE: '0x0',
-                      SENIOR_TRANCHE: '0x0',
-                      JUNIOR_TRANCHE: '0x0',
-                      FEED: '0x0',
-                      POOL_ADMIN: '0x0',
-                      SENIOR_MEMBERLIST: '0x0',
-                      JUNIOR_MEMBERLIST: '0x0',
-                      COORDINATOR: '0x0',
-                      PILE: '0x0',
-                    },
-                    metadata: { name: 'Aave', slug: 'aave', asset: '-' },
-                  }}
-                />
-              </Auth>
-            </Box>
-          </Box>
-        </Container>
+        <FunnelHeader returnPath={config.aaveOnboardingReturnUrl} />
+        <Auth>
+          <PageContainer width="funnel" noMargin>
+            <PoolOnboarding
+              market="aave"
+              activePool={{
+                network: 'mainnet',
+                version: 3,
+                isUpcoming: false,
+                addresses: {
+                  ROOT_CONTRACT: props.market,
+                  TINLAKE_CURRENCY: '0x0',
+                  ACTIONS: '0x0',
+                  PROXY_REGISTRY: '0x0',
+                  COLLATERAL_NFT: '0x0',
+                  SENIOR_TOKEN: '0x0',
+                  JUNIOR_TOKEN: '0x0',
+                  CLERK: '0x0',
+                  ASSESSOR: '0x0',
+                  RESERVE: '0x0',
+                  SENIOR_TRANCHE: '0x0',
+                  JUNIOR_TRANCHE: '0x0',
+                  FEED: '0x0',
+                  POOL_ADMIN: '0x0',
+                  SENIOR_MEMBERLIST: '0x0',
+                  JUNIOR_MEMBERLIST: '0x0',
+                  COORDINATOR: '0x0',
+                  PILE: '0x0',
+                },
+                metadata: { name: 'Aave', slug: 'aave', asset: '-' },
+              }}
+            />
+          </PageContainer>
+        </Auth>
       </WithFooter>
     </TinlakeProvider>
   )

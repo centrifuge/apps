@@ -21,8 +21,8 @@ export class PoolService {
 
   provider = new FastJsonRpcProvider(config.rpcUrl)
   signer = new TransactionManager(new ethers.Wallet(config.signerPrivateKey), {
-    initialSpeed: 'fast',
-    increasedSpeed: 'rapid',
+    maxFeePerGas: 600,
+    initialPriorityFeePerGas: 4,
   }).connect(this.provider)
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
 
