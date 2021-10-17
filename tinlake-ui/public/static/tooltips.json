@@ -76,6 +76,11 @@
     "description": "The risk group of a financing determines the interest rate based on the underlying scorecard.",
     "link": "https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-1-how-to-price-real-world-assets-cf6655132bef"
   },
+  "riskScorecard": {
+    "title": "Risk Scorecard",
+    "description": "Assets in a Tinlake pool are assigned to a specific risk group on the scorecard. This sets the Advance Rate, Term Recovery Rate, and Financing Fee.",
+    "link": "https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-1-how-to-price-real-world-assets-cf6655132bef"
+  },
   "maturityDate": {
     "title": "Maturity date",
     "description": "Expected repayment date for the outstanding financing. It is used to calculate the present value of the financing for the pool's asset value.",

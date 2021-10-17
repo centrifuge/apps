@@ -206,7 +206,11 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                         valueUnit: '%',
                       },
                   {
-                    term: 'Minimum risk buffer',
+                    term: (
+                      <Tooltip id={'minimumTinRiskBuffer'} underline>
+                        Minimum risk buffer
+                      </Tooltip>
+                    ),
                     value: toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2),
                     valueUnit: '%',
                   },

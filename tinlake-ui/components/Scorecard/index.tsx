@@ -8,6 +8,7 @@ import styled from 'styled-components'
 import { Card } from '../../components/Card'
 import { SectionHeading } from '../../components/Heading'
 import { Box, Wrap } from '../../components/Layout'
+import { Tooltip } from '../../components/Tooltip'
 import { Pool } from '../../config'
 import { createTransaction, TransactionProps } from '../../ducks/transactions'
 import { SortableLoan, useAssets } from '../../utils/useAssets'
@@ -15,6 +16,11 @@ import { RiskGroup, usePool } from '../../utils/usePool'
 
 interface Props extends TransactionProps {
   activePool: Pool
+}
+
+interface RiskGroupWithId extends RiskGroup {
+  id: number
+  outstandingDebt: BN
 }
 
 const riskGroupsPerPage = 8
@@ -27,10 +33,6 @@ const Scorecard: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.activePool.addresses.ROOT_CONTRACT)
   const { data: assets } = useAssets(props.activePool.addresses.ROOT_CONTRACT)
 
-  const existingRiskGroups = poolData?.risk
-    ? poolData.risk.filter((riskGroup: any) => riskGroup.ceilingRatio && !riskGroup.ceilingRatio.isZero())
-    : []
-
   const outstandingDebtByRiskGroup = (riskGroup: number) => {
     return assets
       ? assets.reduce(
@@ -41,6 +43,20 @@ const Scorecard: React.FC<Props> = (props: Props) => {
       : new BN(0)
   }
 
+  const existingRiskGroups = poolData?.risk
+    ? poolData.risk
+        .map((riskGroup: RiskGroup, index: number) => {
+          return { ...riskGroup, id: index, outstandingDebt: outstandingDebtByRiskGroup(index) }
+        })
+        .filter(
+          (riskGroup: RiskGroupWithId) =>
+            riskGroup.ceilingRatio && !riskGroup.ceilingRatio.isZero() && !riskGroup.outstandingDebt.isZero()
+        )
+        .sort((a: RiskGroupWithId, b: RiskGroupWithId) => {
+          return parseFloat(b.outstandingDebt.toString()) - parseFloat(a.outstandingDebt.toString())
+        })
+    : []
+
   const [start, setStart] = React.useState(0)
 
   return (
@@ -48,7 +64,10 @@ const Scorecard: React.FC<Props> = (props: Props) => {
       <Wrap p={24} gap="small" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}>
         <Risk />
         <SectionHeading>Risk Scorecard</SectionHeading>
-        <RiskGroupCount>{existingRiskGroups.length} risk groups</RiskGroupCount>
+
+        <Tooltip id="riskScorecard" underline>
+          <RiskGroupCount>{existingRiskGroups.length} risk groups in use</RiskGroupCount>
+        </Tooltip>
 
         <Caret style={{ marginLeft: 'auto', position: 'relative', top: '0' }}>
           <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
@@ -69,7 +88,7 @@ const Scorecard: React.FC<Props> = (props: Props) => {
             <TableBody>
               {existingRiskGroups.slice(start, start + riskGroupsPerPage).map((riskGroup: RiskGroup, index: number) => (
                 <TableRow>
-                  <TableCell>{start + index}</TableCell>
+                  <TableCell>{riskGroup.id}</TableCell>
                   <TableCell>
                     {parseFloat(riskGroup.ceilingRatio.div(new BN(10).pow(new BN(25))).toString())}%
                   </TableCell>
@@ -84,9 +103,9 @@ const Scorecard: React.FC<Props> = (props: Props) => {
                   <TableCell>
                     {parseFloat(
                       (poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
-                        ? outstandingDebtByRiskGroup(start + index)
+                        ? riskGroup.outstandingDebt
                             .mul(e18)
-                            .div(poolData.reserve.add(poolData.netAssetValue))
+                            .div(poolData.netAssetValue)
                             .div(new BN('10').pow(new BN('14')))
                         : new BN(0)
                       ).toString()

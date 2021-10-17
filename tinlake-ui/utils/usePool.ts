@@ -286,7 +286,6 @@ export async function getPool(ipfsPools: IpfsPools, poolId: string, address?: st
   }
 
   pool.metadata.juniorInvestors?.forEach((investor: JuniorInvestor) => {
-    console.log(investor.address)
     calls.push(
       {
         target: pool.addresses.JUNIOR_TOKEN,
