@@ -71,7 +71,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
       : new BN(0)
 
   const juniorHeldByIssuer =
-    poolData && poolData?.juniorInvestors && tinTotalValue
+    poolData && poolData?.juniorInvestors && tinTotalValue && !tinTotalValue.isZero()
       ? Object.values(poolData.juniorInvestors)
           .reduce((prev: BN, inv: { collected: BN; uncollected: BN }) => {
             return prev.add(inv.collected || new BN(0)).add(inv.uncollected || new BN(0))
