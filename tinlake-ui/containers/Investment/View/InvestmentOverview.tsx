@@ -72,6 +72,17 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           .div(new BN('10').pow(new BN('14')))
       : new BN(0)
 
+  const juniorHeldByIssuer =
+    poolData && poolData?.juniorInvestors
+      ? Object.values(poolData.juniorInvestors)
+          .reduce((prev: BN, inv: { collected: BN; uncollected: BN }) => {
+            return prev.add(inv.collected || new BN(0)).add(inv.uncollected || new BN(0))
+          }, new BN(0))
+          .mul(e18)
+          .div(tinTotalValue.div(new BN('10').pow(new BN('27'))))
+          .div(new BN('10').pow(new BN('14')))
+      : new BN(0)
+
   const isMaker = !!poolData?.maker
 
   const availableLiquidityVal = isMaker
@@ -258,49 +269,54 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   items={[
                     {
                       term: 'Min TIN Risk Buffer',
-                      value: addThousandsSeparators(
-                        toPrecision(
-                          baseToDisplay(
-                            poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.minJuniorRatio) || new BN(0),
-                            27 + 18
-                          ),
-                          0
-                        )
-                      ),
-                      valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
+                      value: toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2),
+                      valueUnit: '%',
                     },
                     {
                       term: 'Staked for Maker Overcollateralization',
-                      value: addThousandsSeparators(
-                        toPrecision(
-                          baseToDisplay(
-                            poolData?.maker?.creditline.mul(poolData?.maker?.mat.sub(Fixed27Base)) || new BN(0),
-                            27 + 18
-                          ),
-                          0
-                        )
+                      value: toPrecision(
+                        (
+                          Math.round(
+                            parseRatio(
+                              poolData?.maker?.creditline && poolData?.netAssetValue.add(poolData?.reserve).gtn(0)
+                                ? (
+                                    poolData?.maker?.creditline.mul(poolData?.maker?.mat.sub(Fixed27Base)) || new BN(0)
+                                  ).div(poolData?.netAssetValue.add(poolData?.reserve) || new BN(0))
+                                : new BN(0)
+                            ) * 10000
+                          ) / 100
+                        ).toString(),
+                        2
                       ),
-                      valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
+                      valueUnit: '%',
                     },
                     {
                       term: 'Available TIN',
-                      value: addThousandsSeparators(
-                        toPrecision(
-                          baseToDisplay(
-                            poolData?.junior.totalSupply
-                              .mul(poolData?.junior.tokenPrice)
-                              ?.sub(poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.minJuniorRatio))
-                              .sub(
-                                (poolData?.maker?.creditline || new BN(0)).mul(
-                                  (poolData?.maker?.mat || Fixed27Base).sub(Fixed27Base)
-                                )
-                              ) || new BN(0),
-                            27 + 18
-                          ),
-                          0
-                        )
+                      value: toPrecision(
+                        !(poolData?.netAssetValue && poolData?.reserve) ||
+                          (poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
+                          ? '0'
+                          : (
+                              Math.round(
+                                (parseRatio(
+                                  (poolData?.junior.totalSupply.mul(poolData?.junior.tokenPrice) || new BN(0)).div(
+                                    poolData?.netAssetValue.add(poolData?.reserve) || new BN(0)
+                                  )
+                                ) -
+                                  (minJuniorRatio || 0) -
+                                  parseRatio(
+                                    (
+                                      (poolData?.maker?.creditline || new BN(0)).mul(
+                                        (poolData?.maker?.mat || Fixed27Base).sub(Fixed27Base)
+                                      ) || new BN(0)
+                                    ).div(poolData?.netAssetValue.add(poolData?.reserve) || new BN(0))
+                                  )) *
+                                  10000
+                              ) / 100
+                            ).toString(),
+                        2
                       ),
-                      valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
+                      valueUnit: '%',
                     },
                   ]}
                 />
@@ -324,25 +340,8 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     : undefined,
                   {
                     term: 'Junior provided by Issuer',
-                    value: poolData?.senior
-                      ? addThousandsSeparators(
-                          toPrecision(
-                            baseToDisplay(
-                              poolData?.juniorInvestors
-                                ? Object.values(poolData.juniorInvestors).reduce(
-                                    (prev: BN, inv: { collected: BN; uncollected: BN }) => {
-                                      return prev.add(inv.collected || new BN(0)).add(inv.uncollected || new BN(0))
-                                    },
-                                    new BN(0)
-                                  )
-                                : '0',
-                              18
-                            ),
-                            0
-                          )
-                        )
-                      : null,
-                    valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
+                    value: reserveRatio ? parseFloat(juniorHeldByIssuer.toString()) / 100 : null,
+                    valueUnit: '%',
                   },
                 ]}
               />

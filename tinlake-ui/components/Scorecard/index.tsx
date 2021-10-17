@@ -1,6 +1,6 @@
-import { feeToInterestRate, interestRateToFee, toPrecision } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate, interestRateToFee, toPrecision } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Button, Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
+import { Box as GrommetBox, Button, Table, TableBody, TableCell, TableHeader, TableRow } from 'grommet'
 import { FormDown, Risk } from 'grommet-icons'
 import * as React from 'react'
 import { connect } from 'react-redux'
@@ -10,6 +10,8 @@ import { SectionHeading } from '../../components/Heading'
 import { Box, Wrap } from '../../components/Layout'
 import { Pool } from '../../config'
 import { createTransaction, TransactionProps } from '../../ducks/transactions'
+import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
+import { SortableLoan, useAssets } from '../../utils/useAssets'
 import { RiskGroup, usePool } from '../../utils/usePool'
 
 interface Props extends TransactionProps {
@@ -22,9 +24,21 @@ const Scorecard: React.FC<Props> = (props: Props) => {
   const [open, setOpen] = React.useState(false)
 
   const { data: poolData } = usePool(props.activePool.addresses.ROOT_CONTRACT)
+  const { data: assets } = useAssets(props.activePool.addresses.ROOT_CONTRACT)
+
   const existingRiskGroups = poolData?.risk
     ? poolData.risk.filter((riskGroup: any) => riskGroup.ceilingRatio && !riskGroup.ceilingRatio.isZero())
     : []
+
+  const outstandingDebtByRiskGroup = (riskGroup: number) => {
+    return assets
+      ? assets.reduce(
+          (prev: BN, asset: SortableLoan) =>
+            asset.riskGroup !== undefined && asset.riskGroup === riskGroup ? prev.add(asset.debt) : prev,
+          new BN(0)
+        )
+      : new BN(0)
+  }
 
   const [start, setStart] = React.useState(0)
 
@@ -33,6 +47,7 @@ const Scorecard: React.FC<Props> = (props: Props) => {
       <Wrap p={24} gap="small" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}>
         <Risk />
         <SectionHeading>Risk Scorecard</SectionHeading>
+        <RiskGroupCount>{existingRiskGroups.length} risk groups</RiskGroupCount>
 
         <Caret style={{ marginLeft: 'auto', position: 'relative', top: '0' }}>
           <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
@@ -47,6 +62,7 @@ const Scorecard: React.FC<Props> = (props: Props) => {
                 <TableCell size="20%">Max Advance Rate</TableCell>
                 <TableCell size="20%">Financing Fee (APR)</TableCell>
                 <TableCell size="20%">Term Recovery Rate</TableCell>
+                <TableCell size="20%">Outstanding Debt</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -64,29 +80,37 @@ const Scorecard: React.FC<Props> = (props: Props) => {
                   <TableCell>
                     {parseFloat(riskGroup.recoveryRatePD.div(new BN(10).pow(new BN(22))).toString()) / 1000}%
                   </TableCell>
+                  <TableCell>
+                    {addThousandsSeparators(
+                      toPrecision(baseToDisplay(outstandingDebtByRiskGroup(start + index), 18), 0)
+                    )}{' '}
+                    {props.activePool?.metadata.currencySymbol || 'DAI'}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
 
-          <div>
-            <Button
-              size="small"
-              primary
-              label="Previous"
-              onClick={() => setStart(start - riskGroupsPerPage < 0 ? 0 : start - riskGroupsPerPage)}
-              disabled={start === 0}
-            />
-          </div>
-          <div>
-            <Button
-              size="small"
-              primary
-              label="Next"
-              onClick={() => setStart(start + riskGroupsPerPage)}
-              disabled={existingRiskGroups.length < start + riskGroupsPerPage}
-            />
-          </div>
+          <GrommetBox direction="row" justify="center" margin={{ top: 'medium' }} gap="medium">
+            <div>
+              <Button
+                size="small"
+                primary
+                label="Previous"
+                onClick={() => setStart(start - riskGroupsPerPage < 0 ? 0 : start - riskGroupsPerPage)}
+                disabled={start === 0}
+              />
+            </div>
+            <div>
+              <Button
+                size="small"
+                primary
+                label="Next"
+                onClick={() => setStart(start + riskGroupsPerPage)}
+                disabled={existingRiskGroups.length < start + riskGroupsPerPage}
+              />
+            </div>
+          </GrommetBox>
         </Box>
       )}
     </Card>
@@ -108,4 +132,12 @@ const Caret = styled.div`
   svg {
     transition: 200ms;
   }
+`
+
+const RiskGroupCount = styled.h4`
+  line-height: 24px;
+  font-size: 14px;
+  margin: 0;
+  padding-top: 4px;
+  color: #555;
 `
