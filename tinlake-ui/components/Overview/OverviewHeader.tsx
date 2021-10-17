@@ -97,23 +97,18 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
       valueUnit: '%',
     },
     {
-      term:
-        tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? (
-          <Tooltip id="dropApy" underline>
-            TIN APY {!isMobile && '(90 days)'}
-          </Tooltip>
-        ) : (
-          <Tooltip id="dropApr" underline>
-            ...
-          </Tooltip>
-        ),
+      term: (
+        <Tooltip id="tinApy" underline>
+          TIN APY {!isMobile && '(90 days)'}
+        </Tooltip>
+      ),
       termSuffix: isMobile
         ? tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
-          ? '(30 days)'
-          : '(APR)'
+          ? '(90 days)'
+          : ''
         : undefined,
       valueIcon: '/static/TIN_final.svg',
-      value: tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? tinYield : '...',
+      value: tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? tinYield : 'N/A',
       valueUnit: '%',
     },
     {

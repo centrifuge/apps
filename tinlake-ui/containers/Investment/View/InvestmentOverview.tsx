@@ -59,7 +59,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
     : undefined
 
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
-  const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
   const { dropYield, tinYield } = useTrancheYield(tinlake.contractAddresses.ROOT_CONTRACT)
 
@@ -271,6 +270,25 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 <ValuePairList
                   variant="tertiary"
                   items={[
+                    {
+                      term: 'Total risk buffer',
+                      value: toPrecision(
+                        (
+                          Math.round(
+                            parseRatio(
+                              !(poolData?.netAssetValue && poolData?.reserve) ||
+                                (poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
+                                ? new BN(0)
+                                : (poolData?.junior.totalSupply || new BN(0))
+                                    .mul(poolData?.junior.tokenPrice || new BN(0))
+                                    .div((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)))
+                            ) * 10000
+                          ) / 100
+                        ).toString(),
+                        2
+                      ),
+                      valueUnit: '%',
+                    },
                     {
                       term: 'Locked minimum risk buffer',
                       value: toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2),
