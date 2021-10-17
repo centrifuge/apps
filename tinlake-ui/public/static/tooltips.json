@@ -124,5 +124,9 @@
   "cashDrag": {
     "title": "Cash drag",
     "description": "Share of the pool’s investments that is currently in the pool’s reserve and not financing assets. Liquidity in the pool’s reserve does not earn yield and thus drags down investor’s returns."
+  },
+  "discountRate": {
+    "title": "Discount rate",
+    "description": "Future cashflows in the Tinlake pool are discounted to calculate the Net Asset Value (NAV) using the discount rate. The discount rate usually reflects the rate of return an investor could earn in the marketplace on an investment of comparable size, tenor and risk. The discount rate is the same for every financing of the pool."
   }
 }

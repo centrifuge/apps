@@ -3,7 +3,7 @@ import BN from 'bn.js'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { Area, AreaChart, Tooltip } from 'recharts'
+import { Area, AreaChart, Tooltip as RechartsTooltip } from 'recharts'
 import { Card } from '../../../components/Card'
 import {
   ChartTooltip,
@@ -19,6 +19,7 @@ import { SectionHeading } from '../../../components/Heading'
 import { Shelf, Stack } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { useTinlake } from '../../../components/TinlakeProvider'
+import { Tooltip } from '../../../components/Tooltip'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -135,7 +136,11 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
               style={{ alignItems: 'start', justifyContent: 'center' }}
               border={isAdmin ? undefined : { color: 'transparent' }}
             >
-              <span>Discount rate</span>
+              <span>
+                <Tooltip id="discountRate" underline>
+                  Discount rate
+                </Tooltip>
+              </span>
             </TableCell>
             <TableCell style={{ textAlign: 'end' }} border={isAdmin ? undefined : { color: 'transparent' }}>
               <LoadingValue done={poolData?.discountRate !== undefined}>
@@ -248,7 +253,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   <stop offset="50%" stopColor="#ccc" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <Tooltip content={<CustomTooltip />} offset={20} />
+              <RechartsTooltip content={<CustomTooltip />} offset={20} />
               {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMD(val)} /> */}
               <Area
                 type="monotone"

@@ -208,32 +208,30 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const yieldData = dailyPoolData?.filter((val: AssetData) => val[yieldProp] !== null).slice(1)
 
   const graphElement = (
-    <Stack height="60px" gap="small" mb="small">
-      {yieldData !== undefined && yieldData.length > 0 && (
-        <div style={{ flex: '1 0 auto' }}>
-          <StyledResponsiveContainer>
-            <AreaChart data={yieldData} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
-              <defs>
-                <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <RechartsTooltip content={<CustomTooltip />} offset={20} />
-              <Area
-                type="monotone"
-                stackId={1}
-                dataKey={yieldProp}
-                stroke="#0828BE"
-                strokeWidth={2}
-                fillOpacity={1}
-                fill="url(#colorAssetValue)"
-                name="DROP APY (30d)"
-              />
-            </AreaChart>
-          </StyledResponsiveContainer>
-        </div>
-      )}
+    <Stack height="40px" gap="small" mb="0">
+      <div style={{ flex: '1 0 auto' }}>
+        <StyledResponsiveContainer>
+          <AreaChart data={yieldData} margin={{ top: 0, right: 4, left: 4, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <RechartsTooltip content={<CustomTooltip />} offset={20} />
+            <Area
+              type="monotone"
+              stackId={1}
+              dataKey={yieldProp}
+              stroke="#0828BE"
+              strokeWidth={2}
+              fillOpacity={1}
+              fill="url(#colorAssetValue)"
+              name="DROP APY (30d)"
+            />
+          </AreaChart>
+        </StyledResponsiveContainer>
+      </div>
     </Stack>
   )
   return (
@@ -250,8 +248,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           {props.tranche === 'senior' ? 'Lower risk, stable return' : 'Higher risk, variable return'}
         </TrancheNote>
       </Box>
-
-      {graphElement}
 
       <Table>
         <TableBody>
@@ -299,14 +295,22 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell scope="row" border={{ color: 'transparent' }}>
-              Current value
-            </TableCell>
-            <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+            <TableCell scope="row">Current value</TableCell>
+            <TableCell style={{ textAlign: 'end' }}>
               <LoadingValue done={value !== undefined}>
                 {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 4))}{' '}
                 {props.pool?.metadata.currencySymbol || 'DAI'}
               </LoadingValue>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell scope="row" border={{ color: 'transparent' }}>
+              Current yield (30d APY)
+            </TableCell>
+            <TableCell border={{ color: 'transparent' }}>
+              <div style={{ width: '75%', marginLeft: 'auto', marginTop: '-16px', maxHeight: '21px' }}>
+                {yieldData !== undefined && yieldData.length > 0 && graphElement}
+              </div>
             </TableCell>
           </TableRow>
         </TableBody>
