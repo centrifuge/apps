@@ -194,7 +194,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   },
                   dropYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
                     ? {
-                        term: 'DROP yield (30d APY)',
+                        term: 'Current yield (30d APY)',
                         value: dropYield,
                         valueUnit: '%',
                       }
@@ -355,13 +355,13 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   },
                   tinYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
                     ? {
-                        term: 'TIN yield (90d APY)',
+                        term: 'Current yield (90d APY)',
                         value: tinYield,
                         valueUnit: '%',
                       }
                     : undefined,
                   {
-                    term: 'TIN share provided by Issuer',
+                    term: 'Junior provided by Issuer',
                     value: reserveRatio ? parseFloat(juniorHeldByIssuer.toString()) / 100 : null,
                     valueUnit: '%',
                   },
