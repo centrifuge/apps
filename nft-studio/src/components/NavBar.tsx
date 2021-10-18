@@ -1,3 +1,4 @@
+import { Button, Shelf } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import { encodeAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
@@ -8,7 +9,7 @@ import { useWeb3Context } from './Web3Provider'
 export const NavBar: React.FC = () => {
   const { selectedAccount, isConnecting, connect, disconnect, selectAccount, accounts } = useWeb3Context()
   return (
-    <div>
+    <Shelf gap={2}>
       <nav>
         <Link to="/">Home</Link> <Link to="/collection/1">Collection 1</Link>
       </nav>
@@ -32,10 +33,10 @@ export const NavBar: React.FC = () => {
       ) : isConnecting ? (
         <span>Connecting...</span>
       ) : (
-        <button type="button" onClick={connect}>
+        <Button type="button" onClick={connect}>
           Connect
-        </button>
+        </Button>
       )}
-    </div>
+    </Shelf>
   )
 }

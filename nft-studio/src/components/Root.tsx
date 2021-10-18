@@ -1,3 +1,4 @@
+import { GlobalStyle } from '@centrifuge/fabric'
 import altairDark from '@centrifuge/fabric/dist/theme/altairDark'
 import * as React from 'react'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
@@ -11,6 +12,7 @@ export const Root: React.FC = () => {
   return (
     <>
       <ThemeProvider theme={altairDark}>
+        <GlobalStyle />
         <Web3Provider>
           <Router>
             <NavBar />
