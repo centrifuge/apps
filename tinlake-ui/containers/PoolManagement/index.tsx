@@ -138,7 +138,7 @@ const Menu = styled(Box)`
 
 const MenuItem = styled(Button)`
   font-size: 14px;
-  font-weight: bold;
+  font-weight: 500;
   padding: 0 12px;
   text-align: left;
   margin: 4px 0;

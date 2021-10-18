@@ -1,6 +1,7 @@
 import { ComponentMeta } from '@storybook/react'
 import React from 'react'
 import styled from 'styled-components'
+import { Text } from '..'
 import * as icons from '../icon'
 
 export default {
@@ -14,9 +15,11 @@ export const Icons: React.FC = () => (
       .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
       .map(([iconName, IconComponent]) => (
         <tr key={iconName}>
-          <td>{iconName}</td>
           <td>
-            <IconComponent style={{ fontSize: 24, marginLeft: 24 }} />
+            <Text>{iconName}</Text>
+          </td>
+          <td>
+            <IconComponent color="textPrimary" />
           </td>
         </tr>
       ))}

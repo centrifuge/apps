@@ -8,7 +8,7 @@
     "build": "yarn build:icons && tsc",
     "storybook": "yarn build:icons --ignore-existing && start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "build:icons": "npx @svgr/cli -d ./src/icon ./src/icon-svg",
+    "build:icons": "npx @svgr/cli --template iconTemplate.js -d ./src/icon ./src/icon-svg",
     "lint": "eslint src",
     "test": "loki test",
     "approve": "loki approve",
@@ -49,11 +49,11 @@
     "styled-system": "^5.1.5"
   },
   "svgr": {
-    "icon": true,
+    "dimensions": false,
     "typescript": true,
     "replaceAttrValues": {
-      "black": "currentColor",
-      "#000": "currentColor"
+      "black": "currentcolor",
+      "#000": "currentcolor"
     }
   },
   "loki": {

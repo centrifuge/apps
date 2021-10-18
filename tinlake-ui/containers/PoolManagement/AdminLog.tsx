@@ -194,6 +194,15 @@ const generateLogName = (log: ethers.utils.LogDescription) => {
       log.args[2]
     } and ${addThousandsSeparators(toPrecision(baseToDisplay(log.args[1], 18), 0))} DAI`
   }
+  if (log.name === 'OverrideWriteOff') {
+    return `Override write-off asset ${log.args[0]} to write-off group ${log.args[1]}`
+  }
+  if (log.name === 'ClosePool') {
+    return `Close the pool`
+  }
+  if (log.name === 'UnclosePool') {
+    return `Unclose the pool`
+  }
 
   return `${log.name}(${log.args.join(',')})`
 }
