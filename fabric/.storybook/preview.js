@@ -1,7 +1,17 @@
 import React from 'react'
 import { ThemeProvider } from 'styled-components'
 import { Box, GlobalStyle } from '../src'
-import { themes } from '../src/theme'
+import altairDark from '../src/theme/altairDark'
+import altairLight from '../src/theme/altairLight'
+import centrifugeDark from '../src/theme/centrifugeDark'
+import centrifugeLight from '../src/theme/centrifugeLight'
+
+const themes = {
+  altairDark,
+  altairLight,
+  centrifugeDark,
+  centrifugeLight,
+}
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
