@@ -63,7 +63,7 @@ const Scorecard: React.FC<Props> = (props: Props) => {
     <Card interactive>
       <Wrap p={24} gap="small" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}>
         <Risk />
-        <SectionHeading>Risk Scorecard</SectionHeading>
+        <SectionHeading>Portfolio distribution</SectionHeading>
 
         <Tooltip id="riskScorecard" underline>
           <RiskGroupCount>{existingRiskGroups.length} risk groups in use</RiskGroupCount>
