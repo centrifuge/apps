@@ -1,5 +1,5 @@
 import { baseColors } from './baseColors'
-import { brandColors } from './brandColors'
+import { brandCentrifuge } from './brandCentrifuge'
 import { breakpoints } from './breakpoints'
 import { modeLight } from './modeLight'
 import { space } from './space'
@@ -11,7 +11,7 @@ export const baseTheme = {
   space,
   colors: {
     ...baseColors,
-    ...brandColors.centrifuge,
+    ...brandCentrifuge,
     ...modeLight.colors,
   },
   sizes: {
@@ -28,7 +28,7 @@ export const baseTheme = {
   },
   shadows: {
     cardInteractive: '0 1px 5px rgba(0, 0, 0, 0.2)',
-    buttonFocused: `0 4px 12px ${brandColors.centrifuge.brand}`,
+    buttonFocused: `0 4px 12px ${brandCentrifuge.brand}`,
   },
 }
 

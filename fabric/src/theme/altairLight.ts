@@ -1,17 +1,17 @@
 import { baseTheme, FabricTheme } from './tokens/baseTheme'
-import { brandColors } from './tokens/brandColors'
+import { brandAltair } from './tokens/brandAltair'
 import { modeLight } from './tokens/modeLight'
 
 const altairLight: FabricTheme = {
   ...baseTheme,
   colors: {
     ...baseTheme.colors,
-    ...brandColors.altair,
+    ...brandAltair,
     ...modeLight.colors,
   },
   shadows: {
     ...baseTheme.shadows,
-    buttonFocused: `0 4px 12px ${brandColors.altair.brand}`,
+    buttonFocused: `0 4px 12px ${brandAltair.brand}`,
   },
 }
 
