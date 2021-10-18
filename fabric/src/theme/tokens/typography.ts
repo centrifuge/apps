@@ -1,5 +1,7 @@
 import { ResponsiveValue } from 'styled-system'
-import colors from './colors'
+import { BaseColors } from './baseColors'
+import { brandCentrifuge } from './brandCentrifuge'
+import { modeLight } from './modeLight'
 
 type Variants =
   | 'heading1'
@@ -20,7 +22,7 @@ type Values = Partial<{
   fontSize: ResponsiveValue<number | string>
   lineHeight: ResponsiveValue<number>
   fontWeight: ResponsiveValue<number>
-  color: keyof typeof colors
+  color: keyof BaseColors | keyof typeof brandCentrifuge | keyof typeof modeLight['colors']
 }>
 
 type Typography = {
@@ -105,4 +107,4 @@ const typography: Typography = {
   },
 }
 
-export default typography
+export { typography }

@@ -4,4 +4,4 @@ space.gutterMobile = space[2]
 space.gutterTablet = space[2]
 space.gutterDesktop = space[3]
 
-export default space
+export { space }

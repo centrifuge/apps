@@ -9,7 +9,7 @@ const buttonColor =
       ? `
 background: ${theme.colors[colorName]};
 border-color: ${theme.colors[colorName]};
-color: ${theme.colors.white};
+color: ${theme.colors.backgroundPrimary};
 `
       : outlined
       ? `
@@ -51,22 +51,22 @@ export const Button = styled.button<Props>`
     line-height: 20px;
   `}
 
-  ${buttonColor('black')}
+  ${buttonColor('textPrimary')}
 
   :hover, :active {
-    ${buttonColor('centrifugeBlue')}
+    ${buttonColor('brand')}
   }
 
   :disabled {
     cursor: not-allowed;
-    ${buttonColor('defaultPrimary')}
+    ${buttonColor('textDisabled')}
   }
 
   :focus {
     ${({ contained, outlined, text, theme }) =>
       (contained || outlined || !(contained || outlined || text)) &&
       `
-      box-shadow: 0px 4px 12px ${theme.colors.centrifugeBlue};
+      box-shadow: ${theme.shadows.buttonFocused};
       `}
   }
 
