@@ -33,7 +33,8 @@ create table if not exists kyc (
     created_at timestamp with time zone not null default now(),
     status character varying(20) not null default 'none'::character varying,
     usa_tax_resident boolean not null default false,
-    accredited boolean not null default false
+    accredited boolean not null default false,
+    invalidated_at timestamp with time zone
 );
 
 create unique index if not exists kyc_unique on kyc (provider, provider_account_id);

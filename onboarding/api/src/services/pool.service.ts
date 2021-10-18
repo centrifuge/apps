@@ -12,7 +12,7 @@ import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
 import { TransactionManager } from '../utils/tx-manager'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
-export const customPools: { [key: string]: string[] } = { mainnet: ['aave'] }
+export const customPools: { [key: string]: string[] } = { mainnet: ['aave'], kovan: [] }
 
 @Injectable()
 export class PoolService {
@@ -39,7 +39,9 @@ export class PoolService {
 
     await this.loadFromIPFS()
 
-    if (!(poolId in this.pools)) throw new Error(`Pool ${poolId} not found`)
+    if (!(poolId in this.pools)) {
+      throw new Error(`Pool ${poolId} not found`)
+    }
     return this.pools[poolId]
   }
 
@@ -95,7 +97,8 @@ export class PoolService {
 
   private async getPoolProfile(poolId: string): Promise<Profile | undefined> {
     // Get pool profile
-    const profileUrl = `https://raw.githubusercontent.com/centrifuge/tinlake-pools-mainnet/main/profiles/${poolId}.json`
+    const network = this.provider.network.name === 'homestead' ? 'mainnet' : this.provider.network.name
+    const profileUrl = `https://raw.githubusercontent.com/centrifuge/tinlake-pools-${network}/main/profiles/${poolId}.json`
     const profileResponse = await fetch(profileUrl)
     if (!profileResponse.ok) return undefined
     const profile = await profileResponse.json()

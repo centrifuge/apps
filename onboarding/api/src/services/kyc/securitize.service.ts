@@ -28,6 +28,14 @@ export class SecuritizeService {
     return url
   }
 
+  getGenericAuthorizationLink(address: string): string {
+    const scope = `info%20details%20verification`
+    const redirectUrl = `${config.onboardApiHost}callback/${address}/securitize`
+    const url = `${config.securitize.idHost}#/authorize?issuerId=${config.securitize.clientId}&scope=${scope}&redirecturl=${redirectUrl}`
+
+    return url
+  }
+
   async processAuthorizationCallback(code: string): Promise<SecuritizeKYCInfo> {
     const url = `${config.securitize.apiHost}v1/${config.securitize.clientId}/oauth2/authorize`
 

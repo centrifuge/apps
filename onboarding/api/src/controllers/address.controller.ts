@@ -140,6 +140,87 @@ export class AddressController {
     }
   }
 
+  @Get('addresses/:address')
+  async getStatusForAddress(@Param() params): Promise<AddressStatus> {
+    const blockchain = 'ethereum' // TODO: take this from the pool config as well
+    const network = 'mainnet'
+
+    const address = await this.addressRepo.findOrCreate(blockchain, network, params.address)
+    if (!address) throw new BadRequestException('Failed to create address')
+
+    const user = await this.userRepo.find(address.userId)
+    if (!user) throw new BadRequestException('Invalid user')
+
+    const authorizationLink = this.securitizeService.getGenericAuthorizationLink(params.address)
+    const kyc = await this.kycRepo.find(address.userId)
+    if (kyc) {
+      let status: KycStatusLabel = kyc.status
+
+      const isEntity = user.entityName?.length > 0
+
+      if (kyc.status !== 'verified' || (kyc.usaTaxResident && !kyc.accredited)) {
+        const investor = await this.securitizeService.getInvestor(kyc.userId, kyc.providerAccountId, kyc.digest)
+
+        if (!investor) {
+          return {
+            kyc: {
+              url: authorizationLink,
+              requiresSignin: true,
+            },
+            agreements: [],
+            linkedAddresses: [],
+          }
+        }
+
+        if (investor.verificationStatus !== kyc.status) {
+          this.kycRepo.setStatus(
+            'securitize',
+            kyc.providerAccountId,
+            investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus,
+            investor.domainInvestorDetails.isUsaTaxResident,
+            investor.domainInvestorDetails.isAccredited
+          )
+          status = investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus
+        }
+      }
+
+      const isWhitelisted = await this.investmentRepo.getWhitelistStatus(address.id, params.poolId)
+
+      // TODO: this should also filter by blockchain and network
+      const addresses = await this.addressRepo.getByUser(address.userId)
+      const otherAddresses = addresses
+        .map((a: AddressEntity) => a.address)
+        .filter((a) => {
+          return a !== address.address
+        })
+
+      // Check country restrictions
+      const restrictedGlobal = config.globalRestrictedCountries.includes(user.countryCode)
+
+      return {
+        restrictedGlobal,
+        kyc: {
+          status,
+          isWhitelisted,
+          isEntity,
+          url: authorizationLink,
+          isUsaTaxResident: kyc.usaTaxResident,
+          accredited: kyc.accredited,
+        },
+        agreements: [],
+        linkedAddresses: otherAddresses,
+      }
+    }
+
+    return {
+      kyc: {
+        url: authorizationLink,
+      },
+      agreements: [],
+      linkedAddresses: [],
+    }
+  }
+
   @Delete('addresses/:address')
   async unlinkAddress(@Param() params, @Query() query): Promise<any> {
     const user = await this.userRepo.findByAddress(params.address)
