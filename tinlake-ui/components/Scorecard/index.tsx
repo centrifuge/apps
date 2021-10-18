@@ -78,7 +78,7 @@ const Scorecard: React.FC<Props> = (props: Props) => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableCell size="5%">#</TableCell>
+                <TableCell size="5%">Risk group</TableCell>
                 <TableCell size="20%">Max Advance Rate</TableCell>
                 <TableCell size="20%">Financing Fee (APR)</TableCell>
                 <TableCell size="20%">Term Recovery Rate</TableCell>
