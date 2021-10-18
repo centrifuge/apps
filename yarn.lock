@@ -2813,9 +2813,9 @@ __metadata:
     "@types/react-dom": ^17
     "@types/react-router": ^4.3.1
     "@types/react-router-dom": ^5.1.5
+    "@wojtekmaj/enzyme-adapter-react-17": 0.6.3
     axios: ^0.19.0
     enzyme: ^3.10.0
-    enzyme-adapter-react-16: ^1.14.0
     enzyme-to-json: ^3.3.4
     ethereumjs-util: 7.0.5
     formik: 1.5.8
@@ -2829,7 +2829,7 @@ __metadata:
     react-dom: ^17.0.2
     react-router-dom: ^4.3.1
     react-scripts: 4.0.3
-    react-test-renderer: ^16.9.0
+    react-test-renderer: ^17.0.2
     styled-components: 4.2.1
     supertest: ^3.1.0
     ts-jest: 26.4.0
@@ -9877,6 +9877,41 @@ __metadata:
     "@webassemblyjs/wast-parser": 1.9.0
     "@xtuc/long": 4.2.2
   checksum: 9f013b27e28b60cb215011079a15c94d1a7b0784eb3b59ec4936f8c0635ecdb58875c6809485cff814e01df170f02c18676cf782826795dc08553b98e69c1049
+  languageName: node
+  linkType: hard
+
+"@wojtekmaj/enzyme-adapter-react-17@npm:0.6.3":
+  version: 0.6.3
+  resolution: "@wojtekmaj/enzyme-adapter-react-17@npm:0.6.3"
+  dependencies:
+    "@wojtekmaj/enzyme-adapter-utils": ^0.1.1
+    enzyme-shallow-equal: ^1.0.0
+    has: ^1.0.0
+    object.assign: ^4.1.0
+    object.values: ^1.1.0
+    prop-types: ^15.7.0
+    react-is: ^17.0.2
+    react-test-renderer: ^17.0.0
+  peerDependencies:
+    enzyme: ^3.0.0
+    react: ^17.0.0-0
+    react-dom: ^17.0.0-0
+  checksum: d0b6bc6969d232a60b29bd9e20d1e77af5522ee4f850545f0dff524ee9c323e6329128adbced74558a7c29ecc08e478da84ea5aacd001a4043faaa82e3ad0000
+  languageName: node
+  linkType: hard
+
+"@wojtekmaj/enzyme-adapter-utils@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "@wojtekmaj/enzyme-adapter-utils@npm:0.1.1"
+  dependencies:
+    function.prototype.name: ^1.1.0
+    has: ^1.0.0
+    object.assign: ^4.1.0
+    object.fromentries: ^2.0.0
+    prop-types: ^15.7.0
+  peerDependencies:
+    react: ^17.0.0-0
+  checksum: 89de687d46d10d1994d7b3916281808b649648532553def2ae123e657aa3e4c9bd13021eb2137b21aa1ab4b58ffde746c89a0c05260f1d7ad57207a87ae08ce1
   languageName: node
   linkType: hard
 
@@ -17426,7 +17461,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enzyme-adapter-react-16@npm:^1.11.0, enzyme-adapter-react-16@npm:^1.14.0":
+"enzyme-adapter-react-16@npm:^1.11.0":
   version: 1.15.6
   resolution: "enzyme-adapter-react-16@npm:1.15.6"
   dependencies:
@@ -17464,7 +17499,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enzyme-shallow-equal@npm:^1.0.1, enzyme-shallow-equal@npm:^1.0.4":
+"enzyme-shallow-equal@npm:^1.0.0, enzyme-shallow-equal@npm:^1.0.1, enzyme-shallow-equal@npm:^1.0.4":
   version: 1.0.4
   resolution: "enzyme-shallow-equal@npm:1.0.4"
   dependencies:
@@ -28273,7 +28308,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object.fromentries@npm:^2.0.0 || ^1.0.0, object.fromentries@npm:^2.0.2, object.fromentries@npm:^2.0.3, object.fromentries@npm:^2.0.4":
+"object.fromentries@npm:^2.0.0, object.fromentries@npm:^2.0.0 || ^1.0.0, object.fromentries@npm:^2.0.2, object.fromentries@npm:^2.0.3, object.fromentries@npm:^2.0.4":
   version: 2.0.5
   resolution: "object.fromentries@npm:2.0.5"
   dependencies:
@@ -30811,7 +30846,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:15.7.2, prop-types@npm:^15.0.0, prop-types@npm:^15.5.4, prop-types@npm:^15.5.8, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2":
+"prop-types@npm:15.7.2, prop-types@npm:^15.0.0, prop-types@npm:^15.5.4, prop-types@npm:^15.5.8, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.0, prop-types@npm:^15.7.2":
   version: 15.7.2
   resolution: "prop-types@npm:15.7.2"
   dependencies:
@@ -31684,7 +31719,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-is@npm:17.0.2, react-is@npm:^17.0.1, react-is@npm:^17.0.2":
+"react-is@npm:17.0.2, react-is@npm:^16.12.0 || ^17.0.0, react-is@npm:^17.0.1, react-is@npm:^17.0.2":
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
   checksum: 3eff23f410d40ab9bc5177f147a92c7f42c356a21ecea340e0554566956d67e5e1ba56f26cc7fa22339ac3c7151744177bd6305eaa26d3cbf15f354358c9d9b6
@@ -32006,6 +32041,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-shallow-renderer@npm:^16.13.1":
+  version: 16.14.1
+  resolution: "react-shallow-renderer@npm:16.14.1"
+  dependencies:
+    object-assign: ^4.1.1
+    react-is: ^16.12.0 || ^17.0.0
+  peerDependencies:
+    react: ^16.0.0 || ^17.0.0
+  checksum: d52cb869e25605b00d4a67ff16598dbbf2826b0f09535de499b2f21a339cabf8b954d4b8855e0e6bdaf0a95603a2b6702e2b47eca8797a7d6bf7e6170ab8b2f3
+  languageName: node
+  linkType: hard
+
 "react-sizeme@npm:^3.0.1":
   version: 3.0.2
   resolution: "react-sizeme@npm:3.0.2"
@@ -32062,7 +32109,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-test-renderer@npm:^16.0.0-0, react-test-renderer@npm:^16.9.0":
+"react-test-renderer@npm:^16.0.0-0":
   version: 16.14.0
   resolution: "react-test-renderer@npm:16.14.0"
   dependencies:
@@ -32073,6 +32120,20 @@ __metadata:
   peerDependencies:
     react: ^16.14.0
   checksum: 0905787bfd68865098743ca2d18d874ef09929b80730131c017ced55bcf7082e84f66ec76685799a759812d376de6db718f6d643a2705779a491003d01d45956
+  languageName: node
+  linkType: hard
+
+"react-test-renderer@npm:^17.0.0, react-test-renderer@npm:^17.0.2":
+  version: 17.0.2
+  resolution: "react-test-renderer@npm:17.0.2"
+  dependencies:
+    object-assign: ^4.1.1
+    react-is: ^17.0.2
+    react-shallow-renderer: ^16.13.1
+    scheduler: ^0.20.2
+  peerDependencies:
+    react: 17.0.2
+  checksum: 9e79031ad20f9c20941aec1eda32d39eb558e9130740013e5a7b53367cf0eb8f7505c8034fec7da47cdcd80b254f20f1311c250bb586323bec7fbf7d97a90a1e
   languageName: node
   linkType: hard
 
