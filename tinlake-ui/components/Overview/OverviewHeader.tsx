@@ -76,11 +76,11 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
     {
       term:
         dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? (
-          <Tooltip id="dropApy" underline>
+          <Tooltip id="seniorApy" underline>
             Senior APY {!isMobile && '(30 days)'}
           </Tooltip>
         ) : (
-          <Tooltip id="dropApr" underline>
+          <Tooltip id="seniorApr" underline>
             Fixed senior rate {!isMobile && '(APR)'}
           </Tooltip>
         ),
@@ -98,7 +98,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
     },
     {
       term: (
-        <Tooltip id="tinApy" underline>
+        <Tooltip id="juniorApy" underline>
           Junior APY {!isMobile && '(90 days)'}
         </Tooltip>
       ),

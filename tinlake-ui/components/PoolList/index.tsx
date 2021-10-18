@@ -95,7 +95,11 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
             ),
           },
           {
-            header: <Tooltip id="dropApy">Senior APY</Tooltip>,
+            header: (
+              <Tooltip id="seniorApy" underline>
+                Senior APY
+              </Tooltip>
+            ),
             subHeader: '30 days',
             cell: (p: PoolData) => {
               const v = feeToInterestRate(p.seniorInterestRate || new BN(0))

@@ -213,7 +213,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           <Box mt="xsmall" mb="xsmall" textAlign="center">
             <div>
               Senior is protected by a{' '}
-              <Tooltip id="tinRiskBuffer" underline>
+              <Tooltip id="juniorRiskBuffer" underline>
                 <span style={{ fontWeight: 'bold' }}>
                   <LoadingValue done={!!currentJuniorRatio}>
                     {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}%
@@ -221,7 +221,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   junior risk buffer
                 </span>
               </Tooltip>{' '}
-              <Tooltip id="minimumTinRiskBuffer" underline>
+              <Tooltip id="minimumJuniorRiskBuffer" underline>
                 <LoadingValue done={!!minJuniorRatio}>
                   ({toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}% minimum)
                 </LoadingValue>
