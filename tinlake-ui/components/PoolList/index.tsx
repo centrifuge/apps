@@ -95,7 +95,7 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
             ),
           },
           {
-            header: <Tooltip id="dropApy">DROP APY</Tooltip>,
+            header: <Tooltip id="dropApy">Senior APY</Tooltip>,
             subHeader: '30 days',
             cell: (p: PoolData) => {
               const v = feeToInterestRate(p.seniorInterestRate || new BN(0))
@@ -111,17 +111,17 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
               )
             },
           },
-          {
-            header: 'TIN APY',
-            subHeader: '3 months',
-            cell: (p: PoolData) =>
-              p.juniorYield90Days === null ? (
-                <Value value="" unit="N/A" />
-              ) : (
-                <Value value={toNumber(p.juniorYield90Days.muln(100), 27)} unit="%" />
-              ),
-          },
         ],
+    showAll && {
+      header: 'Junior APY',
+      subHeader: '90 days',
+      cell: (p: PoolData) =>
+        p.juniorYield90Days === null ? (
+          <Value value="" unit="N/A" />
+        ) : (
+          <Value value={toNumber(p.juniorYield90Days.muln(100), 27)} unit="%" />
+        ),
+    },
   ]
     .filter(Boolean)
     .flat() as Column[]

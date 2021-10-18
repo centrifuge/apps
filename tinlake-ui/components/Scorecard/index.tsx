@@ -11,6 +11,7 @@ import { Box, Wrap } from '../../components/Layout'
 import { Tooltip } from '../../components/Tooltip'
 import { Pool } from '../../config'
 import { createTransaction, TransactionProps } from '../../ducks/transactions'
+import { Fixed27Base } from '../../utils/ratios'
 import { SortableLoan, useAssets } from '../../utils/useAssets'
 import { RiskGroup, usePool } from '../../utils/usePool'
 
@@ -63,10 +64,8 @@ const Scorecard: React.FC<Props> = (props: Props) => {
     <Card interactive>
       <Wrap p={24} gap="small" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}>
         <Risk />
-        <SectionHeading>Portfolio distribution</SectionHeading>
-
         <Tooltip id="riskScorecard" underline>
-          <RiskGroupCount>{existingRiskGroups.length} risk groups in use</RiskGroupCount>
+          <SectionHeading>Portfolio distribution</SectionHeading>
         </Tooltip>
 
         <Caret style={{ marginLeft: 'auto', position: 'relative', top: '0' }}>
@@ -78,11 +77,10 @@ const Scorecard: React.FC<Props> = (props: Props) => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableCell size="8%">Risk group</TableCell>
-                <TableCell size="23%">Max Advance Rate</TableCell>
-                <TableCell size="23%">Financing Fee (APR)</TableCell>
-                <TableCell size="23%">Term Recovery Rate</TableCell>
-                <TableCell size="23%">Portfolio Share</TableCell>
+                <TableCell size="14%">Risk group ID</TableCell>
+                <TableCell size="22%">Financing Fee (APR)</TableCell>
+                <TableCell size="22%">Assumed Defaults</TableCell>
+                <TableCell size="22%">Portfolio Share</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -90,15 +88,17 @@ const Scorecard: React.FC<Props> = (props: Props) => {
                 <TableRow>
                   <TableCell>{riskGroup.id}</TableCell>
                   <TableCell>
-                    {parseFloat(riskGroup.ceilingRatio.div(new BN(10).pow(new BN(25))).toString())}%
-                  </TableCell>
-                  <TableCell>
                     {isValidRatePerSecond(riskGroup.rate.ratePerSecond)
                       ? `${toPrecision(feeToInterestRate(riskGroup.rate.ratePerSecond), 2)}%`
                       : 'N/A'}
                   </TableCell>
                   <TableCell>
-                    {parseFloat(riskGroup.recoveryRatePD.div(new BN(10).pow(new BN(22))).toString()) / 1000}%
+                    {parseFloat(
+                      Fixed27Base.sub(riskGroup.recoveryRatePD)
+                        .div(new BN(10).pow(new BN(22)))
+                        .toString()
+                    ) / 1000}
+                    %
                   </TableCell>
                   <TableCell>
                     {parseFloat(

@@ -1,11 +1,11 @@
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { FormDown } from 'grommet-icons'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Card } from '../../../components/Card'
 import { SectionHeading } from '../../../components/Heading'
 import { Box, Shelf, Stack } from '../../../components/Layout'
+import { LoadingValue } from '../../../components/LoadingValue'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
 import { Value } from '../../../components/Value'
@@ -13,7 +13,6 @@ import { ValuePairList } from '../../../components/ValuePairList'
 import { Pool, UpcomingPool } from '../../../config'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { useTrancheYield } from '../../../utils/hooks'
-import { Fixed27Base } from '../../../utils/ratios'
 import { toPrecision } from '../../../utils/toPrecision'
 import { useAssets } from '../../../utils/useAssets'
 import { usePool } from '../../../utils/usePool'
@@ -59,6 +58,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
     : undefined
 
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
+  const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
   const { dropYield, tinYield } = useTrancheYield(tinlake.contractAddresses.ROOT_CONTRACT)
 
@@ -86,8 +86,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const availableLiquidityVal = isMaker
     ? poolData?.reserve.add(poolData?.maker?.remainingCredit || new BN(0))
     : poolData?.reserve
-
-  const [tinDetailsOpen, setTinDetailsOpen] = React.useState(false)
 
   return (
     <>
@@ -194,26 +192,17 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   },
                   dropYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
                     ? {
-                        term: 'Current yield (30d APY)',
+                        term: 'Senior yield (30d APY)',
                         value: dropYield,
                         valueUnit: '%',
                       }
                     : {
-                        term: 'Fixed DROP rate (APR)',
+                        term: 'Fixed senior rate (APR)',
                         value:
                           poolData?.senior?.interestRate &&
                           toPrecision(feeToInterestRate(poolData?.senior?.interestRate || '0'), 2),
                         valueUnit: '%',
                       },
-                  {
-                    term: (
-                      <Tooltip id={'minimumTinRiskBuffer'} underline>
-                        Minimum risk buffer
-                      </Tooltip>
-                    ),
-                    value: toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2),
-                    valueUnit: '%',
-                  },
                 ]}
               />
             </Stack>
@@ -221,7 +210,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
           <DividerInner>&nbsp;</DividerInner>
 
-          {/* <Box mt="xsmall" mb="xsmall" textAlign="center">
+          <Box mt="xsmall" mb="xsmall" textAlign="center">
             <div>
               Senior is protected by a{' '}
               <Tooltip id="tinRiskBuffer" underline>
@@ -229,7 +218,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   <LoadingValue done={!!currentJuniorRatio}>
                     {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}%
                   </LoadingValue>{' '}
-                  risk buffer
+                  junior risk buffer
                 </span>
               </Tooltip>{' '}
               <Tooltip id="minimumTinRiskBuffer" underline>
@@ -240,7 +229,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             </div>
           </Box>
 
-          <DividerInner>&nbsp;</DividerInner> */}
+          <DividerInner>&nbsp;</DividerInner>
 
           <Card p="medium">
             <Shelf justifyContent="space-between">
@@ -262,91 +251,11 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   }
                   unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
                 />
-                <Caret style={{ position: 'relative', top: '0' }}>
-                  <FormDown style={{ transform: tinDetailsOpen ? 'rotate(-180deg)' : '' }} />
-                </Caret>
               </Shelf>
             </Shelf>
             <Stack gap="small">
               <TrancheNote>TIN token &mdash; Higher risk, variable return</TrancheNote>
 
-              {tinDetailsOpen && (
-                <ValuePairList
-                  variant="tertiary"
-                  items={[
-                    {
-                      term: 'Total risk buffer',
-                      value: toPrecision(
-                        (
-                          Math.round(
-                            parseRatio(
-                              !(poolData?.netAssetValue && poolData?.reserve) ||
-                                (poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
-                                ? new BN(0)
-                                : (poolData?.junior.totalSupply || new BN(0))
-                                    .mul(poolData?.junior.tokenPrice || new BN(0))
-                                    .div((poolData?.netAssetValue || new BN(0)).add(poolData?.reserve || new BN(0)))
-                            ) * 10000
-                          ) / 100
-                        ).toString(),
-                        2
-                      ),
-                      valueUnit: '%',
-                    },
-                    {
-                      term: 'Locked minimum risk buffer',
-                      value: toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2),
-                      valueUnit: '%',
-                    },
-                    {
-                      term: 'Locked Maker vault protection',
-                      value: toPrecision(
-                        (
-                          Math.round(
-                            parseRatio(
-                              poolData?.maker?.creditline && poolData?.netAssetValue.add(poolData?.reserve).gtn(0)
-                                ? (
-                                    poolData?.maker?.creditline.mul(poolData?.maker?.mat.sub(Fixed27Base)) || new BN(0)
-                                  ).div(poolData?.netAssetValue.add(poolData?.reserve) || new BN(0))
-                                : new BN(0)
-                            ) * 10000
-                          ) / 100
-                        ).toString(),
-                        2
-                      ),
-                      valueUnit: '%',
-                    },
-                    {
-                      term: 'Excess risk buffer',
-                      value: toPrecision(
-                        !(poolData?.netAssetValue && poolData?.reserve) ||
-                          (poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
-                          ? '0'
-                          : (
-                              Math.round(
-                                (parseRatio(
-                                  (poolData?.junior.totalSupply.mul(poolData?.junior.tokenPrice) || new BN(0)).div(
-                                    poolData?.netAssetValue.add(poolData?.reserve) || new BN(0)
-                                  )
-                                ) -
-                                  (minJuniorRatio || 0) -
-                                  parseRatio(
-                                    (
-                                      (poolData?.maker?.creditline || new BN(0)).mul(
-                                        (poolData?.maker?.mat || Fixed27Base).sub(Fixed27Base)
-                                      ) || new BN(0)
-                                    ).div(poolData?.netAssetValue.add(poolData?.reserve) || new BN(0))
-                                  )) *
-                                  10000
-                              ) / 100
-                            ).toString(),
-                        2
-                      ),
-                      valueUnit: '%',
-                    },
-                  ]}
-                />
-              )}
               <ValuePairList
                 variant="tertiary"
                 items={[
@@ -359,7 +268,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                   },
                   tinYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
                     ? {
-                        term: 'Current yield (90d APY)',
+                        term: 'Junior yield (90d APY)',
                         value: tinYield,
                         valueUnit: '%',
                       }
@@ -383,15 +292,4 @@ export default InvestmentOverview
 
 const TrancheNote = styled.div`
   color: #777;
-`
-
-const Caret = styled.div`
-  position: relative;
-  display: inline-block;
-  top: 6px;
-  height: 24px;
-  margin-left: 10px;
-  svg {
-    transition: 200ms;
-  }
 `

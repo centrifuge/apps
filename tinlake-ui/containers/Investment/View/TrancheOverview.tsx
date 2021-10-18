@@ -239,13 +239,12 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       <Shelf gap="xsmall" mb="xsmall">
         <TokenLogo src={`/static/${token}_final.svg`} />
         <Heading level="5" margin={'0'}>
-          {token} Token
+          {props.tranche === 'senior' ? 'Senior tranche' : 'Junior tranche'}
         </Heading>
       </Shelf>
       <Box mb="medium">
         <TrancheNote>
-          {props.tranche === 'senior' ? 'Senior tranche' : 'Junior tranche'} —{' '}
-          {props.tranche === 'senior' ? 'Lower risk, stable return' : 'Higher risk, variable return'}
+          {token} token — {props.tranche === 'senior' ? 'Lower risk, stable return' : 'Higher risk, variable return'}
         </TrancheNote>
       </Box>
 
@@ -295,24 +294,31 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell scope="row">Current value</TableCell>
-            <TableCell style={{ textAlign: 'end' }}>
+            <TableCell scope="row" border={poolData?.isPoolAdmin ? undefined : { color: 'transparent' }}>
+              Current value
+            </TableCell>
+            <TableCell
+              style={{ textAlign: 'end' }}
+              border={poolData?.isPoolAdmin ? undefined : { color: 'transparent' }}
+            >
               <LoadingValue done={value !== undefined}>
                 {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 4))}{' '}
                 {props.pool?.metadata.currencySymbol || 'DAI'}
               </LoadingValue>
             </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell scope="row" border={{ color: 'transparent' }}>
-              Yield over time (30d APY)
-            </TableCell>
-            <TableCell border={{ color: 'transparent' }}>
-              <div style={{ width: '75%', marginLeft: 'auto', marginTop: '-16px', maxHeight: '21px' }}>
-                {yieldData !== undefined && yieldData.length > 0 && graphElement}
-              </div>
-            </TableCell>
-          </TableRow>
+          {poolData?.isPoolAdmin && (
+            <TableRow>
+              <TableCell scope="row" border={{ color: 'transparent' }}>
+                Yield over time (30d APY)
+              </TableCell>
+              <TableCell border={{ color: 'transparent' }}>
+                <div style={{ width: '75%', marginLeft: 'auto', marginTop: '-16px', maxHeight: '21px' }}>
+                  {yieldData !== undefined && yieldData.length > 0 && graphElement}
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
       {isMaintainanceMode && (
@@ -473,12 +479,12 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                     [
                       dropYield &&
                         !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero()) && {
-                          term: 'Current DROP yield (30d APY)',
+                          term: 'Current senior yield (30d APY)',
                           value: dropYield,
                           valueUnit: '%',
                         },
                       {
-                        term: 'Fixed DROP rate (APR)',
+                        term: 'Fixed senior rate (APR)',
                         value: toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2),
                         valueUnit: '%',
                       },

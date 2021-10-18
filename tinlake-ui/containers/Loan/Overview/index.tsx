@@ -114,10 +114,15 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
               scope="row"
               style={{ alignItems: 'start', justifyContent: 'center', verticalAlign: 'top' }}
               pad={{ vertical: '6px' }}
+              border={isAdmin ? undefined : { color: 'transparent' }}
             >
               <span>Pool reserve</span>
             </TableCell>
-            <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
+            <TableCell
+              style={{ textAlign: 'end' }}
+              pad={{ vertical: '6px' }}
+              border={isAdmin ? undefined : { color: 'transparent' }}
+            >
               <LoadingValue done={poolData?.reserve !== undefined} height={39}>
                 <>
                   {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.reserve || '0', 18), 0))}{' '}
@@ -130,24 +135,6 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
               </LoadingValue>
             </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell
-              scope="row"
-              style={{ alignItems: 'start', justifyContent: 'center' }}
-              border={isAdmin ? undefined : { color: 'transparent' }}
-            >
-              <span>
-                <Tooltip id="discountRate" underline>
-                  Discount rate
-                </Tooltip>
-              </span>
-            </TableCell>
-            <TableCell style={{ textAlign: 'end' }} border={isAdmin ? undefined : { color: 'transparent' }}>
-              <LoadingValue done={poolData?.discountRate !== undefined}>
-                {toPrecision(feeToInterestRate(poolData?.discountRate || '0'), 2)}%
-              </LoadingValue>
-            </TableCell>
-          </TableRow>
         </TableBody>
       </Table>
 
@@ -155,6 +142,20 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
         <>
           <Table>
             <TableBody>
+              <TableRow>
+                <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+                  <span>
+                    <Tooltip id="discountRate" underline>
+                      Discount rate
+                    </Tooltip>
+                  </span>
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  <LoadingValue done={poolData?.discountRate !== undefined}>
+                    {toPrecision(feeToInterestRate(poolData?.discountRate || '0'), 2)}%
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
               <TableRow>
                 <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
                   <span>Available funds for Financing</span>
