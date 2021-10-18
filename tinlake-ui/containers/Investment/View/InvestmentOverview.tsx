@@ -237,13 +237,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                 <Box as={TokenLogo} src="/static/TIN_final.svg" display={['none', 'inline']} />
                 <SectionHeading>Junior tranche</SectionHeading>
               </Shelf>
-              <Shelf
-                justifyContent="space-between"
-                style={{ marginLeft: 'auto', cursor: 'pointer' }}
-                onClick={() => {
-                  setTinDetailsOpen(!tinDetailsOpen)
-                }}
-              >
+              <Shelf justifyContent="space-between" style={{ marginLeft: 'auto' }}>
                 <Value
                   variant="sectionHeading"
                   value={

@@ -159,11 +159,3 @@ const Caret = styled.div`
     transition: 200ms;
   }
 `
-
-const RiskGroupCount = styled.h4`
-  line-height: 24px;
-  font-size: 14px;
-  margin: 0;
-  padding-top: 4px;
-  color: #555;
-`
