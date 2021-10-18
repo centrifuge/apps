@@ -2809,7 +2809,8 @@ __metadata:
     "@centrifuge/axis-utils": ^0.4.2-develop.a1231ee.147
     "@centrifuge/gateway-lib": "*"
     "@types/jest": 26.0.14
-    "@types/react-dom": ^16.9.8
+    "@types/react": ^17.0.30
+    "@types/react-dom": ^17
     "@types/react-router": ^4.3.1
     "@types/react-router-dom": ^5.1.5
     axios: ^0.19.0
@@ -2824,8 +2825,8 @@ __metadata:
     prettier: ^1.14.2
     qrcode: ^1.4.4
     query-string: ^6.13.6
-    react: ^16.9.0
-    react-dom: ^16.9.0
+    react: ^17.0.2
+    react-dom: ^17.0.2
     react-router-dom: ^4.3.1
     react-scripts: 4.0.3
     react-test-renderer: ^16.9.0
@@ -3047,7 +3048,8 @@ __metadata:
     "@types/lodash": ^4.14.172
     "@types/next": 9.0.0
     "@types/node-fetch": 2.5.7
-    "@types/react": 16.9.34
+    "@types/react": ^17.0.30
+    "@types/react-dom": ^17
     "@types/react-redux": 7.1.8
     "@types/react-test-renderer": 16.9.2
     "@types/recharts": ^1
@@ -3089,9 +3091,9 @@ __metadata:
     node-fetch: 2.6.1
     npm-run-all: 4.1.5
     prop-types: 15.7.2
-    react: 16.13.1
+    react: ^17.0.2
     react-control-panel: 0.8.3
-    react-dom: 16.13.1
+    react-dom: ^17.0.2
     react-number-format: 4.4.1
     react-query: ^3.19.6
     react-redux: 7.2.0
@@ -8720,15 +8722,6 @@ __metadata:
   dependencies:
     "@types/react": "*"
   checksum: 13f73536f49906a322880d084e91be5c83bfe680cf374935ff0ff2195f6a4233cc35c00befe839d7997f1d40505ebdfddf5c2a0fefea28169d6598263e249072
-  languageName: node
-  linkType: hard
-
-"@types/react-dom@npm:^16.9.8":
-  version: 16.9.14
-  resolution: "@types/react-dom@npm:16.9.14"
-  dependencies:
-    "@types/react": ^16
-  checksum: 1264a90515acec40d2397f0755451526d63ba128844279801200d606f1222f208d8b3c4dc20e50c8ba0531b28284065d8fe29241a6a0190b360782f96f2d12ec
   languageName: node
   linkType: hard
 
