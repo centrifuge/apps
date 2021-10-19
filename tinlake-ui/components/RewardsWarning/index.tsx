@@ -26,7 +26,7 @@ export const RewardsWarning: React.FC<Props> = ({ showIfUserHasNoInvestments, ..
   const { data: investorOnboardingData } = useInvestorOnboardingState()
   const { data: portfolio } = usePortfolio()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
-  const hasInvestments = portfolio && !portfolio.totalValue.isZero()
+  const hasInvestments = portfolio && !portfolio.totalValue.isZero() && !portfolio.totalSupplyRemaining.isZero()
 
   const shouldShowWarning =
     ethAddr && ethLink === null && investorOnboardingData?.completed && (showIfUserHasNoInvestments || hasInvestments)
