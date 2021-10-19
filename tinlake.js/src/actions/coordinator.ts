@@ -1,7 +1,6 @@
 import BN from 'bn.js'
 import { calculateOptimalSolution, Orders, SolverResult, SolverWeights, State } from '../services/solver/solver'
 import { Constructor, PendingTransaction, TinlakeParams } from '../Tinlake'
-const web3 = require('web3-utils')
 
 const e27 = new BN(10).pow(new BN(27))
 

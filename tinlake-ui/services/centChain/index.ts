@@ -67,6 +67,7 @@ export class CentChain {
    * @returns txHash string
    */
   public claimCFGRewards(claimerAccountID: string, amount: string, proof: Uint8Array[]): Promise<string> {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       const api = await this.api()
       const extrinsic = api.tx.radClaims.claim(claimerAccountID, amount, proof)

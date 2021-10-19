@@ -7,7 +7,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "build:deps": "cd ../fabric && yarn build && cd ../fabric"
+    "build:deps": "cd ../fabric && yarn build && cd ../fabric",
+    "lint": "eslint -c .eslintrc.js '*/**/*.{js,ts,tsx}'",
+    "lint-fix": "npm run lint -- --fix"
   },
   "dependencies": {
     "@centrifuge/fabric": "workspace:*",
@@ -34,13 +36,12 @@
     "@types/styled-components": "^5",
     "@types/styled-system": "^5",
     "@types/styled-system__css": "^5.0.16",
-    "@types/styled-system__should-forward-prop": "^5"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "@types/styled-system__should-forward-prop": "^5",
+    "@typescript-eslint/eslint-plugin": "4.33.0",
+    "@typescript-eslint/parser": "4.33.0",
+    "eslint": "7.32.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-react": "7.21.5"
   },
   "browserslist": {
     "production": [

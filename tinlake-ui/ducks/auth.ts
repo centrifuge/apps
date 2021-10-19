@@ -225,6 +225,7 @@ export function auth(): ThunkAction<Promise<void>, { auth: AuthState }, undefine
       return await openAuthPromise
     }
 
+    // eslint-disable-next-line no-async-promise-executor
     openAuthPromise = new Promise<void>(async (resolve, reject) => {
       dispatch(setAuthState('authing'))
 

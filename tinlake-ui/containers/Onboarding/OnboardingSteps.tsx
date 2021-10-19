@@ -15,7 +15,7 @@ import ConnectStep from './ConnectStep'
 import InfoBox from './InfoBox'
 import KycStep from './KycStep'
 import LinkStep from './LinkStep'
-import { Step, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
+import { Step as StepComponent, StepBody, StepHeader, StepIcon, StepTitle } from './styles'
 
 interface Props {
   activePool: Pool
@@ -125,7 +125,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
                   whitelistStatus={whitelistStatus}
                   active={activeSteps >= 4}
                 />
-                <Step>
+                <StepComponent>
                   <StepHeader>
                     <StepIcon inactive={activeSteps < 5} />
                     <StepTitle inactive={activeSteps < 5}>
@@ -146,7 +146,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
                       </Box>
                     </StepBody>
                   )}
-                </Step>
+                </StepComponent>
               </>
             )}
           </Card>

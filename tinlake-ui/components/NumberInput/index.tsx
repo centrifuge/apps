@@ -13,16 +13,7 @@ interface Props {
   [key: string]: any
 }
 
-const NumberInput: React.FC<Props> = ({
-  value,
-  precision,
-  prefix,
-  suffix,
-  plain,
-  max,
-  onValueChange,
-  ...rest
-}: Props) => {
+const NumberInput: React.FC<Props> = ({ value, precision, prefix, suffix, max, onValueChange, ...rest }: Props) => {
   return (
     <NumberFormat
       thousandSeparator=","
