@@ -10,11 +10,6 @@ const StyledAnchor = styled.a<{ $disabled?: boolean }>(
     display: 'inline-block',
     textDecoration: 'none',
     outline: '0',
-
-    '&:focus-visible': {
-      boxShadow: 'buttonFocused',
-      borderRadius: 40,
-    },
   }),
   (props) => props.$disabled && { pointerEvents: 'none' }
 )

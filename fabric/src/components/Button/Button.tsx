@@ -14,11 +14,6 @@ const StyledButton = styled.button(
     appearance: 'none',
     background: 'transparent',
     outline: '0',
-
-    '&:focus-visible': {
-      boxShadow: 'buttonFocused',
-      borderRadius: 40,
-    },
   })
 )
 

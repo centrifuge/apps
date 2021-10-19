@@ -76,6 +76,10 @@ export const StyledButton = styled.span<StyledProps>(
       '&:active': {
         boxShadow: $variant !== 'text' ? 'buttonFocused' : 'none',
       },
+
+      'a:focus-visible &, button:focus-visible &': {
+        boxShadow: 'buttonFocused',
+      },
     })
   }
 )
