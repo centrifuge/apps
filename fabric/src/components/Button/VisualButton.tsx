@@ -30,15 +30,9 @@ export type VisualButtonProps = React.PropsWithChildren<{
 }>
 
 type StyledProps = {
-  $bg?: string
-  $fg: string
-  $fgHover?: string
-  $bgHover?: string
-  $borderWidth?: number
-  $small?: string
-  $disabled?: boolean
-  $height?: number
   $variant?: 'contained' | 'outlined' | 'text'
+  $small?: boolean
+  $disabled?: boolean
 }
 
 export const StyledButton = styled.span<StyledProps>(
@@ -54,25 +48,36 @@ export const StyledButton = styled.span<StyledProps>(
     borderStyle: 'solid',
     userSelect: 'none',
   },
-  (props) =>
-    css({
-      color: props.$fg,
-      backgroundColor: props.$bg,
-      borderColor: props.$fg,
-      borderWidth: props.$borderWidth,
-      pointerEvents: props.$disabled ? 'none' : 'initial',
-      height: props.$height,
+  ({ $variant, $disabled, $small }) => {
+    let fg = $disabled ? 'textDisabled' : 'textPrimary'
+    let bg = $variant === 'text' ? 'transparent' : 'backgroundPrimary'
+    let fgHover = 'brand'
+    let bgHover = ''
+    const borderWidth = $variant === 'outlined' ? 1 : 0
+
+    if ($variant === 'contained') {
+      ;[fg, bg, fgHover, bgHover] = [bg, fg, bgHover, fgHover]
+    }
+
+    return css({
+      color: fg,
+      backgroundColor: bg,
+      borderColor: fg,
+      borderWidth: borderWidth,
+      pointerEvents: $disabled ? 'none' : 'initial',
+      minHeight: $small ? 32 : 40,
 
       '&:hover, &:active': {
-        color: props.$fgHover,
-        borderColor: props.$fgHover,
-        backgroundColor: props.$bgHover,
+        color: fgHover,
+        borderColor: fgHover,
+        backgroundColor: bgHover,
       },
 
       '&:active': {
-        boxShadow: props.$variant !== 'text' ? 'buttonFocused' : 'none',
+        boxShadow: $variant !== 'text' ? 'buttonFocused' : 'none',
       },
     })
+  }
 )
 
 const SpinnerWrapper = styled.span<{ $loading?: boolean }>`
@@ -117,38 +122,10 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
   const iconSize = variant !== 'text' || small ? 'iconSmall' : 'iconMedium'
   const disabled = disabledProp || loading
 
-  let fg,
-    bg,
-    fgHover,
-    bgHover,
-    borderWidth = 0
-  if (variant === 'contained') {
-    fg = 'backgroundPrimary'
-    bg = disabled ? 'textDisabled' : 'textPrimary'
-    bgHover = 'brand'
-  } else if (variant === 'outlined') {
-    fg = disabled ? 'textDisabled' : 'textPrimary'
-    bg = 'backgroundPrimary'
-    fgHover = 'brand'
-    borderWidth = 1
-  } else {
-    fg = disabled ? 'textDisabled' : 'textPrimary'
-    fgHover = 'brand'
-  }
-
   return (
-    <StyledButton
-      $variant={variant}
-      $fg={fg}
-      $bg={bg}
-      $fgHover={fgHover}
-      $bgHover={bgHover}
-      $borderWidth={borderWidth}
-      $disabled={disabled}
-      $height={small ? 32 : 40}
-    >
+    <StyledButton $variant={variant} $disabled={disabled} $small={small}>
       <SpinnerWrapper $loading={loading}>
-        <Shelf gap={1} px={2}>
+        <Shelf gap={1} px={2} py={small ? '5px' : '8px'}>
           {IconComp && <IconComp size={iconSize} />}
           {children && (
             <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
