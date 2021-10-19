@@ -28,7 +28,7 @@ const ONE_MILLION = new BN('1000000000000000000000000')
 
 const formatAmount = (amount: BN): string => {
   if (amount.gte(ONE_MILLION)) {
-    return `${addThousandsSeparators(toPrecision(baseToDisplay(amount, 24), 2))}M`
+    return `${addThousandsSeparators(toPrecision(baseToDisplay(amount, 24), 1))}M`
   }
   return `${addThousandsSeparators(toPrecision(baseToDisplay(amount, 21), 0))}K`
 }
@@ -109,16 +109,10 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={poolData?.junior.totalSupply !== undefined}>
-                  {addThousandsSeparators(
-                    toPrecision(
-                      baseToDisplay(
-                        poolData?.junior.totalSupply.mul(poolData?.junior.tokenPrice) || new BN(0),
-                        27 + 18 + 6
-                      ),
-                      1
-                    )
-                  )}
-                  M {props.activePool?.metadata.currencySymbol || 'DAI'}
+                  {formatAmount(
+                    (poolData?.junior.totalSupply.mul(poolData?.junior.tokenPrice) || new BN(0)).div(Fixed27Base)
+                  )}{' '}
+                  {props.activePool?.metadata.currencySymbol || 'DAI'}
                 </LoadingValue>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
@@ -150,16 +144,12 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                 <LoadingValue done={poolData?.netAssetValue !== undefined}>
-                  {addThousandsSeparators(
-                    toPrecision(
-                      baseToDisplay(
-                        poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.minJuniorRatio) || new BN(0),
-                        27 + 18 + 6
-                      ),
-                      1
+                  {formatAmount(
+                    (poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.minJuniorRatio) || new BN(0)).div(
+                      Fixed27Base
                     )
-                  )}
-                  M {props.activePool?.metadata.currencySymbol || 'DAI'}
+                  )}{' '}
+                  {props.activePool?.metadata.currencySymbol || 'DAI'}
                 </LoadingValue>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
@@ -178,16 +168,12 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                   <LoadingValue done={poolData?.maker?.mat !== undefined}>
-                    {addThousandsSeparators(
-                      toPrecision(
-                        baseToDisplay(
-                          poolData?.maker?.creditline.mul(poolData?.maker?.mat.sub(Fixed27Base)) || new BN(0),
-                          27 + 18 + 6
-                        ),
-                        1
+                    {formatAmount(
+                      (poolData?.maker?.creditline.mul(poolData?.maker?.mat.sub(Fixed27Base)) || new BN(0)).div(
+                        Fixed27Base
                       )
-                    )}
-                    M {props.activePool?.metadata.currencySymbol || 'DAI'}
+                    )}{' '}
+                    {props.activePool?.metadata.currencySymbol || 'DAI'}
                   </LoadingValue>
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
@@ -220,23 +206,19 @@ const PoolStatus: React.FC<Props> = (props: Props) => {
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                 <LoadingValue done={poolData?.junior.totalSupply !== undefined}>
-                  {addThousandsSeparators(
-                    toPrecision(
-                      baseToDisplay(
-                        poolData?.junior.totalSupply
-                          .mul(poolData?.junior.tokenPrice)
-                          ?.sub(poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.minJuniorRatio))
-                          .sub(
-                            (poolData?.maker?.creditline || new BN(0)).mul(
-                              (poolData?.maker?.mat || Fixed27Base).sub(Fixed27Base)
-                            )
-                          ) || new BN(0),
-                        27 + 18 + 6
-                      ),
-                      1
-                    )
-                  )}
-                  M {props.activePool?.metadata.currencySymbol || 'DAI'}
+                  {formatAmount(
+                    (
+                      poolData?.junior.totalSupply
+                        .mul(poolData?.junior.tokenPrice)
+                        ?.sub(poolData?.netAssetValue.add(poolData?.reserve).mul(poolData?.minJuniorRatio))
+                        .sub(
+                          (poolData?.maker?.creditline || new BN(0)).mul(
+                            (poolData?.maker?.mat || Fixed27Base).sub(Fixed27Base)
+                          )
+                        ) || new BN(0)
+                    ).div(Fixed27Base)
+                  )}{' '}
+                  {props.activePool?.metadata.currencySymbol || 'DAI'}
                 </LoadingValue>
               </TableCell>
               <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>

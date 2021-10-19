@@ -64,9 +64,8 @@ const Scorecard: React.FC<Props> = (props: Props) => {
     <Card interactive>
       <Wrap p={24} gap="small" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}>
         <Risk />
-        <Tooltip id="riskScorecard" underline>
-          <SectionHeading>Portfolio distribution</SectionHeading>
-        </Tooltip>
+
+        <SectionHeading>Portfolio distribution</SectionHeading>
 
         <Caret style={{ marginLeft: 'auto', position: 'relative', top: '0' }}>
           <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
@@ -77,10 +76,18 @@ const Scorecard: React.FC<Props> = (props: Props) => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableCell size="14%">Risk group ID</TableCell>
-                <TableCell size="22%">Financing Fee (APR)</TableCell>
-                <TableCell size="22%">Assumed Defaults</TableCell>
-                <TableCell size="22%">Portfolio Share</TableCell>
+                <TableCell size="14%">
+                  <Tooltip id="riskGroupID" underline>
+                    Risk group ID
+                  </Tooltip>
+                </TableCell>
+                <TableCell size="22%">Financing fee (APR)</TableCell>
+                <TableCell size="22%">
+                  <Tooltip id="assumedRiskAdjustment" underline>
+                    Assumed risk adjustment
+                  </Tooltip>
+                </TableCell>
+                <TableCell size="22%">Portfolio share</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -80,12 +80,12 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
         </Heading>
         {dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) && (
           <Box>
-            <Type>DROP APY (30 days)</Type>
+            <Type>Senior APY (30 days)</Type>
           </Box>
         )}
         {!(dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))) && (
           <Box>
-            <Type>Fixed DROP rate (APR)</Type>
+            <Type>Fixed senior rate (APR)</Type>
           </Box>
         )}
       </HeaderBox>
@@ -97,7 +97,7 @@ const AOMetrics: React.FC<Props> = (props: Props) => {
             <Unit>%</Unit>
           </Heading>
           <Box>
-            <Type>TIN APY (3 months)</Type>
+            <Type>Junior APY (3 months)</Type>
           </Box>
         </HeaderBox>
       )}

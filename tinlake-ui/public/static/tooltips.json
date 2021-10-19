@@ -74,12 +74,17 @@
   "riskGroup": {
     "title": "Risk group",
     "description": "The risk group of a financing determines the interest rate based on the underlying scorecard.",
-    "link": "https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-1-how-to-price-real-world-assets-cf6655132bef"
+    "link": "https://docs.centrifuge.io/learn/pool-valuation/"
   },
-  "riskScorecard": {
-    "title": "Risk Scorecard",
-    "description": "Assets in a Tinlake pool are assigned to a specific risk group on the scorecard. This sets the Advance Rate, Term Recovery Rate, and Financing Fee.",
-    "link": "https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-1-how-to-price-real-world-assets-cf6655132bef"
+  "riskGroupID": {
+    "title": "Risk group ID",
+    "description": "Underlying every Tinlake pool is a \"risk scorecard\" with different risk groups. Each NFT is assigned to one of these risk groups to determine financing fee and assumed risk adjustment for valuation.",
+    "link": "https://docs.centrifuge.io/learn/pool-valuation/"
+  },
+  "assumedRiskAdjustment": {
+    "title": "Assumed risk adjustment",
+    "description": "This is the assumed risk adjustment applied to outstanding financings of the corresponding risk group to calculate the NAV of the asset portfolio.",
+    "link": "https://docs.centrifuge.io/learn/pool-valuation/"
   },
   "maturityDate": {
     "title": "Maturity date",

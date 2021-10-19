@@ -22,6 +22,15 @@ interface Props extends TransactionProps {
   activePool: Pool
 }
 
+const ONE_MILLION = new BN('1000000000000000000000000')
+
+const formatAmount = (amount: BN): string => {
+  if (amount.gte(ONE_MILLION)) {
+    return `${addThousandsSeparators(toPrecision(baseToDisplay(amount, 24), 1))}M DAI`
+  }
+  return `${addThousandsSeparators(toPrecision(baseToDisplay(amount, 21), 0))}K DAI`
+}
+
 const Liquidity: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const { data: poolData, refetch: refetchPoolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
@@ -228,8 +237,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                   <LoadingValue done={poolData?.maker.line !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.line || new BN(0), 45 + 6), 1))}M
-                    DAI
+                    {formatAmount((poolData?.maker?.line || new BN(0)).div(Fixed27Base))}
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -242,9 +250,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
                   Max Locked Credit Line given TIN
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
-                  <LoadingValue done={maxCreditline !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(maxCreditline, 18 + 6), 1))}M DAI
-                  </LoadingValue>
+                  <LoadingValue done={maxCreditline !== undefined}>{formatAmount(maxCreditline)}</LoadingValue>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -257,10 +263,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                   <LoadingValue done={poolData?.maker.creditline !== undefined}>
-                    {addThousandsSeparators(
-                      toPrecision(baseToDisplay(poolData?.maker?.creditline || new BN(0), 18 + 6), 1)
-                    )}
-                    M DAI
+                    {formatAmount(poolData?.maker?.creditline || new BN(0))}
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -274,8 +277,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }}>
                   <LoadingValue done={poolData?.maker?.debt !== undefined}>
-                    {addThousandsSeparators(toPrecision(baseToDisplay(poolData?.maker?.debt || new BN(0), 18 + 6), 1))}M
-                    DAI
+                    {formatAmount(poolData?.maker?.debt || new BN(0))}
                   </LoadingValue>
                 </TableCell>
               </TableRow>
@@ -290,10 +292,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
                 </TableCell>
                 <TableCell style={{ textAlign: 'end' }} pad={{ vertical: '6px' }} border={{ color: 'transparent' }}>
                   <LoadingValue done={poolData?.maker?.remainingCredit !== undefined}>
-                    {addThousandsSeparators(
-                      toPrecision(baseToDisplay(poolData?.maker?.remainingCredit || new BN(0), 18 + 6), 1)
-                    )}
-                    M DAI
+                    {formatAmount(poolData?.maker?.remainingCredit || new BN(0))}
                   </LoadingValue>
                 </TableCell>
               </TableRow>
