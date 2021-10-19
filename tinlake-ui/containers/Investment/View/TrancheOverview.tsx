@@ -12,7 +12,6 @@ import { Card } from '../../../components/Card'
 import InvestAction from '../../../components/InvestAction'
 import { Box, Shelf } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
-import { RewardsWarning } from '../../../components/RewardsWarning'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
 import { ValuePairList } from '../../../components/ValuePairList'
@@ -299,7 +298,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                   <BottomCardToolbar>{displayInWalletBtn}</BottomCardToolbar>
                 </>
               )}
-              {props.tranche === 'senior' && <RewardsWarning mt="medium" bleedX="medium" />}
               {!epochData?.isBlockedState && (
                 <>
                   {poolData?.poolClosing && (

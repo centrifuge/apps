@@ -6,7 +6,6 @@ import { connect } from 'react-redux'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Box } from '../../../components/Layout'
-import { RewardsWarning } from '../../../components/RewardsWarning'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -109,8 +108,6 @@ const CollectCard: React.FC<Props> = (props: Props) => {
           alt="Order steps"
         />
       </Info>
-
-      {props.tranche === 'senior' && type === 'Invest' && <RewardsWarning mt="medium" bleedX="medium" />}
 
       <ButtonGroup mt="medium">
         <Button primary label="Collect" onClick={collect} disabled={disabled} />

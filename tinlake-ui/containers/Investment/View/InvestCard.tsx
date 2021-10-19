@@ -8,7 +8,6 @@ import { connect, useSelector } from 'react-redux'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { useDebugFlags } from '../../../components/DebugFlags'
-import { RewardsWarning } from '../../../components/RewardsWarning'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import config, { Pool } from '../../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../../ducks/transactions'
@@ -137,7 +136,6 @@ const InvestCard: React.FC<Props> = (props: Props) => {
           rewards once your order has been executed.
         </Warning>
       )}
-      {props.tranche === 'senior' && <RewardsWarning mt="medium" bleedX="medium" />}
       <ButtonGroup mt="medium">
         <Button label="Cancel" onClick={() => props.setCard('home')} disabled={disabled} />
         <Button
