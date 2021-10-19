@@ -30,6 +30,7 @@ export async function unlinkedAddresses() {
   let blockNumber: number | null = null
 
   // subgraph only returns 1000 entries, fetch until no more entries are returned
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const response: any = await fetch(start, limit, blockHash)
     if (blockHash === null) {

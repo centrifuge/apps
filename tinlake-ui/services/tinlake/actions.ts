@@ -95,11 +95,7 @@ async function getOrCreateProxy(tinlake: ITinlake, address: string) {
 
   // create new proxy address in case user did not have one
   if (!proxyAddress) {
-    try {
-      proxyAddress = await tinlake.proxyCreateNew(address)
-    } catch (e) {
-      throw e
-    }
+    proxyAddress = await tinlake.proxyCreateNew(address)
   }
   return proxyAddress
 }
@@ -196,7 +192,9 @@ export async function getProxyOwner(tinlake: ITinlake, loanId: string): Promise<
   let owner = ZERO_ADDRESS
   try {
     owner = (await tinlake.getProxyOwnerByLoan(loanId)).toString()
-  } catch (e) {}
+  } catch (e) {
+    /* do nothing */
+  }
   return { data: owner }
 }
 
@@ -220,7 +218,9 @@ export async function getLoan(tinlake: ITinlake, loanId: string): Promise<Loan |
 export async function addProxyDetails(tinlake: ITinlake, loan: Loan) {
   try {
     loan.proxyOwner = (await tinlake.getProxyOwnerByLoan(loan.loanId)).toString()
-  } catch (e) {}
+  } catch (e) {
+    /* do nothing */
+  }
 }
 
 export async function getLoans(tinlake: ITinlake): Promise<TinlakeResult | PendingTransaction> {

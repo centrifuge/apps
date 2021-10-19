@@ -24,6 +24,7 @@ export const findEvent = (abi: { filter: (arg0: (item: any) => boolean | undefin
   )
 }
 
+// eslint-disable-next-line no-unused-vars
 const getEvents = (
   receipt: {
     logs: { length: number; forEach: (arg0: (log: any) => void) => void }

@@ -51,6 +51,7 @@ export async function dailyTokenPrices({ poolId }: { poolId: string; poolData: P
   let blockNumber: number | null = null
 
   // subgraph only returns 1000 entries, fetch until no more entries are returned
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const response: any = await fetch(poolId, start, limit, blockHash)
     if (blockHash === null) {

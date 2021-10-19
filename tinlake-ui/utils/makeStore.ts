@@ -9,6 +9,7 @@ import transactionReducer from '../ducks/transactions'
 const sentryReduxEnhancer = config.enableErrorLogging ? Sentry.createReduxEnhancer({}) : {}
 
 declare global {
+  // eslint-disable-next-line no-unused-vars
   interface Window {
     __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: any
   }

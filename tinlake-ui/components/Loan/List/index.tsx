@@ -99,7 +99,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
               align: 'center',
               sortable: false,
               size: '36px',
-              render: (_l: SortableLoan) => {
+              render: () => {
                 return <ChevronRight />
               },
             },
@@ -178,7 +178,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
               align: 'center',
               sortable: false,
               size: '36px',
-              render: (_l: SortableLoan) => {
+              render: () => {
                 return <ChevronRight />
               },
             },

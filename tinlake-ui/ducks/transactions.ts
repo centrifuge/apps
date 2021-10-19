@@ -159,7 +159,7 @@ function processTransaction(
     }
 
     // This is a hack to grab a human-friendly error. We should eventually refactor Tinlake.js to return this error directly.
-    const errorMessageRegex = /\"message\"\:\"\s?(.*)[\.?][\"?],/
+    const errorMessageRegex = /"message":"\s?(.*)[.?]["?],/
 
     try {
       const actionCall = actions[unconfirmedTx.actionName as keyof typeof actions]
@@ -199,7 +199,7 @@ function processTransaction(
           Sentry.captureMessage(`Transaction failed: ${unconfirmedTx.actionName}`, { extra: { tx: outcomeTx } })
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Transaction error: ${unconfirmedTx.actionName})`, error)
 
       if (config.enableErrorLogging) {

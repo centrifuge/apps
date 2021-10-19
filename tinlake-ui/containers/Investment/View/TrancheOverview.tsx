@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
-import { Card } from '../../../components/Card'
+import { Card as CardComponent } from '../../../components/Card'
 import InvestAction from '../../../components/InvestAction'
 import { Box, Shelf } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
@@ -164,7 +164,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   }, [hasPendingCollection, hasPendingOrder, router.query])
 
   return (
-    <Card p={24} height="100%" display="flex" flexDirection="column">
+    <CardComponent p={24} height="100%" display="flex" flexDirection="column">
       <Shelf gap="xsmall" mb="xsmall">
         <TokenLogo src={`/static/${token}_final.svg`} />
         <Heading level="5" margin={'0'}>
@@ -432,7 +432,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             <DarkLink href={`mailto:${props.pool.metadata.issuerEmail}`}>contact the issuer</DarkLink>.
           </Info>
         )}
-    </Card>
+    </CardComponent>
   )
 }
 
