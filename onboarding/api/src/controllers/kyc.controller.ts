@@ -85,6 +85,60 @@ export class KycController {
     return res.redirect(redirectUrl)
   }
 
+  @Get('callback/:address/securitize')
+  async securitizeOnboardingCallback(@Param() params, @Query() query, @Res({ passthrough: true }) res) {
+    const blockchain = 'ethereum' // TODO: take this from the pool config as well
+    const network = 'mainnet'
+
+    const address = await this.addressRepo.find(blockchain, network, params.address)
+    if (!address) throw new BadRequestException(`Address ${address} does not exist`)
+
+    // Get info from Securitize
+    const kycInfo = await this.securitizeService.processAuthorizationCallback(query.code)
+    // TODO: redirect to app?
+    if (!kycInfo.providerAccountId) {
+      this.logger.warn('Securitize code has already been used')
+      const redirectUrl = `${config.tinlakeUiHost}onboarding?tranche=${params.tranche || 'senior'}`
+      return res.redirect(redirectUrl)
+    }
+
+    // Update KYC and user records in our database
+    const existingKyc = await this.kycRepo.findByProvider('securitize', kycInfo.providerAccountId)
+    if (existingKyc && existingKyc.userId !== address.userId) {
+      // If this provider account is already linked to a diffferent user, then add this address to that user
+      await this.addressRepo.linkToNewUser(address.id, existingKyc.userId)
+    }
+    const userId = existingKyc?.userId || address.userId
+
+    const investor = await this.securitizeService.getInvestor(userId, kycInfo.providerAccountId, kycInfo.digest)
+    if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
+
+    const kyc = await this.kycRepo.upsertSecuritize(userId, kycInfo.providerAccountId, kycInfo.digest)
+    if (!kyc) throw new BadRequestException('Failed to create KYC entity')
+
+    await this.userRepo.update(
+      userId,
+      investor.email,
+      investor.details.address.countryCode,
+      investor.domainInvestorDetails?.investorFullName,
+      investor.domainInvestorDetails?.entityName
+    )
+
+    this.kycRepo.setStatus(
+      'securitize',
+      kyc.providerAccountId,
+      investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus,
+      investor.domainInvestorDetails.isUsaTaxResident,
+      investor.domainInvestorDetails.isAccredited
+    )
+
+    // Create session and redirect user
+    const session = this.sessionService.create(userId)
+
+    const redirectUrl = `${config.tinlakeUiHost}onboarding?session=${session}&tranche=${params.tranche || 'senior'}`
+    return res.redirect(redirectUrl)
+  }
+
   @Get('pools/:poolId/info-redirect')
   async updateInfoRedirect(@Res({ passthrough: true }) res) {
     return res.redirect(config.securitize.idHost)
