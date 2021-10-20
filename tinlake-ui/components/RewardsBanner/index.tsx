@@ -23,14 +23,14 @@ export const RewardsBanner: React.FC = () => {
       px="medium"
       py={['medium', 'medium', 'small']}
       width="100%"
-      backgroundColor="#0828be"
-      style={{ color: 'white' }}
+      backgroundColor="#cde5ff"
+      style={{ color: 'black' }}
     >
       <Box width="page" maxWidth="100%">
         <Wrap gap="medium" rowGap="small" justifyContent="space-between">
           <Wrap gap="small" rowGap="xsmall" alignItems="flex-start">
             <Shelf gap="4px">
-              <Logo src="/static/cfg-white-transparent.svg" width="32" height="32" />
+              <Logo src="/static/cfg-black-transparent.svg" width="32" height="32" />
               <Text color="inherit" fontWeight={600}>
                 Earn CFG Rewards
               </Text>
