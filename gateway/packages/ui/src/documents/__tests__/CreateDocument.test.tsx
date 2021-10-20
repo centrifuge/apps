@@ -5,6 +5,7 @@ import { act } from 'react-dom/test-utils'
 import { MemoryRouter, Router } from 'react-router'
 import { PageError } from '../../components/PageError'
 import { defaultContacts, defaultSchemas, defaultUser } from '../../test-utilities/default-data'
+import { silenceConsoleWhen } from '../../test-utilities/silenceConsoleWhen'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
 import CreateDocument from '../CreateDocument'
 import DocumentForm from '../DocumentForm'
@@ -16,6 +17,8 @@ jest.mock('../../http-client')
 const httpClient = require('../../http-client').httpClient
 
 describe('Create Document', () => {
+  silenceConsoleWhen(/^Can not load (lists|contacts|document)$/, `document_id' of undefined`)
+
   beforeEach(() => {
     httpClient.contacts.list.mockImplementation(async (data) => {
       return { data: defaultContacts }
