@@ -1,10 +1,13 @@
 import { mount } from 'enzyme'
 import { Heading, Paragraph } from 'grommet'
 import React from 'react'
+import { silenceConsoleWhen } from '../../test-utilities/silenceConsoleWhen'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
 import { PageError } from '../PageError'
 
 describe('Page Error', () => {
+  silenceConsoleWhen((e) => e.isAxiosError, 'Some random error')
+
   it('should display a Error error and message when receiving a normal error', () => {
     const component = mount(withAllProvidersAndContexts(<PageError error={new Error('Some random error')} />))
     expect(component.find(Heading).text()).toEqual('Error')

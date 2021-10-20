@@ -2825,7 +2825,7 @@ __metadata:
     query-string: ^6.13.6
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-router-dom: ^4.3.1
+    react-router-dom: ^5.3.0
     react-scripts: 4.0.3
     react-test-renderer: ^17.0.2
     styled-components: 4.2.1
@@ -21446,7 +21446,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"history@npm:^4.7.2, history@npm:^4.9.0":
+"history@npm:^4.9.0":
   version: 4.10.1
   resolution: "history@npm:4.10.1"
   dependencies:
@@ -21468,13 +21468,6 @@ __metadata:
     minimalistic-assert: ^1.0.0
     minimalistic-crypto-utils: ^1.0.1
   checksum: 729d5a55bf793619830aca5e62d101dfdb4164fe30c056cdcaecb32b1a69a23aa663d88e876d9d56cb69b1c3d95395ea60b0a715763c461188b37dca3dea930d
-  languageName: node
-  linkType: hard
-
-"hoist-non-react-statics@npm:^2.5.0":
-  version: 2.5.5
-  resolution: "hoist-non-react-statics@npm:2.5.5"
-  checksum: 0a9ed7b8bff4b02f2e0ebf2e113ce7cb9153c656c711b33cac09153cd5013deb51277c368291e3fe5f229abae208464b2abda6cd8eb2ea9230b779f2b6dd4355
   languageName: node
   linkType: hard
 
@@ -31836,22 +31829,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^4.3.1":
-  version: 4.3.1
-  resolution: "react-router-dom@npm:4.3.1"
-  dependencies:
-    history: ^4.7.2
-    invariant: ^2.2.4
-    loose-envify: ^1.3.1
-    prop-types: ^15.6.1
-    react-router: ^4.3.1
-    warning: ^4.0.1
-  peerDependencies:
-    react: ">=15"
-  checksum: 04524e647e73a633e2362c9aafeb1b553645935bb7b09793ecd082751ad9630122fd8bd937beda194297be9a7c3e815638f105211f92824dac4535322e842114
-  languageName: node
-  linkType: hard
-
 "react-router-dom@npm:^5.3.0":
   version: 5.3.0
   resolution: "react-router-dom@npm:5.3.0"
@@ -31886,23 +31863,6 @@ __metadata:
   peerDependencies:
     react: ">=15"
   checksum: fd2fb21a46caabd4cc8ebaeb54c1e74733658e90eee50fd585c52e37110576ac479072d919b8a422586c361f7939c2d43dbf6d072700f6c8342808839948088a
-  languageName: node
-  linkType: hard
-
-"react-router@npm:^4.3.1":
-  version: 4.3.1
-  resolution: "react-router@npm:4.3.1"
-  dependencies:
-    history: ^4.7.2
-    hoist-non-react-statics: ^2.5.0
-    invariant: ^2.2.4
-    loose-envify: ^1.3.1
-    path-to-regexp: ^1.7.0
-    prop-types: ^15.6.1
-    warning: ^4.0.1
-  peerDependencies:
-    react: ">=15"
-  checksum: 24a7f2d2dbe79a83d47f2116063e3f8145ec7952fff5dd102def08cae2a9ec295014dee6cd3f39a27dcd12b7e3cbf8132dcf9445a9c3a53b37ed504de3195413
   languageName: node
   linkType: hard
 
@@ -37963,7 +37923,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"warning@npm:^4.0.1, warning@npm:^4.0.2, warning@npm:^4.0.3":
+"warning@npm:^4.0.2, warning@npm:^4.0.3":
   version: 4.0.3
   resolution: "warning@npm:4.0.3"
   dependencies:

@@ -4,6 +4,7 @@ import { Anchor, CheckBox, DataTable } from 'grommet'
 import React from 'react'
 import { act } from 'react-dom/test-utils'
 import { PageError } from '../../components/PageError'
+import { silenceConsoleWhen } from '../../test-utilities/silenceConsoleWhen'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
 import SchemaForm from '../SchemaForm'
 import SchemaList from '../SchemaList'
@@ -27,6 +28,8 @@ describe('Schema List', () => {
       archived: true,
     },
   ]
+
+  silenceConsoleWhen('Failed to load!')
 
   beforeEach(() => {
     httpClient.schemas.list.mockImplementation(async (data) => {

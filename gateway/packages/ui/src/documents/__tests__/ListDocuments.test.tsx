@@ -6,6 +6,7 @@ import { MemoryRouter } from 'react-router'
 import { Link } from 'react-router-dom'
 import { PageError } from '../../components/PageError'
 import { defaultSchemas, defaultUser } from '../../test-utilities/default-data'
+import { silenceConsoleWhen } from '../../test-utilities/silenceConsoleWhen'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
 import { ListDocuments } from '../ListDocuments'
 import documentRoutes from '../routes'
@@ -77,6 +78,8 @@ describe('List Documents', () => {
       return { data: defaultSchemas }
     })
   })
+
+  silenceConsoleWhen('Failed to load!')
 
   it('should display a page Error', async () => {
     await act(async () => {
