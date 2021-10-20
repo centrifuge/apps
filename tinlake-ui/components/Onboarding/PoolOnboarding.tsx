@@ -5,7 +5,6 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import config, { Pool } from '../../config'
-import { ExplainerCard } from '../../containers/Investment/View/styles'
 import { AuthState } from '../../ducks/auth'
 import { useAddress } from '../../utils/useAddress'
 import { useOnboardingState } from '../../utils/useOnboardingState'
@@ -19,6 +18,7 @@ import ConnectStep from './ConnectStep'
 import { Header } from './Header'
 import KycStep from './KycStep'
 import LinkStep from './LinkStep'
+import { MultipleAddressesNotice } from './MultipleAddressesNotice'
 import { Step } from './Step'
 import { StepParagraph } from './StepParagraph'
 
@@ -80,12 +80,12 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
       setActiveStep(3)
     } else if (agreementStatus === 'none') {
       setActiveStep(4)
-    } else if (kycStatus === 'processing' && !whitelistStatus) {
-      setActiveStep(4)
-    } else if (kycStatus === 'processing' && agreementStatus === 'signed') {
-      setActiveStep(4)
     } else if (kycStatus === 'processing' && agreementStatus === 'countersigned') {
       setActiveStep(3)
+    } else if (kycStatus === 'processing' && agreementStatus === 'signed') {
+      setActiveStep(4)
+    } else if (kycStatus === 'processing' && !whitelistStatus) {
+      setActiveStep(4)
     } else if ((kycStatus === 'verified' && agreementStatus === 'signed') || !whitelistStatus) {
       setActiveStep(4)
     } else {
@@ -116,9 +116,10 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
           ) : (
             <>
               {onboarding.data?.linkedAddresses && onboarding.data?.linkedAddresses.length > 0 && (
-                <ExplainerCard>
-                  Your Securitize account is linked to {onboarding.data?.linkedAddresses.join(', ')} and {address}.
-                </ExplainerCard>
+                <MultipleAddressesNotice
+                  linkedAddresses={onboarding.data?.linkedAddresses}
+                  connectedAddress={address!}
+                />
               )}
               <div>
                 <ConnectStep state={getState(1, activeStep)} />
@@ -129,6 +130,7 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
                       state={getState(3, activeStep)}
                       onboardingData={onboarding.data}
                       kycStatus={kycStatus}
+                      agreementStatus={agreementStatus}
                       accreditationStatus={accreditationStatus}
                     />
                   </>

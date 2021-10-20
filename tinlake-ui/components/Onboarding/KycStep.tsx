@@ -11,13 +11,14 @@ interface Props {
   onboardingData: Pick<AddressStatus, 'kyc'> | undefined
   kycStatus: KycStatusLabel | 'requires-signin' | undefined
   accreditationStatus: boolean
+  agreementStatus?: 'none' | 'signed' | 'countersigned' | 'declined' | 'voided'
 }
 
 // TODO: Redirect to onboard API URL that isn't pool dependant
 const placeholderPoolId = '0x560Ac248ce28972083B718778EEb0dbC2DE55740'
 const onboardURL = `${config.onboardAPIHost}pools/${placeholderPoolId}/info-redirect`
 
-const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditationStatus }) => {
+const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditationStatus, agreementStatus }) => {
   const active = state === 'active'
 
   return (
@@ -37,14 +38,22 @@ const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditat
       }
       icon={kycStatus === 'processing' ? 'clock' : undefined}
     >
-      {active && kycStatus === 'processing' && (
-        <StepParagraph icon="clock">Submitted KYC is being verified</StepParagraph>
-      )}
+      {active &&
+        kycStatus === 'processing' &&
+        (agreementStatus === 'countersigned' ? (
+          <>
+            <StepParagraph icon="clock">KYC review is still pending. Check your account</StepParagraph>
+            <Button primary label="Check Securitize profile" href={onboardURL} target="_blank" />
+          </>
+        ) : (
+          <StepParagraph icon="clock">Submitted KYC is being verified</StepParagraph>
+        ))}
       {active && kycStatus && ['none', 'updates-required', 'expired'].includes(kycStatus) && (
         <>
           <StepParagraph>
-            Submit your KYC information through Securitize for verification. This is a one time process to become an
-            eligible investor for all Tinlake pools.
+            {kycStatus === 'updates-required'
+              ? 'Your submitted KYC requires an update.'
+              : 'Submit your KYC information through Securitize for verification. This is a one time process to become an eligible investor for all Tinlake pools.'}
           </StepParagraph>
           <Button
             primary

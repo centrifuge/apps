@@ -5,7 +5,6 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import config from '../../config'
-import { ExplainerCard } from '../../containers/Investment/View/styles'
 import { AuthState } from '../../ducks/auth'
 import { useAddress } from '../../utils/useAddress'
 import { useInvestorOnboardingState } from '../../utils/useOnboardingState'
@@ -17,6 +16,7 @@ import ConnectStep from './ConnectStep'
 import { Header } from './Header'
 import KycStep from './KycStep'
 import LinkStep from './LinkStep'
+import { MultipleAddressesNotice } from './MultipleAddressesNotice'
 import { Step } from './Step'
 import { StepParagraph } from './StepParagraph'
 
@@ -79,9 +79,10 @@ export const InvestorOnboarding: React.FC<Props> = () => {
           ) : (
             <>
               {onboarding.data?.linkedAddresses && onboarding.data?.linkedAddresses.length > 0 && (
-                <ExplainerCard>
-                  Your Securitize account is linked to {onboarding.data?.linkedAddresses.join(', ')} and {address}.
-                </ExplainerCard>
+                <MultipleAddressesNotice
+                  linkedAddresses={onboarding.data?.linkedAddresses}
+                  connectedAddress={address!}
+                />
               )}
               <div>
                 <ConnectStep state={getState(1, activeStep)} />
