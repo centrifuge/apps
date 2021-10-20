@@ -2,12 +2,17 @@
   "name": "@centrifuge/nft-studio",
   "private": true,
   "scripts": {
-    "start": "react-scripts start",
+    "start": "yarn build:deps && yarn start:dev",
+    "start:dev": "SKIP_PREFLIGHT_CHECK=true react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build:deps": "cd ../fabric && yarn build && cd ../fabric",
+    "lint": "eslint -c .eslintrc.js '*/**/*.{js,ts,tsx}'",
+    "lint-fix": "npm run lint -- --fix"
   },
   "dependencies": {
+    "@centrifuge/fabric": "workspace:*",
     "@polkadot/api": "^6.2.1",
     "@polkadot/extension-dapp": "^0.40.3",
     "@polkadot/react-identicon": "^0.85.4",
@@ -24,20 +29,19 @@
     "styled-system": "^5.1.5"
   },
   "devDependencies": {
-    "@types/react": "^17",
+    "@types/react": "^17.0.30",
     "@types/react-dom": "^17",
     "@types/react-router": "^5",
     "@types/react-router-dom": "^5",
     "@types/styled-components": "^5",
     "@types/styled-system": "^5",
     "@types/styled-system__css": "^5.0.16",
-    "@types/styled-system__should-forward-prop": "^5"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "@types/styled-system__should-forward-prop": "^5",
+    "@typescript-eslint/eslint-plugin": "4.33.0",
+    "@typescript-eslint/parser": "4.33.0",
+    "eslint": "7.32.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-react": "7.21.5"
   },
   "browserslist": {
     "production": [

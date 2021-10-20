@@ -37,8 +37,8 @@ interface Props extends WithRouterProps {
 }
 
 interface Column {
-  header: string | JSX.Element
-  cell: (row: any) => JSX.Element
+  header: string | React.ReactNode
+  cell: (row: any) => React.ReactNode
   subHeader?: string
 }
 

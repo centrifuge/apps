@@ -18,7 +18,7 @@ interface PropsWithoutID extends BaseProps {
   description?: string
 }
 
-interface Tooltip {
+interface ITooltip {
   title: string
   link?: string
   description?: string
@@ -42,7 +42,7 @@ const Wrapper = styled.span<{ underline?: boolean; fix?: boolean }>`
 let serverHandoffComplete = false
 
 export const Tooltip: React.FC<Props> = (props: Props) => {
-  const { title, link, description } = 'id' in props ? (tooltips[props.id] as Tooltip) : props
+  const { title, link, description } = 'id' in props ? (tooltips[props.id] as ITooltip) : props
   const [fix, setFix] = React.useState(serverHandoffComplete ? false : true)
 
   React.useEffect(() => {
