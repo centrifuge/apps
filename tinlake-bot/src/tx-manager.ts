@@ -70,7 +70,11 @@ class TransactionManager extends ethers.Signer {
       return
     }
 
-    const txWithFee = { ...request, maxFeePerGas: this.config.maxFeePerGas, maxPriorityFeePerGas }
+    const txWithFee = {
+      ...request,
+      maxFeePerGas: ethers.utils.parseUnits(String(this.config.maxFeePerGas), 'gwei'),
+      maxPriorityFeePerGas: ethers.utils.parseUnits(String(maxPriorityFeePerGas), 'gwei'),
+    }
     console.log(`Submitting ${key} with max priority fee of ${maxPriorityFeePerGas}`)
     if (increases > 0)
       console.log(
