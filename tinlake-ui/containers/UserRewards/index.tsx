@@ -1,9 +1,9 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Anchor, Box as GrommetBox, Button, Heading } from 'grommet'
+import { Anchor, Box, Button, Heading } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Card } from '../../components/Card'
 import { useDebugFlags } from '../../components/DebugFlags'
@@ -12,8 +12,8 @@ import { Shelf } from '../../components/Layout'
 import { LoadingValue } from '../../components/LoadingValue'
 import NumberDisplay from '../../components/NumberDisplay'
 import PageTitle from '../../components/PageTitle'
-import { RewardsWarning } from '../../components/RewardsWarning'
 import { ensureAuthed, useAuth } from '../../ducks/auth'
+import { CentChainWalletState } from '../../ducks/centChainWallet'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { shortAddr } from '../../utils/shortAddr'
@@ -22,27 +22,31 @@ import { toPrecision } from '../../utils/toPrecision'
 import { useGlobalRewards } from '../../utils/useGlobalRewards'
 import { usePortfolio } from '../../utils/usePortfolio'
 import { UserRewardsData, UserRewardsLink, useUserRewards } from '../../utils/useUserRewards'
+import CentChainWalletDialog from '../CentChainWalletDialog'
 import ClaimRewards from '../ClaimRewards'
+import SetCentAccount from '../SetCentAccount'
 
 const UserRewards: React.FC = () => {
   const { data: userRewards } = useUserRewards()
   const rewards = useGlobalRewards()
+  const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const { address: ethAddr } = useAuth()
   const portfolio = usePortfolio()
   const portfolioValue = portfolio.data?.totalValue
   const dispatch = useDispatch()
-
   const router = useRouter()
+
+  const [showLink, setShowLink] = React.useState(!!router.query.link)
 
   const { showRewardsInfo } = useDebugFlags()
 
   const connect = () => dispatch(ensureAuthed())
 
   return (
-    <GrommetBox margin={{ top: 'medium' }}>
+    <Box margin={{ top: 'medium' }}>
       <PageTitle page="Claim Your CFG Rewards" return />
 
-      <GrommetBox direction="row" align="start" justify="between" wrap>
+      <Box direction="row" align="start" justify="between" wrap>
         <ColLeft flex>
           {ethAddr && (
             <Shelf
@@ -81,55 +85,61 @@ const UserRewards: React.FC = () => {
 
           {!ethAddr && (
             <Card>
-              <GrommetBox pad="medium">
+              <Box pad="medium">
                 <Head>Connect your Ethereum Account</Head>
                 Please connect with the Ethereum Account holding your Tinlake investment to claim your CFG rewards.
                 <Button primary label="Connect" margin={{ left: 'auto', top: 'large' }} onClick={connect} />
-              </GrommetBox>
+              </Box>
             </Card>
           )}
 
-          {ethAddr && userRewards?.links && userRewards.links.length > 0 ? (
-            <Card>
-              <GrommetBox direction="row" pad={{ horizontal: 'medium', top: 'medium', bottom: 'medium' }}>
-                <GrommetBox flex={true}>
-                  <Head>Claim Your CFG Rewards</Head>
-
-                  {comebackDate(userRewards?.nonZeroInvestmentSince)}
-                </GrommetBox>
-                <RewardRecipients recipients={userRewards?.links} />
-              </GrommetBox>
-              {showClaimStripe(userRewards) && (
-                <ClaimRewards
-                  activeLink={userRewards.links[userRewards.links.length - 1]}
-                  portfolioValue={portfolioValue}
-                />
-              )}
-            </Card>
-          ) : (
-            <Card>
-              <GrommetBox pad="medium">
-                <Head>Earn rewards by investing in pools</Head>
-                {userRewards?.totalEarnedRewards?.isZero() && (
-                  <div>
-                    You don’t have any active Tinlake investments. To start earning CFG rewards, start investing in
-                    Tinlake now.
-                  </div>
+          {ethAddr &&
+            userRewards?.links &&
+            userRewards.links.length === 0 &&
+            (userRewards?.totalEarnedRewards?.isZero() && !showLink ? (
+              <Card>
+                <Box pad="medium">
+                  <Head>Start Investing to Earn Rewards</Head>
+                  You don’t have any active Tinlake investments. To start earning CFG rewards, start investing in
+                  Tinlake now.
+                  <br />
+                  <br />
+                  <Anchor onClick={() => setShowLink(true)} style={{ fontSize: 11 }}>
+                    Link Centrifuge Chain account
+                  </Anchor>
+                  <Button
+                    label="Explore Pools"
+                    primary
+                    onClick={() => router.push('/')}
+                    margin={{ left: 'auto', top: 'medium' }}
+                  />
+                </Box>
+              </Card>
+            ) : (
+              <>
+                {!(cWallet.state === 'connected' && cWallet.accounts.length >= 1) && (
+                  <Card>
+                    <Box pad="medium">
+                      <Head>Link Your Centrifuge Chain Account</Head>
+                      <CentChainWalletDialog />
+                    </Box>
+                  </Card>
                 )}
-                <RewardsWarning showIfUserHasNoInvestments bleedX="medium" mt="small" />
-                <Button
-                  label="Explore Pools"
-                  primary
-                  onClick={() => router.push('/')}
-                  margin={{ left: 'auto', top: 'medium' }}
-                />
-              </GrommetBox>
-            </Card>
-          )}
+
+                {cWallet.state === 'connected' && cWallet.accounts.length >= 1 && (
+                  <Card>
+                    <Box pad="medium">
+                      <Head>Link Your Centrifuge Chain Account</Head>
+                      <SetCentAccount />
+                    </Box>
+                  </Card>
+                )}
+              </>
+            ))}
 
           {showRewardsInfo && (
-            <GrommetBox margin={{ bottom: 'large' }} round="xsmall" background="neutral-3">
-              <GrommetBox pad="medium">
+            <Box margin={{ bottom: 'large' }} round="xsmall" background="neutral-3">
+              <Box pad="medium">
                 <h3>Debug:</h3>
                 <ul>
                   <li>Non-zero investment since: {userRewards?.nonZeroInvestmentSince?.toString() || 'null'}</li>
@@ -160,16 +170,35 @@ const UserRewards: React.FC = () => {
                     </li>
                   ))}
                 </ul>
-              </GrommetBox>
-            </GrommetBox>
+              </Box>
+            </Box>
+          )}
+
+          {ethAddr && userRewards?.links && userRewards.links.length > 0 && (
+            <Card>
+              <Box direction="row" pad={{ horizontal: 'medium', top: 'medium', bottom: 'medium' }}>
+                <Box flex={true}>
+                  <Head>Claim Your CFG Rewards</Head>
+
+                  {comebackDate(userRewards?.nonZeroInvestmentSince)}
+                </Box>
+                <RewardRecipients recipients={userRewards?.links} />
+              </Box>
+              {showClaimStripe(userRewards) && (
+                <ClaimRewards
+                  activeLink={userRewards.links[userRewards.links.length - 1]}
+                  portfolioValue={portfolioValue}
+                />
+              )}
+            </Card>
           )}
         </ColLeft>
         <ColRight margin={{ left: 'xlarge' }}>
           <Card mb="large">
-            <GrommetBox direction="row" background="#FCBA59" style={{ borderRadius: '6px 6px 0 0' }} pad={'14px 24px'}>
+            <Box direction="row" background="#FCBA59" style={{ borderRadius: '6px 6px 0 0' }} pad={'14px 24px'}>
               <TokenLogoBig src="/static/cfg-white.svg" />
               <h3 style={{ margin: 0 }}>System-wide Rewards</h3>
-            </GrommetBox>
+            </Box>
             <MetricRow
               loading={!rewards.data}
               value={baseToDisplay(rewards.data?.todayReward || '0', 18)}
@@ -214,8 +243,8 @@ const UserRewards: React.FC = () => {
 
           <Explainer />
         </ColRight>
-      </GrommetBox>
-    </GrommetBox>
+      </Box>
+    </Box>
   )
 }
 
@@ -290,10 +319,10 @@ const Head = ({ children }: React.PropsWithChildren<{}>) => (
   </Heading>
 )
 
-const ColLeft = styled(GrommetBox)`
+const ColLeft = styled(Box)`
   flex: 1 1 600px;
 `
-const ColRight = styled(GrommetBox)`
+const ColRight = styled(Box)`
   flex: 1 1 250px;
   @media (max-width: 899px) {
     margin: 32px 0 0;
@@ -301,11 +330,11 @@ const ColRight = styled(GrommetBox)`
 `
 
 const Explainer = () => (
-  <GrommetBox background="#eee" pad="medium" round="xsmall" style={{ color: '#555555' }}>
-    <GrommetBox direction="row" pad={'0 0 14px'}>
+  <Box background="#eee" pad="medium" round="xsmall" style={{ color: '#555555' }}>
+    <Box direction="row" pad={'0 0 14px'}>
       <HelpIcon src="/static/help-circle.svg" />
       <h3 style={{ margin: 0 }}>How it works</h3>
-    </GrommetBox>
+    </Box>
     CFG rewards are earned on Ethereum based on your Tinlake investments but claimed on Centrifuge Chain. To claim your
     rewards you need to link your Tinlake investment account to a Centrifuge Chain account receiving and holding your
     CFG.
@@ -320,7 +349,7 @@ const Explainer = () => (
     <Anchor href="https://docs.centrifuge.io/build/cent-chain/" target="_blank">
       What is Centrifuge Chain?
     </Anchor>
-  </GrommetBox>
+  </Box>
 )
 
 const RewardRecipients = ({ recipients }: { recipients: UserRewardsLink[] }) => (
@@ -384,7 +413,7 @@ const Metric = ({
   borderRight?: boolean
 }) => {
   return (
-    <GrommetBox pad={{ horizontal: 'medium' }} style={{ borderRight: borderRight ? '1px solid #f2f2f2' : undefined }}>
+    <Box pad={{ horizontal: 'medium' }} style={{ borderRight: borderRight ? '1px solid #f2f2f2' : undefined }}>
       <LabeledValue
         variant="large"
         icon={{ DAI: `/static/dai.svg`, CFG: `/static/cfg-white.svg` }[token]}
@@ -396,7 +425,7 @@ const Metric = ({
         unit={{ DAI: 'DAI', CFG: 'CFG' }[token]}
         label={label}
       />
-    </GrommetBox>
+    </Box>
   )
 }
 
@@ -423,15 +452,15 @@ const MetricRow = ({
   borderBottom?: boolean
   suffix?: React.ReactNode
 }) => (
-  <GrommetBox
+  <Box
     margin={{ horizontal: 'medium' }}
     pad={{ vertical: 'small' }}
     style={{ borderBottom: borderBottom ? '1px solid #f2f2f2' : undefined }}
     direction="row"
     justify="between"
   >
-    <GrommetBox>{label}</GrommetBox>
-    <GrommetBox direction="row">
+    <Box>{label}</Box>
+    <Box direction="row">
       <div style={{ fontWeight: 500 }}>
         <LoadingValue
           done={!loading}
@@ -444,8 +473,8 @@ const MetricRow = ({
         {{ DAI: 'DAI', CFG: 'CFG' }[token]}
         {suffix}
       </div>
-    </GrommetBox>
-  </GrommetBox>
+    </Box>
+  </Box>
 )
 
 const HelpIcon = styled.img`

@@ -11,7 +11,6 @@ import { Card } from '../Card'
 import InvestAction from '../InvestAction'
 import { Box, Grid, Stack, Wrap } from '../Layout'
 import PageTitle from '../PageTitle'
-import { RewardsWarning } from '../RewardsWarning'
 import OverviewHeader from './OverviewHeader'
 
 interface Props {
@@ -36,7 +35,6 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
 
   return (
     <Stack gap="xlarge" mt="xlarge">
-      <RewardsWarning />
       {!isUpcomingPool(selectedPool) && (
         <div>
           <PageTitle

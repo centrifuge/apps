@@ -11,7 +11,6 @@ import { Stack } from '../../components/Layout'
 import NumberDisplay from '../../components/NumberDisplay'
 import { Row } from '../../components/PoolList'
 import { Desc, EmptyParagraph, Header, HeaderCol, HeaderTitle } from '../../components/PoolList/styles'
-import { RewardsWarning } from '../../components/RewardsWarning'
 import { Tooltip } from '../../components/Tooltip'
 import { Value } from '../../components/Value'
 import { IpfsPools, Pool } from '../../config'
@@ -104,7 +103,6 @@ const Portfolio: React.FC<Props> = (props: Props) => {
   return (
     <Box margin={{ top: 'medium' }}>
       <Box margin={{ bottom: 'medium' }}>
-        <RewardsWarning my="medium" />
         <Box direction="row" justify="between">
           <Box direction="row" align="center">
             <Heading level={2} size="20px">

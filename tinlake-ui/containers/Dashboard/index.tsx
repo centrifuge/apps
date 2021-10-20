@@ -8,7 +8,6 @@ import { useDebugFlags } from '../../components/DebugFlags'
 import { Box, Stack, Wrap } from '../../components/Layout'
 import PoolList from '../../components/PoolList'
 import PoolsMetrics from '../../components/PoolsMetrics'
-import { RewardsWarning } from '../../components/RewardsWarning'
 import { Text } from '../../components/Text'
 import TinlakeExplainer from '../../components/TinlakeExplainer'
 import { IpfsPools } from '../../config'
@@ -55,8 +54,6 @@ const Dashboard: React.FC<Props> = () => {
           <TinlakeExplainer />
         </Box>
       )}
-
-      <RewardsWarning />
 
       <PoolsMetrics totalValue={pools.data.totalValue} />
       <PoolList poolsData={pools.data} />

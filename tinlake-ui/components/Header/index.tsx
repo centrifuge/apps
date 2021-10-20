@@ -18,6 +18,7 @@ import { useCFGRewards } from '../../utils/useCFGRewards'
 import { usePool } from '../../utils/usePool'
 import { usePortfolio } from '../../utils/usePortfolio'
 import { ClientOnlyRender } from '../ClientOnlyRender'
+import { RewardsBanner } from '../RewardsBanner'
 import { Tooltip } from '../Tooltip'
 import { Web3Wallet } from '../Web3Wallet'
 
@@ -37,6 +38,7 @@ interface Props {
   menuItems: MenuItem[]
   logoUrl?: string
   hideHoldings?: boolean
+  hideRewardsBanner?: boolean
 }
 
 const Header: React.FC<Props> = (props: Props) => {
@@ -237,6 +239,7 @@ const Header: React.FC<Props> = (props: Props) => {
           )}
         </MobileNav>
       </HeaderBar>
+      {!props.hideRewardsBanner && <RewardsBanner />}
     </ClientOnlyRender>
   )
 }
