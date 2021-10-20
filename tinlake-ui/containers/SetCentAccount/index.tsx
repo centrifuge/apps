@@ -31,9 +31,7 @@ const HelpText = styled.span`
 `
 
 const LinkingWarning = styled(Warning)`
-  margin: 16px 0;
-  left: 0;
-  width: auto;
+  margin: 16px;
 `
 
 const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: TransactionProps) => {
