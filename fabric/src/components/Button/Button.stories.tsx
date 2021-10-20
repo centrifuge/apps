@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { AnchorButton as AnchorButtonComp, Button as ButtonComp } from '.'
+import { AnchorButton as AnchorButtonComp, Button as ButtonComp, VisualButton } from '.'
 import { IconChevronDown, IconClock } from '../../icon'
 import { Grid } from '../Grid'
 import { Shelf } from '../Shelf'
@@ -8,9 +8,9 @@ import { Shelf } from '../Shelf'
 export default {
   title: 'Components/Button',
   component: ButtonComp,
-} as ComponentMeta<typeof ButtonComp>
+} as ComponentMeta<typeof VisualButton>
 
-type ButtonStory = ComponentStory<typeof ButtonComp>
+type ButtonStory = ComponentStory<typeof VisualButton>
 
 const Template: ButtonStory = (args) => (
   <Grid columns={5} gap={3} justifyItems="start" maxWidth={800} equalColumns>
@@ -42,13 +42,15 @@ Button.args = {
   loading: false,
 }
 
-export const AnchorButton = (args) => (
+export const AnchorButton: ButtonStory = (args) => (
   <Shelf gap={3}>
-    <AnchorButtonComp {...args}>External link</AnchorButtonComp>
-    <AnchorButtonComp {...args} variant="outlined">
+    <AnchorButtonComp href="https://centrifuge.io" {...args}>
       External link
     </AnchorButtonComp>
-    <AnchorButtonComp {...args} variant="text">
+    <AnchorButtonComp href="https://centrifuge.io" {...args} variant="outlined">
+      External link
+    </AnchorButtonComp>
+    <AnchorButtonComp href="https://centrifuge.io" {...args} variant="text">
       External link
     </AnchorButtonComp>
   </Shelf>
@@ -56,5 +58,4 @@ export const AnchorButton = (args) => (
 AnchorButton.args = {
   disabled: false,
   loading: false,
-  href: 'https://centrifuge.io',
 }
