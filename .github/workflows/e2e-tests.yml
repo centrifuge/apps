@@ -6,6 +6,11 @@ on:
   push:
     branches:
       - non-existent-branch-with-long-name
+jobs:
+  test:
+    if: false
+    steps:
+      - run: echo "I shouldn't happen"
 # on:
 #   push:
 #     branches:
