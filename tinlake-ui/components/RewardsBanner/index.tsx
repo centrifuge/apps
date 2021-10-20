@@ -14,7 +14,7 @@ export const RewardsBanner: React.FC = () => {
   const { data: ethLink } = useEthLink()
   const { data: investorOnboardingData } = useInvestorOnboardingState()
   const { data: portfolio } = usePortfolio()
-  const hasInvestments = portfolio && !portfolio.totalValue.isZero() && !portfolio.totalSupplyRemaining.isZero()
+  const hasInvestments = portfolio && (!portfolio.totalValue.isZero() || !portfolio.totalSupplyRemaining.isZero())
 
   const shouldShowWarning = ethAddr && ethLink === null && investorOnboardingData?.completed && hasInvestments
 
