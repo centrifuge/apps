@@ -18,7 +18,7 @@ export const RewardsBanner: React.FC = () => {
 
   const shouldShowWarning = ethAddr && ethLink === null && investorOnboardingData?.completed && hasInvestments
 
-  return shouldShowWarning || true ? (
+  return shouldShowWarning ? (
     <Center
       px="medium"
       py={['medium', 'medium', 'small']}
