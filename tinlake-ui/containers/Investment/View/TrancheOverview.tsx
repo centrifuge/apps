@@ -150,6 +150,36 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       </TextButton>
     )
 
+  const secondaryValues = (
+    <Box mt="small">
+      <Tooltip title="DROP tokens earn yield on the outstanding assets at the fixed DROP rate (APR). The current yield may deviate due to compounding effects or unused liquidity in the pool reserve. The current 30d DROP APY is the annualized return of the pool's DROP token over the last 30 days.">
+        <ValuePairList
+          variant="tertiary"
+          items={
+            [
+              dropYield &&
+                !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero()) && {
+                  term: 'Current DROP yield (30d APY)',
+                  value: dropYield,
+                  valueUnit: '%',
+                },
+              {
+                term: 'Fixed DROP rate (APR)',
+                value: toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2),
+                valueUnit: '%',
+              },
+              {
+                term: 'Minimum investment amount',
+                value: 5000,
+                valueUnit: props.pool?.metadata.currencySymbol || 'DAI',
+              },
+            ].filter(Boolean) as any
+          }
+        />
+      </Tooltip>
+    </Box>
+  )
+
   React.useEffect(() => {
     if (props.pool?.metadata && !props.pool.metadata.issuerEmail) {
       console.warn('The "issuerEmail" field is blank for pool ', props.pool.metadata.name)
@@ -248,6 +278,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         <>
           {card === 'home' && (
             <>
+              {secondaryValues}
               {epochData?.isBlockedState && (
                 <>
                   <Warning>
@@ -267,7 +298,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                   <BottomCardToolbar>{displayInWalletBtn}</BottomCardToolbar>
                 </>
               )}
-
               {!epochData?.isBlockedState && (
                 <>
                   {poolData?.poolClosing && (
@@ -341,7 +371,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           )}
         </>
       )}
-
       {props.pool &&
         !isMaintainanceMode &&
         props.tranche === 'senior' &&
@@ -385,33 +414,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           </>
         ) : (
           <>
-            <Info>
-              <Tooltip title="DROP tokens earn yield on the outstanding assets at the fixed DROP rate (APR). The current yield may deviate due to compounding effects or unused liquidity in the pool reserve. The current 30d DROP APY is the annualized return of the pool's DROP token over the last 30 days.">
-                <ValuePairList
-                  variant="tertiary"
-                  items={
-                    [
-                      dropYield &&
-                        !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero()) && {
-                          term: 'Current DROP yield (30d APY)',
-                          value: dropYield,
-                          valueUnit: '%',
-                        },
-                      {
-                        term: 'Fixed DROP rate (APR)',
-                        value: toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2),
-                        valueUnit: '%',
-                      },
-                      {
-                        term: 'Minimum investment amount',
-                        value: 5000,
-                        valueUnit: props.pool?.metadata.currencySymbol || 'DAI',
-                      },
-                    ].filter(Boolean) as any
-                  }
-                />
-              </Tooltip>
-            </Info>
+            {secondaryValues}
             <ButtonGroup mt="medium">
               <InvestAction pool={props.pool} tranche="senior" />
             </ButtonGroup>

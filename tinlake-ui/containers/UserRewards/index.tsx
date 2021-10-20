@@ -34,9 +34,9 @@ const UserRewards: React.FC = () => {
   const portfolio = usePortfolio()
   const portfolioValue = portfolio.data?.totalValue
   const dispatch = useDispatch()
-
-  const [showLink, setShowLink] = React.useState(false)
   const router = useRouter()
+
+  const [showLink, setShowLink] = React.useState(!!router.query.link)
 
   const { showRewardsInfo } = useDebugFlags()
 
