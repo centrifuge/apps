@@ -42,8 +42,6 @@ export class DocusignService {
       status: 'sent',
     }
 
-    console.log(envelopeDefinition)
-
     const url = `${config.docusign.restApiHost}/restapi/v2.1/accounts/${config.docusign.accountId}/envelopes?change_routing_order=true`
 
     const accessToken = await this.docusignAuthService.getAccessToken()
