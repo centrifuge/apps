@@ -37,12 +37,12 @@ const bleed = system({
   bleedX: {
     properties: ['marginLeft', 'marginRight'],
     scale: 'space',
-    transform: (n: string | number, scale: any) => `-${toPx(get(scale, n, n))}`,
+    transform: (n: string | number, scale: unknown) => `-${toPx(get(scale, n, n))}`,
   },
   bleedY: {
     properties: ['marginTop', 'marginBottom'],
     scale: 'space',
-    transform: (n: string | number, scale: any) => `-${toPx(get(scale, n, n))}`,
+    transform: (n: string | number, scale: unknown) => `-${toPx(get(scale, n, n))}`,
   },
 })
 
@@ -58,6 +58,7 @@ interface SystemProps
     PositionProps,
     BleedProps {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StyledBoxProps extends SystemProps {}
 
 export const Box = styled('div').withConfig({

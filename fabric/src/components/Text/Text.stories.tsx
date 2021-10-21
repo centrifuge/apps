@@ -2,6 +2,7 @@ import { ComponentMeta } from '@storybook/react'
 import React from 'react'
 import { useTheme } from 'styled-components'
 import { Text } from '.'
+import { TextVariantName } from '../../theme'
 import { Stack } from '../Stack'
 
 export default {
@@ -13,8 +14,10 @@ export const Variants: React.FC = () => {
   const theme = useTheme()
   return (
     <Stack gap={2}>
-      {Object.keys(theme.typography).map((variant: any) => (
-        <Text variant={variant}>{variant}</Text>
+      {Object.keys(theme.typography).map((variant: TextVariantName, i) => (
+        <Text variant={variant} key={i}>
+          {variant}
+        </Text>
       ))}
     </Stack>
   )

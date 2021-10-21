@@ -1,1 +1,1 @@
-export type { FabricTheme } from './tokens/baseTheme'
+export * from './types'

@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { AnchorButton as AnchorButtonComp, Button as ButtonComp } from '.'
+import { AnchorButton as AnchorButtonComp, AnchorButtonProps, Button as ButtonComp } from '.'
 import { IconChevronDown, IconClock } from '../../icon'
 import { Grid } from '../Grid'
 import { Shelf } from '../Shelf'
@@ -12,7 +12,7 @@ export default {
 
 type ButtonStory = ComponentStory<typeof ButtonComp>
 
-const Template: ButtonStory = (args) => (
+const Template: ButtonStory = (args): React.ReactElement => (
   <Grid columns={5} gap={3} justifyItems="start" maxWidth={800} equalColumns>
     {(['contained', 'outlined', 'text'] as const).flatMap((variant) =>
       [false, true].map((small) => (
@@ -42,7 +42,7 @@ Button.args = {
   loading: false,
 }
 
-export const AnchorButton = (args) => (
+export const AnchorButton = (args: AnchorButtonProps): React.ReactElement => (
   <Shelf gap={3}>
     <AnchorButtonComp {...args}>External link</AnchorButtonComp>
     <AnchorButtonComp {...args} variant="outlined">

@@ -1,6 +1,6 @@
 import { ResponsiveValue } from 'styled-system'
 
-function isObject(value: any): value is object {
+function isObject(value: unknown): value is Record<string, unknown> {
   return value != null && !Array.isArray(value) && typeof value === 'object'
 }
 
@@ -21,7 +21,7 @@ export function mapResponsive<ResponsiveInput extends ResponsiveValue<any>, Outp
     return Object.entries(prop).reduce((result, [key, value]) => {
       result[key] = mapper(value)
       return result
-    }, {} as any)
+    }, {} as Output)
   }
 
   if (prop != null) {

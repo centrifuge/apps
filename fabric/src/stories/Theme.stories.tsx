@@ -38,7 +38,7 @@ export const Colors: React.FC = () => {
   return (
     <Table>
       {Object.entries(theme.colors)
-        .filter(([_, v]) => typeof v === 'string')
+        .filter(([, v]) => typeof v === 'string')
         .map(([colorName, colorCode]: [string, string]) => (
           <tr key={colorName}>
             <td>
