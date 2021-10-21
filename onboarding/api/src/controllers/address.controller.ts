@@ -151,7 +151,7 @@ export class AddressController {
     const user = await this.userRepo.find(address.userId)
     if (!user) throw new BadRequestException('Invalid user')
 
-    const authorizationLink = this.securitizeService.getGenericAuthorizationLink(params.address)
+    const authorizationLink = this.securitizeService.getAuthorizationLink('', params.address)
     const kyc = await this.kycRepo.find(address.userId)
     if (kyc) {
       let status: KycStatusLabel = kyc.status
