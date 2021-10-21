@@ -22,10 +22,10 @@ export class SecuritizeService {
 
   getAuthorizationLink(poolId: string, address: string): string {
     const scope = `info%20details%20verification`
-    const redirectUrl = `${config.onboardApiHost}pools/${poolId}/callback/${address}/securitize`
-    const url = `${config.securitize.idHost}#/authorize?issuerId=${config.securitize.clientId}&scope=${scope}&redirecturl=${redirectUrl}`
-
-    return url
+    const redirectUrl = poolId
+      ? `${config.onboardApiHost}pools/${poolId}/callback/${address}/securitize`
+      : `${config.onboardApiHost}callback/${address}/securitize`
+    return `${config.securitize.idHost}#/authorize?issuerId=${config.securitize.clientId}&scope=${scope}&redirecturl=${redirectUrl}`
   }
 
   async processAuthorizationCallback(code: string): Promise<SecuritizeKYCInfo> {

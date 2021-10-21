@@ -51,7 +51,6 @@ export class AgreementController {
       (pa) => pa.provider === params.provider && pa.providerTemplateId === params.providerTemplateId
     )
     if (!profileAgreement) throw new BadRequestException('Profile agreement cannot be found')
-
     const agreement = await this.agreementRepo.findOrCreate(
       user.id,
       user.email,
