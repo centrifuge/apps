@@ -27,14 +27,7 @@ jobs:
           cache: yarn
 
       - name: Install Dependencies
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
-
-      - name: Cache Next.js Bundle
-        uses: actions/cache@v2
-        with:
-          path: ${{ github.workspace }}/tinlake-ui/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}
 
       - name: Lint
         run: yarn lint
