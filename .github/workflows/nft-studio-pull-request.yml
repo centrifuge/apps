@@ -8,7 +8,7 @@ on:
 
 jobs:
   pull-request:
-    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
+    uses: ${{ join(['centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml', gitlab.head_ref], '@') }}
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
     secrets:
