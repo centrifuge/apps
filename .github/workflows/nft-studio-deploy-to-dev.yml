@@ -1,0 +1,68 @@
+name: 'tinlake-ui Deploy to Dev'
+on:
+  push:
+    branches:
+      - nft-studio-deploy-dev
+    paths:
+      - 'nft-studio/**'
+      - '.github/workflows/nft-studio-deploy-to-dev.yml'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: nft-studio
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+
+      - name: Restore Yarn Workspaces
+        id: yarn-cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install Dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install
+
+      - name: Cache Next.js Bundle
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/tinlake-ui/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Build dependencies
+        run: yarn build:deps
+
+      - name: Build nft-studio
+        run: yarn build
+        env:
+          SKIP_PREFLIGHT_CHECK: 'true'
+
+      - name: Deploy To Netlify
+        uses: nwtgck/actions-netlify@v1.2.0
+        with:
+          deploy-message: ${{ github.event.head_commit.message }}
+          enable-commit-comment: false
+          # functions-dir: ./nft-studio/functions
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          netlify-config-path: ./nft-studio/netlify.toml
+          production-deploy: true
+          publish-dir: ./nft-studio/build
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
+          NETLIFY_SITE_ID: ${{ secrets.NFT_STUDIO_DEV_NETLIFY_SITE_ID }}

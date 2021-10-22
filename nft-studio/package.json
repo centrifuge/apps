@@ -8,6 +8,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "build:deps": "cd ../fabric && yarn build && cd ../fabric",
+    "build:all": "yarn build:deps && yarn build",
     "lint": "eslint -c .eslintrc.js '*/**/*.{js,ts,tsx}'",
     "lint-fix": "npm run lint -- --fix"
   },
