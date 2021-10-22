@@ -1,18 +1,16 @@
-name: 'nft-studio Dev'
+name: 'nft-studio Pull request'
 on:
-  push:
-    branches:
-      - nft-studio-deploy-dev
+  pull_request:
     paths:
       - 'nft-studio/**'
       - 'fabric/**' # dependency
-      - '.github/workflows/nft-studio-deploy-to-dev.yml'
+      - '.github/workflows/nft-studio-pull-request.yml'
 
 jobs:
-  dev:
-    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@nft-studio-deploy-dev
+  pull-request:
+    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
     with:
-      netlify-alias: ''
+      netlify-alias: pr-${{ github.event.pull_request.number }}
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
