@@ -1,4 +1,4 @@
-name: 'tinlake-ui Deploy to Dev'
+name: 'nft-studio Deploy to Dev'
 on:
   push:
     branches:
@@ -24,14 +24,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16'
-
-      - name: Restore Yarn Workspaces
-        id: yarn-cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          cache: yarn
 
       - name: Install Dependencies
         if: steps.yarn-cache.outputs.cache-hit != 'true'
