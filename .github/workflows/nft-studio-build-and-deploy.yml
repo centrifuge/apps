@@ -1,0 +1,56 @@
+name: 'nft-studio Build and deploy'
+on:
+  workflow_call:
+    inputs:
+      netlify-alias:
+        required: true
+        type: string
+    secrets:
+      netlify-site-id:
+        required: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: nft-studio
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          cache: yarn
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Build dependencies
+        run: yarn build:deps
+
+      - name: Build nft-studio
+        run: yarn build
+        env:
+          SKIP_PREFLIGHT_CHECK: 'true'
+
+      - name: Deploy To Netlify
+        uses: nwtgck/actions-netlify@v1.2.0
+        with:
+          alias: ${{ inputs.netlify-alias }}
+          production-deploy: ${{ inputs.netlify-alias == '' }}
+          deploy-message: ${{ github.event.head_commit.message }}
+          enable-commit-comment: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          netlify-config-path: ./nft-studio/netlify.toml
+          publish-dir: ./nft-studio/build
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
+          NETLIFY_SITE_ID: ${{ secrets.netlify-site-id }}
