@@ -42,12 +42,12 @@ jobs:
         uses: nwtgck/actions-netlify@v1.2.0
         with:
           alias: pr-${{ github.event.pull_request.number }}
+          production-deploy: false
           deploy-message: ${{ github.event.head_commit.message }}
           enable-commit-comment: false
           # functions-dir: ./nft-studio/functions
           github-token: ${{ secrets.GITHUB_TOKEN }}
           netlify-config-path: ./nft-studio/netlify.toml
-          production-deploy: true
           publish-dir: ./nft-studio/build
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
