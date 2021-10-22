@@ -1,12 +1,10 @@
-name: 'nft-studio Deploy to Dev'
+name: 'nft-studio Pull request'
 on:
-  push:
-    branches:
-      - main
+  pull_request:
     paths:
       - 'nft-studio/**'
       - 'fabric/**' # dependency
-      - '.github/workflows/nft-studio-deploy-to-dev.yml'
+      - '.github/workflows/nft-studio-pull-request.yml'
 
 jobs:
   build-and-deploy:
@@ -43,6 +41,7 @@ jobs:
       - name: Deploy To Netlify
         uses: nwtgck/actions-netlify@v1.2.0
         with:
+          alias: pr-${{ github.event.pull_request.number }}
           deploy-message: ${{ github.event.head_commit.message }}
           enable-commit-comment: false
           # functions-dir: ./nft-studio/functions
