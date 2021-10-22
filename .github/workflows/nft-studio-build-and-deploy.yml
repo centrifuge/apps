@@ -6,7 +6,11 @@ on:
         required: true
         type: string
     secrets:
-      netlify-site-id:
+      GITHUB_TOKEN:
+        required: true
+      NETLIFY_AUTH_TOKEN:
+        required: true
+      NETLIFY_SITE_ID:
         required: true
 
 jobs:
