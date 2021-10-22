@@ -5,6 +5,7 @@ on:
       - nft-studio-deploy-dev
     paths:
       - 'nft-studio/**'
+      - 'fabric/**' # dependency
       - '.github/workflows/nft-studio-deploy-to-dev.yml'
 
 jobs:
