@@ -1,8 +1,8 @@
-name: 'nft-studio Staging'
+name: 'nft-studio PROD'
 on:
   push:
-    branches:
-      - rc/nft-studio/release-*
+    tags:
+      - nft-studio/release-*
 
 jobs:
   dev:
@@ -12,4 +12,4 @@ jobs:
     secrets:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      NETLIFY_SITE_ID: ${{ secrets.NFT_STUDIO_STAGING_NETLIFY_SITE_ID }}
+      NETLIFY_SITE_ID: ${{ secrets.NFT_STUDIO_PROD_NETLIFY_SITE_ID }}
