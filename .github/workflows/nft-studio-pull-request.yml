@@ -7,12 +7,14 @@ on:
       - '.github/workflows/nft-studio-pull-request.yml'
 
 jobs:
-  build-and-deploy:
+  pull-request:
     uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@nft-studio-deploy-dev
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
     secrets:
-      netlify-site-id: ${{ secrets.NFT_STUDIO_DEV_NETLIFY_SITE_ID }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NFT_STUDIO_DEV_NETLIFY_SITE_ID }}
 
     # runs-on: ubuntu-latest
 

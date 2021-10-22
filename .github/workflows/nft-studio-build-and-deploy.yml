@@ -53,4 +53,4 @@ jobs:
           publish-dir: ./nft-studio/build
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
-          NETLIFY_SITE_ID: ${{ secrets.netlify-site-id }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
