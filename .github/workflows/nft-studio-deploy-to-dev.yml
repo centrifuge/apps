@@ -1,4 +1,4 @@
-name: 'nft-studio Deploy to Dev'
+name: 'nft-studio Dev'
 on:
   push:
     branches:
