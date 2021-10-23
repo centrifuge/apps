@@ -34,15 +34,19 @@ const Scorecard: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.activePool.addresses.ROOT_CONTRACT)
   const { data: assets } = useAssets(props.activePool.addresses.ROOT_CONTRACT)
 
+  const ongoingAssets = assets ? assets.filter((asset) => asset.status && asset.status === 'ongoing') : []
+
   const outstandingDebtByRiskGroup = (riskGroup: number) => {
-    return assets
-      ? assets.reduce(
-          (prev: BN, asset: SortableLoan) =>
-            asset.riskGroup !== undefined && asset.riskGroup === riskGroup ? prev.add(asset.debt) : prev,
-          new BN(0)
-        )
-      : new BN(0)
+    return ongoingAssets.reduce(
+      (prev: BN, asset: SortableLoan) =>
+        asset.riskGroup !== undefined && asset.riskGroup === riskGroup ? prev.add(asset.debt) : prev,
+      new BN(0)
+    )
   }
+
+  const totalDebt = ongoingAssets.reduce((sum: BN, asset) => {
+    return asset.debt ? sum.add(new BN(asset.debt)) : sum
+  }, new BN(0))
 
   const existingRiskGroups = poolData?.risk
     ? poolData.risk
@@ -112,7 +116,7 @@ const Scorecard: React.FC<Props> = (props: Props) => {
                       (poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
                         ? riskGroup.outstandingDebt
                             .mul(e18)
-                            .div(poolData.netAssetValue)
+                            .div(totalDebt)
                             .div(new BN('10').pow(new BN('14')))
                         : new BN(0)
                       ).toString()

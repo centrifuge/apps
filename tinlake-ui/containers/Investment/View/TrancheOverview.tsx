@@ -324,12 +324,15 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell scope="row" border={poolData?.isPoolAdmin ? undefined : { color: 'transparent' }}>
+            <TableCell
+              scope="row"
+              border={poolData?.adminLevel && poolData?.adminLevel >= 2 ? undefined : { color: 'transparent' }}
+            >
               Current value
             </TableCell>
             <TableCell
               style={{ textAlign: 'end' }}
-              border={poolData?.isPoolAdmin ? undefined : { color: 'transparent' }}
+              border={poolData?.adminLevel && poolData?.adminLevel >= 2 ? undefined : { color: 'transparent' }}
             >
               <LoadingValue done={value !== undefined}>
                 {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 4))}{' '}
@@ -337,7 +340,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               </LoadingValue>
             </TableCell>
           </TableRow>
-          {poolData?.isPoolAdmin && (
+          {poolData?.adminLevel && poolData?.adminLevel >= 2 && (
             <TableRow>
               <TableCell scope="row" border={{ color: 'transparent' }}>
                 Yield over time (30d APY)
