@@ -34,6 +34,7 @@ interface PoolMetadata {
   assetMaturity?: string
   currencySymbol?: string
   isUpcoming?: boolean
+  isArchived?: boolean
   maker?: { ilk: string }
   issuerEmail?: string
   juniorInvestors?: JuniorInvestor[]
@@ -69,7 +70,7 @@ export interface ArchivedPool extends BasePool {
 }
 
 export interface Pool extends BasePool {
-  isUpcoming: false
+  isUpcoming: boolean
   addresses: {
     TINLAKE_CURRENCY: string
     ROOT_CONTRACT: string
@@ -217,6 +218,7 @@ const metadataSchema = yup.object().shape({
   securitize: securitizeDataSchema,
   currencySymbol: yup.string().default('DAI'),
   maker: makerSchema.optional(),
+  isArchived: yup.boolean().default(false),
 })
 
 const poolSchema = yup.object().shape({

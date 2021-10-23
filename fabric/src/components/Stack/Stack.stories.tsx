@@ -17,9 +17,9 @@ export default {
 type StackStory = ComponentStory<typeof Stack>
 const Template: StackStory = (args) => (
   <Stack {...args}>
-    <Box backgroundColor="centrifugeBlue" minWidth={200} height={75} />
-    <Box backgroundColor="centrifugeBlue" minWidth={150} height={75} />
-    <Box backgroundColor="centrifugeBlue" minWidth={250} height={75} />
+    <Box backgroundColor="brand" minWidth={200} height={75} />
+    <Box backgroundColor="brand" minWidth={150} height={75} />
+    <Box backgroundColor="brand" minWidth={250} height={75} />
   </Stack>
 )
 

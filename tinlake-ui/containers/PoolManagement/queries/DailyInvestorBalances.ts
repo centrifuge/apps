@@ -59,6 +59,7 @@ export async function dailyInvestorBalances({ poolId }: { poolId: string; poolDa
   let blockNumber: number | null = null
 
   // subgraph only returns 1000 entries, fetch until no more entries are returned
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const response: IResponse = await fetch(poolId, start, limit, blockHash)
     if (blockHash === null) {

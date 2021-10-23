@@ -27,7 +27,7 @@ const RewardsPage: React.FC<Props> = (props: Props) => {
           <Head>
             <title>CFG Rewards | Tinlake | Centrifuge</title>
           </Head>
-          <Header selectedRoute={''} menuItems={[]} ipfsPools={props.ipfsPools} />
+          <Header selectedRoute={''} menuItems={[]} ipfsPools={props.ipfsPools} hideRewardsBanner />
           <Container style={{ backgroundColor: '#f9f9f9' }}>
             <Box justify="center" direction="row">
               <Box width="xlarge">

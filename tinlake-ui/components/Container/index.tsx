@@ -8,7 +8,7 @@ class Container extends React.Component<PropsWithChildren<{ [k: string]: any }>>
 
     return (
       <Box align="center" pad={{ horizontal: 'medium' }} {...rest} style={{ background: 'rgb(249, 249, 249)' }}>
-        <ClientOnlyRender>{this.props.children}</ClientOnlyRender>
+        <ClientOnlyRender>{children}</ClientOnlyRender>
       </Box>
     )
   }

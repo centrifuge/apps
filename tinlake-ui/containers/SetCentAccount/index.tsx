@@ -1,10 +1,12 @@
+import Tinlake from '@centrifuge/tinlake-js'
+import { ethers } from 'ethers'
 import { Box, Button, Select } from 'grommet'
 import { CircleAlert } from 'grommet-icons'
 import * as React from 'react'
 import { connect, useSelector } from 'react-redux'
 import styled from 'styled-components'
-import { useTinlake } from '../../components/TinlakeProvider'
 import { Tooltip } from '../../components/Tooltip'
+import config from '../../config'
 import { CentChainWalletState, InjectedAccount } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
@@ -29,11 +31,10 @@ const HelpText = styled.span`
 `
 
 const LinkingWarning = styled(Warning)`
-  margin-bottom: 16px;
+  margin: 16px;
 `
 
 const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: TransactionProps) => {
-  const tinlake = useTinlake()
   const { refetch } = useUserRewardsSubgraph()
   const cWallet = useSelector<any, CentChainWalletState>((state: any) => state.centChainWallet)
   const ethAddr = useAddress()
@@ -50,6 +51,8 @@ const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: Trans
     if (!selectedCentAcc || !isCentChainAddr(selectedCentAcc.addrCentChain)) {
       return
     }
+    const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+    const tinlake = new Tinlake({ contractAddresses: { CLAIM_CFG: config.claimCFGContractAddress }, provider })
     const txId = await createTransaction(
       `Link account ${shortAddr(selectedCentAcc.addrCentChain)}`,
       'updateClaimCFGAccountID',

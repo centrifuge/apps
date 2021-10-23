@@ -102,15 +102,26 @@ async function getPortfolio(ipfsPools: IpfsPools, address: string) {
     const newPrice = new BN(tokenResult.price)
     const newValue = newBalance.mul(newPrice).div(new BN(10).pow(new BN(27)))
 
-    return { id: tokenId, symbol: tokenResult.symbol, price: newPrice, value: newValue, balance: newBalance }
+    return {
+      id: tokenId,
+      symbol: tokenResult.symbol,
+      price: newPrice,
+      value: newValue,
+      balance: newBalance,
+      remainingSupplyCurrency: tokenResult.remainingSupplyCurrency,
+    }
   })
 
-  const totalValue = tokenBalances.reduce((prev: BN, tokenBalance: TokenBalance) => {
-    return prev.add(tokenBalance.value)
-  }, new BN(0))
+  const totalValue = new BN(0)
+  const totalSupplyRemaining = new BN(0)
+  tokenBalances.forEach((tokenBalance) => {
+    totalValue.add(tokenBalance.value)
+    totalSupplyRemaining.add(tokenBalance.remainingSupplyCurrency)
+  })
 
   return {
     tokenBalances,
     totalValue,
+    totalSupplyRemaining,
   }
 }

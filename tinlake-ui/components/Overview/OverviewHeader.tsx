@@ -108,8 +108,8 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           : ''
         : undefined,
       valueIcon: '/static/TIN_final.svg',
-      value: tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? tinYield : 'N/A',
-      valueUnit: '%',
+      value: tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? tinYield : 'Not yet available',
+      valueUnit: tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? '%' : '',
     },
     {
       term: 'Pool value',

@@ -6,6 +6,7 @@ import { MemoryRouter } from 'react-router'
 import { PageError } from '../../components/PageError'
 import { Preloader } from '../../components/Preloader'
 import { defaultContacts, defaultSchemas, defaultUser } from '../../test-utilities/default-data'
+import { silenceConsoleWhen } from '../../test-utilities/silenceConsoleWhen'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
 import DocumentForm from '../DocumentForm'
 import { FundingAgreements } from '../FundingAgreements'
@@ -40,6 +41,9 @@ describe('View Document', () => {
       },
     },
   }
+
+  silenceConsoleWhen(/^Can not load (lists|contacts|document)$/)
+
   beforeEach(() => {
     httpClient.contacts.list.mockImplementation(async (data) => {
       return { data: defaultContacts }

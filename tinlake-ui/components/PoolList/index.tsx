@@ -37,8 +37,8 @@ interface Props extends WithRouterProps {
 }
 
 interface Column {
-  header: string | JSX.Element
-  cell: (row: any) => JSX.Element
+  header: string | React.ReactNode
+  cell: (row: any) => React.ReactNode
   subHeader?: string
 }
 
@@ -150,6 +150,7 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
           })}
         </Header>
       )}
+      {console.log(poolsData?.pools)}
       {pools?.map((p) => (
         <Link href={p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`} shallow passHref key={p.id}>
           <Row

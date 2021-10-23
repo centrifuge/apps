@@ -1,6 +1,7 @@
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box } from 'grommet'
+import React from 'react'
 import styled from 'styled-components'
 import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { toDynamicPrecision } from '../../utils/toDynamicPrecision'

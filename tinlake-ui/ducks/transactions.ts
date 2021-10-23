@@ -1,11 +1,13 @@
+import Tinlake from '@centrifuge/tinlake-js'
 import * as Sentry from '@sentry/react'
+import { ethers } from 'ethers'
 import { HYDRATE } from 'next-redux-wrapper'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import { Action, AnyAction } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import config from '../config'
-import { getTinlake } from '../services/tinlake'
+import { getOnboard } from '../services/onboard'
 import * as actions from '../services/tinlake/actions'
 
 export interface WalletTransaction {
@@ -146,12 +148,24 @@ export function createTransaction<A extends TransactionAction>(
 function processTransaction(
   unconfirmedTx: Transaction
 ): ThunkAction<Promise<void>, { transactions: TransactionState }, undefined, Action> {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     const id = unconfirmedTx.id
     dispatch({ id, transaction: unconfirmedTx, type: SET_ACTIVE_TRANSACTION })
 
     // Start transaction
-    const tinlake = getTinlake()
+    const {
+      tinlakeConfig: { contractConfig, addresses },
+    } = getState().transactions.active[id]
+    const rpcProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+    const tinlake = new Tinlake({ contractConfig, contractAddresses: addresses, provider: rpcProvider })
+    const onboard = getOnboard()
+
+    if (!onboard) throw new Error('Onboard not initialized')
+
+    const { wallet } = onboard.getState()
+    const web3Provider = new ethers.providers.Web3Provider(wallet.provider)
+    const fallbackProvider = new ethers.providers.FallbackProvider([web3Provider, rpcProvider])
+    tinlake.setProviderAndSigner(fallbackProvider, web3Provider.getSigner(), web3Provider.provider)
 
     const outcomeTx: Transaction = {
       ...unconfirmedTx,
@@ -159,7 +173,7 @@ function processTransaction(
     }
 
     // This is a hack to grab a human-friendly error. We should eventually refactor Tinlake.js to return this error directly.
-    const errorMessageRegex = /\"message\"\:\"\s?(.*)[\.?][\"?],/
+    const errorMessageRegex = /"message":"\s?(.*)[.?]["?],/
 
     try {
       const actionCall = actions[unconfirmedTx.actionName as keyof typeof actions]
@@ -199,7 +213,7 @@ function processTransaction(
           Sentry.captureMessage(`Transaction failed: ${unconfirmedTx.actionName}`, { extra: { tx: outcomeTx } })
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Transaction error: ${unconfirmedTx.actionName})`, error)
 
       if (config.enableErrorLogging) {

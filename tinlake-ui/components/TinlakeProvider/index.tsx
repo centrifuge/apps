@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo } from 'react'
+import React, { createContext, useContext, useMemo } from 'react'
 import { ContractAddresses, ContractVersions, ITinlake } from '../../../tinlake.js/dist'
 import { initTinlake } from '../../services/tinlake'
 

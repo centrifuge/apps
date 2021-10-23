@@ -70,7 +70,7 @@ export function connect(): ThunkAction<Promise<void>, { centChainWallet: CentCha
           })),
         })
       })
-    } catch (e) {
+    } catch (e: any) {
       if (e?.message === ERR_NO_EXT_OR_NOT_AUTH) {
         dispatch({ type: CONNECTION_ERROR, error: ERR_NO_EXT_OR_NOT_AUTH })
         return

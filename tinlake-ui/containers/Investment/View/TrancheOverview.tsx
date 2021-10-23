@@ -9,7 +9,7 @@ import { Area, AreaChart, Tooltip as RechartsTooltip } from 'recharts'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
-import { Card } from '../../../components/Card'
+import { Card as CardComponent } from '../../../components/Card'
 import {
   ChartTooltip,
   ChartTooltipColor,
@@ -164,6 +164,36 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       </TextButton>
     )
 
+  const secondaryValues = (
+    <Box mt="small">
+      <Tooltip title="DROP tokens earn yield on the outstanding assets at the fixed senior rate (APR). The current yield may deviate due to compounding effects or unused liquidity in the pool reserve. The current 30d senior APY is the annualized return of the pool's DROP token over the last 30 days.">
+        <ValuePairList
+          variant="tertiary"
+          items={
+            [
+              dropYield &&
+                !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero()) && {
+                  term: 'Current senior yield (30d APY)',
+                  value: dropYield,
+                  valueUnit: '%',
+                },
+              {
+                term: 'Fixed senior rate (APR)',
+                value: toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2),
+                valueUnit: '%',
+              },
+              {
+                term: 'Minimum investment amount',
+                value: 5000,
+                valueUnit: props.pool?.metadata.currencySymbol || 'DAI',
+              },
+            ].filter(Boolean) as any
+          }
+        />
+      </Tooltip>
+    </Box>
+  )
+
   React.useEffect(() => {
     if (props.pool?.metadata && !props.pool.metadata.issuerEmail) {
       console.warn('The "issuerEmail" field is blank for pool ', props.pool.metadata.name)
@@ -235,7 +265,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     </Stack>
   )
   return (
-    <Card p={24} height="100%" display="flex" flexDirection="column">
+    <CardComponent p={24} height="100%" display="flex" flexDirection="column">
       <Shelf gap="xsmall" mb="xsmall">
         <TokenLogo src={`/static/${token}_final.svg`} />
         <Heading level="5" margin={'0'}>
@@ -334,6 +364,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         <>
           {card === 'home' && (
             <>
+              {secondaryValues}
               {epochData?.isBlockedState && (
                 <>
                   <Warning>
@@ -353,7 +384,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
                   <BottomCardToolbar>{displayInWalletBtn}</BottomCardToolbar>
                 </>
               )}
-
               {!epochData?.isBlockedState && (
                 <>
                   {poolData?.poolClosing && (
@@ -427,7 +457,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           )}
         </>
       )}
-
       {props.pool &&
         !isMaintainanceMode &&
         props.tranche === 'senior' &&
@@ -471,33 +500,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           </>
         ) : (
           <>
-            <Info>
-              <Tooltip title="DROP tokens earn yield on the outstanding assets at the fixed DROP rate (APR). The current yield may deviate due to compounding effects or unused liquidity in the pool reserve. The current 30d DROP APY is the annualized return of the pool's DROP token over the last 30 days.">
-                <ValuePairList
-                  variant="tertiary"
-                  items={
-                    [
-                      dropYield &&
-                        !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero()) && {
-                          term: 'Current senior yield (30d APY)',
-                          value: dropYield,
-                          valueUnit: '%',
-                        },
-                      {
-                        term: 'Fixed senior rate (APR)',
-                        value: toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2),
-                        valueUnit: '%',
-                      },
-                      {
-                        term: 'Minimum investment amount',
-                        value: 5000,
-                        valueUnit: props.pool?.metadata.currencySymbol || 'DAI',
-                      },
-                    ].filter(Boolean) as any
-                  }
-                />
-              </Tooltip>
-            </Info>
+            {secondaryValues}
             <ButtonGroup mt="medium">
               <InvestAction pool={props.pool} tranche="senior" />
             </ButtonGroup>
@@ -518,7 +521,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             <DarkLink href={`mailto:${props.pool.metadata.issuerEmail}`}>contact the issuer</DarkLink>.
           </Info>
         )}
-    </Card>
+    </CardComponent>
   )
 }
 

@@ -285,17 +285,18 @@ export async function getPool(ipfsPools: IpfsPools, poolId: string, address?: st
     }
   }
 
+  console.log(pool.metadata.juniorInvestors)
   pool.metadata.juniorInvestors?.forEach((investor: JuniorInvestor) => {
     calls.push(
       {
         target: pool.addresses.JUNIOR_TOKEN,
         call: ['balanceOf(address)(uint256)', investor.address],
-        returns: [[`juniorInvestors[${investor.name}].collected`, toBN]],
+        returns: [[`juniorInvestors[${investor.name.replaceAll('.', '-')}].collected`, toBN]],
       },
       {
         target: pool.addresses.JUNIOR_TRANCHE,
         call: ['calcDisburse(address)(uint256,uint256,uint256,uint256)', investor.address],
-        returns: [[`-`], [`juniorInvestors[${investor.name}].uncollected`, toBN], [`-`], [`-`]],
+        returns: [[`-`], [`juniorInvestors[${investor.name.replaceAll('.', '-')}].uncollected`, toBN], [`-`], [`-`]],
       }
     )
   })

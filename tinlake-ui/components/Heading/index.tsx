@@ -1,4 +1,5 @@
 import { Heading } from 'grommet'
+import React from 'react'
 
 export const SectionHeading: React.FC = ({ children }) => {
   return (

@@ -1,6 +1,7 @@
 import { mount } from 'enzyme'
 import { Button, DataTable } from 'grommet'
 import React from 'react'
+import { act } from 'react-dom/test-utils'
 import { defaultContacts, defaultUser } from '../../test-utilities/default-data'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
 import MintNftForm from '../MintNftForm'
@@ -156,7 +157,7 @@ describe('Nfts', () => {
     const mintAction = component.find(Button).findWhere((node) => node.key() === 'mint-nft')
     mintAction.simulate('click')
     const mintingForm = component.find(MintNftForm)
-    await mintingForm.prop('onSubmit')({ registry: registries[0] })
+    await act(() => mintingForm.prop('onSubmit')({ registry: registries[0] }))
     expect(onMintStart).toHaveBeenCalledTimes(1)
     expect(onAsyncError).toHaveBeenCalledTimes(0)
     expect(onAsyncComplete).toHaveBeenCalledWith('Custom Payload')
@@ -187,7 +188,7 @@ describe('Nfts', () => {
     const mintAction = component.find(Button).findWhere((node) => node.key() === 'mint-nft')
     mintAction.simulate('click')
     const mintingForm = component.find(MintNftForm)
-    await mintingForm.prop('onSubmit')({ registry: registries[0] })
+    await act(() => mintingForm.prop('onSubmit')({ registry: registries[0] }))
     expect(onMintStart).toHaveBeenCalledTimes(1)
     expect(onAsyncComplete).toHaveBeenCalledTimes(0)
     expect(onAsyncError).toHaveBeenCalledWith(error, 'Failed to mint NFT')
