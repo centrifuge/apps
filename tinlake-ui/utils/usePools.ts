@@ -289,6 +289,7 @@ async function getPools(ipfsPools: IpfsPools): Promise<PoolsData> {
         ...pool,
         capacity,
         isUpcoming: !!isUpcoming,
+        isArchived: !!poolConfig.metadata.isArchived,
         order: isUpcoming ? -2 : pool.isOversubscribed || !capacity ? -1 : capacity.div(UintBase).toNumber(),
         capacityGivenMaxReserve: capacityGivenMaxReservePerPool[pool.id],
         capacityGivenMaxDropRatio: capacityGivenMaxDropRatioPerPool[pool.id],

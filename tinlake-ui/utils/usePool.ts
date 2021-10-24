@@ -4,7 +4,7 @@ import { BigNumber, ethers } from 'ethers'
 import { useQuery } from 'react-query'
 import { useSelector } from 'react-redux'
 import { useIpfsPools } from '../components/IpfsPoolsProvider'
-import config, { IpfsPools } from '../config'
+import config, { IpfsPools, JuniorInvestor } from '../config'
 import { Call, multicall } from './multicall'
 import { Fixed27Base, seniorToJuniorRatio } from './ratios'
 
@@ -56,6 +56,7 @@ export interface PoolData {
   reserveAndRemainingCredit?: BN
   discountRate: BN
   risk?: RiskGroup[]
+  juniorInvestors?: { [key: string]: { collected: BN; uncollected: BN } }
   writeOffGroups?: WriteOffGroup[]
   isUpcoming: boolean
   poolClosing?: boolean
@@ -283,6 +284,22 @@ export async function getPool(ipfsPools: IpfsPools, poolId: string, address?: st
       // TODO: load for v1 NAV feed, which doesn't have the overdueDays prop
     }
   }
+
+  console.log(pool.metadata.juniorInvestors)
+  pool.metadata.juniorInvestors?.forEach((investor: JuniorInvestor) => {
+    calls.push(
+      {
+        target: pool.addresses.JUNIOR_TOKEN,
+        call: ['balanceOf(address)(uint256)', investor.address],
+        returns: [[`juniorInvestors[${investor.name.replaceAll('.', '-')}].collected`, toBN]],
+      },
+      {
+        target: pool.addresses.JUNIOR_TRANCHE,
+        call: ['calcDisburse(address)(uint256,uint256,uint256,uint256)', investor.address],
+        returns: [[`-`], [`juniorInvestors[${investor.name.replaceAll('.', '-')}].uncollected`, toBN], [`-`], [`-`]],
+      }
+    )
+  })
 
   // TODO: Make separate query for user address related data
   // Now it's fetching all pool data again when the address is set

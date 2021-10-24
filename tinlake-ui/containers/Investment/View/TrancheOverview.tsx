@@ -5,22 +5,35 @@ import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useDispatch, useSelector } from 'react-redux'
+import { Area, AreaChart, Tooltip as RechartsTooltip } from 'recharts'
 import styled from 'styled-components'
 import { Button } from '../../../components/Button'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Card as CardComponent } from '../../../components/Card'
+import {
+  ChartTooltip,
+  ChartTooltipColor,
+  ChartTooltipKey,
+  ChartTooltipLine,
+  ChartTooltipTitle,
+  ChartTooltipValue,
+  StyledResponsiveContainer,
+} from '../../../components/Chart/styles'
 import InvestAction from '../../../components/InvestAction'
-import { Box, Shelf } from '../../../components/Layout'
+import { Box, Shelf, Stack } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
 import { ValuePairList } from '../../../components/ValuePairList'
 import config, { Pool } from '../../../config'
 import { ensureAuthed } from '../../../ducks/auth'
+import { AssetData } from '../../../services/apollo'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
+import { dateToYMD } from '../../../utils/date'
 import { useTrancheYield } from '../../../utils/hooks'
 import { secondsToHms } from '../../../utils/time'
 import { toMaxPrecision, toPrecision } from '../../../utils/toPrecision'
+import { useDailyPoolData } from '../../../utils/useDailyPoolData'
 import { useEpoch } from '../../../utils/useEpoch'
 import { usePool } from '../../../utils/usePool'
 import CollectCard from './CollectCard'
@@ -74,6 +87,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
   const { data: epochData } = useEpoch()
+  const { data: dailyPoolData } = useDailyPoolData(tinlake.contractAddresses.ROOT_CONTRACT!)
   const trancheData = props.tranche === 'senior' ? poolData?.senior : poolData?.junior
 
   const router = useRouter()
@@ -152,19 +166,19 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
 
   const secondaryValues = (
     <Box mt="small">
-      <Tooltip title="DROP tokens earn yield on the outstanding assets at the fixed DROP rate (APR). The current yield may deviate due to compounding effects or unused liquidity in the pool reserve. The current 30d DROP APY is the annualized return of the pool's DROP token over the last 30 days.">
+      <Tooltip title="DROP tokens earn yield on the outstanding assets at the fixed senior rate (APR). The current yield may deviate due to compounding effects or unused liquidity in the pool reserve. The current 30d senior APY is the annualized return of the pool's DROP token over the last 30 days.">
         <ValuePairList
           variant="tertiary"
           items={
             [
               dropYield &&
                 !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero()) && {
-                  term: 'Current DROP yield (30d APY)',
+                  term: 'Current senior yield (30d APY)',
                   value: dropYield,
                   valueUnit: '%',
                 },
               {
-                term: 'Fixed DROP rate (APR)',
+                term: 'Fixed senior rate (APR)',
                 value: toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2),
                 valueUnit: '%',
               },
@@ -193,20 +207,77 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     else setCard('home')
   }, [hasPendingCollection, hasPendingOrder, router.query])
 
+  const CustomTooltip = ({ active, payload }: any) => {
+    return active && payload ? (
+      <ChartTooltip>
+        <ChartTooltipTitle>{dateToYMD(payload[0].payload.day)}</ChartTooltipTitle>
+        <ChartTooltipLine>
+          <ChartTooltipKey>
+            <ChartTooltipColor color="#ccc" /> {props.tranche === 'senior' ? '30d APY' : '90d APY'}:
+          </ChartTooltipKey>
+          <ChartTooltipValue>
+            {toPrecision(
+              baseToDisplay(
+                (
+                  payload[0].payload[props.tranche === 'senior' ? 'seniorYield30Days' : 'juniorYield90Days'] || '0'
+                ).muln(100),
+                27
+              ),
+              2
+            )}{' '}
+            %
+          </ChartTooltipValue>
+        </ChartTooltipLine>
+      </ChartTooltip>
+    ) : (
+      <>&nbsp;</>
+    )
+  }
+
+  const yieldProp = props.tranche === 'senior' ? 'seniorYield30Days' : 'juniorYield90Days'
+  const yieldData = dailyPoolData?.filter((val: AssetData) => val[yieldProp] !== null).slice(1)
+
+  const graphElement = (
+    <Stack height="40px" gap="small" mb="0">
+      <div style={{ flex: '1 0 auto' }}>
+        <StyledResponsiveContainer>
+          <AreaChart data={yieldData} margin={{ top: 0, right: 4, left: 4, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorAssetValue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#0828BE" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#0828BE" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <RechartsTooltip content={<CustomTooltip />} offset={20} />
+            <Area
+              type="monotone"
+              stackId={1}
+              dataKey={yieldProp}
+              stroke="#0828BE"
+              strokeWidth={2}
+              fillOpacity={1}
+              fill="url(#colorAssetValue)"
+              name="DROP APY (30d)"
+            />
+          </AreaChart>
+        </StyledResponsiveContainer>
+      </div>
+    </Stack>
+  )
   return (
     <CardComponent p={24} height="100%" display="flex" flexDirection="column">
       <Shelf gap="xsmall" mb="xsmall">
         <TokenLogo src={`/static/${token}_final.svg`} />
         <Heading level="5" margin={'0'}>
-          {token} Token
+          {props.tranche === 'senior' ? 'Senior tranche' : 'Junior tranche'}
         </Heading>
       </Shelf>
       <Box mb="medium">
         <TrancheNote>
-          {props.tranche === 'senior' ? 'Senior tranche' : 'Junior tranche'} —{' '}
-          {props.tranche === 'senior' ? 'Lower risk, stable return' : 'Higher risk, variable return'}
+          {token} token — {props.tranche === 'senior' ? 'Lower risk, stable return' : 'Higher risk, variable return'}
         </TrancheNote>
       </Box>
+
       <Table>
         <TableBody>
           {(!disbursements?.payoutTokenAmount || disbursements?.payoutTokenAmount.isZero()) && (
@@ -253,16 +324,34 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell scope="row" border={{ color: 'transparent' }}>
+            <TableCell
+              scope="row"
+              border={poolData?.adminLevel && poolData?.adminLevel >= 2 ? undefined : { color: 'transparent' }}
+            >
               Current value
             </TableCell>
-            <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+            <TableCell
+              style={{ textAlign: 'end' }}
+              border={poolData?.adminLevel && poolData?.adminLevel >= 2 ? undefined : { color: 'transparent' }}
+            >
               <LoadingValue done={value !== undefined}>
                 {addThousandsSeparators(toPrecision(baseToDisplay(value || '0', 18), 4))}{' '}
                 {props.pool?.metadata.currencySymbol || 'DAI'}
               </LoadingValue>
             </TableCell>
           </TableRow>
+          {poolData?.adminLevel && poolData?.adminLevel >= 2 && (
+            <TableRow>
+              <TableCell scope="row" border={{ color: 'transparent' }}>
+                Yield over time (30d APY)
+              </TableCell>
+              <TableCell border={{ color: 'transparent' }}>
+                <div style={{ width: '75%', marginLeft: 'auto', marginTop: '-16px', maxHeight: '21px' }}>
+                  {yieldData !== undefined && yieldData.length > 0 && graphElement}
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
       {isMaintainanceMode && (

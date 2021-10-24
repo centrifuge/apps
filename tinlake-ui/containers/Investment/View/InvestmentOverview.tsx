@@ -8,6 +8,7 @@ import { Box, Shelf, Stack } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue'
 import { useTinlake } from '../../../components/TinlakeProvider'
 import { Tooltip } from '../../../components/Tooltip'
+import { Value } from '../../../components/Value'
 import { ValuePairList } from '../../../components/ValuePairList'
 import { Pool, UpcomingPool } from '../../../config'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
@@ -35,6 +36,9 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
   const { data: assets } = useAssets(tinlake.contractAddresses.ROOT_CONTRACT!)
 
+  const dropTotalValue = poolData?.senior ? poolData?.senior.totalSupply.mul(poolData.senior!.tokenPrice) : undefined
+  const tinTotalValue = poolData ? poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice) : undefined
+
   const ongoingAssets = assets ? assets.filter((asset) => asset.status && asset.status === 'ongoing') : undefined
 
   const avgInterestRate = ongoingAssets
@@ -56,13 +60,24 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
   const currentJuniorRatio = poolData ? parseRatio(poolData.currentJuniorRatio) : undefined
 
-  const { dropYield } = useTrancheYield(tinlake.contractAddresses.ROOT_CONTRACT)
+  const { dropYield, tinYield } = useTrancheYield(tinlake.contractAddresses.ROOT_CONTRACT)
 
   const reserveRatio =
     poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
       ? poolData.reserve
           .mul(e18)
           .div(poolData.reserve.add(poolData.netAssetValue))
+          .div(new BN('10').pow(new BN('14')))
+      : new BN(0)
+
+  const juniorHeldByIssuer =
+    poolData && poolData?.juniorInvestors && tinTotalValue && !tinTotalValue.isZero()
+      ? Object.values(poolData.juniorInvestors)
+          .reduce((prev: BN, inv: { collected: BN; uncollected: BN }) => {
+            return prev.add(inv.collected || new BN(0)).add(inv.uncollected || new BN(0))
+          }, new BN(0))
+          .mul(e18)
+          .div(tinTotalValue.div(new BN('10').pow(new BN('27'))))
           .div(new BN('10').pow(new BN('14')))
       : new BN(0)
 
@@ -152,11 +167,18 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             <Shelf justifyContent="space-between">
               <Shelf gap="xsmall" mb="xsmall">
                 <Box as={TokenLogo} src="/static/DROP_final.svg" display={['none', 'inline']} />
-                <SectionHeading>DROP Tranche</SectionHeading>
+                <SectionHeading>Senior tranche</SectionHeading>
               </Shelf>
+              <Value
+                variant="sectionHeading"
+                value={
+                  dropTotalValue ? addThousandsSeparators(toPrecision(baseToDisplay(dropTotalValue, 27 + 18), 0)) : null
+                }
+                unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
+              />
             </Shelf>
             <Stack gap="small">
-              <TrancheNote>Senior tranche &mdash; Lower risk, stable return</TrancheNote>
+              <TrancheNote>DROP token &mdash; Lower risk, stable return</TrancheNote>
 
               <ValuePairList
                 variant="tertiary"
@@ -166,15 +188,16 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     value: poolData?.senior
                       ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.senior!.tokenPrice || '0', 27), 4))
                       : null,
+                    valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
                   },
                   dropYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
                     ? {
-                        term: 'DROP yield (30d APY)',
+                        term: 'Senior yield (30d APY)',
                         value: dropYield,
                         valueUnit: '%',
                       }
                     : {
-                        term: 'Fixed DROP rate (APR)',
+                        term: 'Fixed senior rate (APR)',
                         value:
                           poolData?.senior?.interestRate &&
                           toPrecision(feeToInterestRate(poolData?.senior?.interestRate || '0'), 2),
@@ -189,18 +212,18 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
           <Box mt="xsmall" mb="xsmall" textAlign="center">
             <div>
-              DROP is protected by a{' '}
-              <Tooltip id="tinRiskBuffer" underline>
+              Senior is protected by a{' '}
+              <Tooltip id="juniorRiskBuffer" underline>
                 <span style={{ fontWeight: 'bold' }}>
                   <LoadingValue done={!!currentJuniorRatio}>
                     {toPrecision((Math.round((currentJuniorRatio || 0) * 10000) / 100).toString(), 2)}%
                   </LoadingValue>{' '}
-                  TIN buffer
+                  junior risk buffer
                 </span>
               </Tooltip>{' '}
-              <Tooltip id="minimumTinRiskBuffer" underline>
+              <Tooltip id="minimumJuniorRiskBuffer" underline>
                 <LoadingValue done={!!minJuniorRatio}>
-                  (min: {toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}%)
+                  ({toPrecision((Math.round((minJuniorRatio || 0) * 10000) / 100).toString(), 2)}% minimum)
                 </LoadingValue>
               </Tooltip>
             </div>
@@ -212,12 +235,21 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             <Shelf justifyContent="space-between">
               <Shelf gap="xsmall" mb="xsmall">
                 <Box as={TokenLogo} src="/static/TIN_final.svg" display={['none', 'inline']} />
-                <SectionHeading>TIN Tranche</SectionHeading>
+                <SectionHeading>Junior tranche</SectionHeading>
+              </Shelf>
+              <Shelf justifyContent="space-between" style={{ marginLeft: 'auto' }}>
+                <Value
+                  variant="sectionHeading"
+                  value={
+                    tinTotalValue ? addThousandsSeparators(toPrecision(baseToDisplay(tinTotalValue, 27 + 18), 0)) : null
+                  }
+                  unit={props.selectedPool.metadata.currencySymbol || 'DAI'}
+                />
               </Shelf>
             </Shelf>
             <Stack gap="small">
-              <TrancheNote>Junior tranche &mdash; Higher risk, variable return</TrancheNote>
-
+              <TrancheNote>TIN token &mdash; Higher risk, variable return</TrancheNote>
+              {poolData && console.log(poolData.juniorInvestors)}
               <ValuePairList
                 variant="tertiary"
                 items={[
@@ -226,6 +258,19 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     value: poolData?.senior
                       ? addThousandsSeparators(toPrecision(baseToDisplay(poolData?.junior.tokenPrice || '0', 27), 4))
                       : null,
+                    valueUnit: props.selectedPool.metadata.currencySymbol || 'DAI',
+                  },
+                  tinYield && !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero())
+                    ? {
+                        term: 'Junior yield (90d APY)',
+                        value: tinYield,
+                        valueUnit: '%',
+                      }
+                    : undefined,
+                  {
+                    term: 'Junior provided by Issuer',
+                    value: reserveRatio ? parseFloat(juniorHeldByIssuer.toString()) / 100 : null,
+                    valueUnit: '%',
                   },
                 ]}
               />

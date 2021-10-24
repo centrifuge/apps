@@ -95,7 +95,11 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
             ),
           },
           {
-            header: <Tooltip id="dropApy">DROP APY</Tooltip>,
+            header: (
+              <Tooltip id="seniorApy" underline>
+                Senior APY
+              </Tooltip>
+            ),
             subHeader: '30 days',
             cell: (p: PoolData) => {
               const v = feeToInterestRate(p.seniorInterestRate || new BN(0))
@@ -113,8 +117,8 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
           },
         ],
     showAll && {
-      header: 'TIN APY',
-      subHeader: '3 months',
+      header: 'Junior APY',
+      subHeader: '90 days',
       cell: (p: PoolData) =>
         p.juniorYield90Days === null ? (
           <Value value="" unit="N/A" />
@@ -146,6 +150,7 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
           })}
         </Header>
       )}
+      {console.log(poolsData?.pools)}
       {pools?.map((p) => (
         <Link href={p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`} shallow passHref key={p.id}>
           <Row

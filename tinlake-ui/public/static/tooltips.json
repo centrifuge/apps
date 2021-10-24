@@ -28,14 +28,14 @@
     "title": "TIN Supply",
     "description": "Amount of outstanding TIN tokens for this pool."
   },
-  "tinRiskBuffer": {
-    "title": "TIN Risk Buffer",
-    "description": "The TIN risk buffer is the current value of the junior tranche (TIN) in relation to the pool value. It denotes how much of the pool is currently protected by the junior tranche.",
+  "juniorRiskBuffer": {
+    "title": "Junior risk buffer",
+    "description": "The junior risk buffer is the current value of the junior tranche (TIN) in relation to the pool value. It denotes how much of the pool is currently protected by the junior tranche.",
     "link": "https://docs.centrifuge.io/learn/drop-and-tin/"
   },
-  "minimumTinRiskBuffer": {
-    "title": "Minimum TIN risk buffer",
-    "description": "The TIN risk buffer is the current value of the junior tranche (TIN) in relation to the pool value. The minimum TIN risk buffer indicates the lower limit and ensures that senior investors in DROP are protected by a certain amount of TIN invested in the pool at any time."
+  "minimumJuniorRiskBuffer": {
+    "title": "Minimum junior risk buffer",
+    "description": "The junior risk buffer is the current value of the junior tranche (TIN) in relation to the pool value. The minimum junior risk buffer indicates the lower limit and ensures that senior investors in DROP are protected by a certain amount of TIN invested in the pool at any time."
   },
   "outstandingVolume": {
     "title": "Outstanding Volume",
@@ -74,7 +74,17 @@
   "riskGroup": {
     "title": "Risk group",
     "description": "The risk group of a financing determines the interest rate based on the underlying scorecard.",
-    "link": "https://medium.com/centrifuge/tinlake-pricing-and-valuation-series-part-1-how-to-price-real-world-assets-cf6655132bef"
+    "link": "https://docs.centrifuge.io/learn/pool-valuation/"
+  },
+  "riskGroupID": {
+    "title": "Risk group ID",
+    "description": "Underlying every Tinlake pool is a \"risk scorecard\" with different risk groups. Each NFT is assigned to one of these risk groups to determine financing fee and assumed risk adjustment for valuation.",
+    "link": "https://docs.centrifuge.io/learn/pool-valuation/"
+  },
+  "assumedRiskAdjustment": {
+    "title": "Assumed risk adjustment",
+    "description": "This is the assumed risk adjustment applied to outstanding financings of the corresponding risk group to calculate the NAV of the asset portfolio.",
+    "link": "https://docs.centrifuge.io/learn/pool-valuation/"
   },
   "maturityDate": {
     "title": "Maturity date",
@@ -101,12 +111,16 @@
     "title": "Oversubscribed pool",
     "description": "This pool is currently oversubscribed and not open for investments. Locked investment orders may be pending until the pool opens again."
   },
-  "dropApy": {
-    "title": "DROP APY",
-    "description": "The 30d DROP yield is the effective annualized return of the pool's DROP token over the last 30 days."
+  "seniorApy": {
+    "title": "Senior APY",
+    "description": "The 30d senior yield is the effective annualized return of the pool's DROP token over the last 30 days."
   },
-  "dropApr": {
-    "title": "DROP APR",
+  "juniorApy": {
+    "title": "Junior APY",
+    "description": "The 90d junior yield is the effective annualized return of the pool's TIN token over the last 90 days."
+  },
+  "seniorApr": {
+    "title": "Senior APR",
     "description": "DROP tokens earn yield on the outstanding assets at the DROP APR. The effective APY may deviate due to compounding effects or unused liquidity in the pool reserve."
   },
   "dropInvestment": {
@@ -124,5 +138,9 @@
   "cashDrag": {
     "title": "Cash drag",
     "description": "Share of the pool’s investments that is currently in the pool’s reserve and not financing assets. Liquidity in the pool’s reserve does not earn yield and thus drags down investor’s returns."
+  },
+  "discountRate": {
+    "title": "Discount rate",
+    "description": "Future cashflows in the Tinlake pool are discounted to calculate the Net Asset Value (NAV) using the discount rate. The discount rate usually reflects the rate of return an investor could earn in the marketplace on an investment of comparable size, tenor and risk. The discount rate is the same for every financing of the pool."
   }
 }
