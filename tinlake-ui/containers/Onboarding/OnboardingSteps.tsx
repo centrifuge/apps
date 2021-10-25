@@ -39,7 +39,7 @@ const OnboardingSteps: React.FC<Props> = (props: Props) => {
   const tranche = trancheOverride || DefaultTranche
 
   const address = useAddress()
-  const onboarding = useOnboardingState(props.activePool)
+  const onboarding = useOnboardingState(props.activePool, tranche)
 
   const kycStatus = onboarding.data?.kyc?.requiresSignin ? 'requires-signin' : onboarding.data?.kyc?.status
   const accreditationStatus = onboarding.data?.kyc?.isUsaTaxResident ? onboarding.data?.kyc?.accredited || false : true

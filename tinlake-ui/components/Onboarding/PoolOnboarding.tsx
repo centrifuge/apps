@@ -50,7 +50,7 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
 
   const address = useAddress()
   const { authState } = useSelector<any, AuthState>((state) => state.auth)
-  const onboarding = useOnboardingState(activePool)
+  const onboarding = useOnboardingState(activePool, tranche)
 
   const kycStatus = onboarding.data?.kyc?.requiresSignin ? 'requires-signin' : onboarding.data?.kyc?.status
   const accreditationStatus = onboarding.data?.kyc?.isUsaTaxResident ? onboarding.data?.kyc?.accredited || false : true

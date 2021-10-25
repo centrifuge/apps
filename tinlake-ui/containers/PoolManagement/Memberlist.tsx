@@ -25,6 +25,7 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
   const [onboardingAddress, setOnboardingAddress] = React.useState(undefined as string | undefined)
   const { data: onboardingData, isError: onboardingError } = useOnboardingState(
     props.activePool,
+    undefined,
     onboardingAddress && web3.isAddress(onboardingAddress) ? onboardingAddress : undefined
   )
 

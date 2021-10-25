@@ -4,14 +4,21 @@ import { useDebugFlags } from '../components/DebugFlags'
 import config, { Pool, UpcomingPool } from '../config'
 import { useAddress } from './useAddress'
 
-export function useOnboardingState(pool?: Pool | UpcomingPool, overrideAddress?: string) {
+type Tranche = 'junior' | 'senior'
+
+const DefaultTranche = 'senior'
+
+export function useOnboardingState(pool?: Pool | UpcomingPool, tranche?: Tranche, overrideAddress?: string) {
   const debugValue = useDebugFlags().onboardingState
   const address = useAddress()
   const poolId = (pool as Pool)?.addresses?.ROOT_CONTRACT
   const query = useQuery<AddressStatus>(
     ['onboarding', poolId, overrideAddress || address, debugValue],
     async () =>
-      debugValue || fetch(`${config.onboardAPIHost}pools/${poolId}/addresses/${address}`).then((res) => res.json()),
+      debugValue ||
+      fetch(`${config.onboardAPIHost}pools/${poolId}/addresses/${address}?tranche=${tranche || DefaultTranche}`).then(
+        (res) => res.json()
+      ),
     {
       enabled: !!poolId && !!(overrideAddress || address),
       staleTime: 60000,
