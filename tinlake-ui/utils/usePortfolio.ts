@@ -112,11 +112,11 @@ async function getPortfolio(ipfsPools: IpfsPools, address: string) {
     }
   })
 
-  let totalValue = new BN(0)
-  let totalSupplyRemaining = new BN(0)
+  const totalValue = new BN(0)
+  const totalSupplyRemaining = new BN(0)
   tokenBalances.forEach((tokenBalance) => {
-    totalValue = totalValue.add(tokenBalance.value)
-    totalSupplyRemaining = totalSupplyRemaining.add(tokenBalance.remainingSupplyCurrency)
+    totalValue.iadd(tokenBalance.value)
+    totalSupplyRemaining.iadd(tokenBalance.remainingSupplyCurrency)
   })
 
   return {
