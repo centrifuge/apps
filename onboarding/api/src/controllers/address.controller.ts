@@ -24,7 +24,7 @@ export class AddressController {
   ) {}
 
   @Get('pools/:poolId/addresses/:address')
-  async getStatus(@Param() params): Promise<AddressStatus> {
+  async getStatus(@Param() params, @Query() query): Promise<AddressStatus> {
     const pool = await this.poolService.get(params.poolId)
     if (!pool) throw new BadRequestException('Invalid pool')
 
@@ -37,7 +37,11 @@ export class AddressController {
     const user = await this.userRepo.find(address.userId)
     if (!user) throw new BadRequestException('Invalid user')
 
-    const authorizationLink = this.securitizeService.getAuthorizationLink(params.poolId, params.address)
+    const authorizationLink = this.securitizeService.getAuthorizationLink(
+      params.address,
+      params.poolId,
+      query.tranche || 'senior'
+    )
     const kyc = await this.kycRepo.find(address.userId)
     if (kyc) {
       let status: KycStatusLabel = kyc.status
@@ -141,7 +145,7 @@ export class AddressController {
   }
 
   @Get('addresses/:address')
-  async getStatusForAddress(@Param() params): Promise<AddressStatus> {
+  async getStatusForAddress(@Param() params, @Query() query): Promise<AddressStatus> {
     const blockchain = 'ethereum' // TODO: take this from the pool config as well
     const network = 'mainnet'
 
@@ -151,7 +155,7 @@ export class AddressController {
     const user = await this.userRepo.find(address.userId)
     if (!user) throw new BadRequestException('Invalid user')
 
-    const authorizationLink = this.securitizeService.getAuthorizationLink('', params.address)
+    const authorizationLink = this.securitizeService.getAuthorizationLink(params.address, query.tranche || 'senior')
     const kyc = await this.kycRepo.find(address.userId)
     if (kyc) {
       let status: KycStatusLabel = kyc.status
