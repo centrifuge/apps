@@ -164,36 +164,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       </TextButton>
     )
 
-  const secondaryValues = (
-    <Box mt="small">
-      <Tooltip title="DROP tokens earn yield on the outstanding assets at the fixed senior rate (APR). The current yield may deviate due to compounding effects or unused liquidity in the pool reserve. The current 30d senior APY is the annualized return of the pool's DROP token over the last 30 days.">
-        <ValuePairList
-          variant="tertiary"
-          items={
-            [
-              dropYield &&
-                !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero()) && {
-                  term: 'Current senior yield (30d APY)',
-                  value: dropYield,
-                  valueUnit: '%',
-                },
-              {
-                term: 'Fixed senior rate (APR)',
-                value: toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2),
-                valueUnit: '%',
-              },
-              {
-                term: 'Minimum investment amount',
-                value: 5000,
-                valueUnit: props.pool?.metadata.currencySymbol || 'DAI',
-              },
-            ].filter(Boolean) as any
-          }
-        />
-      </Tooltip>
-    </Box>
-  )
-
   React.useEffect(() => {
     if (props.pool?.metadata && !props.pool.metadata.issuerEmail) {
       console.warn('The "issuerEmail" field is blank for pool ', props.pool.metadata.name)
@@ -367,7 +337,6 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         <>
           {card === 'home' && (
             <>
-              {secondaryValues}
               {epochData?.isBlockedState && (
                 <>
                   <Warning>
@@ -503,7 +472,33 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
           </>
         ) : (
           <>
-            {secondaryValues}
+            <Box mt="small">
+              <Tooltip title="DROP tokens earn yield on the outstanding assets at the fixed senior rate (APR). The current yield may deviate due to compounding effects or unused liquidity in the pool reserve. The current 30d senior APY is the annualized return of the pool's DROP token over the last 30 days.">
+                <ValuePairList
+                  variant="tertiary"
+                  items={
+                    [
+                      dropYield &&
+                        !(poolData?.netAssetValue.isZero() && poolData?.reserve.isZero()) && {
+                          term: 'Current senior yield (30d APY)',
+                          value: dropYield,
+                          valueUnit: '%',
+                        },
+                      {
+                        term: 'Fixed senior rate (APR)',
+                        value: toPrecision(feeToInterestRate(trancheData?.interestRate || new BN(0)), 2),
+                        valueUnit: '%',
+                      },
+                      {
+                        term: 'Minimum investment amount',
+                        value: 5000,
+                        valueUnit: props.pool?.metadata.currencySymbol || 'DAI',
+                      },
+                    ].filter(Boolean) as any
+                  }
+                />
+              </Tooltip>
+            </Box>
             <ButtonGroup mt="medium">
               <InvestAction pool={props.pool} tranche="senior" />
             </ButtonGroup>
