@@ -1,35 +1,6 @@
-import { ResponsiveValue } from 'styled-system'
-import { BaseColors } from './baseColors'
-import { brandCentrifuge } from './brandCentrifuge'
-import { modeLight } from './modeLight'
+import { ThemeTypography } from '../types'
 
-type Variants =
-  | 'heading1'
-  | 'heading2'
-  | 'heading3'
-  | 'heading4'
-  | 'heading5'
-  | 'heading6'
-  | 'emphasized'
-  | 'interactive'
-  | 'interactive2'
-  | 'body1'
-  | 'body2'
-  | 'label1'
-  | 'label2'
-
-type Values = Partial<{
-  fontSize: ResponsiveValue<number | string>
-  lineHeight: ResponsiveValue<number>
-  fontWeight: ResponsiveValue<number>
-  color: keyof BaseColors | keyof typeof brandCentrifuge | keyof typeof modeLight['colors']
-}>
-
-type Typography = {
-  [key in Variants]: Values
-}
-
-const typography: Typography = {
+const typography: ThemeTypography = {
   heading1: {
     fontSize: [20, 24],
     lineHeight: 1.25,

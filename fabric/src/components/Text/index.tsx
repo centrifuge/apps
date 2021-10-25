@@ -6,6 +6,7 @@ import { PropsOf } from '../../utils/types'
 
 interface SystemProps extends TypographyProps, ColorProps {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface StyledTextProps extends SystemProps {}
 
 const StyledText = styled('div').withConfig({
@@ -14,7 +15,7 @@ const StyledText = styled('div').withConfig({
 
 const TextContext = React.createContext(false)
 
-function useTextContext() {
+function useTextContext(): React.ContextType<typeof TextContext> {
   return React.useContext(TextContext)
 }
 
@@ -30,7 +31,7 @@ const Text: React.FC<TextProps> = (props) => {
   }
 
   const {
-    variant,
+    // variant,
     children,
     as = isInText ? 'span' : 'div',
     color = isInText ? 'inherit' : 'textPrimary',
