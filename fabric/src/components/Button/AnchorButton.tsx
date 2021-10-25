@@ -22,7 +22,7 @@ export const AnchorButton: React.FC<AnchorButtonProps> = ({
   disabled,
   loading,
   children,
-  type = 'button',
+  active,
   ...anchorProps
 }) => {
   return (
@@ -34,6 +34,7 @@ export const AnchorButton: React.FC<AnchorButtonProps> = ({
         iconRight={iconRight}
         disabled={disabled}
         loading={loading}
+        active={active}
       >
         {children}
       </VisualButton>

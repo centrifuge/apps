@@ -4,6 +4,7 @@ import { Box, BoxProps } from '../Box'
 export const Container = styled(Box)({})
 
 Container.defaultProps = {
+  width: '100%',
   maxWidth: 'container',
   mx: 'auto',
 }

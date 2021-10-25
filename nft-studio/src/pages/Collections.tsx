@@ -1,12 +1,13 @@
-import { Card, Container, Text } from '@centrifuge/fabric'
+import { Card, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { PageContainer } from '../components/PageContainer'
 
 export const CollectionsPage: React.FC = () => {
   return (
-    <Container>
+    <PageContainer>
       <Card p={3}>
         <Text variant="heading1">Collections</Text>
       </Card>
-    </Container>
+    </PageContainer>
   )
 }

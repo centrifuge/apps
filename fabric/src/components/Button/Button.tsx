@@ -25,6 +25,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   loading,
   children,
+  active,
   type = 'button',
   ...buttonProps
 }) => {
@@ -37,6 +38,7 @@ export const Button: React.FC<ButtonProps> = ({
         iconRight={iconRight}
         disabled={disabled}
         loading={loading}
+        active={active}
       >
         {children}
       </VisualButton>

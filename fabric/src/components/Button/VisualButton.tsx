@@ -4,6 +4,7 @@ import styled, { keyframes } from 'styled-components'
 import { ResponsiveValue } from 'styled-system'
 import { IconSpinner } from '../../icon'
 import { Size } from '../../utils/types'
+import { Box } from '../Box'
 import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 
@@ -23,16 +24,18 @@ type IconProps = {
 export type VisualButtonProps = React.PropsWithChildren<{
   variant?: 'contained' | 'outlined' | 'text'
   small?: boolean
-  icon?: React.ComponentType<IconProps>
+  icon?: React.ComponentType<IconProps> | React.ReactNode
   iconRight?: React.ComponentType<IconProps>
   disabled?: boolean
   loading?: boolean
+  active?: boolean
 }>
 
 type StyledProps = {
   $variant?: 'contained' | 'outlined' | 'text'
   $small?: boolean
   $disabled?: boolean
+  $active?: boolean
 }
 
 export const StyledButton = styled.span<StyledProps>(
@@ -48,7 +51,7 @@ export const StyledButton = styled.span<StyledProps>(
     borderStyle: 'solid',
     userSelect: 'none',
   },
-  ({ $variant, $disabled, $small }) => {
+  ({ $variant, $disabled, $small, $active }) => {
     let fg = $disabled ? 'textDisabled' : 'textPrimary'
     let bg = $variant === 'text' ? 'transparent' : 'backgroundPrimary'
     let fgHover = 'brand'
@@ -60,9 +63,9 @@ export const StyledButton = styled.span<StyledProps>(
     }
 
     return css({
-      color: fg,
-      backgroundColor: bg,
-      borderColor: fg,
+      color: ($active && fgHover) || fg,
+      backgroundColor: ($active && bgHover) || bg,
+      borderColor: ($active && fgHover) || fg,
       borderWidth: borderWidth,
       pointerEvents: $disabled ? 'none' : 'initial',
       minHeight: $small ? 32 : 40,
@@ -78,7 +81,8 @@ export const StyledButton = styled.span<StyledProps>(
       },
 
       'a:focus-visible &, button:focus-visible &': {
-        boxShadow: 'buttonFocused',
+        boxShadow: $variant !== 'text' ? 'buttonFocused' : 'none',
+        color: $variant === 'text' ? fgHover : undefined,
       },
     })
   }
@@ -122,15 +126,16 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
   disabled: disabledProp,
   loading,
   children,
+  active,
 }) => {
   const iconSize = variant !== 'text' || small ? 'iconSmall' : 'iconMedium'
   const disabled = disabledProp || loading
 
   return (
-    <StyledButton $variant={variant} $disabled={disabled} $small={small}>
+    <StyledButton $variant={variant} $disabled={disabled} $small={small} $active={active}>
       <SpinnerWrapper $loading={loading}>
         <Shelf gap={1} px={2} py={small ? '5px' : '8px'}>
-          {IconComp && <IconComp size={iconSize} />}
+          {IconComp && <Box bleedY="5px">{isComponent(IconComp) ? <IconComp size={iconSize} /> : IconComp}</Box>}
           {children && (
             <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
               {children}
@@ -138,8 +143,12 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
           )}
           {IconRightComp && <IconRightComp size="iconSmall" />}
         </Shelf>
-        <Spinner size="iconMedium" />
+        <Spinner size={iconSize} />
       </SpinnerWrapper>
     </StyledButton>
   )
+}
+
+function isComponent(object: any): object is React.ComponentType {
+  return typeof object === 'function'
 }

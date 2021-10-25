@@ -1,0 +1,46 @@
+import { VisualButton, VisualButtonProps } from '@centrifuge/fabric'
+import * as React from 'react'
+import { NavLink, NavLinkProps } from 'react-router-dom'
+import styled from 'styled-components'
+import { useLinkIsActive } from '../utils/useLinkIsActive'
+
+export type RouterLinkButtonProps = VisualButtonProps & NavLinkProps & { showActive: boolean }
+
+const StyledLink = styled(NavLink)<{ $disabled?: boolean }>(
+  {
+    display: 'inline-block',
+    textDecoration: 'none',
+    outline: '0',
+  },
+  (props) => props.$disabled && { pointerEvents: 'none' }
+)
+
+export const RouterLinkButton: React.FC<RouterLinkButtonProps> = ({
+  variant,
+  small,
+  icon,
+  iconRight,
+  disabled,
+  loading,
+  children,
+  showActive = false,
+  ...routeProps
+}) => {
+  const isActive = useLinkIsActive(routeProps)
+
+  return (
+    <StyledLink $disabled={loading || disabled} {...routeProps}>
+      <VisualButton
+        variant={variant}
+        small={small}
+        icon={icon}
+        iconRight={iconRight}
+        disabled={disabled}
+        loading={loading}
+        active={showActive && isActive}
+      >
+        {children}
+      </VisualButton>
+    </StyledLink>
+  )
+}
