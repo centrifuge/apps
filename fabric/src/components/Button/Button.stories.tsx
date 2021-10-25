@@ -11,6 +11,7 @@ export default {
 } as ComponentMeta<typeof ButtonComp>
 
 type ButtonStory = ComponentStory<typeof ButtonComp>
+type AnchorButtonStory = ComponentStory<typeof AnchorButtonComp>
 
 const Template: ButtonStory = (args) => (
   <Grid columns={5} gap={3} justifyItems="start" maxWidth={800} equalColumns>
@@ -42,7 +43,7 @@ Button.args = {
   loading: false,
 }
 
-export const AnchorButton = (args) => (
+export const AnchorButton: AnchorButtonStory = (args) => (
   <Shelf gap={3}>
     <AnchorButtonComp {...args}>External link</AnchorButtonComp>
     <AnchorButtonComp {...args} variant="outlined">
