@@ -12,6 +12,7 @@ import { Box, Stack } from '../../../../../components/Layout'
 import { PageContainer } from '../../../../../components/PageContainer'
 import PageTitle from '../../../../../components/PageTitle'
 import { PoolLink } from '../../../../../components/PoolLink'
+import Scorecard from '../../../../../components/Scorecard'
 import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
@@ -68,6 +69,7 @@ const LoanListPage: React.FC<Props> = (props) => {
                 <Stack gap="small">
                   <SectionHeading>Asset List</SectionHeading>
                   <LoanList auth={auth} activePool={props.pool} />
+                  <Scorecard activePool={props.pool} />
                 </Stack>
               </Stack>
             </Auth>

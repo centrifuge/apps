@@ -112,7 +112,7 @@ const PoolManagement: React.FC<Props> = (props: Props) => {
 
             {view === 'Investors' && <Memberlist activePool={props.activePool} />}
 
-            {view === 'Risk' && <Risk tinlake={tinlake} />}
+            {view === 'Risk' && <Risk tinlake={tinlake} activePool={props.activePool} />}
 
             {view === 'Parameters' && <Parameters />}
 

@@ -37,6 +37,7 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
                 isUpcoming: false,
                 addresses: {
                   ROOT_CONTRACT: props.market,
+                  TINLAKE_CURRENCY: '0x0',
                   ACTIONS: '0x0',
                   PROXY_REGISTRY: '0x0',
                   COLLATERAL_NFT: '0x0',

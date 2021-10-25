@@ -1,9 +1,9 @@
-import { baseToDisplay } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
-import { Area, AreaChart, Tooltip } from 'recharts'
+import { Area, AreaChart, Tooltip as RechartsTooltip } from 'recharts'
 import { Card } from '../../../components/Card'
 import {
   ChartTooltip,
@@ -19,13 +19,14 @@ import { SectionHeading } from '../../../components/Heading'
 import { Shelf, Stack } from '../../../components/Layout'
 import { LoadingValue } from '../../../components/LoadingValue/index'
 import { useTinlake } from '../../../components/TinlakeProvider'
+import { Tooltip } from '../../../components/Tooltip'
 import { Pool } from '../../../config'
 import { AuthState, PermissionsV3 } from '../../../ducks/auth'
 import { addThousandsSeparators } from '../../../utils/addThousandsSeparators'
 import { dateToYMD } from '../../../utils/date'
 import { UintBase } from '../../../utils/ratios'
 import { toPrecision } from '../../../utils/toPrecision'
-import { useDailyAssetsValue } from '../../../utils/useDailyAssetsValue'
+import { useDailyPoolData } from '../../../utils/useDailyPoolData'
 import { useMedia } from '../../../utils/useMedia'
 import { usePool } from '../../../utils/usePool'
 import MaxReserveForm from './MaxReserveForm'
@@ -72,7 +73,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const { data: poolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
 
-  const { data: assetData } = useDailyAssetsValue(tinlake.contractAddresses.ROOT_CONTRACT!)
+  const { data: assetData } = useDailyPoolData(tinlake.contractAddresses.ROOT_CONTRACT!)
 
   const isAdmin =
     poolData?.isPoolAdmin || (props.auth?.permissions && (props.auth?.permissions as PermissionsV3).canSetMaxReserve)
@@ -141,6 +142,20 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
         <>
           <Table>
             <TableBody>
+              <TableRow>
+                <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
+                  <span>
+                    <Tooltip id="discountRate" underline>
+                      Discount rate
+                    </Tooltip>
+                  </span>
+                </TableCell>
+                <TableCell style={{ textAlign: 'end' }}>
+                  <LoadingValue done={poolData?.discountRate !== undefined}>
+                    {toPrecision(feeToInterestRate(poolData?.discountRate || '0'), 2)}%
+                  </LoadingValue>
+                </TableCell>
+              </TableRow>
               <TableRow>
                 <TableCell scope="row" style={{ alignItems: 'start', justifyContent: 'center' }}>
                   <span>Available funds for Financing</span>
@@ -239,7 +254,7 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
                   <stop offset="50%" stopColor="#ccc" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <Tooltip content={<CustomTooltip />} offset={20} />
+              <RechartsTooltip content={<CustomTooltip />} offset={20} />
               {/* <XAxis dataKey="day" mirror tickFormatter={(val: number) => dateToYMD(val)} /> */}
               <Area
                 type="monotone"

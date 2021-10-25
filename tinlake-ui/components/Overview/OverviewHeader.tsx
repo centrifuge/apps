@@ -29,7 +29,7 @@ interface Props {
 const OverviewHeader: React.FC<Props> = (props: Props) => {
   const { data: poolData } = usePool(props.selectedPool.addresses.ROOT_CONTRACT)
 
-  const { dropYield } = useTrancheYield(props.selectedPool.addresses.ROOT_CONTRACT)
+  const { dropYield, tinYield } = useTrancheYield(props.selectedPool.addresses.ROOT_CONTRACT)
 
   const dropRate = poolData?.senior?.interestRate || undefined
 
@@ -76,12 +76,12 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
     {
       term:
         dropYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? (
-          <Tooltip id="dropApy" underline>
-            DROP APY {!isMobile && '(30 days)'}
+          <Tooltip id="seniorApy" underline>
+            Senior APY {!isMobile && '(30 days)'}
           </Tooltip>
         ) : (
-          <Tooltip id="dropApr" underline>
-            Fixed DROP rate {!isMobile && '(APR)'}
+          <Tooltip id="seniorApr" underline>
+            Fixed senior rate {!isMobile && '(APR)'}
           </Tooltip>
         ),
       termSuffix: isMobile
@@ -95,6 +95,21 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
           ? dropYield
           : toPrecision(feeToInterestRate(dropRate || '0'), 2),
       valueUnit: '%',
+    },
+    {
+      term: (
+        <Tooltip id="juniorApy" underline>
+          Junior APY {!isMobile && '(90 days)'}
+        </Tooltip>
+      ),
+      termSuffix: isMobile
+        ? tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0))
+          ? '(90 days)'
+          : ''
+        : undefined,
+      valueIcon: '/static/TIN_final.svg',
+      value: tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? tinYield : 'Not yet available',
+      valueUnit: tinYield && (poolData?.netAssetValue.gtn(0) || poolData?.reserve.gtn(0)) ? '%' : '',
     },
     {
       term: 'Pool value',

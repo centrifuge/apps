@@ -14,12 +14,15 @@ import { connect } from 'react-redux'
 import Alert from '../../components/Alert'
 import { Card } from '../../components/Card'
 import NumberInput from '../../components/NumberInput'
+import Scorecard from '../../components/Scorecard'
+import { Pool } from '../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { Fixed27Base } from '../../utils/ratios'
 import { RiskGroup, usePool, WriteOffGroup } from '../../utils/usePool'
 
 interface Props extends TransactionProps {
   tinlake: ITinlake
+  activePool: Pool
 }
 
 const riskGroupsPerPage = 8
@@ -121,10 +124,10 @@ const Risk: React.FC<Props> = (props: Props) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableCell size="5%">#</TableCell>
-              <TableCell size="20%">Max Advance Rate</TableCell>
-              <TableCell size="20%">Financing Fee (APR)</TableCell>
-              <TableCell size="20%">Term Recovery Rate</TableCell>
+              <TableCell size="14%">Risk group ID</TableCell>
+              <TableCell size="22%">Max Advance Rate</TableCell>
+              <TableCell size="22%">Financing Fee (APR)</TableCell>
+              <TableCell size="22%">Term Recovery Rate</TableCell>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -336,6 +339,8 @@ const Risk: React.FC<Props> = (props: Props) => {
           )}
         </Card>
       )}
+
+      <Scorecard activePool={props.activePool} />
     </Box>
   ) : null
 }

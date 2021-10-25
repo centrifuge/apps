@@ -1,0 +1,15 @@
+name: 'nft-studio Staging'
+on:
+  push:
+    branches:
+      - rc/nft-studio/release-*
+
+jobs:
+  dev:
+    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
+    with:
+      netlify-alias: ''
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NFT_STUDIO_STAGING_NETLIFY_SITE_ID }}
