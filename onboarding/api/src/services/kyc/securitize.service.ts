@@ -20,11 +20,11 @@ export class SecuritizeService {
 
   constructor(private readonly kycRepo: KycRepo) {}
 
-  getAuthorizationLink(poolId: string, address: string): string {
+  getAuthorizationLink(address: string, poolId?: string, tranche?: 'senior' | 'junior'): string {
     const scope = `info%20details%20verification`
     const redirectUrl = poolId
-      ? `${config.onboardApiHost}pools/${poolId}/callback/${address}/securitize`
-      : `${config.onboardApiHost}callback/${address}/securitize`
+      ? `${config.onboardApiHost}pools/${poolId}/callback/${address}/securitize?tranche=${tranche || 'senior'}`
+      : `${config.onboardApiHost}callback/${address}/securitize?tranche=${tranche || 'senior'}`
     return `${config.securitize.idHost}#/authorize?issuerId=${config.securitize.clientId}&scope=${scope}&redirecturl=${redirectUrl}`
   }
 
