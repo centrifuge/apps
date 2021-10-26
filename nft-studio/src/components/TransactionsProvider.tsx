@@ -86,7 +86,7 @@ export function useCreateTransaction() {
         updateTransaction(id, { status: 'failed', failedReason: (e as any).message })
       }
     },
-    []
+    [updateTransaction]
   )
 
   const createTransaction = React.useCallback(
