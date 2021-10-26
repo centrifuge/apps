@@ -24,8 +24,8 @@ type IconProps = {
 export type VisualButtonProps = React.PropsWithChildren<{
   variant?: 'contained' | 'outlined' | 'text'
   small?: boolean
-  icon?: React.ComponentType<IconProps> | React.ReactNode
-  iconRight?: React.ComponentType<IconProps>
+  icon?: React.ComponentType<IconProps> | React.ReactElement
+  iconRight?: React.ComponentType<IconProps> | React.ReactElement
   disabled?: boolean
   loading?: boolean
   active?: boolean
@@ -118,32 +118,41 @@ const Spinner = styled(IconSpinner)`
   animation: ${rotate} 600ms linear infinite;
 `
 
+const ClickableArea = styled.div`
+  width: auto;
+  height: 100%;
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  top: 0;
+`
+
 export const VisualButton: React.FC<VisualButtonProps> = ({
   variant = 'contained',
   small,
   icon: IconComp,
   iconRight: IconRightComp,
-  disabled: disabledProp,
+  disabled,
   loading,
   children,
   active,
 }) => {
   const iconSize = variant !== 'text' || small ? 'iconSmall' : 'iconMedium'
-  const disabled = disabledProp || loading
 
   return (
     <StyledButton $variant={variant} $disabled={disabled} $small={small} $active={active}>
       <SpinnerWrapper $loading={loading}>
-        <Shelf gap={1} px={2} py={small ? '5px' : '8px'}>
+        <Shelf gap={1} px={variant === 'text' ? 0 : 2} py={small ? '5px' : '8px'} position="relative">
+          {variant === 'text' && <ClickableArea />}
           {IconComp && <Box bleedY="5px">{isComponent(IconComp) ? <IconComp size={iconSize} /> : IconComp}</Box>}
           {children && (
             <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
               {children}
             </Text>
           )}
-          {IconRightComp && <IconRightComp size="iconSmall" />}
+          {IconRightComp && (isComponent(IconRightComp) ? <IconRightComp size="iconSmall" /> : IconRightComp)}
         </Shelf>
-        <Spinner size={iconSize} />
+        <Spinner size={small ? 'iconSmall' : 'iconMedium'} />
       </SpinnerWrapper>
     </StyledButton>
   )

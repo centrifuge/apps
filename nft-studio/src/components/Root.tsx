@@ -7,6 +7,7 @@ import { ThemeProvider } from 'styled-components'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
 import { NavBar } from './NavBar'
+import { TransactionProvider } from './TransactionsProvider'
 import { Web3Provider } from './Web3Provider'
 
 export const Root: React.FC = () => {
@@ -15,17 +16,19 @@ export const Root: React.FC = () => {
       <ThemeProvider theme={centrifugeLight}>
         <GlobalStyle />
         <Web3Provider>
-          <Router>
-            <NavBar />
-            <Switch>
-              <Route path="/collection/:id">
-                <CollectionPage />
-              </Route>
-              <Route path="/">
-                <CollectionsPage />
-              </Route>
-            </Switch>
-          </Router>
+          <TransactionProvider>
+            <Router>
+              <NavBar />
+              <Switch>
+                <Route path="/collection/:id">
+                  <CollectionPage />
+                </Route>
+                <Route path="/">
+                  <CollectionsPage />
+                </Route>
+              </Switch>
+            </Router>
+          </TransactionProvider>
         </Web3Provider>
       </ThemeProvider>
     </>

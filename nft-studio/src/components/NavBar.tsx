@@ -1,10 +1,10 @@
-import { Box, Button, IconChevronDown, Shelf } from '@centrifuge/fabric'
+import { Box, Button, IconChevronDown } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import styled from 'styled-components'
+import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { truncateAddress } from '../utils/web3'
-import { RouterLinkButton } from './RouterLinkButton'
-import { useWeb3Context } from './Web3Provider'
+import { useWeb3 } from './Web3Provider'
 
 export const NavBar: React.FC = () => {
   const {
@@ -14,21 +14,13 @@ export const NavBar: React.FC = () => {
     accounts,
     // disconnect,
     // selectAccount,
-  } = useWeb3Context()
+  } = useWeb3()
+  const isDesktop = useIsAboveBreakpoint('M')
 
   return (
-    <Bar px={[2, 3]} bg="backgroundPrimary">
+    <Bar px={[2, 3]}>
       <LogoWrapper>Logo</LogoWrapper>
-      <NavWrapper>
-        <Shelf>
-          <RouterLinkButton to="/" variant="text" showActive exact small>
-            Home
-          </RouterLinkButton>{' '}
-          <RouterLinkButton to="/collection/1" variant="text" showActive small>
-            Collection 1
-          </RouterLinkButton>
-        </Shelf>
-      </NavWrapper>
+      <TitleWrapper>NFT Studio</TitleWrapper>
       <AccountWrapper>
         {selectedAccount && accounts?.length ? (
           <>
@@ -47,18 +39,19 @@ export const NavBar: React.FC = () => {
                   <Identicon value={selectedAccount.address} size={24} theme="polkadot" />
                 </IdenticonWrapper>
               }
-              iconRight={IconChevronDown}
-              variant="outlined"
+              iconRight={isDesktop ? IconChevronDown : undefined}
+              variant="text"
+              small
             >
-              {selectedAccount.meta.name || truncateAddress(selectedAccount.address)}
+              {isDesktop ? selectedAccount.meta.name || truncateAddress(selectedAccount.address) : null}
             </Button>
           </>
         ) : accounts && !accounts.length ? (
-          <Button disabled variant="outlined">
+          <Button disabled variant="text">
             No accounts available
           </Button>
         ) : (
-          <Button onClick={connect} loading={isConnecting}>
+          <Button onClick={() => connect()} loading={isConnecting}>
             Connect
           </Button>
         )}
@@ -77,7 +70,7 @@ const LogoWrapper = styled.div`
   height: 32px;
 `
 
-const NavWrapper = styled.nav`
+const TitleWrapper = styled.nav`
   flex-grow: 1;
 `
 
@@ -88,30 +81,25 @@ const Bar = styled(Box)`
   position: sticky;
   top: 0;
   z-index: 6;
-  box-shadow: 0 0 4px 0px #00000075;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
   align-items: center;
-  gap: ${({ theme }) => `calc(${theme.space[3]} * 1px)`};
+  grid-template-columns: 100%;
+  grid-template-rows: auto;
+  grid-template-areas: 'unit';
+  position: relative;
 
-  @media (min-width: 1500px) {
-    display: grid;
-    grid-template-columns: ${({ theme }) => `1fr calc(${theme.sizes.container} * 1px) 1fr`};
+  ${LogoWrapper} {
+    grid-area: unit;
+    justify-self: start;
+  }
 
-    ${LogoWrapper} {
-      grid-column: 1 / 1;
-      grid-row: 1;
-    }
+  ${TitleWrapper} {
+    grid-area: unit;
+    justify-self: center;
+  }
 
-    ${NavWrapper} {
-      grid-column: 2 / 3;
-      grid-row: 1;
-    }
-
-    ${AccountWrapper} {
-      grid-column: 2 / 4;
-      grid-row: 1;
-      justify-self: right;
-    }
+  ${AccountWrapper} {
+    grid-area: unit;
+    justify-self: end;
   }
 `
