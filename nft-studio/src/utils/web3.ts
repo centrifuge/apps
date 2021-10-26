@@ -9,8 +9,8 @@ export function truncateAddress(address: string) {
   return `${first8}...${last3}`
 }
 
-const RPC_URL = 'wss://fullnode.centrifuge.io'
-const wsProvider = new WsProvider(RPC_URL)
+const WSS_RPC_URL = 'wss://fullnode.centrifuge.io'
+const wsProvider = new WsProvider(WSS_RPC_URL)
 
 let apiPromise: Promise<ApiPromise>
 let api: ApiPromise
