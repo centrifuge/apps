@@ -2861,6 +2861,9 @@ __metadata:
     eslint: 7.32.0
     eslint-config-prettier: 8.3.0
     eslint-plugin-react: 7.21.5
+    http-proxy-middleware: ^2.0.1
+    netlify-lambda: ^2.0.15
+    npm-run-all: ^4.1.5
     react: ^17.0.2
     react-dom: ^17.0.2
     react-query: ^3.25.1
@@ -8210,7 +8213,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/http-proxy@npm:^1.17.4":
+"@types/http-proxy@npm:^1.17.4, @types/http-proxy@npm:^1.17.5":
   version: 1.17.7
   resolution: "@types/http-proxy@npm:1.17.7"
   dependencies:
@@ -21833,6 +21836,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"http-proxy-middleware@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "http-proxy-middleware@npm:2.0.1"
+  dependencies:
+    "@types/http-proxy": ^1.17.5
+    http-proxy: ^1.18.1
+    is-glob: ^4.0.1
+    is-plain-obj: ^3.0.0
+    micromatch: ^4.0.2
+  checksum: bdcc2687d1aafa723f7af8295cfbbc4ba950781747d1550e724e1441c68ed2cb4248c82721aa0902a65c59b5cfbbbf40bf278d726b8302c46dc58e7a78e21802
+  languageName: node
+  linkType: hard
+
 "http-proxy@npm:^1.17.0, http-proxy@npm:^1.18.1":
   version: 1.18.1
   resolution: "http-proxy@npm:1.18.1"
@@ -23082,6 +23098,13 @@ __metadata:
   version: 2.1.0
   resolution: "is-plain-obj@npm:2.1.0"
   checksum: 2314302f9140d1e9607731d523f207d8000281aebbabe0083210342c0758976f75f0f5db405e55910bd4dc9a04baddbeab9d476290642b5a0d31431cc9bda4b3
+  languageName: node
+  linkType: hard
+
+"is-plain-obj@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "is-plain-obj@npm:3.0.0"
+  checksum: 70a50b220133b82adf1302aa7efde74d6a2b734a6687b199c733491a4f724b69d1196a6c440238adcc767cc419e7dc02309af159ab21412f685893d36154eb2e
   languageName: node
   linkType: hard
 
@@ -25089,6 +25112,13 @@ __metadata:
   version: 2.2.0
   resolution: "jwt-decode@npm:2.2.0"
   checksum: d3e8f2176740df81bffa6b3fe4b7305f0ab6c45a796670113046b0f1fb0dba0b610573d4cf4aa4676c3ba52fe678984c0e63b2525df059c224d3be9b685f45bf
+  languageName: node
+  linkType: hard
+
+"jwt-decode@npm:^3.0.0":
+  version: 3.1.2
+  resolution: "jwt-decode@npm:3.1.2"
+  checksum: 144712f200e4ad87d8550f614cb40017b1e6f20b6b105b4184ddbd076566e85e13a015ae1af7fc85ace03768eabe5e0863fa79cb6349adea8396f9f729a93213
   languageName: node
   linkType: hard
 
@@ -27338,6 +27368,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"netlify-lambda@npm:^2.0.15":
+  version: 2.0.15
+  resolution: "netlify-lambda@npm:2.0.15"
+  dependencies:
+    "@babel/core": ^7.10.4
+    "@babel/plugin-proposal-class-properties": ^7.10.4
+    "@babel/plugin-proposal-object-rest-spread": ^7.10.4
+    "@babel/plugin-transform-object-assign": ^7.10.4
+    "@babel/preset-env": ^7.10.4
+    babel-loader: ^8.1.0
+    body-parser: ^1.19.0
+    commander: ^5.1.0
+    express: ^4.17.1
+    express-logging: ^1.1.1
+    find-up: ^5.0.0
+    globby: ^11.0.1
+    jwt-decode: ^3.0.0
+    toml: ^3.0.0
+    webpack: ^4.43.0
+    webpack-merge: ^4.2.2
+  bin:
+    netlify-lambda: bin/cmd.js
+  checksum: 21a678e2b1aa2e2d8e2b3c2ec545951cf66558e596e6dba5c2f174c0748d1133d27a2098cf11aab0f2a26716f890b61f7426024826c887fe732fcbaba32d9904
+  languageName: node
+  linkType: hard
+
 "netmask@npm:^2.0.1":
   version: 2.0.2
   resolution: "netmask@npm:2.0.2"
@@ -28009,7 +28065,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"npm-run-all@npm:4.1.5":
+"npm-run-all@npm:4.1.5, npm-run-all@npm:^4.1.5":
   version: 4.1.5
   resolution: "npm-run-all@npm:4.1.5"
   dependencies:

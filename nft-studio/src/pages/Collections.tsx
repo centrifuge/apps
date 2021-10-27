@@ -1,6 +1,7 @@
 import { Button, Card, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { PageContainer } from '../components/PageContainer'
+import { SampleCreateMetadata } from '../components/SampleCreateMetadata'
 import { useCreateTransaction, useTransactions } from '../components/TransactionsProvider'
 
 export const CollectionsPage: React.FC = () => {
@@ -47,6 +48,10 @@ const TestTransaction: React.FC = () => {
           </dl>
         </>
       ))}
+      <div>
+        <h2>Sample create metadata</h2>
+        <SampleCreateMetadata />
+      </div>
     </Stack>
   )
 }
