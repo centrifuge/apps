@@ -5,7 +5,7 @@
     "start": "yarn build:deps && yarn start:dev",
     "start:dev": "SKIP_PREFLIGHT_CHECK=true react-scripts start",
     "start:all": "run-p -l dev:lambda start:dev",
-    "build": "react-scripts build && yarn build:lambda",
+    "build": "yarn build:lambda && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "build:deps": "cd ../fabric && yarn build && cd ../fabric",
