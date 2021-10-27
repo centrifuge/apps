@@ -55,6 +55,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           netlify-config-path: ./nft-studio/netlify.toml
           publish-dir: ./nft-studio/build
+          functions-dir: ./nft-studio/lambda
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
