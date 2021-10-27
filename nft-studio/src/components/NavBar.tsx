@@ -1,42 +1,105 @@
-import { Button, Shelf } from '@centrifuge/fabric'
+import { Box, Button, IconChevronDown } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
-import { encodeAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
-import { Link } from 'react-router-dom'
+import styled from 'styled-components'
+import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { truncateAddress } from '../utils/web3'
-import { useWeb3Context } from './Web3Provider'
+import { useWeb3 } from './Web3Provider'
 
 export const NavBar: React.FC = () => {
-  const { selectedAccount, isConnecting, connect, disconnect, selectAccount, accounts } = useWeb3Context()
-  return (
-    <Shelf gap={2}>
-      <nav>
-        <Link to="/">Home</Link> <Link to="/collection/1">Collection 1</Link>
-      </nav>
-      {selectedAccount && accounts?.length ? (
-        <div title={encodeAddress(selectedAccount.address, 2)}>
-          <select onChange={(e) => selectAccount(e.target.value)} value={selectedAccount.address}>
-            {accounts.map((acc) => (
-              <option value={acc.address} key={acc.address}>
-                {acc.meta.name || truncateAddress(acc.address)}
-              </option>
-            ))}
-          </select>
-          <Identicon value={selectedAccount.address} size={24} theme="polkadot" />
+  const {
+    selectedAccount,
+    isConnecting,
+    connect,
+    accounts,
+    // disconnect,
+    // selectAccount,
+  } = useWeb3()
+  const isDesktop = useIsAboveBreakpoint('M')
 
-          <button type="button" onClick={disconnect}>
-            Disconnect
-          </button>
-        </div>
-      ) : accounts && !accounts.length ? (
-        <span>No accounts available</span>
-      ) : isConnecting ? (
-        <span>Connecting...</span>
-      ) : (
-        <Button type="button" onClick={connect}>
-          Connect
-        </Button>
-      )}
-    </Shelf>
+  return (
+    <Bar px={[2, 3]}>
+      <LogoWrapper>Logo</LogoWrapper>
+      <TitleWrapper>NFT Studio</TitleWrapper>
+      <AccountWrapper>
+        {selectedAccount && accounts?.length ? (
+          <>
+            {/* <div title={encodeAddress(selectedAccount.address, 2)}>
+              <select onChange={(e) => selectAccount(e.target.value)} value={selectedAccount.address}>
+                {accounts.map((acc) => (
+                  <option value={acc.address} key={acc.address}>
+                    {acc.meta.name || truncateAddress(acc.address)}
+                  </option>
+                ))}
+              </select>
+            </div> */}
+            <Button
+              icon={
+                <IdenticonWrapper>
+                  <Identicon value={selectedAccount.address} size={24} theme="polkadot" />
+                </IdenticonWrapper>
+              }
+              iconRight={isDesktop ? IconChevronDown : undefined}
+              variant="text"
+              small
+            >
+              {isDesktop ? selectedAccount.meta.name || truncateAddress(selectedAccount.address) : null}
+            </Button>
+          </>
+        ) : accounts && !accounts.length ? (
+          <Button disabled variant="text">
+            No accounts available
+          </Button>
+        ) : (
+          <Button onClick={() => connect()} loading={isConnecting}>
+            Connect
+          </Button>
+        )}
+      </AccountWrapper>
+    </Bar>
   )
 }
+
+const IdenticonWrapper = styled.div`
+  pointer-events: none;
+`
+
+const LogoWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  height: 32px;
+`
+
+const TitleWrapper = styled.nav`
+  flex-grow: 1;
+`
+
+const AccountWrapper = styled.div``
+
+const Bar = styled(Box)`
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  display: grid;
+  align-items: center;
+  grid-template-columns: 100%;
+  grid-template-rows: auto;
+  grid-template-areas: 'unit';
+  position: relative;
+
+  ${LogoWrapper} {
+    grid-area: unit;
+    justify-self: start;
+  }
+
+  ${TitleWrapper} {
+    grid-area: unit;
+    justify-self: center;
+  }
+
+  ${AccountWrapper} {
+    grid-area: unit;
+    justify-self: end;
+  }
+`

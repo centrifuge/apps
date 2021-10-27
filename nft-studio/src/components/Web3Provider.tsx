@@ -18,9 +18,9 @@ type Web3ContextType = {
 
 const Web3Context = React.createContext<Web3ContextType>(null as any)
 
-export function useWeb3Context() {
+export function useWeb3() {
   const ctx = React.useContext(Web3Context)
-  if (!ctx) throw new Error('useWeb3Context must be used within Web3Provider')
+  if (!ctx) throw new Error('useWeb3 must be used within Web3Provider')
   return ctx
 }
 
@@ -80,6 +80,7 @@ export const Web3Provider: React.FC = ({ children }) => {
       console.error(e)
       localStorage.setItem('web3Persist', '')
       localStorage.setItem('web3PersistedAddress', '')
+      throw e
     } finally {
       setIsConnecting(false)
     }

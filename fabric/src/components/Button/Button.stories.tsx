@@ -57,5 +57,6 @@ export const AnchorButton: AnchorButtonStory = (args) => (
 AnchorButton.args = {
   disabled: false,
   loading: false,
+  active: false,
   href: 'https://centrifuge.io',
 }
