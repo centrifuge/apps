@@ -102,6 +102,7 @@ export class SecuritizeService {
     })
 
     if (response.status === 401) {
+      this.logger.error(`Refresh token has expired ${refreshToken}: ${response.statusText}`)
       // Refresh token has also expired
       return undefined
     }
@@ -132,7 +133,7 @@ export interface Investor {
       countryCode?: string
     }
   }
-  domainInvestorDetails: {
+  domainInvestorDetails?: {
     taxInfo: any
     isUsaTaxResident: boolean
     isAccredited: boolean

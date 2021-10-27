@@ -67,8 +67,8 @@ export class AddressController {
             'securitize',
             kyc.providerAccountId,
             investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus,
-            investor.domainInvestorDetails.isUsaTaxResident,
-            investor.domainInvestorDetails.isAccredited
+            investor.domainInvestorDetails?.isUsaTaxResident,
+            investor.domainInvestorDetails?.isAccredited
           )
           status = investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus
         }
@@ -185,8 +185,8 @@ export class AddressController {
             'securitize',
             kyc.providerAccountId,
             investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus,
-            investor.domainInvestorDetails.isUsaTaxResident,
-            investor.domainInvestorDetails.isAccredited
+            investor.domainInvestorDetails?.isUsaTaxResident,
+            investor.domainInvestorDetails?.isAccredited
           )
           status = investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus
         }

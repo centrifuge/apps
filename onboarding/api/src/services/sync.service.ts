@@ -48,19 +48,19 @@ export class SyncService {
       // Skip manual-review because we are not saving that separately, so it will be the status processing
       if (
         (investor && investor.verificationStatus !== kyc.status && investor.verificationStatus !== 'manual-review') ||
-        investor.domainInvestorDetails.isAccredited !== kyc.accredited
+        investor.domainInvestorDetails?.isAccredited !== kyc.accredited
       ) {
         this.logger.debug(
           `Update investor ${kyc.userId} status to ${investor.verificationStatus}${
-            investor.domainInvestorDetails.isAccredited ? ' (accredited)' : ''
+            investor.domainInvestorDetails?.isAccredited ? ' (accredited)' : ''
           }`
         )
         this.kycRepo.setStatus(
           'securitize',
           kyc.providerAccountId,
           investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus,
-          investor.domainInvestorDetails.isUsaTaxResident,
-          investor.domainInvestorDetails.isAccredited
+          investor.domainInvestorDetails?.isUsaTaxResident,
+          investor.domainInvestorDetails?.isAccredited
         )
 
         this.memberlistService.update(kyc.userId)
