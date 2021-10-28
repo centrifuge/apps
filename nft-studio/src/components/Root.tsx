@@ -2,25 +2,52 @@ import { GlobalStyle } from '@centrifuge/fabric'
 // import altairDark from '@centrifuge/fabric/dist/theme/altairDark'
 import centrifugeLight from '@centrifuge/fabric/dist/theme/centrifugeLight'
 import * as React from 'react'
+import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
-import { NavBar } from './NavBar'
+import { CreateCollectionPage } from '../pages/CreateCollection'
+import { MintNFTPage } from '../pages/MintNFT'
+import { NFTPage } from '../pages/NFT'
 import { TransactionProvider } from './TransactionsProvider'
 import { Web3Provider } from './Web3Provider'
 
+const theme = {
+  ...centrifugeLight,
+  sizes: {
+    ...centrifugeLight.sizes,
+    container: '100%',
+  },
+}
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+    },
+  },
+})
+
 export const Root: React.FC = () => {
   return (
-    <>
-      <ThemeProvider theme={centrifugeLight}>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
         <GlobalStyle />
         <Web3Provider>
           <TransactionProvider>
             <Router>
-              <NavBar />
               <Switch>
-                <Route path="/collection/:id">
+                <Route path="/collection/:cid/object/mint">
+                  <MintNFTPage />
+                </Route>
+                <Route path="/collection/:cid/object/:nftid">
+                  <NFTPage />
+                </Route>
+                <Route path="/collection/create">
+                  <CreateCollectionPage />
+                </Route>
+                <Route path="/collection/:cid">
                   <CollectionPage />
                 </Route>
                 <Route path="/">
@@ -31,6 +58,6 @@ export const Root: React.FC = () => {
           </TransactionProvider>
         </Web3Provider>
       </ThemeProvider>
-    </>
+    </QueryClientProvider>
   )
 }

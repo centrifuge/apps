@@ -17,5 +17,9 @@ export const Card = styled(Box)<Props>((props) =>
     borderStyle: 'solid',
     borderColor: 'borderSecondary',
     boxShadow: props.interactive ? 'cardInteractive' : undefined,
+
+    'a:focus-visible &, button:focus-visible &': {
+      boxShadow: props.interactive ? 'buttonFocused' : 'none',
+    },
   })
 )

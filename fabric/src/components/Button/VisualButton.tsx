@@ -4,7 +4,7 @@ import styled, { keyframes } from 'styled-components'
 import { ResponsiveValue } from 'styled-system'
 import { IconSpinner } from '../../icon'
 import { Size } from '../../utils/types'
-import { Box } from '../Box'
+import { Flex } from '../Flex'
 import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 
@@ -53,7 +53,7 @@ export const StyledButton = styled.span<StyledProps>(
   },
   ({ $variant, $disabled, $small, $active }) => {
     let fg = $disabled ? 'textDisabled' : 'textPrimary'
-    let bg = $variant === 'text' ? 'transparent' : 'backgroundPrimary'
+    let bg = $variant === 'contained' ? 'backgroundPrimary' : 'transparent'
     let fgHover = 'brand'
     let bgHover = ''
     const borderWidth = $variant === 'outlined' ? 1 : 0
@@ -81,7 +81,7 @@ export const StyledButton = styled.span<StyledProps>(
       },
 
       'a:focus-visible &, button:focus-visible &': {
-        boxShadow: $variant !== 'text' ? 'buttonFocused' : 'none',
+        boxShadow: $variant !== 'text' ? 'buttonFocused' : 'none !important', // styled components renders the focus style also when $variant === 'text' for some reason
         color: $variant === 'text' ? fgHover : undefined,
       },
     })
@@ -144,7 +144,7 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
       <SpinnerWrapper $loading={loading}>
         <Shelf gap={1} px={variant === 'text' ? 0 : 2} py={small ? '5px' : '8px'} position="relative">
           {variant === 'text' && <ClickableArea />}
-          {IconComp && <Box bleedY="5px">{isComponent(IconComp) ? <IconComp size={iconSize} /> : IconComp}</Box>}
+          {IconComp && <Flex bleedY="5px">{isComponent(IconComp) ? <IconComp size={iconSize} /> : IconComp}</Flex>}
           {children && (
             <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
               {children}
