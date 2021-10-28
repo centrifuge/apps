@@ -66,7 +66,7 @@ export const StyledButton = styled.span<StyledProps>(
       color: ($active && fgHover) || fg,
       backgroundColor: ($active && bgHover) || bg,
       borderColor: ($active && fgHover) || fg,
-      borderWidth: borderWidth,
+      borderWidth,
       pointerEvents: $disabled ? 'none' : 'initial',
       minHeight: $small ? 32 : 40,
 

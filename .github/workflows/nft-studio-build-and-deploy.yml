@@ -37,10 +37,7 @@ jobs:
       - name: Lint
         run: yarn lint
 
-      - name: Build dependencies
-        run: yarn build:deps
-
-      - name: Build nft-studio
+      - name: Build nft-studio + dependencies
         run: yarn build
         env:
           SKIP_PREFLIGHT_CHECK: 'true'

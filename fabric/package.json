@@ -12,6 +12,7 @@
     "lint": "eslint src",
     "test": "loki test",
     "approve": "loki approve",
+    "start": "tsc --watch",
     "ci:loki": "build-storybook && loki --requireReference --reactUri file:./storybook-static"
   },
   "author": "",

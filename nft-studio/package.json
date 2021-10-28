@@ -2,18 +2,18 @@
   "name": "@centrifuge/nft-studio",
   "private": true,
   "scripts": {
-    "start": "yarn build:deps && yarn start:dev",
-    "start:dev": "SKIP_PREFLIGHT_CHECK=true react-scripts start",
-    "start:all": "run-p -l dev:lambda start:dev",
-    "build": "yarn build:lambda && react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "start": "run-p -l start:deps netlify:dev",
+    "netlify:dev": "netlify dev",
+    "start:app": "react-scripts start",
+    "start:deps": "cd ../fabric && yarn start && cd ../fabric",
+    "build": "yarn build:deps && yarn build:lambda && yarn build:app",
     "build:deps": "cd ../fabric && yarn build && cd ../fabric",
-    "build:all": "yarn build:deps && yarn build",
+    "build:lambda": "netlify-lambda build lambda",
+    "build:app": "react-scripts build",
     "lint": "eslint -c .eslintrc.js '*/**/*.{js,ts,tsx}'",
     "lint-fix": "npm run lint -- --fix",
-    "dev:lambda": "netlify-lambda serve lambda",
-    "build:lambda": "netlify-lambda build lambda"
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
   "dependencies": {
     "@centrifuge/fabric": "workspace:*",
@@ -47,7 +47,7 @@
     "eslint": "7.32.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-react": "7.21.5",
-    "http-proxy-middleware": "^2.0.1",
+    "netlify-cli": "^6.14.5",
     "npm-run-all": "^4.1.5"
   },
   "browserslist": {
