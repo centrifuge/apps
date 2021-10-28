@@ -5,12 +5,14 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Pool, UpcomingPool } from '../../config'
 import InvestmentOverview from '../../containers/Investment/View/InvestmentOverview'
+import { useAddress } from '../../utils/useAddress'
 import { Button } from '../Button'
 import { ButtonGroup } from '../ButtonGroup'
 import { Card } from '../Card'
 import InvestAction from '../InvestAction'
 import { Box, Grid, Stack, Wrap } from '../Layout'
 import PageTitle from '../PageTitle'
+import { IconMail } from './IconMail'
 import OverviewHeader from './OverviewHeader'
 
 interface Props {
@@ -24,6 +26,7 @@ function isUpcomingPool(pool: Pool | UpcomingPool): pool is UpcomingPool {
 const Overview: React.FC<Props> = ({ selectedPool }) => {
   const [modalLink, setModalLink] = React.useState('')
   const [modalIsOpen, setModalIsOpen] = React.useState(false)
+  const address = useAddress()
 
   const openModal = (link: string) => {
     setModalLink(link)
@@ -89,6 +92,12 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
                             )}
                           </>
                         ))}
+
+                        {selectedPool.metadata.issuerEmail && address && (
+                          <a href={`mailto:${selectedPool.metadata.issuerEmail}`} target="_blank">
+                            <ButtonWithIcon label="Contact the issuer" icon={<IconMail />} size="small" />
+                          </a>
+                        )}
                       </Wrap>
                     )}
                   </>
