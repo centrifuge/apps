@@ -1,7 +1,7 @@
 import { Box, Button, IconChevronDown, Text } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { truncateAddress } from '../utils/web3'
 import { useWeb3 } from './Web3Provider'
@@ -20,9 +20,12 @@ export const NavBar: React.FC<Props> = ({ title }) => {
     // selectAccount,
   } = useWeb3()
   const isDesktop = useIsAboveBreakpoint('M')
+  const {
+    sizes: { navBarHeight, navBarHeightMobile },
+  } = useTheme()
 
   return (
-    <Bar px={[1, 2, 3]} height={[64, 64, 72]}>
+    <Bar px={[1, 2, 3]} height={[navBarHeight, navBarHeight, navBarHeightMobile]}>
       <LogoWrapper>Logo</LogoWrapper>
       <TitleWrapper>
         <Text as="h1" fontSize={24} fontWeight={600} lineHeight={1}>

@@ -4,7 +4,7 @@ import centrifugeLight from '@centrifuge/fabric/dist/theme/centrifugeLight'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-import { ThemeProvider } from 'styled-components'
+import { DefaultTheme, ThemeProvider } from 'styled-components'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
 import { CreateCollectionPage } from '../pages/CreateCollection'
@@ -15,11 +15,13 @@ import { NavBar } from './NavBar'
 import { TransactionProvider } from './TransactionsProvider'
 import { Web3Provider } from './Web3Provider'
 
-const theme = {
+const theme: DefaultTheme = {
   ...centrifugeLight,
   sizes: {
     ...centrifugeLight.sizes,
     container: '100%',
+    navBarHeight: 72,
+    navBarHeightMobile: 64,
   },
 }
 
