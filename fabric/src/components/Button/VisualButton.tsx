@@ -77,7 +77,7 @@ export const StyledButton = styled.span<StyledProps>(
       },
 
       '&:active': {
-        '--fabric-focus-color': theme.colors[$variant === 'contained' ? bg : fgHover],
+        '--fabric-color-focus': theme.colors[$variant === 'contained' ? bg : fgHover],
         boxShadow: $variant !== 'text' ? 'buttonFocused' : 'none',
       },
 

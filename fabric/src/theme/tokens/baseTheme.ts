@@ -21,6 +21,6 @@ export const baseTheme: Omit<FabricTheme, 'colors'> = {
   },
   shadows: {
     cardInteractive: '0 1px 5px rgba(0, 0, 0, 0.2)',
-    buttonFocused: `4px 4px 1px var(--fabric-focus-color)`,
+    buttonFocused: `4px 4px 1px var(--fabric-color-focus)`,
   },
 }
