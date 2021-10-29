@@ -6,7 +6,7 @@ type Props = {}
 
 export const CollectionCard: React.FC<Props> = () => {
   return (
-    <Card as={Link} to="/collection/1" interactive p={3}>
+    <Card as={Link} to="/collection/1" variant="interactive" p={3}>
       <Shelf gap={3} justifyContent="space-between" alignItems="flex-start">
         <Stack gap={3}>
           <div>
