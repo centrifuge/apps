@@ -42,11 +42,11 @@ export const NavBar: React.FC<Props> = ({ title }) => {
               </select>
             </div> */}
             <Button
-              icon={() => (
+              icon={
                 <IdenticonWrapper>
                   <Identicon value={selectedAccount.address} size={24} theme="polkadot" />
                 </IdenticonWrapper>
-              )}
+              }
               iconRight={isDesktop ? IconChevronDown : undefined}
               variant="text"
               small
