@@ -4,7 +4,7 @@ import { NavLink, NavLinkProps } from 'react-router-dom'
 import styled from 'styled-components'
 import { useLinkIsActive } from '../utils/useLinkIsActive'
 
-export type RouterLinkButtonProps = VisualButtonProps & NavLinkProps & { showActive: boolean }
+export type RouterLinkButtonProps = VisualButtonProps & NavLinkProps & { showActive?: boolean }
 
 const StyledLink = styled(NavLink)<{ $disabled?: boolean }>(
   {

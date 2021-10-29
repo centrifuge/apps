@@ -1,4 +1,4 @@
-import { Box, Button, IconChevronDown } from '@centrifuge/fabric'
+import { Box, Button, IconChevronDown, Text } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import styled from 'styled-components'
@@ -6,7 +6,11 @@ import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { truncateAddress } from '../utils/web3'
 import { useWeb3 } from './Web3Provider'
 
-export const NavBar: React.FC = () => {
+type Props = {
+  title: string
+}
+
+export const NavBar: React.FC<Props> = ({ title }) => {
   const {
     selectedAccount,
     isConnecting,
@@ -18,9 +22,13 @@ export const NavBar: React.FC = () => {
   const isDesktop = useIsAboveBreakpoint('M')
 
   return (
-    <Bar px={[2, 3]}>
+    <Bar px={[1, 2, 3]} height={[64, 64, 72]}>
       <LogoWrapper>Logo</LogoWrapper>
-      <TitleWrapper>NFT Studio</TitleWrapper>
+      <TitleWrapper>
+        <Text as="h1" fontSize={24} fontWeight={600} lineHeight={1}>
+          {title}
+        </Text>
+      </TitleWrapper>
       <AccountWrapper>
         {selectedAccount && accounts?.length ? (
           <>
@@ -77,10 +85,6 @@ const TitleWrapper = styled.nav`
 const AccountWrapper = styled.div``
 
 const Bar = styled(Box)`
-  height: 56px;
-  position: sticky;
-  top: 0;
-  z-index: 6;
   display: grid;
   align-items: center;
   grid-template-columns: 100%;
