@@ -51,7 +51,7 @@ export const StyledButton = styled.span<StyledProps>(
     borderStyle: 'solid',
     userSelect: 'none',
   },
-  ({ $variant, $disabled, $small, $active }) => {
+  ({ $variant, $disabled, $small, $active, theme }) => {
     let fg = $disabled ? 'textDisabled' : 'textPrimary'
     let bg = $variant === 'contained' ? 'backgroundPrimary' : 'transparent'
     let fgHover = 'brand'
@@ -77,6 +77,7 @@ export const StyledButton = styled.span<StyledProps>(
       },
 
       '&:active': {
+        '--fabric-focus-color': theme.colors[$variant === 'contained' ? bg : fgHover],
         boxShadow: $variant !== 'text' ? 'buttonFocused' : 'none',
       },
 

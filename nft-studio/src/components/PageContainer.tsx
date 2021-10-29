@@ -1,10 +1,16 @@
 import { Box, Container } from '@centrifuge/fabric'
 import * as React from 'react'
 
-export const PageContainer: React.FC = ({ children }) => {
+type Props = {
+  variant?: 'default' | 'overlay'
+}
+
+export const PageContainer: React.FC<Props> = ({ children, variant = 'default' }) => {
   return (
-    <Box px={[1, 2, 3]} bg="backgroundPage">
-      <Container pt={1}>{children}</Container>
+    <Box bg={variant === 'default' ? 'backgroundPage' : 'backgroundPrimary'}>
+      <Container px={[1, 2, 3]} pt={variant === 'default' ? [3, 5, 8] : 0}>
+        {children}
+      </Container>
     </Box>
   )
 }

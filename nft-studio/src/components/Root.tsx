@@ -10,6 +10,7 @@ import { CollectionsPage } from '../pages/Collections'
 import { CreateCollectionPage } from '../pages/CreateCollection'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
+import { NavBar } from './NavBar'
 import { TransactionProvider } from './TransactionsProvider'
 import { Web3Provider } from './Web3Provider'
 
@@ -37,6 +38,7 @@ export const Root: React.FC = () => {
         <Web3Provider>
           <TransactionProvider>
             <Router>
+              <NavBar title="NFT Studio" />
               <Switch>
                 <Route path="/collection/:cid/object/mint">
                   <MintNFTPage />

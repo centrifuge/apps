@@ -15,6 +15,7 @@ export const GlobalStyle = createGlobalStyle`
     margin: 0;
     padding: 0;
     background-color: ${(props) => props.theme.colors.backgroundPage};
+    --fabric-focus-color: ${(props) => props.theme.colors.brand};
   }
 
   a {

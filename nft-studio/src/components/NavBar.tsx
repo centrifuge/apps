@@ -1,21 +1,16 @@
-import { Box, Button, IconChevronDown, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, IconChevronDown, Text } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import styled from 'styled-components'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { truncateAddress } from '../utils/web3'
-import { RouterLinkButton } from './RouterLinkButton'
 import { useWeb3 } from './Web3Provider'
 
 type Props = {
   title: string
-  breadcrumbs?: {
-    label: string
-    to: string
-  }[]
 }
 
-export const NavBar: React.FC<Props> = ({ title = 'The Title', breadcrumbs }) => {
+export const NavBar: React.FC<Props> = ({ title }) => {
   const {
     selectedAccount,
     isConnecting,
@@ -28,19 +23,11 @@ export const NavBar: React.FC<Props> = ({ title = 'The Title', breadcrumbs }) =>
 
   return (
     <Bar px={[1, 2, 3]} height={[64, 64, 72]}>
-      <LogoWrapper>
-        <Shelf gap={2}>
-          <span>Logo</span>
-          {isDesktop && <Breadcrumbs breadcrumbs={breadcrumbs} />}
-        </Shelf>
-      </LogoWrapper>
+      <LogoWrapper>Logo</LogoWrapper>
       <TitleWrapper>
-        <Stack alignItems="center">
-          {!isDesktop && <Breadcrumbs breadcrumbs={breadcrumbs} />}
-          <Text as="h1" color={['brand', 'brand', 'textPrimary']} fontSize={24} fontWeight={600} lineHeight={1}>
-            {title}
-          </Text>
-        </Stack>
+        <Text as="h1" fontSize={24} fontWeight={600} lineHeight={1}>
+          {title}
+        </Text>
       </TitleWrapper>
       <AccountWrapper>
         {selectedAccount && accounts?.length ? (
@@ -81,22 +68,6 @@ export const NavBar: React.FC<Props> = ({ title = 'The Title', breadcrumbs }) =>
   )
 }
 
-const Breadcrumbs: React.FC<Pick<Props, 'breadcrumbs'>> = ({ breadcrumbs = [] }) => {
-  if (!breadcrumbs.length) return null
-  return (
-    <Shelf gap={1}>
-      {breadcrumbs.map((c, i) => (
-        <React.Fragment key={i}>
-          {i > 0 && <Text>/</Text>}
-          <RouterLinkButton variant="text" small to={c.to}>
-            {c.label}
-          </RouterLinkButton>
-        </React.Fragment>
-      ))}
-    </Shelf>
-  )
-}
-
 const IdenticonWrapper = styled.div`
   pointer-events: none;
 `
@@ -114,9 +85,6 @@ const TitleWrapper = styled.nav`
 const AccountWrapper = styled.div``
 
 const Bar = styled(Box)`
-  position: sticky;
-  top: 0;
-  z-index: 6;
   display: grid;
   align-items: center;
   grid-template-columns: 100%;

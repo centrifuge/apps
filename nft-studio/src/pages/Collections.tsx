@@ -2,7 +2,6 @@ import { Button, Grid, IconPlus, Shelf, Stack } from '@centrifuge/fabric'
 import { ApiPromise } from '@polkadot/api'
 import * as React from 'react'
 import { CollectionCard } from '../components/CollectionCard'
-import { NavBar } from '../components/NavBar'
 import { PageContainer } from '../components/PageContainer'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { useTransactions } from '../components/TransactionsProvider'
@@ -12,27 +11,24 @@ import { useTransactionFeeEstimate } from '../utils/useTransactionFeeEstimate'
 
 export const CollectionsPage: React.FC = () => {
   return (
-    <>
-      <NavBar title="NFT Studio" />
-      <PageContainer>
-        <Stack gap={3}>
-          <Shelf justifyContent="flex-end">
-            <RouterLinkButton to="/collection/create" variant="text" icon={IconPlus}>
-              Create Collection
-            </RouterLinkButton>
-          </Shelf>
-          <Grid gap={[1, 2, 3]} minColumnWidth={['1fr', 440]} equalColumns>
-            <CollectionCard />
-            <CollectionCard />
-            <CollectionCard />
-            <CollectionCard />
-            <CollectionCard />
-            <CollectionCard />
-          </Grid>
-          <TestTransaction />
-        </Stack>
-      </PageContainer>
-    </>
+    <PageContainer>
+      <Stack gap={3}>
+        <Shelf justifyContent="flex-end">
+          <RouterLinkButton to="/collection/create" variant="text" icon={IconPlus}>
+            Create Collection
+          </RouterLinkButton>
+        </Shelf>
+        <Grid gap={[1, 2, 3]} minColumnWidth={['1fr', 440]} equalColumns>
+          <CollectionCard />
+          <CollectionCard />
+          <CollectionCard />
+          <CollectionCard />
+          <CollectionCard />
+          <CollectionCard />
+        </Grid>
+        <TestTransaction />
+      </Stack>
+    </PageContainer>
   )
 }
 
