@@ -8,7 +8,7 @@ on:
 
 jobs:
   pull-request:
-    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
+    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@nft-studio-create-metadata # CHANGE BACK TO MAIN
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
     secrets:
