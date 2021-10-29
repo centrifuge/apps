@@ -1,4 +1,4 @@
-import { baseShadows, baseTheme } from './tokens/baseTheme'
+import { baseTheme } from './tokens/baseTheme'
 import { brandAltair } from './tokens/brandAltair'
 import { modeLight } from './tokens/modeLight'
 import { FabricTheme } from './types'
@@ -8,10 +8,6 @@ const altairLight: FabricTheme = {
   colors: {
     ...brandAltair,
     ...modeLight.colors,
-  },
-  shadows: {
-    ...baseShadows,
-    buttonFocused: `0 4px 12px ${brandAltair.brand}`,
   },
 }
 

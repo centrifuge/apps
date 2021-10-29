@@ -3,7 +3,7 @@ import { breakpoints } from './breakpoints'
 import { space } from './space'
 import { typography } from './typography'
 
-export const baseTheme: Omit<FabricTheme, 'colors' | 'shadows'> = {
+export const baseTheme: Omit<FabricTheme, 'colors'> = {
   breakpoints,
   typography,
   space,
@@ -19,8 +19,8 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'shadows'> = {
     standard:
       "AvenirNextLTW01, 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
   },
-}
-
-export const baseShadows = {
-  cardInteractive: '0 1px 5px rgba(0, 0, 0, 0.2)',
+  shadows: {
+    cardInteractive: '0 1px 5px rgba(0, 0, 0, 0.2)',
+    buttonFocused: `4px 4px 1px var(--fabric-color-focus)`,
+  },
 }
