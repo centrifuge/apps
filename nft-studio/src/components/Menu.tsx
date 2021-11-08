@@ -60,7 +60,8 @@ const Sublabel = styled(Text)``
 const MenuItemButton = styled.button`
   cursor: pointer;
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     background-color: ${({ theme }) => theme.colors.brand};
     color: ${({ theme }) => theme.colors.backgroundPrimary};
 
