@@ -72,13 +72,14 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
   const juniorHeldByIssuer =
     poolData && poolData?.juniorInvestors && tinTotalValue && !tinTotalValue.isZero()
-      ? Object.values(poolData.juniorInvestors)
-          .reduce((prev: BN, inv: { collected: BN; uncollected: BN }) => {
-            return prev.add(inv.collected || new BN(0)).add(inv.uncollected || new BN(0))
-          }, new BN(0))
-          .mul(e18)
-          .div(tinTotalValue.div(new BN('10').pow(new BN('27'))))
-          .div(new BN('10').pow(new BN('14')))
+      ? Object.values(poolData.juniorInvestors).reduce((prev: BN, inv: { collected: BN; uncollected: BN }) => {
+          return prev.add(inv.collected || new BN(0)).add(inv.uncollected || new BN(0))
+        }, new BN(0))
+      : new BN(0)
+
+  const juniorHeldByIssuerPercentage =
+    poolData?.junior.totalSupply && !juniorHeldByIssuer.isZero()
+      ? juniorHeldByIssuer.mul(new BN('100')).div(poolData?.junior.totalSupply || new BN(0))
       : new BN(0)
 
   const isMaker = !!poolData?.maker
@@ -269,7 +270,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     : undefined,
                   {
                     term: 'Junior provided by Issuer',
-                    value: reserveRatio ? parseFloat(juniorHeldByIssuer.toString()) / 100 : null,
+                    value: reserveRatio ? parseFloat(juniorHeldByIssuerPercentage.toString()) : null,
                     valueUnit: '%',
                   },
                 ]}
