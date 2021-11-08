@@ -208,7 +208,7 @@ const UserRewards: React.FC = () => {
             />
             <MetricRow
               loading={!rewards.data}
-              value={rewards.data?.rewardRate.mul(10000).toFixed(0) || ''}
+              value={rewards.data?.rewardRate.mul(10000).toFixed(4) || ''}
               label="Daily Reward Rate"
               token="CFG"
               suffix={<span style={{ fontSize: 10, color: '#777777' }}> / 10k DAI</span>}
