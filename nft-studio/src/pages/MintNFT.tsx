@@ -41,7 +41,7 @@ export const MintNFTPage: React.FC = () => {
           {!fileDataUri && (
             <input
               type="file"
-              name="myFile"
+              name="file"
               onChange={async (ev) => {
                 const file = ev.target?.files && ev.target.files[0]
                 if (file) {
@@ -64,7 +64,7 @@ export const MintNFTPage: React.FC = () => {
                 Name
                 <input
                   type="text"
-                  name="myName"
+                  name="name"
                   value={nftName}
                   onChange={({ target }) => {
                     setNftName(target.value)
@@ -75,7 +75,7 @@ export const MintNFTPage: React.FC = () => {
                 Description
                 <input
                   type="text"
-                  name="myDescription"
+                  name="description"
                   value={nftDescription}
                   onChange={({ target }) => {
                     setNftDescription(target.value)

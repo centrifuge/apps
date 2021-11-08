@@ -48,7 +48,7 @@ const pinFile = async (fileReadStream) => {
   })
 }
 
-const ipfsHashToURI = (hash) => `https://ipfs.io/ipfs/${hash}`
+const ipfsHashToURI = (hash) => `ipfs://ipfs/${hash}`
 
 const handler = async (event) => {
   let tempDir = ''
