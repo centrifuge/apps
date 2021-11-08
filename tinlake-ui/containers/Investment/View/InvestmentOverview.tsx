@@ -79,7 +79,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
 
   const juniorHeldByIssuerPercentage =
     poolData?.junior.totalSupply && !juniorHeldByIssuer.isZero()
-      ? juniorHeldByIssuer.mul(new BN('100')).div(poolData?.junior.totalSupply || new BN(0))
+      ? juniorHeldByIssuer.mul(new BN('10000')).div(poolData?.junior.totalSupply || new BN(0))
       : new BN(0)
 
   const isMaker = !!poolData?.maker
@@ -270,7 +270,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     : undefined,
                   {
                     term: 'Junior provided by Issuer',
-                    value: reserveRatio ? juniorHeldByIssuerPercentage.toString() : null,
+                    value: reserveRatio ? parseFloat(juniorHeldByIssuerPercentage.toString()) / 100 : null,
                     valueUnit: '%',
                   },
                 ]}
