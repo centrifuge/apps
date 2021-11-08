@@ -48,7 +48,7 @@ export const Popover: React.FC<Props> = ({ renderTrigger, renderContent }) => {
           isShown
           targetRef={triggerRef}
           overlayRef={overlayRef}
-          render={({ positionProps }) => (
+          render={(positionProps) => (
             <FocusScope contain restoreFocus autoFocus>
               {renderContent({ ...positionProps, ...overlayAriaProps, ...overlayBehaviorProps }, overlayRef, state)}
             </FocusScope>

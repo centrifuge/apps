@@ -8,7 +8,7 @@ type Props = {
   overlayRef: React.RefObject<HTMLElement>
   placement?: AriaPositionProps['placement']
   offset?: number
-  render: ({ positionProps }: { positionProps: React.HTMLAttributes<Element> }) => React.ReactElement
+  render: (props: React.HTMLAttributes<Element>) => React.ReactElement
 }
 
 const PositionerInner: React.FC<Props> = ({
@@ -20,7 +20,7 @@ const PositionerInner: React.FC<Props> = ({
   render,
 }) => {
   const theme = useTheme()
-  const { overlayProps: positionProps } = useOverlayPosition({
+  const { overlayProps } = useOverlayPosition({
     targetRef,
     overlayRef,
     placement,
@@ -28,7 +28,7 @@ const PositionerInner: React.FC<Props> = ({
     isOpen: isShown,
   })
 
-  return render({ positionProps })
+  return render(overlayProps)
 }
 
 export const Positioner: React.FC<Props> = (props) => {
