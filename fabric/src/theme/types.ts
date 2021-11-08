@@ -86,7 +86,7 @@ type ThemeFonts = {
 
 // Shadows
 
-type ShadowName = 'buttonFocused' | 'cardInteractive'
+type ShadowName = 'buttonFocused' | 'cardInteractive' | 'cardOverlay'
 type ShadowValue = string
 
 type ThemeShadows = {

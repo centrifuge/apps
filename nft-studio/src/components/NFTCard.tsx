@@ -6,7 +6,7 @@ type Props = {}
 
 export const NFTCard: React.FC<Props> = () => {
   return (
-    <Card as={Link} to="/collection/1/object/2" interactive px={[1, 2, 3]} pt={[1, 2, 3]} pb={[2, 3, 4]}>
+    <Card as={Link} to="/collection/1/object/2" variant="interactive" px={[1, 2, 3]} pt={[1, 2, 3]} pb={[2, 3, 4]}>
       <Stack gap={[1, 2, 3]}>
         <Box bg="#eee" style={{ aspectRatio: '1' }} />
         <div>

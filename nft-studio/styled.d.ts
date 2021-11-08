@@ -6,6 +6,7 @@ declare module 'styled-components' {
     sizes: FabricTheme['sizes'] & {
       navBarHeight: number
       navBarHeightMobile: number
+      dialog: number
     }
   }
 }

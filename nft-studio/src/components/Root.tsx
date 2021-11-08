@@ -1,6 +1,7 @@
 import { GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
-// import altairDark from '@centrifuge/fabric/dist/theme/altairDark'
 import centrifugeLight from '@centrifuge/fabric/dist/theme/centrifugeLight'
+// import altairDark from '@centrifuge/fabric/dist/theme/altairDark'
+import { OverlayProvider } from '@react-aria/overlays'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
@@ -22,6 +23,7 @@ const theme: DefaultTheme = {
     container: '100%',
     navBarHeight: 72,
     navBarHeightMobile: 64,
+    dialog: 564,
   },
 }
 
@@ -39,30 +41,32 @@ export const Root: React.FC = () => {
       <ThemeProvider theme={theme}>
         <GlobalStyle />
         <FabricGlobalStyle />
-        <Web3Provider>
-          <TransactionProvider>
-            <Router>
-              <NavBar title="NFT Studio" />
-              <Switch>
-                <Route path="/collection/:cid/object/mint">
-                  <MintNFTPage />
-                </Route>
-                <Route path="/collection/:cid/object/:nftid">
-                  <NFTPage />
-                </Route>
-                <Route path="/collection/create">
-                  <CreateCollectionPage />
-                </Route>
-                <Route path="/collection/:cid">
-                  <CollectionPage />
-                </Route>
-                <Route path="/">
-                  <CollectionsPage />
-                </Route>
-              </Switch>
-            </Router>
-          </TransactionProvider>
-        </Web3Provider>
+        <OverlayProvider>
+          <Web3Provider>
+            <TransactionProvider>
+              <Router>
+                <NavBar title="NFT Studio" />
+                <Switch>
+                  <Route path="/collection/:cid/object/mint">
+                    <MintNFTPage />
+                  </Route>
+                  <Route path="/collection/:cid/object/:nftid">
+                    <NFTPage />
+                  </Route>
+                  <Route path="/collection/create">
+                    <CreateCollectionPage />
+                  </Route>
+                  <Route path="/collection/:cid">
+                    <CollectionPage />
+                  </Route>
+                  <Route path="/">
+                    <CollectionsPage />
+                  </Route>
+                </Switch>
+              </Router>
+            </TransactionProvider>
+          </Web3Provider>
+        </OverlayProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )

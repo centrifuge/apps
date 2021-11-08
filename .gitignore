@@ -22,6 +22,7 @@ yarn-error.log
 # Environment files
 .env*.local
 .env*
+!.env.example
 !.env.kovan-example
 !.env.goerli-example
 !.env.mainnet-example
