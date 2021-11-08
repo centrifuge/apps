@@ -270,7 +270,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
                     : undefined,
                   {
                     term: 'Junior provided by Issuer',
-                    value: reserveRatio ? parseFloat(juniorHeldByIssuerPercentage.toString()) : null,
+                    value: reserveRatio ? juniorHeldByIssuerPercentage.toString() : null,
                     valueUnit: '%',
                   },
                 ]}
