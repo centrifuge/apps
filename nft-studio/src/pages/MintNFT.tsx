@@ -1,6 +1,6 @@
 import { Box, Button, Stack, Text } from '@centrifuge/fabric'
 import { Flex } from '@centrifuge/fabric/dist/components/Flex'
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { SplitView } from '../components/SplitView'
 import { fetchLambda } from '../utils/fetchLambda'
 import { getFileDataURI } from '../utils/getFileDataURI'
@@ -11,7 +11,7 @@ export const MintNFTPage: React.FC = () => {
   const [fileDataUri, setFileDataUri] = useState('')
   const [fileName, setFileName] = useState('')
 
-  const isFormValid = useMemo(() => nftName && nftDescription && fileDataUri, [nftName, nftDescription, fileDataUri])
+  const isFormValid = nftName && nftDescription && fileDataUri
 
   const onSubmit = async () => {
     if (!(nftName && nftDescription && fileDataUri)) {
