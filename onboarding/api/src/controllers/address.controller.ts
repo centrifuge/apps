@@ -192,8 +192,6 @@ export class AddressController {
         }
       }
 
-      const isWhitelisted = await this.investmentRepo.getWhitelistStatus(address.id, params.poolId)
-
       // TODO: this should also filter by blockchain and network
       const addresses = await this.addressRepo.getByUser(address.userId)
       const otherAddresses = addresses
@@ -209,7 +207,6 @@ export class AddressController {
         restrictedGlobal,
         kyc: {
           status,
-          isWhitelisted,
           isEntity,
           url: authorizationLink,
           isUsaTaxResident: kyc.usaTaxResident,
