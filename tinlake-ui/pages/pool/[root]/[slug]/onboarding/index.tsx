@@ -27,7 +27,7 @@ const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Head>
             <title>Investor Onboarding: {pool.metadata.name} | Tinlake | Centrifuge</title>
           </Head>
-          <FunnelHeader returnPath={`${from}` || `/pool/${root}/${slug}/investments`} />
+          <FunnelHeader returnPath={(from as string) || `/pool/${root}/${slug}/investments`} />
           <Auth>
             <PageContainer width="funnel" noMargin>
               <PoolOnboarding activePool={pool} />
