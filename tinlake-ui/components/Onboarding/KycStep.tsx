@@ -42,7 +42,9 @@ const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditat
         kycStatus === 'processing' &&
         (agreementStatus === 'countersigned' ? (
           <>
-            <StepParagraph icon="clock">KYC review is still pending. Check your account</StepParagraph>
+            <StepParagraph icon="clock">
+              Your KYC is still in review. Check your profile for more details.
+            </StepParagraph>
             <Button primary label="Check Securitize profile" href={onboardURL} target="_blank" />
           </>
         ) : (

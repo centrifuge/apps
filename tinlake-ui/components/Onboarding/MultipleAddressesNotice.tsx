@@ -9,7 +9,7 @@ interface Props {
 export const MultipleAddressesNotice: React.FC<Props> = ({ linkedAddresses, connectedAddress }) => {
   return (
     <ExplainerCard gap="xsmall">
-      <strong>Multiple Ethereum addresses to Securitize account</strong>
+      <strong>Multiple Ethereum addresses linked to Securitize account</strong>
       {linkedAddresses.map((addr) => (
         <React.Fragment key={addr}>
           {addr}
