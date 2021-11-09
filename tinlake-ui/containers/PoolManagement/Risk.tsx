@@ -25,6 +25,10 @@ interface Props extends TransactionProps {
   activePool: Pool
 }
 
+interface RiskGroupWithId extends RiskGroup {
+  id: number
+}
+
 const riskGroupsPerPage = 8
 
 const isValidRatePerSecond = (rate: BN): boolean => {
@@ -40,7 +44,11 @@ const Risk: React.FC<Props> = (props: Props) => {
   const [writeOffGroups, setWriteOffGroups] = React.useState([] as IWriteOffGroup[])
 
   const existingRiskGroups = poolData?.risk
-    ? poolData.risk.filter((riskGroup) => riskGroup.ceilingRatio && !riskGroup.ceilingRatio.isZero())
+    ? poolData.risk
+        .map((riskGroup: RiskGroup, index: number) => {
+          return { ...riskGroup, id: index }
+        })
+        .filter((riskGroup) => riskGroup.ceilingRatio && !riskGroup.ceilingRatio.isZero())
     : []
 
   const existingWriteOffGroups = poolData?.writeOffGroups
@@ -131,9 +139,9 @@ const Risk: React.FC<Props> = (props: Props) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {existingRiskGroups.slice(start, start + riskGroupsPerPage).map((riskGroup: RiskGroup, index: number) => (
+            {existingRiskGroups.slice(start, start + riskGroupsPerPage).map((riskGroup: RiskGroupWithId) => (
               <TableRow>
-                <TableCell>{start + index}</TableCell>
+                <TableCell>{riskGroup.id}</TableCell>
                 <TableCell>{parseFloat(riskGroup.ceilingRatio.div(new BN(10).pow(new BN(25))).toString())}%</TableCell>
                 <TableCell>
                   {isValidRatePerSecond(riskGroup.rate.ratePerSecond)
