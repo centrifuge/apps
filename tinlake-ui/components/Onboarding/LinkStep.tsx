@@ -31,9 +31,8 @@ const LinkStep: React.FC<Props> = ({ state, onboardingData }) => {
         {state === 'active' && (
           <>
             <StepParagraph>
-              Tinlake has integrated Securitize’s automated KYC process for investor onboarding. Please set-up a new
-              Securitize account or link an existing Securitize account to your connected Ethereum address. This is a
-              one-time step.
+              Tinlake uses the Securitize service to verify KYC. Create a new Securitize account, or link an existing to
+              your Ethereum address.
             </StepParagraph>
             <Checkbox
               checked={checked}
