@@ -28,9 +28,6 @@ export function useOnboardingState(pool?: Pool | UpcomingPool, tranche?: Tranche
   return query
 }
 
-// TODO: Call onboard API URL that isn't pool dependant
-const placeholderPoolId = '0x560Ac248ce28972083B718778EEb0dbC2DE55740'
-
 type AdditionalData = {
   kycStatus: AddressStatus['kyc']['status'] | 'requires-signin'
   accreditationStatus: boolean
@@ -40,14 +37,10 @@ type AdditionalData = {
 export function useInvestorOnboardingState() {
   const debugValue = useDebugFlags().onboardingState
   const address = useAddress()
-  const query = useQuery<Omit<AddressStatus, 'agreements' | 'restrictedPool'> & AdditionalData>(
+  const query = useQuery<AddressStatus & AdditionalData>(
     ['onboarding', address, debugValue],
     async () => {
-      const data =
-        debugValue ||
-        (await fetch(`${config.onboardAPIHost}pools/${placeholderPoolId}/addresses/${address}`).then((res) =>
-          res.json()
-        ))
+      const data = debugValue || (await fetch(`${config.onboardAPIHost}addresses/${address}`).then((res) => res.json()))
 
       const kycStatus = data?.kyc?.requiresSignin ? 'requires-signin' : data?.kyc?.status
       const accreditationStatus = data?.kyc?.isUsaTaxResident ? data?.kyc?.accredited || false : true
