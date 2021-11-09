@@ -36,7 +36,7 @@ const InfoBox: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Box background="#eee" pad="medium" round="xsmall" style={{ color: '#555555' }}>
+    <Box background="#eee" pad="medium" round="xsmall" style={{ color: '#000' }}>
       <Box direction="row" pad={'0 0 14px'}>
         <HelpIcon src="/static/help-circle.svg" />
         <h3 style={{ margin: 0 }}>How onboarding works</h3>

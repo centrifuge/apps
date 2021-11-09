@@ -23,7 +23,7 @@ export const Description = styled(Text)`
 export const ExplainerCard = styled(Stack)`
   background: #f2f2f2;
   padding: 24px;
-  color: #555;
+  color: #000;
   border-radius: 8px;
 `
 
