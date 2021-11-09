@@ -1,5 +1,5 @@
-import { Box } from '@centrifuge/fabric'
 import styled from 'styled-components'
+import { Box } from '../Box'
 
 const Hr = Box.withComponent('hr')
 

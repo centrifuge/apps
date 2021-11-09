@@ -1,12 +1,18 @@
-import { Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
 import { ResponsiveValue } from 'styled-system'
-import { Divider } from './Divider'
+import { Box } from '../Box'
+import { Card, CardProps } from '../Card'
+import { Divider } from '../Divider'
+import { Shelf } from '../Shelf'
+import { Stack } from '../Stack'
+import { Text } from '../Text'
 
-export const Menu: React.FC = ({ children, ...rest }) => {
+export type MenuProps = Omit<CardProps, 'variant'>
+
+export const Menu: React.FC<MenuProps> = ({ children, ...cardProps }) => {
   return (
-    <Card variant="overlay" {...rest}>
+    <Card {...cardProps} variant="overlay">
       <Stack>
         {React.Children.map(children, (child, i) => (
           <>
@@ -23,14 +29,14 @@ type IconProps = {
   size?: ResponsiveValue<string | number>
 }
 
-type MenuItemProps = {
+export type MenuItemProps = {
   label: string
   sublabel?: string
   icon?: React.ComponentType<IconProps> | React.ReactElement
   iconRight?: React.ComponentType<IconProps> | React.ReactElement
-}
+} & React.ComponentPropsWithoutRef<'button'>
 
-export const MenuItem: React.FC<MenuItemProps & React.ComponentPropsWithoutRef<'button'>> = ({
+export const MenuItem: React.FC<MenuItemProps> = ({
   label,
   sublabel,
   icon: IconComp,
@@ -64,6 +70,7 @@ const MenuItemButton = styled.button`
   appearance: none;
   background: transparent;
   outline: 0;
+  color: ${({ theme }) => theme.colors.textPrimary};
 
   &:hover,
   &:focus-visible {

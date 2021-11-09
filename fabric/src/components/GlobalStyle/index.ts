@@ -18,6 +18,10 @@ export const GlobalStyle = createGlobalStyle`
     --fabric-color-focus: ${(props) => props.theme.colors.brand};
   }
 
+  a {
+    text-decoration: none;
+  }
+
   *:focus {
     outline: none;
   }

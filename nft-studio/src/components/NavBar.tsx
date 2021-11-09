@@ -1,10 +1,9 @@
-import { Box, Button, IconCheck, IconChevronDown, Text } from '@centrifuge/fabric'
+import { Box, Button, IconCheck, IconChevronDown, Menu, MenuItem, Text } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { truncateAddress } from '../utils/web3'
-import { Menu, MenuItem } from './Menu'
 import { Popover } from './Popover'
 import { useWeb3 } from './Web3Provider'
 
