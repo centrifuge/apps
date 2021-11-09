@@ -37,12 +37,12 @@ const InvestAction: React.FC<Props> = (props) => {
       : poolData?.senior?.inMemberlist || poolData?.junior?.inMemberlist
 
   function navigate() {
-    const basePath = `/pool/${(props.pool as Pool).addresses.ROOT_CONTRACT}/${props.pool?.metadata.slug}`
     if (isUpcoming) {
       if (!hasDoneKYC) {
         router.push(`/onboarding?from=${encodeURIComponent(router.asPath)}`)
       }
     } else {
+      const basePath = `/pool/${(props.pool as Pool).addresses.ROOT_CONTRACT}/${props.pool?.metadata.slug}`
       if (canInvestInPool) {
         router.push(`${basePath}/investments`)
       } else {

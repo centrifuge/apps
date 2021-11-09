@@ -42,7 +42,7 @@ const Dashboard: React.FC<Props> = () => {
             </Text>
             <ButtonGroup bleedY={[0, '10px']}>
               <Link href={`/onboarding?from=${encodeURIComponent('/')}`}>
-                <Button primary label="Onboard As investor" />
+                <Button primary label="Onboard as investor" />
               </Link>
             </ButtonGroup>
           </Wrap>
