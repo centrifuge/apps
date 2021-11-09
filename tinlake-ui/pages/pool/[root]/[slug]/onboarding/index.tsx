@@ -2,17 +2,13 @@ import { GetStaticProps } from 'next'
 import Head from 'next/head'
 import * as React from 'react'
 import Auth from '../../../../../components/Auth'
-import { useDebugFlags } from '../../../../../components/DebugFlags'
 import { FunnelHeader } from '../../../../../components/FunnelHeader'
-import Header from '../../../../../components/Header'
 import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
 import { PoolOnboarding } from '../../../../../components/Onboarding'
 import { PageContainer } from '../../../../../components/PageContainer'
 import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
-import OnboardingSteps from '../../../../../containers/Onboarding/OnboardingSteps'
-import { menuItems } from '../../../../../menuItems'
 
 interface Props {
   root: string
@@ -21,7 +17,6 @@ interface Props {
 }
 
 const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
-  const { newOnboarding } = useDebugFlags()
   return (
     <IpfsPoolsProvider value={ipfsPools}>
       <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig} contractVersions={pool.versions}>
@@ -29,26 +24,11 @@ const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Head>
             <title>Investor Onboarding: {pool.metadata.name} | Tinlake | Centrifuge</title>
           </Head>
-          {newOnboarding ? (
-            <FunnelHeader returnPath="/" />
-          ) : (
-            <Header
-              ipfsPools={ipfsPools}
-              poolTitle={pool.metadata.shortName || pool.metadata.name}
-              selectedRoute={'/onboarding'}
-              menuItems={menuItems}
-            />
-          )}
+          <FunnelHeader returnPath="/" />
           <Auth>
-            {newOnboarding ? (
-              <PageContainer width="funnel" noMargin>
-                <PoolOnboarding activePool={pool} />
-              </PageContainer>
-            ) : (
-              <PageContainer>
-                <OnboardingSteps activePool={pool} />
-              </PageContainer>
-            )}
+            <PageContainer width="funnel" noMargin>
+              <PoolOnboarding activePool={pool} />
+            </PageContainer>
           </Auth>
         </WithFooter>
       </TinlakeProvider>

@@ -4,7 +4,6 @@ import Link from 'next/link'
 import * as React from 'react'
 import { Button } from '../../components/Button'
 import { ButtonGroup } from '../../components/ButtonGroup'
-import { useDebugFlags } from '../../components/DebugFlags'
 import { Box, Stack, Wrap } from '../../components/Layout'
 import PoolList from '../../components/PoolList'
 import PoolsMetrics from '../../components/PoolsMetrics'
@@ -21,7 +20,6 @@ interface Props {
 
 const Dashboard: React.FC<Props> = () => {
   const pools = usePools()
-  const { newOnboarding } = useDebugFlags()
   const address = useAddress()
   const { data } = useInvestorOnboardingState()
 
@@ -29,7 +27,7 @@ const Dashboard: React.FC<Props> = () => {
     <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />
   ) : (
     <Stack gap="xlarge" pt="xlarge">
-      {newOnboarding && address ? (
+      {address ? (
         data &&
         !data.completed && (
           <Wrap gap="medium" justifyContent="space-between" flexDirection={['column', 'row']}>
