@@ -5,11 +5,6 @@ export const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
 
-  * {
-    margin: 0;
-    padding: 0;
-  }
-
   *,
   *::before,
   *::after {
@@ -29,12 +24,5 @@ export const GlobalStyle = createGlobalStyle`
 
   *:focus {
     outline: none;
-  }
-
-  button {
-    border: none;
-    appearance: none;
-    background: transparent;
-    outline: 0;
   }
 `

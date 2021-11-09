@@ -4,6 +4,7 @@ import styled from 'styled-components'
 const Hr = Box.withComponent('hr')
 
 export const Divider = styled(Hr)`
+  margin: 0;
   border-top-width: 1px;
   border-right-width: 0;
   border-bottom-width: 0;
