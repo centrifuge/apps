@@ -4,9 +4,9 @@ import styled from 'styled-components'
 import { ResponsiveValue } from 'styled-system'
 import { Divider } from './Divider'
 
-export const Menu: React.FC = ({ children }) => {
+export const Menu: React.FC = ({ children, ...rest }) => {
   return (
-    <Card variant="overlay">
+    <Card variant="overlay" {...rest}>
       <Stack>
         {React.Children.map(children, (child, i) => (
           <>
@@ -59,6 +59,11 @@ const Sublabel = styled(Text)``
 
 const MenuItemButton = styled.button`
   cursor: pointer;
+  padding: 0;
+  border: none;
+  appearance: none;
+  background: transparent;
+  outline: 0;
 
   &:hover,
   &:focus-visible {

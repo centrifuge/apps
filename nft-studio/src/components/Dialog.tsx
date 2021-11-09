@@ -1,12 +1,12 @@
-import { Box, Card } from '@centrifuge/fabric'
+import { Box, Button, Card, IconX } from '@centrifuge/fabric'
 import { useDialog } from '@react-aria/dialog'
 import { FocusScope } from '@react-aria/focus'
 import { OverlayContainer, useModal, useOverlay, usePreventScroll } from '@react-aria/overlays'
 import * as React from 'react'
 
 type Props = {
-  isOpen?: boolean
-  onClose?: () => void
+  isOpen: boolean
+  onClose: () => void
   width?: string | number
 }
 
@@ -34,8 +34,20 @@ const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dial
       {...underlayProps}
     >
       <FocusScope contain restoreFocus autoFocus>
-        <Card p={3} width={width} maxWidth="100%" {...overlayProps} {...dialogProps} {...modalProps} ref={ref}>
+        <Card
+          position="relative"
+          p={4}
+          width={width}
+          maxWidth="100%"
+          {...overlayProps}
+          {...dialogProps}
+          {...modalProps}
+          ref={ref}
+        >
           {children}
+          <Box position="absolute" top={1} right={2}>
+            <Button variant="text" icon={IconX} onClick={() => onClose()} />
+          </Box>
         </Card>
       </FocusScope>
     </Box>
