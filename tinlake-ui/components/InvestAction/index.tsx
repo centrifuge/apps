@@ -39,6 +39,7 @@ const InvestAction: React.FC<Props> = (props) => {
   const hasData = hasPoolData && hasUserData
 
   const isUpcoming = poolData?.isUpcoming
+  const isLaunching = poolData?.isLaunching
   const hasDoneKYC = investorOnboardingData?.completed
   const canInvestInPool =
     props.pool && props.tranche
@@ -96,6 +97,13 @@ const InvestAction: React.FC<Props> = (props) => {
     <>
       {isUpcoming && address && hasDoneKYC ? (
         <Tooltip title="Upcoming pool" description="This upcoming pool is not open for investments yet">
+          <Button primary label="Invest" disabled />
+        </Tooltip>
+      ) : isLaunching && address ? (
+        <Tooltip
+          title="Launching pool"
+          description="This pool is launching with with exisiting investors while ramping up the portfolio. If you are interested in investing once the pool opens, please contact the issuer."
+        >
           <Button primary label="Invest" disabled />
         </Tooltip>
       ) : (

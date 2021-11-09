@@ -17,6 +17,8 @@ export interface PoolTranche extends Tranche {
   effectiveBalance?: BN
   debt?: BN
   balance?: BN
+  interestRate?: BN
+  token: 'DROP' | 'TIN'
 }
 
 export interface RiskGroup {
@@ -59,6 +61,7 @@ export interface PoolData {
   juniorInvestors?: { [key: string]: { collected: BN; uncollected: BN } }
   writeOffGroups?: WriteOffGroup[]
   isUpcoming: boolean
+  isLaunching: boolean
   poolClosing?: boolean
 }
 
@@ -285,7 +288,6 @@ export async function getPool(ipfsPools: IpfsPools, poolId: string, address?: st
     }
   }
 
-  console.log(pool.metadata.juniorInvestors)
   pool.metadata.juniorInvestors?.forEach((investor: JuniorInvestor) => {
     calls.push(
       {
@@ -470,6 +472,8 @@ export async function getPool(ipfsPools: IpfsPools, poolId: string, address?: st
     pool.metadata.isUpcoming ||
     (data.netAssetValue.isZero() && data.reserve.isZero()) ||
     !config.featureFlagNewOnboardingPools.includes(poolId)
+
+  data.isLaunching = !!pool.metadata.isLaunching
 
   return data
 }

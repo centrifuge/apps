@@ -107,6 +107,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
     props.pool && config.featureFlagMaintenanceMode.includes(props.pool.addresses.ROOT_CONTRACT)
 
   const isUpcoming = poolData?.isUpcoming
+  const isLaunching = poolData?.isLaunching
   const forumLink = Object.entries((props.pool?.metadata.attributes as any)?.Links ?? {}).find(([key]) =>
     /discussion/i.test(key)
   )?.[1] as string | undefined
@@ -234,6 +235,18 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       </div>
     </Stack>
   )
+
+  const infoForLaunchingPool = (
+    <Info>
+      <Heading level="6" margin={{ bottom: 'xsmall' }}>
+        Interested in investing?
+      </Heading>
+      This pool is launching with exisiting investors while ramping up the portfolio. If you are interested in investing
+      once the pool opens, please{' '}
+      <DarkLink href={`mailto:${props.pool?.metadata.issuerEmail}`}>contact the issuer</DarkLink>.
+    </Info>
+  )
+
   return (
     <CardComponent p={24} height="100%" display="flex" flexDirection="column">
       <Shelf gap="xsmall" mb="xsmall">
@@ -470,6 +483,8 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
               </Info>
             )}
           </>
+        ) : isLaunching ? (
+          infoForLaunchingPool
         ) : (
           <>
             <Box mt="small">
@@ -509,7 +524,10 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
         props.tranche === 'junior' &&
         !isMaintainanceMode &&
         (!trancheData?.inMemberlist || !address) &&
-        props.pool.metadata.issuerEmail && (
+        props.pool.metadata.issuerEmail &&
+        (isLaunching ? (
+          infoForLaunchingPool
+        ) : (
           <Info>
             <Heading level="6" margin={{ bottom: 'xsmall' }}>
               Interested in investing?
@@ -518,7 +536,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
             amount of 50k DAI. If you are interested in investing in TIN, please{' '}
             <DarkLink href={`mailto:${props.pool.metadata.issuerEmail}`}>contact the issuer</DarkLink>.
           </Info>
-        )}
+        ))}
     </CardComponent>
   )
 }

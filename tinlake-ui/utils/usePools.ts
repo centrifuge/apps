@@ -13,6 +13,7 @@ export interface PoolData {
   slug: string
   isUpcoming: boolean
   isArchived: boolean
+  isLaunching: boolean
   isOversubscribed: boolean
   asset: string
   ongoingLoans: number
