@@ -1,6 +1,6 @@
-import { Box, Button, IconArrowLeft, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, IconArrowLeft, IconX, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { Dialog } from '../components/Dialog'
 import { SplitView } from '../components/SplitView'
@@ -11,6 +11,7 @@ export const NFTPage: React.FC = () => {
   const { selectedAccount } = useWeb3()
   const { data } = useNFT('1')
   const [transferOpen, setTransferOpen] = React.useState(false)
+  const history = useHistory()
 
   return (
     <SplitView
@@ -27,16 +28,23 @@ export const NFTPage: React.FC = () => {
           justifyContent="space-between"
           flexDirection={['column', 'row', 'column']}
         >
+          <Box position="absolute" top={2} right={3}>
+            <Button variant="text" icon={IconX} onClick={() => history.goBack()} />
+          </Box>
           {data && (
             <>
               <Stack gap={3}>
-                <Link to={`/collection/${data.collection.id}`}>
-                  <Text fontWeight={600}>
-                    <u>{data.collection.name}</u>
-                  </Text>
-                </Link>
+                <Box display={['none', 'none', 'block']}>
+                  <Link to={`/collection/${data.collection.id}`}>
+                    <Text fontWeight={600}>
+                      <u>{data.collection.name}</u>
+                    </Text>
+                  </Link>
+                </Box>
                 <Stack>
-                  <Text variant="heading1">{data.metadata.name}</Text>
+                  <Text variant="headingLarge" as="h1">
+                    {data.metadata.name}
+                  </Text>
                   <Text variant="heading3" color="textSecondary">
                     by {data.creator}
                   </Text>

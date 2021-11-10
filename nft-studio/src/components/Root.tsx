@@ -8,7 +8,6 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import { DefaultTheme, ThemeProvider } from 'styled-components'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
-import { CreateCollectionPage } from '../pages/CreateCollection'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
 import { GlobalStyle } from './GlobalStyle'
@@ -24,6 +23,15 @@ const theme: DefaultTheme = {
     navBarHeight: 72,
     navBarHeightMobile: 64,
     dialog: 564,
+  },
+  typography: {
+    ...centrifugeLight.typography,
+    headingLarge: {
+      fontSize: [24, 24, 36],
+      lineHeight: 1.25,
+      fontWeight: 600,
+      color: 'textPrimary',
+    },
   },
 }
 
@@ -52,9 +60,6 @@ export const Root: React.FC = () => {
                   </Route>
                   <Route path="/collection/:cid/object/:nftid">
                     <NFTPage />
-                  </Route>
-                  <Route path="/collection/create">
-                    <CreateCollectionPage />
                   </Route>
                   <Route path="/collection/:cid">
                     <CollectionPage />

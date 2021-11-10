@@ -1,9 +1,11 @@
 import { Box, Button, IconCheck, IconChevronDown, Menu, MenuItem, Text } from '@centrifuge/fabric'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
+import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { truncateAddress } from '../utils/web3'
+import { LogoAltair, LogoAltairText } from './LogoAltair'
 import { Popover } from './Popover'
 import { useWeb3 } from './Web3Provider'
 
@@ -16,10 +18,17 @@ export const NavBar: React.FC<Props> = ({ title }) => {
   const {
     sizes: { navBarHeight, navBarHeightMobile },
   } = useTheme()
+  const isDesktop = useIsAboveBreakpoint('M')
 
   return (
     <Bar px={[1, 2, 3]} height={[navBarHeightMobile, navBarHeightMobile, navBarHeight]}>
-      <LogoWrapper>Logo</LogoWrapper>
+      <LogoWrapper>
+        <Link to="/">
+          <Box height={[32, 40, 48]} color="textPrimary">
+            {isDesktop ? <LogoAltairText style={{ height: '100%' }} /> : <LogoAltair style={{ height: '100%' }} />}
+          </Box>
+        </Link>
+      </LogoWrapper>
       <TitleWrapper>
         <Text as="h1" fontSize={24} fontWeight={600} lineHeight={1}>
           {title}
