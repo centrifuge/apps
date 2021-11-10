@@ -33,6 +33,7 @@ After(async function (this: CentrifugeWorld, scenario) {
 Before({ tags: '@metamask' }, async function () {
   this.clearContext()
 
+  // @ts-expect-error
   await openBrowser(this)
   await this.metamaskInit()
 })
