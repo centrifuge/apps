@@ -54,12 +54,34 @@ const toNumber = (value: BN | undefined, decimals: number) => {
 
 const isAlignedLeft = (c: Column) => c.header === 'Investment Capacity'
 
+// group pools to sort them (e.g. active pools first, then launching pools and then upcoming pools at the bottom)
+const poolGroups = [
+  (p: PoolData) => !p.isUpcoming && !p.isLaunching, // active pools
+  (p: PoolData) => p.isLaunching, // launching pools
+  (p: PoolData) => p.isUpcoming, // upcoming pools
+]
+
+const getPoolGroupIndex = (p: PoolData): number => {
+  for (let i = 0; i < poolGroups.length; i += 1) {
+    if (poolGroups[i](p)) return i
+  }
+  return -1
+}
+
 const PoolList: React.FC<Props> = ({ poolsData }) => {
   const { showAll, showArchived, showCapacity } = useDebugFlags()
   const isMobile = useMedia({ below: 'medium' })
 
   const pools = poolsData?.pools?.filter((p) => showArchived || !p.isArchived)
+
   pools?.sort((a, b) => {
+    const groupA = getPoolGroupIndex(a)
+    const groupB = getPoolGroupIndex(b)
+
+    if (groupA > groupB) return 1
+    if (groupA < groupB) return -1
+
+    // if the pools are in the same group, use order (if defined)
     if (a.order === undefined || b.order === undefined || a.order === b.order) return 0
     if (a.order > b.order) return -1
     return 1
@@ -150,9 +172,8 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
           })}
         </Header>
       )}
-      {console.log(poolsData?.pools)}
-      {pools?.map((p) => (
-        <Link href={p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`} shallow passHref key={p.id}>
+      {pools?.map((p, i) => (
+        <Link href={p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`} shallow passHref key={`${p.id}-${i}`}>
           <Row
             row={p}
             columns={dataColumns}

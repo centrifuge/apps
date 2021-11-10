@@ -5,6 +5,7 @@ const IpfsPoolsContext = createContext<IpfsPools>({
   active: [],
   archived: [],
   upcoming: [],
+  launching: [],
 })
 
 export const useIpfsPools = () => useContext(IpfsPoolsContext)

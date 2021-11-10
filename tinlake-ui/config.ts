@@ -35,6 +35,7 @@ interface PoolMetadata {
   currencySymbol?: string
   isUpcoming?: boolean
   isArchived?: boolean
+  isLaunching?: boolean
   maker?: { ilk: string }
   issuerEmail?: string
   juniorInvestors?: JuniorInvestor[]
@@ -69,8 +70,13 @@ export interface ArchivedPool extends BasePool {
   archivedValues: ArchivedPoolData
 }
 
+export interface LaunchingPool extends BasePool {
+  isLaunching: true
+}
+
 export interface Pool extends BasePool {
   isUpcoming: boolean
+  isLaunching: boolean
   addresses: {
     TINLAKE_CURRENCY: string
     ROOT_CONTRACT: string
@@ -140,6 +146,7 @@ export interface IpfsPools {
   active: Pool[]
   archived: ArchivedPool[]
   upcoming: UpcomingPool[]
+  launching: LaunchingPool[]
 }
 
 const contractAddressesSchema = yup.object().shape({
@@ -290,8 +297,16 @@ export const loadPoolsFromIPFS = async () => {
   const body = await response.json()
   const networkConfigs: any[] = Object.values(body)
 
+  const launching = upcomingPoolsSchema
+    .validateSync(networkConfigs.filter((p: Pool) => !p.metadata.isLaunching))
+    .map((p) => ({ ...p, isLaunching: true } as LaunchingPool))
+
   const active = poolsSchema
-    .validateSync(networkConfigs.filter((p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT))
+    .validateSync(
+      networkConfigs.filter(
+        (p: Pool) => p.addresses && p.addresses.ROOT_CONTRACT && !launching.includes(p as LaunchingPool)
+      )
+    )
     .map((p) => ({ ...p, isUpcoming: false } as Pool))
   const archived = archivedPoolsSchema
     .validateSync(networkConfigs.filter((p: Pool) => 'archivedValues' in p))
@@ -299,7 +314,8 @@ export const loadPoolsFromIPFS = async () => {
   const upcoming = upcomingPoolsSchema
     .validateSync(networkConfigs.filter((p: Pool) => !('archivedValues' in p) && !p.addresses))
     .map((p) => ({ ...p, isUpcoming: true } as UpcomingPool))
-  ipfsPools = { active, upcoming, archived }
+
+  ipfsPools = { active, upcoming, archived, launching }
   return ipfsPools
 }
 

@@ -112,6 +112,7 @@ class Apollo {
         seniorInterestRateNum,
         isUpcoming: false, // TODO: poolConfig?.metadata?.isUpcoming || false
         isArchived: false,
+        isLaunching: poolConfig?.metadata?.isLaunching || false,
         isOversubscribed:
           (pool && new BN(pool.maxReserve).lte(new BN(pool.reserve).add(OversubscribedBuffer))) || false,
         id: poolId,
@@ -144,6 +145,7 @@ class Apollo {
     return upcomingPools.map((p) => ({
       isUpcoming: true,
       isArchived: false,
+      isLaunching: false,
       isOversubscribed: false,
       totalFinancedCurrency: new BN('0'),
       order: orderSummandPoolUpcoming,
@@ -183,6 +185,7 @@ class Apollo {
     return archivedPools.map((p) => ({
       isUpcoming: false,
       isArchived: true,
+      isLaunching: false,
       isOversubscribed: false,
       order: orderSummandPoolClosed,
       totalDebt: new BN('0'),
