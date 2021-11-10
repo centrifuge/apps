@@ -283,7 +283,7 @@ async function getPools(ipfsPools: IpfsPools): Promise<PoolsData> {
         poolConfig.metadata.isUpcoming ||
         (!pool.assetValue && !pool.reserve) ||
         (pool.assetValue?.isZero() && pool.reserve?.isZero()) ||
-        !config.featureFlagNewOnboardingPools.includes(pool.id)
+        (!config.featureFlagNewOnboardingPools.includes(pool.id) && !pool.isLaunching)
 
       const capacity = capacityPerPool[pool.id]
       return {
