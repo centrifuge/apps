@@ -89,7 +89,7 @@ const InvestAction: React.FC<Props> = (props) => {
       ) : isLaunching && address ? (
         <Tooltip
           title="Launching pool"
-          description="This pool is launching with with exisiting investors while ramping up the portfolio. If you are interested in investing once the pool opens, please contact the issuer."
+          description="This pool is launching with with existing investors while ramping up the portfolio. If you are interested in investing once the pool opens, please contact the issuer."
         >
           <Button primary label="Invest" disabled />
         </Tooltip>

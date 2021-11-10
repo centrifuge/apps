@@ -241,7 +241,7 @@ const TrancheOverview: React.FC<Props> = (props: Props) => {
       <Heading level="6" margin={{ bottom: 'xsmall' }}>
         Interested in investing?
       </Heading>
-      This pool is launching with exisiting investors while ramping up the portfolio. If you are interested in investing
+      This pool is launching with existing investors while ramping up the portfolio. If you are interested in investing
       once the pool opens, please{' '}
       <DarkLink href={`mailto:${props.pool?.metadata.issuerEmail}`}>contact the issuer</DarkLink>.
     </Info>
