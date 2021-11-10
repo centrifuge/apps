@@ -8,7 +8,6 @@ export type ButtonProps = VisualButtonProps & React.ComponentPropsWithoutRef<'bu
 const StyledButton = styled.button(
   css({
     display: 'inline-block',
-    margin: '0',
     padding: '0',
     border: 'none',
     appearance: 'none',
