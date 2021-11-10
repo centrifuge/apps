@@ -2744,8 +2744,8 @@ __metadata:
     "@centrifuge/tinlake-js": 3.0.0-develop.35
     "@centrifuge/tinlake-pools-kovan": 0.0.1-develop.3
     "@centrifuge/tinlake-pools-mainnet": 0.0.1-develop.3
+    "@chainsafe/dappeteer": ^2.2.0
     "@cucumber/cucumber": ^7.0.0-rc.0
-    "@nodefactory/dappeteer": ^2.0.0
     "@types/puppeteer": 5.4.3
     puppeteer: 5.5.0
     ts-node: ^9.1.1
@@ -3179,6 +3179,17 @@ __metadata:
     yup: 0.28.5
   languageName: unknown
   linkType: soft
+
+"@chainsafe/dappeteer@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@chainsafe/dappeteer@npm:2.2.0"
+  dependencies:
+    node-stream-zip: ^1.13.0
+  peerDependencies:
+    puppeteer: ">5"
+  checksum: e870758b597da940331aec58d47567f4d8ee20fef63f8432307488ec02bb1ccf901a807931757fc8bdad9de21d905b4d5946844d340af4779a941d2814a8384f
+  languageName: node
+  linkType: hard
 
 "@chaitanyapotti/random-id@npm:^1.0.3":
   version: 1.0.3
@@ -6175,17 +6186,6 @@ __metadata:
   dependencies:
     "@napi-rs/triples": ^1.0.3
   checksum: fd9a40320ed4b5dc8b7700d7e3d4c27a9fed1e218aa035fb72acf9c849443d4d7708cd3a21cbff3ac3ada1a10b31f26076810ab349448d5eba4ed8873f505c9e
-  languageName: node
-  linkType: hard
-
-"@nodefactory/dappeteer@npm:^2.0.0":
-  version: 2.0.1
-  resolution: "@nodefactory/dappeteer@npm:2.0.1"
-  dependencies:
-    node-stream-zip: ^1.13.0
-  peerDependencies:
-    puppeteer: ">5"
-  checksum: 00aec1004a2767339ef58d9d77559ca148c4e4e62b9063c4d01a14184eab4c354dd4fd02a72874f89e8d6712f7d5dfcda63654d8ef8a319a7f609c71fd6324c4
   languageName: node
   linkType: hard
 
