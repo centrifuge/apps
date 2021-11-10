@@ -81,16 +81,14 @@ const TestTransaction: React.FC = () => {
         <div>Est. gas fee: {data}</div>
         <div>Transactions</div>
         {transactions.map((tx) => (
-          <>
-            <dl>
-              <dt>Id:</dt>
-              <dd>{tx.id}</dd>
-              <dt>Status:</dt>
-              <dd>{tx.status}</dd>
-              <dt>Description:</dt>
-              <dd>{tx.description}</dd>
-            </dl>
-          </>
+          <dl key={tx.id}>
+            <dt>Id:</dt>
+            <dd>{tx.id}</dd>
+            <dt>Status:</dt>
+            <dd>{tx.status}</dd>
+            <dt>Description:</dt>
+            <dd>{tx.description}</dd>
+          </dl>
         ))}
       </Text>
     </Stack>
