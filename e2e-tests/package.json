@@ -19,8 +19,8 @@
     "@centrifuge/tinlake-js": "3.0.0-develop.35",
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.3",
     "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.3",
+    "@chainsafe/dappeteer": "^2.2.0",
     "@cucumber/cucumber": "^7.0.0-rc.0",
-    "@nodefactory/dappeteer": "^2.0.0",
     "puppeteer": "5.5.0",
     "ts-node": "^9.1.1"
   },

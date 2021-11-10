@@ -1,6 +1,6 @@
 import { ITinlake } from '@centrifuge/tinlake-js'
+import * as dappeteer from '@chainsafe/dappeteer'
 import { setDefaultTimeout, setWorldConstructor } from '@cucumber/cucumber'
-import * as dappeteer from '@nodefactory/dappeteer'
 import { Browser, Page } from 'puppeteer'
 import { config } from '../config'
 import { tinlake } from '../selectors'

@@ -1,4 +1,4 @@
-import * as dappeteer from '@nodefactory/dappeteer'
+import * as dappeteer from '@chainsafe/dappeteer'
 import * as puppeteer from 'puppeteer'
 import { config } from '../config'
 import { CentrifugeWorld } from './world'
@@ -8,6 +8,7 @@ export async function openBrowser(world: CentrifugeWorld) {
     headless: false,
     slowMo: 1,
     devtools: false,
+    metamaskVersion: 'v10.1.1',
     args: [
       // Required for Docker version of Puppeteer
       '--no-sandbox',
@@ -16,7 +17,12 @@ export async function openBrowser(world: CentrifugeWorld) {
       // because Docker’s default for /dev/shm is 64MB
       '--disable-dev-shm-usage',
     ],
+    defaultViewport: {
+      width: 1920,
+      height: 1080,
+    },
   })
+  await dappeteer.setupMetamask(world.browser)
 }
 
 export async function openPage(world: CentrifugeWorld, url: string) {
