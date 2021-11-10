@@ -1,4 +1,3 @@
-import { Box, Paragraph } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch } from 'react-redux'
@@ -8,10 +7,7 @@ import { useAddress } from '../../utils/useAddress'
 import { useInvestorOnboardingState } from '../../utils/useOnboardingState'
 import { usePool } from '../../utils/usePool'
 import { Button } from '../Button'
-import { useDebugFlags } from '../DebugFlags'
-import { Center } from '../Layout'
 import { Tooltip } from '../Tooltip'
-import { FormModal, InvestmentSteps } from './styles'
 
 interface Props {
   pool: Pool | UpcomingPool
@@ -19,16 +15,11 @@ interface Props {
 }
 
 const InvestAction: React.FC<Props> = (props) => {
-  const { newOnboarding } = useDebugFlags()
   const { data: investorOnboardingData } = useInvestorOnboardingState()
-  const [modalIsOpen, setModalIsOpen] = React.useState(false)
   const [awaitingConnectAndData, setAwaitingConnectAndData] = React.useState(false)
   const address = useAddress()
   const router = useRouter()
   const dispatch = useDispatch()
-
-  const onOpen = () => setModalIsOpen(true)
-  const onClose = () => setModalIsOpen(false)
 
   const { data: poolData } = usePool(
     props.pool && 'addresses' in props.pool ? props.pool.addresses.ROOT_CONTRACT : undefined
@@ -49,11 +40,7 @@ const InvestAction: React.FC<Props> = (props) => {
   function navigate() {
     if (isUpcoming) {
       if (!hasDoneKYC) {
-        if (newOnboarding) {
-          router.push('/onboarding')
-        } else {
-          onOpen()
-        }
+        router.push(`/onboarding?from=${encodeURIComponent(router.asPath)}`)
       }
     } else {
       const basePath = `/pool/${(props.pool as Pool).addresses.ROOT_CONTRACT}/${props.pool?.metadata.slug}`
@@ -109,94 +96,6 @@ const InvestAction: React.FC<Props> = (props) => {
       ) : (
         <Button primary label={buttonLabel} onClick={connectAndNavigate} />
       )}
-
-      <FormModal opened={modalIsOpen} title={'Interested in investing?'} onClose={onClose} style={{ width: '800px' }}>
-        <Paragraph margin={{ top: 'small', bottom: 'small' }}>
-          Tinlake has integrated Securitize.io’s automated KYC process for a smooth investor onboarding. Once Securitize
-          has verified your documentation you will be provided with your “Securitize iD” which makes you eligible to
-          invest in all open Tinlake pools. To invest in an individual pool you will be asked to sign the subscription
-          agreement with the pool’s issuer also provided through the Securitize dashboard.
-        </Paragraph>
-
-        <InvestmentSteps src="/static/kyc-steps.svg" alt="Investment steps" />
-
-        <Box
-          direction="row"
-          justify="center"
-          width={props.pool && !isUpcoming ? '80%' : '40%'}
-          margin={{ left: 'auto', right: 'auto' }}
-          gap="medium"
-          style={{ textAlign: 'center' }}
-        >
-          <Box flex={true} justify="between">
-            <Paragraph>Start your KYC process to become to become an eligible investor.</Paragraph>
-          </Box>
-          {!isUpcoming && props.pool && (
-            <Box flex={true} justify="between">
-              {isUpcoming && <Paragraph>This pool is not open for investments yet</Paragraph>}
-              {!isUpcoming && (
-                <Paragraph>Already an eligible investor? Sign the pool issuers Subscription Agreement.</Paragraph>
-              )}
-              {(props.pool as Pool)?.metadata.securitize?.issuerId && (
-                <Button
-                  primary
-                  label={`Sign up for this pool`}
-                  fill={false}
-                  href={`https://id.securitize.io/#/authorize?issuerId=${
-                    (props.pool as Pool).metadata.securitize?.issuerId
-                  }&scope=info%20details%20verification&redirecturl=https://${
-                    (props.pool as Pool).metadata.securitize?.slug
-                  }.invest.securitize.io/%23/authorize`}
-                  target="_blank"
-                  disabled={isUpcoming}
-                />
-              )}
-            </Box>
-          )}
-        </Box>
-        <Center>
-          {(props.pool as Pool)?.metadata.securitize?.issuerId ? (
-            <Button
-              primary
-              label={`Onboard as an investor`}
-              fill={false}
-              href={`https://id.securitize.io/#/authorize?registration=true&issuerId=${
-                (props.pool as Pool).metadata.securitize?.issuerId
-              }&scope=info%20details%20verification&redirecturl=https://${
-                (props.pool as Pool).metadata.securitize?.slug
-              }.invest.securitize.io/%23/authorize`}
-              target="_blank"
-            />
-          ) : (
-            <Button
-              primary
-              label={`Onboard as an investor`}
-              href={`https://id.securitize.io/#/authorize?issuerId=4d11b353-a327-49ab-b45b-ae5be60697c6&scope=info%20details%20verification&registration=true&redirecturl=https://centrifuge.invest.securitize.io/#/authorize`}
-              fill={false}
-              target="_blank"
-            />
-          )}
-        </Center>
-
-        {props.pool && (
-          <Paragraph
-            margin={{ top: 'medium', bottom: '0', left: 'large', right: 'large' }}
-            style={{ textAlign: 'center' }}
-          >
-            Any questions left? Feel free to reach out to the Issuer directly (see Pool Overview).
-          </Paragraph>
-        )}
-
-        {!props.pool && (
-          <Paragraph
-            margin={{ top: 'medium', bottom: '0', left: 'large', right: 'large' }}
-            style={{ textAlign: 'center' }}
-          >
-            Already an eligible Tinlake investor? Head over to the individual pools to get started with signing the
-            subscription agreement or login to Securitize and select the respective pool there.
-          </Paragraph>
-        )}
-      </FormModal>
     </>
   )
 }

@@ -299,10 +299,6 @@ export const flagsConfig = {
     type: 'checkbox',
     default: params.get('show_close_epoch') != null,
   },
-  newOnboarding: {
-    type: 'checkbox',
-    default: debug,
-  },
   allowMultipleBorrow: {
     type: 'checkbox',
     default: params.get('allowMultipleBorrow') != null,
@@ -316,12 +312,12 @@ export const flagsConfig = {
     default: 'Real data',
     options: addressStatusPermutations,
   },
-  showUnusedFlags: {
-    type: 'checkbox',
-    default: false,
-  },
   showWriteOff: {
     type: 'checkbox',
     default: params.get('writeoff') != null,
+  },
+  showUnusedFlags: {
+    type: 'checkbox',
+    default: false,
   },
 }

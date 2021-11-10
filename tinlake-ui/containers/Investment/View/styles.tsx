@@ -1,5 +1,6 @@
-import { Box, Text } from 'grommet'
+import { Text } from 'grommet'
 import styled from 'styled-components'
+import { Stack } from '../../../components/Layout'
 
 export const FlexWrapper = styled.div`
   display: flex;
@@ -19,10 +20,10 @@ export const Description = styled(Text)`
   font-size: 14px;
 `
 
-export const ExplainerCard = styled(Box)`
+export const ExplainerCard = styled(Stack)`
   background: #f2f2f2;
   padding: 24px;
-  color: #555;
+  color: #000;
   border-radius: 8px;
 `
 
