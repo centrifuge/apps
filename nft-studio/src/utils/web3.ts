@@ -18,7 +18,13 @@ let api: ApiPromise
 
 export async function initPolkadotApi() {
   if (!apiPromise) {
-    apiPromise = ApiPromise.create({ provider: wsProvider })
+    apiPromise = ApiPromise.create({
+      provider: wsProvider,
+      types: {
+        ClassId: 'u64',
+        InstanceId: 'u128',
+      },
+    })
     apiPromise.then((obj) => (api = obj))
     return apiPromise
   }
