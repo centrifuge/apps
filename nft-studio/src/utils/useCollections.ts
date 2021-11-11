@@ -26,8 +26,10 @@ export function useCollections() {
   const query = useQuery(['collections'], async () => {
     const api = await initPolkadotApi()
 
-    const metas = await api.query.uniques.classMetadataOf.entries()
-    const collections = await api.query.uniques.class.entries()
+    const [metas, collections] = await Promise.all([
+      api.query.uniques.classMetadataOf.entries(),
+      api.query.uniques.class.entries(),
+    ])
 
     const metasObj = metas.reduce((acc, [keys, value]) => {
       acc[keys.toJSON()[0]] = value.toHuman()
