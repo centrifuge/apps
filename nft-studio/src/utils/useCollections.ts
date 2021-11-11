@@ -37,8 +37,8 @@ export function useCollections() {
     }, {} as any)
 
     const mapped = collections.map(([keys, value]) => {
-      const id = keys.toJSON()[0]
-      const collectionValue = value.toJSON() as any as CollectionValue
+      const id = (keys.toHuman() as string[])[0]
+      const collectionValue = value.toJSON() as CollectionValue
       const collection: Collection = {
         id,
         admin: encodeAddress(collectionValue.admin),

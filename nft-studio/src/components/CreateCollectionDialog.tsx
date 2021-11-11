@@ -4,6 +4,8 @@ import * as React from 'react'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { Dialog } from '../components/Dialog'
 import { useWeb3 } from '../components/Web3Provider'
+import { createCollectionMetadata } from '../utils/createCollectionMetadata'
+import { getAvailableClassId } from '../utils/getAvailableClassId'
 import { useCreateTransaction } from '../utils/useCreateTransaction'
 
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
@@ -12,15 +14,20 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const [description, setDescription] = React.useState('')
   const { createTransaction, lastCreatedTransaction } = useCreateTransaction()
 
-  function getCreateSubmittable(api: ApiPromise) {
-    return api.tx.utility.batchAll([
-      api.tx.uniques.create(7, selectedAccount!.address),
-      api.tx.uniques.setClassMetadata(
-        7,
-        `data:application/json;base64,${btoa(JSON.stringify({ name, description }))}`,
-        true
-      ),
-    ])
+  const isConnected = !!selectedAccount?.address
+
+  const onClickCreate = async () => {
+    if (!isConnected || !name || !description) return
+
+    const classId = await getAvailableClassId()
+    const res = await createCollectionMetadata(name, description)
+
+    createTransaction('Transfer', (api: ApiPromise) =>
+      api.tx.utility.batchAll([
+        api.tx.uniques.create(classId, selectedAccount!.address),
+        api.tx.uniques.setClassMetadata(classId, res.metadataURI, true),
+      ])
+    )
   }
 
   return (
@@ -36,8 +43,8 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
             Cancel
           </Button>
           <Button
-            disabled={!name}
-            onClick={() => createTransaction('Transfer', getCreateSubmittable)}
+            disabled={!isConnected || !name}
+            onClick={onClickCreate}
             loading={
               lastCreatedTransaction ? ['unconfirmed', 'pending'].includes(lastCreatedTransaction?.status) : false
             }
