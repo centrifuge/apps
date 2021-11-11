@@ -2,20 +2,32 @@ import { Button, Grid, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { ApiPromise } from '@polkadot/api'
 import { BN } from '@polkadot/util'
 import * as React from 'react'
-import { ButtonGroup } from '../components/ButtonGroup'
 import { CollectionCard } from '../components/CollectionCard'
-import { Dialog } from '../components/Dialog'
+import { CreateCollectionDialog } from '../components/CreateCollectionDialog'
 import { Footer } from '../components/Footer'
 import { PageContainer } from '../components/PageContainer'
 import { useTransactions } from '../components/TransactionsProvider'
 import { useWeb3 } from '../components/Web3Provider'
 import { useBalance } from '../utils/useBalance'
+import { useCollections } from '../utils/useCollections'
 import { useCreateTransaction } from '../utils/useCreateTransaction'
 import { useTransactionFeeEstimate } from '../utils/useTransactionFeeEstimate'
+import { initPolkadotApi } from '../utils/web3'
 
 export const CollectionsPage: React.FC = () => {
   const [createOpen, setCreateOpen] = React.useState(false)
   const { selectedAccount } = useWeb3()
+  const { data } = useCollections()
+
+  console.log('data', data)
+
+  React.useEffect(() => {
+    ;(async () => {
+      const api = await initPolkadotApi()
+      const data = await api.query.uniques.class(1)
+      console.log('classs', data)
+    })()
+  }, [])
 
   return (
     <PageContainer>
@@ -92,27 +104,5 @@ const TestTransaction: React.FC = () => {
         ))}
       </Text>
     </Stack>
-  )
-}
-
-const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
-  const [name, setName] = React.useState('')
-  const [description, setDescription] = React.useState('')
-  return (
-    <Dialog isOpen={open} onClose={onClose}>
-      <Stack gap={3}>
-        <Text variant="heading2" as="h2">
-          Create new collection
-        </Text>
-        <input value={name} onChange={(e) => setName(e.target.value)} />
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
-        <ButtonGroup>
-          <Button variant="outlined" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button disabled={!name}>Create</Button>
-        </ButtonGroup>
-      </Stack>
-    </Dialog>
   )
 }
