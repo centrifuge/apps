@@ -12,7 +12,6 @@ import { useBalance } from '../utils/useBalance'
 import { useCollections } from '../utils/useCollections'
 import { useCreateTransaction } from '../utils/useCreateTransaction'
 import { useTransactionFeeEstimate } from '../utils/useTransactionFeeEstimate'
-import { initPolkadotApi } from '../utils/web3'
 
 export const CollectionsPage: React.FC = () => {
   const [createOpen, setCreateOpen] = React.useState(false)
@@ -20,14 +19,6 @@ export const CollectionsPage: React.FC = () => {
   const { data } = useCollections()
 
   console.log('data', data)
-
-  React.useEffect(() => {
-    ;(async () => {
-      const api = await initPolkadotApi()
-      const data = await api.query.uniques.class(1)
-      console.log('classs', data)
-    })()
-  }, [])
 
   return (
     <PageContainer>
