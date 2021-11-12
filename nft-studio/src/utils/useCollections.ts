@@ -63,10 +63,14 @@ export function useCollections() {
   return query
 }
 
-export function useCollectionMetadata(id: string) {
+export function useCollection(id: string) {
   const { data } = useCollections()
-  const collection = React.useMemo(() => data?.find((c) => c.id === id), [data, id])
-  return useMetadata(collection?.metadataUri)
+  return React.useMemo(() => data?.find((c) => c.id === id), [data, id])
+}
+
+export function useCollectionMetadata(id: string) {
+  const collection = useCollection(id)
+  return useMetadata<{ name: string; description: string }>(collection?.metadataUri)
 }
 
 export function useCollectionNFTsPreview(id: string) {
@@ -85,7 +89,7 @@ export function useCollectionNFTsPreview(id: string) {
         const metaValue = value.toHuman() as any
         const meta = {
           id,
-          imageUri: metaValue.data,
+          metadataUri: metaValue.data,
         }
         return meta
       })

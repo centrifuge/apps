@@ -2,7 +2,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api'
 import { encodeAddress } from '@polkadot/util-crypto'
 
 export function truncateAddress(address: string) {
-  const encodedAddress = encodeAddress(address, 2)
+  const encodedAddress = encodeAddress(address)
   const first8 = encodedAddress.slice(0, 8)
   const last3 = encodedAddress.slice(-3)
 

@@ -29,7 +29,7 @@ export const TransactionProvider: React.FC = ({ children }) => {
   }, [])
 
   const updateTransaction = React.useCallback((id: string, update: Partial<Transaction>) => {
-    setTransactions((prev) => prev.map((tx) => (tx.id === id ? { ...tx, ...update } : tx)))
+    setTransactions((prev) => prev.map((tx) => (tx.id === id ? { ...tx, dismissed: false, ...update } : tx)))
   }, [])
 
   const ctx: TransactionsContextType = React.useMemo(
