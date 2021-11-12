@@ -1,4 +1,5 @@
 import { encodeAddress } from '@polkadot/keyring'
+import { StorageKey, u32 } from '@polkadot/types'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useWeb3 } from '../components/Web3Provider'
@@ -17,6 +18,8 @@ type CollectionValue = {
   // isFrozen: boolean
 }
 
+const formatStorageKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
+
 export type Collection = CollectionValue & {
   id: string
   metadataUri?: string
@@ -32,12 +35,12 @@ export function useCollections() {
     ])
 
     const metasObj = metas.reduce((acc, [keys, value]) => {
-      acc[keys.toJSON()[0]] = value.toHuman()
+      acc[formatStorageKey(keys)] = value.toHuman()
       return acc
     }, {} as any)
 
     const mapped = collections.map(([keys, value]) => {
-      const id = (keys.toHuman() as string[])[0]
+      const id = formatStorageKey(keys)
       const collectionValue = value.toJSON() as CollectionValue
       const collection: Collection = {
         id,
@@ -75,7 +78,12 @@ export function useCollectionMetadata(id: string) {
     async () => {
       const collection = data!.find((c) => c.id === id)
       if (!collection || !collection.metadataUri) return null
-      const res = await fetch(collection.metadataUri).then((res) => res.json())
+      const res = await fetch(collection.metadataUri)
+        .catch(() => {
+          // in case of error, try to fetch the metadata from the default gateway
+          return fetch(collection.metadataUri?.replace('ipfs://', `${process.env.REACT_APP_IPFS_GATEWAY}/`) || '')
+        })
+        .then((res) => res.json())
       if (typeof res.name !== 'string' || typeof res.description !== 'string') {
         throw new Error('collectionMetadata: Invalid format')
       }
