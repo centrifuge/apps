@@ -9,7 +9,7 @@ interface SystemProps extends TypographyProps, ColorProps {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface StyledTextProps extends SystemProps {}
 
-const StyledText = styled('div').withConfig({
+const StyledText = styled('span').withConfig({
   shouldForwardProp: (prop) => shouldForwardProp(prop),
 })<StyledTextProps>({ margin: 0 }, compose(typography, color))
 
