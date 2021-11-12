@@ -18,6 +18,6 @@ const StyledTextArea = styled.textarea`
 export const TextArea: React.FC<TextAreaProps> = ({ label, value, onChange }) => (
   <Stack>
     <Text variant="label1">{label}</Text>
-    <StyledTextArea onChange={onChange}>{value || ''}</StyledTextArea>
+    <StyledTextArea onChange={onChange} value={value || ''} />
   </Stack>
 )

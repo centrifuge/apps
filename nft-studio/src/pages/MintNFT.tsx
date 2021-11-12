@@ -4,6 +4,7 @@ import { TextVariantName } from '@centrifuge/fabric/dist/theme'
 import React, { useState } from 'react'
 import { useRouteMatch } from 'react-router'
 import { FileImageUpload } from '../components/FileImageUpload'
+import { RouterLinkButton } from '../components/RouterLinkButton'
 import { SplitView } from '../components/SplitView'
 import { TextArea } from '../components/TextArea'
 import { TextInput } from '../components/TextInput'
@@ -105,7 +106,9 @@ export const MintNFTPage: React.FC = () => {
                 <Button disabled={!isFormValid} onClick={onSubmit}>
                   Mint
                 </Button>
-                <Button>Cancel</Button>
+                <RouterLinkButton to={`/collection/${collectionId}`} variant="outlined">
+                  Cancel
+                </RouterLinkButton>
               </Shelf>
             </form>
           </Stack>
