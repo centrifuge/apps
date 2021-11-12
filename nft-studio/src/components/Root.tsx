@@ -13,6 +13,7 @@ import { NFTPage } from '../pages/NFT'
 import { GlobalStyle } from './GlobalStyle'
 import { NavBar } from './NavBar'
 import { TransactionProvider } from './TransactionsProvider'
+import { TransactionToasts } from './TransactionToasts'
 import { Web3Provider } from './Web3Provider'
 
 const theme: DefaultTheme = {
@@ -52,6 +53,7 @@ export const Root: React.FC = () => {
         <OverlayProvider>
           <Web3Provider>
             <TransactionProvider>
+              <TransactionToasts />
               <Router>
                 <NavBar title="NFT Studio" />
                 <Switch>

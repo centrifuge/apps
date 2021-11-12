@@ -1,8 +1,8 @@
 import { useQuery } from 'react-query'
 import { parseMetadataUrl } from './parseMetadataUrl'
 
-export function useMetadata(uri?: string) {
-  const query = useQuery(
+export function useMetadata<T extends object>(uri?: string) {
+  const query = useQuery<Partial<T>>(
     ['metadata', uri],
     async () => {
       const res = await fetch(uri!)
