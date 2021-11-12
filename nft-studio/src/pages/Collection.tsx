@@ -1,4 +1,5 @@
 import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { TextVariantName } from '@centrifuge/fabric/dist/theme'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Footer } from '../components/Footer'
@@ -21,7 +22,7 @@ export const CollectionPage: React.FC = (props) => {
       <Stack gap={8} flex={1}>
         <Shelf justifyContent="space-between">
           <Shelf gap={[0, 1]} alignItems="baseline" flexWrap="wrap">
-            <Text variant="headingLarge" as="h1">
+            <Text variant={'headingLarge' as TextVariantName} as="h1">
               {metadata?.name}
             </Text>
             <Text variant="heading3" color="textSecondary">

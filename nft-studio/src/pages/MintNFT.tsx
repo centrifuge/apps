@@ -1,14 +1,19 @@
-import { Box, Button, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Flex } from '@centrifuge/fabric/dist/components/Flex'
+import { TextVariantName } from '@centrifuge/fabric/dist/theme'
 import React, { useState } from 'react'
 import { useRouteMatch } from 'react-router'
 import { FileImageUpload } from '../components/FileImageUpload'
 import { SplitView } from '../components/SplitView'
+import { TextArea } from '../components/TextArea'
+import { TextInput } from '../components/TextInput'
 import { useWeb3 } from '../components/Web3Provider'
 import { fetchLambda } from '../utils/fetchLambda'
 import { formatAddress } from '../utils/format/formatAddress'
 import { getFileDataURI } from '../utils/getFileDataURI'
 import { useCollectionMetadata } from '../utils/useCollections'
+
+const DEFAULT_NFT_NAME = 'Untitled NFT'
 
 export const MintNFTPage: React.FC = () => {
   const {
@@ -63,40 +68,45 @@ export const MintNFTPage: React.FC = () => {
         </Flex>
       }
       right={
-        <Box px={5} py={9} bg="backgroundPage">
+        <Box px={8} py={9}>
           <Stack>
-            <Text variant="heading2">{collectionMetadata?.name}</Text>
+            <Text variant="heading3" style={{ textDecoration: 'underline' }}>
+              {collectionMetadata?.name}
+            </Text>
 
-            <Text variant="heading1">{nftName || 'Untitled NFT'}</Text>
-            <Text variant="heading3">by {formatAddress(selectedAccount?.address || '')}</Text>
+            <Stack mt={3} mb={7}>
+              <Text variant={'headingLarge' as TextVariantName} as="h1">
+                {nftName || DEFAULT_NFT_NAME}
+              </Text>
+              <Text variant="heading3" color="textSecondary">
+                by {formatAddress(selectedAccount?.address || '')}
+              </Text>
+            </Stack>
             <form>
-              <div>
-                Name
-                <input
-                  type="text"
-                  name="name"
+              <Box mb={3}>
+                <TextInput
+                  label="Name"
+                  placeholder={DEFAULT_NFT_NAME}
                   value={nftName}
                   onChange={({ target }) => {
-                    setNftName(target.value)
+                    setNftName((target as HTMLInputElement).value)
                   }}
                 />
-              </div>
-              <div>
-                Description
-                <input
-                  type="text"
-                  name="description"
-                  value={nftDescription}
-                  onChange={({ target }) => {
-                    setNftDescription(target.value)
-                  }}
-                />
-              </div>
+              </Box>
+              <TextArea
+                label="Description"
+                value={nftDescription}
+                onChange={({ target }) => {
+                  setNftDescription((target as HTMLTextAreaElement).value)
+                }}
+              />
 
-              <Button disabled={!isFormValid} onClick={onSubmit}>
-                Mint
-              </Button>
-              <Button>Cancel</Button>
+              <Shelf gap={2} mt={6}>
+                <Button disabled={!isFormValid} onClick={onSubmit}>
+                  Mint
+                </Button>
+                <Button>Cancel</Button>
+              </Shelf>
             </form>
           </Stack>
         </Box>
