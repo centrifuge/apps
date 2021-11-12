@@ -18,10 +18,8 @@ export const SplitView: React.FC<Props> = ({ left, right }) => {
         gridAutoRows={['max-content', 'max-content', 'initial']}
         position="relative"
       >
-        <LeftWrapper color="borderPrimary" px={[3, 3, 5]}>
-          {left}
-        </LeftWrapper>
-        <Box px={[3, 3, 5]}>{right}</Box>
+        <LeftWrapper color="borderPrimary">{left}</LeftWrapper>
+        <Box>{right}</Box>
       </Box>
     </PageContainer>
   )
