@@ -24,7 +24,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     const classId = await getAvailableClassId()
     const res = await createCollectionMetadata(name, description)
 
-    createTransaction('Transfer', (api: ApiPromise) =>
+    createTransaction('Create collection', (api: ApiPromise) =>
       api.tx.utility.batchAll([
         api.tx.uniques.create(classId, selectedAccount!.address),
         api.tx.uniques.setClassMetadata(classId, res.metadataURI, true),
