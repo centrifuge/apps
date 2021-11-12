@@ -2,7 +2,7 @@ import { encodeAddress } from '@polkadot/keyring'
 import { StorageKey, u32 } from '@polkadot/types'
 import * as React from 'react'
 import { useQuery } from 'react-query'
-import { useWeb3 } from '../components/Web3Provider'
+import { useMetadata } from './useMetadata'
 import { initPolkadotApi } from './web3'
 
 type CollectionValue = {
@@ -26,74 +26,75 @@ export type Collection = CollectionValue & {
 }
 
 export function useCollections() {
-  const query = useQuery(['collections'], async () => {
-    const api = await initPolkadotApi()
+  const query = useQuery(
+    ['collections'],
+    async () => {
+      const api = await initPolkadotApi()
 
-    const [metas, collections] = await Promise.all([
-      api.query.uniques.classMetadataOf.entries(),
-      api.query.uniques.class.entries(),
-    ])
+      const [metas, collections] = await Promise.all([
+        api.query.uniques.classMetadataOf.entries(),
+        api.query.uniques.class.entries(),
+      ])
 
-    const metasObj = metas.reduce((acc, [keys, value]) => {
-      acc[formatStorageKey(keys)] = value.toHuman()
-      return acc
-    }, {} as any)
+      const metasObj = metas.reduce((acc, [keys, value]) => {
+        acc[formatStorageKey(keys)] = value.toHuman()
+        return acc
+      }, {} as any)
 
-    const mapped = collections.map(([keys, value]) => {
-      const id = formatStorageKey(keys)
-      const collectionValue = value.toJSON() as CollectionValue
-      const collection: Collection = {
-        id,
-        admin: encodeAddress(collectionValue.admin),
-        instances: collectionValue.instances,
-        metadataUri: metasObj[id]?.data,
-      }
-      return collection
-    })
-    console.log('collections', collections, metas, mapped)
-    return mapped
-  })
+      const mapped = collections.map(([keys, value]) => {
+        const id = formatStorageKey(keys)
+        const collectionValue = value.toJSON() as CollectionValue
+        const collection: Collection = {
+          id,
+          admin: encodeAddress(collectionValue.admin),
+          instances: collectionValue.instances,
+          metadataUri: metasObj[id]?.data,
+        }
+        return collection
+      })
+      console.log('collections', collections, metas, mapped)
+      return mapped
+    },
+    {
+      suspense: true,
+    }
+  )
 
   return query
 }
 
-export function useUserCollections(addressOverride?: string) {
-  const { selectedAccount } = useWeb3()
-  const address = addressOverride || selectedAccount?.address
-  const { data } = useCollections()
-
-  return React.useMemo(() => data?.filter((c) => c.admin === address), [data, address])
-}
-
-export type CollectionMetaData = {
-  name: string
-  description: string
-}
-
 export function useCollectionMetadata(id: string) {
   const { data } = useCollections()
+  const collection = React.useMemo(() => data?.find((c) => c.id === id), [data, id])
+  return useMetadata(collection?.metadataUri)
+}
 
+export function useCollectionNFTsPreview(id: string) {
+  const { data } = useCollections()
   const query = useQuery(
-    ['collectionMetadata', id],
+    ['collectionPreview', id],
     async () => {
+      const api = await initPolkadotApi()
       const collection = data!.find((c) => c.id === id)
-      if (!collection || !collection.metadataUri) return null
-      const res = await fetch(collection.metadataUri)
-        .catch(() => {
-          // in case of error, try to fetch the metadata from the default gateway
-          return fetch(collection.metadataUri?.replace('ipfs://', `${process.env.REACT_APP_IPFS_GATEWAY}/`) || '')
-        })
-        .then((res) => res.json())
-      if (typeof res.name !== 'string' || typeof res.description !== 'string') {
-        throw new Error('collectionMetadata: Invalid format')
-      }
-      return {
-        name: res.name,
-        description: res.description,
-      }
+      if (!collection) return null
+
+      const metas = await api.query.uniques.instanceMetadataOf.entriesPaged({ pageSize: 4, args: [collection.id] })
+
+      const mapped = metas.map(([keys, value]) => {
+        const id = (keys.toHuman() as string[])[0]
+        const metaValue = value.toHuman() as any
+        const meta = {
+          id,
+          imageUri: metaValue.data,
+        }
+        return meta
+      })
+
+      return mapped
     },
     {
       enabled: !!data,
+      staleTime: Infinity,
     }
   )
 

@@ -6,7 +6,7 @@ import { Grid } from '../Grid'
 
 export const LayoutGrid: React.FC = ({ children }) => {
   return (
-    <Grid columns={[4, 8, 12]} gap={['gutterMobile', 'gutterTablet', 'gutterDesktop']}>
+    <Grid columns={[4, 4, 8, 12]} equalColumns gap={['gutterMobile', 'gutterTablet', 'gutterDesktop']}>
       {children}
     </Grid>
   )

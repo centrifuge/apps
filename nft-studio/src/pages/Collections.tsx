@@ -1,4 +1,4 @@
-import { Button, Grid, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, IconPlus, LayoutGrid, LayoutGridItem, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { ApiPromise } from '@polkadot/api'
 import { BN } from '@polkadot/util'
 import * as React from 'react'
@@ -11,53 +11,77 @@ import { useWeb3 } from '../components/Web3Provider'
 import { useBalance } from '../utils/useBalance'
 import { useCollections } from '../utils/useCollections'
 import { useCreateTransaction } from '../utils/useCreateTransaction'
-import { useTransactionFeeEstimate } from '../utils/useTransactionFeeEstimate'
 
 export const CollectionsPage: React.FC = () => {
-  const [createOpen, setCreateOpen] = React.useState(false)
-  const { selectedAccount } = useWeb3()
-  const { data } = useCollections()
-
-  console.log('data', data)
-
   return (
     <PageContainer>
-      <Stack gap={8} flex={1}>
-        {selectedAccount && (
-          <Stack gap={3}>
-            <Shelf justifyContent="space-between">
-              <Text variant="heading2" as="h2">
-                My Collections
-              </Text>
-              <Button onClick={() => setCreateOpen(true)} variant="text" icon={IconPlus}>
-                Create Collection
-              </Button>
-            </Shelf>
+      <Collections />
+    </PageContainer>
+  )
+}
+
+const Collections: React.FC = () => {
+  const [createOpen, setCreateOpen] = React.useState(false)
+  const { selectedAccount } = useWeb3()
+  const { data: collections } = useCollections()
+
+  const userCollections = React.useMemo(
+    () => collections?.filter((c) => c.admin === selectedAccount?.address),
+    [collections, selectedAccount?.address]
+  )
+  return (
+    <Stack gap={8} flex={1}>
+      {selectedAccount && (
+        <Stack gap={3}>
+          <Shelf justifyContent="space-between">
+            <Text variant="heading2" as="h2">
+              My Collections
+            </Text>
+            <Button onClick={() => setCreateOpen(true)} variant="text" icon={IconPlus}>
+              Create Collection
+            </Button>
+          </Shelf>
+          {userCollections?.length ? (
+            <LayoutGrid>
+              {collections?.map((col) => (
+                <LayoutGridItem span={4} key={col.id}>
+                  <CollectionCard collection={col} />
+                </LayoutGridItem>
+              ))}
+            </LayoutGrid>
+          ) : (
             <Shelf justifyContent="center" textAlign="center">
               <Text variant="heading2" color="textSecondary">
                 You have no collections yet
               </Text>
             </Shelf>
-          </Stack>
-        )}
-        <Stack gap={3}>
-          <Text variant="heading2" as="h2">
-            {selectedAccount ? 'Other Collections' : 'Collections'}
-          </Text>
-          <Grid gap={[1, 2, 3]} minColumnWidth={['1fr', 440]} equalColumns>
-            <CollectionCard />
-            <CollectionCard />
-            <CollectionCard />
-            <CollectionCard />
-            <CollectionCard />
-            <CollectionCard />
-          </Grid>
-          <TestTransaction />
+          )}
         </Stack>
-        <CreateCollectionDialog open={createOpen} onClose={() => setCreateOpen(false)} />
-        <Footer />
+      )}
+      <Stack gap={3}>
+        <Text variant="heading2" as="h2">
+          {selectedAccount ? 'Other Collections' : 'Collections'}
+        </Text>
+        {collections?.length ? (
+          <LayoutGrid>
+            {collections?.map((col) => (
+              <LayoutGridItem span={4} key={col.id}>
+                <CollectionCard collection={col} />
+              </LayoutGridItem>
+            ))}
+          </LayoutGrid>
+        ) : (
+          <Shelf justifyContent="center" textAlign="center">
+            <Text variant="heading2" color="textSecondary">
+              There are no collections yet
+            </Text>
+          </Shelf>
+        )}
+        <TestTransaction />
       </Stack>
-    </PageContainer>
+      <CreateCollectionDialog open={createOpen} onClose={() => setCreateOpen(false)} />
+      <Footer />
+    </Stack>
   )
 }
 
@@ -69,7 +93,7 @@ const TestTransaction: React.FC = () => {
     return api.tx.balances.transfer('kAMx1vYzEvumnpGcd6a5JL6RPE2oerbr6pZszKPFPZby2gLLF', new BN(1).pow(new BN(18)))
   }
 
-  const { data } = useTransactionFeeEstimate(getTransferSubmittable)
+  // const { data } = useTransactionFeeEstimate(getTransferSubmittable)
 
   return (
     <Stack gap={3}>
@@ -81,7 +105,7 @@ const TestTransaction: React.FC = () => {
         >
           Do some transaction
         </Button>
-        <div>Est. gas fee: {data}</div>
+        {/* <div>Est. gas fee: {data}</div> */}
         <div>Transactions</div>
         {transactions.map((tx) => (
           <dl key={tx.id}>

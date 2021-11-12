@@ -2929,6 +2929,7 @@ __metadata:
     npm-run-all: ^4.1.5
     react: ^17.0.2
     react-dom: ^17.0.2
+    react-error-boundary: ^3.1.4
     react-query: ^3.25.1
     react-router: ^5.2.1
     react-router-dom: ^5.3.0
@@ -35447,6 +35448,17 @@ __metadata:
     react: ^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1
     react-dom: ^0.14.8 || ^15.0.1 || ^16.0.0 || ^17.0.1
   checksum: 38e9e094ff98f2d68a37b53524a64047848a42f4f552a4399b39473f75ca62ff88e92b5cf6c8f9bf8be6368407284119b8f31a3a97bb9b793a457bccb8c4fa6c
+  languageName: node
+  linkType: hard
+
+"react-error-boundary@npm:^3.1.4":
+  version: 3.1.4
+  resolution: "react-error-boundary@npm:3.1.4"
+  dependencies:
+    "@babel/runtime": ^7.12.5
+  peerDependencies:
+    react: ">=16.13.1"
+  checksum: 46284fe6294810fe95a2157e20bf8b241d8761f4e5ae5be7f3b3b1085133cdb7af99d1fa8e3f16ffffc1230e7e858fb04e479c8dafbdb41abbf389d74b8538f0
   languageName: node
   linkType: hard
 

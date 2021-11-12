@@ -1,6 +1,7 @@
 import { Button, Stack, Text } from '@centrifuge/fabric'
 import { ApiPromise } from '@polkadot/api'
 import * as React from 'react'
+import { useQueryClient } from 'react-query'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { Dialog } from '../components/Dialog'
 import { useWeb3 } from '../components/Web3Provider'
@@ -9,6 +10,7 @@ import { getAvailableClassId } from '../utils/getAvailableClassId'
 import { useCreateTransaction } from '../utils/useCreateTransaction'
 
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  const queryClient = useQueryClient()
   const { selectedAccount } = useWeb3()
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
@@ -29,6 +31,13 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
       ])
     )
   }
+
+  React.useEffect(() => {
+    if (lastCreatedTransaction?.status === 'succeeded') {
+      queryClient.invalidateQueries('collections')
+      queryClient.invalidateQueries('balance')
+    }
+  }, [queryClient, lastCreatedTransaction?.status])
 
   return (
     <Dialog isOpen={open} onClose={onClose}>
