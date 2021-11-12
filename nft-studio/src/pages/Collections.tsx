@@ -93,8 +93,6 @@ const TestTransaction: React.FC = () => {
     return api.tx.balances.transfer('kAMx1vYzEvumnpGcd6a5JL6RPE2oerbr6pZszKPFPZby2gLLF', new BN(1).pow(new BN(18)))
   }
 
-  // const { data } = useTransactionFeeEstimate(getTransferSubmittable)
-
   return (
     <Stack gap={3}>
       <Text>
@@ -105,7 +103,6 @@ const TestTransaction: React.FC = () => {
         >
           Do some transaction
         </Button>
-        {/* <div>Est. gas fee: {data}</div> */}
         <div>Transactions</div>
         {transactions.map((tx) => (
           <dl key={tx.id}>

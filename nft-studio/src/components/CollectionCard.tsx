@@ -40,7 +40,7 @@ export const CollectionCard: React.FC<Props> = ({ collection }) => {
 const PreviewImage: React.FC<{ uri?: string }> = ({ uri }) => {
   const { data } = useMetadata(uri)
   return (
-    <Box bg="#eee" width="80px" height="80px" borderRadius={4} overflow="hidden">
+    <Box width="80px" height="80px" borderRadius={4} overflow="hidden">
       {data?.image && (
         <Box
           border="none"
