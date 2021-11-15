@@ -2,10 +2,8 @@ import { Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
 import styled from 'styled-components'
 
-type TextAreaProps = {
+interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string
-  onChange?: React.FormEventHandler
-  value?: string
 }
 
 const StyledTextArea = styled.textarea`
@@ -15,9 +13,9 @@ const StyledTextArea = styled.textarea`
   padding: ${({ theme }) => theme.space[1]}px ${({ theme }) => theme.space[2]}px;
 `
 
-export const TextArea: React.FC<TextAreaProps> = ({ label, value, onChange }) => (
+export const TextArea: React.FC<TextAreaProps> = ({ label, value, ...textareaProps }) => (
   <Stack>
     <Text variant="label1">{label}</Text>
-    <StyledTextArea onChange={onChange} value={value || ''} />
+    <StyledTextArea value={value || ''} {...textareaProps} />
   </Stack>
 )
