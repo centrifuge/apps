@@ -25,7 +25,7 @@ const NFT: React.FC = () => {
   const { selectedAccount } = useWeb3()
   const nft = useNFT(collectionId, nftId)
   const { data: metadata } = useMetadata<{ name: string; description: string; image: string }>(nft?.metadataUri)
-  const collection = useCollection(nft?.collectionId)
+  const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collection?.id)
   const [transferOpen, setTransferOpen] = React.useState(false)
   const history = useHistory()
@@ -51,6 +51,22 @@ const NFT: React.FC = () => {
           <Box position="absolute" top={2} right={3}>
             <Button variant="text" icon={IconX} onClick={() => history.goBack()} />
           </Box>
+          {!nft && (
+            <Stack gap={3}>
+              {collectionMetadata && collection && (
+                <Box display={['none', 'none', 'block']}>
+                  <Link to={`/collection/${collection.id}`}>
+                    <Text fontWeight={600}>
+                      <u>{collectionMetadata.name}</u>
+                    </Text>
+                  </Link>
+                </Box>
+              )}
+              <Text variant="headingLarge" as="h1">
+                NFT Not Found
+              </Text>
+            </Stack>
+          )}
           {nft && imageUrl && metadata && collection && collectionMetadata && (
             <>
               <Stack gap={3}>
