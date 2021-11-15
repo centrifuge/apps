@@ -28,5 +28,8 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
+      - name: Build Fabric components
+        run: yarn build
+
       - name: Run Visual regression tests
         run: yarn ci:loki
