@@ -13,9 +13,15 @@ type Props = {
 export const NFTCard: React.FC<Props> = ({ nft }) => {
   const { data: metadata } = useMetadata<{ name: string; description: string; image: string }>(nft?.metadataUri)
   return (
-    <Card as={Link} to="/collection/1/object/2" variant="interactive" pb={[3, 4]}>
+    <Card as={Link} to={`/collection/${nft.collectionId}/object/${nft.id}`} variant="interactive" pb={[3, 4]}>
       <Stack gap={[2, 3]}>
-        <Box bg="backgroundPage" style={{ aspectRatio: '1' }}>
+        <Box
+          bg="backgroundPage"
+          style={{ aspectRatio: '1' }}
+          borderTopLeftRadius="card"
+          borderTopRightRadius="card"
+          overflow="hidden"
+        >
           {metadata?.image && (
             <Box
               as="img"

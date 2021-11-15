@@ -6,6 +6,7 @@ import { Footer } from '../components/Footer'
 import { PageContainer } from '../components/PageContainer'
 import { useWeb3 } from '../components/Web3Provider'
 import { useCollections } from '../utils/useCollections'
+import { isSameAddress } from '../utils/web3'
 
 export const CollectionsPage: React.FC = () => {
   return (
@@ -21,9 +22,15 @@ const Collections: React.FC = () => {
   const { data: collections } = useCollections()
 
   const userCollections = React.useMemo(
-    () => collections?.filter((c) => c.admin === selectedAccount?.address),
+    () => collections?.filter((c) => isSameAddress(c.admin, selectedAccount?.address)),
     [collections, selectedAccount?.address]
   )
+
+  const otherCollections = React.useMemo(
+    () => collections?.filter((c) => !isSameAddress(c.admin, selectedAccount?.address)),
+    [collections, selectedAccount?.address]
+  )
+
   return (
     <Stack gap={8} flex={1}>
       {selectedAccount && (
@@ -38,7 +45,7 @@ const Collections: React.FC = () => {
           </Shelf>
           {userCollections?.length ? (
             <LayoutGrid>
-              {collections?.map((col) => (
+              {userCollections?.map((col) => (
                 <LayoutGridItem span={4} key={col.id}>
                   <CollectionCard collection={col} />
                 </LayoutGridItem>
@@ -57,9 +64,9 @@ const Collections: React.FC = () => {
         <Text variant="heading2" as="h2">
           {selectedAccount ? 'Other Collections' : 'Collections'}
         </Text>
-        {collections?.length ? (
+        {otherCollections?.length ? (
           <LayoutGrid>
-            {collections?.map((col) => (
+            {otherCollections?.map((col) => (
               <LayoutGridItem span={4} key={col.id}>
                 <CollectionCard collection={col} />
               </LayoutGridItem>

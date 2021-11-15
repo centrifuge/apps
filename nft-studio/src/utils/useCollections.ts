@@ -1,4 +1,3 @@
-import { encodeAddress } from '@polkadot/keyring'
 import { StorageKey, u32 } from '@polkadot/types'
 import * as React from 'react'
 import { useQuery } from 'react-query'
@@ -46,7 +45,7 @@ export function useCollections() {
         const collectionValue = value.toJSON() as CollectionValue
         const collection: Collection = {
           id,
-          admin: encodeAddress(collectionValue.admin),
+          admin: collectionValue.admin,
           instances: collectionValue.instances,
           metadataUri: metasObj[id]?.data,
         }
@@ -63,12 +62,12 @@ export function useCollections() {
   return query
 }
 
-export function useCollection(id: string) {
+export function useCollection(id?: string) {
   const { data } = useCollections()
   return React.useMemo(() => data?.find((c) => c.id === id), [data, id])
 }
 
-export function useCollectionMetadata(id: string) {
+export function useCollectionMetadata(id?: string) {
   const collection = useCollection(id)
   return useMetadata<{ name: string; description: string }>(collection?.metadataUri)
 }

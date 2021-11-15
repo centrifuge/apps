@@ -87,5 +87,6 @@ export function useCreateTransaction() {
   return {
     createTransaction,
     lastCreatedTransaction,
+    reset: () => setLastId(undefined),
   }
 }

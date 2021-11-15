@@ -4,7 +4,7 @@ type Status = 'default' | 'info' | 'ok' | 'warning' | 'critical'
 
 // Colors
 
-type StatusColorVariant = 'Primary' | 'Light' | 'Dark'
+type StatusColorVariant = 'Primary' | 'Foreground' | 'Background'
 type StatusColorName = `${Status}${StatusColorVariant}`
 
 type BrandColorName = 'brand'

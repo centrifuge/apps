@@ -1,4 +1,3 @@
-import { encodeAddress } from '@polkadot/keyring'
 import { StorageKey, u32 } from '@polkadot/types'
 import * as React from 'react'
 import { useQuery } from 'react-query'
@@ -41,7 +40,7 @@ export function useNFTs(collectionId: string) {
         const nft: NFT = {
           id,
           collectionId,
-          owner: encodeAddress(nftValue.owner),
+          owner: nftValue.owner,
           metadataUri: metasObj[id]?.data,
         }
         return nft
