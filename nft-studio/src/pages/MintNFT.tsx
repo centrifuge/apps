@@ -10,9 +10,9 @@ import { TextArea } from '../components/TextArea'
 import { TextInput } from '../components/TextInput'
 import { useWeb3 } from '../components/Web3Provider'
 import { fetchLambda } from '../utils/fetchLambda'
-import { formatAddress } from '../utils/format/formatAddress'
 import { getFileDataURI } from '../utils/getFileDataURI'
 import { useCollectionMetadata } from '../utils/useCollections'
+import { truncateAddress } from '../utils/web3'
 
 const DEFAULT_NFT_NAME = 'Untitled NFT'
 
@@ -80,7 +80,7 @@ export const MintNFTPage: React.FC = () => {
                 {nftName || DEFAULT_NFT_NAME}
               </Text>
               <Text variant="heading3" color="textSecondary">
-                by {formatAddress(selectedAccount?.address || '')}
+                by {truncateAddress(selectedAccount?.address || '')}
               </Text>
             </Stack>
             <form>

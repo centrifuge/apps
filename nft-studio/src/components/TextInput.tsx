@@ -2,11 +2,8 @@ import { Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
 import styled from 'styled-components'
 
-type TextAreaProps = {
+interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string
-  onChange?: React.FormEventHandler
-  value?: string
-  placeholder?: string
 }
 
 const StyledTextInput = styled.input`
@@ -20,9 +17,9 @@ const StyledTextInput = styled.input`
   }
 `
 
-export const TextInput: React.FC<TextAreaProps> = ({ label, value, placeholder, onChange }) => (
+export const TextInput: React.FC<TextInputProps> = ({ label, value, placeholder, ...inputProps }) => (
   <Stack>
     <Text variant="label1">{label}</Text>
-    <StyledTextInput onChange={onChange} placeholder={placeholder || ''} value={value || ''} />
+    <StyledTextInput placeholder={placeholder || ''} value={value || ''} {...inputProps} />
   </Stack>
 )
