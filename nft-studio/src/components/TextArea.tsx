@@ -8,6 +8,8 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 
 const StyledTextArea = styled.textarea`
   border: 1px solid ${({ theme }) => theme.colors.textPrimary};
+  color: ${({ theme }) => theme.colors.textPrimary};
+  background: transparent;
   border-radius: 8px;
   margin-top: ${({ theme }) => theme.space[1]}px;
   padding: ${({ theme }) => theme.space[1]}px ${({ theme }) => theme.space[2]}px;

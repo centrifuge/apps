@@ -9,6 +9,8 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 const StyledTextInput = styled.input`
   border: 0;
   border-bottom: 1px solid ${({ theme }) => theme.colors.textPrimary};
+  color: ${({ theme }) => theme.colors.textPrimary};
+  background: transparent;
   height: 32px;
 
   ::placeholder {
