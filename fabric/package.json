@@ -13,7 +13,7 @@
     "test": "loki test",
     "approve": "loki approve",
     "start": "tsc --watch",
-    "ci:loki": "build-storybook && loki --requireReference --reactUri file:./storybook-static"
+    "ci:loki": "build-storybook --quiet && loki --requireReference --reactUri file:./storybook-static"
   },
   "author": "",
   "license": "ISC",
