@@ -2,7 +2,7 @@ name: 'Fabric'
 on:
   push:
     branches:
-      - fabric-test
+      - main
     paths:
       - 'fabric/**' # dependency
       - '.github/workflows/fabric-test.yml'
