@@ -16,11 +16,11 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const { selectedAccount } = useWeb3()
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
-  const { createTransaction, lastCreatedTransaction } = useCreateTransaction()
+  const { createTransaction, lastCreatedTransaction, reset: resetLastTransaction } = useCreateTransaction()
 
   const isConnected = !!selectedAccount?.address
 
-  const onClickCreate = async () => {
+  async function submit() {
     if (!isConnected || !name || !description) return
 
     const classId = await getAvailableClassId()
@@ -34,6 +34,17 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     )
   }
 
+  function reset() {
+    setName('')
+    setDescription('')
+    resetLastTransaction()
+  }
+
+  function close() {
+    reset()
+    onClose()
+  }
+
   React.useEffect(() => {
     if (lastCreatedTransaction?.status === 'succeeded') {
       queryClient.invalidateQueries('collections')
@@ -42,33 +53,35 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   }, [queryClient, lastCreatedTransaction?.status])
 
   return (
-    <Dialog isOpen={open} onClose={onClose}>
-      <Stack gap={3}>
-        <Text variant="heading2" as="h2">
-          Create new collection
-        </Text>
-        <TextInput label="Name" value={name} maxLength={30} onChange={(e) => setName(e.target.value)} />
-        <TextArea
-          label="Description"
-          value={description}
-          maxLength={200}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <ButtonGroup>
-          <Button variant="outlined" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            disabled={!isConnected || !name}
-            onClick={onClickCreate}
-            loading={
-              lastCreatedTransaction ? ['unconfirmed', 'pending'].includes(lastCreatedTransaction?.status) : false
-            }
-          >
-            Create
-          </Button>
-        </ButtonGroup>
-      </Stack>
+    <Dialog isOpen={open} onClose={close}>
+      <form onSubmit={submit} action="">
+        <Stack gap={3}>
+          <Text variant="heading2" as="h2">
+            Create new collection
+          </Text>
+          <TextInput label="Name" value={name} maxLength={30} onChange={(e) => setName(e.target.value)} />
+          <TextArea
+            label="Description"
+            value={description}
+            maxLength={1000}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <ButtonGroup>
+            <Button variant="outlined" onClick={close}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={!isConnected || !name}
+              loading={
+                lastCreatedTransaction ? ['unconfirmed', 'pending'].includes(lastCreatedTransaction?.status) : false
+              }
+            >
+              Create
+            </Button>
+          </ButtonGroup>
+        </Stack>
+      </form>
     </Dialog>
   )
 }

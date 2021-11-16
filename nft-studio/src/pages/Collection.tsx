@@ -5,10 +5,11 @@ import { Footer } from '../components/Footer'
 import { NFTCard } from '../components/NFTCard'
 import { PageContainer } from '../components/PageContainer'
 import { RouterLinkButton } from '../components/RouterLinkButton'
+import { useWeb3 } from '../components/Web3Provider'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFTs } from '../utils/useNFTs'
-import { truncateAddress } from '../utils/web3'
+import { isSameAddress, truncateAddress } from '../utils/web3'
 
 export const CollectionPage: React.FC = (props) => {
   return (
@@ -22,7 +23,7 @@ const Collection: React.FC = () => {
   const {
     params: { cid: collectionId },
   } = useRouteMatch<{ cid: string }>()
-
+  const { selectedAccount } = useWeb3()
   const collection = useCollection(collectionId)
   const { data: metadata } = useMetadata<{ name: string }>(collection?.metadataUri)
   const { data: nfts } = useNFTs(collectionId)
@@ -40,11 +41,13 @@ const Collection: React.FC = () => {
             </Text>
           )}
         </Shelf>
-        <Box flex="0 0 auto">
-          <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="outlined">
-            Mint NFT
-          </RouterLinkButton>
-        </Box>
+        {isSameAddress(selectedAccount?.address, collection?.admin) && (
+          <Box flex="0 0 auto">
+            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="outlined">
+              Mint NFT
+            </RouterLinkButton>
+          </Box>
+        )}
       </Shelf>
       {nfts?.length ? (
         <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>

@@ -28,8 +28,7 @@ export const TransactionToasts: React.FC = () => {
       gap={2}
       position="fixed"
       top={[navBarHeightMobile, navBarHeightMobile, navBarHeight]}
-      right={2}
-      mt={2}
+      right={1}
       zIndex={10}
     >
       {transactions

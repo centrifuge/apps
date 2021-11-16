@@ -1,4 +1,5 @@
 import { Box, Button, IconCheck, IconChevronDown, Menu, MenuItem, Text } from '@centrifuge/fabric'
+import { encodeAddress } from '@polkadot/keyring'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
@@ -83,7 +84,7 @@ const AccountsMenu: React.FC = () => {
             {accounts.map((acc) => (
               <MenuItem
                 label={acc.meta.name || truncateAddress(acc.address)}
-                sublabel={acc.meta.name ? acc.address : undefined}
+                sublabel={acc.meta.name ? encodeAddress(acc.address, 2) : undefined}
                 icon={
                   <IdenticonWrapper>
                     <Identicon value={acc.address} size={24} theme="polkadot" />

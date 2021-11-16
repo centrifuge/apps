@@ -1,28 +1,48 @@
 import { Box, Button, IconArrowLeft, IconX, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Link, useHistory } from 'react-router-dom'
-import { ButtonGroup } from '../components/ButtonGroup'
-import { Dialog } from '../components/Dialog'
+import { Link, useHistory, useParams } from 'react-router-dom'
+import { LoadBoundary } from '../components/LoadBoundary'
 import { SplitView } from '../components/SplitView'
+import { TransferDialog } from '../components/TransferDialog'
 import { useWeb3 } from '../components/Web3Provider'
-import { useNFT } from '../utils/useNFT'
+import { parseMetadataUrl } from '../utils/parseMetadataUrl'
+import { useCollection, useCollectionMetadata } from '../utils/useCollections'
+import { useMetadata } from '../utils/useMetadata'
+import { useNFT } from '../utils/useNFTs'
+import { isSameAddress, truncateAddress } from '../utils/web3'
 
 export const NFTPage: React.FC = () => {
+  return (
+    <LoadBoundary>
+      <NFT />
+    </LoadBoundary>
+  )
+}
+
+const NFT: React.FC = () => {
+  const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
+
   const { selectedAccount } = useWeb3()
-  const { data } = useNFT('1')
+  const nft = useNFT(collectionId, nftId)
+  const { data: metadata } = useMetadata<{ name: string; description: string; image: string }>(nft?.metadataUri)
+  const collection = useCollection(collectionId)
+  const { data: collectionMetadata } = useCollectionMetadata(collection?.id)
   const [transferOpen, setTransferOpen] = React.useState(false)
   const history = useHistory()
+
+  const imageUrl = parseMetadataUrl(metadata?.image || '')
 
   return (
     <SplitView
       left={
         <Box display="flex" alignItems="center" justifyContent="center" py={8} height="100%">
-          <Box as="img" maxHeight="80vh" src={data?.metadata.image} />
+          <Box as="img" maxHeight="80vh" src={imageUrl} />
         </Box>
       }
       right={
         <Shelf
-          py={8}
+          px={8}
+          py={9}
           gap={8}
           alignItems="flex-start"
           justifyContent="space-between"
@@ -31,51 +51,61 @@ export const NFTPage: React.FC = () => {
           <Box position="absolute" top={2} right={3}>
             <Button variant="text" icon={IconX} onClick={() => history.goBack()} />
           </Box>
-          {data && (
+          {!nft && (
+            <Stack gap={3}>
+              {collectionMetadata && collection && (
+                <Box display={['none', 'none', 'block']}>
+                  <Link to={`/collection/${collection.id}`}>
+                    <Text fontWeight={600}>
+                      <u>{collectionMetadata.name}</u>
+                    </Text>
+                  </Link>
+                </Box>
+              )}
+              <Text variant="headingLarge" as="h1">
+                NFT Not Found
+              </Text>
+            </Stack>
+          )}
+          {nft && imageUrl && metadata && collection && collectionMetadata && (
             <>
               <Stack gap={3}>
                 <Box display={['none', 'none', 'block']}>
-                  <Link to={`/collection/${data.collection.id}`}>
+                  <Link to={`/collection/${collection.id}`}>
                     <Text fontWeight={600}>
-                      <u>{data.collection.name}</u>
+                      <u>{collectionMetadata.name}</u>
                     </Text>
                   </Link>
                 </Box>
                 <Stack>
                   <Text variant="headingLarge" as="h1">
-                    {data.metadata.name}
+                    {metadata.name}
                   </Text>
                   <Text variant="heading3" color="textSecondary">
-                    by {data.creator}
+                    by {truncateAddress(collection.admin)}
                   </Text>
                 </Stack>
               </Stack>
               <Stack gap={3}>
-                <Stack>
+                {/* <Stack>
                   <Text variant="label1">Creation date</Text>
                   <Text variant="heading3">
-                    {data &&
-                      new Date(data.createdAt).toLocaleDateString('en', {
+                    {metadata.createdAt &&
+                      new Date(metadata.createdAt).toLocaleDateString('en', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
                       })}
                   </Text>
-                </Stack>
+                </Stack> */}
                 <Stack>
                   <Text variant="label1">Source</Text>
-                  <Text
-                    as="a"
-                    href={data.metadata.image}
-                    target="_blank"
-                    variant="heading3"
-                    style={{ wordBreak: 'break-all' }}
-                  >
-                    <u>{data.metadata.image}</u>
+                  <Text as="a" href={imageUrl} target="_blank" variant="heading3" style={{ wordBreak: 'break-all' }}>
+                    <u>{imageUrl}</u>
                   </Text>
                 </Stack>
               </Stack>
-              {(data.owner === selectedAccount?.address || true) && (
+              {isSameAddress(nft.owner, selectedAccount?.address) && (
                 <div>
                   <Button
                     onClick={() => setTransferOpen(true)}
@@ -84,7 +114,12 @@ export const NFTPage: React.FC = () => {
                   >
                     Transfer
                   </Button>
-                  <TransferDialog open={transferOpen} onClose={() => setTransferOpen(false)} />
+                  <TransferDialog
+                    collectionId={collectionId}
+                    nftId={nftId}
+                    open={transferOpen}
+                    onClose={() => setTransferOpen(false)}
+                  />
                 </div>
               )}
             </>
@@ -92,26 +127,5 @@ export const NFTPage: React.FC = () => {
         </Shelf>
       }
     />
-  )
-}
-
-const TransferDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
-  const [address, setAddress] = React.useState('')
-  return (
-    <Dialog isOpen={open} onClose={onClose}>
-      <Stack gap={3}>
-        <Text variant="heading2" as="h2">
-          Transfer NFT
-        </Text>
-        <Text variant="body2">You’re about to transfer your NFT to another user</Text>
-        <input value={address} onChange={(e) => setAddress(e.target.value)} />
-        <ButtonGroup>
-          <Button variant="outlined" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button disabled={!address}>Transfer</Button>
-        </ButtonGroup>
-      </Stack>
-    </Dialog>
   )
 }
