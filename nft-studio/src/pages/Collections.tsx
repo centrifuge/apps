@@ -22,12 +22,12 @@ const Collections: React.FC = () => {
   const { data: collections } = useCollections()
 
   const userCollections = React.useMemo(
-    () => collections?.filter((c) => isSameAddress(c.admin, selectedAccount?.address)),
+    () => collections?.filter((c) => isSameAddress(c.owner, selectedAccount?.address)),
     [collections, selectedAccount?.address]
   )
 
   const otherCollections = React.useMemo(
-    () => collections?.filter((c) => !isSameAddress(c.admin, selectedAccount?.address)),
+    () => collections?.filter((c) => !isSameAddress(c.owner, selectedAccount?.address)),
     [collections, selectedAccount?.address]
   )
 

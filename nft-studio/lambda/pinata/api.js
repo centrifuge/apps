@@ -1,4 +1,5 @@
 const axios = require('axios')
+const FormData = require('form-data')
 
 const PINATA_BASE_URL = 'https://api.pinata.cloud'
 const PINATA_AUTH_HEADERS = {

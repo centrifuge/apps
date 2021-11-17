@@ -1,8 +1,9 @@
-import { Button, Stack, Text } from '@centrifuge/fabric'
+import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { ApiPromise } from '@polkadot/api'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { useQueryClient } from 'react-query'
+import { useBalance } from '../utils/useBalance'
 import { useCreateTransaction } from '../utils/useCreateTransaction'
 import { isSameAddress } from '../utils/web3'
 import { ButtonGroup } from './ButtonGroup'
@@ -23,10 +24,12 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
   const queryClient = useQueryClient()
   const { selectedAccount } = useWeb3()
   const { createTransaction, lastCreatedTransaction, reset: resetLastTransaction } = useCreateTransaction()
+  const { data: balance } = useBalance()
 
   const isConnected = !!selectedAccount?.address
 
-  function submit() {
+  function submit(e: React.FormEvent) {
+    e.preventDefault()
     if (!isConnected || !!error) return
 
     createTransaction('Transfer NFT', (api: ApiPromise) => api.tx.uniques.transfer(collectionId, nftId, address))
@@ -61,9 +64,13 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
 
   const error = getError()
 
+  const balanceLow = !balance || balance < 1 // TODO: replace with transaction fee estimate
+
+  const disabled = !!error || balanceLow
+
   return (
     <Dialog isOpen={open} onClose={close}>
-      <form onSubmit={submit} action="">
+      <form onSubmit={submit}>
         <Stack gap={3}>
           <Text variant="heading2" as="h2">
             Transfer NFT
@@ -82,20 +89,27 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
               </Text>
             )}
           </Stack>
-          <ButtonGroup>
-            <Button type="reset" variant="outlined" onClick={close}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={!!error}
-              loading={
-                lastCreatedTransaction ? ['unconfirmed', 'pending'].includes(lastCreatedTransaction?.status) : false
-              }
-            >
-              Transfer
-            </Button>
-          </ButtonGroup>
+          <Shelf justifyContent="space-between">
+            {balanceLow && (
+              <Text variant="label1" color="criticalForeground">
+                Your balance is too low ({(balance || 0).toFixed(2)} AIR)
+              </Text>
+            )}
+            <ButtonGroup ml="auto">
+              <Button variant="outlined" onClick={close}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={disabled}
+                loading={
+                  lastCreatedTransaction ? ['unconfirmed', 'pending'].includes(lastCreatedTransaction?.status) : false
+                }
+              >
+                Transfer
+              </Button>
+            </ButtonGroup>
+          </Shelf>
         </Stack>
       </form>
     </Dialog>

@@ -1,9 +1,9 @@
 import * as React from 'react'
 
-export type TransactionStatus = 'unconfirmed' | 'pending' | 'succeeded' | 'failed'
+export type TransactionStatus = 'creating' | 'unconfirmed' | 'pending' | 'succeeded' | 'failed'
 export type Transaction = {
   id: string
-  description: string
+  title: string
   status: TransactionStatus
   hash?: string
   result?: any
@@ -14,7 +14,7 @@ export type Transaction = {
 type TransactionsContextType = {
   transactions: Transaction[]
   addTransaction: (tx: Transaction) => void
-  updateTransaction: (id: string, update: Partial<Transaction>) => void
+  updateTransaction: (id: string, update: Partial<Transaction> | ((prev: Transaction) => Partial<Transaction>)) => void
 }
 
 const TransactionsContext = React.createContext<TransactionsContextType>(null as any)
@@ -28,9 +28,16 @@ export const TransactionProvider: React.FC = ({ children }) => {
     setTransactions((prev) => [...prev, tx])
   }, [])
 
-  const updateTransaction = React.useCallback((id: string, update: Partial<Transaction>) => {
-    setTransactions((prev) => prev.map((tx) => (tx.id === id ? { ...tx, dismissed: false, ...update } : tx)))
-  }, [])
+  const updateTransaction = React.useCallback(
+    (id: string, update: Partial<Transaction> | ((prev: Transaction) => Partial<Transaction>)) => {
+      setTransactions((prev) =>
+        prev.map((tx) =>
+          tx.id === id ? { ...tx, dismissed: false, ...(typeof update === 'function' ? update(tx) : update) } : tx
+        )
+      )
+    },
+    []
+  )
 
   const ctx: TransactionsContextType = React.useMemo(
     () => ({

@@ -11,6 +11,7 @@ import { CollectionsPage } from '../pages/Collections'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
 import { GlobalStyle } from './GlobalStyle'
+import { LoadBoundary } from './LoadBoundary'
 import { NavBar } from './NavBar'
 import { TransactionProvider } from './TransactionsProvider'
 import { TransactionToasts } from './TransactionToasts'
@@ -56,20 +57,22 @@ export const Root: React.FC = () => {
               <TransactionToasts />
               <Router>
                 <NavBar title="NFT Studio" />
-                <Switch>
-                  <Route path="/collection/:cid/object/mint">
-                    <MintNFTPage />
-                  </Route>
-                  <Route path="/collection/:cid/object/:nftid">
-                    <NFTPage />
-                  </Route>
-                  <Route path="/collection/:cid">
-                    <CollectionPage />
-                  </Route>
-                  <Route path="/">
-                    <CollectionsPage />
-                  </Route>
-                </Switch>
+                <LoadBoundary>
+                  <Switch>
+                    <Route path="/collection/:cid/object/mint">
+                      <MintNFTPage />
+                    </Route>
+                    <Route path="/collection/:cid/object/:nftid">
+                      <NFTPage />
+                    </Route>
+                    <Route path="/collection/:cid">
+                      <CollectionPage />
+                    </Route>
+                    <Route path="/">
+                      <CollectionsPage />
+                    </Route>
+                  </Switch>
+                </LoadBoundary>
               </Router>
             </TransactionProvider>
           </Web3Provider>

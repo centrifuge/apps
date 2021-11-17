@@ -3,8 +3,8 @@ import { addressEq, encodeAddress } from '@polkadot/util-crypto'
 
 export function truncateAddress(address: string) {
   const encodedAddress = encodeAddress(address, 2)
-  const first8 = encodedAddress.slice(0, 8)
-  const last3 = encodedAddress.slice(-3)
+  const first8 = encodedAddress.slice(0, 6)
+  const last3 = encodedAddress.slice(-6)
 
   return `${first8}...${last3}`
 }
@@ -15,24 +15,35 @@ export function isSameAddress(a?: string | Uint8Array, b?: string | Uint8Array) 
   return addressEq(a, b)
 }
 
-// const WSS_RPC_URL = 'wss://fullnode.centrifuge.io'
-const WSS_RPC_URL = 'ws://127.0.0.1:9954'
-const wsProvider = new WsProvider(WSS_RPC_URL)
-
-let apiPromise: Promise<ApiPromise>
-let api: ApiPromise
-
-export async function initPolkadotApi() {
-  if (!apiPromise) {
-    apiPromise = ApiPromise.create({
-      provider: wsProvider,
-      types: {
-        ClassId: 'u64',
-        InstanceId: 'u128',
-      },
-    })
-    apiPromise.then((obj) => (api = obj))
-    return apiPromise
+const apis: {
+  [key in 'kusama' | 'altair']: {
+    api?: ApiPromise
+    apiPromise?: Promise<ApiPromise>
+    provider: WsProvider
+    types?: any
   }
-  return api || apiPromise
+} = {
+  altair: {
+    provider: new WsProvider(process.env.REACT_APP_ALTAIR_WSS_URL),
+    types: {
+      ClassId: 'u64',
+      InstanceId: 'u128',
+    },
+  },
+  kusama: {
+    provider: new WsProvider(process.env.REACT_APP_KUSAMA_WSS_URL),
+  },
+}
+
+export async function initPolkadotApi(network: keyof typeof apis = 'altair') {
+  const obj = apis[network]
+  if (!obj.apiPromise) {
+    obj.apiPromise = ApiPromise.create({
+      provider: obj.provider,
+      types: obj.types,
+    })
+    obj.apiPromise.then((prom) => (obj.api = prom))
+    return obj.apiPromise
+  }
+  return obj.api || obj.apiPromise
 }

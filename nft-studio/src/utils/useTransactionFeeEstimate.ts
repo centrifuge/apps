@@ -14,7 +14,7 @@ export function useTransactionFeeEstimate(callback: (api: ApiPromise) => Submitt
       const api = await initPolkadotApi()
       const submittable = callback(api)
       const feeResponse = await submittable.paymentInfo(selectedAccount!.address)
-      return (feeResponse.partialFee.toNumber() / 10 ** 12).toString()
+      return Number(feeResponse.partialFee.toString()) / 10 ** (api.registry.chainDecimals as any)
     },
     {
       enabled: !!selectedAccount,

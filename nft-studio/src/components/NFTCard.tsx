@@ -2,9 +2,10 @@ import { Box, Card, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
+import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { NFT } from '../utils/useNFTs'
-import { truncateAddress } from '../utils/web3'
+import { Identity } from './Identity'
 
 type Props = {
   nft: NFT
@@ -12,6 +13,8 @@ type Props = {
 
 export const NFTCard: React.FC<Props> = ({ nft }) => {
   const { data: metadata } = useMetadata<{ name: string; description: string; image: string }>(nft?.metadataUri)
+  const collection = useCollection(nft.collectionId)
+
   return (
     <Card as={Link} to={`/collection/${nft.collectionId}/object/${nft.id}`} variant="interactive" pb={[3, 4]}>
       <Stack gap={[2, 3]}>
@@ -36,9 +39,13 @@ export const NFTCard: React.FC<Props> = ({ nft }) => {
         </Box>
         <Box px={[2, 3]}>
           <Text as="h2" variant="heading2">
-            {metadata?.name ?? 'Test NFT'}
+            {metadata?.name ?? 'Unnamed NFT'}
           </Text>
-          <Text variant="label1">by {truncateAddress(nft.owner)}</Text>
+          {collection?.owner && (
+            <Text variant="label1">
+              by <Identity address={collection.owner} />
+            </Text>
+          )}
         </Box>
       </Stack>
     </Card>
