@@ -12,7 +12,7 @@ import { useMetadata } from '../utils/useMetadata'
 import { useNFTs } from '../utils/useNFTs'
 import { isSameAddress } from '../utils/web3'
 
-export const CollectionPage: React.FC = (props) => {
+export const CollectionPage: React.FC = () => {
   return (
     <PageContainer>
       <Collection />

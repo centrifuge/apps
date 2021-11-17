@@ -3,10 +3,10 @@ import { addressEq, encodeAddress } from '@polkadot/util-crypto'
 
 export function truncateAddress(address: string) {
   const encodedAddress = encodeAddress(address, 2)
-  const first8 = encodedAddress.slice(0, 6)
-  const last3 = encodedAddress.slice(-6)
+  const first = encodedAddress.slice(0, 6)
+  const last = encodedAddress.slice(-6)
 
-  return `${first8}...${last3}`
+  return `${first}...${last}`
 }
 
 export function isSameAddress(a?: string | Uint8Array, b?: string | Uint8Array) {
