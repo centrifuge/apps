@@ -1,6 +1,7 @@
 import { Text, TextProps } from '@centrifuge/fabric'
 import { encodeAddress } from '@polkadot/keyring'
 import * as React from 'react'
+import { copyToClipboard } from '../utils/copyToClipboard'
 import { useIdentity } from '../utils/useIdentity'
 import { truncateAddress } from '../utils/web3'
 
@@ -22,18 +23,4 @@ export const Identity: React.FC<Props> = ({ address, clickToCopy, ...textProps }
       {identity?.display || truncateAddress(address)}
     </Text>
   )
-}
-
-function copyToClipboard(value: string) {
-  if (window.navigator && window.navigator.clipboard) {
-    window.navigator.clipboard.writeText(value)
-    return
-  }
-
-  const textField = document.createElement('textarea')
-  textField.innerText = value
-  document.body.appendChild(textField)
-  textField.select()
-  document.execCommand('copy')
-  textField.remove()
 }
