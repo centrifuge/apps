@@ -13,6 +13,7 @@ export function useBalance() {
     },
     {
       enabled: !!selectedAccount,
+      staleTime: 60 * 1000,
     }
   )
 

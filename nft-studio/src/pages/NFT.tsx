@@ -1,7 +1,7 @@
 import { Box, Button, IconArrowLeft, IconX, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link, useHistory, useParams } from 'react-router-dom'
-import { LoadBoundary } from '../components/LoadBoundary'
+import { Identity } from '../components/Identity'
 import { SplitView } from '../components/SplitView'
 import { TransferDialog } from '../components/TransferDialog'
 import { useWeb3 } from '../components/Web3Provider'
@@ -9,17 +9,9 @@ import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFT } from '../utils/useNFTs'
-import { isSameAddress, truncateAddress } from '../utils/web3'
+import { isSameAddress } from '../utils/web3'
 
 export const NFTPage: React.FC = () => {
-  return (
-    <LoadBoundary>
-      <NFT />
-    </LoadBoundary>
-  )
-}
-
-const NFT: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
 
   const { selectedAccount } = useWeb3()
@@ -41,9 +33,9 @@ const NFT: React.FC = () => {
       }
       right={
         <Shelf
-          px={8}
+          px={[2, 4, 8]}
           py={9}
-          gap={8}
+          gap={[4, 4, 8]}
           alignItems="flex-start"
           justifyContent="space-between"
           flexDirection={['column', 'row', 'column']}
@@ -82,7 +74,7 @@ const NFT: React.FC = () => {
                     {metadata.name}
                   </Text>
                   <Text variant="heading3" color="textSecondary">
-                    by {truncateAddress(collection.admin)}
+                    by <Identity address={collection.owner} clickToCopy />
                   </Text>
                 </Stack>
               </Stack>

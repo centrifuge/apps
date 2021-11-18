@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { Collection, useCollectionNFTsPreview } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
-import { truncateAddress } from '../utils/web3'
+import { Identity } from './Identity'
 
 type Props = {
   collection: Collection
@@ -23,7 +23,9 @@ export const CollectionCard: React.FC<Props> = ({ collection }) => {
             <Text as="h2" variant="heading2">
               {metadata?.name ?? 'Unnamed collection'}
             </Text>
-            <Text variant="label1">by {truncateAddress(admin)}</Text>
+            <Text variant="label1">
+              by <Identity address={admin} />
+            </Text>
           </div>
           <Text>{metadata?.description}</Text>
         </Stack>

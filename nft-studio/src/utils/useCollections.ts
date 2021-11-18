@@ -5,8 +5,8 @@ import { useMetadata } from './useMetadata'
 import { initPolkadotApi } from './web3'
 
 type CollectionValue = {
-  // owner: string
-  // issuer: string
+  owner: string
+  issuer: string
   admin: string
   // freezer: string
   // totalDeposit: u128
@@ -46,6 +46,8 @@ export function useCollections() {
         const collection: Collection = {
           id,
           admin: collectionValue.admin,
+          owner: collectionValue.owner,
+          issuer: collectionValue.issuer,
           instances: collectionValue.instances,
           metadataUri: metasObj[id]?.data,
         }

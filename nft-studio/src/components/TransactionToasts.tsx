@@ -4,6 +4,7 @@ import { useTheme } from 'styled-components'
 import { useTransactions } from './TransactionsProvider'
 
 const toastStatus: { [key: string]: ToastStatus } = {
+  creating: 'pending',
   unconfirmed: 'pending',
   pending: 'pending',
   succeeded: 'ok',
@@ -11,6 +12,7 @@ const toastStatus: { [key: string]: ToastStatus } = {
 }
 
 const toastSublabel = {
+  creating: 'Creating transaction',
   unconfirmed: 'Signing transaction',
   pending: 'Transaction pending',
   succeeded: 'Transaction successful',
@@ -35,7 +37,7 @@ export const TransactionToasts: React.FC = () => {
         .filter((tx) => !tx.dismissed)
         .map((tx) => (
           <Toast
-            label={tx.description}
+            label={tx.title}
             sublabel={toastSublabel[tx.status]}
             status={toastStatus[tx.status]}
             onDismiss={() => updateTransaction(tx.id, { dismissed: true })}
