@@ -20,6 +20,9 @@ import { isSameAddress, truncateAddress } from '../utils/web3'
 
 const DEFAULT_NFT_NAME = 'Untitled NFT'
 
+// TODO: replace with better fee estimate
+const MINT_FEE_ESTIMATE = 2
+
 export const MintNFTPage: React.FC = () => {
   const { cid: collectionId } = useParams<{ cid: string }>()
   const queryClient = useQueryClient()
@@ -70,7 +73,7 @@ export const MintNFTPage: React.FC = () => {
     ? ['creating', 'unconfirmed', 'pending'].includes(lastCreatedTransaction?.status)
     : false
 
-  const balanceLow = !balance || balance < 2
+  const balanceLow = !balance || balance < MINT_FEE_ESTIMATE
   const canMint = isSameAddress(selectedAccount?.address, collection?.owner)
   const disabled = !isFormValid || balanceLow || !canMint
 

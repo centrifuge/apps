@@ -11,6 +11,9 @@ import { useCreateTransaction } from '../utils/useCreateTransaction'
 import { TextArea } from './TextArea'
 import { TextInput } from './TextInput'
 
+// TODO: replace with better fee estimate
+const CREATE_FEE_ESTIMATE = 2
+
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const queryClient = useQueryClient()
   const { selectedAccount } = useWeb3()
@@ -54,7 +57,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     }
   }, [queryClient, lastCreatedTransaction?.status])
 
-  const balanceLow = !balance || balance < 2
+  const balanceLow = !balance || balance < CREATE_FEE_ESTIMATE
 
   const disabled = !isConnected || !name || balanceLow
 

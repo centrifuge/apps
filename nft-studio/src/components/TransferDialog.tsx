@@ -17,6 +17,8 @@ type Props = {
   collectionId: string
   nftId: string
 }
+// TODO: replace with better fee estimate
+const TRANSFER_FEE_ESTIMATE = 1
 
 export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const [address, setAddress] = React.useState('')
@@ -64,7 +66,7 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
 
   const error = getError()
 
-  const balanceLow = !balance || balance < 1 // TODO: replace with transaction fee estimate
+  const balanceLow = !balance || balance < TRANSFER_FEE_ESTIMATE
 
   const disabled = !!error || balanceLow
 
