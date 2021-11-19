@@ -6,6 +6,7 @@ import { Identity } from '../components/Identity'
 import { NFTCard } from '../components/NFTCard'
 import { PageContainer } from '../components/PageContainer'
 import { RouterLinkButton } from '../components/RouterLinkButton'
+import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
@@ -20,6 +21,8 @@ export const CollectionPage: React.FC = () => {
   )
 }
 
+const COUNT_PER_PAGE = 16
+
 const Collection: React.FC = () => {
   const {
     params: { cid: collectionId },
@@ -28,6 +31,7 @@ const Collection: React.FC = () => {
   const collection = useCollection(collectionId)
   const { data: metadata } = useMetadata<{ name: string }>(collection?.metadataUri)
   const { data: nfts } = useNFTs(collectionId)
+  const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
 
   return (
     <Stack gap={8} flex={1}>
@@ -51,11 +55,16 @@ const Collection: React.FC = () => {
         )}
       </Shelf>
       {nfts?.length ? (
-        <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>
-          {nfts?.map((nft, i) => (
-            <NFTCard nft={nft} key={i} />
-          ))}
-        </Grid>
+        <>
+          <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>
+            {nfts.slice(0, shownCount).map((nft, i) => (
+              <NFTCard nft={nft} key={i} />
+            ))}
+          </Grid>
+          {nfts.length > shownCount && (
+            <VisibilityChecker marginTop={400} onEnter={() => setShownCount((count) => count + COUNT_PER_PAGE)} />
+          )}
+        </>
       ) : (
         <Shelf justifyContent="center" mt="15vh" textAlign="center">
           <Text variant="heading2" color="textSecondary">
