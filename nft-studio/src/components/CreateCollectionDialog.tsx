@@ -4,6 +4,7 @@ import { useQueryClient } from 'react-query'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { Dialog } from '../components/Dialog'
 import { useWeb3 } from '../components/Web3Provider'
+import { collectionMetadataSchema } from '../schemas'
 import { createCollectionMetadata } from '../utils/createCollectionMetadata'
 import { getAvailableClassId } from '../utils/getAvailableClassId'
 import { useBalance } from '../utils/useBalance'
@@ -28,16 +29,17 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     e.preventDefault()
     if (!isConnected || !name || !description) return
 
-    const classId = await getAvailableClassId()
-    const res = await createCollectionMetadata(name, description)
-
     createTransaction(
       'Create collection',
-      (api) =>
-        api.tx.utility.batchAll([
+      async (api) => {
+        const classId = await getAvailableClassId()
+        const res = await createCollectionMetadata(name, description)
+
+        return api.tx.utility.batchAll([
           api.tx.uniques.create(classId, selectedAccount!.address),
           api.tx.uniques.setClassMetadata(classId, res.metadataURI, true),
-        ]),
+        ])
+      },
       () => {
         queryClient.invalidateQueries('collections')
         queryClient.invalidateQueries('balance')
@@ -68,11 +70,16 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
           <Text variant="heading2" as="h2">
             Create new collection
           </Text>
-          <TextInput label="Name" value={name} maxLength={30} onChange={(e) => setName(e.target.value)} />
+          <TextInput
+            label="Name"
+            value={name}
+            maxLength={collectionMetadataSchema.name.maxLength}
+            onChange={(e) => setName(e.target.value)}
+          />
           <TextArea
             label="Description"
             value={description}
-            maxLength={1000}
+            maxLength={collectionMetadataSchema.description.maxLength}
             onChange={(e) => setDescription(e.target.value)}
           />
           <Shelf justifyContent="space-between">

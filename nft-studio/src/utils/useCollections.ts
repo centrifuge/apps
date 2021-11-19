@@ -1,6 +1,7 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import * as React from 'react'
 import { useQuery } from 'react-query'
+import { collectionMetadataSchema } from '../schemas'
 import { useMetadata } from './useMetadata'
 import { initPolkadotApi } from './web3'
 
@@ -53,7 +54,6 @@ export function useCollections() {
         }
         return collection
       })
-      console.log('collections', collections, metas, mapped)
       return mapped
     },
     {
@@ -71,7 +71,7 @@ export function useCollection(id?: string) {
 
 export function useCollectionMetadata(id?: string) {
   const collection = useCollection(id)
-  return useMetadata<{ name: string; description: string }>(collection?.metadataUri)
+  return useMetadata(collection?.metadataUri, collectionMetadataSchema)
 }
 
 export function useCollectionNFTsPreview(id: string) {

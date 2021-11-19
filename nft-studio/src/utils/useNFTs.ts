@@ -45,7 +45,6 @@ export function useNFTs(collectionId: string) {
         }
         return nft
       })
-      console.log('nfts', nfts, metas, mapped)
       return mapped
     },
     {
@@ -61,7 +60,7 @@ export function useNFT(collectionId: string, nftId: string) {
   return React.useMemo(() => data?.find((c) => c.id === nftId), [data, nftId])
 }
 
-export function useAccountNfts(address?: string) {
+export function useAccountNfts(address?: string, suspense = true) {
   const query = useQuery(
     ['accountNfts', address],
     async () => {
@@ -88,11 +87,10 @@ export function useAccountNfts(address?: string) {
         }
         return nft
       })
-      console.log('accnfts', keys, metas, nfts, mapped)
       return mapped
     },
     {
-      suspense: true,
+      suspense,
       enabled: !!address,
     }
   )

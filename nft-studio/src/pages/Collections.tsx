@@ -25,7 +25,7 @@ const Collections: React.FC = () => {
   const { selectedAccount } = useWeb3()
   const { data: collections } = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
-  const { data: accountNfts } = useAccountNfts(selectedAccount?.address)
+  const { data: accountNfts } = useAccountNfts(selectedAccount?.address, false)
 
   const userCollections = React.useMemo(
     () => collections?.filter((c) => isSameAddress(c.owner, selectedAccount?.address)),

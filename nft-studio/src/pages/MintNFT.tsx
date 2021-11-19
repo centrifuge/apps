@@ -10,6 +10,7 @@ import { SplitView } from '../components/SplitView'
 import { TextArea } from '../components/TextArea'
 import { TextInput } from '../components/TextInput'
 import { useWeb3 } from '../components/Web3Provider'
+import { nftMetadataSchema } from '../schemas'
 import { createNFTMetadata } from '../utils/createNFTMetadata'
 import { getAvailableAssetId } from '../utils/getAvailableClassId'
 import { getFileDataURI } from '../utils/getFileDataURI'
@@ -46,12 +47,10 @@ export const MintNFTPage: React.FC = () => {
       return
     }
 
-    let assetId: number
-
     createTransaction(
       'Mint NFT',
       async (api) => {
-        assetId = await getAvailableAssetId(collectionId)
+        const assetId = await getAvailableAssetId(collectionId)
         const res = await createNFTMetadata({
           name: nftName,
           description: nftDescription,
@@ -131,6 +130,7 @@ export const MintNFTPage: React.FC = () => {
                   label="Name"
                   placeholder={DEFAULT_NFT_NAME}
                   value={nftName}
+                  maxLength={nftMetadataSchema.name.maxLength}
                   onChange={({ target }) => {
                     setNftName((target as HTMLInputElement).value)
                   }}
@@ -139,6 +139,7 @@ export const MintNFTPage: React.FC = () => {
               <TextArea
                 label="Description"
                 value={nftDescription}
+                maxLength={nftMetadataSchema.description.maxLength}
                 onChange={({ target }) => {
                   setNftDescription((target as HTMLTextAreaElement).value)
                 }}

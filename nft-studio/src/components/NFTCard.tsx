@@ -1,6 +1,7 @@
 import { Box, Card, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
+import { nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
@@ -12,7 +13,7 @@ type Props = {
 }
 
 export const NFTCard: React.FC<Props> = ({ nft }) => {
-  const { data: metadata } = useMetadata<{ name: string; description: string; image: string }>(nft?.metadataUri)
+  const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(nft.collectionId)
 
   return (
@@ -38,7 +39,7 @@ export const NFTCard: React.FC<Props> = ({ nft }) => {
           )}
         </Box>
         <Box px={[2, 3]}>
-          <Text as="h2" variant="heading2">
+          <Text as="h2" variant="heading2" style={{ wordBreak: 'break-word' }}>
             {metadata?.name ?? 'Unnamed NFT'}
           </Text>
           {collection?.owner && (
