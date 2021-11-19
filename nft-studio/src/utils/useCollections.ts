@@ -90,7 +90,7 @@ export function useCollectionNFTsPreview(id: string) {
         const metaValue = value.toHuman() as any
         const meta = {
           id,
-          metadataUri: metaValue.data,
+          metadataUri: metaValue.data as string | undefined,
         }
         return meta
       })

@@ -7,41 +7,47 @@ import { Transaction, useTransaction, useTransactions } from '../components/Tran
 import { useWeb3 } from '../components/Web3Provider'
 import { initPolkadotApi } from './web3'
 
-type TransactionArgs = [
-  string,
-  (api: ApiPromise) => SubmittableExtrinsic<'promise'> | Promise<SubmittableExtrinsic<'promise'>>
-]
+type TransactionCallback = (
+  api: ApiPromise
+) => SubmittableExtrinsic<'promise'> | Promise<SubmittableExtrinsic<'promise'>>
 
 export function useCreateTransaction() {
   const { addTransaction, updateTransaction } = useTransactions()
   const { selectedAccount, connect } = useWeb3()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
   const lastCreatedTransaction = useTransaction(lastId)
-  const pendingTransaction = React.useRef<{ id: string; args: TransactionArgs }>()
+  const pendingTransaction = React.useRef<{ id: string; args: [TransactionCallback, (() => void) | undefined] }>()
 
   const doTransaction = React.useCallback(
-    async (selectedAccount: InjectedAccountWithMeta, id: string, ...args: TransactionArgs) => {
+    async (
+      selectedAccount: InjectedAccountWithMeta,
+      id: string,
+      createCallback: TransactionCallback,
+      finalizedCallback?: () => void
+    ) => {
       try {
-        const [, callback] = args
-
         const api = await initPolkadotApi()
         const injector = await web3FromAddress(selectedAccount?.address)
-        const submittable = await callback(api)
+        const submittable = await createCallback(api)
 
         updateTransaction(id, { status: 'unconfirmed' })
 
-        await submittable.signAndSend(selectedAccount.address, { signer: injector.signer }, (result) => {
-          const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
+        return new Promise<void>((resolve, reject) => {
+          submittable.signAndSend(selectedAccount.address, { signer: injector.signer }, (result) => {
+            const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
 
-          if (result.status.isFinalized) {
-            updateTransaction(id, (prev) => (prev.status === 'failed' ? {} : { status: 'succeeded' }))
-          } else if (result.dispatchError || errors.length) {
-            console.error(result.dispatchError || errors)
-            updateTransaction(id, { status: 'failed', failedReason: 'Transaction failed' })
-          } else {
-            updateTransaction(id, { status: 'pending', hash: submittable.hash.toHex() })
-          }
-        })
+            if (result.status.isFinalized) {
+              updateTransaction(id, (prev) => (prev.status === 'failed' ? {} : { status: 'succeeded' }))
+              resolve()
+            } else if (result.dispatchError || errors.length) {
+              console.error(result.dispatchError || errors)
+              updateTransaction(id, { status: 'failed', failedReason: 'Transaction failed' })
+              reject()
+            } else {
+              updateTransaction(id, { status: 'pending', hash: submittable.hash.toHex() })
+            }
+          })
+        }).then(finalizedCallback)
       } catch (e) {
         console.error(e)
         updateTransaction(id, { status: 'failed', failedReason: (e as any).message })
@@ -51,7 +57,7 @@ export function useCreateTransaction() {
   )
 
   const createTransaction = React.useCallback(
-    (title: TransactionArgs[0], callback: TransactionArgs[1]) => {
+    (title: string, createCallback: TransactionCallback, finalizedCallback?: () => void) => {
       const id = Math.random().toString(36).substr(2)
       const tx: Transaction = {
         id,
@@ -62,12 +68,12 @@ export function useCreateTransaction() {
       setLastId(id)
 
       if (!selectedAccount) {
-        pendingTransaction.current = { id, args: [title, callback] }
+        pendingTransaction.current = { id, args: [createCallback, finalizedCallback] }
         connect().catch((e) => {
           updateTransaction(id, { status: 'failed', failedReason: e.message })
         })
       } else {
-        doTransaction(selectedAccount, id, title, callback)
+        doTransaction(selectedAccount, id, createCallback, finalizedCallback)
       }
       return id
     },

@@ -1,4 +1,4 @@
-import { Stack, Toast, ToastStatus } from '@centrifuge/fabric'
+import { AnchorButton, IconExternalLink, Stack, Toast, ToastStatus } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { useTransactions } from './TransactionsProvider'
@@ -41,6 +41,15 @@ export const TransactionToasts: React.FC = () => {
             sublabel={toastSublabel[tx.status]}
             status={toastStatus[tx.status]}
             onDismiss={() => updateTransaction(tx.id, { dismissed: true })}
+            action={
+              tx.hash ? (
+                <AnchorButton
+                  variant="text"
+                  href={`${process.env.REACT_APP_SUBSCAN_URL}${tx.hash}`}
+                  icon={IconExternalLink}
+                />
+              ) : undefined
+            }
             key={tx.id}
           />
         ))}

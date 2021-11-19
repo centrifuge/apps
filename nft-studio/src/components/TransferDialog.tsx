@@ -34,7 +34,16 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
     e.preventDefault()
     if (!isConnected || !!error) return
 
-    createTransaction('Transfer NFT', (api: ApiPromise) => api.tx.uniques.transfer(collectionId, nftId, address))
+    createTransaction(
+      'Transfer NFT',
+      (api: ApiPromise) => api.tx.uniques.transfer(collectionId, nftId, address),
+      () => {
+        queryClient.invalidateQueries(['nfts', collectionId])
+        queryClient.invalidateQueries('balance')
+        queryClient.invalidateQueries(['accountNfts', selectedAccount?.address])
+        close()
+      }
+    )
   }
 
   function reset() {
@@ -47,15 +56,6 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
     reset()
     onClose()
   }
-
-  React.useEffect(() => {
-    if (lastCreatedTransaction?.status === 'succeeded') {
-      queryClient.invalidateQueries(['nfts', collectionId])
-      queryClient.invalidateQueries('balance')
-      reset()
-    }
-    // eslint-disable-next-line
-  }, [queryClient, lastCreatedTransaction?.status, collectionId])
 
   function getError() {
     if (!address) return 'No address provided'
