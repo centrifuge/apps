@@ -7,6 +7,7 @@ import { PageContainer } from '../components/PageContainer'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
 import { useCollections } from '../utils/useCollections'
+import { useAccountNfts } from '../utils/useNFTs'
 import { isSameAddress } from '../utils/web3'
 
 export const CollectionsPage: React.FC = () => {
@@ -24,6 +25,7 @@ const Collections: React.FC = () => {
   const { selectedAccount } = useWeb3()
   const { data: collections } = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
+  const { data: accountNfts } = useAccountNfts(selectedAccount?.address)
 
   const userCollections = React.useMemo(
     () => collections?.filter((c) => isSameAddress(c.owner, selectedAccount?.address)),
@@ -47,13 +49,18 @@ const Collections: React.FC = () => {
               Create Collection
             </Button>
           </Shelf>
-          {userCollections?.length ? (
+          {userCollections?.length || accountNfts?.length ? (
             <LayoutGrid>
               {userCollections?.map((col) => (
                 <LayoutGridItem span={4} key={col.id}>
                   <CollectionCard collection={col} />
                 </LayoutGridItem>
               ))}
+              {accountNfts?.length && (
+                <LayoutGridItem span={4}>
+                  <CollectionCardInner title="My owned NFTs" to="/account" previewNFTs={accountNfts} />
+                </LayoutGridItem>
+              )}
             </LayoutGrid>
           ) : (
             <Shelf justifyContent="center" textAlign="center">

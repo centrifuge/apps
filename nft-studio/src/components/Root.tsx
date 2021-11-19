@@ -6,6 +6,7 @@ import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import { DefaultTheme, ThemeProvider } from 'styled-components'
+import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
 import { MintNFTPage } from '../pages/MintNFT'
@@ -67,6 +68,9 @@ export const Root: React.FC = () => {
                     </Route>
                     <Route path="/collection/:cid">
                       <CollectionPage />
+                    </Route>
+                    <Route path="/account">
+                      <AccountNFTsPage />
                     </Route>
                     <Route path="/">
                       <CollectionsPage />

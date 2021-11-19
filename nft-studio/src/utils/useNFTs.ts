@@ -60,3 +60,42 @@ export function useNFT(collectionId: string, nftId: string) {
   const { data } = useNFTs(collectionId)
   return React.useMemo(() => data?.find((c) => c.id === nftId), [data, nftId])
 }
+
+export function useAccountNfts(address?: string) {
+  const query = useQuery(
+    ['accountNfts', address],
+    async () => {
+      const api = await initPolkadotApi()
+
+      const keys = await api.query.uniques.account.keys(address)
+      const keysArr = keys.map((k) => {
+        const [, cid, aid] = k.toHuman() as any
+        return [cid.replace(/\D/g, ''), aid.replace(/\D/g, '')]
+      })
+      const [metas, nfts] = await Promise.all([
+        api.query.uniques.instanceMetadataOf.multi(keysArr),
+        api.query.uniques.asset.multi(keysArr),
+      ])
+
+      const mapped = nfts.map((value, i) => {
+        const [collectionId, id] = keysArr[i]
+        const nftValue = value.toJSON() as NFTValue
+        const nft = {
+          id,
+          collectionId,
+          owner: nftValue.owner,
+          metadataUri: (metas[i]?.toHuman() as any)?.data,
+        }
+        return nft
+      })
+      console.log('accnfts', keys, metas, nfts, mapped)
+      return mapped
+    },
+    {
+      suspense: true,
+      enabled: !!address,
+    }
+  )
+
+  return query
+}
