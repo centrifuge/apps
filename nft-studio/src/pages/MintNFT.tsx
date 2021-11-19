@@ -1,7 +1,7 @@
 import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Flex } from '@centrifuge/fabric/dist/components/Flex'
 import { TextVariantName } from '@centrifuge/fabric/dist/theme'
-import React, { useState } from 'react'
+import React, { useReducer, useState } from 'react'
 import { useQueryClient } from 'react-query'
 import { useParams } from 'react-router'
 import { FileImageUpload } from '../components/FileImageUpload'
@@ -31,6 +31,7 @@ export const MintNFTPage: React.FC = () => {
   const { createTransaction, lastCreatedTransaction, reset: resetLastTransaction } = useCreateTransaction()
   const { data: balance } = useBalance()
   const { selectedAccount } = useWeb3()
+  const [version, setNextVersion] = useReducer((s) => s + 1, 0)
 
   const [nftName, setNftName] = useState('')
   const [nftDescription, setNftDescription] = useState('')
@@ -45,20 +46,31 @@ export const MintNFTPage: React.FC = () => {
       return
     }
 
-    createTransaction('Mint NFT', async (api) => {
-      const assetId = await getAvailableAssetId(collectionId)
-      const res = await createNFTMetadata({
-        name: nftName,
-        description: nftDescription,
-        fileDataUri,
-        fileName,
-      })
+    let assetId: number
 
-      return api.tx.utility.batchAll([
-        api.tx.uniques.mint(collectionId, assetId, selectedAccount!.address),
-        api.tx.uniques.setMetadata(collectionId, assetId, res.metadataURI, true),
-      ])
-    })
+    createTransaction(
+      'Mint NFT',
+      async (api) => {
+        assetId = await getAvailableAssetId(collectionId)
+        const res = await createNFTMetadata({
+          name: nftName,
+          description: nftDescription,
+          fileDataUri,
+          fileName,
+        })
+
+        return api.tx.utility.batchAll([
+          api.tx.uniques.mint(collectionId, assetId, selectedAccount!.address),
+          api.tx.uniques.setMetadata(collectionId, assetId, res.metadataURI, true),
+        ])
+      },
+      () => {
+        queryClient.invalidateQueries(['nfts', collectionId])
+        queryClient.invalidateQueries('balance')
+        queryClient.invalidateQueries(['accountNfts', selectedAccount?.address])
+        reset()
+      }
+    )
   }
 
   function reset() {
@@ -67,6 +79,7 @@ export const MintNFTPage: React.FC = () => {
     setFileDataUri('')
     setFileName('')
     resetLastTransaction()
+    setNextVersion()
   }
 
   const isMinting = lastCreatedTransaction
@@ -77,20 +90,12 @@ export const MintNFTPage: React.FC = () => {
   const canMint = isSameAddress(selectedAccount?.address, collection?.owner)
   const disabled = !isFormValid || balanceLow || !canMint
 
-  React.useEffect(() => {
-    if (lastCreatedTransaction?.status === 'succeeded') {
-      queryClient.invalidateQueries(['nfts', collectionId])
-      queryClient.invalidateQueries('balance')
-      reset()
-    }
-    // eslint-disable-next-line
-  }, [queryClient, lastCreatedTransaction?.status])
-
   return (
     <SplitView
       left={
         <Flex alignItems="stretch" justifyContent="stretch" height="100%" p={[2, 4, 0]}>
           <FileImageUpload
+            key={version}
             onFileUpdate={async (file) => {
               if (file) {
                 setFileName(file.name)

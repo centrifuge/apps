@@ -31,11 +31,18 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     const classId = await getAvailableClassId()
     const res = await createCollectionMetadata(name, description)
 
-    createTransaction('Create collection', (api) =>
-      api.tx.utility.batchAll([
-        api.tx.uniques.create(classId, selectedAccount!.address),
-        api.tx.uniques.setClassMetadata(classId, res.metadataURI, true),
-      ])
+    createTransaction(
+      'Create collection',
+      (api) =>
+        api.tx.utility.batchAll([
+          api.tx.uniques.create(classId, selectedAccount!.address),
+          api.tx.uniques.setClassMetadata(classId, res.metadataURI, true),
+        ]),
+      () => {
+        queryClient.invalidateQueries('collections')
+        queryClient.invalidateQueries('balance')
+        close()
+      }
     )
   }
 
@@ -49,13 +56,6 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     reset()
     onClose()
   }
-
-  React.useEffect(() => {
-    if (lastCreatedTransaction?.status === 'succeeded') {
-      queryClient.invalidateQueries('collections')
-      queryClient.invalidateQueries('balance')
-    }
-  }, [queryClient, lastCreatedTransaction?.status])
 
   const balanceLow = !balance || balance < CREATE_FEE_ESTIMATE
 
@@ -89,7 +89,9 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
                 type="submit"
                 disabled={disabled}
                 loading={
-                  lastCreatedTransaction ? ['unconfirmed', 'pending'].includes(lastCreatedTransaction?.status) : false
+                  lastCreatedTransaction
+                    ? ['creating', 'unconfirmed', 'pending'].includes(lastCreatedTransaction?.status)
+                    : false
                 }
               >
                 Create
