@@ -1,6 +1,7 @@
 import { Box, Card, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
+import { collectionMetadataSchema, nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { Collection, useCollectionNFTsPreview } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
@@ -11,7 +12,7 @@ type Props = {
 }
 
 export const CollectionCard: React.FC<Props> = ({ collection }) => {
-  const { data: metadata } = useMetadata<{ name: string; description: string }>(collection.metadataUri)
+  const { data: metadata } = useMetadata(collection.metadataUri, collectionMetadataSchema)
   const { data: previewNFTs } = useCollectionNFTsPreview(collection.id)
   const { id, admin } = collection
 
@@ -44,12 +45,22 @@ export const CollectionCardInner: React.FC<InnerProps> = ({ to, title, label, de
       <Shelf gap={3} justifyContent="space-between" alignItems="flex-start">
         <Stack gap={3}>
           <div>
-            <Text as="h2" variant="heading2">
+            <Text as="h2" variant="heading2" style={{ wordBreak: 'break-word' }}>
               {title}
             </Text>
             {label && <Text variant="label1">{label}</Text>}
           </div>
-          <Text>{description}</Text>
+          <Text
+            style={{
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              wordBreak: 'break-word',
+            }}
+          >
+            {description}
+          </Text>
         </Stack>
         <Grid columns={2} gap={1}>
           {Array.from({ length: 4 }, (_, i) => (
@@ -62,7 +73,7 @@ export const CollectionCardInner: React.FC<InnerProps> = ({ to, title, label, de
 }
 
 const PreviewImage: React.FC<{ uri?: string }> = ({ uri }) => {
-  const { data } = useMetadata<{ image: string }>(uri)
+  const { data } = useMetadata(uri, nftMetadataSchema)
   return (
     <Box width="80px" height="80px" borderRadius={4} overflow="hidden">
       {data?.image && (

@@ -8,6 +8,7 @@ import { PageContainer } from '../components/PageContainer'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
+import { collectionMetadataSchema } from '../schemas'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFTs } from '../utils/useNFTs'
@@ -29,15 +30,15 @@ const Collection: React.FC = () => {
   } = useRouteMatch<{ cid: string }>()
   const { selectedAccount } = useWeb3()
   const collection = useCollection(collectionId)
-  const { data: metadata } = useMetadata<{ name: string }>(collection?.metadataUri)
+  const { data: metadata } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
   const { data: nfts } = useNFTs(collectionId)
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
 
   return (
     <Stack gap={8} flex={1}>
-      <Shelf justifyContent="space-between">
+      <Shelf gap={2} justifyContent="space-between">
         <Shelf gap={[0, 1]} alignItems="baseline" flexWrap="wrap">
-          <Text variant="headingLarge" as="h1">
+          <Text variant="headingLarge" as="h1" style={{ wordBreak: 'break-word' }}>
             {metadata?.name}
           </Text>
           {collection?.owner && (

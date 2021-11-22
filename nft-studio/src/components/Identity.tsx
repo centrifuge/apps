@@ -17,7 +17,7 @@ export const Identity: React.FC<Props> = ({ address, clickToCopy, ...textProps }
     <Text
       {...textProps}
       title={addr}
-      style={{ cursor: clickToCopy ? 'copy' : undefined }}
+      style={{ cursor: clickToCopy ? 'copy' : undefined, wordBreak: 'break-word' }}
       onClick={clickToCopy ? () => copyToClipboard(addr) : undefined}
     >
       {identity?.display || truncateAddress(address)}

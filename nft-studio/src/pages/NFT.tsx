@@ -5,6 +5,7 @@ import { Identity } from '../components/Identity'
 import { SplitView } from '../components/SplitView'
 import { TransferDialog } from '../components/TransferDialog'
 import { useWeb3 } from '../components/Web3Provider'
+import { nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
@@ -16,7 +17,7 @@ export const NFTPage: React.FC = () => {
 
   const { selectedAccount } = useWeb3()
   const nft = useNFT(collectionId, nftId)
-  const { data: metadata } = useMetadata<{ name: string; description: string; image: string }>(nft?.metadataUri)
+  const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collection?.id)
   const [transferOpen, setTransferOpen] = React.useState(false)
