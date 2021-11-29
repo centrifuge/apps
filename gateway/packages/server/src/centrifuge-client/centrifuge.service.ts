@@ -31,13 +31,15 @@ export class CentrifugeService {
 
   pullForJobComplete(jobId: string, authorization: string): Promise<JobsStatusResponse> {
     return this.job.getJobStatus(authorization, jobId).then((result) => {
-      if (result.status === 'pending') {
+      if (!result.finished) {
         return delay(250).then(() => this.pullForJobComplete(jobId, authorization))
-      } else if (result.status === 'failed') {
-        console.log('Job Failed', result.message)
-        return result
       } else {
-        console.log('Job Complete', result)
+        const currentTask = result.tasks[result.tasks.length - 1]
+        if (currentTask && currentTask.error) {
+          console.log('Job Failed', currentTask.error)
+        } else {
+          console.log('Job Complete', result)
+        }
         return result
       }
     })

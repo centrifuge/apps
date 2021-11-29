@@ -1374,6 +1374,9 @@ export interface HttputilsHTTPError {
  */
 export interface IdentityDID extends Array<number> {}
 
+export interface Task {
+  error?: string
+}
 /**
  *
  * @export
@@ -1404,6 +1407,8 @@ export interface JobsStatusResponse {
    * @memberof JobsStatusResponse
    */
   status?: string
+  finished?: boolean
+  tasks?: Array<Task>
 }
 
 /**
@@ -7145,7 +7150,7 @@ export const JobsApiFetchParamCreator = function (configuration?: Configuration)
       if (job_id === null || job_id === undefined) {
         throw new RequiredError('job_id', 'Required parameter job_id was null or undefined when calling getJobStatus.')
       }
-      const localVarPath = `/v1/jobs/{job_id}`.replace(`{${'job_id'}}`, encodeURIComponent(String(job_id)))
+      const localVarPath = `/v2/jobs/{job_id}`.replace(`{${'job_id'}}`, encodeURIComponent(String(job_id)))
       const localVarUrlObj = url.parse(localVarPath, true)
       const localVarRequestOptions = Object.assign({ method: 'GET' }, options)
       const localVarHeaderParameter = {} as any
