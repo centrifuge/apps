@@ -2388,7 +2388,7 @@ export const AccountsApiFetchParamCreator = function (configuration?: Configurat
       if (body === null || body === undefined) {
         throw new RequiredError('body', 'Required parameter body was null or undefined when calling generateAccount.')
       }
-      const localVarPath = `/v1/accounts/generate`
+      const localVarPath = `/v2/accounts/generate`
       const localVarUrlObj = url.parse(localVarPath, true)
       const localVarRequestOptions = Object.assign({ method: 'POST' }, options)
       const localVarHeaderParameter = {} as any
@@ -3452,7 +3452,7 @@ export const DocumentsApiFetchParamCreator = function (configuration?: Configura
           'Required parameter document_id was null or undefined when calling getDocument.'
         )
       }
-      const localVarPath = `/v1/documents/{document_id}`.replace(
+      const localVarPath = `/v2/documents/{document_id}/committed`.replace(
         `{${'document_id'}}`,
         encodeURIComponent(String(document_id))
       )
@@ -7281,7 +7281,7 @@ export const NFTsApiFetchParamCreator = function (configuration?: Configuration)
       if (body === null || body === undefined) {
         throw new RequiredError('body', 'Required parameter body was null or undefined when calling mintNft.')
       }
-      const localVarPath = `/v1/nfts/registries/{registry_address}/mint`.replace(
+      const localVarPath = `/v2/nfts/registries/{registry_address}/mint`.replace(
         `{${'registry_address'}}`,
         encodeURIComponent(String(registry_address))
       )
