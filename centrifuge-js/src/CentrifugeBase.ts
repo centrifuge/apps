@@ -17,7 +17,7 @@ type Config = {
 type UserProvidedConfig = Partial<Config>
 
 const defaultConfig: Config = {
-  network: 'altair',
+  network: 'centrifuge',
   centrifugeWsUrl: 'wss://fullnode.centrifuge.io',
   altairWsUrl: 'wss://fullnode.altair.centrifuge.io',
   polkadotWsUrl: 'wss://rpc.polkadot.io',
