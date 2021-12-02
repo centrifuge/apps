@@ -2737,6 +2737,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@centrifuge/centrifuge-js@workspace:*, @centrifuge/centrifuge-js@workspace:centrifuge-js":
+  version: 0.0.0-use.local
+  resolution: "@centrifuge/centrifuge-js@workspace:centrifuge-js"
+  dependencies:
+    "@polkadot/api": ^6.2.1
+    "@polkadot/util-crypto": ^7.4.1
+    tsdx: ^0.14.1
+    tslib: ^2.3.1
+    typescript: ^4.5.2
+  languageName: unknown
+  linkType: soft
+
 "@centrifuge/e2e-tests@workspace:e2e-tests":
   version: 0.0.0-use.local
   resolution: "@centrifuge/e2e-tests@workspace:e2e-tests"
@@ -2901,6 +2913,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@centrifuge/nft-studio@workspace:nft-studio"
   dependencies:
+    "@centrifuge/centrifuge-js": "workspace:*"
     "@centrifuge/fabric": "workspace:*"
     "@polkadot/api": ^6.2.1
     "@polkadot/extension-dapp": ^0.40.3
@@ -40969,7 +40982,7 @@ resolve@1.18.1:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.2.0, tslib@npm:^2.3.0, tslib@npm:~2.3.0":
+"tslib@npm:^2, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0, tslib@npm:^2.2.0, tslib@npm:^2.3.0, tslib@npm:^2.3.1, tslib@npm:~2.3.0":
   version: 2.3.1
   resolution: "tslib@npm:2.3.1"
   checksum: 5ae2f209c5127bad284974c78916f02c72082615f65889a7ed0c7ca6d5f935c30338a0ee7310e1d9652dabc7b7507fd2905035487446d09d45fc1f19de71cf05
