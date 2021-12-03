@@ -1,6 +1,5 @@
 import { GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
-import centrifugeLight from '@centrifuge/fabric/dist/theme/centrifugeLight'
-// import altairDark from '@centrifuge/fabric/dist/theme/altairDark'
+import altairDark from '@centrifuge/fabric/dist/theme/altairDark'
 import { OverlayProvider } from '@react-aria/overlays'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
@@ -18,17 +17,17 @@ import { TransactionProvider } from './TransactionsProvider'
 import { TransactionToasts } from './TransactionToasts'
 import { Web3Provider } from './Web3Provider'
 
-const theme: DefaultTheme = {
-  ...centrifugeLight,
+const darkTheme: DefaultTheme = {
+  ...altairDark,
   sizes: {
-    ...centrifugeLight.sizes,
+    ...altairDark.sizes,
     container: '100%',
     navBarHeight: 72,
     navBarHeightMobile: 64,
     dialog: 564,
   },
   typography: {
-    ...centrifugeLight.typography,
+    ...altairDark.typography,
     headingLarge: {
       fontSize: [24, 24, 36],
       lineHeight: 1.25,
@@ -49,7 +48,7 @@ const queryClient = new QueryClient({
 export const Root: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={darkTheme}>
         <GlobalStyle />
         <FabricGlobalStyle />
         <OverlayProvider>
