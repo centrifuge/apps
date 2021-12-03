@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import { ResponsiveValue } from 'styled-system'
 import { Box } from '../Box'
 import { Card, CardProps } from '../Card'
-import { Divider } from '../Divider'
 import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
@@ -13,14 +12,7 @@ export type MenuProps = Omit<CardProps, 'variant'>
 export const Menu: React.FC<MenuProps> = ({ children, ...cardProps }) => {
   return (
     <Card {...cardProps} variant="overlay">
-      <Stack>
-        {React.Children.map(children, (child, i) => (
-          <>
-            {i > 0 && <Divider />}
-            {child}
-          </>
-        ))}
-      </Stack>
+      <Stack>{children}</Stack>
     </Card>
   )
 }
