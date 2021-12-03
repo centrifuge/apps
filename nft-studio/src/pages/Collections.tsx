@@ -3,6 +3,7 @@ import * as React from 'react'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
 import { CreateCollectionDialog } from '../components/CreateCollectionDialog'
 import { Footer } from '../components/Footer'
+import { Identity } from '../components/Identity'
 import { PageContainer } from '../components/PageContainer'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
@@ -62,7 +63,17 @@ const Collections: React.FC = () => {
               ))}
               {accountNfts?.length ? (
                 <LayoutGridItem span={4}>
-                  <CollectionCardInner title="My owned NFTs" to="/account" previewNFTs={accountNfts} />
+                  <CollectionCardInner
+                    title="All my NFTs"
+                    label={
+                      <>
+                        by <Identity address={selectedAccount.address} />
+                      </>
+                    }
+                    description="A dynamic collection of owned NFTs"
+                    to="/account"
+                    previewNFTs={accountNfts}
+                  />
                 </LayoutGridItem>
               ) : null}
             </LayoutGrid>
