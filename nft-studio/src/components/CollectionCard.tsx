@@ -74,8 +74,9 @@ export const CollectionCardInner: React.FC<InnerProps> = ({ to, title, label, de
 
 const PreviewImage: React.FC<{ uri?: string }> = ({ uri }) => {
   const { data } = useMetadata(uri, nftMetadataSchema)
+  const [shown, setShown] = React.useState(false)
   return (
-    <Box width="80px" height="80px" borderRadius={4} overflow="hidden">
+    <Box width="80px" height="80px" borderRadius={4} bg={uri ? 'placeholderBackground' : undefined} overflow="hidden">
       {data?.image && (
         <Box
           as="img"
@@ -84,7 +85,8 @@ const PreviewImage: React.FC<{ uri?: string }> = ({ uri }) => {
           display="block"
           width="100%"
           height="100%"
-          style={{ objectFit: 'cover' }}
+          style={{ objectFit: 'cover', transition: 'opacity 200ms', opacity: shown ? 1 : 0 }}
+          onLoad={() => setShown(true)}
         />
       )}
     </Box>

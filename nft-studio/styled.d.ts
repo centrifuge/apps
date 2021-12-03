@@ -9,6 +9,9 @@ declare module 'styled-components' {
       navBarHeightMobile: number
       dialog: number
     }
+    colors: FabricTheme['color'] & {
+      placeholderBackground: string
+    }
     typography: FabricTheme['typography'] & {
       headingLarge: ThemeTypography['heading1']
     }

@@ -26,6 +26,10 @@ const darkTheme: DefaultTheme = {
     navBarHeightMobile: 64,
     dialog: 564,
   },
+  colors: {
+    ...altairDark.colors,
+    placeholderBackground: '#424242',
+  },
   typography: {
     ...altairDark.typography,
     headingLarge: {
