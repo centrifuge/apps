@@ -8,7 +8,7 @@ import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
 import { useCollections } from '../utils/useCollections'
 import { useAccountNfts } from '../utils/useNFTs'
-import { isSameAddress } from '../utils/web3'
+import { isSameAddress, isWhitelistedAccount } from '../utils/web3'
 
 export const CollectionsPage: React.FC = () => {
   return (
@@ -33,7 +33,11 @@ const Collections: React.FC = () => {
   )
 
   const otherCollections = React.useMemo(
-    () => collections?.filter((c) => !isSameAddress(c.owner, selectedAccount?.address)),
+    () =>
+      collections?.filter((c) => {
+        if (isSameAddress(c.owner, selectedAccount?.address)) return false
+        return isWhitelistedAccount(c.owner)
+      }),
     [collections, selectedAccount?.address]
   )
 
@@ -56,11 +60,11 @@ const Collections: React.FC = () => {
                   <CollectionCard collection={col} />
                 </LayoutGridItem>
               ))}
-              {accountNfts?.length && (
+              {accountNfts?.length ? (
                 <LayoutGridItem span={4}>
                   <CollectionCardInner title="My owned NFTs" to="/account" previewNFTs={accountNfts} />
                 </LayoutGridItem>
-              )}
+              ) : null}
             </LayoutGrid>
           ) : (
             <Shelf justifyContent="center" textAlign="center">

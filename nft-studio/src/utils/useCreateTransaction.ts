@@ -36,13 +36,13 @@ export function useCreateTransaction() {
           submittable.signAndSend(selectedAccount.address, { signer: injector.signer }, (result) => {
             const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
 
-            if (result.status.isFinalized) {
-              updateTransaction(id, (prev) => (prev.status === 'failed' ? {} : { status: 'succeeded' }))
-              resolve()
-            } else if (result.dispatchError || errors.length) {
+            if (result.dispatchError || errors.length) {
               console.error(result.dispatchError || errors)
               updateTransaction(id, { status: 'failed', failedReason: 'Transaction failed' })
               reject()
+            } else if (result.status.isInBlock || result.status.isFinalized) {
+              updateTransaction(id, (prev) => (prev.status === 'failed' ? {} : { status: 'succeeded' }))
+              resolve()
             } else {
               updateTransaction(id, { status: 'pending', hash: submittable.hash.toHex() })
             }

@@ -19,7 +19,7 @@ export const CollectionCard: React.FC<Props> = ({ collection }) => {
   return (
     <CollectionCardInner
       to={`/collection/${id}`}
-      title={metadata?.name ?? 'Unnamed collection'}
+      title={metadata?.name || 'Unnamed collection'}
       label={
         <>
           by <Identity address={admin} />
@@ -64,7 +64,7 @@ export const CollectionCardInner: React.FC<InnerProps> = ({ to, title, label, de
         </Stack>
         <Grid columns={2} gap={1}>
           {Array.from({ length: 4 }, (_, i) => (
-            <PreviewImage uri={previewNFTs?.[i]?.metadataUri} key={i} />
+            <PreviewImage uri={previewNFTs?.[i]?.metadataUri} key={previewNFTs?.[i]?.metadataUri || i} />
           ))}
         </Grid>
       </Shelf>

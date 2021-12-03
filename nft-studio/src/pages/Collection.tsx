@@ -39,7 +39,7 @@ const Collection: React.FC = () => {
       <Shelf gap={2} justifyContent="space-between">
         <Shelf gap={[0, 1]} alignItems="baseline" flexWrap="wrap">
           <Text variant="headingLarge" as="h1" style={{ wordBreak: 'break-word' }}>
-            {metadata?.name}
+            {metadata?.name || 'Unnamed collection'}
           </Text>
           {collection?.owner && (
             <Text variant="heading3" color="textSecondary">

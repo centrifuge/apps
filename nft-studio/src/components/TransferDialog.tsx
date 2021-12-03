@@ -40,7 +40,7 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
       () => {
         queryClient.invalidateQueries(['nfts', collectionId])
         queryClient.invalidateQueries('balance')
-        queryClient.invalidateQueries(['accountNfts', selectedAccount?.address])
+        queryClient.invalidateQueries(['accountNfts'])
         close()
       }
     )

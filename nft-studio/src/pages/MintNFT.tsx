@@ -65,6 +65,7 @@ export const MintNFTPage: React.FC = () => {
       },
       () => {
         queryClient.invalidateQueries(['nfts', collectionId])
+        queryClient.invalidateQueries(['collectionPreview', collectionId])
         queryClient.invalidateQueries('balance')
         queryClient.invalidateQueries(['accountNfts', selectedAccount?.address])
         reset()
