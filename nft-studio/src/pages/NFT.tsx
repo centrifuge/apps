@@ -92,6 +92,10 @@ export const NFTPage: React.FC = () => {
                   </Text>
                 </Stack> */}
                 <Stack>
+                  <Text variant="label1">Description</Text>
+                  <Text variant="heading3">{collectionMetadata.description || 'No description'}</Text>
+                </Stack>
+                <Stack>
                   <Text variant="label1">Source</Text>
                   <Text as="a" href={imageUrl} target="_blank" variant="heading3" style={{ wordBreak: 'break-all' }}>
                     <u>{imageUrl}</u>
