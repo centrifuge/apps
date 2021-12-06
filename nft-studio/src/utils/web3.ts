@@ -1,6 +1,24 @@
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import { addressEq, encodeAddress } from '@polkadot/util-crypto'
 
+const { REACT_APP_WHITELISTED_ACCOUNTS: whitelistConfig } = process.env
+
+const whitelistedAccounts = whitelistConfig
+  ? whitelistConfig.split(',').map((a) => {
+      try {
+        return encodeAddress(a)
+      } catch (e) {
+        return ''
+      }
+    })
+  : []
+
+export function isWhitelistedAccount(address: string) {
+  if (!whitelistedAccounts.length) return true
+  const addr = encodeAddress(address)
+  return whitelistedAccounts.includes(addr)
+}
+
 export function truncateAddress(address: string) {
   const encodedAddress = encodeAddress(address, 2)
   const first = encodedAddress.slice(0, 6)

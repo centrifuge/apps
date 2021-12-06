@@ -43,10 +43,17 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
       () => {
         queryClient.invalidateQueries('collections')
         queryClient.invalidateQueries('balance')
-        close()
       }
     )
   }
+
+  // Only close if the modal is still showing the last created collection
+  React.useEffect(() => {
+    if (lastCreatedTransaction?.status === 'succeeded') {
+      close()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastCreatedTransaction?.status])
 
   function reset() {
     setName('')
