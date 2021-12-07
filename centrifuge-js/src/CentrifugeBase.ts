@@ -4,7 +4,7 @@ import { Signer } from '@polkadot/types/types'
 import { TransactionOptions } from './types'
 import { getPolkadotApi } from './utils/web3'
 
-type Config = {
+export type Config = {
   network: 'altair' | 'centrifuge'
   centrifugeWsUrl: string
   altairWsUrl: string
@@ -14,7 +14,7 @@ type Config = {
   signingAddress?: AddressOrPair
 }
 
-type UserProvidedConfig = Partial<Config>
+export type UserProvidedConfig = Partial<Config>
 
 const defaultConfig: Config = {
   network: 'centrifuge',
