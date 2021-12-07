@@ -93,5 +93,3 @@ export class CentrifugeBase {
     }
   }
 }
-
-export type CentrifugeBaseConstructorLike = new (...args: any[]) => CentrifugeBase
