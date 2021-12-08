@@ -1,14 +1,8 @@
-function iconTemplate({ template }, opts, { imports, interfaces, componentName, jsx, exports }) {
-  const plugins = ['jsx']
-  if (opts.typescript) {
-    plugins.push('typescript')
-  }
-  const typeScriptTpl = template.smart({ plugins })
-
+function iconTemplate({ imports, interfaces, componentName, jsx, exports }, { tpl }) {
   jsx.openingElement.name.name = 'Svg'
   jsx.closingElement.name.name = 'Svg'
 
-  return typeScriptTpl.ast`
+  return tpl`
 ${imports}
 import styled from 'styled-components'
 import { ResponsiveValue } from 'styled-system'
