@@ -37,7 +37,7 @@ export const feeToInterestRate = (fee: string | BN): string => {
 
   const i = new Decimal(feeToConvert).div('1e27').minus(1).times(n)
 
-  const interestRate = i.mul(100).toDecimalPlaces(1)
+  const interestRate = i.mul(100).toDecimalPlaces(2)
 
   const interestRateString = interestRate.toString()
 
