@@ -1,6 +1,6 @@
 import Decimal from 'decimal.js-light'
 
-export const toPrecision = (value: string, precision: number) => {
+export const toPrecision = (value: string | number, precision: number) => {
   const zero = new Decimal('0').toFixed(precision)
   const result = new Decimal(value.toString()).toFixed(precision)
 
