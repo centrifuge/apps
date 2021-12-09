@@ -93,7 +93,7 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
                           </>
                         ))}
 
-                        {selectedPool.metadata.issuerEmail && address && (
+                        {selectedPool.metadata.issuerEmail && (
                           <a href={`mailto:${selectedPool.metadata.issuerEmail}`}>
                             <ButtonWithIcon label="Contact the issuer" icon={<IconMail />} size="small" />
                           </a>
