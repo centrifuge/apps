@@ -1,14 +1,8 @@
-function iconTemplate({ template }, opts, { imports, interfaces, componentName, jsx, exports }) {
-  const plugins = ['jsx']
-  if (opts.typescript) {
-    plugins.push('typescript')
-  }
-  const typeScriptTpl = template.smart({ plugins })
-
+function iconTemplate({ imports, interfaces, componentName, jsx, exports }, { tpl }) {
   jsx.openingElement.name.name = 'Svg'
   jsx.closingElement.name.name = 'Svg'
 
-  return typeScriptTpl.ast`
+  return tpl`
 ${imports}
 import styled from 'styled-components'
 import { ResponsiveValue } from 'styled-system'
@@ -22,7 +16,7 @@ type OwnProps = {
   color?: ResponsiveValue<Color>
 }
 
-type Props = OwnProps & Omit<React.SVGProps<SVGSVGElement>, 'ref'>
+type Props = OwnProps & Omit<SVGProps<SVGSVGElement>, 'ref'>
 
 const Svg = styled.svg<OwnProps>(props => css({
   width: props.size,
