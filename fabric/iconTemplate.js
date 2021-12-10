@@ -16,7 +16,7 @@ type OwnProps = {
   color?: ResponsiveValue<Color>
 }
 
-type Props = OwnProps & Omit<React.SVGProps<SVGSVGElement>, 'ref'>
+type Props = OwnProps & Omit<SVGProps<SVGSVGElement>, 'ref'>
 
 const Svg = styled.svg<OwnProps>(props => css({
   width: props.size,
