@@ -15,13 +15,18 @@ type Result<T extends Schema> = {
   [P in keyof T]: Optional<T[P]['type'] extends 'string' ? string : number, T[P]['optional']>
 }
 
+export async function fetchMetadata(uri: string) {
+  return fetch(parseMetadataUrl(uri!)).then((res) => res.json())
+}
+
 export function useMetadata<T extends Schema>(uri: string | undefined, schema: T) {
   const query = useQuery(
     ['metadata', uri],
     async () => {
-      const res = await fetch(parseMetadataUrl(uri!)).then((res) => res.json())
+      const res = await fetchMetadata(uri!)
 
       const result: any = {}
+
       for (const key in schema) {
         const { maxLength, optional, type } = schema[key]
         let value = res[key]

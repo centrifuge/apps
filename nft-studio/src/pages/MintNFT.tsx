@@ -17,6 +17,7 @@ import { getFileDataURI } from '../utils/getFileDataURI'
 import { useBalance } from '../utils/useBalance'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useCreateTransaction } from '../utils/useCreateTransaction'
+import { fetchMetadata } from '../utils/useMetadata'
 import { isSameAddress, truncateAddress } from '../utils/web3'
 
 const DEFAULT_NFT_NAME = 'Untitled NFT'
@@ -57,6 +58,8 @@ export const MintNFTPage: React.FC = () => {
           fileDataUri,
           fileName,
         })
+
+        queryClient.prefetchQuery(['metadata', res.metadataURI], () => fetchMetadata(res.metadataURI))
 
         return api.tx.utility.batchAll([
           api.tx.uniques.mint(collectionId, assetId, selectedAccount!.address),
