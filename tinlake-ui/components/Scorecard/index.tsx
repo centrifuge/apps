@@ -104,23 +104,29 @@ const Scorecard: React.FC<Props> = (props: Props) => {
                       : 'N/A'}
                   </TableCell>
                   <TableCell>
-                    {parseFloat(
-                      Fixed27Base.sub(riskGroup.recoveryRatePD)
-                        .div(new BN(10).pow(new BN(22)))
-                        .toString()
-                    ) / 1000}
+                    {toPrecision(
+                      parseFloat(
+                        Fixed27Base.sub(riskGroup.recoveryRatePD)
+                          .div(new BN(10).pow(new BN(22)))
+                          .toString()
+                      ) / 1000,
+                      2
+                    )}
                     %
                   </TableCell>
                   <TableCell>
-                    {parseFloat(
-                      (poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
-                        ? riskGroup.outstandingDebt
-                            .mul(e18)
-                            .div(totalDebt)
-                            .div(new BN('10').pow(new BN('14')))
-                        : new BN(0)
-                      ).toString()
-                    ) / 100}{' '}
+                    {toPrecision(
+                      parseFloat(
+                        (poolData && !poolData.reserve.add(poolData.netAssetValue).isZero()
+                          ? riskGroup.outstandingDebt
+                              .mul(e18)
+                              .div(totalDebt)
+                              .div(new BN('10').pow(new BN('14')))
+                          : new BN(0)
+                        ).toString()
+                      ) / 100,
+                      2
+                    )}
                     %
                   </TableCell>
                 </TableRow>

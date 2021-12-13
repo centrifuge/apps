@@ -40,21 +40,34 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
   const tinTotalValue = poolData ? poolData.junior.totalSupply.mul(poolData?.junior.tokenPrice) : undefined
 
   const ongoingAssets = assets ? assets.filter((asset) => asset.status && asset.status === 'ongoing') : undefined
-
-  const avgInterestRate = ongoingAssets
-    ? ongoingAssets
-        .filter((asset) => asset.interestRate)
-        .reduce((sum: BN, asset) => {
-          return sum.add(new BN(asset.interestRate!))
-        }, new BN(0))
-        .divn(ongoingAssets.length)
+  const ongoingAssetsWithEnoughData = ongoingAssets
+    ? ongoingAssets.filter(
+        (asset) => asset.interestRate && asset.maturityDate && asset.financingDate && asset.debt && !asset.debt.isZero()
+      )
     : undefined
-  const avgMaturity = ongoingAssets
-    ? ongoingAssets
+  const totalOutstanding = ongoingAssetsWithEnoughData
+    ? ongoingAssetsWithEnoughData.reduce((sum, asset) => sum.add(asset.debt), new BN(0))
+    : undefined
+  const totalOutstandingNum = totalOutstanding ? Number(totalOutstanding.toString()) / 10 ** 18 : undefined
+
+  // Averages weighted by current outstanding
+  const avgInterestRate = ongoingAssetsWithEnoughData?.length
+    ? ongoingAssetsWithEnoughData
+        .filter((asset) => asset.interestRate)
+        .reduce((sum, asset) => {
+          return sum.add(new BN(asset.interestRate!).mul(asset.debt))
+        }, new BN(0))
+        .div(totalOutstanding!)
+    : undefined
+  const avgMaturity = ongoingAssetsWithEnoughData?.length
+    ? ongoingAssetsWithEnoughData
         .filter((asset) => asset.maturityDate && asset.financingDate)
-        .reduce((sum: number, asset) => {
-          return sum + (asset.maturityDate! - asset.financingDate!) / SecondsInDay
-        }, 0) / ongoingAssets.length
+        .reduce((sum, asset) => {
+          const a =
+            sum +
+            (((asset.maturityDate! - asset.financingDate!) / SecondsInDay) * Number(asset.debt.toString())) / 10 ** 18
+          return a
+        }, 0) / totalOutstandingNum!
     : undefined
 
   const minJuniorRatio = poolData ? parseRatio(poolData.minJuniorRatio) : undefined
@@ -134,7 +147,7 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
           </Box>
 
           <Shelf mb="small" justifyContent="space-between">
-            <SectionHeading>Reserve</SectionHeading>
+            <SectionHeading>Liquidity</SectionHeading>
           </Shelf>
 
           <ValuePairList
