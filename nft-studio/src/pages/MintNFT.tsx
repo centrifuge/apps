@@ -116,7 +116,7 @@ export const MintNFTPage: React.FC = () => {
             </Text>
 
             <Stack mt={3} mb={7}>
-              <Text variant={'headingLarge' as TextVariantName} as="h1">
+              <Text variant={'headingLarge' as TextVariantName} as="h1" style={{ wordBreak: 'break-word' }}>
                 {nftName || DEFAULT_NFT_NAME}
               </Text>
               {selectedAccount?.address && (
