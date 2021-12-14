@@ -15,7 +15,7 @@ import { AgreementRepo } from '../repos/agreement.repo'
 import { UserRepo } from '../repos/user.repo'
 import { DocusignService, InvestorRoleName, IssuerRoleName } from '../services/docusign.service'
 import { MemberlistService } from '../services/memberlist.service'
-import { PoolService } from '../services/pool.service'
+import { CustomPoolIds, PoolService } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
 
 @Controller()
@@ -39,7 +39,9 @@ export class AgreementController {
     if (!query.session) throw new BadRequestException('Missing session')
     const verifiedSession = this.sessionService.verify(query.session)
     if (!verifiedSession) {
-      const returnUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding`
+      const returnUrl = CustomPoolIds.includes(params.poolId)
+        ? `${config.tinlakeUiHost}onboarding/${params.poolId}`
+        : `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding`
       console.error(`Invalid session`)
       return res.redirect(returnUrl)
     }
@@ -84,7 +86,9 @@ export class AgreementController {
       await this.agreementRepo.setSigned(agreement.id)
     }
 
-    const returnUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${agreement.tranche}`
+    const returnUrl = CustomPoolIds.includes(params.poolId)
+      ? `${config.tinlakeUiHost}onboarding/${params.poolId}`
+      : `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${agreement.tranche}`
     return res.redirect(returnUrl)
   }
 
