@@ -38,7 +38,7 @@ export interface Config {
     domainApiHost: string
     domainApiKey: string
   }
-  aave: {
+  rwaMarket: {
     permissionManagerContractAddress: string
   }
 }
@@ -81,8 +81,8 @@ const config: Config = {
     domainApiHost: process.env.SECURITIZE_DOMAIN_API_HOST,
     domainApiKey: process.env.SECURITIZE_DOMAIN_API_KEY,
   },
-  aave: {
-    permissionManagerContractAddress: process.env.AAVE_PERMISSION_MANAGER_CONTRACT_ADDRESS,
+  rwaMarket: {
+    permissionManagerContractAddress: process.env.RWA_MARKET_PERMISSION_MANAGER_CONTRACT_ADDRESS,
   },
 }
 

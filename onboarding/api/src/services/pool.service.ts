@@ -6,10 +6,10 @@ import { Tranche } from '../controllers/types'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
 import { User, UserRepo } from '../repos/user.repo'
-import contractAbiAavePermissionManager from '../utils/AavePermissionManager.abi'
 import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
 import contractAbiMemberlist from '../utils/Memberlist.abi'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
+import contractAbiRwaMarketPermissionManager from '../utils/RwaMarketPermissionManager.abi'
 import { TransactionManager } from '../utils/tx-manager'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
@@ -29,9 +29,9 @@ export class PoolService {
   }).connect(this.provider)
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
 
-  aavePermissionManager = new ethers.Contract(
-    config.aave.permissionManagerContractAddress,
-    contractAbiAavePermissionManager,
+  rwaMarketPermissionManager = new ethers.Contract(
+    config.rwaMarket.permissionManagerContractAddress,
+    contractAbiRwaMarketPermissionManager,
     this.signer
   )
 
@@ -150,7 +150,7 @@ export class PoolService {
       this.logger.log(`Submitting tx to add ${ethAddresses.join(',')} to ${memberlistAddress}`)
       const tx =
         poolId === RwaMarketKey
-          ? await this.aavePermissionManager.addPermissions(
+          ? await this.rwaMarketPermissionManager.addPermissions(
               Array(ethAddresses.length).fill(AAVE_DEPOSITOR_ROLE),
               ethAddresses,
               { gasLimit: 1000000 }
@@ -191,7 +191,7 @@ export class PoolService {
       this.logger.log(`Checking memberlist for ${address.address}`)
       const isWhitelisted =
         poolId === RwaMarketKey
-          ? (await this.aavePermissionManager.getUserPermissions(address.address))[0].includes(AAVE_DEPOSITOR_ROLE)
+          ? (await this.rwaMarketPermissionManager.getUserPermissions(address.address))[0].includes(AAVE_DEPOSITOR_ROLE)
           : await memberlist.hasMember(address.address)
       this.logger.log(`Checking memberlist for ${address.address} => ${isWhitelisted ? 'true' : 'false'}`)
 
