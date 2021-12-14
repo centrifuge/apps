@@ -77,7 +77,7 @@ export async function investorTransactions(owner: string) {
 
   const date = (timestamp: string) => new Date(parseInt(timestamp, 10) * 1000)
   const formatDate = (timestamp: string) =>
-    date(timestamp).toISOString().substr(0, 10) + ' ' + date(timestamp).toUTCString().substr(17)
+    `${date(timestamp).toISOString().substr(0, 10)} ${date(timestamp).toUTCString().substr(17)}`
 
   const rows: string[][] = [
     [...Object.keys(headers).map((key: string) => headers[key])],
@@ -90,9 +90,9 @@ export async function investorTransactions(owner: string) {
         .map((item: any) => {
           if (['currencyAmount', 'newBalance'].includes(item)) {
             return el[item] ? el[item] / 10 ** 18 : '-'
-          } else if (item == 'tokenPrice') {
+          } else if (item === 'tokenPrice') {
             return el[item] ? el[item] / 10 ** 27 : '-'
-          } else if (item == 'gasPrice') {
+          } else if (item === 'gasPrice') {
             return el[item] ? el[item] / 10 ** 9 : '-'
           }
           return el[item] ? el[item] : '-'
