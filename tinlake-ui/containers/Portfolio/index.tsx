@@ -1,7 +1,8 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Button, Heading } from 'grommet'
+import { Box, Heading } from 'grommet'
+import { FormNextLink } from 'grommet-icons'
 import Link from 'next/link'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
@@ -123,6 +124,14 @@ const Portfolio: React.FC<Props> = (props: Props) => {
               />
             </Box>
           )}
+          {address && hasBalance && (
+            <Box direction="row" align="center">
+              <FormNextLink style={{ transform: 'rotate(90deg)', marginRight: '5px' }} />
+              <Heading level={4} onClick={() => investorTransactions(address)} style={{ cursor: 'pointer' }}>
+                Download transactions
+              </Heading>
+            </Box>
+          )}
         </Box>
       </Box>
       <Box direction="row" gap="small" margin={{ bottom: 'large' }} justify="center">
@@ -200,7 +209,13 @@ const Portfolio: React.FC<Props> = (props: Props) => {
 
           <Box margin={{ top: 'medium', left: 'auto', right: 'auto' }}>
             <Link href="/">
-              <Button label="Explore further investment opportunities" secondary size="small" />
+              {/* <Button label="Browse pools" secondary size="small" /> */}
+              <Box direction="row" align="center">
+                <FormNextLink style={{ marginRight: '5px' }} />
+                <Heading level={4} style={{ cursor: 'pointer' }}>
+                  Browse pools
+                </Heading>
+              </Box>
             </Link>
           </Box>
         </Stack>
@@ -213,13 +228,6 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           </Link>
         </EmptyParagraph>
       )}
-      <Button
-        key={'Export transaction list'}
-        label={'Export transaction list'}
-        size="small"
-        onClick={() => investorTransactions()}
-        margin={{ top: 'small' }}
-      />
     </Box>
   )
 }

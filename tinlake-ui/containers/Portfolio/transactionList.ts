@@ -3,10 +3,12 @@ import Apollo from '../../services/apollo'
 import { downloadCSV } from '../../utils/export'
 import { csvName } from '../DataQuery/queries'
 
-const fetch = async (skip: number, first: number, blockHash: string | null): Promise<any> => {
+const fetch = async (owner: string, skip: number, first: number, blockHash: string | null): Promise<any> => {
   return await Apollo.runCustomQuery(gql`
       {
-      investorTransactions(first: ${first}, skip: ${skip} ${blockHash ? `, block: { hash: "${blockHash}" }` : ''}) {
+      investorTransactions(where: {owner: ${`"${owner}"`} }, first: ${first}, skip: ${skip} ${
+    blockHash ? `, block: { hash: "${blockHash}" }` : ''
+  }) {
         pool {
           shortName
         }
@@ -33,7 +35,7 @@ const fetch = async (skip: number, first: number, blockHash: string | null): Pro
   `)
 }
 
-export async function investorTransactions() {
+export async function investorTransactions(owner: string) {
   let start = 0
   const limit = 1000
 
@@ -44,7 +46,7 @@ export async function investorTransactions() {
   // subgraph only returns 1000 entries, fetch until no more entries are returned
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const response: any = await fetch(start, limit, blockHash)
+    const response: any = await fetch(owner, start, limit, blockHash)
 
     if (blockHash === null) {
       blockHash = response._meta.block.hash
