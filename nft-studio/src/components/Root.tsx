@@ -10,6 +10,7 @@ import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
+import { CentrifugeProvider } from './CentrifugeProvider'
 import { GlobalStyle } from './GlobalStyle'
 import { LoadBoundary } from './LoadBoundary'
 import { NavBar } from './NavBar'
@@ -57,31 +58,33 @@ export const Root: React.FC = () => {
         <FabricGlobalStyle />
         <OverlayProvider>
           <Web3Provider>
-            <TransactionProvider>
-              <TransactionToasts />
-              <Router>
-                <NavBar title="NFT Studio" />
-                <LoadBoundary>
-                  <Switch>
-                    <Route path="/collection/:cid/object/mint">
-                      <MintNFTPage />
-                    </Route>
-                    <Route path="/collection/:cid/object/:nftid">
-                      <NFTPage />
-                    </Route>
-                    <Route path="/collection/:cid">
-                      <CollectionPage />
-                    </Route>
-                    <Route path="/account">
-                      <AccountNFTsPage />
-                    </Route>
-                    <Route path="/">
-                      <CollectionsPage />
-                    </Route>
-                  </Switch>
-                </LoadBoundary>
-              </Router>
-            </TransactionProvider>
+            <CentrifugeProvider>
+              <TransactionProvider>
+                <TransactionToasts />
+                <Router>
+                  <NavBar title="NFT Studio" />
+                  <LoadBoundary>
+                    <Switch>
+                      <Route path="/collection/:cid/object/mint">
+                        <MintNFTPage />
+                      </Route>
+                      <Route path="/collection/:cid/object/:nftid">
+                        <NFTPage />
+                      </Route>
+                      <Route path="/collection/:cid">
+                        <CollectionPage />
+                      </Route>
+                      <Route path="/account">
+                        <AccountNFTsPage />
+                      </Route>
+                      <Route path="/">
+                        <CollectionsPage />
+                      </Route>
+                    </Switch>
+                  </LoadBoundary>
+                </Router>
+              </TransactionProvider>
+            </CentrifugeProvider>
           </Web3Provider>
         </OverlayProvider>
       </ThemeProvider>
