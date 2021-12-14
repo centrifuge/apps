@@ -15,6 +15,8 @@ const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 const RwaMarketKey = 'rwa-market'
 
+export const CustomPoolIds = [RwaMarketKey]
+
 export const customPools: { [key: string]: string[] } = { mainnet: [RwaMarketKey], kovan: [] }
 
 @Injectable()

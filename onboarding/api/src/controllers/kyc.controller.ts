@@ -4,7 +4,7 @@ import { AddressRepo } from '../repos/address.repo'
 import { KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
 import { SecuritizeService } from '../services/kyc/securitize.service'
-import { PoolService } from '../services/pool.service'
+import { CustomPoolIds, PoolService } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
 
 @Controller()
@@ -37,9 +37,11 @@ export class KycController {
     // TODO: redirect to app?
     if (!kycInfo.providerAccountId) {
       this.logger.warn('Securitize code has already been used')
-      const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${
-        query.tranche || 'senior'
-      }`
+      const redirectUrl = CustomPoolIds.includes(params.poolId)
+        ? `${config.tinlakeUiHost}onboarding/${params.poolId}`
+        : `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${
+            query.tranche || 'senior'
+          }`
       return res.redirect(redirectUrl)
     }
 
@@ -79,9 +81,11 @@ export class KycController {
     // Create session and redirect user
     const session = this.sessionService.create(userId)
 
-    const redirectUrl = `${config.tinlakeUiHost}pool/${params.poolId}/${
-      pool.metadata.slug
-    }/onboarding?session=${session}&tranche=${query.tranche || 'senior'}`
+    const redirectUrl = CustomPoolIds.includes(params.poolId)
+      ? `${config.tinlakeUiHost}onboarding/${params.poolId}?session=${session}`
+      : `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?session=${session}&tranche=${
+          query.tranche || 'senior'
+        }`
     return res.redirect(redirectUrl)
   }
 

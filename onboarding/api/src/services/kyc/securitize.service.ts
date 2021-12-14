@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import config from '../../config'
 import { KycRepo } from '../../repos/kyc.repo'
+import { CustomPoolIds } from '../pool.service'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 export interface SecuritizeDigest {
@@ -23,7 +24,9 @@ export class SecuritizeService {
   getAuthorizationLink(address: string, poolId?: string, tranche?: 'senior' | 'junior'): string {
     const scope = `info%20details%20verification`
     const redirectUrl = poolId
-      ? `${config.onboardApiHost}pools/${poolId}/callback/${address}/securitize?tranche=${tranche || 'senior'}`
+      ? CustomPoolIds.includes(poolId)
+        ? `${config.onboardApiHost}onboarding/${poolId}`
+        : `${config.onboardApiHost}pools/${poolId}/callback/${address}/securitize?tranche=${tranche || 'senior'}`
       : `${config.onboardApiHost}callback/${address}/securitize?tranche=${tranche || 'senior'}`
     return `${config.securitize.idHost}#/authorize?issuerId=${config.securitize.clientId}&scope=${scope}&redirecturl=${redirectUrl}`
   }
