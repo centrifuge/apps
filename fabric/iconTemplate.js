@@ -1,12 +1,12 @@
 function iconTemplate({ template }, opts, { imports, interfaces, componentName, jsx, exports }) {
+  jsx.openingElement.name.name = 'Svg'
+  jsx.closingElement.name.name = 'Svg'
+
   const plugins = ['jsx']
   if (opts.typescript) {
     plugins.push('typescript')
   }
   const typeScriptTpl = template.smart({ plugins })
-
-  jsx.openingElement.name.name = 'Svg'
-  jsx.closingElement.name.name = 'Svg'
 
   return typeScriptTpl.ast`
 ${imports}

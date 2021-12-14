@@ -8,7 +8,7 @@
     "build": "yarn build:icons && tsc",
     "storybook": "yarn build:icons --ignore-existing && start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "build:icons": "npx @svgr/cli --template ./iconTemplate.js -d ./src/icon ./src/icon-svg",
+    "build:icons": "svgr --template ./iconTemplate.js -d ./src/icon ./src/icon-svg",
     "lint": "eslint src",
     "test": "loki test",
     "approve": "loki approve",

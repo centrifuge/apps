@@ -15,6 +15,7 @@ import Alert from '../../components/Alert'
 import { Card } from '../../components/Card'
 import NumberInput from '../../components/NumberInput'
 import Scorecard from '../../components/Scorecard'
+import { Tooltip } from '../../components/Tooltip'
 import { Pool } from '../../config'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
 import { Fixed27Base } from '../../utils/ratios'
@@ -133,9 +134,13 @@ const Risk: React.FC<Props> = (props: Props) => {
           <TableHeader>
             <TableRow>
               <TableCell size="14%">Risk group ID</TableCell>
-              <TableCell size="22%">Max Advance Rate</TableCell>
-              <TableCell size="22%">Financing Fee (APR)</TableCell>
-              <TableCell size="22%">Term Recovery Rate</TableCell>
+              <TableCell size="22%">Max advance rate</TableCell>
+              <TableCell size="22%">Financing fee (APR)</TableCell>
+              <TableCell size="22%">
+                <Tooltip id="assumedRiskAdjustment" underline>
+                  Assumed risk adjustment
+                </Tooltip>
+              </TableCell>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -149,7 +154,15 @@ const Risk: React.FC<Props> = (props: Props) => {
                     : 'N/A'}
                 </TableCell>
                 <TableCell>
-                  {parseFloat(riskGroup.recoveryRatePD.div(new BN(10).pow(new BN(22))).toString()) / 1000}%
+                  {toPrecision(
+                    parseFloat(
+                      Fixed27Base.sub(riskGroup.recoveryRatePD)
+                        .div(new BN(10).pow(new BN(22)))
+                        .toString()
+                    ) / 1000,
+                    2
+                  )}
+                  %
                 </TableCell>
               </TableRow>
             ))}
