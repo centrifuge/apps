@@ -19,7 +19,7 @@ Promise.all([
       : undefined,
     external: Object.keys(pkg.dependencies),
     format: 'esm',
-    target: ['esnext'],
+    target: ['es6'],
   }),
   esbuild.build({
     entryPoints: ['src/index.ts'],

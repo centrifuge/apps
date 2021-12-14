@@ -6,13 +6,13 @@
   "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/centrifuge-js.esm.js",
-  "typings": "dist/index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist",
     "src"
   ],
   "scripts": {
-    "start": "yarn clean && run-p -l start:esbuild start:types",
+    "start": "run-p -l start:esbuild start:types",
     "start:esbuild": "node ./esbuild watch",
     "start:types": "tsc --watch --emitDeclarationOnly --outDir dist",
     "build": "yarn clean && yarn build:esbuild && yarn build:types",
