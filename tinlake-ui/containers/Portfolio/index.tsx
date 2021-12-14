@@ -19,6 +19,7 @@ import { useAddress } from '../../utils/useAddress'
 import { useMedia } from '../../utils/useMedia'
 import { usePools } from '../../utils/usePools'
 import { TokenBalance, usePortfolio } from '../../utils/usePortfolio'
+import { investorTransactions } from './transactionList'
 
 interface Props {
   ipfsPools: IpfsPools
@@ -212,6 +213,13 @@ const Portfolio: React.FC<Props> = (props: Props) => {
           </Link>
         </EmptyParagraph>
       )}
+      <Button
+        key={'Export transaction list'}
+        label={'Export transaction list'}
+        size="small"
+        onClick={() => investorTransactions()}
+        margin={{ top: 'small' }}
+      />
     </Box>
   )
 }
