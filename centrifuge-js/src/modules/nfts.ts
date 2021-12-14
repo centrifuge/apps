@@ -2,6 +2,7 @@ import { StorageKey, u32 } from '@polkadot/types'
 // import { AnyNumber } from '@polkadot/types/types'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
+import { getRandomUint } from '../utils'
 
 type Instance = {
   owner: string
@@ -36,7 +37,6 @@ export type Collection = Class & {
 
 const MAX_ATTEMPTS = 10
 
-const getRandomUint = () => (Math.random() * (2 ** 53 - 1)) >>> 0
 const formatClassKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatInstanceKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
