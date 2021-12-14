@@ -71,7 +71,7 @@ export const NFTPage: React.FC = () => {
                   </Link>
                 </Box>
                 <Stack>
-                  <Text variant="headingLarge" as="h1">
+                  <Text variant="headingLarge" as="h1" style={{ wordBreak: 'break-word' }}>
                     {metadata.name}
                   </Text>
                   <Text variant="heading3" color="textSecondary">
@@ -93,7 +93,9 @@ export const NFTPage: React.FC = () => {
                 </Stack> */}
                 <Stack>
                   <Text variant="label1">Description</Text>
-                  <Text variant="heading3">{collectionMetadata.description || 'No description'}</Text>
+                  <Text variant="heading3" style={{ wordBreak: 'break-word' }}>
+                    {collectionMetadata.description || 'No description'}
+                  </Text>
                 </Stack>
                 <Stack>
                   <Text variant="label1">Source</Text>

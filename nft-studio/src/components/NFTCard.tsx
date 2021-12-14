@@ -40,7 +40,7 @@ export const NFTCard: React.FC<Props> = ({ nft }) => {
             />
           )}
         </Box>
-        <Box px={[2, 3]}>
+        <Stack gap={1} px={[2, 3]}>
           <Text as="h2" variant="heading2" style={{ wordBreak: 'break-word' }}>
             {metadata?.name ?? 'Unnamed NFT'}
           </Text>
@@ -49,7 +49,7 @@ export const NFTCard: React.FC<Props> = ({ nft }) => {
               by <Identity address={collection.owner} />
             </Text>
           )}
-        </Box>
+        </Stack>
       </Stack>
     </Card>
   )

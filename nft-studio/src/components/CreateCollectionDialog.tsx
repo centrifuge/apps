@@ -9,6 +9,7 @@ import { createCollectionMetadata } from '../utils/createCollectionMetadata'
 import { getAvailableClassId } from '../utils/getAvailableClassId'
 import { useBalance } from '../utils/useBalance'
 import { useCreateTransaction } from '../utils/useCreateTransaction'
+import { fetchMetadata } from '../utils/useMetadata'
 import { TextArea } from './TextArea'
 import { TextInput } from './TextInput'
 
@@ -34,6 +35,8 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
       async (api) => {
         const classId = await getAvailableClassId()
         const res = await createCollectionMetadata(name, description)
+
+        queryClient.prefetchQuery(['metadata', res.metadataURI], () => fetchMetadata(res.metadataURI))
 
         return api.tx.utility.batchAll([
           api.tx.uniques.create(classId, selectedAccount!.address),
