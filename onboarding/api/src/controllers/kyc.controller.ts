@@ -69,8 +69,8 @@ export class KycController {
       'securitize',
       kyc.providerAccountId,
       investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus,
-      investor.domainInvestorDetails.isUsaTaxResident,
-      investor.domainInvestorDetails.isAccredited
+      investor.domainInvestorDetails?.isUsaTaxResident,
+      investor.domainInvestorDetails?.isAccredited
     )
 
     // Link user to pool/tranche so we know which pools a user has shown interest in
@@ -128,8 +128,8 @@ export class KycController {
       'securitize',
       kyc.providerAccountId,
       investor.verificationStatus === 'manual-review' ? 'processing' : investor.verificationStatus,
-      investor.domainInvestorDetails.isUsaTaxResident,
-      investor.domainInvestorDetails.isAccredited
+      investor.domainInvestorDetails?.isUsaTaxResident,
+      investor.domainInvestorDetails?.isAccredited
     )
 
     // Create session and redirect user

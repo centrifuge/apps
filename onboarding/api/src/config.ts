@@ -35,6 +35,8 @@ export interface Config {
     secret: string
     apiHost: string
     idHost: string
+    domainApiHost: string
+    domainApiKey: string
   }
 }
 
@@ -73,6 +75,8 @@ const config: Config = {
     secret: process.env.SECURITIZE_SECRET,
     apiHost: process.env.SECURITIZE_API_HOST,
     idHost: process.env.SECURITIZE_ID_HOST,
+    domainApiHost: process.env.SECURITIZE_DOMAIN_API_HOST,
+    domainApiKey: process.env.SECURITIZE_DOMAIN_API_KEY,
   },
 }
 
