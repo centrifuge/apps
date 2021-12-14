@@ -6,7 +6,7 @@ import { csvName } from '../DataQuery/queries'
 const fetch = async (owner: string, skip: number, first: number, blockHash: string | null): Promise<any> => {
   return await Apollo.runCustomQuery(gql`
       {
-      investorTransactions(where: {owner: ${`"${owner}"`} }, first: ${first}, skip: ${skip} ${
+      investorTransactions(where: {owner: ${`"${owner}"`} }, orderBy: timestamp, orderDirection: desc, first: ${first}, skip: ${skip} ${
     blockHash ? `, block: { hash: "${blockHash}" }` : ''
   }) {
         pool {
@@ -64,7 +64,7 @@ export async function investorTransactions(owner: string) {
   const headers: { [key: string]: string } = {
     timestamp: 'Date',
     pool: 'Pool',
-    owner: 'Wallet',
+    owner: 'Account',
     type: 'Transaction Type',
     symbol: 'Symbol',
     currencyAmount: 'Currency Amount',
