@@ -86,7 +86,3 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 }
 
 export default OnboardingPage
-
-const capitalizeFirstLetter = (text: string) => {
-  return text.charAt(0).toUpperCase() + text.slice(1)
-}
