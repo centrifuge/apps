@@ -1,7 +1,7 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
 import { baseToDisplay } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
-import { Box, Heading } from 'grommet'
+import { Box, Button, Heading } from 'grommet'
 import { FormNextLink } from 'grommet-icons'
 import Link from 'next/link'
 import * as React from 'react'
@@ -125,12 +125,13 @@ const Portfolio: React.FC<Props> = (props: Props) => {
             </Box>
           )}
           {address && hasBalance && (
-            <Box direction="row" align="center">
-              <FormNextLink style={{ transform: 'rotate(90deg)', marginRight: '5px' }} />
-              <Heading level={4} onClick={() => investorTransactions(address)} style={{ cursor: 'pointer' }}>
-                Download transactions
-              </Heading>
-            </Box>
+            <Button
+              label="Download transactions"
+              plain
+              onClick={() => investorTransactions(address)}
+              icon={<FormNextLink style={{ transform: 'rotate(90deg)' }} />}
+              size="small"
+            />
           )}
         </Box>
       </Box>
@@ -209,13 +210,7 @@ const Portfolio: React.FC<Props> = (props: Props) => {
 
           <Box margin={{ top: 'medium', left: 'auto', right: 'auto' }}>
             <Link href="/">
-              {/* <Button label="Browse pools" secondary size="small" /> */}
-              <Box direction="row" align="center">
-                <FormNextLink style={{ marginRight: '5px' }} />
-                <Heading level={4} style={{ cursor: 'pointer' }}>
-                  Browse pools
-                </Heading>
-              </Box>
+              <Button label="Browse pools" plain icon={<FormNextLink />} size="small" />
             </Link>
           </Box>
         </Stack>
