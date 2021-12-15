@@ -124,6 +124,8 @@ const AgreementStep: React.FC<Props> = ({
                     agreement.name
                   } for ${poolName}. Note that the minimum investment
             amount for this pool is 5000 ${activePool?.metadata.currencySymbol || 'DAI'}.`}
+              {activePool?.metadata.slug === 'rwa-market' &&
+                ' US investors are excluded from participating in this market.'}
             </StepParagraph>
             {onboardingData?.showNonSolicitationNotice && (
               <Checkbox

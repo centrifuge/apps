@@ -56,7 +56,7 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
                   COORDINATOR: '0x0',
                   PILE: '0x0',
                 },
-                metadata: { name: 'RWA Market', slug: 'rwa-market', asset: '-' },
+                metadata: { name: 'RWA Market', slug: 'rwa-market', asset: '-', currencySymbol: 'USDC' },
               }}
             />
           </PageContainer>
