@@ -96,7 +96,7 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
   const [activeStep, setActiveStep] = React.useState(0)
 
   const hideKYC = kycStatus === 'verified' && accreditationStatus
-  const logo = market === 'rwa-market' ? '/static/aave-centrifuge-market.svg' : '/static/logo.svg'
+  const logo = market === 'rwa-market' ? '/static/rwa-market.svg' : '/static/logo.svg'
   const logoHeight = market === 'rwa-market' ? 87 : 16
   const logoMargin = market === 'rwa-market' ? 'xsmall' : 'medium'
 

@@ -26,7 +26,7 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
         <Head>
           <title>Investor Onboarding for {capitalizeFirstLetter(props.market)} | Tinlake | Centrifuge</title>
         </Head>
-        <FunnelHeader returnPath={config.aaveOnboardingReturnUrl} />
+        <FunnelHeader returnPath={config.rwaMarketOnboardingReturnUrl} />
         <Auth>
           <PageContainer width="funnel" noMargin>
             <PoolOnboarding
