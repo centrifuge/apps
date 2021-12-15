@@ -157,7 +157,7 @@ export class PoolService {
       const tx =
         poolId === RwaMarketKey
           ? await this.rwaMarketPermissionManager.addPermissions(
-              Array(ethAddresses.length).fill(AAVE_DEPOSITOR_ROLE),
+              Array(ethAddresses.length).fill(RWA_MARKET_DEPOSITOR_ROLE),
               ethAddresses,
               { gasLimit: 1000000 }
             )
@@ -197,7 +197,7 @@ export class PoolService {
       this.logger.log(`Checking memberlist for ${address.address}`)
       const isWhitelisted =
         poolId === RwaMarketKey
-          ? (await this.rwaMarketPermissionManager.getUserPermissions(address.address))[0].includes(AAVE_DEPOSITOR_ROLE)
+          ? await this.rwaMarketPermissionManager.isInRole(address.address, RWA_MARKET_DEPOSITOR_ROLE)
           : await new ethers.Contract(memberlistAddress, contractAbiMemberlist, this.provider).hasMember(
               address.address
             )
@@ -222,7 +222,7 @@ export class PoolService {
   }
 }
 
-const AAVE_DEPOSITOR_ROLE = 0
+const RWA_MARKET_DEPOSITOR_ROLE = 0
 
 export interface Pool {
   metadata: any
