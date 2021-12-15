@@ -33,15 +33,15 @@ export class AgreementController {
 
   @Get('pools/:poolId/agreements/:provider/:providerTemplateId/redirect')
   async redirectToAgreement(@Param() params, @Query() query, @Res({ passthrough: true }) res) {
-    const pool = await this.poolService.get(params.poolId)
+    const pool = await this.poolService.get(params.poolId.trim())
     if (!pool) throw new BadRequestException('Invalid pool')
 
     if (!query.session) throw new BadRequestException('Missing session')
     const verifiedSession = this.sessionService.verify(query.session)
     if (!verifiedSession) {
-      const returnUrl = CustomPoolIds.includes(params.poolId)
-        ? `${config.tinlakeUiHost}onboarding/${params.poolId}`
-        : `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding`
+      const returnUrl = CustomPoolIds.includes(params.poolId.trim())
+        ? `${config.tinlakeUiHost}onboarding/${params.poolId.trim()}`
+        : `${config.tinlakeUiHost}pool/${params.poolId.trim()}/${pool.metadata.slug}/onboarding`
       console.error(`Invalid session`)
       return res.redirect(returnUrl)
     }
@@ -57,7 +57,7 @@ export class AgreementController {
       user.id,
       user.email,
       user.entityName?.length > 0 ? user.entityName : user.fullName,
-      params.poolId,
+      params.poolId.trim(),
       profileAgreement.tranche,
       profileAgreement.name,
       profileAgreement.providerTemplateId
