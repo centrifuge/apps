@@ -149,7 +149,11 @@ export class PoolService {
     const ethAddresses = addresses.map((a) => a.address)
 
     try {
-      this.logger.log(`Submitting tx to add ${ethAddresses.join(',')} to ${memberlistAddress}`)
+      this.logger.log(
+        `Submitting tx to add ${ethAddresses.join(',')} to ${
+          poolId === RwaMarketKey ? RwaMarketKey : memberlistAddress
+        }`
+      )
       const tx =
         poolId === RwaMarketKey
           ? await this.rwaMarketPermissionManager.addPermissions(
@@ -171,7 +175,9 @@ export class PoolService {
         await this.checkMemberlist(memberlistAddress, address, user, poolId, tranche, agreementId)
       }
     } catch (e) {
-      console.error(`Failed to add ${ethAddresses.join(',')} to ${memberlistAddress}: ${e}`)
+      console.error(
+        `Failed to add ${ethAddresses.join(',')} to ${poolId === RwaMarketKey ? RwaMarketKey : memberlistAddress}: ${e}`
+      )
     }
   }
 
@@ -188,13 +194,13 @@ export class PoolService {
       const pool = await this.get(poolId)
       if (!pool) throw new Error(`Failed to get pool ${poolId} when adding to memberlist`)
 
-      const memberlist = new ethers.Contract(memberlistAddress, contractAbiMemberlist, this.provider)
-
       this.logger.log(`Checking memberlist for ${address.address}`)
       const isWhitelisted =
         poolId === RwaMarketKey
           ? (await this.rwaMarketPermissionManager.getUserPermissions(address.address))[0].includes(AAVE_DEPOSITOR_ROLE)
-          : await memberlist.hasMember(address.address)
+          : await new ethers.Contract(memberlistAddress, contractAbiMemberlist, this.provider).hasMember(
+              address.address
+            )
       this.logger.log(`Checking memberlist for ${address.address} => ${isWhitelisted ? 'true' : 'false'}`)
 
       if (isWhitelisted) {

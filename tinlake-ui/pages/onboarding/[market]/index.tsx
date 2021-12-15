@@ -24,7 +24,7 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
     >
       <WithFooter hideHelpMenu={true}>
         <Head>
-          <title>Investor Onboarding for {capitalizeFirstLetter(props.market)} | Tinlake | Centrifuge</title>
+          <title>Investor Onboarding for the RWA Market | Tinlake | Centrifuge</title>
         </Head>
         <FunnelHeader returnPath={config.rwaMarketOnboardingReturnUrl} />
         <Auth>
@@ -56,7 +56,7 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
                   COORDINATOR: '0x0',
                   PILE: '0x0',
                 },
-                metadata: { name: 'RWA Market', slug: 'rwa-market', asset: '-', currencySymbol: 'USDC' },
+                metadata: { name: 'the RWA Market', slug: 'rwa-market', asset: '-', currencySymbol: 'USDC' },
               }}
             />
           </PageContainer>

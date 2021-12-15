@@ -162,7 +162,7 @@ const AgreementStep: React.FC<Props> = ({
         {active && !isRestricted && agreement && agreementStatus === 'signed' && (
           <>
             <StepParagraph icon="clock">
-              The Issuer will counter-sign your {agreement.tranche === 'senior' ? 'DROP' : 'TIN'} Subscription Agreement
+              The Issuer will counter-sign your {agreement.name}
               for {poolName} soon. If KYC is verified, you will be ready to invest in this pool upon their signature.
             </StepParagraph>
           </>
