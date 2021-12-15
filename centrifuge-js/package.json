@@ -20,6 +20,7 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rm -rf dist",
     "test": "jest",
+    "test2": "node --experimental-vm-modules node_modules/jest/bin/jest",
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
