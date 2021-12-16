@@ -45,7 +45,7 @@ create unique index if not exists kyc_unique_upsert on kyc (user_id, provider, p
 create table if not exists agreements (
     id uuid primary key,
     user_id uuid not null references users(id) on delete cascade on update cascade,
-    pool_id character(42) not null,
+    pool_id character varying(42) not null,
     tranche character varying(20) not null default '''senior'''::character varying,
     name character varying(100) not null default ''::character varying,
     provider character varying(100) not null,
@@ -65,7 +65,7 @@ create unique index if not exists agreements_unique on agreements (provider, pro
 create table if not exists investments (
     id uuid primary key,
     address_id uuid not null references addresses(id) on delete cascade on update cascade,
-    pool_id character(42) not null,
+    pool_id character varying(42) not null,
     tranche character varying(10) not null default '''senior'''::character varying,
     is_whitelisted boolean not null default false,
     balance double precision not null default '0'::double precision,
@@ -78,7 +78,7 @@ create unique index if not exists investments_unique on investments (address_id,
 -- user_pools
 create table if not exists user_pools (
     user_id uuid references users(id) on delete cascade on update cascade,
-    pool_id character(42) not null,
+    pool_id character varying(42) not null,
     tranche character varying(10),
     created_at timestamp with time zone not null default now()
 );

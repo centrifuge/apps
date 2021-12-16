@@ -45,6 +45,7 @@ export class AddressRepo {
       where kyc.status like 'verified' and (kyc.usa_tax_resident is false or kyc.accredited is true)
       and agreements.signed_at is not null and agreements.counter_signed_at is not null
       and investments.is_whitelisted is not true
+      and addresses.unlinked_at is null
       group by users.id, agreements.pool_id, agreements.tranche
     `
 
