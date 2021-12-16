@@ -11,7 +11,7 @@ import WithFooter from '../../../components/WithFooter'
 import config, { loadPoolsFromIPFS, Pool } from '../../../config'
 
 interface Props extends WithRouterProps {
-  market: 'aave'
+  market: 'rwa-market'
   pool: Pool
 }
 
@@ -24,13 +24,13 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
     >
       <WithFooter hideHelpMenu={true}>
         <Head>
-          <title>Investor Onboarding for {capitalizeFirstLetter(props.market)} | Tinlake | Centrifuge</title>
+          <title>Investor Onboarding for the RWA Market | Tinlake | Centrifuge</title>
         </Head>
-        <FunnelHeader returnPath={config.aaveOnboardingReturnUrl} />
+        <FunnelHeader returnPath={config.rwaMarketOnboardingReturnUrl} />
         <Auth>
           <PageContainer width="funnel" noMargin>
             <PoolOnboarding
-              market="aave"
+              market="rwa-market"
               activePool={{
                 network: 'mainnet',
                 version: 3,
@@ -56,7 +56,7 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
                   COORDINATOR: '0x0',
                   PILE: '0x0',
                 },
-                metadata: { name: 'Aave', slug: 'aave', asset: '-' },
+                metadata: { name: 'the RWA Market', slug: 'rwa-market', asset: '-', currencySymbol: 'USDC' },
               }}
             />
           </PageContainer>
@@ -68,7 +68,7 @@ const OnboardingPage: React.FC<Props> = (props: Props) => {
 
 export async function getStaticPaths() {
   // We'll pre-render only these paths at build time.
-  const paths = [{ params: { market: 'aave' } }]
+  const paths = [{ params: { market: 'rwa-market' } }]
 
   // { fallback: false } means other routes should 404.
   return { paths, fallback: false }
@@ -86,7 +86,3 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 }
 
 export default OnboardingPage
-
-const capitalizeFirstLetter = (text: string) => {
-  return text.charAt(0).toUpperCase() + text.slice(1)
-}
