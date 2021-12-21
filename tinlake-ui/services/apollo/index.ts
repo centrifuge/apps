@@ -316,12 +316,12 @@ class Apollo {
               nftRegistry
               maturityDate
               financingDate
+              riskGroup
             }
           }
         }
         `,
     })
-    // riskGroup
 
     if (!result.data?.pools) return { data: [] }
 
@@ -420,14 +420,14 @@ class Apollo {
             reserve
             seniorTokenPrice
             juniorTokenPrice
+            seniorYield30Days
+            seniorYield90Days
+            juniorYield30Days
+            juniorYield90Days
           }
         }
         `,
     })
-    // seniorYield30Days
-    // seniorYield90Days
-    // juniorYield30Days
-    // juniorYield90Days
     const assetData: AssetData[] = result.data.dailyPoolDatas.map((item: any) => {
       return {
         day: Number(item.day.id),
