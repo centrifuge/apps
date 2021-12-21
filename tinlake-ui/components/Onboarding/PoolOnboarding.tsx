@@ -144,17 +144,25 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
                   whitelistStatus={whitelistStatus}
                 />
                 <Step title="Invest in token" state={getState(5, activeStep)} last>
-                  {activeStep === 5 && (
-                    <>
-                      <StepParagraph>
-                        Congratulations, you’ve successfully onboarded to the token! <br />
-                        Your are now ready to invest.
-                      </StepParagraph>
-                      <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
-                        <Button primary label={'Invest'} largeOnMobile={false} />
-                      </PoolLink>
-                    </>
-                  )}
+                  {activeStep === 5 &&
+                    (market === 'rwa-market' ? (
+                      <>
+                        <StepParagraph>
+                          Congratulations, you’ve successfully onboarded to the RWA Market! <br />
+                          You're ready to be one of the first to deposit USDC when it publicly launches.
+                        </StepParagraph>
+                      </>
+                    ) : (
+                      <>
+                        <StepParagraph>
+                          Congratulations, you’ve successfully onboarded to the token! <br />
+                          Your are now ready to invest.
+                        </StepParagraph>
+                        <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
+                          <Button primary label={'Invest'} largeOnMobile={false} />
+                        </PoolLink>
+                      </>
+                    ))}
                 </Step>
               </div>
             </>
