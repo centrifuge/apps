@@ -12,6 +12,7 @@ export type Config = {
   kusamaWsUrl: string
   signer?: Signer
   signingAddress?: AddressOrPair
+  printExtrinsics?: boolean
 }
 
 export type UserProvidedConfig = Partial<Config>
@@ -50,6 +51,18 @@ export class CentrifugeBase {
   ) {
     if (options?.batch) return submittable
 
+    if (this.config.printExtrinsics) {
+      if (submittable.method.method === 'batchAll') {
+        console.log(`utility.batchAll`)
+      } else {
+        console.log(
+          `${submittable.method.section}.${submittable.method.method}(${submittable.method.args
+            .map((arg) => arg.toString())
+            .join(', ')})`
+        )
+      }
+    }
+
     const { signer, signingAddress } = this.getSigner()
     if (options?.paymentInfo) {
       return submittable.paymentInfo(options.paymentInfo)
@@ -62,6 +75,9 @@ export class CentrifugeBase {
           const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
 
           if (result.dispatchError || errors.length) {
+            if (this.config.printExtrinsics) {
+              console.log(`=> ${result.dispatchError?.toString()}`)
+            }
             reject(result.dispatchError || errors)
           } else if (result.status.isInBlock || result.status.isFinalized) {
             resolve()

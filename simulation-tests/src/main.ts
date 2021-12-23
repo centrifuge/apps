@@ -15,84 +15,71 @@ const run = async () => {
     polkadotWsUrl: 'ws://localhost:9944',
     centrifugeWsUrl: 'ws://localhost:9946',
     signingAddress: AliceAccount,
+    printExtrinsics: true,
   })
 
-  console.log(await centrifuge.pools.getPools())
+  const poolId = '481651995861'
+  // const poolId = makeId()
+  // const loanCollectionId = makeId()
+  // const assetCollectionId = makeId()
+  // const assetNftId = makeId()
+  // console.log(
+  //   `poolId: ${poolId}, loanCollectionId: ${loanCollectionId}, assetCollectionId: ${assetCollectionId}, assetNftId: ${assetNftId}`
+  // )
 
-  const poolId = makeId()
-  const loanCollectionId = makeId()
-  const assetCollectionId = makeId()
-  const assetNftId = makeId()
-  console.log(
-    `poolId: ${poolId}, loanCollectionId: ${loanCollectionId}, assetCollectionId: ${assetCollectionId}, assetNftId: ${assetNftId}`
-  )
+  // await centrifuge.pools.createPool([
+  //   poolId,
+  //   loanCollectionId,
+  //   [
+  //     [10, 5],
+  //     [0, 0],
+  //   ],
+  //   'Usd',
+  //   new BN(1000).mul(Currency),
+  // ])
 
-  console.log('Create pool')
-  await centrifuge.pools.createPool([
-    poolId,
-    loanCollectionId,
-    [
-      [10, 5],
-      [0, 0],
-    ],
-    'Usd',
-    new BN(1000).mul(Currency),
-  ])
+  // // console.log(`Max reserve = ${new BN((await centrifuge.pools.getPool([poolId])).pool.toJSON().maxReserve).toString()}`)
+  // console.log(`Pool = ${JSON.stringify(await centrifuge.pools.getPool([poolId]))}`)
 
-  console.log('Add borrower role to Alice')
-  await centrifuge.pools.approveRole([poolId, 'Borrower', [AliceAccount.address]])
+  // await centrifuge.pools.approveRole([poolId, 'Borrower', [AliceAccount.address]])
+  // await centrifuge.pools.approveRole([poolId, 'RiskAdmin', [AliceAccount.address]])
 
-  console.log('Add risk admin role to Alice')
-  await centrifuge.pools.approveRole([poolId, 'RiskAdmin', [AliceAccount.address]])
+  // await centrifuge.pools.addWriteOffGroup([poolId, new BN(50).mul(new BN(10).pow(new BN(25))), 1])
 
-  console.log('Create asset collection')
-  await centrifuge.nfts.createCollection([
-    assetCollectionId,
-    AliceAccount.address,
-    'QmUTwA6RTUb1FbJCeM1D4G4JaMHAbPehK6WwCfykJixjm3',
-  ])
+  // await centrifuge.nfts.createCollection([
+  //   assetCollectionId,
+  //   AliceAccount.address,
+  //   'QmUTwA6RTUb1FbJCeM1D4G4JaMHAbPehK6WwCfykJixjm3',
+  // ])
+  // await centrifuge.nfts.mintNft([
+  //   assetCollectionId,
+  //   assetNftId,
+  //   AliceAccount.address,
+  //   'QmUTwA6RTUb1FbJCeM1D4G4JaMHAbPehK6WwCfykJixjm3',
+  // ])
 
-  console.log('Create asset collection')
-  await centrifuge.nfts.createCollection([
-    assetCollectionId,
-    AliceAccount.address,
-    'QmUTwA6RTUb1FbJCeM1D4G4JaMHAbPehK6WwCfykJixjm3',
-  ])
+  // await centrifuge.pools.createLoan([poolId, assetCollectionId, assetNftId])
+  const loanId = '1'
+  // await centrifuge.pools.priceLoan([
+  //   poolId,
+  //   loanId,
+  //   '1000000003488077118214104515',
+  //   'CreditLine',
+  //   [Rate.toString(), new BN(100).mul(Currency).toString()],
+  // ])
 
-  console.log('Mint asset NFT')
-  await centrifuge.nfts.mintNft([
-    assetCollectionId,
-    assetNftId,
-    AliceAccount.address,
-    'QmUTwA6RTUb1FbJCeM1D4G4JaMHAbPehK6WwCfykJixjm3',
-  ])
+  // await centrifuge.pools.updateInvestOrder([poolId, 1, new BN(100).mul(Currency)])
+  // await centrifuge.pools.updateInvestOrder([poolId, 0, new BN(100).mul(Currency)])
+  // await centrifuge.pools.closeEpoch([poolId])
+  // console.log(`Pool = ${JSON.stringify(await centrifuge.pools.getPool([poolId]))}`)
 
-  console.log('Create asset')
-  await centrifuge.pools.createLoan([poolId, assetCollectionId, assetNftId])
+  // await centrifuge.pools.financeLoan([poolId, loanId, new BN(50).mul(Currency)])
+  console.log(`NAV = ${((await centrifuge.pools.getPool([poolId])) as any).nav!.latestNav}`)
 
-  console.log('Price asset')
-  const loanId = '7'
-  await centrifuge.pools.priceLoan([
-    poolId,
-    loanId,
-    '1000000003488077118214104515',
-    'CreditLine',
-    [Rate.toString(), new BN(100).mul(Currency).toString()],
-  ])
+  const writeOffGroupId = 0
+  await centrifuge.pools.adminWriteOff([poolId, loanId, writeOffGroupId])
 
-  console.log('Invest in both tranches')
-  await centrifuge.pools.updateInvestOrder([poolId, 1, new BN(100).mul(Currency)])
-  await centrifuge.pools.updateInvestOrder([poolId, 0, new BN(100).mul(Currency)])
-
-  console.log('Close epoch')
-  await centrifuge.pools.closeEpoch([poolId])
-
-  console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
-
-  console.log('Finance asset')
-  await centrifuge.pools.financeLoan([poolId, loanId, new BN(50).mul(Currency)])
-
-  console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
+  console.log(`NAV = ${((await centrifuge.pools.getPool([poolId])) as any).nav!.latestNav}`)
 }
 
 cryptoWaitReady().then(() => {

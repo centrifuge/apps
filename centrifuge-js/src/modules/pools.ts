@@ -108,6 +108,16 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
+  async function adminWriteOff(
+    args: [poolId: string, loanId: string, writeOffGroupId: number],
+    options?: TransactionOptions
+  ) {
+    const [poolId, loanId, writeOffGroupId] = args
+    const api = await inst.getApi()
+    const submittable = api.tx.loan.adminWriteOffLoan(poolId, loanId, writeOffGroupId)
+    return inst.wrapSignAndSend(api, submittable, options)
+  }
+
   return {
     createPool,
     updateInvestOrder,
@@ -119,5 +129,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
     getPools,
     getPool,
     addWriteOffGroup,
+    adminWriteOff,
   }
 }

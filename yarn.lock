@@ -3192,6 +3192,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": 4.33.0
     "@typescript-eslint/parser": 4.33.0
     axios: ^0.24.0
+    esbuild-darwin-64: ^0.14.8
     esbuild-darwin-arm64: ^0.14.8
     eslint: 7.32.0
     eslint-config-prettier: 8.3.0
@@ -20636,6 +20637,13 @@ __metadata:
   version: 0.14.2
   resolution: "esbuild-darwin-64@npm:0.14.2"
   checksum: 5b7c8d51c4c2f6d8b268127e8f3dd64716d2d51f7cf514617722644f395af2822ebc1af08cbde2325dd81f2cc9654b5651068fb25095f090c4e3235b3bf8ea72
+  languageName: node
+  linkType: hard
+
+"esbuild-darwin-64@npm:^0.14.8":
+  version: 0.14.8
+  resolution: "esbuild-darwin-64@npm:0.14.8"
+  checksum: a84bdbc5383c155b67e381a48dcdfab83fae5c0f35888a62131dfdbaa62c112ce72069227d7479f5be4288b2521258a6ed42ea19b584d927cac7cca7e90def5b
   languageName: node
   linkType: hard
 
