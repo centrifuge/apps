@@ -13,7 +13,8 @@
     "gateway",
     "gateway/packages/lib",
     "gateway/packages/ui",
-    "gateway/packages/server"
+    "gateway/packages/server",
+    "simulation-tests"
   ],
   "devDependencies": {
     "@types/concurrently": "^5",
