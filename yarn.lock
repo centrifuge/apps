@@ -2989,10 +2989,12 @@ __metadata:
   dependencies:
     "@polkadot/api": ^6.2.1
     "@polkadot/util-crypto": ^7.4.1
+    "@types/bn.js": ^5
     "@types/jest": ^27.0.3
     "@types/node": ^16.11.12
     "@typescript-eslint/eslint-plugin": ^4.32.0
     "@typescript-eslint/parser": ^4.32.0
+    bn.js: ^5.2.0
     esbuild: ^0.14.2
     eslint: ^7.32.0
     eslint-config-prettier: ^8.3.0
