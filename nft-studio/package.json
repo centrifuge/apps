@@ -52,6 +52,7 @@
     "@types/styled-system__should-forward-prop": "^5",
     "@typescript-eslint/eslint-plugin": "4.33.0",
     "@typescript-eslint/parser": "4.33.0",
+    "esbuild-darwin-arm64": "^0.14.8",
     "eslint": "7.32.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-react": "7.21.5",

@@ -55,13 +55,14 @@ jobs:
           NEXT_PUBLIC_IPFS_GATEWAY: 'https://cloudflare-ipfs.com/ipfs/'
           NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS: '0x2cc8688c5f75e365aaeeb4ea8d6a480405a48d2a'
           NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.amber.centrifuge.io/'
+          NEXT_PUBLIC_RWA_MARKET_ONBOARD_RETURN_URL: 'https://dev.rwamarket.io'
           NEXT_PUBLIC_POOL_REGISTRY: '0x8FE85CeAe6157C1dfcDD1c5ec99361c9722d97de'
           NEXT_PUBLIC_POOLS_CONFIG: 'kovanStaging'
           NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmQbyqTrrvMCB4ZuUietmpqWRV3zvMCTLUK5jHz5GgTa2N'
           NEXT_PUBLIC_PORTIS_KEY: 'bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f'
           NEXT_PUBLIC_REWARDS_TREE_URL: 'https://storage.googleapis.com/rad-rewards-trees-kovan-staging/latest.json'
           NEXT_PUBLIC_RPC_URL: 'https://kovan.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5'
-          NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL: 'https://api.thegraph.com/subgraphs/name/centrifuge/tinlake-kovan-staging'
+          NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL: 'https://thegraph.centrifuge.io/subgraphs/name/centrifuge/tinlake-rewards-kovan-staging'
           NEXT_PUBLIC_TRANSACTION_TIMEOUT: '3600'
 
       - name: Deploy To Netlify
@@ -127,13 +128,14 @@ jobs:
           NEXT_PUBLIC_IPFS_GATEWAY: 'https://cloudflare-ipfs.com/ipfs/'
           NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
           NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.centrifuge.io/'
+          NEXT_PUBLIC_RWA_MARKET_ONBOARD_RETURN_URL: 'https://rwamarket.io'
           NEXT_PUBLIC_POOL_REGISTRY: '0xddf1c516cf87126c6c610b52fd8d609e67fb6033'
           NEXT_PUBLIC_POOLS_CONFIG: 'mainnetProduction'
-          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'Qmb42B6xa9dtYgrrkBoMNQVQYdsrEZYfrXss6XnNNmf3Ls'
+          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmYUbcMAXLG4ksGaxbnm3VvTcqpWPZPpMSyfm1APv6juq2'
           NEXT_PUBLIC_PORTIS_KEY: 'bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f'
           NEXT_PUBLIC_REWARDS_TREE_URL: 'https://storage.googleapis.com/rad-rewards-trees-mainnet-production/latest.json'
           NEXT_PUBLIC_RPC_URL: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516'
-          NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL: 'https://thegraph.centrifuge.io/subgraphs/name/centrifuge/tinlake'
+          NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL: 'https://thegraph.centrifuge.io/subgraphs/name/centrifuge/tinlake-rewards'
           NEXT_PUBLIC_TRANSACTION_TIMEOUT: '3600'
 
       - name: Deploy To Netlify

@@ -9,10 +9,15 @@ import { User, UserRepo } from '../repos/user.repo'
 import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
 import contractAbiMemberlist from '../utils/Memberlist.abi'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
+import contractAbiRwaMarketPermissionManager from '../utils/RwaMarketPermissionManager.abi'
 import { TransactionManager } from '../utils/tx-manager'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
-export const customPools: { [key: string]: string[] } = { mainnet: ['aave'], kovan: [] }
+const RwaMarketKey = 'rwa-market'
+
+export const CustomPoolIds = [RwaMarketKey]
+
+export const customPools: { [key: string]: string[] } = { mainnet: [RwaMarketKey], kovan: [] }
 
 @Injectable()
 export class PoolService {
@@ -25,6 +30,12 @@ export class PoolService {
     initialPriorityFeePerGas: 4,
   }).connect(this.provider)
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
+
+  rwaMarketPermissionManager = new ethers.Contract(
+    config.rwaMarket.permissionManagerContractAddress,
+    contractAbiRwaMarketPermissionManager,
+    this.signer
+  )
 
   constructor(
     private readonly addressRepo: AddressRepo,
@@ -138,44 +149,65 @@ export class PoolService {
     const ethAddresses = addresses.map((a) => a.address)
 
     try {
-      this.logger.log(`Submitting tx to add ${ethAddresses.join(',')} to ${memberlistAddress}`)
-      const tx = await memberAdmin.updateMembers(memberlistAddress, ethAddresses, validUntil, { gasLimit: 1000000 })
+      this.logger.log(
+        `Submitting tx to add ${ethAddresses.join(',')} to ${
+          poolId === RwaMarketKey ? RwaMarketKey : memberlistAddress
+        }`
+      )
+      const tx =
+        poolId === RwaMarketKey
+          ? await this.rwaMarketPermissionManager.addPermissions(
+              Array(ethAddresses.length).fill(RWA_MARKET_DEPOSITOR_ROLE),
+              ethAddresses,
+              { gasLimit: 1000000 }
+            )
+          : await memberAdmin.updateMembers(memberlistAddress, ethAddresses, validUntil, { gasLimit: 1000000 })
 
       this.logger.log(
-        `Submitted tx to add ${ethAddresses.join(',')} to ${memberlistAddress}: ${tx.hash} (nonce=${tx.nonce})`
+        `Submitted tx to add ${ethAddresses.join(',')} to ${
+          poolId === RwaMarketKey ? RwaMarketKey : memberlistAddress
+        }: ${tx.hash} (nonce=${tx.nonce})`
       )
       await this.provider.waitForTransaction(tx.hash)
       this.logger.log(`${tx.hash} (nonce=${tx.nonce}) completed`)
 
       for (let address of addresses) {
-        await this.checkMemberlist(memberlistAddress, address, user, pool, tranche, agreementId)
+        await this.checkMemberlist(memberlistAddress, address, user, poolId, tranche, agreementId)
       }
     } catch (e) {
-      console.error(`Failed to add ${ethAddresses.join(',')} to ${memberlistAddress}: ${e}`)
+      console.error(
+        `Failed to add ${ethAddresses.join(',')} to ${poolId === RwaMarketKey ? RwaMarketKey : memberlistAddress}: ${e}`
+      )
     }
   }
 
   // TODO: move to memberlist.service
   async checkMemberlist(
-    memberlistAddress: string,
+    memberlistAddress: string | undefined,
     address: AddressEntity,
     user: User,
-    pool: Pool,
+    poolId: string,
     tranche: Tranche,
     agreementId: string
   ): Promise<any> {
     try {
-      const memberlist = new ethers.Contract(memberlistAddress, contractAbiMemberlist, this.provider)
+      const pool = await this.get(poolId)
+      if (!pool) throw new Error(`Failed to get pool ${poolId} when adding to memberlist`)
 
       this.logger.log(`Checking memberlist for ${address.address}`)
-      const isWhitelisted = await memberlist.hasMember(address.address)
+      const isWhitelisted =
+        poolId === RwaMarketKey
+          ? await this.rwaMarketPermissionManager.isInRole(address.address, RWA_MARKET_DEPOSITOR_ROLE)
+          : await new ethers.Contract(memberlistAddress, contractAbiMemberlist, this.provider).hasMember(
+              address.address
+            )
       this.logger.log(`Checking memberlist for ${address.address} => ${isWhitelisted ? 'true' : 'false'}`)
 
       if (isWhitelisted) {
         this.logger.log(`${address.address} is a member of ${pool.metadata.name} - ${tranche}`)
         this.investmentRepo.upsert(
           address.id,
-          pool.addresses.ROOT_CONTRACT,
+          poolId === RwaMarketKey ? poolId : pool.addresses.ROOT_CONTRACT,
           tranche,
           true,
           agreementId,
@@ -189,6 +221,8 @@ export class PoolService {
     }
   }
 }
+
+const RWA_MARKET_DEPOSITOR_ROLE = 0
 
 export interface Pool {
   metadata: any

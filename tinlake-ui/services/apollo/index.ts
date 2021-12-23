@@ -561,7 +561,7 @@ function toTinlakeLoans(loans: any[]): { data: Loan[] } {
       financingDate: loan.financingDate,
       borrowsAggregatedAmount: loan.borrowsAggregatedAmount,
       repaysAggregatedAmount: loan.repaysAggregatedAmount,
-      riskGroup: Number(loan.riskGroup),
+      riskGroup: loan.riskGroup ? Number(loan.riskGroup) : 0,
     }
     tinlakeLoans.push(tinlakeLoan)
   })
