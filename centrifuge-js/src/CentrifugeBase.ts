@@ -48,6 +48,8 @@ export class CentrifugeBase {
     submittable: SubmittableExtrinsic<'promise'>,
     options?: T
   ) {
+    if (options?.batch) return submittable
+
     const { signer, signingAddress } = this.getSigner()
     if (options?.paymentInfo) {
       return submittable.paymentInfo(options.paymentInfo)

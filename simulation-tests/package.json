@@ -6,9 +6,11 @@
     "build:deps": "cd ../centrifuge-js && yarn build && cd ../simulation-tests"
   },
   "dependencies": {
-    "@centrifuge/centrifuge-js": "workspace:*"
+    "@centrifuge/centrifuge-js": "workspace:*",
+    "bn.js": "^5.2.0"
   },
   "devDependencies": {
+    "@types/bn.js": "^5",
     "nodemon": "^2.0.15",
     "ts-node": "^10.4.0"
   }

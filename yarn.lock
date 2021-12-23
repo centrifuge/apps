@@ -3271,6 +3271,8 @@ __metadata:
   resolution: "@centrifuge/simulation-tests@workspace:simulation-tests"
   dependencies:
     "@centrifuge/centrifuge-js": "workspace:*"
+    "@types/bn.js": ^5
+    bn.js: ^5.2.0
     nodemon: ^2.0.15
     ts-node: ^10.4.0
   languageName: unknown
@@ -9718,7 +9720,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/bn.js@npm:^5.1.0":
+"@types/bn.js@npm:^5, @types/bn.js@npm:^5.1.0":
   version: 5.1.0
   resolution: "@types/bn.js@npm:5.1.0"
   dependencies:
