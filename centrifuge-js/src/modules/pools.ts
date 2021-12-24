@@ -1,3 +1,4 @@
+import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
@@ -37,18 +38,33 @@ type PoolDetails = {
   maxReserve: BN
   availableReserve: BN
   totalReserve: BN
+  metadata: string
 }
+
+type NAVDetails = {
+  latestNav: BN
+  lastUpdated: number
+}
+
+const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 
 export function getPoolsModule(inst: CentrifugeBase) {
   async function createPool(
-    args: [poolId: string, collectionId: string, tranches: number[][], currency: string, maxReserve: BN],
+    args: [
+      poolId: string,
+      collectionId: string,
+      tranches: number[][],
+      currency: string,
+      maxReserve: BN,
+      metadata: string
+    ],
     options?: TransactionOptions
   ) {
-    const [poolId, collectionId, tranches, currency, maxReserve] = args
+    const [poolId, collectionId, tranches, currency, maxReserve, metadata] = args
     const api = await inst.getApi()
     const submittable = api.tx.utility.batchAll([
       api.tx.uniques.create(collectionId, LoanPalletAccountId),
-      api.tx.investorPool.createPool(poolId, tranches, currency, maxReserve.toString()),
+      api.tx.investorPool.createPool(poolId, tranches, currency, maxReserve.toString(), metadata),
       api.tx.loan.initialisePool(poolId, collectionId),
     ])
     return inst.wrapSignAndSend(api, submittable, options)
@@ -98,19 +114,20 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
+  // TODO: loanInfo type should be dependent on loanType
   async function priceLoan(
     args: [
       poolId: string,
       loanId: string,
       ratePerSec: string,
-      loanType: 'CreditLine',
+      loanType: 'CreditLine' | 'BulletLoan',
       loanInfo: CreditLineLoanInfo | BulletLoanInfo
     ],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, ratePerSec, , loanInfo] = args
+    const [poolId, loanId, ratePerSec, loanType, loanInfo] = args
     const api = await inst.getApi()
-    const submittable = api.tx.loan.priceLoan(poolId, loanId, ratePerSec, { CreditLine: loanInfo })
+    const submittable = api.tx.loan.priceLoan(poolId, loanId, ratePerSec, { [loanType]: loanInfo })
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -121,13 +138,28 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
+  async function repayLoanPartially(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
+    const [poolId, loanId, amount] = args
+    const api = await inst.getApi()
+    const submittable = api.tx.loan.repay(poolId, loanId, amount.toString())
+    return inst.wrapSignAndSend(api, submittable, options)
+  }
+
+  // async function repayLoanFully(args: [poolId: string, loanId: string], options?: TransactionOptions) {
+  //   const [poolId, loanId] = args
+  //   const api = await inst.getApi()
+  //   const submittable = api.tx.loan.repay(poolId, loanId, amount.toString())
+  //   return inst.wrapSignAndSend(api, submittable, options)
+  // }
+
   async function getPools() {
     const api = await inst.getApi()
     const rawPools = await api.query.investorPool.pool.entries()
 
-    const pools = rawPools.map(([, value]) => {
+    const pools = rawPools.map(([key, value]) => {
       const pool = value.toJSON() as unknown as PoolDetails
       return {
+        name: formatPoolKey(key as StorageKey<[u32]>),
         owner: pool.owner,
         currentEpoch: pool.currentEpoch,
         lastEpochClosed: pool.lastEpochClosed,
@@ -137,8 +169,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
         maxReserve: parseBN(pool.maxReserve),
         availableReserve: parseBN(pool.availableReserve),
         totalReserve: parseBN(pool.totalReserve),
-        tranches: pool.tranches.map((tranche: TrancheDetails) => {
+        tranches: pool.tranches.map((tranche: TrancheDetails, index: number) => {
           return {
+            name: tokenIndexToName(index, pool.tranches.length),
             debt: parseBN(tranche.debt),
             reserve: parseBN(tranche.reserve),
             minSubordinationRatio: parseBN(tranche.minSubordinationRatio),
@@ -159,9 +192,58 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const api = await inst.getApi()
 
-    const [pool, nav] = await Promise.all([api.query.investorPool.pool(poolId), api.query.loan.poolNAV(poolId)])
+    const [poolValue, navValue] = await Promise.all([
+      api.query.investorPool.pool(poolId),
+      api.query.loan.poolNAV(poolId),
+    ])
 
-    return { pool: pool.toJSON(), nav: nav.toJSON() }
+    const pool = poolValue.toJSON() as unknown as PoolDetails
+    const nav = navValue.toJSON() as unknown as NAVDetails
+
+    const tokenIssuanceValues = await Promise.all(
+      pool.tranches.map((_1, index: number) => api.query.tokens.totalIssuance({ Tranche: [poolId, index] }))
+    )
+
+    const totalIssuance = tokenIssuanceValues.map((val) => parseBN(val as unknown as BN))
+
+    return {
+      pool: {
+        totalIssuance,
+        name: poolId,
+        owner: pool.owner,
+        metadata: Buffer.from(pool.metadata.substring(2), 'hex').toString(),
+        currency: Object.keys(pool.currency)[0],
+        tranches: pool.tranches.map((tranche: TrancheDetails, index: number) => {
+          return {
+            name: tokenIndexToName(index, pool.tranches.length),
+            debt: parseBN(tranche.debt),
+            reserve: parseBN(tranche.reserve),
+            supply: totalIssuance[index],
+            minSubordinationRatio: parseBN(tranche.minSubordinationRatio),
+            epochSupply: parseBN(tranche.epochSupply),
+            epochRedeem: parseBN(tranche.epochRedeem),
+            ratio: parseBN(tranche.ratio),
+            interestPerSec: parseBN(tranche.interestPerSec),
+            lastUpdatedInterest: tranche.lastUpdatedInterest,
+          }
+        }),
+        nav: {
+          latest: nav ? parseBN(nav.latestNav) : new BN(0),
+          lastUpdated: nav ? nav.lastUpdated : 0,
+        },
+        reserve: {
+          max: parseBN(pool.maxReserve),
+          available: parseBN(pool.availableReserve),
+          total: parseBN(pool.totalReserve),
+        },
+        epoch: {
+          current: pool.currentEpoch,
+          lastClosed: pool.lastEpochClosed,
+          lastExecuted: pool.lastEpochExecuted,
+          closing: pool.closingEpoch,
+        },
+      },
+    }
   }
 
   async function addWriteOffGroup(
@@ -193,6 +275,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     createLoan,
     priceLoan,
     financeLoan,
+    repayLoanPartially,
     getPools,
     getPool,
     addWriteOffGroup,
@@ -202,4 +285,17 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
 const parseBN = (value: BN) => {
   return new BN(value.toString().substring(2), 'hex').toString()
+}
+
+const tokenNames = [
+  ['Junior'],
+  ['Junior', 'Senior'],
+  ['Junior', 'Mezzanine', 'Senior'],
+  ['Junior', 'Mezzanine', 'Senior', 'Super-senior'],
+]
+
+const tokenIndexToName = (index: number, numberOfTranches: number) => {
+  if (numberOfTranches > 0 && numberOfTranches <= 4) return tokenNames[numberOfTranches - 1][index]
+  if (index <= 4) return tokenNames[3][index]
+  return 'Other'
 }
