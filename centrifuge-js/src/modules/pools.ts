@@ -15,6 +15,30 @@ export type LoanType = 'BulletLoan' | 'CreditLine' | 'CreditLineWithMaturity'
 export type CreditLineLoanInfo = [string, string]
 export type BulletLoanInfo = [string, string, string, string, string, string]
 
+type TrancheDetails = {
+  debt: BN
+  reserve: BN
+  minSubordinationRatio: BN
+  epochSupply: BN
+  epochRedeem: BN
+  ratio: BN
+  interestPerSec: BN
+  lastUpdatedInterest: number
+}
+
+type PoolDetails = {
+  owner: string
+  currency: { [key: string]: null }
+  tranches: TrancheDetails[]
+  currentEpoch: number
+  lastEpochClosed: number
+  lastEpochExecuted: number
+  closingEpoch: number | null
+  maxReserve: BN
+  availableReserve: BN
+  totalReserve: BN
+}
+
 export function getPoolsModule(inst: CentrifugeBase) {
   async function createPool(
     args: [poolId: string, collectionId: string, tranches: number[][], currency: string, maxReserve: BN],
@@ -47,11 +71,24 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
-  async function approveRole(args: [poolId: string, role: PoolRole, accounts: string[]], options?: TransactionOptions) {
-    const [poolId, role, accounts] = args
+  async function approveRoles(
+    args: [poolId: string, roles: PoolRole[], accounts: string[]],
+    options?: TransactionOptions
+  ) {
+    const [poolId, roles, accounts] = args
+    if (roles.length !== accounts.length) throw new Error('Roles length needs to match accounts length')
+
     const api = await inst.getApi()
-    const submittable = api.tx.investorPool.approveRoleFor(poolId, role, accounts)
+    const extrinsics = roles.map((role: PoolRole, index: number) =>
+      api.tx.investorPool.approveRoleFor(poolId, role, [accounts[index]])
+    )
+    const submittable = api.tx.utility.batchAll(extrinsics)
     return inst.wrapSignAndSend(api, submittable, options)
+  }
+
+  async function getNextLoanId() {
+    const api = await inst.getApi()
+    return (await api.query.loan.nextLoanId()).toString()
   }
 
   async function createLoan(args: [poolId: string, collectionId: string, nftId: string], options?: TransactionOptions) {
@@ -86,7 +123,36 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   async function getPools() {
     const api = await inst.getApi()
-    return await api.query.investorPool.pool.entries()
+    const rawPools = await api.query.investorPool.pool.entries()
+
+    const pools = rawPools.map(([, value]) => {
+      const pool = value.toJSON() as unknown as PoolDetails
+      return {
+        owner: pool.owner,
+        currentEpoch: pool.currentEpoch,
+        lastEpochClosed: pool.lastEpochClosed,
+        lastEpochExecuted: pool.lastEpochExecuted,
+        closingEpoch: pool.closingEpoch,
+        currency: Object.keys(pool.currency)[0],
+        maxReserve: parseBN(pool.maxReserve),
+        availableReserve: parseBN(pool.availableReserve),
+        totalReserve: parseBN(pool.totalReserve),
+        tranches: pool.tranches.map((tranche: TrancheDetails) => {
+          return {
+            debt: parseBN(tranche.debt),
+            reserve: parseBN(tranche.reserve),
+            minSubordinationRatio: parseBN(tranche.minSubordinationRatio),
+            epochSupply: parseBN(tranche.epochSupply),
+            epochRedeem: parseBN(tranche.epochRedeem),
+            ratio: parseBN(tranche.ratio),
+            interestPerSec: parseBN(tranche.interestPerSec),
+            lastUpdatedInterest: tranche.lastUpdatedInterest,
+          }
+        }),
+      }
+    })
+
+    return pools
   }
 
   async function getPool(args: [poolId: string]) {
@@ -122,7 +188,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
     createPool,
     updateInvestOrder,
     closeEpoch,
-    approveRole,
+    approveRoles,
+    getNextLoanId,
     createLoan,
     priceLoan,
     financeLoan,
@@ -131,4 +198,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
     addWriteOffGroup,
     adminWriteOff,
   }
+}
+
+const parseBN = (value: BN) => {
+  return new BN(value.toString().substring(2), 'hex').toString()
 }
