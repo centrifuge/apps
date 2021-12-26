@@ -3,10 +3,12 @@ import { Signer } from '@polkadot/types/types'
 import { CentrifugeBase, UserProvidedConfig } from './CentrifugeBase'
 import { getNftsModule } from './modules/nfts'
 import { getPoolsModule } from './modules/pools'
+import { getUtilsModule } from './modules/utils'
 
 export class Centrifuge extends CentrifugeBase {
   nfts = getNftsModule(this)
   pools = getPoolsModule(this)
+  utils = getUtilsModule(this)
 
   constructor(config: UserProvidedConfig = {}) {
     super(config)

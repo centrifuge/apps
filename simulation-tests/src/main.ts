@@ -59,39 +59,40 @@ const run = async () => {
   // await centrifuge.pools.priceLoan([
   //   poolId,
   //   loanId,
-  //   '1000000003488077118214104515',
+  //   centrifuge.utils.aprToFee(0.11),
   //   'CreditLine',
   //   [Rate.toString(), new BN(100).mul(Currency).toString()],
   // ])
   await centrifuge.pools.priceLoan([
     poolId,
     loanId,
-    '1000000003488077118214104515',
+    centrifuge.utils.aprToFee(0.11),
     'BulletLoan',
     [
-      Rate.toString(),
-      new BN(1).pow(new BN(25)).toString(),
-      new BN(50).pow(new BN(25)).toString(),
+      centrifuge.utils.toRate(1),
+      centrifuge.utils.toRate(0),
+      centrifuge.utils.toRate(0),
       new BN(100).mul(Currency).toString(),
-      new BN(10).pow(new BN(25)).toString(),
-      '1640553336',
+      centrifuge.utils.aprToFee(0.1),
+      new Date(2022, 12, 25).getTime().toString(),
     ],
   ])
 
-  await centrifuge.pools.updateInvestOrder([poolId, 1, new BN(100).mul(Currency)])
+  // await centrifuge.pools.updateInvestOrder([poolId, 1, new BN(100).mul(Currency)])
   await centrifuge.pools.updateInvestOrder([poolId, 0, new BN(100).mul(Currency)])
   await centrifuge.pools.closeEpoch([poolId])
+  console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
 
   await centrifuge.pools.financeLoan([poolId, loanId, new BN(50).mul(Currency)])
+  console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
 
-  const writeOffGroupId = 0
-  await centrifuge.pools.adminWriteOff([poolId, loanId, writeOffGroupId])
+  // const writeOffGroupId = 0
+  // await centrifuge.pools.adminWriteOff([poolId, loanId, writeOffGroupId])
 
   // await centrifuge.pools.updateInvestOrder([poolId, 0, new BN(10).mul(Currency)])
   // await centrifuge.pools.closeEpoch([poolId])
 
-  const pool = await centrifuge.pools.getPool([poolId])
-  console.log(JSON.stringify(pool, null, 4))
+  // console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
 }
 
 cryptoWaitReady().then(() => {

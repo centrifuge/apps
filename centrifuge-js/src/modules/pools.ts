@@ -289,9 +289,9 @@ const parseBN = (value: BN) => {
 
 const tokenNames = [
   ['Junior'],
-  ['Junior', 'Senior'],
-  ['Junior', 'Mezzanine', 'Senior'],
-  ['Junior', 'Mezzanine', 'Senior', 'Super-senior'],
+  ['Senior', 'Junior'],
+  ['Senior', 'Mezzanine', 'Junior'],
+  ['Super-senior', 'Senior', 'Mezzanine', 'Junior'],
 ]
 
 const tokenIndexToName = (index: number, numberOfTranches: number) => {
