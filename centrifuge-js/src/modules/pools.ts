@@ -60,11 +60,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
     ],
     options?: TransactionOptions
   ) {
-    const [poolId, collectionId, tranches, currency, maxReserve, metadata] = args
+    const [poolId, collectionId, tranches, currency, maxReserve] = args
     const api = await inst.getApi()
     const submittable = api.tx.utility.batchAll([
       api.tx.uniques.create(collectionId, LoanPalletAccountId),
-      api.tx.investorPool.createPool(poolId, tranches, currency, maxReserve.toString(), metadata),
+      api.tx.investorPool.createPool(poolId, tranches, currency, maxReserve.toString()), // , metadata
       api.tx.loan.initialisePool(poolId, collectionId),
     ])
     return inst.wrapSignAndSend(api, submittable, options)
@@ -84,6 +84,14 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const api = await inst.getApi()
     const submittable = api.tx.utility.batchAll([api.tx.loan.updateNav(poolId), api.tx.investorPool.closeEpoch(poolId)])
+    return inst.wrapSignAndSend(api, submittable, options)
+  }
+
+  async function collect(args: [poolId: string, trancheId: number], options?: TransactionOptions) {
+    const [poolId, trancheId] = args
+    const api = await inst.getApi()
+    const currentEpochId = (await getPool([poolId])).epoch.lastExecuted
+    const submittable = api.tx.investorPool.collect(poolId, trancheId, currentEpochId)
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -207,41 +215,39 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const totalIssuance = tokenIssuanceValues.map((val) => parseBN(val as unknown as BN))
 
     return {
-      pool: {
-        totalIssuance,
-        name: poolId,
-        owner: pool.owner,
-        metadata: Buffer.from(pool.metadata.substring(2), 'hex').toString(),
-        currency: Object.keys(pool.currency)[0],
-        tranches: pool.tranches.map((tranche: TrancheDetails, index: number) => {
-          return {
-            name: tokenIndexToName(index, pool.tranches.length),
-            debt: parseBN(tranche.debt),
-            reserve: parseBN(tranche.reserve),
-            supply: totalIssuance[index],
-            minSubordinationRatio: parseBN(tranche.minSubordinationRatio),
-            epochSupply: parseBN(tranche.epochSupply),
-            epochRedeem: parseBN(tranche.epochRedeem),
-            ratio: parseBN(tranche.ratio),
-            interestPerSec: parseBN(tranche.interestPerSec),
-            lastUpdatedInterest: tranche.lastUpdatedInterest,
-          }
-        }),
-        nav: {
-          latest: nav ? parseBN(nav.latestNav) : new BN(0),
-          lastUpdated: nav ? nav.lastUpdated : 0,
-        },
-        reserve: {
-          max: parseBN(pool.maxReserve),
-          available: parseBN(pool.availableReserve),
-          total: parseBN(pool.totalReserve),
-        },
-        epoch: {
-          current: pool.currentEpoch,
-          lastClosed: pool.lastEpochClosed,
-          lastExecuted: pool.lastEpochExecuted,
-          closing: pool.closingEpoch,
-        },
+      totalIssuance,
+      name: poolId,
+      owner: pool.owner,
+      // metadata: Buffer.from(pool.metadata.substring(2), 'hex').toString(),
+      currency: Object.keys(pool.currency)[0],
+      tranches: pool.tranches.map((tranche: TrancheDetails, index: number) => {
+        return {
+          name: tokenIndexToName(index, pool.tranches.length),
+          debt: parseBN(tranche.debt),
+          reserve: parseBN(tranche.reserve),
+          supply: totalIssuance[index],
+          minSubordinationRatio: parseBN(tranche.minSubordinationRatio),
+          epochSupply: parseBN(tranche.epochSupply),
+          epochRedeem: parseBN(tranche.epochRedeem),
+          ratio: parseBN(tranche.ratio),
+          interestPerSec: parseBN(tranche.interestPerSec),
+          lastUpdatedInterest: tranche.lastUpdatedInterest,
+        }
+      }),
+      nav: {
+        latest: nav ? parseBN(nav.latestNav) : new BN(0),
+        lastUpdated: nav ? nav.lastUpdated : 0,
+      },
+      reserve: {
+        max: parseBN(pool.maxReserve),
+        available: parseBN(pool.availableReserve),
+        total: parseBN(pool.totalReserve),
+      },
+      epoch: {
+        current: pool.currentEpoch,
+        lastClosed: pool.lastEpochClosed,
+        lastExecuted: pool.lastEpochExecuted,
+        closing: pool.closingEpoch,
       },
     }
   }
@@ -269,6 +275,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   return {
     createPool,
     updateInvestOrder,
+    collect,
     closeEpoch,
     approveRoles,
     getNextLoanId,

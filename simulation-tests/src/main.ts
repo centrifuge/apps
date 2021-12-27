@@ -78,9 +78,10 @@ const run = async () => {
     ],
   ])
 
-  // await centrifuge.pools.updateInvestOrder([poolId, 1, new BN(100).mul(Currency)])
+  await centrifuge.pools.updateInvestOrder([poolId, 1, new BN(100).mul(Currency)])
   await centrifuge.pools.updateInvestOrder([poolId, 0, new BN(100).mul(Currency)])
   await centrifuge.pools.closeEpoch([poolId])
+  await centrifuge.pools.collect([poolId, 0])
   console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
 
   await centrifuge.pools.financeLoan([poolId, loanId, new BN(50).mul(Currency)])
@@ -89,8 +90,9 @@ const run = async () => {
   // const writeOffGroupId = 0
   // await centrifuge.pools.adminWriteOff([poolId, loanId, writeOffGroupId])
 
-  // await centrifuge.pools.updateInvestOrder([poolId, 0, new BN(10).mul(Currency)])
-  // await centrifuge.pools.closeEpoch([poolId])
+  await centrifuge.pools.updateInvestOrder([poolId, 0, new BN(10).mul(Currency)])
+  await centrifuge.pools.closeEpoch([poolId])
+  await centrifuge.pools.collect([poolId, 0])
 
   // console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
 }
