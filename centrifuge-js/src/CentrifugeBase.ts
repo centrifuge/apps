@@ -52,8 +52,15 @@ export class CentrifugeBase {
     if (options?.batch) return submittable
 
     if (this.config.printExtrinsics) {
-      if (submittable.method.method === 'batchAll') {
-        console.log(`utility.batchAll`)
+      if (submittable.method.method === 'batchAll' || submittable.method.method === 'batch') {
+        console.log(`utility.${submittable.method.method}([`)
+        ;(submittable.method.args as any)[0].forEach((call: any) => {
+          const callDetails = api.findCall(call.callIndex)
+          console.log(
+            `\t${callDetails.section}.${callDetails.method}(${call.args.map((arg: any) => arg.toString()).join(', ')})`
+          )
+        })
+        console.log(`])`)
       } else {
         console.log(
           `${submittable.method.section}.${submittable.method.method}(${submittable.method.args
