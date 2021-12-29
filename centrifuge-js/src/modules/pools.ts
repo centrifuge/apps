@@ -11,10 +11,11 @@ const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000
 
 export type PoolRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'RiskAdmin'
 
-export type LoanType = 'BulletLoan' | 'CreditLine' | 'CreditLineWithMaturity'
-
-export type CreditLineLoanInfo = [string, string]
-export type BulletLoanInfo = [string, string, string, string, string, string]
+export type LoanInfo = {
+  BulletLoan: [string, string, string, string, string, string]
+  CreditLine: [string, string]
+  CreditLineWithMaturity: [string, string, string, string, string, string]
+}
 
 type TrancheDetails = {
   debt: BN
@@ -49,6 +50,7 @@ type NAVDetails = {
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 
 export function getPoolsModule(inst: CentrifugeBase) {
+  // TODO: integrate ipfs pinning
   async function createPool(
     args: [
       poolId: string,
@@ -123,14 +125,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
   }
 
   // TODO: loanInfo type should be dependent on loanType
-  async function priceLoan(
-    args: [
-      poolId: string,
-      loanId: string,
-      ratePerSec: string,
-      loanType: 'CreditLine' | 'BulletLoan',
-      loanInfo: CreditLineLoanInfo | BulletLoanInfo
-    ],
+  async function priceLoan<T extends keyof LoanInfo, I extends LoanInfo[T]>(
+    args: [poolId: string, loanId: string, ratePerSec: string, loanType: T, loanInfo: I],
     options?: TransactionOptions
   ) {
     const [poolId, loanId, ratePerSec, loanType, loanInfo] = args
@@ -212,10 +208,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
       pool.tranches.map((_1, index: number) => api.query.tokens.totalIssuance({ Tranche: [poolId, index] }))
     )
 
-    const totalIssuance = tokenIssuanceValues.map((val) => parseBN(val as unknown as BN))
+    const epochValues = await Promise.all(
+      pool.tranches.map((_1, index: number) => api.query.investorPool.epoch([poolId, index], pool.lastEpochExecuted))
+    )
+
+    const lastEpoch = epochValues.map((val) => (val as any).unwrap())
 
     return {
-      totalIssuance,
       name: poolId,
       owner: pool.owner,
       // metadata: Buffer.from(pool.metadata.substring(2), 'hex').toString(),
@@ -225,13 +224,14 @@ export function getPoolsModule(inst: CentrifugeBase) {
           name: tokenIndexToName(index, pool.tranches.length),
           debt: parseBN(tranche.debt),
           reserve: parseBN(tranche.reserve),
-          supply: totalIssuance[index],
+          totalIssuance: tokenIssuanceValues[index].toString(),
           minSubordinationRatio: parseBN(tranche.minSubordinationRatio),
           epochSupply: parseBN(tranche.epochSupply),
           epochRedeem: parseBN(tranche.epochRedeem),
           ratio: parseBN(tranche.ratio),
           interestPerSec: parseBN(tranche.interestPerSec),
           lastUpdatedInterest: tranche.lastUpdatedInterest,
+          price: lastEpoch[index]?.tokenPrice.toString(),
         }
       }),
       nav: {
