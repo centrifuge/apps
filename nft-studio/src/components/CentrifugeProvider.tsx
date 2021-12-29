@@ -7,9 +7,9 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
   const ctx = React.useMemo(
     () =>
       new Centrifuge({
-        network: 'altair',
-        altairWsUrl: process.env.REACT_APP_ALTAIR_WSS_URL,
-        kusamaWsUrl: process.env.REACT_APP_KUSAMA_WSS_URL,
+        network: 'centrifuge',
+        polkadotWsUrl: 'ws://localhost:9944',
+        centrifugeWsUrl: 'ws://localhost:9946',
       }),
     []
   )

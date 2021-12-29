@@ -4,8 +4,8 @@ import { useRouteMatch } from 'react-router'
 import { Footer } from '../components/Footer'
 import { Identity } from '../components/Identity'
 import { NFTCard } from '../components/NFTCard'
-import { PageContainer } from '../components/PageContainer'
 import { RouterLinkButton } from '../components/RouterLinkButton'
+import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
@@ -16,9 +16,9 @@ import { isSameAddress } from '../utils/web3'
 
 export const CollectionPage: React.FC = () => {
   return (
-    <PageContainer>
+    <PageWithSideBar>
       <Collection />
-    </PageContainer>
+    </PageWithSideBar>
   )
 }
 

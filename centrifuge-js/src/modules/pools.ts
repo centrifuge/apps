@@ -7,6 +7,8 @@ export type Pool = {
   id: string
 }
 
+const Currency = new BN(10).pow(new BN(18))
+
 const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
 
 export type PoolRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'RiskAdmin'
@@ -148,7 +150,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
-  // TODO: loanInfo type should be dependent on loanType
   async function priceLoan<T extends keyof LoanInfo, I extends LoanInfo[T]>(
     args: [poolId: string, loanId: string, ratePerSec: string, loanType: T, loanInfo: I],
     options?: TransactionOptions
@@ -173,12 +174,20 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
-  // async function repayLoanFully(args: [poolId: string, loanId: string], options?: TransactionOptions) {
-  //   const [poolId, loanId] = args
-  //   const api = await inst.getApi()
-  //   const submittable = api.tx.loan.repay(poolId, loanId, amount.toString())
-  //   return inst.wrapSignAndSend(api, submittable, options)
-  // }
+  async function repayAndCloseLoan(args: [poolId: string, loanId: string], options?: TransactionOptions) {
+    const [poolId, loanId] = args
+    const api = await inst.getApi()
+    const loan = await getLoan([poolId, loanId])
+
+    // Add small buffer to repayment amount
+    // TODO: calculate accumulatedRate 1 minute from now and up to date outstanding debt
+    const amount = new BN(loan.outstandingDebt).mul(new BN(1).mul(Currency))
+    const submittable = api.tx.utility.batchAll([
+      api.tx.loan.repay(poolId, loanId, amount),
+      api.tx.loan.closeLoan(poolId, loanId),
+    ])
+    return inst.wrapSignAndSend(api, submittable, options)
+  }
 
   async function getPools() {
     const api = await inst.getApi()
@@ -368,6 +377,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     priceLoan,
     financeLoan,
     repayLoanPartially,
+    repayAndCloseLoan,
     getPools,
     getPool,
     getLoans,

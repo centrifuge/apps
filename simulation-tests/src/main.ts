@@ -84,7 +84,11 @@ const run = async () => {
   // console.log(JSON.stringify(await centrifuge.pools.getLoan([poolId, loanId]), null, 4))
 
   // await centrifuge.pools.updateRedeemOrder([poolId, 1, new BN(5).mul(Currency)])
+
   console.log(JSON.stringify(await centrifuge.pools.getLoans([poolId]), null, 4))
+  await centrifuge.pools.repayAndCloseLoan([poolId, loanId])
+  console.log(JSON.stringify(await centrifuge.pools.getLoans([poolId]), null, 4))
+
   // console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
 
   // const writeOffGroupId = 0

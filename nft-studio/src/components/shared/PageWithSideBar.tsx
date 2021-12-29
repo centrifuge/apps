@@ -11,7 +11,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children }) => {
       <BoxWithBorder width={220}>
         <SideBar />
       </BoxWithBorder>
-      <Box>{children}</Box>
+      <Box margin="60px">{children}</Box>
     </Shelf>
   )
 }

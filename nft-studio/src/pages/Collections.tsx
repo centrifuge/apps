@@ -2,9 +2,8 @@ import { Button, IconPlus, LayoutGrid, LayoutGridItem, Shelf, Stack, Text } from
 import * as React from 'react'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
 import { CreateCollectionDialog } from '../components/CreateCollectionDialog'
-import { Footer } from '../components/Footer'
 import { Identity } from '../components/Identity'
-import { PageContainer } from '../components/PageContainer'
+import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
 import { useCollections } from '../utils/useCollections'
@@ -13,9 +12,9 @@ import { isSameAddress, isWhitelistedAccount } from '../utils/web3'
 
 export const CollectionsPage: React.FC = () => {
   return (
-    <PageContainer>
+    <PageWithSideBar>
       <Collections />
-    </PageContainer>
+    </PageWithSideBar>
   )
 }
 
@@ -112,7 +111,6 @@ const Collections: React.FC = () => {
         )}
       </Stack>
       <CreateCollectionDialog open={createOpen} onClose={() => setCreateOpen(false)} />
-      <Footer />
     </Stack>
   )
 }

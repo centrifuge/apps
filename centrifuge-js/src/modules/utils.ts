@@ -1,7 +1,7 @@
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import BN from 'bn.js'
+import Decimal from 'decimal.js-light'
 import { CentrifugeBase } from '../CentrifugeBase'
-const Decimal = require('decimal.js-light')
 
 Decimal.set({
   precision: 28,
