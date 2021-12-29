@@ -149,7 +149,7 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
                       <>
                         <StepParagraph>
                           Congratulations, you’ve successfully onboarded to the RWA Market! <br />
-                          Your are now ready to invest.
+                          You are now ready to invest.
                         </StepParagraph>
                         <Link href="https://rwamarket.io/#/deposit/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb480xb953a066377176092879a151c07798b3946eea4b">
                           <Button primary label={'Invest'} largeOnMobile={false} />
@@ -159,7 +159,7 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
                       <>
                         <StepParagraph>
                           Congratulations, you’ve successfully onboarded to the token! <br />
-                          Your are now ready to invest.
+                          You are now ready to invest.
                         </StepParagraph>
                         <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
                           <Button primary label={'Invest'} largeOnMobile={false} />
