@@ -47,7 +47,21 @@ type NAVDetails = {
   lastUpdated: number
 }
 
+type LoanDetails = {
+  borrowedAmount: BN
+  ratePerSec: BN
+  accumulatedRate: BN
+  principalDebt: BN
+  lastUpdated: number
+  originationDate: number
+  status: string // TODO: enum
+  loanType: { [key: string]: LoanInfo }
+  adminWrittenOff: boolean
+  writeOffIndex: number | null
+}
+
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
+const formatLoanKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 
 export function getPoolsModule(inst: CentrifugeBase) {
   // TODO: integrate ipfs pinning
@@ -66,7 +80,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const api = await inst.getApi()
     const submittable = api.tx.utility.batchAll([
       api.tx.uniques.create(collectionId, LoanPalletAccountId),
-      api.tx.investorPool.createPool(poolId, tranches, currency, maxReserve.toString()), // , metadata
+      api.tx.investorPool.createPool(poolId, tranches, currency, maxReserve.toString()),
       api.tx.loan.initialisePool(poolId, collectionId),
     ])
     return inst.wrapSignAndSend(api, submittable, options)
@@ -79,6 +93,16 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId, trancheId, newOrder] = args
     const api = await inst.getApi()
     const submittable = api.tx.investorPool.orderSupply(poolId, trancheId, newOrder.toString())
+    return inst.wrapSignAndSend(api, submittable, options)
+  }
+
+  async function updateRedeemOrder(
+    args: [poolId: string, trancheId: number, newOrder: BN],
+    options?: TransactionOptions
+  ) {
+    const [poolId, trancheId, newOrder] = args
+    const api = await inst.getApi()
+    const submittable = api.tx.investorPool.orderRedeem(poolId, trancheId, newOrder.toString())
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -208,10 +232,15 @@ export function getPoolsModule(inst: CentrifugeBase) {
       pool.tranches.map((_1, index: number) => api.query.tokens.totalIssuance({ Tranche: [poolId, index] }))
     )
 
+    const orderValues = await Promise.all(
+      pool.tranches.map((_1, index: number) => api.query.investorPool.order.entries({ Tranche: [poolId, index] }))
+    )
+
+    console.log(JSON.stringify(orderValues, null, 4))
+
     const epochValues = await Promise.all(
       pool.tranches.map((_1, index: number) => api.query.investorPool.epoch([poolId, index], pool.lastEpochExecuted))
     )
-
     const lastEpoch = epochValues.map((val) => (val as any).unwrap())
 
     return {
@@ -252,6 +281,61 @@ export function getPoolsModule(inst: CentrifugeBase) {
     }
   }
 
+  async function getLoans(args: [poolId: string]) {
+    const [poolId] = args
+    const api = await inst.getApi()
+
+    const loanValues = await api.query.loan.loanInfo.entries(poolId)
+
+    return loanValues.map(([key, value]) => {
+      const loan = value.toJSON() as unknown as LoanDetails
+      return {
+        id: formatLoanKey(key as StorageKey<[u32]>),
+        borrowedAmount: parseBN(loan.borrowedAmount),
+        ratePerSec: parseBN(loan.ratePerSec),
+        accumulatedRate: parseBN(loan.accumulatedRate),
+        principalDebt: parseBN(loan.principalDebt),
+        outstandingDebt: new BN(parseBN(loan.principalDebt))
+          .mul(new BN(parseBN(loan.accumulatedRate)))
+          .div(new BN(10).pow(new BN(27)))
+          .toString(),
+        lastUpdated: loan.lastUpdated,
+        originationDate: loan.originationDate,
+        status: loan.status,
+        loanType: loan.loanType,
+        adminWrittenOff: loan.adminWrittenOff,
+        writeOffIndex: loan.writeOffIndex,
+      }
+    })
+  }
+
+  async function getLoan(args: [poolId: string, loanId: string]) {
+    const [poolId, loanId] = args
+    const api = await inst.getApi()
+
+    const loanValue = await api.query.loan.loanInfo(poolId, loanId)
+
+    const loan = loanValue.toJSON() as unknown as LoanDetails
+
+    return {
+      id: loanId,
+      borrowedAmount: parseBN(loan.borrowedAmount),
+      ratePerSec: parseBN(loan.ratePerSec),
+      accumulatedRate: parseBN(loan.accumulatedRate),
+      principalDebt: parseBN(loan.principalDebt),
+      outstandingDebt: new BN(parseBN(loan.principalDebt))
+        .mul(new BN(parseBN(loan.accumulatedRate)))
+        .div(new BN(10).pow(new BN(27)))
+        .toString(),
+      lastUpdated: loan.lastUpdated,
+      originationDate: loan.originationDate,
+      status: loan.status,
+      loanType: loan.loanType,
+      adminWrittenOff: loan.adminWrittenOff,
+      writeOffIndex: loan.writeOffIndex,
+    }
+  }
+
   async function addWriteOffGroup(
     args: [poolId: string, percentage: BN, overdueDays: number],
     options?: TransactionOptions
@@ -275,6 +359,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   return {
     createPool,
     updateInvestOrder,
+    updateRedeemOrder,
     collect,
     closeEpoch,
     approveRoles,
@@ -285,6 +370,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
     repayLoanPartially,
     getPools,
     getPool,
+    getLoans,
+    getLoan,
     addWriteOffGroup,
     adminWriteOff,
   }
