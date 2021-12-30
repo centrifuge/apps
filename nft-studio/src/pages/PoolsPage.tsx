@@ -1,6 +1,8 @@
-import { LayoutGrid, LayoutGridItem, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
+import { useCentrifuge } from '../components/CentrifugeProvider'
+import { DataTableCol, DataTableRow } from '../components/DataTable'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { usePools } from '../utils/usePools'
 
@@ -13,6 +15,7 @@ export const PoolsPage: React.FC = () => {
 }
 
 const Pools: React.FC = () => {
+  const centrifuge = useCentrifuge()
   const { data: pools } = usePools()
 
   return (
@@ -23,13 +26,14 @@ const Pools: React.FC = () => {
         </Text>
         {pools?.length ? (
           <>
-            <LayoutGrid>
-              {pools.map((pool) => (
-                <LayoutGridItem span={4} key={pool.name}>
+            {pools.map((pool) => (
+              <DataTableRow key={pool.name}>
+                <DataTableCol>
                   <Link to={`/pools/${pool.name}`}>{pool.name}</Link>
-                </LayoutGridItem>
-              ))}
-            </LayoutGrid>
+                </DataTableCol>
+                <DataTableCol>{centrifuge.utils.formatCurrencyAmount(pool.totalReserve)}</DataTableCol>
+              </DataTableRow>
+            ))}
           </>
         ) : (
           <Shelf justifyContent="center" textAlign="center">
