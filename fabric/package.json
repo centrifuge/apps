@@ -4,6 +4,7 @@
   "description": "Fabric Component Library",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": ["dist"],
   "scripts": {
     "build": "yarn build:icons && tsc",
     "prepare": "yarn build",
