@@ -96,4 +96,4 @@ yarn approve
 
 ### Publishing a new version
 
-Merging to `main` will publish a new version. For generating the changelog, make sure to use the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) spec in your commits, with `fabric` as the scope, e.g.: `feat(fabric): Add button component`
+Create a new branch and run `yarn bump`, which bumps the package version, updates the changelog, creates a commit and tags it. Push the branch/tag, which should publish the version to NPM. Open a PR to merge the changes to `main`. For generating the changelog, make sure to use the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) spec in your commits, with `fabric` as the scope, e.g.: `feat(fabric): Add button component`
