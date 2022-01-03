@@ -27,13 +27,18 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
+      - name: Fetch from main
+        run: git fetch origin main
+
       - name: Bump version
-        run: yarn bump
+        run: |
+          git config --local user.name "fabric-publish"
+          yarn bump
+
+      - name: Push bumped version and changelog
+        run: git push --follow-tags origin main
 
       - name: Public
         run: yarn publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-
-      - name: Push bumped version and changelog
-        run: git push --follow-tags origin main
