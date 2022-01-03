@@ -1,4 +1,5 @@
 import { Stack, Text } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
@@ -34,8 +35,12 @@ const Pool: React.FC = () => {
           (pool as any).tranches.map((tranche: any) => (
             <DataTableRow key={tranche.name}>
               <DataTableCol>{tranche.name}</DataTableCol>
-              <DataTableCol>{centrifuge.utils.formatPercentage(tranche.minSubordinationRatio)}</DataTableCol>
-              <DataTableCol>{centrifuge.utils.formatPercentage(tranche.interestPerSec)}</DataTableCol>
+              <DataTableCol>
+                {centrifuge.utils.formatPercentage(
+                  tranche.minSubordinationRatio,
+                  new BN(10).pow(new BN(18)).toString()
+                )}
+              </DataTableCol>
               <DataTableCol>{centrifuge.utils.feeToApr(tranche.interestPerSec)}</DataTableCol>
               <DataTableCol>{centrifuge.utils.formatRatio(tranche.price)}</DataTableCol>
               <DataTableCol>{centrifuge.utils.formatCurrencyAmount(tranche.totalIssuance)}</DataTableCol>
@@ -46,7 +51,7 @@ const Pool: React.FC = () => {
         <Text variant="heading2" as="h2">
           Assets
         </Text>
-        {loans.map((loan: any) => (
+        {loans?.map((loan: any) => (
           <DataTableRow key={loan.id}>
             <DataTableCol>{loan.id}</DataTableCol>
             <DataTableCol>{centrifuge.utils.formatCurrencyAmount(loan.outstandingDebt)}</DataTableCol>

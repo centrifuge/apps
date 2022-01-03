@@ -13,13 +13,17 @@ Decimal.set({
 const secondsPerYear = new Decimal(60 * 60 * 24 * 365)
 
 const percentFormatter = new Intl.NumberFormat('en-US', {
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 2,
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 4,
 })
 
 export function getUtilsModule(inst: CentrifugeBase) {
   function toRate(rate: number) {
     return new BN(rate * 10 ** 6).mul(new BN(10).pow(new BN(27 - 6))).toString()
+  }
+
+  function toPerquintill(rate: number) {
+    return new BN(rate * 10 ** 6).mul(new BN(10).pow(new BN(18 - 6))).toString()
   }
 
   function aprToFee(apr: number) {
@@ -74,16 +78,16 @@ export function getUtilsModule(inst: CentrifugeBase) {
     return parts.join('.')
   }
 
-  function formatCurrencyAmount(bn: BN | undefined, currency?: string) {
+  function formatCurrencyAmount(bn: BN | string | undefined, currency?: string) {
     const currencyStr = currency || 'Usd'
     if (!bn) return ''
-    return `${addThousandsSeparators(toPrecision(baseToDisplay(bn || '0', 18), 0))} ${currencyStr}`
+    return `${addThousandsSeparators(toPrecision(baseToDisplay(new BN(bn), 18), 0))} ${currencyStr}`
   }
 
-  function formatPercentage(numerator: BN | undefined, denominator: BN | undefined) {
+  function formatPercentage(numerator: BN | string | undefined, denominator: BN | string | undefined) {
     if (!numerator || !denominator) return ''
-    const a = numerator.div(new BN(1e6))
-    let b = denominator.div(new BN(1e6))
+    const a = new BN(numerator).div(new BN(1e6))
+    let b = new BN(denominator).div(new BN(1e6))
     b = b.isZero() ? new BN(1) : b
     const percentage = (parseInt(a.toString(), 10) / parseInt(b.toString(), 10)) * 100
     return `${percentFormatter.format(percentage)}%`
@@ -105,6 +109,7 @@ export function getUtilsModule(inst: CentrifugeBase) {
 
   return {
     toRate,
+    toPerquintill,
     aprToFee,
     feeToApr,
     formatCurrencyAmount,

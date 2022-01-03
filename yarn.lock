@@ -3278,6 +3278,7 @@ __metadata:
     "@centrifuge/centrifuge-js": "workspace:*"
     "@types/bn.js": ^5
     bn.js: ^5.2.0
+    esbuild-darwin-64: ^0.14.10
     node-fetch: ^3.1.0
     nodemon: ^2.0.15
     ts-node: ^10.4.0
@@ -20646,6 +20647,13 @@ __metadata:
   version: 0.14.2
   resolution: "esbuild-darwin-64@npm:0.14.2"
   checksum: 5b7c8d51c4c2f6d8b268127e8f3dd64716d2d51f7cf514617722644f395af2822ebc1af08cbde2325dd81f2cc9654b5651068fb25095f090c4e3235b3bf8ea72
+  languageName: node
+  linkType: hard
+
+"esbuild-darwin-64@npm:^0.14.10":
+  version: 0.14.10
+  resolution: "esbuild-darwin-64@npm:0.14.10"
+  checksum: c8e546b1028ee9ad87f0f4d8b8dd9926df46d030a30f85e0e83f07044b590ad4b2c91df83cd28d1f4b5c3ae099076a641ec1cab0b1d2f24dff891eab222f348e
   languageName: node
   linkType: hard
 

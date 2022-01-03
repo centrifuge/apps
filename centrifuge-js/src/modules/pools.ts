@@ -115,11 +115,25 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
-  async function collect(args: [poolId: string, trancheId: number], options?: TransactionOptions) {
+  async function submitSolution(args: [poolId: string, solution: string[][]], options?: TransactionOptions) {
+    const [poolId, solution] = args
+    const api = await inst.getApi()
+    const submittable = api.tx.investorPool.solveEpoch(poolId, solution)
+    return inst.wrapSignAndSend(api, submittable, options)
+  }
+
+  async function collect(args: [poolId: string, trancheId?: number], options?: TransactionOptions) {
     const [poolId, trancheId] = args
     const api = await inst.getApi()
-    const currentEpochId = (await getPool([poolId])).epoch.lastExecuted
-    const submittable = api.tx.investorPool.collect(poolId, trancheId, currentEpochId)
+    const pool = await getPool([poolId])
+    const submittable =
+      trancheId !== undefined
+        ? api.tx.investorPool.collect(poolId, trancheId, pool.epoch.lastExecuted)
+        : api.tx.utility.batchAll(
+            pool.tranches.map((_t, index: number) =>
+              api.tx.investorPool.collect(poolId, index, pool.epoch.lastExecuted)
+            )
+          )
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -198,27 +212,30 @@ export function getPoolsModule(inst: CentrifugeBase) {
       return {
         name: formatPoolKey(key as StorageKey<[u32]>),
         owner: pool.owner,
-        currentEpoch: pool.currentEpoch,
-        lastEpochClosed: pool.lastEpochClosed,
-        lastEpochExecuted: pool.lastEpochExecuted,
-        closingEpoch: pool.closingEpoch,
         currency: Object.keys(pool.currency)[0],
-        maxReserve: parseBN(pool.maxReserve),
-        availableReserve: parseBN(pool.availableReserve),
-        totalReserve: parseBN(pool.totalReserve),
         tranches: pool.tranches.map((tranche: TrancheDetails, index: number) => {
           return {
             name: tokenIndexToName(index, pool.tranches.length),
             debt: parseBN(tranche.debt),
             reserve: parseBN(tranche.reserve),
             minSubordinationRatio: parseBN(tranche.minSubordinationRatio),
-            epochSupply: parseBN(tranche.epochSupply),
-            epochRedeem: parseBN(tranche.epochRedeem),
-            ratio: parseBN(tranche.ratio),
+            outstandingInvestOrders: parseBN(tranche.epochSupply),
+            outstandingRedeemOrders: parseBN(tranche.epochRedeem),
             interestPerSec: parseBN(tranche.interestPerSec),
             lastUpdatedInterest: tranche.lastUpdatedInterest,
           }
         }),
+        reserve: {
+          max: parseBN(pool.maxReserve),
+          available: parseBN(pool.availableReserve),
+          total: parseBN(pool.totalReserve),
+        },
+        epoch: {
+          current: pool.currentEpoch,
+          lastClosed: pool.lastEpochClosed,
+          lastExecuted: pool.lastEpochExecuted,
+          closing: pool.closingEpoch,
+        },
       }
     })
 
@@ -264,12 +281,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
           reserve: parseBN(tranche.reserve),
           totalIssuance: tokenIssuanceValues[index].toString(),
           minSubordinationRatio: parseBN(tranche.minSubordinationRatio),
-          epochSupply: parseBN(tranche.epochSupply),
-          epochRedeem: parseBN(tranche.epochRedeem),
-          ratio: parseBN(tranche.ratio),
+          outstandingInvestOrders: parseBN(tranche.epochSupply),
+          outstandingRedeemOrders: parseBN(tranche.epochRedeem),
           interestPerSec: parseBN(tranche.interestPerSec),
           lastUpdatedInterest: tranche.lastUpdatedInterest,
-          price: lastEpoch[index]?.tokenPrice.toString(),
+          tokenPrice: lastEpoch[index]?.tokenPrice.toString(),
         }
       }),
       nav: {
@@ -300,10 +316,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
       const loan = value.toJSON() as unknown as LoanDetails
       return {
         id: formatLoanKey(key as StorageKey<[u32]>),
-        borrowedAmount: parseBN(loan.borrowedAmount),
-        ratePerSec: parseBN(loan.ratePerSec),
-        accumulatedRate: parseBN(loan.accumulatedRate),
-        principalDebt: parseBN(loan.principalDebt),
+        financedAmount: parseBN(loan.borrowedAmount),
+        financingFee: parseBN(loan.ratePerSec),
         outstandingDebt: new BN(parseBN(loan.principalDebt))
           .mul(new BN(parseBN(loan.accumulatedRate)))
           .div(new BN(10).pow(new BN(27)))
@@ -328,10 +342,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return {
       id: loanId,
-      borrowedAmount: parseBN(loan.borrowedAmount),
-      ratePerSec: parseBN(loan.ratePerSec),
-      accumulatedRate: parseBN(loan.accumulatedRate),
-      principalDebt: parseBN(loan.principalDebt),
+      financedAmount: parseBN(loan.borrowedAmount),
+      financingFee: parseBN(loan.ratePerSec),
       outstandingDebt: new BN(parseBN(loan.principalDebt))
         .mul(new BN(parseBN(loan.accumulatedRate)))
         .div(new BN(10).pow(new BN(27)))
@@ -371,6 +383,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     updateRedeemOrder,
     collect,
     closeEpoch,
+    submitSolution,
     approveRoles,
     getNextLoanId,
     createLoan,

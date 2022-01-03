@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@types/bn.js": "^5",
+    "esbuild-darwin-64": "^0.14.10",
     "nodemon": "^2.0.15",
     "ts-node": "^10.4.0"
   }
