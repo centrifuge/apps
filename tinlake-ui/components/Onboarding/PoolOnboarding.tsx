@@ -1,6 +1,7 @@
 import { Spinner } from '@centrifuge/axis-spinner'
 import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { Anchor } from 'grommet'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
@@ -149,14 +150,17 @@ export const PoolOnboarding: React.FC<Props> = ({ activePool, market }) => {
                       <>
                         <StepParagraph>
                           Congratulations, you’ve successfully onboarded to the RWA Market! <br />
-                          You're ready to be one of the first to deposit USDC when it publicly launches.
+                          You are now ready to invest.
                         </StepParagraph>
+                        <Link href="https://rwamarket.io/#/deposit/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48-0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb480xb953a066377176092879a151c07798b3946eea4b">
+                          <Button primary label={'Invest'} largeOnMobile={false} />
+                        </Link>
                       </>
                     ) : (
                       <>
                         <StepParagraph>
                           Congratulations, you’ve successfully onboarded to the token! <br />
-                          Your are now ready to invest.
+                          You are now ready to invest.
                         </StepParagraph>
                         <PoolLink href={{ pathname: '/investments', query: { invest: 'senior' } }}>
                           <Button primary label={'Invest'} largeOnMobile={false} />
