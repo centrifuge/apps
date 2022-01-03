@@ -28,7 +28,9 @@ jobs:
         run: yarn install
 
       - name: Bump version
-        run: yarn bump
+        run: |
+          git config --local user.name "fabric-publish"
+          yarn bump
 
       - name: Public
         run: yarn publish
