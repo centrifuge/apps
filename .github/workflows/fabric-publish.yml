@@ -1,0 +1,39 @@
+name: 'Fabric publish'
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'fabric/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: fabric
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          cache: yarn
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Bump version
+        run: yarn bump
+
+      - name: Public
+        run: yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+      - name: Push bumped version and changelog
+        run: git push --follow-tags origin main

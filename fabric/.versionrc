@@ -1,0 +1,5 @@
+{
+  "path": ".",
+  "tag-prefix": "fabric/v",
+  "releaseCommitMessageFormat": "chore(release): fabric@{{currentTag}}"
+}
