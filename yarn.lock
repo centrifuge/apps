@@ -3042,7 +3042,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@centrifuge/tinlake-js@3.0.0-develop.35, @centrifuge/tinlake-js@workspace:*, @centrifuge/tinlake-js@workspace:tinlake.js":
+"@centrifuge/tinlake-js@npm:3.0.0-develop.35":
+  version: 3.0.0-develop.35
+  resolution: "@centrifuge/tinlake-js@npm:3.0.0-develop.35"
+  dependencies:
+    bignumber.js: ^9.0.0
+    decimal.js-light: 2.5.1
+    dotenv: ^8.2.0
+    eth-permit: ^0.1.7
+    glpk.js: 3.1.2
+    mocha: ^6.1.4
+    web3-eth-abi: ^1.2.11
+    web3-utils: ^1.2.0
+  checksum: 1869f89f4f5540192d25103b4e6f5fcd2843606068097f25d6052b5d2d307c1c6cf38112a4f528d3ea94ddb0bddb2a683fc0ecb2e613853a5dcf496557f645f0
+  languageName: node
+  linkType: hard
+
+"@centrifuge/tinlake-js@workspace:*, @centrifuge/tinlake-js@workspace:tinlake.js":
   version: 0.0.0-use.local
   resolution: "@centrifuge/tinlake-js@workspace:tinlake.js"
   dependencies:

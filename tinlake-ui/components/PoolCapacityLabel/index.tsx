@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { PoolData } from '../../utils/usePools'
 
 interface Props {
-  pool: PoolData
+  pool?: PoolData
 }
 
 const ONE_MILLION = new BN('1000000000000000000000000')
@@ -18,31 +18,31 @@ const formatCapacity = (capacity: BN): string => {
 }
 
 export const PoolCapacityLabel: React.FC<Props> = ({ pool }) => {
-  const { capacity, currency, isArchived, isOversubscribed } = pool
+  if (!pool) {
+    return <Label green>Open</Label>
+  }
 
-  const isUpcoming = pool.isUpcoming
-
-  if (pool.poolClosing) {
+  if (pool?.poolClosing) {
     return <Label orange>Closing down</Label>
   }
 
-  if (isUpcoming) {
+  if (pool?.isUpcoming) {
     return <Label blue>Upcoming</Label>
   }
 
-  if (isArchived) {
+  if (pool?.isArchived) {
     return <Label>Archived</Label>
   }
 
-  if (isOversubscribed || pool.capacity?.isZero()) {
+  if (pool?.isOversubscribed || pool?.capacity?.isZero()) {
     return <Label orange>Oversubscribed</Label>
   }
 
-  if (capacity == null) {
+  if (pool?.capacity == null) {
     return null
   }
 
-  return <Label green>{capacity ? `${formatCapacity(capacity)} ${currency}` : '...'}</Label>
+  return <Label green>{pool?.capacity ? `${formatCapacity(pool?.capacity)} ${pool?.currency}` : '...'}</Label>
 }
 
 const Label = styled.div<{ green?: true; blue?: true; orange?: true }>`

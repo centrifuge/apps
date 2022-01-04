@@ -1,3 +1,4 @@
+import { UiPoolDataProvider } from '@aave/contract-helpers'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { WithRouterProps } from 'next/dist/client/with-router'
@@ -13,6 +14,8 @@ import { Divider } from '../Divider'
 import { SectionHeading } from '../Heading'
 import { Shelf, Stack } from '../Layout'
 import { PoolCapacityLabel } from '../PoolCapacityLabel'
+import { IconExternalLink } from '../RewardsBanner/IconExternalLink'
+import { useTinlake } from '../TinlakeProvider'
 import { Tooltip } from '../Tooltip'
 import { Value } from '../Value'
 import { ValuePairList } from '../ValuePairList'
@@ -173,7 +176,7 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
           })}
         </Header>
       )}
-      <Link href={'https://rwamarket.io/'} shallow passHref>
+      <Link href={'https://rwamarket.io/'} shallow passHref key="rwa-market">
         <RwaMarketRow isMobile={isMobile as boolean} />
       </Link>
       {pools?.map((p, i) => (
@@ -252,39 +255,67 @@ interface RwaMarketRowProps {
 }
 
 export const RwaMarketRow: React.FC<RwaMarketRowProps> = ({ isMobile }) => {
-  const poolIcon = <Icon src={'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'} />
+  const tinlake = useTinlake()
+
+  const poolIcon = <Icon src={'/static/rwa-market-icon.png'} />
   const poolTitle = (
     <Stack gap="xsmall" flex="1 1 auto">
-      <Name>RWA Market</Name>
-      <Type>Market of Centrifuge pools built on the Aave protocol</Type>
+      <Name>
+        Real-World Asset Market <IconExternalLink />
+      </Name>
+      <Type>Market of RWA pools, built on the Aave protocol</Type>
     </Stack>
   )
 
+  const [marketSize, setMarketSize] = React.useState(new BN(0))
+
   const columns = [
-    // {
-    //   header: 'Pool Value',
-    //   cell: () => { <Value value={'0'} unit={p.currency} /> }
-    // },
-    // {
-    //   header: (
-    //     <Tooltip id="seniorApy" underline>
-    //       Senior APY
-    //     </Tooltip>
-    //   ),
-    //   subHeader: '30 days',
-    //   cell: () => {
-    //     const v = feeToInterestRate(p.seniorInterestRate || new BN(0))
-    //     return v === '0.00' ? (
-    //       <Value value="" unit="-" />
-    //     )
-    //     }
-    // },
+    {
+      header: 'Investment Capacity',
+      cell: () => <PoolCapacityLabel />,
+    },
+    {
+      header: 'Pool Value',
+      cell: () => <Value value={toNumber(marketSize, 0)} unit={'$'} />,
+    },
+    {
+      header: () => (
+        <Tooltip id="seniorApy" underline>
+          Senior APY
+        </Tooltip>
+      ),
+      subHeader: '30 days',
+      cell: () => {
+        return <Value value="" unit="-" />
+      },
+    },
   ]
     .filter(Boolean)
     .flat() as Column[]
 
+  const getMarketData = async () => {
+    const uiPoolDataProvider = new UiPoolDataProvider({
+      uiPoolDataProviderAddress: '0x47e300dDd1d25447482E2F7e5a5a967EA2DA8634',
+      provider: tinlake.provider,
+    })
+    const reservesData = await uiPoolDataProvider.getReservesData('0xB953a066377176092879a151C07798B3946EEa4b')
+    setMarketSize(
+      reservesData[0].reduce(
+        (sum, reserve) =>
+          sum.add(
+            new BN(reserve.availableLiquidity.toString()).div(new BN(10).pow(new BN(reserve.decimals.toString())))
+          ),
+        new BN(0)
+      )
+    )
+  }
+
+  React.useEffect(() => {
+    getMarketData()
+  }, [])
+
   return (
-    <PoolRow>
+    <PoolRow interactive as="a">
       {isMobile ? (
         <Stack gap="small">
           <Shelf gap="xsmall">
