@@ -173,13 +173,16 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
           })}
         </Header>
       )}
+      <Link href={'https://rwamarket.io/'} shallow passHref>
+        <RwaMarketRow isMobile={isMobile as boolean} />
+      </Link>
       {pools?.map((p, i) => (
         <Link href={p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`} shallow passHref key={`${p.id}-${i}`}>
           <Row
             row={p}
             columns={dataColumns}
             isMobile={isMobile as boolean}
-            icon={p.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'}
+            icon={p.icon || ''}
             title={p.name}
             type={p.asset}
             as="a"
@@ -237,6 +240,70 @@ export const Row: React.FC<DetailsProps & PropsOf<typeof PoolRow>> = ({
           {columns.map((col) => {
             const Col = isAlignedLeft(col) ? DataColLeft : DataCol
             return <Col>{col.cell(row)}</Col>
+          })}
+        </Shelf>
+      )}
+    </PoolRow>
+  )
+}
+
+interface RwaMarketRowProps {
+  isMobile: boolean
+}
+
+export const RwaMarketRow: React.FC<RwaMarketRowProps> = ({ isMobile }) => {
+  const poolIcon = <Icon src={'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'} />
+  const poolTitle = (
+    <Stack gap="xsmall" flex="1 1 auto">
+      <Name>RWA Market</Name>
+      <Type>Market of Centrifuge pools built on the Aave protocol</Type>
+    </Stack>
+  )
+
+  const columns = [
+    // {
+    //   header: 'Pool Value',
+    //   cell: () => { <Value value={'0'} unit={p.currency} /> }
+    // },
+    // {
+    //   header: (
+    //     <Tooltip id="seniorApy" underline>
+    //       Senior APY
+    //     </Tooltip>
+    //   ),
+    //   subHeader: '30 days',
+    //   cell: () => {
+    //     const v = feeToInterestRate(p.seniorInterestRate || new BN(0))
+    //     return v === '0.00' ? (
+    //       <Value value="" unit="-" />
+    //     )
+    //     }
+    // },
+  ]
+    .filter(Boolean)
+    .flat() as Column[]
+
+  return (
+    <PoolRow>
+      {isMobile ? (
+        <Stack gap="small">
+          <Shelf gap="xsmall">
+            {poolIcon}
+            {poolTitle}
+          </Shelf>
+          <Divider bleedX="small" width="auto" />
+          <ValuePairList
+            variant="primary"
+            items={columns.map((col) => ({ term: col.header, termSuffix: col.subHeader, value: col.cell() }))}
+          />
+        </Stack>
+      ) : (
+        <Shelf gap="small">
+          {poolIcon}
+          {poolTitle}
+          {columns.map((col) => {
+            const Col = isAlignedLeft(col) ? DataColLeft : DataCol
+            return <Col>{col.cell()}</Col>
           })}
         </Shelf>
       )}
