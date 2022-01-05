@@ -2,7 +2,7 @@ import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
 import config from '../config'
 
-type ReturnType = { ensName: string | null }
+type ReturnType = { ensName: string | null, ensAvatar: string | null }
 
 export const useENS = (address: string | null | undefined): ReturnType => {
   const [ensName, setENSName] = useState<string | null>(null)
@@ -21,5 +21,5 @@ export const useENS = (address: string | null | undefined): ReturnType => {
     resolveENS()
   }, [address])
 
-  return { ensName }
+  return { ensName, ensAvatar }
 }
