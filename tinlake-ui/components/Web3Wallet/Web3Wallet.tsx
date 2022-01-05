@@ -83,7 +83,11 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
           {open && (
             <Card>
               <Identicon>
-                <img src={toDataUrl(address)} width={64} height={64} />
+                {ensAvatar ? (
+                  <img src={ensAvatar} width={64} height={64} />
+                ) : (
+                  <img src={toDataUrl(address)} width={64} height={64} />
+                )}
               </Identicon>
               <StatusAddrCopyLink>
                 <StatusAddr>
