@@ -269,7 +269,7 @@ export const RwaMarketRow: React.FC<RwaMarketRowProps> = ({ isMobile }) => {
 
   const [marketSize, setMarketSize] = React.useState(new BN(0))
 
-  const columns = [
+  const columns: any[] = [
     {
       header: 'Investment Capacity',
       cell: () => <PoolCapacityLabel />,
