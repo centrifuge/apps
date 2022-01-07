@@ -3,10 +3,6 @@ import BN from 'bn.js'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
 
-export type Pool = {
-  id: string
-}
-
 const Currency = new BN(10).pow(new BN(18))
 
 const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
@@ -19,7 +15,7 @@ export type LoanInfo = {
   CreditLineWithMaturity: [string, string, string, string, string, string]
 }
 
-type TrancheDetails = {
+type TrancheDetailsData = {
   debt: BN
   reserve: BN
   minSubordinationRatio: BN
@@ -30,10 +26,10 @@ type TrancheDetails = {
   lastUpdatedInterest: number
 }
 
-type PoolDetails = {
+type PoolDetailsData = {
   owner: string
   currency: { [key: string]: null }
-  tranches: TrancheDetails[]
+  tranches: TrancheDetailsData[]
   currentEpoch: number
   lastEpochClosed: number
   lastEpochExecuted: number
@@ -44,26 +40,100 @@ type PoolDetails = {
   metadata: string
 }
 
-type NAVDetails = {
+type NAVDetailsData = {
   latestNav: BN
   lastUpdated: number
 }
 
-type LoanDetails = {
+export type Pool = {
+  id: string
+  owner: string
+  currency: string
+  metadata: string
+  tranches: {
+    index: number
+    name: string
+    debt: string
+    reserve: string
+    minSubordinationRatio: string
+    outstandingInvestOrders: string
+    outstandingRedeemOrders: string
+    interestPerSec: string
+    lastUpdatedInterest: number
+  }[]
+  reserve: {
+    max: string
+    available: string
+    total: string
+  }
+  epoch: {
+    current: number
+    lastClosed: number
+    lastExecuted: number
+    closing: number | null
+  }
+}
+
+export type DetailedPool = Omit<Pool, 'tranches'> & {
+  nav: {
+    latest: string
+    lastUpdated: number
+  }
+  tranches: {
+    index: number
+    name: string
+    debt: string
+    reserve: string
+    minSubordinationRatio: string
+    outstandingInvestOrders: string
+    outstandingRedeemOrders: string
+    interestPerSec: string
+    lastUpdatedInterest: number
+    totalIssuance: string
+    tokenPrice: string
+  }[]
+}
+
+export enum LoanStatus {
+  // this when asset is locked and loan nft is issued.
+  Issued = 'Issued',
+  // this is when loan is in active state. Either underwriters or oracles can move loan to this state
+  // by providing information like discount rates etc.. to loan
+  Active = 'Active',
+  // loan is closed and asset nft is transferred back to borrower and loan nft is transferred back to loan module
+  Closed = 'Closed',
+}
+
+type LoanDetailsData = {
   borrowedAmount: BN
   ratePerSec: BN
   accumulatedRate: BN
   principalDebt: BN
   lastUpdated: number
   originationDate: number
-  status: string // TODO: enum
+  status: LoanStatus
   loanType: { [key: string]: LoanInfo }
   adminWrittenOff: boolean
   writeOffIndex: number | null
 }
 
+export type Loan = {
+  id: string
+  financedAmount: string
+  financingFee: string
+  outstandingDebt: string
+  lastUpdated: number
+  originationDate: number
+  status: LoanStatus
+  loanType: {
+    [key: string]: LoanInfo
+  }
+  adminWrittenOff: boolean
+  writeOffIndex: number | null
+}
+
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
-const formatLoanKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
+const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
 export function getPoolsModule(inst: CentrifugeBase) {
   // TODO: integrate ipfs pinning
@@ -203,18 +273,21 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
-  async function getPools() {
+  async function getPools(): Promise<Pool[]> {
     const api = await inst.getApi()
     const rawPools = await api.query.investorPool.pool.entries()
 
     const pools = rawPools.map(([key, value]) => {
-      const pool = value.toJSON() as unknown as PoolDetails
+      const pool = value.toJSON() as unknown as PoolDetailsData
+      const metadata = (value.toHuman() as any).metadata
       return {
-        name: formatPoolKey(key as StorageKey<[u32]>),
+        id: formatPoolKey(key as StorageKey<[u32]>),
         owner: pool.owner,
+        metadata,
         currency: Object.keys(pool.currency)[0],
-        tranches: pool.tranches.map((tranche: TrancheDetails, index: number) => {
+        tranches: pool.tranches.map((tranche: TrancheDetailsData, index: number) => {
           return {
+            index,
             name: tokenIndexToName(index, pool.tranches.length),
             debt: parseBN(tranche.debt),
             reserve: parseBN(tranche.reserve),
@@ -242,7 +315,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return pools
   }
 
-  async function getPool(args: [poolId: string]) {
+  async function getPool(args: [poolId: string]): Promise<DetailedPool> {
     const [poolId] = args
     const api = await inst.getApi()
 
@@ -251,8 +324,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
       api.query.loan.poolNAV(poolId),
     ])
 
-    const pool = poolValue.toJSON() as unknown as PoolDetails
-    const nav = navValue.toJSON() as unknown as NAVDetails
+    const pool = poolValue.toJSON() as unknown as PoolDetailsData
+    const nav = navValue.toJSON() as unknown as NAVDetailsData
+    const metadata = (poolValue.toHuman() as any).metadata
 
     const tokenIssuanceValues = await Promise.all(
       pool.tranches.map((_1, index: number) => api.query.tokens.totalIssuance({ Tranche: [poolId, index] }))
@@ -270,12 +344,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const lastEpoch = epochValues.map((val) => (val as any).unwrap())
 
     return {
-      name: poolId,
+      id: poolId,
       owner: pool.owner,
-      // metadata: Buffer.from(pool.metadata.substring(2), 'hex').toString(),
+      metadata,
       currency: Object.keys(pool.currency)[0],
-      tranches: pool.tranches.map((tranche: TrancheDetails, index: number) => {
+      tranches: pool.tranches.map((tranche, index) => {
         return {
+          index,
           name: tokenIndexToName(index, pool.tranches.length),
           debt: parseBN(tranche.debt),
           reserve: parseBN(tranche.reserve),
@@ -289,7 +364,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         }
       }),
       nav: {
-        latest: nav ? parseBN(nav.latestNav) : new BN(0),
+        latest: nav ? parseBN(nav.latestNav) : '0',
         lastUpdated: nav ? nav.lastUpdated : 0,
       },
       reserve: {
@@ -306,16 +381,16 @@ export function getPoolsModule(inst: CentrifugeBase) {
     }
   }
 
-  async function getLoans(args: [poolId: string]) {
+  async function getLoans(args: [poolId: string]): Promise<Loan[]> {
     const [poolId] = args
     const api = await inst.getApi()
 
     const loanValues = await api.query.loan.loanInfo.entries(poolId)
 
     return loanValues.map(([key, value]) => {
-      const loan = value.toJSON() as unknown as LoanDetails
+      const loan = value.toJSON() as unknown as LoanDetailsData
       return {
-        id: formatLoanKey(key as StorageKey<[u32]>),
+        id: formatLoanKey(key as StorageKey<[u32, u32]>),
         financedAmount: parseBN(loan.borrowedAmount),
         financingFee: parseBN(loan.ratePerSec),
         outstandingDebt: new BN(parseBN(loan.principalDebt))
@@ -332,13 +407,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
     })
   }
 
-  async function getLoan(args: [poolId: string, loanId: string]) {
+  async function getLoan(args: [poolId: string, loanId: string]): Promise<Loan> {
     const [poolId, loanId] = args
     const api = await inst.getApi()
 
     const loanValue = await api.query.loan.loanInfo(poolId, loanId)
 
-    const loan = loanValue.toJSON() as unknown as LoanDetails
+    const loan = loanValue.toJSON() as unknown as LoanDetailsData
 
     return {
       id: loanId,

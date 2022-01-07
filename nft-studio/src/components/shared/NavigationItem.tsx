@@ -42,7 +42,7 @@ export const NavigationItem: React.FC<Props> = ({ label, icon, href, children })
       >
         <Shelf alignItems="center">
           <IconWrapper>{icon}</IconWrapper>
-          <Text variant="interactive">{label}</Text>
+          <Text variant="interactive1">{label}</Text>
         </Shelf>
 
         <Box>{children && (open ? <IconChevronDown /> : <IconChevronRight />)}</Box>

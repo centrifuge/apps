@@ -8,10 +8,11 @@ import { DefaultTheme, ThemeProvider } from 'styled-components'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
+import { LoanPage } from '../pages/Loan'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
 import { PoolPage } from '../pages/Pool'
-import { PoolsPage } from '../pages/PoolsPage'
+import { PoolsPage } from '../pages/Pools'
 import { CentrifugeProvider } from './CentrifugeProvider'
 import { GlobalStyle } from './GlobalStyle'
 import { LoadBoundary } from './LoadBoundary'
@@ -79,6 +80,9 @@ export const Root: React.FC = () => {
                       </Route>
                       <Route path="/nfts">
                         <CollectionsPage />
+                      </Route>
+                      <Route path="/pools/:pid/assets/:aid">
+                        <LoanPage />
                       </Route>
                       <Route path="/pools/:pid">
                         <PoolPage />

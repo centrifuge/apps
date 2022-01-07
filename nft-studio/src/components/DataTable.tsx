@@ -1,43 +1,104 @@
-import { Shelf } from '@centrifuge/fabric'
-import React from 'react'
+import { Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import css from '@styled-system/css'
+import * as React from 'react'
 import styled from 'styled-components'
 
-interface DataTableProps {
-  children: React.ReactNode | React.ReactNode[]
+type Props = {
+  data: Array<any>
+  columns: Column[]
+  keyField?: string
+  onRowClicked?: (row: any) => void
 }
 
-const StyledDataTable = styled.div`
-  width: 100%;
-  border: 0;
-  font-family: sans-serif;
-`
-
-export const DataTable: React.FC<DataTableProps> = ({ children }) => <StyledDataTable>{children}</StyledDataTable>
-
-interface DataTableRowProps {
-  children: React.ReactNode | React.ReactNode[]
+type Column = {
+  header: React.ReactNode
+  cell: (row: any) => React.ReactNode
+  align?: string
+  flex?: string
 }
 
-const StyledDataTableRow = styled.div`
-  width: 100%;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-`
+export const DataTable: React.VFC<Props> = ({ data, columns, keyField, onRowClicked }) => {
+  return (
+    <Stack>
+      <Shelf>
+        {columns.map((col) =>
+          col.align === 'left' ? (
+            <HeaderColLeft style={{ flex: col.flex }}>
+              <Text variant="label1">{col.header}</Text>
+            </HeaderColLeft>
+          ) : (
+            <HeaderCol style={{ flex: col.flex }}>
+              <Text variant="label1">{col.header}</Text>
+            </HeaderCol>
+          )
+        )}
+      </Shelf>
+      <Card>
+        {data.map((row: any, i) => (
+          <Row
+            as={onRowClicked ? 'button' : 'div'}
+            key={keyField ? row[keyField] : i}
+            onClick={onRowClicked && (() => onRowClicked(row))}
+            tabIndex={onRowClicked ? 0 : undefined}
+          >
+            {columns.map((col) =>
+              col.align === 'left' ? (
+                <DataColLeft style={{ flex: col.flex }}>{col.cell(row)}</DataColLeft>
+              ) : (
+                <DataCol style={{ flex: col.flex }}>{col.cell(row)}</DataCol>
+              )
+            )}
+          </Row>
+        ))}
+      </Card>
+    </Stack>
+  )
+}
 
-export const DataTableRow: React.FC<DataTableRowProps> = ({ children }) => (
-  <StyledDataTableRow>
-    <Shelf justifyContent="space-between">{children}</Shelf>
-  </StyledDataTableRow>
+const Row = styled(Shelf)(
+  css({
+    width: '100%',
+    minHeight: 56,
+    appearance: 'none',
+    border: 'none',
+    backgroundColor: 'transparent',
+    '&:not(:last-child)': {
+      borderWidth: '0 0 1px',
+      borderStyle: 'solid',
+      borderColor: 'borderPrimary',
+    },
+    'button&:hover': {
+      backgroundColor: 'backgroundSecondary',
+      cursor: 'pointer',
+    },
+    '&:focus-visible': {
+      boxShadow: 'inset 0 0 0 3px var(--fabric-color-focus)',
+    },
+    '&:first-child': {
+      borderTopLeftRadius: 'card',
+      borderTopRightRadius: 'card',
+    },
+    '&:last-child': {
+      borderBottomLeftRadius: 'card',
+      borderBottomRightRadius: 'card',
+    },
+  })
 )
 
-interface DataTableColProps {
-  children: React.ReactNode | React.ReactNode[]
-}
-
-const StyledDataTableCol = styled.div`
-  padding: 16px;
+const DataCol = styled.div`
+  flex: 1 1 160px;
+  padding: 8px 24px;
+  display: flex;
+  justify-content: flex-end;
 `
 
-export const DataTableCol: React.FC<DataTableColProps> = ({ children }) => (
-  <StyledDataTableCol>{children}</StyledDataTableCol>
-)
+const DataColLeft = styled.div`
+  flex: 1 1 160px;
+  padding: 8px 24px;
+  display: flex;
+  justify-content: flex-start;
+`
+
+const HeaderCol = styled(DataCol)``
+
+const HeaderColLeft = styled(DataColLeft)``

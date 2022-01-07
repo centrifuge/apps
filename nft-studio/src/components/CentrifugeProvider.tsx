@@ -10,6 +10,7 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
         network: 'centrifuge',
         polkadotWsUrl: 'ws://localhost:9944',
         centrifugeWsUrl: 'ws://localhost:9946',
+        printExtrinsics: process.env.NODE_ENV === 'development',
       }),
     []
   )

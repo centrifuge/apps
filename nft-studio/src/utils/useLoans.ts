@@ -15,3 +15,18 @@ export function useLoans(poolId: string) {
 
   return query
 }
+
+export function useLoan(poolId: string, assetId: string) {
+  const centrifuge = useCentrifuge()
+  const query = useQuery(
+    ['loan', poolId, assetId],
+    async () => {
+      return centrifuge.pools.getLoan([poolId, assetId])
+    },
+    {
+      suspense: true,
+    }
+  )
+
+  return query
+}

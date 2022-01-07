@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query'
+import { useQuery, UseQueryResult } from 'react-query'
 import { parseMetadataUrl } from './parseMetadataUrl'
 
 type Schema = {
@@ -16,14 +16,19 @@ type Result<T extends Schema> = {
 }
 
 export async function fetchMetadata(uri: string) {
-  return fetch(parseMetadataUrl(uri!)).then((res) => res.json())
+  const url = parseMetadataUrl(uri)
+  return fetch(url).then((res) => res.json())
 }
 
-export function useMetadata<T extends Schema>(uri: string | undefined, schema: T) {
+export function useMetadata<T = any>(uri: string | undefined): UseQueryResult<Partial<T>, unknown>
+export function useMetadata<T extends Schema>(uri: string | undefined, schema: T): UseQueryResult<Result<T>, unknown>
+export function useMetadata<T extends Schema>(uri: string | undefined, schema?: T) {
   const query = useQuery(
     ['metadata', uri],
     async () => {
       const res = await fetchMetadata(uri!)
+
+      if (!schema) return res
 
       const result: any = {}
 

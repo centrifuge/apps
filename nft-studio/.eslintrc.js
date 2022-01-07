@@ -10,5 +10,6 @@ module.exports = {
   plugins: ['eslint-plugin-react'],
   rules: {
     'react/prop-types': 'off',
+    'react/display-name': 'off',
   },
 }
