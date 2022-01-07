@@ -18,7 +18,6 @@ import { httpClient } from '../http-client'
 import routes from '../routes'
 import { goToHomePage } from '../utils/goToHomePage'
 import DocumentForm from './DocumentForm'
-import { FundingAgreements } from './FundingAgreements'
 import { Nfts } from './Nfts'
 import documentRoutes from './routes'
 
@@ -152,18 +151,6 @@ export const ViewDocument: FunctionComponent<Props> = (props: Props) => {
           template={selectedSchema!.template}
           registries={selectedSchema!.registries}
         />
-
-        {selectedSchema!.formFeatures && selectedSchema!.formFeatures!.fundingAgreement && (
-          <FundingAgreements
-            onAsyncStart={startLoading}
-            onAsyncComplete={loadData}
-            onAsyncError={displayModalError}
-            user={user}
-            viewMode={true}
-            document={document!}
-            contacts={extendedContacts}
-          />
-        )}
       </DocumentForm>
     </Box>
   )
