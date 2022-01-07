@@ -153,7 +153,6 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
 
   // Add mint action if schema has any registries defined
   const canMint = selectedSchema!.registries && selectedSchema!.registries.length > 0
-  const canFund = canWriteToDoc(user, document)
   const extendedContacts = extendContactsWithUsers(contacts, [user!])
 
   return (
