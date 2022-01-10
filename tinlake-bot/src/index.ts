@@ -22,6 +22,10 @@ const run = async () => {
   console.log(`Awaiting JSON RPC provider connection`)
   await provider.ready
 
+  if (config.excludedPools.length > 0) {
+    console.log(`Excluding pools: ${config.excludedPools.join(', ')}`)
+  }
+
   const signer = new TransactionManager(wallet).connect(provider)
 
   console.log(`Booting Tinlake Bot as ${wallet.address}`)
