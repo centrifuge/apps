@@ -276,7 +276,7 @@ export const RwaMarketRow: React.FC<RwaMarketRowProps> = ({ isMobile }) => {
     },
     {
       header: 'Pool Value',
-      cell: () => <Value value={toNumber(marketSize, 0)} unit={'$'} />,
+      cell: () => <Value value={toNumber(marketSize, 0)} unit={'USDC'} />,
     },
     {
       header: () => (
