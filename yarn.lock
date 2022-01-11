@@ -5,17 +5,6 @@ __metadata:
   version: 4
   cacheKey: 7
 
-"@aave/contract-helpers@npm:^0.27.3":
-  version: 0.27.3
-  resolution: "@aave/contract-helpers@npm:0.27.3"
-  dependencies:
-    isomorphic-unfetch: ^3.1.0
-  peerDependencies:
-    ethers: ~5.4.7
-  checksum: 1af99e9128a100e17459fae7f40fef6463bf1846bf2ee99b9730a16a4dbb6ef54f3b01d949a56c22b9fb73ece5ed71dd3a53166d6b46cef5b3f6f19207a46d71
-  languageName: node
-  linkType: hard
-
 "@ampproject/toolbox-core@npm:^2.6.0, @ampproject/toolbox-core@npm:^2.8.0":
   version: 2.8.0
   resolution: "@ampproject/toolbox-core@npm:2.8.0"
@@ -26735,16 +26724,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"isomorphic-unfetch@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "isomorphic-unfetch@npm:3.1.0"
-  dependencies:
-    node-fetch: ^2.6.1
-    unfetch: ^4.2.0
-  checksum: 6453f52bfef7adbd59130b9e6727ccf6f80488920fa89b1294cba6ffc5736384fa7dfe49897b0ad48006044fbe52bc5b5d5b131c4ee33123646fd3b3813c4f15
-  languageName: node
-  linkType: hard
-
 "isomorphic-ws@npm:^4.0.1":
   version: 4.0.1
   resolution: "isomorphic-ws@npm:4.0.1"
@@ -37835,7 +37814,6 @@ resolve@1.18.1:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@aave/contract-helpers": ^0.27.3
     "@types/concurrently": ^5
     babel-plugin-styled-components: 1.12.0
     bn.js: 5.1.3

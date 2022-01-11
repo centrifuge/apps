@@ -1,6 +1,9 @@
-import { UiPoolDataProvider } from '@aave/contract-helpers'
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import ApolloClient from 'apollo-client'
+import { createHttpLink } from 'apollo-link-http'
 import BN from 'bn.js'
+import gql from 'graphql-tag'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Link from 'next/link'
 import { withRouter } from 'next/router'
@@ -15,7 +18,6 @@ import { SectionHeading } from '../Heading'
 import { Shelf, Stack } from '../Layout'
 import { PoolCapacityLabel } from '../PoolCapacityLabel'
 import { IconExternalLink } from '../RewardsBanner/IconExternalLink'
-import { useTinlake } from '../TinlakeProvider'
 import { Tooltip } from '../Tooltip'
 import { Value } from '../Value'
 import { ValuePairList } from '../ValuePairList'
@@ -176,8 +178,8 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
           })}
         </Header>
       )}
-      <Link href={'https://rwamarket.io/'} shallow passHref key="rwa-market">
-        <RwaMarketRow isMobile={isMobile as boolean} />
+      <Link href={'https://rwamarket.io/'} passHref key="rwa-market">
+        <RwaMarketRow isMobile={isMobile as boolean} interactive as="a" target="_blank" />
       </Link>
       {pools?.map((p, i) => (
         <Link href={p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`} shallow passHref key={`${p.id}-${i}`}>
@@ -254,14 +256,45 @@ interface RwaMarketRowProps {
   isMobile: boolean
 }
 
-export const RwaMarketRow: React.FC<RwaMarketRowProps> = ({ isMobile }) => {
-  const tinlake = useTinlake()
+const fetchReserves = async (): Promise<any> => {
+  const Apollo = new ApolloClient({
+    cache: new InMemoryCache(),
+    link: createHttpLink({
+      fetch: fetch as any,
+      headers: {
+        'user-agent': null,
+      },
+      uri: 'https://api.thegraph.com/subgraphs/name/aave/aave-centrifuge',
+    }),
+    defaultOptions: {
+      query: {
+        fetchPolicy: 'no-cache',
+        errorPolicy: 'all',
+      },
+    },
+  })
 
+  return Apollo.query({
+    query: gql`
+      {
+        reserves(where: { symbol: "USDC" }) {
+          symbol
+          totalLiquidity
+        }
+      }
+    `,
+  })
+}
+
+export const RwaMarketRow: React.FC<RwaMarketRowProps & PropsOf<typeof PoolRow>> = ({ isMobile, ...rest }) => {
   const poolIcon = <Icon src={'/static/rwa-market-icon.png'} />
   const poolTitle = (
     <Stack gap="xsmall" flex="1 1 auto">
       <Name>
-        Real-World Asset Market <IconExternalLink />
+        Real-World Asset Market{' '}
+        <span style={{ position: 'relative', top: '2px' }}>
+          <IconExternalLink />
+        </span>
       </Name>
       <Type>Market of RWA pools, built on the Aave protocol</Type>
     </Stack>
@@ -286,7 +319,7 @@ export const RwaMarketRow: React.FC<RwaMarketRowProps> = ({ isMobile }) => {
       ),
       subHeader: '30 days',
       cell: () => {
-        return <Value value="" unit="-" />
+        return <SubNumber>Expected: 3.5 % APR</SubNumber>
       },
     },
   ]
@@ -294,20 +327,8 @@ export const RwaMarketRow: React.FC<RwaMarketRowProps> = ({ isMobile }) => {
     .flat() as Column[]
 
   const getMarketData = async () => {
-    const uiPoolDataProvider = new UiPoolDataProvider({
-      uiPoolDataProviderAddress: '0x47e300dDd1d25447482E2F7e5a5a967EA2DA8634',
-      provider: tinlake.provider,
-    })
-    const reservesData = await uiPoolDataProvider.getReservesData('0xB953a066377176092879a151C07798B3946EEa4b')
-    setMarketSize(
-      reservesData[0].reduce(
-        (sum, reserve) =>
-          sum.add(
-            new BN(reserve.availableLiquidity.toString()).div(new BN(10).pow(new BN(reserve.decimals.toString())))
-          ),
-        new BN(0)
-      )
-    )
+    const reserves = await fetchReserves()
+    setMarketSize(new BN(reserves.data.reserves[0].totalLiquidity).div(new BN(10).pow(new BN(6))))
   }
 
   React.useEffect(() => {
@@ -315,7 +336,7 @@ export const RwaMarketRow: React.FC<RwaMarketRowProps> = ({ isMobile }) => {
   }, [])
 
   return (
-    <PoolRow interactive as="a">
+    <PoolRow {...rest}>
       {isMobile ? (
         <Stack gap="small">
           <Shelf gap="xsmall">
