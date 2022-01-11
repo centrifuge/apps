@@ -12,6 +12,7 @@ import { LoanPage } from '../pages/Loan'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
 import { PoolPage } from '../pages/Pool'
+import { PoolFormPage } from '../pages/PoolForm'
 import { PoolsPage } from '../pages/Pools'
 import { CentrifugeProvider } from './CentrifugeProvider'
 import { GlobalStyle } from './GlobalStyle'
@@ -86,6 +87,9 @@ export const Root: React.FC = () => {
                       </Route>
                       <Route path="/pools/:pid">
                         <PoolPage />
+                      </Route>
+                      <Route path="/pool/new">
+                        <PoolFormPage />
                       </Route>
                       <Route path="/">
                         <PoolsPage />

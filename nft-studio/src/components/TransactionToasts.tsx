@@ -45,6 +45,7 @@ export const TransactionToasts: React.FC = () => {
               tx.hash ? (
                 <AnchorButton
                   variant="text"
+                  target="_blank"
                   href={`${process.env.REACT_APP_SUBSCAN_URL}${tx.hash}`}
                   icon={IconExternalLink}
                 />

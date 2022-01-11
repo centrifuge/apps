@@ -1,4 +1,4 @@
-import { Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { PageHeader } from '../components/PageHeader'
 import { PoolList } from '../components/PoolList'
@@ -19,7 +19,16 @@ const Pools: React.FC = () => {
 
   return (
     <Stack gap={8} flex={1}>
-      <PageHeader title="Pools" />
+      <PageHeader
+        title="Pools"
+        actions={
+          <AnchorButton variant="text" href="/pool/new" icon={<IconPlus size="iconSmall" />}>
+            <Text variant="interactive1" color="currentColor">
+              Create pool
+            </Text>
+          </AnchorButton>
+        }
+      />
       {pools?.length ? (
         <PoolList pools={pools} />
       ) : (
