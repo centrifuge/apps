@@ -32,6 +32,8 @@ const Pool: React.FC = () => {
   const { data: poolMetadata } = usePoolMetadata(pool)
   const history = useHistory()
 
+  console.log('pool', pool)
+
   const centrifuge = useCentrifuge()
 
   return (
@@ -42,7 +44,7 @@ const Pool: React.FC = () => {
         subtitle={poolMetadata?.metadata?.asset}
       />
       <PageSummary>
-        <LabelValueStack label="Value" value={'[Total value]'} />
+        <LabelValueStack label="Value" value={centrifuge.utils.formatCurrencyAmount(pool?.nav.latest)} />
       </PageSummary>
       <Grid columns={[1, 2]} gap={3} equalColumns>
         {pool &&
@@ -53,32 +55,37 @@ const Pool: React.FC = () => {
                   <CardHeader
                     pretitle="Tranche token"
                     title={'[SYMBOL]'}
-                    titleAddition={centrifuge.utils.formatCurrencyAmount(tranche.totalIssuance)}
+                    titleAddition={centrifuge.utils.formatCurrencyAmount(tranche.debt)}
                     subtitle={`${poolMetadata?.metadata?.name} ${tranche.name} tranche`}
                   />
                   <LabelValueList
-                    items={[
-                      {
-                        label: 'Risk protection',
-                        value: (
-                          <>
-                            <Text color="textSecondary">
-                              Min.{' '}
-                              {centrifuge.utils.formatPercentage(
-                                tranche.minRiskBuffer,
-                                new BN(10).pow(new BN(18)).toString()
-                              )}
-                            </Text>{' '}
-                            [ratio]
-                          </>
-                        ),
-                      },
-                      { label: 'APR', value: `${centrifuge.utils.feeToApr(tranche.interestPerSec)}%` },
-                      {
-                        label: 'Reserve',
-                        value: <Text color="statusOk">{centrifuge.utils.formatCurrencyAmount(tranche.reserve)}</Text>,
-                      },
-                    ]}
+                    items={
+                      [
+                        tranche.name !== 'Junior' && {
+                          label: 'Risk protection',
+                          value: (
+                            <>
+                              <Text color="textSecondary">
+                                Min.{' '}
+                                {centrifuge.utils.formatPercentage(
+                                  tranche.minRiskBuffer,
+                                  new BN(10).pow(new BN(18)).toString()
+                                )}
+                              </Text>{' '}
+                              [ratio]
+                            </>
+                          ),
+                        },
+                        tranche.name !== 'Junior' && {
+                          label: 'APR',
+                          value: `${centrifuge.utils.feeToApr(tranche.interestPerSec)}%`,
+                        },
+                        {
+                          label: 'Reserve',
+                          value: <Text color="statusOk">{centrifuge.utils.formatCurrencyAmount(tranche.reserve)}</Text>,
+                        },
+                      ].filter(Boolean) as any
+                    }
                   />
                   <ButtonGroup>
                     <Button small variant="outlined">

@@ -1,4 +1,4 @@
-import { Button, Card, IconArrowRight, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Card, Grid, IconArrowRight, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -70,30 +70,32 @@ const Loan: React.FC = () => {
         <Card p={3}>
           <Stack gap={3}>
             <CardHeader title="[Asset]" />
-            <LabelValueList
-              items={
-                [
-                  { label: 'Value', value: `${centrifuge.utils.formatCurrencyAmount(loan.loanInfo.value)}` },
-                  'maturityDate' in loan.loanInfo && {
-                    label: 'Maturity date',
-                    value: formatDate(loan.loanInfo.maturityDate),
-                  },
-                  'probabilityOfDefault' in loan.loanInfo && {
-                    label: 'Probability of default',
-                    value: `${centrifuge.utils.formatPercentage(loan.loanInfo.probabilityOfDefault, e27)}`,
-                  },
-                  'lossGivenDefault' in loan.loanInfo && {
-                    label: 'Loss given default',
-                    value: `${centrifuge.utils.formatPercentage(loan.loanInfo.lossGivenDefault, e27)}`,
-                  },
-                  { label: 'Financing fee', value: `${centrifuge.utils.feeToApr(loan.financingFee)}%` },
-                  {
-                    label: 'Advance rate',
-                    value: `${centrifuge.utils.formatPercentage(loan.loanInfo.advanceRate, e27)}`,
-                  },
-                ].filter(Boolean) as any
-              }
-            />
+            <Grid columns={[1, 2]} equalColumns gap={5}>
+              <LabelValueList
+                items={
+                  [
+                    { label: 'Value', value: `${centrifuge.utils.formatCurrencyAmount(loan.loanInfo.value)}` },
+                    'maturityDate' in loan.loanInfo && {
+                      label: 'Maturity date',
+                      value: formatDate(loan.loanInfo.maturityDate),
+                    },
+                    'probabilityOfDefault' in loan.loanInfo && {
+                      label: 'Probability of default',
+                      value: `${centrifuge.utils.formatPercentage(loan.loanInfo.probabilityOfDefault, e27)}`,
+                    },
+                    'lossGivenDefault' in loan.loanInfo && {
+                      label: 'Loss given default',
+                      value: `${centrifuge.utils.formatPercentage(loan.loanInfo.lossGivenDefault, e27)}`,
+                    },
+                    { label: 'Financing fee', value: `${centrifuge.utils.feeToApr(loan.financingFee)}%` },
+                    {
+                      label: 'Advance rate',
+                      value: `${centrifuge.utils.formatPercentage(loan.loanInfo.advanceRate, e27)}`,
+                    },
+                  ].filter(Boolean) as any
+                }
+              />
+            </Grid>
           </Stack>
         </Card>
       ) : (
