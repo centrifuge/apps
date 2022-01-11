@@ -65,7 +65,7 @@ const Pool: React.FC = () => {
                             <Text color="textSecondary">
                               Min.{' '}
                               {centrifuge.utils.formatPercentage(
-                                tranche.minSubordinationRatio,
+                                tranche.minRiskBuffer,
                                 new BN(10).pow(new BN(18)).toString()
                               )}
                             </Text>{' '}

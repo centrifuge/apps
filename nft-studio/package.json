@@ -29,6 +29,7 @@
     "@styled-system/css": "^5.1.5",
     "@styled-system/should-forward-prop": "^5.1.5",
     "axios": "^0.24.0",
+    "bn.js": "^5.2.0",
     "form-data": "^4.0.0",
     "netlify-lambda": "^2.0.15",
     "react": "^17.0.2",
@@ -42,6 +43,7 @@
     "styled-system": "^5.1.5"
   },
   "devDependencies": {
+    "@types/bn.js": "^5",
     "@types/react": "^17.0.30",
     "@types/react-dom": "^17",
     "@types/react-router": "^5",

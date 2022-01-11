@@ -9,16 +9,67 @@ const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000
 
 export type PoolRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'RiskAdmin'
 
-export type LoanInfo = {
+export type LoanInfoInput = {
   BulletLoan: [string, string, string, string, string, string]
   CreditLine: [string, string]
   CreditLineWithMaturity: [string, string, string, string, string, string]
 }
 
+type LoanInfoData = {
+  bulletLoan?: {
+    advanceRate: string
+    value: string
+    probabilityOfDefault: string
+    lossGivenDefault: string
+    discountRate: string
+    maturityDate: number
+  }
+  creditLine?: {
+    advanceRate: string
+    value: string
+  }
+  creditLineWithMaturity?: {
+    advanceRate: string
+    value: string
+    probabilityOfDefault: string
+    lossGivenDefault: string
+    discountRate: string
+    maturityDate: number
+  }
+}
+
+type BulletLoan = {
+  type: 'bulletLoan'
+  advanceRate: string
+  probabilityOfDefault: string
+  lossGivenDefault: string
+  value: string
+  discountRate: string
+  maturityDate: number
+}
+
+type CreditLine = {
+  type: 'creditLine'
+  advanceRate: string
+  value: string
+}
+
+type CreditLineWithMaturity = {
+  type: 'creditLineWithMaturity'
+  advanceRate: string
+  probabilityOfDefault: string
+  value: string
+  discountRate: string
+  maturityDate: number
+  lossGivenDefault: string
+}
+
+type LoanInfo = BulletLoan | CreditLine | CreditLineWithMaturity
+
 type TrancheDetailsData = {
   debt: BN
   reserve: BN
-  minSubordinationRatio: BN
+  minRiskBuffer: BN
   epochSupply: BN
   epochRedeem: BN
   ratio: BN
@@ -55,7 +106,7 @@ export type Pool = {
     name: string
     debt: string
     reserve: string
-    minSubordinationRatio: string
+    minRiskBuffer: string
     outstandingInvestOrders: string
     outstandingRedeemOrders: string
     interestPerSec: string
@@ -84,7 +135,7 @@ export type DetailedPool = Omit<Pool, 'tranches'> & {
     name: string
     debt: string
     reserve: string
-    minSubordinationRatio: string
+    minRiskBuffer: string
     outstandingInvestOrders: string
     outstandingRedeemOrders: string
     interestPerSec: string
@@ -112,7 +163,7 @@ type LoanDetailsData = {
   lastUpdated: number
   originationDate: number
   status: LoanStatus
-  loanType: { [key: string]: LoanInfo }
+  loanType: { [key: string]: LoanInfoData }
   adminWrittenOff: boolean
   writeOffIndex: number | null
 }
@@ -125,9 +176,7 @@ export type Loan = {
   lastUpdated: number
   originationDate: number
   status: LoanStatus
-  loanType: {
-    [key: string]: LoanInfo
-  }
+  loanInfo: LoanInfo
   adminWrittenOff: boolean
   writeOffIndex: number | null
 }
@@ -148,11 +197,12 @@ export function getPoolsModule(inst: CentrifugeBase) {
     ],
     options?: TransactionOptions
   ) {
-    const [poolId, collectionId, tranches, currency, maxReserve] = args
+    const [poolId, collectionId, tranches, currency, maxReserve, metadata] = args
     const api = await inst.getApi()
     const submittable = api.tx.utility.batchAll([
       api.tx.uniques.create(collectionId, LoanPalletAccountId),
       api.tx.investorPool.createPool(poolId, tranches, currency, maxReserve.toString()),
+      api.tx.investorPool.setPoolMetadata(poolId, metadata),
       api.tx.loan.initialisePool(poolId, collectionId),
     ])
     return inst.wrapSignAndSend(api, submittable, options)
@@ -234,7 +284,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
-  async function priceLoan<T extends keyof LoanInfo, I extends LoanInfo[T]>(
+  async function priceLoan<T extends keyof LoanInfoInput, I extends LoanInfoInput[T]>(
     args: [poolId: string, loanId: string, ratePerSec: string, loanType: T, loanInfo: I],
     options?: TransactionOptions
   ) {
@@ -291,7 +341,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
             name: tokenIndexToName(index, pool.tranches.length),
             debt: parseBN(tranche.debt),
             reserve: parseBN(tranche.reserve),
-            minSubordinationRatio: parseBN(tranche.minSubordinationRatio),
+            minRiskBuffer: parseBN(tranche.minRiskBuffer),
             outstandingInvestOrders: parseBN(tranche.epochSupply),
             outstandingRedeemOrders: parseBN(tranche.epochRedeem),
             interestPerSec: parseBN(tranche.interestPerSec),
@@ -341,7 +391,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const epochValues = await Promise.all(
       pool.tranches.map((_1, index: number) => api.query.investorPool.epoch([poolId, index], pool.lastEpochExecuted))
     )
-    const lastEpoch = epochValues.map((val) => (val as any).unwrap())
+    const lastEpoch = epochValues.filter((val) => !val.isEmpty).map((val) => (val as any).unwrap())
 
     return {
       id: poolId,
@@ -355,7 +405,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           debt: parseBN(tranche.debt),
           reserve: parseBN(tranche.reserve),
           totalIssuance: tokenIssuanceValues[index].toString(),
-          minSubordinationRatio: parseBN(tranche.minSubordinationRatio),
+          minRiskBuffer: parseBN(tranche.minRiskBuffer),
           outstandingInvestOrders: parseBN(tranche.epochSupply),
           outstandingRedeemOrders: parseBN(tranche.epochRedeem),
           interestPerSec: parseBN(tranche.interestPerSec),
@@ -400,7 +450,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         lastUpdated: loan.lastUpdated,
         originationDate: loan.originationDate,
         status: loan.status,
-        loanType: loan.loanType,
+        loanInfo: getLoanInfo(loan.loanType),
         adminWrittenOff: loan.adminWrittenOff,
         writeOffIndex: loan.writeOffIndex,
       }
@@ -426,7 +476,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
       lastUpdated: loan.lastUpdated,
       originationDate: loan.originationDate,
       status: loan.status,
-      loanType: loan.loanType,
+      loanInfo: getLoanInfo(loan.loanType),
       adminWrittenOff: loan.adminWrittenOff,
       writeOffIndex: loan.writeOffIndex,
     }
@@ -478,6 +528,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
 const parseBN = (value: BN) => {
   return new BN(value.toString().substring(2), 'hex').toString()
 }
+const parseHex = (value: string | number) => {
+  return new BN(value.toString().substring(2), 'hex').toString()
+}
 
 const tokenNames = [
   ['Junior'],
@@ -490,4 +543,38 @@ const tokenIndexToName = (index: number, numberOfTranches: number) => {
   if (numberOfTranches > 0 && numberOfTranches <= 4) return tokenNames[numberOfTranches - 1][index]
   if (index <= 4) return tokenNames[3][index]
   return 'Other'
+}
+
+function getLoanInfo(loanType: LoanInfoData): LoanInfo {
+  if (loanType.bulletLoan) {
+    return {
+      type: 'bulletLoan',
+      advanceRate: parseHex(loanType.bulletLoan.advanceRate),
+      probabilityOfDefault: parseHex(loanType.bulletLoan.probabilityOfDefault),
+      lossGivenDefault: parseHex(loanType.bulletLoan.lossGivenDefault),
+      value: parseHex(loanType.bulletLoan.value),
+      discountRate: parseHex(loanType.bulletLoan.discountRate),
+      maturityDate: loanType.bulletLoan.maturityDate,
+    }
+  }
+  if (loanType.creditLine) {
+    return {
+      type: 'creditLine',
+      advanceRate: parseHex(loanType.creditLine.advanceRate),
+      value: parseHex(loanType.creditLine.value),
+    }
+  }
+  if (loanType.creditLineWithMaturity) {
+    return {
+      type: 'creditLineWithMaturity',
+      advanceRate: parseHex(loanType.creditLineWithMaturity.advanceRate),
+      probabilityOfDefault: parseHex(loanType.creditLineWithMaturity.probabilityOfDefault),
+      value: parseHex(loanType.creditLineWithMaturity.value),
+      discountRate: parseHex(loanType.creditLineWithMaturity.discountRate),
+      maturityDate: loanType.creditLineWithMaturity.maturityDate,
+      lossGivenDefault: parseHex(loanType.creditLineWithMaturity.lossGivenDefault),
+    }
+  }
+
+  throw new Error(`Unrecognized loan info: ${JSON.stringify(loanType)}`)
 }

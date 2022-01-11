@@ -8,7 +8,7 @@ type Props = {}
 
 export const PageWithSideBar: React.FC<Props> = ({ children }) => {
   return (
-    <Shelf height="100vh" alignItems="stretch">
+    <Shelf minHeight="100vh" alignItems="stretch">
       <BoxWithBorder width={220}>
         <SideBar />
       </BoxWithBorder>

@@ -3,6 +3,7 @@ import * as React from 'react'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
 import { CreateCollectionDialog } from '../components/CreateCollectionDialog'
 import { Identity } from '../components/Identity'
+import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
@@ -43,16 +44,19 @@ const Collections: React.FC = () => {
 
   return (
     <Stack gap={8} flex={1}>
+      <PageHeader
+        title="NFTs"
+        actions={
+          <Button onClick={() => setCreateOpen(true)} variant="text" small icon={IconPlus}>
+            Create Collection
+          </Button>
+        }
+      />
       {selectedAccount && (
         <Stack gap={3}>
-          <Shelf justifyContent="space-between">
-            <Text variant="heading2" as="h2">
-              My Collections
-            </Text>
-            <Button onClick={() => setCreateOpen(true)} variant="text" icon={IconPlus}>
-              Create Collection
-            </Button>
-          </Shelf>
+          <Text variant="heading3" as="h2">
+            My Collections
+          </Text>
           {userCollections?.length || accountNfts?.length ? (
             <LayoutGrid>
               {userCollections?.map((col) => (
@@ -86,7 +90,7 @@ const Collections: React.FC = () => {
         </Stack>
       )}
       <Stack gap={3}>
-        <Text variant="heading2" as="h2">
+        <Text variant="heading3" as="h2">
           {selectedAccount ? 'Other Collections' : 'Collections'}
         </Text>
         {otherCollections?.length ? (

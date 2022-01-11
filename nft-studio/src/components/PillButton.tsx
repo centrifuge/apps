@@ -4,7 +4,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { PropsOf } from '../../helpers'
 
-export const Pill = styled.button(
+const Pill = styled.button(
   css({
     color: 'textPrimary',
     backgroundColor: 'backgroundSecondary',

@@ -3188,6 +3188,7 @@ __metadata:
     "@react-aria/overlays": ^3.7.2
     "@styled-system/css": ^5.1.5
     "@styled-system/should-forward-prop": ^5.1.5
+    "@types/bn.js": ^5
     "@types/react": ^17.0.30
     "@types/react-dom": ^17
     "@types/react-router": ^5
@@ -3199,6 +3200,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": 4.33.0
     "@typescript-eslint/parser": 4.33.0
     axios: ^0.24.0
+    bn.js: ^5.2.0
     esbuild-darwin-64: ^0.14.8
     esbuild-darwin-arm64: ^0.14.8
     eslint: 7.32.0

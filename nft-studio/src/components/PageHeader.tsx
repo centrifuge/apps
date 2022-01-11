@@ -9,7 +9,7 @@ import { RouterTextLink } from './TextLink'
 type Props = {
   title: string
   titleAddition?: React.ReactNode
-  subtitle?: string
+  subtitle?: React.ReactNode
   subtitleLink?: {
     to: string
     label: string
@@ -43,7 +43,7 @@ export const PageHeader: React.FC<Props> = ({ title, titleAddition, subtitle, su
           )}
         </Shelf>
         <Shelf gap={1}>
-          <Text variant="heading2" as="h1">
+          <Text variant="heading2" as="h1" style={{ wordBreak: 'break-word' }}>
             {title}
           </Text>
           {titleAddition}
