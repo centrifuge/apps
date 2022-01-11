@@ -137,7 +137,7 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
                 (p.assetValue?.isZero() && p.reserve?.isZero()) ||
                 !p.seniorYield30Days ||
                 p.seniorYield30Days.isZero() ? (
-                <SubNumber>Expected: {v} % APR</SubNumber>
+                <SubNumber>Target: {v} % APR</SubNumber>
               ) : (
                 <Value value={parseFloat(getDropAPY(p.seniorYield30Days) || '0').toFixed(2)} unit="%" />
               )
