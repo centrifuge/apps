@@ -312,14 +312,14 @@ export const RwaMarketRow: React.FC<RwaMarketRowProps & PropsOf<typeof PoolRow>>
       cell: () => <Value value={toNumber(marketSize, 0)} unit={'USDC'} />,
     },
     {
-      header: () => (
+      header: (
         <Tooltip id="seniorApy" underline>
           Senior APY
         </Tooltip>
       ),
       subHeader: '30 days',
       cell: () => {
-        return <SubNumber>Expected: 3.5 % APR</SubNumber>
+        return <SubNumber>Target: 3.5 % APR</SubNumber>
       },
     },
   ]
