@@ -1,5 +1,6 @@
-import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { FileImageUpload } from '../../components/FileImageUpload'
 import { RadioInput } from '../../components/RadioInput'
 import { PageWithSideBar } from '../../components/shared/PageWithSideBar'
 import { TextInput } from '../../components/TextInput'
@@ -21,12 +22,16 @@ const ASSET_CLASS = [
 const CreatePoolForm: React.FC = () => {
   const [poolName, setPoolName] = React.useState<string>('')
   const [assetClass, setAssetClass] = React.useState<string>('')
+  const [currency, setCurrency] = React.useState<string>('')
+  const [discountRate, setDiscountRate] = React.useState<string>('')
+  const [minEpochDuration, setMinEpochDuration] = React.useState<string>('')
+  const [challengeTime, setChallengeTime] = React.useState<string>('')
   return (
     <Stack gap="3">
       <Shelf justifyContent="space-between">
         <TextInput
           label="Pool name"
-          placeholder="Utitled pool"
+          placeholder="Untitled pool"
           value={poolName}
           onChange={(ev) => {
             setPoolName(ev.target.value)
@@ -55,6 +60,52 @@ const CreatePoolForm: React.FC = () => {
           ))}
         </Shelf>
       </Stack>
+
+      <Stack gap="1">
+        <Text variant="label1">Pool icon</Text>
+        <FileImageUpload onFileUpdate={() => {}} />
+      </Stack>
+
+      <Stack gap="1">
+        <Text variant="label1">Issuer logo</Text>
+        <FileImageUpload onFileUpdate={() => {}} />
+      </Stack>
+
+      <Select
+        label="Currency"
+        placeholder="Select..."
+        options={[{ value: 'dai', label: 'DAI' }]}
+        onSelect={(it) => {
+          console.log('onSelect', it)
+        }}
+      />
+
+      <TextInput
+        label="Discount rate"
+        placeholder="0.00%"
+        value={discountRate}
+        onChange={(ev) => {
+          setDiscountRate(ev.target.value)
+        }}
+      />
+
+      <Select
+        label="Minimum epoch duration"
+        placeholder="Select..."
+        options={[{ value: '24h', label: '24 hours' }]}
+        onSelect={(it) => {
+          console.log('onSelect', it)
+        }}
+      />
+
+      <Select
+        label="Challenge time"
+        placeholder="Select..."
+        options={[{ value: '30m', label: '30 minutes' }]}
+        onSelect={(it) => {
+          console.log('onSelect', it)
+        }}
+      />
     </Stack>
   )
 }
