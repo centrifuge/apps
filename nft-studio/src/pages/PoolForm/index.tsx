@@ -1,9 +1,25 @@
 import { AnchorButton, Box, Button, Grid, IconPlus, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { FileImageUpload } from '../../components/FileImageUpload'
+import { FileInput } from '../../components/FileInput'
 import { RadioInput } from '../../components/RadioInput'
 import { PageWithSideBar } from '../../components/shared/PageWithSideBar'
 import { TextInput } from '../../components/TextInput'
+
+const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
+
+const validateImageFile = (file: File) => {
+  if (!isImageFile(file)) {
+    console.error(`Only image files are allowed (selected file of type ${file.type})`)
+    return false
+  }
+  return true
+}
+
+const ASSET_CLASS = [
+  { label: 'Asset class 1', id: 'assetClass1' },
+  { label: 'Asset class 2', id: 'assetClass2' },
+  { label: 'Asset class 3', id: 'assetClass3' },
+]
 
 export const PoolFormPage: React.FC = () => {
   return (
@@ -12,12 +28,6 @@ export const PoolFormPage: React.FC = () => {
     </PageWithSideBar>
   )
 }
-
-const ASSET_CLASS = [
-  { label: 'Asset class 1', id: 'assetClass1' },
-  { label: 'Asset class 2', id: 'assetClass2' },
-  { label: 'Asset class 3', id: 'assetClass3' },
-]
 
 const CreatePoolForm: React.FC = () => {
   const [poolName, setPoolName] = React.useState<string>('')
@@ -78,12 +88,22 @@ const CreatePoolForm: React.FC = () => {
 
         <Stack gap="1">
           <Text variant="label1">Pool icon</Text>
-          <FileImageUpload onFileUpdate={() => {}} />
+          <FileInput
+            onFileUpdate={(...a) => {
+              console.log('Pool icon file update', a)
+            }}
+            onBeforeFileUpdate={validateImageFile}
+          />
         </Stack>
 
         <Stack gap="1">
           <Text variant="label1">Issuer logo</Text>
-          <FileImageUpload onFileUpdate={() => {}} />
+          <FileInput
+            onFileUpdate={(...a) => {
+              console.log('Issuer logo file update', a)
+            }}
+            onBeforeFileUpdate={validateImageFile}
+          />
         </Stack>
 
         <Select
