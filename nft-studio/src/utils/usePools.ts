@@ -34,19 +34,66 @@ export function usePool(id: string) {
 }
 
 type PoolMetadata = {
-  metadata: {
+  pool: {
     name: string
-    asset: string
     description: string
-    media: {
-      logo: string
+    asset: {
+      class: string
+      averageMaturity: string
+    }
+    issuer: {
+      name: string
+      email: string
     }
     attributes: {
-      Issuer?: string
       Links: {
-        [key: string]: string
+        'Executive Summary': string
+        'Forum Discussion': string
+        Website: string
       }
     }
+    media: {
+      logo: string
+      icon: string
+    }
+    status: 'open' | 'upcoming' | 'hidden'
+  }
+  tranches: [
+    {
+      name: string
+      symbol: string
+      icon: string
+    }
+  ]
+  riskGroups: [
+    {
+      id: string
+      advance_rate: string
+      financing_fee: string
+      probability_of_default: string
+      loss_given_default: string
+      discount_rate: string
+    }
+  ]
+  onboarding: {
+    live: boolean
+    agreements: {
+      name: string
+      provider: 'docusign'
+      providerTemplateId: string
+      tranche: string
+      country: 'us | non-us'
+    }[]
+    issuer: {
+      name: string
+      email: string
+      restrictedCountryCodes: string[]
+      minInvestmentCurrency: number
+      nonSolicitationNotice: 'all' | 'non-us' | 'none'
+    }
+  }
+  bot: {
+    channelId: string
   }
 }
 

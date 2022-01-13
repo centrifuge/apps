@@ -49,12 +49,12 @@ const PoolName: React.VFC<{ pool: Pool }> = ({ pool }) => {
   const { data } = usePoolMetadata(pool)
   return (
     <Text variant="body2" fontWeight={600}>
-      {data?.metadata?.name}
+      {data?.pool?.name}
     </Text>
   )
 }
 
 const AssetClass: React.VFC<{ pool: Pool }> = ({ pool }) => {
   const { data } = usePoolMetadata(pool)
-  return <Text variant="body2">{data?.metadata?.asset}</Text>
+  return <Text variant="body2">{data?.pool?.asset?.class}</Text>
 }

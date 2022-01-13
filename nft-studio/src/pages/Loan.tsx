@@ -28,7 +28,7 @@ const Loan: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const { data: pool } = usePool(pid)
   const { data: loan } = useLoan(pid, aid)
-  const { data: poolMetadata } = usePoolMetadata(pool)
+  const { data: metadata } = usePoolMetadata(pool)
   const centrifuge = useCentrifuge()
 
   console.log('loan', loan)
@@ -40,7 +40,7 @@ const Loan: React.FC = () => {
         titleAddition={loan && <LoanLabel loan={loan} />}
         parent={{ to: `/pools/${pid}/assets`, label: 'Assets' }}
         subtitle="[Florida real estate loan]"
-        subtitleLink={{ label: poolMetadata?.metadata?.name ?? '', to: `/pools/${pid}` }}
+        subtitleLink={{ label: metadata?.pool?.name ?? '', to: `/pools/${pid}` }}
         actions={
           <>
             <Button variant="text" small icon={IconArrowRight}>

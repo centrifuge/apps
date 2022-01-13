@@ -29,7 +29,7 @@ const Pool: React.FC = () => {
   } = useRouteMatch<{ pid: string }>()
   const { data: pool } = usePool(poolId)
   const { data: loans } = useLoans(poolId)
-  const { data: poolMetadata } = usePoolMetadata(pool)
+  const { data: metadata } = usePoolMetadata(pool)
   const history = useHistory()
 
   console.log('pool', pool)
@@ -39,24 +39,27 @@ const Pool: React.FC = () => {
   return (
     <Stack gap={5} flex={1}>
       <PageHeader
-        title={poolMetadata?.metadata?.name ?? ''}
+        title={metadata?.pool?.name ?? ''}
         parent={{ to: '/pools', label: 'Pools' }}
-        subtitle={poolMetadata?.metadata?.asset}
+        subtitle={metadata?.pool?.asset?.class}
       />
       <PageSummary>
-        <LabelValueStack label="Value" value={centrifuge.utils.formatCurrencyAmount(pool?.nav.latest)} />
+        <LabelValueStack
+          label="Value"
+          value={centrifuge.utils.formatCurrencyAmount(pool?.nav.latest, pool?.currency)}
+        />
       </PageSummary>
       <Grid columns={[1, 2]} gap={3} equalColumns>
         {pool &&
-          pool.tranches.map((tranche) => (
+          pool.tranches.map((tranche, i) => (
             <>
               <Card p={3} variant="interactive">
                 <Stack gap={2}>
                   <CardHeader
                     pretitle="Tranche token"
-                    title={'[SYMBOL]'}
-                    titleAddition={centrifuge.utils.formatCurrencyAmount(tranche.debt)}
-                    subtitle={`${poolMetadata?.metadata?.name} ${tranche.name} tranche`}
+                    title={metadata?.tranches?.[i]?.symbol ?? ''}
+                    titleAddition={centrifuge.utils.formatCurrencyAmount(tranche.totalIssuance, pool.currency)}
+                    subtitle={metadata?.tranches?.[i]?.name || `${metadata?.pool?.name} ${tranche.name} tranche`}
                   />
                   <LabelValueList
                     items={
@@ -72,7 +75,7 @@ const Pool: React.FC = () => {
                                   new BN(10).pow(new BN(18)).toString()
                                 )}
                               </Text>{' '}
-                              [ratio]
+                              {centrifuge.utils.formatPercentage(tranche.ratio, new BN(10).pow(new BN(18)).toString())}
                             </>
                           ),
                         },
@@ -82,7 +85,11 @@ const Pool: React.FC = () => {
                         },
                         {
                           label: 'Reserve',
-                          value: <Text color="statusOk">{centrifuge.utils.formatCurrencyAmount(tranche.reserve)}</Text>,
+                          value: (
+                            <Text color="statusOk">
+                              {centrifuge.utils.formatCurrencyAmount(tranche.reserve, pool.currency)}
+                            </Text>
+                          ),
                         },
                       ].filter(Boolean) as any
                     }
@@ -100,14 +107,14 @@ const Pool: React.FC = () => {
 
       <Card p={3}>
         <Stack gap={3}>
-          <CardHeader title={`Issuer: ${poolMetadata?.metadata?.attributes?.Issuer}`} />
+          <CardHeader title={`Issuer: ${metadata?.pool?.issuer?.name}`} />
 
           <Shelf gap={4} flex="1 1 45%">
             <Stack gap={3} alignItems="center">
-              <img src={poolMetadata?.metadata?.media?.logo} style={{ maxHeight: '120px', maxWidth: '100%' }} alt="" />
-              {poolMetadata?.metadata?.attributes?.Links && (
+              <img src={metadata?.pool?.media?.logo} style={{ maxHeight: '120px', maxWidth: '100%' }} alt="" />
+              {metadata?.pool?.attributes?.Links && (
                 <Shelf gap={2} rowGap={1} flexWrap="wrap">
-                  {Object.entries(poolMetadata.metadata.attributes?.Links).map(([label, value]) => (
+                  {Object.entries(metadata.pool.attributes.Links).map(([label, value]) => (
                     <AnchorPillButton href={value as string} target="_blank" rel="noopener noreferrer" key={label}>
                       {label}
                     </AnchorPillButton>
@@ -116,7 +123,7 @@ const Pool: React.FC = () => {
               )}
             </Stack>
             <Box flex="1 1 55%">
-              <Text>{poolMetadata?.metadata?.description}</Text>
+              <Text>{metadata?.pool?.description}</Text>
             </Box>
           </Shelf>
         </Stack>

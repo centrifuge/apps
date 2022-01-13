@@ -14,6 +14,8 @@ import { NFTPage } from '../pages/NFT'
 import { PoolPage } from '../pages/Pool'
 import { PoolFormPage } from '../pages/PoolForm/index'
 import { PoolsPage } from '../pages/Pools'
+import { TokenPage } from '../pages/Token'
+import { TokensPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
 import { GlobalStyle } from './GlobalStyle'
 import { LoadBoundary } from './LoadBoundary'
@@ -90,6 +92,12 @@ export const Root: React.FC = () => {
                       </Route>
                       <Route path="/pool/new">
                         <PoolFormPage />
+                      </Route>
+                      <Route path="/investments/tokens/:pid/:tid">
+                        <TokenPage />
+                      </Route>
+                      <Route path="/investments/tokens">
+                        <TokensPage />
                       </Route>
                       <Route path="/">
                         <PoolsPage />

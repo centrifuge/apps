@@ -36,7 +36,7 @@ const run = async () => {
     ],
     'Usd',
     new BN(1000).mul(Currency),
-    'QmUTwA6RTUb1FbJCeM1D4G4JaMHAbPehK6WwCfykJixjm3',
+    'QmTPNcy1R18o6Z2NW2nD8a43GoHs5HZoWQUxoY89kV188g',
   ])
 
   await centrifuge.pools.approveRoles([poolId, ['Borrower', 'RiskAdmin'], [Alice.address, Alice.address]])
