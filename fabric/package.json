@@ -55,6 +55,8 @@
     "styled-components": "^5.1.1"
   },
   "dependencies": {
+    "@react-aria/button": "^3.3.4",
+    "@react-aria/select": "^3.6.0",
     "@styled-system/css": "^5.1.5",
     "@styled-system/should-forward-prop": "^5.1.5",
     "styled-system": "^5.1.5"
