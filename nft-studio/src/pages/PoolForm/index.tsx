@@ -4,6 +4,7 @@ import { FileInput } from '../../components/FileInput'
 import { RadioInput } from '../../components/RadioInput'
 import { PageWithSideBar } from '../../components/shared/PageWithSideBar'
 import { TextInput } from '../../components/TextInput'
+import { createPool } from './createPool'
 
 const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
@@ -40,20 +41,24 @@ const CreatePoolForm: React.FC = () => {
   const [tokenName, setTokenName] = React.useState<string>('')
   const [interestRate, setInterestRate] = React.useState<string>('')
   const [minRiskBuffer, setMinRiskBuffer] = React.useState<string>('')
+  const [issuerLogoFile, setIssuerLogoFile] = React.useState<File>()
+  const [poolIconFile, setPoolIconFile] = React.useState<File>()
 
   // TODO: call centrifuge-js and create pool
   const onSubmit = () => {
-    console.log('submit pool:', {
-      currency,
-      minEpochDuration,
-      challengeTime,
+    createPool({
       poolName,
       assetClass,
+      currency,
       discountRate,
+      minEpochDuration,
+      challengeTime,
       tranche,
       tokenName,
       interestRate,
       minRiskBuffer,
+      issuerLogoFile,
+      poolIconFile,
     })
   }
 
@@ -89,8 +94,8 @@ const CreatePoolForm: React.FC = () => {
         <Stack gap="1">
           <Text variant="label1">Pool icon</Text>
           <FileInput
-            onFileUpdate={(...a) => {
-              console.log('Pool icon file update', a)
+            onFileUpdate={(file) => {
+              setPoolIconFile(file)
             }}
             onBeforeFileUpdate={validateImageFile}
           />
@@ -99,8 +104,8 @@ const CreatePoolForm: React.FC = () => {
         <Stack gap="1">
           <Text variant="label1">Issuer logo</Text>
           <FileInput
-            onFileUpdate={(...a) => {
-              console.log('Issuer logo file update', a)
+            onFileUpdate={(file) => {
+              setIssuerLogoFile(file)
             }}
             onBeforeFileUpdate={validateImageFile}
           />
