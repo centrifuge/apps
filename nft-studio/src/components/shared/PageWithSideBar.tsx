@@ -12,7 +12,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children }) => {
       <BoxWithBorder width={220}>
         <SideBar />
       </BoxWithBorder>
-      <Box mx={5} my={3} flexGrow={1} as="main">
+      <Box display="flex" mx={5} my={3} flexGrow={1} as="main">
         <LoadBoundary>{children}</LoadBoundary>
       </Box>
     </Shelf>

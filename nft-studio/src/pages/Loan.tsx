@@ -10,6 +10,7 @@ import LoanLabel from '../components/LoanLabel'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
+import { RouterTextLink } from '../components/TextLink'
 import { formatDate } from '../utils/date'
 import { useLoan } from '../utils/useLoans'
 import { usePool, usePoolMetadata } from '../utils/usePools'
@@ -96,6 +97,14 @@ const Loan: React.FC = () => {
                 }
               />
             </Grid>
+            <Text>
+              NFT:{' '}
+              {pool && (
+                <RouterTextLink to={`/collection/${loan.asset.collectionId}/object/${loan.asset.nftId}`}>
+                  {loan.asset.nftId}
+                </RouterTextLink>
+              )}
+            </Text>
           </Stack>
         </Card>
       ) : (

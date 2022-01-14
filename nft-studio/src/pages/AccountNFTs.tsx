@@ -1,6 +1,5 @@
 import { Button, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Footer } from '../components/Footer'
 import { NFTCard } from '../components/NFTCard'
 import { PageContainer } from '../components/PageContainer'
 import { VisibilityChecker } from '../components/VisibilityChecker'
@@ -59,7 +58,6 @@ const AccountNFTs: React.FC = () => {
           </Text>
         </Shelf>
       )}
-      <Footer />
     </Stack>
   )
 }

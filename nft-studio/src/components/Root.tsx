@@ -34,7 +34,7 @@ const darkTheme: DefaultTheme = {
   },
   colors: {
     ...centrifugeLight.colors,
-    placeholderBackground: '#424242',
+    placeholderBackground: centrifugeLight.colors.backgroundSecondary,
   },
   typography: {
     ...centrifugeLight.typography,

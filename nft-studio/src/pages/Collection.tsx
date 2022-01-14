@@ -1,7 +1,6 @@
 import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
-import { Footer } from '../components/Footer'
 import { Identity } from '../components/Identity'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'
@@ -38,6 +37,7 @@ const Collection: React.FC = () => {
   return (
     <Stack gap={8} flex={1}>
       <PageHeader
+        parent={{ to: '/nfts', label: 'NFTs' }}
         title={metadata?.name || 'Unnamed collection'}
         subtitle={
           collection?.owner && (
@@ -72,7 +72,6 @@ const Collection: React.FC = () => {
           </Text>
         </Shelf>
       )}
-      <Footer />
     </Stack>
   )
 }

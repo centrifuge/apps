@@ -46,13 +46,13 @@ const run = async () => {
   await centrifuge.nfts.createCollection([
     assetCollectionId,
     Alice.address,
-    'QmUTwA6RTUb1FbJCeM1D4G4JaMHAbPehK6WwCfykJixjm3',
+    'data:application/json;base64,eyJuYW1lIjoiU29tZSBjb2xsZWN0aW9uIiwiZGVzY3JpcHRpb24iOiJMb3JlbSBpcHN1bSBkb2xvciBzaXQgYW1ldCBjb25zZWN0ZXR1ciBhZGlwaXNpY2luZyBlbGl0In0=',
   ])
   await centrifuge.nfts.mintNft([
     assetCollectionId,
     assetNftId,
     Alice.address,
-    'QmUTwA6RTUb1FbJCeM1D4G4JaMHAbPehK6WwCfykJixjm3',
+    'data:application/json;base64,eyJuYW1lIjoiU29tZSBORlQgMiIsImRlc2NyaXB0aW9uIjoiSnVzdCBzb21lIE5GVCIsImltYWdlIjoiaXBmczovL2lwZnMvUW1lUHgyV3Z4eG1qbWgyZkpXNWJyMkZCcHE2ekRFWEVHanpQelRjVjVoamF0VyJ9',
   ])
 
   let loanId = await centrifuge.pools.getNextLoanId()

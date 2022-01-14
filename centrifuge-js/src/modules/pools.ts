@@ -168,6 +168,7 @@ type LoanDetailsData = {
   loanType: { [key: string]: LoanInfoData }
   adminWrittenOff: boolean
   writeOffIndex: number | null
+  asset: [BN, BN]
 }
 
 export type Loan = {
@@ -181,6 +182,10 @@ export type Loan = {
   loanInfo: LoanInfo
   adminWrittenOff: boolean
   writeOffIndex: number | null
+  asset: {
+    collectionId: string
+    nftId: string
+  }
 }
 
 export type Investment = {
@@ -378,9 +383,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const api = await inst.getApi()
 
-    const [poolValue, navValue] = await Promise.all([
+    const [poolValue, navValue, loanCollectionIdValue] = await Promise.all([
       api.query.investorPool.pool(poolId),
       api.query.loan.poolNAV(poolId),
+      api.query.loan.poolToLoanNftClass(poolId),
     ])
 
     const pool = poolValue.toJSON() as unknown as PoolDetailsData
@@ -468,6 +474,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return loanValues.map(([key, value]) => {
       const loan = value.toJSON() as unknown as LoanDetailsData
+      const assetKey = (value.toHuman() as any).asset
       return {
         id: formatLoanKey(key as StorageKey<[u32, u32]>),
         financedAmount: parseBN(loan.borrowedAmount),
@@ -482,6 +489,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
         loanInfo: getLoanInfo(loan.loanType),
         adminWrittenOff: loan.adminWrittenOff,
         writeOffIndex: loan.writeOffIndex,
+        asset: {
+          collectionId: assetKey[0].replace(/\D/g, ''),
+          nftId: assetKey[1].replace(/\D/g, ''),
+        },
       }
     })
   }
@@ -493,6 +504,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const loanValue = await api.query.loan.loanInfo(poolId, loanId)
 
     const loan = loanValue.toJSON() as unknown as LoanDetailsData
+    const assetKey = (loanValue.toHuman() as any).asset
 
     return {
       id: loanId,
@@ -508,6 +520,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
       loanInfo: getLoanInfo(loan.loanType),
       adminWrittenOff: loan.adminWrittenOff,
       writeOffIndex: loan.writeOffIndex,
+      asset: {
+        collectionId: assetKey[0].replace(/\D/g, ''),
+        nftId: assetKey[1].replace(/\D/g, ''),
+      },
     }
   }
 
