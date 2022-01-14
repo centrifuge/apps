@@ -6,15 +6,12 @@ type CreatePoolArg = {
   poolName: string
   assetClass: string
   currency: string
-  discountRate: string
-  minEpochDuration: string
-  challengeTime: string
+  maxReserve: string
   tranche: string
   tokenName: string
   interestRate: string
   minRiskBuffer: string
   issuerLogoFile?: File
-  poolIconFile?: File
 }
 
 const getFileIpfsHash = async (file?: File): Promise<string | null> => {
@@ -42,7 +39,6 @@ export const createPool = async (poolData: CreatePoolArg) => {
   // pin image files file. If not present, hash will be null
   const fileHashMap = await promiseAllObject<string | null>({
     issuerLogoFile: getFileIpfsHash(poolData.issuerLogoFile),
-    poolIconFile: getFileIpfsHash(poolData.poolIconFile),
   })
 
   console.log({ fileHashMap })

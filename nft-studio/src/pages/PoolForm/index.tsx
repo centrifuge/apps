@@ -16,11 +16,11 @@ const validateImageFile = (file: File) => {
   return true
 }
 
-const ASSET_CLASS = [
-  { label: 'Asset class 1', id: 'assetClass1' },
-  { label: 'Asset class 2', id: 'assetClass2' },
-  { label: 'Asset class 3', id: 'assetClass3' },
-]
+const DEFAULT_CURRENCY = 'Usd'
+const ASSET_CLASS = ['Real Estate', 'Revenue Based Financing', 'Invoice Factoring'].map((label) => ({
+  label,
+  id: label,
+}))
 
 export const PoolFormPage: React.FC = () => {
   return (
@@ -33,16 +33,14 @@ export const PoolFormPage: React.FC = () => {
 const CreatePoolForm: React.FC = () => {
   const [poolName, setPoolName] = React.useState<string>('')
   const [assetClass, setAssetClass] = React.useState<string>('')
-  const [currency, setCurrency] = React.useState<string>('')
-  const [discountRate, setDiscountRate] = React.useState<string>('')
-  const [minEpochDuration, setMinEpochDuration] = React.useState<string>('')
-  const [challengeTime, setChallengeTime] = React.useState<string>('')
+  const [maxReserve, setMaxReserve] = React.useState<string>('')
   const [tranche, setTranche] = React.useState<string>('')
   const [tokenName, setTokenName] = React.useState<string>('')
   const [interestRate, setInterestRate] = React.useState<string>('')
   const [minRiskBuffer, setMinRiskBuffer] = React.useState<string>('')
   const [issuerLogoFile, setIssuerLogoFile] = React.useState<File>()
-  const [poolIconFile, setPoolIconFile] = React.useState<File>()
+
+  const currency = DEFAULT_CURRENCY
 
   // TODO: call centrifuge-js and create pool
   const onSubmit = () => {
@@ -50,15 +48,12 @@ const CreatePoolForm: React.FC = () => {
       poolName,
       assetClass,
       currency,
-      discountRate,
-      minEpochDuration,
-      challengeTime,
+      maxReserve,
       tranche,
       tokenName,
       interestRate,
       minRiskBuffer,
       issuerLogoFile,
-      poolIconFile,
     })
   }
 
@@ -92,16 +87,6 @@ const CreatePoolForm: React.FC = () => {
         </Stack>
 
         <Stack gap="1">
-          <Text variant="label1">Pool icon</Text>
-          <FileInput
-            onFileUpdate={(file) => {
-              setPoolIconFile(file)
-            }}
-            onBeforeFileUpdate={validateImageFile}
-          />
-        </Stack>
-
-        <Stack gap="1">
           <Text variant="label1">Issuer logo</Text>
           <FileInput
             onFileUpdate={(file) => {
@@ -111,45 +96,12 @@ const CreatePoolForm: React.FC = () => {
           />
         </Stack>
 
-        <Select
-          label="Currency"
-          placeholder="Select..."
-          options={[{ value: 'dai', label: 'DAI' }]}
-          onSelect={(key) => {
-            if (key) {
-              setCurrency(key)
-            }
-          }}
-        />
-
         <TextInput
-          label="Discount rate"
-          placeholder="0.00%"
-          value={discountRate}
+          label="Max reserve"
+          placeholder="0"
+          value={maxReserve}
           onChange={(ev) => {
-            setDiscountRate(ev.target.value)
-          }}
-        />
-
-        <Select
-          label="Minimum epoch duration"
-          placeholder="Select..."
-          options={[{ value: '24h', label: '24 hours' }]}
-          onSelect={(key) => {
-            if (key) {
-              setMinEpochDuration(key)
-            }
-          }}
-        />
-
-        <Select
-          label="Challenge time"
-          placeholder="Select..."
-          options={[{ value: '30m', label: '30 minutes' }]}
-          onSelect={(key) => {
-            if (key) {
-              setChallengeTime(key)
-            }
+            setMaxReserve(ev.target.value)
           }}
         />
       </Stack>
