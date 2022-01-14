@@ -1,4 +1,4 @@
-import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Grid, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Identity } from '../components/Identity'
@@ -48,7 +48,7 @@ const Collection: React.FC = () => {
         }
         actions={
           isSameAddress(selectedAccount?.address, collection?.owner) && (
-            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="outlined">
+            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="outlined" icon={IconPlus} small>
               Mint NFT
             </RouterLinkButton>
           )
