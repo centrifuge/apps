@@ -1,5 +1,5 @@
 import path from 'path'
-import { pinFile } from './pinata/api'
+import { pinFile, pinJson, unpinFile } from './pinata/api'
 
 const fs = require('fs')
 const os = require('os')
@@ -19,11 +19,11 @@ const ipfsHashToURI = (hash) => `ipfs://ipfs/${hash}`
 const handler = async (event) => {
   let tempDir = ''
   try {
-    const { fileDataUri, fileName } = JSON.parse(event.body)
+    const { name, description, fileDataUri, fileName } = JSON.parse(event.body)
 
     // check incoming data
-    if (!(fileDataUri && fileName)) {
-      return { statusCode: 400, body: 'Bad request: fileName and fileDataUri are required fields' }
+    if (!(name && description && fileDataUri && fileName)) {
+      return { statusCode: 400, body: 'Bad request: name, description and fileDataUri are required fields' }
     }
 
     // create temp directory
@@ -42,11 +42,24 @@ const handler = async (event) => {
     const fileHash = pinFileResponse.data.IpfsHash
     const fileURL = ipfsHashToURI(fileHash)
 
+    let pinMetadataResponse
+    try {
+      pinMetadataResponse = await pinJson({ name, description, image: fileURL })
+    } catch (e) {
+      // if the creation of metadata fails, unpin the image file
+      await unpinFile(fileHash)
+      throw e
+    }
+
+    const metadataHash = pinMetadataResponse.data.IpfsHash
+
     return {
       statusCode: 200,
       body: JSON.stringify({
-        fileIpfsHash: fileHash,
-        fileURI: fileURL,
+        imageIpfsHash: fileHash,
+        metadataIpfsHash: metadataHash,
+        imageURI: fileURL,
+        metadataURI: ipfsHashToURI(metadataHash),
       }),
     }
   } catch (e) {
