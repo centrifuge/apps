@@ -18,7 +18,6 @@ const run = async () => {
     printExtrinsics: true,
   })
 
-  // const poolId = '253701019090'
   const poolId = makeId()
   const loanCollectionId = makeId()
   const assetCollectionId = makeId()
@@ -30,18 +29,29 @@ const run = async () => {
   await centrifuge.pools.createPool([
     poolId,
     loanCollectionId,
-    [
-      [10, 5],
-      [0, 0],
-    ],
+    [{ interestPerSec: centrifuge.utils.aprToFee(0.1), minRiskBuffer: centrifuge.utils.toPerquintill(0.1) }, {}],
     'Usd',
     new BN(1000).mul(Currency),
     'QmTPNcy1R18o6Z2NW2nD8a43GoHs5HZoWQUxoY89kV188g',
   ])
 
-  await centrifuge.pools.approveRoles([poolId, ['Borrower', 'RiskAdmin'], [Alice.address, Alice.address]])
+  await centrifuge.pools.updatePool([poolId, new BN(0), new BN(0), new BN(10000)])
 
-  // await centrifuge.pools.addWriteOffGroup([poolId, centrifuge.utils.toRate(0.5), 1])
+  const SEC_PER_YEAR = 365 * 24 * 60 * 60
+
+  await centrifuge.pools.approveRoles([
+    poolId,
+    [
+      'Borrower',
+      'RiskAdmin',
+      'PricingAdmin',
+      { TrancheInvestor: [0, SEC_PER_YEAR] },
+      { TrancheInvestor: [1, SEC_PER_YEAR] },
+    ],
+    [Alice.address, Alice.address, Alice.address, Alice.address, Alice.address],
+  ])
+
+  await centrifuge.pools.addWriteOffGroup([poolId, new BN(centrifuge.utils.toRate(0.5)), 1])
 
   await centrifuge.nfts.createCollection([
     assetCollectionId,
@@ -67,7 +77,7 @@ const run = async () => {
       centrifuge.utils.toRate(0),
       centrifuge.utils.toRate(0),
       new BN(100).mul(Currency).toString(),
-      centrifuge.utils.aprToFee(0.1),
+      centrifuge.utils.aprToFee(0.12),
       new Date(2022, 12, 25).getTime().toString(),
     ],
   ])

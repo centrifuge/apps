@@ -7,7 +7,14 @@ const Currency = new BN(10).pow(new BN(18))
 
 const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
 
-export type PoolRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'RiskAdmin'
+export type PoolRole =
+  | 'PoolAdmin'
+  | 'Borrower'
+  | 'PricingAdmin'
+  | 'LiquidityAdmin'
+  | 'MemberListAdmin'
+  | 'RiskAdmin'
+  | { TrancheInvestor: [trancheId: number, delta: number] }
 
 export type LoanInfoInput = {
   BulletLoan: [string, string, string, string, string, string]
@@ -70,8 +77,8 @@ type TrancheDetailsData = {
   debt: BN
   reserve: BN
   minRiskBuffer: BN
-  epochSupply: BN
-  epochRedeem: BN
+  outstandingInvestOrders: BN
+  outstandingRedeemOrders: BN
   ratio: BN
   interestPerSec: BN
   lastUpdatedInterest: number
@@ -84,7 +91,7 @@ type PoolDetailsData = {
   currentEpoch: number
   lastEpochClosed: number
   lastEpochExecuted: number
-  closingEpoch: number | null
+  submissionPeriodEpoch: number | null
   maxReserve: BN
   availableReserve: BN
   totalReserve: BN
@@ -122,7 +129,7 @@ export type Pool = {
     current: number
     lastClosed: number
     lastExecuted: number
-    closing: number | null
+    inSubmissionPeriod: number | null
   }
 }
 
@@ -194,6 +201,12 @@ export type Investment = {
   balance: string
 }
 
+export type TrancheInput = {
+  interestPerSec?: string
+  minRiskBuffer?: string
+  seniority?: number
+}
+
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
@@ -203,7 +216,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     args: [
       poolId: string,
       collectionId: string,
-      tranches: number[][],
+      tranches: TrancheInput[],
       currency: string,
       maxReserve: BN,
       metadata: string
@@ -214,10 +227,25 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const api = await inst.getApi()
     const submittable = api.tx.utility.batchAll([
       api.tx.uniques.create(collectionId, LoanPalletAccountId),
-      api.tx.investorPool.createPool(poolId, tranches, currency, maxReserve.toString()),
-      api.tx.investorPool.setPoolMetadata(poolId, metadata),
-      api.tx.loan.initialisePool(poolId, collectionId),
+      api.tx.pools.create(poolId, tranches, currency, maxReserve.toString()),
+      api.tx.pools.setMetadata(poolId, metadata),
+      api.tx.loans.initialisePool(poolId, collectionId),
     ])
+    return inst.wrapSignAndSend(api, submittable, options)
+  }
+
+  async function updatePool(
+    args: [poolId: string, minEpochTime: BN, challengeTime: BN, maxNavAge: BN],
+    options?: TransactionOptions
+  ) {
+    const [poolId, minEpochTime, challengeTime, maxNavAge] = args
+    const api = await inst.getApi()
+    const submittable = api.tx.pools.update(
+      poolId,
+      minEpochTime.toString(),
+      challengeTime.toString(),
+      maxNavAge.toString()
+    )
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -227,7 +255,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   ) {
     const [poolId, trancheId, newOrder] = args
     const api = await inst.getApi()
-    const submittable = api.tx.investorPool.orderSupply(poolId, trancheId, newOrder.toString())
+    const submittable = api.tx.pools.updateInvestOrder(poolId, trancheId, newOrder.toString())
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -237,21 +265,21 @@ export function getPoolsModule(inst: CentrifugeBase) {
   ) {
     const [poolId, trancheId, newOrder] = args
     const api = await inst.getApi()
-    const submittable = api.tx.investorPool.orderRedeem(poolId, trancheId, newOrder.toString())
+    const submittable = api.tx.pools.updateRedeemOrder(poolId, trancheId, newOrder.toString())
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
   async function closeEpoch(args: [poolId: string], options?: TransactionOptions) {
     const [poolId] = args
     const api = await inst.getApi()
-    const submittable = api.tx.utility.batchAll([api.tx.loan.updateNav(poolId), api.tx.investorPool.closeEpoch(poolId)])
+    const submittable = api.tx.utility.batchAll([api.tx.loans.updateNav(poolId), api.tx.pools.closeEpoch(poolId)])
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
   async function submitSolution(args: [poolId: string, solution: string[][]], options?: TransactionOptions) {
     const [poolId, solution] = args
     const api = await inst.getApi()
-    const submittable = api.tx.investorPool.solveEpoch(poolId, solution)
+    const submittable = api.tx.pools.submitSolution(poolId, solution)
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -261,11 +289,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const pool = await getPool([poolId])
     const submittable =
       trancheId !== undefined
-        ? api.tx.investorPool.collect(poolId, trancheId, pool.epoch.lastExecuted)
+        ? api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted)
         : api.tx.utility.batchAll(
-            pool.tranches.map((_t, index: number) =>
-              api.tx.investorPool.collect(poolId, index, pool.epoch.lastExecuted)
-            )
+            pool.tranches.map((_t, index: number) => api.tx.pools.collect(poolId, index, pool.epoch.lastExecuted))
           )
     return inst.wrapSignAndSend(api, submittable, options)
   }
@@ -279,7 +305,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     const api = await inst.getApi()
     const extrinsics = roles.map((role: PoolRole, index: number) =>
-      api.tx.investorPool.approveRoleFor(poolId, role, [accounts[index]])
+      api.tx.pools.approveRoleFor(poolId, role, [accounts[index]])
     )
     const submittable = api.tx.utility.batchAll(extrinsics)
     return inst.wrapSignAndSend(api, submittable, options)
@@ -287,13 +313,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   async function getNextLoanId() {
     const api = await inst.getApi()
-    return (await api.query.loan.nextLoanId()).toString()
+    return (await api.query.loans.nextLoanId()).toString()
   }
 
   async function createLoan(args: [poolId: string, collectionId: string, nftId: string], options?: TransactionOptions) {
     const [poolId, collectionId, nftId] = args
     const api = await inst.getApi()
-    const submittable = api.tx.loan.issueLoan(poolId, [collectionId, nftId])
+    const submittable = api.tx.loans.create(poolId, [collectionId, nftId])
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -303,21 +329,21 @@ export function getPoolsModule(inst: CentrifugeBase) {
   ) {
     const [poolId, loanId, ratePerSec, loanType, loanInfo] = args
     const api = await inst.getApi()
-    const submittable = api.tx.loan.priceLoan(poolId, loanId, ratePerSec, { [loanType]: loanInfo })
+    const submittable = api.tx.loans.price(poolId, loanId, ratePerSec, { [loanType]: loanInfo })
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
   async function financeLoan(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
     const [poolId, loanId, amount] = args
     const api = await inst.getApi()
-    const submittable = api.tx.loan.borrow(poolId, loanId, amount.toString())
+    const submittable = api.tx.loans.borrow(poolId, loanId, amount.toString())
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
   async function repayLoanPartially(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
     const [poolId, loanId, amount] = args
     const api = await inst.getApi()
-    const submittable = api.tx.loan.repay(poolId, loanId, amount.toString())
+    const submittable = api.tx.loans.repay(poolId, loanId, amount.toString())
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -330,15 +356,15 @@ export function getPoolsModule(inst: CentrifugeBase) {
     // TODO: calculate accumulatedRate 1 minute from now and up to date outstanding debt
     const amount = new BN(loan.outstandingDebt).mul(new BN(1).mul(Currency))
     const submittable = api.tx.utility.batchAll([
-      api.tx.loan.repay(poolId, loanId, amount),
-      api.tx.loan.closeLoan(poolId, loanId),
+      api.tx.loans.repay(poolId, loanId, amount),
+      api.tx.loans.close(poolId, loanId),
     ])
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
   async function getPools(): Promise<Pool[]> {
     const api = await inst.getApi()
-    const rawPools = await api.query.investorPool.pool.entries()
+    const rawPools = await api.query.pools.pool.entries()
 
     const pools = rawPools.map(([key, value]) => {
       const pool = value.toJSON() as unknown as PoolDetailsData
@@ -356,8 +382,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
             reserve: parseBN(tranche.reserve),
             minRiskBuffer: parseBN(tranche.minRiskBuffer),
             ratio: parseBN(tranche.ratio),
-            outstandingInvestOrders: parseBN(tranche.epochSupply),
-            outstandingRedeemOrders: parseBN(tranche.epochRedeem),
+            outstandingInvestOrders: parseBN(tranche.outstandingInvestOrders),
+            outstandingRedeemOrders: parseBN(tranche.outstandingRedeemOrders),
             interestPerSec: parseBN(tranche.interestPerSec),
             lastUpdatedInterest: tranche.lastUpdatedInterest,
           }
@@ -371,7 +397,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           current: pool.currentEpoch,
           lastClosed: pool.lastEpochClosed,
           lastExecuted: pool.lastEpochExecuted,
-          closing: pool.closingEpoch,
+          inSubmissionPeriod: pool.submissionPeriodEpoch,
         },
       }
     })
@@ -383,10 +409,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const api = await inst.getApi()
 
-    const [poolValue, navValue, loanCollectionIdValue] = await Promise.all([
-      api.query.investorPool.pool(poolId),
-      api.query.loan.poolNAV(poolId),
-      api.query.loan.poolToLoanNftClass(poolId),
+    const [poolValue, navValue] = await Promise.all([
+      api.query.pools.pool(poolId),
+      api.query.loans.poolNAV(poolId),
+      // api.query.loans.poolToLoanNftClass(poolId),
     ])
 
     const pool = poolValue.toJSON() as unknown as PoolDetailsData
@@ -398,13 +424,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
 
     const orderValues = await Promise.all(
-      pool.tranches.map((_1, index: number) => api.query.investorPool.order.entries({ Tranche: [poolId, index] }))
+      pool.tranches.map((_1, index: number) => api.query.pools.order.entries({ Tranche: [poolId, index] }))
     )
 
     console.log(JSON.stringify(orderValues, null, 4))
 
     const epochValues = await Promise.all(
-      pool.tranches.map((_1, index: number) => api.query.investorPool.epoch([poolId, index], pool.lastEpochExecuted))
+      pool.tranches.map((_1, index: number) => api.query.pools.epoch([poolId, index], pool.lastEpochExecuted))
     )
     const lastEpoch = epochValues.filter((val) => !val.isEmpty).map((val) => (val as any).unwrap())
 
@@ -422,8 +448,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
           totalIssuance: tokenIssuanceValues[index].toString(),
           minRiskBuffer: parseBN(tranche.minRiskBuffer),
           ratio: parseBN(tranche.ratio),
-          outstandingInvestOrders: parseBN(tranche.epochSupply),
-          outstandingRedeemOrders: parseBN(tranche.epochRedeem),
+          outstandingInvestOrders: parseBN(tranche.outstandingInvestOrders),
+          outstandingRedeemOrders: parseBN(tranche.outstandingRedeemOrders),
           interestPerSec: parseBN(tranche.interestPerSec),
           lastUpdatedInterest: tranche.lastUpdatedInterest,
           tokenPrice: lastEpoch[index]?.tokenPrice.toString(),
@@ -442,7 +468,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         current: pool.currentEpoch,
         lastClosed: pool.lastEpochClosed,
         lastExecuted: pool.lastEpochExecuted,
-        closing: pool.closingEpoch,
+        inSubmissionPeriod: pool.submissionPeriodEpoch,
       },
     }
   }
@@ -470,7 +496,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const api = await inst.getApi()
 
-    const loanValues = await api.query.loan.loanInfo.entries(poolId)
+    const loanValues = await api.query.loans.loanInfo.entries(poolId)
 
     return loanValues.map(([key, value]) => {
       const loan = value.toJSON() as unknown as LoanDetailsData
@@ -501,7 +527,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId, loanId] = args
     const api = await inst.getApi()
 
-    const loanValue = await api.query.loan.loanInfo(poolId, loanId)
+    const loanValue = await api.query.loans.loanInfo(poolId, loanId)
 
     const loan = loanValue.toJSON() as unknown as LoanDetailsData
     const assetKey = (loanValue.toHuman() as any).asset
@@ -533,7 +559,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   ) {
     const [poolId, percentage, overdueDays] = args
     const api = await inst.getApi()
-    const submittable = api.tx.loan.addWriteOffGroupToPool(poolId, [percentage.toString(), overdueDays])
+    const submittable = api.tx.loans.addWriteOffGroup(poolId, [percentage.toString(), overdueDays])
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -543,12 +569,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
   ) {
     const [poolId, loanId, writeOffGroupId] = args
     const api = await inst.getApi()
-    const submittable = api.tx.loan.adminWriteOffLoan(poolId, loanId, writeOffGroupId)
+    const submittable = api.tx.loans.adminWriteOff(poolId, loanId, writeOffGroupId)
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
   return {
     createPool,
+    updatePool,
     updateInvestOrder,
     updateRedeemOrder,
     collect,
