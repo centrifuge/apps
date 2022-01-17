@@ -100,7 +100,20 @@ describe('DocumentsController', () => {
         header: {
           job_id: 'some_job_id',
         },
-        attributes: {},
+        attributes: {
+          animal_type: {
+            type: 'string',
+            value: 'iguana',
+          },
+          diet: {
+            type: 'string',
+            value: 'insects',
+          },
+          schema: {
+            type: 'string',
+            value: 'zoology',
+          },
+        },
         ownerId: user._id,
         organizationId: user.account,
       })
