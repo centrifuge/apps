@@ -1,4 +1,4 @@
-import { Box, Shelf } from '@centrifuge/fabric'
+import { Box, Shelf, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
 import { LoadBoundary } from '../LoadBoundary'
@@ -12,9 +12,9 @@ export const PageWithSideBar: React.FC<Props> = ({ children }) => {
       <BoxWithBorder width={220}>
         <SideBar />
       </BoxWithBorder>
-      <Box display="flex" mx={5} my={3} flexGrow={1} as="main">
+      <Stack mx={5} my={3} flexGrow={1} as="main">
         <LoadBoundary>{children}</LoadBoundary>
-      </Box>
+      </Stack>
     </Shelf>
   )
 }

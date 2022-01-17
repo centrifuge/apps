@@ -79,7 +79,8 @@ const NFT: React.FC = () => {
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-                maxHeight="80vh"
+                maxHeight="60vh"
+                maxWidth="60vh"
                 borderRadius="10px"
                 style={{ aspectRatio: '1 / 1' }}
               >
