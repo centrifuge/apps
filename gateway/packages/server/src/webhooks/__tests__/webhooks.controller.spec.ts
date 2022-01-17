@@ -4,7 +4,7 @@ import { centrifugeServiceProvider } from '../../centrifuge-client/centrifuge.mo
 import { CentrifugeService } from '../../centrifuge-client/centrifuge.service'
 import { databaseServiceProvider } from '../../database/database.providers'
 import { DatabaseService } from '../../database/database.service'
-import { DocumentTypes, EventTypes, WebhooksController } from '../webhooks.controller'
+import { WebhooksController } from '../webhooks.controller'
 
 describe('WebhooksController', () => {
   let webhooksModule: TestingModule
@@ -29,7 +29,7 @@ describe('WebhooksController', () => {
 
     documentSpies.spyInsert = jest.spyOn(databaseService.documents, 'insert')
     documentSpies.spyUpdate = jest.spyOn(databaseService.documents, 'update')
-    centrifugeSpies.spyDocGet = jest.spyOn(centrifugeService.documents, 'getDocument')
+    centrifugeSpies.spyDocGet = jest.spyOn(centrifugeService.documents, 'getCommittedDocument')
   })
 
   describe('when it receives  an document', function () {
@@ -37,15 +37,16 @@ describe('WebhooksController', () => {
       const webhooksController = webhooksModule.get<WebhooksController>(WebhooksController)
 
       const result = await webhooksController.receiveMessage({
-        event_type: EventTypes.DOCUMENT,
-        document_type: DocumentTypes.GENERIC_DOCUMENT,
-        document_id,
-        to_id: user.account,
-        from_id: '0xRandomId',
+        eventType: 1,
+        document: {
+          id: document_id,
+          from: '0xRandomId',
+          to: user.account,
+        },
       })
 
       expect(result).toEqual('OK')
-      expect(centrifugeSpies.spyDocGet).toHaveBeenCalledWith(user.account, document_id)
+      expect(centrifugeSpies.spyDocGet).toHaveBeenCalledWith(document_id, user.account)
 
       expect(documentSpies.spyUpdate).toHaveBeenCalledWith(
         { 'header.document_id': document_id, organizationId: user.account },
@@ -87,10 +88,11 @@ describe('WebhooksController', () => {
       const webhooksController = webhooksModule.get<WebhooksController>(WebhooksController)
       try {
         const result = await webhooksController.receiveMessage({
-          event_type: EventTypes.DOCUMENT,
-          document_type: DocumentTypes.GENERIC_DOCUMENT,
-          document_id,
-          to_id: '0x4444',
+          eventType: 1,
+          document: {
+            id: document_id,
+            to: '0x4444',
+          },
         })
       } catch (e) {
         expect(e.message).toEqual('Webhook Error: User is not present in database')

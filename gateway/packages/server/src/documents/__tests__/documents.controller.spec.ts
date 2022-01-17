@@ -13,8 +13,8 @@ describe('DocumentsController', () => {
   let documentsModule: TestingModule
   const documentToCreate: Document = {
     header: {
-      read_access: ['0x111'],
-      write_access: ['0x222'],
+      readAccess: ['0x111'],
+      writeAccess: ['0x222'],
     },
     attributes: {
       animal_type: {
@@ -34,8 +34,8 @@ describe('DocumentsController', () => {
 
   const documentToInsert: Document = {
     header: {
-      read_access: ['0x111'],
-      write_access: ['0x222'],
+      readAccess: ['0x111'],
+      writeAccess: ['0x222'],
     },
     attributes: {
       animal_type: {
@@ -68,7 +68,7 @@ describe('DocumentsController', () => {
     const databaseService = documentsModule.get<DatabaseService>(DatabaseService)
     insertedDocument = await databaseService.documents.insert({
       header: {
-        document_id: '0x39393939',
+        documentId: '0x39393939',
       },
       ...documentToInsert,
       organizationId: user.account,
@@ -82,7 +82,7 @@ describe('DocumentsController', () => {
     databaseSpies.spyUpdateById = jest.spyOn(databaseService.documents, 'updateById')
 
     const centrifugeService = documentsModule.get<CentrifugeService>(CentrifugeService)
-    centApiSpies.spyGetDocument = jest.spyOn(centrifugeService.documents, 'getDocument')
+    centApiSpies.spyGetDocument = jest.spyOn(centrifugeService.documents, 'getCommittedDocument')
   })
 
   describe('create', () => {
@@ -100,13 +100,7 @@ describe('DocumentsController', () => {
         header: {
           job_id: 'some_job_id',
         },
-        attributes: {
-          ...documentToCreate.attributes,
-          _createdBy: {
-            type: 'bytes',
-            value: 'user_account',
-          },
-        },
+        attributes: {},
         ownerId: user._id,
         organizationId: user.account,
       })
