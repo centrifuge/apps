@@ -1,4 +1,4 @@
-import { Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
@@ -33,12 +33,16 @@ const BackLink = styled(Link)(
 
 export const PageHeader: React.FC<Props> = ({ title, titleAddition, subtitle, subtitleLink, parent, actions }) => {
   return (
-    <Shelf
-      as="header"
-      justifyContent="space-between"
-      alignItems="flex-start"
-      style={{ position: 'sticky', top: '24px' }}
-    >
+    <Shelf as="header" justifyContent="space-between" alignItems="flex-start" position="sticky" top="24px">
+      <Box
+        position="absolute"
+        top="-24px"
+        bottom={0}
+        right="-12px"
+        left="-12px"
+        backgroundColor="backgroundPrimary"
+        zIndex={-1}
+      />
       <Stack gap={1}>
         <Shelf minHeight={20}>
           {parent && (

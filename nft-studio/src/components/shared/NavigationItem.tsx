@@ -1,11 +1,12 @@
-import { Box, IconChevronDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
+import { Box, Button, IconChevronDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
 import React, { useState } from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
 import styled from 'styled-components'
+import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
 
 type Props = {
   label: string
-  icon?: React.ReactNode
+  icon?: React.ReactElement
   href?: string
   defaultOpen?: boolean
 }
@@ -28,32 +29,47 @@ export const NavigationItem: React.FC<Props> = ({ label, icon, href, children, d
   const [open, setOpen] = useState(defaultOpen)
   const history = useHistory()
   const match = useRouteMatch(href || '/ignore')
+  const isDesktop = useIsAboveBreakpoint('M')
 
   return (
-    <Box>
-      <NavigationClickable
-        paddingLeft={1}
-        paddingRight={1}
-        borderRadius={4}
-        height={32}
-        justifyContent="space-between"
-        alignItems="center"
-        onClick={() => {
-          if (children) setOpen(!open)
-          if (href) history.push(href)
-        }}
-        $active={!!match}
-      >
-        <Shelf alignItems="center">
-          <IconWrapper>{icon}</IconWrapper>
-          <Text variant="interactive1" color="inherit">
-            {label}
-          </Text>
-        </Shelf>
+    <>
+      {isDesktop ? (
+        <>
+          <NavigationClickable
+            paddingLeft={1}
+            paddingRight={1}
+            borderRadius={4}
+            height={32}
+            justifyContent="space-between"
+            alignItems="center"
+            onClick={() => {
+              if (children) setOpen(!open)
+              else if (href) history.push(href)
+            }}
+            $active={(!isDesktop || !children) && !!match}
+          >
+            <Shelf alignItems="center">
+              <IconWrapper>{icon}</IconWrapper>
+              {isDesktop && (
+                <Text variant="interactive1" color="inherit">
+                  {label}
+                </Text>
+              )}
+            </Shelf>
 
-        <Box>{children && (open ? <IconChevronDown /> : <IconChevronRight />)}</Box>
-      </NavigationClickable>
-      <Box>{open && children}</Box>
-    </Box>
+            <Box>{children && isDesktop && (open ? <IconChevronDown /> : <IconChevronRight />)}</Box>
+          </NavigationClickable>
+          <Box>{open && isDesktop && children}</Box>
+        </>
+      ) : (
+        <Button
+          onClick={() => {
+            if (href) history.push(href)
+          }}
+          variant="text"
+          icon={icon}
+        />
+      )}
+    </>
   )
 }
