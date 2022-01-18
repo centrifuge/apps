@@ -7,7 +7,7 @@ import { TextInput } from '../../components/form/formik/TextInput'
 export const TrancheInput: React.FC = () => {
   const fmk = useFormikContext<PoolFormValues>()
   const { values } = fmk
-  const [field, meta, helpers] = useField('tranches')
+  const [field, meta, helpers] = useField<Tranche[]>('tranches')
 
   console.log({ field, meta, helpers })
 
@@ -33,11 +33,6 @@ export const TrancheInput: React.FC = () => {
               <Box borderBottomWidth="1px" borderBottomStyle="solid" borderBottomColor="borderPrimary" />
             </React.Fragment>
           ))}
-          {/* <TextInput label="Token name" placeholder="SEN" />
-        <TextInput label="Interest rate" placeholder="0.00%" />
-        <TextInput label="Minimum risk buffer" placeholder="0.00%" />
-
-        <Box borderBottomWidth="1px" borderBottomStyle="solid" borderBottomColor="borderPrimary" /> */}
           <Box>
             <Button
               variant="text"

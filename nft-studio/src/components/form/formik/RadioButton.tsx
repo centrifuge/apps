@@ -1,13 +1,16 @@
-import { IconCheckCircle, IconCircle } from '@centrifuge/fabric'
+import { IconCheckCircle, IconCircle, Shelf, Text } from '@centrifuge/fabric'
 import { Field, useField } from 'formik'
 import React from 'react'
 import styled from 'styled-components'
-import { getRadioButtonComponent } from '../abstract/getRadioButtonComponent'
 
 interface RadioInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  // label: string
-  // name: string
-  // value: string
+  name: string
+}
+
+interface RadioButtonProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string
+  name: string
+  value: string
 }
 
 const HiddenField = styled(Field)`
@@ -15,7 +18,7 @@ const HiddenField = styled(Field)`
 `
 
 export const RadioInput: React.FC<RadioInputProps> = (props) => {
-  const [field] = useField(props.name || '')
+  const [field] = useField(props.name)
 
   return (
     <label>
@@ -25,4 +28,14 @@ export const RadioInput: React.FC<RadioInputProps> = (props) => {
   )
 }
 
-export const RadioButton = getRadioButtonComponent(RadioInput)
+export const RadioButton: React.FC<RadioButtonProps> = ({ label, ...props }) => {
+  const id = props.id || props.name
+  return (
+    <label htmlFor={id}>
+      <Shelf gap="1">
+        <RadioInput type="radio" {...props} id={id} />
+        <Text variant="interactive2">{label}</Text>
+      </Shelf>
+    </label>
+  )
+}

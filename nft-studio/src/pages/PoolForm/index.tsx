@@ -1,4 +1,4 @@
-import { AnchorButton, Button, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Form, Formik, FormikHelpers } from 'formik'
 import * as React from 'react'
 import { FileInput } from '../../components/FileInput'
@@ -6,6 +6,7 @@ import { RadioButton } from '../../components/form/formik/RadioButton'
 import { TextInput } from '../../components/form/formik/TextInput'
 import { PageWithSideBar } from '../../components/shared/PageWithSideBar'
 import { createPool } from './createPool'
+import { SubmitButton } from './SubmitButton'
 import { TrancheInput } from './TrancheInput'
 
 const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
@@ -40,6 +41,7 @@ export interface Tranche {
 }
 export interface PoolFormValues {
   poolName: string
+  currency: string
   assetClass: string
   maxReserve: string
   tranches: Tranche[]
@@ -54,6 +56,7 @@ export const createEmptyTranche = (): Tranche => ({
 
 const initialValues = {
   poolName: '',
+  currency: DEFAULT_CURRENCY,
   assetClass: '',
   maxReserve: '',
   tranches: [createEmptyTranche()],
@@ -106,51 +109,15 @@ const CreatePoolForm: React.FC = () => {
 
             <TextInput label="Max reserve" placeholder="0" id="maxReserve" name="maxReserve" />
           </Stack>
-          {/* <Stack gap="4" gridColumn="6 / 9" marginTop="9">
-            <Text variant="heading3">Tranches</Text>
 
-            <TextInput
-              label="Token name"
-              placeholder="SEN"
-              value={tokenName}
-              onChange={(ev) => {
-                setTokenName(ev.target.value)
-              }}
-            />
-            <TextInput
-              label="Interest rate"
-              placeholder="0.00%"
-              value={interestRate}
-              onChange={(ev) => {
-                setInterestRate(ev.target.value)
-              }}
-            />
-            <TextInput
-              label="Minimum risk buffer"
-              placeholder="0.00%"
-              value={minRiskBuffer}
-              onChange={(ev) => {
-                setMinRiskBuffer(ev.target.value)
-              }}
-            />
-
-            <Box borderBottomWidth="1px" borderBottomStyle="solid" borderBottomColor="borderPrimary" />
-
-            <Box>
-              <Button variant="text" icon={<IconPlus />}>
-                Add another tranche
-              </Button>
-            </Box>
-          </Stack> */}
           <TrancheInput />
           <Stack gap="3" gridColumn="9 / 11">
             <Shelf gap="2">
               <AnchorButton variant="outlined" href="/managed-pools">
                 Cancel
               </AnchorButton>
-              <Button variant="contained" type="submit">
-                Create
-              </Button>
+
+              <SubmitButton />
             </Shelf>
           </Stack>
         </Grid>
