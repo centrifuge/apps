@@ -4,7 +4,7 @@ export function parseMetadataUrl(url: string) {
   try {
     let newUrl
 
-    if (!url.includes('://')) {
+    if (!url.includes(':')) {
       // string without protocol is assumed to be an IPFS hash
       newUrl = new URL(`ipfs/${url}`, IFPS_GATEWAY)
     } else if (url.startsWith('ipfs://')) {

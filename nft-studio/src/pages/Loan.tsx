@@ -1,4 +1,4 @@
-import { Button, Card, Grid, IconArrowRight, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Card, Grid, IconArrowRight, IconNft, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -10,9 +10,12 @@ import LoanLabel from '../components/LoanLabel'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
-import { RouterTextLink } from '../components/TextLink'
+import { nftMetadataSchema } from '../schemas'
 import { formatDate } from '../utils/date'
+import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useLoan } from '../utils/useLoans'
+import { useMetadata } from '../utils/useMetadata'
+import { useNFT } from '../utils/useNFTs'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 
 const e27 = new BN(10).pow(new BN(27))
@@ -29,19 +32,23 @@ const Loan: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const { data: pool } = usePool(pid)
   const { data: loan } = useLoan(pid, aid)
-  const { data: metadata } = usePoolMetadata(pool)
+  const { data: poolMetadata } = usePoolMetadata(pool)
+  const nft = useNFT(loan?.asset.collectionId, loan?.asset.nftId)
+  const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const centrifuge = useCentrifuge()
 
   console.log('loan', loan)
+  const name = truncate(nftMetadata?.name || 'Unnamed asset', 30)
+  const imageUrl = nftMetadata?.image ? parseMetadataUrl(nftMetadata.image) : ''
 
   return (
     <Stack gap={3} flex={1}>
       <PageHeader
-        title="[Asset]"
+        title={name}
         titleAddition={loan && <LoanLabel loan={loan} />}
         parent={{ to: `/pools/${pid}/assets`, label: 'Assets' }}
-        subtitle="[Florida real estate loan]"
-        subtitleLink={{ label: metadata?.pool?.name ?? '', to: `/pools/${pid}` }}
+        subtitle={truncate(nftMetadata?.description ?? '', 30)}
+        subtitleLink={{ label: poolMetadata?.pool?.name ?? '', to: `/pools/${pid}` }}
         actions={
           <>
             <Button variant="text" small icon={IconArrowRight}>
@@ -70,7 +77,7 @@ const Loan: React.FC = () => {
       {loan ? (
         <Card p={3}>
           <Stack gap={3}>
-            <CardHeader title="[Asset]" />
+            <CardHeader title={name} />
             <Grid columns={[1, 2]} equalColumns gap={5}>
               <LabelValueList
                 items={
@@ -96,15 +103,14 @@ const Loan: React.FC = () => {
                   ].filter(Boolean) as any
                 }
               />
+              <Box display="flex" alignItems="center" justifyContent="center">
+                {imageUrl ? (
+                  <Box as="img" maxHeight="300px" src={imageUrl} />
+                ) : (
+                  <IconNft color="backgroundSecondary" size="250px" />
+                )}
+              </Box>
             </Grid>
-            <Text>
-              NFT:{' '}
-              {pool && (
-                <RouterTextLink to={`/collection/${loan.asset.collectionId}/object/${loan.asset.nftId}`}>
-                  {loan.asset.nftId}
-                </RouterTextLink>
-              )}
-            </Text>
           </Stack>
         </Card>
       ) : (
@@ -116,4 +122,11 @@ const Loan: React.FC = () => {
       )}
     </Stack>
   )
+}
+
+function truncate(txt: string, num: number) {
+  if (txt.length > num) {
+    return `${txt.slice(0, num)}...`
+  }
+  return txt
 }

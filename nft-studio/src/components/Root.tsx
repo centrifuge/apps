@@ -9,6 +9,7 @@ import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
 import { LoanPage } from '../pages/Loan'
+import { LoansPage } from '../pages/Loans'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
 import { PoolPage } from '../pages/Pool'
@@ -92,6 +93,9 @@ export const Root: React.FC = () => {
                       </Route>
                       <Route path="/pool/new">
                         <PoolFormPage />
+                      </Route>
+                      <Route path="/issuers/assets">
+                        <LoansPage />
                       </Route>
                       <Route path="/investments/tokens/:pid/:tid">
                         <TokenPage />

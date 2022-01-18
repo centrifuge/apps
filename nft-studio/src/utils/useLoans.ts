@@ -16,6 +16,22 @@ export function useLoans(poolId: string) {
   return query
 }
 
+export function useLoansAcrossPools(poolIds?: string[]) {
+  const centrifuge = useCentrifuge()
+  const query = useQuery(
+    ['loansAcrossPools', poolIds],
+    async () => {
+      return (await Promise.all(poolIds!.map((poolId) => centrifuge.pools.getLoans([poolId])))).flat()
+    },
+    {
+      suspense: true,
+      enabled: poolIds && poolIds.length > 0,
+    }
+  )
+
+  return query
+}
+
 export function useLoan(poolId: string, assetId: string) {
   const centrifuge = useCentrifuge()
   const query = useQuery(

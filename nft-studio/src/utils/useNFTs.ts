@@ -2,22 +2,23 @@ import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 
-export function useNFTs(collectionId: string) {
+export function useNFTs(collectionId?: string) {
   const cent = useCentrifuge()
   const query = useQuery(
     ['nfts', collectionId],
     async () => {
-      return cent.nfts.getCollectionNfts([collectionId])
+      return cent.nfts.getCollectionNfts([collectionId!])
     },
     {
       suspense: true,
+      enabled: !!collectionId,
     }
   )
 
   return query
 }
 
-export function useNFT(collectionId: string, nftId: string) {
+export function useNFT(collectionId?: string, nftId?: string) {
   const { data } = useNFTs(collectionId)
   return React.useMemo(() => data?.find((c) => c.id === nftId), [data, nftId])
 }

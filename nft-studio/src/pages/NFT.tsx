@@ -122,8 +122,12 @@ const NFT: React.FC = () => {
                   {imageUrl && (
                     <Stack gap={1}>
                       <Text variant="label1">Source</Text>
-                      <AnchorPillButton href={imageUrl} target="_blank">
-                        <span style={{ wordBreak: 'break-all' }}>{imageUrl}</span>
+                      <AnchorPillButton
+                        href={imageUrl}
+                        target="_blank"
+                        style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
+                      >
+                        {imageUrl}
                       </AnchorPillButton>
                     </Stack>
                   )}

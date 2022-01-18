@@ -14,7 +14,7 @@ const NavigationClickable = styled(Shelf)<{ $active?: boolean }>`
   cursor: pointer;
   background: ${({ $active, theme }) => $active && theme.colors.backgroundSecondary};
   :hover {
-    background: ${({ theme }) => theme.colors.backgroundSecondary};
+    color: ${({ theme }) => theme.colors.brand};
   }
 `
 
@@ -46,7 +46,9 @@ export const NavigationItem: React.FC<Props> = ({ label, icon, href, children, d
       >
         <Shelf alignItems="center">
           <IconWrapper>{icon}</IconWrapper>
-          <Text variant="interactive1">{label}</Text>
+          <Text variant="interactive1" color="inherit">
+            {label}
+          </Text>
         </Shelf>
 
         <Box>{children && (open ? <IconChevronDown /> : <IconChevronRight />)}</Box>

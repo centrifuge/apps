@@ -33,7 +33,12 @@ const BackLink = styled(Link)(
 
 export const PageHeader: React.FC<Props> = ({ title, titleAddition, subtitle, subtitleLink, parent, actions }) => {
   return (
-    <Shelf as="header" justifyContent="space-between" alignItems="flex-start" style={{ position: 'sticky' }}>
+    <Shelf
+      as="header"
+      justifyContent="space-between"
+      alignItems="flex-start"
+      style={{ position: 'sticky', top: '24px' }}
+    >
       <Stack gap={1}>
         <Shelf minHeight={20}>
           {parent && (
