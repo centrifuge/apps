@@ -8,6 +8,7 @@ import { PageWithSideBar } from '../../components/shared/PageWithSideBar'
 import { createPool } from './createPool'
 import { SubmitButton } from './SubmitButton'
 import { TrancheInput } from './TrancheInput'
+import { validate } from './validate'
 
 const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
@@ -86,7 +87,13 @@ const CreatePoolForm: React.FC = () => {
       <Form>
         <Grid columns={[10]} equalColumns gap={['gutterMobile', 'gutterTablet', 'gutterDesktop']}>
           <Stack gap="3" gridColumn="1 / 5">
-            <TextInput label="Pool name" placeholder="Untitled pool" id="poolName" name="poolName" />
+            <TextInput
+              label="Pool name"
+              placeholder="Untitled pool"
+              id="poolName"
+              name="poolName"
+              validate={validate.poolName}
+            />
 
             <Stack gap="1">
               <Text variant="label1">Asset class</Text>
@@ -107,7 +114,13 @@ const CreatePoolForm: React.FC = () => {
               />
             </Stack>
 
-            <TextInput label="Max reserve" placeholder="0" id="maxReserve" name="maxReserve" />
+            <TextInput
+              label="Max reserve"
+              placeholder="0"
+              id="maxReserve"
+              name="maxReserve"
+              validate={validate.maxReserve}
+            />
           </Stack>
 
           <TrancheInput />

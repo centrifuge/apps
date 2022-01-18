@@ -3,6 +3,7 @@ import { FieldArray, useField, useFormikContext } from 'formik'
 import React from 'react'
 import { createEmptyTranche, PoolFormValues, Tranche } from '.'
 import { TextInput } from '../../components/form/formik/TextInput'
+import { validate } from './validate'
 
 export const TrancheInput: React.FC = () => {
   const fmk = useFormikContext<PoolFormValues>()
@@ -25,8 +26,18 @@ export const TrancheInput: React.FC = () => {
               <TextInput label="Token symbol" placeholder="" name={`tranches.${index}.symbolName`} />
               {index !== juniorTrancheIndex && (
                 <>
-                  <TextInput label="Interest rate" placeholder="0.00%" name={`tranches.${index}.interestRate`} />
-                  <TextInput label="Minimum risk buffer" placeholder="0.00%" name={`tranches.${index}.minRiskBuffer`} />
+                  <TextInput
+                    label="Interest rate"
+                    placeholder="0.00%"
+                    name={`tranches.${index}.interestRate`}
+                    validate={validate.interestRate}
+                  />
+                  <TextInput
+                    label="Minimum risk buffer"
+                    placeholder="0.00%"
+                    name={`tranches.${index}.minRiskBuffer`}
+                    validate={validate.minRiskBuffer}
+                  />
                 </>
               )}
 
