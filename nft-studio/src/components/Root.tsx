@@ -103,6 +103,9 @@ export const Root: React.FC = () => {
                       <Route path="/investments/tokens">
                         <TokensPage />
                       </Route>
+                      <Route path="/investments">
+                        <TokensPage />
+                      </Route>
                       <Route path="/">
                         <PoolsPage />
                       </Route>
