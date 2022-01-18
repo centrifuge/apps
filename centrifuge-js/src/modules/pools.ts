@@ -173,6 +173,7 @@ type LoanDetailsData = {
 
 export type Loan = {
   id: string
+  poolId: string
   financedAmount: string
   financingFee: string
   outstandingDebt: string
@@ -477,6 +478,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
       const assetKey = (value.toHuman() as any).asset
       return {
         id: formatLoanKey(key as StorageKey<[u32, u32]>),
+        poolId,
         financedAmount: parseBN(loan.borrowedAmount),
         financingFee: parseBN(loan.ratePerSec),
         outstandingDebt: new BN(parseBN(loan.principalDebt))
@@ -508,6 +510,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return {
       id: loanId,
+      poolId,
       financedAmount: parseBN(loan.borrowedAmount),
       financingFee: parseBN(loan.ratePerSec),
       outstandingDebt: new BN(parseBN(loan.principalDebt))
