@@ -79,7 +79,10 @@ const UserRewards: React.FC = () => {
               <Metric
                 loading={!rewards.data || !userRewards || !portfolioValue}
                 value={baseToDisplay(
-                  rewards.data?.rewardRate?.mul(portfolioValue?.toString() || 0).toFixed(0) || '0',
+                  rewards.data?.dropRewardRate
+                    ?.mul(portfolioDropValue?.toString() || 0)
+                    .add(rewards.data?.tinRewardRate?.mul(portfolioTinValue?.toString() || 0))
+                    .toFixed(0) || '0',
                   18
                 )}
                 label="Your Daily Rewards"
@@ -218,14 +221,22 @@ const UserRewards: React.FC = () => {
               token="CFG"
               borderBottom
             />
-            {/* <MetricRow
+            <MetricRow
               loading={!rewards.data}
-              value={rewards.data?.rewardRate.mul(10000).toFixed(4) || ''}
-              label="Daily Reward Rate"
+              value={rewards.data?.dropRewardRate.mul(10000).toFixed(4) || ''}
+              label="Daily Drop Reward Rate"
               token="CFG"
               suffix={<span style={{ fontSize: 10, color: '#777777' }}> / 10k DAI</span>}
               borderBottom
-            /> */}
+            />
+            <MetricRow
+              loading={!rewards.data}
+              value={rewards.data?.tinRewardRate.mul(10000).toFixed(4) || ''}
+              label="Daily Tin Reward Rate"
+              token="CFG"
+              suffix={<span style={{ fontSize: 10, color: '#777777' }}> / 10k DAI</span>}
+              borderBottom
+            />
             <MetricRow
               loading={!rewards.data}
               value={baseToDisplay(rewards.data?.toDateRewardAggregateValue || new BN(0), 18)}
