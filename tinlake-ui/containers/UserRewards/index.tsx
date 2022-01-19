@@ -20,7 +20,7 @@ import { shortAddr } from '../../utils/shortAddr'
 import { dynamicPrecision, toDynamicPrecision } from '../../utils/toDynamicPrecision'
 import { toPrecision } from '../../utils/toPrecision'
 import { useGlobalRewards } from '../../utils/useGlobalRewards'
-import { usePortfolio } from '../../utils/usePortfolio'
+import { Tranche, usePortfolio } from '../../utils/usePortfolio'
 import { UserRewardsData, UserRewardsLink, useUserRewards } from '../../utils/useUserRewards'
 import CentChainWalletDialog from '../CentChainWalletDialog'
 import ClaimRewards from '../ClaimRewards'
@@ -33,6 +33,18 @@ const UserRewards: React.FC = () => {
   const { address: ethAddr } = useAuth()
   const portfolio = usePortfolio()
   const portfolioValue = portfolio.data?.totalValue
+  const portfolioTinValue = portfolio.data?.tokenBalances
+    ?.filter((tb) => tb.tranche === Tranche.junior)
+    .reduce((sum, tb) => tb.value.add(sum), new BN(0))
+  const portfolioDropValue = portfolio.data?.tokenBalances
+    ?.filter((tb) => tb.tranche === Tranche.senior)
+    .reduce((sum, tb) => tb.value.add(sum), new BN(0))
+
+  // console.log(portfolio.data?.tokenBalances?.filter((tb) => tb.tranche === Tranche.senior))
+  // console.log(portfolioValue?.toString())
+  // console.log(portfolioDropValue?.toString())
+  // console.log(portfolioTinValue?.toString())
+
   const dispatch = useDispatch()
   const router = useRouter()
 
@@ -206,14 +218,14 @@ const UserRewards: React.FC = () => {
               token="CFG"
               borderBottom
             />
-            <MetricRow
+            {/* <MetricRow
               loading={!rewards.data}
               value={rewards.data?.rewardRate.mul(10000).toFixed(4) || ''}
               label="Daily Reward Rate"
               token="CFG"
               suffix={<span style={{ fontSize: 10, color: '#777777' }}> / 10k DAI</span>}
               borderBottom
-            />
+            /> */}
             <MetricRow
               loading={!rewards.data}
               value={baseToDisplay(rewards.data?.toDateRewardAggregateValue || new BN(0), 18)}
