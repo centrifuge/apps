@@ -98,7 +98,6 @@ async function getPortfolio(ipfsPools: IpfsPools, address: string) {
   const updatesPerToken = await multicall<{ [key: string]: TokenResult }>(calls)
 
   const tokenBalances = Object.entries(updatesPerToken).map(([tokenId, tokenResult]) => {
-    console.log(tokenId)
     let tranche = Tranche.senior
     ipfsPools.active.flatMap((pool) => {
       if (tokenId === pool.addresses.JUNIOR_TOKEN) {

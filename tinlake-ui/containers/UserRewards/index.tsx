@@ -40,11 +40,6 @@ const UserRewards: React.FC = () => {
     ?.filter((tb) => tb.tranche === Tranche.senior)
     .reduce((sum, tb) => tb.value.add(sum), new BN(0))
 
-  // console.log(portfolio.data?.tokenBalances?.filter((tb) => tb.tranche === Tranche.senior))
-  // console.log(portfolioValue?.toString())
-  // console.log(portfolioDropValue?.toString())
-  // console.log(portfolioTinValue?.toString())
-
   const dispatch = useDispatch()
   const router = useRouter()
 
