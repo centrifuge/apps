@@ -224,7 +224,7 @@ const UserRewards: React.FC = () => {
             <MetricRow
               loading={!rewards.data}
               value={rewards.data?.dropRewardRate.mul(10000).toFixed(4) || ''}
-              label="Daily Drop Reward Rate"
+              label="Daily DROP Reward Rate"
               token="CFG"
               suffix={<span style={{ fontSize: 10, color: '#777777' }}> / 10k DAI</span>}
               borderBottom
@@ -232,7 +232,7 @@ const UserRewards: React.FC = () => {
             <MetricRow
               loading={!rewards.data}
               value={rewards.data?.tinRewardRate.mul(10000).toFixed(4) || ''}
-              label="Daily Tin Reward Rate"
+              label="Daily TIN Reward Rate"
               token="CFG"
               suffix={<span style={{ fontSize: 10, color: '#777777' }}> / 10k DAI</span>}
               borderBottom
