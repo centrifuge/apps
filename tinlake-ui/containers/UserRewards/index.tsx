@@ -198,6 +198,8 @@ const UserRewards: React.FC = () => {
                 <ClaimRewards
                   activeLink={userRewards.links[userRewards.links.length - 1]}
                   portfolioValue={portfolioValue}
+                  portfolioDropValue={portfolioDropValue}
+                  portfolioTinValue={portfolioTinValue}
                 />
               )}
             </Card>
