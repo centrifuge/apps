@@ -17,13 +17,19 @@ const HiddenField = styled(Field)`
   display: none;
 `
 
+const FocusableLabel = styled.label`
+  :focus {
+    color: ${({ theme }) => theme.colors.brand};
+  }
+`
+
 export const RadioInput: React.FC<RadioInputProps> = (props) => {
   const [field] = useField(props.name)
 
   return (
     <label>
       {field.value === props.value ? <IconCheckCircle /> : <IconCircle />}
-      <HiddenField type="radio" {...field} {...props} />
+      <HiddenField type="radio" tabIndex={-1} {...field} {...props} />
     </label>
   )
 }
@@ -31,11 +37,11 @@ export const RadioInput: React.FC<RadioInputProps> = (props) => {
 export const RadioButton: React.FC<RadioButtonProps> = ({ label, ...props }) => {
   const id = props.id || props.name
   return (
-    <label htmlFor={id}>
+    <FocusableLabel tabIndex={0} htmlFor={id}>
       <Shelf gap="1">
         <RadioInput type="radio" {...props} id={id} />
         <Text variant="interactive2">{label}</Text>
       </Shelf>
-    </label>
+    </FocusableLabel>
   )
 }
