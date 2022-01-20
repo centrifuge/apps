@@ -1,7 +1,7 @@
 import Centrifuge, { aprToFee, toPerquintill } from '@centrifuge/centrifuge-js'
 import { AnchorButton, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
-import { Form, Formik, FormikHelpers } from 'formik'
+import { ErrorMessage, Form, Formik, FormikHelpers } from 'formik'
 import * as React from 'react'
 import { FileInput } from '../../components/FileInput'
 import { RadioButton } from '../../components/form/formik/RadioButton'
@@ -84,6 +84,13 @@ const CreatePoolForm: React.FC = () => {
   return (
     <Formik
       initialValues={initialValues}
+      validate={(values) => {
+        // validate fields without field level validation
+        if (!values.assetClass) {
+          return { assetClass: 'Select an asset class' }
+        }
+        return {}
+      }}
       onSubmit={async (values: PoolFormValues, { setSubmitting }: FormikHelpers<PoolFormValues>) => {
         // validation passed, submit
         const metadataHash = await pinPoolMetadata({
@@ -135,6 +142,9 @@ const CreatePoolForm: React.FC = () => {
                   <RadioButton key={id} label={label} value={id} id={id} name="assetClass" />
                 ))}
               </Shelf>
+              <Text variant="label2" color="statusCritical">
+                <ErrorMessage name="assetClass" />
+              </Text>
             </Stack>
 
             <Stack gap="1">
