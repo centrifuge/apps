@@ -22,6 +22,7 @@ export interface TokenBalance {
   price: BN
   value: BN
   balance: BN
+  tranche: Tranche
 }
 
 export interface PortfolioData {
@@ -111,7 +112,7 @@ async function getPortfolio(ipfsPools: IpfsPools, address: string) {
     return {
       id: tokenId,
       symbol: tokenResult.symbol,
-      tranche,
+      tranche: tranche as Tranche,
       price: newPrice,
       value: newValue,
       balance: newBalance,
