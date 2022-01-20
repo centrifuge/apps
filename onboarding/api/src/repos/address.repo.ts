@@ -50,8 +50,8 @@ export class AddressRepo {
 
     if (!data) return []
 
-    const investors = data as unknown as { userId: string; poolId: string; tranche: Tranche; address_count: number }[]
-    return investors.filter((investor) => investor.address_count > 0)
+    const investors = data as unknown as { userId: string; poolId: string; tranche: Tranche; addressCount: number }[]
+    return investors.filter((investor) => investor.addressCount > 0)
   }
 
   async findOrCreate(blockchain: Blockchain, network: Network, address: string): Promise<AddressEntity> {
