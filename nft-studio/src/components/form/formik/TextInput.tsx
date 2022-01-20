@@ -27,10 +27,6 @@ const StyledTextInput = styled(Field)<{ haserror: boolean }>`
   }
 `
 
-const ErrorMsg = styled(Text)`
-  color: ${({ theme }) => theme.colors.statusCritical};
-`
-
 export const TextInput: React.FC<TextInputProps> = ({ label, value, placeholder, ...inputProps }) => {
   const [, meta] = useField(inputProps)
   return (
@@ -41,7 +37,9 @@ export const TextInput: React.FC<TextInputProps> = ({ label, value, placeholder,
       </Text>
       {meta.error && meta.touched && (
         <Box marginTop={1}>
-          <ErrorMsg variant="label2">{meta.error}</ErrorMsg>
+          <Text variant="label2" color="statusCritical">
+            {meta.error}
+          </Text>
         </Box>
       )}
     </Stack>
