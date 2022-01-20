@@ -121,7 +121,6 @@ const CreatePoolForm: React.FC = () => {
         ])
 
         setSubmitting(false)
-        alert(JSON.stringify(values, null, 2))
       }}
     >
       <Form>
