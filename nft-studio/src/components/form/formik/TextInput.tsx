@@ -9,11 +9,11 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   validate?: (value: string) => string | undefined
 }
 
-const StyledTextInput = styled(Field)<{ hasError: boolean }>`
+const StyledTextInput = styled(Field)<{ haserror: boolean }>`
   width: 100%;
   border: 0;
   border-bottom: 1px solid
-    ${({ theme, hasError }) => (hasError ? theme.colors.statusCritical : theme.colors.textPrimary)};
+    ${({ theme, haserror }) => (haserror ? theme.colors.statusCritical : theme.colors.textPrimary)};
   background: transparent;
   height: 32px;
   font-size: inherit;
@@ -37,7 +37,7 @@ export const TextInput: React.FC<TextInputProps> = ({ label, value, placeholder,
     <Stack>
       <Text variant="label1">{label}</Text>
       <Text variant="body2">
-        <StyledTextInput {...inputProps} hasError={!!(meta.error && meta.touched)} />
+        <StyledTextInput {...inputProps} haserror={meta.error && meta.touched ? '1' : ''} />
       </Text>
       {meta.error && meta.touched && (
         <Box marginTop={1}>
