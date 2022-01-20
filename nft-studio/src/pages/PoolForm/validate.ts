@@ -5,6 +5,9 @@ const numWith2Decimals = pattern(/^\d+(\.\d{1,2})?$/, 'Please insert a number wi
 export const validate = {
   poolName: required(),
   maxReserve: required(),
+  // tranche data
+  tokenName: required(),
+  symbolName: required(),
   interestRate: combine(required(), numWith2Decimals),
   minRiskBuffer: combine(required(), numWith2Decimals),
 }

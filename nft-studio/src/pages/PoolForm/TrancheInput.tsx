@@ -1,5 +1,5 @@
 import { Box, Button, IconPlus, Stack, Text } from '@centrifuge/fabric'
-import { FieldArray, useField, useFormikContext } from 'formik'
+import { FieldArray, useFormikContext } from 'formik'
 import React from 'react'
 import { createEmptyTranche, PoolFormValues, Tranche } from '.'
 import { TextInput } from '../../components/form/formik/TextInput'
@@ -8,9 +8,6 @@ import { validate } from './validate'
 export const TrancheInput: React.FC = () => {
   const fmk = useFormikContext<PoolFormValues>()
   const { values } = fmk
-  const [field, meta, helpers] = useField<Tranche[]>('tranches')
-
-  console.log({ field, meta, helpers })
 
   const juniorTrancheIndex = 0 // the first tranche is the most junior in the UI
 
@@ -22,8 +19,18 @@ export const TrancheInput: React.FC = () => {
 
           {values.tranches.map((s: Tranche, index: number) => (
             <React.Fragment key={index}>
-              <TextInput label="Token name" placeholder="" name={`tranches.${index}.tokenName`} />
-              <TextInput label="Token symbol" placeholder="" name={`tranches.${index}.symbolName`} />
+              <TextInput
+                label="Token name"
+                placeholder=""
+                name={`tranches.${index}.tokenName`}
+                validate={validate.tokenName}
+              />
+              <TextInput
+                label="Token symbol"
+                placeholder=""
+                name={`tranches.${index}.symbolName`}
+                validate={validate.symbolName}
+              />
               {index !== juniorTrancheIndex && (
                 <>
                   <TextInput

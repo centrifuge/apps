@@ -28,9 +28,7 @@ const getFileIpfsHash = async (file?: File): Promise<string | null> => {
   return null
 }
 
-export const createPool = async ({ poolFormData, issuerLogoFile }: CreatePoolArg) => {
-  // TODO: validate if the inputs are as expected
-
+export const pinPoolMetadata = async ({ poolFormData, issuerLogoFile }: CreatePoolArg): Promise<string> => {
   // pin image files files. If not present, hash will be null
   const fileHashMap = await promiseAllObject<string | null>({
     issuerLogoFile: getFileIpfsHash(issuerLogoFile),
@@ -53,23 +51,11 @@ export const createPool = async ({ poolFormData, issuerLogoFile }: CreatePoolArg
     })),
   }
 
-  // pin the metadata json
-  // const pinMetadataResponse = await fetchLambda('pinJson', {
-  //   method: 'POST',
-  //   body: JSON.stringify(metadata),
-  // })
-
-  // if (!pinMetadataResponse.ok) {
-  //   // todo report error
-  //   const respText = await pinMetadataResponse.text()
-  //   console.error(`Error pinning metadata: `, respText)
-  //   return
-  // }
-
-  // build arguments to call createPool
-  const trancheMatrix = tranches.map((tranche) => [parseFloat(tranche.interestRate), parseFloat(tranche.minRiskBuffer)])
-
-  // call createPool transaction
-
-  console.log(metadata, trancheMatrix)
+  const resp = await fetchLambda('pinJson', { method: 'POST', body: JSON.stringify(metadata) })
+  if (!resp.ok) {
+    const respText = await resp.text()
+    throw new Error(`Error pinning pool metadata: ${respText}`)
+  }
+  const json = await resp.json()
+  return json.ipfsHash as string
 }
