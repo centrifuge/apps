@@ -1,6 +1,6 @@
 import { ApiPromise } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
-import { Signer } from '@polkadot/types/types'
+import { ISubmittableResult, Signer } from '@polkadot/types/types'
 import { TransactionOptions } from './types'
 import { getPolkadotApi } from './utils/web3'
 
@@ -75,7 +75,7 @@ export class CentrifugeBase {
       return submittable.paymentInfo(options.paymentInfo)
     }
     // eslint-disable-next-line no-async-promise-executor
-    return new Promise<void>(async (resolve, reject) => {
+    return new Promise<ISubmittableResult>(async (resolve, reject) => {
       try {
         const unsub = await submittable.signAndSend(signingAddress, { signer }, (result) => {
           options?.onStatusChange?.(result)
@@ -87,7 +87,7 @@ export class CentrifugeBase {
             }
             reject(result.dispatchError || errors)
           } else if (result.status.isInBlock || result.status.isFinalized) {
-            resolve()
+            resolve(result)
           }
           if (result.status.isFinalized) {
             unsub()

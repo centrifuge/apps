@@ -33,7 +33,7 @@ export function usePool(id: string) {
   return query
 }
 
-type PoolMetadata = {
+export type PoolMetadata = {
   pool: {
     name: string
     description: string

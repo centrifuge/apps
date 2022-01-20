@@ -18,7 +18,7 @@ const LoanLabel: React.FC<Props> = ({ loan }) => {
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
     if (l.status === 'Closed') return 'default'
-    if (l.status === 'Issued') return 'default'
+    if (l.status === 'Created') return 'info'
     if (!('maturityDate' in l.loanInfo)) return 'ok'
 
     const days = daysBetween(today.getTime() / 1000, Number(l.loanInfo.maturityDate))
@@ -32,7 +32,7 @@ const LoanLabel: React.FC<Props> = ({ loan }) => {
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
     if (l.status === 'Closed') return 'Closed'
-    if (l.status === 'Issued') return 'NFT Locked'
+    if (l.status === 'Created') return 'Upcoming'
     if (!('maturityDate' in l.loanInfo)) return 'Ongoing'
 
     const days = daysBetween(today.getTime() / 1000, Number(l.loanInfo.maturityDate))

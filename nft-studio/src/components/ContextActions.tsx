@@ -11,25 +11,27 @@ import { useWeb3 } from './Web3Provider'
 
 type Props = {
   actions?: React.ReactNode
+  walletShown?: boolean
 }
 
-export const ContextActions: React.FC<Props> = ({ actions }) => {
+export const ContextActions: React.FC<Props> = ({ actions, walletShown = true }) => {
   const { selectedAccount, isConnecting, connect, accounts } = useWeb3()
 
   return (
     <Shelf gap={5}>
       {actions && <ButtonGroup>{actions}</ButtonGroup>}
-      {selectedAccount && accounts?.length ? (
-        <AccountsMenu />
-      ) : accounts && !accounts.length ? (
-        <Button disabled variant="text">
-          No accounts available
-        </Button>
-      ) : (
-        <Button onClick={() => connect()} loading={isConnecting}>
-          Connect
-        </Button>
-      )}
+      {walletShown &&
+        (selectedAccount && accounts?.length ? (
+          <AccountsMenu />
+        ) : accounts && !accounts.length ? (
+          <Button disabled variant="text">
+            No accounts available
+          </Button>
+        ) : (
+          <Button onClick={() => connect()} loading={isConnecting}>
+            Connect
+          </Button>
+        ))}
     </Shelf>
   )
 }

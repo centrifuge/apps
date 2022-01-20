@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom'
 import { Identity } from '../components/Identity'
 import { PageHeader } from '../components/PageHeader'
 import { AnchorPillButton } from '../components/PillButton'
+import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { SplitView } from '../components/SplitView'
 import { TransferDialog } from '../components/TransferDialog'
@@ -13,6 +14,7 @@ import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFT } from '../utils/useNFTs'
+import { usePermissions } from '../utils/usePermissions'
 import { isSameAddress } from '../utils/web3'
 
 export const NFTPage: React.FC = () => {
@@ -27,6 +29,7 @@ const NFT: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
 
   const { selectedAccount } = useWeb3()
+  const { data: permissions } = usePermissions(selectedAccount?.address)
   const nft = useNFT(collectionId, nftId)
   const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)
@@ -34,6 +37,8 @@ const NFT: React.FC = () => {
   const [transferOpen, setTransferOpen] = React.useState(false)
 
   const imageUrl = metadata?.image ? parseMetadataUrl(metadata.image) : ''
+
+  const canCreateLoan = permissions && Object.values(permissions).some((p) => p.roles.includes('Borrower'))
 
   return (
     <Stack gap={8} flex={1}>
@@ -51,9 +56,16 @@ const NFT: React.FC = () => {
           <>
             {nft && isSameAddress(nft.owner, selectedAccount?.address) && (
               <>
-                <Button icon={IconPlus} small variant="text">
-                  Create asset
-                </Button>
+                {canCreateLoan && (
+                  <RouterLinkButton
+                    to={`/collection/${collectionId}/object/${nftId}/new-asset`}
+                    icon={IconPlus}
+                    small
+                    variant="text"
+                  >
+                    Create asset
+                  </RouterLinkButton>
+                )}
                 <Button onClick={() => setTransferOpen(true)} icon={IconArrowRight} small variant="text">
                   Transfer
                 </Button>
