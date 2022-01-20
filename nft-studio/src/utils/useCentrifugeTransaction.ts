@@ -1,6 +1,7 @@
 import Centrifuge, { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { web3FromAddress } from '@polkadot/extension-dapp'
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types'
+import { ISubmittableResult } from '@polkadot/types/types'
 import * as React from 'react'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Transaction, useTransaction, useTransactions } from '../components/TransactionsProvider'
@@ -9,7 +10,7 @@ import { useWeb3 } from '../components/Web3Provider'
 export function useCentrifugeTransaction<T extends Array<any>>(
   title: string,
   transactionCallback: (centrifuge: Centrifuge) => (args: T, options?: TransactionOptions) => Promise<any>,
-  options: { onSuccess?: (args: T) => void; onError?: (error: any) => void } = {}
+  options: { onSuccess?: (args: T, result: ISubmittableResult) => void; onError?: (error: any) => void } = {}
 ) {
   const { addTransaction, updateTransaction } = useTransactions()
   const { selectedAccount, connect } = useWeb3()
@@ -28,8 +29,10 @@ export function useCentrifugeTransaction<T extends Array<any>>(
 
       updateTransaction(id, { status: 'unconfirmed' })
 
+      let lastResult: ISubmittableResult
       await transaction(args, {
         onStatusChange: (result) => {
+          lastResult = result
           const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
 
           if (result.dispatchError || errors.length) {
@@ -43,7 +46,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
         },
       })
 
-      options.onSuccess?.(args)
+      options.onSuccess?.(args, lastResult!)
     } catch (e) {
       console.error(e)
       updateTransaction(id, { status: 'failed', failedReason: (e as any).message })

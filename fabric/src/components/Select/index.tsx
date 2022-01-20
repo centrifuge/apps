@@ -6,7 +6,7 @@ import { AriaSelectOptions, HiddenSelect, useSelect } from '@react-aria/select'
 import { Item } from '@react-stately/collections'
 import { SelectState, useSelectState } from '@react-stately/select'
 import { CollectionElement, Node } from '@react-types/shared'
-import React, { useEffect } from 'react'
+import React from 'react'
 import styled from 'styled-components'
 import { IconChevronDown, IconChevronUp } from '../..'
 import { Text } from '../Text'
@@ -21,10 +21,9 @@ type OptionProps = {
   item: Node<SelectOptionItem>
 }
 
-type OnSelectCallback = (key?: string) => void
+type OnSelectCallback = (key?: string | number) => void
 
 interface SelectIntProps extends AriaSelectOptions<SelectOptionItem> {
-  onSelect?: OnSelectCallback
   placeholder: string
 }
 
@@ -36,11 +35,13 @@ export type SelectOptionItem = {
 type SelectProps = {
   options: SelectOptionItem[]
   onSelect?: OnSelectCallback
+  value?: string
   label: string
   placeholder: string
+  disabled?: boolean
 }
 
-export const Select: React.FC<SelectProps> = ({ options, onSelect, label, placeholder }) => {
+export const Select: React.FC<SelectProps> = ({ options, onSelect, label, placeholder, value, disabled }) => {
   const items: CollectionElement<SelectOptionItem>[] = options.map((opt) => {
     return (
       <Item key={opt.value} textValue={opt.value}>
@@ -50,7 +51,14 @@ export const Select: React.FC<SelectProps> = ({ options, onSelect, label, placeh
   })
 
   return (
-    <SelectInputInt items={options} onSelect={onSelect} label={label} placeholder={placeholder}>
+    <SelectInputInt
+      items={options}
+      label={label}
+      placeholder={placeholder}
+      selectedKey={value}
+      onSelectionChange={onSelect}
+      isDisabled={disabled}
+    >
       {items}
     </SelectInputInt>
   )
@@ -61,17 +69,6 @@ const SelectInputInt: React.FC<SelectIntProps> = (props) => {
   const ref = React.useRef<HTMLButtonElement>(null)
   const { labelProps, triggerProps, valueProps, menuProps } = useSelect(props, state, ref)
   const { buttonProps } = useButton(triggerProps, ref)
-
-  useEffect(() => {
-    if (!props.onSelect) return
-    if (!state.selectedItem) {
-      props.onSelect()
-    } else {
-      if (!state.selectionManager.firstSelectedKey) return
-      const item = state.collection.getItem(state.selectionManager.firstSelectedKey)
-      props.onSelect(item.textValue)
-    }
-  }, [state.selectedItem, props.onSelect])
 
   return (
     <StyledSelect>

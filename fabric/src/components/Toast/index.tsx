@@ -46,11 +46,11 @@ const statusIcons = {
 }
 
 const statusColors = {
-  info: 'infoPrimary',
-  pending: 'infoPrimary',
-  ok: 'okPrimary',
-  warning: 'warningPrimary',
-  critical: 'criticalPrimary',
+  info: 'statusInfo',
+  pending: 'statusInfo',
+  ok: 'statusOk',
+  warning: 'statusWarning',
+  critical: 'statusCritical',
 }
 
 export const Toast: React.FC<ToastProps> = ({ status = 'info', label, sublabel, onDismiss, action }) => {

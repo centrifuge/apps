@@ -8,6 +8,7 @@ import { DefaultTheme, ThemeProvider } from 'styled-components'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
+import { CreateLoanPage } from '../pages/CreateLoan'
 import { LoanPage } from '../pages/Loan'
 import { LoansPage } from '../pages/Loans'
 import { MintNFTPage } from '../pages/MintNFT'
@@ -72,6 +73,9 @@ export const Root: React.FC = () => {
                     <Switch>
                       <Route path="/collection/:cid/object/mint">
                         <MintNFTPage />
+                      </Route>
+                      <Route path="/collection/:cid/object/:nftid/new-asset">
+                        <CreateLoanPage />
                       </Route>
                       <Route path="/collection/:cid/object/:nftid">
                         <NFTPage />

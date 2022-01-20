@@ -19,6 +19,7 @@ type Props = {
     label: string
   }
   actions?: React.ReactNode
+  walletShown?: boolean
 }
 
 const BackLink = styled(Link)(
@@ -31,7 +32,15 @@ const BackLink = styled(Link)(
   })
 )
 
-export const PageHeader: React.FC<Props> = ({ title, titleAddition, subtitle, subtitleLink, parent, actions }) => {
+export const PageHeader: React.FC<Props> = ({
+  title,
+  titleAddition,
+  subtitle,
+  subtitleLink,
+  parent,
+  actions,
+  walletShown = true,
+}) => {
   return (
     <Shelf as="header" justifyContent="space-between" alignItems="flex-start" position="sticky" top="24px">
       <Box
@@ -69,7 +78,7 @@ export const PageHeader: React.FC<Props> = ({ title, titleAddition, subtitle, su
           </Text>
         )}
       </Stack>
-      <ContextActions actions={actions} />
+      <ContextActions actions={actions} walletShown={walletShown} />
     </Shelf>
   )
 }

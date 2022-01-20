@@ -7,14 +7,23 @@ const Currency = new BN(10).pow(new BN(18))
 
 const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
 
-export type PoolRole =
-  | 'PoolAdmin'
-  | 'Borrower'
-  | 'PricingAdmin'
-  | 'LiquidityAdmin'
-  | 'MemberListAdmin'
-  | 'RiskAdmin'
-  | { TrancheInvestor: [trancheId: number, delta: number] }
+type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'RiskAdmin'
+
+export type PoolRoleInput = AdminRole | { TrancheInvestor: [trancheId: number, delta: number] }
+
+const AdminRoleBits = {
+  PoolAdmin: 0b00000001,
+  Borrower: 0b00000010,
+  PricingAdmin: 0b00000100,
+  LiquidityAdmin: 0b00001000,
+  MemberListAdmin: 0b00010000,
+  RiskAdmin: 0b00100000,
+}
+
+export type PoolRoles = {
+  roles: AdminRole[]
+  tranches: number[]
+}
 
 export type LoanInfoInput = {
   BulletLoan: [string, string, string, string, string, string]
@@ -156,7 +165,7 @@ export type DetailedPool = Omit<Pool, 'tranches'> & {
 
 export enum LoanStatus {
   // this when asset is locked and loan nft is issued.
-  Issued = 'Issued',
+  Created = 'Created',
   // this is when loan is in active state. Either underwriters or oracles can move loan to this state
   // by providing information like discount rates etc.. to loan
   Active = 'Active',
@@ -298,18 +307,39 @@ export function getPoolsModule(inst: CentrifugeBase) {
   }
 
   async function approveRoles(
-    args: [poolId: string, roles: PoolRole[], accounts: string[]],
+    args: [poolId: string, roles: PoolRoleInput[], accounts: string[]],
     options?: TransactionOptions
   ) {
     const [poolId, roles, accounts] = args
     if (roles.length !== accounts.length) throw new Error('Roles length needs to match accounts length')
 
     const api = await inst.getApi()
-    const extrinsics = roles.map((role: PoolRole, index: number) =>
+    const extrinsics = roles.map((role: PoolRoleInput, index: number) =>
       api.tx.pools.approveRoleFor(poolId, role, [accounts[index]])
     )
     const submittable = api.tx.utility.batchAll(extrinsics)
     return inst.wrapSignAndSend(api, submittable, options)
+  }
+
+  async function getRolesByPool(args: [address: string]): Promise<{ [poolId: string]: PoolRoles }> {
+    const api = await inst.getApi()
+    const permissionsRaw = await api.query.permissions.permission.entries(args[0])
+
+    const roles: { [poolId: string]: PoolRoles } = {}
+    permissionsRaw.forEach(([keys, value]) => {
+      const poolId = (keys.toHuman() as string[])[1].replace(/\D/g, '')
+      const permissions = value.toJSON() as any
+      roles[poolId] = {
+        roles: (
+          ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'RiskAdmin'] as const
+        ).filter((role) => AdminRoleBits[role] & permissions.admin.bits),
+        tranches: permissions.trancheInvestor.info
+          .filter((info: any) => info.permissionedTill * 1000 > Date.now())
+          .map((info: any) => info.trancheId),
+      }
+    })
+
+    return roles
   }
 
   async function getNextLoanId() {
@@ -585,6 +615,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     closeEpoch,
     submitSolution,
     approveRoles,
+    getRolesByPool,
     getNextLoanId,
     createLoan,
     priceLoan,
