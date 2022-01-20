@@ -29,7 +29,7 @@ const run = async () => {
   await centrifuge.pools.createPool([
     poolId,
     loanCollectionId,
-    [{ interestPerSec: centrifuge.utils.aprToFee(0.1), minRiskBuffer: centrifuge.utils.toPerquintill(0.1) }, {}],
+    [{}, { interestPerSec: centrifuge.utils.aprToFee(0.1), minRiskBuffer: centrifuge.utils.toPerquintill(0.1) }],
     'Usd',
     new BN(1000).mul(Currency),
     'QmTPNcy1R18o6Z2NW2nD8a43GoHs5HZoWQUxoY89kV188g',

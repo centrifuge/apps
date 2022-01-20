@@ -35,7 +35,7 @@ export const pinPoolMetadata = async ({ poolFormData, issuerLogoFile }: CreatePo
   })
 
   // build metadata JSON
-  const tranches = [...poolFormData.tranches].reverse()
+  const tranches = [...poolFormData.tranches]
   const metadata: PoolMetadata = {
     pool: {
       name: poolFormData.poolName,

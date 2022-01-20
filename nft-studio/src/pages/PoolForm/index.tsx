@@ -102,13 +102,13 @@ const CreatePoolForm: React.FC = () => {
         const collectionId = makeId()
 
         // tranches must be reversed (most junior is the first in the UI but the last in the API)
-        const noJuniorTranches = values.tranches.slice(1).reverse()
+        const noJuniorTranches = values.tranches.slice(1)
         const tranches = [
+          {}, // most junior tranche
           ...noJuniorTranches.map((tranche) => ({
             interestPerSec: aprToFee(parseFloat(tranche.interestRate) / 100),
             minRiskBuffer: toPerquintill(parseFloat(tranche.minRiskBuffer) / 100),
           })),
-          {}, // most junior tranche
         ]
 
         await createPoolTx([
