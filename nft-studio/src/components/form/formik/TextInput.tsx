@@ -1,7 +1,6 @@
-import { Box, Stack, Text } from '@centrifuge/fabric'
 import { Field, useField } from 'formik'
 import React from 'react'
-import styled from 'styled-components'
+import { TextInput as TextInputBase } from '../base/TextInput'
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string
@@ -9,39 +8,14 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   validate?: (value: string) => string | undefined
 }
 
-const StyledTextInput = styled(Field)<{ haserror: boolean }>`
-  width: 100%;
-  border: 0;
-  border-bottom: 1px solid
-    ${({ theme, haserror }) => (haserror ? theme.colors.statusCritical : theme.colors.textPrimary)};
-  background: transparent;
-  height: 32px;
-  font-size: inherit;
-  font-weight: inherit;
-  font-family: inherit;
-  line-height: inherit;
-  color: inherit;
-
-  ::placeholder {
-    color: ${({ theme }) => theme.colors.borderPrimary};
-  }
-`
-
-export const TextInput: React.FC<TextInputProps> = ({ label, value, placeholder, ...inputProps }) => {
-  const [, meta] = useField(inputProps)
+export const TextInput: React.FC<TextInputProps> = (props) => {
+  const [, meta] = useField<TextInputProps>(props)
   return (
-    <Stack>
-      <Text variant="label1">{label}</Text>
-      <Text variant="body2">
-        <StyledTextInput {...inputProps} haserror={meta.error && meta.touched ? '1' : ''} />
-      </Text>
-      {meta.error && meta.touched && (
-        <Box marginTop={1}>
-          <Text variant="label2" color="statusCritical">
-            {meta.error}
-          </Text>
-        </Box>
-      )}
-    </Stack>
+    <Field
+      as={TextInputBase}
+      errorMessage={meta.touched ? meta.error : undefined}
+      validate={props.validate}
+      {...props}
+    />
   )
 }

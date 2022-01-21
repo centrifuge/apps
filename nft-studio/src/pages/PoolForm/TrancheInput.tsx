@@ -1,5 +1,5 @@
 import { Box, Button, IconPlus, Stack, Text } from '@centrifuge/fabric'
-import { FieldArray, useFormikContext } from 'formik'
+import { Field, FieldArray, useFormikContext } from 'formik'
 import React from 'react'
 import { createEmptyTranche, PoolFormValues, Tranche } from '.'
 import { TextInput } from '../../components/form/formik/TextInput'
@@ -19,13 +19,15 @@ export const TrancheInput: React.FC = () => {
 
           {values.tranches.map((s: Tranche, index: number) => (
             <React.Fragment key={index}>
-              <TextInput
+              <Field
+                as={TextInput}
                 label="Token name"
                 placeholder=""
                 name={`tranches.${index}.tokenName`}
                 validate={validate.tokenName}
               />
-              <TextInput
+              <Field
+                as={TextInput}
                 label="Token symbol"
                 placeholder=""
                 name={`tranches.${index}.symbolName`}
@@ -33,13 +35,15 @@ export const TrancheInput: React.FC = () => {
               />
               {index !== juniorTrancheIndex && (
                 <>
-                  <TextInput
+                  <Field
+                    as={TextInput}
                     label="Interest rate"
                     placeholder="0.00%"
                     name={`tranches.${index}.interestRate`}
                     validate={validate.interestRate}
                   />
-                  <TextInput
+                  <Field
+                    as={TextInput}
                     label="Minimum risk buffer"
                     placeholder="0.00%"
                     name={`tranches.${index}.minRiskBuffer`}
