@@ -66,7 +66,7 @@ export const FileInput: React.FC<Props> = ({ onFileUpdate, onBeforeFileUpdate })
           <Text variant="label1">{curFile ? curFile.name : 'No file selected'}</Text>
         </Box>
       </Shelf>
-      <FormField type="file" ref={fileInputField} onChange={handleNewFileUpload} title="" value="" />
+      <FormField type="file" ref={fileInputField} onChange={handleNewFileUpload} title="" value="" tabIndex={-1} />
     </FileUploadContainer>
   )
 }

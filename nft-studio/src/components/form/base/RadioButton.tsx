@@ -14,26 +14,27 @@ interface RadioButtonProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const HiddenField = styled.input`
-  display: none;
+  position: absolute;
+  opacity: 0;
 `
 
 const FocusableLabel = styled.label`
-  :focus {
+  :focus-within {
     color: ${({ theme }) => theme.colors.brand};
   }
 `
 
 export const RadioInput: React.FC<RadioInputProps> = (props) => (
-  <label tabIndex={-1}>
+  <div>
     {props.checked ? <IconCheckCircle /> : <IconCircle />}
-    <HiddenField type="radio" tabIndex={-1} {...props} />
-  </label>
+    <HiddenField type="radio" tabIndex={0} {...props} />
+  </div>
 )
 
 export const RadioButton: React.FC<RadioButtonProps> = ({ label, ...props }) => {
   const id = props.id || props.name
   return (
-    <FocusableLabel tabIndex={0} htmlFor={id}>
+    <FocusableLabel htmlFor={id}>
       <Shelf gap="1">
         <RadioInput type="radio" {...props} id={id} />
         <Text variant="interactive2">{label}</Text>
