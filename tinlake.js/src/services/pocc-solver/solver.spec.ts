@@ -59,10 +59,11 @@ describe('pocc-solver tests', () => {
         isFeasible: 'isFeasible' in problem.solution ? problem.solution.isFeasible : true,
       }
 
+      const redeemStartWeight = new BN(10).pow(new BN(problem.state.tranches.length))
       const weights = problem.state.tranches.map((_t, index) => {
         return {
-          invest: new BN(10),
-          redeem: new BN(10),
+          invest: new BN(10).pow(new BN(problem.state.tranches.length - index)),
+          redeem: redeemStartWeight.mul(new BN(10).pow(new BN(index).add(new BN(1)))),
         }
       })
 

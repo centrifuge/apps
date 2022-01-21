@@ -80,12 +80,10 @@ export const calculateOptimalSolution = async (
       }
     }
 
-    console.log(solutionVector)
-
     return {
       isFeasible,
       tranches: state.tranches.map((_t, index: number) => {
-        return { invest: solutionVector[index * 2], redeem: index * 2 + 1 }
+        return { invest: solutionVector[index * 2], redeem: solutionVector[index * 2 + 1] }
       }),
     }
   })

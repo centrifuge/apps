@@ -67,7 +67,7 @@
     {
       "invest": {
         "base": 18,
-        "value": 0
+        "value": 4
       },
       "redeem": {
         "base": 18,
