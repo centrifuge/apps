@@ -40,7 +40,7 @@ export const calculateOptimalSolution = async (
       .slice(1) // skip junior tranche
       .map(
         (tranche, index) => `
-          tranche-${index}-minRiskBuffer: ${linearExpression(varNames, [1, 1, -1, -1])} <= ${tranche.minRiskBuffer}
+          tranche-${index}-minRiskBuffer: ${linearExpression(varNames, [1, -1, 1, -1])} <= ${tranche.minRiskBuffer}
         `
       )
       .join()
@@ -54,17 +54,21 @@ export const calculateOptimalSolution = async (
       )
       .join()
 
+    const coefs = Array(state.tranches.length).fill([1, -1]).flat()
+
+    // TODO: add ${minRiskBufferConstraints}
     const lp = `
       Maximize
         ${linearExpression(varNames, varWeights)}
       Subject To
-        reserve: ${linearExpression(varNames, [1, 1, -1, -1])} >= ${state.reserve.neg()}
-        maxReserve: ${linearExpression(varNames, [1, 1, -1, -1])} <= ${state.maxReserve.sub(state.reserve)}
-        ${minRiskBufferConstraints}
+        reserve: ${linearExpression(varNames, coefs)} >= ${state.reserve.neg()}
+        maxReserve: ${linearExpression(varNames, coefs)} <= ${state.maxReserve.sub(state.reserve)}
       Bounds
         ${bounds}
       End
     `
+
+    // console.log(lp)
 
     const output = (clp as any).solve(lp, 0)
 
