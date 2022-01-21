@@ -12,7 +12,7 @@ export const calculateOptimalSolution = async (
       throw new Error('Mismatched input length')
     }
 
-    if (state.tranches.length == 0 || state.tranches[0].minRiskBuffer !== undefined) {
+    if (state.tranches.length === 0 || state.tranches[0].minRiskBuffer !== undefined) {
       throw new Error('Missing junior tranche')
     }
 
@@ -36,14 +36,14 @@ export const calculateOptimalSolution = async (
 
     const varNames = weights.map((_t, index) => [`tranche-${index}-invest`, `tranche-${index}-redeem`]).flat()
 
-    const minRiskBufferConstraints = state.tranches
-      .slice(1) // skip junior tranche
-      .map(
-        (tranche, index) => `
-          tranche-${index}-minRiskBuffer: ${linearExpression(varNames, [1, -1, 1, -1])} <= ${tranche.minRiskBuffer}
-        `
-      )
-      .join()
+    // const minRiskBufferConstraints = state.tranches
+    //   .slice(1) // skip junior tranche
+    //   .map(
+    //     (tranche, index) => `
+    //       tranche-${index}-minRiskBuffer: ${linearExpression(varNames, [1, -1, 1, -1])} <= ${tranche.minRiskBuffer}
+    //     `
+    //   )
+    //   .join()
 
     const bounds = orders
       .map(
@@ -78,7 +78,7 @@ export const calculateOptimalSolution = async (
     if (!isFeasible) {
       return {
         isFeasible: false,
-        tranches: state.tranches.map((_t) => {
+        tranches: state.tranches.map(() => {
           return { invest: new BN(0), redeem: new BN(0) }
         }),
       }
