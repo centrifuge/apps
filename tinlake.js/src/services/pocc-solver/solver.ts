@@ -12,7 +12,7 @@ export const calculateOptimalSolution = async (
       throw new Error('Mismatched input length')
     }
 
-    if (state.tranches.length == 0 || !state.tranches[0].minRiskBuffer) {
+    if (state.tranches.length == 0 || state.tranches[0].minRiskBuffer !== undefined) {
       throw new Error('Missing junior tranche')
     }
 
@@ -28,17 +28,13 @@ export const calculateOptimalSolution = async (
       throw new Error('Trying to calculate investment capacity for an invalid tranche')
     }
 
-    const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
+    // const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
 
-    const varWeights = [
-      weights.map((tranche) => parseFloat(tranche.invest.toString())),
-      weights.map((tranche) => parseFloat(tranche.redeem.toString())),
-    ].flat()
+    const varWeights = weights
+      .map((tranche) => [parseFloat(tranche.invest.toString()), parseFloat(tranche.redeem.toString())])
+      .flat()
 
-    const varNames = [
-      weights.map((_t, index) => `tranche-${index}-invest`),
-      weights.map((_t, index) => `tranche-${index}-redeem`),
-    ].flat()
+    const varNames = weights.map((_t, index) => [`tranche-${index}-invest`, `tranche-${index}-redeem`]).flat()
 
     const minRiskBufferConstraints = state.tranches
       .slice(1) // skip junior tranche
@@ -84,10 +80,12 @@ export const calculateOptimalSolution = async (
       }
     }
 
+    console.log(solutionVector)
+
     return {
       isFeasible,
       tranches: state.tranches.map((_t, index: number) => {
-        return { invest: solutionVector[index], redeem: state.tranches.length + index }
+        return { invest: solutionVector[index * 2], redeem: index * 2 + 1 }
       }),
     }
   })
@@ -161,6 +159,6 @@ interface TrancheResult {
 
 export interface SolverResult {
   isFeasible: boolean
-  result: TrancheResult[]
+  tranches: TrancheResult[]
   error?: string
 }

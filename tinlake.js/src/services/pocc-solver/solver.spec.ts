@@ -21,8 +21,8 @@ const weights = {
   dropInvest: new BN(1000),
 }
 
-const problems = glob.sync('src/services/solver/problems/*.json')
-describe('solver tests', () => {
+const problems = glob.sync('src/services/pocc-solver/problems/*.json')
+describe('pocc-solver tests', () => {
   problems.forEach((problemPath: string) => {
     const problem = JSON.parse(fs.readFileSync(problemPath, 'utf8'))
     const name = problemPath.split('/').slice(-1)[0].split('.').slice(0, -1).join('.')
@@ -31,26 +31,40 @@ describe('solver tests', () => {
       const state = {
         netAssetValue: objToNum(problem.state.netAssetValue),
         reserve: objToNum(problem.state.reserve),
-        seniorAsset: objToNum(problem.state.seniorAsset),
-        minDropRatio: e27.sub(objToNum(problem.state.maxTinRatio)),
-        maxDropRatio: e27.sub(objToNum(problem.state.minTinRatio)),
         maxReserve: objToNum(problem.state.maxReserve),
+        tranches: problem.state.tranches.map((tranche) => {
+          return {
+            ratio: objToNum(tranche.ratio),
+            minRiskBuffer: tranche.minRiskBuffer ? objToNum(tranche.minRiskBuffer) : undefined,
+          }
+        }),
       }
 
-      const orders = {
-        dropInvest: objToNum(problem.orders.dropInvest),
-        dropRedeem: objToNum(problem.orders.dropRedeem),
-        tinInvest: objToNum(problem.orders.tinInvest),
-        tinRedeem: objToNum(problem.orders.tinRedeem),
-      }
+      const orders = problem.orders.map((tranche) => {
+        return {
+          invest: objToNum(tranche.invest),
+          redeem: objToNum(tranche.redeem),
+        }
+      })
+
+      const expectedSolution = problem.solution.map((tranche) => {
+        return {
+          invest: objToNum(tranche.invest),
+          redeem: objToNum(tranche.redeem),
+        }
+      })
 
       const expected = {
-        dropInvest: problem.solution.dropInvest ? objToNum(problem.solution.dropInvest) : new BN(0),
-        dropRedeem: problem.solution.dropRedeem ? objToNum(problem.solution.dropRedeem) : new BN(0),
-        tinInvest: problem.solution.tinInvest ? objToNum(problem.solution.tinInvest) : new BN(0),
-        tinRedeem: problem.solution.tinRedeem ? objToNum(problem.solution.tinRedeem) : new BN(0),
+        tranches: expectedSolution,
         isFeasible: 'isFeasible' in problem.solution ? problem.solution.isFeasible : true,
       }
+
+      const weights = problem.state.tranches.map((_t, index) => {
+        return {
+          invest: new BN(10),
+          redeem: new BN(10),
+        }
+      })
 
       const result = await calculateOptimalSolution(state, orders, weights)
 
@@ -58,10 +72,10 @@ describe('solver tests', () => {
       if (
         DebugMode ||
         result.isFeasible !== expected.isFeasible ||
-        result.dropInvest.toString() !== expected.dropInvest.toString() ||
-        result.dropRedeem.toString() !== expected.dropRedeem.toString() ||
-        result.tinInvest.toString() !== expected.tinInvest.toString() ||
-        result.tinRedeem.toString() !== expected.tinRedeem.toString()
+        result.tranches.every(
+          (result, index) =>
+            result.invest !== expected.tranches[index].invest || result.redeem !== expected.tranches[index].redeem
+        )
       ) {
         if (problem.explanation) console.log(`${problem.explanation}\n`)
         console.log(`\n\t- State`)
@@ -84,10 +98,18 @@ describe('solver tests', () => {
       }
 
       assert.strictEqual(result.isFeasible, expected.isFeasible, 'isFeasible does not match')
-      assert.strictEqual(result.dropInvest.toString(), expected.dropInvest.toString(), 'dropInvest is not correct')
-      assert.strictEqual(result.dropRedeem.toString(), expected.dropRedeem.toString(), 'dropRedeem is not correct')
-      assert.strictEqual(result.tinInvest.toString(), expected.tinInvest.toString(), 'tinInvest is not correct')
-      assert.strictEqual(result.tinRedeem.toString(), expected.tinRedeem.toString(), 'tinRedeem is not correct')
+      result.tranches.forEach((result, index) => {
+        assert.strictEqual(
+          result.invest.toString(),
+          expected.tranches[index].invest.toString(),
+          `tranche-${index}-invest is not correct`
+        )
+        assert.strictEqual(
+          result.redeem.toString(),
+          expected.tranches[index].redeem.toString(),
+          `tranche-${index}-redeem is not correct`
+        )
+      })
     })
   })
 })
