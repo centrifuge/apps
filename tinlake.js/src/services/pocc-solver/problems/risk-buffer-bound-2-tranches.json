@@ -1,0 +1,78 @@
+{
+  "state": {
+    "netAssetValue": {
+      "base": 18,
+      "value": 0
+    },
+    "reserve": {
+      "base": 18,
+      "value": 10
+    },
+    "tranches": [
+      {
+        "ratio": {
+          "base": 27,
+          "value": 0.20
+        }
+      },
+      {
+        "ratio": {
+          "base": 27,
+          "value": 0.80
+        },
+        "minRiskBuffer": {
+          "base": 27,
+          "value": 0.20
+        }
+      }
+    ],
+    "maxReserve": {
+      "base": 18,
+      "value": 1000
+    }
+  },
+  "orders": [
+    {
+      "invest": {
+        "base": 18,
+        "value": 5
+      },
+      "redeem": {
+        "base": 18,
+        "value": 0
+      }
+    },
+    {
+      "invest": {
+        "base": 18,
+        "value": 10
+      },
+      "redeem": {
+        "base": 18,
+        "value": 0
+      }
+    }
+  ],
+  "solution": [
+    {
+      "invest": {
+        "base": 18,
+        "value": 5
+      },
+      "redeem": {
+        "base": 18,
+        "value": 0
+      }
+    },
+    {
+      "invest": {
+        "base": 18,
+        "value": 5
+      },
+      "redeem": {
+        "base": 18,
+        "value": 0
+      }
+    }
+  ]
+}
