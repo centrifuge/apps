@@ -3,21 +3,22 @@ import { User } from '../repos/user.repo'
 
 export class Mailer {
   async sendEmail(user: User, pool: any, data: any) {
+    const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
     const response = await fetch(config.sendgrid.apiUrl, {
       body: JSON.stringify({
         from: {
-          name: pool.profile.issuer.name,
-          email: `issuer+${pool.profile.issuer.name}@tinlake.com`,
+          name: pool.profile?.issuer?.name,
+          email: `issuer+${issuerName}@tinlake.com`,
         },
         personalizations: [
           {
             to: [user.email],
             dynamic_template_data: {
               investorName: user.fullName,
-              poolName: pool.metadata.name,
-              token: `${pool.metadata.name} ${data.tranche}`,
-              issuerName: pool.profile.issuer.name,
-              issuerEmail: pool.profile.issuer.email,
+              poolName: pool.metadata?.name,
+              token: `${pool.metadata?.name} ${data.tranche}`,
+              issuerName: pool.profile?.issuer?.name,
+              issuerEmail: pool.profile?.issuer?.email,
             },
           },
         ],
