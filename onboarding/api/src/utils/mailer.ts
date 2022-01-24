@@ -2,7 +2,7 @@ import config from '../config'
 import { User } from '../repos/user.repo'
 
 export class Mailer {
-  async sendEmail(user: User, pool: any) {
+  async sendEmail(user: User, pool: any, data: any) {
     const response = await fetch(config.sendgrid.apiUrl, {
       body: JSON.stringify({
         from: {
@@ -15,7 +15,7 @@ export class Mailer {
             dynamic_template_data: {
               investorName: user.fullName,
               poolName: pool.metadata.name,
-              token: 'DROP',
+              token: `${pool.metadata.name} ${data.tranche}`,
               issuerName: pool.profile.issuer.name,
               issuerEmail: pool.profile.issuer.email,
             },
