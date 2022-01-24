@@ -12,7 +12,7 @@ export class Mailer {
         },
         personalizations: [
           {
-            to: [user.email],
+            to: [{ email: user.email }],
             dynamic_template_data: {
               investorName: user.fullName,
               poolName: pool.metadata?.name,
