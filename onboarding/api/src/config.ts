@@ -42,7 +42,7 @@ export interface Config {
     permissionManagerContractAddress: string
   }
   sendgrid: {
-    templateId: string
+    whitelistEmailTemplate: string
     apiKey: string
     apiUrl: string
   }
@@ -90,7 +90,7 @@ const config: Config = {
     permissionManagerContractAddress: process.env.RWA_MARKET_PERMISSION_MANAGER_CONTRACT_ADDRESS,
   },
   sendgrid: {
-    templateId: `d-a0e7c096a0cf43868de275751e57fdf5`,
+    whitelistEmailTemplate: `d-a0e7c096a0cf43868de275751e57fdf5`,
     apiKey: process.env.SENDGRID_API_KEY,
     apiUrl: `https://api.sendgrid.com/v3/mail/send`,
   },

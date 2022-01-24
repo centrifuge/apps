@@ -2,7 +2,7 @@ import config from '../config'
 import { User } from '../repos/user.repo'
 
 export class Mailer {
-  async sendEmail(user: User, pool: any, data: any) {
+  async sendWhitelistedEmail(user: User, pool: any, data: any) {
     const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
     const response = await fetch(config.sendgrid.apiUrl, {
       body: JSON.stringify({
@@ -22,7 +22,7 @@ export class Mailer {
             },
           },
         ],
-        template_id: config.sendgrid.templateId,
+        template_id: config.sendgrid.whitelistEmailTemplate,
       }),
       headers: {
         Authorization: `Bearer ${config.sendgrid.apiKey}`,
