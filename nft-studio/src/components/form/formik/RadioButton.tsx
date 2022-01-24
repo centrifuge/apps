@@ -1,4 +1,4 @@
-import { Field, useField } from 'formik'
+import { Field } from 'formik'
 import React from 'react'
 import { RadioButton as RadioButtonBase } from '../base/RadioButton'
 
@@ -9,6 +9,5 @@ interface RadioButtonProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const RadioButton: React.FC<RadioButtonProps> = (props) => {
-  const [field] = useField<string>(props)
-  return <Field as={RadioButtonBase} {...props} checked={field.value === props.value} />
+  return <Field as={RadioButtonBase} {...props} type="radio" />
 }
