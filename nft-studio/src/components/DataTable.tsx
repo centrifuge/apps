@@ -21,13 +21,13 @@ export const DataTable: React.VFC<Props> = ({ data, columns, keyField, onRowClic
   return (
     <Stack>
       <Shelf>
-        {columns.map((col) =>
+        {columns.map((col, i) =>
           col.align === 'left' ? (
-            <HeaderColLeft style={{ flex: col.flex }}>
+            <HeaderColLeft key={`${col.header}-${i}`} style={{ flex: col.flex }}>
               <Text variant="label1">{col.header}</Text>
             </HeaderColLeft>
           ) : (
-            <HeaderCol style={{ flex: col.flex }}>
+            <HeaderCol key={`${col.header}-${i}`} style={{ flex: col.flex }}>
               <Text variant="label1">{col.header}</Text>
             </HeaderCol>
           )

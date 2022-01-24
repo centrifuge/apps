@@ -11,6 +11,7 @@ import { CollectionsPage } from '../pages/Collections'
 import { CreateLoanPage } from '../pages/CreateLoan'
 import { LoanPage } from '../pages/Loan'
 import { LoansPage } from '../pages/Loans'
+import { ManagedPoolsPage } from '../pages/ManagedPools'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
 import { PoolPage } from '../pages/Pool'
@@ -109,6 +110,9 @@ export const Root: React.FC = () => {
                       </Route>
                       <Route path="/investments">
                         <TokensPage />
+                      </Route>
+                      <Route path="/issuers/managed-pools">
+                        <ManagedPoolsPage />
                       </Route>
                       <Route path="/">
                         <PoolsPage />
