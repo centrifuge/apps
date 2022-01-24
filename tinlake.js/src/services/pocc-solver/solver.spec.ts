@@ -14,13 +14,6 @@ const objToNum = (jsonNumber: { base: number; value: number; add?: number } | st
   return new BN(jsonNumber.value * 100000).mul(new BN(10).pow(new BN(jsonNumber.base - 5))).add(new BN(add))
 }
 
-const weights = {
-  dropRedeem: new BN(1000000),
-  tinRedeem: new BN(100000),
-  tinInvest: new BN(10000),
-  dropInvest: new BN(1000),
-}
-
 const problems = glob.sync('src/services/pocc-solver/problems/*.json')
 describe('pocc-solver tests', () => {
   problems.forEach((problemPath: string) => {
