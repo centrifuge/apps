@@ -6,7 +6,7 @@ export class Mailer {
     const response = await fetch(config.sendgrid.apiUrl, {
       body: JSON.stringify({
         from: {
-          name: 'Tinlake pools',
+          name: pool.profile.issuer.name,
           email: `issuer+${pool.profile.issuer.name}@tinlake.com`,
         },
         personalizations: [
