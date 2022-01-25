@@ -2,7 +2,7 @@ import { PoolData } from '../../../utils/usePool'
 import { assetList } from './AssetList'
 import { dailyInvestorBalances } from './DailyInvestorBalances'
 import { dailyTokenPrices } from './DailyTokenPrices'
-import { investorTransactions } from './InvestorTransactions'
+import { investorTransactions2020, investorTransactions2021 } from './InvestorTransactions'
 import { rawPoolData } from './PoolData'
 
 export type PoolQuery = ({ poolId, poolData }: { poolId: string; poolData: PoolData }) => Promise<boolean>
@@ -12,7 +12,8 @@ const queries: { [name: string]: PoolQuery } = {
   'Daily token prices': dailyTokenPrices,
   'List of assets': assetList,
   'Raw pool data': rawPoolData,
-  'Tax report 2021': investorTransactions,
+  'Tax report 2020': investorTransactions2020,
+  'Tax report 2021': investorTransactions2021,
 }
 
 export default queries
