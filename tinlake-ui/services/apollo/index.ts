@@ -16,7 +16,8 @@ import { UserRewardsData } from '../../utils/useUserRewards'
 export interface RewardsData {
   toDateRewardAggregateValue: BN
   toDateAORewardAggregateValue: BN
-  rewardRate: Decimal
+  dropRewardRate: Decimal
+  tinRewardRate: Decimal
   todayReward: BN
 }
 
@@ -337,7 +338,8 @@ class Apollo {
         query: gql`
           {
             rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
-              rewardRate
+              dropRewardRate
+              tinRewardRate
               toDateRewardAggregateValue
               toDateAORewardAggregateValue
               todayReward
@@ -357,7 +359,8 @@ class Apollo {
     return {
       toDateRewardAggregateValue: new BN(new Decimal(data.toDateRewardAggregateValue).toFixed(0)),
       toDateAORewardAggregateValue: new BN(new Decimal(data.toDateAORewardAggregateValue).toFixed(0)),
-      rewardRate: new Decimal(data.rewardRate),
+      dropRewardRate: new Decimal(data.dropRewardRate),
+      tinRewardRate: new Decimal(data.tinRewardRate),
       todayReward: new BN(new Decimal(data.todayReward).toFixed(0)),
     }
   }
