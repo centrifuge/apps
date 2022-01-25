@@ -214,8 +214,6 @@ const PricingForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
       const loanInfo = loanInfoFields.map((key) => loanInfoValues[key])
       const ratePerSec = centrifuge.utils.aprToFee((values.interestRate as number) / 100)
 
-      console.log('loanInfo', loanInfo)
-
       doTransaction([loan.poolId, loan.id, ratePerSec, values.loanType, loanInfo])
       setSubmitting(false)
     },
@@ -229,7 +227,6 @@ const PricingForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
       if (shownFields.includes('value') && validateNumberInput(values.value, 0)) {
         errors.value = validateNumberInput(values.value, 0)
       }
-      console.log('values', values)
       if (shownFields.includes('maturityDate')) {
         if (!values.maturityDate) {
           errors.maturityDate = 'Required'
