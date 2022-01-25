@@ -1,5 +1,6 @@
 import { Button, IconPlus, LayoutGrid, LayoutGridItem, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
 import { CreateCollectionDialog } from '../components/CreateCollectionDialog'
 import { Identity } from '../components/Identity'
@@ -27,6 +28,7 @@ const Collections: React.FC = () => {
   const { data: collections } = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const { data: accountNfts } = useAccountNfts(selectedAccount?.address, false)
+  const centrifuge = useCentrifuge()
 
   const userCollections = React.useMemo(
     () => collections?.filter((c) => isSameAddress(c.owner, selectedAccount?.address)),
@@ -37,8 +39,10 @@ const Collections: React.FC = () => {
     () =>
       collections?.filter((c) => {
         if (isSameAddress(c.owner, selectedAccount?.address)) return false
+        if (centrifuge.utils.isLoanPalletAccount(c.admin)) return false
         return isWhitelistedAccount(c.owner)
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [collections, selectedAccount?.address]
   )
 

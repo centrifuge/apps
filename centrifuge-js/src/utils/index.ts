@@ -1,5 +1,8 @@
+import { addressEq } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
+
+const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
 
 Decimal.set({
   precision: 28,
@@ -96,4 +99,14 @@ export function formatPercentage(numerator: BN | string | undefined, denominator
 export function formatRatio(ratio: BN | undefined) {
   if (!ratio) return ''
   return `${addThousandsSeparators(toPrecision(baseToDisplay(ratio || '0', 27), 4))}`
+}
+
+export function isSameAddress(a?: string | Uint8Array, b?: string | Uint8Array) {
+  if (!a || !b) return false
+  if (a === b) return true
+  return addressEq(a, b)
+}
+
+export function isLoanPalletAccount(address?: string | Uint8Array) {
+  return isSameAddress(address, LoanPalletAccountId)
 }
