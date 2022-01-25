@@ -14,12 +14,14 @@ import { LoansPage } from '../pages/Loans'
 import { ManagedPoolsPage } from '../pages/ManagedPools'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
+import { NotFoundPage } from '../pages/NotFound'
 import { PoolPage } from '../pages/Pool'
 import { PoolFormPage } from '../pages/PoolForm/index'
 import { PoolsPage } from '../pages/Pools'
 import { TokenPage } from '../pages/Token'
 import { TokensPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
+import { useDebugFlags } from './DebugFlags'
 import { GlobalStyle } from './GlobalStyle'
 import { LoadBoundary } from './LoadBoundary'
 import { TransactionProvider } from './TransactionsProvider'
@@ -59,6 +61,7 @@ const queryClient = new QueryClient({
 })
 
 export const Root: React.FC = () => {
+  const showOnlyNFT = useDebugFlags().showOnlyNFT
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={darkTheme}>
@@ -90,32 +93,39 @@ export const Root: React.FC = () => {
                       <Route path="/nfts">
                         <CollectionsPage />
                       </Route>
-                      <Route path="/pools/:pid/assets/:aid">
-                        <LoanPage />
+                      {!showOnlyNFT && (
+                        <>
+                          <Route path="/pools/:pid/assets/:aid">
+                            <LoanPage />
+                          </Route>
+                          <Route path="/pools/:pid">
+                            <PoolPage />
+                          </Route>
+                          <Route path="/pool/new">
+                            <PoolFormPage />
+                          </Route>
+                          <Route path="/issuers/assets">
+                            <LoansPage />
+                          </Route>
+                          <Route path="/investments/tokens/:pid/:tid">
+                            <TokenPage />
+                          </Route>
+                          <Route path="/investments/tokens">
+                            <TokensPage />
+                          </Route>
+                          <Route path="/investments">
+                            <TokensPage />
+                          </Route>
+                          <Route path="/issuers/managed-pools">
+                            <ManagedPoolsPage />
+                          </Route>
+                        </>
+                      )}
+                      <Route exact path="/">
+                        {showOnlyNFT ? <CollectionsPage /> : <PoolsPage />}
                       </Route>
-                      <Route path="/pools/:pid">
-                        <PoolPage />
-                      </Route>
-                      <Route path="/pool/new">
-                        <PoolFormPage />
-                      </Route>
-                      <Route path="/issuers/assets">
-                        <LoansPage />
-                      </Route>
-                      <Route path="/investments/tokens/:pid/:tid">
-                        <TokenPage />
-                      </Route>
-                      <Route path="/investments/tokens">
-                        <TokensPage />
-                      </Route>
-                      <Route path="/investments">
-                        <TokensPage />
-                      </Route>
-                      <Route path="/issuers/managed-pools">
-                        <ManagedPoolsPage />
-                      </Route>
-                      <Route path="/">
-                        <PoolsPage />
+                      <Route>
+                        <NotFoundPage />
                       </Route>
                     </Switch>
                   </LoadBoundary>

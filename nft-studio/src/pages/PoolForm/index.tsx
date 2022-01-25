@@ -76,10 +76,7 @@ const makeId = (): string => {
 const CreatePoolForm: React.FC = () => {
   const [issuerLogoFile, setIssuerLogoFile] = React.useState<File>()
 
-  const { execute: createPoolTx } = useCentrifugeTransaction(
-    'Create collection',
-    (cent: Centrifuge) => cent.pools.createPool
-  )
+  const { execute: createPoolTx } = useCentrifugeTransaction('Create pool', (cent: Centrifuge) => cent.pools.createPool)
 
   return (
     <Formik

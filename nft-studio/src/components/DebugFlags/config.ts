@@ -1,0 +1,19 @@
+const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
+export const debug = process.env.NODE_ENV === 'development' || params.get('debug') != null
+
+type DebugFlagConfig = {
+  type: string
+  default: boolean | string | number
+  options?: Record<string, unknown>
+}
+
+export const flagsConfig: Record<string, DebugFlagConfig> = {
+  showOnlyNFT: {
+    type: 'checkbox',
+    default: true,
+  },
+  showUnusedFlags: {
+    type: 'checkbox',
+    default: false,
+  },
+}

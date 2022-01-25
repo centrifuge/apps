@@ -57,7 +57,7 @@ const MintNFT: React.FC = () => {
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
-  } = useCentrifugeTransaction('Create collection', (cent) => cent.nfts.mintNft, {
+  } = useCentrifugeTransaction('Mint NFT', (cent) => cent.nfts.mintNft, {
     onSuccess: () => {
       queryClient.invalidateQueries(['nfts', collectionId])
       queryClient.invalidateQueries(['collectionPreview', collectionId])
