@@ -8,8 +8,34 @@ import { PoolData } from '../../../utils/usePool'
 const rawEthPrices = require('./eth_prices.json')
 
 const date = (timestamp: string) => new Date(parseInt(timestamp, 10) * 1000)
-const formatDate = (date: Date) => `${date.toISOString().substr(0, 10)} ${date.toUTCString().substr(17)}`
 const formatDateOnly = (date: Date) => date.toISOString().substr(0, 10)
+
+const fetchTokenPrices = async (
+  poolId: string,
+  skip: number,
+  first: number,
+  blockHash: string | null
+): Promise<any> => {
+  return await Apollo.runCustomQuery(gql`
+    {
+      dailyPoolDatas(where: {pool: ${`"${poolId.toLowerCase()}"`} }, first: ${first}, skip: ${skip} ${
+    blockHash ? `, block: { hash: "${blockHash}" }` : ''
+  }) {
+        day {
+          id
+        }
+        juniorTokenPrice
+        seniorTokenPrice
+      }
+      _meta {
+          block {
+          hash
+          number
+          }
+      }
+    }
+    `)
+}
 
 const fetch = async (poolId: string, skip: number, first: number, blockHash: string | null): Promise<any> => {
   return await Apollo.runCustomQuery(gql`
@@ -132,17 +158,35 @@ const calculateInterestAccrued = (
   }
 }
 
-async function investorTransactionsByYear({
-  poolId,
-  taxYear,
-}: {
-  poolId: string
-  poolData: PoolData
-  taxYear: number
-}) {
-  const yearStart = new Date(taxYear, 0, 1)
-  const yearEnd = new Date(taxYear, 11, 31)
+async function getAllTokenPrices(poolId: string) {
+  let start = 0
+  const limit = 1000
 
+  const tokenPrices: any[] = []
+  let blockHash: string | null = null
+  let blockNumber: number | null = null
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const response: any = await fetchTokenPrices(poolId, start, limit, blockHash)
+
+    if (blockHash === null) {
+      blockHash = response._meta.block.hash
+    }
+    if (blockNumber === null) {
+      blockNumber = response._meta.block.number
+    }
+    tokenPrices.push(...response.dailyPoolDatas)
+    if (response.dailyPoolDatas.length < limit) {
+      break
+    }
+    start += limit
+  }
+
+  return tokenPrices
+}
+
+async function getAllTransactions(poolId: string) {
   let start = 0
   const limit = 1000
 
@@ -167,7 +211,50 @@ async function investorTransactionsByYear({
     start += limit
   }
 
+  return transactions
+}
+
+async function investorTransactionsByYear({
+  poolId,
+  taxYear,
+}: {
+  poolId: string
+  poolData: PoolData
+  taxYear: number
+}) {
+  const yearStart = new Date(taxYear, 0, 1)
+  const yearEnd = new Date(taxYear, 11, 31)
+
+  const transactions = await getAllTransactions(poolId)
   const symbols = transactions.map((tx) => tx.symbol).filter(onlyUnique)
+
+  const tokenPrices = await getAllTokenPrices(poolId)
+  const tokenPricesByDay = tokenPrices.reduce((prev: any, result: any) => {
+    return {
+      ...prev,
+      ...{
+        [formatDateOnly(date(result.day.id)).toString()]: {
+          senior: new BN(result.seniorTokenPrice).div(new BN(10).pow(new BN(27 - 6))).toNumber() / 10 ** 6,
+          junior: new BN(result.juniorTokenPrice).div(new BN(10).pow(new BN(27 - 6))).toNumber() / 10 ** 6,
+        },
+      },
+    }
+  }, {})
+  const tokenPricesYearStart =
+    formatDateOnly(yearStart) in tokenPricesByDay && tokenPricesByDay[formatDateOnly(yearStart)] !== '0'
+      ? tokenPricesByDay[formatDateOnly(yearStart)]
+      : { senior: 1.0, junior: 1.0 }
+  console.log(tokenPricesByDay)
+  console.log(formatDateOnly(yearEnd))
+  const tokenPricesYearEnd =
+    formatDateOnly(yearEnd) in tokenPricesByDay && tokenPricesByDay[formatDateOnly(yearEnd)] !== '0'
+      ? tokenPricesByDay[formatDateOnly(yearEnd)]
+      : Object.values(tokenPricesByDay).length > 0
+      ? Object.values(tokenPricesByDay)[Object.values(tokenPricesByDay).length - 1] // TODO: this should not take the last element
+      : { senior: 1.0, junior: 1.0 }
+
+  console.log(`DROP token price started at ${tokenPricesYearStart.senior} and ended at ${tokenPricesYearEnd.senior}`)
+  console.log(`TIN token price started at ${tokenPricesYearStart.junior} and ended at ${tokenPricesYearEnd.junior}`)
 
   // Get all investors who had a non-zero balance before year end
   const investors = transactions
@@ -192,8 +279,14 @@ async function investorTransactionsByYear({
         .filter((tx) => tx.type === 'INVEST_ORDER' || tx.type === 'REDEEM_ORDER')
         .filter((result) => date(result.timestamp) >= yearStart && date(result.timestamp) <= yearEnd)
 
-      // console.log(`${symbol}: ${investor}`)
-      const interestAccrued: any = calculateInterestAccrued(executions, symbol, 1.0, 1.1, yearStart, yearEnd)
+      const interestAccrued: any = calculateInterestAccrued(
+        executions,
+        symbol,
+        tokenPricesYearStart['senior'], // TODO: get by symbol
+        tokenPricesYearEnd['senior'], // TODO: get by symbol
+        yearStart,
+        yearEnd
+      )
       const transactionFees = sumTransactionFees(orders)
       rows.push([investor, symbol, interestAccrued['2021'], transactionFees])
     })
