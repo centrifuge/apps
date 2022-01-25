@@ -28,7 +28,7 @@ interface SelectIntProps extends AriaSelectOptions<SelectOptionItem> {
 }
 
 export type SelectOptionItem = {
-  label: string
+  label: string | React.ReactElement
   value: string
 }
 
