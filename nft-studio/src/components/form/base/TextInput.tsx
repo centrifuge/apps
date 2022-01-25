@@ -26,7 +26,7 @@ const StyledTextInput = styled.input<{ hasError?: string }>`
   }
 `
 
-export const TextInput: React.FC<TextInputProps> = ({ label, value, errorMessage, placeholder, ...inputProps }) => {
+export const TextInput: React.FC<TextInputProps> = ({ label, errorMessage, ...inputProps }) => {
   return (
     <Stack>
       <Text variant="label1">{label}</Text>

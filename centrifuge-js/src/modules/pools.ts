@@ -451,7 +451,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const metadata = (poolValue.toHuman() as any).metadata
 
     const tokenIssuanceValues = await Promise.all(
-      pool.tranches.map((_1, index: number) => api.query.tokens.totalIssuance({ Tranche: [poolId, index] }))
+      pool.tranches.map((_1, index: number) => api.query.ormlTokens.totalIssuance({ Tranche: [poolId, index] }))
     )
 
     const orderValues = await Promise.all(
@@ -506,7 +506,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   async function getInvestments(args: [address: string]): Promise<Investment[]> {
     const api = await inst.getApi()
-    const rawTokens = await api.query.tokens.accounts.entries(args[0])
+    const rawTokens = await api.query.ormlTokens.accounts.entries(args[0])
 
     const tokens = rawTokens
       .map(([key, value]) => [key.toHuman(), value.toJSON()] as any)
