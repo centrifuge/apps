@@ -49,6 +49,7 @@ const fetch = async (poolId: string, skip: number, first: number, blockHash: str
         }
         type
         symbol
+        tokenAmount
         currencyAmount
         newBalance
         tokenPrice
@@ -100,16 +101,39 @@ const getBalanceOnFirstDay = (executionsBeforeYearStart: any[]) => {
   }, 0)
 }
 
-const calculateRealizedCapitalGains = (executions: any[]) => {
+const calculateRealizedCapitalGains = (executions: any[], investor: string, yearStart: Date) => {
   if (executions.length === 0) return 0
 
+  let totalBought = 0
+  let largeAdjustment = false
   const operations: Operation[] = executions.map((execution) => {
+    let tokenAmount =
+      execution.type === 'INVEST_EXECUTION'
+        ? new BN(execution.tokenAmount).div(new BN(10).pow(new BN(18))).toNumber()
+        : new BN(execution.currencyAmount)
+            .mul(e27)
+            .div(new BN(execution.tokenPrice))
+            .div(new BN(10).pow(new BN(18)))
+            .toNumber()
+
+    if (execution.type === 'INVEST_EXECUTION') {
+      totalBought += tokenAmount
+    }
+
+    if (execution.type === 'REDEEM_EXECUTION') {
+      if (totalBought - tokenAmount < 0) {
+        // This ensures that we don't try to sell more than we buy, which can be caused by issues with token prices being slightly off
+        console.log(`Adjusting ${tokenAmount} to ${totalBought}: ${tokenAmount - totalBought}`)
+        if (tokenAmount - totalBought > 5) largeAdjustment = true
+        tokenAmount = totalBought
+        totalBought = 0
+      } else {
+        totalBought = totalBought - tokenAmount
+      }
+    }
+
     return {
-      amount: new BN(execution.currencyAmount)
-        .mul(e27)
-        .div(new BN(execution.tokenPrice))
-        .div(new BN(10).pow(new BN(18)))
-        .toNumber(),
+      amount: tokenAmount,
       date: date(execution.timestamp),
       price: new BN(execution.tokenPrice).div(new BN(10).pow(new BN(27 - 6))).toNumber() / 10 ** 6,
       symbol: execution.symbol,
@@ -117,10 +141,28 @@ const calculateRealizedCapitalGains = (executions: any[]) => {
     }
   })
 
+  if (largeAdjustment) {
+    console.log(investor)
+    console.log(operations)
+    console.log('\n')
+  }
+
   try {
+    // if (investor === '0x143a9422b6c78e78a898dd1f9d25b2a42ae211e5') {
+    //   console.log(operations)
+    //   const newops: Operation[] = [
+    //     { amount: 4963, date: new Date('2021-02-26T09:09:12.000Z'), price: 100739, symbol: 'NS2DRP', type: 'BUY' },
+    //     { amount: 9937, date: new Date('2021-02-15T09:02:14.000Z'), price: 1006196, symbol: 'NS2DRP', type: 'BUY' },
+    //     { amount: 14902, date: new Date('2021-06-27T15:11:45.000Z'), price: 1021908, symbol: 'NS2DRP', type: 'SELL' },
+    //   ]
+    //   const capGains = calculateFIFOCapitalGains(operations)
+    //   console.log(JSON.stringify(capGains))
+    // }
     return aggregateByYear(calculateFIFOCapitalGains(operations))
   } catch (e) {
-    return 0
+    console.error(e)
+    const year = yearStart.getFullYear()
+    return { [year]: 0 }
   }
 }
 
@@ -137,14 +179,34 @@ const calculateInterestAccrued = (
   const executionsBeforeYearStart = executions.filter((result) => date(result.timestamp) < yearStart)
   const balanceOnFirstDay = getBalanceOnFirstDay(executionsBeforeYearStart)
 
+  let totalBought = 0
   const operations: Operation[] = executions.map((execution) => {
-    if (investor === '0x143a9422b6c78e78a898dd1f9d25b2a42ae211e5') console.log(execution)
+    let tokenAmount =
+      execution.type === 'INVEST_EXECUTION'
+        ? new BN(execution.tokenAmount).div(new BN(10).pow(new BN(18))).toNumber()
+        : new BN(execution.currencyAmount)
+            .mul(e27)
+            .div(new BN(execution.tokenPrice))
+            .div(new BN(10).pow(new BN(18)))
+            .toNumber()
+
+    if (execution.type === 'INVEST_EXECUTION') {
+      totalBought += tokenAmount
+    }
+
+    if (execution.type === 'REDEEM_EXECUTION') {
+      if (totalBought - tokenAmount < 0) {
+        // This ensures that we don't try to sell more than we buy, which can be caused by issues with token prices being slightly off
+        console.log(`Adjusting ${tokenAmount} to ${totalBought}: ${tokenAmount - totalBought}`)
+        tokenAmount = totalBought
+        totalBought = 0
+      } else {
+        totalBought = totalBought - tokenAmount
+      }
+    }
+
     return {
-      amount: new BN(execution.currencyAmount)
-        .mul(e27)
-        .div(new BN(execution.tokenPrice))
-        .div(new BN(10).pow(new BN(18)))
-        .toNumber(),
+      amount: tokenAmount,
       date: date(execution.timestamp),
       price: new BN(execution.tokenPrice).div(new BN(10).pow(new BN(27 - 6))).toNumber() / 10 ** 6,
       symbol: execution.symbol,
@@ -187,13 +249,11 @@ const calculateInterestAccrued = (
           } as Operation,
         ]
   try {
-    if (investor === '0x143a9422b6c78e78a898dd1f9d25b2a42ae211e5') console.log(operations)
-    if (investor === '0x143a9422b6c78e78a898dd1f9d25b2a42ae211e5') console.log(operationsWithAssumedYearEndSale)
-    if (investor === '0x143a9422b6c78e78a898dd1f9d25b2a42ae211e5')
-      console.log(calculateFIFOCapitalGains(operationsWithAssumedYearEndSale))
     return aggregateByYear(calculateFIFOCapitalGains(operationsWithAssumedYearEndSale))
   } catch (e) {
-    return 0
+    console.error(e)
+    const year = yearStart.getFullYear()
+    return { [year]: 0 }
   }
 }
 
@@ -250,7 +310,9 @@ async function getAllTransactions(poolId: string) {
     start += limit
   }
 
-  return transactions
+  return transactions.sort((a: any, b: any) => {
+    return date(a.timestamp).getTime() - date(b.timestamp).getTime()
+  })
 }
 
 async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: PoolData; taxYear: number }) {
@@ -311,7 +373,7 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
         .filter((tx) => tx.type === 'INVEST_ORDER' || tx.type === 'REDEEM_ORDER')
         .filter((result) => date(result.timestamp) >= yearStart && date(result.timestamp) <= yearEnd)
 
-      const realizedCapitalGains: any = calculateRealizedCapitalGains(executions)
+      const realizedCapitalGains: any = calculateRealizedCapitalGains(executions, investor, yearStart)
       const interestAccrued: any = calculateInterestAccrued(
         executions,
         symbol,
@@ -322,7 +384,7 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
         investor
       )
       const transactionFees = sumTransactionFees(orders)
-      rows.push([investor, symbol, realizedCapitalGains['2021'], interestAccrued['2021'], transactionFees])
+      rows.push([investor, symbol, realizedCapitalGains['2021'] || 0, interestAccrued['2021'] || 0, transactionFees])
     })
   })
 
