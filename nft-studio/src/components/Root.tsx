@@ -74,60 +74,88 @@ export const Root: React.FC = () => {
                 <TransactionToasts />
                 <Router>
                   <LoadBoundary>
-                    <Switch>
-                      <Route path="/collection/:cid/object/mint">
-                        <MintNFTPage />
-                      </Route>
-                      <Route path="/collection/:cid/object/:nftid/new-asset">
-                        <CreateLoanPage />
-                      </Route>
-                      <Route path="/collection/:cid/object/:nftid">
-                        <NFTPage />
-                      </Route>
-                      <Route path="/collection/:cid">
-                        <CollectionPage />
-                      </Route>
-                      <Route path="/account">
-                        <AccountNFTsPage />
-                      </Route>
-                      <Route path="/nfts">
-                        <CollectionsPage />
-                      </Route>
-                      {!showOnlyNFT && (
-                        <>
-                          <Route path="/pools/:pid/assets/:aid">
-                            <LoanPage />
-                          </Route>
-                          <Route path="/pools/:pid">
-                            <PoolPage />
-                          </Route>
-                          <Route path="/pool/new">
-                            <PoolFormPage />
-                          </Route>
-                          <Route path="/issuers/assets">
-                            <LoansPage />
-                          </Route>
-                          <Route path="/investments/tokens/:pid/:tid">
-                            <TokenPage />
-                          </Route>
-                          <Route path="/investments/tokens">
-                            <TokensPage />
-                          </Route>
-                          <Route path="/investments">
-                            <TokensPage />
-                          </Route>
-                          <Route path="/issuers/managed-pools">
-                            <ManagedPoolsPage />
-                          </Route>
-                        </>
-                      )}
-                      <Route exact path="/">
-                        {showOnlyNFT ? <CollectionsPage /> : <PoolsPage />}
-                      </Route>
-                      <Route>
-                        <NotFoundPage />
-                      </Route>
-                    </Switch>
+                    {showOnlyNFT ? (
+                      <Switch>
+                        <Route path="/collection/:cid/object/mint">
+                          <MintNFTPage />
+                        </Route>
+                        <Route path="/collection/:cid/object/:nftid/new-asset">
+                          <CreateLoanPage />
+                        </Route>
+                        <Route path="/collection/:cid/object/:nftid">
+                          <NFTPage />
+                        </Route>
+                        <Route path="/collection/:cid">
+                          <CollectionPage />
+                        </Route>
+                        <Route path="/account">
+                          <AccountNFTsPage />
+                        </Route>
+                        <Route path="/nfts">
+                          <CollectionsPage />
+                        </Route>
+                        <Route exact path="/">
+                          <CollectionsPage />
+                        </Route>
+                        <Route>
+                          <NotFoundPage />
+                        </Route>
+                      </Switch>
+                    ) : (
+                      <Switch>
+                        <Route path="/collection/:cid/object/mint">
+                          <MintNFTPage />
+                        </Route>
+                        <Route path="/collection/:cid/object/:nftid/new-asset">
+                          <CreateLoanPage />
+                        </Route>
+                        <Route path="/collection/:cid/object/:nftid">
+                          <NFTPage />
+                        </Route>
+                        <Route path="/collection/:cid">
+                          <CollectionPage />
+                        </Route>
+                        <Route path="/account">
+                          <AccountNFTsPage />
+                        </Route>
+                        <Route path="/nfts">
+                          <CollectionsPage />
+                        </Route>
+                        <Route path="/pools/:pid/assets/:aid">
+                          <LoanPage />
+                        </Route>
+                        <Route path="/pools/:pid">
+                          <PoolPage />
+                        </Route>
+                        <Route path="/pools">
+                          <PoolsPage />
+                        </Route>
+                        <Route path="/pool/new">
+                          <PoolFormPage />
+                        </Route>
+                        <Route path="/issuers/assets">
+                          <LoansPage />
+                        </Route>
+                        <Route path="/investments/tokens/:pid/:tid">
+                          <TokenPage />
+                        </Route>
+                        <Route path="/investments/tokens">
+                          <TokensPage />
+                        </Route>
+                        <Route path="/investments">
+                          <TokensPage />
+                        </Route>
+                        <Route path="/issuers/managed-pools">
+                          <ManagedPoolsPage />
+                        </Route>
+                        <Route exact path="/">
+                          <PoolsPage />
+                        </Route>
+                        <Route>
+                          <NotFoundPage />
+                        </Route>
+                      </Switch>
+                    )}
                   </LoadBoundary>
                 </Router>
               </TransactionProvider>

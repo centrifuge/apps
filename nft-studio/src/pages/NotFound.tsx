@@ -1,7 +1,8 @@
-import { AnchorButton, Stack, Text } from '@centrifuge/fabric'
+import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation } from 'react-router'
 import { PageHeader } from '../components/PageHeader'
+import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { usePools } from '../utils/usePools'
 
@@ -23,9 +24,9 @@ const Pools: React.FC = () => {
       <PageHeader title="Page not found" />
       <Stack alignItems="center" gap="4">
         <Text variant="label1">The page {location.pathname} does not exist</Text>
-        <AnchorButton variant="outlined" href="/">
+        <RouterLinkButton variant="outlined" to="/">
           Go to the home page
-        </AnchorButton>
+        </RouterLinkButton>
       </Stack>
     </Stack>
   )
