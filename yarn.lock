@@ -3170,6 +3170,7 @@ __metadata:
     ethereum-blockies: "github:MyEtherWallet/blockies"
     ethers: 5.4.7
     express: 4.17.1
+    fifo-capital-gains-js: ^0.1.1
     graphql: 15.0.0
     graphql-tag: 2.10.3
     grommet: 2.17.5
@@ -22329,6 +22330,15 @@ __metadata:
   dependencies:
     node-fetch: ~1.7.1
   checksum: addf11196887a31e947e74700d9be5097bfc32535c9bd03d99eb287e8b23b44e44bd6c3749dfcb80920fcfc942a188787b7df5a8d9522d3b2434aac54b9c37ca
+  languageName: node
+  linkType: hard
+
+"fifo-capital-gains-js@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "fifo-capital-gains-js@npm:0.1.1"
+  peerDependencies:
+    tslib: ">=1.9.0"
+  checksum: 42d494e9fe1f70026ca5dac8cbca093b6704d9947aeb46eaf793fc9feaf3e841dde52cca0ff1ca1585c6b3d3a38a10c80753c0032d784360d13a40257afecbd1
   languageName: node
   linkType: hard
 
