@@ -95,7 +95,7 @@ const getBalanceOnFirstDay = (executionsBeforeYearStart: any[]) => {
   return executionsBeforeYearStart.reduce((balance: number, result: any) => {
     const amount = new BN(result.currencyAmount).div(new BN(10).pow(new BN(18))).toNumber()
     if (result.type === 'INVEST_EXECUTION') return balance + amount
-    else return balance - amount
+    return balance - amount
   }, 0)
 }
 
@@ -134,7 +134,7 @@ const calculateInterestAccrued = (
   })
   const lastBalance = operations.reduce((last: number, operation: Operation) => {
     if (operation.type === 'BUY') return last + operation.amount
-    else return last - operation.amount
+    return last - operation.amount
   }, 0)
 
   // Add a sell order at the end of the year, to assume everything was sold
@@ -263,7 +263,7 @@ async function investorTransactionsByYear({
     .map((tx) => tx.owner.id)
     .filter(onlyUnique)
 
-  let rows: any = [['ETH account', 'Token', 'Interest accrued', 'Transaction fees paid']]
+  const rows: any = [['ETH account', 'Token', 'Interest accrued', 'Transaction fees paid']]
   symbols.forEach((symbol) => {
     investors.forEach((investor) => {
       // Get all the executions until the end of the year (including the years before, to get all buy ordres)
