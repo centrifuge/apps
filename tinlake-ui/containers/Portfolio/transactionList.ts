@@ -15,7 +15,9 @@ const fetch = async (owner: string, skip: number, first: number, blockHash: stri
         type
         symbol
         currencyAmount
+        tokenAmount
         newBalance
+        newBalanceValue
         tokenPrice
         transaction
         owner {
@@ -62,15 +64,17 @@ export async function investorTransactions(owner: string) {
   }
 
   const headers: { [key: string]: string } = {
+    transaction: 'Transaction Hash',
     timestamp: 'Date',
     pool: 'Pool',
     owner: 'Account',
     type: 'Transaction Type',
-    symbol: 'Symbol',
-    currencyAmount: 'Currency Amount',
+    symbol: 'Token Symbol',
+    tokenAmount: 'Token Amount',
+    currencyAmount: 'DAI Amount',
     newBalance: 'New Balance',
+    newBalanceValue: 'DAI Value',
     tokenPrice: 'Token Price',
-    transaction: 'Transaction Hash',
     gasPrice: 'Gas Price',
     gasUsed: 'Gas Used',
   }
@@ -82,13 +86,14 @@ export async function investorTransactions(owner: string) {
   const rows: string[][] = [
     [...Object.keys(headers).map((key: string) => headers[key])],
     ...results.map((el: any) => [
+      el.transaction,
       el.timestamp ? formatDate(el.timestamp) : '-',
       el.pool ? el.pool.shortName : '-',
       el.owner ? el.owner.id : '-',
       ...Object.keys(headers)
-        .filter((item: any) => !Object.keys(headers).slice(0, 3).includes(item))
+        .filter((item: any) => !Object.keys(headers).slice(0, 4).includes(item))
         .map((item: any) => {
-          if (['currencyAmount', 'newBalance'].includes(item)) {
+          if (['currencyAmount', 'tokenAmount', 'newBalance'].includes(item)) {
             return el[item] ? el[item] / 10 ** 18 : '-'
           } else if (item === 'tokenPrice') {
             return el[item] ? el[item] / 10 ** 27 : '-'
