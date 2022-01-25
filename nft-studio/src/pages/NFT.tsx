@@ -31,12 +31,12 @@ const NFT: React.FC = () => {
   const { selectedAccount } = useWeb3()
   const { data: permissions } = usePermissions(selectedAccount?.address)
   const nft = useNFT(collectionId, nftId)
-  const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
+  const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collection?.id)
   const [transferOpen, setTransferOpen] = React.useState(false)
 
-  const imageUrl = metadata?.image ? parseMetadataUrl(metadata.image) : ''
+  const imageUrl = nftMetadata?.image ? parseMetadataUrl(nftMetadata.image) : ''
 
   const canCreateLoan = permissions && Object.values(permissions).some((p) => p.roles.includes('Borrower'))
 
@@ -44,7 +44,7 @@ const NFT: React.FC = () => {
     <Stack gap={8} flex={1}>
       <PageHeader
         parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
-        title={metadata?.name ?? 'Unnamed NFT'}
+        title={nftMetadata?.name ?? 'Unnamed NFT'}
         subtitle={
           collection && (
             <>
@@ -146,7 +146,7 @@ const NFT: React.FC = () => {
                   <Stack gap={1}>
                     <Text variant="label1">Description</Text>
                     <Text variant="body2" style={{ wordBreak: 'break-word' }}>
-                      {collectionMetadata?.description || 'No description'}
+                      {nftMetadata?.description || 'No description'}
                     </Text>
                   </Stack>
                 </Stack>
