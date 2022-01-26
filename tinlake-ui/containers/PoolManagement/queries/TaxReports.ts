@@ -173,7 +173,7 @@ const calculateInterestAccrued = (
   tokenPriceLastDay: number,
   yearStart: Date,
   yearEnd: Date,
-  investor: string
+  _investor: string
 ) => {
   if (executions.length === 0) return 0
   const executionsBeforeYearStart = executions.filter((result) => date(result.timestamp) < yearStart)
