@@ -172,8 +172,7 @@ const calculateInterestAccrued = (
   tokenPriceFirstDay: number,
   tokenPriceLastDay: number,
   yearStart: Date,
-  yearEnd: Date,
-  _investor: string
+  yearEnd: Date
 ) => {
   if (executions.length === 0) return 0
   const executionsBeforeYearStart = executions.filter((result) => date(result.timestamp) < yearStart)
@@ -380,8 +379,7 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
         tokenPricesYearStart['senior'], // TODO: get by symbol
         tokenPricesYearEnd['senior'], // TODO: get by symbol
         yearStart,
-        yearEnd,
-        investor
+        yearEnd
       )
       const transactionFees = sumTransactionFees(orders)
       rows.push([investor, symbol, realizedCapitalGains['2021'] || 0, interestAccrued['2021'] || 0, transactionFees])
