@@ -86,6 +86,38 @@ export class SecuritizeService {
     }
 
     const investor = await response.json()
+
+    // The accreditation status needs to be retrieved from the Domain API instead
+    if (investor.domainInvestorDetails?.isUsaTaxResident && investor.domainInvestorDetails?.externalId) {
+      this.logger.log(
+        `Investor ${userId} (external id: ${investor.domainInvestorDetails?.externalId}) is US tax resident, looking up accreditation status`
+      )
+
+      if (!config.securitize.domainApiKey) {
+        this.logger.error('Domain API config is missing, cannot retrieve accreditation status')
+        return investor
+      }
+
+      const url = `${config.securitize.domainApiHost}v1/domains/${config.securitize.clientId}/investors/${investor.domainInvestorDetails?.externalId}`
+
+      const domainResponse = await fetch(url, {
+        headers: {
+          accept: 'application/json',
+          Authorization: `apiKey ${config.securitize.domainApiKey}`,
+        },
+      })
+
+      if (!domainResponse.ok) {
+        this.logger.error(
+          `Failed to retrieve investor ${providerAccountId} from domain API: ${domainResponse.statusText}`
+        )
+        return undefined
+      }
+
+      const domainInvestor = await domainResponse.json()
+      this.logger.log(JSON.stringify(domainInvestor))
+    }
+
     return investor
   }
 
