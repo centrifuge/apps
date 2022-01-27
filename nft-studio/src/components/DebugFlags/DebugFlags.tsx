@@ -47,7 +47,17 @@ const Panel: React.FC<{ state: FlagsState; usedKeys: Set<any>; onChange: (key: K
   onChange,
 }) => {
   const [open, setOpen] = React.useState(false)
-  const { showUnusedFlags } = useDebugFlags()
+  const { showUnusedFlags, alwaysShowPanel } = useDebugFlags()
+
+  React.useEffect(() => {
+    if (alwaysShowPanel && !localStorage.getItem('debug')) {
+      localStorage.setItem('debug', '1')
+    }
+    if (!alwaysShowPanel && localStorage.getItem('debug')) {
+      localStorage.removeItem('debug')
+    }
+  }, [alwaysShowPanel])
+
   return (
     <StyledPanel position="fixed" bottom={0} right={0}>
       <Shelf

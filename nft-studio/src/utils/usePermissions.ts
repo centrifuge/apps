@@ -4,7 +4,7 @@ import { useCentrifuge } from '../components/CentrifugeProvider'
 export function usePermissions(address?: string) {
   const centrifuge = useCentrifuge()
   const query = useQuery(
-    ['permissions'],
+    ['permissions', address],
     async () => {
       return centrifuge.pools.getRolesByPool([address!])
     },

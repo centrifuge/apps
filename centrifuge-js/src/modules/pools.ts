@@ -55,7 +55,7 @@ type LoanInfoData = {
 }
 
 type BulletLoan = {
-  type: 'bulletLoan'
+  type: 'BulletLoan'
   advanceRate: string
   probabilityOfDefault: string
   lossGivenDefault: string
@@ -65,13 +65,13 @@ type BulletLoan = {
 }
 
 type CreditLine = {
-  type: 'creditLine'
+  type: 'CreditLine'
   advanceRate: string
   value: string
 }
 
 type CreditLineWithMaturity = {
-  type: 'creditLineWithMaturity'
+  type: 'CreditLineWithMaturity'
   advanceRate: string
   probabilityOfDefault: string
   value: string
@@ -586,6 +586,16 @@ export function getPoolsModule(inst: CentrifugeBase) {
     }
   }
 
+  async function getLoanCollectionIdForPool(args: [poolId: string]) {
+    const [poolId] = args
+    const api = await inst.getApi()
+
+    const result = await api.query.loans.poolToLoanNftClass(poolId)
+    const collectionId = (result.toHuman() as string).replace(/\D/g, '')
+
+    return collectionId
+  }
+
   async function addWriteOffGroup(
     args: [poolId: string, percentage: BN, overdueDays: number],
     options?: TransactionOptions
@@ -629,6 +639,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     getLoan,
     addWriteOffGroup,
     adminWriteOff,
+    getLoanCollectionIdForPool,
   }
 }
 
@@ -655,7 +666,7 @@ const tokenIndexToName = (index: number, numberOfTranches: number) => {
 function getLoanInfo(loanType: LoanInfoData): LoanInfo {
   if (loanType.bulletLoan) {
     return {
-      type: 'bulletLoan',
+      type: 'BulletLoan',
       advanceRate: parseHex(loanType.bulletLoan.advanceRate),
       probabilityOfDefault: parseHex(loanType.bulletLoan.probabilityOfDefault),
       lossGivenDefault: parseHex(loanType.bulletLoan.lossGivenDefault),
@@ -666,14 +677,14 @@ function getLoanInfo(loanType: LoanInfoData): LoanInfo {
   }
   if (loanType.creditLine) {
     return {
-      type: 'creditLine',
+      type: 'CreditLine',
       advanceRate: parseHex(loanType.creditLine.advanceRate),
       value: parseHex(loanType.creditLine.value),
     }
   }
   if (loanType.creditLineWithMaturity) {
     return {
-      type: 'creditLineWithMaturity',
+      type: 'CreditLineWithMaturity',
       advanceRate: parseHex(loanType.creditLineWithMaturity.advanceRate),
       probabilityOfDefault: parseHex(loanType.creditLineWithMaturity.probabilityOfDefault),
       value: parseHex(loanType.creditLineWithMaturity.value),

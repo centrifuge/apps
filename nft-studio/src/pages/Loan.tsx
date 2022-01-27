@@ -1,20 +1,23 @@
 import { Loan as LoanType } from '@centrifuge/centrifuge-js'
 import { Box, Button, Card, Grid, IconNft, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
-import { Form, FormikErrors, FormikProvider, useFormik } from 'formik'
+import Decimal from 'decimal.js-light'
+import { Field, Form, Formik, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import styled from 'styled-components'
 import { CardHeader } from '../components/CardHeader'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { TextInput } from '../components/form/base/TextInput'
 import { RadioButton } from '../components/form/formik/RadioButton'
-import { TextInput } from '../components/form/formik/TextInput'
+import { TextInput as FormikTextInput } from '../components/form/formik/TextInput'
 import { LabelValueList } from '../components/LabelValueList'
 import { LabelValueStack } from '../components/LabelValueStack'
 import LoanLabel from '../components/LoanLabel'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
+import { ButtonTextLink } from '../components/TextLink'
 import { useWeb3 } from '../components/Web3Provider'
 import { nftMetadataSchema } from '../schemas'
 import { formatDate } from '../utils/date'
@@ -22,9 +25,10 @@ import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLoan } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
-import { useNFT } from '../utils/useNFTs'
+import { useLoanNft, useNFT } from '../utils/useNFTs'
 import { usePermissions } from '../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../utils/usePools'
+import { isSameAddress } from '../utils/web3'
 
 const e27 = new BN(10).pow(new BN(27))
 const e18 = new BN(10).pow(new BN(18))
@@ -37,18 +41,27 @@ export const LoanPage: React.FC = () => {
   )
 }
 
+const LOAN_TYPE_LABELS = {
+  BulletLoan: 'Bullet loan',
+  CreditLine: 'Credit line',
+  CreditLineWithMaturity: 'Credit line with maturity',
+}
+
 const Loan: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const { data: pool } = usePool(pid)
   const { data: loan, refetch } = useLoan(pid, aid)
   const { data: poolMetadata } = usePoolMetadata(pool)
   const nft = useNFT(loan?.asset.collectionId, loan?.asset.nftId)
+  const loanNft = useLoanNft(pid, aid)
   const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const centrifuge = useCentrifuge()
   const { selectedAccount } = useWeb3()
   const { data: permissions } = usePermissions(selectedAccount?.address)
 
   const canPrice = permissions?.[pid]?.roles.includes('PricingAdmin')
+  const isLoanOwner = isSameAddress(loanNft?.owner, selectedAccount?.address)
+  const canBorrow = permissions?.[pid]?.roles.includes('Borrower') && isLoanOwner
 
   const name = truncate(nftMetadata?.name || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? parseMetadataUrl(nftMetadata.image) : ''
@@ -66,15 +79,7 @@ const Loan: React.FC = () => {
         (loan.status !== 'Created' ? (
           <>
             <PageSummary>
-              <LabelValueStack label="Loan type" value={loan?.loanInfo.type} />
-              <LabelValueStack
-                label="Total borrowed amount"
-                value={`${centrifuge.utils.formatCurrencyAmount(loan?.financedAmount)}`}
-              />
-              <LabelValueStack
-                label="Current debt"
-                value={`${centrifuge.utils.formatCurrencyAmount(loan?.outstandingDebt)}`}
-              />
+              <LabelValueStack label="Loan type" value={loan?.loanInfo.type && LOAN_TYPE_LABELS[loan.loanInfo.type]} />
             </PageSummary>
             <Card p={3}>
               <Stack gap={3}>
@@ -118,12 +123,31 @@ const Loan: React.FC = () => {
         ) : canPrice ? (
           <PricingForm loan={loan} refetch={refetch} />
         ) : (
-          <Shelf justifyContent="center" textAlign="center">
-            <Text variant="heading2" color="textSecondary">
-              You don&rsquo;t have permission to price assets for this pool
-            </Text>
-          </Shelf>
+          <Card p={3}>
+            <Stack gap={3}>
+              <CardHeader title="Price" />
+              <Text variant="body2">You don&rsquo;t have permission to price assets for this pool</Text>
+            </Stack>
+          </Card>
         ))}
+      {loan &&
+        (loan.status === 'Active' && canBorrow ? (
+          <FinanceForm loan={loan} refetch={refetch} />
+        ) : loan.status === 'Active' ? (
+          <Card p={3}>
+            <Stack gap={3}>
+              <CardHeader title="Finance &amp; Repay" />
+              <Text variant="body2">You don&rsquo;t have permission to finance this asset</Text>
+            </Stack>
+          </Card>
+        ) : loan.status === 'Created' ? (
+          <Card p={3}>
+            <Stack gap={3}>
+              <CardHeader title="Finance &amp; Repay" />
+              <Text variant="body2">Finance &amp; repay requires the asset to be priced first.</Text>
+            </Stack>
+          </Card>
+        ) : null)}
     </Stack>
   )
 }
@@ -146,12 +170,6 @@ type LoanInfoKey =
   | 'lossGivenDefault'
   | 'discountRate'
   | 'advanceRate'
-
-const LOAN_TYPES = [
-  { id: 'BulletLoan', label: 'Bullet loan' },
-  { id: 'CreditLine', label: 'Credit line' },
-  { id: 'CreditLineWithMaturity', label: 'Credit line with maturity' },
-]
 
 const LOAN_FIELDS = {
   BulletLoan: ['advanceRate', 'probabilityOfDefault', 'lossGivenDefault', 'value', 'discountRate', 'maturityDate'],
@@ -258,12 +276,12 @@ const PricingForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
 
   // prettier-ignore
   const fields = {
-    value: <NumberInput label="Value (kUSD)" min={0} placeholder="Value" id="value" name="value" />,
-    maturityDate: <TextInput label="Maturity date" type="date" min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)} id="maturityDate" name="maturityDate" />,
-    probabilityOfDefault: <NumberInput label="Probability of default (%)" min={1} max={100} placeholder="1-100" id="probabilityOfDefault" name="probabilityOfDefault" />,
-    lossGivenDefault: <NumberInput label="Loss given default (%)" min={0} max={100} placeholder="0-100" id="lossGivenDefault" name="lossGivenDefault" />,
-    discountRate: <NumberInput label="Discount rate (%)" min={0} max={100} placeholder="0-100" id="discountRate" name="discountRate" />,
-    advanceRate: <NumberInput label="Advance rate (%)" min={0} max={100} placeholder="0-100" id="advanceRate" name="advanceRate" />,
+    value: <FormikNumberInput label="Value (kUSD)" min="0" placeholder="Value" name="value" />,
+    maturityDate: <FormikTextInput label="Maturity date" type="date" min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)} name="maturityDate" />,
+    probabilityOfDefault: <FormikNumberInput label="Probability of default (%)" min="1" max="100" step="1" placeholder="1-100" name="probabilityOfDefault" />,
+    lossGivenDefault: <FormikNumberInput label="Loss given default (%)" min="0" max="100" step="1" placeholder="0-100" name="lossGivenDefault" />,
+    discountRate: <FormikNumberInput label="Discount rate (%)" min="0" max="100" step="1" placeholder="0-100" name="discountRate" />,
+    advanceRate: <FormikNumberInput label="Advance rate (%)" min="0" max="100" step="1" placeholder="0-100" name="advanceRate" />,
   }
 
   return (
@@ -276,28 +294,28 @@ const PricingForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
             <Stack gap={1}>
               <Text variant="label1">Loan type</Text>
               <Shelf gap={4}>
-                {LOAN_TYPES.map(({ label, id }) => (
+                {Object.entries(LOAN_TYPE_LABELS).map(([id, label]) => (
                   <RadioButton key={id} label={label} value={id} id={id} name="loanType" />
                 ))}
               </Shelf>
             </Stack>
-            <Grid columns={2} gap={3} rowGap={5}>
+            <Grid columns={[1, 2]} equalColumns gap={3} rowGap={5}>
               {Object.entries(fields)
                 .filter(([key]) => shownFields.includes(key))
                 .map(([, el]) => el)}
-              <NumberInput
+              <FormikNumberInput
                 label="Financing fee (%)"
                 type="number"
-                min={0}
-                max={100}
-                step={1}
+                min="0"
+                max="100"
+                step="1"
                 placeholder="1-100"
                 id="interestRate"
                 name="interestRate"
               />
             </Grid>
             <div>
-              <Button type="submit" disabled={!form.isValid} loading={isLoading}>
+              <Button type="submit" formNoValidate disabled={!form.isValid} loading={isLoading}>
                 Price
               </Button>
             </div>
@@ -306,6 +324,194 @@ const PricingForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
       </Form>
     </FormikProvider>
   )
+}
+
+type FinanceValues = {
+  amount: number | Decimal
+}
+
+type RepayValues = {
+  amount: number | Decimal
+}
+
+const FinanceForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan, refetch }) => {
+  const { data: pool } = usePool(loan.poolId)
+  const centrifuge = useCentrifuge()
+  const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
+    'Finance asset',
+    (cent) => cent.pools.financeLoan,
+    {
+      onSuccess: () => refetch(),
+    }
+  )
+
+  const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
+    'Repay asset',
+    (cent) => cent.pools.repayLoanPartially,
+    {
+      onSuccess: () => refetch(),
+    }
+  )
+
+  const { execute: doRepayAllTransaction, isLoading: isRepayAllLoading } = useCentrifugeTransaction(
+    'Repay asset',
+    (cent) => cent.pools.repayAndCloseLoan,
+    {
+      onSuccess: () => {
+        refetch()
+      },
+    }
+  )
+
+  function repayAll() {
+    doRepayAllTransaction([loan.poolId, loan.id])
+  }
+
+  const debt = new Decimal(loan.outstandingDebt).div('1e18')
+  const poolReserve = new Decimal(pool?.reserve.available ?? 0).div('1e18')
+  let ceiling = new Decimal(loan.loanInfo.value).div('1e18').mul(loan.loanInfo.advanceRate).div('1e27')
+  if (loan.loanInfo.type === 'BulletLoan') {
+    ceiling = ceiling.minus(new Decimal(loan.financedAmount).div('1e18'))
+  } else {
+    ceiling = ceiling.minus(debt)
+    ceiling = ceiling.isNegative() ? new Decimal(0) : ceiling
+  }
+  const maxBorrow = poolReserve.lessThan(ceiling) ? poolReserve : ceiling
+
+  return (
+    <Card p={3}>
+      <Stack gap={3}>
+        <CardHeader title="Finance &amp; Repay" />
+
+        <PageSummary>
+          <LabelValueStack
+            label="Total borrowed amount"
+            value={`${centrifuge.utils.formatCurrencyAmount(loan?.financedAmount)}`}
+          />
+          <LabelValueStack
+            label="Current debt"
+            value={`${centrifuge.utils.formatCurrencyAmount(loan?.outstandingDebt)}`}
+          />
+        </PageSummary>
+        <Grid columns={[1, 2]} equalColumns gap={3} rowGap={5}>
+          <Formik
+            initialValues={{
+              amount: 0,
+            }}
+            onSubmit={(values, actions) => {
+              const amount = new Decimal(values.amount).mul('1e18').toString()
+              doFinanceTransaction([loan.poolId, loan.id, new BN(amount)])
+              actions.setSubmitting(false)
+            }}
+            validate={(values) => {
+              const errors: FormikErrors<FinanceValues> = {}
+
+              if (validateNumberInput(values.amount, 0)) {
+                errors.amount = validateNumberInput(values.amount, 0)
+              }
+
+              return errors
+            }}
+            validateOnMount
+          >
+            {(form) => (
+              <Stack as={Form} gap={3}>
+                <Stack>
+                  <Field name="amount">
+                    {({ field: { value, ...fieldProps } }: any) => (
+                      <NumberInput
+                        {...fieldProps}
+                        value={value instanceof Decimal ? value.toNumber() : value}
+                        label="Finance amount"
+                        type="number"
+                        min="0"
+                      />
+                    )}
+                  </Field>
+                  <Text>
+                    <ButtonTextLink
+                      onClick={() => {
+                        form.setFieldValue('amount', maxBorrow)
+                      }}
+                    >
+                      {/* TODO: With credit lines, the max borrow is limited by the debt, so if there's outstanding debt, 
+                          the actual max is a little less by the time the form is submitted. Maybe it should be rounded down */}
+                      Set max
+                    </ButtonTextLink>
+                  </Text>
+                </Stack>
+                <Box mt="auto">
+                  <Button
+                    type="submit"
+                    formNoValidate
+                    variant="outlined"
+                    disabled={!form.isValid}
+                    loading={isFinanceLoading}
+                  >
+                    Finance asset
+                  </Button>
+                </Box>
+              </Stack>
+            )}
+          </Formik>
+
+          <Formik
+            initialValues={{
+              amount: 0,
+            }}
+            onSubmit={(values, actions) => {
+              const amountBN = new BN(values.amount).mul(e18)
+              doRepayTransaction([loan.poolId, loan.id, amountBN])
+              actions.setSubmitting(false)
+            }}
+            validate={(values) => {
+              const errors: FormikErrors<RepayValues> = {}
+
+              if (validateNumberInput(values.amount, 0)) {
+                errors.amount = validateNumberInput(values.amount, 0)
+              }
+
+              return errors
+            }}
+            validateOnMount
+          >
+            {(form) => (
+              <Stack as={Form} gap={3}>
+                <FormikNumberInput name="amount" label="Repay amount" type="number" min="0" />
+                <Shelf mt="auto" gap={2}>
+                  <Button
+                    type="submit"
+                    formNoValidate
+                    variant="outlined"
+                    disabled={!form.isValid}
+                    loading={isRepayLoading}
+                  >
+                    Repay asset
+                  </Button>
+                  <Button variant="outlined" loading={isRepayAllLoading} onClick={() => repayAll()}>
+                    Repay all and close
+                  </Button>
+                </Shelf>
+              </Stack>
+            )}
+          </Formik>
+        </Grid>
+      </Stack>
+    </Card>
+  )
+}
+
+const FormikNumberInput = styled(FormikTextInput)`
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+`
+FormikNumberInput.defaultProps = {
+  type: 'number',
 }
 
 const NumberInput = styled(TextInput)`

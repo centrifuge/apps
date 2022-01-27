@@ -12,9 +12,7 @@ export const SideBar: React.FC<Props> = () => {
   const investmentsMatch = useRouteMatch('/investments')
   const issuersMatch = useRouteMatch('/issuers')
   const isDesktop = useIsAboveBreakpoint('M')
-  const showOnlyNFT = useDebugFlags().showOnlyNFT
-
-  console.log('showOnlyNFT', showOnlyNFT)
+  const { showOnlyNFT } = useDebugFlags()
 
   return (
     <Box

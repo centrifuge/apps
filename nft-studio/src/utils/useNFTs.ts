@@ -23,6 +23,22 @@ export function useNFT(collectionId?: string, nftId?: string) {
   return React.useMemo(() => data?.find((c) => c.id === nftId), [data, nftId])
 }
 
+export function useLoanNft(poolId?: string, loanId?: string) {
+  const cent = useCentrifuge()
+  const { data: collectionId } = useQuery(
+    ['poolToLoanCollection', poolId],
+    async () => {
+      return cent.pools.getLoanCollectionIdForPool([poolId!])
+    },
+    {
+      suspense: true,
+      enabled: !!poolId,
+      staleTime: Infinity,
+    }
+  )
+  return useNFT(collectionId, loanId)
+}
+
 export function useAccountNfts(address?: string, suspense = true) {
   const cent = useCentrifuge()
   const query = useQuery(

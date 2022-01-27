@@ -85,7 +85,7 @@ export class CentrifugeBase {
             if (this.config.printExtrinsics) {
               console.log(`=> ${result.dispatchError?.toString()}`)
             }
-            reject(result.dispatchError || errors)
+            reject(result)
           } else if (result.status.isInBlock || result.status.isFinalized) {
             resolve(result)
           }

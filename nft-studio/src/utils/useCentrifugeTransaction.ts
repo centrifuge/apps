@@ -6,6 +6,7 @@ import * as React from 'react'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Transaction, useTransaction, useTransactions } from '../components/TransactionsProvider'
 import { useWeb3 } from '../components/Web3Provider'
+import { PalletError } from './errors'
 
 export function useCentrifugeTransaction<T extends Array<any>>(
   title: string,
@@ -34,12 +35,37 @@ export function useCentrifugeTransaction<T extends Array<any>>(
         onStatusChange: (result) => {
           lastResult = result
           const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
+          let errorObject: any
 
           if (result.dispatchError || errors.length) {
-            console.error(result.dispatchError || errors)
-            updateTransaction(id, { status: 'failed', failedReason: 'Transaction failed' })
+            let errorMessage = 'Transaction failed'
+            if (errors.length) {
+              const error = errors[0].event.data[0] as any
+              if ((error as any).isModule) {
+                // for module errors, we have the section indexed, lookup
+                const decoded = api.registry.findMetaError((error as any).asModule)
+                const { section, method, docs } = decoded
+                errorObject = new PalletError(section, method)
+                errorMessage = errorObject.message || errorMessage
+                console.error(`${section}.${method}: ${docs.join(' ')}`)
+              } else {
+                // Other, CannotLookup, BadOrigin, no extra info
+                console.error(error.toString())
+              }
+            }
+
+            updateTransaction(id, (prev) => ({
+              status: 'failed',
+              failedReason: errorMessage,
+              error: errorObject,
+              dismissed: prev.status === 'failed' && prev.dismissed,
+            }))
           } else if (result.status.isInBlock || result.status.isFinalized) {
-            updateTransaction(id, (prev) => (prev.status === 'failed' ? {} : { status: 'succeeded' }))
+            updateTransaction(id, (prev) =>
+              prev.status === 'failed'
+                ? {}
+                : { status: 'succeeded', dismissed: prev.status === 'succeeded' && prev.dismissed }
+            )
           } else {
             updateTransaction(id, { status: 'pending', hash: result.status.hash.toHex() })
           }
