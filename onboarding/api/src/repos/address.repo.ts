@@ -36,7 +36,7 @@ export class AddressRepo {
   // Gets the list of users which should have been whitelisted, but arent
   async getMissingWhitelistedUsers(): Promise<{ userId: string; poolId: string; tranche: Tranche }[]> {
     const data = await this.db.sql`
-      select users.id as user_id, agreements.pool_id, agreements.tranche
+      select users.id as user_id, agreements.pool_id, agreements.tranche, count(addresses.id) as address_count
       from addresses
       right join users on users.id = addresses.user_id
       right join kyc on kyc.user_id = users.id
@@ -51,7 +51,8 @@ export class AddressRepo {
 
     if (!data) return []
 
-    return data as unknown as { userId: string; poolId: string; tranche: Tranche }[]
+    const investors = data as unknown as { userId: string; poolId: string; tranche: Tranche; addressCount: number }[]
+    return investors.filter((investor) => investor.addressCount > 0)
   }
 
   async findOrCreate(blockchain: Blockchain, network: Network, address: string): Promise<AddressEntity> {
