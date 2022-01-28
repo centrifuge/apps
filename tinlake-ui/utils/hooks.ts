@@ -53,15 +53,15 @@ export const useCFGYield = () => {
   const { data: wCFGPrice } = useQuery('wCFGPrice', () => getWCFGPrice(tinlake))
 
   return React.useMemo(() => {
-    if (wCFGPrice && rewards.data?.rewardRate) {
+    if (wCFGPrice && rewards.data?.dropRewardRate) {
       const DAYS = 365
-      const rewardRate = rewards.data.rewardRate.toNumber()
+      const rewardRate = rewards.data.dropRewardRate.toNumber()
 
       return (DAYS * rewardRate * wCFGPrice * 100).toString()
     }
 
     return null
-  }, [wCFGPrice, rewards.data?.rewardRate])
+  }, [wCFGPrice, rewards.data?.dropRewardRate])
 }
 
 async function getWCFGPrice(tinlake: ITinlake) {
