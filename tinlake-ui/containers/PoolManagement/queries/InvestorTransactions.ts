@@ -1,3 +1,4 @@
+import BN from 'bn.js'
 import { ethers } from 'ethers'
 import gql from 'graphql-tag'
 import { csvName } from '.'
@@ -5,6 +6,8 @@ import config from '../../../config'
 import Apollo from '../../../services/apollo'
 import { downloadCSV } from '../../../utils/export'
 import { PoolData } from '../../../utils/usePool'
+
+const tokenSymbolIsJunior = (symbol: string) => symbol.slice(symbol.length - 3) === 'TIN'
 
 const fetch = async (poolId: string, skip: number, first: number, blockHash: string | null): Promise<any> => {
   return await Apollo.runCustomQuery(gql`
@@ -88,6 +91,8 @@ const fetchERC20Transfers = async (
             seniorTranche
             juniorTranche
           }
+          seniorTokenPrice
+          juniorTokenPrice
         }
         token {
           symbol
@@ -202,7 +207,14 @@ export async function investorTransactions({ poolId }: { poolId: string; poolDat
       transfer.to ? transfer.to : '-',
       'TRANSFER_IN',
       transfer.token ? transfer.token.symbol : '-',
-      transfer.amount,
+      new BN(transfer.amount)
+        .mul(
+          new BN(
+            tokenSymbolIsJunior(transfer.token.symbol) ? transfer.pool.juniorTokenPrice : transfer.pool.seniorTokenPrice
+          )
+        )
+        .div(new BN(10).pow(new BN(27 + 18)))
+        .toNumber(),
       '-',
       '-',
       transfer.transaction,
@@ -215,7 +227,14 @@ export async function investorTransactions({ poolId }: { poolId: string; poolDat
       transfer.from ? transfer.from : '-',
       'TRANSFER_OUT',
       transfer.token ? transfer.token.symbol : '-',
-      transfer.amount,
+      new BN(transfer.amount)
+        .mul(
+          new BN(
+            tokenSymbolIsJunior(transfer.token.symbol) ? transfer.pool.juniorTokenPrice : transfer.pool.seniorTokenPrice
+          )
+        )
+        .div(new BN(10).pow(new BN(27 + 18)))
+        .toNumber(),
       '-',
       '-',
       transfer.transaction,
