@@ -1,75 +1,15 @@
 import BN from 'bn.js'
 import { aggregateByYear, calculateFIFOCapitalGains, Operation } from 'fifo-capital-gains-js'
-import gql from 'graphql-tag'
 import { csvName } from '.'
-import Apollo from '../../../services/apollo'
 import { downloadCSV } from '../../../utils/export'
 import { PoolData } from '../../../utils/usePool'
+import { getAllTokenPrices, getAllTransactions, getAllTransfers } from './util'
 const rawEthPrices = require('./eth_prices.json')
 
+const tokenSymbolIsJunior = (symbol: string) => symbol.slice(symbol.length - 3) === 'TIN'
 const date = (timestamp: string) => new Date(parseInt(timestamp, 10) * 1000)
 const formatDateOnly = (date: Date) => date.toISOString().substr(0, 10)
 const e27 = new BN(10).pow(new BN(27))
-
-const fetchTokenPrices = async (
-  poolId: string,
-  skip: number,
-  first: number,
-  blockHash: string | null
-): Promise<any> => {
-  return await Apollo.runCustomQuery(gql`
-    {
-      dailyPoolDatas(where: {pool: ${`"${poolId.toLowerCase()}"`} }, first: ${first}, skip: ${skip} ${
-    blockHash ? `, block: { hash: "${blockHash}" }` : ''
-  }) {
-        day {
-          id
-        }
-        juniorTokenPrice
-        seniorTokenPrice
-      }
-      _meta {
-          block {
-          hash
-          number
-          }
-      }
-    }
-    `)
-}
-
-const fetch = async (poolId: string, skip: number, first: number, blockHash: string | null): Promise<any> => {
-  return await Apollo.runCustomQuery(gql`
-      {
-      investorTransactions(where: {pool: ${`"${poolId.toLowerCase()}"`} }, orderBy: timestamp, orderDirection: desc, first: ${first}, skip: ${skip} ${
-    blockHash ? `, block: { hash: "${blockHash}" }` : ''
-  }) {
-        pool {
-          shortName
-        }
-        type
-        symbol
-        tokenAmount
-        currencyAmount
-        newBalance
-        tokenPrice
-        transaction
-        owner {
-          id
-        }
-        timestamp
-        gasPrice
-        gasUsed
-      }
-      _meta {
-          block {
-          hash
-          number
-          }
-      }
-    }
-  `)
-}
 
 type EthPrice = { Date: string; price: number }
 const ethPrices = (rawEthPrices as EthPrice[]).reduce((prev: any, price: EthPrice) => {
@@ -101,45 +41,76 @@ const getBalanceOnFirstDay = (executionsBeforeYearStart: any[]) => {
   }, 0)
 }
 
-const calculateRealizedCapitalGains = (executions: any[], investor: string, yearStart: Date) => {
+const calculateRealizedCapitalGains = (
+  executions: any[],
+  transfersFrom: any[],
+  transfersTo: any[],
+  investor: string,
+  yearStart: Date
+) => {
   if (executions.length === 0) return 0
 
   let totalBought = 0
   let largeAdjustment = false
-  const operations: Operation[] = executions.map((execution) => {
-    let tokenAmount =
-      execution.type === 'INVEST_EXECUTION'
-        ? new BN(execution.tokenAmount).div(new BN(10).pow(new BN(18))).toNumber()
-        : new BN(execution.currencyAmount)
-            .mul(e27)
-            .div(new BN(execution.tokenPrice))
-            .div(new BN(10).pow(new BN(18)))
-            .toNumber()
+  const operations: Operation[] = [
+    ...executions.map((execution) => {
+      let tokenAmount = new BN(execution.currencyAmount)
+        .mul(e27)
+        .div(new BN(execution.tokenPrice))
+        .div(new BN(10).pow(new BN(18)))
+        .toNumber()
 
-    if (execution.type === 'INVEST_EXECUTION') {
-      totalBought += tokenAmount
-    }
-
-    if (execution.type === 'REDEEM_EXECUTION') {
-      if (totalBought - tokenAmount < 0) {
-        // This ensures that we don't try to sell more than we buy, which can be caused by issues with token prices being slightly off
-        console.log(`Adjusting ${tokenAmount} to ${totalBought}: ${tokenAmount - totalBought}`)
-        if (tokenAmount - totalBought > 5) largeAdjustment = true
-        tokenAmount = totalBought
-        totalBought = 0
-      } else {
-        totalBought = totalBought - tokenAmount
+      if (execution.type === 'INVEST_EXECUTION') {
+        totalBought += tokenAmount
       }
-    }
 
-    return {
-      amount: tokenAmount,
-      date: date(execution.timestamp),
-      price: new BN(execution.tokenPrice).div(new BN(10).pow(new BN(27 - 6))).toNumber() / 10 ** 6,
-      symbol: execution.symbol,
-      type: execution.type === 'INVEST_EXECUTION' ? 'BUY' : 'SELL',
-    }
-  })
+      if (execution.type === 'REDEEM_EXECUTION') {
+        if (totalBought - tokenAmount < 0) {
+          // This ensures that we don't try to sell more than we buy, which can be caused by issues with token prices being slightly off
+          console.log(`Adjusting ${tokenAmount} to ${totalBought}: ${tokenAmount - totalBought}`)
+          if (tokenAmount - totalBought > 5) largeAdjustment = true
+          tokenAmount = totalBought
+          totalBought = 0
+        } else {
+          totalBought = totalBought - tokenAmount
+        }
+      }
+
+      return {
+        amount: tokenAmount,
+        date: date(execution.timestamp),
+        price: new BN(execution.tokenPrice).div(new BN(10).pow(new BN(27 - 6))).toNumber() / 10 ** 6,
+        symbol: execution.symbol,
+        type: execution.type === 'INVEST_EXECUTION' ? 'BUY' : 'SELL',
+      } as Operation
+    }),
+    ...transfersFrom.map((transfer) => {
+      const tokenPrice = tokenSymbolIsJunior(transfer.token.symbol)
+        ? transfer.pool.juniorTokenPrice
+        : transfer.pool.seniorTokenPrice
+
+      return {
+        amount: new BN(transfer.amount).div(new BN(10).pow(new BN(18))).toNumber(),
+        date: date(transfer.timestamp),
+        price: new BN(tokenPrice).div(new BN(10).pow(new BN(27 - 6))).toNumber() / 10 ** 6,
+        symbol: transfer.token.symbol,
+        type: 'SELL',
+      } as Operation
+    }),
+    ...transfersTo.map((transfer) => {
+      const tokenPrice = tokenSymbolIsJunior(transfer.token.symbol)
+        ? transfer.pool.juniorTokenPrice
+        : transfer.pool.seniorTokenPrice
+
+      return {
+        amount: new BN(transfer.amount).div(new BN(10).pow(new BN(18))).toNumber(),
+        date: date(transfer.timestamp),
+        price: new BN(tokenPrice).div(new BN(10).pow(new BN(27 - 6))).toNumber() / 10 ** 6,
+        symbol: transfer.token.symbol,
+        type: 'BUY',
+      } as Operation
+    }),
+  ]
 
   if (largeAdjustment) {
     console.log(investor)
@@ -148,15 +119,11 @@ const calculateRealizedCapitalGains = (executions: any[], investor: string, year
   }
 
   try {
-    // if (investor === '0x143a9422b6c78e78a898dd1f9d25b2a42ae211e5') {
+    // if (investor === '0x00397d81c4b005e86df0492fd468891ad2153377') {
+    //   console.log(executions)
+    //   console.log(transfersFrom)
+    //   console.log(transfersTo)
     //   console.log(operations)
-    //   const newops: Operation[] = [
-    //     { amount: 4963, date: new Date('2021-02-26T09:09:12.000Z'), price: 100739, symbol: 'NS2DRP', type: 'BUY' },
-    //     { amount: 9937, date: new Date('2021-02-15T09:02:14.000Z'), price: 1006196, symbol: 'NS2DRP', type: 'BUY' },
-    //     { amount: 14902, date: new Date('2021-06-27T15:11:45.000Z'), price: 1021908, symbol: 'NS2DRP', type: 'SELL' },
-    //   ]
-    //   const capGains = calculateFIFOCapitalGains(operations)
-    //   console.log(JSON.stringify(capGains))
     // }
     return aggregateByYear(calculateFIFOCapitalGains(operations))
   } catch (e) {
@@ -256,70 +223,14 @@ const calculateInterestAccrued = (
   }
 }
 
-async function getAllTokenPrices(poolId: string) {
-  let start = 0
-  const limit = 1000
-
-  const tokenPrices: any[] = []
-  let blockHash: string | null = null
-  let blockNumber: number | null = null
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const response: any = await fetchTokenPrices(poolId, start, limit, blockHash)
-
-    if (blockHash === null) {
-      blockHash = response._meta.block.hash
-    }
-    if (blockNumber === null) {
-      blockNumber = response._meta.block.number
-    }
-    tokenPrices.push(...response.dailyPoolDatas)
-    if (response.dailyPoolDatas.length < limit) {
-      break
-    }
-    start += limit
-  }
-
-  return tokenPrices
-}
-
-async function getAllTransactions(poolId: string) {
-  let start = 0
-  const limit = 1000
-
-  const transactions: any[] = []
-  let blockHash: string | null = null
-  let blockNumber: number | null = null
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const response: any = await fetch(poolId, start, limit, blockHash)
-
-    if (blockHash === null) {
-      blockHash = response._meta.block.hash
-    }
-    if (blockNumber === null) {
-      blockNumber = response._meta.block.number
-    }
-    transactions.push(...response.investorTransactions)
-    if (response.investorTransactions.length < limit) {
-      break
-    }
-    start += limit
-  }
-
-  return transactions.sort((a: any, b: any) => {
-    return date(a.timestamp).getTime() - date(b.timestamp).getTime()
-  })
-}
-
 async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: PoolData; taxYear: number }) {
   const yearStart = new Date(taxYear, 0, 1)
   const yearEnd = new Date(taxYear, 11, 31)
 
   const transactions = await getAllTransactions(poolId)
   const symbols = transactions.map((tx) => tx.symbol).filter(onlyUnique)
+
+  const transfers = await getAllTransfers(poolId)
 
   const tokenPrices = await getAllTokenPrices(poolId)
   const tokenPricesByDay = tokenPrices.reduce((prev: any, result: any) => {
@@ -372,12 +283,25 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
         .filter((tx) => tx.type === 'INVEST_ORDER' || tx.type === 'REDEEM_ORDER')
         .filter((result) => date(result.timestamp) >= yearStart && date(result.timestamp) <= yearEnd)
 
-      const realizedCapitalGains: any = calculateRealizedCapitalGains(executions, investor, yearStart)
+      const transfersFrom = transfers.filter((transfer) => transfer.from === investor)
+      const transfersTo = transfers.filter((transfer) => transfer.to === investor)
+
+      if (executions.length === 0 && transfersFrom.length === 0 && transfersTo.length === 0) {
+        return
+      }
+
+      const realizedCapitalGains: any = calculateRealizedCapitalGains(
+        executions,
+        transfersFrom,
+        transfersTo,
+        investor,
+        yearStart
+      )
       const interestAccrued: any = calculateInterestAccrued(
         executions,
         symbol,
-        tokenPricesYearStart['senior'], // TODO: get by symbol
-        tokenPricesYearEnd['senior'], // TODO: get by symbol
+        tokenPricesYearStart[tokenSymbolIsJunior(symbol) ? 'junior' : 'senior'],
+        tokenPricesYearEnd[tokenSymbolIsJunior(symbol) ? 'junior' : 'senior'],
         yearStart,
         yearEnd
       )
