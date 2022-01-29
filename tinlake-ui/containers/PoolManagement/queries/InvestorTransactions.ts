@@ -216,7 +216,12 @@ export async function investorTransactions({ poolId }: { poolId: string; poolDat
         .div(new BN(10).pow(new BN(27 + 18)))
         .toNumber(),
       '-',
-      '-',
+      new BN(
+        tokenSymbolIsJunior(transfer.token.symbol) ? transfer.pool.juniorTokenPrice : transfer.pool.seniorTokenPrice
+      )
+        .div(new BN(10).pow(new BN(27 - 8)))
+        .toNumber() /
+        10 ** 8,
       transfer.transaction,
       '-',
       '-',
@@ -236,7 +241,12 @@ export async function investorTransactions({ poolId }: { poolId: string; poolDat
         .div(new BN(10).pow(new BN(27 + 18)))
         .toNumber(),
       '-',
-      '-',
+      new BN(
+        tokenSymbolIsJunior(transfer.token.symbol) ? transfer.pool.juniorTokenPrice : transfer.pool.seniorTokenPrice
+      )
+        .div(new BN(10).pow(new BN(27 - 8)))
+        .toNumber() /
+        10 ** 8,
       transfer.transaction,
       '-',
       '-',
