@@ -177,8 +177,6 @@ export async function investorTransactions({ poolId }: { poolId: string; poolDat
   const formatDate = (timestamp: string) =>
     `${date(timestamp).toISOString().substr(0, 10)} ${date(timestamp).toUTCString().substr(17)}`
 
-  console.log(transfers)
-
   const rows: string[][] = [
     [...Object.keys(headers).map((key: string) => headers[key])],
     ...transactions.map((el: any) => [
@@ -199,36 +197,38 @@ export async function investorTransactions({ poolId }: { poolId: string; poolDat
         }),
     ]),
     ...transfers.map((transfer: any) => [
-      [
-        formatDate(transfer.timestamp),
-        transfer.pool ? transfer.pool.shortName : '-',
-        transfer.to ? transfer.to : '-',
-        'TRANSFER_IN',
-        transfer.token ? transfer.token.symbol : '-',
-        transfer.amount,
-        '-',
-        '-',
-        transfer.transaction,
-        '-',
-        '-',
-      ],
-      [
-        formatDate(transfer.timestamp),
-        transfer.pool ? transfer.pool.shortName : '-',
-        transfer.from ? transfer.from : '-',
-        'TRANSFER_OUT',
-        transfer.token ? transfer.token.symbol : '-',
-        transfer.amount,
-        '-',
-        '-',
-        transfer.transaction,
-        '-',
-        '-',
-      ],
+      formatDate(transfer.timestamp),
+      transfer.pool ? transfer.pool.shortName : '-',
+      transfer.to ? transfer.to : '-',
+      'TRANSFER_IN',
+      transfer.token ? transfer.token.symbol : '-',
+      transfer.amount,
+      '-',
+      '-',
+      transfer.transaction,
+      '-',
+      '-',
+    ]),
+    ...transfers.map((transfer: any) => [
+      formatDate(transfer.timestamp),
+      transfer.pool ? transfer.pool.shortName : '-',
+      transfer.from ? transfer.from : '-',
+      'TRANSFER_OUT',
+      transfer.token ? transfer.token.symbol : '-',
+      transfer.amount,
+      '-',
+      '-',
+      transfer.transaction,
+      '-',
+      '-',
     ]),
   ]
 
-  downloadCSV(rows, csvName(`Investor Transaction List`))
+  const sorted = rows.sort((a: string[], b: string[]) => {
+    return new Date(a[0]).getTime() - new Date(b[0]).getTime()
+  })
+
+  downloadCSV(sorted, csvName(`Investor Transaction List`))
 
   return true
 }
