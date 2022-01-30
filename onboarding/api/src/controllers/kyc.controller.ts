@@ -56,6 +56,14 @@ export class KycController {
     const investor = await this.securitizeService.getInvestor(userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!investor) throw new BadRequestException('Failed to retrieve investor information from Securitize')
 
+    const userByEmail = await this.userRepo.findByEmail(investor.email)
+    if (userId !== userByEmail.id) {
+      const otherUser = await this.userRepo.find(userId)
+      this.logger.error(
+        `The email ${investor.email} is currently linked to user ${userByEmail.id}, while KYC account ${existingKyc.providerAccountId} is linked to user ${otherUser.id} with email ${otherUser.email}`
+      )
+    }
+
     const kyc = await this.kycRepo.upsertSecuritize(userId, kycInfo.providerAccountId, kycInfo.digest)
     if (!kyc) throw new BadRequestException('Failed to create KYC entity')
 

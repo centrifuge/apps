@@ -29,6 +29,16 @@ export class UserRepo {
     return data as User | undefined
   }
 
+  async findByEmail(email: string): Promise<User | undefined> {
+    const [data] = await this.db.sql`
+      select users.*
+      from users
+      where users.email = ${email}
+    `
+
+    return data as User | undefined
+  }
+
   async getWithKycAndAgreement(poolId: string): Promise<UserWithKyc[]> {
     const data = await this.db.sql`
       select users.*, kyc.provider, kyc.provider_account_id, kyc.created_at, kyc.status, kyc.usa_tax_resident, kyc.accredited
