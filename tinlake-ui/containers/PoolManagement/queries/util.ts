@@ -3,6 +3,8 @@ import gql from 'graphql-tag'
 import config from '../../../config'
 import Apollo from '../../../services/apollo'
 
+const date = (timestamp: string) => new Date(parseInt(timestamp, 10) * 1000)
+
 const fetchTransactions = async (
   poolId: string,
   skip: number,
@@ -65,7 +67,11 @@ export async function getAllTransactions(poolId: string) {
     start += limit
   }
 
-  return transactions
+  const sorted = transactions.sort((a, b) => {
+    return date(a.timestamp).getTime() - date(b.timestamp).getTime()
+  })
+
+  return sorted
 }
 
 const fetchERC20Transfers = async (
@@ -134,7 +140,7 @@ export async function getAllTransfers(poolId: string): Promise<any[]> {
     start += limit
   }
 
-  return (
+  const nonContractTransfers = (
     await Promise.all(
       transfers
         .map((transfer: any) => {
@@ -155,6 +161,12 @@ export async function getAllTransfers(poolId: string): Promise<any[]> {
         })
     )
   ).filter((transfer: any) => transfer.codeFrom === '0x' && transfer.codeTo === '0x')
+
+  const sorted = nonContractTransfers.sort((a, b) => {
+    return date(a.timestamp).getTime() - date(b.timestamp).getTime()
+  })
+
+  return sorted
 }
 
 const fetchTokenPrices = async (

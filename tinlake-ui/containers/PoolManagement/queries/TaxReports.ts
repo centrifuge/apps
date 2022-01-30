@@ -114,6 +114,7 @@ const calculateRealizedCapitalGains = (
 
   if (largeAdjustment) {
     console.log(investor)
+    console.log(executions)
     console.log(operations)
     console.log('\n')
   }
