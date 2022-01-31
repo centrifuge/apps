@@ -3,18 +3,17 @@ import { aggregateByYear, calculateFIFOCapitalGains, Operation } from 'fifo-capi
 import { csvName } from '.'
 import { downloadCSV } from '../../../utils/export'
 import { PoolData } from '../../../utils/usePool'
-import { getAllTokenPrices, getAllTransactions, getAllTransfers } from './util'
-const rawEthPrices = require('./eth_prices.json')
+import {
+  calculateCostInUsd,
+  date,
+  formatDateOnly,
+  getAllTokenPrices,
+  getAllTransactions,
+  getAllTransfers,
+} from './util'
 
 const tokenSymbolIsJunior = (symbol: string) => symbol.slice(symbol.length - 3) === 'TIN'
-const date = (timestamp: string) => new Date(parseInt(timestamp, 10) * 1000)
-const formatDateOnly = (date: Date) => date.toISOString().substr(0, 10)
 const e27 = new BN(10).pow(new BN(27))
-
-type EthPrice = { Date: string; price: number }
-const ethPrices = (rawEthPrices as EthPrice[]).reduce((prev: any, price: EthPrice) => {
-  return { ...prev, ...{ [formatDateOnly(new Date(price.Date)).toString()]: price.price } }
-}, {})
 
 function onlyUnique(value: any, index: number, self: any) {
   return self.indexOf(value) === index
@@ -22,13 +21,7 @@ function onlyUnique(value: any, index: number, self: any) {
 
 const sumTransactionFees = (orders: any[]) => {
   return orders.reduce((sum: number, order: any) => {
-    const costInEth =
-      new BN(order.gasUsed)
-        .mul(new BN(order.gasPrice))
-        .div(new BN(10).pow(new BN(12)))
-        .toNumber() /
-      10 ** 6
-    const costInUsd = costInEth * ethPrices[formatDateOnly(date(order.timestamp))]
+    const costInUsd = calculateCostInUsd(order.gasPrice, order.gasUsed, order.timestamp)
     return sum + costInUsd
   }, 0)
 }
@@ -142,7 +135,14 @@ const calculateInterestAccrued = (
   yearStart: Date,
   yearEnd: Date
 ) => {
-  if (executions.length === 0) return 0
+  if (executions.length === 0) {
+    const year = yearStart.getFullYear()
+    return {
+      balanceOnFirstDay: 0,
+      balanceOnLastDay: 0,
+      interestAccrued: { [year]: 0 },
+    }
+  }
   const executionsBeforeYearStart = executions.filter((result) => date(result.timestamp) < yearStart)
   const balanceOnFirstDay = getBalanceOnFirstDay(executionsBeforeYearStart)
 
@@ -181,7 +181,7 @@ const calculateInterestAccrued = (
     }
   })
 
-  const lastBalance = operations.reduce((last: number, operation: Operation) => {
+  const balanceOnLastDay = operations.reduce((last: number, operation: Operation) => {
     if (operation.type === 'BUY') return last + operation.amount
     return last - operation.amount
   }, 0)
@@ -203,24 +203,32 @@ const calculateInterestAccrued = (
 
   // Add a sell order at the end of the year, to assume everything was sold
   const operationsWithAssumedYearEndSale =
-    lastBalance <= 0
+    balanceOnLastDay <= 0
       ? operationsAggregratedYearStart
       : [
           ...operationsAggregratedYearStart,
           {
             symbol,
-            amount: lastBalance,
+            amount: balanceOnLastDay,
             date: yearEnd,
             price: tokenPriceLastDay,
             type: 'SELL',
           } as Operation,
         ]
   try {
-    return aggregateByYear(calculateFIFOCapitalGains(operationsWithAssumedYearEndSale))
+    return {
+      balanceOnFirstDay,
+      balanceOnLastDay,
+      interestAccrued: aggregateByYear(calculateFIFOCapitalGains(operationsWithAssumedYearEndSale)),
+    }
   } catch (e) {
     console.error(e)
     const year = yearStart.getFullYear()
-    return { [year]: 0 }
+    return {
+      balanceOnFirstDay,
+      balanceOnLastDay,
+      interestAccrued: { [year]: 0 },
+    }
   }
 }
 
@@ -268,7 +276,17 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
     .map((tx) => tx.owner.id)
     .filter(onlyUnique)
 
-  const rows: any = [['ETH account', 'Token', 'Realized capital gains', 'Interest accrued', 'Transaction fees paid']]
+  const rows: any = [
+    [
+      'ETH account',
+      'Token',
+      'Realized capital gains',
+      'Interest accrued',
+      'Transaction fees paid',
+      'Balance Jan 1',
+      'Balance Dec 31',
+    ],
+  ]
   symbols.forEach((symbol) => {
     investors.forEach((investor) => {
       // Get all the executions until the end of the year (including the years before, to get all buy ordres)
@@ -298,16 +316,24 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
         investor,
         yearStart
       )
-      const interestAccrued: any = calculateInterestAccrued(
+      const { interestAccrued, balanceOnFirstDay, balanceOnLastDay } = calculateInterestAccrued(
         executions,
         symbol,
         tokenPricesYearStart[tokenSymbolIsJunior(symbol) ? 'junior' : 'senior'],
         tokenPricesYearEnd[tokenSymbolIsJunior(symbol) ? 'junior' : 'senior'],
         yearStart,
         yearEnd
-      )
+      ) as any
       const transactionFees = sumTransactionFees(orders)
-      rows.push([investor, symbol, realizedCapitalGains['2021'] || 0, interestAccrued['2021'] || 0, transactionFees])
+      rows.push([
+        investor,
+        symbol,
+        realizedCapitalGains['2021'] || 0,
+        interestAccrued['2021'] || 0,
+        transactionFees,
+        balanceOnFirstDay,
+        balanceOnLastDay,
+      ])
     })
   })
 
