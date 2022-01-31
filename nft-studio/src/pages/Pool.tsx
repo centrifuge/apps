@@ -1,6 +1,6 @@
-import { Box, Button, Card, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Card, Grid, IconArrowRight, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
-import * as React from 'react'
+import React, { useMemo } from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { CardHeader } from '../components/CardHeader'
@@ -12,6 +12,9 @@ import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { AnchorPillButton } from '../components/PillButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
+import { useWeb3 } from '../components/Web3Provider'
+import { isOwnPool } from '../utils/ownership/isOwnPool'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLoans } from '../utils/useLoans'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 
@@ -31,22 +34,60 @@ const Pool: React.FC = () => {
   const { data: loans } = useLoans(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const history = useHistory()
+  const { selectedAccount } = useWeb3()
 
   console.log('pool', pool)
 
   const centrifuge = useCentrifuge()
 
+  const isManagedPool = useMemo(
+    () => (pool && selectedAccount ? isOwnPool(pool, selectedAccount) : false),
+    [pool, selectedAccount]
+  )
+
+  const { execute: closeEpochTx } = useCentrifugeTransaction('Close epoch', (cent) => cent.pools.closeEpoch, {
+    onSuccess: () => {
+      console.log('Epoch closed successfully')
+    },
+  })
+
+  const closeEpoch = async () => {
+    if (!pool) return
+    closeEpochTx([pool.id])
+  }
+
   return (
     <Stack gap={5} flex={1}>
       <PageHeader
         title={metadata?.pool?.name ?? ''}
-        parent={{ to: '/pools', label: 'Pools' }}
+        parent={{ to: '/managed-pools', label: isManagedPool ? 'Managed pools' : 'Pools' }}
         subtitle={metadata?.pool?.asset?.class}
+        actions={
+          <>
+            {isManagedPool && (
+              <Button variant="text" icon={<IconArrowRight />} onClick={closeEpoch} disabled={!pool}>
+                Close epoch
+              </Button>
+            )}
+          </>
+        }
       />
       <PageSummary>
         <LabelValueStack
-          label="Value"
+          label="Pool value"
           value={centrifuge.utils.formatCurrencyAmount(pool?.nav.latest, pool?.currency)}
+        />
+        <LabelValueStack
+          label="Asset value"
+          value={centrifuge.utils.formatCurrencyAmount(pool?.nav.latest, pool?.currency)}
+        />
+        <LabelValueStack
+          label="Reserve"
+          value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.available, pool?.currency)}
+        />
+        <LabelValueStack
+          label="Max. Reserve"
+          value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.max, pool?.currency)}
         />
       </PageSummary>
       <Grid columns={[1, 2]} gap={3} equalColumns>
