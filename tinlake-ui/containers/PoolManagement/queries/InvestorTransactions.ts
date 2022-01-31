@@ -2,7 +2,7 @@ import BN from 'bn.js'
 import { csvName } from '.'
 import { downloadCSV } from '../../../utils/export'
 import { PoolData } from '../../../utils/usePool'
-import { getAllTransactions, getAllTransfers } from './util'
+import { calculateCostInUsd, getAllTransactions, getAllTransfers } from './util'
 
 const tokenSymbolIsJunior = (symbol: string) => symbol.slice(symbol.length - 3) === 'TIN'
 
@@ -22,6 +22,7 @@ export async function investorTransactions({ poolId }: { poolId: string; poolDat
     transaction: 'Transaction Hash',
     gasPrice: 'Gas Price',
     gasUsed: 'Gas Used',
+    transactionCost: 'Transaction Cost (USD)',
   }
 
   const date = (timestamp: string) => new Date(parseInt(timestamp, 10) * 1000)
@@ -46,6 +47,7 @@ export async function investorTransactions({ poolId }: { poolId: string; poolDat
           }
           return el[item] ? el[item] : '-'
         }),
+      calculateCostInUsd(el.gasPrice, el.gasUsed, el.timestamp),
     ]),
     ...transfers.map((transfer: any) => [
       formatDate(transfer.timestamp),
@@ -69,8 +71,9 @@ export async function investorTransactions({ poolId }: { poolId: string; poolDat
         .toNumber() /
         10 ** 8,
       transfer.transaction,
-      '-',
-      '-',
+      transfer.gasPrice / 10 ** 9,
+      transfer.gasUsed,
+      calculateCostInUsd(transfer.gasPrice, transfer.gasUsed, transfer.timestamp),
     ]),
     ...transfers.map((transfer: any) => [
       formatDate(transfer.timestamp),
@@ -94,8 +97,9 @@ export async function investorTransactions({ poolId }: { poolId: string; poolDat
         .toNumber() /
         10 ** 8,
       transfer.transaction,
-      '-',
-      '-',
+      transfer.gasPrice / 10 ** 9,
+      transfer.gasUsed,
+      calculateCostInUsd(transfer.gasPrice, transfer.gasUsed, transfer.timestamp),
     ]),
   ]
 

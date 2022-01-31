@@ -1,9 +1,27 @@
+import BN from 'bn.js'
 import { ethers } from 'ethers'
 import gql from 'graphql-tag'
 import config from '../../../config'
 import Apollo from '../../../services/apollo'
+const rawEthPrices = require('./eth_prices.json')
 
-const date = (timestamp: string) => new Date(parseInt(timestamp, 10) * 1000)
+export const date = (timestamp: string) => new Date(parseInt(timestamp, 10) * 1000)
+export const formatDateOnly = (date: Date) => date.toISOString().substr(0, 10)
+
+type EthPrice = { Date: string; price: number }
+export const ethPrices = (rawEthPrices as EthPrice[]).reduce((prev: any, price: EthPrice) => {
+  return { ...prev, ...{ [formatDateOnly(new Date(price.Date)).toString()]: price.price } }
+}, {})
+
+export const calculateCostInUsd = (gasPrice: number, gasUsed: number, timestamp: string) => {
+  const costInEth =
+    new BN(gasUsed)
+      .mul(new BN(gasPrice))
+      .div(new BN(10).pow(new BN(12)))
+      .toNumber() /
+    10 ** 6
+  return costInEth * ethPrices[formatDateOnly(date(timestamp))]
+}
 
 const fetchTransactions = async (
   poolId: string,
@@ -157,7 +175,15 @@ export async function getAllTransfers(poolId: string): Promise<any[]> {
           const codeFrom = await provider.getCode(transfer.from)
           const codeTo = await provider.getCode(transfer.to)
           const block = await provider.getBlock(Number(transfer.id.split('-')[0]))
-          return { ...transfer, codeFrom, codeTo, timestamp: block.timestamp }
+          const receipt = await provider.getTransactionReceipt(transfer.transaction)
+          return {
+            ...transfer,
+            codeFrom,
+            codeTo,
+            timestamp: block.timestamp,
+            gasUsed: receipt.gasUsed.toNumber(),
+            gasPrice: receipt.effectiveGasPrice.toNumber(),
+          }
         })
     )
   ).filter((transfer: any) => transfer.codeFrom === '0x' && transfer.codeTo === '0x')
