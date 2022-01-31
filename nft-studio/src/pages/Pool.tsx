@@ -16,6 +16,7 @@ import { useWeb3 } from '../components/Web3Provider'
 import { isOwnPool } from '../utils/ownership/isOwnPool'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLoans } from '../utils/useLoans'
+import { usePermissions } from '../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 
 export const PoolPage: React.FC = () => {
@@ -30,20 +31,27 @@ const Pool: React.FC = () => {
   const {
     params: { pid: poolId },
   } = useRouteMatch<{ pid: string }>()
-  const { data: pool } = usePool(poolId)
+  const { data: pool, refetch: refetchPool } = usePool(poolId)
   const { data: loans } = useLoans(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const history = useHistory()
   const { selectedAccount } = useWeb3()
 
-  console.log('pool', pool)
+  const { data: permissions } = usePermissions(selectedAccount?.address)
 
   const centrifuge = useCentrifuge()
+
+  const canSetMaxReserve = useMemo(
+    () => !!(selectedAccount && permissions && permissions[poolId]?.roles.includes('LiquidityAdmin')),
+    [poolId, selectedAccount, permissions]
+  )
 
   const isManagedPool = useMemo(
     () => (pool && selectedAccount ? isOwnPool(pool, selectedAccount) : false),
     [pool, selectedAccount]
   )
+
+  console.log('pool', pool)
 
   const { execute: closeEpochTx } = useCentrifugeTransaction('Close epoch', (cent) => cent.pools.closeEpoch, {
     onSuccess: () => {
@@ -54,6 +62,20 @@ const Pool: React.FC = () => {
   const closeEpoch = async () => {
     if (!pool) return
     closeEpochTx([pool.id])
+  }
+
+  const { execute: setMaxReserveTx } = useCentrifugeTransaction('Set max reserve', (cent) => cent.pools.setMaxReserve, {
+    onSuccess: () => {
+      refetchPool()
+    },
+  })
+
+  const promptMaxReserve = () => {
+    if (!pool) return
+    const maxReserve = Number.parseFloat(prompt('Insert max reserve') || 'a')
+    if (Number.isNaN(maxReserve)) return
+
+    setMaxReserveTx([pool.id, new BN(maxReserve).mul(new BN(10).pow(new BN(18)))])
   }
 
   return (
@@ -89,6 +111,12 @@ const Pool: React.FC = () => {
           label="Max. Reserve"
           value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.max, pool?.currency)}
         />
+
+        {isManagedPool && (
+          <Button variant="text" icon={<IconArrowRight />} onClick={promptMaxReserve} disabled={!canSetMaxReserve}>
+            Set maximum
+          </Button>
+        )}
       </PageSummary>
       <Grid columns={[1, 2]} gap={3} equalColumns>
         {pool &&

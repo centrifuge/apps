@@ -259,6 +259,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
+  async function setMaxReserve(args: [poolId: string, maxReserve: BN], options?: TransactionOptions) {
+    const [poolId, maxReserve] = args
+    const api = await inst.getApi()
+    const submittable = api.tx.pools.setMaxReserve(poolId, maxReserve.toString())
+    return inst.wrapSignAndSend(api, submittable, options)
+  }
+
   async function updateInvestOrder(
     args: [poolId: string, trancheId: number, newOrder: BN],
     options?: TransactionOptions
@@ -619,6 +626,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   return {
     createPool,
     updatePool,
+    setMaxReserve,
     updateInvestOrder,
     updateRedeemOrder,
     collect,
