@@ -149,7 +149,7 @@ const calculateInterestAccrued = (
   let totalBought = 0
   const operations: Operation[] = executions.map((execution) => {
     let tokenAmount =
-      execution.type === 'INVEST_EXECUTION'
+      execution.type === 'INVEST_EXECUTION' && execution.tokenAmount !== undefined
         ? new BN(execution.tokenAmount).div(new BN(10).pow(new BN(18))).toNumber()
         : new BN(execution.currencyAmount)
             .mul(e27)
@@ -216,6 +216,8 @@ const calculateInterestAccrued = (
           } as Operation,
         ]
   try {
+    // console.log(executions)
+    // console.log(operations)
     return {
       balanceOnFirstDay,
       balanceOnLastDay,
@@ -230,6 +232,16 @@ const calculateInterestAccrued = (
       interestAccrued: { [year]: 0 },
     }
   }
+}
+
+const countTypes = (transactions: any[], transfersFrom: any[], transfersTo: any[]) => {
+  let counts = {
+    INVEST_EXECUTION: transactions.filter((tx) => tx.type === 'INVEST_EXECUTION').length,
+    REDEEM_EXECUTION: transactions.filter((tx) => tx.type === 'REDEEM_EXECUTION').length,
+    TRANSFER_IN: transfersFrom.length,
+    TRANSFER_OUT: transfersTo.length,
+  }
+  return counts
 }
 
 async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: PoolData; taxYear: number }) {
@@ -257,8 +269,6 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
     formatDateOnly(yearStart) in tokenPricesByDay && tokenPricesByDay[formatDateOnly(yearStart)] !== '0'
       ? tokenPricesByDay[formatDateOnly(yearStart)]
       : { senior: 1.0, junior: 1.0 }
-  console.log(tokenPricesByDay)
-  console.log(formatDateOnly(yearEnd))
   const tokenPricesYearEnd =
     formatDateOnly(yearEnd) in tokenPricesByDay && tokenPricesByDay[formatDateOnly(yearEnd)] !== '0'
       ? tokenPricesByDay[formatDateOnly(yearEnd)]
@@ -285,6 +295,10 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
       'Transaction fees paid',
       'Balance Jan 1',
       'Balance Dec 31',
+      'Number of invest executions',
+      'Number of redeem executions',
+      'Number of transfers in',
+      'Number of transfers out',
     ],
   ]
   symbols.forEach((symbol) => {
@@ -324,7 +338,16 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
         yearStart,
         yearEnd
       ) as any
+
       const transactionFees = sumTransactionFees(orders)
+      const counts = countTypes(
+        transactions
+          .filter((tx) => tx.symbol === symbol && tx.owner.id === investor)
+          .filter((result) => date(result.timestamp) >= yearStart && date(result.timestamp) <= yearEnd),
+        transfersFrom.filter((result) => date(result.timestamp) >= yearStart && date(result.timestamp) <= yearEnd),
+        transfersTo.filter((result) => date(result.timestamp) >= yearStart && date(result.timestamp) <= yearEnd)
+      )
+
       rows.push([
         investor,
         symbol,
@@ -333,6 +356,10 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
         transactionFees,
         balanceOnFirstDay,
         balanceOnLastDay,
+        counts['INVEST_EXECUTION'],
+        counts['REDEEM_EXECUTION'],
+        counts['TRANSFER_IN'],
+        counts['TRANSFER_OUT'],
       ])
     })
   })

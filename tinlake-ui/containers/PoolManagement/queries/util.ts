@@ -8,6 +8,8 @@ const rawEthPrices = require('./eth_prices.json')
 export const date = (timestamp: string) => new Date(parseInt(timestamp, 10) * 1000)
 export const formatDateOnly = (date: Date) => date.toISOString().substr(0, 10)
 
+const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
+
 type EthPrice = { Date: string; price: number }
 export const ethPrices = (rawEthPrices as EthPrice[]).reduce((prev: any, price: EthPrice) => {
   return { ...prev, ...{ [formatDateOnly(new Date(price.Date)).toString()]: price.price } }
@@ -85,7 +87,18 @@ export async function getAllTransactions(poolId: string) {
     start += limit
   }
 
-  const sorted = transactions.sort((a, b) => {
+  const transactionsWithActualGasUsed = await Promise.all(
+    transactions.map(async (tx: any) => {
+      const receipt = await provider.getTransactionReceipt(tx.transaction)
+      return {
+        ...tx,
+        gasUsed: receipt.gasUsed.toNumber(),
+        gasPrice: receipt.effectiveGasPrice.toNumber(),
+      }
+    })
+  )
+
+  const sorted = transactionsWithActualGasUsed.sort((a, b) => {
     return date(a.timestamp).getTime() - date(b.timestamp).getTime()
   })
 
@@ -132,8 +145,6 @@ const fetchERC20Transfers = async (
 }
 
 export async function getAllTransfers(poolId: string): Promise<any[]> {
-  const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
-
   let start = 0
   const limit = 1000
 

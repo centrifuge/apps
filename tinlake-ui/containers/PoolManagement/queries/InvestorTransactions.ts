@@ -35,18 +35,14 @@ export async function investorTransactions({ poolId }: { poolId: string; poolDat
       el.timestamp ? formatDate(el.timestamp) : '-',
       el.pool ? el.pool.shortName : '-',
       el.owner ? el.owner.id : '-',
-      ...Object.keys(headers)
-        .filter((item: any) => !Object.keys(headers).slice(0, 3).includes(item))
-        .map((item: any) => {
-          if (['currencyAmount', 'newBalance'].includes(item)) {
-            return el[item] ? el[item] / 10 ** 18 : '-'
-          } else if (item === 'tokenPrice') {
-            return el[item] ? el[item] / 10 ** 27 : '-'
-          } else if (item === 'gasPrice') {
-            return el[item] ? el[item] / 10 ** 9 : '-'
-          }
-          return el[item] ? el[item] : '-'
-        }),
+      el.type,
+      el.token.symbol,
+      el.currencyAmount / 10 ** 18,
+      el.newBalance / 10 ** 18,
+      el.tokenPrice / 10 ** 27,
+      el.transaction,
+      el.gasPrice / 10 ** 9,
+      el.gasUsed,
       calculateCostInUsd(el.gasPrice, el.gasUsed, el.timestamp),
     ]),
     ...transfers.map((transfer: any) => [
