@@ -1,0 +1,32 @@
+name: 'Fabric publish'
+on:
+  push:
+    branches:
+      - fabric-storybook-deploy
+    paths:
+      - 'fabric/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: fabric
+
+    steps:
+      - name: Build fabric storybook
+        run: yarn build-storybook
+
+      - name: Deploy To Netlify
+        uses: nwtgck/actions-netlify@v1.2.0
+        with:
+          deploy-message: ${{ github.event.head_commit.message }}
+          enable-commit-comment: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          netlify-config-path: ./fabric/netlify.toml
+          production-deploy: true
+          publish-dir: ./fabric/storybook-static
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
+          NETLIFY_SITE_ID: ${{ secrets.FABRIC_NETLIFY_SITE_ID }}
