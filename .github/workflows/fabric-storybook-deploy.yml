@@ -5,6 +5,7 @@ on:
       - fabric-storybook-deploy
     paths:
       - 'fabric/**'
+      - '.github/workflows/fabric-storybook-deploy.yml'
 
 jobs:
   build-and-deploy:
@@ -27,7 +28,6 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
-        
       - name: Build fabric storybook
         run: yarn build-storybook
 
