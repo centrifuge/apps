@@ -47,8 +47,24 @@ const run = async () => {
       'PricingAdmin',
       { TrancheInvestor: [0, SEC_PER_YEAR] },
       { TrancheInvestor: [1, SEC_PER_YEAR] },
+      'Borrower',
+      'RiskAdmin',
+      'PricingAdmin',
+      { TrancheInvestor: [0, SEC_PER_YEAR] },
+      { TrancheInvestor: [1, SEC_PER_YEAR] },
     ],
-    [Alice.address, Alice.address, Alice.address, Alice.address, Alice.address],
+    [
+      Alice.address,
+      Alice.address,
+      Alice.address,
+      Alice.address,
+      Alice.address,
+      '5EEtqn1SXs3FmfeFvuXdWhavNq878iG9sFkgMNMrzJfDiM5g',
+      '5EEtqn1SXs3FmfeFvuXdWhavNq878iG9sFkgMNMrzJfDiM5g',
+      '5EEtqn1SXs3FmfeFvuXdWhavNq878iG9sFkgMNMrzJfDiM5g',
+      '5EEtqn1SXs3FmfeFvuXdWhavNq878iG9sFkgMNMrzJfDiM5g',
+      '5EEtqn1SXs3FmfeFvuXdWhavNq878iG9sFkgMNMrzJfDiM5g',
+    ],
   ])
 
   await centrifuge.pools.addWriteOffGroup([poolId, new BN(centrifuge.utils.toRate(0.5)), 1])
