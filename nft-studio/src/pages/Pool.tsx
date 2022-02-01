@@ -51,7 +51,7 @@ const Pool: React.FC = () => {
     [pool, selectedAccount]
   )
 
-  console.log('pool', pool)
+  console.log('pool', pool, loans)
 
   const { execute: closeEpochTx } = useCentrifugeTransaction('Close epoch', (cent) => cent.pools.closeEpoch, {
     onSuccess: () => {
@@ -97,7 +97,10 @@ const Pool: React.FC = () => {
       <PageSummary>
         <LabelValueStack
           label="Pool value"
-          value={centrifuge.utils.formatCurrencyAmount(pool?.nav.latest, pool?.currency)}
+          value={centrifuge.utils.formatCurrencyAmount(
+            pool ? new BN(pool.reserve.total).add(new BN(pool.nav.latest)) : '0',
+            pool?.currency
+          )}
         />
         <LabelValueStack
           label="Asset value"
@@ -105,7 +108,7 @@ const Pool: React.FC = () => {
         />
         <LabelValueStack
           label="Reserve"
-          value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.available, pool?.currency)}
+          value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.total, pool?.currency)}
         />
         <LabelValueStack
           label="Max. Reserve"
