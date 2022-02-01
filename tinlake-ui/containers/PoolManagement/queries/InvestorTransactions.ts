@@ -36,7 +36,7 @@ export async function investorTransactions({ poolId }: { poolId: string; poolDat
       el.pool ? el.pool.shortName : '-',
       el.owner ? el.owner.id : '-',
       el.type,
-      el.token.symbol,
+      el.symbol,
       el.currencyAmount / 10 ** 18,
       el.newBalance / 10 ** 18,
       el.tokenPrice / 10 ** 27,
