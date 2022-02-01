@@ -28,6 +28,9 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
+      - name: Build fabric
+        run: yarn build
+
       - name: Build fabric storybook
         run: yarn build-storybook
 
