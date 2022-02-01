@@ -1,8 +1,8 @@
-name: 'Fabric publish'
+name: 'Fabric storybook deploy'
 on:
   push:
     branches:
-      - fabric-storybook-deploy
+      - main
     paths:
       - 'fabric/**'
       - '.github/workflows/fabric-storybook-deploy.yml'
