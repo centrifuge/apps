@@ -235,13 +235,12 @@ const calculateInterestAccrued = (
 }
 
 const countTypes = (transactions: any[], transfersFrom: any[], transfersTo: any[]) => {
-  let counts = {
+  return {
     INVEST_EXECUTION: transactions.filter((tx) => tx.type === 'INVEST_EXECUTION').length,
     REDEEM_EXECUTION: transactions.filter((tx) => tx.type === 'REDEEM_EXECUTION').length,
     TRANSFER_IN: transfersFrom.length,
     TRANSFER_OUT: transfersTo.length,
   }
-  return counts
 }
 
 async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: PoolData; taxYear: number }) {
