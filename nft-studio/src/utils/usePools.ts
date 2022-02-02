@@ -1,11 +1,11 @@
-import { Pool } from '@centrifuge/centrifuge-js'
+import { DetailedPool, Pool } from '@centrifuge/centrifuge-js'
 import { useQuery } from 'react-query'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useMetadata } from './useMetadata'
 
 export function usePools() {
   const centrifuge = useCentrifuge()
-  const query = useQuery(
+  const query = useQuery<Pool[]>(
     ['pools'],
     async () => {
       return centrifuge.pools.getPools()
@@ -20,7 +20,7 @@ export function usePools() {
 
 export function usePool(id: string) {
   const centrifuge = useCentrifuge()
-  const query = useQuery(
+  const query = useQuery<DetailedPool>(
     ['pool', id],
     async () => {
       return centrifuge.pools.getPool([id])
