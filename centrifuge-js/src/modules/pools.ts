@@ -150,13 +150,13 @@ export type Pool = {
     lastExecuted: number
     inSubmissionPeriod: number | null
   }
-}
-
-export type DetailedPool = Omit<Pool, 'tranches'> & {
   nav: {
     latest: string
     lastUpdated: number
   }
+}
+
+export type DetailedPool = Omit<Pool, 'tranches'> & {
   tranches: TrancheWithTokenPrice[]
 }
 
@@ -450,11 +450,23 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const api = await inst.getApi()
     const rawPools = await api.query.pools.pool.entries()
 
+    const rawNavs = await api.query.loans.poolNAV.entries()
+    const navMap = rawNavs.reduce((acc, [key, navValue]) => {
+      const poolId = formatPoolKey(key as StorageKey<[u32]>)
+      const nav = navValue.toJSON() as unknown as NAVDetailsData
+      acc[poolId] = {
+        latest: nav ? parseBN(nav.latestNav) : '0',
+        lastUpdated: nav ? nav.lastUpdated : 0,
+      }
+      return acc
+    }, {} as Record<string, { latest: string; lastUpdated: number }>)
+
     const pools = rawPools.map(([key, value]) => {
       const pool = value.toJSON() as unknown as PoolDetailsData
       const metadata = (value.toHuman() as any).metadata
+      const poolId = formatPoolKey(key as StorageKey<[u32]>)
       return {
-        id: formatPoolKey(key as StorageKey<[u32]>),
+        id: poolId,
         owner: pool.owner,
         metadata,
         currency: Object.keys(pool.currency)[0],
@@ -483,6 +495,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           lastExecuted: pool.lastEpochExecuted,
           inSubmissionPeriod: pool.submissionPeriodEpoch,
         },
+        nav: navMap[poolId],
       }
     })
 
