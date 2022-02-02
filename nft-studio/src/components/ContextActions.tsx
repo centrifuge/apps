@@ -6,6 +6,7 @@ import styled from 'styled-components'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { truncateAddress } from '../utils/web3'
 import { ButtonGroup } from './ButtonGroup'
+import { ConnectButton } from './ConnectButton'
 import { Popover } from './Popover'
 import { useWeb3 } from './Web3Provider'
 
@@ -15,7 +16,7 @@ type Props = {
 }
 
 export const ContextActions: React.FC<Props> = ({ actions, walletShown = true }) => {
-  const { selectedAccount, isConnecting, connect, accounts } = useWeb3()
+  const { selectedAccount, accounts } = useWeb3()
 
   return (
     <Shelf gap={5}>
@@ -28,9 +29,7 @@ export const ContextActions: React.FC<Props> = ({ actions, walletShown = true })
             No accounts available
           </Button>
         ) : (
-          <Button onClick={() => connect()} loading={isConnecting}>
-            Connect
-          </Button>
+          <ConnectButton />
         ))}
     </Shelf>
   )

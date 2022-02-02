@@ -8,7 +8,8 @@ import { useCentrifuge } from '../components/CentrifugeProvider'
 import { LabelValueList } from '../components/LabelValueList'
 import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
-import { useInvestmentTokens } from '../utils/useInvestments'
+import { useAddress } from '../utils/useAddress'
+import { useBalances } from '../utils/useBalances'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 
 export const TokenPage: React.FC = () => {
@@ -21,17 +22,18 @@ export const TokenPage: React.FC = () => {
 
 const Token: React.FC = () => {
   const { pid: poolId, tid } = useParams<{ pid: string; tid: string }>()
-  const { data: tokens } = useInvestmentTokens('kAMx1vYzEvumnpGcd6a5JL6RPE2oerbr6pZszKPFPZby2gLLF')
+  const address = useAddress()
+  const { data: balances } = useBalances(address)
   const { data: pool } = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const centrifuge = useCentrifuge()
-  const trancheIndex = Number(tid)
+  const trancheId = Number(tid)
 
-  const token = tokens?.find((t) => t.poolId === poolId && t.trancheIndex === trancheIndex)
-  const tranche = pool?.tranches[trancheIndex]
-  const trancheMeta = metadata?.tranches?.[trancheIndex]
+  const token = balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)
+  const tranche = pool?.tranches[trancheId]
+  const trancheMeta = metadata?.tranches?.[trancheId]
 
-  console.log('tokens', tokens)
+  console.log('balances', balances)
 
   return (
     <Stack gap={8} flex={1}>
@@ -108,7 +110,7 @@ const Token: React.FC = () => {
                       token?.balance &&
                       centrifuge.utils.formatCurrencyAmount(
                         new BN(token.balance)
-                          .mul(new BN(pool.tranches[trancheIndex].tokenPrice))
+                          .mul(new BN(pool.tranches[trancheId].tokenPrice))
                           .div(new BN(10).pow(new BN(27))),
                         pool.currency
                       ),

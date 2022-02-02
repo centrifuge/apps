@@ -1,5 +1,6 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
 import { StatusChip } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import * as React from 'react'
 import { daysBetween } from '../utils/date'
 
@@ -19,6 +20,7 @@ const LoanLabel: React.FC<Props> = ({ loan }) => {
     today.setUTCHours(0, 0, 0, 0)
     if (l.status === 'Closed') return 'default'
     if (l.status === 'Created') return 'info'
+    if (new BN(l.financedAmount).isZero()) return 'info'
     if (!('maturityDate' in l.loanInfo)) return 'ok'
 
     const days = daysBetween(today.getTime() / 1000, Number(l.loanInfo.maturityDate))
@@ -33,6 +35,7 @@ const LoanLabel: React.FC<Props> = ({ loan }) => {
     today.setUTCHours(0, 0, 0, 0)
     if (l.status === 'Closed') return 'Closed'
     if (l.status === 'Created') return 'Upcoming'
+    if (new BN(l.financedAmount).isZero()) return 'Priced'
     if (!('maturityDate' in l.loanInfo)) return 'Ongoing'
 
     const days = daysBetween(today.getTime() / 1000, Number(l.loanInfo.maturityDate))

@@ -5,6 +5,7 @@ import { useHistory, useRouteMatch } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { CardHeader } from '../components/CardHeader'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { InvestRedeemDialog } from '../components/InvestRedeemDialog'
 import { LabelValueList } from '../components/LabelValueList'
 import { LabelValueStack } from '../components/LabelValueStack'
 import { LoanList } from '../components/LoanList'
@@ -94,11 +95,7 @@ const Pool: React.FC = () => {
                       ].filter(Boolean) as any
                     }
                   />
-                  <ButtonGroup>
-                    <Button small variant="outlined">
-                      Invest
-                    </Button>
-                  </ButtonGroup>
+                  <InvestAction poolId={poolId} trancheId={i} />
                 </Stack>
               </Card>
             </>
@@ -142,5 +139,25 @@ const Pool: React.FC = () => {
         )}
       </Stack>
     </Stack>
+  )
+}
+
+export const InvestAction: React.FC<{ poolId: string; trancheId: number }> = ({ poolId, trancheId }) => {
+  const [open, setOpen] = React.useState(false)
+  return (
+    <>
+      <ButtonGroup>
+        <Button small variant="outlined" onClick={() => setOpen(true)}>
+          Invest
+        </Button>
+      </ButtonGroup>
+      <InvestRedeemDialog
+        poolId={poolId}
+        trancheId={trancheId}
+        open={open}
+        onClose={() => setOpen(false)}
+        action="invest"
+      />
+    </>
   )
 }
