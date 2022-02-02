@@ -1,5 +1,9 @@
 import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import ApolloClient from 'apollo-client'
+import { createHttpLink } from 'apollo-link-http'
 import BN from 'bn.js'
+import gql from 'graphql-tag'
 import { WithRouterProps } from 'next/dist/client/with-router'
 import Link from 'next/link'
 import { withRouter } from 'next/router'
@@ -13,6 +17,7 @@ import { Divider } from '../Divider'
 import { SectionHeading } from '../Heading'
 import { Shelf, Stack } from '../Layout'
 import { PoolCapacityLabel } from '../PoolCapacityLabel'
+import { IconExternalLink } from '../RewardsBanner/IconExternalLink'
 import { Tooltip } from '../Tooltip'
 import { Value } from '../Value'
 import { ValuePairList } from '../ValuePairList'
@@ -131,8 +136,10 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
                 (!p.assetValue && !p.reserve) ||
                 (p.assetValue?.isZero() && p.reserve?.isZero()) ||
                 !p.seniorYield30Days ||
-                p.seniorYield30Days.isZero() ? (
-                <SubNumber>Expected: {v} % APR</SubNumber>
+                p.seniorYield30Days.isZero() ||
+                !p.juniorYield90Days ||
+                p.juniorYield90Days.isZero() ? (
+                <SubNumber>Target: {v} % APR</SubNumber>
               ) : (
                 <Value value={parseFloat(getDropAPY(p.seniorYield30Days) || '0').toFixed(2)} unit="%" />
               )
@@ -173,13 +180,16 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
           })}
         </Header>
       )}
+      <Link href={'https://rwamarket.io/'} passHref key="rwa-market">
+        <RwaMarketRow isMobile={isMobile as boolean} interactive as="a" target="_blank" />
+      </Link>
       {pools?.map((p, i) => (
         <Link href={p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`} shallow passHref key={`${p.id}-${i}`}>
           <Row
             row={p}
             columns={dataColumns}
             isMobile={isMobile as boolean}
-            icon={p.icon || 'https://storage.googleapis.com/tinlake/pool-media/icon-placeholder.svg'}
+            icon={p.icon || ''}
             title={p.name}
             type={p.asset}
             as="a"
@@ -237,6 +247,117 @@ export const Row: React.FC<DetailsProps & PropsOf<typeof PoolRow>> = ({
           {columns.map((col) => {
             const Col = isAlignedLeft(col) ? DataColLeft : DataCol
             return <Col>{col.cell(row)}</Col>
+          })}
+        </Shelf>
+      )}
+    </PoolRow>
+  )
+}
+
+interface RwaMarketRowProps {
+  isMobile: boolean
+}
+
+const fetchReserves = async (): Promise<any> => {
+  const Apollo = new ApolloClient({
+    cache: new InMemoryCache(),
+    link: createHttpLink({
+      fetch: fetch as any,
+      headers: {
+        'user-agent': null,
+      },
+      uri: 'https://api.thegraph.com/subgraphs/name/aave/aave-centrifuge',
+    }),
+    defaultOptions: {
+      query: {
+        fetchPolicy: 'no-cache',
+        errorPolicy: 'all',
+      },
+    },
+  })
+
+  return Apollo.query({
+    query: gql`
+      {
+        reserves(where: { symbol: "USDC" }) {
+          symbol
+          totalLiquidity
+        }
+      }
+    `,
+  })
+}
+
+export const RwaMarketRow: React.FC<RwaMarketRowProps & PropsOf<typeof PoolRow>> = ({ isMobile, ...rest }) => {
+  const poolIcon = <Icon src={'/static/rwa-market-icon.png'} />
+  const poolTitle = (
+    <Stack gap="xsmall" flex="1 1 auto">
+      <Name>
+        Real-World Asset Market{' '}
+        <span style={{ position: 'relative', top: '2px' }}>
+          <IconExternalLink />
+        </span>
+      </Name>
+      <Type>Market of RWA pools, built on the Aave protocol</Type>
+    </Stack>
+  )
+
+  const [marketSize, setMarketSize] = React.useState(new BN(0))
+
+  const columns: any[] = [
+    {
+      header: 'Investment Capacity',
+      cell: () => <PoolCapacityLabel />,
+    },
+    {
+      header: 'Pool Value',
+      cell: () => <Value value={toNumber(marketSize, 0)} unit={'USDC'} />,
+    },
+    {
+      header: (
+        <Tooltip id="seniorApy" underline>
+          Senior APY
+        </Tooltip>
+      ),
+      subHeader: '30 days',
+      cell: () => {
+        return <SubNumber>Target: 3.5 % APR</SubNumber>
+      },
+    },
+  ]
+    .filter(Boolean)
+    .flat() as Column[]
+
+  const getMarketData = async () => {
+    const reserves = await fetchReserves()
+    setMarketSize(new BN(reserves.data.reserves[0].totalLiquidity).div(new BN(10).pow(new BN(6))))
+  }
+
+  React.useEffect(() => {
+    getMarketData()
+  }, [])
+
+  return (
+    <PoolRow {...rest}>
+      {isMobile ? (
+        <Stack gap="small">
+          <Shelf gap="xsmall">
+            {poolIcon}
+            {poolTitle}
+          </Shelf>
+          <Divider bleedX="small" width="auto" />
+          <ValuePairList
+            variant="primary"
+            items={columns.map((col) => ({ term: col.header, termSuffix: col.subHeader, value: col.cell() }))}
+          />
+        </Stack>
+      ) : (
+        <Shelf gap="small">
+          {poolIcon}
+          {poolTitle}
+          {columns.map((col) => {
+            const Col = isAlignedLeft(col) ? DataColLeft : DataCol
+            return <Col>{col.cell()}</Col>
           })}
         </Shelf>
       )}

@@ -4,6 +4,7 @@ on:
     paths:
       - 'nft-studio/**'
       - 'fabric/**' # dependency
+      - 'centrifuge-js/**' # dependency
       - '.github/workflows/nft-studio-pull-request.yml'
 
 jobs:

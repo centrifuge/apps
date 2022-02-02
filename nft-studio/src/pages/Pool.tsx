@@ -1,6 +1,6 @@
-import { Box, Button, Card, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Card, Grid, IconArrowRight, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
-import * as React from 'react'
+import React, { useMemo } from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { CardHeader } from '../components/CardHeader'
@@ -13,7 +13,11 @@ import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { AnchorPillButton } from '../components/PillButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
+import { useWeb3 } from '../components/Web3Provider'
+import { isOwnPool } from '../utils/ownership/isOwnPool'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLoans } from '../utils/useLoans'
+import { usePermissions } from '../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 
 export const PoolPage: React.FC = () => {
@@ -28,27 +32,95 @@ const Pool: React.FC = () => {
   const {
     params: { pid: poolId },
   } = useRouteMatch<{ pid: string }>()
-  const { data: pool } = usePool(poolId)
+  const { data: pool, refetch: refetchPool } = usePool(poolId)
   const { data: loans } = useLoans(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const history = useHistory()
+  const { selectedAccount } = useWeb3()
 
-  console.log('pool', pool)
+  const { data: permissions } = usePermissions(selectedAccount?.address)
 
   const centrifuge = useCentrifuge()
+
+  const canSetMaxReserve = useMemo(
+    () => !!(selectedAccount && permissions && permissions[poolId]?.roles.includes('LiquidityAdmin')),
+    [poolId, selectedAccount, permissions]
+  )
+
+  const isManagedPool = useMemo(
+    () => (pool && selectedAccount ? isOwnPool(pool, selectedAccount) : false),
+    [pool, selectedAccount]
+  )
+
+  console.log('pool', pool, loans)
+
+  const { execute: closeEpochTx } = useCentrifugeTransaction('Close epoch', (cent) => cent.pools.closeEpoch, {
+    onSuccess: () => {
+      console.log('Epoch closed successfully')
+    },
+  })
+
+  const closeEpoch = async () => {
+    if (!pool) return
+    closeEpochTx([pool.id])
+  }
+
+  const { execute: setMaxReserveTx } = useCentrifugeTransaction('Set max reserve', (cent) => cent.pools.setMaxReserve, {
+    onSuccess: () => {
+      refetchPool()
+    },
+  })
+
+  const promptMaxReserve = () => {
+    if (!pool) return
+    const maxReserve = Number.parseFloat(prompt('Insert max reserve') || 'a')
+    if (Number.isNaN(maxReserve)) return
+
+    setMaxReserveTx([pool.id, new BN(maxReserve).mul(new BN(10).pow(new BN(18)))])
+  }
 
   return (
     <Stack gap={5} flex={1}>
       <PageHeader
         title={metadata?.pool?.name ?? ''}
-        parent={{ to: '/pools', label: 'Pools' }}
+        parent={{ to: '/managed-pools', label: isManagedPool ? 'Managed pools' : 'Pools' }}
         subtitle={metadata?.pool?.asset?.class}
+        actions={
+          <>
+            {isManagedPool && (
+              <Button variant="text" icon={<IconArrowRight />} onClick={closeEpoch} disabled={!pool}>
+                Close epoch
+              </Button>
+            )}
+          </>
+        }
       />
       <PageSummary>
         <LabelValueStack
-          label="Value"
+          label="Pool value"
+          value={centrifuge.utils.formatCurrencyAmount(
+            pool ? new BN(pool.reserve.total).add(new BN(pool.nav.latest)) : '0',
+            pool?.currency
+          )}
+        />
+        <LabelValueStack
+          label="Asset value"
           value={centrifuge.utils.formatCurrencyAmount(pool?.nav.latest, pool?.currency)}
         />
+        <LabelValueStack
+          label="Reserve"
+          value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.total, pool?.currency)}
+        />
+        <LabelValueStack
+          label="Max. Reserve"
+          value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.max, pool?.currency)}
+        />
+
+        {isManagedPool && (
+          <Button variant="text" icon={<IconArrowRight />} onClick={promptMaxReserve} disabled={!canSetMaxReserve}>
+            Set maximum
+          </Button>
+        )}
       </PageSummary>
       <Grid columns={[1, 2]} gap={3} equalColumns>
         {pool &&
