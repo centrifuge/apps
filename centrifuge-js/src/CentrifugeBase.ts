@@ -117,4 +117,14 @@ export class CentrifugeBase {
       signingAddress,
     }
   }
+
+  getSignerAddress() {
+    const { signingAddress } = this.getSigner()
+
+    if (typeof signingAddress !== 'string' && 'address' in signingAddress) {
+      return signingAddress.address
+    }
+
+    return signingAddress
+  }
 }

@@ -18,10 +18,11 @@ import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { ButtonTextLink } from '../components/TextLink'
-import { useWeb3 } from '../components/Web3Provider'
 import { nftMetadataSchema } from '../schemas'
 import { formatDate } from '../utils/date'
+import { Dec } from '../utils/Decimal'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
+import { useAddress } from '../utils/useAddress'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLoan } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
@@ -56,11 +57,11 @@ const Loan: React.FC = () => {
   const loanNft = useLoanNft(pid, aid)
   const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const centrifuge = useCentrifuge()
-  const { selectedAccount } = useWeb3()
-  const { data: permissions } = usePermissions(selectedAccount?.address)
+  const address = useAddress()
+  const { data: permissions } = usePermissions(address)
 
   const canPrice = permissions?.[pid]?.roles.includes('PricingAdmin')
-  const isLoanOwner = isSameAddress(loanNft?.owner, selectedAccount?.address)
+  const isLoanOwner = isSameAddress(loanNft?.owner, address)
   const canBorrow = permissions?.[pid]?.roles.includes('Borrower') && isLoanOwner
 
   const name = truncate(nftMetadata?.name || 'Unnamed asset', 30)
@@ -184,14 +185,14 @@ const LOAN_FIELDS = {
   ],
 }
 
-function validateNumberInput(value: number | string, min: number, max?: number) {
+function validateNumberInput(value: number | string, min: number | Decimal, max?: number | Decimal) {
   if (value === '') {
     return 'Not a valid number'
   }
-  if (max && value > max) {
+  if (max && Dec(value).greaterThan(Dec(max))) {
     return 'Value too large'
   }
-  if (value < min) {
+  if (Dec(value).lessThan(Dec(min))) {
     return 'Value too small'
   }
 }
@@ -286,7 +287,7 @@ const PricingForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
 
   return (
     <FormikProvider value={form}>
-      <Form>
+      <Form noValidate>
         <Card p={3}>
           <Stack gap={5}>
             <CardHeader title="Price" />
@@ -315,7 +316,7 @@ const PricingForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
               />
             </Grid>
             <div>
-              <Button type="submit" formNoValidate disabled={!form.isValid} loading={isLoading}>
+              <Button type="submit" disabled={!form.isValid} loading={isLoading}>
                 Price
               </Button>
             </div>
@@ -367,14 +368,14 @@ const FinanceForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
     doRepayAllTransaction([loan.poolId, loan.id])
   }
 
-  const debt = new Decimal(loan.outstandingDebt).div('1e18')
-  const poolReserve = new Decimal(pool?.reserve.available ?? 0).div('1e18')
-  let ceiling = new Decimal(loan.loanInfo.value).div('1e18').mul(loan.loanInfo.advanceRate).div('1e27')
+  const debt = Dec(loan.outstandingDebt).div('1e18')
+  const poolReserve = Dec(pool?.reserve.available ?? 0).div('1e18')
+  let ceiling = Dec(loan.loanInfo.value).div('1e18').mul(loan.loanInfo.advanceRate).div('1e27')
   if (loan.loanInfo.type === 'BulletLoan') {
-    ceiling = ceiling.minus(new Decimal(loan.financedAmount).div('1e18'))
+    ceiling = ceiling.minus(Dec(loan.financedAmount).div('1e18'))
   } else {
     ceiling = ceiling.minus(debt)
-    ceiling = ceiling.isNegative() ? new Decimal(0) : ceiling
+    ceiling = ceiling.isNegative() ? Dec(0) : ceiling
   }
   const maxBorrow = poolReserve.lessThan(ceiling) ? poolReserve : ceiling
 
@@ -399,7 +400,7 @@ const FinanceForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
               amount: 0,
             }}
             onSubmit={(values, actions) => {
-              const amount = new Decimal(values.amount).mul('1e18').toString()
+              const amount = Dec(values.amount).mul('1e18').toString()
               doFinanceTransaction([loan.poolId, loan.id, new BN(amount)])
               actions.setSubmitting(false)
             }}
@@ -415,7 +416,7 @@ const FinanceForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
             validateOnMount
           >
             {(form) => (
-              <Stack as={Form} gap={3}>
+              <Stack as={Form} gap={3} noValidate>
                 <Stack>
                   <Field name="amount">
                     {({ field: { value, ...fieldProps } }: any) => (
@@ -441,13 +442,7 @@ const FinanceForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
                   </Text>
                 </Stack>
                 <Box mt="auto">
-                  <Button
-                    type="submit"
-                    formNoValidate
-                    variant="outlined"
-                    disabled={!form.isValid}
-                    loading={isFinanceLoading}
-                  >
+                  <Button type="submit" variant="outlined" disabled={!form.isValid} loading={isFinanceLoading}>
                     Finance asset
                   </Button>
                 </Box>
@@ -476,16 +471,10 @@ const FinanceForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
             validateOnMount
           >
             {(form) => (
-              <Stack as={Form} gap={3}>
-                <FormikNumberInput name="amount" label="Repay amount" type="number" min="0" />
+              <Stack as={Form} gap={3} noValidate>
+                <FormikNumberInput name="amount" label="Repay amount" min="0" />
                 <Shelf mt="auto" gap={2}>
-                  <Button
-                    type="submit"
-                    formNoValidate
-                    variant="outlined"
-                    disabled={!form.isValid}
-                    loading={isRepayLoading}
-                  >
+                  <Button type="submit" variant="outlined" disabled={!form.isValid} loading={isRepayLoading}>
                     Repay asset
                   </Button>
                   <Button variant="outlined" loading={isRepayAllLoading} onClick={() => repayAll()}>

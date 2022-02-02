@@ -1,15 +1,14 @@
 import { useQuery } from 'react-query'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 
-export function useInvestmentTokens(address?: string) {
+export function useBalances(address?: string) {
   const centrifuge = useCentrifuge()
   const query = useQuery(
-    ['investmentTokens'],
+    ['balances', address],
     async () => {
-      return centrifuge.pools.getInvestments([address!])
+      return centrifuge.pools.getBalances([address!])
     },
     {
-      suspense: true,
       enabled: !!address,
     }
   )

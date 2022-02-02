@@ -1,4 +1,5 @@
 import { StorageKey, u32 } from '@polkadot/types'
+import type { AccountId, Address } from '@polkadot/types/interfaces'
 import BN from 'bn.js'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
@@ -8,6 +9,8 @@ const Currency = new BN(10).pow(new BN(18))
 const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
 
 type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'RiskAdmin'
+
+type Account = AccountId | Address | string
 
 export type PoolRoleInput = AdminRole | { TrancheInvestor: [trancheId: number, delta: number] }
 
@@ -112,23 +115,30 @@ type NAVDetailsData = {
   lastUpdated: number
 }
 
+export type Tranche = {
+  index: number
+  name: string
+  debt: string
+  reserve: string
+  minRiskBuffer: string
+  ratio: string
+  outstandingInvestOrders: string
+  outstandingRedeemOrders: string
+  interestPerSec: string
+  lastUpdatedInterest: number
+}
+
+export type TrancheWithTokenPrice = Tranche & {
+  totalIssuance: string
+  tokenPrice: string
+}
+
 export type Pool = {
   id: string
   owner: string
   currency: string
   metadata: string
-  tranches: {
-    index: number
-    name: string
-    debt: string
-    reserve: string
-    minRiskBuffer: string
-    ratio: string
-    outstandingInvestOrders: string
-    outstandingRedeemOrders: string
-    interestPerSec: string
-    lastUpdatedInterest: number
-  }[]
+  tranches: Tranche[]
   reserve: {
     max: string
     available: string
@@ -147,20 +157,7 @@ export type DetailedPool = Omit<Pool, 'tranches'> & {
     latest: string
     lastUpdated: number
   }
-  tranches: {
-    index: number
-    name: string
-    debt: string
-    reserve: string
-    minRiskBuffer: string
-    ratio: string
-    outstandingInvestOrders: string
-    outstandingRedeemOrders: string
-    interestPerSec: string
-    lastUpdatedInterest: number
-    totalIssuance: string
-    tokenPrice: string
-  }[]
+  tranches: TrancheWithTokenPrice[]
 }
 
 export enum LoanStatus {
@@ -205,9 +202,14 @@ export type Loan = {
   }
 }
 
-export type Investment = {
+export type TokenBalance = {
+  currency: string
+  balance: string
+}
+
+export type TrancheBalance = {
   poolId: string
-  trancheIndex: number
+  trancheId: number
   balance: string
 }
 
@@ -272,7 +274,22 @@ export function getPoolsModule(inst: CentrifugeBase) {
   ) {
     const [poolId, trancheId, newOrder] = args
     const api = await inst.getApi()
-    const submittable = api.tx.pools.updateInvestOrder(poolId, trancheId, newOrder.toString())
+    const address = inst.getSignerAddress()
+
+    const [pool, order] = await Promise.all([getPool([poolId]), getOrder([address, poolId, trancheId])])
+
+    // console.log('order', order, pool.epoch)
+
+    let submittable
+    if (order.epoch < pool.epoch.lastExecuted - 9999 /* disabled for now */) {
+      submittable = api.tx.utility.batchAll([
+        api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted - order.epoch),
+        api.tx.pools.updateInvestOrder(poolId, trancheId, newOrder.toString()),
+      ])
+    } else {
+      submittable = api.tx.pools.updateInvestOrder(poolId, trancheId, newOrder.toString())
+    }
+
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -282,7 +299,23 @@ export function getPoolsModule(inst: CentrifugeBase) {
   ) {
     const [poolId, trancheId, newOrder] = args
     const api = await inst.getApi()
-    const submittable = api.tx.pools.updateRedeemOrder(poolId, trancheId, newOrder.toString())
+
+    const address = inst.getSignerAddress()
+
+    const [pool, order] = await Promise.all([getPool([poolId]), getOrder([address, poolId, trancheId])])
+
+    // console.log('order', order, pool.epoch)
+
+    let submittable
+    if (order.epoch < pool.epoch.lastExecuted - 9999 /* disabled for now */) {
+      submittable = api.tx.utility.batchAll([
+        api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted - order.epoch),
+        api.tx.pools.updateRedeemOrder(poolId, trancheId, newOrder.toString()),
+      ])
+    } else {
+      submittable = api.tx.pools.updateRedeemOrder(poolId, trancheId, newOrder.toString())
+    }
+
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -304,12 +337,25 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId, trancheId] = args
     const api = await inst.getApi()
     const pool = await getPool([poolId])
-    const submittable =
-      trancheId !== undefined
-        ? api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted)
-        : api.tx.utility.batchAll(
-            pool.tranches.map((_t, index: number) => api.tx.pools.collect(poolId, index, pool.epoch.lastExecuted))
-          )
+
+    const address = inst.getSignerAddress()
+
+    let submittable
+    if (trancheId !== undefined) {
+      const order = await getOrder([address, poolId, trancheId])
+      submittable = api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted - order.epoch)
+    } else {
+      const orders = await Promise.all(pool.tranches.map((_t, index: number) => getOrder([address, poolId, index])))
+      submittable = api.tx.utility.batchAll(
+        pool.tranches
+          .map((_t, index: number) => {
+            const nEpochs = pool.epoch.lastExecuted - orders[index].epoch
+            if (!nEpochs) return null as any
+            return api.tx.pools.collect(poolId, index, nEpochs)
+          })
+          .filter(Boolean)
+      )
+    }
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
@@ -328,7 +374,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
-  async function getRolesByPool(args: [address: string]): Promise<{ [poolId: string]: PoolRoles }> {
+  async function getRolesByPool(args: [address: Account]): Promise<{ [poolId: string]: PoolRoles }> {
     const api = await inst.getApi()
     const permissionsRaw = await api.query.permissions.permission.entries(args[0])
 
@@ -511,23 +557,49 @@ export function getPoolsModule(inst: CentrifugeBase) {
     }
   }
 
-  async function getInvestments(args: [address: string]): Promise<Investment[]> {
+  async function getBalances(args: [address: Account]) {
     const api = await inst.getApi()
-    const rawTokens = await api.query.ormlTokens.accounts.entries(args[0])
+    const rawBalances = await api.query.ormlTokens.accounts.entries(args[0])
 
-    const tokens = rawTokens
-      .map(([key, value]) => [key.toHuman(), value.toJSON()] as any)
-      .filter(([key, value]) => typeof key[1] !== 'string' && value.free !== 0)
-      .map(([key, value]) => {
-        const [poolId, trancheIndex] = key[1].Tranche
-        return {
-          poolId: poolId.replace(/\D/g, ''),
-          trancheIndex: parseInt(trancheIndex, 10),
-          balance: parseHex(value.free),
+    const balances = {
+      tranches: [] as TrancheBalance[],
+      tokens: [] as TokenBalance[],
+    }
+
+    rawBalances.forEach(([rawKey, rawValue]) => {
+      const key = (rawKey.toHuman() as any)[1] as string | { Tranche: [string, string] }
+      const value = rawValue.toJSON() as { free: string | number }
+      if (typeof key !== 'string') {
+        const [poolId, trancheId] = key.Tranche
+        if (value.free !== 0) {
+          balances.tranches.push({
+            poolId: poolId.replace(/\D/g, ''),
+            trancheId: parseInt(trancheId, 10),
+            balance: parseHex(value.free),
+          })
         }
-      })
+      } else {
+        balances.tokens.push({
+          currency: key.toLowerCase(),
+          balance: parseHex(value.free),
+        })
+      }
+    })
 
-    return tokens
+    return balances
+  }
+
+  async function getOrder(args: [address: Account, poolId: string, trancheId: number]) {
+    const api = await inst.getApi()
+    const [address, poolId, trancheId] = args
+    const result = await api.query.pools.order({ Tranche: [poolId, trancheId] }, address)
+    const order = result.toJSON() as any
+
+    return {
+      invest: parseHex(order.invest),
+      redeem: parseHex(order.redeem),
+      epoch: order.epoch as number,
+    }
   }
 
   async function getLoans(args: [poolId: string]): Promise<Loan[]> {
@@ -642,7 +714,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
     repayAndCloseLoan,
     getPools,
     getPool,
-    getInvestments,
+    getBalances,
+    getOrder,
     getLoans,
     getLoan,
     addWriteOffGroup,
@@ -660,9 +733,9 @@ const parseHex = (value: string | number) => {
 
 const tokenNames = [
   ['Junior'],
-  ['Senior', 'Junior'],
-  ['Senior', 'Mezzanine', 'Junior'],
-  ['Super-senior', 'Senior', 'Mezzanine', 'Junior'],
+  ['Junior', 'Senior'],
+  ['Junior', 'Mezzanine', 'Senior'],
+  ['Junior', 'Mezzanine', 'Senior', 'Super-senior'],
 ]
 
 const tokenIndexToName = (index: number, numberOfTranches: number) => {

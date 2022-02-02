@@ -33,6 +33,21 @@ export function usePool(id: string) {
   return query
 }
 
+export function useOrder(poolId: string, trancheId: number, address?: string) {
+  const centrifuge = useCentrifuge()
+  const query = useQuery(
+    ['order', poolId, trancheId, address],
+    async () => {
+      return centrifuge.pools.getOrder([address!, poolId, trancheId])
+    },
+    {
+      enabled: !!address,
+    }
+  )
+
+  return query
+}
+
 export type PoolMetadata = {
   pool: {
     name: string

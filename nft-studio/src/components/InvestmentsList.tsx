@@ -1,4 +1,4 @@
-import { Investment } from '@centrifuge/centrifuge-js'
+import { TrancheBalance } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -8,7 +8,7 @@ import { useCentrifuge } from './CentrifugeProvider'
 import { DataTable } from './DataTable'
 
 type Props = {
-  investments: Investment[]
+  investments: TrancheBalance[]
 }
 
 export const InvestmentsList: React.FC<Props> = ({ investments }) => {
@@ -18,18 +18,18 @@ export const InvestmentsList: React.FC<Props> = ({ investments }) => {
     {
       align: 'left',
       header: 'Pool',
-      cell: (i: Investment) => <TokenSymbol investment={i} />,
+      cell: (i: TrancheBalance) => <TokenSymbol investment={i} />,
       flex: '1 1 100px',
     },
     {
       align: 'left',
       header: 'Asset class',
-      cell: (i: Investment) => <TrancheName investment={i} />,
+      cell: (i: TrancheBalance) => <TrancheName investment={i} />,
       flex: '2 1 250px',
     },
     {
       header: 'Value',
-      cell: (i: Investment) => <TokenValue investment={i} />,
+      cell: (i: TrancheBalance) => <TokenValue investment={i} />,
     },
     {
       header: '',
@@ -41,30 +41,30 @@ export const InvestmentsList: React.FC<Props> = ({ investments }) => {
     <DataTable
       data={investments}
       columns={columns}
-      onRowClicked={(i: Investment) => {
-        history.push(`/investments/tokens/${i.poolId}/${i.trancheIndex}`)
+      onRowClicked={(i: TrancheBalance) => {
+        history.push(`/investments/tokens/${i.poolId}/${i.trancheId}`)
       }}
     />
   )
 }
 
-const TokenSymbol: React.VFC<{ investment: Investment }> = ({ investment }) => {
+const TokenSymbol: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
   const { data: pool } = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
   return (
     <Text variant="body2" fontWeight={600}>
-      {metadata?.tranches?.[investment.trancheIndex]?.symbol}
+      {metadata?.tranches?.[investment.trancheId]?.symbol}
     </Text>
   )
 }
 
-const TrancheName: React.VFC<{ investment: Investment }> = ({ investment }) => {
+const TrancheName: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
   const { data: pool } = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
-  return <Text variant="body2">{metadata?.tranches?.[investment.trancheIndex]?.name}</Text>
+  return <Text variant="body2">{metadata?.tranches?.[investment.trancheId]?.name}</Text>
 }
 
-const TokenValue: React.VFC<{ investment: Investment }> = ({ investment }) => {
+const TokenValue: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
   const { data: pool } = usePool(investment.poolId)
   const centrifuge = useCentrifuge()
 
@@ -72,7 +72,7 @@ const TokenValue: React.VFC<{ investment: Investment }> = ({ investment }) => {
     <Text variant="body2">
       {centrifuge.utils.formatCurrencyAmount(
         new BN(investment.balance)
-          .mul(new BN(pool?.tranches[investment.trancheIndex].tokenPrice ?? 1))
+          .mul(new BN(pool?.tranches[investment.trancheId].tokenPrice ?? 1))
           .div(new BN(10).pow(new BN(27))),
         pool?.currency
       )}

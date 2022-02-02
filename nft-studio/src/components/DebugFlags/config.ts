@@ -8,9 +8,13 @@ type DebugFlagConfig = {
 }
 
 export const flagsConfig: Record<string, DebugFlagConfig> = {
+  address: {
+    type: 'text',
+    default: '',
+  },
   showOnlyNFT: {
     type: 'checkbox',
-    default: true,
+    default: false,
   },
   alwaysShowPanel: {
     type: 'checkbox',
