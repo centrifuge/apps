@@ -154,6 +154,7 @@ export type Pool = {
     latest: string
     lastUpdated: number
   }
+  value: string
 }
 
 export type DetailedPool = Omit<Pool, 'tranches'> & {
@@ -455,16 +456,17 @@ export function getPoolsModule(inst: CentrifugeBase) {
       const poolId = formatPoolKey(key as StorageKey<[u32]>)
       const nav = navValue.toJSON() as unknown as NAVDetailsData
       acc[poolId] = {
-        latest: nav ? parseBN(nav.latestNav) : '0',
+        latest: nav ? nav.latestNav : new BN('0'),
         lastUpdated: nav ? nav.lastUpdated : 0,
       }
       return acc
-    }, {} as Record<string, { latest: string; lastUpdated: number }>)
+    }, {} as Record<string, { latest: BN; lastUpdated: number }>)
 
     const pools = rawPools.map(([key, value]) => {
       const pool = value.toJSON() as unknown as PoolDetailsData
       const metadata = (value.toHuman() as any).metadata
       const poolId = formatPoolKey(key as StorageKey<[u32]>)
+      const navData = navMap[poolId]
       return {
         id: poolId,
         owner: pool.owner,
@@ -495,7 +497,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
           lastExecuted: pool.lastEpochExecuted,
           inSubmissionPeriod: pool.submissionPeriodEpoch,
         },
-        nav: navMap[poolId],
+        nav: {
+          latest: parseBN(navData.latest),
+          lastUpdated: navData.lastUpdated,
+        },
+        value: new BN(parseBN(pool.totalReserve)).add(new BN(parseBN(navData.latest))).toString(),
       }
     })
 
@@ -561,6 +567,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         available: parseBN(pool.availableReserve),
         total: parseBN(pool.totalReserve),
       },
+      value: new BN(parseBN(pool.totalReserve)).add(new BN(parseBN(nav.latestNav))).toString(),
       epoch: {
         current: pool.currentEpoch,
         lastClosed: pool.lastEpochClosed,

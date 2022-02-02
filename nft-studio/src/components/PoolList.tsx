@@ -1,6 +1,5 @@
 import { formatCurrencyAmount, Pool } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Text } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { usePoolMetadata } from '../utils/usePools'
@@ -27,7 +26,7 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
     },
     {
       header: 'Value',
-      cell: (p: Pool) => formatCurrencyAmount(new BN(p.reserve.total).add(new BN(p.nav.latest)), p.currency),
+      cell: (p: Pool) => formatCurrencyAmount(p.value, p.currency),
     },
     {
       header: '',

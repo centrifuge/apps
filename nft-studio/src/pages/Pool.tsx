@@ -98,10 +98,7 @@ const Pool: React.FC = () => {
       <PageSummary>
         <LabelValueStack
           label="Pool value"
-          value={centrifuge.utils.formatCurrencyAmount(
-            pool ? new BN(pool.reserve.total).add(new BN(pool.nav.latest)) : '0',
-            pool?.currency
-          )}
+          value={centrifuge.utils.formatCurrencyAmount(pool ? pool.value : '0', pool?.currency)}
         />
         <LabelValueStack
           label="Asset value"
