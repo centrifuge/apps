@@ -1,4 +1,4 @@
-import { Pool } from '@centrifuge/centrifuge-js'
+import { formatCurrencyAmount, Pool } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory } from 'react-router'
@@ -26,7 +26,7 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
     },
     {
       header: 'Value',
-      cell: (p: Pool) => p.reserve.total,
+      cell: (p: Pool) => formatCurrencyAmount(p.reserve.total, p.currency),
     },
     {
       header: '',
