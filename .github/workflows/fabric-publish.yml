@@ -1,10 +1,8 @@
 name: 'Fabric publish'
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'fabric/**'
+    tags:
+      - fabric/v*
 
 jobs:
   build-and-deploy:
@@ -27,13 +25,7 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
-      - name: Bump version
-        run: yarn bump
-
-      - name: Public
+      - name: Publish
         run: yarn publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-
-      - name: Push bumped version and changelog
-        run: git push --follow-tags origin main
