@@ -5,6 +5,7 @@ import { useHistory, useRouteMatch } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { CardHeader } from '../components/CardHeader'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { ConnectButton } from '../components/ConnectButton'
 import { InvestRedeemDialog } from '../components/InvestRedeemDialog'
 import { LabelValueList } from '../components/LabelValueList'
 import { LabelValueStack } from '../components/LabelValueStack'
@@ -15,6 +16,7 @@ import { AnchorPillButton } from '../components/PillButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { useWeb3 } from '../components/Web3Provider'
 import { isOwnPool } from '../utils/ownership/isOwnPool'
+import { useAddress } from '../utils/useAddress'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLoans } from '../utils/useLoans'
 import { usePermissions } from '../utils/usePermissions'
@@ -213,12 +215,17 @@ const Pool: React.FC = () => {
 
 export const InvestAction: React.FC<{ poolId: string; trancheId: number }> = ({ poolId, trancheId }) => {
   const [open, setOpen] = React.useState(false)
+  const address = useAddress()
   return (
     <>
       <ButtonGroup>
-        <Button small variant="outlined" onClick={() => setOpen(true)}>
-          Invest
-        </Button>
+        {address ? (
+          <Button small variant="outlined" onClick={() => setOpen(true)}>
+            Invest
+          </Button>
+        ) : (
+          <ConnectButton small variant="outlined" />
+        )}
       </ButtonGroup>
       <InvestRedeemDialog
         poolId={poolId}

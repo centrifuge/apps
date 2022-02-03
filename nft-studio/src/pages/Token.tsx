@@ -5,6 +5,7 @@ import { useParams } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { CardHeader } from '../components/CardHeader'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { ConnectButton } from '../components/ConnectButton'
 import { InvestRedeemDialog } from '../components/InvestRedeemDialog'
 import { LabelValueList } from '../components/LabelValueList'
 import { PageHeader } from '../components/PageHeader'
@@ -101,24 +102,28 @@ const Token: React.FC = () => {
                 items={[
                   {
                     label: 'Balance',
-                    value: centrifuge.utils.formatCurrencyAmount(token?.balance, trancheMeta?.symbol),
+                    value: centrifuge.utils.formatCurrencyAmount(token?.balance ?? '0', trancheMeta?.symbol),
                   },
                   {
                     label: 'Value',
-                    value:
-                      token?.balance &&
-                      centrifuge.utils.formatCurrencyAmount(
-                        new BN(token.balance)
-                          .mul(new BN(pool.tranches[trancheId].tokenPrice))
-                          .div(new BN(10).pow(new BN(27))),
-                        pool.currency
-                      ),
+                    value: centrifuge.utils.formatCurrencyAmount(
+                      new BN(token?.balance ?? 0)
+                        .mul(new BN(pool.tranches[trancheId].tokenPrice))
+                        .div(new BN(10).pow(new BN(27))),
+                      pool.currency
+                    ),
                   },
                 ]}
               />
               <ButtonGroup>
-                <RedeemAction poolId={poolId} trancheId={trancheId} />
-                <InvestAction poolId={poolId} trancheId={trancheId} />
+                {address ? (
+                  <>
+                    <RedeemAction poolId={poolId} trancheId={trancheId} />
+                    <InvestAction poolId={poolId} trancheId={trancheId} />
+                  </>
+                ) : (
+                  <ConnectButton />
+                )}
               </ButtonGroup>
             </Stack>
           </Card>

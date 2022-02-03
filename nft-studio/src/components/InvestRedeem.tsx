@@ -10,6 +10,7 @@ import { useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { usePermissions } from '../utils/usePermissions'
 import { useOrder, usePool } from '../utils/usePools'
+import { ButtonGroup } from './ButtonGroup'
 import { ConnectButton } from './ConnectButton'
 import { TextInput } from './form/base/TextInput'
 import { LoadBoundary } from './LoadBoundary'
@@ -173,9 +174,11 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
             </Text>
           )}
           {pendingInvest.isZero() ? (
-            <Button type="submit" disabled={!form.isValid} loading={isLoading}>
-              Invest
-            </Button>
+            <ButtonGroup>
+              <Button type="submit" disabled={!form.isValid} loading={isLoading}>
+                Invest
+              </Button>
+            </ButtonGroup>
           ) : (
             <>
               <Box backgroundColor="backgroundSecondary" p={2}>
@@ -183,7 +186,7 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                   you have <Text fontWeight={600}>{pendingInvest.toFixed(0)} usd</Text> pending investment
                 </Text>
               </Box>
-              <Shelf gap={2}>
+              <ButtonGroup>
                 <Button type="submit" disabled={!form.isValid} loading={isLoading}>
                   Update
                 </Button>
@@ -194,7 +197,7 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                 >
                   Cancel order
                 </Button>
-              </Shelf>
+              </ButtonGroup>
             </>
           )}
         </Stack>
@@ -289,9 +292,11 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
             </Text>
           )}
           {pendingRedeem.isZero() ? (
-            <Button type="submit" disabled={!form.isValid} loading={isLoading}>
-              Redeem
-            </Button>
+            <ButtonGroup>
+              <Button type="submit" disabled={!form.isValid} loading={isLoading}>
+                Redeem
+              </Button>
+            </ButtonGroup>
           ) : (
             <>
               <Box backgroundColor="backgroundSecondary" p={2}>
@@ -299,7 +304,7 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                   you have <Text fontWeight={600}>{pendingRedeem.toFixed(0)} usd</Text> pending redemption
                 </Text>
               </Box>
-              <Shelf gap={2}>
+              <ButtonGroup>
                 <Button type="submit" disabled={!form.isValid} loading={isLoading}>
                   Update
                 </Button>
@@ -310,7 +315,7 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                 >
                   Cancel order
                 </Button>
-              </Shelf>
+              </ButtonGroup>
             </>
           )}
         </Stack>
