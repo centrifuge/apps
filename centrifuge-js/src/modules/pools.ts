@@ -449,9 +449,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   async function getPools(): Promise<Pool[]> {
     const api = await inst.getApi()
-    const rawPools = await api.query.pools.pool.entries()
 
-    const rawNavs = await api.query.loans.poolNAV.entries()
+    const [rawPools, rawNavs] = await Promise.all([api.query.pools.pool.entries(), api.query.loans.poolNAV.entries()])
+
     const navMap = rawNavs.reduce((acc, [key, navValue]) => {
       const poolId = formatPoolKey(key as StorageKey<[u32]>)
       const nav = navValue.toJSON() as unknown as NAVDetailsData
