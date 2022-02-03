@@ -5,6 +5,7 @@ import { useParams } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { CardHeader } from '../components/CardHeader'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { InvestRedeemDialog } from '../components/InvestRedeemDialog'
 import { LabelValueList } from '../components/LabelValueList'
 import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
@@ -32,8 +33,6 @@ const Token: React.FC = () => {
   const token = balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)
   const tranche = pool?.tranches[trancheId]
   const trancheMeta = metadata?.tranches?.[trancheId]
-
-  console.log('balances', balances)
 
   return (
     <Stack gap={8} flex={1}>
@@ -118,13 +117,51 @@ const Token: React.FC = () => {
                 ]}
               />
               <ButtonGroup>
-                <Button variant="outlined">Redeem</Button>
-                <Button>Invest</Button>
+                <RedeemAction poolId={poolId} trancheId={trancheId} />
+                <InvestAction poolId={poolId} trancheId={trancheId} />
               </ButtonGroup>
             </Stack>
           </Card>
         </Grid>
       )}
     </Stack>
+  )
+}
+
+export const InvestAction: React.FC<{ poolId: string; trancheId: number }> = ({ poolId, trancheId }) => {
+  const [open, setOpen] = React.useState(false)
+  return (
+    <>
+      <ButtonGroup>
+        <Button variant="outlined" onClick={() => setOpen(true)}>
+          Invest
+        </Button>
+      </ButtonGroup>
+      <InvestRedeemDialog
+        poolId={poolId}
+        trancheId={trancheId}
+        open={open}
+        onClose={() => setOpen(false)}
+        action="invest"
+      />
+    </>
+  )
+}
+
+export const RedeemAction: React.FC<{ poolId: string; trancheId: number }> = ({ poolId, trancheId }) => {
+  const [open, setOpen] = React.useState(false)
+  return (
+    <>
+      <ButtonGroup>
+        <Button onClick={() => setOpen(true)}>Redeem</Button>
+      </ButtonGroup>
+      <InvestRedeemDialog
+        poolId={poolId}
+        trancheId={trancheId}
+        open={open}
+        onClose={() => setOpen(false)}
+        action="redeem"
+      />
+    </>
   )
 }

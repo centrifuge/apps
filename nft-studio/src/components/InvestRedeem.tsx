@@ -106,6 +106,7 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
         refetchPool()
         refetchOrder()
         refetchBalances()
+        form.resetForm()
       },
     }
   )
@@ -222,6 +223,7 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
         refetchPool()
         refetchOrder()
         refetchBalances()
+        form.resetForm()
       },
     }
   )
