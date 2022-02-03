@@ -282,7 +282,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     // console.log('order', order, pool.epoch)
 
     let submittable
-    if (order.epoch < pool.epoch.lastExecuted - 9999 /* disabled for now */) {
+    if (order.epoch < pool.epoch.lastExecuted) {
       submittable = api.tx.utility.batchAll([
         api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted - order.epoch),
         api.tx.pools.updateInvestOrder(poolId, trancheId, newOrder.toString()),
@@ -308,7 +308,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     // console.log('order', order, pool.epoch)
 
     let submittable
-    if (order.epoch < pool.epoch.lastExecuted - 9999 /* disabled for now */) {
+    if (order.epoch < pool.epoch.lastExecuted) {
       submittable = api.tx.utility.batchAll([
         api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted - order.epoch),
         api.tx.pools.updateRedeemOrder(poolId, trancheId, newOrder.toString()),
