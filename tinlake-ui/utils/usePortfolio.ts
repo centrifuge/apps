@@ -22,6 +22,7 @@ export interface TokenBalance {
   price: BN
   value: BN
   balance: BN
+  tranche: Tranche
 }
 
 export interface PortfolioData {
@@ -98,6 +99,12 @@ async function getPortfolio(ipfsPools: IpfsPools, address: string) {
   const updatesPerToken = await multicall<{ [key: string]: TokenResult }>(calls)
 
   const tokenBalances = Object.entries(updatesPerToken).map(([tokenId, tokenResult]) => {
+    let tranche = Tranche.senior
+    ipfsPools.active.flatMap((pool) => {
+      if (tokenId === pool.addresses.JUNIOR_TOKEN) {
+        tranche = Tranche.junior
+      }
+    })
     const newBalance = new BN(tokenResult.balance).add(new BN(tokenResult.payoutTokenAmount))
     const newPrice = new BN(tokenResult.price)
     const newValue = newBalance.mul(newPrice).div(new BN(10).pow(new BN(27)))
@@ -105,6 +112,7 @@ async function getPortfolio(ipfsPools: IpfsPools, address: string) {
     return {
       id: tokenId,
       symbol: tokenResult.symbol,
+      tranche: tranche as Tranche,
       price: newPrice,
       value: newValue,
       balance: newBalance,
@@ -124,4 +132,9 @@ async function getPortfolio(ipfsPools: IpfsPools, address: string) {
     totalValue,
     totalSupplyRemaining,
   }
+}
+
+export enum Tranche {
+  senior = 'SENIOR',
+  junior = 'JUNIOR',
 }
