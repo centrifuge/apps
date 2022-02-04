@@ -279,12 +279,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     const [pool, order] = await Promise.all([getPool([poolId]), getOrder([address, poolId, trancheId])])
 
-    // console.log('order', order, pool.epoch)
-
     let submittable
-    if (order.epoch < pool.epoch.lastExecuted) {
+    if (order.epoch <= pool.epoch.lastExecuted) {
       submittable = api.tx.utility.batchAll([
-        api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted - order.epoch),
+        api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted + 1 - order.epoch),
         api.tx.pools.updateInvestOrder(poolId, trancheId, newOrder.toString()),
       ])
     } else {
@@ -305,12 +303,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     const [pool, order] = await Promise.all([getPool([poolId]), getOrder([address, poolId, trancheId])])
 
-    // console.log('order', order, pool.epoch)
-
     let submittable
-    if (order.epoch < pool.epoch.lastExecuted) {
+    if (order.epoch <= pool.epoch.lastExecuted) {
       submittable = api.tx.utility.batchAll([
-        api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted - order.epoch),
+        api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted + 1 - order.epoch),
         api.tx.pools.updateRedeemOrder(poolId, trancheId, newOrder.toString()),
       ])
     } else {
@@ -344,13 +340,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
     let submittable
     if (trancheId !== undefined) {
       const order = await getOrder([address, poolId, trancheId])
-      submittable = api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted - order.epoch)
+      submittable = api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted + 1 - order.epoch)
     } else {
       const orders = await Promise.all(pool.tranches.map((_t, index: number) => getOrder([address, poolId, index])))
       submittable = api.tx.utility.batchAll(
         pool.tranches
           .map((_t, index: number) => {
-            const nEpochs = pool.epoch.lastExecuted - orders[index].epoch
+            const nEpochs = pool.epoch.lastExecuted + 1 - orders[index].epoch
             if (!nEpochs) return null as any
             return api.tx.pools.collect(poolId, index, nEpochs)
           })
