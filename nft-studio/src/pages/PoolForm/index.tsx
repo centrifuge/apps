@@ -1,11 +1,12 @@
 import Centrifuge, { aprToFee, toPerquintill } from '@centrifuge/centrifuge-js'
-import { AnchorButton, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import { ErrorMessage, Form, Formik, FormikHelpers } from 'formik'
 import * as React from 'react'
 import { FileInput } from '../../components/FileInput'
 import { RadioButton } from '../../components/form/formik/RadioButton'
 import { TextInput } from '../../components/form/formik/TextInput'
+import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { PageWithSideBar } from '../../components/shared/PageWithSideBar'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { pinPoolMetadata } from './pinPoolMetadata'
@@ -165,9 +166,9 @@ const CreatePoolForm: React.FC = () => {
           <TrancheInput />
           <Stack gap="3" gridColumn="9 / 11">
             <Shelf gap="2">
-              <AnchorButton variant="outlined" href="/managed-pools">
+              <RouterLinkButton variant="outlined" to="/issuers/managed-pools">
                 Cancel
-              </AnchorButton>
+              </RouterLinkButton>
 
               <SubmitButton />
             </Shelf>

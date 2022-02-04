@@ -1,8 +1,9 @@
-import { AnchorButton, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { encodeAddress } from '@polkadot/util-crypto'
 import React, { useMemo } from 'react'
 import { PageHeader } from '../components/PageHeader'
 import { PoolList } from '../components/PoolList'
+import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { useWeb3 } from '../components/Web3Provider'
 import { usePools } from '../utils/usePools'
@@ -33,11 +34,11 @@ const ManagedPools: React.FC = () => {
       <PageHeader
         title="Managed pools"
         actions={
-          <AnchorButton variant="text" href="/pool/new" icon={<IconPlus size="iconSmall" />}>
+          <RouterLinkButton variant="text" to="/pool/new" icon={<IconPlus size="iconSmall" />}>
             <Text variant="interactive1" color="currentColor">
               Create pool
             </Text>
-          </AnchorButton>
+          </RouterLinkButton>
         }
       />
       {pools?.length ? (
