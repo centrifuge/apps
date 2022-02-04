@@ -226,7 +226,7 @@ const PricingForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
         maturityDate: Math.floor(new Date(form.values.maturityDate).getTime() / 1000).toString(),
         probabilityOfDefault: centrifuge.utils.toRate((values.probabilityOfDefault as number) / 100),
         lossGivenDefault: centrifuge.utils.toRate((values.lossGivenDefault as number) / 100),
-        discountRate: centrifuge.utils.toRate((values.discountRate as number) / 100),
+        discountRate: centrifuge.utils.aprToFee((values.discountRate as number) / 100),
         advanceRate: centrifuge.utils.toRate((values.advanceRate as number) / 100),
       }
       const loanInfoFields = LOAN_FIELDS[values.loanType] as LoanInfoKey[]
