@@ -1,4 +1,5 @@
 import { useQuery, UseQueryResult } from 'react-query'
+import { useHostPermission } from '../components/HostPermissions'
 import { parseMetadataUrl } from './parseMetadataUrl'
 
 type Schema = {
@@ -23,6 +24,7 @@ export async function fetchMetadata(uri: string) {
 export function useMetadata<T = any>(uri: string | undefined): UseQueryResult<Partial<T>, unknown>
 export function useMetadata<T extends Schema>(uri: string | undefined, schema: T): UseQueryResult<Result<T>, unknown>
 export function useMetadata<T extends Schema>(uri: string | undefined, schema?: T) {
+  const { allowed } = useHostPermission(uri)
   const query = useQuery(
     ['metadata', uri],
     async () => {
@@ -47,7 +49,7 @@ export function useMetadata<T extends Schema>(uri: string | undefined, schema?: 
       return result as Result<T>
     },
     {
-      enabled: !!uri,
+      enabled: !!uri && !!parseMetadataUrl(uri) && allowed,
       staleTime: Infinity,
     }
   )

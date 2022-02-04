@@ -1,5 +1,14 @@
 const IFPS_GATEWAY = process.env.REACT_APP_IPFS_GATEWAY
 
+export function isUrl(url: string) {
+  try {
+    const urlObj = new URL(url)
+    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:'
+  } catch (e) {
+    return false
+  }
+}
+
 export function parseMetadataUrl(url: string) {
   try {
     let newUrl
@@ -13,9 +22,12 @@ export function parseMetadataUrl(url: string) {
       newUrl = new URL(url)
     }
 
-    return newUrl.href
+    if (newUrl.protocol === 'http:' || newUrl.protocol === 'https:') {
+      return newUrl.href
+    }
+
+    return ''
   } catch (e) {
-    console.log('e', e)
-    return url
+    return ''
   }
 }
