@@ -85,12 +85,12 @@ const Pool: React.FC = () => {
     <Stack gap={5} flex={1}>
       <PageHeader
         title={metadata?.pool?.name ?? ''}
-        parent={{ to: '/managed-pools', label: isManagedPool ? 'Managed pools' : 'Pools' }}
+        parent={{ to: '/issuers/managed-pools', label: isManagedPool ? 'Managed pools' : 'Pools' }}
         subtitle={metadata?.pool?.asset?.class}
         actions={
           <>
             {isManagedPool && (
-              <Button variant="text" icon={<IconArrowRight />} onClick={closeEpoch} disabled={!pool}>
+              <Button small variant="text" icon={<IconArrowRight />} onClick={closeEpoch} disabled={!pool}>
                 Close epoch
               </Button>
             )}

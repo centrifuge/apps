@@ -31,7 +31,12 @@ const Collections: React.FC = () => {
   const centrifuge = useCentrifuge()
 
   const userCollections = React.useMemo(
-    () => collections?.filter((c) => isSameAddress(c.owner, selectedAccount?.address)),
+    () =>
+      collections?.filter((c) => {
+        if (centrifuge.utils.isLoanPalletAccount(c.admin)) return false
+        return isSameAddress(c.owner, selectedAccount?.address)
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [collections, selectedAccount?.address]
   )
 

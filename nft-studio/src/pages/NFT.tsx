@@ -1,6 +1,7 @@
 import { Box, Button, IconArrowRight, IconNft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router-dom'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Identity } from '../components/Identity'
 import { PageHeader } from '../components/PageHeader'
 import { AnchorPillButton } from '../components/PillButton'
@@ -35,10 +36,13 @@ const NFT: React.FC = () => {
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collection?.id)
   const [transferOpen, setTransferOpen] = React.useState(false)
+  const centrifuge = useCentrifuge()
 
   const imageUrl = nftMetadata?.image ? parseMetadataUrl(nftMetadata.image) : ''
 
-  const canCreateLoan = permissions && Object.values(permissions).some((p) => p.roles.includes('Borrower'))
+  const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
+  const canCreateLoan =
+    !isLoanCollection && permissions && Object.values(permissions).some((p) => p.roles.includes('Borrower'))
 
   return (
     <Stack gap={8} flex={1}>

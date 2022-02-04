@@ -1,6 +1,7 @@
 import { Grid, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Identity } from '../components/Identity'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'
@@ -33,6 +34,10 @@ const Collection: React.FC = () => {
   const { data: metadata } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
   const { data: nfts } = useNFTs(collectionId)
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
+  const centrifuge = useCentrifuge()
+
+  const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
+  const canMint = !isLoanCollection && isSameAddress(selectedAccount?.address, collection?.owner)
 
   return (
     <Stack gap={8} flex={1}>
@@ -47,7 +52,7 @@ const Collection: React.FC = () => {
           )
         }
         actions={
-          isSameAddress(selectedAccount?.address, collection?.owner) && (
+          canMint && (
             <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="outlined" icon={IconPlus} small>
               Mint NFT
             </RouterLinkButton>

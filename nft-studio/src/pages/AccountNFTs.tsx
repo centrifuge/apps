@@ -2,6 +2,7 @@ import { Button, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { NFTCard } from '../components/NFTCard'
+import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
@@ -49,13 +50,7 @@ const AccountNFTs: React.FC = () => {
 
   return (
     <Stack gap={8} flex={1}>
-      <Shelf justifyContent="space-between">
-        <Shelf gap={[0, 1]} alignItems="baseline" flexWrap="wrap">
-          <Text variant="headingLarge" as="h1">
-            My NFTs
-          </Text>
-        </Shelf>
-      </Shelf>
+      <PageHeader parent={{ to: '/nfts', label: 'collections' }} title="My NFTs" />
       {filteredNfts?.length ? (
         <>
           <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>
