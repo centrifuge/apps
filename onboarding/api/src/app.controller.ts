@@ -21,8 +21,8 @@ export class AppController {
 
   @Get('docusign/callback')
   async getDocusignCallback(): Promise<string> {
-    await this.docusignAuthService.getAccessToken()
-    return 'Callback received'
+    const accessToken = await this.docusignAuthService.getAccessToken()
+    return accessToken
   }
 
   @Get('pools/:poolId/restricted-countries')

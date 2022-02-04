@@ -131,7 +131,14 @@ export interface Investor {
     tax: any[]
     address?: {
       countryCode?: string
+      city?: string
+      entrance?: string
+      houseNumber?: string
+      street?: string
+      zip?: string
+      state?: string
     }
+    birthday?: string
   }
   domainInvestorDetails?: {
     taxInfo: any

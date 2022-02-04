@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common'
+import { DatabaseService } from 'src/repos/db.service'
 import config from '../config'
 import { User } from '../repos/user.repo'
 import { DocusignAuthService } from './docusign-auth.service'
+import { SecuritizeService } from './kyc/securitize.service'
 import { PoolService } from './pool.service'
+import { getPrefilledTabs } from './templateTabs'
+
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 export const InvestorRoleName = 'Investor'
@@ -10,7 +14,12 @@ export const IssuerRoleName = 'Self'
 
 @Injectable()
 export class DocusignService {
-  constructor(private readonly docusignAuthService: DocusignAuthService, private readonly poolService: PoolService) {}
+  constructor(
+    private readonly docusignAuthService: DocusignAuthService,
+    private readonly poolService: PoolService,
+    private readonly securitizeService: SecuritizeService,
+    private readonly db: DatabaseService
+  ) {}
 
   async createAgreement(
     poolId: string,
@@ -22,8 +31,16 @@ export class DocusignService {
     const pool = await this.poolService.get(poolId)
     if (!pool) throw new Error(`Failed to find pool ${poolId}`)
 
+    const [kycInfo] = await this.db.sql`
+      select provider_account_id, digest
+      from kyc
+      where kyc.user_id = ${userId}
+    `
+
+    const investor = await this.securitizeService.getInvestor(userId, kycInfo.providerAccountId, kycInfo.digest)
+
     const envelopeDefinition = {
-      templateId: templateId,
+      templateId,
       templateRoles: [
         {
           email,
@@ -31,6 +48,7 @@ export class DocusignService {
           roleName: InvestorRoleName,
           clientUserId: userId,
           routingOrder: 1,
+          tabs: getPrefilledTabs(templateId, investor),
         },
         {
           email: pool.profile.issuer.email,
@@ -73,10 +91,11 @@ export class DocusignService {
       userName: user.entityName?.length > 0 ? user.entityName : user.fullName,
       roleName: InvestorRoleName,
       clientUserId: user.id,
-      returnUrl: returnUrl,
+      returnUrl,
     }
 
     const accessToken = await this.docusignAuthService.getAccessToken()
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
