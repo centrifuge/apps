@@ -223,7 +223,7 @@ const PricingForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
     onSubmit: (values, { setSubmitting }) => {
       const loanInfoValues = {
         value: new BN(values.value).mul(e18).toString(),
-        maturityDate: new Date(form.values.maturityDate).getTime().toString(),
+        maturityDate: Math.floor(new Date(form.values.maturityDate).getTime() / 1000).toString(),
         probabilityOfDefault: centrifuge.utils.toRate((values.probabilityOfDefault as number) / 100),
         lossGivenDefault: centrifuge.utils.toRate((values.lossGivenDefault as number) / 100),
         discountRate: centrifuge.utils.toRate((values.discountRate as number) / 100),
