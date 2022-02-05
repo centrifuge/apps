@@ -84,11 +84,18 @@ export class DocusignService {
   async getAgreementLink(envelopeId: string, user: User, returnUrl: string): Promise<string> {
     const url = `${config.docusign.restApiHost}/restapi/v2.1/accounts/${config.docusign.accountId}/envelopes/${envelopeId}/views/recipient`
 
-    // TODO: email and userName here should be taken from Securitize
+    const [kycInfo] = await this.db.sql`
+      select provider_account_id, digest
+      from kyc
+      where kyc.user_id = ${user.id}
+    `
+
+    const investor = await this.securitizeService.getInvestor(user.id, kycInfo.providerAccountId, kycInfo.digest)
+
     const recipientViewRequest = {
       authenticationMethod: 'none',
-      email: user.email,
-      userName: user.entityName?.length > 0 ? user.entityName : user.fullName,
+      email: investor.email,
+      userName: investor.fullName,
       roleName: InvestorRoleName,
       clientUserId: user.id,
       returnUrl,
