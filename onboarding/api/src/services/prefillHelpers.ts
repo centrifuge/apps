@@ -66,11 +66,9 @@ export const formatBirthday = (date) => {
   if (date) {
     const dateWithNoTimeZone = new Date(date.replace('Z', ''))
 
-    // pads month with leading 0 if single digit
-    const birthMonth = `0${dateWithNoTimeZone.getMonth() + 1}`.slice(-2)
+    const birthMonth = `${dateWithNoTimeZone.getMonth() + 1}`.padStart(2, '0')
 
-    // pads date with leading 0 if single digit
-    const birthDate = `0${dateWithNoTimeZone.getDate()}`.slice(-2)
+    const birthDate = `${dateWithNoTimeZone.getDate()}`.padStart(2, '0')
 
     const birthYear = dateWithNoTimeZone.getFullYear()
 
