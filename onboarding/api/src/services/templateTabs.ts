@@ -1,5 +1,18 @@
 import { formatBirthday, formatCityStateZip, formatEntranceHouseNumberStreet } from './prefillHelpers'
 
+export const templateIds = {
+  REIF: '98cc99ff-8154-4e4c-a500-ba813e8d2a87',
+  'RWA/AAVE': '--',
+  NEW_SILVER: '19750b36-24ab-43e3-9441-23abc2f09a80',
+  1754: 'bc240308-7286-49f4-b1eb-6434a771bc53',
+  CONSOL_FREIGHT: 'a9adc13b-a990-4d58-b54f-647762853923',
+  FORTUNA_FI_S1: '3b3a33b8-23fc-40a4-8a4c-d1f5edd52f96',
+  HARBOR_TRADE: 'fb9d4f62-43b3-4e8f-b135-4d29a4a72a0e',
+  GIG: '--',
+  '1754_SERIES_3': '--',
+  NEW_TEMPLATE: '--',
+}
+
 export const getPrefilledTabs = (templateId, investor) => {
   const { details, domainInvestorDetails, verificationStatus } = investor
 
@@ -13,19 +26,6 @@ export const getPrefilledTabs = (templateId, investor) => {
   const cityStateZip = `${formatCityStateZip(city, state, zip)}`
 
   const taxId = domainInvestorDetails?.taxInfo[0]?.taxId
-
-  const templateIds = {
-    REIF: '98cc99ff-8154-4e4c-a500-ba813e8d2a87',
-    'RWA/AAVE': '--',
-    NEW_SILVER: '19750b36-24ab-43e3-9441-23abc2f09a80',
-    1754: 'bc240308-7286-49f4-b1eb-6434a771bc53',
-    CONSOL_FREIGHT: 'a9adc13b-a990-4d58-b54f-647762853923',
-    FORTUNA_FI_S1: '3b3a33b8-23fc-40a4-8a4c-d1f5edd52f96',
-    HARBOR_TRADE: 'fb9d4f62-43b3-4e8f-b135-4d29a4a72a0e',
-    GIG: '--',
-    '1754_SERIES_3': '--',
-    NEW_TEMPLATE: '--',
-  }
 
   const includeCountryCode =
     templateId === templateIds.NEW_SILVER ||
