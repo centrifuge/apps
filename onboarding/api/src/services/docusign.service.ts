@@ -95,7 +95,7 @@ export class DocusignService {
     const recipientViewRequest = {
       authenticationMethod: 'none',
       email: investor.email,
-      userName: investor.fullName,
+      userName: investor.details.investorType === 'individual' ? investor.fullName : investor.details.entityName,
       roleName: InvestorRoleName,
       clientUserId: user.id,
       returnUrl,

@@ -125,6 +125,8 @@ export interface Investor {
   email: string
   verificationStatus: 'none' | 'processing' | 'updates-required' | 'verified' | 'manual-review' | 'rejected' | 'expired'
   details: {
+    investorType: 'individual' | 'entity'
+    entityName?: string
     firstName?: string
     middleName?: string
     lastName?: string
