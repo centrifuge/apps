@@ -280,7 +280,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [pool, order] = await Promise.all([getPool([poolId]), getOrder([address, poolId, trancheId])])
 
     let submittable
-    if (order.epoch <= pool.epoch.lastExecuted) {
+    if (order.epoch <= pool.epoch.lastExecuted && order.epoch > 0 && (order.invest !== '0' || order.redeem !== '0')) {
       submittable = api.tx.utility.batchAll([
         api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted + 1 - order.epoch),
         api.tx.pools.updateInvestOrder(poolId, trancheId, newOrder.toString()),
@@ -304,7 +304,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [pool, order] = await Promise.all([getPool([poolId]), getOrder([address, poolId, trancheId])])
 
     let submittable
-    if (order.epoch <= pool.epoch.lastExecuted) {
+    if (order.epoch <= pool.epoch.lastExecuted && order.epoch > 0 && (order.invest !== '0' || order.redeem !== '0')) {
       submittable = api.tx.utility.batchAll([
         api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted + 1 - order.epoch),
         api.tx.pools.updateRedeemOrder(poolId, trancheId, newOrder.toString()),
@@ -523,7 +523,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
 
     const orderValues = await Promise.all(
-      pool.tranches.map((_1, index: number) => api.query.pools.order.entries({ Tranche: [poolId, index] }))
+      pool.tranches.map((_1, index: number) => api.query.pools.order.entries([poolId, index]))
     )
 
     console.log(JSON.stringify(orderValues, null, 4))
@@ -608,7 +608,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   async function getOrder(args: [address: Account, poolId: string, trancheId: number]) {
     const api = await inst.getApi()
     const [address, poolId, trancheId] = args
-    const result = await api.query.pools.order({ Tranche: [poolId, trancheId] }, address)
+    const result = await api.query.pools.order([poolId, trancheId], address)
     const order = result.toJSON() as any
 
     return {

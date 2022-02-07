@@ -115,8 +115,8 @@ const Pool: React.FC = () => {
           value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.max, pool?.currency)}
         />
 
-        {isManagedPool && (
-          <Button variant="text" icon={<IconArrowRight />} onClick={promptMaxReserve} disabled={!canSetMaxReserve}>
+        {isManagedPool && canSetMaxReserve && (
+          <Button variant="text" icon={<IconArrowRight />} onClick={promptMaxReserve}>
             Set maximum
           </Button>
         )}

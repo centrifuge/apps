@@ -9,7 +9,7 @@ import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { usePermissions } from '../utils/usePermissions'
-import { useOrder, usePool } from '../utils/usePools'
+import { useOrder, usePool, usePoolMetadata } from '../utils/usePools'
 import { ButtonGroup } from './ButtonGroup'
 import { ConnectButton } from './ConnectButton'
 import { TextInput } from './form/base/TextInput'
@@ -211,6 +211,7 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
   const { data: order, refetch: refetchOrder } = useOrder(poolId, trancheId, address)
   const { data: balances, refetch: refetchBalances } = useBalances(address)
   const { data: pool, refetch: refetchPool } = usePool(poolId)
+  const { data: metadata } = usePoolMetadata(pool)
   const tranche = pool?.tranches[trancheId]
   const balance = Dec(
     balances?.tranches.find((b) => b.poolId === poolId && b.trancheId === trancheId)?.balance ?? 0
@@ -301,7 +302,11 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
             <>
               <Box backgroundColor="backgroundSecondary" p={2}>
                 <Text>
-                  you have <Text fontWeight={600}>{pendingRedeem.toFixed(0)} usd</Text> pending redemption
+                  you have{' '}
+                  <Text fontWeight={600}>
+                    {pendingRedeem.toFixed(0)} {metadata?.tranches?.[trancheId]?.symbol ?? ''}
+                  </Text>{' '}
+                  pending redemption
                 </Text>
               </Box>
               <ButtonGroup>
