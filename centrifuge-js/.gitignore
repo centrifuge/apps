@@ -2,3 +2,9 @@
 .DS_Store
 node_modules
 dist
+
+# polkadot typegen: ignore everything but the definition files
+# (ignore all files generated during the build)
+src/interfaces/**
+!src/interfaces/**/
+!src/interfaces/**/definitions.ts

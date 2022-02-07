@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "esnext",
+    "target": "ES5",
     "lib": ["dom", "esnext"],
     "importHelpers": true,
     "declaration": true,
@@ -17,7 +18,14 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "typeRoots": ["./node_modules/@types"],
+    "paths": {
+      "centrifuge-js/*": ["./src/*"],
+      "@polkadot/api/augment": ["./src/interfaces/augment-api.ts"],
+      "@polkadot/types/augment": ["./src/interfaces/augment-types.ts"]
+    }
   },
-  "include": ["src", "types"]
+  "include": ["src", "types"],
+  "exclude": ["dist/**/*", "node_modules"]
 }

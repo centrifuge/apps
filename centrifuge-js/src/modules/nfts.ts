@@ -1,5 +1,5 @@
-import { StorageKey, u32 } from '@polkadot/types'
-// import { AnyNumber } from '@polkadot/types/types'
+import { StorageKey } from '@polkadot/types'
+import { AnyTuple } from '@polkadot/types/types'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
 import { getRandomUint } from '../utils'
@@ -37,8 +37,8 @@ export type Collection = Class & {
 
 const MAX_ATTEMPTS = 10
 
-const formatClassKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
-const formatInstanceKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
+const formatClassKey = (keys: StorageKey<AnyTuple>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
+const formatInstanceKey = (keys: StorageKey<AnyTuple>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
 export function getNftsModule(inst: CentrifugeBase) {
   async function getCollections() {
