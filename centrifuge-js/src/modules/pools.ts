@@ -531,7 +531,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const epochValues = await Promise.all(
       pool.tranches.map((_1, index: number) => api.query.pools.epoch([poolId, index], pool.lastEpochExecuted))
     )
-    const lastEpoch = epochValues.filter((val) => !val.isEmpty).map((val) => (val as any).unwrap())
+    const lastEpoch = epochValues.map((val) => (!val.isEmpty ? (val as any).unwrap() : null))
 
     return {
       id: poolId,
@@ -551,7 +551,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           outstandingRedeemOrders: parseBN(tranche.outstandingRedeemOrders),
           interestPerSec: parseBN(tranche.interestPerSec),
           lastUpdatedInterest: tranche.lastUpdatedInterest,
-          tokenPrice: lastEpoch[index]?.tokenPrice.toString(),
+          tokenPrice: lastEpoch[index]?.tokenPrice.toString() ?? '0',
         }
       }),
       nav: {
