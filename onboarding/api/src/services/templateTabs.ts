@@ -15,16 +15,12 @@ export const templateIds = {
 
 export const getPrefilledTabs = (templateId, investor) => {
   const { details, domainInvestorDetails, email, fullName, verificationStatus } = investor
-
   const { address, birthday } = details
   const { city, countryCode, entrance, houseNumber, state, street, zip } = address
 
   const birthDate = formatBirthday(birthday)
-
   const entranceHouseNumberStreet = `${formatEntranceHouseNumberStreet(entrance, houseNumber, street)}`
-
   const cityStateZip = `${formatCityStateZip(city, state, zip)}`
-
   const taxId = domainInvestorDetails?.taxInfo[0]?.taxId
 
   const includeCountryCode =
