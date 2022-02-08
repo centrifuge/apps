@@ -4,6 +4,13 @@ on:
     tags:
       - nft-studio/release-*
 
+env:
+  REACT_APP_IPFS_GATEWAY: https://gateway.pinata.cloud/
+  REACT_APP_COLLATOR_WSS_URL: wss://fullnode-collator.development.cntrfg.com
+  REACT_APP_RELAY_WSS_URL: wss://fullnode-relay.development.cntrfg.com
+  REACT_APP_SUBSCAN_URL: https://centrifuge.subscan.io/extrinsic/
+  REACT_APP_WHITELISTED_ACCOUNTS: ''
+
 jobs:
   dev:
     uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
