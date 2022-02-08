@@ -102,7 +102,7 @@ const Token: React.FC = () => {
                 items={[
                   {
                     label: 'Balance',
-                    value: centrifuge.utils.formatCurrencyAmount(token?.balance ?? '0', trancheMeta?.symbol),
+                    value: centrifuge.utils.formatCurrencyAmount(token?.balance ?? '0', trancheMeta?.symbol || ' '),
                   },
                   {
                     label: 'Value',

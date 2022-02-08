@@ -57,7 +57,6 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId, action = 'inve
             {invested.toFixed(0)} {pool?.currency}
           </Text>
         </Text>
-        {/* <Divider /> */}
       </Stack>
       {!trancheBalance.isZero() && showTabs && (
         <Shelf gap={3}>
@@ -163,11 +162,7 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
 
   const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(investmentCapacity)
   const needsToCollect =
-    order &&
-    pool &&
-    order.epoch <= pool.epoch.lastExecuted &&
-    order.epoch > 0 &&
-    (order.invest !== '0' || order.redeem !== '0')
+    order && pool && order.epoch <= pool.epoch.lastExecuted && order.epoch > 0 && order.invest !== '0'
 
   return (
     <FormikProvider value={form}>
@@ -252,6 +247,7 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
   const { data: order, refetch: refetchOrder } = useOrder(poolId, trancheId, address)
   const { data: balances, refetch: refetchBalances } = useBalances(address)
   const { data: pool, refetch: refetchPool } = usePool(poolId)
+
   const { data: metadata } = usePoolMetadata(pool)
   const tranche = pool?.tranches[trancheId]
   const balance = Dec(
@@ -301,11 +297,7 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
   const availableReserve = Dec(pool?.reserve.available ?? '0').div('1e18')
   const redeemCapacity = min(availableReserve.div(price)) // TODO: check risk buffer
   const needsToCollect =
-    order &&
-    pool &&
-    order.epoch <= pool.epoch.lastExecuted &&
-    order.epoch > 0 &&
-    (order.invest !== '0' || order.redeem !== '0')
+    order && pool && order.epoch <= pool.epoch.lastExecuted && order.epoch > 0 && order.redeem !== '0'
 
   const form = useFormik({
     initialValues: {
