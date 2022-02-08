@@ -8,6 +8,7 @@ export type Transaction = {
   hash?: string
   result?: any
   failedReason?: string
+  error?: any
   dismissed?: boolean
 }
 

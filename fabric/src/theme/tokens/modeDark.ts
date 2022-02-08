@@ -11,25 +11,11 @@ const grayScale = {
   gray900: '#212121',
 }
 
-const defaultLight = grayScale.gray100
-const defaultPrimary = grayScale.gray500
-const defaultDark = grayScale.gray700
-
-const infoLight = '#CDE5FF'
-const infoPrimary = '#1486FF'
-const infoDark = '#005ACB'
-
-const okLight = '#ECFFD6'
-const okPrimary = '#7ED321'
-const okDark = '#598232'
-
-const warningLight = '#FFF0D6'
-const warningPrimary = '#FFAA16'
-const warningDark = '#9B6F2B'
-
-const criticalLight = '#FFE8ED'
-const criticalPrimary = '#F44E72'
-const criticalDark = '#CA4A63'
+const statusDefault = grayScale.gray600
+const statusInfo = '#006EF5'
+const statusOk = '#598232'
+const statusWarning = '#A86500'
+const statusCritical = '#D43F2B'
 
 const darkColors = {
   textPrimary: 'white',
@@ -43,21 +29,11 @@ const darkColors = {
   borderPrimary: grayScale.gray700,
   borderSecondary: grayScale.gray800,
 
-  defaultBackground: defaultDark,
-  defaultPrimary,
-  defaultForeground: defaultLight,
-  infoBackground: infoDark,
-  infoPrimary,
-  infoForeground: infoLight,
-  okBackground: okDark,
-  okPrimary,
-  okForeground: okLight,
-  warningBackground: warningDark,
-  warningPrimary,
-  warningForeground: warningLight,
-  criticalBackground: criticalDark,
-  criticalPrimary,
-  criticalForeground: criticalLight,
+  statusDefault,
+  statusInfo,
+  statusOk,
+  statusWarning,
+  statusCritical,
 }
 
 export const modeDark = {

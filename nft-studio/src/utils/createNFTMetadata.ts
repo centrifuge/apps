@@ -19,7 +19,7 @@ export const createNFTMetadata = async ({ name, description, fileDataUri, fileNa
     throw new Error('createNFTMetadata: required fields not provided')
   }
 
-  const res = await fetchLambda('pinFile', {
+  const res = await fetchLambda('pinFileWithMetadata', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({

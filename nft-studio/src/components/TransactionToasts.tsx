@@ -38,13 +38,14 @@ export const TransactionToasts: React.FC = () => {
         .map((tx) => (
           <Toast
             label={tx.title}
-            sublabel={toastSublabel[tx.status]}
+            sublabel={(tx.status === 'failed' && tx.failedReason) || toastSublabel[tx.status]}
             status={toastStatus[tx.status]}
             onDismiss={() => updateTransaction(tx.id, { dismissed: true })}
             action={
               tx.hash ? (
                 <AnchorButton
                   variant="text"
+                  target="_blank"
                   href={`${process.env.REACT_APP_SUBSCAN_URL}${tx.hash}`}
                   icon={IconExternalLink}
                 />

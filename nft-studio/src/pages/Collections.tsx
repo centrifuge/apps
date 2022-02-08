@@ -1,10 +1,11 @@
 import { Button, IconPlus, LayoutGrid, LayoutGridItem, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
 import { CreateCollectionDialog } from '../components/CreateCollectionDialog'
-import { Footer } from '../components/Footer'
 import { Identity } from '../components/Identity'
-import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
+import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
 import { useCollections } from '../utils/useCollections'
@@ -13,9 +14,9 @@ import { isSameAddress, isWhitelistedAccount } from '../utils/web3'
 
 export const CollectionsPage: React.FC = () => {
   return (
-    <PageContainer>
+    <PageWithSideBar>
       <Collections />
-    </PageContainer>
+    </PageWithSideBar>
   )
 }
 
@@ -27,9 +28,15 @@ const Collections: React.FC = () => {
   const { data: collections } = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const { data: accountNfts } = useAccountNfts(selectedAccount?.address, false)
+  const centrifuge = useCentrifuge()
 
   const userCollections = React.useMemo(
-    () => collections?.filter((c) => isSameAddress(c.owner, selectedAccount?.address)),
+    () =>
+      collections?.filter((c) => {
+        if (centrifuge.utils.isLoanPalletAccount(c.admin)) return false
+        return isSameAddress(c.owner, selectedAccount?.address)
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [collections, selectedAccount?.address]
   )
 
@@ -37,23 +44,28 @@ const Collections: React.FC = () => {
     () =>
       collections?.filter((c) => {
         if (isSameAddress(c.owner, selectedAccount?.address)) return false
+        if (centrifuge.utils.isLoanPalletAccount(c.admin)) return false
         return isWhitelistedAccount(c.owner)
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [collections, selectedAccount?.address]
   )
 
   return (
     <Stack gap={8} flex={1}>
+      <PageHeader
+        title="NFTs"
+        actions={
+          <Button onClick={() => setCreateOpen(true)} variant="text" small icon={IconPlus}>
+            Create Collection
+          </Button>
+        }
+      />
       {selectedAccount && (
         <Stack gap={3}>
-          <Shelf justifyContent="space-between">
-            <Text variant="heading2" as="h2">
-              My Collections
-            </Text>
-            <Button onClick={() => setCreateOpen(true)} variant="text" icon={IconPlus}>
-              Create Collection
-            </Button>
-          </Shelf>
+          <Text variant="heading3" as="h2">
+            My Collections
+          </Text>
           {userCollections?.length || accountNfts?.length ? (
             <LayoutGrid>
               {userCollections?.map((col) => (
@@ -87,7 +99,7 @@ const Collections: React.FC = () => {
         </Stack>
       )}
       <Stack gap={3}>
-        <Text variant="heading2" as="h2">
+        <Text variant="heading3" as="h2">
           {selectedAccount ? 'Other Collections' : 'Collections'}
         </Text>
         {otherCollections?.length ? (
@@ -112,7 +124,6 @@ const Collections: React.FC = () => {
         )}
       </Stack>
       <CreateCollectionDialog open={createOpen} onClose={() => setCreateOpen(false)} />
-      <Footer />
     </Stack>
   )
 }

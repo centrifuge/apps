@@ -1,11 +1,10 @@
 import { ResponsiveValue } from 'styled-system'
 
-type Status = 'default' | 'info' | 'ok' | 'warning' | 'critical'
+type Status = 'Default' | 'Info' | 'Ok' | 'Warning' | 'Critical'
 
 // Colors
 
-type StatusColorVariant = 'Primary' | 'Foreground' | 'Background'
-type StatusColorName = `${Status}${StatusColorVariant}`
+type StatusColorName = `status${Status}`
 
 type BrandColorName = 'brand'
 type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled'}`
@@ -59,12 +58,13 @@ export type TextVariantName =
   | 'heading5'
   | 'heading6'
   | 'emphasized'
-  | 'interactive'
+  | 'interactive1'
   | 'interactive2'
   | 'body1'
   | 'body2'
   | 'label1'
   | 'label2'
+  | 'label3'
 
 type TypographyValue = Partial<{
   fontSize: ResponsiveValue<number | string>

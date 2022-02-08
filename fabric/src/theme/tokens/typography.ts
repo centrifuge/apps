@@ -40,7 +40,7 @@ const typography: ThemeTypography = {
   emphasized: {
     fontWeight: 600,
   },
-  interactive: {
+  interactive1: {
     fontSize: 14,
     lineHeight: 1.375,
     fontWeight: 500,
@@ -65,12 +65,18 @@ const typography: ThemeTypography = {
     color: 'textPrimary',
   },
   label1: {
-    fontSize: 12,
+    fontSize: 14,
     lineHeight: 1.375,
     fontWeight: 500,
     color: 'textSecondary',
   },
   label2: {
+    fontSize: 12,
+    lineHeight: 1.375,
+    fontWeight: 500,
+    color: 'textSecondary',
+  },
+  label3: {
     fontSize: 10,
     lineHeight: 1.25,
     fontWeight: 500,
