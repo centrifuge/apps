@@ -14,7 +14,7 @@ export const flagsConfig: Record<string, DebugFlagConfig> = {
   },
   showOnlyNFT: {
     type: 'checkbox',
-    default: false,
+    default: true,
   },
   alwaysShowPanel: {
     type: 'checkbox',
