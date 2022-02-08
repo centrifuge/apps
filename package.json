@@ -8,11 +8,13 @@
     "onboarding/ui",
     "tinlake-ui",
     "tinlake.js",
+    "centrifuge-js",
     "nft-studio",
     "gateway",
     "gateway/packages/lib",
     "gateway/packages/ui",
-    "gateway/packages/server"
+    "gateway/packages/server",
+    "simulation-tests"
   ],
   "devDependencies": {
     "@types/concurrently": "^5",

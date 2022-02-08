@@ -1,9 +1,10 @@
+import { Collection } from '@centrifuge/centrifuge-js'
 import { Box, Card, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { collectionMetadataSchema, nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
-import { Collection, useCollectionNFTsPreview } from '../utils/useCollections'
+import { useCollectionNFTsPreview } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { Identity } from './Identity'
 

@@ -6,6 +6,7 @@ on:
     paths:
       - 'nft-studio/**'
       - 'fabric/**' # dependency
+      - 'centrifuge-js/**' # dependency
       - '.github/workflows/nft-studio-deploy-to-dev.yml'
 
 jobs:
@@ -14,6 +15,6 @@ jobs:
     with:
       netlify-alias: ''
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      NETLIFY_SITE_ID: ${{ secrets.NFT_STUDIO_DEV_NETLIFY_SITE_ID }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      netlify-site-id: ${{ secrets.NFT_STUDIO_DEV_NETLIFY_SITE_ID }}

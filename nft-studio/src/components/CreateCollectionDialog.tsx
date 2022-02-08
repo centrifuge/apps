@@ -6,10 +6,11 @@ import { Dialog } from '../components/Dialog'
 import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
 import { createCollectionMetadata } from '../utils/createCollectionMetadata'
-import { getAvailableClassId } from '../utils/getAvailableClassId'
+import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
-import { useCreateTransaction } from '../utils/useCreateTransaction'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { fetchMetadata } from '../utils/useMetadata'
+import { useCentrifuge } from './CentrifugeProvider'
 import { TextArea } from './TextArea'
 import { TextInput } from './TextInput'
 
@@ -21,34 +22,39 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const { selectedAccount } = useWeb3()
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
-  const { createTransaction, lastCreatedTransaction, reset: resetLastTransaction } = useCreateTransaction()
+  const cent = useCentrifuge()
   const { data: balance } = useBalance()
 
   const isConnected = !!selectedAccount?.address
 
-  async function submit(e: React.FormEvent) {
+  const {
+    execute: doTransaction,
+    lastCreatedTransaction,
+    reset: resetLastTransaction,
+    isLoading: transactionIsPending,
+  } = useCentrifugeTransaction('Create collection', (cent) => cent.nfts.createCollection, {
+    onSuccess: () => {
+      queryClient.invalidateQueries('collections')
+      queryClient.invalidateQueries('balance')
+    },
+  })
+
+  const {
+    execute,
+    isLoading: metadataIsUploading,
+    isError: uploadError,
+    reset: resetUpload,
+  } = useAsyncCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isConnected || !name || !description) return
 
-    createTransaction(
-      'Create collection',
-      async (api) => {
-        const classId = await getAvailableClassId()
-        const res = await createCollectionMetadata(name, description)
+    const collectionId = await cent.nfts.getAvailableCollectionId()
+    const res = await createCollectionMetadata(name, description)
 
-        queryClient.prefetchQuery(['metadata', res.metadataURI], () => fetchMetadata(res.metadataURI))
+    queryClient.prefetchQuery(['metadata', res.metadataURI], () => fetchMetadata(res.metadataURI))
 
-        return api.tx.utility.batchAll([
-          api.tx.uniques.create(classId, selectedAccount!.address),
-          api.tx.uniques.setClassMetadata(classId, res.metadataURI, true),
-        ])
-      },
-      () => {
-        queryClient.invalidateQueries('collections')
-        queryClient.invalidateQueries('balance')
-      }
-    )
-  }
+    doTransaction([collectionId, selectedAccount!.address, res.metadataURI])
+  })
 
   // Only close if the modal is still showing the last created collection
   React.useEffect(() => {
@@ -62,6 +68,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     setName('')
     setDescription('')
     resetLastTransaction()
+    resetUpload()
   }
 
   function close() {
@@ -75,7 +82,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
 
   return (
     <Dialog isOpen={open} onClose={close}>
-      <form onSubmit={submit}>
+      <form onSubmit={execute}>
         <Stack gap={3}>
           <Text variant="heading2" as="h2">
             Create new collection
@@ -99,18 +106,11 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
               </Text>
             )}
             <ButtonGroup ml="auto">
+              {uploadError && <Text color="criticalPrimary">Failed to create collection</Text>}
               <Button variant="outlined" onClick={close}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={disabled}
-                loading={
-                  lastCreatedTransaction
-                    ? ['creating', 'unconfirmed', 'pending'].includes(lastCreatedTransaction?.status)
-                    : false
-                }
-              >
+              <Button type="submit" disabled={disabled} loading={metadataIsUploading || transactionIsPending}>
                 Create
               </Button>
             </ButtonGroup>
