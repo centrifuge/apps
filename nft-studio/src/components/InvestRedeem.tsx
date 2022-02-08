@@ -112,6 +112,17 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
     }
   )
 
+  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransaction(
+    'Collect',
+    (cent) => cent.pools.collect,
+    {
+      onSuccess: () => {
+        refetchOrder()
+        refetchBalances()
+      },
+    }
+  )
+
   if (pool && !tranche) throw new Error('Nonexistent tranche')
 
   const totalReserve = Dec(pool?.reserve.total ?? '0').div('1e18')
@@ -139,6 +150,12 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
   })
 
   const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(investmentCapacity)
+  const needsToCollect =
+    order &&
+    pool &&
+    order.epoch <= pool.epoch.lastExecuted &&
+    order.epoch > 0 &&
+    (order.invest !== '0' || order.redeem !== '0')
 
   return (
     <FormikProvider value={form}>
@@ -179,6 +196,17 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                 Invest
               </Button>
             </ButtonGroup>
+          ) : needsToCollect ? (
+            <>
+              <Box backgroundColor="backgroundSecondary" p={2}>
+                <Text>you need to collect before you can make another investment</Text>
+              </Box>
+              <ButtonGroup>
+                <Button onClick={() => doCollect([poolId, trancheId])} loading={isLoadingCollect}>
+                  Collect
+                </Button>
+              </ButtonGroup>
+            </>
           ) : (
             <>
               <Box backgroundColor="backgroundSecondary" p={2}>
@@ -232,10 +260,27 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
     }
   )
 
+  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransaction(
+    'Collect',
+    (cent) => cent.pools.collect,
+    {
+      onSuccess: () => {
+        refetchOrder()
+        refetchBalances()
+      },
+    }
+  )
+
   if (pool && !tranche) throw new Error('Nonexistent tranche')
 
   const availableReserve = Dec(pool?.reserve.available ?? '0').div('1e18')
   const redeemCapacity = min(availableReserve.div(price)) // TODO: check risk buffer
+  const needsToCollect =
+    order &&
+    pool &&
+    order.epoch <= pool.epoch.lastExecuted &&
+    order.epoch > 0 &&
+    (order.invest !== '0' || order.redeem !== '0')
 
   const form = useFormik({
     initialValues: {
@@ -298,6 +343,17 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                 Redeem
               </Button>
             </ButtonGroup>
+          ) : needsToCollect ? (
+            <>
+              <Box backgroundColor="backgroundSecondary" p={2}>
+                <Text>you need to collect before you can make another redeem order</Text>
+              </Box>
+              <ButtonGroup>
+                <Button onClick={() => doCollect([poolId, trancheId])} loading={isLoadingCollect}>
+                  Collect
+                </Button>
+              </ButtonGroup>
+            </>
           ) : (
             <>
               <Box backgroundColor="backgroundSecondary" p={2}>
