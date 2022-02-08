@@ -111,6 +111,18 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
       },
     }
   )
+  const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
+    'Cancel order',
+    (cent) => cent.pools.updateInvestOrder,
+    {
+      onSuccess: () => {
+        refetchPool()
+        refetchOrder()
+        refetchBalances()
+        form.resetForm()
+      },
+    }
+  )
 
   const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransaction(
     'Collect',
@@ -170,7 +182,7 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                   label="Amount"
                   type="number"
                   min="0"
-                  disabled={isLoading}
+                  disabled={isLoading || isLoadingCancel || isLoadingCollect}
                 />
               )}
             </Field>
@@ -220,8 +232,9 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                 </Button>
                 <Button
                   onClick={() => {
-                    doInvestTransaction([poolId, trancheId, new BN(0)])
+                    doCancel([poolId, trancheId, new BN(0)])
                   }}
+                  loading={isLoadingCancel}
                 >
                   Cancel order
                 </Button>
@@ -249,6 +262,18 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
 
   const { execute: doRedeemTransaction, isLoading } = useCentrifugeTransaction(
     'Invest',
+    (cent) => cent.pools.updateRedeemOrder,
+    {
+      onSuccess: () => {
+        refetchPool()
+        refetchOrder()
+        refetchBalances()
+        form.resetForm()
+      },
+    }
+  )
+  const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
+    'Cancel order',
     (cent) => cent.pools.updateRedeemOrder,
     {
       onSuccess: () => {
@@ -317,7 +342,7 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                   label="Amount"
                   type="number"
                   min="0"
-                  disabled={isLoading}
+                  disabled={isLoading || isLoadingCancel || isLoadingCollect}
                 />
               )}
             </Field>
@@ -371,8 +396,9 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                 </Button>
                 <Button
                   onClick={() => {
-                    doRedeemTransaction([poolId, trancheId, new BN(0)])
+                    doCancel([poolId, trancheId, new BN(0)])
                   }}
+                  loading={isLoadingCancel}
                 >
                   Cancel order
                 </Button>
