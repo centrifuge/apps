@@ -10,7 +10,7 @@ on:
 
 jobs:
   pull-request:
-    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
+    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@nft-studio-env-vars # REPLACE WITH main!!!
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
       ipfs-gateway: https://gateway.pinata.cloud/
