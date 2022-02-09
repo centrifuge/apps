@@ -25,6 +25,7 @@ const lightColors = {
   backgroundPrimary: 'white',
   backgroundSecondary: grayScale.gray100,
   backgroundPage: 'white',
+  backgroundInput: grayScale.gray50,
 
   borderPrimary: grayScale.gray300,
   borderSecondary: grayScale.gray200,

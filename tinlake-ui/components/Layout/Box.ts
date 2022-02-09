@@ -62,7 +62,10 @@ interface StyledBoxProps extends SystemProps {}
 
 export const Box = styled('div').withConfig({
   shouldForwardProp: (prop) => shouldForwardProp(prop),
-})<StyledBoxProps>(compose(space, layout, background, color, flexbox, grid, border, textAlign, position, bleed))
+})<StyledBoxProps>(
+  { boxSizing: 'border-box', margin: 0, padding: 0 },
+  compose(space, layout, background, color, flexbox, grid, border, textAlign, position, bleed)
+)
 
 export type BoxProps = PropsOf<typeof Box>
 

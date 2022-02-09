@@ -14,6 +14,7 @@ export const baseTheme: Omit<FabricTheme, 'colors'> = {
   },
   radii: {
     card: 8,
+    input: 10,
   },
   fonts: {
     standard:

@@ -9,6 +9,8 @@ import { CollectionElement, Node } from '@react-types/shared'
 import React from 'react'
 import styled from 'styled-components'
 import { IconChevronDown, IconChevronUp } from '../..'
+import { InputBox } from '../InputBox'
+import { Stack } from '../Stack'
 import { Text } from '../Text'
 
 type PopoverProps = {
@@ -25,6 +27,7 @@ type OnSelectCallback = (key?: string | number) => void
 
 interface SelectIntProps extends AriaSelectOptions<SelectOptionItem> {
   placeholder: string
+  errorMessage?: string
 }
 
 export type SelectOptionItem = {
@@ -39,9 +42,18 @@ type SelectProps = {
   label: string
   placeholder: string
   disabled?: boolean
+  errorMessage?: string
 }
 
-export const Select: React.FC<SelectProps> = ({ options, onSelect, label, placeholder, value, disabled }) => {
+export const Select: React.FC<SelectProps> = ({
+  options,
+  onSelect,
+  label,
+  placeholder,
+  value,
+  disabled,
+  errorMessage,
+}) => {
   const items: CollectionElement<SelectOptionItem>[] = options.map((opt) => {
     return (
       <Item key={opt.value} textValue={opt.value}>
@@ -58,6 +70,7 @@ export const Select: React.FC<SelectProps> = ({ options, onSelect, label, placeh
       selectedKey={value}
       onSelectionChange={onSelect}
       isDisabled={disabled}
+      errorMessage={errorMessage}
     >
       {items}
     </SelectInputInt>
@@ -69,25 +82,33 @@ const SelectInputInt: React.FC<SelectIntProps> = (props) => {
   const ref = React.useRef<HTMLButtonElement>(null)
   const { labelProps, triggerProps, valueProps, menuProps } = useSelect(props, state, ref)
   const { buttonProps } = useButton(triggerProps, ref)
+  const IconComp = state.isOpen ? IconChevronUp : IconChevronDown
 
   return (
-    <StyledSelect>
-      <Text as="label" variant="label1" {...labelProps}>
-        {props.label}
-      </Text>
-      <HiddenSelect state={state} triggerRef={ref} label={props.label} name={props.name} />
+    <Stack position="relative" width="100%">
       <StyledTrigger {...buttonProps} ref={ref}>
-        <StyledTriggerText variant="body2" isPlaceholder={!state.selectedItem} {...valueProps}>
-          {state.selectedItem ? state.selectedItem.rendered : props.placeholder}
-        </StyledTriggerText>
-        {state.isOpen ? <IconChevronUp color="textPrimary" /> : <IconChevronDown color="textPrimary" />}
+        <InputBox
+          label={props.label}
+          as="div"
+          disabled={props.isDisabled}
+          active={(state.isOpen || state.isFocused) && !props.isDisabled}
+          errorMessage={props.errorMessage}
+          inputElement={
+            <Text color={!state.selectedItem || props.isDisabled ? 'textDisabled' : 'textPrimary'} {...valueProps}>
+              {state.selectedItem ? state.selectedItem.rendered : props.placeholder}
+            </Text>
+          }
+          rightElement={<IconComp color={props.isDisabled ? 'textSecondary' : 'textPrimary'} />}
+        />
       </StyledTrigger>
+      <HiddenSelect state={state} triggerRef={ref} label={props.label} name={props.name} />
+
       {state.isOpen && (
         <Popover isOpen={state.isOpen} onClose={state.close}>
           <ListBox {...menuProps} state={state} />
         </Popover>
       )}
-    </StyledSelect>
+    </Stack>
   )
 }
 
@@ -147,39 +168,22 @@ const Popover: React.FC<PopoverProps> = (props) => {
 }
 
 // Styles
-const StyledSelect = styled.div`
-  display: inline-block;
-  position: relative;
-  width: 100%;
-`
 
-const StyledTrigger = styled.button<{ isPlaceholder: boolean }>`
+const StyledTrigger = styled.button`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  width: 100%;
   appearance: none;
   background: transparent;
-  color: red;
   border: none;
-
-  border-bottom: 1px solid ${({ theme }) => theme.colors.textPrimary};
-  width: 100%;
   text-align: left;
-  padding-bottom: 4px;
-  margin-top: 4px;
-`
-
-const StyledTriggerText = styled(Text)<{ isPlaceholder: boolean }>`
-  color: ${({ theme, isPlaceholder }) =>
-    isPlaceholder ? theme.colors.textDisabled : theme.colors.textPrimary} !important;
 `
 
 const StyledPopover = styled.div`
   position: absolute;
+  top: 100%;
   width: 100%;
-  background: ${({ theme }) => theme.colors.backgroundPrimary};
-  border-radius: ${({ theme }) => theme.space[1]}px;
-  box-shadow: ${({ theme }) => theme.shadows.cardInteractive};
+  background: ${({ theme }) => theme.colors.backgroundInput};
+  border-radius: ${({ theme }) => theme.radii.input}px;
   overflow: hidden;
   z-index: 20;
 `
@@ -189,25 +193,26 @@ const StyledListBox = styled.ul`
   margin: 0;
   padding: 0;
   list-style: none;
-  max-height: 150px;
+  max-height: 162px;
   overflow: auto;
 `
 
 const StyledOption = styled.li<{ isSelected: boolean; isFocused: boolean; isDisabled: boolean }>`
-  background: ${({ theme }) => theme.colors.backgroundPrimary};
-  color: ${({ theme, isSelected, isDisabled }) => {
-    if (isSelected) return theme.colors.brand
-    if (isDisabled) return theme.colors.textDisabled
-    return theme.colors.textPrimary
-  }} !important;
+  box-sizing: border-box;
+  background: ${({ theme, isSelected, isFocused, isDisabled }) => {
+    if (isFocused) return '#EDF2FF'
+    // if (isSelected) return theme.colors.brand
+    if (isDisabled) return theme.colors.backgroundSecondary
+    return theme.colors.backgroundInput
+  }};
   cursor: pointer;
-  outline: 'none';
-  padding: 8px 16px;
+  outline: none;
+  padding: 16px;
 `
 
 const StyledOptionText = styled(Text)<{ isSelected: boolean; isFocused: boolean; isDisabled: boolean }>`
   color: ${({ theme, isSelected, isDisabled }) => {
-    if (isSelected) return theme.colors.brand
+    // if (isSelected) return theme.colors.brand
     if (isDisabled) return theme.colors.textDisabled
     return theme.colors.textPrimary
   }} !important;

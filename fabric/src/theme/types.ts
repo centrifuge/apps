@@ -9,7 +9,7 @@ type StatusColorName = `status${Status}`
 type BrandColorName = 'brand'
 type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled'}`
 type BorderColorName = `border${'Primary' | 'Secondary'}`
-type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page'}`
+type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page' | 'Input'}`
 
 type ColorName = StatusColorName | BrandColorName | TextColorName | BorderColorName | BackgroundColorName
 type ColorValue = string
@@ -34,7 +34,7 @@ type ThemeSizes = {
   [k in SizeName]: SizeValue
 }
 
-type RadiusName = 'card'
+type RadiusName = 'card' | 'input'
 type RadiusValue = number
 
 type ThemeRadii = {
