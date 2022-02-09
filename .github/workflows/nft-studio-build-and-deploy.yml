@@ -66,8 +66,6 @@ jobs:
           REACT_APP_RELAY_WSS_URL: ${{ inputs.relay-wss-url }}
           REACT_APP_SUBSCAN_URL: ${{ inputs.subscan-url }}
           REACT_APP_WHITELISTED_ACCOUNTS: ${{ inputs.whitelisted-accounts }}
-          PINATA_API_KEY: ${{ secrets.pinata-api-key }}
-          PINATA_SECRET_API_KEY: ${{ secrets.pinata-secret-api-key }}
 
       - name: Deploy To Netlify
         uses: nwtgck/actions-netlify@v1.2.0
@@ -83,3 +81,5 @@ jobs:
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.netlify-auth-token  }}
           NETLIFY_SITE_ID: ${{ secrets.netlify-site-id }}
+          PINATA_API_KEY: ${{ secrets.pinata-api-key }}
+          PINATA_SECRET_API_KEY: ${{ secrets.pinata-secret-api-key }}
