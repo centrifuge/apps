@@ -1,3 +1,4 @@
+import { NFT } from '@centrifuge/centrifuge-js'
 import { Box, Card, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
@@ -5,7 +6,6 @@ import { nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
-import { NFT } from '../utils/useNFTs'
 import { Identity } from './Identity'
 
 type Props = {

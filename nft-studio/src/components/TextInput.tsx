@@ -4,6 +4,7 @@ import styled from 'styled-components'
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string
+  InputComponent?: React.ComponentType<React.InputHTMLAttributes<HTMLInputElement>>
 }
 
 const StyledTextInput = styled.input`

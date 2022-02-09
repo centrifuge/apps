@@ -1,11 +1,12 @@
-import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Grid, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
-import { Footer } from '../components/Footer'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Identity } from '../components/Identity'
 import { NFTCard } from '../components/NFTCard'
-import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
 import { RouterLinkButton } from '../components/RouterLinkButton'
+import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
@@ -16,9 +17,9 @@ import { isSameAddress } from '../utils/web3'
 
 export const CollectionPage: React.FC = () => {
   return (
-    <PageContainer>
+    <PageWithSideBar>
       <Collection />
-    </PageContainer>
+    </PageWithSideBar>
   )
 }
 
@@ -33,28 +34,31 @@ const Collection: React.FC = () => {
   const { data: metadata } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
   const { data: nfts } = useNFTs(collectionId)
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
+  const centrifuge = useCentrifuge()
+
+  const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
+  const canMint = !isLoanCollection && isSameAddress(selectedAccount?.address, collection?.owner)
 
   return (
     <Stack gap={8} flex={1}>
-      <Shelf gap={2} justifyContent="space-between">
-        <Shelf gap={[0, 1]} alignItems="baseline" flexWrap="wrap">
-          <Text variant="headingLarge" as="h1" style={{ wordBreak: 'break-word' }}>
-            {metadata?.name || 'Unnamed collection'}
-          </Text>
-          {collection?.owner && (
-            <Text variant="heading3" color="textSecondary">
-              by <Identity address={collection.owner} clickToCopy />
-            </Text>
-          )}
-        </Shelf>
-        {isSameAddress(selectedAccount?.address, collection?.owner) && (
-          <Box flex="0 0 auto">
-            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="outlined">
+      <PageHeader
+        parent={{ to: '/nfts', label: 'NFTs' }}
+        title={metadata?.name || 'Unnamed collection'}
+        subtitle={
+          collection?.owner && (
+            <>
+              by <Identity address={collection?.owner} clickToCopy />
+            </>
+          )
+        }
+        actions={
+          canMint && (
+            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="outlined" icon={IconPlus} small>
               Mint NFT
             </RouterLinkButton>
-          </Box>
-        )}
-      </Shelf>
+          )
+        }
+      />
       {nfts?.length ? (
         <>
           <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>
@@ -73,7 +77,6 @@ const Collection: React.FC = () => {
           </Text>
         </Shelf>
       )}
-      <Footer />
     </Stack>
   )
 }

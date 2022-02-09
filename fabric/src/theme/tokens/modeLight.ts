@@ -11,25 +11,11 @@ const grayScale = {
   gray900: '#212121',
 }
 
-const defaultLight = grayScale.gray100
-const defaultPrimary = grayScale.gray500
-const defaultDark = grayScale.gray700
-
-const infoLight = '#CDE5FF'
-const infoPrimary = '#1486FF'
-const infoDark = '#005ACB'
-
-const okLight = '#ECFFD6'
-const okPrimary = '#7ED321'
-const okDark = '#598232'
-
-const warningLight = '#FFF0D6'
-const warningPrimary = '#FFAA16'
-const warningDark = '#9B6F2B'
-
-const criticalLight = '#FFE8ED'
-const criticalPrimary = '#F44E72'
-const criticalDark = '#CA4A63'
+const statusDefault = grayScale.gray600
+const statusInfo = '#006EF5'
+const statusOk = '#5DA01D'
+const statusWarning = '#A86500'
+const statusCritical = '#D43F2B'
 
 const lightColors = {
   textPrimary: 'black',
@@ -38,26 +24,16 @@ const lightColors = {
 
   backgroundPrimary: 'white',
   backgroundSecondary: grayScale.gray100,
-  backgroundPage: grayScale.gray50,
+  backgroundPage: 'white',
 
   borderPrimary: grayScale.gray300,
   borderSecondary: grayScale.gray200,
 
-  defaultBackground: defaultLight,
-  defaultPrimary,
-  defaultForeground: defaultDark,
-  infoBackground: infoLight,
-  infoPrimary,
-  infoForeground: infoDark,
-  okBackground: okLight,
-  okPrimary,
-  okForeground: okDark,
-  warningBackground: warningLight,
-  warningPrimary,
-  warningForeground: warningDark,
-  criticalBackground: criticalLight,
-  criticalPrimary,
-  criticalForeground: criticalDark,
+  statusDefault,
+  statusInfo,
+  statusOk,
+  statusWarning,
+  statusCritical,
 }
 
 export const modeLight = {

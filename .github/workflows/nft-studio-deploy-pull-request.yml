@@ -4,7 +4,15 @@ on:
     paths:
       - 'nft-studio/**'
       - 'fabric/**' # dependency
+      - 'centrifuge-js/**' # dependency
       - '.github/workflows/nft-studio-pull-request.yml'
+
+env:
+  REACT_APP_IPFS_GATEWAY: https://gateway.pinata.cloud/
+  REACT_APP_COLLATOR_WSS_URL: wss://fullnode-collator.development.cntrfg.com
+  REACT_APP_RELAY_WSS_URL: wss://fullnode-relay.development.cntrfg.com
+  REACT_APP_SUBSCAN_URL: https://centrifuge.subscan.io/extrinsic/
+  REACT_APP_WHITELISTED_ACCOUNTS: ''
 
 jobs:
   pull-request:
@@ -12,6 +20,6 @@ jobs:
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      NETLIFY_SITE_ID: ${{ secrets.NFT_STUDIO_DEV_NETLIFY_SITE_ID }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      netlify-site-id: ${{ secrets.NFT_STUDIO_DEV_NETLIFY_SITE_ID }}

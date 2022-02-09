@@ -16,9 +16,11 @@ import { RewardStripe, Small } from './styles'
 interface Props {
   activeLink: UserRewardsLink
   portfolioValue: BN | undefined
+  portfolioTinValue: BN | undefined
+  portfolioDropValue: BN | undefined
 }
 
-const ClaimRewards: React.FC<Props> = ({ activeLink, portfolioValue }) => {
+const ClaimRewards: React.FC<Props> = ({ activeLink, portfolioValue, portfolioDropValue, portfolioTinValue }) => {
   const { data, refetchCentChain } = useUserRewards()
   const { data: claims } = useRewardClaims()
   const rewards = useGlobalRewards()
@@ -121,11 +123,18 @@ const ClaimRewards: React.FC<Props> = ({ activeLink, portfolioValue }) => {
               </>
             )}
             Stay invested to continue earning{' '}
-            {rewards.data?.rewardRate &&
+            {rewards.data?.dropRewardRate &&
+              rewards.data?.tinRewardRate &&
               portfolioValue &&
               addThousandsSeparators(
                 toDynamicPrecision(
-                  baseToDisplay(rewards.data?.rewardRate.mul(portfolioValue.toString()).toFixed(0), 18)
+                  baseToDisplay(
+                    rewards.data?.dropRewardRate
+                      ?.mul(portfolioDropValue?.toString() || 0)
+                      .add(rewards.data?.tinRewardRate?.mul(portfolioTinValue?.toString() || 0))
+                      .toFixed(0) || '0',
+                    18
+                  )
                 )
               )}{' '}
             CFG daily.
