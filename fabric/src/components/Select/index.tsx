@@ -80,7 +80,12 @@ export const Select: React.FC<SelectProps> = ({
 const SelectInputInt: React.FC<SelectIntProps> = (props) => {
   const state = useSelectState<SelectOptionItem>(props)
   const ref = React.useRef<HTMLButtonElement>(null)
-  const { labelProps, triggerProps, valueProps, menuProps } = useSelect(props, state, ref)
+  const {
+    // labelProps,
+    triggerProps,
+    valueProps,
+    menuProps,
+  } = useSelect(props, state, ref)
   const { buttonProps } = useButton(triggerProps, ref)
   const IconComp = state.isOpen ? IconChevronUp : IconChevronDown
 
@@ -199,7 +204,7 @@ const StyledListBox = styled.ul`
 
 const StyledOption = styled.li<{ isSelected: boolean; isFocused: boolean; isDisabled: boolean }>`
   box-sizing: border-box;
-  background: ${({ theme, isSelected, isFocused, isDisabled }) => {
+  background: ${({ theme, isFocused, isDisabled }) => {
     if (isFocused) return '#EDF2FF'
     // if (isSelected) return theme.colors.brand
     if (isDisabled) return theme.colors.backgroundSecondary
@@ -211,7 +216,7 @@ const StyledOption = styled.li<{ isSelected: boolean; isFocused: boolean; isDisa
 `
 
 const StyledOptionText = styled(Text)<{ isSelected: boolean; isFocused: boolean; isDisabled: boolean }>`
-  color: ${({ theme, isSelected, isDisabled }) => {
+  color: ${({ theme, isDisabled }) => {
     // if (isSelected) return theme.colors.brand
     if (isDisabled) return theme.colors.textDisabled
     return theme.colors.textPrimary
