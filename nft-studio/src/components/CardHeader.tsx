@@ -13,7 +13,7 @@ export const CardHeader: React.FC<Props> = ({ title, titleAddition, subtitle, su
   return (
     <Stack as="header" justifyContent="space-between">
       {pretitle && (
-        <Text variant="interactive1" color="brand">
+        <Text variant="interactive1" color="accentPrimary">
           {pretitle}
         </Text>
       )}

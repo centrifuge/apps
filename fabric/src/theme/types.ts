@@ -6,12 +6,12 @@ type Status = 'Default' | 'Info' | 'Ok' | 'Warning' | 'Critical'
 
 type StatusColorName = `status${Status}`
 
-type BrandColorName = 'brand'
+type AccentColorName = `accent${'Primary' | 'Secondary'}`
 type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled'}`
 type BorderColorName = `border${'Primary' | 'Secondary'}`
 type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page' | 'Input'}`
 
-type ColorName = StatusColorName | BrandColorName | TextColorName | BorderColorName | BackgroundColorName
+type ColorName = StatusColorName | AccentColorName | TextColorName | BorderColorName | BackgroundColorName
 type ColorValue = string
 
 type ThemeColors = {
@@ -94,6 +94,7 @@ type ThemeShadows = {
 }
 
 export type FabricTheme = {
+  scheme: 'light' | 'dark'
   colors: ThemeColors
   breakpoints: ThemeBreakpoints
   sizes: ThemeSizes
