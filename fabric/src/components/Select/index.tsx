@@ -97,7 +97,6 @@ const SelectInputInt: React.FC<SelectIntProps> = (props) => {
           as="div"
           disabled={props.isDisabled}
           active={(state.isOpen || state.isFocused) && !props.isDisabled}
-          errorMessage={props.errorMessage}
           inputElement={
             <Text color={!state.selectedItem || props.isDisabled ? 'textDisabled' : 'textPrimary'} {...valueProps}>
               {state.selectedItem ? state.selectedItem.rendered : props.placeholder}
@@ -177,6 +176,7 @@ const Popover: React.FC<PopoverProps> = (props) => {
 const StyledTrigger = styled.button`
   display: flex;
   width: 100%;
+  padding: 0;
   appearance: none;
   background: transparent;
   border: none;
