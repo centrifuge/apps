@@ -10,8 +10,8 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
     () =>
       new Centrifuge({
         network: 'centrifuge',
-        polkadotWsUrl: REACT_APP_RELAY_WSS_URL,
-        centrifugeWsUrl: REACT_APP_COLLATOR_WSS_URL,
+        polkadotWsUrl: REACT_APP_RELAY_WSS_URL || 'wss://google.com',
+        centrifugeWsUrl: REACT_APP_COLLATOR_WSS_URL || 'wss://yahoo.com',
         printExtrinsics: process.env.NODE_ENV === 'development',
       }),
     []
