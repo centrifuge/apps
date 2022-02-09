@@ -1,5 +1,6 @@
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
-export const debug = process.env.NODE_ENV === 'development' || params.get('debug') != null
+export const debug =
+  process.env.NODE_ENV === 'development' || params.get('debug') != null || !!localStorage.getItem('debug')
 
 type DebugFlagConfig = {
   type: string
