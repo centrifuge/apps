@@ -5,11 +5,12 @@ on:
       - 'nft-studio/**'
       - 'fabric/**' # dependency
       - 'centrifuge-js/**' # dependency
+      - '.github/workflows/nft-studio-build-and-deploy.yml' # dependency
       - '.github/workflows/nft-studio-pull-request.yml'
 
 jobs:
   pull-request:
-    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@nft-studio-env-vars
+    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
       ipfs-gateway: https://gateway.pinata.cloud/

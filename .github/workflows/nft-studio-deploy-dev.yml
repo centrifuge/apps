@@ -2,16 +2,17 @@ name: 'nft-studio Dev'
 on:
   push:
     branches:
-      - main
+      - nft-studio-env-vars # REPLACE WITH main!!!
     paths:
       - 'nft-studio/**'
       - 'fabric/**' # dependency
       - 'centrifuge-js/**' # dependency
+      - '.github/workflows/nft-studio-build-and-deploy.yml' # dependency
       - '.github/workflows/nft-studio-deploy-to-dev.yml'
 
 jobs:
   dev:
-    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
+    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@nft-studio-env-vars # REPLACE WITH main!!!
     with:
       netlify-alias: ''
       ipfs-gateway: https://gateway.pinata.cloud/
