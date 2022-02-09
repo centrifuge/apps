@@ -5,6 +5,22 @@ on:
       netlify-alias:
         required: true
         type: string
+      ipfs-gateway:
+        required: true
+        type: string
+      collator-wss-url:
+        required: true
+        type: string
+      relay-wss-url:
+        required: true
+        type: string
+      subscan-url:
+        required: true
+        type: string
+      whitelisted-accounts:
+        required: true
+        type: string
+
     secrets:
       github-token:
         required: true
@@ -41,6 +57,11 @@ jobs:
         run: yarn build
         env:
           SKIP_PREFLIGHT_CHECK: 'true'
+          REACT_APP_IPFS_GATEWAY: ${{ inputs.ipfs-gateway }}
+          REACT_APP_COLLATOR_WSS_URL: ${{ inputs.collator-wss-url }}
+          REACT_APP_RELAY_WSS_URL: ${{ inputs.relay-wss-url }}
+          REACT_APP_SUBSCAN_URL: ${{ inputs.subscan-url }}
+          REACT_APP_WHITELISTED_ACCOUNTS: ${{ inputs.whitelisted-accounts }}
 
       - name: Deploy To Netlify
         uses: nwtgck/actions-netlify@v1.2.0

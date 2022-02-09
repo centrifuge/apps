@@ -9,18 +9,16 @@ on:
       - 'centrifuge-js/**' # dependency
       - '.github/workflows/nft-studio-deploy-to-dev.yml'
 
-env:
-  REACT_APP_IPFS_GATEWAY: https://gateway.pinata.cloud/
-  REACT_APP_COLLATOR_WSS_URL: wss://fullnode-collator.development.cntrfg.com
-  REACT_APP_RELAY_WSS_URL: wss://fullnode-relay.development.cntrfg.com
-  REACT_APP_SUBSCAN_URL: https://centrifuge.subscan.io/extrinsic/
-  REACT_APP_WHITELISTED_ACCOUNTS: ''
-
 jobs:
   dev:
     uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
     with:
       netlify-alias: ''
+      ipfs-gateway: https://gateway.pinata.cloud/
+      collator-wss-url: wss://fullnode-collator.development.cntrfg.com
+      relay-wss-url: wss://fullnode-relay.development.cntrfg.com
+      subscan-url: https://centrifuge.subscan.io/extrinsic/
+      whitelisted-accounts: ''
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
