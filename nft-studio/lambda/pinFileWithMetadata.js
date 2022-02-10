@@ -17,7 +17,6 @@ const dataUriToReadStream = ({ tempFilePath, fileDataUri }) => {
 const ipfsHashToURI = (hash) => `ipfs://ipfs/${hash}`
 
 const handler = async (event) => {
-  let tempDir = ''
   try {
     const { name, description, fileDataUri, fileName } = JSON.parse(event.body)
 
@@ -26,13 +25,8 @@ const handler = async (event) => {
       return { statusCode: 400, body: 'Bad request: name, description and fileDataUri are required fields' }
     }
 
-    // create temp directory
-    tempDir = path.join(fs.realpathSync(os.tmpdir()), fs.mkdtempSync('nft-studio-'))
-    fs.mkdirSync(tempDir)
-    console.log(`Temp dir '${tempDir}' created`)
-
     // create temp file to call the pinFile API
-    const tempFilePath = path.join(tempDir, fileName)
+    const tempFilePath = path.join('/tmp', fileName)
     console.log(`Temp file '${tempFilePath}' created`)
     const fileStream = dataUriToReadStream({ tempFilePath, fileDataUri })
 
@@ -65,12 +59,6 @@ const handler = async (event) => {
   } catch (e) {
     console.log(e)
     return { statusCode: 500, body: e.message || 'Server error' }
-  } finally {
-    // clean up the temp file/directory
-    if (tempDir) {
-      fs.rmSync(tempDir, { recursive: true })
-      console.log(`Temp dir '${tempDir}' removed`)
-    }
   }
 }
 
