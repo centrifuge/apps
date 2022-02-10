@@ -2,7 +2,6 @@ import path from 'path'
 import { pinFile } from './pinata/api'
 
 const fs = require('fs')
-const os = require('os')
 
 const dataUriToReadStream = ({ tempFilePath, fileDataUri }) => {
   const base64String = fileDataUri.replace(/.+;base64,/, '')
