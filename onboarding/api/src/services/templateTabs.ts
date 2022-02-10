@@ -1,16 +1,16 @@
 import { formatBirthday, formatCityStateZip, formatEntranceHouseNumberStreet } from './prefillHelpers'
 
 export const templateIds = {
-  '1754_SERIES_3': '892cad87-9734-4e16-bcac-f70dbe91356a',
-  'RWA/AAVE': 'a4f7d075-89ec-49c5-9165-d5b136cf2416',
-  1754: 'bc240308-7286-49f4-b1eb-6434a771bc53',
-  CONSOL_FREIGHT: 'a9adc13b-a990-4d58-b54f-647762853923',
-  FORTUNA_FI_S1: '3b3a33b8-23fc-40a4-8a4c-d1f5edd52f96',
-  GIG: '4742c326-3ca2-4e5f-9aea-0b3946eddf2e',
-  HARBOR_TRADE: 'fb9d4f62-43b3-4e8f-b135-4d29a4a72a0e',
-  NEW_SILVER: '19750b36-24ab-43e3-9441-23abc2f09a80',
-  NEW_TEMPLATE: '--', // tbd
-  REIF: '78c4e681-500d-46cf-bafc-4e7d79dc8409',
+  '1754_SERIES_3': '2e1d5a1a-3527-4094-9177-8fda0d6f4cc0',
+  'RWA/AAVE': 'a7b4b697-a78d-4654-bd59-481d51b8fa80',
+  1754: '93b69222-4ca9-48ca-9b01-e04006460d01',
+  CONSOL_FREIGHT: 'efcbf8e0-aabf-44c3-92fe-583bf024a439',
+  FORTUNA_FI_S1: 'ce589bb8-76d1-4e48-a4f6-bc7dac1d782b',
+  GIG: 'e460985a-7f2d-40b3-ba12-466f70cd977e',
+  HARBOR_TRADE: '1b56bc30-b3a6-4614-8611-04ec862f702d',
+  NEW_SILVER: 'a3b0758d-23ff-4adf-ac31-bf8b516853a2',
+  NEW_TEMPLATE: '--',
+  REIF: '98cc99ff-8154-4e4c-a500-ba813e8d2a87',
 }
 
 export const getPrefilledTabs = (templateId, investor) => {
@@ -19,8 +19,8 @@ export const getPrefilledTabs = (templateId, investor) => {
   const { city, countryCode, entrance, houseNumber, state, street, zip } = address
 
   const birthDate = formatBirthday(birthday)
-  const entranceHouseNumberStreet = `${formatEntranceHouseNumberStreet(entrance, houseNumber, street)}`
-  const cityStateZip = `${formatCityStateZip(city, state, zip)}`
+  const entranceHouseNumberStreet = formatEntranceHouseNumberStreet(entrance, houseNumber, street)
+  const cityStateZip = formatCityStateZip(city, state, zip)
   const taxId = domainInvestorDetails?.taxInfo[0]?.taxId
 
   const includeCountryCode =

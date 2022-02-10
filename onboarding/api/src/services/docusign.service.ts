@@ -31,16 +31,33 @@ export class DocusignService {
     const pool = await this.poolService.get(poolId)
     if (!pool) throw new Error(`Failed to find pool ${poolId}`)
 
-    const [kycInfo] = await this.db.sql`
-      select provider_account_id, digest
-      from kyc
-      where kyc.user_id = ${userId}
-    `
-
-    const investor = await this.securitizeService.getInvestor(userId, kycInfo.providerAccountId, kycInfo.digest)
+    const investor = {
+      fullName: 'Satoshi Nakamoto',
+      email: 'satoshi@nakamoto.com',
+      verificationStatus: 'verified',
+      details: {
+        address: {
+          countryCode: 'US',
+          city: 'Los Angeles',
+          entrance: '',
+          state: 'CA',
+          street: '123 Bitcoin Way',
+          zip: '42069',
+        },
+        birthday: '1990-01-01T00:00:00.000Z',
+      },
+      domainInvestorDetails: {
+        taxInfo: [
+          {
+            taxId: '123456789',
+            taxCountryCode: 'US',
+          },
+        ],
+      },
+    }
 
     const envelopeDefinition = {
-      templateId,
+      templateId: '98cc99ff-8154-4e4c-a500-ba813e8d2a87',
       templateRoles: [
         {
           email,
@@ -48,7 +65,7 @@ export class DocusignService {
           roleName: InvestorRoleName,
           clientUserId: userId,
           routingOrder: 1,
-          tabs: getPrefilledTabs(templateId, investor),
+          tabs: getPrefilledTabs('98cc99ff-8154-4e4c-a500-ba813e8d2a87', investor),
         },
         {
           email: pool.profile.issuer.email,
@@ -84,18 +101,10 @@ export class DocusignService {
   async getAgreementLink(envelopeId: string, user: User, returnUrl: string): Promise<string> {
     const url = `${config.docusign.restApiHost}/restapi/v2.1/accounts/${config.docusign.accountId}/envelopes/${envelopeId}/views/recipient`
 
-    const [kycInfo] = await this.db.sql`
-      select provider_account_id, digest
-      from kyc
-      where kyc.user_id = ${user.id}
-    `
-
-    const investor = await this.securitizeService.getInvestor(user.id, kycInfo.providerAccountId, kycInfo.digest)
-
     const recipientViewRequest = {
       authenticationMethod: 'none',
-      email: investor.email,
-      userName: investor.details.investorType === 'individual' ? investor.fullName : investor.details.entityName,
+      email: user.email,
+      userName: user.entityName?.length > 0 ? user.entityName : user.fullName,
       roleName: InvestorRoleName,
       clientUserId: user.id,
       returnUrl,
