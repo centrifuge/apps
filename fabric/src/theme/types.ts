@@ -62,6 +62,7 @@ export type TextVariantName =
   | 'interactive2'
   | 'body1'
   | 'body2'
+  | 'body3'
   | 'label1'
   | 'label2'
   | 'label3'
