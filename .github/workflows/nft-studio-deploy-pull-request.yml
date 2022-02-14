@@ -5,21 +5,23 @@ on:
       - 'nft-studio/**'
       - 'fabric/**' # dependency
       - 'centrifuge-js/**' # dependency
+      - '.github/workflows/nft-studio-build-and-deploy.yml' # dependency
       - '.github/workflows/nft-studio-pull-request.yml'
-
-env:
-  REACT_APP_IPFS_GATEWAY: https://gateway.pinata.cloud/
-  REACT_APP_COLLATOR_WSS_URL: wss://fullnode-collator.development.cntrfg.com
-  REACT_APP_RELAY_WSS_URL: wss://fullnode-relay.development.cntrfg.com
-  REACT_APP_SUBSCAN_URL: https://centrifuge.subscan.io/extrinsic/
-  REACT_APP_WHITELISTED_ACCOUNTS: ''
 
 jobs:
   pull-request:
     uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
+      ipfs-gateway: https://gateway.pinata.cloud/
+      collator-wss-url: wss://fullnode-collator.development.cntrfg.com
+      relay-wss-url: wss://fullnode-relay.development.cntrfg.com
+      subscan-url: https://centrifuge.subscan.io/extrinsic/
+      whitelisted-accounts: ''
+
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       netlify-site-id: ${{ secrets.NFT_STUDIO_DEV_NETLIFY_SITE_ID }}
+      pinata-api-key: ${{ secrets.PINATA_API_KEY }}
+      pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}
