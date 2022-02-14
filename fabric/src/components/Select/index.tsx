@@ -80,12 +80,7 @@ export const Select: React.FC<SelectProps> = ({
 const SelectInputInt: React.FC<SelectIntProps> = (props) => {
   const state = useSelectState<SelectOptionItem>(props)
   const ref = React.useRef<HTMLButtonElement>(null)
-  const {
-    // labelProps,
-    triggerProps,
-    valueProps,
-    menuProps,
-  } = useSelect(props, state, ref)
+  const { triggerProps, valueProps, menuProps } = useSelect(props, state, ref)
   const { buttonProps } = useButton(triggerProps, ref)
   const IconComp = state.isOpen ? IconChevronUp : IconChevronDown
 
@@ -206,7 +201,6 @@ const StyledOption = styled.li<{ isSelected: boolean; isFocused: boolean; isDisa
   box-sizing: border-box;
   background: ${({ theme, isFocused, isDisabled }) => {
     if (isFocused) return '#EDF2FF'
-    // if (isSelected) return theme.colors.accentPrimary
     if (isDisabled) return theme.colors.backgroundSecondary
     return theme.colors.backgroundInput
   }};
@@ -217,7 +211,6 @@ const StyledOption = styled.li<{ isSelected: boolean; isFocused: boolean; isDisa
 
 const StyledOptionText = styled(Text)<{ isSelected: boolean; isFocused: boolean; isDisabled: boolean }>`
   color: ${({ theme, isDisabled }) => {
-    // if (isSelected) return theme.colors.accentPrimary
     if (isDisabled) return theme.colors.textDisabled
     return theme.colors.textPrimary
   }} !important;

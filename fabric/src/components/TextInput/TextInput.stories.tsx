@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
 import React from 'react'
-import { DateInput, NumberInput, SearchInput, TextInput } from '.'
+import { DateInput, NumberInput, SearchInput, TextAreaInput, TextInput } from '.'
 import { Stack } from '../Stack'
 
 export default {
@@ -61,6 +61,21 @@ export const Number = NumberTemplate.bind({})
 Number.args = {
   label: 'Number',
   placeholder: '00.00',
+  errorMessage: '',
+  disabled: false,
+}
+
+type TextAreaStory = ComponentStory<typeof TextAreaInput>
+const TextAreaTemplate: TextAreaStory = (args) => (
+  <Stack gap={3}>
+    <TextAreaInput {...args} />
+    <TextAreaInput {...args} label="" />
+  </Stack>
+)
+export const TextArea = TextAreaTemplate.bind({})
+TextArea.args = {
+  label: 'Label',
+  placeholder: 'Add description...',
   errorMessage: '',
   disabled: false,
 }
