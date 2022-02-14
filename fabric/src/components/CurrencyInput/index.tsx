@@ -39,7 +39,7 @@ const StyledTextInput = styled.input`
 `
 
 const StyledMaxButton = styled(Box)`
-  padding: 0 6px;
+  padding: 0 8px;
   border: 0;
   border-radius: 12px;
   color: ${({ theme }) => theme.colors.textPrimary};
@@ -55,6 +55,7 @@ const StyledMaxButton = styled(Box)`
     box-shadow: ${({ theme }) => theme.shadows.buttonFocused};
   }
 `.withComponent('button')
+
 StyledMaxButton.defaultProps = {
   type: 'button',
 }
@@ -77,7 +78,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
           <span>{secondaryLabel}</span>
           {onSetMax && (
             <StyledMaxButton onClick={onSetMax} disabled={disabled}>
-              <Text variant="label2" color="inherit">
+              <Text variant="label3" lineHeight={1.5} color="inherit">
                 MAX
               </Text>
             </StyledMaxButton>

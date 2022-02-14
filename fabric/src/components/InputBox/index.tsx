@@ -59,7 +59,7 @@ export const InputBox: React.FC<StackProps & InputBoxProps> = ({
             )}
           </Shelf>
           {secondaryLabel && (
-            <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'}>
+            <Text variant="body3" color={disabled ? 'textDisabled' : 'textSecondary'}>
               {secondaryLabel}
             </Text>
           )}

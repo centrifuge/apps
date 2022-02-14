@@ -93,7 +93,16 @@ const SelectInputInt: React.FC<SelectIntProps> = (props) => {
           disabled={props.isDisabled}
           active={(state.isOpen || state.isFocused) && !props.isDisabled}
           inputElement={
-            <Text color={!state.selectedItem || props.isDisabled ? 'textDisabled' : 'textPrimary'} {...valueProps}>
+            <Text
+              color={
+                !state.selectedItem || props.isDisabled
+                  ? 'textDisabled'
+                  : state.isFocused
+                  ? 'accentPrimary'
+                  : 'textPrimary'
+              }
+              {...valueProps}
+            >
               {state.selectedItem ? state.selectedItem.rendered : props.placeholder}
             </Text>
           }
