@@ -1,3 +1,4 @@
+import countries from 'i18n-iso-countries'
 import { formatBirthday, formatCityStateZip, formatEntranceHouseNumberStreet } from './prefillHelpers'
 
 export const templateIds = {
@@ -23,7 +24,9 @@ export const getPrefilledTabs = (templateId, investor) => {
   const cityStateZip = formatCityStateZip(city, state, zip)
   const taxId = domainInvestorDetails?.taxInfo[0]?.taxId
 
-  const includeCountryCode =
+  const countryName = countries.getName(countryCode, 'en')
+
+  const includeCountryName =
     templateId === templateIds.NEW_SILVER ||
     templateId === templateIds[1754] ||
     templateId === templateIds.CONSOL_FREIGHT ||
@@ -90,12 +93,12 @@ export const getPrefilledTabs = (templateId, investor) => {
           tabLabel: 'City & Postal Code',
           locked: !!cityStateZip,
         },
-        ...(includeCountryCode
+        ...(includeCountryName
           ? [
               {
-                value: countryCode || '',
+                value: countryName || '',
                 tabLabel: 'Country',
-                locked: !!countryCode,
+                locked: !!countryName,
               },
             ]
           : []),
