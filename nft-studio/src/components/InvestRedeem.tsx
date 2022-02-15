@@ -57,7 +57,6 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId, action = 'inve
             {invested.toFixed(0)} {pool?.currency}
           </Text>
         </Text>
-        {/* <Divider /> */}
       </Stack>
       {!trancheBalance.isZero() && showTabs && (
         <Shelf gap={3}>
@@ -111,6 +110,29 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
       },
     }
   )
+  const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
+    'Cancel order',
+    (cent) => cent.pools.updateInvestOrder,
+    {
+      onSuccess: () => {
+        refetchPool()
+        refetchOrder()
+        refetchBalances()
+        form.resetForm()
+      },
+    }
+  )
+
+  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransaction(
+    'Collect',
+    (cent) => cent.pools.collect,
+    {
+      onSuccess: () => {
+        refetchOrder()
+        refetchBalances()
+      },
+    }
+  )
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')
 
@@ -139,6 +161,8 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
   })
 
   const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(investmentCapacity)
+  const needsToCollect =
+    order && pool && order.epoch <= pool.epoch.lastExecuted && order.epoch > 0 && order.invest !== '0'
 
   return (
     <FormikProvider value={form}>
@@ -153,7 +177,7 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                   label="Amount"
                   type="number"
                   min="0"
-                  disabled={isLoading}
+                  disabled={isLoading || isLoadingCancel || isLoadingCollect}
                 />
               )}
             </Field>
@@ -179,6 +203,17 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                 Invest
               </Button>
             </ButtonGroup>
+          ) : needsToCollect ? (
+            <>
+              <Box backgroundColor="backgroundSecondary" p={2}>
+                <Text>you need to collect before you can make another investment</Text>
+              </Box>
+              <ButtonGroup>
+                <Button onClick={() => doCollect([poolId, trancheId])} loading={isLoadingCollect}>
+                  Collect
+                </Button>
+              </ButtonGroup>
+            </>
           ) : (
             <>
               <Box backgroundColor="backgroundSecondary" p={2}>
@@ -192,8 +227,9 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                 </Button>
                 <Button
                   onClick={() => {
-                    doInvestTransaction([poolId, trancheId, new BN(0)])
+                    doCancel([poolId, trancheId, new BN(0)])
                   }}
+                  loading={isLoadingCancel}
                 >
                   Cancel order
                 </Button>
@@ -231,11 +267,36 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
       },
     }
   )
+  const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
+    'Cancel order',
+    (cent) => cent.pools.updateRedeemOrder,
+    {
+      onSuccess: () => {
+        refetchPool()
+        refetchOrder()
+        refetchBalances()
+        form.resetForm()
+      },
+    }
+  )
+
+  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransaction(
+    'Collect',
+    (cent) => cent.pools.collect,
+    {
+      onSuccess: () => {
+        refetchOrder()
+        refetchBalances()
+      },
+    }
+  )
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')
 
   const availableReserve = Dec(pool?.reserve.available ?? '0').div('1e18')
   const redeemCapacity = min(availableReserve.div(price)) // TODO: check risk buffer
+  const needsToCollect =
+    order && pool && order.epoch <= pool.epoch.lastExecuted && order.epoch > 0 && order.redeem !== '0'
 
   const form = useFormik({
     initialValues: {
@@ -272,7 +333,7 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                   label="Amount"
                   type="number"
                   min="0"
-                  disabled={isLoading}
+                  disabled={isLoading || isLoadingCancel || isLoadingCollect}
                 />
               )}
             </Field>
@@ -298,6 +359,17 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                 Redeem
               </Button>
             </ButtonGroup>
+          ) : needsToCollect ? (
+            <>
+              <Box backgroundColor="backgroundSecondary" p={2}>
+                <Text>you need to collect before you can make another redeem order</Text>
+              </Box>
+              <ButtonGroup>
+                <Button onClick={() => doCollect([poolId, trancheId])} loading={isLoadingCollect}>
+                  Collect
+                </Button>
+              </ButtonGroup>
+            </>
           ) : (
             <>
               <Box backgroundColor="backgroundSecondary" p={2}>
@@ -315,8 +387,9 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
                 </Button>
                 <Button
                   onClick={() => {
-                    doRedeemTransaction([poolId, trancheId, new BN(0)])
+                    doCancel([poolId, trancheId, new BN(0)])
                   }}
+                  loading={isLoadingCancel}
                 >
                   Cancel order
                 </Button>

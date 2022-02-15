@@ -3,13 +3,15 @@ import * as React from 'react'
 
 const CentrifugeContext = React.createContext<Centrifuge>(null as any)
 
+const { REACT_APP_RELAY_WSS_URL, REACT_APP_COLLATOR_WSS_URL } = process.env
+
 export const CentrifugeProvider: React.FC = ({ children }) => {
-  const ctx = React.useMemo(
+  const ctx: Centrifuge = React.useMemo(
     () =>
       new Centrifuge({
         network: 'centrifuge',
-        polkadotWsUrl: 'ws://localhost:9944',
-        centrifugeWsUrl: 'ws://localhost:9946',
+        polkadotWsUrl: REACT_APP_RELAY_WSS_URL,
+        centrifugeWsUrl: REACT_APP_COLLATOR_WSS_URL,
         printExtrinsics: process.env.NODE_ENV === 'development',
       }),
     []
@@ -18,8 +20,8 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
   return <CentrifugeContext.Provider value={ctx}>{children}</CentrifugeContext.Provider>
 }
 
-export function useCentrifuge() {
-  const ctx = React.useContext(CentrifugeContext)
+export function useCentrifuge(): Centrifuge {
+  const ctx = React.useContext<Centrifuge>(CentrifugeContext)
   if (!ctx) throw new Error('useCentrifuge must be used within CentrifugeProvider')
   return ctx
 }

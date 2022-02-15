@@ -15,7 +15,7 @@ export const InvestRedeemDialog: React.FC<{
     <Dialog isOpen={open} onClose={onClose}>
       <Stack gap={3}>
         <Text variant="heading2" as="h2">
-          Invest
+          {action === 'invest' ? 'Invest' : 'Redeem'}
         </Text>
         <InvestRedeem poolId={poolId} trancheId={trancheId} action={action} showTabs={showTabs} />
       </Stack>

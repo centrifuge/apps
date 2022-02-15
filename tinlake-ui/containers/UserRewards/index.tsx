@@ -20,7 +20,7 @@ import { shortAddr } from '../../utils/shortAddr'
 import { dynamicPrecision, toDynamicPrecision } from '../../utils/toDynamicPrecision'
 import { toPrecision } from '../../utils/toPrecision'
 import { useGlobalRewards } from '../../utils/useGlobalRewards'
-import { usePortfolio } from '../../utils/usePortfolio'
+import { Tranche, usePortfolio } from '../../utils/usePortfolio'
 import { UserRewardsData, UserRewardsLink, useUserRewards } from '../../utils/useUserRewards'
 import CentChainWalletDialog from '../CentChainWalletDialog'
 import ClaimRewards from '../ClaimRewards'
@@ -33,6 +33,13 @@ const UserRewards: React.FC = () => {
   const { address: ethAddr } = useAuth()
   const portfolio = usePortfolio()
   const portfolioValue = portfolio.data?.totalValue
+  const portfolioTinValue = portfolio.data?.tokenBalances
+    ?.filter((tb) => tb.tranche === Tranche.junior)
+    .reduce((sum, tb) => tb.value.add(sum), new BN(0))
+  const portfolioDropValue = portfolio.data?.tokenBalances
+    ?.filter((tb) => tb.tranche === Tranche.senior)
+    .reduce((sum, tb) => tb.value.add(sum), new BN(0))
+
   const dispatch = useDispatch()
   const router = useRouter()
 
@@ -67,7 +74,10 @@ const UserRewards: React.FC = () => {
               <Metric
                 loading={!rewards.data || !userRewards || !portfolioValue}
                 value={baseToDisplay(
-                  rewards.data?.rewardRate?.mul(portfolioValue?.toString() || 0).toFixed(0) || '0',
+                  rewards.data?.dropRewardRate
+                    ?.mul(portfolioDropValue?.toString() || 0)
+                    .add(rewards.data?.tinRewardRate?.mul(portfolioTinValue?.toString() || 0))
+                    .toFixed(0) || '0',
                   18
                 )}
                 label="Your Daily Rewards"
@@ -188,6 +198,8 @@ const UserRewards: React.FC = () => {
                 <ClaimRewards
                   activeLink={userRewards.links[userRewards.links.length - 1]}
                   portfolioValue={portfolioValue}
+                  portfolioDropValue={portfolioDropValue}
+                  portfolioTinValue={portfolioTinValue}
                 />
               )}
             </Card>
@@ -208,8 +220,16 @@ const UserRewards: React.FC = () => {
             />
             <MetricRow
               loading={!rewards.data}
-              value={rewards.data?.rewardRate.mul(10000).toFixed(4) || ''}
-              label="Daily Reward Rate"
+              value={rewards.data?.dropRewardRate.mul(10000).toFixed(4) || ''}
+              label="Daily DROP Reward Rate"
+              token="CFG"
+              suffix={<span style={{ fontSize: 10, color: '#777777' }}> / 10k DAI</span>}
+              borderBottom
+            />
+            <MetricRow
+              loading={!rewards.data}
+              value={rewards.data?.tinRewardRate.mul(10000).toFixed(4) || ''}
+              label="Daily TIN Reward Rate"
               token="CFG"
               suffix={<span style={{ fontSize: 10, color: '#777777' }}> / 10k DAI</span>}
               borderBottom

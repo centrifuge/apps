@@ -115,6 +115,11 @@ type NAVDetailsData = {
   lastUpdated: number
 }
 
+export type AccountBalances = {
+  tranches: TrancheBalance[]
+  tokens: TokenBalance[]
+}
+
 export type Tranche = {
   index: number
   name: string
@@ -573,7 +578,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     }
   }
 
-  async function getBalances(args: [address: Account]) {
+  async function getBalances(args: [address: Account]): Promise<AccountBalances> {
     const api = await inst.getApi()
     const rawBalances = await api.query.ormlTokens.accounts.entries(args[0])
 
