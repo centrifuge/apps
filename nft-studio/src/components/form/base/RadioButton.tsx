@@ -20,7 +20,7 @@ const HiddenField = styled.input`
 
 const FocusableLabel = styled.label`
   :focus-within {
-    color: ${({ theme }) => theme.colors.brand};
+    color: ${({ theme }) => theme.colors.accentPrimary};
   }
 `
 
