@@ -3268,6 +3268,7 @@ __metadata:
     ts-jest: ^27.1.1
     ts-node: ^10.4.0
     typescript: ^4.5.2
+    wscat: ^5.1.0
   languageName: unknown
   linkType: soft
 
@@ -18495,6 +18496,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commander@npm:^8.1.0":
+  version: 8.3.0
+  resolution: "commander@npm:8.3.0"
+  checksum: 0b818d97ca9c8ad461ff05f873082af0c1895e49984a2abf1090e4a85c3537c3c0f9921e38314a9de7e71941f00f710c204d3560e3a7bc0b1023eef92d6bbfc0
+  languageName: node
+  linkType: hard
+
 "common-path-prefix@npm:^3.0.0":
   version: 3.0.0
   resolution: "common-path-prefix@npm:3.0.0"
@@ -33554,7 +33562,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mute-stream@npm:0.0.8":
+"mute-stream@npm:0.0.8, mute-stream@npm:~0.0.4":
   version: 0.0.8
   resolution: "mute-stream@npm:0.0.8"
   checksum: 315c40f463ec31deee54c5b8779207feb6b63dd4c58fe0f84ad46abdd6dac1ada578d53efde4a47b0ae4d29d453d35bb39ecdd98ee9ebf538929039a3a9945df
@@ -39407,6 +39415,15 @@ __metadata:
     parse-json: ^5.0.0
     type-fest: ^0.6.0
   checksum: 641102f0955f64304f97ed388bfe3b7ce55d74b1ffe1be06be1ae75479ce4910aa7177460d1982af6963f80b293a25f25d593a52a4328d941fd9b7d89fde2dbf
+  languageName: node
+  linkType: hard
+
+"read@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "read@npm:1.0.7"
+  dependencies:
+    mute-stream: ~0.0.4
+  checksum: 78dd30f529452e53a3eab0fdab0e353b3732096ea398c3e3edb15d8ebefc3be6c8cfd509e03a79bdd8f028cd1e3f11eee47d643bd992599d8c1393b87233767d
   languageName: node
   linkType: hard
 
@@ -47327,7 +47344,7 @@ resolve@1.18.1:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.2.3":
+"ws@npm:^8.0.0, ws@npm:^8.2.3":
   version: 8.5.0
   resolution: "ws@npm:8.5.0"
   peerDependencies:
@@ -47339,6 +47356,20 @@ resolve@1.18.1:
     utf-8-validate:
       optional: true
   checksum: d6a23b354e058a4adc4c36adbf54e2f4dd0acdab2f15615a9bb22b1d7e1fe452cf70e2d038da1fea0a8ade87fc1a9e074750c6dd41d16c7e0e4e80948b415c68
+  languageName: node
+  linkType: hard
+
+"wscat@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "wscat@npm:5.1.0"
+  dependencies:
+    commander: ^8.1.0
+    https-proxy-agent: ^5.0.0
+    read: ^1.0.7
+    ws: ^8.0.0
+  bin:
+    wscat: bin/wscat
+  checksum: 29ebb07754128b2800eea7eb2a186925dbcb9173f55f5592e40d63d8d0a191c5578d6f3fd461b806529b7d15c351ac99cb3731d385b7b9f24cd92264be017c7e
   languageName: node
   linkType: hard
 

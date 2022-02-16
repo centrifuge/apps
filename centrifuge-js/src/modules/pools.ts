@@ -1,4 +1,4 @@
-import { StorageKey, u32 } from '@polkadot/types'
+import { StorageKey, u128, u64 } from '@polkadot/types'
 import type { AccountId, Address } from '@polkadot/types/interfaces'
 import BN from 'bn.js'
 import { CentrifugeBase } from '../CentrifugeBase'
@@ -225,8 +225,8 @@ export type TrancheInput = {
   seniority?: number
 }
 
-const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
-const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
+const formatPoolKey = (keys: StorageKey) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
+const formatLoanKey = (keys: StorageKey<[u64, u128]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
 export function getPoolsModule(inst: CentrifugeBase) {
   // TODO: integrate ipfs pinning
@@ -331,6 +331,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   async function submitSolution(args: [poolId: string, solution: string[][]], options?: TransactionOptions) {
     const [poolId, solution] = args
     const api = await inst.getApi()
+    // @ts-ignore
     const submittable = api.tx.pools.submitSolution(poolId, solution)
     return inst.wrapSignAndSend(api, submittable, options)
   }
@@ -405,6 +406,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
   async function createLoan(args: [poolId: string, collectionId: string, nftId: string], options?: TransactionOptions) {
     const [poolId, collectionId, nftId] = args
     const api = await inst.getApi()
+
+    // @ts-ignore
     const submittable = api.tx.loans.create(poolId, [collectionId, nftId])
     return inst.wrapSignAndSend(api, submittable, options)
   }
@@ -415,6 +418,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   ) {
     const [poolId, loanId, ratePerSec, loanType, loanInfo] = args
     const api = await inst.getApi()
+    // @ts-ignore
     const submittable = api.tx.loans.price(poolId, loanId, ratePerSec, { [loanType]: loanInfo })
     return inst.wrapSignAndSend(api, submittable, options)
   }
@@ -454,7 +458,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [rawPools, rawNavs] = await Promise.all([api.query.pools.pool.entries(), api.query.loans.poolNAV.entries()])
 
     const navMap = rawNavs.reduce((acc, [key, navValue]) => {
-      const poolId = formatPoolKey(key as StorageKey<[u32]>)
+      const poolId = formatPoolKey(key)
       const nav = navValue.toJSON() as unknown as NAVDetailsData
       acc[poolId] = {
         latest: nav ? nav.latestNav : new BN('0'),
@@ -466,7 +470,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const pools = rawPools.map(([key, value]) => {
       const pool = value.toJSON() as unknown as PoolDetailsData
       const metadata = (value.toHuman() as any).metadata
-      const poolId = formatPoolKey(key as StorageKey<[u32]>)
+      const poolId = formatPoolKey(key)
       const navData = navMap[poolId]
       return {
         id: poolId,
@@ -633,7 +637,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
       const loan = value.toJSON() as unknown as LoanDetailsData
       const assetKey = (value.toHuman() as any).asset
       return {
-        id: formatLoanKey(key as StorageKey<[u32, u32]>),
+        id: formatLoanKey(key),
         poolId,
         financedAmount: parseBN(loan.borrowedAmount),
         financingFee: parseBN(loan.ratePerSec),
@@ -702,7 +706,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
   ) {
     const [poolId, percentage, overdueDays] = args
     const api = await inst.getApi()
-    const submittable = api.tx.loans.addWriteOffGroup(poolId, [percentage.toString(), overdueDays])
+
+    const submittable = api.tx.loans.addWriteOffGroup(poolId, new Uint8Array([percentage.toNumber(), overdueDays]))
     return inst.wrapSignAndSend(api, submittable, options)
   }
 

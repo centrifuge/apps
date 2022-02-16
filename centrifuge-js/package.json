@@ -23,8 +23,9 @@
     "test2": "node --experimental-vm-modules node_modules/jest/bin/jest",
     "lint": "eslint src/**/*.ts",
     "generate:polkadot-types": "yarn generate:defs && yarn generate:meta",
-    "generate:defs": "ts-node --skip-project ../node_modules/.bin/polkadot-types-from-defs --package centrifuge-js/interfaces --input ./src/interfaces --endpoint ./edgeware.json",
-    "generate:meta": "ts-node --skip-project ../node_modules/.bin/polkadot-types-from-chain --package centrifuge-js/interfaces --endpoint ./edgeware.json --output ./src/interfaces"
+    "generate:defs": "ts-node --skip-project ../node_modules/.bin/polkadot-types-from-defs --package centrifuge-js/interfaces --input ./src/interfaces --endpoint ./centrifuge-dev.json",
+    "generate:meta": "ts-node --skip-project ../node_modules/.bin/polkadot-types-from-chain --package centrifuge-js/interfaces --endpoint ./centrifuge-dev.json --output ./src/interfaces",
+    "generate:fetch": "yarn wscat -c wss://fullnode-collator.development.cntrfg.com -x '{\"id\":\"1\", \"jsonrpc\":\"2.0\", \"method\": \"state_getMetadata\", \"params\":[]}' > ./centrifuge-dev.json"
   },
   "dependencies": {
     "@polkadot/api": "6.9.1",
@@ -47,6 +48,7 @@
     "npm-run-all": "4.1.5",
     "ts-jest": "^27.1.1",
     "ts-node": "^10.4.0",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.2",
+    "wscat": "^5.1.0"
   }
 }
