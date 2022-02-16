@@ -66,7 +66,7 @@ const MenuItemButton = styled.button`
 
   &:hover,
   &:focus-visible {
-    background-color: ${({ theme }) => theme.colors.brand};
+    background-color: ${({ theme }) => theme.colors.accentPrimary};
     color: ${({ theme }) => theme.colors.backgroundPrimary};
 
     ${Sublabel} {

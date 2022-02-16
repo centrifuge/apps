@@ -3,7 +3,7 @@ import { breakpoints } from './breakpoints'
 import { space } from './space'
 import { typography } from './typography'
 
-export const baseTheme: Omit<FabricTheme, 'colors'> = {
+export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
   breakpoints,
   typography,
   space,
@@ -14,6 +14,7 @@ export const baseTheme: Omit<FabricTheme, 'colors'> = {
   },
   radii: {
     card: 8,
+    input: 10,
   },
   fonts: {
     standard: 'Inter, sans-serif',

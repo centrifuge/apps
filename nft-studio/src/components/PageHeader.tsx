@@ -25,9 +25,9 @@ type Props = {
 const BackLink = styled(Link)(
   css({
     position: 'relative',
-    color: 'brand',
+    color: 'accentPrimary',
     '&:visited': {
-      color: 'brand',
+      color: 'accentPrimary',
     },
   })
 )
