@@ -15,7 +15,7 @@ interface Props {
 }
 
 // TODO: Redirect to onboard API URL that isn't pool dependant
-const placeholderPoolId = '0x1f4155D64D75555B9B36E4514C0FCC11313d5A54'
+const placeholderPoolId = '0x560Ac248ce28972083B718778EEb0dbC2DE55740'
 const onboardURL = `${config.onboardAPIHost}pools/${placeholderPoolId}/info-redirect`
 
 const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditationStatus, agreementStatus }) => {
