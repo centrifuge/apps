@@ -12,7 +12,7 @@ const Pill = styled.button(
       color: 'textPrimary',
     },
     '&:hover': {
-      color: 'brand',
+      color: 'accentPrimary',
     },
   }),
   {

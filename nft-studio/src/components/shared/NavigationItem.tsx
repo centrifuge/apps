@@ -15,7 +15,7 @@ const NavigationClickable = styled(Shelf)<{ $active?: boolean }>`
   cursor: pointer;
   background: ${({ $active, theme }) => $active && theme.colors.backgroundSecondary};
   :hover {
-    color: ${({ theme }) => theme.colors.brand};
+    color: ${({ theme }) => theme.colors.accentPrimary};
   }
 `
 

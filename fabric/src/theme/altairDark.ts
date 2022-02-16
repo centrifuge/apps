@@ -5,6 +5,7 @@ import { FabricTheme } from './types'
 
 const altairDark: FabricTheme = {
   ...baseTheme,
+  scheme: 'dark',
   colors: {
     ...brandAltair,
     ...modeDark.colors,
