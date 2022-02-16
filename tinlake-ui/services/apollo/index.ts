@@ -294,40 +294,36 @@ class Apollo {
     const result = await this.client.query({
       query: gql`
         {
-          pools (where : {id: "${root.toLowerCase()}"}){
+          loans (first: 1000, where: { pool_in: ["${root.toLowerCase()}"]}) {
             id
-            loans (first: 1000) {
+            pool {
               id
-              pool {
-                id
-              }
-              index
-              owner
-              opened
-              closed
-              debt
-              interestRatePerSecond
-              ceiling
-              threshold
-              borrowsCount
-              borrowsAggregatedAmount
-              repaysCount
-              repaysAggregatedAmount
-              nftId
-              nftRegistry
-              maturityDate
-              financingDate
-              riskGroup
             }
+            index
+            owner
+            opened
+            closed
+            debt
+            interestRatePerSecond
+            ceiling
+            threshold
+            borrowsCount
+            borrowsAggregatedAmount
+            repaysCount
+            repaysAggregatedAmount
+            nftId
+            nftRegistry
+            maturityDate
+            financingDate
+            riskGroup
           }
         }
         `,
     })
 
-    if (!result.data?.pools) return { data: [] }
+    if (!result.data?.loans) return { data: [] }
 
-    const pool = result.data.pools[0]
-    const tinlakeLoans = pool ? toTinlakeLoans(pool.loans) : { data: [] }
+    const tinlakeLoans = toTinlakeLoans(result.data.loans)
     return tinlakeLoans
   }
 
