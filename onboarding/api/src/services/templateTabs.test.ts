@@ -1,4 +1,4 @@
-import { getPrefilledTabs, templateIds } from './templateTabs'
+import { formatTabs, templateIds } from './templateTabs'
 
 describe('getPrefilledTabs', () => {
   test('full data for reif, rwa/aave', () => {
@@ -27,7 +27,7 @@ describe('getPrefilledTabs', () => {
       },
     }
 
-    const result = getPrefilledTabs(templateIds.REIF, investor)
+    const result = formatTabs(templateIds.REIF, investor)
 
     const expected = {
       dateTabs: [{ locked: true, tabLabel: 'birthDate', value: '01/01/1990' }],
@@ -67,7 +67,7 @@ describe('getPrefilledTabs', () => {
       },
     }
 
-    const result = getPrefilledTabs(templateIds.CONSOL_FREIGHT, investor)
+    const result = formatTabs(templateIds.CONSOL_FREIGHT, investor)
 
     const expected = {
       dateTabs: [{ locked: true, tabLabel: 'birthDate', value: '01/01/1990' }],
@@ -107,7 +107,7 @@ describe('getPrefilledTabs', () => {
       },
     }
 
-    const result = getPrefilledTabs(templateIds.CONSOL_FREIGHT, investor)
+    const result = formatTabs(templateIds.CONSOL_FREIGHT, investor)
 
     const expected = {
       dateTabs: [{ locked: true, tabLabel: 'birthDate', value: '01/01/1990' }],
@@ -149,7 +149,7 @@ describe('getPrefilledTabs', () => {
       },
     }
 
-    const result = getPrefilledTabs(templateIds.CONSOL_FREIGHT, investor)
+    const result = formatTabs(templateIds.CONSOL_FREIGHT, investor)
 
     const expected = {
       dateTabs: [{ locked: true, tabLabel: 'birthDate', value: '01/01/1990' }],
@@ -192,7 +192,7 @@ describe('getPrefilledTabs', () => {
       },
     }
 
-    const result = getPrefilledTabs(templateIds.CONSOL_FREIGHT, investor)
+    const result = formatTabs(templateIds.CONSOL_FREIGHT, investor)
 
     const expected = {
       dateTabs: [{ locked: true, tabLabel: 'birthDate', value: '01/01/1990' }],
@@ -236,7 +236,7 @@ describe('getPrefilledTabs', () => {
       },
     }
 
-    const result = getPrefilledTabs(templateIds.CONSOL_FREIGHT, investor)
+    const result = formatTabs(templateIds.CONSOL_FREIGHT, investor)
 
     const expected = {
       dateTabs: [{ locked: true, tabLabel: 'birthDate', value: '01/01/1990' }],

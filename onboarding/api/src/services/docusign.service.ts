@@ -32,8 +32,8 @@ export class DocusignService {
       const investor = await this.securitizeService.getInvestor(userId, kycInfo.providerAccountId, kycInfo.digest)
 
       return formatTabs(templateId, investor)
-    } catch (error) {
-      throw new Error('error getting user data')
+    } catch {
+      return undefined
     }
   }
 
@@ -58,7 +58,7 @@ export class DocusignService {
           roleName: InvestorRoleName,
           clientUserId: userId,
           routingOrder: 1,
-          tabs: tabs || [],
+          tabs,
         },
         {
           email: pool.profile.issuer.email,

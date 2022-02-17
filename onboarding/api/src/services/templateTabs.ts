@@ -1,4 +1,4 @@
-import countries from 'i18n-iso-countries'
+import { getName } from 'i18n-iso-countries'
 import { formatBirthday, formatCityStateZip, formatEntranceHouseNumberStreet } from './prefillHelpers'
 
 export const templateIds = {
@@ -24,7 +24,7 @@ export const formatTabs = (templateId, investor) => {
   const cityStateZip = formatCityStateZip(city, state, zip)
   const taxId = domainInvestorDetails?.taxInfo[0]?.taxId
 
-  const countryName = countries.getName(countryCode, 'en')
+  const countryName = getName(countryCode, 'en')
 
   const includeCountryName =
     templateId === templateIds.NEW_SILVER ||
