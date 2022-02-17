@@ -211,6 +211,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
               style={{
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
               }}
             >
               {curFile.name}
