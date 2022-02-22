@@ -107,6 +107,10 @@ const Loan: React.FC = () => {
                           label: 'Advance rate',
                           value: `${centrifuge.utils.formatPercentage(loan.loanInfo.advanceRate, e27)}`,
                         },
+                        'discountRate' in loan.loanInfo && {
+                          label: 'Discount rate',
+                          value: `${centrifuge.utils.feeToApr(loan.loanInfo.discountRate)}%`,
+                        },
                       ].filter(Boolean) as any
                     }
                   />
