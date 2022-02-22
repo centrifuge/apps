@@ -26,6 +26,7 @@
     "@react-aria/dialog": "^3.1.4",
     "@react-aria/focus": "^3.5.0",
     "@react-aria/overlays": "^3.7.2",
+    "@react-rxjs/core": "^0.8.4",
     "@styled-system/css": "^5.1.5",
     "@styled-system/should-forward-prop": "^5.1.5",
     "axios": "^0.24.0",
@@ -41,6 +42,7 @@
     "react-router": "^5.2.1",
     "react-router-dom": "^5.3.0",
     "react-scripts": "4.0.3",
+    "rxjs": "^7.4.0",
     "styled-components": "^5.3.1",
     "styled-system": "^5.1.5"
   },

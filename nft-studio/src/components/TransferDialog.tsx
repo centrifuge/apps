@@ -3,7 +3,7 @@ import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { useQueryClient } from 'react-query'
 import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
+import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
 import { isSameAddress } from '../utils/web3'
 import { ButtonGroup } from './ButtonGroup'
 import { Dialog } from './Dialog'
@@ -32,7 +32,7 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
-  } = useCentrifugeTransaction('Transfer NFT', (cent) => cent.nfts.transferNft, {
+  } = useCentrifugeTransactionRx('Transfer NFT', (cent) => cent.nfts.transferNftRx, {
     onSuccess: () => {
       queryClient.invalidateQueries(['nfts', collectionId])
       queryClient.invalidateQueries('balance')

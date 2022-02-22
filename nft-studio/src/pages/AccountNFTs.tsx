@@ -6,8 +6,8 @@ import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
-import { useCollections } from '../utils/useCollections'
-import { useAccountNfts } from '../utils/useNFTs'
+import { useCollections, useCollectionsRx } from '../utils/useCollections'
+import { useAccountNfts, useAccountNftsRx } from '../utils/useNFTs'
 
 export const AccountNFTsPage: React.FC = () => {
   return (
@@ -23,6 +23,8 @@ const AccountNFTs: React.FC = () => {
   const { selectedAccount, isConnecting, connect } = useWeb3()
   const { data: nfts } = useAccountNfts(selectedAccount?.address)
   const { data: collections } = useCollections()
+  useCollectionsRx()
+  useAccountNftsRx(selectedAccount?.address)
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const centrifuge = useCentrifuge()
 

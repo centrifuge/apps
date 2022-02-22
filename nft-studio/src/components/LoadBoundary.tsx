@@ -1,4 +1,5 @@
 import { Box, Button, Stack, Text } from '@centrifuge/fabric'
+import { Subscribe } from '@react-rxjs/core'
 import * as React from 'react'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { useQueryErrorResetBoundary } from 'react-query'
@@ -13,7 +14,9 @@ export const LoadBoundary: React.FC = ({ children }) => {
         </Box>
       }
     >
-      <ErrorBoundary>{children}</ErrorBoundary>
+      <ErrorBoundary>
+        <Subscribe>{children}</Subscribe>
+      </ErrorBoundary>
     </React.Suspense>
   )
 }

@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { useCentrifugeQuery } from './useCentrifugeQuery'
 
 export function useNFTs(collectionId?: string) {
   const cent = useCentrifuge()
@@ -53,4 +54,14 @@ export function useAccountNfts(address?: string, suspense = true) {
   )
 
   return query
+}
+
+export function useAccountNftsRx(address?: string) {
+  const [result] = useCentrifugeQuery(['accountNfts', address], (cent) => cent.nfts.getAccountNftsRx([address!]), {
+    suspense: true,
+    enabled: !!address,
+  })
+
+  console.log('accountnfts', result)
+  return result
 }

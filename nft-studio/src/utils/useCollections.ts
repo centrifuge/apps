@@ -2,6 +2,7 @@ import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { collectionMetadataSchema } from '../schemas'
+import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 
 export function useCollections() {
@@ -17,6 +18,13 @@ export function useCollections() {
   )
 
   return query
+}
+
+export function useCollectionsRx() {
+  const [result] = useCentrifugeQuery(['collections'], (cent) => cent.nfts.getCollectionsRx())
+
+  console.log('result', result)
+  return result
 }
 
 export function useCollection(id?: string) {

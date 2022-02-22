@@ -3002,6 +3002,7 @@ __metadata:
     eslint-plugin-prettier: ^4.0.0
     jest: ^27.4.3
     npm-run-all: 4.1.5
+    rxjs: ^7.4.0
     ts-jest: ^27.1.1
     typescript: ^4.5.2
   languageName: unknown
@@ -3189,6 +3190,7 @@ __metadata:
     "@react-aria/dialog": ^3.1.4
     "@react-aria/focus": ^3.5.0
     "@react-aria/overlays": ^3.7.2
+    "@react-rxjs/core": ^0.8.4
     "@styled-system/css": ^5.1.5
     "@styled-system/should-forward-prop": ^5.1.5
     "@types/bn.js": ^5
@@ -3222,6 +3224,7 @@ __metadata:
     react-router: ^5.2.1
     react-router-dom: ^5.3.0
     react-scripts: 4.0.3
+    rxjs: ^7.4.0
     styled-components: ^5.3.1
     styled-system: ^5.1.5
   languageName: unknown
@@ -7882,6 +7885,16 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1
   checksum: 3546eb982818454ef0028c7211f73ef8e03109c88a25ab041583446fa4ad9ecd2bbf5c07a7e7641838156c48c52692d051e2e4d419d58298b8fbca1a144f7619
+  languageName: node
+  linkType: hard
+
+"@react-rxjs/core@npm:^0.8.4":
+  version: 0.8.4
+  resolution: "@react-rxjs/core@npm:0.8.4"
+  peerDependencies:
+    react: ">=16.8.0"
+    rxjs: ">=6"
+  checksum: 617bc1fc1bf63e811903421433b442f14ff162cd319fa4c3cc2af27edd44f9d58d0dfd8e999f3f0f44ed9fdece07880320c8018ff0bd6f921438e25e42186f66
   languageName: node
   linkType: hard
 

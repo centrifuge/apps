@@ -7,6 +7,7 @@ export function useIdentity(address?: string) {
     ['identity', address],
     async () => {
       const api = await cent.getRelayChainApi()
+      if (!api.query.identity) return null
       const result = await api.query.identity.identityOf(address)
       const obj = result.toHuman() as any
       if (!obj) return null
