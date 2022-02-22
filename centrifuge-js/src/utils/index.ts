@@ -81,10 +81,10 @@ export function addThousandsSeparators(x: string | BN | number) {
   return parts.join('.')
 }
 
-export function formatCurrencyAmount(bn: BN | string | undefined, currency?: string) {
+export function formatCurrencyAmount(bn: BN | string | undefined, currency?: string, precise?: boolean) {
   const currencyStr = currency || 'Usd'
   if (!bn) return ''
-  return `${addThousandsSeparators(toPrecision(baseToDisplay(new BN(bn), 18), 0))} ${currencyStr}`
+  return `${addThousandsSeparators(toPrecision(baseToDisplay(new BN(bn), 18), precise ? 4 : 0))} ${currencyStr}`
 }
 
 export function formatPercentage(numerator: BN | string | undefined, denominator: BN | string | undefined) {
