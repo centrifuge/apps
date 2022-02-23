@@ -31,8 +31,7 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
   const [copied, setCopied] = useState(false)
   const contRef = useRef<HTMLButtonElement>(null)
   const [, setShowDrop] = useState(false)
-  const { ensName, ensAvatar } = useENS(address, networkName)
-
+  const { ensName, ensAvatar } = useENS(address)
   useEffect(() => setShowDrop(true), [])
 
   return (

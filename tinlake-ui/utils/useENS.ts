@@ -10,13 +10,13 @@ const getENSAvatar = async (ensName: string) => {
 
 type ReturnType = { ensName: string | null; ensAvatar: string | null }
 
-export const useENS = (address: string | null | undefined, networkName: string): ReturnType => {
+export const useENS = (address: string | null | undefined): ReturnType => {
   const [ensName, setENSName] = useState<string | null>(null)
   const [ensAvatar, setENSAvatar] = useState<string | null>(null)
 
   useEffect(() => {
     async function resolveENS() {
-      if (networkName === 'Mainnet' && address && ethers.utils.isAddress(address)) {
+      if (address && ethers.utils.isAddress(address)) {
         const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl)
         const ensName = await provider.lookupAddress(address)
         const ensAvatar = ensName ? await getENSAvatar(ensName) : null
