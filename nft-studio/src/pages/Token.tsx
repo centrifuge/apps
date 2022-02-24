@@ -58,14 +58,16 @@ const Token: React.FC = () => {
                     label: 'Value',
                     value: centrifuge.utils.formatCurrencyAmount(
                       new BN(tranche.debt).mul(new BN(tranche.tokenPrice)).div(new BN(10).pow(new BN(27))),
-                      pool.currency
+                      pool.currency,
+                      true
                     ),
                   },
                   {
                     label: 'Price',
                     value: centrifuge.utils.formatCurrencyAmount(
                       new BN(tranche.tokenPrice).div(new BN(1e9)),
-                      pool.currency
+                      pool.currency,
+                      true
                     ),
                   },
                   tranche.name !== 'Junior' && {
@@ -87,7 +89,7 @@ const Token: React.FC = () => {
                     label: 'Reserve',
                     value: (
                       <Text color="statusOk">
-                        {centrifuge.utils.formatCurrencyAmount(tranche.reserve, pool.currency)}
+                        {centrifuge.utils.formatCurrencyAmount(tranche.reserve, pool.currency, true)}
                       </Text>
                     ),
                   },
@@ -102,7 +104,11 @@ const Token: React.FC = () => {
                 items={[
                   {
                     label: 'Balance',
-                    value: centrifuge.utils.formatCurrencyAmount(token?.balance ?? '0', trancheMeta?.symbol || ' '),
+                    value: centrifuge.utils.formatCurrencyAmount(
+                      token?.balance ?? '0',
+                      trancheMeta?.symbol || ' ',
+                      true
+                    ),
                   },
                   {
                     label: 'Value',
@@ -110,7 +116,8 @@ const Token: React.FC = () => {
                       new BN(token?.balance ?? 0)
                         .mul(new BN(pool.tranches[trancheId].tokenPrice))
                         .div(new BN(10).pow(new BN(27))),
-                      pool.currency
+                      pool.currency,
+                      true
                     ),
                   },
                 ]}
