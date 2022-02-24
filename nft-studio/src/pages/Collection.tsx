@@ -8,8 +8,8 @@ import { PageHeader } from '../components/PageHeader'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
-import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
+import { useAddress } from '../utils/useAddress'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFTs } from '../utils/useNFTs'
@@ -29,15 +29,15 @@ const Collection: React.FC = () => {
   const {
     params: { cid: collectionId },
   } = useRouteMatch<{ cid: string }>()
-  const { selectedAccount } = useWeb3()
+  const address = useAddress()
   const collection = useCollection(collectionId)
   const { data: metadata } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
-  const { data: nfts } = useNFTs(collectionId)
+  const nfts = useNFTs(collectionId)
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const centrifuge = useCentrifuge()
 
   const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
-  const canMint = !isLoanCollection && isSameAddress(selectedAccount?.address, collection?.owner)
+  const canMint = !isLoanCollection && isSameAddress(address, collection?.owner)
 
   return (
     <Stack gap={8} flex={1}>

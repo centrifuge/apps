@@ -32,7 +32,7 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
-  } = useCentrifugeTransactionRx('Transfer NFT', (cent) => cent.nfts.transferNftRx, {
+  } = useCentrifugeTransactionRx('Transfer NFT', (cent) => cent.nfts.transferNft, {
     onSuccess: () => {
       queryClient.invalidateQueries(['nfts', collectionId])
       queryClient.invalidateQueries('balance')

@@ -8,7 +8,7 @@ import { collectionMetadataSchema } from '../schemas'
 import { createCollectionMetadata } from '../utils/createCollectionMetadata'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
+import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
 import { fetchMetadata } from '../utils/useMetadata'
 import { useCentrifuge } from './CentrifugeProvider'
 import { TextArea } from './TextArea'
@@ -32,12 +32,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     lastCreatedTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
-  } = useCentrifugeTransaction('Create collection', (cent) => cent.nfts.createCollection, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('collections')
-      queryClient.invalidateQueries('balance')
-    },
-  })
+  } = useCentrifugeTransactionRx('Create collection', (cent) => cent.nfts.createCollection)
 
   const {
     execute,

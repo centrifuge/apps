@@ -2,18 +2,23 @@ import Centrifuge from '@centrifuge/centrifuge-js'
 import { bind } from '@react-rxjs/core'
 import * as React from 'react'
 import { useQuery, useQueryClient } from 'react-query'
-import { Observable, of } from 'rxjs'
+import { Observable, of, timer } from 'rxjs'
+import { delayWhen, mapTo, retryWhen, scan, tap } from 'rxjs/operators'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 
 const [useEmptySuspenseSub] = bind(of(null))
 const [useEmptySub] = bind(of(null), null)
 
+const RETRIES_BEFORE_THROWING = 3
+const RETRY_MIN_DELAY = 2000
+const RETRY_MAX_DELAY = 30000
+
 export function useCentrifugeQuery<T = any>(
   key: readonly unknown[],
   queryCallback: (cent: Centrifuge) => Observable<T>,
-  options?: { suspense?: boolean; enabled?: boolean }
+  options?: { suspense?: boolean; enabled?: boolean; throwErrors?: boolean }
 ): [T | null | undefined, Observable<T | null> | undefined] {
-  const { suspense: suspenseOption, enabled = true } = options || {}
+  const { suspense: suspenseOption, enabled = true, throwErrors: throwErrorsOption } = options || {}
   const cent = useCentrifuge()
 
   // react-rxjs's shareLatest operator stores and replays the last received data.
@@ -24,12 +29,30 @@ export function useCentrifugeQuery<T = any>(
   const cachedData = queryClient.getQueryData<T>(['queryData', ...key])
 
   const [suspense] = React.useState(suspenseOption && !cachedData)
+  const throwErrors = throwErrorsOption ?? suspense
 
   // Using react-query to cache the observable to ensure that all consumers subscribe to the same multicasted observable
   const { data: bindResult } = useQuery(
     ['query', suspense, ...key],
     () => {
-      const $obs = queryCallback(cent)
+      const $obs = queryCallback(cent).pipe(
+        // When an error is thrown, retry after a delay of RETRY_MIN_DELAY, doubling every attempt to a max of RETRY_MAX_DELAY.
+        // When using Suspense, an error will be thrown after RETRIES_BEFORE_THROWING retries.
+        retryWhen((errors) =>
+          errors.pipe(
+            tap((error) => {
+              console.error(error)
+            }),
+            mapTo(1),
+            scan((acc, cur) => acc + cur),
+            tap((errorCount) => {
+              if (errorCount > RETRIES_BEFORE_THROWING && throwErrors) throw new Error('Failed to query data')
+            }),
+            delayWhen((errorCount) => timer(Math.min(RETRY_MIN_DELAY * 2 ** (errorCount - 1), RETRY_MAX_DELAY)))
+          )
+        )
+      )
+
       if (!suspense) {
         return bind($obs, null)
       }

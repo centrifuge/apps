@@ -25,9 +25,9 @@ const COUNT_PER_PAGE = 12
 const Collections: React.FC = () => {
   const [createOpen, setCreateOpen] = React.useState(false)
   const { selectedAccount } = useWeb3()
-  const { data: collections } = useCollections()
+  const collections = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
-  const { data: accountNfts } = useAccountNfts(selectedAccount?.address, false)
+  const accountNfts = useAccountNfts(selectedAccount?.address, false)
   const centrifuge = useCentrifuge()
 
   const userCollections = React.useMemo(

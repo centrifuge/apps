@@ -1,6 +1,6 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import { combineLatest, EMPTY, firstValueFrom, lastValueFrom } from 'rxjs'
-import { expand, filter, map, switchMap, take, tap } from 'rxjs/operators'
+import { expand, filter, map, switchMap, take } from 'rxjs/operators'
 // import { AnyNumber } from '@polkadot/types/types'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
@@ -43,36 +43,7 @@ const formatClassKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])
 const formatInstanceKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
 export function getNftsModule(inst: CentrifugeBase) {
-  async function getCollections() {
-    const api = await inst.getApi()
-
-    const [metas, collections] = await Promise.all([
-      api.query.uniques.classMetadataOf.entries(),
-      api.query.uniques.class.entries(),
-    ])
-
-    const metasObj = metas.reduce((acc, [keys, value]) => {
-      acc[formatClassKey(keys)] = value.toHuman()
-      return acc
-    }, {} as any)
-
-    const mapped = collections.map(([keys, value]) => {
-      const id = formatClassKey(keys)
-      const collectionValue = value.toJSON() as Class
-      const collection: Collection = {
-        id,
-        admin: collectionValue.admin,
-        owner: collectionValue.owner,
-        issuer: collectionValue.issuer,
-        instances: collectionValue.instances,
-        metadataUri: metasObj[id]?.data,
-      }
-      return collection
-    })
-    return mapped
-  }
-
-  function getCollectionsRx() {
+  function getCollections() {
     const $api = inst.getRxApi()
 
     return $api.pipe(
@@ -104,35 +75,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     )
   }
 
-  async function getCollectionNfts(args: [collectionId: string]) {
-    const [collectionId] = args
-    const api = await inst.getApi()
-
-    const [metas, nfts] = await Promise.all([
-      api.query.uniques.instanceMetadataOf.entries(collectionId),
-      api.query.uniques.asset.entries(collectionId),
-    ])
-
-    const metasObj = metas.reduce((acc, [keys, value]) => {
-      acc[formatInstanceKey(keys)] = value.toHuman()
-      return acc
-    }, {} as any)
-
-    const mapped = nfts.map(([keys, value]) => {
-      const id = formatInstanceKey(keys)
-      const nftValue = value.toJSON() as Instance
-      const nft: NFT = {
-        id,
-        collectionId,
-        owner: nftValue.owner,
-        metadataUri: metasObj[id]?.data,
-      }
-      return nft
-    })
-    return mapped
-  }
-
-  async function getCollectionNftsRx(args: [collectionId: string]) {
+  function getCollectionNfts(args: [collectionId: string]) {
     const [collectionId] = args
     const $api = inst.getRxApi()
 
@@ -141,9 +84,11 @@ export function getNftsModule(inst: CentrifugeBase) {
         combineLatest([
           api.query.uniques.instanceMetadataOf.entries(collectionId),
           api.query.uniques.asset.entries(collectionId),
+          api.query.system.number(),
         ])
       ),
-      map(([metas, nfts]) => {
+      map(([metas, nfts, number]) => {
+        console.log('number', number)
         const metasObj = metas.reduce((acc, [keys, value]) => {
           acc[formatInstanceKey(keys)] = value.toHuman()
           return acc
@@ -165,35 +110,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     )
   }
 
-  async function getAccountNfts(args: [address: string]) {
-    const [address] = args
-    const api = await inst.getApi()
-
-    const keys = await api.query.uniques.account.keys(address)
-    const keysArr = keys.map((k) => {
-      const [, cid, aid] = k.toHuman() as any
-      return [cid.replace(/\D/g, ''), aid.replace(/\D/g, '')]
-    })
-    const [metas, nfts] = await Promise.all([
-      api.query.uniques.instanceMetadataOf.multi(keysArr),
-      api.query.uniques.asset.multi(keysArr),
-    ])
-
-    const mapped = nfts.map((value, i) => {
-      const [collectionId, id] = keysArr[i]
-      const instance = value.toJSON() as Instance
-      const nft: NFT = {
-        id,
-        collectionId,
-        owner: instance.owner,
-        metadataUri: (metas[i]?.toHuman() as any)?.data,
-      }
-      return nft
-    })
-    return mapped
-  }
-
-  function getAccountNftsRx(args: [address: string]) {
+  function getAccountNfts(args: [address: string]) {
     const [address] = args
 
     const $api = inst.getRxApi()
@@ -234,20 +151,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     )
   }
 
-  async function createCollection(
-    args: [collectionId: string, owner: string, metadataUri: string],
-    options?: TransactionOptions
-  ) {
-    const [collectionId, owner, metadataUri] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.utility.batchAll([
-      api.tx.uniques.create(collectionId, owner),
-      api.tx.uniques.setClassMetadata(collectionId, metadataUri, true),
-    ])
-    return inst.wrapSignAndSend(api, submittable, options)
-  }
-
-  function createCollectionRx(
+  function createCollection(
     args: [collectionId: string, owner: string, metadataUri: string],
     options?: TransactionOptions
   ) {
@@ -269,7 +173,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     )
   }
 
-  async function transferNftRx(
+  async function transferNft(
     args: [collectionId: string, nftId: string, recipientAddress: string],
     options?: TransactionOptions
   ) {
@@ -281,10 +185,7 @@ export function getNftsModule(inst: CentrifugeBase) {
           api,
           submittable: api.tx.uniques.transfer(...args),
         })),
-        switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options)),
-        tap((res) => {
-          console.log('result on tap bissh', res)
-        })
+        switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
       )
     )
   }
@@ -294,22 +195,20 @@ export function getNftsModule(inst: CentrifugeBase) {
     options?: TransactionOptions
   ) {
     const [collectionId, nftId, owner, metadataUri] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.utility.batchAll([
-      api.tx.uniques.mint(collectionId, nftId, owner),
-      api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
-    ])
+    const $api = inst.getRxApi()
 
-    return inst.wrapSignAndSend(api, submittable, options)
-  }
-
-  async function transferNft(
-    args: [collectionId: string, nftId: string, recipientAddress: string],
-    options?: TransactionOptions
-  ) {
-    const api = await inst.getApi()
-    const submittable = api.tx.uniques.transfer(...args)
-    return inst.wrapSignAndSend(api, submittable, options)
+    return lastValueFrom(
+      $api.pipe(
+        map((api) => ({
+          api,
+          submittable: api.tx.utility.batchAll([
+            api.tx.uniques.mint(collectionId, nftId, owner),
+            api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
+          ]),
+        })),
+        switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+      )
+    )
   }
 
   async function getAvailableCollectionId() {
@@ -380,10 +279,5 @@ export function getNftsModule(inst: CentrifugeBase) {
     createCollection,
     mintNft,
     transferNft,
-    getCollectionsRx,
-    getCollectionNftsRx,
-    getAccountNftsRx,
-    createCollectionRx,
-    transferNftRx,
   }
 }

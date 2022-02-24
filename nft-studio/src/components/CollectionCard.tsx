@@ -14,7 +14,7 @@ type Props = {
 
 export const CollectionCard: React.FC<Props> = ({ collection }) => {
   const { data: metadata } = useMetadata(collection.metadataUri, collectionMetadataSchema)
-  const { data: previewNFTs } = useCollectionNFTsPreview(collection.id)
+  const previewNFTs = useCollectionNFTsPreview(collection.id)
   const { id, admin } = collection
 
   return (

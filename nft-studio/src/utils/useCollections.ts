@@ -1,35 +1,21 @@
 import * as React from 'react'
 import { useQuery } from 'react-query'
+import { firstValueFrom } from 'rxjs'
+import { map, switchMap } from 'rxjs/operators'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { collectionMetadataSchema } from '../schemas'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 
 export function useCollections() {
-  const cent = useCentrifuge()
-  const query = useQuery(
-    ['collections'],
-    async () => {
-      return cent.nfts.getCollections()
-    },
-    {
-      suspense: true,
-    }
-  )
+  const [result] = useCentrifugeQuery(['collections'], (cent) => cent.nfts.getCollections(), { suspense: true })
 
-  return query
-}
-
-export function useCollectionsRx() {
-  const [result] = useCentrifugeQuery(['collections'], (cent) => cent.nfts.getCollectionsRx())
-
-  console.log('result', result)
   return result
 }
 
 export function useCollection(id?: string) {
-  const { data } = useCollections()
-  return React.useMemo(() => data?.find((c) => c.id === id), [data, id])
+  const collections = useCollections()
+  return React.useMemo(() => collections?.find((c) => c.id === id), [collections, id])
 }
 
 export function useCollectionMetadata(id?: string) {
@@ -38,34 +24,37 @@ export function useCollectionMetadata(id?: string) {
 }
 
 export function useCollectionNFTsPreview(id: string) {
-  const { data } = useCollections()
+  const collections = useCollections()
   const cent = useCentrifuge()
   const query = useQuery(
     ['collectionPreview', id],
     async () => {
-      const api = await cent.getApi()
-      const collection = data!.find((c) => c.id === id)
+      const collection = collections!.find((c) => c.id === id)
       if (!collection) return null
+      return firstValueFrom(
+        cent.getRxApi().pipe(
+          switchMap((api) => api.query.uniques.instanceMetadataOf.entriesPaged({ pageSize: 4, args: [collection.id] })),
+          map((metas) => {
+            const mapped = metas.map(([keys, value]) => {
+              const id = (keys.toHuman() as string[])[0]
+              const metaValue = value.toHuman() as any
+              const meta = {
+                id,
+                metadataUri: metaValue.data as string | undefined,
+              }
+              return meta
+            })
 
-      const metas = await api.query.uniques.instanceMetadataOf.entriesPaged({ pageSize: 4, args: [collection.id] })
-
-      const mapped = metas.map(([keys, value]) => {
-        const id = (keys.toHuman() as string[])[0]
-        const metaValue = value.toHuman() as any
-        const meta = {
-          id,
-          metadataUri: metaValue.data as string | undefined,
-        }
-        return meta
-      })
-
-      return mapped
+            return mapped
+          })
+        )
+      )
     },
     {
-      enabled: !!data,
+      enabled: !!collections,
       staleTime: Infinity,
     }
   )
 
-  return query
+  return query.data
 }
