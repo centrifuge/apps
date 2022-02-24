@@ -107,6 +107,10 @@ const Loan: React.FC = () => {
                           label: 'Advance rate',
                           value: `${centrifuge.utils.formatPercentage(loan.loanInfo.advanceRate, e27)}`,
                         },
+                        'discountRate' in loan.loanInfo && {
+                          label: 'Discount rate',
+                          value: `${centrifuge.utils.feeToApr(loan.loanInfo.discountRate)}%`,
+                        },
                       ].filter(Boolean) as any
                     }
                   />
@@ -387,11 +391,11 @@ const FinanceForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan,
         <PageSummary>
           <LabelValueStack
             label="Total borrowed amount"
-            value={`${centrifuge.utils.formatCurrencyAmount(loan?.financedAmount)}`}
+            value={`${centrifuge.utils.formatCurrencyAmount(loan?.financedAmount, pool?.currency)}`}
           />
           <LabelValueStack
             label="Current debt"
-            value={`${centrifuge.utils.formatCurrencyAmount(loan?.outstandingDebt)}`}
+            value={`${centrifuge.utils.formatCurrencyAmount(loan?.outstandingDebt, pool?.currency, true)}`}
           />
         </PageSummary>
         <Grid columns={[1, 2]} equalColumns gap={3} rowGap={5}>
