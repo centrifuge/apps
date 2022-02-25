@@ -10,7 +10,7 @@ const [useEmptySuspenseSub] = bind(of(null))
 const [useEmptySub] = bind(of(null), null)
 
 const RETRIES_BEFORE_THROWING = 3
-const RETRY_MIN_DELAY = 2000
+const RETRY_MIN_DELAY = 1000
 const RETRY_MAX_DELAY = 30000
 
 export function useCentrifugeQuery<T = any>(

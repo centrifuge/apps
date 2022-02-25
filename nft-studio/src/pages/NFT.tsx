@@ -9,9 +9,9 @@ import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { SplitView } from '../components/SplitView'
 import { TransferDialog } from '../components/TransferDialog'
-import { useWeb3 } from '../components/Web3Provider'
 import { nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
+import { useAddress } from '../utils/useAddress'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFT } from '../utils/useNFTs'
@@ -28,9 +28,8 @@ export const NFTPage: React.FC = () => {
 
 const NFT: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
-
-  const { selectedAccount } = useWeb3()
-  const { data: permissions } = usePermissions(selectedAccount?.address)
+  const address = useAddress()
+  const permissions = usePermissions(address)
   const nft = useNFT(collectionId, nftId)
   const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)

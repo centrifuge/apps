@@ -36,7 +36,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId, action = 'inve
   const [tab, setTab] = React.useState<'invest' | 'redeem'>(action)
   const { selectedAccount } = useWeb3()
   const address = useAddress()
-  const { data: permissions } = usePermissions(address)
+  const permissions = usePermissions(address)
   const { data: balances } = useBalances(address)
   const { data: pool } = usePool(poolId)
 

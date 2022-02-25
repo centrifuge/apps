@@ -58,7 +58,7 @@ const Loan: React.FC = () => {
   const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const centrifuge = useCentrifuge()
   const address = useAddress()
-  const { data: permissions } = usePermissions(address)
+  const permissions = usePermissions(address)
 
   const canPrice = permissions?.[pid]?.roles.includes('PricingAdmin')
   const isLoanOwner = isSameAddress(loanNft?.owner, address)

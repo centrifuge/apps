@@ -28,7 +28,7 @@ const CreateLoan: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
 
   const { selectedAccount } = useWeb3()
-  const { data: permissions } = usePermissions(selectedAccount?.address)
+  const permissions = usePermissions(selectedAccount?.address)
   const { data: pools } = usePools()
   const [redirect, setRedirect] = React.useState<string>()
 

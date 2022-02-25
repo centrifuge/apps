@@ -3,6 +3,7 @@ import { web3FromAddress } from '@polkadot/extension-dapp'
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types'
 import { ISubmittableResult } from '@polkadot/types/types'
 import * as React from 'react'
+import { lastValueFrom, Observable } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Transaction, useTransaction, useTransactions } from '../components/TransactionsProvider'
 import { useWeb3 } from '../components/Web3Provider'
@@ -10,7 +11,7 @@ import { PalletError } from './errors'
 
 export function useCentrifugeTransactionRx<T extends Array<any>>(
   title: string,
-  transactionCallback: (centrifuge: Centrifuge) => (args: T, options?: TransactionOptions) => Promise<any>,
+  transactionCallback: (centrifuge: Centrifuge) => (args: T, options?: TransactionOptions) => Observable<any>,
   options: { onSuccess?: (args: T, result: ISubmittableResult) => void; onError?: (error: any) => void } = {}
 ) {
   const { addTransaction, updateTransaction } = useTransactions()
@@ -31,46 +32,48 @@ export function useCentrifugeTransactionRx<T extends Array<any>>(
       updateTransaction(id, { status: 'unconfirmed' })
 
       let txError: any = null
-      const lastResult = await transaction(args, {
-        onStatusChange: (result) => {
-          const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
-          let errorObject: any
+      const lastResult = await lastValueFrom(
+        transaction(args, {
+          onStatusChange: (result) => {
+            const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
+            let errorObject: any
 
-          if (result.dispatchError || errors.length) {
-            let errorMessage = 'Transaction failed'
-            txError = result.dispatchError || errors[0]
-            if (errors.length) {
-              const error = errors[0].event.data[0] as any
-              if (error.isModule) {
-                // for module errors, we have the section indexed, lookup
-                const decoded = api.registry.findMetaError(error.asModule)
-                const { section, method, docs } = decoded
-                errorObject = new PalletError(section, method)
-                errorMessage = errorObject.message || errorMessage
-                console.error(`${section}.${method}: ${docs.join(' ')}`)
-              } else {
-                // Other, CannotLookup, BadOrigin, no extra info
-                console.error(error.toString())
+            if (result.dispatchError || errors.length) {
+              let errorMessage = 'Transaction failed'
+              txError = result.dispatchError || errors[0]
+              if (errors.length) {
+                const error = errors[0].event.data[0] as any
+                if (error.isModule) {
+                  // for module errors, we have the section indexed, lookup
+                  const decoded = api.registry.findMetaError(error.asModule)
+                  const { section, method, docs } = decoded
+                  errorObject = new PalletError(section, method)
+                  errorMessage = errorObject.message || errorMessage
+                  console.error(`${section}.${method}: ${docs.join(' ')}`)
+                } else {
+                  // Other, CannotLookup, BadOrigin, no extra info
+                  console.error(error.toString())
+                }
               }
-            }
 
-            updateTransaction(id, (prev) => ({
-              status: 'failed',
-              failedReason: errorMessage,
-              error: errorObject,
-              dismissed: prev.status === 'failed' && prev.dismissed,
-            }))
-          } else if (result.status.isInBlock || result.status.isFinalized) {
-            updateTransaction(id, (prev) =>
-              prev.status === 'failed'
-                ? {}
-                : { status: 'succeeded', dismissed: prev.status === 'succeeded' && prev.dismissed }
-            )
-          } else {
-            updateTransaction(id, { status: 'pending', hash: result.status.hash.toHex() })
-          }
-        },
-      })
+              updateTransaction(id, (prev) => ({
+                status: 'failed',
+                failedReason: errorMessage,
+                error: errorObject,
+                dismissed: prev.status === 'failed' && prev.dismissed,
+              }))
+            } else if (result.status.isInBlock || result.status.isFinalized) {
+              updateTransaction(id, (prev) =>
+                prev.status === 'failed'
+                  ? {}
+                  : { status: 'succeeded', dismissed: prev.status === 'succeeded' && prev.dismissed }
+              )
+            } else {
+              updateTransaction(id, { status: 'pending', hash: result.status.hash.toHex() })
+            }
+          },
+        })
+      )
 
       if (txError) {
         options.onError?.(txError)

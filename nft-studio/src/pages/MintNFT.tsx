@@ -18,7 +18,7 @@ import { createNFTMetadata } from '../utils/createNFTMetadata'
 import { getFileDataURI } from '../utils/getFileDataURI'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
+import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { fetchMetadata } from '../utils/useMetadata'
 import { isSameAddress } from '../utils/web3'
@@ -57,7 +57,7 @@ const MintNFT: React.FC = () => {
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
-  } = useCentrifugeTransaction('Mint NFT', (cent) => cent.nfts.mintNft, {
+  } = useCentrifugeTransactionRx('Mint NFT', (cent) => cent.nfts.mintNft, {
     onSuccess: () => {
       queryClient.invalidateQueries(['nfts', collectionId])
       queryClient.invalidateQueries(['collectionPreview', collectionId])

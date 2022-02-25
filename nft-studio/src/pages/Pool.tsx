@@ -40,7 +40,7 @@ const Pool: React.FC = () => {
   const history = useHistory()
   const { selectedAccount } = useWeb3()
 
-  const { data: permissions } = usePermissions(selectedAccount?.address)
+  const permissions = usePermissions(selectedAccount?.address)
 
   const centrifuge = useCentrifuge()
 
