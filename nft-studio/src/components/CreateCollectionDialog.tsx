@@ -23,7 +23,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
   const cent = useCentrifuge()
-  const { data: balance } = useBalance()
+  const balance = useBalance()
 
   const isConnected = !!selectedAccount?.address
 

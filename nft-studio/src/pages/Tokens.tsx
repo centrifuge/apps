@@ -16,7 +16,7 @@ export const TokensPage: React.FC = () => {
 
 const Tokens: React.FC = () => {
   const address = useAddress()
-  const { data: balances } = useBalances(address)
+  const balances = useBalances(address)
 
   return (
     <Stack gap={8} flex={1}>

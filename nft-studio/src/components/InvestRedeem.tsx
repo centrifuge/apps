@@ -7,7 +7,7 @@ import styled from 'styled-components'
 import { Dec } from '../utils/Decimal'
 import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
+import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
 import { usePermissions } from '../utils/usePermissions'
 import { useOrder, usePool, usePoolMetadata } from '../utils/usePools'
 import { ButtonGroup } from './ButtonGroup'
@@ -37,8 +37,8 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId, action = 'inve
   const { selectedAccount } = useWeb3()
   const address = useAddress()
   const permissions = usePermissions(address)
-  const { data: balances } = useBalances(address)
-  const { data: pool } = usePool(poolId)
+  const balances = useBalances(address)
+  const pool = usePool(poolId)
 
   const allowedToInvest = permissions?.[poolId]?.tranches.includes(trancheId)
   const tranche = pool?.tranches[trancheId]
@@ -91,47 +91,35 @@ type InvestValues = {
 
 const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
   const address = useAddress()
-  const { data: order, refetch: refetchOrder } = useOrder(poolId, trancheId, address)
-  const { data: balances, refetch: refetchBalances } = useBalances(address)
-  const { data: pool, refetch: refetchPool } = usePool(poolId)
+  const order = useOrder(poolId, trancheId, address)
+  const balances = useBalances(address)
+  const pool = usePool(poolId)
   const tranche = pool?.tranches[trancheId]
   const balance = Dec(balances?.tokens.find((b) => b.currency === pool?.currency)?.balance ?? 0).div('1e18')
   const pendingInvest = Dec(order?.invest ?? 0).div('1e18')
 
-  const { execute: doInvestTransaction, isLoading } = useCentrifugeTransaction(
+  const { execute: doInvestTransaction, isLoading } = useCentrifugeTransactionRx(
     'Invest',
     (cent) => cent.pools.updateInvestOrder,
     {
       onSuccess: () => {
-        refetchPool()
-        refetchOrder()
-        refetchBalances()
         form.resetForm()
       },
     }
   )
-  const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
+  const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransactionRx(
     'Cancel order',
     (cent) => cent.pools.updateInvestOrder,
     {
       onSuccess: () => {
-        refetchPool()
-        refetchOrder()
-        refetchBalances()
         form.resetForm()
       },
     }
   )
 
-  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransaction(
+  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransactionRx(
     'Collect',
-    (cent) => cent.pools.collect,
-    {
-      onSuccess: () => {
-        refetchOrder()
-        refetchBalances()
-      },
-    }
+    (cent) => cent.pools.collect
   )
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')
@@ -244,9 +232,9 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
 
 const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
   const address = useAddress()
-  const { data: order, refetch: refetchOrder } = useOrder(poolId, trancheId, address)
-  const { data: balances, refetch: refetchBalances } = useBalances(address)
-  const { data: pool, refetch: refetchPool } = usePool(poolId)
+  const order = useOrder(poolId, trancheId, address)
+  const balances = useBalances(address)
+  const pool = usePool(poolId)
 
   const { data: metadata } = usePoolMetadata(pool)
   const tranche = pool?.tranches[trancheId]
@@ -256,40 +244,28 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
   const pendingRedeem = Dec(order?.redeem ?? 0).div('1e18')
   const price = Dec(tranche?.tokenPrice ?? 0).div('1e27')
 
-  const { execute: doRedeemTransaction, isLoading } = useCentrifugeTransaction(
+  const { execute: doRedeemTransaction, isLoading } = useCentrifugeTransactionRx(
     'Invest',
     (cent) => cent.pools.updateRedeemOrder,
     {
       onSuccess: () => {
-        refetchPool()
-        refetchOrder()
-        refetchBalances()
         form.resetForm()
       },
     }
   )
-  const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
+  const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransactionRx(
     'Cancel order',
     (cent) => cent.pools.updateRedeemOrder,
     {
       onSuccess: () => {
-        refetchPool()
-        refetchOrder()
-        refetchBalances()
         form.resetForm()
       },
     }
   )
 
-  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransaction(
+  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransactionRx(
     'Collect',
-    (cent) => cent.pools.collect,
-    {
-      onSuccess: () => {
-        refetchOrder()
-        refetchBalances()
-      },
-    }
+    (cent) => cent.pools.collect
   )
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')

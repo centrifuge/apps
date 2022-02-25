@@ -57,7 +57,7 @@ const NFT: React.FC = () => {
         }
         actions={
           <>
-            {nft && isSameAddress(nft.owner, selectedAccount?.address) && (
+            {nft && isSameAddress(nft.owner, address) && (
               <>
                 {canCreateLoan && (
                   <RouterLinkButton

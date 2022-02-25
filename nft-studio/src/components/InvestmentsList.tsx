@@ -49,7 +49,7 @@ export const InvestmentsList: React.FC<Props> = ({ investments }) => {
 }
 
 const TokenSymbol: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
-  const { data: pool } = usePool(investment.poolId)
+  const pool = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
   return (
     <Text variant="body2" fontWeight={600}>
@@ -59,13 +59,13 @@ const TokenSymbol: React.VFC<{ investment: TrancheBalance }> = ({ investment }) 
 }
 
 const TrancheName: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
-  const { data: pool } = usePool(investment.poolId)
+  const pool = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
   return <Text variant="body2">{metadata?.tranches?.[investment.trancheId]?.name}</Text>
 }
 
 const TokenValue: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
-  const { data: pool } = usePool(investment.poolId)
+  const pool = usePool(investment.poolId)
   const centrifuge = useCentrifuge()
 
   return (

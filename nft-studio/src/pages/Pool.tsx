@@ -14,13 +14,12 @@ import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { AnchorPillButton } from '../components/PillButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
-import { useWeb3 } from '../components/Web3Provider'
-import { isOwnPool } from '../utils/ownership/isOwnPool'
 import { useAddress } from '../utils/useAddress'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
+import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
 import { useLoans } from '../utils/useLoans'
 import { usePermissions } from '../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../utils/usePools'
+import { isSameAddress } from '../utils/web3'
 
 export const PoolPage: React.FC = () => {
   return (
@@ -34,29 +33,26 @@ const Pool: React.FC = () => {
   const {
     params: { pid: poolId },
   } = useRouteMatch<{ pid: string }>()
-  const { data: pool, refetch: refetchPool } = usePool(poolId)
-  const { data: loans } = useLoans(poolId)
+  const pool = usePool(poolId)
+  const loans = useLoans(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const history = useHistory()
-  const { selectedAccount } = useWeb3()
+  const address = useAddress()
 
-  const permissions = usePermissions(selectedAccount?.address)
+  const permissions = usePermissions(address)
 
   const centrifuge = useCentrifuge()
 
   const canSetMaxReserve = useMemo(
-    () => !!(selectedAccount && permissions && permissions[poolId]?.roles.includes('LiquidityAdmin')),
-    [poolId, selectedAccount, permissions]
+    () => !!(address && permissions && permissions[poolId]?.roles.includes('LiquidityAdmin')),
+    [poolId, address, permissions]
   )
 
-  const isManagedPool = useMemo(
-    () => (pool && selectedAccount ? isOwnPool(pool, selectedAccount) : false),
-    [pool, selectedAccount]
-  )
+  const isManagedPool = useMemo(() => (pool && address ? isSameAddress(pool.owner, address) : false), [pool, address])
 
   console.log('pool', pool, loans)
 
-  const { execute: closeEpochTx } = useCentrifugeTransaction('Close epoch', (cent) => cent.pools.closeEpoch, {
+  const { execute: closeEpochTx } = useCentrifugeTransactionRx('Close epoch', (cent) => cent.pools.closeEpoch, {
     onSuccess: () => {
       console.log('Epoch closed successfully')
     },
@@ -67,11 +63,7 @@ const Pool: React.FC = () => {
     closeEpochTx([pool.id])
   }
 
-  const { execute: setMaxReserveTx } = useCentrifugeTransaction('Set max reserve', (cent) => cent.pools.setMaxReserve, {
-    onSuccess: () => {
-      refetchPool()
-    },
-  })
+  const { execute: setMaxReserveTx } = useCentrifugeTransactionRx('Set max reserve', (cent) => cent.pools.setMaxReserve)
 
   const promptMaxReserve = () => {
     if (!pool) return

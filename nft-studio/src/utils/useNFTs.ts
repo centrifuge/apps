@@ -1,4 +1,5 @@
 import { useQuery } from 'react-query'
+import { firstValueFrom } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 
@@ -8,21 +9,19 @@ export function useNFTs(collectionId?: string) {
     enabled: !!collectionId,
   })
 
-  console.log('nfts', result)
   return result
 }
 
-export function useNFT(collectionId?: string, nftId?: string) {
+export function useNFT(collectionId?: string, nftId?: string, suspense = true) {
   const [result] = useCentrifugeQuery(
     ['nft', collectionId, nftId],
     (cent) => cent.nfts.getNft([collectionId!, nftId!]),
     {
-      suspense: true,
+      suspense,
       enabled: !!collectionId && !!nftId,
     }
   )
 
-  console.log('nft', result)
   return result
 }
 
@@ -31,15 +30,14 @@ export function useLoanNft(poolId?: string, loanId?: string) {
   const { data: collectionId } = useQuery(
     ['poolToLoanCollection', poolId],
     async () => {
-      return cent.pools.getLoanCollectionIdForPool([poolId!])
+      return firstValueFrom(cent.pools.getLoanCollectionIdForPool([poolId!]))
     },
     {
-      suspense: true,
       enabled: !!poolId,
       staleTime: Infinity,
     }
   )
-  return useNFT(collectionId, loanId)
+  return useNFT(collectionId, loanId, false)
 }
 
 export function useAccountNfts(address?: string, suspense = true) {

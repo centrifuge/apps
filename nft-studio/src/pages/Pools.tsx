@@ -14,7 +14,7 @@ export const PoolsPage: React.FC = () => {
 }
 
 const Pools: React.FC = () => {
-  const { data: pools } = usePools()
+  const pools = usePools()
   console.log('pools', pools)
 
   return (

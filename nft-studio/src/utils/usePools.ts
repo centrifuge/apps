@@ -1,51 +1,33 @@
-import { DetailedPool, Pool } from '@centrifuge/centrifuge-js'
-import { useQuery } from 'react-query'
-import { useCentrifuge } from '../components/CentrifugeProvider'
+import { Pool } from '@centrifuge/centrifuge-js'
+import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 
 export function usePools() {
-  const centrifuge = useCentrifuge()
-  const query = useQuery<Pool[]>(
-    ['pools'],
-    async () => {
-      return centrifuge.pools.getPools()
-    },
-    {
-      suspense: true,
-    }
-  )
+  const [result] = useCentrifugeQuery(['pools'], (cent) => cent.pools.getPools(), {
+    suspense: true,
+  })
 
-  return query
+  return result
 }
 
 export function usePool(id: string) {
-  const centrifuge = useCentrifuge()
-  const query = useQuery<DetailedPool>(
-    ['pool', id],
-    async () => {
-      return centrifuge.pools.getPool([id])
-    },
-    {
-      suspense: true,
-    }
-  )
+  const [result] = useCentrifugeQuery(['pool', id], (cent) => cent.pools.getPool([id]), {
+    suspense: true,
+  })
 
-  return query
+  return result
 }
 
 export function useOrder(poolId: string, trancheId: number, address?: string) {
-  const centrifuge = useCentrifuge()
-  const query = useQuery(
+  const [result] = useCentrifugeQuery(
     ['order', poolId, trancheId, address],
-    async () => {
-      return centrifuge.pools.getOrder([address!, poolId, trancheId])
-    },
+    (cent) => cent.pools.getOrder([address!, poolId, trancheId]),
     {
       enabled: !!address,
     }
   )
 
-  return query
+  return result
 }
 
 export type PoolMetadata = {

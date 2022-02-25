@@ -154,6 +154,9 @@ export class CentrifugeBase {
   getRelayChainApi() {
     return getPolkadotApi(this.relayChainUrl, relayChainTypes)
   }
+  getRxRelayChainApi() {
+    return getPolkadotRxApi(this.relayChainUrl, relayChainTypes)
+  }
 
   getSigner() {
     const { signer, signingAddress } = this.config

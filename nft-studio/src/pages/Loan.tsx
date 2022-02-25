@@ -23,7 +23,7 @@ import { formatDate } from '../utils/date'
 import { Dec } from '../utils/Decimal'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useAddress } from '../utils/useAddress'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
+import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
 import { useLoan } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
 import { useLoanNft, useNFT } from '../utils/useNFTs'
@@ -50,10 +50,10 @@ const LOAN_TYPE_LABELS = {
 
 const Loan: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
-  const { data: pool } = usePool(pid)
-  const { data: loan, refetch } = useLoan(pid, aid)
+  const pool = usePool(pid)
+  const loan = useLoan(pid, aid)
   const { data: poolMetadata } = usePoolMetadata(pool)
-  const nft = useNFT(loan?.asset.collectionId, loan?.asset.nftId)
+  const nft = useNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const loanNft = useLoanNft(pid, aid)
   const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const centrifuge = useCentrifuge()
@@ -122,7 +122,7 @@ const Loan: React.FC = () => {
             </Card>
           </>
         ) : canPrice ? (
-          <PricingForm loan={loan} refetch={refetch} />
+          <PricingForm loan={loan} />
         ) : (
           <Card p={3}>
             <Stack gap={3}>
@@ -133,7 +133,7 @@ const Loan: React.FC = () => {
         ))}
       {loan &&
         (loan.status === 'Active' && canBorrow ? (
-          <FinanceForm loan={loan} refetch={refetch} />
+          <FinanceForm loan={loan} />
         ) : loan.status === 'Active' ? (
           <Card p={3}>
             <Stack gap={3}>
@@ -197,16 +197,11 @@ function validateNumberInput(value: number | string, min: number | Decimal, max?
   }
 }
 
-const PricingForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan, refetch }) => {
+const PricingForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const centrifuge = useCentrifuge()
-  const { execute: doTransaction, isLoading } = useCentrifugeTransaction(
-    'Create asset',
-    (cent) => cent.pools.priceLoan as any,
-    {
-      onSuccess: () => {
-        refetch()
-      },
-    }
+  const { execute: doTransaction, isLoading } = useCentrifugeTransactionRx(
+    'Price asset',
+    (cent) => cent.pools.priceLoan as any
   )
 
   const form = useFormik<PricingFormValues>({
@@ -335,33 +330,22 @@ type RepayValues = {
   amount: number | Decimal
 }
 
-const FinanceForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan, refetch }) => {
-  const { data: pool } = usePool(loan.poolId)
+const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
+  const pool = usePool(loan.poolId)
   const centrifuge = useCentrifuge()
-  const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
+  const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransactionRx(
     'Finance asset',
-    (cent) => cent.pools.financeLoan,
-    {
-      onSuccess: () => refetch(),
-    }
+    (cent) => cent.pools.financeLoan
   )
 
-  const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
+  const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransactionRx(
     'Repay asset',
-    (cent) => cent.pools.repayLoanPartially,
-    {
-      onSuccess: () => refetch(),
-    }
+    (cent) => cent.pools.repayLoanPartially
   )
 
-  const { execute: doRepayAllTransaction, isLoading: isRepayAllLoading } = useCentrifugeTransaction(
+  const { execute: doRepayAllTransaction, isLoading: isRepayAllLoading } = useCentrifugeTransactionRx(
     'Repay asset',
-    (cent) => cent.pools.repayAndCloseLoan,
-    {
-      onSuccess: () => {
-        refetch()
-      },
-    }
+    (cent) => cent.pools.repayAndCloseLoan
   )
 
   function repayAll() {

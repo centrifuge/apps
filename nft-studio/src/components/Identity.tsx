@@ -11,7 +11,7 @@ type Props = TextProps & {
 }
 
 export const Identity: React.FC<Props> = ({ address, clickToCopy, ...textProps }) => {
-  const { data: identity } = useIdentity(address)
+  const identity = useIdentity(address)
   const addr = encodeAddress(address, 2)
   return (
     <Text

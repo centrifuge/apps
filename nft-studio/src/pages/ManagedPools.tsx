@@ -1,12 +1,12 @@
 import { IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
-import { encodeAddress } from '@polkadot/util-crypto'
 import React, { useMemo } from 'react'
 import { PageHeader } from '../components/PageHeader'
 import { PoolList } from '../components/PoolList'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
-import { useWeb3 } from '../components/Web3Provider'
+import { useAddress } from '../utils/useAddress'
 import { usePools } from '../utils/usePools'
+import { isSameAddress } from '../utils/web3'
 
 export const ManagedPoolsPage: React.FC = () => {
   return (
@@ -17,15 +17,15 @@ export const ManagedPoolsPage: React.FC = () => {
 }
 
 const ManagedPools: React.FC = () => {
-  const { data: allPools } = usePools()
-  const { selectedAccount } = useWeb3()
+  const allPools = usePools()
+  const address = useAddress()
 
   const pools = useMemo(() => {
-    if (!allPools || !selectedAccount?.address) {
+    if (!allPools || !address) {
       return []
     }
-    return allPools.filter(({ owner }) => encodeAddress(owner, 2) === encodeAddress(selectedAccount.address, 2))
-  }, [allPools, selectedAccount?.address])
+    return allPools.filter(({ owner }) => isSameAddress(owner, address))
+  }, [allPools, address])
 
   console.log('managed pools', pools)
 

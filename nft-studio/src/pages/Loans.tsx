@@ -16,9 +16,9 @@ export const LoansPage: React.FC = () => {
 }
 
 const Loans: React.FC = () => {
-  const { data: pools } = usePools()
+  const pools = usePools()
   const managedPoolIds = pools?.filter((p) => true)?.map((p) => p.id)
-  const { data: loans } = useLoansAcrossPools(managedPoolIds)
+  const loans = useLoansAcrossPools(managedPoolIds)
   const history = useHistory()
 
   return (

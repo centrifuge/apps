@@ -4,7 +4,6 @@ import { useLocation } from 'react-router'
 import { PageHeader } from '../components/PageHeader'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
-import { usePools } from '../utils/usePools'
 
 export const NotFoundPage: React.FC = () => {
   return (
@@ -15,9 +14,7 @@ export const NotFoundPage: React.FC = () => {
 }
 
 const Pools: React.FC = () => {
-  const { data: pools } = usePools()
   const location = useLocation()
-  console.log('pools', pools)
 
   return (
     <Stack gap={8} flex={1}>

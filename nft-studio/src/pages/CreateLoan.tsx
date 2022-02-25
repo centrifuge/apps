@@ -7,7 +7,7 @@ import { useCentrifuge } from '../components/CentrifugeProvider'
 import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { useWeb3 } from '../components/Web3Provider'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
+import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
 import { fetchMetadata } from '../utils/useMetadata'
 import { usePermissions } from '../utils/usePermissions'
 import { PoolMetadata, usePools } from '../utils/usePools'
@@ -29,7 +29,7 @@ const CreateLoan: React.FC = () => {
 
   const { selectedAccount } = useWeb3()
   const permissions = usePermissions(selectedAccount?.address)
-  const { data: pools } = usePools()
+  const pools = usePools()
   const [redirect, setRedirect] = React.useState<string>()
 
   const history = useHistory()
@@ -69,7 +69,7 @@ const CreateLoan: React.FC = () => {
     },
   })
 
-  const { execute: doTransaction, isLoading } = useCentrifugeTransaction(
+  const { execute: doTransaction, isLoading } = useCentrifugeTransactionRx(
     'Create asset',
     (cent) => cent.pools.createLoan,
     {

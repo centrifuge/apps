@@ -2,7 +2,7 @@ import { StorageKey, u32 } from '@polkadot/types'
 import type { AccountId, Address } from '@polkadot/types/interfaces'
 import BN from 'bn.js'
 import { combineLatest, firstValueFrom } from 'rxjs'
-import { combineLatestWith, map, repeatWhen, switchMap } from 'rxjs/operators'
+import { combineLatestWith, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
 
@@ -813,7 +813,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
         const collectionId = (result.toHuman() as string).replace(/\D/g, '')
 
         return collectionId
-      })
+      }),
+      take(1)
     )
   }
 
