@@ -26,17 +26,24 @@ export const useInterval = (callback: any, delay?: number | null) => {
   }, [delay])
 }
 
-export const useTrancheYield = (poolId?: string | undefined) => {
+type TrancheYield = {
+  dropYield: string
+  tinYield: string
+}
+
+export const useTrancheYield = (poolId?: string | undefined): TrancheYield => {
   const pools = usePools()
 
   return React.useMemo(() => {
     if (pools.data?.pools && poolId) {
       const poolData = pools.data.pools.find((singlePool) => singlePool.id.toLowerCase() === poolId.toLowerCase())
-      if (poolData?.seniorYield30Days && poolData?.juniorYield90Days) {
-        return {
-          dropYield: toPrecision(baseToDisplay(poolData.seniorYield30Days.muln(100), 27), 2),
-          tinYield: toPrecision(baseToDisplay(poolData.juniorYield90Days.muln(100), 27), 2),
-        }
+      return {
+        dropYield: poolData?.seniorYield30Days
+          ? toPrecision(baseToDisplay(poolData.seniorYield30Days.muln(100), 27), 2)
+          : '',
+        tinYield: poolData?.juniorYield90Days
+          ? toPrecision(baseToDisplay(poolData.juniorYield90Days.muln(100), 27), 2)
+          : '',
       }
     }
 
