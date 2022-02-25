@@ -34,5 +34,10 @@
     "**/*.ts",
     "**/*.tsx",
     ".eslintrc.js"
-  ]
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
 }
