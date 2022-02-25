@@ -7,7 +7,7 @@ export const calculateOptimalSolution = async (
   weights: SolverWeights,
   calcInvestmentCapacity?: boolean
 ): Promise<SolverResult> => {
-  let clp: CLP = await require('clp-wasm/clp-wasm.all')
+  const clp: CLP = await require('clp-wasm/clp-wasm.all')
 
   const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
   const maxTinRatio = e27.sub(state.minDropRatio)
