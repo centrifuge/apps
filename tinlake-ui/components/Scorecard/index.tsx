@@ -7,13 +7,14 @@ import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { Card } from '../../components/Card'
 import { SectionHeading } from '../../components/Heading'
-import { Box, Wrap } from '../../components/Layout'
+import { Box, Shelf, Stack } from '../../components/Layout'
 import { Tooltip } from '../../components/Tooltip'
 import { Pool } from '../../config'
 import { createTransaction, TransactionProps } from '../../ducks/transactions'
 import { Fixed27Base } from '../../utils/ratios'
 import { SortableLoan, useAssets } from '../../utils/useAssets'
 import { RiskGroup, usePool } from '../../utils/usePool'
+import { Text } from '../Text'
 
 interface Props extends TransactionProps {
   activePool: Pool
@@ -27,6 +28,18 @@ interface RiskGroupWithId extends RiskGroup {
 const riskGroupsPerPage = 8
 
 const e18 = new BN(10).pow(new BN(18))
+
+const HeaderValue: React.FC = ({ children }) => (
+  <Text fontSize="16px" fontWeight="600" lineHeight="28px" textAlign="center">
+    {children}
+  </Text>
+)
+
+const HeaderLabel: React.FC = ({ children }) => (
+  <Text fontSize="14px" fontWeight="500" lineHeight="19.25px" textAlign="center" color="#777">
+    {children}
+  </Text>
+)
 
 const Scorecard: React.FC<Props> = (props: Props) => {
   const [open, setOpen] = React.useState(false)
@@ -62,19 +75,64 @@ const Scorecard: React.FC<Props> = (props: Props) => {
         })
     : []
 
+  const ratePerSecondAvg = React.useMemo(() => {
+    if (!existingRiskGroups || existingRiskGroups.length === 0) return new BN(0)
+    const validRates = existingRiskGroups.map((riskGroup) => riskGroup.rate.ratePerSecond).filter(isValidRatePerSecond)
+    if (validRates.length === 0) return new BN(0)
+    return validRates.reduce((acc, rate) => acc.add(rate), new BN(0)).div(new BN(validRates.length))
+  }, [existingRiskGroups])
+
+  const recoveryRatePDAvg = React.useMemo(() => {
+    if (!existingRiskGroups || existingRiskGroups.length === 0) return 0
+    return (
+      existingRiskGroups
+        .map(
+          (riskGroup) =>
+            parseFloat(
+              Fixed27Base.sub(riskGroup.recoveryRatePD)
+                .div(new BN(10).pow(new BN(22)))
+                .toString()
+            ) / 1000
+        )
+        .reduce((acc, rate) => acc + rate, 0) / existingRiskGroups.length
+    )
+  }, [existingRiskGroups])
+
   const [start, setStart] = React.useState(0)
 
   return (
     <Card interactive>
-      <Wrap p={24} gap="small" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}>
-        <Risk />
+      <Shelf
+        p={24}
+        gap="small"
+        justifyContent="space-between"
+        style={{ cursor: 'pointer', overflow: 'hidden' }}
+        onClick={() => setOpen(!open)}
+      >
+        <Shelf gap="small">
+          <Risk />
+          <SectionHeading>Portfolio distribution</SectionHeading>
+        </Shelf>
 
-        <SectionHeading>Portfolio distribution</SectionHeading>
+        <Shelf gap="48px">
+          <Stack alignItems="center">
+            <HeaderValue>
+              {isValidRatePerSecond(ratePerSecondAvg)
+                ? `${toPrecision(feeToInterestRate(ratePerSecondAvg), 2)}%`
+                : 'N/A'}
+            </HeaderValue>
+            <HeaderLabel>Average financing fee</HeaderLabel>
+          </Stack>
 
-        <Caret style={{ marginLeft: 'auto', position: 'relative', top: '0' }}>
-          <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
-        </Caret>
-      </Wrap>
+          <Stack alignItems="center">
+            <HeaderValue>{toPrecision(recoveryRatePDAvg, 2)}%</HeaderValue>
+            <HeaderLabel>Average risk adjustment</HeaderLabel>
+          </Stack>
+          <Caret style={{ marginLeft: 'auto', position: 'relative', top: '0' }}>
+            <FormDown style={{ transform: open ? 'rotate(-180deg)' : '' }} />
+          </Caret>
+        </Shelf>
+      </Shelf>
       {open && (
         <Box px={24} pb={24}>
           <Table>
