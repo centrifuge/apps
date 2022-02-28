@@ -2,7 +2,7 @@ name: 'tinlake-ui Update changelog'
 on:
   push:
     branches:
-      - main
+      - fix-changelog
     paths:
       - 'tinlake-ui/**'
       - '.github/workflows/changelog-generator.yml'
@@ -17,7 +17,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.1
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - name: Install gem
