@@ -2,7 +2,7 @@ name: 'tinlake-ui Update changelog'
 on:
   push:
     branches:
-      - fix-changelog
+      - main
     paths:
       - 'tinlake-ui/**'
       - '.github/workflows/changelog-generator.yml'
