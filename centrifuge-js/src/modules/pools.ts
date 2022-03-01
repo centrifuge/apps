@@ -1,18 +1,16 @@
 import { StorageKey, u32 } from '@polkadot/types'
-import type { AccountId, Address } from '@polkadot/types/interfaces'
 import BN from 'bn.js'
 import { combineLatest, firstValueFrom } from 'rxjs'
-import { combineLatestWith, map, repeatWhen, switchMap, take } from 'rxjs/operators'
+import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
+import { isSameAddress } from '..'
 import { CentrifugeBase } from '../CentrifugeBase'
-import { TransactionOptions } from '../types'
+import { Account, TransactionOptions } from '../types'
 
 const Currency = new BN(10).pow(new BN(18))
 
 const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
 
 type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'RiskAdmin'
-
-type Account = AccountId | Address | string
 
 export type PoolRoleInput = AdminRole | { TrancheInvestor: [trancheId: number, delta: number] }
 
@@ -430,10 +428,29 @@ export function getPoolsModule(inst: CentrifugeBase) {
   }
 
   function getRolesByPool(args: [address: Account]) {
+    const [address] = args
     const $api = inst.getRxApi()
 
+    const $events = $api.pipe(
+      switchMap(
+        (api) => combineLatest([api.query.system.events(), api.query.system.number()]),
+        (api, [events]) => ({ api, events })
+      ),
+      filter(({ api, events }) => {
+        console.log('getPools events', events)
+        const event = events.find(
+          ({ event }) => api.events.pools.RoleApproved.is(event) || api.events.pools.RoleRevoked.is(event)
+        )
+
+        if (!event) return false
+
+        const [, , accountId] = (event.toJSON() as any).event.data
+        return isSameAddress(address, accountId)
+      })
+    )
+
     return $api.pipe(
-      switchMap((api) => api.query.permissions.permission.entries(args[0])),
+      switchMap((api) => api.query.permissions.permission.entries(address)),
       map((permissionsData) => {
         const roles: { [poolId: string]: PoolRoles } = {}
         permissionsData.forEach(([keys, value]) => {
@@ -449,7 +466,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
           }
         })
         return roles
-      })
+      }),
+      repeatWhen(() => $events)
     )
   }
 
@@ -533,7 +551,17 @@ export function getPoolsModule(inst: CentrifugeBase) {
   function getPools() {
     const $api = inst.getRxApi()
 
-    const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
+    const $events = $api.pipe(
+      switchMap(
+        (api) => combineLatest([api.query.system.events(), api.query.system.number()]),
+        (api, [events]) => ({ api, events })
+      ),
+      filter(({ api, events }) => {
+        console.log('getPools events', events)
+        const event = events.find(({ event }) => api.events.pools.Created.is(event))
+        return !!event
+      })
+    )
 
     return $api.pipe(
       switchMap((api) => combineLatest([api.query.pools.pool.entries(), api.query.loans.poolNAV.entries()])),
@@ -595,7 +623,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
         return pools
       }),
-      repeatWhen(() => $blocks)
+      repeatWhen(() => $events)
     )
   }
 
@@ -733,7 +761,23 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const $api = inst.getRxApi()
 
-    const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
+    const $events = $api.pipe(
+      switchMap(
+        (api) => combineLatest([api.query.system.events(), api.query.system.number()]),
+        (api, [events]) => ({ api, events })
+      ),
+      filter(({ api, events }) => {
+        console.log('getLoans events', events)
+        const event = events.find(
+          ({ event }) =>
+            api.events.loans.Created.is(event) ||
+            api.events.loans.Closed.is(event) ||
+            api.events.loans.Priced.is(event) ||
+            api.events.loans.Borrowed.is(event)
+        )
+        return !!event
+      })
+    )
 
     return $api.pipe(
       switchMap((api) => api.query.loans.loanInfo.entries(poolId)),
@@ -764,7 +808,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           return mapped
         })
       }),
-      repeatWhen(() => $blocks)
+      repeatWhen(() => $events)
     )
   }
 

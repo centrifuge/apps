@@ -176,6 +176,6 @@ export class CentrifugeBase {
       return signingAddress.address
     }
 
-    return signingAddress
+    return signingAddress as string
   }
 }

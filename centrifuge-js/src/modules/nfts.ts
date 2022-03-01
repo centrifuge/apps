@@ -46,7 +46,19 @@ export function getNftsModule(inst: CentrifugeBase) {
   function getCollections() {
     const $api = inst.getRxApi()
 
-    const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
+    // const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
+
+    const $events = $api.pipe(
+      switchMap(
+        (api) => combineLatest([api.query.system.events(), api.query.system.number()]),
+        (api, [events]) => ({ api, events })
+      ),
+      filter(({ api, events }) => {
+        console.log('events', events)
+        const event = events.find(({ event }) => api.events.uniques.Created.is(event))
+        return !!event
+      })
+    )
 
     return $api.pipe(
       switchMap((api) =>
@@ -74,7 +86,7 @@ export function getNftsModule(inst: CentrifugeBase) {
 
         return mapped
       }),
-      repeatWhen(() => $blocks)
+      repeatWhen(() => $events)
     )
   }
 
@@ -106,23 +118,9 @@ export function getNftsModule(inst: CentrifugeBase) {
     const [collectionId] = args
     const $api = inst.getRxApi()
 
-    const $events = $api.pipe(
-      switchMap(
-        (api) => api.query.system.events(),
-        (api, events) => ({ api, events })
-      ),
-      filter(({ api, events }) => {
-        console.log('events', events)
-        const event = events.find(({ event }) => api.events.uniques.Issued.is(event))
-        if (!event) return false
-
-        const eventData = event.toHuman() as any
-        const cid = eventData.event.data[0].replace(/\D/g, '')
-        return cid === collectionId
-      })
-    )
-
     return $api.pipe(
+      // subscribe to the collection to watch for nfts being minted
+      switchMap((api) => api.query.uniques.class(collectionId).pipe(map(() => api))),
       switchMap((api) =>
         combineLatest([
           api.query.uniques.instanceMetadataOf.entries(collectionId),
@@ -147,8 +145,7 @@ export function getNftsModule(inst: CentrifugeBase) {
           return nft
         })
         return mapped
-      }),
-      repeatWhen(() => $events)
+      })
     )
   }
 
@@ -187,7 +184,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         console.log('block', number)
       })
     )
-    const $events = $api.pipe(
+    const $events2 = $api.pipe(
       switchMap(
         (api) => api.query.system.events(),
         (api, events) => ({ api, events })
@@ -205,7 +202,7 @@ export function getNftsModule(inst: CentrifugeBase) {
       delayWhen(() => $blocks.pipe(skip(1)))
     )
 
-    const $blocks2 = $api.pipe(
+    const $events = $api.pipe(
       switchMap(
         (api) =>
           combineLatest([
@@ -236,6 +233,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         })
       ),
       switchMap(({ api, keys }) => {
+        console.log('keys', keys)
         const keysArr = keys.map((k) => {
           const [, cid, aid] = k.toHuman() as any
           return [cid.replace(/\D/g, ''), aid.replace(/\D/g, '')]
@@ -261,7 +259,7 @@ export function getNftsModule(inst: CentrifugeBase) {
           take(1)
         )
       }),
-      repeatWhen(() => $blocks2)
+      repeatWhen(() => $events)
     )
   }
 
