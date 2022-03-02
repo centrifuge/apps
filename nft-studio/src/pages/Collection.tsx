@@ -1,6 +1,7 @@
-import { Grid, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Grid, IconPlus, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
+import styled from 'styled-components'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Identity } from '../components/Identity'
 import { NFTCard } from '../components/NFTCard'
@@ -24,6 +25,10 @@ export const CollectionPage: React.FC = () => {
 }
 
 const COUNT_PER_PAGE = 16
+
+const DescriptionCard = styled.div`
+  grid-column: span 2;
+`
 
 const Collection: React.FC = () => {
   const {
@@ -59,23 +64,29 @@ const Collection: React.FC = () => {
           )
         }
       />
-      {nfts?.length ? (
-        <>
-          <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>
-            {nfts.slice(0, shownCount).map((nft, i) => (
-              <NFTCard nft={nft} key={i} />
-            ))}
-          </Grid>
-          {nfts.length > shownCount && (
-            <VisibilityChecker marginTop={400} onEnter={() => setShownCount((count) => count + COUNT_PER_PAGE)} />
-          )}
-        </>
-      ) : (
-        <Shelf justifyContent="center" mt="15vh" textAlign="center">
-          <Text variant="heading2" color="textSecondary">
-            The collection does not contain any NFTs yet
-          </Text>
-        </Shelf>
+
+      <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>
+        {metadata?.description?.trim() ||
+          (true && (
+            <DescriptionCard>
+              <Text variant="body1">{metadata?.description}</Text>
+            </DescriptionCard>
+          ))}
+        {!nfts?.length && (
+          <DescriptionCard>
+            <Text variant="label1">The collection does not contain any NFT</Text>
+            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="text" icon={IconPlus}>
+              Mint NFT
+            </RouterLinkButton>
+          </DescriptionCard>
+        )}
+
+        {nfts?.slice(0, shownCount).map((nft, i) => (
+          <NFTCard nft={nft} key={i} />
+        ))}
+      </Grid>
+      {(nfts?.length || 0) > shownCount && (
+        <VisibilityChecker marginTop={400} onEnter={() => setShownCount((count) => count + COUNT_PER_PAGE)} />
       )}
     </Stack>
   )
