@@ -2,7 +2,7 @@ import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Flex } from '@centrifuge/fabric/dist/components/Flex'
 import React, { useReducer, useState } from 'react'
 import { useQueryClient } from 'react-query'
-import { useParams } from 'react-router'
+import { useHistory, useParams } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { FileImageUpload } from '../components/FileImageUpload'
 import { Identity } from '../components/Identity'
@@ -20,6 +20,7 @@ import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
+import { useIsPageUnchanged } from '../utils/useIsPageUnchanged'
 import { fetchMetadata } from '../utils/useMetadata'
 import { isSameAddress } from '../utils/web3'
 
@@ -45,11 +46,14 @@ const MintNFT: React.FC = () => {
   const { selectedAccount } = useWeb3()
   const cent = useCentrifuge()
   const [version, setNextVersion] = useReducer((s) => s + 1, 0)
+  const history = useHistory()
 
   const [nftName, setNftName] = useState('')
   const [nftDescription, setNftDescription] = useState('')
   const [fileDataUri, setFileDataUri] = useState('')
   const [fileName, setFileName] = useState('')
+
+  const isPageUnchanged = useIsPageUnchanged()
 
   const isFormValid = nftName && nftDescription && fileDataUri
 
@@ -58,12 +62,16 @@ const MintNFT: React.FC = () => {
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
   } = useCentrifugeTransaction('Mint NFT', (cent) => cent.nfts.mintNft, {
-    onSuccess: () => {
+    onSuccess: ([, nftId]) => {
       queryClient.invalidateQueries(['nfts', collectionId])
       queryClient.invalidateQueries(['collectionPreview', collectionId])
       queryClient.invalidateQueries('balance')
       queryClient.invalidateQueries(['accountNfts', selectedAccount?.address])
       reset()
+
+      if (isPageUnchanged()) {
+        history.push(`/collection/${collectionId}/object/${nftId}`)
+      }
     },
   })
 
