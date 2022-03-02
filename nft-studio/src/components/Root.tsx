@@ -21,7 +21,7 @@ import { PoolsPage } from '../pages/Pools'
 import { TokenPage } from '../pages/Token'
 import { TokensPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
-import { useDebugFlags } from './DebugFlags'
+import { DebugFlags, useDebugFlags } from './DebugFlags'
 import { GlobalStyle } from './GlobalStyle'
 import { HostPermissionsProvider } from './HostPermissions'
 import { LoadBoundary } from './LoadBoundary'
@@ -69,101 +69,103 @@ export const Root: React.FC = () => {
         <GlobalStyle />
         <FabricGlobalStyle />
         <OverlayProvider>
-          <HostPermissionsProvider>
-            <Web3Provider>
-              <CentrifugeProvider>
-                <TransactionProvider>
-                  <TransactionToasts />
-                  <Router>
-                    <LoadBoundary>
-                      {showOnlyNFT ? (
-                        <Switch>
-                          <Route path="/collection/:cid/object/mint">
-                            <MintNFTPage />
-                          </Route>
-                          <Route path="/collection/:cid/object/:nftid/new-asset">
-                            <CreateLoanPage />
-                          </Route>
-                          <Route path="/collection/:cid/object/:nftid">
-                            <NFTPage />
-                          </Route>
-                          <Route path="/collection/:cid">
-                            <CollectionPage />
-                          </Route>
-                          <Route path="/account">
-                            <AccountNFTsPage />
-                          </Route>
-                          <Route path="/nfts">
-                            <CollectionsPage />
-                          </Route>
-                          <Route exact path="/">
-                            <CollectionsPage />
-                          </Route>
-                          <Route>
-                            <NotFoundPage />
-                          </Route>
-                        </Switch>
-                      ) : (
-                        <Switch>
-                          <Route path="/collection/:cid/object/mint">
-                            <MintNFTPage />
-                          </Route>
-                          <Route path="/collection/:cid/object/:nftid/new-asset">
-                            <CreateLoanPage />
-                          </Route>
-                          <Route path="/collection/:cid/object/:nftid">
-                            <NFTPage />
-                          </Route>
-                          <Route path="/collection/:cid">
-                            <CollectionPage />
-                          </Route>
-                          <Route path="/account">
-                            <AccountNFTsPage />
-                          </Route>
-                          <Route path="/nfts">
-                            <CollectionsPage />
-                          </Route>
-                          <Route path="/pools/:pid/assets/:aid">
-                            <LoanPage />
-                          </Route>
-                          <Route path="/pools/:pid">
-                            <PoolPage />
-                          </Route>
-                          <Route path="/pools">
-                            <PoolsPage />
-                          </Route>
-                          <Route path="/pool/new">
-                            <PoolFormPage />
-                          </Route>
-                          <Route path="/issuers/assets">
-                            <LoansPage />
-                          </Route>
-                          <Route path="/investments/tokens/:pid/:tid">
-                            <TokenPage />
-                          </Route>
-                          <Route path="/investments/tokens">
-                            <TokensPage />
-                          </Route>
-                          <Route path="/investments">
-                            <TokensPage />
-                          </Route>
-                          <Route path="/issuers/managed-pools">
-                            <ManagedPoolsPage />
-                          </Route>
-                          <Route exact path="/">
-                            <PoolsPage />
-                          </Route>
-                          <Route>
-                            <NotFoundPage />
-                          </Route>
-                        </Switch>
-                      )}
-                    </LoadBoundary>
-                  </Router>
-                </TransactionProvider>
-              </CentrifugeProvider>
-            </Web3Provider>
-          </HostPermissionsProvider>
+          <Web3Provider>
+            <DebugFlags>
+              <HostPermissionsProvider>
+                <CentrifugeProvider>
+                  <TransactionProvider>
+                    <TransactionToasts />
+                    <Router>
+                      <LoadBoundary>
+                        {showOnlyNFT ? (
+                          <Switch>
+                            <Route path="/collection/:cid/object/mint">
+                              <MintNFTPage />
+                            </Route>
+                            <Route path="/collection/:cid/object/:nftid/new-asset">
+                              <CreateLoanPage />
+                            </Route>
+                            <Route path="/collection/:cid/object/:nftid">
+                              <NFTPage />
+                            </Route>
+                            <Route path="/collection/:cid">
+                              <CollectionPage />
+                            </Route>
+                            <Route path="/account">
+                              <AccountNFTsPage />
+                            </Route>
+                            <Route path="/nfts">
+                              <CollectionsPage />
+                            </Route>
+                            <Route exact path="/">
+                              <CollectionsPage />
+                            </Route>
+                            <Route>
+                              <NotFoundPage />
+                            </Route>
+                          </Switch>
+                        ) : (
+                          <Switch>
+                            <Route path="/collection/:cid/object/mint">
+                              <MintNFTPage />
+                            </Route>
+                            <Route path="/collection/:cid/object/:nftid/new-asset">
+                              <CreateLoanPage />
+                            </Route>
+                            <Route path="/collection/:cid/object/:nftid">
+                              <NFTPage />
+                            </Route>
+                            <Route path="/collection/:cid">
+                              <CollectionPage />
+                            </Route>
+                            <Route path="/account">
+                              <AccountNFTsPage />
+                            </Route>
+                            <Route path="/nfts">
+                              <CollectionsPage />
+                            </Route>
+                            <Route path="/pools/:pid/assets/:aid">
+                              <LoanPage />
+                            </Route>
+                            <Route path="/pools/:pid">
+                              <PoolPage />
+                            </Route>
+                            <Route path="/pools">
+                              <PoolsPage />
+                            </Route>
+                            <Route path="/pool/new">
+                              <PoolFormPage />
+                            </Route>
+                            <Route path="/issuers/assets">
+                              <LoansPage />
+                            </Route>
+                            <Route path="/investments/tokens/:pid/:tid">
+                              <TokenPage />
+                            </Route>
+                            <Route path="/investments/tokens">
+                              <TokensPage />
+                            </Route>
+                            <Route path="/investments">
+                              <TokensPage />
+                            </Route>
+                            <Route path="/issuers/managed-pools">
+                              <ManagedPoolsPage />
+                            </Route>
+                            <Route exact path="/">
+                              <PoolsPage />
+                            </Route>
+                            <Route>
+                              <NotFoundPage />
+                            </Route>
+                          </Switch>
+                        )}
+                      </LoadBoundary>
+                    </Router>
+                  </TransactionProvider>
+                </CentrifugeProvider>
+              </HostPermissionsProvider>
+            </DebugFlags>
+          </Web3Provider>
         </OverlayProvider>
       </ThemeProvider>
     </QueryClientProvider>

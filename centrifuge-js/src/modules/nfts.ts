@@ -1,4 +1,5 @@
 import { StorageKey, u32 } from '@polkadot/types'
+import BN from 'bn.js'
 // import { AnyNumber } from '@polkadot/types/types'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
@@ -15,6 +16,7 @@ export type NFT = Instance & {
   id: string
   collectionId: string
   metadataUri?: string
+  sellPrice: string | null
 }
 
 type Class = {
@@ -74,13 +76,19 @@ export function getNftsModule(inst: CentrifugeBase) {
     const [collectionId] = args
     const api = await inst.getApi()
 
-    const [metas, nfts] = await Promise.all([
+    const [metas, nfts, sales] = await Promise.all([
       api.query.uniques.instanceMetadataOf.entries(collectionId),
       api.query.uniques.asset.entries(collectionId),
+      api.query.nftSales.sales.entries(collectionId),
     ])
 
     const metasObj = metas.reduce((acc, [keys, value]) => {
       acc[formatInstanceKey(keys)] = value.toHuman()
+      return acc
+    }, {} as any)
+
+    const salesObj = sales.reduce((acc, [keys, value]) => {
+      acc[formatInstanceKey(keys as StorageKey<[u32, u32]>)] = value.toJSON()
       return acc
     }, {} as any)
 
@@ -90,8 +98,9 @@ export function getNftsModule(inst: CentrifugeBase) {
       const nft: NFT = {
         id,
         collectionId,
-        owner: nftValue.owner,
+        owner: salesObj[id]?.seller || nftValue.owner,
         metadataUri: metasObj[id]?.data,
+        sellPrice: salesObj[id]?.seller ? parseHex(salesObj[id]?.price.amount) : null,
       }
       return nft
     })
@@ -110,6 +119,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     const [metas, nfts] = await Promise.all([
       api.query.uniques.instanceMetadataOf.multi(keysArr),
       api.query.uniques.asset.multi(keysArr),
+      // api.query.nftSales.sales.multi(keysArr),
     ])
 
     const mapped = nfts.map((value, i) => {
@@ -120,6 +130,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         collectionId,
         owner: instance.owner,
         metadataUri: (metas[i]?.toHuman() as any)?.data,
+        sellPrice: null,
       }
       return nft
     })
@@ -162,6 +173,27 @@ export function getNftsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
+  async function sellNft(args: [collectionId: string, nftId: string, price: BN], options?: TransactionOptions) {
+    const [collectionId, nftId, price] = args
+    const api = await inst.getApi()
+    const submittable = api.tx.nftSales.add(collectionId, nftId, ['Native', price.toString()])
+    return inst.wrapSignAndSend(api, submittable, options)
+  }
+
+  async function removeNftListing(args: [collectionId: string, nftId: string], options?: TransactionOptions) {
+    const [collectionId, nftId] = args
+    const api = await inst.getApi()
+    const submittable = api.tx.nftSales.remove(collectionId, nftId)
+    return inst.wrapSignAndSend(api, submittable, options)
+  }
+
+  async function buyNft(args: [collectionId: string, nftId: string, maxPrice: string], options?: TransactionOptions) {
+    const [collectionId, nftId, price] = args
+    const api = await inst.getApi()
+    const submittable = api.tx.nftSales.buy(collectionId, nftId, ['Native', price.toString()])
+    return inst.wrapSignAndSend(api, submittable, options)
+  }
+
   async function getAvailableCollectionId() {
     const api = await inst.getApi()
     for (let i = 0; i < MAX_ATTEMPTS; i += 1) {
@@ -195,5 +227,12 @@ export function getNftsModule(inst: CentrifugeBase) {
     createCollection,
     mintNft,
     transferNft,
+    sellNft,
+    removeNftListing,
+    buyNft,
   }
+}
+
+const parseHex = (value: string | number) => {
+  return new BN(value.toString().substring(2), 'hex').toString()
 }
