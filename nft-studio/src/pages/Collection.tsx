@@ -26,7 +26,7 @@ export const CollectionPage: React.FC = () => {
 
 const COUNT_PER_PAGE = 16
 
-const DescriptionCard = styled.div`
+const TwoColumnSpan = styled.div`
   grid-column: span 2;
 `
 
@@ -66,19 +66,18 @@ const Collection: React.FC = () => {
       />
 
       <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>
-        {metadata?.description?.trim() ||
-          (true && (
-            <DescriptionCard>
-              <Text variant="body1">{metadata?.description}</Text>
-            </DescriptionCard>
-          ))}
+        {metadata?.description?.trim() && (
+          <TwoColumnSpan>
+            <Text variant="body1">{metadata?.description}</Text>
+          </TwoColumnSpan>
+        )}
         {!nfts?.length && (
-          <DescriptionCard>
+          <TwoColumnSpan>
             <Text variant="label1">The collection does not contain any NFT</Text>
             <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="text" icon={IconPlus}>
               Mint NFT
             </RouterLinkButton>
-          </DescriptionCard>
+          </TwoColumnSpan>
         )}
 
         {nfts?.slice(0, shownCount).map((nft, i) => (
