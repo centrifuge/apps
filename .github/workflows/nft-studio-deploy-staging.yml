@@ -10,8 +10,8 @@ jobs:
     with:
       netlify-alias: ''
       ipfs-gateway: https://gateway.pinata.cloud/
-      collator-wss-url: wss://fullnode-collator.development.cntrfg.com
-      relay-wss-url: wss://fullnode-relay.development.cntrfg.com
+      collator-wss-url: wss://fullnode-collator-2.development.cntrfg.com
+      relay-wss-url: wss://fullnode-relay-2.development.cntrfg.com
       subscan-url: https://centrifuge.subscan.io/extrinsic/
       whitelisted-accounts: ''
     secrets:
