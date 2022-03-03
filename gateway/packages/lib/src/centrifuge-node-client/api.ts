@@ -16,7 +16,7 @@ import * as isomorphicFetch from 'isomorphic-fetch'
 import * as url from 'url'
 import { Configuration } from './configuration'
 
-const BASE_PATH = 'http://localhost:8082/'.replace(/\/+$/, '')
+const BASE_PATH = 'http://34.89.173.240:8082/'.replace(/\/+$/, '')
 
 /**
  *
