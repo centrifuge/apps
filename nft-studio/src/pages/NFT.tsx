@@ -135,6 +135,21 @@ const NFT: React.FC = () => {
                       })}
                   </Text>
                 </Stack> */}
+
+                  <Stack gap={1}>
+                    <Text variant="label1">Owner</Text>
+                    <Text variant="label2" color="textPrimary">
+                      <Identity address={nft.owner} clickToCopy />
+                    </Text>
+                  </Stack>
+
+                  <Stack gap={1}>
+                    <Text variant="label1">Description</Text>
+                    <Text variant="body2" style={{ wordBreak: 'break-word' }}>
+                      {nftMetadata?.description || 'No description'}
+                    </Text>
+                  </Stack>
+
                   {imageUrl && (
                     <Stack gap={1}>
                       <Text variant="label1">Source</Text>
@@ -143,16 +158,10 @@ const NFT: React.FC = () => {
                         target="_blank"
                         style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
                       >
-                        {imageUrl}
+                        Source file
                       </AnchorPillButton>
                     </Stack>
                   )}
-                  <Stack gap={1}>
-                    <Text variant="label1">Description</Text>
-                    <Text variant="body2" style={{ wordBreak: 'break-word' }}>
-                      {nftMetadata?.description || 'No description'}
-                    </Text>
-                  </Stack>
                 </Stack>
               </>
             )}
