@@ -104,7 +104,7 @@ const Scorecard: React.FC<Props> = (props: Props) => {
   return (
     <Card interactive>
       <Shelf
-        p={24}
+        p={16}
         gap="small"
         justifyContent="space-between"
         style={{ cursor: 'pointer', overflow: 'hidden' }}

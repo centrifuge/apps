@@ -64,7 +64,7 @@ const LoanListPage: React.FC<Props> = (props) => {
                   )
                 }
               />
-              <Stack gap="xlarge">
+              <Stack gap="medium">
                 <LoanOverview auth={auth} selectedPool={props.pool} />
                 <Stack gap="small">
                   <Scorecard activePool={props.pool} />
