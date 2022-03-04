@@ -74,11 +74,6 @@ const Collections: React.FC = () => {
           </Text>
           {userCollections?.length || accountNfts?.length ? (
             <LayoutGrid>
-              {userCollections?.map((col) => (
-                <LayoutGridItem span={4} key={col.id}>
-                  <CollectionCard collection={col} />
-                </LayoutGridItem>
-              ))}
               {accountNfts?.length ? (
                 <LayoutGridItem span={4}>
                   <CollectionCardInner
@@ -94,6 +89,11 @@ const Collections: React.FC = () => {
                   />
                 </LayoutGridItem>
               ) : null}
+              {userCollections?.map((col) => (
+                <LayoutGridItem span={4} key={col.id}>
+                  <CollectionCard collection={col} />
+                </LayoutGridItem>
+              ))}
             </LayoutGrid>
           ) : (
             <Shelf justifyContent="center" textAlign="center">
