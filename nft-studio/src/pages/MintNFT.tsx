@@ -113,7 +113,8 @@ const MintNFT: React.FC = () => {
 
   const balanceLow = !balance || balance < MINT_FEE_ESTIMATE
   const canMint = isSameAddress(selectedAccount?.address, collection?.owner)
-  const disabled = !isFormValid || balanceLow || !canMint
+  const fieldDisabled = balanceLow || !canMint || isMinting
+  const submitDisabled = !isFormValid || balanceLow || !canMint || isMinting
 
   return (
     <Stack gap={8} flex={1}>
@@ -127,7 +128,6 @@ const MintNFT: React.FC = () => {
             </>
           )
         }
-        actions={<></>}
       />
       <SplitView
         left={
@@ -159,6 +159,7 @@ const MintNFT: React.FC = () => {
                     onChange={({ target }) => {
                       setNftName((target as HTMLInputElement).value)
                     }}
+                    disabled={fieldDisabled}
                   />
                 </Box>
                 <TextArea
@@ -168,13 +169,14 @@ const MintNFT: React.FC = () => {
                   onChange={({ target }) => {
                     setNftDescription((target as HTMLTextAreaElement).value)
                   }}
+                  disabled={fieldDisabled}
                 />
 
                 <Shelf gap={2} mt={6}>
-                  <Button disabled={disabled} type="submit" loading={isMinting}>
+                  <Button disabled={submitDisabled} type="submit" loading={isMinting}>
                     Mint
                   </Button>
-                  <RouterLinkButton to={`/collection/${collectionId}`} variant="outlined">
+                  <RouterLinkButton to={`/collection/${collectionId}`} variant="outlined" disabled={submitDisabled}>
                     Cancel
                   </RouterLinkButton>
                   {(balanceLow || !canMint) && (
