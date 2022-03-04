@@ -17,7 +17,7 @@ type Props = {
   nftId: string
 }
 // TODO: replace with better fee estimate
-const TRANSFER_FEE_ESTIMATE = 1
+const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const queryClient = useQueryClient()
@@ -64,8 +64,8 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
 
   function getMessage() {
     if (balance == null) return
-    if (balanceDec.lt(priceDec)) return 'Balance too low'
-    if (balanceLow) return 'Not enough balance to pay for transaction costs'
+    if (balanceDec.lt(priceDec)) return 'Insufficient funds to purchase this NFT'
+    if (balanceLow) return 'Insufficient funds to pay for transaction costs'
   }
 
   const message = getMessage()
@@ -81,7 +81,7 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
             <Shelf gap={1} alignItems="baseline">
               <Stack>
                 <Text variant="heading1" fontWeight={400}>
-                  {nft?.sellPrice && formatPrice(priceDec.toNumber())}
+                  {nft?.sellPrice && `${formatPrice(priceDec.toNumber())} AIR`}
                 </Text>
                 {balance != null && <Text variant="label2">{formatPrice(balance)} AIR balance</Text>}
               </Stack>

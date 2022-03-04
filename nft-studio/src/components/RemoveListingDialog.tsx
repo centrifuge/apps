@@ -16,7 +16,7 @@ type Props = {
   nftId: string
 }
 // TODO: replace with better fee estimate
-const TRANSFER_FEE_ESTIMATE = 1
+const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const queryClient = useQueryClient()
