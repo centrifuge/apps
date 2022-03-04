@@ -1,13 +1,14 @@
 import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import * as React from 'react'
 import { useQueryClient } from 'react-query'
+import { Dec } from '../utils/Decimal'
+import { useAddress } from '../utils/useAddress'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useNFT } from '../utils/useNFTs'
 import { ButtonGroup } from './ButtonGroup'
-import { useCentrifuge } from './CentrifugeProvider'
 import { Dialog } from './Dialog'
-import { useWeb3 } from './Web3Provider'
 
 type Props = {
   open: boolean
@@ -20,12 +21,11 @@ const TRANSFER_FEE_ESTIMATE = 1
 
 export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const queryClient = useQueryClient()
-  const { selectedAccount } = useWeb3()
+  const address = useAddress()
   const { data: balance } = useBalance()
-  const centrifuge = useCentrifuge()
   const nft = useNFT(collectionId, nftId)
 
-  const isConnected = !!selectedAccount?.address
+  const isConnected = !!address
 
   const {
     execute: doTransaction,
@@ -34,6 +34,7 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
   } = useCentrifugeTransaction('Buy NFT', (cent) => cent.nfts.buyNft, {
     onSuccess: () => {
       queryClient.invalidateQueries(['nfts', collectionId])
+      queryClient.invalidateQueries(['accountNfts', address])
       close()
     },
   })
@@ -42,7 +43,7 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
     e.preventDefault()
     if (!isConnected || !nft || nft.sellPrice === null) return
 
-    doTransaction([collectionId, nftId, nft.sellPrice])
+    doTransaction([collectionId, nftId, new BN(nft.sellPrice)])
   }
 
   function reset() {
@@ -54,9 +55,20 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
     onClose()
   }
 
-  const balanceLow = !balance || balance < TRANSFER_FEE_ESTIMATE
+  const priceDec = Dec(nft?.sellPrice ?? 0).div('1e18')
+  const balanceDec = Dec(balance ?? 0)
+
+  const balanceLow = balanceDec.lt(priceDec.add(Dec(TRANSFER_FEE_ESTIMATE)))
 
   const disabled = balanceLow || !nft
+
+  function getMessage() {
+    if (balance == null) return
+    if (balanceDec.lt(priceDec)) return 'Balance too low'
+    if (balanceLow) return 'Not enough balance to pay for transaction costs'
+  }
+
+  const message = getMessage()
 
   return (
     <Dialog isOpen={open} onClose={close}>
@@ -67,17 +79,16 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
           </Text>
           <Stack>
             <Shelf gap={1} alignItems="baseline">
-              <Text variant="heading3">
-                {nft?.sellPrice && centrifuge.utils.formatCurrencyAmount(nft.sellPrice, 'AIR')}
-              </Text>
+              <Stack>
+                <Text variant="heading1" fontWeight={400}>
+                  {nft?.sellPrice && formatPrice(priceDec.toNumber())}
+                </Text>
+                {balance != null && <Text variant="label2">{formatPrice(balance)} AIR balance</Text>}
+              </Stack>
             </Shelf>
           </Stack>
           <Shelf justifyContent="space-between">
-            {balanceLow && (
-              <Text variant="label1" color="criticalForeground">
-                Your balance is too low ({(balance || 0).toFixed(2)} AIR)
-              </Text>
-            )}
+            {message && <Text variant="label2">{message}</Text>}
             <ButtonGroup ml="auto">
               <Button variant="outlined" onClick={close}>
                 Cancel
@@ -91,4 +102,8 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
       </form>
     </Dialog>
   )
+}
+
+function formatPrice(number: number) {
+  return number.toLocaleString('en', { maximumSignificantDigits: 2 })
 }

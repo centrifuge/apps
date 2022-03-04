@@ -67,7 +67,7 @@ export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collection
           </Text>
           <Stack>
             <Shelf gap={1} alignItems="baseline">
-              <Text variant="heading3">
+              <Text variant="heading1" fontWeight={400}>
                 {nft?.sellPrice && centrifuge.utils.formatCurrencyAmount(nft.sellPrice, 'AIR')}
               </Text>
             </Shelf>

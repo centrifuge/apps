@@ -111,26 +111,35 @@ export function getNftsModule(inst: CentrifugeBase) {
     const [address] = args
     const api = await inst.getApi()
 
-    const keys = await api.query.uniques.account.keys(address)
-    const keysArr = keys.map((k) => {
-      const [, cid, aid] = k.toHuman() as any
-      return [cid.replace(/\D/g, ''), aid.replace(/\D/g, '')]
+    const [accountKeys, salesKeys] = await Promise.all([
+      api.query.uniques.account.keys(address),
+      api.query.nftSales.nftsBySeller.keys(address),
+    ])
+    const accountkeysArr = accountKeys.map((k) => {
+      const [, cid, nid] = k.toHuman() as any
+      return [cid.replace(/\D/g, ''), nid.replace(/\D/g, '')]
     })
-    const [metas, nfts] = await Promise.all([
+    const salesKeysArr = salesKeys.map((k) => {
+      const [, cid, nid] = k.toHuman() as any
+      return [cid.replace(/\D/g, ''), nid.replace(/\D/g, '')]
+    })
+    const keysArr = salesKeysArr.concat(accountkeysArr)
+    const [metas, nfts, sales] = await Promise.all([
       api.query.uniques.instanceMetadataOf.multi(keysArr),
       api.query.uniques.asset.multi(keysArr),
-      // api.query.nftSales.sales.multi(keysArr),
+      api.query.nftSales.sales.multi(salesKeysArr),
     ])
 
     const mapped = nfts.map((value, i) => {
       const [collectionId, id] = keysArr[i]
       const instance = value.toJSON() as Instance
+      const sale = sales[i]?.toJSON() as any
       const nft: NFT = {
         id,
         collectionId,
         owner: instance.owner,
         metadataUri: (metas[i]?.toHuman() as any)?.data,
-        sellPrice: null,
+        sellPrice: sale ? parseHex(sale.price.amount) : null,
       }
       return nft
     })
@@ -187,7 +196,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     return inst.wrapSignAndSend(api, submittable, options)
   }
 
-  async function buyNft(args: [collectionId: string, nftId: string, maxPrice: string], options?: TransactionOptions) {
+  async function buyNft(args: [collectionId: string, nftId: string, maxPrice: BN], options?: TransactionOptions) {
     const [collectionId, nftId, price] = args
     const api = await inst.getApi()
     const submittable = api.tx.nftSales.buy(collectionId, nftId, ['Native', price.toString()])
