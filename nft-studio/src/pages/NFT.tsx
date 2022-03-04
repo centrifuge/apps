@@ -190,24 +190,33 @@ const NFT: React.FC = () => {
                       })}
                   </Text>
                 </Stack> */}
-                  {imageUrl && (
-                    <Stack gap={1}>
-                      <Text variant="label1">Source</Text>
-                      <AnchorPillButton
-                        href={imageUrl}
-                        target="_blank"
-                        style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
-                      >
-                        {imageUrl}
-                      </AnchorPillButton>
-                    </Stack>
-                  )}
+
+                  <Stack gap={1}>
+                    <Text variant="label1">Owner</Text>
+                    <Text variant="label2" color="textPrimary">
+                      <Identity address={nft.owner} clickToCopy />
+                    </Text>
+                  </Stack>
+
                   <Stack gap={1}>
                     <Text variant="label1">Description</Text>
                     <Text variant="body2" style={{ wordBreak: 'break-word' }}>
                       {nftMetadata?.description || 'No description'}
                     </Text>
                   </Stack>
+
+                  {imageUrl && (
+                    <Stack gap={1}>
+                      <Text variant="label1">Image</Text>
+                      <AnchorPillButton
+                        href={imageUrl}
+                        target="_blank"
+                        style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
+                      >
+                        Source file
+                      </AnchorPillButton>
+                    </Stack>
+                  )}
                   {nft.sellPrice !== null && (
                     <Stack gap={1}>
                       <Text variant="label1">Price</Text>

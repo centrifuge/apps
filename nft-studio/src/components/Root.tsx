@@ -1,5 +1,5 @@
 import { GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
-import centrifugeLight from '@centrifuge/fabric/dist/theme/centrifugeLight'
+import altairDark from '@centrifuge/fabric/dist/theme/altairDark'
 import { OverlayProvider } from '@react-aria/overlays'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
@@ -30,20 +30,20 @@ import { TransactionToasts } from './TransactionToasts'
 import { Web3Provider } from './Web3Provider'
 
 const darkTheme: DefaultTheme = {
-  ...centrifugeLight,
+  ...altairDark,
   sizes: {
-    ...centrifugeLight.sizes,
+    ...altairDark.sizes,
     container: '100%',
     navBarHeight: 72,
     navBarHeightMobile: 64,
     dialog: 564,
   },
   colors: {
-    ...centrifugeLight.colors,
-    placeholderBackground: centrifugeLight.colors.backgroundSecondary,
+    ...altairDark.colors,
+    placeholderBackground: altairDark.colors.backgroundSecondary,
   },
   typography: {
-    ...centrifugeLight.typography,
+    ...altairDark.typography,
     headingLarge: {
       fontSize: [24, 24, 36],
       lineHeight: 1.25,
