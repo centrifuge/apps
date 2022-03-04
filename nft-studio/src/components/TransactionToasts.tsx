@@ -19,11 +19,16 @@ const toastSublabel = {
   failed: 'Transaction failed',
 }
 
+const TOAST_DURATION = 5000
+
 export const TransactionToasts: React.FC = () => {
   const { transactions, updateTransaction } = useTransactions()
   const {
     sizes: { navBarHeight, navBarHeightMobile },
   } = useTheme()
+
+  const dismiss = (txId: string) => () => updateTransaction(txId, { dismissed: true })
+
   return (
     <Stack
       width={330}
@@ -34,13 +39,18 @@ export const TransactionToasts: React.FC = () => {
       zIndex={10}
     >
       {transactions
-        .filter((tx) => !tx.dismissed)
+        .filter((tx) => !tx.dismissed && !['creating', 'unconfirmed'].includes(tx.status))
         .map((tx) => (
           <Toast
             label={tx.title}
             sublabel={(tx.status === 'failed' && tx.failedReason) || toastSublabel[tx.status]}
             status={toastStatus[tx.status]}
-            onDismiss={() => updateTransaction(tx.id, { dismissed: true })}
+            onDismiss={dismiss(tx.id)}
+            onStatusChange={(newStatus) => {
+              if (['ok', 'critical'].includes(newStatus)) {
+                setTimeout(dismiss(tx.id), TOAST_DURATION)
+              }
+            }}
             action={
               tx.hash ? (
                 <AnchorButton
