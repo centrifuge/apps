@@ -1,6 +1,7 @@
 import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useQueryClient } from 'react-query'
+import { useHistory } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { Dialog } from '../components/Dialog'
 import { useWeb3 } from '../components/Web3Provider'
@@ -9,6 +10,7 @@ import { createCollectionMetadata } from '../utils/createCollectionMetadata'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
+import { useIsPageUnchanged } from '../utils/useIsPageUnchanged'
 import { fetchMetadata } from '../utils/useMetadata'
 import { useCentrifuge } from './CentrifugeProvider'
 import { TextArea } from './TextArea'
@@ -24,6 +26,8 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const [description, setDescription] = React.useState('')
   const cent = useCentrifuge()
   const { data: balance } = useBalance()
+  const isPageUnchanged = useIsPageUnchanged()
+  const history = useHistory()
 
   const isConnected = !!selectedAccount?.address
 
@@ -33,9 +37,12 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
   } = useCentrifugeTransaction('Create collection', (cent) => cent.nfts.createCollection, {
-    onSuccess: () => {
+    onSuccess: ([collectionId]) => {
       queryClient.invalidateQueries('collections')
       queryClient.invalidateQueries('balance')
+      if (open && isPageUnchanged()) {
+        history.push(`/collection/${collectionId}`)
+      }
     },
   })
 
@@ -77,8 +84,10 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   }
 
   const balanceLow = !balance || balance < CREATE_FEE_ESTIMATE
+  const isTxPending = metadataIsUploading || transactionIsPending
 
-  const disabled = !isConnected || !name || balanceLow
+  const fieldDisabled = !isConnected || balanceLow || isTxPending
+  const disabled = !isConnected || !name || balanceLow || isTxPending
 
   return (
     <Dialog isOpen={open} onClose={close}>
@@ -92,12 +101,14 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
             value={name}
             maxLength={collectionMetadataSchema.name.maxLength}
             onChange={(e) => setName(e.target.value)}
+            disabled={fieldDisabled}
           />
           <TextArea
             label="Description"
             value={description}
             maxLength={collectionMetadataSchema.description.maxLength}
             onChange={(e) => setDescription(e.target.value)}
+            disabled={fieldDisabled}
           />
           <Shelf justifyContent="space-between">
             {balanceLow && (
@@ -107,10 +118,10 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
             )}
             <ButtonGroup ml="auto">
               {uploadError && <Text color="criticalPrimary">Failed to create collection</Text>}
-              <Button variant="outlined" onClick={close}>
+              <Button variant="outlined" onClick={close} disabled={fieldDisabled}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={disabled} loading={metadataIsUploading || transactionIsPending}>
+              <Button type="submit" disabled={disabled} loading={isTxPending}>
                 Create
               </Button>
             </ButtonGroup>
