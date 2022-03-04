@@ -31,11 +31,13 @@ export class PoolService {
   }).connect(this.provider)
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
 
-  rwaMarketPermissionManager = config.rwaMarket.permissionManagerContractAddress ? new ethers.Contract(
-    config.rwaMarket.permissionManagerContractAddress,
-    contractAbiRwaMarketPermissionManager,
-    this.signer
-  ) : undefined;
+  rwaMarketPermissionManager = config.rwaMarket.permissionManagerContractAddress
+    ? new ethers.Contract(
+        config.rwaMarket.permissionManagerContractAddress,
+        contractAbiRwaMarketPermissionManager,
+        this.signer
+      )
+    : undefined
 
   constructor(
     private readonly addressRepo: AddressRepo,
