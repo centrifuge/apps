@@ -76,7 +76,7 @@ const Collection: React.FC = () => {
           )}
         </>
       ) : (
-        <Stack ml={3} alignItems="flex-start">
+        <Stack alignItems="flex-start">
           <Text variant="label1">This collection does not contain any NFT</Text>
           {canMint && (
             <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="text" icon={IconPlus}>
