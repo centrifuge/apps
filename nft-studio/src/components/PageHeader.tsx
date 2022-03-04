@@ -46,15 +46,7 @@ export const PageHeader: React.FC<Props> = ({
   const showOnlyNFT = useDebugFlags().showOnlyNFT
   return (
     <Shelf as="header" justifyContent="space-between" alignItems="flex-start" position="sticky" top="24px">
-      <Box
-        position="absolute"
-        top="-24px"
-        bottom={0}
-        right="-12px"
-        left="-12px"
-        backgroundColor="backgroundPrimary"
-        zIndex={-1}
-      />
+      <Box position="absolute" top="-24px" bottom={0} right="-12px" left="-12px" zIndex={-1} />
       {!showOnlyNFT && (
         <Stack gap={1}>
           <Shelf minHeight={20}>
@@ -89,7 +81,7 @@ export const PageHeader: React.FC<Props> = ({
           <Box height="48px" width="60px" marginTop="-8px">
             <img src={logoUrl} alt="" />
           </Box>
-          <Box position="absolute" width="100%" textAlign="center">
+          <Box position="absolute" width="100%" textAlign="center" display={['none', 'block']}>
             <Text variant="heading2">NFT Playground</Text>
           </Box>
         </>
