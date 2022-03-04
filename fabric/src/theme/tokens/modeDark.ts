@@ -25,7 +25,7 @@ const darkColors = {
   backgroundPrimary: grayScale.gray900,
   backgroundSecondary: grayScale.gray800,
   backgroundPage: 'black',
-  backgroundInput: grayScale.gray900,
+  backgroundInput: 'black',
 
   borderPrimary: grayScale.gray700,
   borderSecondary: grayScale.gray800,
