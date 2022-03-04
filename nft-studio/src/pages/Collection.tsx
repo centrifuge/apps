@@ -1,4 +1,4 @@
-import { Grid, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Grid, IconPlus, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
@@ -40,7 +40,7 @@ const Collection: React.FC = () => {
   const canMint = !isLoanCollection && isSameAddress(selectedAccount?.address, collection?.owner)
 
   return (
-    <Stack gap={8} flex={1}>
+    <Stack gap={4} flex={1}>
       <PageHeader
         parent={{ to: '/nfts', label: 'NFTs' }}
         title={metadata?.name || 'Unnamed collection'}
@@ -59,6 +59,11 @@ const Collection: React.FC = () => {
           )
         }
       />
+      {metadata?.description && (
+        <Box maxWidth="680px">
+          <Text variant="body1">{metadata?.description || ''}</Text>
+        </Box>
+      )}
       {nfts?.length ? (
         <>
           <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>
@@ -71,11 +76,14 @@ const Collection: React.FC = () => {
           )}
         </>
       ) : (
-        <Shelf justifyContent="center" mt="15vh" textAlign="center">
-          <Text variant="heading2" color="textSecondary">
-            The collection does not contain any NFTs yet
-          </Text>
-        </Shelf>
+        <Stack alignItems="flex-start">
+          <Text variant="label1">This collection does not contain any NFT</Text>
+          {canMint && (
+            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="text" icon={IconPlus}>
+              Mint NFT
+            </RouterLinkButton>
+          )}
+        </Stack>
       )}
     </Stack>
   )
