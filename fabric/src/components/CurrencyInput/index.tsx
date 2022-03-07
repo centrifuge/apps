@@ -16,7 +16,7 @@ const StyledTextInput = styled.input`
   border: 0;
   background: transparent;
   height: 22px;
-  font-size: 24px;
+  font-size: 16px;
   font-weight: inherit;
   font-family: inherit;
   line-height: inherit;
@@ -89,7 +89,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
       errorMessage={errorMessage}
       inputElement={<StyledTextInput disabled={disabled} placeholder={placeholder} type="number" {...inputProps} />}
       rightElement={
-        <Text fontSize={24} color={disabled ? 'textDisabled' : 'textPrimary'}>
+        <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'}>
           {currency}
         </Text>
       }

@@ -1,14 +1,14 @@
-import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
-import { isAddress } from '@polkadot/util-crypto'
+import { Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
+import BN from 'bn.js'
 import * as React from 'react'
 import { useQueryClient } from 'react-query'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
-import { isSameAddress } from '../utils/web3'
 import { ButtonGroup } from './ButtonGroup'
 import { Dialog } from './Dialog'
-import { TextInput } from './TextInput'
 import { useWeb3 } from './Web3Provider'
+
+const e18 = new BN(10).pow(new BN(18))
 
 type Props = {
   open: boolean
@@ -19,8 +19,8 @@ type Props = {
 // TODO: replace with better fee estimate
 const TRANSFER_FEE_ESTIMATE = 0.1
 
-export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
-  const [address, setAddress] = React.useState('')
+export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
+  const [price, setPrice] = React.useState<string | number>('')
   const [touched, setTouched] = React.useState(false)
   const queryClient = useQueryClient()
   const { selectedAccount } = useWeb3()
@@ -32,11 +32,9 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
-  } = useCentrifugeTransaction('Transfer NFT', (cent) => cent.nfts.transferNft, {
+  } = useCentrifugeTransaction('List NFT for sale', (cent) => cent.nfts.sellNft, {
     onSuccess: () => {
       queryClient.invalidateQueries(['nfts', collectionId])
-      queryClient.invalidateQueries('balance')
-      queryClient.invalidateQueries(['accountNfts'])
       close()
     },
   })
@@ -45,11 +43,12 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
     e.preventDefault()
     if (!isConnected || !!error) return
 
-    doTransaction([collectionId, nftId, address])
+    const amountBN = new BN(price).mul(e18)
+    doTransaction([collectionId, nftId, amountBN])
   }
 
   function reset() {
-    setAddress('')
+    setPrice('')
     setTouched(false)
     resetLastTransaction()
   }
@@ -60,9 +59,9 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
   }
 
   function getError() {
-    if (!address) return 'No address provided'
-    if (!isAddress(address)) return 'Not a valid address'
-    if (isSameAddress(address, selectedAccount!.address)) return 'Address is the same as the current owner'
+    if (!price && price !== 0) return 'Invalid price'
+    if (price < 0) return "Price can't be negative"
+    if (price > Number.MAX_SAFE_INTEGER) return 'Price too high'
     return null
   }
 
@@ -77,22 +76,18 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
       <form onSubmit={submit}>
         <Stack gap={3}>
           <Text variant="heading2" as="h2">
-            Transfer NFT
+            Sell NFT
           </Text>
-          <Text variant="body2">Transfer the NFT ownership</Text>
-          <Stack gap={1}>
-            <TextInput
-              label="Recipient address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              onBlur={() => setTouched(true)}
-            />
-            {touched && error && (
-              <Text variant="label2" color="criticalForeground">
-                {error}
-              </Text>
-            )}
-          </Stack>
+          <Text variant="body2">Set price to put NFT on sale</Text>
+          <CurrencyInput
+            label="Price"
+            value={price}
+            min="0"
+            onChange={(e) => setPrice(e.target.value)}
+            errorMessage={(touched && error) || undefined}
+            onBlur={() => setTouched(true)}
+            currency="AIR"
+          />
           <Shelf justifyContent="space-between">
             {balanceLow && (
               <Text variant="label1" color="criticalForeground">
@@ -104,7 +99,7 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
                 Cancel
               </Button>
               <Button type="submit" disabled={disabled} loading={transactionIsPending}>
-                Transfer
+                Put on sale
               </Button>
             </ButtonGroup>
           </Shelf>

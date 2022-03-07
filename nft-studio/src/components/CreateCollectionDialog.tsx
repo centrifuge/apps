@@ -78,7 +78,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
 
   const balanceLow = !balance || balance < CREATE_FEE_ESTIMATE
 
-  const disabled = !isConnected || !name || balanceLow
+  const disabled = !isConnected || !name || !description || balanceLow
 
   return (
     <Dialog isOpen={open} onClose={close}>
