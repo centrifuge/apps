@@ -1,17 +1,20 @@
 import { Box, Button, IconArrowRight, IconNft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams } from 'react-router-dom'
+import { NavLink, useParams } from 'react-router-dom'
+import { BuyDialog } from '../components/BuyDialog'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Identity } from '../components/Identity'
 import { PageHeader } from '../components/PageHeader'
 import { AnchorPillButton } from '../components/PillButton'
+import { RemoveListingDialog } from '../components/RemoveListingDialog'
 import { RouterLinkButton } from '../components/RouterLinkButton'
+import { SellDialog } from '../components/SellDialog'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { SplitView } from '../components/SplitView'
 import { TransferDialog } from '../components/TransferDialog'
-import { useWeb3 } from '../components/Web3Provider'
 import { nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
+import { useAddress } from '../utils/useAddress'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFT } from '../utils/useNFTs'
@@ -29,13 +32,16 @@ export const NFTPage: React.FC = () => {
 const NFT: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
 
-  const { selectedAccount } = useWeb3()
-  const { data: permissions } = usePermissions(selectedAccount?.address)
+  const address = useAddress()
+  const { data: permissions } = usePermissions(address)
   const nft = useNFT(collectionId, nftId)
   const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collection?.id)
   const [transferOpen, setTransferOpen] = React.useState(false)
+  const [sellOpen, setSellOpen] = React.useState(false)
+  const [buyOpen, setBuyOpen] = React.useState(false)
+  const [unlistOpen, setUnlistOpen] = React.useState(false)
   const centrifuge = useCentrifuge()
 
   const imageUrl = nftMetadata?.image ? parseMetadataUrl(nftMetadata.image) : ''
@@ -58,29 +64,78 @@ const NFT: React.FC = () => {
         }
         actions={
           <>
-            {nft && isSameAddress(nft.owner, selectedAccount?.address) && (
-              <>
-                {canCreateLoan && (
-                  <RouterLinkButton
-                    to={`/collection/${collectionId}/object/${nftId}/new-asset`}
-                    icon={IconPlus}
+            {nft &&
+              address &&
+              (isSameAddress(nft.owner, address) ? (
+                <>
+                  {canCreateLoan && (
+                    <RouterLinkButton
+                      to={`/collection/${collectionId}/object/${nftId}/new-asset`}
+                      icon={IconPlus}
+                      small
+                      variant="text"
+                    >
+                      Create asset
+                    </RouterLinkButton>
+                  )}
+                  {nft.sellPrice !== null ? (
+                    <Button onClick={() => setUnlistOpen(true)} small variant="text">
+                      Remove listing
+                    </Button>
+                  ) : (
+                    <Button onClick={() => setSellOpen(true)} small variant="text">
+                      Sell
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => setTransferOpen(true)}
+                    icon={IconArrowRight}
                     small
                     variant="text"
+                    disabled={nft.sellPrice !== null}
                   >
-                    Create asset
-                  </RouterLinkButton>
-                )}
-                <Button onClick={() => setTransferOpen(true)} icon={IconArrowRight} small variant="text">
-                  Transfer
-                </Button>
-                <TransferDialog
-                  collectionId={collectionId}
-                  nftId={nftId}
-                  open={transferOpen}
-                  onClose={() => setTransferOpen(false)}
-                />
-              </>
-            )}
+                    Transfer
+                  </Button>
+                  <TransferDialog
+                    collectionId={collectionId}
+                    nftId={nftId}
+                    open={transferOpen}
+                    onClose={() => setTransferOpen(false)}
+                  />
+                  <SellDialog
+                    collectionId={collectionId}
+                    nftId={nftId}
+                    open={sellOpen}
+                    onClose={() => setSellOpen(false)}
+                  />
+                  <BuyDialog
+                    collectionId={collectionId}
+                    nftId={nftId}
+                    open={buyOpen}
+                    onClose={() => setBuyOpen(false)}
+                  />
+                  <RemoveListingDialog
+                    collectionId={collectionId}
+                    nftId={nftId}
+                    open={unlistOpen}
+                    onClose={() => setUnlistOpen(false)}
+                  />
+                </>
+              ) : (
+                <>
+                  {nft.sellPrice !== null && (
+                    <Button onClick={() => setBuyOpen(true)} small>
+                      Buy
+                    </Button>
+                  )}
+                  <BuyDialog
+                    collectionId={collectionId}
+                    nftId={nftId}
+                    open={buyOpen}
+                    onClose={() => setBuyOpen(false)}
+                  />
+                </>
+              ))}
           </>
         }
       />
@@ -108,7 +163,6 @@ const NFT: React.FC = () => {
         right={
           <Shelf
             px={[2, 4, 8]}
-            py={9}
             gap={[4, 4, 8]}
             alignItems="flex-start"
             justifyContent="space-between"
@@ -136,10 +190,18 @@ const NFT: React.FC = () => {
                   </Text>
                 </Stack> */}
 
-                  <Stack gap={1}>
-                    <Text variant="label1">Owner</Text>
-                    <Text variant="label2" color="textPrimary">
-                      <Identity address={nft.owner} clickToCopy />
+                  <NavLink to={`/collection/${collectionId}`}>
+                    <Text variant="heading3" underline>
+                      {collectionMetadata?.name}
+                    </Text>
+                  </NavLink>
+
+                  <Stack gap={1} mb={6}>
+                    <Text variant="heading1" fontSize="36px">
+                      {nftMetadata?.name}
+                    </Text>
+                    <Text variant="heading3" color="textSecondary">
+                      by <Identity address={nft.owner} clickToCopy />
                     </Text>
                   </Stack>
 
@@ -160,6 +222,20 @@ const NFT: React.FC = () => {
                       >
                         Source file
                       </AnchorPillButton>
+                    </Stack>
+                  )}
+
+                  <Stack gap={1}>
+                    <Text variant="label1">Owner</Text>
+                    <Text variant="label2" color="textPrimary">
+                      <Identity address={nft.owner} clickToCopy />
+                    </Text>
+                  </Stack>
+
+                  {nft.sellPrice !== null && (
+                    <Stack gap={1}>
+                      <Text variant="label1">Price</Text>
+                      <Text variant="heading3">{centrifuge.utils.formatCurrencyAmount(nft.sellPrice, 'AIR')}</Text>
                     </Stack>
                   )}
                 </Stack>

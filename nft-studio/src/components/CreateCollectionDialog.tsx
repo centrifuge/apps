@@ -83,7 +83,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const isTxPending = metadataIsUploading || transactionIsPending
 
   const fieldDisabled = !isConnected || balanceLow || isTxPending
-  const disabled = !isConnected || !name || balanceLow || isTxPending
+  const disabled = !isConnected || !name || !description || balanceLow || isTxPending
 
   if (redirect) {
     return <Redirect to={redirect} />

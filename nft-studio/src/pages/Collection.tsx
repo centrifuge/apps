@@ -1,4 +1,4 @@
-import { Box, Grid, IconPlus, Stack, Text } from '@centrifuge/fabric'
+import { Box, Grid, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
@@ -40,7 +40,7 @@ const Collection: React.FC = () => {
   const canMint = !isLoanCollection && isSameAddress(selectedAccount?.address, collection?.owner)
 
   return (
-    <Stack gap={4} flex={1}>
+    <Stack flex={1}>
       <PageHeader
         parent={{ to: '/nfts', label: 'NFTs' }}
         title={metadata?.name || 'Unnamed collection'}
@@ -59,16 +59,26 @@ const Collection: React.FC = () => {
           )
         }
       />
-      {metadata?.description && (
-        <Box maxWidth="680px">
+      <Shelf gap={2} alignItems="baseline" mt={8} mb={2}>
+        <Text variant="heading1" fontSize="36px">
+          {metadata?.name || ''}
+        </Text>
+        <Text variant="heading3" color="textSecondary">
+          by <Identity address={collection?.owner || ''} />
+        </Text>
+      </Shelf>
+      {metadata?.description ? (
+        <Box maxWidth="680px" mb={6}>
           <Text variant="body1">{metadata?.description || ''}</Text>
         </Box>
+      ) : (
+        <Box mb={4} />
       )}
       {nfts?.length ? (
         <>
-          <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>
-            {nfts.slice(0, shownCount).map((nft, i) => (
-              <NFTCard nft={nft} key={i} />
+          <Grid gap={[2, 3]} columns={[2, 2, 3, 4]} equalColumns>
+            {nfts.slice(0, shownCount).map((nft) => (
+              <NFTCard nft={nft} key={nft.id} />
             ))}
           </Grid>
           {nfts.length > shownCount && (
