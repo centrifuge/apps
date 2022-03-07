@@ -6,18 +6,20 @@ import { SideBar } from './SideBar'
 
 type Props = {}
 
+export const PAGE_PX = ['gutterMobile', 'gutterTablet', 'gutterDesktop']
+
 export const PageWithSideBar: React.FC<Props> = ({ children }) => {
-  const showOnlyNTF = useDebugFlags().showOnlyNFT
-  if (showOnlyNTF) {
+  const showOnlyNFT = useDebugFlags().showOnlyNFT
+  if (showOnlyNFT) {
     return (
-      <Box minHeight="100vh" p={3}>
+      <Box minHeight="100vh" px={PAGE_PX}>
         {children}
       </Box>
     )
   }
 
   return (
-    <LayoutGrid minHeight="100vh" px={['gutterMobile', 'gutterTablet', 'gutterDesktop']}>
+    <LayoutGrid minHeight="100vh" px={PAGE_PX}>
       <LayoutGridItem
         span={[4, 4, 2]}
         order={[1, 1, 0]}

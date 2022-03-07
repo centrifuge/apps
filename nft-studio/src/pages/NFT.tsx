@@ -1,6 +1,6 @@
 import { Box, Button, IconArrowRight, IconNft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams } from 'react-router-dom'
+import { NavLink, useParams } from 'react-router-dom'
 import { BuyDialog } from '../components/BuyDialog'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Identity } from '../components/Identity'
@@ -163,7 +163,6 @@ const NFT: React.FC = () => {
         right={
           <Shelf
             px={[2, 4, 8]}
-            py={9}
             gap={[4, 4, 8]}
             alignItems="flex-start"
             justifyContent="space-between"
@@ -191,10 +190,18 @@ const NFT: React.FC = () => {
                   </Text>
                 </Stack> */}
 
-                  <Stack gap={1}>
-                    <Text variant="label1">Owner</Text>
-                    <Text variant="label2" color="textPrimary">
-                      <Identity address={nft.owner} clickToCopy />
+                  <NavLink to={`/collection/${collectionId}`}>
+                    <Text variant="heading3" underline>
+                      {collectionMetadata?.name}
+                    </Text>
+                  </NavLink>
+
+                  <Stack gap={1} mb={6}>
+                    <Text variant="heading1" fontSize="36px">
+                      {nftMetadata?.name}
+                    </Text>
+                    <Text variant="heading3" color="textSecondary">
+                      by <Identity address={nft.owner} clickToCopy />
                     </Text>
                   </Stack>
 
@@ -217,6 +224,14 @@ const NFT: React.FC = () => {
                       </AnchorPillButton>
                     </Stack>
                   )}
+
+                  <Stack gap={1}>
+                    <Text variant="label1">Owner</Text>
+                    <Text variant="label2" color="textPrimary">
+                      <Identity address={nft.owner} clickToCopy />
+                    </Text>
+                  </Stack>
+
                   {nft.sellPrice !== null && (
                     <Stack gap={1}>
                       <Text variant="label1">Price</Text>
