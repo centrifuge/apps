@@ -1,11 +1,21 @@
 import { Box, LayoutGrid, LayoutGridItem, Stack } from '@centrifuge/fabric'
-import * as React from 'react'
+import React from 'react'
+import { useDebugFlags } from '../DebugFlags'
 import { LoadBoundary } from '../LoadBoundary'
 import { SideBar } from './SideBar'
 
 type Props = {}
 
 export const PageWithSideBar: React.FC<Props> = ({ children }) => {
+  const showOnlyNTF = useDebugFlags().showOnlyNFT
+  if (showOnlyNTF) {
+    return (
+      <Box minHeight="100vh" p={3}>
+        {children}
+      </Box>
+    )
+  }
+
   return (
     <LayoutGrid minHeight="100vh" px={['gutterMobile', 'gutterTablet', 'gutterDesktop']}>
       <LayoutGridItem
