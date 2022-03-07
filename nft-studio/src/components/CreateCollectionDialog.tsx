@@ -1,7 +1,7 @@
 import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useQueryClient } from 'react-query'
-import { useHistory } from 'react-router'
+import { Redirect } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { Dialog } from '../components/Dialog'
 import { useWeb3 } from '../components/Web3Provider'
@@ -10,7 +10,6 @@ import { createCollectionMetadata } from '../utils/createCollectionMetadata'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
-import { useIsPageUnchanged } from '../utils/useIsPageUnchanged'
 import { fetchMetadata } from '../utils/useMetadata'
 import { useCentrifuge } from './CentrifugeProvider'
 import { TextArea } from './TextArea'
@@ -22,12 +21,11 @@ const CREATE_FEE_ESTIMATE = 2
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const queryClient = useQueryClient()
   const { selectedAccount } = useWeb3()
-  const [name, setName] = React.useState('')
-  const [description, setDescription] = React.useState('')
+  const [name, setName] = useState<string>('')
+  const [description, setDescription] = useState<string>('')
   const cent = useCentrifuge()
   const { data: balance } = useBalance()
-  const isPageUnchanged = useIsPageUnchanged()
-  const history = useHistory()
+  const [redirect, setRedirect] = useState<string>('')
 
   const isConnected = !!selectedAccount?.address
 
@@ -40,9 +38,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     onSuccess: ([collectionId]) => {
       queryClient.invalidateQueries('collections')
       queryClient.invalidateQueries('balance')
-      if (open && isPageUnchanged()) {
-        history.push(`/collection/${collectionId}`)
-      }
+      setRedirect(`/collection/${collectionId}`)
     },
   })
 
@@ -64,7 +60,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   })
 
   // Only close if the modal is still showing the last created collection
-  React.useEffect(() => {
+  useEffect(() => {
     if (lastCreatedTransaction?.status === 'succeeded') {
       close()
     }
@@ -88,6 +84,10 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
 
   const fieldDisabled = !isConnected || balanceLow || isTxPending
   const disabled = !isConnected || !name || balanceLow || isTxPending
+
+  if (redirect) {
+    return <Redirect to={redirect} />
+  }
 
   return (
     <Dialog isOpen={open} onClose={close}>
