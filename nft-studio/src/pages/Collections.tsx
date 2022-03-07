@@ -8,7 +8,7 @@ import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
-import { useCollections } from '../utils/useCollections'
+import { useCollections, useFeaturedCollections } from '../utils/useCollections'
 import { useAccountNfts } from '../utils/useNFTs'
 import { isSameAddress, isWhitelistedAccount } from '../utils/web3'
 
@@ -30,6 +30,8 @@ const Collections: React.FC = () => {
   const { data: accountNfts } = useAccountNfts(selectedAccount?.address, false)
   const centrifuge = useCentrifuge()
 
+  const featuredCollections = useFeaturedCollections()
+
   const userCollections = React.useMemo(
     () =>
       collections?.filter((c) => {
@@ -41,12 +43,17 @@ const Collections: React.FC = () => {
   )
 
   const otherCollections = React.useMemo(
-    () =>
-      collections?.filter((c) => {
-        if (isSameAddress(c.owner, selectedAccount?.address)) return false
-        if (centrifuge.utils.isLoanPalletAccount(c.admin)) return false
+    () => {
+      const userCollectionIds = userCollections?.map((c) => c.id) || []
+      const featuredCollectionIds = featuredCollections?.map((c) => c.id) || []
+
+      const excludedCollectionIds = [...userCollectionIds, ...featuredCollectionIds]
+
+      return collections?.filter((c) => {
+        if (excludedCollectionIds.includes(c.id) || centrifuge.utils.isLoanPalletAccount(c.admin)) return false
         return isWhitelistedAccount(c.owner)
-      }),
+      })
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [collections, selectedAccount?.address]
   )
@@ -67,10 +74,25 @@ const Collections: React.FC = () => {
           </Button>
         }
       />
+      {featuredCollections?.length ? (
+        <Stack gap={3}>
+          <Text variant="heading3" as="h2">
+            Featured collections
+          </Text>
+
+          <LayoutGrid>
+            {featuredCollections?.map((col) => (
+              <LayoutGridItem span={4} key={col.id}>
+                <CollectionCard collection={col} />
+              </LayoutGridItem>
+            ))}
+          </LayoutGrid>
+        </Stack>
+      ) : null}
       {selectedAccount && (
         <Stack gap={3}>
           <Text variant="heading3" as="h2">
-            My Collections
+            My collections
           </Text>
           {userCollections?.length || accountNfts?.length ? (
             <LayoutGrid>
@@ -106,7 +128,7 @@ const Collections: React.FC = () => {
       )}
       <Stack gap={3}>
         <Text variant="heading3" as="h2">
-          {selectedAccount ? 'Other Collections' : 'Collections'}
+          {selectedAccount || featuredCollections?.length ? 'Other collections' : 'Collections'}
         </Text>
         {otherCollections?.length ? (
           <>

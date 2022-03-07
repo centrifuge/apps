@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { FEATURED_COLLECTIONS } from '../config'
 import { collectionMetadataSchema } from '../schemas'
 import { useMetadata } from './useMetadata'
 
@@ -60,4 +61,11 @@ export function useCollectionNFTsPreview(id: string) {
   )
 
   return query
+}
+
+export function useFeaturedCollections() {
+  const { data } = useCollections()
+  return React.useMemo(() => {
+    return data?.filter((c) => FEATURED_COLLECTIONS.includes(c.id))
+  }, [data])
 }

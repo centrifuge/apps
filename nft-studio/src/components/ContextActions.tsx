@@ -5,7 +5,6 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { truncateAddress } from '../utils/web3'
-import { ButtonGroup } from './ButtonGroup'
 import { ConnectButton } from './ConnectButton'
 import { Popover } from './Popover'
 import { useWeb3 } from './Web3Provider'
@@ -20,7 +19,7 @@ export const ContextActions: React.FC<Props> = ({ actions, walletShown = true })
 
   return (
     <Shelf gap={5}>
-      {actions && <ButtonGroup>{actions}</ButtonGroup>}
+      {actions && <Shelf gap={3}>{actions}</Shelf>}
       {walletShown &&
         (selectedAccount && accounts?.length ? (
           <AccountsMenu />
