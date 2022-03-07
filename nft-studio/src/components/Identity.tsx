@@ -1,10 +1,11 @@
+import { isSameAddress } from '@centrifuge/centrifuge-js'
 import { Text, TextProps } from '@centrifuge/fabric'
 import { encodeAddress } from '@polkadot/keyring'
-import * as React from 'react'
+import React, { useMemo } from 'react'
 import { copyToClipboard } from '../utils/copyToClipboard'
+import { useAddress } from '../utils/useAddress'
 import { useIdentity } from '../utils/useIdentity'
 import { truncateAddress } from '../utils/web3'
-import { useWeb3 } from './Web3Provider'
 
 type Props = TextProps & {
   address: string
@@ -13,9 +14,9 @@ type Props = TextProps & {
 
 export const Identity: React.FC<Props> = ({ address, clickToCopy, ...textProps }) => {
   const { data: identity } = useIdentity(address)
-  const { selectedAccount } = useWeb3()
+  const myAddress = useAddress()
   const addr = encodeAddress(address, 2)
-  const isMe = selectedAccount?.address && encodeAddress(selectedAccount?.address, 2) === addr
+  const isMe = useMemo(() => isSameAddress(addr, myAddress), [addr, myAddress])
 
   return (
     <Text
