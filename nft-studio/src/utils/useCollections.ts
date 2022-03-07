@@ -65,7 +65,9 @@ export function useCollectionNFTsPreview(id: string) {
 export function useFeaturedCollections() {
   const { data } = useCollections()
   return React.useMemo(() => {
-    const featuredCollectionIds: string[] = (process.env.REACT_APP_FEATURED_COLLECTIONS || '').split(',')
+    const featuredCollectionIds: string[] = (process.env.REACT_APP_FEATURED_COLLECTIONS || '')
+      .split(',')
+      .map((id) => id.trim())
     return data?.filter((c) => featuredCollectionIds.includes(c.id))
   }, [data])
 }
