@@ -18,7 +18,7 @@ jobs:
       ipfs-gateway: https://gateway.pinata.cloud/
       collator-wss-url: wss://fullnode-collator-2.development.cntrfg.com
       relay-wss-url: wss://fullnode-relay-2.development.cntrfg.com
-      subscan-url: https://centrifuge.subscan.io/extrinsic/
+      subscan-url: https://centrifuge.subscan.io
       whitelisted-accounts: ''
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
