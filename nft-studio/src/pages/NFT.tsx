@@ -190,18 +190,20 @@ const NFT: React.FC = () => {
                   </Text>
                 </Stack> */}
 
-                  <NavLink to={`/collection/${collectionId}`}>
-                    <Text variant="heading3" underline>
-                      {collectionMetadata?.name}
-                    </Text>
-                  </NavLink>
-
                   <Stack gap={1} mb={6}>
-                    <Text variant="heading1" fontSize="36px">
+                    <NavLink to={`/collection/${collectionId}`}>
+                      <Text variant="heading3" underline>
+                        {collectionMetadata?.name}
+                      </Text>
+                    </NavLink>
+                    <Text variant="heading1" fontSize="36px" fontWeight="700" mb="4px">
                       {nftMetadata?.name}
                     </Text>
                     <Text variant="heading3" color="textSecondary">
-                      by <Identity address={nft.owner} clickToCopy />
+                      by{' '}
+                      <AnchorPillButton>
+                        <Identity address={nft.owner} clickToCopy />
+                      </AnchorPillButton>
                     </Text>
                   </Stack>
 
@@ -213,7 +215,7 @@ const NFT: React.FC = () => {
                   </Stack>
 
                   {imageUrl && (
-                    <Stack gap={1}>
+                    <Stack gap={1} alignItems="flex-start">
                       <Text variant="label1">Image</Text>
                       <AnchorPillButton
                         href={imageUrl}
