@@ -18,6 +18,7 @@ create table if not exists addresses (
     blockchain character varying(50) not null default  '''ethereum'''::character varying,
     network character varying(50) not null,
     address character varying(100) not null,
+    unlinked_at character varying(100),
     created_at timestamp with time zone not null default now()
 );
 
@@ -54,6 +55,7 @@ create table if not exists agreements (
     created_at timestamp with time zone not null default now(),
     signed_at timestamp with time zone,
     counter_signed_at timestamp with time zone,
+    voided_at timestamp with time zone,
     declined_at timestamp with time zone
 );
 
