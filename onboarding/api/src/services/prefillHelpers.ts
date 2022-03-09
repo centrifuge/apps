@@ -72,7 +72,11 @@ export const formatBirthday = (date) => {
 
     const birthYear = dateWithNoTimeZone.getFullYear()
 
-    return `${birthMonth}/${birthDate}/${birthYear}`
+    const birthday = `${birthMonth}/${birthDate}/${birthYear}`
+
+    if (!isNaN(Date.parse(birthday))) {
+      return birthday
+    }
   }
 
   return ''
