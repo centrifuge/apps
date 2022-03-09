@@ -499,7 +499,7 @@ class Apollo {
         data: [],
       }
     }
-    const proxies = result.data.proxies.map((e: { id: string; owner: string }) => e.id)
+    const proxies = result.data?.proxies.map((e: { id: string; owner: string }) => e.id)
     return { data: proxies }
   }
 
