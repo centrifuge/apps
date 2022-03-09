@@ -32,6 +32,14 @@ describe('formatBirthday', () => {
 
     expect(result).toBe('')
   })
+
+  test('should return empty string when date is invalid', () => {
+    const date = '1990-00-20'
+
+    const result = formatBirthday(date)
+
+    expect(result).toBe('')
+  })
 })
 
 describe('formatCityStateZip', () => {

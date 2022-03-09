@@ -78,7 +78,7 @@ describe('getPrefilledTabs', () => {
         {
           locked: true,
           tabLabel: 'Country',
-          value: 'US',
+          value: 'United States of America',
         },
       ],
     }
@@ -118,7 +118,7 @@ describe('getPrefilledTabs', () => {
         {
           locked: true,
           tabLabel: 'Country',
-          value: 'US',
+          value: 'United States of America',
         },
       ],
     }
@@ -160,7 +160,7 @@ describe('getPrefilledTabs', () => {
         {
           locked: true,
           tabLabel: 'Country',
-          value: 'US',
+          value: 'United States of America',
         },
       ],
     }
@@ -203,7 +203,7 @@ describe('getPrefilledTabs', () => {
         {
           locked: true,
           tabLabel: 'Country',
-          value: 'US',
+          value: 'United States of America',
         },
       ],
     }
