@@ -60,6 +60,7 @@ export const PageHeader: React.FC<Props> = ({
         borderBottomColor="borderPrimary"
         borderBottomWidth="1px"
         borderBottomStyle="solid"
+        zIndex={10}
       >
         <Box flex="1">
           <NavLink to="/">

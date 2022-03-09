@@ -59,7 +59,7 @@ const Collections: React.FC = () => {
   )
 
   return (
-    <Stack gap={8} flex={1}>
+    <Stack gap={8} flex={1} pb={8}>
       <PageHeader
         title="NFTs"
         actions={
@@ -82,7 +82,7 @@ const Collections: React.FC = () => {
 
           <LayoutGrid>
             {featuredCollections?.map((col) => (
-              <LayoutGridItem span={4} key={col.id}>
+              <LayoutGridItem span={[4, 2, 4, 3]} key={col.id}>
                 <CollectionCard collection={col} />
               </LayoutGridItem>
             ))}
@@ -97,7 +97,7 @@ const Collections: React.FC = () => {
           {userCollections?.length || accountNfts?.length ? (
             <LayoutGrid>
               {accountNfts?.length ? (
-                <LayoutGridItem span={4}>
+                <LayoutGridItem span={[4, 2, 4, 3]}>
                   <CollectionCardInner
                     title="All my NFTs"
                     label={
@@ -108,11 +108,12 @@ const Collections: React.FC = () => {
                     description="A dynamic collection of owned NFTs"
                     to="/account"
                     previewNFTs={accountNfts}
+                    count={accountNfts.length}
                   />
                 </LayoutGridItem>
               ) : null}
               {userCollections?.map((col) => (
-                <LayoutGridItem span={4} key={col.id}>
+                <LayoutGridItem span={[4, 2, 4, 3]} key={col.id}>
                   <CollectionCard collection={col} />
                 </LayoutGridItem>
               ))}
@@ -134,7 +135,7 @@ const Collections: React.FC = () => {
           <>
             <LayoutGrid>
               {otherCollections.slice(0, shownCount).map((col) => (
-                <LayoutGridItem span={4} key={col.id}>
+                <LayoutGridItem span={[4, 2, 4, 3]} key={col.id}>
                   <CollectionCard collection={col} />
                 </LayoutGridItem>
               ))}
