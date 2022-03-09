@@ -59,7 +59,7 @@ const Collections: React.FC = () => {
   )
 
   return (
-    <Stack gap={8} flex={1}>
+    <Stack gap={8} flex={1} pb={8}>
       <PageHeader
         title="NFTs"
         actions={
