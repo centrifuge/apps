@@ -49,7 +49,7 @@ const AccountNFTs: React.FC = () => {
   }
 
   return (
-    <Stack gap={8} flex={1}>
+    <Stack gap={8} flex={1} pb={8}>
       <PageHeader parent={{ to: '/nfts', label: 'collections' }} title="My NFTs" />
       {filteredNfts?.length ? (
         <>

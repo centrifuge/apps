@@ -1,10 +1,11 @@
-import { Box, Grid, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Grid, IconArrowLeft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Identity } from '../components/Identity'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'
+import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
@@ -47,7 +48,7 @@ const Collection: React.FC = () => {
         subtitle={
           collection?.owner && (
             <>
-              by <Identity address={collection?.owner} clickToCopy />
+              by <Identity address={collection.owner} clickToCopy />
             </>
           )
         }
@@ -59,21 +60,48 @@ const Collection: React.FC = () => {
           )
         }
       />
-      <Shelf gap={2} alignItems="baseline" mt={8} mb={2}>
-        <Text variant="heading1" fontSize="36px">
-          {metadata?.name || ''}
-        </Text>
-        <Text variant="heading3" color="textSecondary">
-          by <Identity address={collection?.owner || ''} />
-        </Text>
-      </Shelf>
-      {metadata?.description ? (
-        <Box maxWidth="680px" mb={6}>
-          <Text variant="body1">{metadata?.description || ''}</Text>
-        </Box>
-      ) : (
-        <Box mb={4} />
-      )}
+      <Box mt={1}>
+        <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
+          Back
+        </RouterLinkButton>
+      </Box>
+      <Stack alignItems="center" gap={2} mb={5} mt="-16px">
+        <Stack alignItems="center" gap="4px">
+          <Text variant="heading1" fontSize="36px" textAlign="center" style={{ wordBreak: 'break-word' }}>
+            {metadata?.name || ''}
+          </Text>
+          <Shelf gap={1} alignItems="baseline">
+            <Text variant="body2">by</Text>
+            <AnchorPillButton
+              href={`${process.env.REACT_APP_SUBSCAN_URL}/account/${collection?.owner ?? ''}`}
+              target="_blank"
+            >
+              <Identity address={collection?.owner || ''} />
+            </AnchorPillButton>
+          </Shelf>
+        </Stack>
+
+        {metadata?.description && (
+          <Box maxWidth="680px">
+            <Text
+              variant="body1"
+              textAlign="center"
+              style={{
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitLineClamp: 10,
+                WebkitBoxOrient: 'vertical',
+                wordBreak: 'break-word',
+              }}
+            >
+              {metadata?.description || ''}
+            </Text>
+          </Box>
+        )}
+      </Stack>
+      <Box mb={2}>
+        <Text variant="heading3">{collection?.instances ?? 0} NFTs</Text>
+      </Box>
       {nfts?.length ? (
         <>
           <Grid gap={[2, 3]} columns={[2, 2, 3, 4]} equalColumns>
