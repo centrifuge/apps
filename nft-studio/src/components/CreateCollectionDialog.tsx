@@ -49,10 +49,12 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     reset: resetUpload,
   } = useAsyncCallback(async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!isConnected || !name || !description) return
+    const nameValue = name.trim()
+    const descriptionValue = name.trim()
+    if (!isConnected || !nameValue || !descriptionValue) return
 
     const collectionId = await cent.nfts.getAvailableCollectionId()
-    const res = await createCollectionMetadata(name, description)
+    const res = await createCollectionMetadata(nameValue, descriptionValue)
 
     queryClient.prefetchQuery(['metadata', res.metadataURI], () => fetchMetadata(res.metadataURI))
 
@@ -83,7 +85,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const isTxPending = metadataIsUploading || transactionIsPending
 
   const fieldDisabled = !isConnected || balanceLow || isTxPending
-  const disabled = !isConnected || !name || !description || balanceLow || isTxPending
+  const disabled = !isConnected || !name.trim() || !description.trim() || balanceLow || isTxPending
 
   if (redirect) {
     return <Redirect to={redirect} />

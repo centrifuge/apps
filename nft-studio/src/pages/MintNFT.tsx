@@ -12,10 +12,10 @@ import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { SplitView } from '../components/SplitView'
 import { TextArea } from '../components/TextArea'
 import { TextInput } from '../components/TextInput'
-import { useWeb3 } from '../components/Web3Provider'
 import { nftMetadataSchema } from '../schemas'
 import { createNFTMetadata } from '../utils/createNFTMetadata'
 import { getFileDataURI } from '../utils/getFileDataURI'
+import { useAddress } from '../utils/useAddress'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
@@ -43,7 +43,7 @@ const MintNFT: React.FC = () => {
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collectionId)
   const { data: balance } = useBalance()
-  const { selectedAccount } = useWeb3()
+  const address = useAddress()
   const cent = useCentrifuge()
   const [version, setNextVersion] = useReducer((s) => s + 1, 0)
   const history = useHistory()
@@ -55,7 +55,7 @@ const MintNFT: React.FC = () => {
 
   const isPageUnchanged = useIsPageUnchanged()
 
-  const isFormValid = nftName && nftDescription && fileDataUri
+  const isFormValid = nftName.trim() && nftDescription.trim() && fileDataUri
 
   const {
     execute: doTransaction,
@@ -66,7 +66,7 @@ const MintNFT: React.FC = () => {
       queryClient.invalidateQueries(['nfts', collectionId])
       queryClient.invalidateQueries(['collectionPreview', collectionId])
       queryClient.invalidateQueries('balance')
-      queryClient.invalidateQueries(['accountNfts', selectedAccount?.address])
+      queryClient.invalidateQueries(['accountNfts', address])
       reset()
 
       if (isPageUnchanged()) {
@@ -83,20 +83,23 @@ const MintNFT: React.FC = () => {
   } = useAsyncCallback(async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!(nftName && nftDescription && fileDataUri)) {
+    const nameValue = nftName.trim()
+    const descriptionValue = nftDescription.trim()
+
+    if (!(nameValue && descriptionValue && fileDataUri)) {
       return
     }
     const nftId = await cent.nfts.getAvailableNftId(collectionId)
     const res = await createNFTMetadata({
-      name: nftName,
-      description: nftDescription,
+      name: nameValue,
+      description: descriptionValue,
       fileDataUri,
       fileName,
     })
 
     queryClient.prefetchQuery(['metadata', res.metadataURI], () => fetchMetadata(res.metadataURI))
 
-    doTransaction([collectionId, nftId, selectedAccount!.address, res.metadataURI])
+    doTransaction([collectionId, nftId, address!, res.metadataURI])
   })
 
   function reset() {
@@ -112,7 +115,7 @@ const MintNFT: React.FC = () => {
   const isMinting = metadataIsUploading || transactionIsPending
 
   const balanceLow = !balance || balance < MINT_FEE_ESTIMATE
-  const canMint = isSameAddress(selectedAccount?.address, collection?.owner)
+  const canMint = isSameAddress(address, collection?.owner)
   const fieldDisabled = balanceLow || !canMint || isMinting
   const submitDisabled = !isFormValid || balanceLow || !canMint || isMinting
 
@@ -122,9 +125,9 @@ const MintNFT: React.FC = () => {
         parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
         title={nftName || DEFAULT_NFT_NAME}
         subtitle={
-          selectedAccount?.address && (
+          address && (
             <>
-              by <Identity address={selectedAccount.address} clickToCopy />
+              by <Identity address={address} clickToCopy />
             </>
           )
         }
