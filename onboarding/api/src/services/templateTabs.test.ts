@@ -35,6 +35,11 @@ describe('getPrefilledTabs', () => {
         { locked: true, tabLabel: 'taxID', value: '123456789' },
         { locked: true, tabLabel: 'Street & Number', value: '123 Bitcoin Way' },
         { locked: true, tabLabel: 'City & Postal Code', value: 'Los Angeles, CA, 42069' },
+        {
+          locked: true,
+          tabLabel: 'Country',
+          value: 'United States of America',
+        },
       ],
     }
 

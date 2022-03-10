@@ -26,16 +26,6 @@ export const formatTabs = (templateId, investor) => {
 
   const countryName = getName(countryCode, 'en')
 
-  const includeCountryName =
-    templateId === templateIds.NEW_SILVER ||
-    templateId === templateIds[1754] ||
-    templateId === templateIds.CONSOL_FREIGHT ||
-    templateId === templateIds.FORTUNA_FI_S1 ||
-    templateId === templateIds.HARBOR_TRADE ||
-    templateId === templateIds.GIG ||
-    templateId === templateIds['1754_SERIES_3'] ||
-    templateId === templateIds.NEW_TEMPLATE
-
   const shouldPrefill = Object.values(templateIds).includes(templateId) && verificationStatus === 'verified'
 
   if (shouldPrefill) {
@@ -93,15 +83,11 @@ export const formatTabs = (templateId, investor) => {
           tabLabel: 'City & Postal Code',
           locked: !!cityStateZip,
         },
-        ...(includeCountryName
-          ? [
-              {
-                value: countryName || '',
-                tabLabel: 'Country',
-                locked: !!countryName,
-              },
-            ]
-          : []),
+        {
+          value: countryName || '',
+          tabLabel: 'Country',
+          locked: !!countryName,
+        },
       ],
       dateTabs: [
         {
