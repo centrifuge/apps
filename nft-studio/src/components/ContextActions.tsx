@@ -19,7 +19,11 @@ export const ContextActions: React.FC<Props> = ({ actions, walletShown = true })
 
   return (
     <Shelf gap={5}>
-      {actions && <Shelf gap={3}>{actions}</Shelf>}
+      {actions && (
+        <Box display={['none', 'block']}>
+          <Shelf gap={3}>{actions}</Shelf>
+        </Box>
+      )}
       {walletShown &&
         (selectedAccount && accounts?.length ? (
           <AccountsMenu />

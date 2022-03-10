@@ -30,39 +30,6 @@ export function useCollectionMetadata(id?: string) {
   return useMetadata(collection?.metadataUri, collectionMetadataSchema)
 }
 
-export function useCollectionNFTsPreview(id: string) {
-  const { data } = useCollections()
-  const cent = useCentrifuge()
-  const query = useQuery(
-    ['collectionPreview', id],
-    async () => {
-      const api = await cent.getApi()
-      const collection = data!.find((c) => c.id === id)
-      if (!collection) return null
-
-      const metas = await api.query.uniques.instanceMetadataOf.entriesPaged({ pageSize: 4, args: [collection.id] })
-
-      const mapped = metas.map(([keys, value]) => {
-        const id = (keys.toHuman() as string[])[0]
-        const metaValue = value.toHuman() as any
-        const meta = {
-          id,
-          metadataUri: metaValue.data as string | undefined,
-        }
-        return meta
-      })
-
-      return mapped
-    },
-    {
-      enabled: !!data,
-      staleTime: Infinity,
-    }
-  )
-
-  return query
-}
-
 export function useFeaturedCollections() {
   const { data } = useCollections()
   return React.useMemo(() => {

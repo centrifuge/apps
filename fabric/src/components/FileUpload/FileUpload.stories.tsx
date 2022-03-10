@@ -13,6 +13,7 @@ const Template: FileUploadStory = (args) => <FileUpload {...args} />
 export const Default = Template.bind({})
 Default.args = {
   placeholder: 'Add file',
+  label: 'Upload file',
   errorMessage: '',
   disabled: false,
   loading: false,

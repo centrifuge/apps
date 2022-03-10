@@ -1,13 +1,13 @@
 import { Collection } from '@centrifuge/centrifuge-js'
-import { Box, Card, Stack, Text } from '@centrifuge/fabric'
+import { Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { collectionMetadataSchema, nftMetadataSchema } from '../schemas'
+import { collectionMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
-import { useCollectionNFTsPreview } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { Identity } from './Identity'
+import { LogoAltair } from './LogoAltair'
 
 type Props = {
   collection: Collection
@@ -15,7 +15,6 @@ type Props = {
 
 export const CollectionCard: React.FC<Props> = ({ collection }) => {
   const { data: metadata } = useMetadata(collection.metadataUri, collectionMetadataSchema)
-  const { data: previewNFTs } = useCollectionNFTsPreview(collection.id)
   const { id, admin, instances } = collection
 
   return (
@@ -23,12 +22,13 @@ export const CollectionCard: React.FC<Props> = ({ collection }) => {
       to={`/collection/${id}`}
       title={metadata?.name || 'Unnamed collection'}
       label={
-        <>
-          by <Identity address={admin} />
-        </>
+        <Shelf gap="4px">
+          <span>by</span>
+          <Identity address={admin} />
+        </Shelf>
       }
       description={metadata?.description}
-      previewNFTs={previewNFTs ?? undefined}
+      image={metadata?.image}
       count={instances}
     />
   )
@@ -40,13 +40,12 @@ type InnerProps = {
   title: string
   label?: React.ReactNode
   description?: string
-  previewNFTs?: { id: string; metadataUri?: string }[]
+  image?: string
 }
 
-export const CollectionCardInner: React.FC<InnerProps> = ({ count, to, title, label, description, previewNFTs }) => {
-  const previewNFT = previewNFTs?.[0]
-  const { data } = useMetadata(previewNFT?.metadataUri, nftMetadataSchema)
+export const CollectionCardInner: React.FC<InnerProps> = ({ count, to, title, label, description, image }) => {
   const [imageShown, setImageShown] = React.useState(false)
+
   return (
     <Card as={Link} display="block" height="100%" to={to} variant="interactive">
       <Stack>
@@ -58,18 +57,33 @@ export const CollectionCardInner: React.FC<InnerProps> = ({ count, to, title, la
           overflow="hidden"
           position="relative"
         >
-          {data?.image && (
+          {image && (
             <Box
               as="img"
               alt=""
-              src={parseMetadataUrl(data.image)}
+              src={parseMetadataUrl(image)}
               display="block"
               width="100%"
               height="100%"
+              position="relative"
+              zIndex={1}
               style={{ objectFit: 'cover', transition: 'opacity 200ms', opacity: imageShown ? 1 : 0 }}
               onLoad={() => setImageShown(true)}
             />
           )}
+          <Shelf
+            justifyContent="center"
+            position="absolute"
+            width="100%"
+            height="100%"
+            top={0}
+            left={0}
+            zIndex={0}
+            backgroundColor="black"
+          >
+            <LogoAltair height="50%" />
+          </Shelf>
+
           {count != null ? (
             <Count px={1} py="4px" position="absolute" bottom={1} right={1} zIndex={1}>
               <Text variant="label2" color="textPrimary">

@@ -8,7 +8,9 @@ import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
+import { nftMetadataSchema } from '../schemas'
 import { useCollections, useFeaturedCollections } from '../utils/useCollections'
+import { useMetadata } from '../utils/useMetadata'
 import { useAccountNfts } from '../utils/useNFTs'
 import { isSameAddress, isWhitelistedAccount } from '../utils/web3'
 
@@ -28,6 +30,7 @@ const Collections: React.FC = () => {
   const { data: collections } = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const { data: accountNfts } = useAccountNfts(selectedAccount?.address, false)
+  const { data: firstAccountNftMetadata } = useMetadata(accountNfts?.[0]?.metadataUri, nftMetadataSchema)
   const centrifuge = useCentrifuge()
 
   const featuredCollections = useFeaturedCollections()
@@ -107,7 +110,7 @@ const Collections: React.FC = () => {
                     }
                     description="A dynamic collection of owned NFTs"
                     to="/account"
-                    previewNFTs={accountNfts}
+                    image={firstAccountNftMetadata?.image}
                     count={accountNfts.length}
                   />
                 </LayoutGridItem>

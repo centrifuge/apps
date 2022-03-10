@@ -13,6 +13,7 @@ type Props = TextProps & {
 }
 
 export const Identity: React.FC<Props> = ({ address, clickToCopy, ...textProps }) => {
+  console.log('address', address)
   const { data: identity } = useIdentity(address)
   const myAddress = useAddress()
   const addr = encodeAddress(address, 2)
@@ -22,7 +23,11 @@ export const Identity: React.FC<Props> = ({ address, clickToCopy, ...textProps }
     <Text
       {...textProps}
       title={addr}
-      style={{ cursor: clickToCopy ? 'copy' : undefined, wordBreak: 'break-word' }}
+      style={{
+        cursor: clickToCopy ? 'copy' : undefined,
+        wordBreak: 'break-word',
+        whiteSpace: 'normal',
+      }}
       onClick={clickToCopy ? () => copyToClipboard(addr) : undefined}
     >
       {isMe ? 'me' : identity?.display || truncateAddress(address)}
