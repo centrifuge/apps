@@ -94,7 +94,7 @@ export const FileImageUpload: React.FC<Props> = ({
         <Stack alignItems="center" height="100%">
           <Shelf flex="1" alignItems="flex-end">
             {errorMsg && (
-              <Shelf gap={1} mb={6}>
+              <Shelf gap={1} mb={6} alignItems="center">
                 <IconAlertCircle color="statusCritical" />
                 <Text color="statusCritical">{errorMsg}</Text>
               </Shelf>
