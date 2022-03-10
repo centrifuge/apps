@@ -86,7 +86,7 @@ export const formatTabs = (templateId, investor) => {
         {
           value: countryName || '',
           tabLabel: 'Country',
-          locked: !!countryName,
+          locked: false,
         },
       ],
       dateTabs: [
