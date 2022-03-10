@@ -142,8 +142,11 @@ const MintNFT: React.FC = () => {
                   setFileName(file.name)
                   setFileDataUri(await getFileDataURI(file))
                   if (!nftName) {
-                    setNftName(file.name)
+                    setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
                   }
+                } else {
+                  setFileName('')
+                  setFileDataUri('')
                 }
               }}
             />
