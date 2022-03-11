@@ -36,7 +36,7 @@ export const TransactionToasts: React.FC = () => {
       position="fixed"
       top={[navBarHeightMobile, navBarHeightMobile, navBarHeight]}
       right={1}
-      zIndex={10}
+      zIndex={11}
     >
       {transactions
         .filter((tx) => !tx.dismissed && !['creating', 'unconfirmed'].includes(tx.status))
