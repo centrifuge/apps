@@ -9,6 +9,7 @@ const FileUploadContainer = styled.div<{ hasPreview: boolean }>`
   align-items: center;
   justify-content: center;
   width: 100%;
+  max-width: 800px;
   aspect-ratio: 1/1;
   position: relative;
   border-radius: 6px;
