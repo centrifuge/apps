@@ -78,7 +78,7 @@ export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId
           <Text variant="heading2" as="h2">
             Sell NFT
           </Text>
-          <Text variant="body2">Set price to put NFT on sale</Text>
+          <Text variant="body2">Enter item price</Text>
           <CurrencyInput
             label="Price"
             value={price}

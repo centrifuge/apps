@@ -63,7 +63,7 @@ export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collection
       <form onSubmit={submit}>
         <Stack gap={3}>
           <Text variant="heading2" as="h2">
-            Remove listing
+            Are you sure about removing this listing?
           </Text>
           <Stack>
             <Shelf gap={1} alignItems="baseline">
