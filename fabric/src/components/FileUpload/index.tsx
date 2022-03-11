@@ -186,7 +186,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       {errorMessage ? (
         <>
           <Shelf gap={2}>
-            <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver} />
+            <UploadButton type="button" onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver} />
             <Flex minWidth="iconMedium">
               <IconAlertCircle color="statusCritical" />
             </Flex>
@@ -201,7 +201,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       ) : curFile ? (
         <>
           <Shelf gap={2}>
-            <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver} />
+            <UploadButton type="button" onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver} />
             <Flex minWidth="iconMedium">
               {loading ? (
                 <Spinner color={disabled ? 'textDisabled' : 'textPrimary'} />
@@ -226,7 +226,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           </Shelf>
         </>
       ) : (
-        <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver}>
+        <UploadButton type="button" onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver}>
           <Shelf gap={1}>
             <IconPlus />
             <Text variant="body1" color="currentcolor">

@@ -2,6 +2,7 @@ import { Box, Button, IconAlertCircle, Shelf, Stack, Text } from '@centrifuge/fa
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { getFileDataURI } from '../utils/getFileDataURI'
+import { SUPPORTED_IMAGE_TYPES_STRING, validateImageFile } from '../utils/validateImageFile'
 import { FileInputOverlay } from './FileInputOverlay'
 
 const FileUploadContainer = styled.div<{ hasPreview: boolean }>`
@@ -33,28 +34,9 @@ const ImgPreview = styled.img`
 
 type Props = {
   onFileUpdate: (file: File | null) => void
-  maxFileSizeInBytes?: number
 }
 
-const DEFAULT_MAX_FILE_SIZE_IN_BYTES = 1e6 // 1 MB
-const ALLOWED_TYPES = [
-  'image/png',
-  'image/avif',
-  'image/jpeg',
-  'image/webp',
-  'image/gif',
-  'image/svg+xml',
-  'image/bmp',
-  'image/vnd.microsoft.icon',
-]
-const isFormatSupported = (file: File): boolean => ALLOWED_TYPES.includes(file.type)
-
-const ACCEPT_STRING = ALLOWED_TYPES.join(',')
-
-export const FileImageUpload: React.FC<Props> = ({
-  onFileUpdate,
-  maxFileSizeInBytes = DEFAULT_MAX_FILE_SIZE_IN_BYTES,
-}) => {
+export const FileImageUpload: React.FC<Props> = ({ onFileUpdate }) => {
   const [, setCurFile] = useState<File | null>(null)
   const [fileDataUri, setFileDataUri] = useState<string>('')
   const [fileName, setFileName] = useState<string>('')
@@ -72,12 +54,11 @@ export const FileImageUpload: React.FC<Props> = ({
   const handleNewFileUpload = (newFiles: FileList) => {
     const newFile = newFiles[0]
 
-    if (!isFormatSupported(newFile)) {
-      return showErrorMsg('File format not supported')
+    const errMsg = validateImageFile(newFile)
+    if (errMsg) {
+      return showErrorMsg(errMsg)
     }
-    if (newFile.size > maxFileSizeInBytes) {
-      return showErrorMsg('File size exceeded')
-    }
+
     setCurFile(newFile)
     setFileName(newFile.name)
     onFileUpdate(newFile)
@@ -130,7 +111,7 @@ export const FileImageUpload: React.FC<Props> = ({
       <FileInputOverlay
         onFilesUpdate={onSingleFileUpdate}
         onBeforeFilesUpdate={handleNewFileUpload}
-        accept={ACCEPT_STRING}
+        accept={SUPPORTED_IMAGE_TYPES_STRING}
       />
     </FileUploadContainer>
   )

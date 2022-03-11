@@ -2,14 +2,14 @@ import { ipfsHashToURI, pinJson } from './pinata/api'
 
 const handler = async (event) => {
   try {
-    const { name, description } = JSON.parse(event.body)
+    const { name, description, logo } = JSON.parse(event.body)
 
     // check incoming data
     if (!(name && description)) {
       return { statusCode: 400, body: 'Bad request: name, description are required fields' }
     }
 
-    const pinMetadataResponse = await pinJson({ name, description })
+    const pinMetadataResponse = await pinJson({ name, description, logo })
 
     const metadataHash = pinMetadataResponse.data.IpfsHash
 

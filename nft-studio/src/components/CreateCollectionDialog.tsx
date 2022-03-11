@@ -1,4 +1,4 @@
-import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, FileUpload, Shelf, Stack, Text } from '@centrifuge/fabric'
 import React, { useEffect, useState } from 'react'
 import { useQueryClient } from 'react-query'
 import { Redirect } from 'react-router'
@@ -7,10 +7,12 @@ import { Dialog } from '../components/Dialog'
 import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
 import { createCollectionMetadata } from '../utils/createCollectionMetadata'
+import { getFileIpfsHash } from '../utils/getFileIpfsHash'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { fetchMetadata } from '../utils/useMetadata'
+import { SUPPORTED_IMAGE_TYPES_STRING, validateImageFile } from '../utils/validateImageFile'
 import { useCentrifuge } from './CentrifugeProvider'
 import { TextArea } from './TextArea'
 import { TextInput } from './TextInput'
@@ -26,6 +28,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const cent = useCentrifuge()
   const { data: balance } = useBalance()
   const [redirect, setRedirect] = useState<string>('')
+  const [logoFile, setLogoFile] = useState<File>()
 
   const isConnected = !!selectedAccount?.address
 
@@ -53,8 +56,10 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     const descriptionValue = name.trim()
     if (!isConnected || !nameValue || !descriptionValue) return
 
+    const logoHash = logoFile ? (await getFileIpfsHash(logoFile)) || '' : ''
+
     const collectionId = await cent.nfts.getAvailableCollectionId()
-    const res = await createCollectionMetadata(nameValue, descriptionValue)
+    const res = await createCollectionMetadata(nameValue, descriptionValue, logoHash)
 
     queryClient.prefetchQuery(['metadata', res.metadataURI], () => fetchMetadata(res.metadataURI))
 
@@ -112,6 +117,17 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
             onChange={(e) => setDescription(e.target.value)}
             disabled={fieldDisabled}
           />
+          <Stack gap={1}>
+            <Text variant="label1">Upload collection logo (JPEG, SVG, PNG, or GIF up to 1 MB)</Text>
+            <FileUpload
+              onFileUpdate={(file) => setLogoFile(file)}
+              onFileCleared={() => setLogoFile(undefined)}
+              placeholder="Add file"
+              validate={validateImageFile}
+              accept={SUPPORTED_IMAGE_TYPES_STRING}
+            />
+          </Stack>
+
           <Shelf justifyContent="space-between">
             {balanceLow && (
               <Text variant="label1" color="criticalForeground">

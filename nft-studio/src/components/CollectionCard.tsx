@@ -1,10 +1,11 @@
 import { Collection } from '@centrifuge/centrifuge-js'
 import { Box, Card, Stack, Text } from '@centrifuge/fabric'
-import * as React from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { collectionMetadataSchema, nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
+import { toIpfsUrl } from '../utils/toIpfsUrl'
 import { useCollectionNFTsPreview } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { Identity } from './Identity'
@@ -28,6 +29,7 @@ export const CollectionCard: React.FC<Props> = ({ collection }) => {
         </>
       }
       description={metadata?.description}
+      previewLogo={metadata?.logo}
       previewNFTs={previewNFTs ?? undefined}
       count={instances}
     />
@@ -41,12 +43,28 @@ type InnerProps = {
   label?: React.ReactNode
   description?: string
   previewNFTs?: { id: string; metadataUri?: string }[]
+  previewLogo?: string
 }
 
-export const CollectionCardInner: React.FC<InnerProps> = ({ count, to, title, label, description, previewNFTs }) => {
+export const CollectionCardInner: React.FC<InnerProps> = ({
+  count,
+  to,
+  title,
+  label,
+  description,
+  previewNFTs,
+  previewLogo,
+}) => {
   const previewNFT = previewNFTs?.[0]
   const { data } = useMetadata(previewNFT?.metadataUri, nftMetadataSchema)
   const [imageShown, setImageShown] = React.useState(false)
+
+  const previewUrl = React.useMemo(() => {
+    if (previewLogo) return toIpfsUrl(previewLogo)
+    if (data?.image) return parseMetadataUrl(data.image)
+    return ''
+  }, [previewLogo, data?.image])
+
   return (
     <Card as={Link} display="block" height="100%" to={to} variant="interactive">
       <Stack>
@@ -58,11 +76,11 @@ export const CollectionCardInner: React.FC<InnerProps> = ({ count, to, title, la
           overflow="hidden"
           position="relative"
         >
-          {data?.image && (
+          {previewUrl && (
             <Box
               as="img"
               alt=""
-              src={parseMetadataUrl(data.image)}
+              src={previewUrl}
               display="block"
               width="100%"
               height="100%"

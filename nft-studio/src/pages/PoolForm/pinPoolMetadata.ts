@@ -1,31 +1,12 @@
 import { PoolFormValues } from '.'
 import { fetchLambda } from '../../utils/fetchLambda'
-import { getFileDataURI } from '../../utils/getFileDataURI'
+import { getFileIpfsHash } from '../../utils/getFileIpfsHash'
 import { promiseAllObject } from '../../utils/promiseAllObject'
 import { PoolMetadata } from './types'
 
 type CreatePoolArg = {
   poolFormData: PoolFormValues
   issuerLogoFile?: File
-}
-
-const getFileIpfsHash = async (file?: File): Promise<string | null> => {
-  if (!file) return null
-
-  const resp = await fetchLambda('pinFile', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      fileDataUri: await getFileDataURI(file),
-      fileName: file.name,
-    }),
-  })
-
-  if (resp.ok && Math.floor(resp.status) / 100 === 2) {
-    const json = await resp.json()
-    return json.fileIpfsHash as string
-  }
-  return null
 }
 
 export const pinPoolMetadata = async ({ poolFormData, issuerLogoFile }: CreatePoolArg): Promise<string> => {

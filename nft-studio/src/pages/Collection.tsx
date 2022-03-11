@@ -1,6 +1,7 @@
 import { Box, Grid, IconArrowLeft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
+import styled from 'styled-components'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Identity } from '../components/Identity'
 import { NFTCard } from '../components/NFTCard'
@@ -11,10 +12,18 @@ import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
+import { toIpfsUrl } from '../utils/toIpfsUrl'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFTs } from '../utils/useNFTs'
 import { isSameAddress } from '../utils/web3'
+
+const CollectionLogo = styled.img`
+  max-width: 144px;
+  min-width: 144px;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+`
 
 export const CollectionPage: React.FC = () => {
   return (
@@ -65,8 +74,11 @@ const Collection: React.FC = () => {
           Back
         </RouterLinkButton>
       </Box>
+
       <Stack alignItems="center" gap={2} mb={5} mt="-16px">
         <Stack alignItems="center" gap="4px">
+          {metadata?.logo && <CollectionLogo src={toIpfsUrl(metadata.logo)} />}
+
           <Text variant="heading1" fontSize="36px" textAlign="center" style={{ wordBreak: 'break-word' }}>
             {metadata?.name || ''}
           </Text>
