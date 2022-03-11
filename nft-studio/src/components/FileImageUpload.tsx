@@ -61,7 +61,7 @@ export const FileImageUpload: React.FC<Props> = ({
   const [errorMsg, setErrorMsg] = useState<string>('')
 
   const showErrorMsg = (err: string) => {
-    setErrorMsg('File format not supported')
+    setErrorMsg(err)
     onFileUpdate(null)
     setCurFile(null)
     setFileName('')
