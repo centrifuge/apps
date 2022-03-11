@@ -76,7 +76,7 @@ const Collection: React.FC = () => {
               href={`${process.env.REACT_APP_SUBSCAN_URL}/account/${collection?.owner ?? ''}`}
               target="_blank"
             >
-              <Identity address={collection?.owner || ''} />
+              {collection?.owner && <Identity address={collection.owner} clickToCopy />}
             </AnchorPillButton>
           </Shelf>
         </Stack>
