@@ -1,4 +1,4 @@
-import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, IconArrowLeft, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Flex } from '@centrifuge/fabric/dist/components/Flex'
 import React, { useReducer, useState } from 'react'
 import { useQueryClient } from 'react-query'
@@ -120,10 +120,17 @@ const MintNFT: React.FC = () => {
 
   return (
     <Stack gap={8} flex={1}>
-      <PageHeader
-        parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
-        title={nftName || DEFAULT_NFT_NAME}
-      />
+      <Box>
+        <PageHeader
+          parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
+          title={nftName || DEFAULT_NFT_NAME}
+        />
+        <Box mt={1}>
+          <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
+            Back
+          </RouterLinkButton>
+        </Box>
+      </Box>
       <SplitView
         left={
           <Flex alignItems="stretch" justifyContent="stretch" height="100%" p={[2, 4, 0]}>
