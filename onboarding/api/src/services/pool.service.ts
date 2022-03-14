@@ -6,11 +6,13 @@ import { Tranche } from '../controllers/types'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
 import { User, UserRepo } from '../repos/user.repo'
+import Mailer from '../utils/mailer'
 import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
 import contractAbiMemberlist from '../utils/Memberlist.abi'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
 import contractAbiRwaMarketPermissionManager from '../utils/RwaMarketPermissionManager.abi'
 import { TransactionManager } from '../utils/tx-manager'
+
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 const RwaMarketKey = 'rwa-market'
@@ -38,6 +40,7 @@ export class PoolService {
         this.signer
       )
     : undefined
+  mailer = new Mailer()
 
   constructor(
     private readonly addressRepo: AddressRepo,
@@ -215,6 +218,7 @@ export class PoolService {
           agreementId,
           user.entityName?.length > 0 ? user.entityName : user.fullName
         )
+        await this.mailer.sendWhitelistedEmail(user, pool, { tranche })
       } else {
         this.logger.log(`${address.address} is not a member of ${pool.metadata.name} - ${tranche}`)
       }
