@@ -8,7 +8,7 @@ export class Mailer {
       body: JSON.stringify({
         from: {
           name: pool.profile?.issuer?.name,
-          email: `issuer+${issuerName}@tinlake.com`,
+          email: `issuer+${issuerName}@centrifuge.io`,
         },
         personalizations: [
           {
@@ -38,7 +38,7 @@ export class Mailer {
       body: JSON.stringify({
         from: {
           name: pool.profile?.issuer?.name,
-          email: `issuer+${issuerName}@tinlake.com`,
+          email: `issuer+${issuerName}@centrifuge.io`,
         },
         personalizations: [
           {
