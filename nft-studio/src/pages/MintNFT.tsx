@@ -5,7 +5,6 @@ import { useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { FileImageUpload } from '../components/FileImageUpload'
-import { Identity } from '../components/Identity'
 import { PageHeader } from '../components/PageHeader'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
@@ -125,13 +124,6 @@ const MintNFT: React.FC = () => {
         <PageHeader
           parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
           title={nftName || DEFAULT_NFT_NAME}
-          subtitle={
-            address && (
-              <>
-                by <Identity address={address} clickToCopy />
-              </>
-            )
-          }
         />
         <Box mt={1}>
           <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
