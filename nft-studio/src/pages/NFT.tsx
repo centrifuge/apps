@@ -159,7 +159,7 @@ const NFT: React.FC = () => {
                   maxWidth={800}
                   style={{ aspectRatio: '1 / 1' }}
                 >
-                  <Box as="img" maxWidth={800} src={imageUrl} />
+                  <Box as="img" maxWidth="100%" src={imageUrl} />
                 </Box>
               ) : (
                 <Box
@@ -232,14 +232,21 @@ const NFT: React.FC = () => {
                         href={`${process.env.REACT_APP_SUBSCAN_URL}/account/${nft.owner}`}
                         target="_blank"
                       >
-                        <Identity address={collection.owner} clickToCopy />
+                        <Identity address={collection.owner} />
                       </AnchorPillButton>
                     </Shelf>
                   </Stack>
 
                   <Stack gap={1}>
                     <Text variant="label1">Description</Text>
-                    <TextWithPlaceholder isLoading={isLoading} variant="body2" style={{ wordBreak: 'break-word' }}>
+                    <TextWithPlaceholder
+                      isLoading={isLoading}
+                      words={2}
+                      width={80}
+                      variance={30}
+                      variant="body2"
+                      style={{ wordBreak: 'break-word' }}
+                    >
                       {nftMetadata?.description || 'No description'}
                     </TextWithPlaceholder>
                   </Stack>
