@@ -127,7 +127,7 @@ export class AgreementController {
       await this.agreementRepo.setSigned(agreement.id)
       const user = await this.userRepo.find(agreement.userId)
       const pool = await this.poolService.get(agreement.poolId)
-      this.mailer.sendSubscriptionAgreementEmail(user, pool, agreement.tranche)
+      await this.mailer.sendSubscriptionAgreementEmail(user, pool, agreement.tranche)
     }
 
     if (!agreement.counterSignedAt && status.counterSigned) {
