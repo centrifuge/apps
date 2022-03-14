@@ -4,6 +4,8 @@ on:
     paths:
       - 'nft-studio/**'
       - 'fabric/**' # dependency
+      - 'centrifuge-js/**' # dependency
+      - '.github/workflows/nft-studio-build-and-deploy.yml' # dependency
       - '.github/workflows/nft-studio-pull-request.yml'
 
 jobs:
@@ -11,7 +13,15 @@ jobs:
     uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
+      ipfs-gateway: https://altair.mypinata.cloud/
+      collator-wss-url: wss://fullnode-collator-2.development.cntrfg.com
+      relay-wss-url: wss://fullnode-relay-2.development.cntrfg.com
+      subscan-url: https://rococo.subscan.io
+      whitelisted-accounts: ''
+
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      NETLIFY_SITE_ID: ${{ secrets.NFT_STUDIO_DEV_NETLIFY_SITE_ID }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      netlify-site-id: ${{ secrets.NFT_STUDIO_DEV_NETLIFY_SITE_ID }}
+      pinata-api-key: ${{ secrets.PINATA_API_KEY }}
+      pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}

@@ -1,21 +1,24 @@
 import { Button, IconPlus, LayoutGrid, LayoutGridItem, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
 import { CreateCollectionDialog } from '../components/CreateCollectionDialog'
-import { Footer } from '../components/Footer'
 import { Identity } from '../components/Identity'
-import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
+import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
-import { useCollections } from '../utils/useCollections'
+import { nftMetadataSchema } from '../schemas'
+import { useCollections, useFeaturedCollections } from '../utils/useCollections'
+import { useMetadata } from '../utils/useMetadata'
 import { useAccountNfts } from '../utils/useNFTs'
 import { isSameAddress, isWhitelistedAccount } from '../utils/web3'
 
 export const CollectionsPage: React.FC = () => {
   return (
-    <PageContainer>
+    <PageWithSideBar>
       <Collections />
-    </PageContainer>
+    </PageWithSideBar>
   )
 }
 
@@ -27,42 +30,77 @@ const Collections: React.FC = () => {
   const { data: collections } = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const { data: accountNfts } = useAccountNfts(selectedAccount?.address, false)
+  const { data: firstAccountNftMetadata } = useMetadata(accountNfts?.[0]?.metadataUri, nftMetadataSchema)
+  const centrifuge = useCentrifuge()
+
+  const featuredCollections = useFeaturedCollections()
 
   const userCollections = React.useMemo(
-    () => collections?.filter((c) => isSameAddress(c.owner, selectedAccount?.address)),
+    () =>
+      collections?.filter((c) => {
+        if (centrifuge.utils.isLoanPalletAccount(c.admin)) return false
+        return isSameAddress(c.owner, selectedAccount?.address)
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [collections, selectedAccount?.address]
   )
 
   const otherCollections = React.useMemo(
-    () =>
-      collections?.filter((c) => {
-        if (isSameAddress(c.owner, selectedAccount?.address)) return false
+    () => {
+      const userCollectionIds = userCollections?.map((c) => c.id) || []
+      const featuredCollectionIds = featuredCollections?.map((c) => c.id) || []
+
+      const excludedCollectionIds = [...userCollectionIds, ...featuredCollectionIds]
+
+      return collections?.filter((c) => {
+        if (excludedCollectionIds.includes(c.id) || centrifuge.utils.isLoanPalletAccount(c.admin)) return false
         return isWhitelistedAccount(c.owner)
-      }),
+      })
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [collections, selectedAccount?.address]
   )
 
   return (
-    <Stack gap={8} flex={1}>
+    <Stack gap={8} flex={1} pb={8}>
+      <PageHeader
+        title="NFTs"
+        actions={
+          <Button
+            onClick={() => setCreateOpen(true)}
+            variant="text"
+            small
+            icon={IconPlus}
+            disabled={!selectedAccount?.address}
+          >
+            Create Collection
+          </Button>
+        }
+      />
+      {featuredCollections?.length ? (
+        <Stack gap={3}>
+          <Text variant="heading3" as="h2">
+            Featured collections
+          </Text>
+
+          <LayoutGrid>
+            {featuredCollections?.map((col) => (
+              <LayoutGridItem span={[4, 2, 4, 3]} key={col.id}>
+                <CollectionCard collection={col} />
+              </LayoutGridItem>
+            ))}
+          </LayoutGrid>
+        </Stack>
+      ) : null}
       {selectedAccount && (
         <Stack gap={3}>
-          <Shelf justifyContent="space-between">
-            <Text variant="heading2" as="h2">
-              My Collections
-            </Text>
-            <Button onClick={() => setCreateOpen(true)} variant="text" icon={IconPlus}>
-              Create Collection
-            </Button>
-          </Shelf>
+          <Text variant="heading3" as="h2">
+            My collections
+          </Text>
           {userCollections?.length || accountNfts?.length ? (
             <LayoutGrid>
-              {userCollections?.map((col) => (
-                <LayoutGridItem span={4} key={col.id}>
-                  <CollectionCard collection={col} />
-                </LayoutGridItem>
-              ))}
               {accountNfts?.length ? (
-                <LayoutGridItem span={4}>
+                <LayoutGridItem span={[4, 2, 4, 3]}>
                   <CollectionCardInner
                     title="All my NFTs"
                     label={
@@ -72,10 +110,16 @@ const Collections: React.FC = () => {
                     }
                     description="A dynamic collection of owned NFTs"
                     to="/account"
-                    previewNFTs={accountNfts}
+                    image={firstAccountNftMetadata?.image}
+                    count={accountNfts.length}
                   />
                 </LayoutGridItem>
               ) : null}
+              {userCollections?.map((col) => (
+                <LayoutGridItem span={[4, 2, 4, 3]} key={col.id}>
+                  <CollectionCard collection={col} />
+                </LayoutGridItem>
+              ))}
             </LayoutGrid>
           ) : (
             <Shelf justifyContent="center" textAlign="center">
@@ -87,14 +131,14 @@ const Collections: React.FC = () => {
         </Stack>
       )}
       <Stack gap={3}>
-        <Text variant="heading2" as="h2">
-          {selectedAccount ? 'Other Collections' : 'Collections'}
+        <Text variant="heading3" as="h2">
+          {selectedAccount || featuredCollections?.length ? 'Other collections' : 'Collections'}
         </Text>
         {otherCollections?.length ? (
           <>
             <LayoutGrid>
               {otherCollections.slice(0, shownCount).map((col) => (
-                <LayoutGridItem span={4} key={col.id}>
+                <LayoutGridItem span={[4, 2, 4, 3]} key={col.id}>
                   <CollectionCard collection={col} />
                 </LayoutGridItem>
               ))}
@@ -112,7 +156,6 @@ const Collections: React.FC = () => {
         )}
       </Stack>
       <CreateCollectionDialog open={createOpen} onClose={() => setCreateOpen(false)} />
-      <Footer />
     </Stack>
   )
 }

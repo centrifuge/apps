@@ -1,15 +1,50 @@
-import { ipfsHashToURI, pinJson } from './pinata/api'
+import path from 'path'
+import { ipfsHashToURI, pinFile, pinJson, unpinFile } from './pinata/api'
+
+const fs = require('fs')
+
+const dataUriToReadStream = ({ tempFilePath, fileDataUri }) => {
+  const base64String = fileDataUri.replace(/.+;base64,/, '')
+
+  fs.writeFileSync(tempFilePath, base64String, { encoding: 'base64' })
+
+  console.log(`Temp file '${tempFilePath}' created`)
+
+  return fs.createReadStream(tempFilePath)
+}
 
 const handler = async (event) => {
   try {
-    const { name, description } = JSON.parse(event.body)
+    const { name, description, fileDataUri, fileName } = JSON.parse(event.body)
 
     // check incoming data
     if (!(name && description)) {
       return { statusCode: 400, body: 'Bad request: name, description are required fields' }
     }
 
-    const pinMetadataResponse = await pinJson({ name, description })
+    let fileURL
+    let fileHash
+    if (fileDataUri && fileName) {
+      // create temp file to call the pinFile API
+      const tempFilePath = path.join('/tmp', fileName)
+      console.log(`Temp file '${tempFilePath}' created`)
+      const fileStream = dataUriToReadStream({ tempFilePath, fileDataUri })
+
+      // pin the image file
+      const pinFileResponse = await pinFile(fileStream)
+
+      fileHash = pinFileResponse.data.IpfsHash
+      fileURL = ipfsHashToURI(fileHash)
+    }
+
+    let pinMetadataResponse
+    try {
+      pinMetadataResponse = await pinJson({ name, description, image: fileURL })
+    } catch (e) {
+      // if the creation of metadata fails, unpin the image file
+      await unpinFile(fileHash)
+      throw e
+    }
 
     const metadataHash = pinMetadataResponse.data.IpfsHash
 
@@ -18,6 +53,8 @@ const handler = async (event) => {
       body: JSON.stringify({
         metadataIpfsHash: metadataHash,
         metadataURI: ipfsHashToURI(metadataHash),
+        imageIpfsHash: fileHash,
+        imageURI: fileURL,
       }),
     }
   } catch (e) {

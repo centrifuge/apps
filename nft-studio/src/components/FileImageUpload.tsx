@@ -1,98 +1,137 @@
-import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
-import React, { useRef, useState } from 'react'
+import { Box, Button, IconAlertCircle, Shelf, Stack, Text } from '@centrifuge/fabric'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import { getFileDataURI } from '../utils/getFileDataURI'
+import { FileInputOverlay } from './FileInputOverlay'
 
-const FileUploadContainer = styled.div`
+const FileUploadContainer = styled.div<{ hasPreview: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
+  max-width: 800px;
+  aspect-ratio: 1/1;
   position: relative;
   border-radius: 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
-`
-
-const FormField = styled.input`
-  font-size: 18px;
-  display: block;
-  width: 100%;
-  border: none;
-  text-transform: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  opacity: 0;
-
-  &:focus {
-    outline: none;
+  border: 1px dashed ${({ theme }) => theme.colors.textSecondary};
+  background-color: ${({ theme }) => theme.colors.backgroundPrimary};
+  :hover {
+    ${({ hasPreview }) => (hasPreview ? 'filter: contrast(0.5);' : '')}
   }
 `
 
+const ImgPreview = styled.img`
+  min-width: 200px;
+  min-height: 200px;
+  max-width: 600px;
+  max-height: 600px;
+  object-fit: contain;
+`
+
 type Props = {
-  onFileUpdate: (file: File) => void
+  onFileUpdate: (file: File | null) => void
   maxFileSizeInBytes?: number
 }
 
-const DEFAULT_MAX_FILE_SIZE_IN_BYTES = Infinity // no limit by default
+const DEFAULT_MAX_FILE_SIZE_IN_BYTES = 1e6 // 1 MB
+const ALLOWED_TYPES = [
+  'image/png',
+  'image/avif',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+  'image/svg+xml',
+  'image/bmp',
+  'image/vnd.microsoft.icon',
+]
+const isFormatSupported = (file: File): boolean => ALLOWED_TYPES.includes(file.type)
 
-const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
+const ACCEPT_STRING = ALLOWED_TYPES.join(',')
 
 export const FileImageUpload: React.FC<Props> = ({
   onFileUpdate,
   maxFileSizeInBytes = DEFAULT_MAX_FILE_SIZE_IN_BYTES,
 }) => {
-  const fileInputField = useRef<HTMLInputElement>(null)
   const [, setCurFile] = useState<File | null>(null)
   const [fileDataUri, setFileDataUri] = useState<string>('')
+  const [fileName, setFileName] = useState<string>('')
+  const [errorMsg, setErrorMsg] = useState<string>('')
 
-  const handleUploadBtnClick = () => {
-    fileInputField?.current?.click()
+  const showErrorMsg = (err: string) => {
+    setErrorMsg(err)
+    onFileUpdate(null)
+    setCurFile(null)
+    setFileName('')
+    setFileDataUri('')
+    return false
   }
 
-  const handleNewFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { files: newFiles } = e.target
-    if (newFiles?.length) {
-      const newFile = newFiles[0]
-      if (!isImageFile(newFile)) {
-        console.error(`Only image files are allowed (selected file of type ${newFile.type})`)
-        return
-      }
-      if (newFile.size > maxFileSizeInBytes) {
-        console.error(
-          `Files bigger than ${maxFileSizeInBytes} bytes are not allowed (selected file of ${newFile.size} bites)`
-        )
-        return
-      }
-      setCurFile(newFile)
-      onFileUpdate(newFile)
-      setFileDataUri(await getFileDataURI(newFile))
+  const handleNewFileUpload = (newFiles: FileList) => {
+    const newFile = newFiles[0]
+
+    if (!isFormatSupported(newFile)) {
+      return showErrorMsg('File format not supported')
     }
+    if (newFile.size > maxFileSizeInBytes) {
+      return showErrorMsg('File size exceeded')
+    }
+    setCurFile(newFile)
+    setFileName(newFile.name)
+    onFileUpdate(newFile)
+    getFileDataURI(newFile).then((dataUri) => {
+      setFileDataUri(dataUri)
+    })
+    return true
   }
+
+  const onSingleFileUpdate = (files: FileList) => onFileUpdate(files[0])
 
   return (
-    <FileUploadContainer>
+    <FileUploadContainer hasPreview={!!fileDataUri}>
       {!fileDataUri && (
-        <Stack>
-          <Shelf>
-            <Button variant="outlined" onClick={handleUploadBtnClick}>
-              Choose file
-            </Button>
-            <Box pl={2}>
-              <Text variant="label1">No file selected</Text>
-            </Box>
+        <Stack alignItems="center" height="100%">
+          <Shelf flex="1" alignItems="flex-end">
+            {errorMsg && (
+              <Shelf gap={1} mb={6} alignItems="center">
+                <IconAlertCircle color="statusCritical" />
+                <Text color="statusCritical">{errorMsg}</Text>
+              </Shelf>
+            )}
           </Shelf>
-          <Box pt={2} pl={1}>
-            <Text variant="label1">Or drag image here</Text>
+          <Box>
+            <Text variant="body1" textAlign="center">
+              Drop file to upload <br /> or
+            </Text>
           </Box>
+          <Box mb={4} mt={1}>
+            <Button variant="outlined">Choose file</Button>
+          </Box>
+
+          <Text variant="body2" color="textSecondary">
+            Upload JPEG, SVG, PNG, or GIF up to 1 MB
+          </Text>
+          <Box flex="1"></Box>
         </Stack>
       )}
-      <FormField type="file" ref={fileInputField} onChange={handleNewFileUpload} title="" value="" />
-      {fileDataUri && <img src={fileDataUri} alt="Preview" />}
+      {fileDataUri && (
+        <Stack p={2} height="100%">
+          <Box flex="1" pb={2}>
+            {' '}
+          </Box>
+          <ImgPreview src={fileDataUri} alt="Preview" />
+          <Shelf flex="1" textAlign="center" justifyContent="center" alignItems="flex-end" pt={2}>
+            <Text variant="body2">{fileName}</Text>
+          </Shelf>
+        </Stack>
+      )}
+      <FileInputOverlay
+        onFilesUpdate={onSingleFileUpdate}
+        onBeforeFilesUpdate={handleNewFileUpload}
+        accept={ACCEPT_STRING}
+      />
     </FileUploadContainer>
   )
 }

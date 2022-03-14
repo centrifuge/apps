@@ -54,7 +54,7 @@ export const StyledButton = styled.span<StyledProps>(
   ({ $variant, $disabled, $small, $active, theme }) => {
     let fg = $disabled ? 'textDisabled' : 'textPrimary'
     let bg = $variant === 'contained' ? 'backgroundPrimary' : 'transparent'
-    let fgHover = 'brand'
+    let fgHover = 'accentPrimary'
     let bgHover = ''
     const borderWidth = $variant === 'outlined' ? 1 : 0
 

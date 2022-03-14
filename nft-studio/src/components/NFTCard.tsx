@@ -1,11 +1,12 @@
-import { Box, Card, Stack, Text } from '@centrifuge/fabric'
+import { NFT } from '@centrifuge/centrifuge-js'
+import { Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
-import { NFT } from '../utils/useNFTs'
+import { useCentrifuge } from './CentrifugeProvider'
 import { Identity } from './Identity'
 
 type Props = {
@@ -15,6 +16,7 @@ type Props = {
 export const NFTCard: React.FC<Props> = ({ nft }) => {
   const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(nft.collectionId)
+  const centrifuge = useCentrifuge()
   const [imageShown, setImageShown] = React.useState(false)
 
   return (
@@ -44,11 +46,23 @@ export const NFTCard: React.FC<Props> = ({ nft }) => {
           <Text as="h2" variant="heading2" style={{ wordBreak: 'break-word' }}>
             {metadata?.name ?? 'Unnamed NFT'}
           </Text>
-          {collection?.owner && (
-            <Text variant="label1">
-              by <Identity address={collection.owner} />
-            </Text>
-          )}
+          <Shelf flexWrap="wrap" gap={1}>
+            {collection?.owner && (
+              <Box flexBasis="150px" mr="auto">
+                <Text variant="label1">
+                  <Shelf gap="4px">
+                    <span>by</span>
+                    <Identity address={collection.owner} />
+                  </Shelf>
+                </Text>
+              </Box>
+            )}
+            {nft.sellPrice !== null && (
+              <Box flexBasis="auto">
+                <Text variant="heading3">{centrifuge.utils.formatCurrencyAmount(nft.sellPrice, 'AIR')}</Text>
+              </Box>
+            )}
+          </Shelf>
         </Stack>
       </Stack>
     </Card>

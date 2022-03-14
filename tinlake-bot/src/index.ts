@@ -22,16 +22,20 @@ const run = async () => {
   console.log(`Awaiting JSON RPC provider connection`)
   await provider.ready
 
+  if (config.excludedPools.length > 0) {
+    console.log(`Excluding pools: ${config.excludedPools.join(', ')}`)
+  }
+
   const signer = new TransactionManager(wallet).connect(provider)
 
   console.log(`Booting Tinlake Bot as ${wallet.address}`)
-  pools = await loadFromIPFS(provider)
+  pools = await loadFromIPFS(provider, config.excludedPools)
 
   let cronJobs: Map<string, CronJob> = new Map<string, CronJob>()
 
   let retrievePoolsTask = new CronJob(CronExpression.EVERY_HOUR, async () => {
     // Update the list of pools every 30 minutes
-    pools = await loadFromIPFS(provider)
+    pools = await loadFromIPFS(provider, config.excludedPools)
   })
   cronJobs.set('retrievePools', retrievePoolsTask)
 

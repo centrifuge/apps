@@ -1,11 +1,13 @@
 import { useQuery } from 'react-query'
-import { initPolkadotApi } from './web3'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 
 export function useIdentity(address?: string) {
+  const cent = useCentrifuge()
   const query = useQuery(
     ['identity', address],
     async () => {
-      const api = await initPolkadotApi('kusama')
+      const api = await cent.getRelayChainApi()
+      if (!api.query.identity) return null
       const result = await api.query.identity.identityOf(address)
       const obj = result.toHuman() as any
       if (!obj) return null
