@@ -32,7 +32,7 @@ export class Mailer {
     })
   }
 
-  async sendSubscriptionAgreementEmail(user: User, pool: any, data: any) {
+  async sendSubscriptionAgreementEmail(user: User, pool: any, tranche: string) {
     const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
     const response = await fetch(config.sendgrid.apiUrl, {
       body: JSON.stringify({

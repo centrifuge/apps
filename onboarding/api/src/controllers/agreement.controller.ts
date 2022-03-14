@@ -17,10 +17,12 @@ import { DocusignService, InvestorRoleName, IssuerRoleName } from '../services/d
 import { MemberlistService } from '../services/memberlist.service'
 import { CustomPoolIds, PoolService } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
+import Mailer from '../utils/mailer'
 
 @Controller()
 export class AgreementController {
   private readonly logger = new Logger(AgreementController.name)
+  private readonly mailer = new Mailer()
 
   constructor(
     private readonly agreementRepo: AgreementRepo,
@@ -123,6 +125,9 @@ export class AgreementController {
 
     if (!agreement.signedAt && status.signed) {
       await this.agreementRepo.setSigned(agreement.id)
+      const user = await this.userRepo.find(agreement.userId)
+      const pool = await this.poolService.get(agreement.poolId)
+      this.mailer.sendSubscriptionAgreementEmail(user, pool, agreement.tranche)
     }
 
     if (!agreement.counterSignedAt && status.counterSigned) {
