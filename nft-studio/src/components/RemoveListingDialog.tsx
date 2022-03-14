@@ -31,12 +31,19 @@ export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collection
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
+    lastCreatedTransaction,
   } = useCentrifugeTransaction('Remove NFT listing', (cent) => cent.nfts.removeNftListing, {
     onSuccess: () => {
       queryClient.invalidateQueries(['nfts', collectionId])
-      close()
     },
   })
+
+  React.useEffect(() => {
+    if (lastCreatedTransaction?.status === 'pending') {
+      close()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastCreatedTransaction?.status])
 
   function submit(e: React.FormEvent) {
     e.preventDefault()

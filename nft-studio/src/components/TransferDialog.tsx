@@ -32,14 +32,21 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
+    lastCreatedTransaction,
   } = useCentrifugeTransaction('Transfer NFT', (cent) => cent.nfts.transferNft, {
     onSuccess: () => {
       queryClient.invalidateQueries(['nfts', collectionId])
       queryClient.invalidateQueries('balance')
       queryClient.invalidateQueries(['accountNfts'])
-      close()
     },
   })
+
+  React.useEffect(() => {
+    if (lastCreatedTransaction?.status === 'pending') {
+      close()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastCreatedTransaction?.status])
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
