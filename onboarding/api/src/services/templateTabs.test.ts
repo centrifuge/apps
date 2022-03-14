@@ -35,6 +35,11 @@ describe('getPrefilledTabs', () => {
         { locked: true, tabLabel: 'taxID', value: '123456789' },
         { locked: true, tabLabel: 'Street & Number', value: '123 Bitcoin Way' },
         { locked: true, tabLabel: 'City & Postal Code', value: 'Los Angeles, CA, 42069' },
+        {
+          locked: false,
+          tabLabel: 'Country',
+          value: 'United States of America',
+        },
       ],
     }
 
@@ -76,7 +81,7 @@ describe('getPrefilledTabs', () => {
         { locked: true, tabLabel: 'Street & Number', value: '123 Bitcoin Way' },
         { locked: true, tabLabel: 'City & Postal Code', value: 'Los Angeles, CA, 42069' },
         {
-          locked: true,
+          locked: false,
           tabLabel: 'Country',
           value: 'United States of America',
         },
@@ -116,7 +121,7 @@ describe('getPrefilledTabs', () => {
         { locked: true, tabLabel: 'Street & Number', value: '123 Bitcoin Way' },
         { locked: true, tabLabel: 'City & Postal Code', value: 'Los Angeles, CA, 42069' },
         {
-          locked: true,
+          locked: false,
           tabLabel: 'Country',
           value: 'United States of America',
         },
@@ -158,7 +163,7 @@ describe('getPrefilledTabs', () => {
         { locked: true, tabLabel: 'Street & Number', value: '123 Bitcoin Way' },
         { locked: false, tabLabel: 'City & Postal Code', value: '' },
         {
-          locked: true,
+          locked: false,
           tabLabel: 'Country',
           value: 'United States of America',
         },
@@ -201,7 +206,7 @@ describe('getPrefilledTabs', () => {
         { locked: false, tabLabel: 'Street & Number', value: '' },
         { locked: true, tabLabel: 'City & Postal Code', value: 'Los Angeles, CA, 42069' },
         {
-          locked: true,
+          locked: false,
           tabLabel: 'Country',
           value: 'United States of America',
         },

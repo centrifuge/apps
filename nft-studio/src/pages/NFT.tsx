@@ -207,7 +207,7 @@ const NFT: React.FC = () => {
                         href={`${process.env.REACT_APP_SUBSCAN_URL}/account/${nft.owner}`}
                         target="_blank"
                       >
-                        <Identity address={nft.owner} />
+                        <Identity address={collection.owner} clickToCopy />
                       </AnchorPillButton>
                     </Shelf>
                   </Stack>

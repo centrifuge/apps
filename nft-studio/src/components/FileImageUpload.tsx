@@ -9,6 +9,7 @@ const FileUploadContainer = styled.div<{ hasPreview: boolean }>`
   align-items: center;
   justify-content: center;
   width: 100%;
+  max-width: 800px;
   aspect-ratio: 1/1;
   position: relative;
   border-radius: 6px;
@@ -60,7 +61,7 @@ export const FileImageUpload: React.FC<Props> = ({
   const [errorMsg, setErrorMsg] = useState<string>('')
 
   const showErrorMsg = (err: string) => {
-    setErrorMsg('File format not supported')
+    setErrorMsg(err)
     onFileUpdate(null)
     setCurFile(null)
     setFileName('')

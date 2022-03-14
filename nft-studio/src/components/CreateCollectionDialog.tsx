@@ -53,7 +53,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   } = useAsyncCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     const nameValue = name.trim()
-    const descriptionValue = name.trim()
+    const descriptionValue = description.trim()
     if (!isConnected || !nameValue || !descriptionValue) return
 
     const collectionId = await cent.nfts.getAvailableCollectionId()
