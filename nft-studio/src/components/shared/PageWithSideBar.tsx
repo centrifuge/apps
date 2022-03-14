@@ -12,7 +12,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children }) => {
   const showOnlyNFT = useDebugFlags().showOnlyNFT
   if (showOnlyNFT) {
     return (
-      <Box minHeight="100vh" px={PAGE_PX}>
+      <Box minHeight="100vh" px={PAGE_PX} display="flex">
         {children}
       </Box>
     )
