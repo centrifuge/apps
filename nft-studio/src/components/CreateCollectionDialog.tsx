@@ -79,7 +79,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
 
   // Only close if the modal is still showing the last created collection
   useEffect(() => {
-    if (lastCreatedTransaction?.status === 'succeeded') {
+    if (lastCreatedTransaction?.status === 'pending') {
       close()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
