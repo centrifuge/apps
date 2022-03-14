@@ -6,21 +6,33 @@ import { nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
+import { useVisibilityChecker } from '../utils/useVisibilityChecker'
 import { useCentrifuge } from './CentrifugeProvider'
 import { Identity } from './Identity'
+import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   nft: NFT
 }
 
 export const NFTCard: React.FC<Props> = ({ nft }) => {
-  const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
+  const [visible, setVisible] = React.useState(false)
+  const ref = React.useRef<HTMLAnchorElement>(null)
+
+  useVisibilityChecker({ ref, onEnterOnce: () => setVisible(true), marginTop: 200 })
+
+  const { data: metadata, isLoading: metadataIsLoading } = useMetadata(
+    visible ? nft.metadataUri : undefined,
+    nftMetadataSchema
+  )
   const collection = useCollection(nft.collectionId)
   const centrifuge = useCentrifuge()
   const [imageShown, setImageShown] = React.useState(false)
 
+  const isLoading = !visible || metadataIsLoading
+
   return (
-    <Card as={Link} to={`/collection/${nft.collectionId}/object/${nft.id}`} variant="interactive" pb={[3, 4]}>
+    <Card as={Link} to={`/collection/${nft.collectionId}/object/${nft.id}`} variant="interactive" pb={[3, 4]} ref={ref}>
       <Stack gap={[2, 3]}>
         <Box
           bg="placeholderBackground"
@@ -43,9 +55,9 @@ export const NFTCard: React.FC<Props> = ({ nft }) => {
           )}
         </Box>
         <Stack gap={1} px={[2, 3]}>
-          <Text as="h2" variant="heading2" style={{ wordBreak: 'break-word' }}>
+          <TextWithPlaceholder isLoading={isLoading} as="h2" variant="heading2" style={{ wordBreak: 'break-word' }}>
             {metadata?.name ?? 'Unnamed NFT'}
-          </Text>
+          </TextWithPlaceholder>
           <Shelf flexWrap="wrap" gap={1}>
             {collection?.owner && (
               <Box flexBasis="150px" mr="auto">

@@ -10,6 +10,7 @@ import { PageHeader } from '../components/PageHeader'
 import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
+import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
@@ -35,7 +36,7 @@ const Collection: React.FC = () => {
   } = useRouteMatch<{ cid: string }>()
   const { selectedAccount } = useWeb3()
   const collection = useCollection(collectionId)
-  const { data: metadata } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
+  const { data: metadata, isLoading } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
   const { data: nfts } = useNFTs(collectionId)
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const centrifuge = useCentrifuge()
@@ -83,20 +84,29 @@ const Collection: React.FC = () => {
           />
         ) : (
           <Shelf
-            backgroundColor="textPrimary"
+            backgroundColor="black"
             display="flex"
             width="144px"
             height="144px"
             justifyContent="center"
             borderRadius="50%"
+            borderWidth={1}
+            borderStyle="solid"
+            borderColor="borderPrimary"
           >
             <LogoAltair width="100px" />
           </Shelf>
         )}
         <Stack alignItems="center" gap="4px">
-          <Text variant="heading1" fontSize="36px" textAlign="center" style={{ wordBreak: 'break-word' }}>
+          <TextWithPlaceholder
+            isLoading={isLoading}
+            variant="heading1"
+            fontSize="36px"
+            textAlign="center"
+            style={{ wordBreak: 'break-word' }}
+          >
             {metadata?.name || 'Unnamed collection'}
-          </Text>
+          </TextWithPlaceholder>
           <Shelf gap={1} alignItems="baseline" flexWrap="wrap">
             <Box mx="auto">
               <Text variant="body2">by</Text>
@@ -110,23 +120,24 @@ const Collection: React.FC = () => {
           </Shelf>
         </Stack>
 
-        {metadata?.description && (
-          <Box maxWidth="680px">
-            <Text
-              variant="body1"
-              textAlign="center"
-              style={{
-                overflow: 'hidden',
-                display: '-webkit-box',
-                WebkitLineClamp: 10,
-                WebkitBoxOrient: 'vertical',
-                wordBreak: 'break-word',
-              }}
-            >
-              {metadata?.description || ''}
-            </Text>
-          </Box>
-        )}
+        <Box maxWidth="680px">
+          <TextWithPlaceholder
+            isLoading={isLoading}
+            width={100}
+            words={1}
+            variant="body1"
+            textAlign="center"
+            style={{
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 10,
+              WebkitBoxOrient: 'vertical',
+              wordBreak: 'break-word',
+            }}
+          >
+            {metadata?.description || ''}
+          </TextWithPlaceholder>
+        </Box>
       </Stack>
       {nfts?.length ? (
         <>

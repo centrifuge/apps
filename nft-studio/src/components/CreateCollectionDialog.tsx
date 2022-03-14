@@ -129,7 +129,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
             disabled={fieldDisabled}
           />
           <FileUpload
-            label="Upload collection logo (JPEG, SVG, PNG, or GIF up to 1 MB)"
+            label="Collection logo (JPEG, SVG, PNG, or GIF up to 1 MB)"
             placeholder="Add file"
             onFileUpdate={(file) => setLogo(file)}
             onFileCleared={() => setLogo(null)}
