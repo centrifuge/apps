@@ -13,10 +13,14 @@ export const Card = styled(Box)<Props>(({ variant = 'default' }) =>
   css({
     bg: 'backgroundPrimary',
     borderRadius: 'card',
-    borderWidth: variant === 'default' ? 1 : 0,
+    borderWidth: ['default', 'interactive'].includes(variant) ? 1 : 0,
     borderStyle: 'solid',
     borderColor: 'borderSecondary',
-    boxShadow: variant === 'interactive' ? 'cardInteractive' : variant === 'overlay' ? 'cardOverlay' : undefined,
+    boxShadow: variant === 'overlay' ? 'cardOverlay' : undefined,
+
+    '&:hover': {
+      boxShadow: variant === 'interactive' ? 'cardInteractive' : undefined,
+    },
 
     'a:focus-visible &, button:focus-visible &, &:focus-visible': {
       boxShadow: 'buttonFocused',
