@@ -18,8 +18,12 @@ export const Card = styled(Box)<Props>(({ variant = 'default' }) =>
     borderColor: 'borderSecondary',
     boxShadow: variant === 'interactive' ? 'cardInteractive' : variant === 'overlay' ? 'cardOverlay' : undefined,
 
-    'a:focus-visible &, button:focus-visible &, &:focus-visible, &:hover': {
+    'a:focus-visible &, button:focus-visible &, &:focus-visible': {
       boxShadow: 'buttonFocused',
+    },
+
+    '&:hover': {
+      boxShadow: variant === 'interactive' ? 'buttonFocused' : undefined,
     },
   })
 )
