@@ -156,11 +156,11 @@ const MintNFT: React.FC = () => {
             <Stack gap={6}>
               <Stack gap={1}>
                 <NavLink to={`/collection/${collectionId}`}>
-                  <Text variant="heading3" underline>
+                  <Text variant="heading3" underline style={{ wordBreak: 'break-word' }}>
                     {collectionMetadata?.name}
                   </Text>
                 </NavLink>
-                <Text variant="heading1" fontSize="36px" fontWeight="700" mb="4px">
+                <Text variant="heading1" fontSize="36px" fontWeight="700" mb="4px" style={{ wordBreak: 'break-word' }}>
                   {nftName || 'Untitled NFT'}
                 </Text>
               </Stack>
