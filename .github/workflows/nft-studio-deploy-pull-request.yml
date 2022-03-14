@@ -13,7 +13,7 @@ jobs:
     uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
-      ipfs-gateway: https://gateway.pinata.cloud/
+      ipfs-gateway: https://altair.mypinata.cloud/
       collator-wss-url: wss://fullnode-collator-2.development.cntrfg.com
       relay-wss-url: wss://fullnode-relay-2.development.cntrfg.com
       subscan-url: https://rococo.subscan.io
