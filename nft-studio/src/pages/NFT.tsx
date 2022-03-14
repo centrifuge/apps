@@ -1,4 +1,4 @@
-import { Box, Button, IconArrowRight, IconNft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, IconArrowLeft, IconArrowRight, IconNft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { NavLink, useParams } from 'react-router-dom'
 import { BuyDialog } from '../components/BuyDialog'
@@ -52,93 +52,100 @@ const NFT: React.FC = () => {
 
   return (
     <Stack gap={8} flex={1}>
-      <PageHeader
-        parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
-        title={nftMetadata?.name ?? 'Unnamed NFT'}
-        subtitle={
-          collection && (
+      <Box>
+        <PageHeader
+          parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
+          title={nftMetadata?.name ?? 'Unnamed NFT'}
+          subtitle={
+            collection && (
+              <>
+                by <Identity address={collection.owner} clickToCopy />
+              </>
+            )
+          }
+          actions={
             <>
-              by <Identity address={collection.owner} clickToCopy />
-            </>
-          )
-        }
-        actions={
-          <>
-            {nft &&
-              address &&
-              (isSameAddress(nft.owner, address) ? (
-                <>
-                  {canCreateLoan && (
-                    <RouterLinkButton
-                      to={`/collection/${collectionId}/object/${nftId}/new-asset`}
-                      icon={IconPlus}
+              {nft &&
+                address &&
+                (isSameAddress(nft.owner, address) ? (
+                  <>
+                    {canCreateLoan && (
+                      <RouterLinkButton
+                        to={`/collection/${collectionId}/object/${nftId}/new-asset`}
+                        icon={IconPlus}
+                        small
+                        variant="text"
+                      >
+                        Create asset
+                      </RouterLinkButton>
+                    )}
+                    {nft.sellPrice !== null ? (
+                      <Button onClick={() => setUnlistOpen(true)} small variant="text">
+                        Remove listing
+                      </Button>
+                    ) : (
+                      <Button onClick={() => setSellOpen(true)} small variant="text">
+                        Sell
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() => setTransferOpen(true)}
+                      icon={IconArrowRight}
                       small
                       variant="text"
+                      disabled={nft.sellPrice !== null}
                     >
-                      Create asset
-                    </RouterLinkButton>
-                  )}
-                  {nft.sellPrice !== null ? (
-                    <Button onClick={() => setUnlistOpen(true)} small variant="text">
-                      Remove listing
+                      Transfer
                     </Button>
-                  ) : (
-                    <Button onClick={() => setSellOpen(true)} small variant="text">
-                      Sell
-                    </Button>
-                  )}
-                  <Button
-                    onClick={() => setTransferOpen(true)}
-                    icon={IconArrowRight}
-                    small
-                    variant="text"
-                    disabled={nft.sellPrice !== null}
-                  >
-                    Transfer
-                  </Button>
-                  <TransferDialog
-                    collectionId={collectionId}
-                    nftId={nftId}
-                    open={transferOpen}
-                    onClose={() => setTransferOpen(false)}
-                  />
-                  <SellDialog
-                    collectionId={collectionId}
-                    nftId={nftId}
-                    open={sellOpen}
-                    onClose={() => setSellOpen(false)}
-                  />
-                  <BuyDialog
-                    collectionId={collectionId}
-                    nftId={nftId}
-                    open={buyOpen}
-                    onClose={() => setBuyOpen(false)}
-                  />
-                  <RemoveListingDialog
-                    collectionId={collectionId}
-                    nftId={nftId}
-                    open={unlistOpen}
-                    onClose={() => setUnlistOpen(false)}
-                  />
-                </>
-              ) : (
-                <>
-                  {nft.sellPrice !== null && (
-                    <Button onClick={() => setBuyOpen(true)} small>
-                      Buy
-                    </Button>
-                  )}
-                  <BuyDialog
-                    collectionId={collectionId}
-                    nftId={nftId}
-                    open={buyOpen}
-                    onClose={() => setBuyOpen(false)}
-                  />
-                </>
-              ))}
-          </>
-        }
-      />
+                    <TransferDialog
+                      collectionId={collectionId}
+                      nftId={nftId}
+                      open={transferOpen}
+                      onClose={() => setTransferOpen(false)}
+                    />
+                    <SellDialog
+                      collectionId={collectionId}
+                      nftId={nftId}
+                      open={sellOpen}
+                      onClose={() => setSellOpen(false)}
+                    />
+                    <BuyDialog
+                      collectionId={collectionId}
+                      nftId={nftId}
+                      open={buyOpen}
+                      onClose={() => setBuyOpen(false)}
+                    />
+                    <RemoveListingDialog
+                      collectionId={collectionId}
+                      nftId={nftId}
+                      open={unlistOpen}
+                      onClose={() => setUnlistOpen(false)}
+                    />
+                  </>
+                ) : (
+                  <>
+                    {nft.sellPrice !== null && (
+                      <Button onClick={() => setBuyOpen(true)} small>
+                        Buy
+                      </Button>
+                    )}
+                    <BuyDialog
+                      collectionId={collectionId}
+                      nftId={nftId}
+                      open={buyOpen}
+                      onClose={() => setBuyOpen(false)}
+                    />
+                  </>
+                ))}
+            </>
+          }
+        />
+        <Box mt={1}>
+          <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
+            Back
+          </RouterLinkButton>
+        </Box>
+      </Box>
       <SplitView
         left={
           <Box display="flex" alignItems="center" justifyContent="center" py={8} height="100%">
