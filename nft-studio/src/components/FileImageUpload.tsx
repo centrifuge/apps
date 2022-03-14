@@ -16,8 +16,8 @@ const FileUploadContainer = styled.div<{ hasPreview: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 1px dashed ${({ theme }) => theme.colors.textDisabled};
-  background-color: ${({ theme }) => theme.colors.backgroundForm};
+  border: 1px dashed ${({ theme }) => theme.colors.textSecondary};
+  background-color: ${({ theme }) => theme.colors.backgroundPrimary};
   :hover {
     ${({ hasPreview }) => (hasPreview ? 'filter: contrast(0.5);' : '')}
   }
