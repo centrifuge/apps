@@ -17,7 +17,6 @@ const Pill = styled.button(
   }),
   {
     textDecoration: 'none',
-    whiteSpace: 'nowrap',
     padding: '4px 8px',
     borderRadius: '20px',
     '&:focus-visible': {

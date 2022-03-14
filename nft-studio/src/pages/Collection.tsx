@@ -2,7 +2,9 @@ import { Box, Grid, IconArrowLeft, IconPlus, Shelf, Stack, Text } from '@centrif
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { useDebugFlags } from '../components/DebugFlags'
 import { Identity } from '../components/Identity'
+import { LogoAltair } from '../components/LogoAltair'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'
 import { AnchorPillButton } from '../components/PillButton'
@@ -11,6 +13,7 @@ import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
+import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFTs } from '../utils/useNFTs'
@@ -36,12 +39,13 @@ const Collection: React.FC = () => {
   const { data: nfts } = useNFTs(collectionId)
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const centrifuge = useCentrifuge()
+  const { showOnlyNFT } = useDebugFlags()
 
   const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
   const canMint = !isLoanCollection && isSameAddress(selectedAccount?.address, collection?.owner)
 
   return (
-    <Stack flex={1}>
+    <Stack flex={1} pb={8}>
       <PageHeader
         parent={{ to: '/nfts', label: 'NFTs' }}
         title={metadata?.name || 'Unnamed collection'}
@@ -62,16 +66,41 @@ const Collection: React.FC = () => {
       />
       <Box mt={1}>
         <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
-          Back
+          {showOnlyNFT ? 'Home' : 'Back'}
         </RouterLinkButton>
       </Box>
       <Stack alignItems="center" gap={2} mb={5} mt="-16px">
+        {metadata?.image ? (
+          <Box
+            as="img"
+            alt=""
+            src={parseMetadataUrl(metadata.image)}
+            display="block"
+            width="144px"
+            height="144px"
+            borderRadius="50%"
+            style={{ objectFit: 'cover' }}
+          />
+        ) : (
+          <Shelf
+            backgroundColor="textPrimary"
+            display="flex"
+            width="144px"
+            height="144px"
+            justifyContent="center"
+            borderRadius="50%"
+          >
+            <LogoAltair width="100px" />
+          </Shelf>
+        )}
         <Stack alignItems="center" gap="4px">
           <Text variant="heading1" fontSize="36px" textAlign="center" style={{ wordBreak: 'break-word' }}>
-            {metadata?.name || ''}
+            {metadata?.name || 'Unnamed collection'}
           </Text>
-          <Shelf gap={1} alignItems="baseline">
-            <Text variant="body2">by</Text>
+          <Shelf gap={1} alignItems="baseline" flexWrap="wrap">
+            <Box mx="auto">
+              <Text variant="body2">by</Text>
+            </Box>
             <AnchorPillButton
               href={`${process.env.REACT_APP_SUBSCAN_URL}/account/${collection?.owner ?? ''}`}
               target="_blank"
@@ -99,11 +128,11 @@ const Collection: React.FC = () => {
           </Box>
         )}
       </Stack>
-      <Box mb={2}>
-        <Text variant="heading3">{collection?.instances ?? 0} NFTs</Text>
-      </Box>
       {nfts?.length ? (
         <>
+          <Box mb={2}>
+            <Text variant="heading3">{collection?.instances ?? 0} NFTs</Text>
+          </Box>
           <Grid gap={[2, 3]} columns={[2, 2, 3, 4]} equalColumns>
             {nfts.slice(0, shownCount).map((nft) => (
               <NFTCard nft={nft} key={nft.id} />
@@ -114,10 +143,10 @@ const Collection: React.FC = () => {
           )}
         </>
       ) : (
-        <Stack alignItems="flex-start">
+        <Stack alignItems="center" gap={2} mt={8}>
           <Text variant="label1">This collection does not contain any NFT</Text>
           {canMint && (
-            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="text" icon={IconPlus}>
+            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} icon={IconPlus}>
               Mint NFT
             </RouterLinkButton>
           )}

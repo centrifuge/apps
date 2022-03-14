@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react'
 import styled, { css, keyframes } from 'styled-components'
+import { IconFileText } from '../..'
 import IconAlertCircle from '../../icon/IconAlertCircle'
-import IconCheckCircle from '../../icon/IconCheckCircle'
 import IconPlus from '../../icon/IconPlus'
 import IconSpinner from '../../icon/IconSpinner'
 import IconX from '../../icon/IconX'
@@ -23,14 +23,18 @@ const rotate = keyframes`
 
 const FileUploadContainer = styled(Stack)<{ $disabled?: boolean }>`
   position: relative;
-  height: 64px;
   justify-content: center;
   width: 100%;
+  background: ${({ theme }) => theme.colors.backgroundInput};
   outline: 1px dashed ${({ theme, $disabled }) => ($disabled ? theme.colors.textDisabled : theme.colors.textSecondary)};
   outline-offset: -1px;
   border-radius: ${({ theme }) => theme.radii.card}px;
   cursor: pointer;
   pointer-events: ${({ $disabled }) => ($disabled ? 'none' : 'initial')};
+`
+
+const AddButton = styled(Shelf)`
+  transition: color 100ms ease-in-out;
 `
 
 const UploadButton = styled.button<{ $active?: boolean }>`
@@ -51,10 +55,21 @@ const UploadButton = styled.button<{ $active?: boolean }>`
   transition: border-color 100ms ease-in-out, color 100ms ease-in-out;
   cursor: pointer;
 
+  &:disabled,
+  &:hover {
+    & + ${AddButton} {
+      color: ${({ theme }) => theme.colors.textDisabled};
+    }
+  }
+
   &:focus-visible,
   &:hover {
     color: ${({ theme }) => theme.colors.accentPrimary};
     border-color: currentcolor;
+
+    & + ${AddButton} {
+      color: ${({ theme }) => theme.colors.accentPrimary};
+    }
   }
 
   ${({ $active, theme }) =>
@@ -62,8 +77,14 @@ const UploadButton = styled.button<{ $active?: boolean }>`
     css`
       color: ${theme.colors.accentPrimary};
       border-color: currentcolor;
+      & + ${AddButton} {
+        color: ${theme.colors.accentPrimary};
+      }
     `}
 `
+UploadButton.defaultProps = {
+  type: 'button',
+}
 
 const FormField = styled.input`
   // Visually hidden
@@ -82,14 +103,15 @@ const Spinner = styled(IconSpinner)`
 `
 
 type FileUploadProps = {
-  onFileUpdate: (file: File) => void
-  onFileCleared: () => void
-  validate: (file: File) => string | undefined
+  onFileUpdate?: (file: File) => void
+  onFileCleared?: () => void
+  validate?: (file: File) => string | undefined
   errorMessage?: string
   accept?: string
   disabled?: boolean
   placeholder: string
   loading?: boolean
+  label?: React.ReactNode
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
@@ -101,6 +123,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   disabled,
   loading,
   placeholder,
+  label,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null)
   const [curFile, setCurFile] = useState<File | null>(null)
@@ -132,7 +155,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }
 
     setCurFile(newFile)
-    onFileUpdate(newFile)
+    onFileUpdate?.(newFile)
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -165,76 +188,82 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   }
 
   return (
-    <FileUploadContainer
-      $disabled={disabled}
-      px={2}
-      onDragOver={handleDrag}
-      onDragEnter={handleDrag}
-      onDragEnd={handleDragEnd}
-      onDragLeave={handleDragEnd}
-      onDrop={handleDrop}
-    >
-      <FormField
-        type="file"
-        accept={accept}
-        onChange={handleFileChange}
-        value=""
-        disabled={disabled}
-        tabIndex={-1}
-        ref={inputRef}
-      />
-      {errorMessage ? (
-        <>
-          <Shelf gap={2}>
-            <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver} />
-            <Flex minWidth="iconMedium">
-              <IconAlertCircle color="statusCritical" />
-            </Flex>
-            <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'}>
-              {errorMessage}
+    <Stack gap={1} width="100%">
+      <FileUploadContainer
+        $disabled={disabled}
+        px={2}
+        py={1}
+        onDragOver={handleDrag}
+        onDragEnter={handleDrag}
+        onDragEnd={handleDragEnd}
+        onDragLeave={handleDragEnd}
+        onDrop={handleDrop}
+      >
+        <FormField
+          type="file"
+          accept={accept}
+          onChange={handleFileChange}
+          value=""
+          disabled={disabled}
+          tabIndex={-1}
+          ref={inputRef}
+        />
+        <Stack gap="4px">
+          {label && (
+            <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'}>
+              {label}
             </Text>
-            <Box position="relative" zIndex={1} ml="auto" minWidth="iconMedium">
-              <Button variant="text" onClick={handleClear} icon={IconX} disabled={disabled} />
-            </Box>
-          </Shelf>
-        </>
-      ) : curFile ? (
-        <>
-          <Shelf gap={2}>
-            <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver} />
-            <Flex minWidth="iconMedium">
-              {loading ? (
-                <Spinner color={disabled ? 'textDisabled' : 'textPrimary'} />
-              ) : (
-                <IconCheckCircle color={disabled ? 'textDisabled' : 'textPrimary'} />
-              )}
-            </Flex>
-            <Text
-              variant="body1"
-              color={disabled ? 'textDisabled' : 'textPrimary'}
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {curFile.name}
-            </Text>
-            <Box position="relative" zIndex={1} ml="auto" minWidth="iconMedium">
-              <Button variant="text" onClick={handleClear} icon={IconX} disabled={disabled} />
-            </Box>
-          </Shelf>
-        </>
-      ) : (
-        <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver}>
-          <Shelf gap={1}>
-            <IconPlus />
-            <Text variant="body1" color="currentcolor">
-              {placeholder}
-            </Text>
-          </Shelf>
-        </UploadButton>
+          )}
+          {curFile ? (
+            <>
+              <Shelf gap={1}>
+                <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver} />
+                <Flex minWidth="iconMedium">
+                  {loading ? (
+                    <Spinner color={disabled ? 'textDisabled' : 'textPrimary'} />
+                  ) : errorMessage ? (
+                    <IconAlertCircle color={disabled ? 'textDisabled' : 'textPrimary'} />
+                  ) : (
+                    <IconFileText color={disabled ? 'textDisabled' : 'textPrimary'} />
+                  )}
+                </Flex>
+                <Text
+                  variant="body1"
+                  color={disabled ? 'textDisabled' : 'textPrimary'}
+                  style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {curFile.name}
+                </Text>
+                <Box display="flex" position="relative" zIndex={1} ml="auto" my="-10px" minWidth="iconMedium">
+                  <Button variant="text" onClick={handleClear} icon={IconX} disabled={disabled} />
+                </Box>
+              </Shelf>
+            </>
+          ) : (
+            <>
+              <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver}></UploadButton>
+              <AddButton gap={1} justifyContent="center">
+                <IconPlus />
+                <Text variant="body1" color="currentcolor">
+                  {placeholder}
+                </Text>
+              </AddButton>
+            </>
+          )}
+        </Stack>
+      </FileUploadContainer>
+
+      {errorMessage && (
+        <Box px={2}>
+          <Text variant="label2" color="statusCritical">
+            {errorMessage}
+          </Text>
+        </Box>
       )}
-    </FileUploadContainer>
+    </Stack>
   )
 }

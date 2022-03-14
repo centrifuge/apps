@@ -199,15 +199,17 @@ const NFT: React.FC = () => {
                     <Text variant="heading1" fontSize="36px" fontWeight="700" mb="4px">
                       {nftMetadata?.name}
                     </Text>
-                    <Text variant="heading3" color="textSecondary">
-                      by{' '}
+                    <Shelf gap={1}>
+                      <Text variant="heading3" color="textSecondary">
+                        by
+                      </Text>
                       <AnchorPillButton
                         href={`${process.env.REACT_APP_SUBSCAN_URL}/account/${nft.owner}`}
                         target="_blank"
                       >
                         <Identity address={collection.owner} clickToCopy />
                       </AnchorPillButton>
-                    </Text>
+                    </Shelf>
                   </Stack>
 
                   <Stack gap={1}>

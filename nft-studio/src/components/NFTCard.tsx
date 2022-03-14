@@ -50,7 +50,10 @@ export const NFTCard: React.FC<Props> = ({ nft }) => {
             {collection?.owner && (
               <Box flexBasis="150px" mr="auto">
                 <Text variant="label1">
-                  by <Identity address={collection.owner} />
+                  <Shelf gap="4px">
+                    <span>by</span>
+                    <Identity address={collection.owner} />
+                  </Shelf>
                 </Text>
               </Box>
             )}

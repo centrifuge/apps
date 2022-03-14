@@ -1,4 +1,4 @@
-import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, FileUpload, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import React, { useEffect, useState } from 'react'
 import { useQueryClient } from 'react-query'
 import { Redirect } from 'react-router'
@@ -7,22 +7,25 @@ import { Dialog } from '../components/Dialog'
 import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
 import { createCollectionMetadata } from '../utils/createCollectionMetadata'
+import { getFileDataURI } from '../utils/getFileDataURI'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { fetchMetadata } from '../utils/useMetadata'
 import { useCentrifuge } from './CentrifugeProvider'
-import { TextArea } from './TextArea'
-import { TextInput } from './TextInput'
 
 // TODO: replace with better fee estimate
 const CREATE_FEE_ESTIMATE = 2
+
+const MAX_FILE_SIZE_IN_BYTES = 1024 ** 2 // 1 mb limit by default
+const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const queryClient = useQueryClient()
   const { selectedAccount } = useWeb3()
   const [name, setName] = useState<string>('')
   const [description, setDescription] = useState<string>('')
+  const [logo, setLogo] = useState<File | null>(null)
   const cent = useCentrifuge()
   const { data: balance } = useBalance()
   const [redirect, setRedirect] = useState<string>('')
@@ -54,7 +57,20 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     if (!isConnected || !nameValue || !descriptionValue) return
 
     const collectionId = await cent.nfts.getAvailableCollectionId()
-    const res = await createCollectionMetadata(nameValue, descriptionValue)
+
+    let fileName
+    let fileDataUri
+    if (logo) {
+      fileName = logo.name
+      fileDataUri = await getFileDataURI(logo)
+    }
+
+    const res = await createCollectionMetadata({
+      name: nameValue,
+      description: descriptionValue,
+      fileName,
+      fileDataUri,
+    })
 
     queryClient.prefetchQuery(['metadata', res.metadataURI], () => fetchMetadata(res.metadataURI))
 
@@ -105,12 +121,27 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
             onChange={(e) => setName(e.target.value)}
             disabled={fieldDisabled}
           />
-          <TextArea
+          <TextAreaInput
             label="Description"
             value={description}
             maxLength={collectionMetadataSchema.description.maxLength}
             onChange={(e) => setDescription(e.target.value)}
             disabled={fieldDisabled}
+          />
+          <FileUpload
+            label="Upload collection logo (JPEG, SVG, PNG, or GIF up to 1 MB)"
+            placeholder="Add file"
+            onFileUpdate={(file) => setLogo(file)}
+            onFileCleared={() => setLogo(null)}
+            validate={(file) => {
+              if (!isImageFile(file)) {
+                return 'File format not supported'
+              }
+              if (file.size > MAX_FILE_SIZE_IN_BYTES) {
+                return 'File too large'
+              }
+            }}
+            // accept="image/*"
           />
           <Shelf justifyContent="space-between">
             {balanceLow && (
@@ -120,7 +151,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
             )}
             <ButtonGroup ml="auto">
               {uploadError && <Text color="criticalPrimary">Failed to create collection</Text>}
-              <Button variant="outlined" onClick={close} disabled={fieldDisabled}>
+              <Button variant="outlined" onClick={close}>
                 Cancel
               </Button>
               <Button type="submit" disabled={disabled} loading={isTxPending}>
