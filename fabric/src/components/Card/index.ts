@@ -21,5 +21,9 @@ export const Card = styled(Box)<Props>(({ variant = 'default' }) =>
     'a:focus-visible &, button:focus-visible &, &:focus-visible': {
       boxShadow: 'buttonFocused',
     },
+
+    '&:hover': {
+      boxShadow: variant === 'interactive' ? 'buttonFocused' : undefined,
+    },
   })
 )

@@ -35,6 +35,14 @@ const BackLink = styled(Link)(
   })
 )
 
+const AnchorHover = styled(NavLink)(
+  css({
+    '.AnchorHoverText:hover': {
+      color: 'accentPrimary',
+    },
+  })
+)
+
 export const PageHeader: React.FC<Props> = ({
   title,
   titleAddition,
@@ -67,9 +75,11 @@ export const PageHeader: React.FC<Props> = ({
             <img src={logoUrl} alt="" height="48px" width="60px" />
           </NavLink>
         </Box>
-        <Box>
-          <Text variant="heading2">NFT Playground</Text>
-        </Box>
+        <AnchorHover to="/ntfs">
+          <Text className="AnchorHoverText" variant="heading2">
+            NFT Playground
+          </Text>
+        </AnchorHover>
         <Shelf flex="1" justifyContent="flex-end">
           <ContextActions actions={actions} walletShown={walletShown} />
         </Shelf>

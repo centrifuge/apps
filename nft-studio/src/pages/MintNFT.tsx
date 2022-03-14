@@ -119,37 +119,38 @@ const MintNFT: React.FC = () => {
   const submitDisabled = !isFormValid || balanceLow || !canMint || isMinting
 
   return (
-    <Stack gap={8} flex={1}>
-      <Box>
-        <PageHeader
-          parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
-          title={nftName || DEFAULT_NFT_NAME}
-        />
-        <Box mt={1}>
-          <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
-            Back
-          </RouterLinkButton>
-        </Box>
-      </Box>
+    <Stack flex={1}>
+      <PageHeader
+        parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
+        title={nftName || DEFAULT_NFT_NAME}
+      />
+
       <SplitView
         left={
-          <Flex alignItems="stretch" justifyContent="stretch" height="100%" p={[2, 4, 0]}>
-            <FileImageUpload
-              key={version}
-              onFileUpdate={async (file) => {
-                if (file) {
-                  setFileName(file.name)
-                  setFileDataUri(await getFileDataURI(file))
-                  if (!nftName) {
-                    setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
+          <Box>
+            <Box pt={1}>
+              <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
+                Back
+              </RouterLinkButton>
+            </Box>
+            <Flex alignItems="stretch" justifyContent="center" height="100%" p={[2, 4, 0]} mx={8} mt={2}>
+              <FileImageUpload
+                key={version}
+                onFileUpdate={async (file) => {
+                  if (file) {
+                    setFileName(file.name)
+                    setFileDataUri(await getFileDataURI(file))
+                    if (!nftName) {
+                      setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
+                    }
+                  } else {
+                    setFileName('')
+                    setFileDataUri('')
                   }
-                } else {
-                  setFileName('')
-                  setFileDataUri('')
-                }
-              }}
-            />
-          </Flex>
+                }}
+              />
+            </Flex>
+          </Box>
         }
         right={
           <Box px={[2, 4, 8]} py={9}>
