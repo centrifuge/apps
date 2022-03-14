@@ -1,4 +1,4 @@
-import { Box, Grid, IconArrowLeft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Grid, IconArrowLeft, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
@@ -58,7 +58,7 @@ const Collection: React.FC = () => {
         }
         actions={
           canMint && (
-            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="outlined" icon={IconPlus} small>
+            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="outlined" small>
               Mint NFT
             </RouterLinkButton>
           )
@@ -145,11 +145,7 @@ const Collection: React.FC = () => {
       ) : (
         <Stack alignItems="center" gap={2} mt={8}>
           <Text variant="label1">This collection does not contain any NFT</Text>
-          {canMint && (
-            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} icon={IconPlus}>
-              Mint NFT
-            </RouterLinkButton>
-          )}
+          {canMint && <RouterLinkButton to={`/collection/${collectionId}/object/mint`}>Mint NFT</RouterLinkButton>}
         </Stack>
       )}
     </Stack>

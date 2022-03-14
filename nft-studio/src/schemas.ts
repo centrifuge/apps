@@ -23,5 +23,6 @@ export const collectionMetadataSchema = {
   },
   image: {
     type: 'string',
+    optional: true,
   },
 } as const

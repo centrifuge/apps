@@ -31,13 +31,20 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
+    lastCreatedTransaction,
   } = useCentrifugeTransaction('Buy NFT', (cent) => cent.nfts.buyNft, {
     onSuccess: () => {
       queryClient.invalidateQueries(['nfts', collectionId])
       queryClient.invalidateQueries(['accountNfts', address])
-      close()
     },
   })
+
+  React.useEffect(() => {
+    if (lastCreatedTransaction?.status === 'pending') {
+      close()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastCreatedTransaction?.status])
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
