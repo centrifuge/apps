@@ -32,7 +32,7 @@ export class Mailer {
     })
   }
 
-  async sendSubscriptionAgreementEmail(user: User, pool: any, data: any) {
+  async sendSubscriptionAgreementEmail(user: User, pool: any, tranche: string) {
     const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
     const response = await fetch(config.sendgrid.apiUrl, {
       body: JSON.stringify({
@@ -45,7 +45,7 @@ export class Mailer {
             to: [{ email: user.email }],
             dynamic_template_data: {
               investorName: user.fullName,
-              token: `${pool.metadata?.name} ${data.tranche}`,
+              token: `${pool.metadata?.name} ${tranche}`,
               issuerName: pool.profile?.issuer?.name,
             },
           },
