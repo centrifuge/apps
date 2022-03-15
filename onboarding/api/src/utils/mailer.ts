@@ -45,7 +45,7 @@ export class Mailer {
             to: [{ email: user.email }],
             dynamic_template_data: {
               investorName: user.fullName,
-              token: `${pool.metadata?.name} ${data.tranche}`,
+              token: `${pool.metadata?.name} ${tranche}`,
               issuerName: pool.profile?.issuer?.name,
             },
           },
