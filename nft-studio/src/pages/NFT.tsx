@@ -11,6 +11,7 @@ import { RouterLinkButton } from '../components/RouterLinkButton'
 import { SellDialog } from '../components/SellDialog'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { SplitView } from '../components/SplitView'
+import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { TransferDialog } from '../components/TransferDialog'
 import { nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
@@ -35,9 +36,9 @@ const NFT: React.FC = () => {
   const address = useAddress()
   const { data: permissions } = usePermissions(address)
   const nft = useNFT(collectionId, nftId)
-  const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
+  const { data: nftMetadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)
-  const { data: collectionMetadata } = useCollectionMetadata(collection?.id)
+  const { data: collectionMetadata, isLoading: isCollectionMetadataLoading } = useCollectionMetadata(collection?.id)
   const [transferOpen, setTransferOpen] = React.useState(false)
   const [sellOpen, setSellOpen] = React.useState(false)
   const [buyOpen, setBuyOpen] = React.useState(false)
@@ -51,7 +52,7 @@ const NFT: React.FC = () => {
     !isLoanCollection && permissions && Object.values(permissions).some((p) => p.roles.includes('Borrower'))
 
   return (
-    <Stack gap={8} flex={1}>
+    <Stack flex={1}>
       <Box>
         <PageHeader
           parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
@@ -140,35 +141,46 @@ const NFT: React.FC = () => {
             </>
           }
         />
-        <Box mt={1}>
-          <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
-            Back
-          </RouterLinkButton>
-        </Box>
       </Box>
       <SplitView
         left={
-          <Box display="flex" alignItems="center" justifyContent="center" py={8} height="100%">
-            {imageUrl ? (
-              <Box as="img" maxHeight="80vh" src={imageUrl} />
-            ) : (
-              <Box
-                bg="borderSecondary"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                maxHeight="60vh"
-                maxWidth="60vh"
-                borderRadius="10px"
-                style={{ aspectRatio: '1 / 1' }}
-              >
-                <IconNft color="backgroundPrimary" size="50%" />
-              </Box>
-            )}
+          <Box>
+            <Box mt={1}>
+              <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
+                Back
+              </RouterLinkButton>
+            </Box>
+            <Box display="flex" alignItems="center" justifyContent="center" py={2} height="100%">
+              {imageUrl ? (
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  maxWidth={800}
+                  style={{ aspectRatio: '1 / 1' }}
+                >
+                  <Box as="img" maxWidth="100%" src={imageUrl} />
+                </Box>
+              ) : (
+                <Box
+                  bg="borderSecondary"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  // maxHeight="60vh"
+                  maxWidth={800}
+                  borderRadius="10px"
+                  style={{ aspectRatio: '1 / 1' }}
+                >
+                  <IconNft color="backgroundPrimary" size="50%" />
+                </Box>
+              )}
+            </Box>
           </Box>
         }
         right={
           <Shelf
+            pt={8}
             px={[2, 4, 8]}
             gap={[4, 4, 8]}
             alignItems="flex-start"
@@ -199,13 +211,19 @@ const NFT: React.FC = () => {
 
                   <Stack gap={1} mb={6}>
                     <NavLink to={`/collection/${collectionId}`}>
-                      <Text variant="heading3" underline>
+                      <TextWithPlaceholder isLoading={isCollectionMetadataLoading} variant="heading3" underline>
                         {collectionMetadata?.name}
-                      </Text>
+                      </TextWithPlaceholder>
                     </NavLink>
-                    <Text variant="heading1" fontSize="36px" fontWeight="700" mb="4px">
+                    <TextWithPlaceholder
+                      isLoading={isLoading}
+                      variant="heading1"
+                      fontSize="36px"
+                      fontWeight="700"
+                      mb="4px"
+                    >
                       {nftMetadata?.name}
-                    </Text>
+                    </TextWithPlaceholder>
                     <Shelf gap={1}>
                       <Text variant="heading3" color="textSecondary">
                         by
@@ -214,16 +232,23 @@ const NFT: React.FC = () => {
                         href={`${process.env.REACT_APP_SUBSCAN_URL}/account/${nft.owner}`}
                         target="_blank"
                       >
-                        <Identity address={collection.owner} clickToCopy />
+                        <Identity address={collection.owner} />
                       </AnchorPillButton>
                     </Shelf>
                   </Stack>
 
                   <Stack gap={1}>
                     <Text variant="label1">Description</Text>
-                    <Text variant="body2" style={{ wordBreak: 'break-word' }}>
+                    <TextWithPlaceholder
+                      isLoading={isLoading}
+                      words={2}
+                      width={80}
+                      variance={30}
+                      variant="body2"
+                      style={{ wordBreak: 'break-word' }}
+                    >
                       {nftMetadata?.description || 'No description'}
-                    </Text>
+                    </TextWithPlaceholder>
                   </Stack>
 
                   {imageUrl && (

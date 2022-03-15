@@ -17,7 +17,7 @@ import { useCentrifuge } from './CentrifugeProvider'
 // TODO: replace with better fee estimate
 const CREATE_FEE_ESTIMATE = 2
 
-const MAX_FILE_SIZE_IN_BYTES = 1024 ** 2 // 1 mb limit by default
+const MAX_FILE_SIZE_IN_BYTES = 10 * 1024 ** 2 // 1 MB limit by default
 const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
@@ -129,7 +129,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
             disabled={fieldDisabled}
           />
           <FileUpload
-            label="Upload collection logo (JPEG, SVG, PNG, or GIF up to 1 MB)"
+            label="Collection logo (JPEG, SVG, PNG, or GIF up to 1 MB)"
             placeholder="Add file"
             onFileUpdate={(file) => setLogo(file)}
             onFileCleared={() => setLogo(null)}

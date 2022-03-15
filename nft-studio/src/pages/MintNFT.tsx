@@ -1,16 +1,15 @@
-import { Box, Button, IconArrowLeft, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, IconArrowLeft, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import { Flex } from '@centrifuge/fabric/dist/components/Flex'
 import React, { useReducer, useState } from 'react'
 import { useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router'
+import { NavLink } from 'react-router-dom'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { FileImageUpload } from '../components/FileImageUpload'
 import { PageHeader } from '../components/PageHeader'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { SplitView } from '../components/SplitView'
-import { TextArea } from '../components/TextArea'
-import { TextInput } from '../components/TextInput'
 import { nftMetadataSchema } from '../schemas'
 import { createNFTMetadata } from '../utils/createNFTMetadata'
 import { getFileDataURI } from '../utils/getFileDataURI'
@@ -154,7 +153,17 @@ const MintNFT: React.FC = () => {
         }
         right={
           <Box px={[2, 4, 8]} py={9}>
-            <Stack>
+            <Stack gap={6}>
+              <Stack gap={1}>
+                <NavLink to={`/collection/${collectionId}`}>
+                  <Text variant="heading3" underline style={{ wordBreak: 'break-word' }}>
+                    {collectionMetadata?.name}
+                  </Text>
+                </NavLink>
+                <Text variant="heading1" fontSize="36px" fontWeight="700" mb="4px" style={{ wordBreak: 'break-word' }}>
+                  {nftName || 'Untitled NFT'}
+                </Text>
+              </Stack>
               <form onSubmit={execute} action="">
                 <Box mb={3}>
                   <TextInput
@@ -168,7 +177,7 @@ const MintNFT: React.FC = () => {
                     disabled={fieldDisabled}
                   />
                 </Box>
-                <TextArea
+                <TextAreaInput
                   label="Description"
                   value={nftDescription}
                   maxLength={nftMetadataSchema.description.maxLength}
