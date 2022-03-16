@@ -1,13 +1,13 @@
 const tsconfigJson = require('./tsconfig.json')
 
 module.exports = {
+  root: true,
   ignorePatterns: ['node_modules', 'build', '.env', ...(tsconfigJson.exclude || [])],
-  extends: ['../.eslintrc.js', 'react-app', 'react-app/jest', 'plugin:react/recommended'],
+  extends: ['react-app'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     sourceType: 'module',
   },
-  plugins: ['eslint-plugin-react'],
   rules: {
     'react/prop-types': 'off',
     'react/display-name': 'off',
