@@ -1,5 +1,5 @@
 import { useQuery } from 'react-query'
-import { firstValueFrom } from 'rxjs'
+import { firstValueFrom, of } from 'rxjs'
 import { map, switchMap } from 'rxjs/operators'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 
@@ -11,7 +11,7 @@ export function useIdentity(address?: string) {
       return firstValueFrom(
         centrifuge.getRxRelayChainApi().pipe(
           switchMap((api) => {
-            if (!api.query.identity) return null
+            if (!api.query.identity) return of(null)
             return api.query.identity.identityOf(address)
           }),
           map((result) => {

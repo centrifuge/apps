@@ -17,7 +17,7 @@ export function useCentrifugeQuery<T = any>(
   key: readonly unknown[],
   queryCallback: (cent: Centrifuge) => Observable<T>,
   options?: { suspense?: boolean; enabled?: boolean; throwErrors?: boolean }
-): [T | null | undefined, Observable<T | null> | undefined] {
+): [T | undefined, Observable<T | null> | undefined] {
   const { suspense: suspenseOption, enabled = true, throwErrors: throwErrorsOption } = options || {}
   const cent = useCentrifuge()
 

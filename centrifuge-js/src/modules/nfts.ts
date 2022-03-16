@@ -1,6 +1,6 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import { combineLatest, EMPTY, firstValueFrom } from 'rxjs'
-import { delayWhen, expand, filter, map, repeatWhen, skip, switchMap, take, tap } from 'rxjs/operators'
+import { expand, filter, map, repeatWhen, switchMap, take, tap } from 'rxjs/operators'
 // import { AnyNumber } from '@polkadot/types/types'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
@@ -178,29 +178,29 @@ export function getNftsModule(inst: CentrifugeBase) {
     const [address] = args
 
     const $api = inst.getRxApi()
-    const $blocks = $api.pipe(
-      switchMap((api) => api.query.system.number()),
-      tap((number) => {
-        console.log('block', number)
-      })
-    )
-    const $events2 = $api.pipe(
-      switchMap(
-        (api) => api.query.system.events(),
-        (api, events) => ({ api, events })
-      ),
-      filter(({ api, events }) => {
-        console.log('events', events)
-        const event = events.find(
-          ({ event }) => api.events.uniques.Transferred.is(event) || api.events.uniques.Issued.is(event)
-        )
-        if (!event) return false
+    // const $blocks = $api.pipe(
+    //   switchMap((api) => api.query.system.number()),
+    //   tap((number) => {
+    //     console.log('block', number)
+    //   })
+    // )
+    // const $events2 = $api.pipe(
+    //   switchMap(
+    //     (api) => api.query.system.events(),
+    //     (api, events) => ({ api, events })
+    //   ),
+    //   filter(({ api, events }) => {
+    //     console.log('events', events)
+    //     const event = events.find(
+    //       ({ event }) => api.events.uniques.Transferred.is(event) || api.events.uniques.Issued.is(event)
+    //     )
+    //     if (!event) return false
 
-        const [, , from, to] = (event.toJSON() as any).event.data
-        return isSameAddress(address, from) || (to && isSameAddress(address, to))
-      }),
-      delayWhen(() => $blocks.pipe(skip(1)))
-    )
+    //     const [, , from, to] = (event.toJSON() as any).event.data
+    //     return isSameAddress(address, from) || (to && isSameAddress(address, to))
+    //   }),
+    //   delayWhen(() => $blocks.pipe(skip(1)))
+    // )
 
     const $events = $api.pipe(
       switchMap(

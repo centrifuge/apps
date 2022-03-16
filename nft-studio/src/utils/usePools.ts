@@ -1,4 +1,3 @@
-import { Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 
@@ -94,6 +93,6 @@ export type PoolMetadata = {
   }
 }
 
-export function usePoolMetadata(pool?: Pool) {
+export function usePoolMetadata(pool?: { metadata?: string }) {
   return useMetadata<PoolMetadata>(pool?.metadata)
 }
