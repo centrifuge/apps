@@ -499,7 +499,6 @@ class Apollo {
         data: [],
       }
     }
-    // sdf
     const proxies = result.data?.proxies.map((e: { id: string; owner: string }) => e.id)
     return { data: proxies }
   }
