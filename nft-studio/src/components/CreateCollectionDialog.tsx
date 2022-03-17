@@ -173,7 +173,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
             <Text variant="heading2" as="h2">
               Terms of use
             </Text>
-            <Box p={2} maxHeight="60vh" overflowY="scroll" backgroundColor="backgroundInput" borderRadius="input">
+            <Box p={2} maxHeight="50vh" overflowY="scroll" backgroundColor="backgroundInput" borderRadius="input">
               <Text style={{ whiteSpace: 'pre-wrap' }}>{terms}</Text>
             </Box>
             <Checkbox onChange={(e) => setTermsAccepted(e.target.checked)} label="I agree to the terms of use" />
