@@ -8,7 +8,7 @@ import { RadioButton } from '../../components/form/formik/RadioButton'
 import { TextInput } from '../../components/form/formik/TextInput'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { PageWithSideBar } from '../../components/shared/PageWithSideBar'
-import { useCentrifugeTransactionRx } from '../../utils/useCentrifugeTransactionRx'
+import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { pinPoolMetadata } from './pinPoolMetadata'
 import { SubmitButton } from './SubmitButton'
 import { TrancheInput } from './TrancheInput'
@@ -77,7 +77,7 @@ const makeId = (): string => {
 const CreatePoolForm: React.FC = () => {
   const [issuerLogoFile, setIssuerLogoFile] = React.useState<File>()
 
-  const { execute: createPoolTx } = useCentrifugeTransactionRx('Create pool', (cent) => cent.pools.createPool)
+  const { execute: createPoolTx } = useCentrifugeTransaction('Create pool', (cent) => cent.pools.createPool)
 
   return (
     <Formik

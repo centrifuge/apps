@@ -10,7 +10,7 @@ import { createCollectionMetadata } from '../utils/createCollectionMetadata'
 import { getFileDataURI } from '../utils/getFileDataURI'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { fetchMetadata } from '../utils/useMetadata'
 import { useCentrifuge } from './CentrifugeProvider'
 
@@ -37,7 +37,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     lastCreatedTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
-  } = useCentrifugeTransactionRx('Create collection', (cent) => cent.nfts.createCollection, {
+  } = useCentrifugeTransaction('Create collection', (cent) => cent.nfts.createCollection, {
     onSuccess: ([collectionId]) => {
       setRedirect(`/collection/${collectionId}`)
     },

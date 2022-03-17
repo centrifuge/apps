@@ -1,7 +1,7 @@
 import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useNFT } from '../utils/useNFTs'
 import { ButtonGroup } from './ButtonGroup'
 import { useCentrifuge } from './CentrifugeProvider'
@@ -30,7 +30,7 @@ export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collection
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
     lastCreatedTransaction,
-  } = useCentrifugeTransactionRx('Remove NFT listing', (cent) => cent.nfts.removeNftListing)
+  } = useCentrifugeTransaction('Remove NFT listing', (cent) => cent.nfts.removeNftListing)
 
   React.useEffect(() => {
     if (lastCreatedTransaction?.status === 'pending') {

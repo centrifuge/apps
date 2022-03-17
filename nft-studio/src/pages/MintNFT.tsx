@@ -16,7 +16,7 @@ import { getFileDataURI } from '../utils/getFileDataURI'
 import { useAddress } from '../utils/useAddress'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useIsPageUnchanged } from '../utils/useIsPageUnchanged'
 import { fetchMetadata } from '../utils/useMetadata'
@@ -59,7 +59,7 @@ const MintNFT: React.FC = () => {
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
-  } = useCentrifugeTransactionRx('Mint NFT', (cent) => cent.nfts.mintNft, {
+  } = useCentrifugeTransaction('Mint NFT', (cent) => cent.nfts.mintNft, {
     onSuccess: ([, nftId]) => {
       reset()
 

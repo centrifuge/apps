@@ -2,7 +2,7 @@ import { Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { ButtonGroup } from './ButtonGroup'
 import { Dialog } from './Dialog'
 import { useWeb3 } from './Web3Provider'
@@ -31,7 +31,7 @@ export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
     lastCreatedTransaction,
-  } = useCentrifugeTransactionRx('List NFT for sale', (cent) => cent.nfts.sellNft)
+  } = useCentrifugeTransaction('List NFT for sale', (cent) => cent.nfts.sellNft)
 
   React.useEffect(() => {
     if (lastCreatedTransaction?.status === 'pending') {

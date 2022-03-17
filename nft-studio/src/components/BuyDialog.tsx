@@ -4,7 +4,7 @@ import * as React from 'react'
 import { Dec } from '../utils/Decimal'
 import { useAddress } from '../utils/useAddress'
 import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useNFT } from '../utils/useNFTs'
 import { ButtonGroup } from './ButtonGroup'
 import { Dialog } from './Dialog'
@@ -30,7 +30,7 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
     lastCreatedTransaction,
-  } = useCentrifugeTransactionRx('Buy NFT', (cent) => cent.nfts.buyNft)
+  } = useCentrifugeTransaction('Buy NFT', (cent) => cent.nfts.buyNft)
 
   React.useEffect(() => {
     if (lastCreatedTransaction?.status === 'pending') {

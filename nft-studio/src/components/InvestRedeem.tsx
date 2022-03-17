@@ -7,7 +7,7 @@ import styled from 'styled-components'
 import { Dec } from '../utils/Decimal'
 import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
-import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { usePermissions } from '../utils/usePermissions'
 import { useOrder, usePool, usePoolMetadata } from '../utils/usePools'
 import { ButtonGroup } from './ButtonGroup'
@@ -98,7 +98,7 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
   const balance = Dec(balances?.tokens.find((b) => b.currency === pool?.currency)?.balance ?? 0).div('1e18')
   const pendingInvest = Dec(order?.invest ?? 0).div('1e18')
 
-  const { execute: doInvestTransaction, isLoading } = useCentrifugeTransactionRx(
+  const { execute: doInvestTransaction, isLoading } = useCentrifugeTransaction(
     'Invest',
     (cent) => cent.pools.updateInvestOrder,
     {
@@ -107,7 +107,7 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
       },
     }
   )
-  const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransactionRx(
+  const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
     'Cancel order',
     (cent) => cent.pools.updateInvestOrder,
     {
@@ -117,7 +117,7 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
     }
   )
 
-  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransactionRx(
+  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransaction(
     'Collect',
     (cent) => cent.pools.collect
   )
@@ -244,7 +244,7 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
   const pendingRedeem = Dec(order?.redeem ?? 0).div('1e18')
   const price = Dec(tranche?.tokenPrice ?? 0).div('1e27')
 
-  const { execute: doRedeemTransaction, isLoading } = useCentrifugeTransactionRx(
+  const { execute: doRedeemTransaction, isLoading } = useCentrifugeTransaction(
     'Invest',
     (cent) => cent.pools.updateRedeemOrder,
     {
@@ -253,7 +253,7 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
       },
     }
   )
-  const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransactionRx(
+  const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
     'Cancel order',
     (cent) => cent.pools.updateRedeemOrder,
     {
@@ -263,7 +263,7 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
     }
   )
 
-  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransactionRx(
+  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransaction(
     'Collect',
     (cent) => cent.pools.collect
   )

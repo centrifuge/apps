@@ -16,7 +16,7 @@ import { AnchorPillButton } from '../components/PillButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
-import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLoans } from '../utils/useLoans'
 import { usePermissions } from '../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../utils/usePools'
@@ -54,7 +54,7 @@ const Pool: React.FC = () => {
 
   console.log('pool', pool, loans)
 
-  const { execute: closeEpochTx } = useCentrifugeTransactionRx('Close epoch', (cent) => cent.pools.closeEpoch, {
+  const { execute: closeEpochTx } = useCentrifugeTransaction('Close epoch', (cent) => cent.pools.closeEpoch, {
     onSuccess: () => {
       console.log('Epoch closed successfully')
     },
@@ -65,7 +65,7 @@ const Pool: React.FC = () => {
     closeEpochTx([pool.id])
   }
 
-  const { execute: setMaxReserveTx } = useCentrifugeTransactionRx('Set max reserve', (cent) => cent.pools.setMaxReserve)
+  const { execute: setMaxReserveTx } = useCentrifugeTransaction('Set max reserve', (cent) => cent.pools.setMaxReserve)
 
   const promptMaxReserve = () => {
     if (!pool) return

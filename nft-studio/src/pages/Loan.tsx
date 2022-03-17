@@ -23,7 +23,7 @@ import { formatDate } from '../utils/date'
 import { Dec } from '../utils/Decimal'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useAddress } from '../utils/useAddress'
-import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLoan } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
 import { useLoanNft, useNFT } from '../utils/useNFTs'
@@ -203,7 +203,7 @@ function validateNumberInput(value: number | string, min: number | Decimal, max?
 
 const PricingForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const centrifuge = useCentrifuge()
-  const { execute: doTransaction, isLoading } = useCentrifugeTransactionRx(
+  const { execute: doTransaction, isLoading } = useCentrifugeTransaction(
     'Price asset',
     (cent) => cent.pools.priceLoan as any
   )
@@ -337,17 +337,17 @@ type RepayValues = {
 const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const pool = usePool(loan.poolId)
   const centrifuge = useCentrifuge()
-  const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransactionRx(
+  const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
     (cent) => cent.pools.financeLoan
   )
 
-  const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransactionRx(
+  const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Repay asset',
     (cent) => cent.pools.repayLoanPartially
   )
 
-  const { execute: doRepayAllTransaction, isLoading: isRepayAllLoading } = useCentrifugeTransactionRx(
+  const { execute: doRepayAllTransaction, isLoading: isRepayAllLoading } = useCentrifugeTransaction(
     'Repay asset',
     (cent) => cent.pools.repayAndCloseLoan
   )

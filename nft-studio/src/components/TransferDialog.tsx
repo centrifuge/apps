@@ -3,7 +3,7 @@ import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { useAddress } from '../utils/useAddress'
 import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { isSameAddress } from '../utils/web3'
 import { ButtonGroup } from './ButtonGroup'
 import { Dialog } from './Dialog'
@@ -31,7 +31,7 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
     lastCreatedTransaction,
-  } = useCentrifugeTransactionRx('Transfer NFT', (cent) => cent.nfts.transferNft)
+  } = useCentrifugeTransaction('Transfer NFT', (cent) => cent.nfts.transferNft)
 
   React.useEffect(() => {
     if (lastCreatedTransaction?.status === 'pending') {

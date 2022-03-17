@@ -7,7 +7,7 @@ import { useCentrifuge } from '../components/CentrifugeProvider'
 import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { useWeb3 } from '../components/Web3Provider'
-import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
+import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { fetchMetadata } from '../utils/useMetadata'
 import { usePermissions } from '../utils/usePermissions'
 import { PoolMetadata, usePools } from '../utils/usePools'
@@ -69,7 +69,7 @@ const CreateLoan: React.FC = () => {
     },
   })
 
-  const { execute: doTransaction, isLoading } = useCentrifugeTransactionRx(
+  const { execute: doTransaction, isLoading } = useCentrifugeTransaction(
     'Create asset',
     (cent) => cent.pools.createLoan,
     {
