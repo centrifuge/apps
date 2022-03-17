@@ -139,7 +139,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
                 return 'File too large'
               }
             }}
-            // accept="image/*"
+            accept="image/*"
           />
           <Shelf justifyContent="space-between">
             {balanceLow && (

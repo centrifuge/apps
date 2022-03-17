@@ -46,6 +46,5 @@ export function useAccountNfts(address?: string, suspense = true) {
     enabled: !!address,
   })
 
-  console.log('accountnfts', result)
   return result
 }
