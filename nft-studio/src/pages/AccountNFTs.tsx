@@ -49,13 +49,13 @@ const AccountNFTs: React.FC = () => {
   }
 
   return (
-    <Stack gap={8} flex={1}>
+    <Stack gap={8} flex={1} pb={8}>
       <PageHeader parent={{ to: '/nfts', label: 'collections' }} title="My NFTs" />
       {filteredNfts?.length ? (
         <>
-          <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>
-            {filteredNfts.slice(0, shownCount).map((nft, i) => (
-              <NFTCard nft={nft} key={i} />
+          <Grid gap={[2, 3]} columns={[2, 2, 3, 4]} equalColumns>
+            {filteredNfts.slice(0, shownCount).map((nft) => (
+              <NFTCard nft={nft} key={`${nft.collectionId}-${nft.id}`} />
             ))}
           </Grid>
           {filteredNfts.length > shownCount && (

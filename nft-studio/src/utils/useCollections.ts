@@ -1,4 +1,5 @@
-import { map, switchMap } from 'rxjs/operators'
+import * as React from 'react'
+import { FEATURED_COLLECTIONS } from '../config'
 import { collectionMetadataSchema } from '../schemas'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
@@ -23,30 +24,9 @@ export function useCollectionMetadata(id?: string) {
   return useMetadata(collection?.metadataUri, collectionMetadataSchema)
 }
 
-export function useCollectionNFTsPreview(id: string) {
-  const [result] = useCentrifugeQuery(
-    ['collectionPreview', id],
-    (cent) =>
-      cent.getRxApi().pipe(
-        switchMap((api) => api.query.uniques.instanceMetadataOf.entriesPaged({ pageSize: 4, args: [id] })),
-        map((metas) => {
-          const mapped = metas.map(([keys, value]) => {
-            const id = (keys.toHuman() as string[])[0]
-            const metaValue = value.toHuman() as any
-            const meta = {
-              id,
-              metadataUri: metaValue.data as string | undefined,
-            }
-            return meta
-          })
-
-          return mapped
-        })
-      ),
-    {
-      enabled: !!id,
-    }
-  )
-
-  return result
+export function useFeaturedCollections() {
+  const data = useCollections()
+  return React.useMemo(() => {
+    return data?.filter((c) => FEATURED_COLLECTIONS.includes(c.id))
+  }, [data])
 }

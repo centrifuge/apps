@@ -15,6 +15,7 @@ import { PageSummary } from '../components/PageSummary'
 import { AnchorPillButton } from '../components/PillButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { useAddress } from '../utils/useAddress'
+import { useBalances } from '../utils/useBalances'
 import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
 import { useLoans } from '../utils/useLoans'
 import { usePermissions } from '../utils/usePermissions'
@@ -40,6 +41,7 @@ const Pool: React.FC = () => {
   const address = useAddress()
 
   const permissions = usePermissions(address)
+  const balances = useBalances(address)
 
   const centrifuge = useCentrifuge()
 
@@ -92,15 +94,15 @@ const Pool: React.FC = () => {
       <PageSummary>
         <LabelValueStack
           label="Pool value"
-          value={centrifuge.utils.formatCurrencyAmount(pool ? pool.value : '0', pool?.currency)}
+          value={centrifuge.utils.formatCurrencyAmount(pool ? pool.value : '0', pool?.currency, true)}
         />
         <LabelValueStack
           label="Asset value"
-          value={centrifuge.utils.formatCurrencyAmount(pool?.nav.latest, pool?.currency)}
+          value={centrifuge.utils.formatCurrencyAmount(pool?.nav.latest, pool?.currency, true)}
         />
         <LabelValueStack
           label="Reserve"
-          value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.total, pool?.currency)}
+          value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.total, pool?.currency, true)}
         />
         <LabelValueStack
           label="Max. Reserve"
@@ -115,14 +117,19 @@ const Pool: React.FC = () => {
       </PageSummary>
       <Grid columns={[1, 2]} gap={3} equalColumns>
         {pool &&
-          pool.tranches.map((tranche, i) => (
-            <>
-              <Card p={3} variant="interactive">
+          pool.tranches.map((tranche, i) => {
+            const tokenBalance = balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === i)?.balance
+            return (
+              <Card p={3} variant="interactive" key={i}>
                 <Stack gap={2}>
                   <CardHeader
                     pretitle="Tranche token"
                     title={metadata?.tranches?.[i]?.symbol ?? ''}
-                    titleAddition={centrifuge.utils.formatCurrencyAmount(tranche.totalIssuance, pool.currency)}
+                    titleAddition={centrifuge.utils.formatCurrencyAmount(
+                      new BN(tranche.totalIssuance).mul(new BN(tranche.tokenPrice)).div(new BN(10).pow(new BN(27))),
+                      pool.currency,
+                      true
+                    )}
                     subtitle={metadata?.tranches?.[i]?.name || `${metadata?.pool?.name} ${tranche.name} tranche`}
                   />
                   <LabelValueList
@@ -148,11 +155,18 @@ const Pool: React.FC = () => {
                           value: `${centrifuge.utils.feeToApr(tranche.interestPerSec)}%`,
                         },
                         {
-                          label: 'Reserve',
-                          value: (
-                            <Text color="statusOk">
-                              {centrifuge.utils.formatCurrencyAmount(tranche.reserve, pool.currency)}
-                            </Text>
+                          label: 'Token price',
+                          value: centrifuge.utils.formatCurrencyAmount(
+                            new BN(tranche.tokenPrice).div(new BN(1e9)),
+                            pool.currency,
+                            true
+                          ),
+                        },
+                        {
+                          label: 'Currently locked investment',
+                          value: centrifuge.utils.formatCurrencyAmount(
+                            new BN(tokenBalance ?? 0).mul(new BN(tranche.tokenPrice)).div(new BN(10).pow(new BN(27))),
+                            pool.currency
                           ),
                         },
                       ].filter(Boolean) as any
@@ -161,33 +175,35 @@ const Pool: React.FC = () => {
                   <InvestAction poolId={poolId} trancheId={i} />
                 </Stack>
               </Card>
-            </>
-          ))}
+            )
+          })}
       </Grid>
 
-      <Card p={3}>
-        <Stack gap={3}>
-          <CardHeader title={`Issuer: ${metadata?.pool?.issuer?.name}`} />
+      {metadata?.pool?.issuer && (
+        <Card p={3}>
+          <Stack gap={3}>
+            <CardHeader title={`Issuer: ${metadata?.pool?.issuer?.name}`} />
 
-          <Shelf gap={4} flex="1 1 45%">
-            <Stack gap={3} alignItems="center">
-              <img src={metadata?.pool?.media?.logo} style={{ maxHeight: '120px', maxWidth: '100%' }} alt="" />
-              {metadata?.pool?.attributes?.Links && (
-                <Shelf gap={2} rowGap={1} flexWrap="wrap">
-                  {Object.entries(metadata.pool.attributes.Links).map(([label, value]) => (
-                    <AnchorPillButton href={value as string} target="_blank" rel="noopener noreferrer" key={label}>
-                      {label}
-                    </AnchorPillButton>
-                  ))}
-                </Shelf>
-              )}
-            </Stack>
-            <Box flex="1 1 55%">
-              <Text>{metadata?.pool?.description}</Text>
-            </Box>
-          </Shelf>
-        </Stack>
-      </Card>
+            <Shelf gap={4} flex="1 1 45%">
+              <Stack gap={3} alignItems="center">
+                <img src={metadata?.pool?.media?.logo} style={{ maxHeight: '120px', maxWidth: '100%' }} alt="" />
+                {metadata?.pool?.attributes?.Links && (
+                  <Shelf gap={2} rowGap={1} flexWrap="wrap">
+                    {Object.entries(metadata.pool.attributes.Links).map(([label, value]) => (
+                      <AnchorPillButton href={value as string} target="_blank" rel="noopener noreferrer" key={label}>
+                        {label}
+                      </AnchorPillButton>
+                    ))}
+                  </Shelf>
+                )}
+              </Stack>
+              <Box flex="1 1 55%">
+                <Text>{metadata?.pool?.description}</Text>
+              </Box>
+            </Shelf>
+          </Stack>
+        </Card>
+      )}
       <Stack gap={2}>
         <Text variant="heading2" as="h2">
           Assets

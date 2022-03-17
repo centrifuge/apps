@@ -9,6 +9,7 @@ const grayScale = {
   gray700: '#616161',
   gray800: '#424242',
   gray900: '#212121',
+  gray950: '#171717',
 }
 
 const statusDefault = grayScale.gray600

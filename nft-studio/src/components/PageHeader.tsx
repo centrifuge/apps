@@ -1,9 +1,12 @@
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import * as React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import styled from 'styled-components'
+import logoUrl from '../assets/images/altair-wordmark-light.svg'
 import { ContextActions } from './ContextActions'
+import { useDebugFlags } from './DebugFlags'
+import { PAGE_PX } from './shared/PageWithSideBar'
 import { RouterTextLink } from './TextLink'
 
 type Props = {
@@ -32,6 +35,14 @@ const BackLink = styled(Link)(
   })
 )
 
+const AnchorHover = styled(NavLink)(
+  css({
+    '.AnchorHoverText:hover': {
+      color: 'accentPrimary',
+    },
+  })
+)
+
 export const PageHeader: React.FC<Props> = ({
   title,
   titleAddition,
@@ -41,6 +52,40 @@ export const PageHeader: React.FC<Props> = ({
   actions,
   walletShown = true,
 }) => {
+  const showOnlyNFT = useDebugFlags().showOnlyNFT
+
+  if (showOnlyNFT) {
+    return (
+      <Shelf
+        as="header"
+        position="sticky"
+        top="0"
+        height="80px"
+        alignItems="center"
+        backgroundColor="backgroundPage"
+        bleedX={PAGE_PX}
+        px={PAGE_PX}
+        borderBottomColor="borderPrimary"
+        borderBottomWidth="1px"
+        borderBottomStyle="solid"
+        zIndex={10}
+      >
+        <Box flex="1">
+          <NavLink to="/">
+            <img src={logoUrl} alt="" height="48px" width="60px" />
+          </NavLink>
+        </Box>
+        <AnchorHover to="/nfts">
+          <Text className="AnchorHoverText" variant="heading2">
+            NFT Playground
+          </Text>
+        </AnchorHover>
+        <Shelf flex="1" justifyContent="flex-end">
+          <ContextActions actions={actions} walletShown={walletShown} />
+        </Shelf>
+      </Shelf>
+    )
+  }
   return (
     <Shelf as="header" justifyContent="space-between" alignItems="flex-start" position="sticky" top="24px">
       <Box
@@ -49,9 +94,10 @@ export const PageHeader: React.FC<Props> = ({
         bottom={0}
         right="-12px"
         left="-12px"
-        backgroundColor="backgroundPrimary"
         zIndex={-1}
+        backgroundColor="backgroundPage"
       />
+
       <Stack gap={1}>
         <Shelf minHeight={20}>
           {parent && (
@@ -78,6 +124,7 @@ export const PageHeader: React.FC<Props> = ({
           </Text>
         )}
       </Stack>
+
       <ContextActions actions={actions} walletShown={walletShown} />
     </Shelf>
   )

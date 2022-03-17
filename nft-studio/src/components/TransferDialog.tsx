@@ -1,7 +1,6 @@
 import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
-import { useQueryClient } from 'react-query'
 import { useAddress } from '../utils/useAddress'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
@@ -17,12 +16,11 @@ type Props = {
   nftId: string
 }
 // TODO: replace with better fee estimate
-const TRANSFER_FEE_ESTIMATE = 1
+const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const [address, setAddress] = React.useState('')
   const [touched, setTouched] = React.useState(false)
-  const queryClient = useQueryClient()
   const connectedAddress = useAddress()
   const balance = useBalance()
 
@@ -32,14 +30,15 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
-  } = useCentrifugeTransactionRx('Transfer NFT', (cent) => cent.nfts.transferNft, {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['nfts', collectionId])
-      queryClient.invalidateQueries('balance')
-      queryClient.invalidateQueries(['accountNfts'])
+    lastCreatedTransaction,
+  } = useCentrifugeTransactionRx('Transfer NFT', (cent) => cent.nfts.transferNft)
+
+  React.useEffect(() => {
+    if (lastCreatedTransaction?.status === 'pending') {
       close()
-    },
-  })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastCreatedTransaction?.status])
 
   function submit(e: React.FormEvent) {
     e.preventDefault()

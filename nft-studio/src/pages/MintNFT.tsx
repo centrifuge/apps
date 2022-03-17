@@ -1,25 +1,24 @@
-import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, IconArrowLeft, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import { Flex } from '@centrifuge/fabric/dist/components/Flex'
 import React, { useReducer, useState } from 'react'
 import { useQueryClient } from 'react-query'
-import { useParams } from 'react-router'
+import { useHistory, useParams } from 'react-router'
+import { NavLink } from 'react-router-dom'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { FileImageUpload } from '../components/FileImageUpload'
-import { Identity } from '../components/Identity'
 import { PageHeader } from '../components/PageHeader'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { SplitView } from '../components/SplitView'
-import { TextArea } from '../components/TextArea'
-import { TextInput } from '../components/TextInput'
-import { useWeb3 } from '../components/Web3Provider'
 import { nftMetadataSchema } from '../schemas'
 import { createNFTMetadata } from '../utils/createNFTMetadata'
 import { getFileDataURI } from '../utils/getFileDataURI'
+import { useAddress } from '../utils/useAddress'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransactionRx } from '../utils/useCentrifugeTransactionRx'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
+import { useIsPageUnchanged } from '../utils/useIsPageUnchanged'
 import { fetchMetadata } from '../utils/useMetadata'
 import { isSameAddress } from '../utils/web3'
 
@@ -42,24 +41,31 @@ const MintNFT: React.FC = () => {
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collectionId)
   const balance = useBalance()
-  const { selectedAccount } = useWeb3()
+  const address = useAddress()
   const cent = useCentrifuge()
   const [version, setNextVersion] = useReducer((s) => s + 1, 0)
+  const history = useHistory()
 
   const [nftName, setNftName] = useState('')
   const [nftDescription, setNftDescription] = useState('')
   const [fileDataUri, setFileDataUri] = useState('')
   const [fileName, setFileName] = useState('')
 
-  const isFormValid = nftName && nftDescription && fileDataUri
+  const isPageUnchanged = useIsPageUnchanged()
+
+  const isFormValid = nftName.trim() && nftDescription.trim() && fileDataUri
 
   const {
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
   } = useCentrifugeTransactionRx('Mint NFT', (cent) => cent.nfts.mintNft, {
-    onSuccess: () => {
+    onSuccess: ([, nftId]) => {
       reset()
+
+      if (isPageUnchanged()) {
+        history.push(`/collection/${collectionId}/object/${nftId}`)
+      }
     },
   })
 
@@ -71,20 +77,23 @@ const MintNFT: React.FC = () => {
   } = useAsyncCallback(async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!(nftName && nftDescription && fileDataUri)) {
+    const nameValue = nftName.trim()
+    const descriptionValue = nftDescription.trim()
+
+    if (!(nameValue && descriptionValue && fileDataUri)) {
       return
     }
     const nftId = await cent.nfts.getAvailableNftId(collectionId)
     const res = await createNFTMetadata({
-      name: nftName,
-      description: nftDescription,
+      name: nameValue,
+      description: descriptionValue,
       fileDataUri,
       fileName,
     })
 
     queryClient.prefetchQuery(['metadata', res.metadataURI], () => fetchMetadata(res.metadataURI))
 
-    doTransaction([collectionId, nftId, selectedAccount!.address, res.metadataURI])
+    doTransaction([collectionId, nftId, address!, res.metadataURI])
   })
 
   function reset() {
@@ -100,43 +109,57 @@ const MintNFT: React.FC = () => {
   const isMinting = metadataIsUploading || transactionIsPending
 
   const balanceLow = !balance || balance < MINT_FEE_ESTIMATE
-  const canMint = isSameAddress(selectedAccount?.address, collection?.owner)
-  const disabled = !isFormValid || balanceLow || !canMint
+  const canMint = isSameAddress(address, collection?.owner)
+  const fieldDisabled = balanceLow || !canMint || isMinting
+  const submitDisabled = !isFormValid || balanceLow || !canMint || isMinting
 
   return (
-    <Stack gap={8} flex={1}>
+    <Stack flex={1}>
       <PageHeader
         parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
         title={nftName || DEFAULT_NFT_NAME}
-        subtitle={
-          selectedAccount?.address && (
-            <>
-              by <Identity address={selectedAccount.address} clickToCopy />
-            </>
-          )
-        }
-        actions={<></>}
       />
+
       <SplitView
         left={
-          <Flex alignItems="stretch" justifyContent="stretch" height="100%" p={[2, 4, 0]}>
-            <FileImageUpload
-              key={version}
-              onFileUpdate={async (file) => {
-                if (file) {
-                  setFileName(file.name)
-                  setFileDataUri(await getFileDataURI(file))
-                  if (!nftName) {
-                    setNftName(file.name)
+          <Box>
+            <Box pt={1}>
+              <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
+                Back
+              </RouterLinkButton>
+            </Box>
+            <Flex alignItems="stretch" justifyContent="center" height="100%" p={[2, 4, 0]} mx={8} mt={2}>
+              <FileImageUpload
+                key={version}
+                onFileUpdate={async (file) => {
+                  if (file) {
+                    setFileName(file.name)
+                    setFileDataUri(await getFileDataURI(file))
+                    if (!nftName) {
+                      setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
+                    }
+                  } else {
+                    setFileName('')
+                    setFileDataUri('')
                   }
-                }
-              }}
-            />
-          </Flex>
+                }}
+              />
+            </Flex>
+          </Box>
         }
         right={
           <Box px={[2, 4, 8]} py={9}>
-            <Stack>
+            <Stack gap={6}>
+              <Stack gap={1}>
+                <NavLink to={`/collection/${collectionId}`}>
+                  <Text variant="heading3" underline style={{ wordBreak: 'break-word' }}>
+                    {collectionMetadata?.name}
+                  </Text>
+                </NavLink>
+                <Text variant="heading1" fontSize="36px" fontWeight="700" mb="4px" style={{ wordBreak: 'break-word' }}>
+                  {nftName || 'Untitled NFT'}
+                </Text>
+              </Stack>
               <form onSubmit={execute} action="">
                 <Box mb={3}>
                   <TextInput
@@ -147,22 +170,24 @@ const MintNFT: React.FC = () => {
                     onChange={({ target }) => {
                       setNftName((target as HTMLInputElement).value)
                     }}
+                    disabled={fieldDisabled}
                   />
                 </Box>
-                <TextArea
+                <TextAreaInput
                   label="Description"
                   value={nftDescription}
                   maxLength={nftMetadataSchema.description.maxLength}
                   onChange={({ target }) => {
                     setNftDescription((target as HTMLTextAreaElement).value)
                   }}
+                  disabled={fieldDisabled}
                 />
 
                 <Shelf gap={2} mt={6}>
-                  <Button disabled={disabled} type="submit" loading={isMinting}>
+                  <Button disabled={submitDisabled} type="submit" loading={isMinting}>
                     Mint
                   </Button>
-                  <RouterLinkButton to={`/collection/${collectionId}`} variant="outlined">
+                  <RouterLinkButton to={`/collection/${collectionId}`} variant="outlined" disabled={submitDisabled}>
                     Cancel
                   </RouterLinkButton>
                   {(balanceLow || !canMint) && (

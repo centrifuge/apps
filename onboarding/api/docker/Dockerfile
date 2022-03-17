@@ -11,6 +11,7 @@ COPY onboarding/api ./onboarding/api/
 
 RUN yarn set version berry
 RUN yarn install
+RUN yarn workspace @centrifuge/onboarding-api testOnce
 
 RUN yarn workspace @centrifuge/onboarding-api build
 

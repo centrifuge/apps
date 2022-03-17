@@ -39,7 +39,7 @@ jobs:
   push:
     runs-on: ubuntu-latest
     needs: build
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     
     steps:
       - name: Checkout
@@ -62,5 +62,5 @@ jobs:
           context: .
           file: ./onboarding/api/docker/Dockerfile
           push: true
-          tags: centrifugeio/onboard-api:latest
-          # tags: centrifugeio/onboard-api:${{ steps.tag.outputs.TAG_NAME }}
+          # tags: centrifugeio/onboard-api:latest
+          tags: centrifugeio/onboard-api:${{ steps.tag.outputs.TAG_NAME }}

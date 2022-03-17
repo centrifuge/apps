@@ -1,4 +1,4 @@
-import centrifugeLight from '@centrifuge/fabric/dist/theme/centrifugeLight'
+import altairDark from '@centrifuge/fabric/dist/theme/altairDark'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { DefaultTheme, ThemeProvider } from 'styled-components'
@@ -6,20 +6,20 @@ import { DebugFlags } from './components/DebugFlags'
 import { Root } from './components/Root'
 
 const darkTheme: DefaultTheme = {
-  ...centrifugeLight,
+  ...altairDark,
   sizes: {
-    ...centrifugeLight.sizes,
+    ...altairDark.sizes,
     container: '100%',
     navBarHeight: 72,
     navBarHeightMobile: 64,
     dialog: 564,
   },
   colors: {
-    ...centrifugeLight.colors,
-    placeholderBackground: centrifugeLight.colors.backgroundSecondary,
+    ...altairDark.colors,
+    placeholderBackground: altairDark.colors.backgroundSecondary,
   },
   typography: {
-    ...centrifugeLight.typography,
+    ...altairDark.typography,
     headingLarge: {
       fontSize: [24, 24, 36],
       lineHeight: 1.25,

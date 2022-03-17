@@ -21,4 +21,8 @@ export const collectionMetadataSchema = {
     type: 'string',
     maxLength: 400,
   },
+  image: {
+    type: 'string',
+    optional: true,
+  },
 } as const
