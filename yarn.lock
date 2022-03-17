@@ -3004,7 +3004,7 @@ __metadata:
     npm-run-all: 4.1.5
     rxjs: ^7.4.0
     ts-jest: ^27.1.1
-    typescript: ^4.5.2
+    typescript: ~4.4.3
   languageName: unknown
   linkType: soft
 
@@ -3059,7 +3059,7 @@ __metadata:
     reg-cli: ^0.17.4
     standard-version: ^9.3.2
     styled-system: ^5.1.5
-    typescript: ^4.4.3
+    typescript: ~4.4.3
   peerDependencies:
     react: ">=16.13.1"
     react-dom: ">=16.13.1"
@@ -40121,7 +40121,7 @@ resolve@1.18.1:
     prettier-plugin-organize-imports: 1.1.1
     pretty-quick: ^3.1.1
     ts-node: 9.0.0
-    typescript: 4.1.2
+    typescript: ~4.4.3
   languageName: unknown
   linkType: soft
 
@@ -44179,23 +44179,23 @@ resolve@1.18.1:
   languageName: node
   linkType: hard
 
-"typescript@npm:4.1.2":
-  version: 4.1.2
-  resolution: "typescript@npm:4.1.2"
+"typescript@npm:~4.4.3":
+  version: 4.4.4
+  resolution: "typescript@npm:4.4.4"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: d2ac373b469e973448c7287d0fbc732dbd34d00d07911b9506bbf81469a80db6613361fc9293d021da357cb7c7da2ee32f56d8ef76446361231374200cd6aee9
+  checksum: 8c5455b860a69f05d4730f54bcd0c380dae34bb1ae1b0d6ac5f16fb9d3c445834dff563eccc8c970cd15e7c9d2aa8183851a0d35d62bac1e24260bf805c23af4
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A4.1.2#builtin<compat/typescript>":
-  version: 4.1.2
-  resolution: "typescript@patch:typescript@npm%3A4.1.2#builtin<compat/typescript>::version=4.1.2&hash=cc6730"
+"typescript@patch:typescript@npm%3A~4.4.3#builtin<compat/typescript>":
+  version: 4.4.4
+  resolution: "typescript@patch:typescript@npm%3A4.4.4#builtin<compat/typescript>::version=4.4.4&hash=8133ad"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 001ab09bb8f597aab1ec43476aedb91b5d547749219273c232bf34cf5a2209d18fa782e64475755115f0907598bb9b503f5e1c0fed06c3651cac584fc88a8172
+  checksum: d1c6c0a705893112dc19979fa58dd96b1b9395bf4cb9b013bdfe4badb31320c39187f2ff6088568e6742b66624c1bcf49c8d7ef1f443fbd64d4225752c09f065
   languageName: node
   linkType: hard
 
