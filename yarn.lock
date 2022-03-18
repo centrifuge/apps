@@ -3888,7 +3888,7 @@ __metadata:
     npm-run-all: 4.1.5
     rxjs: ^7.4.0
     ts-jest: ^27.1.1
-    typescript: ~4.4.3
+    typescript: ~4.4.4
   languageName: unknown
   linkType: soft
 
@@ -3943,7 +3943,7 @@ __metadata:
     reg-cli: ^0.17.4
     standard-version: ^9.3.2
     styled-system: ^5.1.5
-    typescript: ~4.4.3
+    typescript: ~4.4.4
   peerDependencies:
     react: ">=16.13.1"
     react-dom: ">=16.13.1"
@@ -3964,7 +3964,7 @@ __metadata:
     portable-fetch: ^3.0.0
     prettier: ^1.14.2
     ts-jest: 26.4.0
-    typescript: 4.1.2
+    typescript: ~4.4.4
   languageName: unknown
   linkType: soft
 
@@ -4010,7 +4010,7 @@ __metadata:
     ts-loader: ^4.4.2
     ts-node: ^7.0.1
     tsconfig-paths: ^3.5.0
-    typescript: 4.1.2
+    typescript: ~4.4.4
     web3-eth: ^1.2.6
   languageName: unknown
   linkType: soft
@@ -4056,7 +4056,7 @@ __metadata:
     supertest: ^3.1.0
     ts-jest: 26.4.0
     ts-loader: ^4.4.2
-    typescript: 4.1.2
+    typescript: ~4.4.4
     yup: 0.27.0
   languageName: unknown
   linkType: soft
@@ -4215,7 +4215,7 @@ __metadata:
     prettier-plugin-organize-imports: ^1.1.1
     ts-node: 9.0.0
     ts-node-dev: ^1.1.1
-    typescript: 4.1.2
+    typescript: ~4.4.4
     ws: ^7.4.5
   languageName: unknown
   linkType: soft
@@ -41850,7 +41850,7 @@ resolve@1.18.1:
     prettier-plugin-organize-imports: 1.1.1
     pretty-quick: ^3.1.1
     ts-node: 9.0.0
-    typescript: ~4.4.3
+    typescript: ~4.4.4
   languageName: unknown
   linkType: soft
 
@@ -45945,7 +45945,7 @@ resolve@1.18.1:
   languageName: node
   linkType: hard
 
-"typescript@npm:~4.4.3":
+"typescript@npm:~4.4.4":
   version: 4.4.4
   resolution: "typescript@npm:4.4.4"
   bin:
@@ -45955,7 +45955,7 @@ resolve@1.18.1:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A~4.4.3#builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A~4.4.4#builtin<compat/typescript>":
   version: 4.4.4
   resolution: "typescript@patch:typescript@npm%3A4.4.4#builtin<compat/typescript>::version=4.4.4&hash=8133ad"
   bin:
