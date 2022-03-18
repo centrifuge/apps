@@ -52,8 +52,6 @@ const Pool: React.FC = () => {
 
   const isManagedPool = useMemo(() => (pool && address ? isSameAddress(pool.owner, address) : false), [pool, address])
 
-  console.log('pool', pool, loans)
-
   const { execute: closeEpochTx } = useCentrifugeTransaction('Close epoch', (cent) => cent.pools.closeEpoch, {
     onSuccess: () => {
       console.log('Epoch closed successfully')

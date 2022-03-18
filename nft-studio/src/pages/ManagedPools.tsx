@@ -27,8 +27,6 @@ const ManagedPools: React.FC = () => {
     return allPools.filter(({ owner }) => isSameAddress(owner, address))
   }, [allPools, address])
 
-  console.log('managed pools', pools)
-
   return (
     <Stack gap={8} flex={1}>
       <PageHeader

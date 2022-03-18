@@ -437,7 +437,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api, [events]) => ({ api, events })
       ),
       filter(({ api, events }) => {
-        console.log('getPools events', events)
         const event = events.find(
           ({ event }) => api.events.pools.RoleApproved.is(event) || api.events.pools.RoleRevoked.is(event)
         )
@@ -557,7 +556,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api, [events]) => ({ api, events })
       ),
       filter(({ api, events }) => {
-        console.log('getPools events', events)
         const event = events.find(({ event }) => api.events.pools.Created.is(event))
         return !!event
       })
@@ -767,7 +765,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api, [events]) => ({ api, events })
       ),
       filter(({ api, events }) => {
-        console.log('getLoans events', events)
         const event = events.find(
           ({ event }) =>
             api.events.loans.Created.is(event) ||
