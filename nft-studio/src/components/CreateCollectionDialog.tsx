@@ -137,8 +137,8 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
             <FileUpload
               label="Collection logo (JPEG, SVG, PNG, or GIF up to 1 MB)"
               placeholder="Choose image"
-              onFileUpdate={(file) => setLogo(file)}
-              onFileCleared={() => setLogo(null)}
+              file={logo}
+              onFileChange={(file) => setLogo(file)}
               validate={(file) => {
                 if (!isImageFile(file)) {
                   return 'File format not supported'
