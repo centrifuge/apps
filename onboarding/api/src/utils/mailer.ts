@@ -1,9 +1,13 @@
+import { Logger } from '@nestjs/common'
 import config from '../config'
 import { User } from '../repos/user.repo'
 
 export class Mailer {
+  private readonly logger = new Logger(Mailer.name)
+
   async sendWhitelistedEmail(user: User, pool: any, data: any) {
     const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
+    this.logger.log(`Sending whitelisted email for user ${user.id}, issuer: ${issuerName}`)
     const response = await fetch(config.sendgrid.apiUrl, {
       body: JSON.stringify({
         from: {
@@ -29,11 +33,14 @@ export class Mailer {
         'Content-Type': 'application/json',
       },
       method: 'POST',
+    }).catch((e) => {
+      this.logger.error('Error sending whitelisted email', e)
     })
   }
 
   async sendSubscriptionAgreementEmail(user: User, pool: any, tranche: string) {
     const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
+    this.logger.log(`Sending subscription agreement email for user ${user.id}, issuer: ${issuerName}`)
     const response = await fetch(config.sendgrid.apiUrl, {
       body: JSON.stringify({
         from: {
@@ -57,6 +64,8 @@ export class Mailer {
         'Content-Type': 'application/json',
       },
       method: 'POST',
+    }).catch((e) => {
+      this.logger.error('Error sending whitelisted email', e)
     })
   }
 }
