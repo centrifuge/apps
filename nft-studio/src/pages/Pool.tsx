@@ -34,14 +34,14 @@ const Pool: React.FC = () => {
   const {
     params: { pid: poolId },
   } = useRouteMatch<{ pid: string }>()
-  const { data: pool, refetch: refetchPool } = usePool(poolId)
-  const { data: loans } = useLoans(poolId)
+  const pool = usePool(poolId)
+  const loans = useLoans(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const history = useHistory()
   const address = useAddress()
-  const { data: balances } = useBalances(address)
 
-  const { data: permissions } = usePermissions(address)
+  const permissions = usePermissions(address)
+  const balances = useBalances(address)
 
   const centrifuge = useCentrifuge()
 
@@ -51,8 +51,6 @@ const Pool: React.FC = () => {
   )
 
   const isManagedPool = useMemo(() => (pool && address ? isSameAddress(pool.owner, address) : false), [pool, address])
-
-  console.log('pool', pool, loans)
 
   const { execute: closeEpochTx } = useCentrifugeTransaction('Close epoch', (cent) => cent.pools.closeEpoch, {
     onSuccess: () => {
@@ -65,11 +63,7 @@ const Pool: React.FC = () => {
     closeEpochTx([pool.id])
   }
 
-  const { execute: setMaxReserveTx } = useCentrifugeTransaction('Set max reserve', (cent) => cent.pools.setMaxReserve, {
-    onSuccess: () => {
-      refetchPool()
-    },
-  })
+  const { execute: setMaxReserveTx } = useCentrifugeTransaction('Set max reserve', (cent) => cent.pools.setMaxReserve)
 
   const promptMaxReserve = () => {
     if (!pool) return

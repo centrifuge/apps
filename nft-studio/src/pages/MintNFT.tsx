@@ -40,7 +40,7 @@ const MintNFT: React.FC = () => {
   const queryClient = useQueryClient()
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collectionId)
-  const { data: balance } = useBalance()
+  const balance = useBalance()
   const address = useAddress()
   const cent = useCentrifuge()
   const [version, setNextVersion] = useReducer((s) => s + 1, 0)
@@ -61,10 +61,6 @@ const MintNFT: React.FC = () => {
     isLoading: transactionIsPending,
   } = useCentrifugeTransaction('Mint NFT', (cent) => cent.nfts.mintNft, {
     onSuccess: ([, nftId]) => {
-      queryClient.invalidateQueries(['nfts', collectionId])
-      queryClient.invalidateQueries(['collectionPreview', collectionId])
-      queryClient.invalidateQueries('balance')
-      queryClient.invalidateQueries(['accountNfts', address])
       reset()
 
       if (isPageUnchanged()) {

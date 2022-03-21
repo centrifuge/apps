@@ -1,12 +1,8 @@
-import Centrifuge from '@centrifuge/centrifuge-js'
+import { Loan } from '@centrifuge/centrifuge-js'
 import { StatusChip } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import * as React from 'react'
 import { daysBetween } from '../utils/date'
-
-type PromiseResult<T> = T extends Promise<infer R> ? R : never
-type QueryReturnType<T extends (...args: any) => any> = PromiseResult<ReturnType<T>>
-type Loan = QueryReturnType<Centrifuge['pools']['getLoan']>
 
 type LabelStatus = 'default' | 'info' | 'ok' | 'warning' | 'critical'
 

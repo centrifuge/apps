@@ -1,16 +1,16 @@
 import { StorageKey, u32 } from '@polkadot/types'
-import type { AccountId, Address } from '@polkadot/types/interfaces'
 import BN from 'bn.js'
+import { combineLatest, firstValueFrom } from 'rxjs'
+import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
+import { isSameAddress } from '..'
 import { CentrifugeBase } from '../CentrifugeBase'
-import { TransactionOptions } from '../types'
+import { Account, TransactionOptions } from '../types'
 
 const Currency = new BN(10).pow(new BN(18))
 
 const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
 
 type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'RiskAdmin'
-
-type Account = AccountId | Address | string
 
 export type PoolRoleInput = AdminRole | { TrancheInvestor: [trancheId: number, delta: number] }
 
@@ -224,8 +224,7 @@ const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
 export function getPoolsModule(inst: CentrifugeBase) {
-  // TODO: integrate ipfs pinning
-  async function createPool(
+  function createPool(
     args: [
       poolId: string,
       collectionId: string,
@@ -237,478 +236,654 @@ export function getPoolsModule(inst: CentrifugeBase) {
     options?: TransactionOptions
   ) {
     const [poolId, collectionId, tranches, currency, maxReserve, metadata] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.utility.batchAll([
-      api.tx.uniques.create(collectionId, LoanPalletAccountId),
-      api.tx.pools.create(poolId, tranches, currency, maxReserve.toString()),
-      api.tx.pools.setMetadata(poolId, metadata),
-      api.tx.loans.initialisePool(poolId, collectionId),
-    ])
-    return inst.wrapSignAndSend(api, submittable, options)
+
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.utility.batchAll([
+          api.tx.uniques.create(collectionId, LoanPalletAccountId),
+          api.tx.pools.create(poolId, tranches, currency, maxReserve.toString()),
+          api.tx.pools.setMetadata(poolId, metadata),
+          api.tx.loans.initialisePool(poolId, collectionId),
+        ])
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
-  async function updatePool(
+  function updatePool(
     args: [poolId: string, minEpochTime: BN, challengeTime: BN, maxNavAge: BN],
     options?: TransactionOptions
   ) {
     const [poolId, minEpochTime, challengeTime, maxNavAge] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.pools.update(
-      poolId,
-      minEpochTime.toString(),
-      challengeTime.toString(),
-      maxNavAge.toString()
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.pools.update(
+          poolId,
+          minEpochTime.toString(),
+          challengeTime.toString(),
+          maxNavAge.toString()
+        )
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
     )
-    return inst.wrapSignAndSend(api, submittable, options)
   }
 
-  async function setMaxReserve(args: [poolId: string, maxReserve: BN], options?: TransactionOptions) {
+  function setMaxReserve(args: [poolId: string, maxReserve: BN], options?: TransactionOptions) {
     const [poolId, maxReserve] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.pools.setMaxReserve(poolId, maxReserve.toString())
-    return inst.wrapSignAndSend(api, submittable, options)
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.pools.setMaxReserve(poolId, maxReserve.toString())
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
-  async function updateInvestOrder(
-    args: [poolId: string, trancheId: number, newOrder: BN],
-    options?: TransactionOptions
-  ) {
+  function updateInvestOrder(args: [poolId: string, trancheId: number, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
-    const api = await inst.getApi()
-    const address = inst.getSignerAddress()
-
-    const [pool, order] = await Promise.all([getPool([poolId]), getOrder([address, poolId, trancheId])])
-
-    let submittable
-    if (order.epoch <= pool.epoch.lastExecuted && order.epoch > 0 && (order.invest !== '0' || order.redeem !== '0')) {
-      submittable = api.tx.utility.batchAll([
-        api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted + 1 - order.epoch),
-        api.tx.pools.updateInvestOrder(poolId, trancheId, newOrder.toString()),
-      ])
-    } else {
-      submittable = api.tx.pools.updateInvestOrder(poolId, trancheId, newOrder.toString())
-    }
-
-    return inst.wrapSignAndSend(api, submittable, options)
-  }
-
-  async function updateRedeemOrder(
-    args: [poolId: string, trancheId: number, newOrder: BN],
-    options?: TransactionOptions
-  ) {
-    const [poolId, trancheId, newOrder] = args
-    const api = await inst.getApi()
 
     const address = inst.getSignerAddress()
+    const $api = inst.getApi()
 
-    const [pool, order] = await Promise.all([getPool([poolId]), getOrder([address, poolId, trancheId])])
-
-    let submittable
-    if (order.epoch <= pool.epoch.lastExecuted && order.epoch > 0 && (order.invest !== '0' || order.redeem !== '0')) {
-      submittable = api.tx.utility.batchAll([
-        api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted + 1 - order.epoch),
-        api.tx.pools.updateRedeemOrder(poolId, trancheId, newOrder.toString()),
-      ])
-    } else {
-      submittable = api.tx.pools.updateRedeemOrder(poolId, trancheId, newOrder.toString())
-    }
-
-    return inst.wrapSignAndSend(api, submittable, options)
+    return $api.pipe(
+      combineLatestWith(getPool([poolId])),
+      combineLatestWith(getOrder([address, poolId, trancheId])),
+      switchMap(([[api, pool], order]) => {
+        let submittable
+        if (
+          order.epoch <= pool.epoch.lastExecuted &&
+          order.epoch > 0 &&
+          (order.invest !== '0' || order.redeem !== '0')
+        ) {
+          submittable = api.tx.utility.batchAll([
+            api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted + 1 - order.epoch),
+            api.tx.pools.updateInvestOrder(poolId, trancheId, newOrder.toString()),
+          ])
+        } else {
+          submittable = api.tx.pools.updateInvestOrder(poolId, trancheId, newOrder.toString())
+        }
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
-  async function closeEpoch(args: [poolId: string], options?: TransactionOptions) {
+  function updateRedeemOrder(args: [poolId: string, trancheId: number, newOrder: BN], options?: TransactionOptions) {
+    const [poolId, trancheId, newOrder] = args
+    const address = inst.getSignerAddress()
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      combineLatestWith(getPool([poolId])),
+      combineLatestWith(getOrder([address, poolId, trancheId])),
+      switchMap(([[api, pool], order]) => {
+        let submittable
+        if (
+          order.epoch <= pool.epoch.lastExecuted &&
+          order.epoch > 0 &&
+          (order.invest !== '0' || order.redeem !== '0')
+        ) {
+          submittable = api.tx.utility.batchAll([
+            api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted + 1 - order.epoch),
+            api.tx.pools.updateRedeemOrder(poolId, trancheId, newOrder.toString()),
+          ])
+        } else {
+          submittable = api.tx.pools.updateRedeemOrder(poolId, trancheId, newOrder.toString())
+        }
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
+  }
+
+  function closeEpoch(args: [poolId: string], options?: TransactionOptions) {
     const [poolId] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.utility.batchAll([api.tx.loans.updateNav(poolId), api.tx.pools.closeEpoch(poolId)])
-    return inst.wrapSignAndSend(api, submittable, options)
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.utility.batchAll([api.tx.loans.updateNav(poolId), api.tx.pools.closeEpoch(poolId)])
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
-  async function submitSolution(args: [poolId: string, solution: string[][]], options?: TransactionOptions) {
+  function submitSolution(args: [poolId: string, solution: string[][]], options?: TransactionOptions) {
     const [poolId, solution] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.pools.submitSolution(poolId, solution)
-    return inst.wrapSignAndSend(api, submittable, options)
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.pools.submitSolution(poolId, solution)
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
-  async function collect(args: [poolId: string, trancheId?: number], options?: TransactionOptions) {
+  function collect(args: [poolId: string, trancheId?: number], options?: TransactionOptions) {
     const [poolId, trancheId] = args
-    const api = await inst.getApi()
-    const pool = await getPool([poolId])
-
+    const $api = inst.getApi()
     const address = inst.getSignerAddress()
 
-    let submittable
     if (trancheId !== undefined) {
-      const order = await getOrder([address, poolId, trancheId])
-      submittable = api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted + 1 - order.epoch)
-    } else {
-      const orders = await Promise.all(pool.tranches.map((_t, index: number) => getOrder([address, poolId, index])))
-      submittable = api.tx.utility.batchAll(
-        pool.tranches
-          .map((_t, index: number) => {
-            const nEpochs = pool.epoch.lastExecuted + 1 - orders[index].epoch
-            if (!nEpochs) return null as any
-            return api.tx.pools.collect(poolId, index, nEpochs)
-          })
-          .filter(Boolean)
+      return $api.pipe(
+        combineLatestWith(getPool([poolId])),
+        combineLatestWith(getOrder([address, poolId, trancheId])),
+        switchMap(([[api, pool], order]) => {
+          const submittable = api.tx.pools.collect(poolId, trancheId, pool.epoch.lastExecuted + 1 - order.epoch)
+          return inst.wrapSignAndSendRx(api, submittable, options)
+        })
       )
     }
-    return inst.wrapSignAndSend(api, submittable, options)
+
+    return $api.pipe(
+      combineLatestWith(
+        getPool([poolId]).pipe(
+          switchMap(
+            (pool) => combineLatest(pool.tranches.map((_t, index: number) => getOrder([address, poolId, index]))),
+            (pool, orders) => ({
+              pool,
+              orders,
+            })
+          )
+        )
+      ),
+      switchMap(([api, { pool, orders }]) => {
+        const submittable = api.tx.utility.batchAll(
+          pool.tranches
+            .map((_t, index: number) => {
+              const nEpochs = pool.epoch.lastExecuted + 1 - orders[index].epoch
+              if (!nEpochs) return null as any
+              return api.tx.pools.collect(poolId, index, nEpochs)
+            })
+            .filter(Boolean)
+        )
+
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
-  async function approveRoles(
+  function approveRoles(
     args: [poolId: string, roles: PoolRoleInput[], accounts: string[]],
     options?: TransactionOptions
   ) {
     const [poolId, roles, accounts] = args
     if (roles.length !== accounts.length) throw new Error('Roles length needs to match accounts length')
 
-    const api = await inst.getApi()
-    const extrinsics = roles.map((role: PoolRoleInput, index: number) =>
-      api.tx.pools.approveRoleFor(poolId, role, [accounts[index]])
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const extrinsics = roles.map((role: PoolRoleInput, index: number) =>
+          api.tx.pools.approveRoleFor(poolId, role, [accounts[index]])
+        )
+        const submittable = api.tx.utility.batchAll(extrinsics)
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
     )
-    const submittable = api.tx.utility.batchAll(extrinsics)
-    return inst.wrapSignAndSend(api, submittable, options)
   }
 
-  async function getRolesByPool(args: [address: Account]): Promise<{ [poolId: string]: PoolRoles }> {
-    const api = await inst.getApi()
-    const permissionsRaw = await api.query.permissions.permission.entries(args[0])
+  function getRolesByPool(args: [address: Account]) {
+    const [address] = args
+    const $api = inst.getApi()
 
-    const roles: { [poolId: string]: PoolRoles } = {}
-    permissionsRaw.forEach(([keys, value]) => {
-      const poolId = (keys.toHuman() as string[])[1].replace(/\D/g, '')
-      const permissions = value.toJSON() as any
-      roles[poolId] = {
-        roles: (
-          ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'RiskAdmin'] as const
-        ).filter((role) => AdminRoleBits[role] & permissions.admin.bits),
-        tranches: permissions.trancheInvestor.info
-          .filter((info: any) => info.permissionedTill * 1000 > Date.now())
-          .map((info: any) => info.trancheId),
-      }
-    })
+    const $events = $api.pipe(
+      switchMap(
+        (api) => combineLatest([api.query.system.events(), api.query.system.number()]),
+        (api, [events]) => ({ api, events })
+      ),
+      filter(({ api, events }) => {
+        const event = events.find(
+          ({ event }) => api.events.pools.RoleApproved.is(event) || api.events.pools.RoleRevoked.is(event)
+        )
 
-    return roles
+        if (!event) return false
+
+        const [, , accountId] = (event.toJSON() as any).event.data
+        return isSameAddress(address, accountId)
+      })
+    )
+
+    return $api.pipe(
+      switchMap((api) => api.query.permissions.permission.entries(address)),
+      map((permissionsData) => {
+        const roles: { [poolId: string]: PoolRoles } = {}
+        permissionsData.forEach(([keys, value]) => {
+          const poolId = (keys.toHuman() as string[])[1].replace(/\D/g, '')
+          const permissions = value.toJSON() as any
+          roles[poolId] = {
+            roles: (
+              ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'RiskAdmin'] as const
+            ).filter((role) => AdminRoleBits[role] & permissions.admin.bits),
+            tranches: permissions.trancheInvestor.info
+              .filter((info: any) => info.permissionedTill * 1000 > Date.now())
+              .map((info: any) => info.trancheId),
+          }
+        })
+        return roles
+      }),
+      repeatWhen(() => $events)
+    )
   }
 
   async function getNextLoanId() {
-    const api = await inst.getApi()
-    return (await api.query.loans.nextLoanId()).toString()
+    const $api = inst.getApi()
+
+    const id = await firstValueFrom($api.pipe(switchMap((api) => api.query.loans.nextLoanId()))).toString()
+    return id
   }
 
-  async function createLoan(args: [poolId: string, collectionId: string, nftId: string], options?: TransactionOptions) {
+  function createLoan(args: [poolId: string, collectionId: string, nftId: string], options?: TransactionOptions) {
     const [poolId, collectionId, nftId] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.loans.create(poolId, [collectionId, nftId])
-    return inst.wrapSignAndSend(api, submittable, options)
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.loans.create(poolId, [collectionId, nftId])
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
-  async function priceLoan<T extends keyof LoanInfoInput, I extends LoanInfoInput[T]>(
+  function priceLoan<T extends keyof LoanInfoInput, I extends LoanInfoInput[T]>(
     args: [poolId: string, loanId: string, ratePerSec: string, loanType: T, loanInfo: I],
     options?: TransactionOptions
   ) {
     const [poolId, loanId, ratePerSec, loanType, loanInfo] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.loans.price(poolId, loanId, ratePerSec, { [loanType]: loanInfo })
-    return inst.wrapSignAndSend(api, submittable, options)
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.loans.price(poolId, loanId, ratePerSec, { [loanType]: loanInfo })
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
-  async function financeLoan(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
+  function financeLoan(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
     const [poolId, loanId, amount] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.loans.borrow(poolId, loanId, amount.toString())
-    return inst.wrapSignAndSend(api, submittable, options)
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.loans.borrow(poolId, loanId, amount.toString())
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
-  async function repayLoanPartially(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
+  function repayLoanPartially(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
     const [poolId, loanId, amount] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.loans.repay(poolId, loanId, amount.toString())
-    return inst.wrapSignAndSend(api, submittable, options)
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.loans.repay(poolId, loanId, amount.toString())
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
-  async function repayAndCloseLoan(args: [poolId: string, loanId: string], options?: TransactionOptions) {
+  function repayAndCloseLoan(args: [poolId: string, loanId: string], options?: TransactionOptions) {
     const [poolId, loanId] = args
-    const api = await inst.getApi()
-    const loan = await getLoan([poolId, loanId])
+    const $api = inst.getApi()
 
-    // Add small buffer to repayment amount
-    // TODO: calculate accumulatedRate 1 minute from now and up to date outstanding debt
-    const amount = new BN(loan.outstandingDebt).mul(new BN(1).mul(Currency))
-    const submittable = api.tx.utility.batchAll([
-      api.tx.loans.repay(poolId, loanId, amount),
-      api.tx.loans.close(poolId, loanId),
-    ])
-    return inst.wrapSignAndSend(api, submittable, options)
+    return $api.pipe(
+      combineLatestWith(getLoan([poolId, loanId])),
+      switchMap(([api, loan]) => {
+        // Add small buffer to repayment amount
+        // TODO: calculate accumulatedRate 1 minute from now and up to date outstanding debt
+        const amount = new BN(loan.outstandingDebt).mul(new BN(1).mul(Currency))
+        const submittable = api.tx.utility.batchAll([
+          api.tx.loans.repay(poolId, loanId, amount),
+          api.tx.loans.close(poolId, loanId),
+        ])
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
-  async function getPools(): Promise<Pool[]> {
-    const api = await inst.getApi()
+  function getPools() {
+    const $api = inst.getApi()
 
-    const [rawPools, rawNavs] = await Promise.all([api.query.pools.pool.entries(), api.query.loans.poolNAV.entries()])
+    const $events = $api.pipe(
+      switchMap(
+        (api) => combineLatest([api.query.system.events(), api.query.system.number()]),
+        (api, [events]) => ({ api, events })
+      ),
+      filter(({ api, events }) => {
+        const event = events.find(({ event }) => api.events.pools.Created.is(event))
+        return !!event
+      })
+    )
 
-    const navMap = rawNavs.reduce((acc, [key, navValue]) => {
-      const poolId = formatPoolKey(key as StorageKey<[u32]>)
-      const nav = navValue.toJSON() as unknown as NAVDetailsData
-      acc[poolId] = {
-        latest: nav ? nav.latestNav : new BN('0'),
-        lastUpdated: nav ? nav.lastUpdated : 0,
-      }
-      return acc
-    }, {} as Record<string, { latest: BN; lastUpdated: number }>)
-
-    const pools = rawPools.map(([key, value]) => {
-      const pool = value.toJSON() as unknown as PoolDetailsData
-      const metadata = (value.toHuman() as any).metadata
-      const poolId = formatPoolKey(key as StorageKey<[u32]>)
-      const navData = navMap[poolId]
-      return {
-        id: poolId,
-        owner: pool.owner,
-        metadata,
-        currency: Object.keys(pool.currency)[0],
-        tranches: pool.tranches.map((tranche: TrancheDetailsData, index: number) => {
-          return {
-            index,
-            name: tokenIndexToName(index, pool.tranches.length),
-            debt: parseBN(tranche.debt),
-            reserve: parseBN(tranche.reserve),
-            minRiskBuffer: parseBN(tranche.minRiskBuffer),
-            ratio: parseBN(tranche.ratio),
-            outstandingInvestOrders: parseBN(tranche.outstandingInvestOrders),
-            outstandingRedeemOrders: parseBN(tranche.outstandingRedeemOrders),
-            interestPerSec: parseBN(tranche.interestPerSec),
-            lastUpdatedInterest: tranche.lastUpdatedInterest,
+    return $api.pipe(
+      switchMap((api) => combineLatest([api.query.pools.pool.entries(), api.query.loans.poolNAV.entries()])),
+      map(([rawPools, rawNavs]) => {
+        const navMap = rawNavs.reduce((acc, [key, navValue]) => {
+          const poolId = formatPoolKey(key as StorageKey<[u32]>)
+          const nav = navValue.toJSON() as unknown as NAVDetailsData
+          acc[poolId] = {
+            latest: nav ? nav.latestNav : new BN('0'),
+            lastUpdated: nav ? nav.lastUpdated : 0,
           }
-        }),
-        reserve: {
-          max: parseBN(pool.maxReserve),
-          available: parseBN(pool.availableReserve),
-          total: parseBN(pool.totalReserve),
-        },
-        epoch: {
-          current: pool.currentEpoch,
-          lastClosed: pool.lastEpochClosed,
-          lastExecuted: pool.lastEpochExecuted,
-          inSubmissionPeriod: pool.submissionPeriodEpoch,
-        },
-        nav: {
-          latest: parseBN(navData.latest),
-          lastUpdated: navData.lastUpdated,
-        },
-        value: new BN(parseBN(pool.totalReserve)).add(new BN(parseBN(navData.latest))).toString(),
-      }
-    })
+          return acc
+        }, {} as Record<string, { latest: BN; lastUpdated: number }>)
 
-    return pools
-  }
+        const pools = rawPools.map(([key, value]) => {
+          const pool = value.toJSON() as unknown as PoolDetailsData
+          const metadata = (value.toHuman() as any).metadata
+          const poolId = formatPoolKey(key as StorageKey<[u32]>)
+          const navData = navMap[poolId]
+          const mapped: Pool = {
+            id: poolId,
+            owner: pool.owner,
+            metadata,
+            currency: Object.keys(pool.currency)[0],
+            tranches: pool.tranches.map((tranche: TrancheDetailsData, index: number) => {
+              return {
+                index,
+                name: tokenIndexToName(index, pool.tranches.length),
+                debt: parseBN(tranche.debt),
+                reserve: parseBN(tranche.reserve),
+                minRiskBuffer: parseBN(tranche.minRiskBuffer),
+                ratio: parseBN(tranche.ratio),
+                outstandingInvestOrders: parseBN(tranche.outstandingInvestOrders),
+                outstandingRedeemOrders: parseBN(tranche.outstandingRedeemOrders),
+                interestPerSec: parseBN(tranche.interestPerSec),
+                lastUpdatedInterest: tranche.lastUpdatedInterest,
+              }
+            }),
+            reserve: {
+              max: parseBN(pool.maxReserve),
+              available: parseBN(pool.availableReserve),
+              total: parseBN(pool.totalReserve),
+            },
+            epoch: {
+              current: pool.currentEpoch,
+              lastClosed: pool.lastEpochClosed,
+              lastExecuted: pool.lastEpochExecuted,
+              inSubmissionPeriod: pool.submissionPeriodEpoch,
+            },
+            nav: {
+              latest: parseBN(navData.latest),
+              lastUpdated: navData.lastUpdated,
+            },
+            value: new BN(parseBN(pool.totalReserve)).add(new BN(parseBN(navData.latest))).toString(),
+          }
 
-  async function getPool(args: [poolId: string]): Promise<DetailedPool> {
-    const [poolId] = args
-    const api = await inst.getApi()
-
-    const [poolValue, navValue] = await Promise.all([
-      api.query.pools.pool(poolId),
-      api.query.loans.poolNAV(poolId),
-      // api.query.loans.poolToLoanNftClass(poolId),
-    ])
-
-    const pool = poolValue.toJSON() as unknown as PoolDetailsData
-    const nav = navValue.toJSON() as unknown as NAVDetailsData
-    const metadata = (poolValue.toHuman() as any).metadata
-
-    const tokenIssuanceValues = await Promise.all(
-      pool.tranches.map((_1, index: number) => api.query.ormlTokens.totalIssuance({ Tranche: [poolId, index] }))
-    )
-
-    const orderValues = await Promise.all(
-      pool.tranches.map((_1, index: number) => api.query.pools.order.entries([poolId, index]))
-    )
-
-    console.log(JSON.stringify(orderValues, null, 4))
-
-    const epochValues = await Promise.all(
-      pool.tranches.map((_1, index: number) => api.query.pools.epoch([poolId, index], pool.lastEpochExecuted))
-    )
-    const lastEpoch = epochValues.map((val) => (!val.isEmpty ? (val as any).unwrap() : null))
-
-    return {
-      id: poolId,
-      owner: pool.owner,
-      metadata,
-      currency: Object.keys(pool.currency)[0],
-      tranches: pool.tranches.map((tranche, index) => {
-        return {
-          index,
-          name: tokenIndexToName(index, pool.tranches.length),
-          debt: parseBN(tranche.debt),
-          reserve: parseBN(tranche.reserve),
-          totalIssuance: tokenIssuanceValues[index].toString(),
-          minRiskBuffer: parseBN(tranche.minRiskBuffer),
-          ratio: parseBN(tranche.ratio),
-          outstandingInvestOrders: parseBN(tranche.outstandingInvestOrders),
-          outstandingRedeemOrders: parseBN(tranche.outstandingRedeemOrders),
-          interestPerSec: parseBN(tranche.interestPerSec),
-          lastUpdatedInterest: tranche.lastUpdatedInterest,
-          tokenPrice: lastEpoch[index]?.tokenPrice.toString() ?? '0',
-        }
-      }),
-      nav: {
-        latest: nav ? parseBN(nav.latestNav) : '0',
-        lastUpdated: nav ? nav.lastUpdated : 0,
-      },
-      reserve: {
-        max: parseBN(pool.maxReserve),
-        available: parseBN(pool.availableReserve),
-        total: parseBN(pool.totalReserve),
-      },
-      value: new BN(parseBN(pool.totalReserve)).add(new BN(parseBN(nav.latestNav))).toString(),
-      epoch: {
-        current: pool.currentEpoch,
-        lastClosed: pool.lastEpochClosed,
-        lastExecuted: pool.lastEpochExecuted,
-        inSubmissionPeriod: pool.submissionPeriodEpoch,
-      },
-    }
-  }
-
-  async function getBalances(args: [address: Account]) {
-    const api = await inst.getApi()
-    const rawBalances = await api.query.ormlTokens.accounts.entries(args[0])
-
-    const balances = {
-      tranches: [] as TrancheBalance[],
-      tokens: [] as TokenBalance[],
-    }
-
-    rawBalances.forEach(([rawKey, rawValue]) => {
-      const key = (rawKey.toHuman() as any)[1] as string | { Tranche: [string, string] }
-      const value = rawValue.toJSON() as { free: string | number }
-      if (typeof key !== 'string') {
-        const [poolId, trancheId] = key.Tranche
-        if (value.free !== 0) {
-          balances.tranches.push({
-            poolId: poolId.replace(/\D/g, ''),
-            trancheId: parseInt(trancheId, 10),
-            balance: parseHex(value.free),
-          })
-        }
-      } else {
-        balances.tokens.push({
-          currency: key.toLowerCase(),
-          balance: parseHex(value.free),
+          return mapped
         })
-      }
-    })
 
-    return balances
+        return pools
+      }),
+      repeatWhen(() => $events)
+    )
   }
 
-  async function getOrder(args: [address: Account, poolId: string, trancheId: number]) {
-    const api = await inst.getApi()
+  function getPool(args: [poolId: string]) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) =>
+        combineLatest([api.query.pools.pool(poolId), api.query.loans.poolNAV(poolId)]).pipe(
+          switchMap(([poolValue, navValue]) => {
+            const pool = poolValue.toJSON() as unknown as PoolDetailsData
+            const nav = navValue.toJSON() as unknown as NAVDetailsData
+            const metadata = (poolValue.toHuman() as any).metadata
+
+            const $tokenIssuance = combineLatest(
+              pool.tranches.map((_1, index: number) => api.query.ormlTokens.totalIssuance({ Tranche: [poolId, index] }))
+            )
+
+            const $epoch = combineLatest(
+              pool.tranches.map((_1, index: number) => api.query.pools.epoch([poolId, index], pool.lastEpochExecuted))
+            )
+
+            return combineLatest([$tokenIssuance, $epoch]).pipe(
+              map(([tokenIssuanceValues, epochValues]) => {
+                const lastEpoch = epochValues.map((val) => (!val.isEmpty ? (val as any).unwrap() : null))
+
+                const detailedPool: DetailedPool = {
+                  id: poolId,
+                  owner: pool.owner,
+                  metadata,
+                  currency: Object.keys(pool.currency)[0],
+                  tranches: pool.tranches.map((tranche, index) => {
+                    return {
+                      index,
+                      name: tokenIndexToName(index, pool.tranches.length),
+                      debt: parseBN(tranche.debt),
+                      reserve: parseBN(tranche.reserve),
+                      totalIssuance: tokenIssuanceValues[index].toString(),
+                      minRiskBuffer: parseBN(tranche.minRiskBuffer),
+                      ratio: parseBN(tranche.ratio),
+                      outstandingInvestOrders: parseBN(tranche.outstandingInvestOrders),
+                      outstandingRedeemOrders: parseBN(tranche.outstandingRedeemOrders),
+                      interestPerSec: parseBN(tranche.interestPerSec),
+                      lastUpdatedInterest: tranche.lastUpdatedInterest,
+                      tokenPrice: lastEpoch[index]?.tokenPrice.toString() ?? '0',
+                    }
+                  }),
+                  nav: {
+                    latest: nav ? parseBN(nav.latestNav) : '0',
+                    lastUpdated: nav ? nav.lastUpdated : 0,
+                  },
+                  reserve: {
+                    max: parseBN(pool.maxReserve),
+                    available: parseBN(pool.availableReserve),
+                    total: parseBN(pool.totalReserve),
+                  },
+                  value: new BN(parseBN(pool.totalReserve)).add(new BN(parseBN(nav.latestNav))).toString(),
+                  epoch: {
+                    current: pool.currentEpoch,
+                    lastClosed: pool.lastEpochClosed,
+                    lastExecuted: pool.lastEpochExecuted,
+                    inSubmissionPeriod: pool.submissionPeriodEpoch,
+                  },
+                }
+                return detailedPool
+              })
+            )
+          })
+        )
+      )
+    )
+  }
+
+  function getBalances(args: [address: Account]) {
+    const [address] = args
+    const $api = inst.getApi()
+
+    const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
+
+    return $api.pipe(
+      switchMap((api) => api.query.ormlTokens.accounts.entries(address)),
+      map((rawBalances) => {
+        const balances = {
+          tranches: [] as TrancheBalance[],
+          tokens: [] as TokenBalance[],
+        }
+
+        rawBalances.forEach(([rawKey, rawValue]) => {
+          const key = (rawKey.toHuman() as any)[1] as string | { Tranche: [string, string] }
+          const value = rawValue.toJSON() as { free: string | number }
+          if (typeof key !== 'string') {
+            const [poolId, trancheId] = key.Tranche
+            if (value.free !== 0) {
+              balances.tranches.push({
+                poolId: poolId.replace(/\D/g, ''),
+                trancheId: parseInt(trancheId, 10),
+                balance: parseHex(value.free),
+              })
+            }
+          } else {
+            balances.tokens.push({
+              currency: key.toLowerCase(),
+              balance: parseHex(value.free),
+            })
+          }
+        })
+
+        return balances
+      }),
+      repeatWhen(() => $blocks)
+    )
+  }
+
+  function getOrder(args: [address: Account, poolId: string, trancheId: number]) {
     const [address, poolId, trancheId] = args
-    const result = await api.query.pools.order([poolId, trancheId], address)
-    const order = result.toJSON() as any
 
-    return {
-      invest: parseHex(order.invest),
-      redeem: parseHex(order.redeem),
-      epoch: order.epoch as number,
-    }
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => api.query.pools.order([poolId, trancheId], address)),
+      map((result) => {
+        const order = result.toJSON() as any
+
+        return {
+          invest: parseHex(order.invest),
+          redeem: parseHex(order.redeem),
+          epoch: order.epoch as number,
+        }
+      })
+    )
   }
 
-  async function getLoans(args: [poolId: string]): Promise<Loan[]> {
+  function getLoans(args: [poolId: string]) {
     const [poolId] = args
-    const api = await inst.getApi()
+    const $api = inst.getApi()
 
-    const loanValues = await api.query.loans.loanInfo.entries(poolId)
+    const $events = $api.pipe(
+      switchMap(
+        (api) => combineLatest([api.query.system.events(), api.query.system.number()]),
+        (api, [events]) => ({ api, events })
+      ),
+      filter(({ api, events }) => {
+        const event = events.find(
+          ({ event }) =>
+            api.events.loans.Created.is(event) ||
+            api.events.loans.Closed.is(event) ||
+            api.events.loans.Priced.is(event) ||
+            api.events.loans.Borrowed.is(event)
+        )
+        return !!event
+      })
+    )
 
-    return loanValues.map(([key, value]) => {
-      const loan = value.toJSON() as unknown as LoanDetailsData
-      const assetKey = (value.toHuman() as any).asset
-      return {
-        id: formatLoanKey(key as StorageKey<[u32, u32]>),
-        poolId,
-        financedAmount: parseBN(loan.borrowedAmount),
-        financingFee: parseBN(loan.ratePerSec),
-        outstandingDebt: new BN(parseBN(loan.principalDebt))
-          .mul(new BN(parseBN(loan.accumulatedRate)))
-          .div(new BN(10).pow(new BN(27)))
-          .toString(),
-        lastUpdated: loan.lastUpdated,
-        originationDate: loan.originationDate,
-        status: loan.status,
-        loanInfo: getLoanInfo(loan.loanType),
-        adminWrittenOff: loan.adminWrittenOff,
-        writeOffIndex: loan.writeOffIndex,
-        asset: {
-          collectionId: assetKey[0].replace(/\D/g, ''),
-          nftId: assetKey[1].replace(/\D/g, ''),
-        },
-      }
-    })
+    return $api.pipe(
+      switchMap((api) => api.query.loans.loanInfo.entries(poolId)),
+      map((loanValues) => {
+        return loanValues.map(([key, value]) => {
+          const loan = value.toJSON() as unknown as LoanDetailsData
+          const assetKey = (value.toHuman() as any).asset
+          const mapped: Loan = {
+            id: formatLoanKey(key as StorageKey<[u32, u32]>),
+            poolId,
+            financedAmount: parseBN(loan.borrowedAmount),
+            financingFee: parseBN(loan.ratePerSec),
+            outstandingDebt: new BN(parseBN(loan.principalDebt))
+              .mul(new BN(parseBN(loan.accumulatedRate)))
+              .div(new BN(10).pow(new BN(27)))
+              .toString(),
+            lastUpdated: loan.lastUpdated,
+            originationDate: loan.originationDate,
+            status: loan.status,
+            loanInfo: getLoanInfo(loan.loanType),
+            adminWrittenOff: loan.adminWrittenOff,
+            writeOffIndex: loan.writeOffIndex,
+            asset: {
+              collectionId: assetKey[0].replace(/\D/g, ''),
+              nftId: assetKey[1].replace(/\D/g, ''),
+            },
+          }
+          return mapped
+        })
+      }),
+      repeatWhen(() => $events)
+    )
   }
 
-  async function getLoan(args: [poolId: string, loanId: string]): Promise<Loan> {
+  function getLoan(args: [poolId: string, loanId: string]) {
     const [poolId, loanId] = args
-    const api = await inst.getApi()
+    const $api = inst.getApi()
 
-    const loanValue = await api.query.loans.loanInfo(poolId, loanId)
+    return $api.pipe(
+      switchMap((api) => api.query.loans.loanInfo(poolId, loanId)),
+      map((loanData) => {
+        const loanValue = loanData.toJSON() as unknown as LoanDetailsData
+        const assetKey = (loanData.toHuman() as any).asset
 
-    const loan = loanValue.toJSON() as unknown as LoanDetailsData
-    const assetKey = (loanValue.toHuman() as any).asset
-
-    return {
-      id: loanId,
-      poolId,
-      financedAmount: parseBN(loan.borrowedAmount),
-      financingFee: parseBN(loan.ratePerSec),
-      outstandingDebt: new BN(parseBN(loan.principalDebt))
-        .mul(new BN(parseBN(loan.accumulatedRate)))
-        .div(new BN(10).pow(new BN(27)))
-        .toString(),
-      lastUpdated: loan.lastUpdated,
-      originationDate: loan.originationDate,
-      status: loan.status,
-      loanInfo: getLoanInfo(loan.loanType),
-      adminWrittenOff: loan.adminWrittenOff,
-      writeOffIndex: loan.writeOffIndex,
-      asset: {
-        collectionId: assetKey[0].replace(/\D/g, ''),
-        nftId: assetKey[1].replace(/\D/g, ''),
-      },
-    }
+        const loan: Loan = {
+          id: loanId,
+          poolId,
+          financedAmount: parseBN(loanValue.borrowedAmount),
+          financingFee: parseBN(loanValue.ratePerSec),
+          outstandingDebt: new BN(parseBN(loanValue.principalDebt))
+            .mul(new BN(parseBN(loanValue.accumulatedRate)))
+            .div(new BN(10).pow(new BN(27)))
+            .toString(),
+          lastUpdated: loanValue.lastUpdated,
+          originationDate: loanValue.originationDate,
+          status: loanValue.status,
+          loanInfo: getLoanInfo(loanValue.loanType),
+          adminWrittenOff: loanValue.adminWrittenOff,
+          writeOffIndex: loanValue.writeOffIndex,
+          asset: {
+            collectionId: assetKey[0].replace(/\D/g, ''),
+            nftId: assetKey[1].replace(/\D/g, ''),
+          },
+        }
+        return loan
+      })
+    )
   }
 
-  async function getLoanCollectionIdForPool(args: [poolId: string]) {
+  function getLoanCollectionIdForPool(args: [poolId: string]) {
     const [poolId] = args
-    const api = await inst.getApi()
+    const $api = inst.getApi()
 
-    const result = await api.query.loans.poolToLoanNftClass(poolId)
-    const collectionId = (result.toHuman() as string).replace(/\D/g, '')
+    return $api.pipe(
+      switchMap((api) => api.query.loans.poolToLoanNftClass(poolId)),
+      map((result) => {
+        const collectionId = (result.toHuman() as string).replace(/\D/g, '')
 
-    return collectionId
+        return collectionId
+      }),
+      take(1)
+    )
   }
 
-  async function addWriteOffGroup(
-    args: [poolId: string, percentage: BN, overdueDays: number],
-    options?: TransactionOptions
-  ) {
+  function addWriteOffGroup(args: [poolId: string, percentage: BN, overdueDays: number], options?: TransactionOptions) {
     const [poolId, percentage, overdueDays] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.loans.addWriteOffGroup(poolId, [percentage.toString(), overdueDays])
-    return inst.wrapSignAndSend(api, submittable, options)
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.loans.addWriteOffGroup(poolId, [percentage.toString(), overdueDays])
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
-  async function adminWriteOff(
+  function adminWriteOff(
     args: [poolId: string, loanId: string, writeOffGroupId: number],
     options?: TransactionOptions
   ) {
     const [poolId, loanId, writeOffGroupId] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.loans.adminWriteOff(poolId, loanId, writeOffGroupId)
-    return inst.wrapSignAndSend(api, submittable, options)
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.loans.adminWriteOff(poolId, loanId, writeOffGroupId)
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
   }
 
   return {

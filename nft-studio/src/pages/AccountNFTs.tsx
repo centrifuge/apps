@@ -21,8 +21,8 @@ const COUNT_PER_PAGE = 16
 
 const AccountNFTs: React.FC = () => {
   const { selectedAccount, isConnecting, connect } = useWeb3()
-  const { data: nfts } = useAccountNfts(selectedAccount?.address)
-  const { data: collections } = useCollections()
+  const nfts = useAccountNfts(selectedAccount?.address)
+  const collections = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const centrifuge = useCentrifuge()
 

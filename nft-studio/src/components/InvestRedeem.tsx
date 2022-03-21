@@ -36,9 +36,9 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId, action = 'inve
   const [tab, setTab] = React.useState<'invest' | 'redeem'>(action)
   const { selectedAccount } = useWeb3()
   const address = useAddress()
-  const { data: permissions } = usePermissions(address)
-  const { data: balances } = useBalances(address)
-  const { data: pool } = usePool(poolId)
+  const permissions = usePermissions(address)
+  const balances = useBalances(address)
+  const pool = usePool(poolId)
 
   const allowedToInvest = permissions?.[poolId]?.tranches.includes(trancheId)
   const tranche = pool?.tranches[trancheId]
@@ -91,9 +91,9 @@ type InvestValues = {
 
 const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
   const address = useAddress()
-  const { data: order, refetch: refetchOrder } = useOrder(poolId, trancheId, address)
-  const { data: balances, refetch: refetchBalances } = useBalances(address)
-  const { data: pool, refetch: refetchPool } = usePool(poolId)
+  const order = useOrder(poolId, trancheId, address)
+  const balances = useBalances(address)
+  const pool = usePool(poolId)
   const tranche = pool?.tranches[trancheId]
   const balance = Dec(balances?.tokens.find((b) => b.currency === pool?.currency)?.balance ?? 0).div('1e18')
   const pendingInvest = Dec(order?.invest ?? 0).div('1e18')
@@ -103,9 +103,6 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
     (cent) => cent.pools.updateInvestOrder,
     {
       onSuccess: () => {
-        refetchPool()
-        refetchOrder()
-        refetchBalances()
         form.resetForm()
       },
     }
@@ -115,9 +112,6 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
     (cent) => cent.pools.updateInvestOrder,
     {
       onSuccess: () => {
-        refetchPool()
-        refetchOrder()
-        refetchBalances()
         form.resetForm()
       },
     }
@@ -125,13 +119,7 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
 
   const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransaction(
     'Collect',
-    (cent) => cent.pools.collect,
-    {
-      onSuccess: () => {
-        refetchOrder()
-        refetchBalances()
-      },
-    }
+    (cent) => cent.pools.collect
   )
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')
@@ -244,9 +232,9 @@ const InvestForm: React.VFC<Props> = ({ poolId, trancheId }) => {
 
 const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
   const address = useAddress()
-  const { data: order, refetch: refetchOrder } = useOrder(poolId, trancheId, address)
-  const { data: balances, refetch: refetchBalances } = useBalances(address)
-  const { data: pool, refetch: refetchPool } = usePool(poolId)
+  const order = useOrder(poolId, trancheId, address)
+  const balances = useBalances(address)
+  const pool = usePool(poolId)
 
   const { data: metadata } = usePoolMetadata(pool)
   const tranche = pool?.tranches[trancheId]
@@ -261,9 +249,6 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
     (cent) => cent.pools.updateRedeemOrder,
     {
       onSuccess: () => {
-        refetchPool()
-        refetchOrder()
-        refetchBalances()
         form.resetForm()
       },
     }
@@ -273,9 +258,6 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
     (cent) => cent.pools.updateRedeemOrder,
     {
       onSuccess: () => {
-        refetchPool()
-        refetchOrder()
-        refetchBalances()
         form.resetForm()
       },
     }
@@ -283,13 +265,7 @@ const RedeemForm: React.VFC<Props> = ({ poolId, trancheId }) => {
 
   const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransaction(
     'Collect',
-    (cent) => cent.pools.collect,
-    {
-      onSuccess: () => {
-        refetchOrder()
-        refetchBalances()
-      },
-    }
+    (cent) => cent.pools.collect
   )
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')

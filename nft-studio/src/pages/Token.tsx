@@ -25,8 +25,8 @@ export const TokenPage: React.FC = () => {
 const Token: React.FC = () => {
   const { pid: poolId, tid } = useParams<{ pid: string; tid: string }>()
   const address = useAddress()
-  const { data: balances } = useBalances(address)
-  const { data: pool } = usePool(poolId)
+  const balances = useBalances(address)
+  const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const centrifuge = useCentrifuge()
   const trancheId = Number(tid)

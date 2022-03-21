@@ -1,14 +1,13 @@
 import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
-import { useQueryClient } from 'react-query'
+import { useAddress } from '../utils/useAddress'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { isSameAddress } from '../utils/web3'
 import { ButtonGroup } from './ButtonGroup'
 import { Dialog } from './Dialog'
 import { TextInput } from './TextInput'
-import { useWeb3 } from './Web3Provider'
 
 type Props = {
   open: boolean
@@ -22,24 +21,17 @@ const TRANSFER_FEE_ESTIMATE = 0.1
 export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const [address, setAddress] = React.useState('')
   const [touched, setTouched] = React.useState(false)
-  const queryClient = useQueryClient()
-  const { selectedAccount } = useWeb3()
-  const { data: balance } = useBalance()
+  const connectedAddress = useAddress()
+  const balance = useBalance()
 
-  const isConnected = !!selectedAccount?.address
+  const isConnected = !!connectedAddress
 
   const {
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
     lastCreatedTransaction,
-  } = useCentrifugeTransaction('Transfer NFT', (cent) => cent.nfts.transferNft, {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['nfts', collectionId])
-      queryClient.invalidateQueries('balance')
-      queryClient.invalidateQueries(['accountNfts'])
-    },
-  })
+  } = useCentrifugeTransaction('Transfer NFT', (cent) => cent.nfts.transferNft)
 
   React.useEffect(() => {
     if (lastCreatedTransaction?.status === 'pending') {
@@ -69,7 +61,7 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
   function getError() {
     if (!address) return 'No address provided'
     if (!isAddress(address)) return 'Not a valid address'
-    if (isSameAddress(address, selectedAccount!.address)) return 'Address is the same as the current owner'
+    if (isSameAddress(address, connectedAddress)) return 'Address is the same as the current owner'
     return null
   }
 

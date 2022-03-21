@@ -14,8 +14,7 @@ export const PoolsPage: React.FC = () => {
 }
 
 const Pools: React.FC = () => {
-  const { data: pools } = usePools()
-  console.log('pools', pools)
+  const pools = usePools()
 
   return (
     <Stack gap={8} flex={1}>

@@ -1,9 +1,10 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
-// import { AnyNumber } from '@polkadot/types/types'
+import { combineLatest, EMPTY, firstValueFrom } from 'rxjs'
+import { delayWhen, expand, filter, map, repeatWhen, skip, switchMap, take } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
-import { getRandomUint } from '../utils'
+import { getRandomUint, isSameAddress } from '../utils'
 
 type Instance = {
   owner: string
@@ -43,194 +44,390 @@ const formatClassKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])
 const formatInstanceKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
 export function getNftsModule(inst: CentrifugeBase) {
-  async function getCollections() {
-    const api = await inst.getApi()
+  function getCollections() {
+    const $api = inst.getApi()
 
-    const [metas, collections] = await Promise.all([
-      api.query.uniques.classMetadataOf.entries(),
-      api.query.uniques.class.entries(),
-    ])
+    const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
+    const $events = $api.pipe(
+      switchMap(
+        (api) => api.query.system.events(),
+        (api, events) => ({ api, events })
+      ),
+      filter(({ api, events }) => {
+        const event = events.find(({ event }) => api.events.uniques.Created.is(event))
+        return !!event
+      }),
+      delayWhen(() => $blocks.pipe(skip(1)))
+    )
 
-    const metasObj = metas.reduce((acc, [keys, value]) => {
-      acc[formatClassKey(keys)] = value.toHuman()
-      return acc
-    }, {} as any)
+    return $api.pipe(
+      switchMap((api) =>
+        combineLatest([api.query.uniques.classMetadataOf.entries(), api.query.uniques.class.entries()])
+      ),
+      map(([metas, collections]) => {
+        const metasObj = metas.reduce((acc, [keys, value]) => {
+          acc[formatClassKey(keys)] = value.toHuman()
+          return acc
+        }, {} as any)
 
-    const mapped = collections.map(([keys, value]) => {
-      const id = formatClassKey(keys)
-      const collectionValue = value.toJSON() as Class
-      const collection: Collection = {
-        id,
-        admin: collectionValue.admin,
-        owner: collectionValue.owner,
-        issuer: collectionValue.issuer,
-        instances: collectionValue.instances,
-        metadataUri: metasObj[id]?.data,
-      }
-      return collection
-    })
-    return mapped
+        const mapped = collections.map(([keys, value]) => {
+          const id = formatClassKey(keys)
+          const collectionValue = value.toJSON() as Class
+          const collection: Collection = {
+            id,
+            admin: collectionValue.admin,
+            owner: collectionValue.owner,
+            issuer: collectionValue.issuer,
+            instances: collectionValue.instances,
+            metadataUri: metasObj[id]?.data,
+          }
+          return collection
+        })
+
+        return mapped
+      }),
+      repeatWhen(() => $events)
+    )
   }
 
-  async function getCollectionNfts(args: [collectionId: string]) {
+  function getCollection(args: [collectionId: string]) {
     const [collectionId] = args
-    const api = await inst.getApi()
+    const $api = inst.getApi()
 
-    const [metas, nfts, sales] = await Promise.all([
-      api.query.uniques.instanceMetadataOf.entries(collectionId),
-      api.query.uniques.asset.entries(collectionId),
-      api.query.nftSales.sales.entries(collectionId),
-    ])
-
-    const metasObj = metas.reduce((acc, [keys, value]) => {
-      acc[formatInstanceKey(keys)] = value.toHuman()
-      return acc
-    }, {} as any)
-
-    const salesObj = sales.reduce((acc, [keys, value]) => {
-      acc[formatInstanceKey(keys as StorageKey<[u32, u32]>)] = value.toJSON()
-      return acc
-    }, {} as any)
-
-    const mapped = nfts.map(([keys, value]) => {
-      const id = formatInstanceKey(keys)
-      const nftValue = value.toJSON() as Instance
-      const nft: NFT = {
-        id,
-        collectionId,
-        owner: salesObj[id]?.seller || nftValue.owner,
-        metadataUri: metasObj[id]?.data,
-        sellPrice: salesObj[id]?.seller ? parseHex(salesObj[id]?.price.amount) : null,
-      }
-      return nft
-    })
-    return mapped
+    return $api.pipe(
+      switchMap((api) =>
+        combineLatest([api.query.uniques.classMetadataOf(collectionId), api.query.uniques.class(collectionId)])
+      ),
+      map(([meta, collectionData]) => {
+        const collectionValue = collectionData.toJSON() as Class
+        if (!collectionValue) throw new Error('Collection not found')
+        const collection: Collection = {
+          id: collectionId,
+          admin: collectionValue.admin,
+          owner: collectionValue.owner,
+          issuer: collectionValue.issuer,
+          instances: collectionValue.instances,
+          metadataUri: (meta.toHuman() as any)?.data,
+        }
+        return collection
+      })
+    )
   }
 
-  async function getAccountNfts(args: [address: string]) {
+  function getCollectionNfts(args: [collectionId: string]) {
+    const [collectionId] = args
+    const $api = inst.getApi()
+
+    const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
+    const $events = $api.pipe(
+      switchMap(
+        (api) => api.query.system.events(),
+        (api, events) => ({ api, events })
+      ),
+      filter(({ api, events }) => {
+        const event = events.find(
+          ({ event }) => api.events.uniques.Transferred.is(event) || api.events.uniques.Issued.is(event)
+        )
+        if (!event) return false
+
+        const [cid] = (event.toHuman() as any).event.data
+        return cid.replace(/\D/g, '') === collectionId
+      }),
+      delayWhen(() => $blocks.pipe(skip(1)))
+    )
+
+    return $api.pipe(
+      switchMap((api) =>
+        combineLatest([
+          api.query.uniques.instanceMetadataOf.entries(collectionId),
+          api.query.uniques.asset.entries(collectionId),
+          api.query.nftSales.sales.entries(collectionId),
+        ])
+      ),
+      map(([metas, nfts, sales]) => {
+        const metasObj = metas.reduce((acc, [keys, value]) => {
+          acc[formatInstanceKey(keys)] = value.toHuman()
+          return acc
+        }, {} as any)
+
+        const salesObj = sales.reduce((acc, [keys, value]) => {
+          acc[formatInstanceKey(keys as StorageKey<[u32, u32]>)] = value.toJSON()
+          return acc
+        }, {} as any)
+
+        const mapped = nfts.map(([keys, value]) => {
+          const id = formatInstanceKey(keys)
+          const nftValue = value.toJSON() as Instance
+          const nft: NFT = {
+            id,
+            collectionId,
+            owner: salesObj[id]?.seller || nftValue.owner,
+            metadataUri: metasObj[id]?.data,
+            sellPrice: salesObj[id]?.seller ? parseHex(salesObj[id]?.price.amount) : null,
+          }
+          return nft
+        })
+        return mapped
+      }),
+      repeatWhen(() => $events)
+    )
+  }
+
+  function getNft(args: [collectionId: string, nftId: string]) {
+    const [collectionId, nftId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) =>
+        combineLatest([
+          api.query.uniques.instanceMetadataOf(collectionId, nftId),
+          api.query.uniques.asset(collectionId, nftId),
+          api.query.nftSales.sales(collectionId, nftId),
+        ])
+      ),
+      map(([meta, nftData, sale]) => {
+        const nftValue = nftData.toJSON() as Instance
+        const saleValue = sale.toJSON() as any
+        if (!nftValue) throw new Error('NFT not found')
+        const nft: NFT = {
+          id: nftId,
+          collectionId,
+          owner: saleValue?.seller || nftValue.owner,
+          metadataUri: (meta.toHuman() as any)?.data,
+          sellPrice: saleValue ? parseHex(saleValue.price.amount) : null,
+        }
+        return nft
+      })
+    )
+  }
+
+  function getAccountNfts(args: [address: string]) {
     const [address] = args
-    const api = await inst.getApi()
 
-    const [accountKeys, salesKeys] = await Promise.all([
-      api.query.uniques.account.keys(address),
-      api.query.nftSales.nftsBySeller.keys(address),
-    ])
-    const accountkeysArr = accountKeys.map((k) => {
-      const [, cid, nid] = k.toHuman() as any
-      return [cid.replace(/\D/g, ''), nid.replace(/\D/g, '')]
-    })
-    const salesKeysArr = salesKeys.map((k) => {
-      const [, cid, nid] = k.toHuman() as any
-      return [cid.replace(/\D/g, ''), nid.replace(/\D/g, '')]
-    })
-    const keysArr = salesKeysArr.concat(accountkeysArr)
-    const [metas, nfts, sales] = await Promise.all([
-      api.query.uniques.instanceMetadataOf.multi(keysArr),
-      api.query.uniques.asset.multi(keysArr),
-      api.query.nftSales.sales.multi(salesKeysArr),
-    ])
+    const $api = inst.getApi()
 
-    const mapped = nfts.map((value, i) => {
-      const [collectionId, id] = keysArr[i]
-      const instance = value.toJSON() as Instance
-      const sale = sales[i]?.toJSON() as any
-      const nft: NFT = {
-        id,
-        collectionId,
-        owner: instance.owner,
-        metadataUri: (metas[i]?.toHuman() as any)?.data,
-        sellPrice: sale ? parseHex(sale.price.amount) : null,
-      }
-      return nft
-    })
-    return mapped
+    const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
+    const $events = $api.pipe(
+      switchMap(
+        (api) => api.query.system.events(),
+        (api, events) => ({ api, events })
+      ),
+
+      filter(({ api, events }) => {
+        const event = events.find(
+          ({ event }) => api.events.uniques.Transferred.is(event) || api.events.uniques.Issued.is(event)
+        )
+        if (!event) return false
+
+        const [, , from, to] = (event.toJSON() as any).event.data
+        return isSameAddress(address, from) || (to && isSameAddress(address, to))
+      }),
+      delayWhen(() => $blocks.pipe(skip(1)))
+    )
+
+    return $api.pipe(
+      switchMap(
+        (api) =>
+          combineLatest([api.query.uniques.account.keys(address), api.query.nftSales.nftsBySeller.keys(address)]),
+        (api, [accountKeys, salesKeys]) => ({
+          api,
+          accountKeys,
+          salesKeys,
+        })
+      ),
+      switchMap(({ api, accountKeys, salesKeys }) => {
+        const accountkeysArr = accountKeys.map((k) => {
+          const [, cid, nid] = k.toHuman() as any
+          return [cid.replace(/\D/g, ''), nid.replace(/\D/g, '')]
+        })
+        const salesKeysArr = salesKeys.map((k) => {
+          const [, cid, nid] = k.toHuman() as any
+          return [cid.replace(/\D/g, ''), nid.replace(/\D/g, '')]
+        })
+        const keysArr = salesKeysArr.concat(accountkeysArr)
+        return combineLatest([
+          api.query.uniques.instanceMetadataOf.multi(keysArr),
+          api.query.uniques.asset.multi(keysArr),
+          api.query.nftSales.sales.multi(salesKeysArr),
+        ]).pipe(
+          map(([metas, nfts, sales]) => {
+            const mapped = nfts.map((value, i) => {
+              const [collectionId, id] = keysArr[i]
+              const instance = value.toJSON() as Instance
+              const sale = sales[i]?.toJSON() as any
+              const nft: NFT = {
+                id,
+                collectionId,
+                owner: sale?.seller || instance.owner,
+                metadataUri: (metas[i]?.toHuman() as any)?.data,
+                sellPrice: sale ? parseHex(sale.price.amount) : null,
+              }
+              return nft
+            })
+            return mapped
+          }),
+          take(1)
+        )
+      }),
+      repeatWhen(() => $events)
+    )
   }
 
-  async function createCollection(
+  function createCollection(
     args: [collectionId: string, owner: string, metadataUri: string],
     options?: TransactionOptions
   ) {
     const [collectionId, owner, metadataUri] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.utility.batchAll([
-      api.tx.uniques.create(collectionId, owner),
-      api.tx.uniques.setClassMetadata(collectionId, metadataUri, true),
-    ])
-    return inst.wrapSignAndSend(api, submittable, options)
+
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      map((api) => ({
+        api,
+        submittable: api.tx.utility.batchAll([
+          api.tx.uniques.create(collectionId, owner),
+          api.tx.uniques.setClassMetadata(collectionId, metadataUri, true),
+        ]),
+      })),
+      switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+    )
   }
 
-  async function mintNft(
+  function transferNft(
+    args: [collectionId: string, nftId: string, recipientAddress: string],
+    options?: TransactionOptions
+  ) {
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      map((api) => ({
+        api,
+        submittable: api.tx.uniques.transfer(...args),
+      })),
+      switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+    )
+  }
+
+  function mintNft(
     args: [collectionId: string, nftId: string, owner: string, metadataUri: string],
     options?: TransactionOptions
   ) {
     const [collectionId, nftId, owner, metadataUri] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.utility.batchAll([
-      api.tx.uniques.mint(collectionId, nftId, owner),
-      api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
-    ])
+    const $api = inst.getApi()
 
-    return inst.wrapSignAndSend(api, submittable, options)
+    return $api.pipe(
+      map((api) => ({
+        api,
+        submittable: api.tx.utility.batchAll([
+          api.tx.uniques.mint(collectionId, nftId, owner),
+          api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
+        ]),
+      })),
+      switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+    )
   }
 
-  async function transferNft(
-    args: [collectionId: string, nftId: string, recipientAddress: string],
-    options?: TransactionOptions
-  ) {
-    const api = await inst.getApi()
-    const submittable = api.tx.uniques.transfer(...args)
-    return inst.wrapSignAndSend(api, submittable, options)
-  }
-
-  async function sellNft(args: [collectionId: string, nftId: string, price: BN], options?: TransactionOptions) {
+  function sellNft(args: [collectionId: string, nftId: string, price: BN], options?: TransactionOptions) {
     const [collectionId, nftId, price] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.nftSales.add(collectionId, nftId, ['Native', price.toString()])
-    return inst.wrapSignAndSend(api, submittable, options)
+    const $api = inst.getApi()
+    return $api.pipe(
+      map((api) => ({
+        api,
+        submittable: api.tx.nftSales.add(collectionId, nftId, ['Native', price.toString()]),
+      })),
+      switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+    )
   }
 
-  async function removeNftListing(args: [collectionId: string, nftId: string], options?: TransactionOptions) {
+  function removeNftListing(args: [collectionId: string, nftId: string], options?: TransactionOptions) {
     const [collectionId, nftId] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.nftSales.remove(collectionId, nftId)
-    return inst.wrapSignAndSend(api, submittable, options)
+    const $api = inst.getApi()
+    return $api.pipe(
+      map((api) => ({
+        api,
+        submittable: api.tx.nftSales.remove(collectionId, nftId),
+      })),
+      switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+    )
   }
 
-  async function buyNft(args: [collectionId: string, nftId: string, maxPrice: BN], options?: TransactionOptions) {
+  function buyNft(args: [collectionId: string, nftId: string, maxPrice: BN], options?: TransactionOptions) {
     const [collectionId, nftId, price] = args
-    const api = await inst.getApi()
-    const submittable = api.tx.nftSales.buy(collectionId, nftId, ['Native', price.toString()])
-    return inst.wrapSignAndSend(api, submittable, options)
+    const $api = inst.getApi()
+    return $api.pipe(
+      map((api) => ({
+        api,
+        submittable: api.tx.nftSales.buy(collectionId, nftId, ['Native', price.toString()]),
+      })),
+      switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+    )
   }
 
   async function getAvailableCollectionId() {
-    const api = await inst.getApi()
-    for (let i = 0; i < MAX_ATTEMPTS; i += 1) {
-      const id = String(getRandomUint())
-      const res = await api.query.uniques.class(id)
-      if (res.toJSON() === null) {
-        return id
-      }
+    const $api = inst.getApi()
+
+    try {
+      const res = await firstValueFrom(
+        $api.pipe(
+          map((api) => ({
+            api,
+            id: null,
+            triesLeft: MAX_ATTEMPTS,
+          })),
+          expand(({ api, triesLeft }) => {
+            const id = String(getRandomUint())
+            if (triesLeft <= 0) return EMPTY
+
+            return api.query.uniques.class(id).pipe(
+              map((res) => ({ api, id: res.toJSON() === null ? id : null, triesLeft: triesLeft - 1 })),
+              take(1)
+            )
+          }),
+          filter(({ id }) => !!id)
+        )
+      )
+
+      return res.id as string
+    } catch (e) {
+      throw new Error(`Could not find an available collection ID in ${MAX_ATTEMPTS} attempts`)
     }
-    throw new Error(`Could not find an available collection ID in ${MAX_ATTEMPTS} attempts`)
   }
 
   async function getAvailableNftId(collectionId: string) {
-    const api = await inst.getApi()
-    for (let i = 0; i < MAX_ATTEMPTS; i += 1) {
-      const id = String(getRandomUint())
-      const res = await api.query.uniques.asset(collectionId, id)
-      if (res.toJSON() === null) {
-        return id
-      }
+    const $api = inst.getApi()
+    try {
+      const res = await firstValueFrom(
+        $api.pipe(
+          map((api) => ({
+            api,
+            id: null,
+            triesLeft: MAX_ATTEMPTS,
+          })),
+          expand(({ api, triesLeft }) => {
+            const id = String(getRandomUint())
+            if (triesLeft <= 0) return EMPTY
+
+            return api.query.uniques.asset(collectionId, id).pipe(
+              map((res) => ({ api, id: res.toJSON() === null ? id : null, triesLeft: triesLeft - 1 })),
+              take(1)
+            )
+          }),
+          filter(({ id }) => !!id)
+        )
+      )
+
+      return res.id as string
+    } catch (e) {
+      throw new Error(`Could not find an available NFT ID in ${MAX_ATTEMPTS} attempts`)
     }
-    throw new Error(`Could not find an available NFT ID in ${MAX_ATTEMPTS} attempts`)
   }
 
   return {
     getCollections,
+    getCollection,
     getCollectionNfts,
     getAccountNfts,
+    getNft,
     getAvailableCollectionId,
     getAvailableNftId,
     createCollection,

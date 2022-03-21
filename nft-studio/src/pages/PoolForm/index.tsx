@@ -1,4 +1,4 @@
-import Centrifuge, { aprToFee, toPerquintill } from '@centrifuge/centrifuge-js'
+import { aprToFee, toPerquintill } from '@centrifuge/centrifuge-js'
 import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import { ErrorMessage, Form, Formik, FormikHelpers } from 'formik'
@@ -77,7 +77,7 @@ const makeId = (): string => {
 const CreatePoolForm: React.FC = () => {
   const [issuerLogoFile, setIssuerLogoFile] = React.useState<File>()
 
-  const { execute: createPoolTx } = useCentrifugeTransaction('Create pool', (cent: Centrifuge) => cent.pools.createPool)
+  const { execute: createPoolTx } = useCentrifugeTransaction('Create pool', (cent) => cent.pools.createPool)
 
   return (
     <Formik

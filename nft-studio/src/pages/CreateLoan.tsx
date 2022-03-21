@@ -28,8 +28,8 @@ const CreateLoan: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
 
   const { selectedAccount } = useWeb3()
-  const { data: permissions } = usePermissions(selectedAccount?.address)
-  const { data: pools } = usePools()
+  const permissions = usePermissions(selectedAccount?.address)
+  const pools = usePools()
   const [redirect, setRedirect] = React.useState<string>()
 
   const history = useHistory()
@@ -74,7 +74,7 @@ const CreateLoan: React.FC = () => {
     (cent) => cent.pools.createLoan,
     {
       onSuccess: async ([poolId], result) => {
-        const api = await centrifuge.getApi()
+        const api = await centrifuge.getApiPromise()
         const event = result.events.find(({ event }) => api.events.loans.Created.is(event))
         if (event) {
           const eventData = event.toHuman() as any

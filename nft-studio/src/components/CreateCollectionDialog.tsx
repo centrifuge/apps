@@ -27,7 +27,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const [description, setDescription] = useState<string>('')
   const [logo, setLogo] = useState<File | null>(null)
   const cent = useCentrifuge()
-  const { data: balance } = useBalance()
+  const balance = useBalance()
   const [redirect, setRedirect] = useState<string>('')
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
@@ -41,8 +41,6 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     isLoading: transactionIsPending,
   } = useCentrifugeTransaction('Create collection', (cent) => cent.nfts.createCollection, {
     onSuccess: ([collectionId]) => {
-      queryClient.invalidateQueries('collections')
-      queryClient.invalidateQueries('balance')
       setRedirect(`/collection/${collectionId}`)
     },
   })

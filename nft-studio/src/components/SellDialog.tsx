@@ -1,7 +1,6 @@
 import { Button, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
-import { useQueryClient } from 'react-query'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { ButtonGroup } from './ButtonGroup'
@@ -22,9 +21,8 @@ const TRANSFER_FEE_ESTIMATE = 0.1
 export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const [price, setPrice] = React.useState<string | number>('')
   const [touched, setTouched] = React.useState(false)
-  const queryClient = useQueryClient()
   const { selectedAccount } = useWeb3()
-  const { data: balance } = useBalance()
+  const balance = useBalance()
 
   const isConnected = !!selectedAccount?.address
 
@@ -33,11 +31,7 @@ export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
     lastCreatedTransaction,
-  } = useCentrifugeTransaction('List NFT for sale', (cent) => cent.nfts.sellNft, {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['nfts', collectionId])
-    },
-  })
+  } = useCentrifugeTransaction('List NFT for sale', (cent) => cent.nfts.sellNft)
 
   React.useEffect(() => {
     if (lastCreatedTransaction?.status === 'pending') {

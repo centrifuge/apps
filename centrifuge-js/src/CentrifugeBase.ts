@@ -1,6 +1,8 @@
-import { ApiPromise } from '@polkadot/api'
+import { ApiPromise, ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult, Signer } from '@polkadot/types/types'
+import { firstValueFrom, of, throwError } from 'rxjs'
+import { takeWhile, tap } from 'rxjs/operators'
 import { TransactionOptions } from './types'
 import { getPolkadotApi } from './utils/web3'
 
@@ -99,12 +101,63 @@ export class CentrifugeBase {
     })
   }
 
+  wrapSignAndSendRx<T extends TransactionOptions>(api: ApiRx, submittable: SubmittableExtrinsic<'rxjs'>, options?: T) {
+    if (options?.batch) return of(submittable)
+
+    if (this.config.printExtrinsics) {
+      if (submittable.method.method === 'batchAll' || submittable.method.method === 'batch') {
+        console.log(`utility.${submittable.method.method}([`)
+        ;(submittable.method.args as any)[0].forEach((call: any) => {
+          const callDetails = api.findCall(call.callIndex)
+          console.log(
+            `\t${callDetails.section}.${callDetails.method}(${call.args.map((arg: any) => arg.toString()).join(', ')})`
+          )
+        })
+        console.log(`])`)
+      } else {
+        console.log(
+          `${submittable.method.section}.${submittable.method.method}(${submittable.method.args
+            .map((arg) => arg.toString())
+            .join(', ')})`
+        )
+      }
+    }
+
+    const { signer, signingAddress } = this.getSigner()
+    if (options?.paymentInfo) {
+      return submittable.paymentInfo(options.paymentInfo)
+    }
+    try {
+      return submittable.signAndSend(signingAddress, { signer }).pipe(
+        tap((result) => {
+          options?.onStatusChange?.(result)
+        }),
+        takeWhile((result) => {
+          const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
+          const hasError = !!(result.dispatchError || errors.length)
+
+          return !result.status.isInBlock && !hasError
+        }, true)
+      )
+    } catch (e) {
+      return throwError(() => e)
+    }
+  }
+
   getApi() {
     return getPolkadotApi(this.parachainUrl, parachainTypes)
   }
 
+  getApiPromise() {
+    return firstValueFrom(getPolkadotApi(this.parachainUrl, parachainTypes))
+  }
+
   getRelayChainApi() {
     return getPolkadotApi(this.relayChainUrl, relayChainTypes)
+  }
+
+  getRelayChainApiPromise() {
+    return firstValueFrom(getPolkadotApi(this.relayChainUrl, relayChainTypes))
   }
 
   getSigner() {
@@ -125,6 +178,6 @@ export class CentrifugeBase {
       return signingAddress.address
     }
 
-    return signingAddress
+    return signingAddress as string
   }
 }

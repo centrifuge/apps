@@ -32,9 +32,8 @@ export const NFTPage: React.FC = () => {
 
 const NFT: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
-
   const address = useAddress()
-  const { data: permissions } = usePermissions(address)
+  const permissions = usePermissions(address)
   const nft = useNFT(collectionId, nftId)
   const { data: nftMetadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)

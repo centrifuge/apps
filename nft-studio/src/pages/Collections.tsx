@@ -7,8 +7,8 @@ import { Identity } from '../components/Identity'
 import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
-import { useWeb3 } from '../components/Web3Provider'
 import { nftMetadataSchema } from '../schemas'
+import { useAddress } from '../utils/useAddress'
 import { useCollections, useFeaturedCollections } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useAccountNfts } from '../utils/useNFTs'
@@ -26,10 +26,10 @@ const COUNT_PER_PAGE = 12
 
 const Collections: React.FC = () => {
   const [createOpen, setCreateOpen] = React.useState(false)
-  const { selectedAccount } = useWeb3()
-  const { data: collections } = useCollections()
+  const address = useAddress()
+  const collections = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
-  const { data: accountNfts } = useAccountNfts(selectedAccount?.address, false)
+  const accountNfts = useAccountNfts(address, false)
   const { data: firstAccountNftMetadata } = useMetadata(accountNfts?.[0]?.metadataUri, nftMetadataSchema)
   const centrifuge = useCentrifuge()
 
@@ -39,10 +39,10 @@ const Collections: React.FC = () => {
     () =>
       collections?.filter((c) => {
         if (centrifuge.utils.isLoanPalletAccount(c.admin)) return false
-        return isSameAddress(c.owner, selectedAccount?.address)
+        return isSameAddress(c.owner, address)
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [collections, selectedAccount?.address]
+    [collections, address]
   )
 
   const otherCollections = React.useMemo(
@@ -58,7 +58,7 @@ const Collections: React.FC = () => {
       })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [collections, selectedAccount?.address]
+    [collections, address]
   )
 
   return (
@@ -66,13 +66,7 @@ const Collections: React.FC = () => {
       <PageHeader
         title="NFTs"
         actions={
-          <Button
-            onClick={() => setCreateOpen(true)}
-            variant="text"
-            small
-            icon={IconPlus}
-            disabled={!selectedAccount?.address}
-          >
+          <Button onClick={() => setCreateOpen(true)} variant="text" small icon={IconPlus} disabled={!address}>
             Create Collection
           </Button>
         }
@@ -92,7 +86,7 @@ const Collections: React.FC = () => {
           </LayoutGrid>
         </Stack>
       ) : null}
-      {selectedAccount && (
+      {address && (
         <Stack gap={3}>
           <Text variant="heading3" as="h2">
             My collections
@@ -105,7 +99,7 @@ const Collections: React.FC = () => {
                     title="All my NFTs"
                     label={
                       <>
-                        by <Identity address={selectedAccount.address} />
+                        by <Identity address={address} />
                       </>
                     }
                     description="A dynamic collection of owned NFTs"
@@ -132,7 +126,7 @@ const Collections: React.FC = () => {
       )}
       <Stack gap={3}>
         <Text variant="heading3" as="h2">
-          {selectedAccount || featuredCollections?.length ? 'Other collections' : 'Collections'}
+          {address || featuredCollections?.length ? 'Other collections' : 'Collections'}
         </Text>
         {otherCollections?.length ? (
           <>

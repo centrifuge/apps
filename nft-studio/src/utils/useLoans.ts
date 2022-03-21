@@ -1,48 +1,32 @@
-import { useQuery } from 'react-query'
-import { useCentrifuge } from '../components/CentrifugeProvider'
+import { combineLatest } from 'rxjs'
+import { map } from 'rxjs/operators'
+import { useCentrifugeQuery } from './useCentrifugeQuery'
 
 export function useLoans(poolId: string) {
-  const centrifuge = useCentrifuge()
-  const query = useQuery(
-    ['loans', poolId],
-    async () => {
-      return centrifuge.pools.getLoans([poolId])
-    },
-    {
-      suspense: true,
-    }
-  )
+  const [result] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
+    suspense: true,
+  })
 
-  return query
+  return result
 }
 
 export function useLoansAcrossPools(poolIds?: string[]) {
-  const centrifuge = useCentrifuge()
-  const query = useQuery(
+  const [result] = useCentrifugeQuery(
     ['loansAcrossPools', poolIds],
-    async () => {
-      return (await Promise.all(poolIds!.map((poolId) => centrifuge.pools.getLoans([poolId])))).flat()
-    },
+    (cent) => combineLatest(poolIds!.map((poolId) => cent.pools.getLoans([poolId]))).pipe(map((loans) => loans.flat())),
     {
       suspense: true,
       enabled: poolIds && poolIds.length > 0,
     }
   )
 
-  return query
+  return result
 }
 
 export function useLoan(poolId: string, assetId: string) {
-  const centrifuge = useCentrifuge()
-  const query = useQuery(
-    ['loan', poolId, assetId],
-    async () => {
-      return centrifuge.pools.getLoan([poolId, assetId])
-    },
-    {
-      suspense: true,
-    }
-  )
+  const [result] = useCentrifugeQuery(['loan', poolId, assetId], (cent) => cent.pools.getLoan([poolId, assetId]), {
+    suspense: true,
+  })
 
-  return query
+  return result
 }
