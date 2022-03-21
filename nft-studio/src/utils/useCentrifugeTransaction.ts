@@ -25,7 +25,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     try {
       const injector = await web3FromAddress(selectedAccount?.address)
       const connectedCent = cent.connect(selectedAccount?.address, injector.signer)
-      const api = await cent.getApi()
+      const api = await cent.getApiPromise()
 
       const transaction = transactionCallback(connectedCent)
 

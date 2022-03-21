@@ -9,7 +9,7 @@ export function useIdentity(address?: string) {
     ['identity', address],
     async () => {
       return firstValueFrom(
-        centrifuge.getRxRelayChainApi().pipe(
+        centrifuge.getRelayChainApi().pipe(
           switchMap((api) => {
             if (!api.query.identity) return of(null)
             return api.query.identity.identityOf(address)

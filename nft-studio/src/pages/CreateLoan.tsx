@@ -74,7 +74,7 @@ const CreateLoan: React.FC = () => {
     (cent) => cent.pools.createLoan,
     {
       onSuccess: async ([poolId], result) => {
-        const api = await centrifuge.getApi()
+        const api = await centrifuge.getApiPromise()
         const event = result.events.find(({ event }) => api.events.loans.Created.is(event))
         if (event) {
           const eventData = event.toHuman() as any

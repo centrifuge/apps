@@ -45,7 +45,7 @@ const formatInstanceKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as s
 
 export function getNftsModule(inst: CentrifugeBase) {
   function getCollections() {
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
     const $events = $api.pipe(
@@ -92,7 +92,7 @@ export function getNftsModule(inst: CentrifugeBase) {
 
   function getCollection(args: [collectionId: string]) {
     const [collectionId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) =>
@@ -116,7 +116,7 @@ export function getNftsModule(inst: CentrifugeBase) {
 
   function getCollectionNfts(args: [collectionId: string]) {
     const [collectionId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
     const $events = $api.pipe(
@@ -175,7 +175,7 @@ export function getNftsModule(inst: CentrifugeBase) {
 
   function getNft(args: [collectionId: string, nftId: string]) {
     const [collectionId, nftId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) =>
@@ -204,7 +204,7 @@ export function getNftsModule(inst: CentrifugeBase) {
   function getAccountNfts(args: [address: string]) {
     const [address] = args
 
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
     const $events = $api.pipe(
@@ -279,7 +279,7 @@ export function getNftsModule(inst: CentrifugeBase) {
   ) {
     const [collectionId, owner, metadataUri] = args
 
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       map((api) => ({
@@ -297,7 +297,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     args: [collectionId: string, nftId: string, recipientAddress: string],
     options?: TransactionOptions
   ) {
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       map((api) => ({
@@ -313,7 +313,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     options?: TransactionOptions
   ) {
     const [collectionId, nftId, owner, metadataUri] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       map((api) => ({
@@ -329,7 +329,7 @@ export function getNftsModule(inst: CentrifugeBase) {
 
   function sellNft(args: [collectionId: string, nftId: string, price: BN], options?: TransactionOptions) {
     const [collectionId, nftId, price] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
     return $api.pipe(
       map((api) => ({
         api,
@@ -341,7 +341,7 @@ export function getNftsModule(inst: CentrifugeBase) {
 
   function removeNftListing(args: [collectionId: string, nftId: string], options?: TransactionOptions) {
     const [collectionId, nftId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
     return $api.pipe(
       map((api) => ({
         api,
@@ -353,7 +353,7 @@ export function getNftsModule(inst: CentrifugeBase) {
 
   function buyNft(args: [collectionId: string, nftId: string, maxPrice: BN], options?: TransactionOptions) {
     const [collectionId, nftId, price] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
     return $api.pipe(
       map((api) => ({
         api,
@@ -364,7 +364,7 @@ export function getNftsModule(inst: CentrifugeBase) {
   }
 
   async function getAvailableCollectionId() {
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     try {
       const res = await firstValueFrom(
@@ -394,7 +394,7 @@ export function getNftsModule(inst: CentrifugeBase) {
   }
 
   async function getAvailableNftId(collectionId: string) {
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
     try {
       const res = await firstValueFrom(
         $api.pipe(

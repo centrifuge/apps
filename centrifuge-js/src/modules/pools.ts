@@ -237,7 +237,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   ) {
     const [poolId, collectionId, tranches, currency, maxReserve, metadata] = args
 
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
@@ -257,7 +257,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     options?: TransactionOptions
   ) {
     const [poolId, minEpochTime, challengeTime, maxNavAge] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
@@ -274,7 +274,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function setMaxReserve(args: [poolId: string, maxReserve: BN], options?: TransactionOptions) {
     const [poolId, maxReserve] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
@@ -288,7 +288,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId, trancheId, newOrder] = args
 
     const address = inst.getSignerAddress()
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       combineLatestWith(getPool([poolId])),
@@ -315,7 +315,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   function updateRedeemOrder(args: [poolId: string, trancheId: number, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
     const address = inst.getSignerAddress()
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       combineLatestWith(getPool([poolId])),
@@ -341,7 +341,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function closeEpoch(args: [poolId: string], options?: TransactionOptions) {
     const [poolId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
@@ -353,7 +353,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function submitSolution(args: [poolId: string, solution: string[][]], options?: TransactionOptions) {
     const [poolId, solution] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
@@ -365,7 +365,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function collect(args: [poolId: string, trancheId?: number], options?: TransactionOptions) {
     const [poolId, trancheId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
     const address = inst.getSignerAddress()
 
     if (trancheId !== undefined) {
@@ -414,7 +414,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId, roles, accounts] = args
     if (roles.length !== accounts.length) throw new Error('Roles length needs to match accounts length')
 
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
@@ -429,7 +429,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function getRolesByPool(args: [address: Account]) {
     const [address] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     const $events = $api.pipe(
       switchMap(
@@ -471,7 +471,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   }
 
   async function getNextLoanId() {
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     const id = await firstValueFrom($api.pipe(switchMap((api) => api.query.loans.nextLoanId()))).toString()
     return id
@@ -479,7 +479,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function createLoan(args: [poolId: string, collectionId: string, nftId: string], options?: TransactionOptions) {
     const [poolId, collectionId, nftId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
@@ -494,7 +494,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     options?: TransactionOptions
   ) {
     const [poolId, loanId, ratePerSec, loanType, loanInfo] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
@@ -506,7 +506,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function financeLoan(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
     const [poolId, loanId, amount] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
@@ -518,7 +518,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function repayLoanPartially(args: [poolId: string, loanId: string, amount: BN], options?: TransactionOptions) {
     const [poolId, loanId, amount] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
@@ -530,7 +530,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function repayAndCloseLoan(args: [poolId: string, loanId: string], options?: TransactionOptions) {
     const [poolId, loanId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       combineLatestWith(getLoan([poolId, loanId])),
@@ -548,7 +548,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   }
 
   function getPools() {
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     const $events = $api.pipe(
       switchMap(
@@ -627,7 +627,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function getPool(args: [poolId: string]) {
     const [poolId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) =>
@@ -698,7 +698,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function getBalances(args: [address: Account]) {
     const [address] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
 
@@ -739,7 +739,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   function getOrder(args: [address: Account, poolId: string, trancheId: number]) {
     const [address, poolId, trancheId] = args
 
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => api.query.pools.order([poolId, trancheId], address)),
@@ -757,7 +757,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function getLoans(args: [poolId: string]) {
     const [poolId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     const $events = $api.pipe(
       switchMap(
@@ -811,7 +811,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function getLoan(args: [poolId: string, loanId: string]) {
     const [poolId, loanId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => api.query.loans.loanInfo(poolId, loanId)),
@@ -846,7 +846,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function getLoanCollectionIdForPool(args: [poolId: string]) {
     const [poolId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => api.query.loans.poolToLoanNftClass(poolId)),
@@ -861,7 +861,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function addWriteOffGroup(args: [poolId: string, percentage: BN, overdueDays: number], options?: TransactionOptions) {
     const [poolId, percentage, overdueDays] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
@@ -876,7 +876,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     options?: TransactionOptions
   ) {
     const [poolId, loanId, writeOffGroupId] = args
-    const $api = inst.getRxApi()
+    const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {

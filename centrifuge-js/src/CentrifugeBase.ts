@@ -1,10 +1,10 @@
 import { ApiPromise, ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult, Signer } from '@polkadot/types/types'
-import { of, throwError } from 'rxjs'
+import { firstValueFrom, of, throwError } from 'rxjs'
 import { takeWhile, tap } from 'rxjs/operators'
 import { TransactionOptions } from './types'
-import { getPolkadotApi, getPolkadotRxApi } from './utils/web3'
+import { getPolkadotApi } from './utils/web3'
 
 export type Config = {
   network: 'altair' | 'centrifuge'
@@ -147,15 +147,17 @@ export class CentrifugeBase {
   getApi() {
     return getPolkadotApi(this.parachainUrl, parachainTypes)
   }
-  getRxApi() {
-    return getPolkadotRxApi(this.parachainUrl, parachainTypes)
+
+  getApiPromise() {
+    return firstValueFrom(getPolkadotApi(this.parachainUrl, parachainTypes))
   }
 
   getRelayChainApi() {
     return getPolkadotApi(this.relayChainUrl, relayChainTypes)
   }
-  getRxRelayChainApi() {
-    return getPolkadotRxApi(this.relayChainUrl, relayChainTypes)
+
+  getRelayChainApiPromise() {
+    return firstValueFrom(getPolkadotApi(this.relayChainUrl, relayChainTypes))
   }
 
   getSigner() {

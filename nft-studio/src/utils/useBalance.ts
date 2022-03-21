@@ -7,7 +7,7 @@ export function useBalance() {
   const [result] = useCentrifugeQuery(
     ['balance', address],
     (cent) =>
-      cent.getRxApi().pipe(
+      cent.getApi().pipe(
         switchMap(
           (api) => api.query.system.account(address),
           (api, balances) => ({ api, balances })
