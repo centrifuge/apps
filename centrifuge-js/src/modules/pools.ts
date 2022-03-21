@@ -150,7 +150,7 @@ export type Pool = {
     lastExecuted: number
     inSubmissionPeriod: number | null
   }
-  nav: {
+  nav: null | {
     latest: string
     lastUpdated: number
   }
@@ -609,11 +609,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
               lastExecuted: pool.lastEpochExecuted,
               inSubmissionPeriod: pool.submissionPeriodEpoch,
             },
-            nav: {
-              latest: parseBN(navData.latest),
-              lastUpdated: navData.lastUpdated,
-            },
-            value: new BN(parseBN(pool.totalReserve)).add(new BN(parseBN(navData.latest))).toString(),
+            nav: navData
+              ? {
+                  latest: parseBN(navData.latest),
+                  lastUpdated: navData.lastUpdated,
+                }
+              : null,
+            value: new BN(parseBN(pool.totalReserve)).add(new BN(navData ? parseBN(navData.latest) : 0)).toString(),
           }
 
           return mapped

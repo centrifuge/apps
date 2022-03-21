@@ -25,8 +25,9 @@ const FileUploadContainer = styled(Stack)<{ $disabled?: boolean }>`
   position: relative;
   justify-content: center;
   width: 100%;
-  background: ${({ theme }) => theme.colors.backgroundInput};
-  outline: 1px dashed ${({ theme, $disabled }) => ($disabled ? theme.colors.textDisabled : theme.colors.textSecondary)};
+  background: ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundPage : theme.colors.backgroundInput)};
+  outline: 1px dashed
+    ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundSecondary : theme.colors.textSecondary)};
   outline-offset: -1px;
   border-radius: ${({ theme }) => theme.radii.card}px;
   cursor: pointer;

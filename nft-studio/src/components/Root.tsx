@@ -1,5 +1,5 @@
 import { GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
-import altairDark from '@centrifuge/fabric/dist/theme/altairDark'
+import centrifugeLight from '@centrifuge/fabric/dist/theme/centrifugeLight'
 import { OverlayProvider } from '@react-aria/overlays'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
@@ -21,7 +21,7 @@ import { PoolsPage } from '../pages/Pools'
 import { TokenPage } from '../pages/Token'
 import { TokensPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
-import { DebugFlags, useDebugFlags } from './DebugFlags'
+import { DebugFlags } from './DebugFlags'
 import { GlobalStyle } from './GlobalStyle'
 import { HostPermissionsProvider } from './HostPermissions'
 import { LoadBoundary } from './LoadBoundary'
@@ -38,20 +38,20 @@ const queryClient = new QueryClient({
 })
 
 const darkTheme: DefaultTheme = {
-  ...altairDark,
+  ...centrifugeLight,
   sizes: {
-    ...altairDark.sizes,
+    ...centrifugeLight.sizes,
     container: '100%',
     navBarHeight: 72,
     navBarHeightMobile: 64,
     dialog: 564,
   },
   colors: {
-    ...altairDark.colors,
-    placeholderBackground: altairDark.colors.backgroundSecondary,
+    ...centrifugeLight.colors,
+    placeholderBackground: centrifugeLight.colors.backgroundSecondary,
   },
   typography: {
-    ...altairDark.typography,
+    ...centrifugeLight.typography,
     headingLarge: {
       fontSize: [24, 24, 36],
       lineHeight: 1.25,
@@ -91,35 +91,7 @@ export const Root: React.VFC = () => {
 }
 
 const Routes: React.VFC = () => {
-  const { showOnlyNFT } = useDebugFlags()
-  return showOnlyNFT ? (
-    <Switch>
-      <Route path="/collection/:cid/object/mint">
-        <MintNFTPage />
-      </Route>
-      <Route path="/collection/:cid/object/:nftid/new-asset">
-        <CreateLoanPage />
-      </Route>
-      <Route path="/collection/:cid/object/:nftid">
-        <NFTPage />
-      </Route>
-      <Route path="/collection/:cid">
-        <CollectionPage />
-      </Route>
-      <Route path="/account">
-        <AccountNFTsPage />
-      </Route>
-      <Route path="/nfts">
-        <CollectionsPage />
-      </Route>
-      <Route exact path="/">
-        <CollectionsPage />
-      </Route>
-      <Route>
-        <NotFoundPage />
-      </Route>
-    </Switch>
-  ) : (
+  return (
     <Switch>
       <Route path="/collection/:cid/object/mint">
         <MintNFTPage />

@@ -15,8 +15,8 @@ const StyledTextInput = styled.input`
   width: 100%;
   border: 0;
   background: transparent;
-  height: 22px;
-  font-size: 16px;
+  height: 36px;
+  font-size: 24px;
   font-weight: inherit;
   font-family: inherit;
   line-height: inherit;

@@ -96,7 +96,7 @@ const Pool: React.FC = () => {
         />
         <LabelValueStack
           label="Asset value"
-          value={centrifuge.utils.formatCurrencyAmount(pool?.nav.latest, pool?.currency, true)}
+          value={centrifuge.utils.formatCurrencyAmount(pool?.nav?.latest, pool?.currency, true)}
         />
         <LabelValueStack
           label="Reserve"
