@@ -113,8 +113,6 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
 
   const confirmDisabled = !termsAccepted
 
-  console.log('file', logo)
-
   return (
     <>
       <Dialog isOpen={open && !confirmOpen} onClose={close}>
