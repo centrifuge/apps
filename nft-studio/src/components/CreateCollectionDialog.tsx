@@ -92,6 +92,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     setDescription('')
     resetLastTransaction()
     resetUpload()
+    setConfirmOpen(false)
     setTermsAccepted(false)
   }
 
@@ -183,7 +184,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
                 <Button variant="outlined" onClick={() => setConfirmOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={confirmDisabled}>
+                <Button type="submit" loading={isTxPending} disabled={confirmDisabled}>
                   Create Collection
                 </Button>
               </ButtonGroup>
