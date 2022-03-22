@@ -17,7 +17,7 @@ import { useCentrifuge } from './CentrifugeProvider'
 // TODO: replace with better fee estimate
 const CREATE_FEE_ESTIMATE = 2
 
-const MAX_FILE_SIZE_IN_BYTES = 10 * 1024 ** 2 // 1 MB limit by default
+const MAX_FILE_SIZE_IN_BYTES = 1024 ** 2 // 1 MB limit by default
 const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
@@ -112,6 +112,8 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   }
 
   const confirmDisabled = !termsAccepted
+
+  console.log('file', logo)
 
   return (
     <>

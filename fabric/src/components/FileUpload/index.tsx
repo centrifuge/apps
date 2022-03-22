@@ -143,6 +143,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   }
 
   async function handleNewFile(newFile: File) {
+    setError(null)
+
     if (curFile) {
       handleClear()
     }
