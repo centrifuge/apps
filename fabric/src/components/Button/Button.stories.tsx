@@ -15,7 +15,7 @@ type AnchorButtonStory = ComponentStory<typeof AnchorButtonComp>
 
 const Template: ButtonStory = (args): React.ReactElement => (
   <Grid columns={5} gap={3} justifyItems="start" maxWidth={800} equalColumns>
-    {(['contained', 'outlined', 'text'] as const).flatMap((variant) =>
+    {(['contained', 'containedSecondary', 'outlined', 'text'] as const).flatMap((variant) =>
       [false, true].map((small) => (
         <>
           <ButtonComp {...args} variant={variant} small={small}>
