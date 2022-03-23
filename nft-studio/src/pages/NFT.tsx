@@ -146,7 +146,7 @@ const NFT: React.FC = () => {
         left={
           <Box>
             <Box mt={1}>
-              <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
+              <RouterLinkButton icon={IconArrowLeft} to={`/collection/${collectionId}`} variant="text">
                 Back
               </RouterLinkButton>
             </Box>
