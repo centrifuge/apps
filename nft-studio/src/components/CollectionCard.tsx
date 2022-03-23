@@ -94,6 +94,7 @@ export const CollectionCardInner = React.forwardRef<HTMLAnchorElement, InnerProp
               left={0}
               zIndex={0}
               backgroundColor="black"
+              style={{ transition: 'opacity 200ms', opacity: imageShown ? 0 : 1 }}
             >
               <LogoAltair height="50%" />
             </Shelf>

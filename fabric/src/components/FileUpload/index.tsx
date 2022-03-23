@@ -5,6 +5,7 @@ import IconAlertCircle from '../../icon/IconAlertCircle'
 import IconPlus from '../../icon/IconPlus'
 import IconSpinner from '../../icon/IconSpinner'
 import IconX from '../../icon/IconX'
+import useControlledState from '../../utils/useControlledState'
 import { Box } from '../Box'
 import { Button } from '../Button'
 import { Flex } from '../Flex'
@@ -104,8 +105,8 @@ const Spinner = styled(IconSpinner)`
 `
 
 type FileUploadProps = {
-  onFileUpdate?: (file: File) => void
-  onFileCleared?: () => void
+  file?: File | null
+  onFileChange?: (file: File | null) => void
   validate?: (file: File) => string | undefined
   errorMessage?: string
   accept?: string
@@ -116,8 +117,8 @@ type FileUploadProps = {
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
-  onFileUpdate,
-  onFileCleared,
+  file: fileProp,
+  onFileChange,
   validate,
   errorMessage: errorMessageProp,
   accept,
@@ -127,7 +128,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   label,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [curFile, setCurFile] = useState<File | null>(null)
+  const [curFile, setCurFile] = useControlledState<File | null>(null, fileProp, onFileChange)
   const [error, setError] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
 
@@ -140,10 +141,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   function handleClear() {
     setError(null)
     setCurFile(null)
-    onFileCleared?.()
   }
 
   async function handleNewFile(newFile: File) {
+    setError(null)
+
     if (curFile) {
       handleClear()
     }
@@ -156,7 +158,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }
 
     setCurFile(newFile)
-    onFileUpdate?.(newFile)
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {

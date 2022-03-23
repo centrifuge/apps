@@ -17,7 +17,7 @@ import { useCentrifuge } from './CentrifugeProvider'
 // TODO: replace with better fee estimate
 const CREATE_FEE_ESTIMATE = 2
 
-const MAX_FILE_SIZE_IN_BYTES = 10 * 1024 ** 2 // 1 MB limit by default
+const MAX_FILE_SIZE_IN_BYTES = 1024 ** 2 // 1 MB limit by default
 const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
@@ -90,6 +90,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     setDescription('')
     resetLastTransaction()
     resetUpload()
+    setConfirmOpen(false)
     setTermsAccepted(false)
   }
 
@@ -135,8 +136,8 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
             <FileUpload
               label="Collection logo (JPEG, SVG, PNG, or GIF up to 1 MB)"
               placeholder="Choose image"
-              onFileUpdate={(file) => setLogo(file)}
-              onFileCleared={() => setLogo(null)}
+              file={logo}
+              onFileChange={(file) => setLogo(file)}
               validate={(file) => {
                 if (!isImageFile(file)) {
                   return 'File format not supported'
@@ -181,7 +182,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
                 <Button variant="outlined" onClick={() => setConfirmOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={confirmDisabled}>
+                <Button type="submit" loading={isTxPending} disabled={confirmDisabled}>
                   Create Collection
                 </Button>
               </ButtonGroup>
