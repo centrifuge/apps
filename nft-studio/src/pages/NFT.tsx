@@ -1,4 +1,4 @@
-import { Box, Button, IconArrowLeft, IconArrowRight, IconNft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, IconArrowRight, IconNft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { NavLink, useParams } from 'react-router-dom'
 import { BuyDialog } from '../components/BuyDialog'
@@ -143,38 +143,31 @@ const NFT: React.FC = () => {
       </Box>
       <SplitView
         left={
-          <Box>
-            <Box mt={1}>
-              <RouterLinkButton icon={IconArrowLeft} to={`/collection/${collectionId}`} variant="text">
-                Back
-              </RouterLinkButton>
-            </Box>
-            <Box display="flex" alignItems="center" justifyContent="center" py={2} height="100%">
-              {imageUrl ? (
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  maxWidth={800}
-                  style={{ aspectRatio: '1 / 1' }}
-                >
-                  <Box as="img" maxWidth="100%" src={imageUrl} />
-                </Box>
-              ) : (
-                <Box
-                  bg="borderSecondary"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  // maxHeight="60vh"
-                  maxWidth={800}
-                  borderRadius="10px"
-                  style={{ aspectRatio: '1 / 1' }}
-                >
-                  <IconNft color="backgroundPrimary" size="50%" />
-                </Box>
-              )}
-            </Box>
+          <Box display="flex" alignItems="center" justifyContent="center" py={2} height="100%">
+            {imageUrl ? (
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                maxWidth={800}
+                style={{ aspectRatio: '1 / 1' }}
+              >
+                <Box as="img" maxWidth="100%" src={imageUrl} />
+              </Box>
+            ) : (
+              <Box
+                bg="borderSecondary"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                // maxHeight="60vh"
+                maxWidth={800}
+                borderRadius="10px"
+                style={{ aspectRatio: '1 / 1' }}
+              >
+                <IconNft color="backgroundPrimary" size="50%" />
+              </Box>
+            )}
           </Box>
         }
         right={

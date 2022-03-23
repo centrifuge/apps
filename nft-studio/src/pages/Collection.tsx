@@ -1,8 +1,7 @@
-import { Box, Grid, IconArrowLeft, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
-import { useDebugFlags } from '../components/DebugFlags'
 import { Identity } from '../components/Identity'
 import { LogoAltair } from '../components/LogoAltair'
 import { NFTCard } from '../components/NFTCard'
@@ -40,7 +39,6 @@ const Collection: React.FC = () => {
   const { data: metadata, isLoading } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const centrifuge = useCentrifuge()
-  const { showOnlyNFT } = useDebugFlags()
 
   const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
   const canMint = !isLoanCollection && isSameAddress(address, collection?.owner)
@@ -65,12 +63,7 @@ const Collection: React.FC = () => {
           )
         }
       />
-      <Box mt={1}>
-        <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
-          {showOnlyNFT ? 'Home' : 'Back'}
-        </RouterLinkButton>
-      </Box>
-      <Stack alignItems="center" gap={2} mb={5} mt="-16px">
+      <Stack alignItems="center" gap={2} mb={5}>
         {metadata?.image ? (
           <Box
             as="img"

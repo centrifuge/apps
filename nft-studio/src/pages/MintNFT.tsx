@@ -1,4 +1,4 @@
-import { Box, Button, IconArrowLeft, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
+import { Box, Button, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import { Flex } from '@centrifuge/fabric/dist/components/Flex'
 import React, { useReducer, useState } from 'react'
 import { useQueryClient } from 'react-query'
@@ -122,30 +122,23 @@ const MintNFT: React.FC = () => {
 
       <SplitView
         left={
-          <Box>
-            <Box pt={1}>
-              <RouterLinkButton icon={IconArrowLeft} to={`/collection/${collectionId}`} variant="text">
-                Back
-              </RouterLinkButton>
-            </Box>
-            <Flex alignItems="stretch" justifyContent="center" height="100%" p={[2, 4, 0]} mx={8} mt={2}>
-              <FileImageUpload
-                key={version}
-                onFileUpdate={async (file) => {
-                  if (file) {
-                    setFileName(file.name)
-                    setFileDataUri(await getFileDataURI(file))
-                    if (!nftName) {
-                      setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
-                    }
-                  } else {
-                    setFileName('')
-                    setFileDataUri('')
+          <Flex alignItems="stretch" justifyContent="center" height="100%" p={[2, 4, 0]} mx={8} mt={2}>
+            <FileImageUpload
+              key={version}
+              onFileUpdate={async (file) => {
+                if (file) {
+                  setFileName(file.name)
+                  setFileDataUri(await getFileDataURI(file))
+                  if (!nftName) {
+                    setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
                   }
-                }}
-              />
-            </Flex>
-          </Box>
+                } else {
+                  setFileName('')
+                  setFileDataUri('')
+                }
+              }}
+            />
+          </Flex>
         }
         right={
           <Box px={[2, 4, 8]} py={9}>

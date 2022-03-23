@@ -15,9 +15,7 @@ export const SplitView: React.FC<Props> = ({ left, right }) => {
       gridAutoRows={['max-content', 'max-content', 'initial']}
       position="relative"
     >
-      <Box borderRightWidth={[0, 0, '1px']} borderRightStyle="solid" borderRightColor="borderPrimary">
-        {left}
-      </Box>
+      <Box>{left}</Box>
       <Box>{right}</Box>
     </Box>
   )
