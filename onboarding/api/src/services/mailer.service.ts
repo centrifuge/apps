@@ -2,68 +2,80 @@ import { Injectable } from '@nestjs/common'
 import config from '../config'
 import { User } from '../repos/user.repo'
 
-const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
+const client = require('@sendgrid/mail')
+client.setApiKey(config.sendgrid.apiKey)
 
 @Injectable()
 export class MailerService {
   async sendWhitelistedEmail(user: User, pool: any, data: any) {
     const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
-    const response = await fetch(config.sendgrid.apiUrl, {
-      body: JSON.stringify({
-        from: {
-          name: pool.profile?.issuer?.name,
-          email: `issuer+${issuerName}@centrifuge.io`,
-        },
-        personalizations: [
-          {
-            to: [{ email: user.email }],
-            dynamic_template_data: {
-              investorName: user.fullName,
-              poolName: pool.metadata?.name,
-              token: `${pool.metadata?.name} ${data.tranche}`,
-              issuerName: pool.profile?.issuer?.name,
-              issuerEmail: pool.profile?.issuer?.email,
+    const message = {
+      personalizations: [
+        {
+          to: [
+            {
+              email: user.email,
+              name: user.fullName,
             },
+          ],
+          dynamic_template_data: {
+            investorName: user.fullName,
+            poolName: pool.metadata?.name,
+            token: `${pool.metadata?.name} ${data.tranche}`,
+            issuerName: pool.profile?.issuer?.name,
+            issuerEmail: pool.profile?.issuer?.email,
           },
-        ],
-        template_id: config.sendgrid.whitelistEmailTemplate,
-      }),
-      headers: {
-        Authorization: `Bearer ${config.sendgrid.apiKey}`,
-        'Content-Type': 'application/json',
+          headers: {
+            'Content-Type': 'text/html',
+          },
+        },
+      ],
+      from: {
+        name: pool.profile?.issuer?.name,
+        email: `issuer+${issuerName}@centrifuge.io`,
       },
-      method: 'POST',
-    })
+      template_id: config.sendgrid.whitelistEmailTemplate,
+    }
+
+    await client
+      .send(message)
+      .then(() => console.log('Subscription email sent successfully'))
+      .catch((error) => {
+        console.error(error)
+      })
   }
 
   async sendSubscriptionAgreementEmail(user: User, pool: any, tranche: string) {
     const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
-    const response = await fetch(config.sendgrid.apiUrl, {
-      body: JSON.stringify({
-        from: {
-          name: pool.profile?.issuer?.name,
-          email: `issuer+${issuerName}@centrifuge.io`,
-        },
-        personalizations: [
-          {
-            to: [{ email: user.email }],
-            dynamic_template_data: {
-              investorName: user.fullName,
-              token: `${pool.metadata?.name} ${tranche}`,
-              issuerName: pool.profile?.issuer?.name,
+    const message = {
+      personalizations: [
+        {
+          to: [
+            {
+              email: user.email,
+              name: user.fullName,
             },
+          ],
+          dynamic_template_data: {
+            investorName: user.fullName,
+            token: `${pool.metadata?.slug} ${tranche}`,
+            issuerName: pool.profile?.issuer?.name,
           },
-        ],
-        template_id: config.sendgrid.subscriptionAgreementTemplate,
-      }),
-      headers: {
-        Authorization: `Bearer ${config.sendgrid.apiKey}`,
-        'Content-Type': 'application/json',
+        },
+      ],
+      from: {
+        name: pool.profile?.issuer?.name,
+        email: `issuer+${issuerName}@centrifuge.io`,
       },
-      method: 'POST',
-    }).catch((e) => {
-      console.log('Error in sending email', e)
-    })
+      template_id: config.sendgrid.subscriptionAgreementTemplate,
+    }
+
+    await client
+      .send(message)
+      .then(() => console.log('Mail sent successfully'))
+      .catch((error) => {
+        console.error(JSON.stringify(error))
+      })
   }
 }
 
