@@ -9409,12 +9409,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sendgrid/client@npm:^7.6.2":
+  version: 7.6.2
+  resolution: "@sendgrid/client@npm:7.6.2"
+  dependencies:
+    "@sendgrid/helpers": ^7.6.2
+    axios: ^0.26.0
+  checksum: c6d198aaae0497f7af520551e40cc065cc25bdeebbbe7bb7f84f781ddbbcc36c1b6f35a85b5990b662296d7016fa279a4f5c4d4f7846b5603f1edcf5820c5e9b
+  languageName: node
+  linkType: hard
+
 "@sendgrid/helpers@npm:^7.0.1, @sendgrid/helpers@npm:^7.4.6":
   version: 7.4.6
   resolution: "@sendgrid/helpers@npm:7.4.6"
   dependencies:
     deepmerge: ^4.2.2
   checksum: ec0e8ee01f796f9bde3b6519a063f6cbc226fcd0d64b5d14e7587a6ebd1e93cd011d74f5ddcadee7e65bb43ce6b1b3714fb7bb44a52c66df2d95d30ab34d41e2
+  languageName: node
+  linkType: hard
+
+"@sendgrid/helpers@npm:^7.6.2":
+  version: 7.6.2
+  resolution: "@sendgrid/helpers@npm:7.6.2"
+  dependencies:
+    deepmerge: ^4.2.2
+  checksum: ca0cd5454b22abdcff663fa2c5eaec38de5214a39da27dd884ec7893cc5b742439e4d9d6bb05ddcb9071aad7e8bd0610ff9761eb1b6a886c883546637ce3486f
   languageName: node
   linkType: hard
 
@@ -9425,6 +9444,16 @@ __metadata:
     "@sendgrid/client": ^7.1.1
     "@sendgrid/helpers": ^7.0.1
   checksum: 19536670f4c3d5de7f843d57e91427aad1649aea63d1d63c35a49bb2cfdc1d55e62fb4b245bf011995ab4084b42a037205cbcb3789f5d9b0cb44769a942f0f6e
+  languageName: node
+  linkType: hard
+
+"@sendgrid/mail@npm:^7.6.2":
+  version: 7.6.2
+  resolution: "@sendgrid/mail@npm:7.6.2"
+  dependencies:
+    "@sendgrid/client": ^7.6.2
+    "@sendgrid/helpers": ^7.6.2
+  checksum: 0fbbb3f2fcd7f43d7e5f645c68a0765acfca89990fe2638ee273ce965ebcd9f33c3974db700b5aa421297b3dae46e763534dc16154037ce29a8fb623d88a8776
   languageName: node
   linkType: hard
 
@@ -15331,6 +15360,15 @@ __metadata:
   dependencies:
     follow-redirects: ^1.14.4
   checksum: e741dfea07def55be7b1082824d71f54f7859b9c3c75a86c6a74b91c6e48bb461aceac683f77867313f89ff40ef5f2d1d2a1fe1953fcb71bdc1c1fc0fc069925
+  languageName: node
+  linkType: hard
+
+"axios@npm:^0.26.0":
+  version: 0.26.1
+  resolution: "axios@npm:0.26.1"
+  dependencies:
+    follow-redirects: ^1.14.8
+  checksum: 139698e390e6e875d75efcebc3b4a0bb94b680fab69e4e8632d640bb64d746f4dd3efcedbab69f3e55ae01e4b83e4f530f78800b936ff282c6c24365023d2e89
   languageName: node
   linkType: hard
 
@@ -25460,6 +25498,16 @@ __metadata:
     debug:
       optional: true
   checksum: 69c5dc6658d9a5ac337b82e2b4ab4af5ed4b0482b582b9517dc10fa132f781187febe4d28e1808866c299b1ca0083c1493e781364746376e89a24e15b4887a0c
+  languageName: node
+  linkType: hard
+
+"follow-redirects@npm:^1.14.8":
+  version: 1.14.9
+  resolution: "follow-redirects@npm:1.14.9"
+  peerDependenciesMeta:
+    debug:
+      optional: true
+  checksum: 1b602c548b4194c66d8d530d2c8f76b4116b6c498434acfa561f583f45b571fd9fc042fba778748cd863044051656cf4788ba11c8ff35407223ed0d38ffff0d4
   languageName: node
   linkType: hard
 
@@ -41826,6 +41874,7 @@ resolve@1.18.1:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
+    "@sendgrid/mail": ^7.6.2
     "@types/concurrently": ^5
     babel-plugin-styled-components: 1.12.0
     bn.js: 5.1.3
