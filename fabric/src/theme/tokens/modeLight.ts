@@ -1,5 +1,6 @@
 const grayScale = {
   gray50: '#FAFAFA',
+  gray80: '#F8F8F8',
   gray100: '#F5F5F5',
   gray200: '#EEEEEE',
   gray300: '#E0E0E0',
@@ -20,7 +21,7 @@ const statusCritical = '#D43F2B'
 
 const lightColors = {
   textPrimary: 'black',
-  textSecondary: grayScale.gray600,
+  textSecondary: grayScale.gray700,
   textDisabled: grayScale.gray500,
 
   backgroundPrimary: 'white',

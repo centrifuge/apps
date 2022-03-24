@@ -226,6 +226,7 @@ const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as strin
 export function getPoolsModule(inst: CentrifugeBase) {
   function createPool(
     args: [
+      admin: string,
       poolId: string,
       collectionId: string,
       tranches: TrancheInput[],
@@ -235,7 +236,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     ],
     options?: TransactionOptions
   ) {
-    const [poolId, collectionId, tranches, currency, maxReserve, metadata] = args
+    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata] = args
 
     const $api = inst.getApi()
 
@@ -243,7 +244,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
       switchMap((api) => {
         const submittable = api.tx.utility.batchAll([
           api.tx.uniques.create(collectionId, LoanPalletAccountId),
-          api.tx.pools.create(poolId, tranches, currency, maxReserve.toString()),
+          api.tx.pools.create(admin, poolId, tranches, currency, maxReserve.toString()),
           api.tx.pools.setMetadata(poolId, metadata),
           api.tx.loans.initialisePool(poolId, collectionId),
         ])

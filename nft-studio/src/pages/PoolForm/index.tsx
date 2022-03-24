@@ -8,6 +8,7 @@ import { RadioButton } from '../../components/form/formik/RadioButton'
 import { TextInput } from '../../components/form/formik/TextInput'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { PageWithSideBar } from '../../components/shared/PageWithSideBar'
+import { useAddress } from '../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { pinPoolMetadata } from './pinPoolMetadata'
 import { SubmitButton } from './SubmitButton'
@@ -76,6 +77,7 @@ const makeId = (): string => {
 
 const CreatePoolForm: React.FC = () => {
   const [issuerLogoFile, setIssuerLogoFile] = React.useState<File>()
+  const address = useAddress()
 
   const { execute: createPoolTx } = useCentrifugeTransaction('Create pool', (cent) => cent.pools.createPool)
 
@@ -90,6 +92,7 @@ const CreatePoolForm: React.FC = () => {
         return {}
       }}
       onSubmit={async (values: PoolFormValues, { setSubmitting }: FormikHelpers<PoolFormValues>) => {
+        if (!address) return
         // validation passed, submit
         const metadataHash = await pinPoolMetadata({
           poolFormData: values,
@@ -110,6 +113,7 @@ const CreatePoolForm: React.FC = () => {
         ]
 
         await createPoolTx([
+          address,
           poolId,
           collectionId,
           tranches,

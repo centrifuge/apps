@@ -45,8 +45,9 @@ const Pool: React.FC = () => {
 
   const centrifuge = useCentrifuge()
 
-  const canSetMaxReserve = useMemo(
-    () => !!(address && permissions && permissions[poolId]?.roles.includes('LiquidityAdmin')),
+
+  const isPoolAdmin = useMemo(
+    () => !!(address && permissions && permissions[poolId]?.roles.includes('PoolAdmin')),
     [poolId, address, permissions]
   )
 
@@ -81,7 +82,7 @@ const Pool: React.FC = () => {
         subtitle={metadata?.pool?.asset?.class}
         actions={
           <>
-            {isManagedPool && (
+            {isPoolAdmin && (
               <Button small variant="text" icon={<IconArrowRight />} onClick={closeEpoch} disabled={!pool}>
                 Close epoch
               </Button>
@@ -107,7 +108,7 @@ const Pool: React.FC = () => {
           value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.max, pool?.currency)}
         />
 
-        {isManagedPool && canSetMaxReserve && (
+        {isManagedPool && isPoolAdmin && (
           <Button variant="text" icon={<IconArrowRight />} onClick={promptMaxReserve}>
             Set maximum
           </Button>
