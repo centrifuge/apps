@@ -1,7 +1,11 @@
+import { Injectable } from '@nestjs/common'
 import config from '../config'
 import { User } from '../repos/user.repo'
 
-export class Mailer {
+const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
+
+@Injectable()
+export class MailerService {
   async sendWhitelistedEmail(user: User, pool: any, data: any) {
     const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
     const response = await fetch(config.sendgrid.apiUrl, {
@@ -57,8 +61,10 @@ export class Mailer {
         'Content-Type': 'application/json',
       },
       method: 'POST',
+    }).catch((e) => {
+      console.log('Error in sending email', e)
     })
   }
 }
 
-export default Mailer
+export default MailerService
