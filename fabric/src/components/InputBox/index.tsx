@@ -42,7 +42,7 @@ export const InputBox: React.FC<StackProps & InputBoxProps> = ({
     <Stack gap={1} width="100%">
       <InputWrapper gap="4px" px={2} py={1} as="label" $active={active} $disabled={disabled} {...boxProps}>
         {label && (
-          <Text variant="label2" color={disabled ? 'textDisabled' : errorMessage ? 'statusCritical' : 'textSecondary'}>
+          <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'}>
             {label}
           </Text>
         )}
@@ -55,7 +55,7 @@ export const InputBox: React.FC<StackProps & InputBoxProps> = ({
             </Box>
             {rightElement && (
               <Box flex="0 0 auto" display="flex">
-                {rightElement}
+                <Text variant="body1">{rightElement}</Text>
               </Box>
             )}
           </Shelf>

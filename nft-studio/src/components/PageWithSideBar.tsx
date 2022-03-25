@@ -33,18 +33,17 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar }) => {
       >
         <Menu />
       </Box>
-      <Box gridArea={sidebar ? 'main' : ['main', 'main', '1 / 2 / 1 / 4']} as="main">
+      <Box
+        gridArea={sidebar ? 'main' : ['main', 'main', '1 / 2 / 1 / 4']}
+        as="main"
+        style={{
+          boxShadow: `1px 0 0 ${theme.colors.borderSecondary}`,
+        }}
+      >
         <LoadBoundary>{children}</LoadBoundary>
       </Box>
       {sidebar && (
-        <Box
-          gridArea="sidebar"
-          as="aside"
-          zIndex={5}
-          style={{
-            boxShadow: `-1px 0 0 ${theme.colors.borderSecondary}`,
-          }}
-        >
+        <Box gridArea="sidebar" as="aside" zIndex={5}>
           <Box position="sticky" top={0} p={3}>
             <Shelf justifyContent="center" pb={3}>
               <AccountsMenu />

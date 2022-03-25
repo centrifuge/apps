@@ -3,6 +3,8 @@ import styled, { useTheme } from 'styled-components'
 import { IconSearch } from '../..'
 import { Box } from '../Box'
 import { InputBox, InputBoxProps } from '../InputBox'
+import { Stack } from '../Stack'
+import { Text } from '../Text'
 
 export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & InputBoxProps
 
@@ -160,10 +162,12 @@ export const TextAreaInput: React.FC<TextAreaInputProps> = ({
       disabled={disabled}
       errorMessage={errorMessage}
       inputElement={
-        <Box bleedX={2} bleedY={1}>
-          {/* Offset the padding by 2px, to move the browser's resize gizmo a little inwards, so it doesn't overlap the rounded border  */}
-          <StyledTextArea as="textarea" px={`${two - 2}px`} py={`${one - 2}px`} disabled={disabled} {...inputProps} />
-        </Box>
+        <Stack bleedX={2} bleedY={1}>
+          <Text variant="body2">
+            {/* Offset the padding by 2px, to move the browser's resize gizmo a little inwards, so it doesn't overlap the rounded border  */}
+            <StyledTextArea as="textarea" px={`${two - 2}px`} py={`${one - 2}px`} disabled={disabled} {...inputProps} />
+          </Text>
+        </Stack>
       }
       rightElement={rightElement}
     />
