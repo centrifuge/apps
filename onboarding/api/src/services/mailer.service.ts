@@ -49,6 +49,7 @@ export class MailerService {
 
   async sendSubscriptionAgreementEmail(user: User, pool: any, tranche: string) {
     this.logger.log('Sending subscription agreement signed email')
+
     const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
     const message = {
       personalizations: [
