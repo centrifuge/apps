@@ -1,27 +1,21 @@
 import { Box, IconHome, IconNft, IconPieChart, IconUser, Shelf } from '@centrifuge/fabric'
 import React from 'react'
 import { useRouteMatch } from 'react-router'
-import logoCentrifuge from '../../assets/images/logoCentrifuge.svg'
-import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
+import logoCentrifuge from '../assets/images/logoCentrifuge.svg'
+import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { NavigationItem } from './NavigationItem'
 
 type Props = {}
 
-export const SideBar: React.FC<Props> = () => {
+export const Menu: React.FC<Props> = () => {
   const investmentsMatch = useRouteMatch('/investments')
   const issuersMatch = useRouteMatch('/issuers')
   const isDesktop = useIsAboveBreakpoint('M')
 
   return (
-    <Box
-      background="backgroundPrimary"
-      bleedX={['gutterMobile', 'gutterTablet', 0]}
-      borderStyle="solid"
-      borderColor="borderPrimary"
-      borderWidth={['1px 0 0', '1px 0 0', 0]}
-    >
+    <Box backgroundColor="backgroundPrimary" position="sticky" top={0} px={[0, 2]}>
       {isDesktop && (
-        <Box marginBottom={8}>
+        <Box py={3} px={1} mb={10}>
           <img src={logoCentrifuge} alt="" />
         </Box>
       )}

@@ -12,15 +12,14 @@ import { LabelValueStack } from '../components/LabelValueStack'
 import { LoanList } from '../components/LoanList'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLoans } from '../utils/useLoans'
 import { usePermissions } from '../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../utils/usePools'
-import { isSameAddress } from '../utils/web3'
 
 export const PoolPage: React.FC = () => {
   return (
@@ -45,13 +44,12 @@ const Pool: React.FC = () => {
 
   const centrifuge = useCentrifuge()
 
+  console.log('permissions', permissions)
 
   const isPoolAdmin = useMemo(
     () => !!(address && permissions && permissions[poolId]?.roles.includes('PoolAdmin')),
     [poolId, address, permissions]
   )
-
-  const isManagedPool = useMemo(() => (pool && address ? isSameAddress(pool.owner, address) : false), [pool, address])
 
   const { execute: closeEpochTx } = useCentrifugeTransaction('Close epoch', (cent) => cent.pools.closeEpoch, {
     onSuccess: () => {
@@ -78,7 +76,7 @@ const Pool: React.FC = () => {
     <Stack gap={5} flex={1}>
       <PageHeader
         title={metadata?.pool?.name ?? ''}
-        parent={{ to: '/issuers/managed-pools', label: isManagedPool ? 'Managed pools' : 'Pools' }}
+        parent={{ to: '/pools', label: 'Pools' }}
         subtitle={metadata?.pool?.asset?.class}
         actions={
           <>
@@ -108,7 +106,7 @@ const Pool: React.FC = () => {
           value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.max, pool?.currency)}
         />
 
-        {isManagedPool && isPoolAdmin && (
+        {isPoolAdmin && (
           <Button variant="text" icon={<IconArrowRight />} onClick={promptMaxReserve}>
             Set maximum
           </Button>

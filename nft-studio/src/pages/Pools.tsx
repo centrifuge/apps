@@ -1,8 +1,8 @@
 import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { PageHeader } from '../components/PageHeader'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolList } from '../components/PoolList'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { usePools } from '../utils/usePools'
 
 export const PoolsPage: React.FC = () => {

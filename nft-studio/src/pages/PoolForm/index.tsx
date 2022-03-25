@@ -1,13 +1,15 @@
 import { aprToFee, toPerquintill } from '@centrifuge/centrifuge-js'
-import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { FileUpload, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import { ErrorMessage, Form, Formik, FormikHelpers } from 'formik'
 import * as React from 'react'
 import { FileInput } from '../../components/FileInput'
 import { RadioButton } from '../../components/form/formik/RadioButton'
 import { TextInput } from '../../components/form/formik/TextInput'
+import { PageHeader } from '../../components/PageHeader'
+import { PageSection } from '../../components/PageSection'
+import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
-import { PageWithSideBar } from '../../components/shared/PageWithSideBar'
 import { useAddress } from '../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { pinPoolMetadata } from './pinPoolMetadata'
@@ -126,6 +128,22 @@ const CreatePoolForm: React.FC = () => {
       }}
     >
       <Form>
+        <PageHeader
+          title="New Pool"
+          subtitle="by The Pool Guys LLC"
+          actions={
+            <>
+              <RouterLinkButton variant="outlined" to="/issuers/managed-pools">
+                Cancel
+              </RouterLinkButton>
+
+              <SubmitButton />
+            </>
+          }
+        />
+        <PageSection title="Details">
+          <FileUpload label="Pool icon (SVG, 40x40 px)" placeholder="Choose pool icon" />
+        </PageSection>
         <Grid columns={[10]} equalColumns gap={['gutterMobile', 'gutterTablet', 'gutterDesktop']}>
           <Stack gap="3" gridColumn="1 / 5">
             <TextInput
@@ -168,15 +186,6 @@ const CreatePoolForm: React.FC = () => {
           </Stack>
 
           <TrancheInput />
-          <Stack gap="3" gridColumn="9 / 11">
-            <Shelf gap="2">
-              <RouterLinkButton variant="outlined" to="/issuers/managed-pools">
-                Cancel
-              </RouterLinkButton>
-
-              <SubmitButton />
-            </Shelf>
-          </Stack>
         </Grid>
       </Form>
     </Formik>

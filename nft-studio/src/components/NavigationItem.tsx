@@ -2,7 +2,7 @@ import { Box, Button, IconChevronDown, IconChevronRight, Shelf, Text } from '@ce
 import React, { useState } from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
 import styled from 'styled-components'
-import { useIsAboveBreakpoint } from '../../utils/useIsAboveBreakpoint'
+import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 
 type Props = {
   label: string

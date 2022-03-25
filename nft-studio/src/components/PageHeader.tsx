@@ -1,8 +1,6 @@
-import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
-import css from '@styled-system/css'
+import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Link } from 'react-router-dom'
-import styled from 'styled-components'
+import { useTheme } from 'styled-components'
 import { ContextActions } from './ContextActions'
 import { RouterTextLink } from './TextLink'
 
@@ -14,36 +12,43 @@ type Props = {
     to: string
     label: string
   }
+  pretitle?: string
   parent?: {
     to: string
     label: string
   }
   actions?: React.ReactNode
+  icon?: React.ReactNode
   walletShown?: boolean
 }
-
-const BackLink = styled(Link)(
-  css({
-    position: 'relative',
-    color: 'accentPrimary',
-    '&:visited': {
-      color: 'accentPrimary',
-    },
-  })
-)
 
 export const PageHeader: React.FC<Props> = ({
   title,
   titleAddition,
   subtitle,
   subtitleLink,
-  parent,
+  pretitle,
+  icon,
   actions,
-  walletShown = true,
+  walletShown,
 }) => {
+  const theme = useTheme()
+
   return (
-    <Shelf as="header" justifyContent="space-between" alignItems="flex-start" position="sticky" top="24px">
-      <Box
+    <Shelf
+      as="header"
+      justifyContent="space-between"
+      alignItems="flex-start"
+      position="sticky"
+      top={0}
+      backgroundColor="backgroundPage"
+      style={{
+        boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
+      }}
+      zIndex={4}
+      p={3}
+    >
+      {/* <Box
         position="absolute"
         top="-24px"
         bottom={0}
@@ -51,34 +56,35 @@ export const PageHeader: React.FC<Props> = ({
         left="-12px"
         zIndex={-1}
         backgroundColor="backgroundPage"
-      />
+      /> */}
 
-      <Stack gap={1}>
-        <Shelf minHeight={20}>
-          {parent && (
-            <Text variant="interactive1">
-              <BackLink to={parent.to}>{parent.label}</BackLink>
+      <Shelf gap={2}>
+        {icon}
+        <Stack gap={0}>
+          {pretitle && (
+            <Text variant="label2" color="textPrimary" style={{ textTransform: 'uppercase' }}>
+              {pretitle}
             </Text>
           )}
-        </Shelf>
-        <Shelf gap={1}>
-          <Text variant="heading2" as="h1" style={{ wordBreak: 'break-word' }}>
-            {title}
-          </Text>
-          {titleAddition}
-        </Shelf>
-        {subtitle && (
-          <Text variant="heading6" fontWeight={500}>
-            {subtitle}
-            {subtitleLink && (
-              <>
-                {' '}
-                • <RouterTextLink to={subtitleLink.to}>{subtitleLink.label}</RouterTextLink>
-              </>
-            )}
-          </Text>
-        )}
-      </Stack>
+          <Shelf gap={1}>
+            <Text variant="heading1" as="h1" style={{ wordBreak: 'break-word' }}>
+              {title}
+            </Text>
+            {titleAddition}
+          </Shelf>
+          {subtitle && (
+            <Text variant="heading6">
+              {subtitle}
+              {subtitleLink && (
+                <>
+                  {' '}
+                  • <RouterTextLink to={subtitleLink.to}>{subtitleLink.label}</RouterTextLink>
+                </>
+              )}
+            </Text>
+          )}
+        </Stack>
+      </Shelf>
 
       <ContextActions actions={actions} walletShown={walletShown} />
     </Shelf>

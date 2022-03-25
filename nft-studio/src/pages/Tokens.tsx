@@ -2,7 +2,7 @@ import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { InvestmentsList } from '../components/InvestmentsList'
 import { PageHeader } from '../components/PageHeader'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
 

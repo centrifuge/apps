@@ -5,7 +5,7 @@ import { CollectionCard, CollectionCardInner } from '../components/CollectionCar
 import { CreateCollectionDialog } from '../components/CreateCollectionDialog'
 import { Identity } from '../components/Identity'
 import { PageHeader } from '../components/PageHeader'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { nftMetadataSchema } from '../schemas'
 import { useAddress } from '../utils/useAddress'

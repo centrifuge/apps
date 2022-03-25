@@ -59,7 +59,7 @@ const Panel: React.FC<{ state: FlagsState; usedKeys: Set<any>; onChange: (key: K
   }, [alwaysShowPanel])
 
   return (
-    <StyledPanel position="fixed" bottom={0} right={0}>
+    <StyledPanel position="fixed" bottom={0} right={0} zIndex={10}>
       <Shelf
         justifyContent="center"
         width="400px"
