@@ -55,7 +55,9 @@ export const InputBox: React.FC<StackProps & InputBoxProps> = ({
             </Box>
             {rightElement && (
               <Box flex="0 0 auto" display="flex">
-                <Text variant="body1">{rightElement}</Text>
+                <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'}>
+                  {rightElement}
+                </Text>
               </Box>
             )}
           </Shelf>

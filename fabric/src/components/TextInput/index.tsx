@@ -33,6 +33,7 @@ export const TextInput: React.FC<TextInputProps> = ({
   secondaryLabel,
   disabled,
   errorMessage,
+  rightElement,
   ...inputProps
 }) => {
   return (
@@ -42,11 +43,12 @@ export const TextInput: React.FC<TextInputProps> = ({
       disabled={disabled}
       errorMessage={errorMessage}
       inputElement={<StyledTextInput disabled={disabled} {...inputProps} />}
+      rightElement={rightElement}
     />
   )
 }
 
-export const SearchInput: React.FC<TextInputProps> = ({
+export const SearchInput: React.FC<Omit<TextInputProps, 'rightElement'>> = ({
   label,
   secondaryLabel,
   disabled,
@@ -65,7 +67,7 @@ export const SearchInput: React.FC<TextInputProps> = ({
   )
 }
 
-export const DateInput: React.FC<TextInputProps> = ({
+export const DateInput: React.FC<Omit<TextInputProps, 'rightElement'>> = ({
   label,
   secondaryLabel,
   disabled,
