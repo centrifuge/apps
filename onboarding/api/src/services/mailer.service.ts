@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import config from '../config'
 import { User } from '../repos/user.repo'
 
@@ -7,7 +7,10 @@ client.setApiKey(config.sendgrid.apiKey)
 
 @Injectable()
 export class MailerService {
+  private readonly logger = new Logger(MailerService.name)
+
   async sendWhitelistedEmail(user: User, pool: any, data: any) {
+    this.logger.log('Sending whitelisted email')
     const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
     const message = {
       personalizations: [
@@ -36,16 +39,17 @@ export class MailerService {
       },
       template_id: config.sendgrid.whitelistEmailTemplate,
     }
-
-    await client
-      .send(message)
-      .then(() => console.log('Subscription email sent successfully'))
-      .catch((error) => {
-        console.error(error)
-      })
+    try {
+      await client.send(message)
+      this.logger.log('Mail sent successfully')
+    } catch (e) {
+      this.logger.error(JSON.stringify(e))
+    }
   }
 
   async sendSubscriptionAgreementEmail(user: User, pool: any, tranche: string) {
+    this.logger.log('Sending subscription agreement signed email')
+
     const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
     const message = {
       personalizations: [
@@ -69,13 +73,12 @@ export class MailerService {
       },
       template_id: config.sendgrid.subscriptionAgreementTemplate,
     }
-
-    await client
-      .send(message)
-      .then(() => console.log('Mail sent successfully'))
-      .catch((error) => {
-        console.error(JSON.stringify(error))
-      })
+    try {
+      await client.send(message)
+      this.logger.log('Mail sent successfully')
+    } catch (e) {
+      this.logger.error(JSON.stringify(e))
+    }
   }
 }
 
