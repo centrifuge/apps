@@ -1,12 +1,14 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
-import { combineLatest, firstValueFrom } from 'rxjs'
+import { combineLatest, firstValueFrom, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { isSameAddress } from '..'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
 
-const Currency = new BN(10).pow(new BN(18))
+const Balance = new BN(10).pow(new BN(18))
+const Perquintill = new BN(10).pow(new BN(18))
+const Price = new BN(10).pow(new BN(27))
 
 const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
 
@@ -538,7 +540,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
       switchMap(([api, loan]) => {
         // Add small buffer to repayment amount
         // TODO: calculate accumulatedRate 1 minute from now and up to date outstanding debt
-        const amount = new BN(loan.outstandingDebt).mul(new BN(1).mul(Currency))
+        const amount = new BN(loan.outstandingDebt).mul(new BN(1).mul(Balance))
         const submittable = api.tx.utility.batchAll([
           api.tx.loans.repay(poolId, loanId, amount),
           api.tx.loans.close(poolId, loanId),
@@ -810,6 +812,81 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
+  function getPendingCollect(args: [address: Account, poolId: string, trancheId: number]) {
+    const [address, poolId, trancheId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      combineLatestWith(getPool([poolId])),
+      combineLatestWith(getOrder([address, poolId, trancheId])),
+      switchMap(([[api, pool], order]) => {
+        if (
+          order.epoch <= pool.epoch.lastExecuted &&
+          order.epoch > 0 &&
+          (order.invest !== '0' || order.redeem !== '0')
+        ) {
+          const epochKeys = Array.from({ length: pool.epoch.lastExecuted + 1 - order.epoch }, (_, i) => [
+            [poolId, trancheId],
+            order.epoch + i,
+          ])
+          const $epochs = api.query.pools.epoch.multi(epochKeys)
+
+          return $epochs.pipe(
+            map((epochs) => {
+              let payoutCurrencyAmount = new BN(0)
+              let payoutTokenAmount = new BN(0)
+              let remainingInvestCurrency = new BN(order.invest)
+              let remainingRedeemToken = new BN(order.redeem)
+
+              for (const epoch of epochs) {
+                if (remainingInvestCurrency.isZero() && remainingRedeemToken.isZero()) break
+
+                let { investFulfillment, redeemFulfillment, tokenPrice } = epoch.toJSON() as any
+
+                investFulfillment = hexToBN(investFulfillment)
+                redeemFulfillment = hexToBN(redeemFulfillment)
+                tokenPrice = hexToBN(tokenPrice)
+
+                if (!remainingInvestCurrency.isZero()) {
+                  // Multiply invest fulfilment in this epoch with outstanding order amount to get executed amount
+                  const amount = remainingInvestCurrency.mul(investFulfillment).div(Perquintill)
+                  // Divide by the token price to get the payout in tokens
+                  if (!amount.isZero()) {
+                    payoutTokenAmount = payoutTokenAmount.add(amount.mul(Price).div(tokenPrice))
+                    remainingInvestCurrency = remainingInvestCurrency.sub(amount)
+                  }
+                }
+
+                if (!remainingRedeemToken.isZero()) {
+                  // Multiply redeem fulfilment in this epoch with outstanding order amount to get executed amount
+                  const amount = remainingRedeemToken.mul(redeemFulfillment).div(Perquintill)
+                  // Multiply by the token price to get the payout in currency
+                  if (!amount.isZero()) {
+                    payoutCurrencyAmount = payoutCurrencyAmount.add(amount.mul(tokenPrice).div(Price))
+                    remainingRedeemToken = remainingRedeemToken.sub(amount)
+                  }
+                }
+              }
+
+              return {
+                payoutCurrencyAmount: payoutCurrencyAmount.toString(),
+                payoutTokenAmount: payoutTokenAmount.toString(),
+                remainingInvestCurrency: remainingInvestCurrency.toString(),
+                remainingRedeemToken: remainingRedeemToken.toString(),
+              }
+            })
+          )
+        }
+        return of({
+          payoutCurrencyAmount: '0',
+          payoutTokenAmount: '0',
+          remainingInvestCurrency: order.invest,
+          remainingRedeemToken: order.redeem,
+        })
+      })
+    )
+  }
+
   function getLoan(args: [poolId: string, loanId: string]) {
     const [poolId, loanId] = args
     const $api = inst.getApi()
@@ -910,6 +987,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     getOrder,
     getLoans,
     getLoan,
+    getPendingCollect,
     addWriteOffGroup,
     adminWriteOff,
     getLoanCollectionIdForPool,
@@ -919,8 +997,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
 const parseBN = (value: BN) => {
   return new BN(value.toString().substring(2), 'hex').toString()
 }
+const hexToBN = (value: string | number) => {
+  return new BN(value.toString().substring(2), 'hex')
+}
 const parseHex = (value: string | number) => {
-  return new BN(value.toString().substring(2), 'hex').toString()
+  return hexToBN(value).toString()
 }
 
 const tokenNames = [
