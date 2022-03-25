@@ -17,6 +17,10 @@ export const flagsConfig: Record<string, DebugFlagConfig> = {
     type: 'checkbox',
     default: true,
   },
+  batchMintNFTs: {
+    type: 'checkbox',
+    default: true,
+  },
   alwaysShowPanel: {
     type: 'checkbox',
     default: !!localStorage.getItem('debug'),
