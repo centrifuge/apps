@@ -1,10 +1,21 @@
-import { Box, Button, IconArrowLeft, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  IconArrowLeft,
+  NumberInput,
+  Shelf,
+  Stack,
+  Text,
+  TextAreaInput,
+  TextInput,
+} from '@centrifuge/fabric'
 import { Flex } from '@centrifuge/fabric/dist/components/Flex'
 import React, { useReducer, useState } from 'react'
 import { useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router'
 import { NavLink } from 'react-router-dom'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { useDebugFlags } from '../components/DebugFlags'
 import { FileImageUpload } from '../components/FileImageUpload'
 import { PageHeader } from '../components/PageHeader'
 import { RouterLinkButton } from '../components/RouterLinkButton'
@@ -47,6 +58,7 @@ const MintNFT: React.FC = () => {
   const history = useHistory()
 
   const [nftName, setNftName] = useState('')
+  const [nftAmount, setNftAmount] = useState(1)
   const [nftDescription, setNftDescription] = useState('')
   const [fileDataUri, setFileDataUri] = useState('')
   const [fileName, setFileName] = useState('')
@@ -97,7 +109,7 @@ const MintNFT: React.FC = () => {
 
     queryClient.prefetchQuery(['metadata', res.metadataURI], () => fetchMetadata(res.metadataURI))
 
-    doTransaction([collectionId, nftId, address!, res.metadataURI])
+    doTransaction([collectionId, nftId, address!, res.metadataURI, nftAmount])
   })
 
   function reset() {
@@ -116,6 +128,8 @@ const MintNFT: React.FC = () => {
   const canMint = isSameAddress(address, collection?.owner)
   const fieldDisabled = balanceLow || !canMint || isMinting
   const submitDisabled = !isFormValid || balanceLow || !canMint || isMinting
+
+  const batchMintNFTs = useDebugFlags().batchMintNFTs
 
   return (
     <Stack flex={1}>
@@ -186,6 +200,21 @@ const MintNFT: React.FC = () => {
                   }}
                   disabled={fieldDisabled}
                 />
+                {batchMintNFTs && (
+                  <Box mt={3}>
+                    <NumberInput
+                      value={nftAmount}
+                      label="Amount"
+                      type="number"
+                      min="1"
+                      max="1000"
+                      onChange={({ target }) => {
+                        setNftAmount(Number((target as HTMLInputElement).value))
+                      }}
+                      disabled={fieldDisabled}
+                    />
+                  </Box>
+                )}
 
                 <Shelf gap={2} mt={6}>
                   <Button disabled={submitDisabled} type="submit" loading={isMinting}>
