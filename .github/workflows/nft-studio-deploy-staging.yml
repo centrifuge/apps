@@ -10,9 +10,9 @@ jobs:
     with:
       netlify-alias: ''
       ipfs-gateway: https://altair.mypinata.cloud/
-      collator-wss-url: wss://fullnode-collator.charcoal.centrifuge.io
-      relay-wss-url: wss://westend-rpc.polkadot.io
-      subscan-url: https://westend.subscan.io
+      collator-wss-url: wss://fullnode.altair.centrifuge.io
+      relay-wss-url: wss://kusama-rpc.polkadot.io
+      subscan-url: https://altair.subscan.io
       whitelisted-accounts: ''
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
