@@ -75,7 +75,12 @@ export const sendSupplyRedeemSummary = async (
 
   const blocks = await Promise.all(
     Object.entries(pools).map(async ([poolId, pool]) => {
-      const tinlake = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
+      const tinlake = new Tinlake({
+        provider,
+        signer,
+        contractAddresses: pool.addresses,
+        contractVersions: pool.versions,
+      })
       const state = await tinlake.getCurrentEpochState()
       const poolData = dataPerPool[poolId]
       const hasSignificantOrders = [
