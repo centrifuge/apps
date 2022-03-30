@@ -27,7 +27,7 @@ export const PageHeader: React.FC<Props> = ({
   title,
   titleAddition,
   subtitle,
-  subtitleFirst,
+  pretitle,
   subtitleLink,
   icon,
   actions,
@@ -62,14 +62,19 @@ export const PageHeader: React.FC<Props> = ({
       <Shelf gap={2}>
         {icon}
         <Stack gap={0}>
-          <Shelf gap={1} order={subtitleFirst ? 2 : 1}>
+          {pretitle && (
+            <Text variant="label2" color="textPrimary" style={{ textTransform: 'uppercase' }}>
+              {pretitle}
+            </Text>
+          )}
+          <Shelf gap={1}>
             <Text variant="heading1" as="h1" style={{ wordBreak: 'break-word' }}>
               {title}
             </Text>
             {titleAddition}
           </Shelf>
           {subtitle && (
-            <Text variant="heading6" order={subtitleFirst ? 1 : 2}>
+            <Text variant="heading6">
               {subtitle}
               {subtitleLink && (
                 <>

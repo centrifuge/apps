@@ -21,7 +21,7 @@ const TokenOverview: React.FC = () => {
 
   return (
     <Stack gap={0} flex={1}>
-      <PageHeader title="Art NFT Tokens" subtitle="Tokens" subtitleFirst />
+      <PageHeader pretitle="Tokens" title="Art NFT Tokens" />
       {balances?.tranches.length ? (
         <TokenList tokens={balances.tranches} />
       ) : (
