@@ -9,6 +9,8 @@ import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
 import { CreateLoanPage } from '../pages/CreateLoan'
+import { InvestmentsTokenPage } from '../pages/InvestmentsToken'
+import { InvestmentsTokensPage } from '../pages/InvestmentsTokens'
 import { LoanPage } from '../pages/Loan'
 import { LoansPage } from '../pages/Loans'
 import { ManagedPoolsPage } from '../pages/ManagedPools'
@@ -18,8 +20,7 @@ import { NotFoundPage } from '../pages/NotFound'
 import { PoolPage } from '../pages/Pool'
 import { PoolFormPage } from '../pages/PoolForm/index'
 import { PoolsPage } from '../pages/Pools'
-import { TokenPage } from '../pages/Token'
-import { TokensPage } from '../pages/Tokens'
+import { TokenOverviewPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
 import { DebugFlags } from './DebugFlags'
 import { GlobalStyle } from './GlobalStyle'
@@ -127,16 +128,19 @@ const Routes: React.VFC = () => {
         <LoansPage />
       </Route>
       <Route path="/investments/tokens/:pid/:tid">
-        <TokenPage />
+        <InvestmentsTokenPage />
       </Route>
       <Route path="/investments/tokens">
-        <TokensPage />
+        <InvestmentsTokensPage />
       </Route>
       <Route path="/investments">
-        <TokensPage />
+        <InvestmentsTokensPage />
       </Route>
       <Route path="/issuers/managed-pools">
         <ManagedPoolsPage />
+      </Route>
+      <Route path="/tokens">
+        <TokenOverviewPage />
       </Route>
       <Route exact path="/">
         <PoolsPage />

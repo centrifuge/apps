@@ -8,6 +8,7 @@ type Props = {
   title: string
   titleAddition?: React.ReactNode
   subtitle?: React.ReactNode
+  subtitleFirst?: boolean
   subtitleLink?: {
     to: string
     label: string
@@ -26,8 +27,8 @@ export const PageHeader: React.FC<Props> = ({
   title,
   titleAddition,
   subtitle,
+  subtitleFirst,
   subtitleLink,
-  pretitle,
   icon,
   actions,
   walletShown,
@@ -61,19 +62,14 @@ export const PageHeader: React.FC<Props> = ({
       <Shelf gap={2}>
         {icon}
         <Stack gap={0}>
-          {pretitle && (
-            <Text variant="label2" color="textPrimary" style={{ textTransform: 'uppercase' }}>
-              {pretitle}
-            </Text>
-          )}
-          <Shelf gap={1}>
+          <Shelf gap={1} order={subtitleFirst ? 2 : 1}>
             <Text variant="heading1" as="h1" style={{ wordBreak: 'break-word' }}>
               {title}
             </Text>
             {titleAddition}
           </Shelf>
           {subtitle && (
-            <Text variant="heading6">
+            <Text variant="heading6" order={subtitleFirst ? 1 : 2}>
               {subtitle}
               {subtitleLink && (
                 <>

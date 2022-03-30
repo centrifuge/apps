@@ -1,4 +1,4 @@
-import { Box, IconHome, IconNft, IconPieChart, IconUser, Shelf } from '@centrifuge/fabric'
+import { Box, IconCircle, IconHome, IconNft, IconPieChart, IconUser, Shelf } from '@centrifuge/fabric'
 import React from 'react'
 import { useRouteMatch } from 'react-router'
 import logoCentrifuge from '../assets/images/logoCentrifuge.svg'
@@ -26,6 +26,7 @@ export const Menu: React.FC<Props> = () => {
         justifyContent="space-evenly"
         px={[2, 2, 0]}
       >
+        <NavigationItem label="Tokens" href="/tokens" icon={<IconCircle size="16px" />} />
         <NavigationItem label="Pools" href="/pools" icon={<IconHome size="16px" />} />
         <NavigationItem label="NFTs" href="/nfts" icon={<IconNft size="16px" />} />
         <NavigationItem
