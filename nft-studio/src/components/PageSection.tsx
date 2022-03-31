@@ -10,7 +10,17 @@ type Props = {
 
 export const PageSection: React.FC<Props> = ({ title, titleAddition, subtitle, headerRight, children }) => {
   return (
-    <Stack as="section" px={3} pt={3} pb={4} borderTopWidth={1} borderTopStyle="solid" borderTopColor="borderSecondary">
+    <Stack
+      as="section"
+      pl={3}
+      pr={6}
+      pt={3}
+      pb={4}
+      gap={3}
+      borderTopWidth={1}
+      borderTopStyle="solid"
+      borderTopColor="borderSecondary"
+    >
       <Shelf justifyContent="space-between" as="header">
         <Stack>
           <Shelf gap={1} alignItems="baseline">
@@ -28,9 +38,7 @@ export const PageSection: React.FC<Props> = ({ title, titleAddition, subtitle, h
         </Stack>
         {headerRight}
       </Shelf>
-      <Box px={3} pt={3}>
-        {children}
-      </Box>
+      <Box pl={3}>{children}</Box>
     </Stack>
   )
 }

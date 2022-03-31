@@ -1,37 +1,40 @@
 import { aprToFee, toPerquintill } from '@centrifuge/centrifuge-js'
-import { FileUpload, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, FileUpload, Grid, NumberInput, Select, Shelf, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
-import { ErrorMessage, Form, Formik, FormikHelpers } from 'formik'
+import { Field, FieldProps, Form, Formik, FormikErrors, setIn } from 'formik'
 import * as React from 'react'
-import { FileInput } from '../../components/FileInput'
-import { RadioButton } from '../../components/form/formik/RadioButton'
-import { TextInput } from '../../components/form/formik/TextInput'
+import { useCentrifuge } from '../../components/CentrifugeProvider'
+import { FieldWithErrorMessage } from '../../components/form/formik/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
+import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { pinPoolMetadata } from './pinPoolMetadata'
+import { RiskGroupsInput } from './RiskGroupsInput'
 import { SubmitButton } from './SubmitButton'
 import { TrancheInput } from './TrancheInput'
 import { validate } from './validate'
+import { WriteOffInput } from './WriteOffInput'
 
-const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
-
-const validateImageFile = (file: File) => {
-  if (!isImageFile(file)) {
-    console.error(`Only image files are allowed (selected file of type ${file.type})`)
-    return false
-  }
-  return true
-}
-
-const DEFAULT_CURRENCY = 'Usd'
-const ASSET_CLASS = ['Real Estate', 'Revenue Based Financing', 'Invoice Factoring'].map((label) => ({
+export const CURRENCIES = [
+  {
+    label: 'AIR',
+    value: 'Native',
+  },
+  {
+    label: 'kUSD',
+    value: 'Usd',
+  },
+]
+const DEFAULT_CURRENCY = 'Native'
+const ASSET_CLASSES = ['Art NFT'].map((label) => ({
   label,
-  id: label,
+  value: label,
 }))
+const DEFAULT_ASSET_CLASS = 'Art NFT'
 
 export const PoolFormPage: React.FC = () => {
   return (
@@ -44,42 +47,116 @@ export const PoolFormPage: React.FC = () => {
 export interface Tranche {
   tokenName: string
   symbolName: string
-  interestRate: string
-  minRiskBuffer: string
+  interestRate: number | ''
+  minRiskBuffer: number | ''
+  minInvestment: number | ''
+}
+export interface RiskGroup {
+  groupName: string
+  advanceRate: number | ''
+  fee: number | ''
+  probabilityOfDefault: number | ''
+  lossGivenDefault: number | ''
+  discountRate: number | ''
+}
+export interface WriteOffGroup {
+  days: number | ''
+  writeOff: number | ''
 }
 export interface PoolFormValues {
+  // details
+  poolIcon: File | null
   poolName: string
-  currency: string
   assetClass: string
-  maxReserve: string
+  currency: string
+  maxReserve: number | ''
+  epochDuration: number | ''
+  challengeTime: number | ''
+
+  // issuer
+  issuerName: string
+  issuerLogo: File | null
+  issuerDescription: string
+
+  executiveSummary: File | null
+  website: string
+  forum: string
+  email: string
+
+  // tranche
   tranches: Tranche[]
+  riskGroups: RiskGroup[]
+  writeOffGroups: WriteOffGroup[]
 }
 
-export const createEmptyTranche = (): Tranche => ({
+export const createEmptyTranche = (junior?: boolean): Tranche => ({
   tokenName: '',
   symbolName: '',
-  interestRate: '0',
-  minRiskBuffer: '0',
+  interestRate: junior ? '' : 0,
+  minRiskBuffer: junior ? '' : 0,
+  minInvestment: '',
 })
 
-const initialValues = {
+export const createEmptyRiskGroup = (): RiskGroup => ({
+  groupName: '',
+  advanceRate: '',
+  fee: '',
+  probabilityOfDefault: '',
+  lossGivenDefault: '',
+  discountRate: '',
+})
+
+export const createEmptyWriteOffGroup = (): WriteOffGroup => ({
+  days: '',
+  writeOff: '',
+})
+
+const initialValues: PoolFormValues = {
+  poolIcon: null,
   poolName: '',
+  assetClass: DEFAULT_ASSET_CLASS,
   currency: DEFAULT_CURRENCY,
-  assetClass: '',
-  maxReserve: '',
-  tranches: [createEmptyTranche()],
+  maxReserve: 0,
+  epochDuration: 24, // in hours
+  challengeTime: 30, // in minutes
+
+  issuerName: '',
+  issuerLogo: null,
+  issuerDescription: '',
+
+  executiveSummary: null,
+  website: '',
+  forum: '',
+  email: '',
+
+  tranches: [createEmptyTranche(true)],
+  riskGroups: [createEmptyRiskGroup()],
+  writeOffGroups: [createEmptyWriteOffGroup()],
 }
 
-// generates a random id
-const makeId = (): string => {
-  const min = 1
-  const max = 10 ** 12
-  return Math.round(Math.random() * (max - min) + min).toString()
+const PoolIcon: React.FC<{ icon?: File | null }> = ({ children, icon }) => {
+  const [dataUri, setDataUri] = React.useState('')
+
+  React.useEffect(() => {
+    if (icon && icon.type === 'image/svg+xml') {
+      getFileDataURI(icon).then((d) => setDataUri(d))
+    } else {
+      setDataUri('')
+    }
+  }, [icon])
+
+  return dataUri ? (
+    <img src={dataUri} width={40} height={40} alt="" />
+  ) : (
+    <Shelf width={40} height={40} borderRadius="card" backgroundColor="accentSecondary" justifyContent="center">
+      <Text variant="body1">{children}</Text>
+    </Shelf>
+  )
 }
 
-const CreatePoolForm: React.FC = () => {
-  const [issuerLogoFile, setIssuerLogoFile] = React.useState<File>()
+const CreatePoolForm: React.VFC = () => {
   const address = useAddress()
+  const centrifuge = useCentrifuge()
 
   const { execute: createPoolTx } = useCentrifugeTransaction('Create pool', (cent) => cent.pools.createPool)
 
@@ -87,107 +164,275 @@ const CreatePoolForm: React.FC = () => {
     <Formik
       initialValues={initialValues}
       validate={(values) => {
-        // validate fields without field level validation
-        if (!values.assetClass) {
-          return { assetClass: 'Select an asset class' }
-        }
-        return {}
+        let errors: FormikErrors<any> = {}
+        const tokenNames = new Set<string>()
+        const tokenSymbols = new Set<string>()
+        let prevInterest = Infinity
+        let prevRiskBuffer = 0
+        values.tranches.forEach((t, i) => {
+          if (tokenNames.has(t.tokenName)) {
+            errors = setIn(errors, `tranches.${i}.tokenName`, 'Tranche names must be unique')
+          }
+          tokenNames.add(t.tokenName)
+
+          if (tokenSymbols.has(t.symbolName)) {
+            errors = setIn(errors, `tranches.${i}.symbolName`, 'Token symbols must be unique')
+          }
+          tokenSymbols.add(t.symbolName)
+
+          if (t.interestRate !== '') {
+            if (t.interestRate > prevInterest) {
+              errors = setIn(errors, `tranches.${i}.interestRate`, "Can't be higher than a more junior tranche")
+            }
+            prevInterest = t.interestRate
+          }
+
+          if (t.minRiskBuffer !== '') {
+            if (t.minRiskBuffer < prevRiskBuffer) {
+              errors = setIn(errors, `tranches.${i}.minRiskBuffer`, "Can't be lower than a more junior tranche")
+            }
+            prevRiskBuffer = t.minRiskBuffer
+          }
+        })
+        return errors
       }}
-      onSubmit={async (values: PoolFormValues, { setSubmitting }: FormikHelpers<PoolFormValues>) => {
+      onSubmit={async (values, { setSubmitting }) => {
+        console.log('submit', values)
         if (!address) return
         // validation passed, submit
-        const metadataHash = await pinPoolMetadata({
-          poolFormData: values,
-          issuerLogoFile,
-        })
+        const metadataHash = await pinPoolMetadata(values)
 
-        const poolId = makeId()
-        const collectionId = makeId()
+        const poolId = await centrifuge.pools.getAvailablePoolId()
+        const collectionId = await centrifuge.nfts.getAvailableCollectionId()
 
         // tranches must be reversed (most junior is the first in the UI but the last in the API)
         const noJuniorTranches = values.tranches.slice(1)
         const tranches = [
           {}, // most junior tranche
           ...noJuniorTranches.map((tranche) => ({
-            interestPerSec: aprToFee(parseFloat(tranche.interestRate) / 100),
-            minRiskBuffer: toPerquintill(parseFloat(tranche.minRiskBuffer) / 100),
+            interestPerSec: aprToFee((tranche.interestRate as number) / 100),
+            minRiskBuffer: toPerquintill((tranche.minRiskBuffer as number) / 100),
           })),
         ]
 
-        await createPoolTx([
+        createPoolTx([
           address,
           poolId,
           collectionId,
           tranches,
           DEFAULT_CURRENCY,
-          new BN(parseFloat(values.maxReserve)).mul(new BN(10).pow(new BN(18))),
+          new BN(values.maxReserve as number).mul(new BN(10).pow(new BN(18))),
           metadataHash,
+          (values.epochDuration as number) * 60 * 60, // convert to seconds
+          (values.challengeTime as number) * 60, // convert to seconds
         ])
 
         setSubmitting(false)
       }}
     >
-      <Form>
-        <PageHeader
-          title="New Pool"
-          subtitle="by The Pool Guys LLC"
-          actions={
-            <>
-              <RouterLinkButton variant="outlined" to="/issuers/managed-pools">
-                Cancel
-              </RouterLinkButton>
+      {(form) => (
+        <Form>
+          <PageHeader
+            icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
+            title={form.values.poolName || 'New Pool'}
+            subtitle="by The Pool Guys LLC"
+            actions={
+              <>
+                <RouterLinkButton variant="outlined" to="/issuers/managed-pools">
+                  Cancel
+                </RouterLinkButton>
 
-              <SubmitButton />
-            </>
-          }
-        />
-        <PageSection title="Details">
-          <FileUpload label="Pool icon (SVG, 40x40 px)" placeholder="Choose pool icon" />
-        </PageSection>
-        <Grid columns={[10]} equalColumns gap={['gutterMobile', 'gutterTablet', 'gutterDesktop']}>
-          <Stack gap="3" gridColumn="1 / 5">
-            <TextInput
-              label="Pool name"
-              placeholder="Untitled pool"
-              id="poolName"
-              name="poolName"
-              validate={validate.poolName}
-            />
-
-            <Stack gap="1">
-              <Text variant="label1">Asset class</Text>
-              <Shelf gap="4">
-                {ASSET_CLASS.map(({ label, id }) => (
-                  <RadioButton key={id} label={label} value={id} id={id} name="assetClass" />
-                ))}
-              </Shelf>
-              <Text variant="label2" color="statusCritical">
-                <ErrorMessage name="assetClass" />
-              </Text>
-            </Stack>
-
-            <Stack gap="1">
-              <Text variant="label1">Issuer logo</Text>
-              <FileInput
-                onFileUpdate={(file) => {
-                  setIssuerLogoFile(file)
-                }}
-                onBeforeFileUpdate={validateImageFile}
-              />
-            </Stack>
-
-            <TextInput
-              label="Max reserve"
-              placeholder="0"
-              id="maxReserve"
-              name="maxReserve"
-              validate={validate.maxReserve}
-            />
-          </Stack>
+                <SubmitButton />
+              </>
+            }
+          />
+          <PageSection title="Details">
+            <Grid columns={[6]} equalColumns gap={2} rowGap={3}>
+              <Box gridColumn="span 3" width="100%">
+                <Field name="poolIcon" validate={validate.poolIcon}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <FileUpload
+                      file={field.value}
+                      onFileChange={(file) => {
+                        form.setFieldTouched('poolIcon', true, false)
+                        form.setFieldValue('poolIcon', file)
+                      }}
+                      label="Pool icon (SVG, square format)"
+                      placeholder="Choose pool icon"
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      accept="image/svg+xml"
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 3">
+                <FieldWithErrorMessage
+                  validate={validate.poolName}
+                  name="poolName"
+                  as={TextInput}
+                  label="Pool name"
+                  placeholder="New pool"
+                  maxLength={100}
+                />
+              </Box>
+              <Box gridColumn="span 3">
+                <Field name="assetClass" validate={validate.assetClass}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <Select
+                      label="Asset class"
+                      onSelect={(v) => form.setFieldValue('assetClass', v)}
+                      onBlur={field.onBlur}
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      value={field.value}
+                      options={ASSET_CLASSES}
+                      placeholder="Select..."
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 3">
+                <Field name="currency" validate={validate.currency}>
+                  {({ field, form, meta }: FieldProps) => (
+                    <Select
+                      label="Currency"
+                      onSelect={(v) => form.setFieldValue('currency', v)}
+                      onBlur={field.onBlur}
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      value={field.value}
+                      options={CURRENCIES}
+                      placeholder="Select..."
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 2">
+                <FieldWithErrorMessage
+                  validate={validate.maxReserve}
+                  name="maxReserve"
+                  as={NumberInput}
+                  label="Initial maximum reserve"
+                  placeholder="0"
+                  rightElement={CURRENCIES.find((c) => c.value === form.values.currency)?.label}
+                />
+              </Box>
+              <Box gridColumn="span 2">
+                <FieldWithErrorMessage
+                  validate={validate.epochDuration}
+                  name="epochDuration"
+                  as={NumberInput}
+                  label="Minimum epoch duration"
+                  placeholder="0"
+                  rightElement="hrs"
+                />
+              </Box>
+              <Box gridColumn="span 2">
+                <FieldWithErrorMessage
+                  validate={validate.challengeTime}
+                  name="challengeTime"
+                  as={NumberInput}
+                  label="Challenge time"
+                  placeholder="0"
+                  rightElement="min"
+                />
+              </Box>
+            </Grid>
+          </PageSection>
+          <PageSection title="Issuer">
+            <Grid columns={[6]} equalColumns gap={2} rowGap={3}>
+              <Box gridColumn="span 3">
+                <FieldWithErrorMessage
+                  validate={validate.issuerName}
+                  name="issuerName"
+                  as={TextInput}
+                  label="Issuer name"
+                  placeholder="Name..."
+                  maxLength={100}
+                />
+              </Box>
+              <Box gridColumn="span 3" width="100%">
+                <Field name="issuerLogo" validate={validate.issuerLogo}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <FileUpload
+                      file={field.value}
+                      onFileChange={(file) => {
+                        form.setFieldTouched('issuerLogo', true, false)
+                        form.setFieldValue('issuerLogo', file)
+                      }}
+                      label="Issuer logo (JPG/PNG/SVG, 480x480 px)"
+                      placeholder="Choose issuer logo"
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      accept="image/*"
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 6">
+                <FieldWithErrorMessage
+                  validate={validate.issuerDescription}
+                  name="issuerDescription"
+                  as={TextAreaInput}
+                  label="Description"
+                  placeholder="Description..."
+                  maxLength={800}
+                />
+              </Box>
+              <Box gridColumn="span 6">
+                <Text>Links</Text>
+              </Box>
+              <Box gridColumn="span 3">
+                <Field name="executiveSummary" validate={validate.executiveSummary}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <FileUpload
+                      file={field.value}
+                      onFileChange={(file) => {
+                        form.setFieldTouched('executiveSummary', true, false)
+                        form.setFieldValue('executiveSummary', file)
+                      }}
+                      accept="application/pdf"
+                      label="Executive summary PDF (required)"
+                      placeholder="Choose file"
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 3">
+                <FieldWithErrorMessage
+                  name="website"
+                  as={TextInput}
+                  label="Website"
+                  placeholder="https://..."
+                  validate={validate.website}
+                />
+              </Box>
+              <Box gridColumn="span 3">
+                <FieldWithErrorMessage
+                  name="forum"
+                  as={TextInput}
+                  label="Governance forum"
+                  placeholder="https://..."
+                  validate={validate.forum}
+                />
+              </Box>
+              <Box gridColumn="span 3">
+                <FieldWithErrorMessage
+                  name="email"
+                  as={TextInput}
+                  label="Email"
+                  placeholder=""
+                  validate={validate.email}
+                />
+              </Box>
+            </Grid>
+          </PageSection>
 
           <TrancheInput />
-        </Grid>
-      </Form>
+
+          <RiskGroupsInput />
+
+          <WriteOffInput />
+        </Form>
+      )}
     </Formik>
   )
 }

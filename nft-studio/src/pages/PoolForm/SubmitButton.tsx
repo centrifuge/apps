@@ -5,7 +5,7 @@ import React from 'react'
 export const SubmitButton: React.FC = () => {
   const { isValid } = useFormikContext()
   return (
-    <Button variant="contained" type="submit" disabled={!isValid}>
+    <Button variant="contained" type="submit" disabled={!isValid && false}>
       Create
     </Button>
   )

@@ -4,12 +4,7 @@ import { getFileDataURI } from '../../utils/getFileDataURI'
 import { promiseAllObject } from '../../utils/promiseAllObject'
 import { PoolMetadata } from './types'
 
-type CreatePoolArg = {
-  poolFormData: PoolFormValues
-  issuerLogoFile?: File
-}
-
-const getFileIpfsHash = async (file?: File): Promise<string | null> => {
+const getFileIpfsUri = async (file?: File | null): Promise<string | null> => {
   if (!file) return null
 
   const resp = await fetchLambda('pinFile', {
@@ -23,31 +18,50 @@ const getFileIpfsHash = async (file?: File): Promise<string | null> => {
 
   if (resp.ok && Math.floor(resp.status) / 100 === 2) {
     const json = await resp.json()
-    return json.fileIpfsHash as string
+    return `ipfs://ipfs/${json.fileIpfsHash as string}`
   }
   return null
 }
 
-export const pinPoolMetadata = async ({ poolFormData, issuerLogoFile }: CreatePoolArg): Promise<string> => {
+export const pinPoolMetadata = async (poolFormData: PoolFormValues): Promise<string> => {
   // pin image files files. If not present, hash will be null
   const fileHashMap = await promiseAllObject<string | null>({
-    issuerLogoFile: getFileIpfsHash(issuerLogoFile),
+    poolIcon: getFileIpfsUri(poolFormData.poolIcon),
+    issuerLogo: getFileIpfsUri(poolFormData.issuerLogo),
+    executiveSummary: getFileIpfsUri(poolFormData.executiveSummary),
   })
 
   // build metadata JSON
-  const tranches = [...poolFormData.tranches]
+  const { tranches, riskGroups } = poolFormData
   const metadata: PoolMetadata = {
     pool: {
       name: poolFormData.poolName,
+      icon: fileHashMap.poolIcon || '',
       asset: { class: poolFormData.assetClass },
       issuer: {
+        name: poolFormData.issuerName,
+        description: poolFormData.issuerDescription,
+        email: poolFormData.email,
         logo: fileHashMap.issuerLogoFile || '',
+      },
+      links: {
+        executiveSummary: fileHashMap.executiveSummary || '',
+        forum: poolFormData.forum,
+        website: poolFormData.website,
       },
       status: 'open',
     },
     tranches: tranches.map((tranche) => ({
       name: tranche.tokenName,
       symbol: tranche.symbolName,
+    })),
+    riskGroups: riskGroups.map((group) => ({
+      name: group.groupName,
+      advanceRate: Number(group.advanceRate),
+      financingFee: Number(group.fee),
+      probabilityOfDefault: Number(group.probabilityOfDefault),
+      lossGivenDefault: Number(group.lossGivenDefault),
+      discountRate: Number(group.discountRate),
     })),
   }
 

@@ -2,8 +2,8 @@ import React, { useRef, useState } from 'react'
 import styled, { css, keyframes } from 'styled-components'
 import { IconFileText } from '../..'
 import IconAlertCircle from '../../icon/IconAlertCircle'
-import IconPlus from '../../icon/IconPlus'
 import IconSpinner from '../../icon/IconSpinner'
+import IconUpload from '../../icon/IconUpload'
 import IconX from '../../icon/IconX'
 import useControlledState from '../../utils/useControlledState'
 import { Box } from '../Box'
@@ -249,7 +249,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             <>
               <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver}></UploadButton>
               <AddButton gap={1} justifyContent="center">
-                <IconPlus />
+                <IconUpload />
                 <Text variant="body1" color="currentcolor">
                   {placeholder}
                 </Text>

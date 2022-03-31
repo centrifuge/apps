@@ -1,4 +1,8 @@
-const getError = (defaultError: string, err: CustomError | undefined, val: string) => {
+import { getImageDimensions } from '../getImageDimensions'
+
+const isImageFile = (file: any): boolean => file instanceof File && !!file.type.match(/^image\//)
+
+const getError = (defaultError: string, err: CustomError | undefined, val: any) => {
   switch (typeof err) {
     case 'undefined':
       return defaultError
@@ -9,23 +13,53 @@ const getError = (defaultError: string, err: CustomError | undefined, val: strin
   }
 }
 
-export const required = () => (val?: string, err?: CustomError) =>
-  val ? '' : getError(`The field is required`, err, val || '')
+export const required = (err?: CustomError) => (val?: any) =>
+  val != null && val !== '' ? '' : getError(`This field is required`, err, val)
+
+export const nonNegativeNumber = (err?: CustomError) => (val?: any) =>
+  Number.isFinite(val) && val >= 0 ? '' : getError(`Value must be positive`, err, val)
+
+export const max = (maxValue: number, err?: CustomError) => (val?: any) =>
+  val <= maxValue ? '' : getError(`Value too large`, err, val)
+
+export const maxFileSize = (maxBytes: number, err?: CustomError) => (val?: any) => {
+  return val instanceof File && val.size > maxBytes ? getError(`File too large`, err, val) : ''
+}
+
+export const mimeType = (type: RegExp | string, err?: CustomError) => (val?: any) => {
+  return val instanceof File && (typeof type === 'string' ? type !== val.type : !type.test(val.type))
+    ? getError(`Invalid valid type`, err, val)
+    : ''
+}
+
+export const imageFile = (err?: CustomError) => {
+  return mimeType(/^image\//, err)
+}
+
+export const maxImageSize = (maxWidth: number, maxHeight: number, err?: CustomError) => async (val?: any) => {
+  if (!isImageFile(val)) return ''
+  const [width, height] = await getImageDimensions(val)
+  return width > maxWidth || height > maxHeight
+    ? getError(`Image too large. max: ${maxWidth}x${maxHeight}px`, err, val)
+    : ''
+}
 
 export const pattern =
   (regexp: RegExp, err?: CustomError) =>
   (val?: string): string =>
-    typeof val === 'string' && val.match(regexp) ? '' : getError(`The input doesn't match ${regexp}`, err, val || '')
+    !val || (typeof val === 'string' && val.match(regexp))
+      ? ''
+      : getError(`The input doesn't match ${regexp}`, err, val || '')
 
 export const minLength = (minValue: number, err?: CustomError) => (val?: string) =>
   typeof val === 'string' && val.length >= minValue
     ? ''
-    : getError(`Minimum length: ${minValue} characters`, err, val || '')
+    : getError(`Needs to be at least ${minValue} characters`, err, val || '')
 
 export const maxLength = (maxValue: number, err?: CustomError) => (val?: string) =>
   typeof val === 'string' && val.length <= maxValue
     ? ''
-    : getError(`Maximum length: ${maxValue} characters`, err, val || '')
+    : getError(`Needs to be less than ${maxValue} characters`, err, val || '')
 
 export const oneOf = (valuesArray: unknown[], err?: CustomError) => (val?: string) =>
   valuesArray.indexOf(val) !== -1 ? '' : getError(`Value must be one of: ${valuesArray.join(', ')}`, err, val || '')
@@ -40,8 +74,18 @@ export const oneOf = (valuesArray: unknown[], err?: CustomError) => (val?: strin
  * of the parameters.
  */
 export const combine =
-  (...funcs: ((val?: string) => string)[]) =>
-  (val?: string) =>
+  (...funcs: ((val?: any) => string)[]) =>
+  (val?: any) =>
     funcs.reduce((err, func) => err || func(val), '')
 
-type CustomError = string | ((val?: string) => string)
+export const combineAsync =
+  (...funcs: ((val?: any) => string | Promise<string>)[]) =>
+  async (val?: any) => {
+    for (const func of funcs) {
+      const res = await func(val)
+      if (res) return res
+    }
+    return ''
+  }
+
+type CustomError = string | ((val?: any) => string)
