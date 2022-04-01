@@ -3,10 +3,10 @@ import { IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import * as React from 'react'
 import { useHistory } from 'react-router'
-import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { usePoolMetadata } from '../utils/usePools'
 import { useCentrifuge } from './CentrifugeProvider'
 import { DataTable } from './DataTable'
+import { TokenAvatar } from './TokenAvatar'
 
 type Props = {
   pools: Pool[]
@@ -63,22 +63,11 @@ export const TokenList: React.FC<Props> = ({ pools }) => {
 
 const TokenName: React.VFC<{ token: Row }> = ({ token }) => {
   const { data: metadata } = usePoolMetadata(token?.pool)
+  const symbol = metadata?.tranches?.find((_, index) => index === token.index)?.symbol
 
   return (
     <Shelf gap="2">
-      {metadata?.pool?.issuer?.logo ? (
-        <img
-          height="24"
-          width="24"
-          src={parseMetadataUrl(
-            metadata?.pool?.issuer.logo ||
-              'https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/dog-halloween-costumes-1600877570.jpg?crop=0.494xw:0.987xh;0,0.0128xh&resize=640:*'
-          )}
-          alt=""
-        />
-      ) : (
-        <LogoPlaceholder />
-      )}
+      <TokenAvatar label={symbol || ''} size="small" />
       <Text variant="body2" color="textPrimary" fontWeight={600}>
         {metadata?.pool?.name} {token?.name}
       </Text>
@@ -88,7 +77,6 @@ const TokenName: React.VFC<{ token: Row }> = ({ token }) => {
 
 const AssetClass: React.VFC<{ token: Row }> = ({ token }) => {
   const { data: metadata } = usePoolMetadata(token?.pool)
-
   return <Text variant="body2">{metadata?.pool?.asset.class}</Text>
 }
 
@@ -102,8 +90,4 @@ const Protection: React.VFC<{ token: Row }> = ({ token }) => {
 const Yield: React.VFC<{ token: Row }> = ({ token }) => {
   const centrifuge = useCentrifuge()
   return <Text variant="body2">{parseInt(centrifuge.utils.feeToApr(token.interestPerSec), 10).toFixed(2)}%</Text>
-}
-
-const LogoPlaceholder = () => {
-  return <div>NFT</div>
 }
