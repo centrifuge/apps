@@ -34,22 +34,28 @@ export const DataTable: React.VFC<Props> = ({ data, columns, keyField, onRowClic
         )}
       </Shelf>
       <Card>
-        {data.map((row: any, i) => (
-          <Row
-            as={onRowClicked ? 'button' : 'div'}
-            key={keyField ? row[keyField] : i}
-            onClick={onRowClicked && (() => onRowClicked(row))}
-            tabIndex={onRowClicked ? 0 : undefined}
-          >
-            {columns.map((col) =>
-              col.align === 'left' ? (
-                <DataColLeft style={{ flex: col.flex }}>{col.cell(row)}</DataColLeft>
-              ) : (
-                <DataCol style={{ flex: col.flex }}>{col.cell(row)}</DataCol>
-              )
-            )}
-          </Row>
-        ))}
+        {data.map((row: any, i) => {
+          return (
+            <Row
+              as={onRowClicked ? 'button' : 'div'}
+              key={keyField ? row[keyField] : i}
+              onClick={onRowClicked && (() => onRowClicked(row))}
+              tabIndex={onRowClicked ? 0 : undefined}
+            >
+              {columns.map((col) =>
+                col.align === 'left' ? (
+                  <React.Fragment key={`${col.header}-${i}`}>
+                    <DataColLeft style={{ flex: col.flex }}>{col.cell(row)}</DataColLeft>
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment key={`${col.header}-${i}`}>
+                    <DataCol style={{ flex: col.flex }}>{col.cell(row)}</DataCol>
+                  </React.Fragment>
+                )
+              )}
+            </Row>
+          )
+        })}
       </Card>
     </Stack>
   )
@@ -94,7 +100,7 @@ const DataCol = styled.div`
 
 const DataColLeft = styled.div`
   flex: 1 1 160px;
-  padding: 8px 24px;
+  padding: 16px 12px 16px 24px;
   display: flex;
   justify-content: flex-start;
 `
