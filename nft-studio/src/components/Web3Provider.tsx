@@ -63,7 +63,7 @@ export const Web3Provider: React.FC = ({ children }) => {
     setIsConnecting(true)
 
     try {
-      const injected = await (web3EnablePromise || web3Enable('NFT Studio'))
+      const injected = await (web3EnablePromise || web3Enable('NFT Playground'))
       if (injected.length === 0) {
         // no extension installed, or the user did not accept the authorization
         // in this case we should inform the use and give a link to the extension
