@@ -1,101 +1,109 @@
-import { TrancheBalance } from '@centrifuge/centrifuge-js'
+import { Pool, Tranche } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
-import BN from 'bn.js'
+import { BN } from 'bn.js'
 import * as React from 'react'
 import { useHistory } from 'react-router'
-import { usePool, usePoolMetadata } from '../utils/usePools'
+import { parseMetadataUrl } from '../utils/parseMetadataUrl'
+import { usePoolMetadata } from '../utils/usePools'
 import { useCentrifuge } from './CentrifugeProvider'
 import { DataTable } from './DataTable'
 
 type Props = {
-  tokens: TrancheBalance[]
+  pools: Pool[]
 }
 
-export const TokenList: React.FC<Props> = ({ tokens }) => {
-  const history = useHistory()
+type Row = Tranche & {
+  pool: Pool
+}
 
-  const columns = [
-    {
-      align: 'left',
-      header: 'Token',
-      cell: (i: TrancheBalance) => <TokenName token={i} />,
-      flex: '2',
-    },
-    {
-      align: 'left',
-      header: 'Asset class',
-      cell: (i: TrancheBalance) => <AssetClass token={i} />,
-      flex: '2',
-    },
-    {
-      header: 'Yield',
-      cell: (i: TrancheBalance) => <TokenValue token={i} />,
-      flex: '1',
-    },
-    {
-      header: 'Protection',
-      cell: (i: TrancheBalance) => <TokenValue token={i} />,
-      flex: '1',
-    },
-    {
-      header: 'Capacity',
-      cell: (i: TrancheBalance) => <TokenValue token={i} />,
-      flex: '1',
-    },
-    {
-      header: '',
-      cell: () => <IconChevronRight size={24} color="textPrimary" />,
-      flex: '0 0 72px',
-    },
-  ]
+const columns = [
+  {
+    align: 'left',
+    header: 'Token',
+    cell: (i: Row) => <TokenName token={i} />,
+    flex: '2',
+  },
+  {
+    align: 'left',
+    header: 'Asset class',
+    cell: (i: Row) => <AssetClass token={i} />,
+    flex: '2',
+  },
+  {
+    header: 'Yield',
+    cell: (i: Row) => <Yield token={i} />,
+    flex: '1',
+  },
+  {
+    header: 'Protection',
+    cell: (i: Row) => <Protection token={i} />,
+    flex: '1',
+  },
+  {
+    header: '',
+    cell: () => <IconChevronRight size={24} color="textPrimary" />,
+    flex: '0 0 72px',
+  },
+]
+
+export const TokenList: React.FC<Props> = ({ pools }) => {
+  const history = useHistory()
+  const tokens = pools?.map((pool) => pool.tranches.map((tranche) => ({ ...tranche, pool }))).flat()
+
   return (
     <DataTable
       data={tokens}
       columns={columns}
-      onRowClicked={(i: TrancheBalance) => {
-        history.push(`/tokens/${i.poolId}/${i.trancheId}`)
+      onRowClicked={(i: Row) => {
+        history.push(`/tokens/${i.name}`)
       }}
     />
   )
 }
 
-const TokenName: React.VFC<{ token: TrancheBalance }> = ({ token }) => {
-  const pool = usePool(token.poolId)
-  console.log('🚀 ~ pool', pool)
-  const { data: metadata } = usePoolMetadata(pool)
+const TokenName: React.VFC<{ token: Row }> = ({ token }) => {
+  const { data: metadata } = usePoolMetadata(token?.pool)
+
   return (
     <Shelf gap="2">
-      <img
-        height="24"
-        width="24"
-        src="https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/dog-halloween-costumes-1600877570.jpg?crop=0.494xw:0.987xh;0,0.0128xh&resize=640:*"
-        alt=""
-      />
-      <Text variant="body2" fontWeight={600}>
-        New Silver 2 Senior
+      {metadata?.pool?.issuer?.logo ? (
+        <img
+          height="24"
+          width="24"
+          src={parseMetadataUrl(
+            metadata?.pool?.issuer.logo ||
+              'https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/dog-halloween-costumes-1600877570.jpg?crop=0.494xw:0.987xh;0,0.0128xh&resize=640:*'
+          )}
+          alt=""
+        />
+      ) : (
+        <LogoPlaceholder />
+      )}
+      <Text variant="body2" color="textPrimary" fontWeight={600}>
+        {metadata?.pool?.name} {token?.name}
       </Text>
     </Shelf>
   )
 }
 
-const AssetClass: React.VFC<{ token: TrancheBalance }> = ({ token }) => {
-  // const pool = usePool(token.poolId)
-  // const { data: metadata } = usePoolMetadata(pool)
-  return <Text variant="body2">Art NFT</Text>
+const AssetClass: React.VFC<{ token: Row }> = ({ token }) => {
+  const { data: metadata } = usePoolMetadata(token?.pool)
+
+  return <Text variant="body2">{metadata?.pool?.asset.class}</Text>
 }
 
-const TokenValue: React.VFC<{ token: TrancheBalance }> = ({ token }) => {
-  const pool = usePool(token.poolId)
+const Protection: React.VFC<{ token: Row }> = ({ token }) => {
   const centrifuge = useCentrifuge()
-
   return (
-    <Text variant="body2">
-      {centrifuge.utils.formatCurrencyAmount(
-        new BN(token.balance)
-          .mul(new BN(pool?.tranches[token.trancheId].tokenPrice ?? 1))
-          .div(new BN(10).pow(new BN(27))),
-        pool?.currency
-      )}
-    </Text>
+    <Text variant="body2">{centrifuge.utils.formatPercentage(token.ratio, new BN(10).pow(new BN(18)).toString())}</Text>
   )
+}
+
+const Yield: React.VFC<{ token: Row }> = ({ token }) => {
+  const centrifuge = useCentrifuge()
+  return <Text variant="body2">{parseInt(centrifuge.utils.feeToApr(token.interestPerSec), 10).toFixed(2)}%</Text>
+}
+
+const LogoPlaceholder = () => {
+  return <div>NFT</div>
 }
