@@ -88,6 +88,9 @@ const Protection: React.VFC<{ token: Row }> = ({ token }) => {
 
 const Yield: React.VFC<{ token: Row }> = ({ token }) => {
   const { utils } = useCentrifuge()
+  // feeToApr is a temporary solution for calculating yield
+  // bc we don't have a way to query for historical token prices yet
+  // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
   const APR = parseInt(utils.feeToApr(token.interestPerSec), 10)
   return <Text variant="body2">{APR > 0 ? `Target: ${APR.toFixed(2)}%` : '-'}</Text>
 }
