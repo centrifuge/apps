@@ -8,7 +8,6 @@ type Props = {
   title: string
   titleAddition?: React.ReactNode
   subtitle?: React.ReactNode
-  subtitleFirst?: boolean
   subtitleLink?: {
     to: string
     label: string
@@ -27,8 +26,8 @@ export const PageHeader: React.FC<Props> = ({
   title,
   titleAddition,
   subtitle,
-  pretitle,
   subtitleLink,
+  pretitle,
   icon,
   actions,
   walletShown,

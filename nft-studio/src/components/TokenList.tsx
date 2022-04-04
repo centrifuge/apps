@@ -64,7 +64,6 @@ export const TokenList: React.FC<Props> = ({ pools }) => {
 const TokenName: React.VFC<{ token: Row }> = ({ token }) => {
   const { data: metadata } = usePoolMetadata(token?.pool)
   const symbol = metadata?.tranches?.find((_, index) => index === token.index)?.symbol
-
   return (
     <Shelf gap="2">
       <TokenAvatar label={symbol || ''} size="small" />
@@ -88,6 +87,7 @@ const Protection: React.VFC<{ token: Row }> = ({ token }) => {
 }
 
 const Yield: React.VFC<{ token: Row }> = ({ token }) => {
-  const centrifuge = useCentrifuge()
-  return <Text variant="body2">{parseInt(centrifuge.utils.feeToApr(token.interestPerSec), 10).toFixed(2)}%</Text>
+  const { utils } = useCentrifuge()
+  const APR = parseInt(utils.feeToApr(token.interestPerSec), 10)
+  return <Text variant="body2">{APR > 0 ? `Target: ${APR.toFixed(2)}%` : '-'}</Text>
 }
