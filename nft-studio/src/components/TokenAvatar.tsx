@@ -7,29 +7,6 @@ type TokenAvatarProps = {
   size: 'small' | 'large'
 }
 
-const StyledAvatar = styled(Box)`
-  background: ${({ theme }) => theme.colors.accentSecondary};
-  border-radius: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  ${({ size }) =>
-    size === 'large'
-      ? css({
-          lineHeight: '0.9',
-          fontSize: '12px',
-          height: '40px',
-          width: '40px',
-        })
-      : css({
-          lineHeight: '1',
-          fontSize: '8px',
-          height: '24px',
-          width: '24px',
-        })}
-`
-
 export const TokenAvatar: React.VFC<TokenAvatarProps> = ({ label, ...props }) => {
   return (
     <StyledAvatar {...props}>
@@ -38,3 +15,31 @@ export const TokenAvatar: React.VFC<TokenAvatarProps> = ({ label, ...props }) =>
     </StyledAvatar>
   )
 }
+
+const StyledAvatar = styled(Box)<Partial<TokenAvatarProps>>`
+  background: ${({ theme }) => theme.colors.accentSecondary};
+  border-radius: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  ${({ size }) => {
+    switch (size) {
+      case 'large':
+        return css({
+          lineHeight: '0.9',
+          fontSize: '12px',
+          height: '40px',
+          width: '40px',
+        })
+      case 'small':
+      default:
+        return css({
+          lineHeight: '1',
+          fontSize: '8px',
+          height: '24px',
+          width: '24px',
+        })
+    }
+  }}
+`
