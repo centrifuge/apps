@@ -57,21 +57,25 @@ const columns: Column[] = [
 export const TokenList: React.FC<Props> = ({ pools }) => {
   const history = useHistory()
   const { utils } = useCentrifuge()
-  const tokens = pools
-    ?.map((pool) =>
-      pool.tranches.map((tranche) => ({
-        ...tranche,
-        poolMetadata: pool.metadata,
-        // feeToApr is a temporary solution for calculating yield
-        // bc we don't have a way to query for historical token prices yet
-        // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
-        yield: utils.feeToApr(tranche.interestPerSec),
-        // for now proctection is being calculated as a percentage of the ratio
-        // replace with proper protection calculation when token prices are available
-        protection: tranche.ratio,
-      }))
-    )
-    .flat()
+  const tokens = React.useMemo(
+    () =>
+      pools
+        ?.map((pool) =>
+          pool.tranches.map((tranche) => ({
+            ...tranche,
+            poolMetadata: pool.metadata,
+            // feeToApr is a temporary solution for calculating yield
+            // bc we don't have a way to query for historical token prices yet
+            // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
+            yield: utils.feeToApr(tranche.interestPerSec),
+            // for now proctection is being calculated as a percentage of the ratio
+            // replace with proper protection calculation when token prices are available
+            protection: tranche.ratio,
+          }))
+        )
+        .flat(),
+    [pools]
+  )
 
   return (
     <DataTable
@@ -122,7 +126,11 @@ const SortableHeader: React.VFC<{ label: string; orderBy: OrderBy }> = ({ label,
   return (
     <Shelf>
       {label}
-      <IconArrowDown size={16} style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+      <IconArrowDown
+        color="textSecondary"
+        size={16}
+        style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+      />
     </Shelf>
   )
 }
