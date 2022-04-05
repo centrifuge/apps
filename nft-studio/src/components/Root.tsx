@@ -9,14 +9,14 @@ import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
 import { CreateLoanPage } from '../pages/CreateLoan'
+import { IssuerCreatePoolPage } from '../pages/IssuerCreatePool'
+import { IssuerPoolPage } from '../pages/IssuerPool'
 import { LoanPage } from '../pages/Loan'
-import { LoansPage } from '../pages/Loans'
 import { ManagedPoolsPage } from '../pages/ManagedPools'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
 import { NotFoundPage } from '../pages/NotFound'
 import { PoolPage } from '../pages/Pool'
-import { PoolFormPage } from '../pages/PoolForm/index'
 import { PoolsPage } from '../pages/Pools'
 import { TokenPage } from '../pages/Token'
 import { TokensPage } from '../pages/Tokens'
@@ -120,11 +120,11 @@ const Routes: React.VFC = () => {
       <Route path="/pools">
         <PoolsPage />
       </Route>
-      <Route path="/pool/new">
-        <PoolFormPage />
+      <Route path="/issuer/create-pool">
+        <IssuerCreatePoolPage />
       </Route>
-      <Route path="/issuers/assets">
-        <LoansPage />
+      <Route path="/issuer/:pid">
+        <IssuerPoolPage />
       </Route>
       <Route path="/investments/tokens/:pid/:tid">
         <TokenPage />

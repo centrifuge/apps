@@ -21,6 +21,7 @@ const NavigationClickable = styled(Shelf)<{ $active?: boolean }>`
 
 const IconWrapper = styled(Shelf)`
   width: 24px;
+  min-width: 24px;
   & svg {
     vertical-align: baseline;
   }

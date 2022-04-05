@@ -1,20 +1,30 @@
 import { aprToFee, toPerquintill } from '@centrifuge/centrifuge-js'
-import { Box, FileUpload, Grid, NumberInput, Select, Shelf, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  FileUpload,
+  Grid,
+  NumberInput,
+  Select,
+  Shelf,
+  Text,
+  TextAreaInput,
+  TextInput,
+} from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import { Field, FieldProps, Form, Formik, FormikErrors, setIn } from 'formik'
 import * as React from 'react'
+import { useHistory } from 'react-router'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { FieldWithErrorMessage } from '../../components/form/formik/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
-import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { pinPoolMetadata } from './pinPoolMetadata'
 import { RiskGroupsInput } from './RiskGroupsInput'
-import { SubmitButton } from './SubmitButton'
 import { TrancheInput } from './TrancheInput'
 import { validate } from './validate'
 import { WriteOffInput } from './WriteOffInput'
@@ -36,7 +46,7 @@ const ASSET_CLASSES = ['Art NFT'].map((label) => ({
 }))
 const DEFAULT_ASSET_CLASS = 'Art NFT'
 
-export const PoolFormPage: React.FC = () => {
+export const IssuerCreatePoolPage: React.FC = () => {
   return (
     <PageWithSideBar>
       <CreatePoolForm />
@@ -157,8 +167,12 @@ const PoolIcon: React.FC<{ icon?: File | null }> = ({ children, icon }) => {
 const CreatePoolForm: React.VFC = () => {
   const address = useAddress()
   const centrifuge = useCentrifuge()
+  const history = useHistory()
 
-  const { execute: createPoolTx } = useCentrifugeTransaction('Create pool', (cent) => cent.pools.createPool)
+  const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
+    'Create pool',
+    (cent) => cent.pools.createPool
+  )
 
   return (
     <Formik
@@ -196,6 +210,7 @@ const CreatePoolForm: React.VFC = () => {
         })
         return errors
       }}
+      validateOnMount
       onSubmit={async (values, { setSubmitting }) => {
         console.log('submit', values)
         if (!address) return
@@ -238,11 +253,18 @@ const CreatePoolForm: React.VFC = () => {
             subtitle="by The Pool Guys LLC"
             actions={
               <>
-                <RouterLinkButton variant="outlined" to="/issuers/managed-pools">
+                <Button variant="outlined" onClick={() => history.goBack()}>
                   Cancel
-                </RouterLinkButton>
+                </Button>
 
-                <SubmitButton />
+                <Button
+                  loading={form.isSubmitting || transactionIsPending}
+                  variant="contained"
+                  type="submit"
+                  disabled={!form.isValid}
+                >
+                  Create
+                </Button>
               </>
             }
           />
@@ -257,7 +279,7 @@ const CreatePoolForm: React.VFC = () => {
                         form.setFieldTouched('poolIcon', true, false)
                         form.setFieldValue('poolIcon', file)
                       }}
-                      label="Pool icon (SVG, square format)"
+                      label="Pool icon: SVG in square size (required)"
                       placeholder="Choose pool icon"
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       accept="image/svg+xml"

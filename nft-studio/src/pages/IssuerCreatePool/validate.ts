@@ -13,13 +13,11 @@ import {
   required,
 } from '../../utils/validation'
 
-const numWith2Decimals = pattern(/^\d+(\.\d{1,2})?$/, 'Please insert a number with up to 2 decimals')
-
 const MB = 1024 ** 2
 
 export const validate = {
   poolName: combine(required(), maxLength(100)),
-  poolIcon: combine(mimeType('image/svg+xml', 'Icon must be an SVG file')),
+  poolIcon: combine(required(), mimeType('image/svg+xml', 'Icon must be an SVG file')),
   assetClass: required(),
   maxReserve: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
 
@@ -38,7 +36,7 @@ export const validate = {
   // tranches
   tokenName: combine(required(), maxLength(30)),
   symbolName: combine(required(), maxLength(6)),
-  minInvest: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
+  minInvestment: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
   interestRate: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
   minRiskBuffer: combine(required(), nonNegativeNumber(), max(100)),
 

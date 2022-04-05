@@ -61,8 +61,8 @@ export const TrancheInput: React.FC = () => {
                     as={NumberInput}
                     label="Min. investment amount"
                     placeholder="0.00"
-                    name={`tranches.${index}.minInvest`}
-                    validate={validate.minInvest}
+                    name={`tranches.${index}.minInvestment`}
+                    validate={validate.minInvestment}
                     rightElement={CURRENCIES.find((c) => c.value === values.currency)?.label}
                   />
                   {index === juniorTrancheIndex ? (

@@ -6,7 +6,15 @@ type Status = 'Default' | 'Info' | 'Ok' | 'Warning' | 'Critical'
 
 type StatusColorName = `status${Status}`
 
-type AccentColorName = `accent${'Primary' | 'Secondary'}`
+type AccentColorName =
+  | `accent${'Primary' | 'Secondary'}`
+  | 'primarySelectedBackground'
+  | 'secondarySelectedBackground'
+  | 'borderFocus'
+  | 'borderSelected'
+  | 'textSelected'
+  | 'textInteractive'
+  | 'textInteractiveHover'
 type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled'}`
 type BorderColorName = `border${'Primary' | 'Secondary'}`
 type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page' | 'Input'}`
@@ -27,7 +35,7 @@ export type ThemeBreakpoints = BreakpointValue[] & {
   [k in BreakpointName]: BreakpointValue
 }
 
-type SizeName = 'container' | 'iconSmall' | 'iconMedium'
+type SizeName = 'container' | 'iconSmall' | 'iconMedium' | 'iconLarge'
 type SizeValue = string | number
 
 type ThemeSizes = {

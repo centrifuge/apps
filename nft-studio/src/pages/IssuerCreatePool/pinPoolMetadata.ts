@@ -18,14 +18,14 @@ const getFileIpfsUri = async (file?: File | null): Promise<string | null> => {
 
   if (resp.ok && Math.floor(resp.status) / 100 === 2) {
     const json = await resp.json()
-    return `ipfs://ipfs/${json.fileIpfsHash as string}`
+    return json.fileURI as string
   }
   return null
 }
 
 export const pinPoolMetadata = async (poolFormData: PoolFormValues): Promise<string> => {
   // pin image files files. If not present, hash will be null
-  const fileHashMap = await promiseAllObject<string | null>({
+  const fileUriMap = await promiseAllObject<string | null>({
     poolIcon: getFileIpfsUri(poolFormData.poolIcon),
     issuerLogo: getFileIpfsUri(poolFormData.issuerLogo),
     executiveSummary: getFileIpfsUri(poolFormData.executiveSummary),
@@ -36,16 +36,16 @@ export const pinPoolMetadata = async (poolFormData: PoolFormValues): Promise<str
   const metadata: PoolMetadata = {
     pool: {
       name: poolFormData.poolName,
-      icon: fileHashMap.poolIcon || '',
+      icon: fileUriMap.poolIcon || '',
       asset: { class: poolFormData.assetClass },
       issuer: {
         name: poolFormData.issuerName,
         description: poolFormData.issuerDescription,
         email: poolFormData.email,
-        logo: fileHashMap.issuerLogoFile || '',
+        logo: fileUriMap.issuerLogo || '',
       },
       links: {
-        executiveSummary: fileHashMap.executiveSummary || '',
+        executiveSummary: fileUriMap.executiveSummary || '',
         forum: poolFormData.forum,
         website: poolFormData.website,
       },

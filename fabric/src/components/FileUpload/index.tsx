@@ -105,7 +105,7 @@ const Spinner = styled(IconSpinner)`
 `
 
 type FileUploadProps = {
-  file?: File | null
+  file?: File | string | null
   onFileChange?: (file: File | null) => void
   validate?: (file: File) => string | undefined
   errorMessage?: string
@@ -128,7 +128,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   label,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [curFile, setCurFile] = useControlledState<File | null>(null, fileProp, onFileChange)
+  const [curFile, setCurFile] = useControlledState<File | string | null>(null, fileProp, onFileChange)
   const [error, setError] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
 
@@ -238,7 +238,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {curFile.name}
+                  {typeof curFile === 'string' ? curFile : curFile.name}
                 </Text>
                 <Box display="flex" position="relative" zIndex={1} ml="auto" my="-10px" minWidth="iconMedium">
                   <Button variant="text" onClick={handleClear} icon={IconX} disabled={disabled} />
