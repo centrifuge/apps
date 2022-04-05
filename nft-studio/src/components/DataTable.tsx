@@ -3,11 +3,11 @@ import css from '@styled-system/css'
 import * as React from 'react'
 import styled from 'styled-components'
 
-type Props = {
-  data: Array<any>
+type Props<T> = {
+  data: Array<T>
   columns: Column[]
   keyField?: string
-  onRowClicked?: (row: any) => void
+  onRowClicked?: (row: T) => void
 }
 
 export type OrderBy = 'asc' | 'desc'
@@ -19,7 +19,7 @@ export type Column = {
   flex?: string
   sortKey?: string
 }
-const sorter = (data: Array<any>, order: OrderBy, sortKey?: string) => {
+const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, sortKey?: string) => {
   if (!sortKey) return data
   if (order === 'asc') {
     return data.sort((a, b) => a[sortKey] - b[sortKey])
@@ -27,30 +27,29 @@ const sorter = (data: Array<any>, order: OrderBy, sortKey?: string) => {
   return data.sort((a, b) => b[sortKey] - a[sortKey])
 }
 
-export const DataTable: React.VFC<Props> = ({ data, columns, keyField, onRowClicked }) => {
+export const DataTable = <T extends Record<string, any>>({ data, columns, keyField, onRowClicked }: Props<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>({})
-  const [currentSortKey, setCurrentSortKey] = React.useState<string>('')
+  const [currentSortKey, setCurrentSortKey] = React.useState('')
 
-  const updateSortOrder = (sortKey: Required<Column>['sortKey']) => {
+  const updateSortOrder = (sortKey: Column['sortKey']) => {
+    if (!sortKey) return
     const updatedOrderBy = orderBy[sortKey] === 'asc' ? 'desc' : 'asc'
     setOrderBy({ ...orderBy, [sortKey]: updatedOrderBy })
     setCurrentSortKey(sortKey)
   }
 
-  const sortedData = React.useMemo(() => {
-    return sorter(data, orderBy[currentSortKey], currentSortKey)
-  }, [orderBy, data])
+  const sortedData = React.useMemo(() => sorter(data, orderBy[currentSortKey], currentSortKey), [orderBy, data])
 
   return (
     <Stack>
       <Shelf>
-        {columns.map((col: any, i) => (
+        {columns.map((col, i) => (
           <HeaderCol
             key={`${col.header}-${i}`}
             style={{ flex: col.flex }}
             tabIndex={col?.sortKey ? 0 : undefined}
             as={col?.sortKey ? 'button' : 'div'}
-            onClick={col?.sortKey && (() => updateSortOrder(col.sortKey))}
+            onClick={col?.sortKey ? () => updateSortOrder(col.sortKey) : () => undefined}
             align={col?.align}
           >
             <Text variant="label1">
@@ -60,7 +59,7 @@ export const DataTable: React.VFC<Props> = ({ data, columns, keyField, onRowClic
         ))}
       </Shelf>
       <Card>
-        {sortedData?.map((row: any, i: number) => (
+        {sortedData?.map((row, i) => (
           <Row
             as={onRowClicked ? 'button' : 'div'}
             key={keyField ? row[keyField] : i}

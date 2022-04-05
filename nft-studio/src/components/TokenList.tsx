@@ -1,10 +1,9 @@
-import { Pool, Tranche } from '@centrifuge/centrifuge-js'
+import { feeToApr, formatPercentage, Pool, Tranche } from '@centrifuge/centrifuge-js'
 import { IconArrowDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { usePoolMetadata } from '../utils/usePools'
-import { useCentrifuge } from './CentrifugeProvider'
 import { Column, DataTable, OrderBy } from './DataTable'
 import { TokenAvatar } from './TokenAvatar'
 
@@ -56,7 +55,6 @@ const columns: Column[] = [
 
 export const TokenList: React.FC<Props> = ({ pools }) => {
   const history = useHistory()
-  const { utils } = useCentrifuge()
   const tokens = React.useMemo(
     () =>
       pools
@@ -67,14 +65,14 @@ export const TokenList: React.FC<Props> = ({ pools }) => {
             // feeToApr is a temporary solution for calculating yield
             // bc we don't have a way to query for historical token prices yet
             // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
-            yield: utils.feeToApr(tranche.interestPerSec),
+            yield: feeToApr(tranche.interestPerSec),
             // for now proctection is being calculated as a percentage of the ratio
             // replace with proper protection calculation when token prices are available
             protection: tranche.ratio,
           }))
         )
         .flat(),
-    [pools, utils]
+    [pools]
   )
 
   return (
@@ -112,11 +110,10 @@ const Yield: React.VFC<RowProps> = ({ token }) => {
 }
 
 const Protection: React.VFC<RowProps> = ({ token }) => {
-  const { utils } = useCentrifuge()
   return (
     <Text variant="body2">
       {parseInt(token.protection, 10) > 0
-        ? utils.formatPercentage(token.protection, new BN(10).pow(new BN(18)).toString())
+        ? formatPercentage(token.protection, new BN(10).pow(new BN(18)).toString())
         : '-'}
     </Text>
   )
