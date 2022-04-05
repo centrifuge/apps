@@ -278,6 +278,12 @@ async function getPools(ipfsPools: IpfsPools): Promise<PoolsData> {
   const poolsWithCapacity = poolsData.pools.map((pool: PoolData) => {
     const poolConfig = ipfsPools.active.find((p) => p.addresses.ROOT_CONTRACT.toLowerCase() === pool.id.toLowerCase())!
     if (pool.id in capacityPerPool) {
+      console.log(pool.name)
+      console.log('isUpcoming1: ', pool.isUpcoming)
+      console.log('isUpcoming2: ', poolConfig.metadata.isUpcoming)
+      console.log('asset & reserve: ', !pool.assetValue && !pool.reserve)
+      console.log('asset & reserve2: ', pool.assetValue?.isZero() && pool.reserve?.isZero())
+      console.log('config flag: ', !config.featureFlagNewOnboardingPools.includes(pool.id) && !pool.isLaunching)
       const isUpcoming =
         pool.isUpcoming ||
         poolConfig.metadata.isUpcoming ||
