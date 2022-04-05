@@ -27,18 +27,19 @@ const sorter = (data: Array<any>, order: OrderBy, sortKey?: string) => {
   return data.sort((a, b) => b[sortKey] - a[sortKey])
 }
 
-export const DataTable: React.VFC<Props> = ({ data: initialData, columns, keyField, onRowClicked }) => {
-  const [data, setData] = React.useState(initialData)
+export const DataTable: React.VFC<Props> = ({ data, columns, keyField, onRowClicked }) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>({})
+  const [currentSortKey, setCurrentSortKey] = React.useState<string>('')
 
-  const sortData = (column: Column) => {
-    if (column?.sortKey) {
-      const updatedOrderBy = orderBy[column.sortKey] === 'asc' ? 'desc' : 'asc'
-      const sortedData = sorter(data, updatedOrderBy, column?.sortKey)
-      setOrderBy({ ...orderBy, [column.sortKey]: updatedOrderBy })
-      setData(sortedData)
-    }
+  const updateSortOrder = (sortKey: Required<Column>['sortKey']) => {
+    const updatedOrderBy = orderBy[sortKey] === 'asc' ? 'desc' : 'asc'
+    setOrderBy({ ...orderBy, [sortKey]: updatedOrderBy })
+    setCurrentSortKey(sortKey)
   }
+
+  const sortedData = React.useMemo(() => {
+    return sorter(data, orderBy[currentSortKey], currentSortKey)
+  }, [orderBy, data])
 
   return (
     <Stack>
@@ -49,7 +50,7 @@ export const DataTable: React.VFC<Props> = ({ data: initialData, columns, keyFie
             style={{ flex: col.flex }}
             tabIndex={col?.sortKey ? 0 : undefined}
             as={col?.sortKey ? 'button' : 'div'}
-            onClick={col?.sortKey && (() => sortData(col))}
+            onClick={col?.sortKey && (() => updateSortOrder(col.sortKey))}
             align={col?.align}
           >
             <Text variant="label1">
@@ -59,7 +60,7 @@ export const DataTable: React.VFC<Props> = ({ data: initialData, columns, keyFie
         ))}
       </Shelf>
       <Card>
-        {data.map((row: any, i) => (
+        {sortedData?.map((row: any, i: number) => (
           <Row
             as={onRowClicked ? 'button' : 'div'}
             key={keyField ? row[keyField] : i}
