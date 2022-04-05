@@ -111,6 +111,10 @@ const Row = styled(Shelf)(
 const DataCol = styled.div<{ align: Column['align'] }>`
   background: initial;
   border: none;
+  button&:hover {
+    backgroundColor: backgroundSecondary;
+    cursor: pointer;
+  },
   ${({ align }) => {
     switch (align) {
       case 'left':
