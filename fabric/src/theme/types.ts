@@ -35,14 +35,14 @@ export type ThemeBreakpoints = BreakpointValue[] & {
   [k in BreakpointName]: BreakpointValue
 }
 
-type SizeName = 'container' | 'iconSmall' | 'iconMedium' | 'iconLarge'
+type SizeName = 'dialog' | 'container' | 'iconSmall' | 'iconMedium' | 'iconLarge'
 type SizeValue = string | number
 
 type ThemeSizes = {
   [k in SizeName]: SizeValue
 }
 
-type RadiusName = 'card' | 'input'
+type RadiusName = 'card' | 'input' | 'tooltip'
 type RadiusValue = number
 
 type ThemeRadii = {

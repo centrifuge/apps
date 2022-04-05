@@ -1,10 +1,9 @@
-import { GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
+import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import centrifugeLight from '@centrifuge/fabric/dist/theme/centrifugeLight'
-import { OverlayProvider } from '@react-aria/overlays'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-import { DefaultTheme, ThemeProvider } from 'styled-components'
+import { DefaultTheme } from 'styled-components'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
@@ -42,9 +41,6 @@ const darkTheme: DefaultTheme = {
   sizes: {
     ...centrifugeLight.sizes,
     container: '100%',
-    navBarHeight: 72,
-    navBarHeightMobile: 64,
-    dialog: 564,
   },
   colors: {
     ...centrifugeLight.colors,
@@ -64,28 +60,26 @@ const darkTheme: DefaultTheme = {
 export const Root: React.VFC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={darkTheme}>
+      <FabricProvider theme={darkTheme}>
         <GlobalStyle />
         <FabricGlobalStyle />
-        <OverlayProvider>
-          <HostPermissionsProvider>
-            <Web3Provider>
-              <CentrifugeProvider>
-                <DebugFlags>
-                  <TransactionProvider>
-                    <TransactionToasts />
-                    <Router>
-                      <LoadBoundary>
-                        <Routes />
-                      </LoadBoundary>
-                    </Router>
-                  </TransactionProvider>
-                </DebugFlags>
-              </CentrifugeProvider>
-            </Web3Provider>
-          </HostPermissionsProvider>
-        </OverlayProvider>
-      </ThemeProvider>
+        <HostPermissionsProvider>
+          <Web3Provider>
+            <CentrifugeProvider>
+              <DebugFlags>
+                <TransactionProvider>
+                  <TransactionToasts />
+                  <Router>
+                    <LoadBoundary>
+                      <Routes />
+                    </LoadBoundary>
+                  </Router>
+                </TransactionProvider>
+              </DebugFlags>
+            </CentrifugeProvider>
+          </Web3Provider>
+        </HostPermissionsProvider>
+      </FabricProvider>
     </QueryClientProvider>
   )
 }

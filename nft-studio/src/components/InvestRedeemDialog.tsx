@@ -1,6 +1,5 @@
-import { Stack, Text } from '@centrifuge/fabric'
+import { Dialog, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Dialog } from '../components/Dialog'
 import { InvestRedeem } from './InvestRedeem'
 
 export const InvestRedeemDialog: React.FC<{
