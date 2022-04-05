@@ -74,7 +74,7 @@ export const TokenList: React.FC<Props> = ({ pools }) => {
           }))
         )
         .flat(),
-    [pools]
+    [pools, utils]
   )
 
   return (
