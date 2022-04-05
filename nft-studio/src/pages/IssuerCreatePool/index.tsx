@@ -104,7 +104,7 @@ export const createEmptyTranche = (junior?: boolean): Tranche => ({
   symbolName: '',
   interestRate: junior ? '' : 0,
   minRiskBuffer: junior ? '' : 0,
-  minInvestment: '',
+  minInvestment: 0,
 })
 
 export const createEmptyRiskGroup = (): RiskGroup => ({
@@ -230,6 +230,11 @@ const CreatePoolForm: React.VFC = () => {
           })),
         ]
 
+        const writeOffGroups = values.writeOffGroups.map((g) => ({
+          overdueDays: g.days as number,
+          percentage: centrifuge.utils.toRate((g.writeOff as number) / 100),
+        }))
+
         createPoolTx([
           address,
           poolId,
@@ -240,6 +245,7 @@ const CreatePoolForm: React.VFC = () => {
           metadataHash,
           (values.epochDuration as number) * 60 * 60, // convert to seconds
           (values.challengeTime as number) * 60, // convert to seconds
+          writeOffGroups,
         ])
 
         setSubmitting(false)

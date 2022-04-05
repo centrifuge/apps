@@ -239,23 +239,38 @@ export function getPoolsModule(inst: CentrifugeBase) {
       maxReserve: BN,
       metadata: string,
       minEpochTime: number,
-      challengeTime: number
+      challengeTime: number,
+      writeOffGroups: { overdueDays: number; percentage: string }[]
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, minEpochTime, challengeTime] = args
+    const [
+      admin,
+      poolId,
+      collectionId,
+      tranches,
+      currency,
+      maxReserve,
+      metadata,
+      minEpochTime,
+      challengeTime,
+      writeOffGroups,
+    ] = args
 
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.utility.batchAll([
-          api.tx.uniques.create(collectionId, LoanPalletAccountId),
-          api.tx.pools.create(admin, poolId, tranches, currency, maxReserve.toString()),
-          api.tx.pools.update(poolId, minEpochTime.toString(), challengeTime.toString(), '60'),
-          api.tx.pools.setMetadata(poolId, metadata),
-          api.tx.loans.initialisePool(poolId, collectionId),
-        ])
+        const submittable = api.tx.utility.batchAll(
+          [
+            api.tx.uniques.create(collectionId, LoanPalletAccountId),
+            api.tx.pools.create(admin, poolId, tranches, currency, maxReserve.toString()),
+            api.tx.pools.update(poolId, minEpochTime.toString(), challengeTime.toString(), '60'),
+            api.tx.pools.setMetadata(poolId, metadata),
+            api.tx.pools.approveRoleFor(poolId, 'RiskAdmin', inst.getSignerAddress()),
+            api.tx.loans.initialisePool(poolId, collectionId),
+          ].concat(writeOffGroups.map((g) => api.tx.loans.addWriteOffGroup(poolId, [g.percentage, g.overdueDays])))
+        )
         return inst.wrapSignAndSendRx(api, submittable, options)
       })
     )

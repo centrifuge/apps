@@ -3,10 +3,16 @@ import { pinFile } from './pinata/api'
 
 const fs = require('fs')
 
+const MAX_FILE_SIZE_IN_BYTES = 5 * 1024 ** 2 // 5 MB limit
+
 const dataUriToReadStream = ({ tempFilePath, fileDataUri }) => {
   const base64String = fileDataUri.replace(/.+;base64,/, '')
 
-  fs.writeFileSync(tempFilePath, base64String, { encoding: 'base64' })
+  const buffer = Buffer.from(base64String, 'base64')
+
+  if (buffer.byteLength > MAX_FILE_SIZE_IN_BYTES) throw new Error('File too large')
+
+  fs.writeFileSync(tempFilePath, buffer)
 
   console.log(`Temp file '${tempFilePath}' created`)
 
