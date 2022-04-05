@@ -22,13 +22,9 @@ export type Column = {
 const sorter = (data: Array<any>, order: OrderBy, sortKey?: string) => {
   if (!sortKey) return data
   if (order === 'asc') {
-    return data.sort((a, b) => {
-      return a[sortKey] - b[sortKey]
-    })
+    return data.sort((a, b) => a[sortKey] - b[sortKey])
   }
-  return data.sort((a, b) => {
-    return b[sortKey] - a[sortKey]
-  })
+  return data.sort((a, b) => b[sortKey] - a[sortKey])
 }
 
 export const DataTable: React.VFC<Props> = ({ data: initialData, columns, keyField, onRowClicked }) => {

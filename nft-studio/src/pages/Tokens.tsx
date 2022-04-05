@@ -7,7 +7,7 @@ import { usePools } from '../utils/usePools'
 
 export const TokenOverviewPage: React.FC = () => {
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar>
       <TokenOverview />
     </PageWithSideBar>
   )
@@ -17,7 +17,7 @@ const TokenOverview: React.FC = () => {
   const pools = usePools()
   return (
     <Stack gap={0} flex={1}>
-      <PageHeader pretitle="Tokens" title="Art NFT Tokens" />
+      <PageHeader pretitle="Tokens" title="Art NFT Tokens" walletShown={false} />
       {pools?.length ? (
         <TokenList pools={pools} />
       ) : (
