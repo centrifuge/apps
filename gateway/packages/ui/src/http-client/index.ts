@@ -4,7 +4,6 @@ import { FundingRequest, FundingSignatureRequest } from '@centrifuge/gateway-lib
 import { MintNftRequest, TransferNftRequest } from '@centrifuge/gateway-lib/models/nfts'
 import { Organization } from '@centrifuge/gateway-lib/models/organization'
 import { Schema } from '@centrifuge/gateway-lib/models/schema'
-import { TransferDetailsRequest } from '@centrifuge/gateway-lib/models/transfer-details'
 import { LoggedInUser, User } from '@centrifuge/gateway-lib/models/user'
 import { ROUTES } from '@centrifuge/gateway-lib/utils/constants'
 import axios, { AxiosPromise } from 'axios'
@@ -49,12 +48,6 @@ export const httpClient = {
       instance.post(ROUTES.FUNDING.base, fundingRequest, authHeader(token)),
     sign: async (fundingRequest: FundingSignatureRequest, token: string) =>
       instance.post(ROUTES.FUNDING.sign, fundingRequest, authHeader(token)),
-  },
-  transferDetails: {
-    create: async (transferDetails: TransferDetailsRequest, token: string) =>
-      instance.post(ROUTES.TRANSFER_DETAILS, transferDetails, authHeader(token)),
-    update: async (transferDetails: TransferDetailsRequest, token: string) =>
-      instance.put(`${ROUTES.TRANSFER_DETAILS}`, transferDetails, authHeader(token)),
   },
   schemas: {
     create: async (schema: Schema, token: string) => instance.post(ROUTES.SCHEMAS, schema, authHeader(token)),

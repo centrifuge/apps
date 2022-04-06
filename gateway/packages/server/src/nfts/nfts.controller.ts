@@ -26,10 +26,10 @@ export class NftsController {
   async mintNFT(@Req() request, @Body() body: MintNftRequest) {
     const docId = body.document_id
     const payload: CoreapiMintNFTRequest = {
-      asset_manager_address: body.asset_manager_address,
-      document_id: body.document_id,
-      proof_fields: body.proof_fields,
-      deposit_address: body.deposit_address,
+      assetManagerAddress: body.asset_manager_address,
+      documentId: body.document_id,
+      proofFields: body.proof_fields,
+      depositAddress: body.deposit_address,
     }
     const docsFromDb = (await this.databaseService.documents.update(
       { 'header.document_id': docId },
@@ -46,11 +46,11 @@ export class NftsController {
 
     let mintingResult
     try {
-      mintingResult = await this.centrifugeService.nft.mintNft(request.user.account, body.registry_address, payload)
+      mintingResult = await this.centrifugeService.nft.mintNft(payload, request.user.account, body.registry_address)
 
       const mint = await this.centrifugeService.pullForJobComplete(mintingResult.header.job_id, request.user.account)
 
-      if (mint.status !== 'success') {
+      if (mint.finished) {
         throw new InternalServerErrorException('Minting job failed')
       }
 
@@ -99,19 +99,19 @@ export class NftsController {
     }
 
     const oraclePushResult = await this.centrifugeService.nft.pushAttributeOracle(
-      request.user.account,
       {
         // TODO: this attribute key is a hardcoded hash of 'result' --  we should update this when we have a UI mockup
-        attribute_key: '0xf6a214f7a5fcda0c2cee9660b7fc29f5649e3c68aad48e20e950137c98913a68',
-        oracle_address: body.oracle_address,
-        token_id: mintingResult.token_id,
+        attributeKey: '0xf6a214f7a5fcda0c2cee9660b7fc29f5649e3c68aad48e20e950137c98913a68',
+        oracleAddress: body.oracle_address,
+        tokenId: mintingResult.token_id,
       },
+      request.user.account,
       body.document_id
     )
 
-    const push = await this.centrifugeService.pullForJobComplete(oraclePushResult.job_id, request.user.account)
+    const push = await this.centrifugeService.pullForJobComplete(oraclePushResult.jobId, request.user.account)
 
-    if (push.status === 'success') {
+    if (push.finished) {
       console.log('pushing to oracle succeeded', oraclePushResult)
     } else {
       console.log('pushing to oracle failed', oraclePushResult)

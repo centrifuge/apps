@@ -9,7 +9,6 @@ import config from './config'
 import { ContactsModule } from './contacts/contacts.module'
 import { DocumentsModule } from './documents/documents.module'
 import { AllExceptionFilter } from './exceptions/all-exception.filter'
-import { FundingModule } from './funding/funding.module'
 import { NftsModule } from './nfts/nfts.module'
 import { OrganizationsModule } from './organizations/organizations.module'
 import { SchemasModule } from './schemas/schemas.module'
@@ -28,7 +27,6 @@ import { WebhooksModule } from './webhooks/webhooks.module'
   imports: [
     AuthModule,
     ContactsModule,
-    FundingModule,
     UsersModule,
     WebhooksModule,
     SchemasModule,
