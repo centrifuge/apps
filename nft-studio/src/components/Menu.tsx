@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Box, IconHome, IconNft, IconPieChart, IconPlus, IconUser, Shelf } from '@centrifuge/fabric'
+import { Box, IconHome, IconNft, IconPieChart, IconUser, Shelf } from '@centrifuge/fabric'
 import React from 'react'
 import { useRouteMatch } from 'react-router'
 import logoCentrifuge from '../assets/images/logoCentrifuge.svg'
@@ -8,6 +8,7 @@ import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { usePermissions } from '../utils/usePermissions'
 import { usePoolMetadata, usePools } from '../utils/usePools'
 import { NavigationItem } from './NavigationItem'
+import { RouterLinkButton } from './RouterLinkButton'
 
 type Props = {}
 
@@ -57,7 +58,13 @@ export const Menu: React.FC<Props> = () => {
           {pools.map((pool) => (
             <PoolNavigationItem key={pool.id} pool={pool} />
           ))}
-          <NavigationItem label="Create pool" href="/issuer/create-pool" icon={<IconPlus size={16} />} />
+          {address && (
+            <Shelf justifyContent="center" mt={1}>
+              <RouterLinkButton to="/issuer/create-pool" variant="outlined" small>
+                Create Pool
+              </RouterLinkButton>
+            </Shelf>
+          )}
         </NavigationItem>
       </Shelf>
     </Box>

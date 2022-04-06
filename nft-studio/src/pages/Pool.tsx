@@ -51,8 +51,6 @@ const Pool: React.FC = () => {
 
   const centrifuge = useCentrifuge()
 
-  console.log('permissions', permissions)
-
   const isPoolAdmin = useMemo(
     () => !!(address && permissions && permissions[poolId]?.roles.includes('PoolAdmin')),
     [poolId, address, permissions]

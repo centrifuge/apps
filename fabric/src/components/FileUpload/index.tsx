@@ -27,9 +27,9 @@ const FileUploadContainer = styled(Stack)<{ $disabled?: boolean }>`
   justify-content: center;
   width: 100%;
   background: ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundPage : theme.colors.backgroundInput)};
-  outline: 1px dashed
-    ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundSecondary : theme.colors.textSecondary)};
-  outline-offset: -1px;
+  /* outline: 1px dashed
+    ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundSecondary : theme.colors.borderPrimary)};
+  outline-offset: -1px; */
   border-radius: ${({ theme }) => theme.radii.card}px;
   cursor: pointer;
   pointer-events: ${({ $disabled }) => ($disabled ? 'none' : 'initial')};
@@ -50,7 +50,8 @@ const UploadButton = styled.button<{ $active?: boolean }>`
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid transparent;
+  border: 1px dashed
+    ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundSecondary : theme.colors.borderPrimary)};
   border-radius: ${({ theme }) => theme.radii.card}px;
   background: transparent;
   appearance: none;
@@ -241,7 +242,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   {typeof curFile === 'string' ? curFile : curFile.name}
                 </Text>
                 <Box display="flex" position="relative" zIndex={1} ml="auto" my="-10px" minWidth="iconMedium">
-                  <Button variant="text" onClick={handleClear} icon={IconX} disabled={disabled} />
+                  {!disabled && <Button variant="text" onClick={handleClear} icon={IconX} disabled={disabled} />}
                 </Box>
               </Shelf>
             </>

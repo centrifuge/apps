@@ -12,7 +12,7 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
-import { Field, FieldProps, Form, Formik, FormikErrors, setIn } from 'formik'
+import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
@@ -20,12 +20,14 @@ import { FieldWithErrorMessage } from '../../components/form/formik/FieldWithErr
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
+import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { pinPoolMetadata } from './pinPoolMetadata'
 import { RiskGroupsInput } from './RiskGroupsInput'
 import { TrancheInput } from './TrancheInput'
+import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
 import { WriteOffInput } from './WriteOffInput'
 
@@ -168,299 +170,319 @@ const CreatePoolForm: React.VFC = () => {
   const address = useAddress()
   const centrifuge = useCentrifuge()
   const history = useHistory()
+  const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
+
 
   const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
     'Create pool',
     (cent) => cent.pools.createPool
   )
 
+  const form = useFormik({
+    initialValues,
+    validate: (values) => {
+      let errors: FormikErrors<any> = {}
+      const tokenNames = new Set<string>()
+      const tokenSymbols = new Set<string>()
+      let prevInterest = Infinity
+      let prevRiskBuffer = 0
+      values.tranches.forEach((t, i) => {
+        if (tokenNames.has(t.tokenName)) {
+          errors = setIn(errors, `tranches.${i}.tokenName`, 'Tranche names must be unique')
+        }
+        tokenNames.add(t.tokenName)
+
+        if (tokenSymbols.has(t.symbolName)) {
+          errors = setIn(errors, `tranches.${i}.symbolName`, 'Token symbols must be unique')
+        }
+        tokenSymbols.add(t.symbolName)
+
+        if (t.interestRate !== '') {
+          if (t.interestRate > prevInterest) {
+            errors = setIn(errors, `tranches.${i}.interestRate`, "Can't be higher than a more junior tranche")
+          }
+          prevInterest = t.interestRate
+        }
+
+        if (t.minRiskBuffer !== '') {
+          if (t.minRiskBuffer < prevRiskBuffer) {
+            errors = setIn(errors, `tranches.${i}.minRiskBuffer`, "Can't be lower than a more junior tranche")
+          }
+          prevRiskBuffer = t.minRiskBuffer
+        }
+      })
+      return errors
+    },
+    validateOnMount: true,
+    onSubmit: async (values, { setSubmitting }) => {
+      console.log('submit', values)
+      if (!address) return
+      // validation passed, submit
+      const metadataHash = await pinPoolMetadata(values)
+
+      const poolId = await centrifuge.pools.getAvailablePoolId()
+      const collectionId = await centrifuge.nfts.getAvailableCollectionId()
+
+      // tranches must be reversed (most junior is the first in the UI but the last in the API)
+      const noJuniorTranches = values.tranches.slice(1)
+      const tranches = [
+        {}, // most junior tranche
+        ...noJuniorTranches.map((tranche) => ({
+          interestPerSec: aprToFee((tranche.interestRate as number) / 100),
+          minRiskBuffer: toPerquintill((tranche.minRiskBuffer as number) / 100),
+        })),
+      ]
+
+      const writeOffGroups = values.writeOffGroups.map((g) => ({
+        overdueDays: g.days as number,
+        percentage: centrifuge.utils.toRate((g.writeOff as number) / 100),
+      }))
+
+      createPoolTx([
+        address,
+        poolId,
+        collectionId,
+        tranches,
+        DEFAULT_CURRENCY,
+        new BN(values.maxReserve as number).mul(new BN(10).pow(new BN(18))),
+        metadataHash,
+        (values.epochDuration as number) * 60 * 60, // convert to seconds
+        (values.challengeTime as number) * 60, // convert to seconds
+        writeOffGroups,
+      ])
+
+      setSubmitting(false)
+    },
+  })
+
+  React.useEffect(() => {
+    if (!isStoredIssuerLoading && storedIssuer) {
+      if (storedIssuer.name) {
+        form.setFieldValue('issuerName', storedIssuer.name, false)
+      }
+      if (storedIssuer.description) {
+        form.setFieldValue('issuerDescription', storedIssuer.description, false)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isStoredIssuerLoading])
+
   return (
-    <Formik
-      initialValues={initialValues}
-      validate={(values) => {
-        let errors: FormikErrors<any> = {}
-        const tokenNames = new Set<string>()
-        const tokenSymbols = new Set<string>()
-        let prevInterest = Infinity
-        let prevRiskBuffer = 0
-        values.tranches.forEach((t, i) => {
-          if (tokenNames.has(t.tokenName)) {
-            errors = setIn(errors, `tranches.${i}.tokenName`, 'Tranche names must be unique')
+    <FormikProvider value={form}>
+      <Form>
+        <PageHeader
+          icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
+          title={form.values.poolName || 'New Pool'}
+          subtitle={
+            <TextWithPlaceholder isLoading={isStoredIssuerLoading} width={15}>
+              by {form.values.issuerName || address}
+            </TextWithPlaceholder>
           }
-          tokenNames.add(t.tokenName)
+          actions={
+            <>
+              <Button variant="outlined" onClick={() => history.goBack()}>
+                Cancel
+              </Button>
 
-          if (tokenSymbols.has(t.symbolName)) {
-            errors = setIn(errors, `tranches.${i}.symbolName`, 'Token symbols must be unique')
+              <Button
+                loading={form.isSubmitting || transactionIsPending}
+                variant="contained"
+                type="submit"
+                disabled={!form.isValid}
+              >
+                Create
+              </Button>
+            </>
           }
-          tokenSymbols.add(t.symbolName)
+        />
+        <PageSection title="Details">
+          <Grid columns={[6]} equalColumns gap={2} rowGap={3}>
+            <Box gridColumn="span 3" width="100%">
+              <Field name="poolIcon" validate={validate.poolIcon}>
+                {({ field, meta, form }: FieldProps) => (
+                  <FileUpload
+                    file={field.value}
+                    onFileChange={(file) => {
+                      form.setFieldTouched('poolIcon', true, false)
+                      form.setFieldValue('poolIcon', file)
+                    }}
+                    label="Pool icon: SVG in square size (required)"
+                    placeholder="Choose pool icon"
+                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                    accept="image/svg+xml"
+                  />
+                )}
+              </Field>
+            </Box>
+            <Box gridColumn="span 3">
+              <FieldWithErrorMessage
+                validate={validate.poolName}
+                name="poolName"
+                as={TextInput}
+                label="Pool name"
+                placeholder="New pool"
+                maxLength={100}
+              />
+            </Box>
+            <Box gridColumn="span 3">
+              <Field name="assetClass" validate={validate.assetClass}>
+                {({ field, meta, form }: FieldProps) => (
+                  <Select
+                    label="Asset class"
+                    onSelect={(v) => form.setFieldValue('assetClass', v)}
+                    onBlur={field.onBlur}
+                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                    value={field.value}
+                    options={ASSET_CLASSES}
+                    placeholder="Select..."
+                  />
+                )}
+              </Field>
+            </Box>
+            <Box gridColumn="span 3">
+              <Field name="currency" validate={validate.currency}>
+                {({ field, form, meta }: FieldProps) => (
+                  <Select
+                    label="Currency"
+                    onSelect={(v) => form.setFieldValue('currency', v)}
+                    onBlur={field.onBlur}
+                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                    value={field.value}
+                    options={CURRENCIES}
+                    placeholder="Select..."
+                  />
+                )}
+              </Field>
+            </Box>
+            <Box gridColumn="span 2">
+              <FieldWithErrorMessage
+                validate={validate.maxReserve}
+                name="maxReserve"
+                as={NumberInput}
+                label="Initial maximum reserve"
+                placeholder="0"
+                rightElement={CURRENCIES.find((c) => c.value === form.values.currency)?.label}
+              />
+            </Box>
+            <Box gridColumn="span 2">
+              <FieldWithErrorMessage
+                validate={validate.epochDuration}
+                name="epochDuration"
+                as={NumberInput}
+                label="Minimum epoch duration"
+                placeholder="0"
+                rightElement="hrs"
+              />
+            </Box>
+            <Box gridColumn="span 2">
+              <FieldWithErrorMessage
+                validate={validate.challengeTime}
+                name="challengeTime"
+                as={NumberInput}
+                label="Challenge time"
+                placeholder="0"
+                rightElement="min"
+              />
+            </Box>
+          </Grid>
+        </PageSection>
+        <PageSection title="Issuer">
+          <Grid columns={[6]} equalColumns gap={2} rowGap={3}>
+            <Box gridColumn="span 3">
+              <FieldWithErrorMessage
+                validate={validate.issuerName}
+                name="issuerName"
+                as={TextInput}
+                label="Issuer name"
+                placeholder="Name..."
+                maxLength={100}
+                disabled={isStoredIssuerLoading}
+              />
+            </Box>
+            <Box gridColumn="span 3" width="100%">
+              <Field name="issuerLogo" validate={validate.issuerLogo}>
+                {({ field, meta, form }: FieldProps) => (
+                  <FileUpload
+                    file={field.value}
+                    onFileChange={(file) => {
+                      form.setFieldTouched('issuerLogo', true, false)
+                      form.setFieldValue('issuerLogo', file)
+                    }}
+                    label="Issuer logo (JPG/PNG/SVG, 480x480 px)"
+                    placeholder="Choose issuer logo"
+                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                    accept="image/*"
+                  />
+                )}
+              </Field>
+            </Box>
+            <Box gridColumn="span 6">
+              <FieldWithErrorMessage
+                validate={validate.issuerDescription}
+                name="issuerDescription"
+                as={TextAreaInput}
+                label="Description"
+                placeholder="Description..."
+                maxLength={800}
+                disabled={isStoredIssuerLoading}
+              />
+            </Box>
+            <Box gridColumn="span 6">
+              <Text>Links</Text>
+            </Box>
+            <Box gridColumn="span 3">
+              <Field name="executiveSummary" validate={validate.executiveSummary}>
+                {({ field, meta, form }: FieldProps) => (
+                  <FileUpload
+                    file={field.value}
+                    onFileChange={(file) => {
+                      form.setFieldTouched('executiveSummary', true, false)
+                      form.setFieldValue('executiveSummary', file)
+                    }}
+                    accept="application/pdf"
+                    label="Executive summary PDF (required)"
+                    placeholder="Choose file"
+                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                  />
+                )}
+              </Field>
+            </Box>
+            <Box gridColumn="span 3">
+              <FieldWithErrorMessage
+                name="website"
+                as={TextInput}
+                label="Website"
+                placeholder="https://..."
+                validate={validate.website}
+              />
+            </Box>
+            <Box gridColumn="span 3">
+              <FieldWithErrorMessage
+                name="forum"
+                as={TextInput}
+                label="Governance forum"
+                placeholder="https://..."
+                validate={validate.forum}
+              />
+            </Box>
+            <Box gridColumn="span 3">
+              <FieldWithErrorMessage
+                name="email"
+                as={TextInput}
+                label="Email"
+                placeholder=""
+                validate={validate.email}
+              />
+            </Box>
+          </Grid>
+        </PageSection>
 
-          if (t.interestRate !== '') {
-            if (t.interestRate > prevInterest) {
-              errors = setIn(errors, `tranches.${i}.interestRate`, "Can't be higher than a more junior tranche")
-            }
-            prevInterest = t.interestRate
-          }
+        <TrancheInput />
 
-          if (t.minRiskBuffer !== '') {
-            if (t.minRiskBuffer < prevRiskBuffer) {
-              errors = setIn(errors, `tranches.${i}.minRiskBuffer`, "Can't be lower than a more junior tranche")
-            }
-            prevRiskBuffer = t.minRiskBuffer
-          }
-        })
-        return errors
-      }}
-      validateOnMount
-      onSubmit={async (values, { setSubmitting }) => {
-        console.log('submit', values)
-        if (!address) return
-        // validation passed, submit
-        const metadataHash = await pinPoolMetadata(values)
+        <RiskGroupsInput />
 
-        const poolId = await centrifuge.pools.getAvailablePoolId()
-        const collectionId = await centrifuge.nfts.getAvailableCollectionId()
-
-        // tranches must be reversed (most junior is the first in the UI but the last in the API)
-        const noJuniorTranches = values.tranches.slice(1)
-        const tranches = [
-          {}, // most junior tranche
-          ...noJuniorTranches.map((tranche) => ({
-            interestPerSec: aprToFee((tranche.interestRate as number) / 100),
-            minRiskBuffer: toPerquintill((tranche.minRiskBuffer as number) / 100),
-          })),
-        ]
-
-        const writeOffGroups = values.writeOffGroups.map((g) => ({
-          overdueDays: g.days as number,
-          percentage: centrifuge.utils.toRate((g.writeOff as number) / 100),
-        }))
-
-        createPoolTx([
-          address,
-          poolId,
-          collectionId,
-          tranches,
-          DEFAULT_CURRENCY,
-          new BN(values.maxReserve as number).mul(new BN(10).pow(new BN(18))),
-          metadataHash,
-          (values.epochDuration as number) * 60 * 60, // convert to seconds
-          (values.challengeTime as number) * 60, // convert to seconds
-          writeOffGroups,
-        ])
-
-        setSubmitting(false)
-      }}
-    >
-      {(form) => (
-        <Form>
-          <PageHeader
-            icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
-            title={form.values.poolName || 'New Pool'}
-            subtitle="by The Pool Guys LLC"
-            actions={
-              <>
-                <Button variant="outlined" onClick={() => history.goBack()}>
-                  Cancel
-                </Button>
-
-                <Button
-                  loading={form.isSubmitting || transactionIsPending}
-                  variant="contained"
-                  type="submit"
-                  disabled={!form.isValid}
-                >
-                  Create
-                </Button>
-              </>
-            }
-          />
-          <PageSection title="Details">
-            <Grid columns={[6]} equalColumns gap={2} rowGap={3}>
-              <Box gridColumn="span 3" width="100%">
-                <Field name="poolIcon" validate={validate.poolIcon}>
-                  {({ field, meta, form }: FieldProps) => (
-                    <FileUpload
-                      file={field.value}
-                      onFileChange={(file) => {
-                        form.setFieldTouched('poolIcon', true, false)
-                        form.setFieldValue('poolIcon', file)
-                      }}
-                      label="Pool icon: SVG in square size (required)"
-                      placeholder="Choose pool icon"
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                      accept="image/svg+xml"
-                    />
-                  )}
-                </Field>
-              </Box>
-              <Box gridColumn="span 3">
-                <FieldWithErrorMessage
-                  validate={validate.poolName}
-                  name="poolName"
-                  as={TextInput}
-                  label="Pool name"
-                  placeholder="New pool"
-                  maxLength={100}
-                />
-              </Box>
-              <Box gridColumn="span 3">
-                <Field name="assetClass" validate={validate.assetClass}>
-                  {({ field, meta, form }: FieldProps) => (
-                    <Select
-                      label="Asset class"
-                      onSelect={(v) => form.setFieldValue('assetClass', v)}
-                      onBlur={field.onBlur}
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                      value={field.value}
-                      options={ASSET_CLASSES}
-                      placeholder="Select..."
-                    />
-                  )}
-                </Field>
-              </Box>
-              <Box gridColumn="span 3">
-                <Field name="currency" validate={validate.currency}>
-                  {({ field, form, meta }: FieldProps) => (
-                    <Select
-                      label="Currency"
-                      onSelect={(v) => form.setFieldValue('currency', v)}
-                      onBlur={field.onBlur}
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                      value={field.value}
-                      options={CURRENCIES}
-                      placeholder="Select..."
-                    />
-                  )}
-                </Field>
-              </Box>
-              <Box gridColumn="span 2">
-                <FieldWithErrorMessage
-                  validate={validate.maxReserve}
-                  name="maxReserve"
-                  as={NumberInput}
-                  label="Initial maximum reserve"
-                  placeholder="0"
-                  rightElement={CURRENCIES.find((c) => c.value === form.values.currency)?.label}
-                />
-              </Box>
-              <Box gridColumn="span 2">
-                <FieldWithErrorMessage
-                  validate={validate.epochDuration}
-                  name="epochDuration"
-                  as={NumberInput}
-                  label="Minimum epoch duration"
-                  placeholder="0"
-                  rightElement="hrs"
-                />
-              </Box>
-              <Box gridColumn="span 2">
-                <FieldWithErrorMessage
-                  validate={validate.challengeTime}
-                  name="challengeTime"
-                  as={NumberInput}
-                  label="Challenge time"
-                  placeholder="0"
-                  rightElement="min"
-                />
-              </Box>
-            </Grid>
-          </PageSection>
-          <PageSection title="Issuer">
-            <Grid columns={[6]} equalColumns gap={2} rowGap={3}>
-              <Box gridColumn="span 3">
-                <FieldWithErrorMessage
-                  validate={validate.issuerName}
-                  name="issuerName"
-                  as={TextInput}
-                  label="Issuer name"
-                  placeholder="Name..."
-                  maxLength={100}
-                />
-              </Box>
-              <Box gridColumn="span 3" width="100%">
-                <Field name="issuerLogo" validate={validate.issuerLogo}>
-                  {({ field, meta, form }: FieldProps) => (
-                    <FileUpload
-                      file={field.value}
-                      onFileChange={(file) => {
-                        form.setFieldTouched('issuerLogo', true, false)
-                        form.setFieldValue('issuerLogo', file)
-                      }}
-                      label="Issuer logo (JPG/PNG/SVG, 480x480 px)"
-                      placeholder="Choose issuer logo"
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                      accept="image/*"
-                    />
-                  )}
-                </Field>
-              </Box>
-              <Box gridColumn="span 6">
-                <FieldWithErrorMessage
-                  validate={validate.issuerDescription}
-                  name="issuerDescription"
-                  as={TextAreaInput}
-                  label="Description"
-                  placeholder="Description..."
-                  maxLength={800}
-                />
-              </Box>
-              <Box gridColumn="span 6">
-                <Text>Links</Text>
-              </Box>
-              <Box gridColumn="span 3">
-                <Field name="executiveSummary" validate={validate.executiveSummary}>
-                  {({ field, meta, form }: FieldProps) => (
-                    <FileUpload
-                      file={field.value}
-                      onFileChange={(file) => {
-                        form.setFieldTouched('executiveSummary', true, false)
-                        form.setFieldValue('executiveSummary', file)
-                      }}
-                      accept="application/pdf"
-                      label="Executive summary PDF (required)"
-                      placeholder="Choose file"
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                    />
-                  )}
-                </Field>
-              </Box>
-              <Box gridColumn="span 3">
-                <FieldWithErrorMessage
-                  name="website"
-                  as={TextInput}
-                  label="Website"
-                  placeholder="https://..."
-                  validate={validate.website}
-                />
-              </Box>
-              <Box gridColumn="span 3">
-                <FieldWithErrorMessage
-                  name="forum"
-                  as={TextInput}
-                  label="Governance forum"
-                  placeholder="https://..."
-                  validate={validate.forum}
-                />
-              </Box>
-              <Box gridColumn="span 3">
-                <FieldWithErrorMessage
-                  name="email"
-                  as={TextInput}
-                  label="Email"
-                  placeholder=""
-                  validate={validate.email}
-                />
-              </Box>
-            </Grid>
-          </PageSection>
-
-          <TrancheInput />
-
-          <RiskGroupsInput />
-
-          <WriteOffInput />
-        </Form>
-      )}
-    </Formik>
+        <WriteOffInput />
+      </Form>
+    </FormikProvider>
   )
 }

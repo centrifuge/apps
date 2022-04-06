@@ -7,7 +7,7 @@ import { usePools } from '../utils/usePools'
 
 export const PoolsPage: React.FC = () => {
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar={<></>}>
       <Pools />
     </PageWithSideBar>
   )

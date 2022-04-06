@@ -267,7 +267,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
             api.tx.pools.create(admin, poolId, tranches, currency, maxReserve.toString()),
             api.tx.pools.update(poolId, minEpochTime.toString(), challengeTime.toString(), '60'),
             api.tx.pools.setMetadata(poolId, metadata),
-            api.tx.pools.approveRoleFor(poolId, 'RiskAdmin', inst.getSignerAddress()),
+            api.tx.permissions.addPermission('PoolAdmin', inst.getSignerAddress(), poolId, 'RiskAdmin'),
             api.tx.loans.initialisePool(poolId, collectionId),
           ].concat(writeOffGroups.map((g) => api.tx.loans.addWriteOffGroup(poolId, [g.percentage, g.overdueDays])))
         )

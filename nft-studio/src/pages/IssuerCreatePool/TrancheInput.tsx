@@ -1,5 +1,5 @@
 import { Box, Button, Grid, IconMinusCircle, NumberInput, Stack, Text, TextInput } from '@centrifuge/fabric'
-import { FieldArray, useFormikContext } from 'formik'
+import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import React from 'react'
 import { createEmptyTranche, CURRENCIES, PoolFormValues } from '.'
 import { FieldWithErrorMessage } from '../../components/form/formik/FieldWithErrorMessage'
@@ -49,14 +49,18 @@ export const TrancheInput: React.FC = () => {
                     name={`tranches.${index}.tokenName`}
                     validate={validate.tokenName}
                   />
-                  <FieldWithErrorMessage
-                    as={TextInput}
-                    label="Token symbol"
-                    placeholder=""
-                    maxLength={6}
-                    name={`tranches.${index}.symbolName`}
-                    validate={validate.symbolName}
-                  />
+                  <Field name={`tranches.${index}.symbolName`} validate={validate.symbolName}>
+                    {({ field, form, meta }: FieldProps) => (
+                      <TextInput
+                        onChange={(e) => form.setFieldValue(field.name, e.target.value.toUpperCase())}
+                        onBlur={field.onBlur}
+                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                        label="Token symbol"
+                        placeholder=""
+                        maxLength={6}
+                      />
+                    )}
+                  </Field>
                   <FieldWithErrorMessage
                     as={NumberInput}
                     label="Min. investment amount"
