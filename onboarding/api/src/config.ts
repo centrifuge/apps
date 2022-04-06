@@ -44,6 +44,7 @@ export interface Config {
   sendgrid: {
     whitelistEmailTemplate: string
     subscriptionAgreementTemplate: string
+    kycRejectedTemplate: string
     apiKey: string
     apiUrl: string
   }
@@ -93,6 +94,7 @@ const config: Config = {
   sendgrid: {
     whitelistEmailTemplate: `d-a0e7c096a0cf43868de275751e57fdf5`,
     subscriptionAgreementTemplate: `d-4ba3d74ecffd490eb3a5d616b6854d57`,
+    kycRejectedTemplate: `d-0355a8a15020445fb0d785ad75420ece`,
     apiKey: process.env.SENDGRID_API_KEY,
     apiUrl: `https://api.sendgrid.com/v3/mail/send`,
   },
