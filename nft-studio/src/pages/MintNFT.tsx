@@ -1,16 +1,26 @@
-import { Box, Button, IconArrowLeft, Shelf, Stack, Text } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  IconArrowLeft,
+  NumberInput,
+  Shelf,
+  Stack,
+  Text,
+  TextAreaInput,
+  TextInput,
+} from '@centrifuge/fabric'
 import { Flex } from '@centrifuge/fabric/dist/components/Flex'
 import React, { useReducer, useState } from 'react'
 import { useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router'
+import { NavLink } from 'react-router-dom'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { useDebugFlags } from '../components/DebugFlags'
 import { FileImageUpload } from '../components/FileImageUpload'
 import { PageHeader } from '../components/PageHeader'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { SplitView } from '../components/SplitView'
-import { TextArea } from '../components/TextArea'
-import { TextInput } from '../components/TextInput'
 import { nftMetadataSchema } from '../schemas'
 import { createNFTMetadata } from '../utils/createNFTMetadata'
 import { getFileDataURI } from '../utils/getFileDataURI'
@@ -48,6 +58,7 @@ const MintNFT: React.FC = () => {
   const history = useHistory()
 
   const [nftName, setNftName] = useState('')
+  const [nftAmount, setNftAmount] = useState(1)
   const [nftDescription, setNftDescription] = useState('')
   const [fileDataUri, setFileDataUri] = useState('')
   const [fileName, setFileName] = useState('')
@@ -98,7 +109,7 @@ const MintNFT: React.FC = () => {
 
     queryClient.prefetchQuery(['metadata', res.metadataURI], () => fetchMetadata(res.metadataURI))
 
-    doTransaction([collectionId, nftId, address!, res.metadataURI])
+    doTransaction([collectionId, nftId, address!, res.metadataURI, nftAmount])
   })
 
   function reset() {
@@ -118,6 +129,8 @@ const MintNFT: React.FC = () => {
   const fieldDisabled = balanceLow || !canMint || isMinting
   const submitDisabled = !isFormValid || balanceLow || !canMint || isMinting
 
+  const batchMintNFTs = useDebugFlags().batchMintNFTs
+
   return (
     <Stack flex={1}>
       <PageHeader
@@ -129,7 +142,7 @@ const MintNFT: React.FC = () => {
         left={
           <Box>
             <Box pt={1}>
-              <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
+              <RouterLinkButton icon={IconArrowLeft} to={`/collection/${collectionId}`} variant="text">
                 Back
               </RouterLinkButton>
             </Box>
@@ -154,7 +167,17 @@ const MintNFT: React.FC = () => {
         }
         right={
           <Box px={[2, 4, 8]} py={9}>
-            <Stack>
+            <Stack gap={6}>
+              <Stack gap={1}>
+                <NavLink to={`/collection/${collectionId}`}>
+                  <Text variant="heading3" underline style={{ wordBreak: 'break-word' }}>
+                    {collectionMetadata?.name}
+                  </Text>
+                </NavLink>
+                <Text variant="heading1" fontSize="36px" fontWeight="700" mb="4px" style={{ wordBreak: 'break-word' }}>
+                  {nftName || 'Untitled NFT'}
+                </Text>
+              </Stack>
               <form onSubmit={execute} action="">
                 <Box mb={3}>
                   <TextInput
@@ -168,7 +191,7 @@ const MintNFT: React.FC = () => {
                     disabled={fieldDisabled}
                   />
                 </Box>
-                <TextArea
+                <TextAreaInput
                   label="Description"
                   value={nftDescription}
                   maxLength={nftMetadataSchema.description.maxLength}
@@ -177,6 +200,21 @@ const MintNFT: React.FC = () => {
                   }}
                   disabled={fieldDisabled}
                 />
+                {batchMintNFTs && (
+                  <Box mt={3}>
+                    <NumberInput
+                      value={nftAmount}
+                      label="Amount"
+                      type="number"
+                      min="1"
+                      max="1000"
+                      onChange={({ target }) => {
+                        setNftAmount(Number((target as HTMLInputElement).value))
+                      }}
+                      disabled={fieldDisabled}
+                    />
+                  </Box>
+                )}
 
                 <Shelf gap={2} mt={6}>
                   <Button disabled={submitDisabled} type="submit" loading={isMinting}>

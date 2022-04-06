@@ -75,7 +75,7 @@ export const PageHeader: React.FC<Props> = ({
             <img src={logoUrl} alt="" height="48px" width="60px" />
           </NavLink>
         </Box>
-        <AnchorHover to="/ntfs">
+        <AnchorHover to="/nfts">
           <Text className="AnchorHoverText" variant="heading2">
             NFT Playground
           </Text>

@@ -9,6 +9,7 @@ const grayScale = {
   gray700: '#616161',
   gray800: '#424242',
   gray900: '#212121',
+  gray950: '#171717',
 }
 
 const statusDefault = grayScale.gray600
@@ -25,7 +26,7 @@ const darkColors = {
   backgroundPrimary: grayScale.gray900,
   backgroundSecondary: grayScale.gray800,
   backgroundPage: 'black',
-  backgroundInput: 'black',
+  backgroundInput: grayScale.gray950,
 
   borderPrimary: grayScale.gray700,
   borderSecondary: grayScale.gray800,

@@ -3,9 +3,9 @@ import { Options as UseVisibilityCheckerOptions, useVisibilityChecker } from '..
 
 type Props = Omit<UseVisibilityCheckerOptions, 'ref'>
 
-export const VisibilityChecker: React.FC<Props> = (visibilityCheckerOptions) => {
+export const VisibilityChecker: React.FC<Props> = ({ children, ...visibilityCheckerOptions }) => {
   const ref = React.useRef<HTMLDivElement>(null)
   useVisibilityChecker({ ref, ...visibilityCheckerOptions })
 
-  return <div ref={ref} />
+  return <div ref={ref}>{children}</div>
 }

@@ -17,6 +17,7 @@ import { UserRepo } from './repos/user.repo'
 import { DocusignAuthService } from './services/docusign-auth.service'
 import { DocusignService } from './services/docusign.service'
 import { SecuritizeService } from './services/kyc/securitize.service'
+import { MailerService } from './services/mailer.service'
 import { MemberlistService } from './services/memberlist.service'
 import { PoolService } from './services/pool.service'
 import { SessionService } from './services/session.service'
@@ -31,6 +32,7 @@ const serviceProviders = [
   DocusignAuthService,
   SessionService,
   MemberlistService,
+  MailerService,
 ]
 const taskProviders = [SyncService]
 
