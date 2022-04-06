@@ -3,6 +3,8 @@ import { IconArrowDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric
 import { BN } from 'bn.js'
 import * as React from 'react'
 import { useHistory } from 'react-router'
+import { useAddress } from '../utils/useAddress'
+import { useBalances } from '../utils/useBalances'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, OrderBy } from './DataTable'
 import { TokenAvatar } from './TokenAvatar'
@@ -26,7 +28,7 @@ const columns: Column[] = [
     align: 'left',
     header: 'Token',
     cell: (token: Row) => <TokenName token={token} />,
-    flex: '2',
+    flex: '3',
   },
   {
     align: 'left',
@@ -47,14 +49,26 @@ const columns: Column[] = [
     sortKey: 'protection',
   },
   {
+    header: (orderBy: OrderBy) => <SortableHeader label="Value Locked" orderBy={orderBy} />,
+    cell: (token: Row) => <ValueLocked token={token} />,
+    flex: '1',
+    sortKey: 'valueLocked',
+  },
+  {
     header: '',
     cell: () => <IconChevronRight size={24} color="textPrimary" />,
-    flex: '0 0 72px',
+    flex: '0 1 52px',
   },
 ]
 
 export const TokenList: React.FC<Props> = ({ pools }) => {
+  console.log('🚀 ~ pools', pools)
   const history = useHistory()
+  const address = useAddress()
+  console.log('🚀 ~ address', address)
+  const balances = useBalances(address)
+  console.log('🚀 ~ balances', balances)
+
   const tokens = React.useMemo(
     () =>
       pools
@@ -69,6 +83,7 @@ export const TokenList: React.FC<Props> = ({ pools }) => {
             // for now proctection is being calculated as a percentage of the ratio
             // replace with proper protection calculation when token prices are available
             protection: tranche.ratio,
+            valueLocked: tranche.ratio,
           }))
         )
         .flat(),
@@ -106,10 +121,20 @@ const AssetClass: React.VFC<RowProps> = ({ token }) => {
 
 const Yield: React.VFC<RowProps> = ({ token }) => {
   const apr = parseInt(token.yield, 10)
-  return <Text variant="body2">{apr > 0 ? `Target: ${apr.toFixed(2)}%` : '-'}</Text>
+  return <Text variant="body2">{apr > 0 ? `Target: ${apr.toPrecision(3)}%` : '-'}</Text>
 }
 
 const Protection: React.VFC<RowProps> = ({ token }) => {
+  return (
+    <Text variant="body2">
+      {parseInt(token.protection, 10) > 0
+        ? formatPercentage(token.protection, new BN(10).pow(new BN(18)).toString())
+        : '-'}
+    </Text>
+  )
+}
+
+const ValueLocked: React.VFC<RowProps> = ({ token }) => {
   return (
     <Text variant="body2">
       {parseInt(token.protection, 10) > 0

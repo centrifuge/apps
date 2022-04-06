@@ -38,7 +38,10 @@ export const DataTable = <T extends Record<string, any>>({ data, columns, keyFie
     setCurrentSortKey(sortKey)
   }
 
-  const sortedData = React.useMemo(() => sorter(data, orderBy[currentSortKey], currentSortKey), [orderBy, data])
+  const sortedData = React.useMemo(
+    () => sorter(data, orderBy[currentSortKey], currentSortKey),
+    [orderBy, data, currentSortKey]
+  )
 
   return (
     <Stack>
@@ -52,7 +55,7 @@ export const DataTable = <T extends Record<string, any>>({ data, columns, keyFie
             onClick={col?.sortKey ? () => updateSortOrder(col.sortKey) : () => undefined}
             align={col?.align}
           >
-            <Text variant="label1">
+            <Text variant="label2">
               {typeof col?.header !== 'string' && col?.sortKey ? col.header(orderBy[col.sortKey]) : col.header}
             </Text>
           </HeaderCol>
@@ -111,26 +114,39 @@ const Row = styled(Shelf)(
 const DataCol = styled.div<{ align: Column['align'] }>`
   background: initial;
   border: none;
+  padding: 16px 0 16px 16px;
+  display: flex;
+  flex: 1 1 160px;
   button&:hover {
-    backgroundColor: backgroundSecondary;
     cursor: pointer;
-  },
+  }
+  &:first-child {
+    paddingright: '16px';
+  }
   ${({ align }) => {
     switch (align) {
       case 'left':
         return css({
-          flex: '1 1 160px',
-          padding: '16px 12px 16px 24px',
-          display: 'flex',
           justifyContent: 'flex-start',
+          '&:last-child': {
+            paddingRight: '16px',
+          },
         })
       case 'right':
       default:
         return css({
-          flex: '1 1 160px',
-          padding: '8px 24px',
-          display: 'flex',
+          textAlign: 'right',
           justifyContent: 'flex-end',
+          // '$:last-of-type': {
+          //   paddingRight: '24px',
+          // },
+          // paddingRight: '16px',
+          // '&:last-of-type': {
+          //   paddingRight: '24px',
+          // },
+          '&:last-child': {
+            paddingRight: '16px',
+          },
         })
     }
   }}
