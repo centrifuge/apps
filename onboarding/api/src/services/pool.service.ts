@@ -11,6 +11,8 @@ import contractAbiMemberlist from '../utils/Memberlist.abi'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
 import contractAbiRwaMarketPermissionManager from '../utils/RwaMarketPermissionManager.abi'
 import { TransactionManager } from '../utils/tx-manager'
+import MailerService from './mailer.service'
+
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
 const RwaMarketKey = 'rwa-market'
@@ -31,11 +33,14 @@ export class PoolService {
   }).connect(this.provider)
   registry = new ethers.Contract(config.poolRegistry, contractAbiPoolRegistry, this.provider)
 
-  rwaMarketPermissionManager = new ethers.Contract(
-    config.rwaMarket.permissionManagerContractAddress,
-    contractAbiRwaMarketPermissionManager,
-    this.signer
-  )
+  rwaMarketPermissionManager = config.rwaMarket.permissionManagerContractAddress
+    ? new ethers.Contract(
+        config.rwaMarket.permissionManagerContractAddress,
+        contractAbiRwaMarketPermissionManager,
+        this.signer
+      )
+    : undefined
+  mailer = new MailerService()
 
   constructor(
     private readonly addressRepo: AddressRepo,
@@ -213,6 +218,7 @@ export class PoolService {
           agreementId,
           user.entityName?.length > 0 ? user.entityName : user.fullName
         )
+        await this.mailer.sendWhitelistedEmail(user, pool, { tranche })
       } else {
         this.logger.log(`${address.address} is not a member of ${pool.metadata.name} - ${tranche}`)
       }

@@ -5,12 +5,32 @@ on:
       netlify-alias:
         required: true
         type: string
+      ipfs-gateway:
+        required: true
+        type: string
+      collator-wss-url:
+        required: true
+        type: string
+      relay-wss-url:
+        required: true
+        type: string
+      subscan-url:
+        required: true
+        type: string
+      whitelisted-accounts:
+        required: true
+        type: string
+
     secrets:
-      GITHUB_TOKEN:
+      github-token:
         required: true
-      NETLIFY_AUTH_TOKEN:
+      netlify-auth-token:
         required: true
-      NETLIFY_SITE_ID:
+      netlify-site-id:
+        required: true
+      pinata-api-key:
+        required: true
+      pinata-secret-api-key:
         required: true
 
 jobs:
@@ -41,6 +61,13 @@ jobs:
         run: yarn build
         env:
           SKIP_PREFLIGHT_CHECK: 'true'
+          REACT_APP_IPFS_GATEWAY: ${{ inputs.ipfs-gateway }}
+          REACT_APP_COLLATOR_WSS_URL: ${{ inputs.collator-wss-url }}
+          REACT_APP_RELAY_WSS_URL: ${{ inputs.relay-wss-url }}
+          REACT_APP_SUBSCAN_URL: ${{ inputs.subscan-url }}
+          REACT_APP_WHITELISTED_ACCOUNTS: ${{ inputs.whitelisted-accounts }}
+          PINATA_API_KEY: ${{ secrets.pinata-api-key }}
+          PINATA_SECRET_API_KEY: ${{ secrets.pinata-secret-api-key }}
 
       - name: Deploy To Netlify
         uses: nwtgck/actions-netlify@v1.2.0
@@ -49,10 +76,12 @@ jobs:
           production-deploy: ${{ inputs.netlify-alias == '' }}
           deploy-message: ${{ github.event.head_commit.message }}
           enable-commit-comment: false
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.github-token }}
           netlify-config-path: ./nft-studio/netlify.toml
           publish-dir: ./nft-studio/build
           functions-dir: ./nft-studio/functions
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.netlify-auth-token  }}
+          NETLIFY_SITE_ID: ${{ secrets.netlify-site-id }}
+          PINATA_API_KEY: ${{ secrets.pinata-api-key }}
+          PINATA_SECRET_API_KEY: ${{ secrets.pinata-secret-api-key }}

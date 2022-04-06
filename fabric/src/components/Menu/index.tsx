@@ -40,7 +40,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
       <Shelf gap={1} px={2} py={1}>
         {IconComp && isComponent(IconComp) ? <IconComp size="iconMedium" /> : IconComp}
         <Stack alignItems="flex-start">
-          <Text variant="interactive" color="currentcolor">
+          <Text variant="interactive1" color="currentcolor">
             {label}
           </Text>
           <Sublabel variant="label2">{sublabel}</Sublabel>
@@ -66,7 +66,7 @@ const MenuItemButton = styled.button`
 
   &:hover,
   &:focus-visible {
-    background-color: ${({ theme }) => theme.colors.brand};
+    background-color: ${({ theme }) => theme.colors.accentPrimary};
     color: ${({ theme }) => theme.colors.backgroundPrimary};
 
     ${Sublabel} {

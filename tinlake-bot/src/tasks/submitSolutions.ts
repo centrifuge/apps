@@ -7,7 +7,12 @@ export const submitSolutions = async (pools: PoolMap, provider: ethers.providers
   for (let pool of Object.values(pools)) {
     try {
       if (!pool.addresses) continue
-      const tinlake: any = new Tinlake({ provider, signer, contractAddresses: pool.addresses })
+      const tinlake: any = new Tinlake({
+        provider,
+        signer,
+        contractAddresses: pool.addresses,
+        contractVersions: pool.versions,
+      })
       const id = await tinlake.getCurrentEpochId()
       const state = await tinlake.getCurrentEpochState()
       const name = pool.metadata.shortName || pool.metadata.name
