@@ -14,6 +14,7 @@ RUN apt-get update -y
 RUN apt-get install -y rsync
 
 RUN yarn workspace centrifuge-gateway build
+RUN yarn workspace centrifuge-gateway move:assets
 
 EXPOSE 3001
 
