@@ -26,7 +26,7 @@ export const AnchorButton: React.FC<AnchorButtonProps> = ({
   ...anchorProps
 }) => {
   return (
-    <StyledAnchor $disabled={loading || disabled} target="_blank" rel="noopener noreferrer" {...anchorProps}>
+    <StyledAnchor $disabled={loading || disabled} rel="noopener noreferrer" {...anchorProps}>
       <VisualButton
         variant={variant}
         small={small}

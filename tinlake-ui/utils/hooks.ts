@@ -26,17 +26,24 @@ export const useInterval = (callback: any, delay?: number | null) => {
   }, [delay])
 }
 
-export const useTrancheYield = (poolId?: string | undefined) => {
+type TrancheYield = {
+  dropYield: string
+  tinYield: string
+}
+
+export const useTrancheYield = (poolId?: string | undefined): TrancheYield => {
   const pools = usePools()
 
   return React.useMemo(() => {
     if (pools.data?.pools && poolId) {
       const poolData = pools.data.pools.find((singlePool) => singlePool.id.toLowerCase() === poolId.toLowerCase())
-      if (poolData?.seniorYield30Days && poolData?.juniorYield90Days) {
-        return {
-          dropYield: toPrecision(baseToDisplay(poolData.seniorYield30Days.muln(100), 27), 2),
-          tinYield: toPrecision(baseToDisplay(poolData.juniorYield90Days.muln(100), 27), 2),
-        }
+      return {
+        dropYield: poolData?.seniorYield30Days
+          ? toPrecision(baseToDisplay(poolData.seniorYield30Days.muln(100), 27), 2)
+          : '',
+        tinYield: poolData?.juniorYield90Days
+          ? toPrecision(baseToDisplay(poolData.juniorYield90Days.muln(100), 27), 2)
+          : '',
       }
     }
 
@@ -53,15 +60,15 @@ export const useCFGYield = () => {
   const { data: wCFGPrice } = useQuery('wCFGPrice', () => getWCFGPrice(tinlake))
 
   return React.useMemo(() => {
-    if (wCFGPrice && rewards.data?.rewardRate) {
+    if (wCFGPrice && rewards.data?.dropRewardRate) {
       const DAYS = 365
-      const rewardRate = rewards.data.rewardRate.toNumber()
+      const rewardRate = rewards.data.dropRewardRate.toNumber()
 
       return (DAYS * rewardRate * wCFGPrice * 100).toString()
     }
 
     return null
-  }, [wCFGPrice, rewards.data?.rewardRate])
+  }, [wCFGPrice, rewards.data?.dropRewardRate])
 }
 
 async function getWCFGPrice(tinlake: ITinlake) {

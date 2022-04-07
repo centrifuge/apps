@@ -14,6 +14,7 @@ export interface Config {
   profileRoot: string
   defaultSlackChannelId: string
   gasnowWs: string
+  excludedPools: string[]
 }
 
 const config: Config = {
@@ -30,6 +31,9 @@ const config: Config = {
   profileRoot: process.env.PROFILE_ROOT,
   defaultSlackChannelId: process.env.DEFAULT_SLACK_CHANNEL_ID,
   gasnowWs: process.env.GASNOW_WS,
+  excludedPools: process.env.EXCLUDED_POOLS
+    ? process.env.EXCLUDED_POOLS.split(',').map((pool) => pool.toLowerCase())
+    : [],
 }
 
 export default config

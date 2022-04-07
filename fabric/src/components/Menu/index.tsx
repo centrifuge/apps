@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import { ResponsiveValue } from 'styled-system'
 import { Box } from '../Box'
 import { Card, CardProps } from '../Card'
-import { Divider } from '../Divider'
 import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
@@ -13,14 +12,7 @@ export type MenuProps = Omit<CardProps, 'variant'>
 export const Menu: React.FC<MenuProps> = ({ children, ...cardProps }) => {
   return (
     <Card {...cardProps} variant="overlay">
-      <Stack>
-        {React.Children.map(children, (child, i) => (
-          <>
-            {i > 0 && <Divider />}
-            {child}
-          </>
-        ))}
-      </Stack>
+      <Stack>{children}</Stack>
     </Card>
   )
 }
@@ -48,7 +40,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
       <Shelf gap={1} px={2} py={1}>
         {IconComp && isComponent(IconComp) ? <IconComp size="iconMedium" /> : IconComp}
         <Stack alignItems="flex-start">
-          <Text variant="interactive" color="currentcolor">
+          <Text variant="interactive1" color="currentcolor">
             {label}
           </Text>
           <Sublabel variant="label2">{sublabel}</Sublabel>
@@ -74,7 +66,7 @@ const MenuItemButton = styled.button`
 
   &:hover,
   &:focus-visible {
-    background-color: ${({ theme }) => theme.colors.brand};
+    background-color: ${({ theme }) => theme.colors.accentPrimary};
     color: ${({ theme }) => theme.colors.backgroundPrimary};
 
     ${Sublabel} {

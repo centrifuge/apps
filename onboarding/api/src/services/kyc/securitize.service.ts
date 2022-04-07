@@ -102,6 +102,7 @@ export class SecuritizeService {
     })
 
     if (response.status === 401) {
+      this.logger.error(`Refresh token has expired ${refreshToken}: ${response.statusText}`)
       // Refresh token has also expired
       return undefined
     }
@@ -124,15 +125,24 @@ export interface Investor {
   email: string
   verificationStatus: 'none' | 'processing' | 'updates-required' | 'verified' | 'manual-review' | 'rejected' | 'expired'
   details: {
+    investorType: 'individual' | 'entity'
+    entityName?: string
     firstName?: string
     middleName?: string
     lastName?: string
     tax: any[]
     address?: {
       countryCode?: string
+      city?: string
+      entrance?: string
+      houseNumber?: string
+      street?: string
+      zip?: string
+      state?: string
     }
+    birthday?: string
   }
-  domainInvestorDetails: {
+  domainInvestorDetails?: {
     taxInfo: any
     isUsaTaxResident: boolean
     isAccredited: boolean

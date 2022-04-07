@@ -16,7 +16,8 @@ import { UserRewardsData } from '../../utils/useUserRewards'
 export interface RewardsData {
   toDateRewardAggregateValue: BN
   toDateAORewardAggregateValue: BN
-  rewardRate: Decimal
+  dropRewardRate: Decimal
+  tinRewardRate: Decimal
   todayReward: BN
 }
 
@@ -293,40 +294,36 @@ class Apollo {
     const result = await this.client.query({
       query: gql`
         {
-          pools (where : {id: "${root.toLowerCase()}"}){
+          loans (first: 1000, where: { pool_in: ["${root.toLowerCase()}"]}) {
             id
-            loans (first: 1000) {
+            pool {
               id
-              pool {
-                id
-              }
-              index
-              owner
-              opened
-              closed
-              debt
-              interestRatePerSecond
-              ceiling
-              threshold
-              borrowsCount
-              borrowsAggregatedAmount
-              repaysCount
-              repaysAggregatedAmount
-              nftId
-              nftRegistry
-              maturityDate
-              financingDate
-              riskGroup
             }
+            index
+            owner
+            opened
+            closed
+            debt
+            interestRatePerSecond
+            ceiling
+            threshold
+            borrowsCount
+            borrowsAggregatedAmount
+            repaysCount
+            repaysAggregatedAmount
+            nftId
+            nftRegistry
+            maturityDate
+            financingDate
+            riskGroup
           }
         }
         `,
     })
 
-    if (!result.data?.pools) return { data: [] }
+    if (!result.data?.loans) return { data: [] }
 
-    const pool = result.data.pools[0]
-    const tinlakeLoans = pool ? toTinlakeLoans(pool.loans) : { data: [] }
+    const tinlakeLoans = toTinlakeLoans(result.data.loans)
     return tinlakeLoans
   }
 
@@ -337,7 +334,8 @@ class Apollo {
         query: gql`
           {
             rewardDayTotals(first: 1, skip: 1, orderBy: id, orderDirection: desc) {
-              rewardRate
+              dropRewardRate
+              tinRewardRate
               toDateRewardAggregateValue
               toDateAORewardAggregateValue
               todayReward
@@ -357,7 +355,8 @@ class Apollo {
     return {
       toDateRewardAggregateValue: new BN(new Decimal(data.toDateRewardAggregateValue).toFixed(0)),
       toDateAORewardAggregateValue: new BN(new Decimal(data.toDateAORewardAggregateValue).toFixed(0)),
-      rewardRate: new Decimal(data.rewardRate),
+      dropRewardRate: new Decimal(data.dropRewardRate),
+      tinRewardRate: new Decimal(data.tinRewardRate),
       todayReward: new BN(new Decimal(data.todayReward).toFixed(0)),
     }
   }
@@ -500,7 +499,7 @@ class Apollo {
         data: [],
       }
     }
-    const proxies = result.data.proxies.map((e: { id: string; owner: string }) => e.id)
+    const proxies = result.data?.proxies.map((e: { id: string; owner: string }) => e.id)
     return { data: proxies }
   }
 
@@ -561,7 +560,7 @@ function toTinlakeLoans(loans: any[]): { data: Loan[] } {
       financingDate: loan.financingDate,
       borrowsAggregatedAmount: loan.borrowsAggregatedAmount,
       repaysAggregatedAmount: loan.repaysAggregatedAmount,
-      riskGroup: Number(loan.riskGroup),
+      riskGroup: loan.riskGroup ? Number(loan.riskGroup) : 0,
     }
     tinlakeLoans.push(tinlakeLoan)
   })

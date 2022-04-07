@@ -20,6 +20,7 @@ export type ToastProps = {
   label: string
   sublabel?: string
   onDismiss?: () => void
+  onStatusChange?: (status: ToastStatus) => void
   action?: React.ReactElement
 }
 
@@ -46,15 +47,25 @@ const statusIcons = {
 }
 
 const statusColors = {
-  info: 'infoPrimary',
-  pending: 'infoPrimary',
-  ok: 'okPrimary',
-  warning: 'warningPrimary',
-  critical: 'criticalPrimary',
+  info: 'statusInfo',
+  pending: 'statusInfo',
+  ok: 'statusOk',
+  warning: 'statusWarning',
+  critical: 'statusCritical',
 }
 
-export const Toast: React.FC<ToastProps> = ({ status = 'info', label, sublabel, onDismiss, action }) => {
+export const Toast: React.FC<ToastProps> = ({
+  status = 'info',
+  label,
+  sublabel,
+  onDismiss,
+  onStatusChange,
+  action,
+}) => {
   const Icon = statusIcons[status]
+  React.useEffect(() => {
+    onStatusChange && onStatusChange(status)
+  }, [status, onStatusChange])
   return (
     <Card variant="overlay">
       <Shelf gap={2} px={2} py={1}>

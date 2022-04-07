@@ -3,6 +3,7 @@ import { Button, Drop } from 'grommet'
 import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { WalletTransaction } from '../../ducks/transactions'
+import { useENS } from '../../utils/useENS'
 import { AnimatedBar } from './AnimatedBar'
 import { ToastWrapper } from './Toast'
 const { toDataUrl } = require('ethereum-blockies')
@@ -30,6 +31,7 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
   const [copied, setCopied] = useState(false)
   const contRef = useRef<HTMLButtonElement>(null)
   const [, setShowDrop] = useState(false)
+  const { ensName, ensAvatar } = useENS(address)
   useEffect(() => setShowDrop(true), [])
 
   return (
@@ -46,10 +48,14 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
       >
         <InnerWallet>
           <IdenticonSmall>
-            <img src={toDataUrl(address)} width={24} height={24} />
+            {ensAvatar ? (
+              <img src={ensAvatar} width={24} height={24} />
+            ) : (
+              <img src={toDataUrl(address)} width={24} height={24} />
+            )}
           </IdenticonSmall>
           <StatusAddrSmall>
-            <Addr>{shorten(address, 4)}</Addr>
+            <Addr>{ensName || shorten(address, 4)}</Addr>
           </StatusAddrSmall>
           <Caret>
             <img src="/static/chevron-down.svg" style={{ transform: open ? 'rotate(-180deg)' : '' }} />
@@ -77,14 +83,18 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
           {open && (
             <Card>
               <Identicon>
-                <img src={toDataUrl(address)} width={64} height={64} />
+                {ensAvatar ? (
+                  <img src={ensAvatar} width={64} height={64} />
+                ) : (
+                  <img src={toDataUrl(address)} width={64} height={64} />
+                )}
               </Identicon>
               <StatusAddrCopyLink>
                 <StatusAddr>
                   <Subtitle>
                     Connected to {providerName} - {networkName}
                   </Subtitle>
-                  <Addr title={address}>{shorten(address, 8)}</Addr>
+                  <Addr title={address}>{ensName || shorten(address, 8)}</Addr>
                 </StatusAddr>
                 <Copy
                   plain

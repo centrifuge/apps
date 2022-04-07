@@ -5,6 +5,7 @@ import { FabricTheme } from './types'
 
 const centrifugeLight: FabricTheme = {
   ...baseTheme,
+  scheme: 'light',
   colors: {
     ...brandCentrifuge,
     ...modeLight.colors,

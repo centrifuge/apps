@@ -3,7 +3,10 @@ import config from '../config'
 import contractAbiPoolRegistry from './PoolRegistry.abi'
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
-export const loadFromIPFS = async (rpcProvider: ethers.providers.JsonRpcProvider): Promise<PoolMap> => {
+export const loadFromIPFS = async (
+  rpcProvider: ethers.providers.JsonRpcProvider,
+  excludedPools: string[]
+): Promise<PoolMap> => {
   const url = await assembleIpfsUrl(rpcProvider)
   const response = await fetch(url)
   const pools = await response.json()
@@ -11,7 +14,7 @@ export const loadFromIPFS = async (rpcProvider: ethers.providers.JsonRpcProvider
   let poolsWithProfiles = {}
   await Promise.all(
     Object.values(pools).map(async (pool: Pool) => {
-      if (!pool.addresses) return
+      if (!pool.addresses || excludedPools.includes(pool.addresses.ROOT_CONTRACT.toLowerCase())) return
 
       const profile = await getPoolProfile(pool.addresses.ROOT_CONTRACT)
       if (profile) poolsWithProfiles[pool.addresses.ROOT_CONTRACT] = { ...pool, profile }
@@ -51,6 +54,7 @@ export interface Pool {
   addresses: { [key: string]: string }
   network: 'mainnet' | 'kovan'
   profile?: Profile
+  versions: { [key: string]: number }
 }
 
 export interface Profile {

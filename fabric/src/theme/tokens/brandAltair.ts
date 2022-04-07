@@ -1,5 +1,6 @@
-const altairYellow = '#FAB961'
+const altairYellow = '#ffc012'
 
 export const brandAltair = {
-  brand: altairYellow,
+  accentPrimary: altairYellow,
+  accentSecondary: altairYellow,
 }

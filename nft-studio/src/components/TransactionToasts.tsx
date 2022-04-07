@@ -1,4 +1,4 @@
-import { Stack, Toast, ToastStatus } from '@centrifuge/fabric'
+import { AnchorButton, IconExternalLink, Stack, Toast, ToastStatus } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { useTransactions } from './TransactionsProvider'
@@ -19,11 +19,16 @@ const toastSublabel = {
   failed: 'Transaction failed',
 }
 
+const TOAST_DURATION = 5000
+
 export const TransactionToasts: React.FC = () => {
   const { transactions, updateTransaction } = useTransactions()
   const {
     sizes: { navBarHeight, navBarHeightMobile },
   } = useTheme()
+
+  const dismiss = (txId: string) => () => updateTransaction(txId, { dismissed: true })
+
   return (
     <Stack
       width={330}
@@ -31,16 +36,31 @@ export const TransactionToasts: React.FC = () => {
       position="fixed"
       top={[navBarHeightMobile, navBarHeightMobile, navBarHeight]}
       right={1}
-      zIndex={10}
+      zIndex={11}
     >
       {transactions
-        .filter((tx) => !tx.dismissed)
+        .filter((tx) => !tx.dismissed && !['creating', 'unconfirmed'].includes(tx.status))
         .map((tx) => (
           <Toast
             label={tx.title}
-            sublabel={toastSublabel[tx.status]}
+            sublabel={(tx.status === 'failed' && tx.failedReason) || toastSublabel[tx.status]}
             status={toastStatus[tx.status]}
-            onDismiss={() => updateTransaction(tx.id, { dismissed: true })}
+            onDismiss={dismiss(tx.id)}
+            onStatusChange={(newStatus) => {
+              if (['ok', 'critical'].includes(newStatus)) {
+                setTimeout(dismiss(tx.id), TOAST_DURATION)
+              }
+            }}
+            action={
+              tx.hash ? (
+                <AnchorButton
+                  variant="text"
+                  target="_blank"
+                  href={`${process.env.REACT_APP_SUBSCAN_URL}/extrinsic/${tx.hash}`}
+                  icon={IconExternalLink}
+                />
+              ) : undefined
+            }
             key={tx.id}
           />
         ))}
