@@ -14,7 +14,8 @@
     "move:email-templates": "rm -rf ./email-templates && rsync -a packages/server/email-templates ."
   },
   "devDependencies": {
-    "nodemon": "2.0.15"
+    "nodemon": "2.0.15",
+    "ts-node": "^7.0.1"
   },
   "eslintConfig": {
     "extends": "react-app"

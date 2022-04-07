@@ -17113,6 +17113,9 @@ __metadata:
 "centrifuge-gateway@workspace:gateway":
   version: 0.0.0-use.local
   resolution: "centrifuge-gateway@workspace:gateway"
+  dependencies:
+    nodemon: 2.0.15
+    ts-node: ^7.0.1
   languageName: unknown
   linkType: soft
 
@@ -34547,6 +34550,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nodemon@npm:2.0.15, nodemon@npm:^2.0.15":
+  version: 2.0.15
+  resolution: "nodemon@npm:2.0.15"
+  dependencies:
+    chokidar: ^3.5.2
+    debug: ^3.2.7
+    ignore-by-default: ^1.0.1
+    minimatch: ^3.0.4
+    pstree.remy: ^1.1.8
+    semver: ^5.7.1
+    supports-color: ^5.5.0
+    touch: ^3.1.0
+    undefsafe: ^2.0.5
+    update-notifier: ^5.1.0
+  bin:
+    nodemon: bin/nodemon.js
+  checksum: c5b5f1b909fd0ebec9a32a950bb827e2323ac911787574b6f6709e6493ae698224de8dc5ab3e0126874a8f8d3e7fd2f4e975fb78ff72e9c047cdebc1ae39339c
+  languageName: node
+  linkType: hard
+
 "nodemon@npm:^1.18.7, nodemon@npm:^1.19.1":
   version: 1.19.4
   resolution: "nodemon@npm:1.19.4"
@@ -34564,26 +34587,6 @@ __metadata:
   bin:
     nodemon: ./bin/nodemon.js
   checksum: 463be4f1e4787f324ac3f4bf6d932cef57f05ccb28a2dae1ca7d2ff9d2adf3a38cb8cc10cc74d91f333cdf264e4894e66cfb95a6bb54f0bfde35d681ade44b4c
-  languageName: node
-  linkType: hard
-
-"nodemon@npm:^2.0.15":
-  version: 2.0.15
-  resolution: "nodemon@npm:2.0.15"
-  dependencies:
-    chokidar: ^3.5.2
-    debug: ^3.2.7
-    ignore-by-default: ^1.0.1
-    minimatch: ^3.0.4
-    pstree.remy: ^1.1.8
-    semver: ^5.7.1
-    supports-color: ^5.5.0
-    touch: ^3.1.0
-    undefsafe: ^2.0.5
-    update-notifier: ^5.1.0
-  bin:
-    nodemon: bin/nodemon.js
-  checksum: c5b5f1b909fd0ebec9a32a950bb827e2323ac911787574b6f6709e6493ae698224de8dc5ab3e0126874a8f8d3e7fd2f4e975fb78ff72e9c047cdebc1ae39339c
   languageName: node
   linkType: hard
 
