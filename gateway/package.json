@@ -13,6 +13,9 @@
     "move:ui": "rm -rf ./build && rsync -a packages/ui/build .",
     "move:email-templates": "rm -rf ./email-templates && rsync -a packages/server/email-templates ."
   },
+  "devDependencies": {
+    "nodemon": "2.0.15"
+  },
   "eslintConfig": {
     "extends": "react-app"
   },
