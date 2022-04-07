@@ -239,23 +239,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
       maxReserve: BN,
       metadata: string,
       minEpochTime: number,
-      challengeTime: number,
       writeOffGroups: { overdueDays: number; percentage: string }[]
     ],
     options?: TransactionOptions
   ) {
-    const [
-      admin,
-      poolId,
-      collectionId,
-      tranches,
-      currency,
-      maxReserve,
-      metadata,
-      minEpochTime,
-      challengeTime,
-      writeOffGroups,
-    ] = args
+    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, minEpochTime, writeOffGroups] = args
 
     const $api = inst.getApi()
 
@@ -265,7 +253,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           [
             api.tx.uniques.create(collectionId, LoanPalletAccountId),
             api.tx.pools.create(admin, poolId, tranches, currency, maxReserve.toString()),
-            api.tx.pools.update(poolId, minEpochTime.toString(), challengeTime.toString(), '60'),
+            api.tx.pools.update(poolId, minEpochTime.toString(), '5', '60'),
             api.tx.pools.setMetadata(poolId, metadata),
             api.tx.permissions.addPermission('PoolAdmin', inst.getSignerAddress(), poolId, 'RiskAdmin'),
             api.tx.loans.initialisePool(poolId, collectionId),

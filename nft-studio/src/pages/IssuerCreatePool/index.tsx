@@ -82,8 +82,8 @@ export interface PoolFormValues {
   assetClass: string
   currency: string
   maxReserve: number | ''
-  epochDuration: number | ''
-  challengeTime: number | ''
+  epochHours: number | ''
+  epochMinutes: number | ''
 
   // issuer
   issuerName: string
@@ -129,8 +129,8 @@ const initialValues: PoolFormValues = {
   assetClass: DEFAULT_ASSET_CLASS,
   currency: DEFAULT_CURRENCY,
   maxReserve: 0,
-  epochDuration: 24, // in hours
-  challengeTime: 30, // in minutes
+  epochHours: 23, // in hours
+  epochMinutes: 50, // in minutes
 
   issuerName: '',
   issuerLogo: null,
@@ -214,7 +214,6 @@ const CreatePoolForm: React.VFC = () => {
     },
     validateOnMount: true,
     onSubmit: async (values, { setSubmitting }) => {
-      console.log('submit', values)
       if (!address) return
       // validation passed, submit
       const metadataHash = await pinPoolMetadata(values)
@@ -237,6 +236,8 @@ const CreatePoolForm: React.VFC = () => {
         percentage: centrifuge.utils.toRate((g.writeOff as number) / 100),
       }))
 
+      const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
+
       createPoolTx([
         address,
         poolId,
@@ -245,8 +246,7 @@ const CreatePoolForm: React.VFC = () => {
         DEFAULT_CURRENCY,
         new BN(values.maxReserve as number).mul(new BN(10).pow(new BN(18))),
         metadataHash,
-        (values.epochDuration as number) * 60 * 60, // convert to seconds
-        (values.challengeTime as number) * 60, // convert to seconds
+        epochSeconds,
         writeOffGroups,
       ])
 
@@ -295,8 +295,8 @@ const CreatePoolForm: React.VFC = () => {
           }
         />
         <PageSection title="Details">
-          <Grid columns={[6]} equalColumns gap={2} rowGap={3}>
-            <Box gridColumn="span 3" width="100%">
+          <Grid columns={[4]} equalColumns gap={2} rowGap={3}>
+            <Box gridColumn="span 2" width="100%">
               <Field name="poolIcon" validate={validate.poolIcon}>
                 {({ field, meta, form }: FieldProps) => (
                   <FileUpload
@@ -313,7 +313,7 @@ const CreatePoolForm: React.VFC = () => {
                 )}
               </Field>
             </Box>
-            <Box gridColumn="span 3">
+            <Box gridColumn="span 2">
               <FieldWithErrorMessage
                 validate={validate.poolName}
                 name="poolName"
@@ -323,7 +323,7 @@ const CreatePoolForm: React.VFC = () => {
                 maxLength={100}
               />
             </Box>
-            <Box gridColumn="span 3">
+            <Box gridColumn="span 2">
               <Field name="assetClass" validate={validate.assetClass}>
                 {({ field, meta, form }: FieldProps) => (
                   <Select
@@ -338,7 +338,7 @@ const CreatePoolForm: React.VFC = () => {
                 )}
               </Field>
             </Box>
-            <Box gridColumn="span 3">
+            <Box gridColumn="span 2">
               <Field name="currency" validate={validate.currency}>
                 {({ field, form, meta }: FieldProps) => (
                   <Select
@@ -363,22 +363,22 @@ const CreatePoolForm: React.VFC = () => {
                 rightElement={CURRENCIES.find((c) => c.value === form.values.currency)?.label}
               />
             </Box>
-            <Box gridColumn="span 2">
+            <Box gridColumn="span 1">
               <FieldWithErrorMessage
-                validate={validate.epochDuration}
-                name="epochDuration"
+                validate={validate.epochHours}
+                name="epochHours"
                 as={NumberInput}
                 label="Minimum epoch duration"
                 placeholder="0"
                 rightElement="hrs"
               />
             </Box>
-            <Box gridColumn="span 2">
+            <Box gridColumn="span 1">
               <FieldWithErrorMessage
-                validate={validate.challengeTime}
-                name="challengeTime"
+                validate={validate.epochMinutes}
+                name="epochMinutes"
                 as={NumberInput}
-                label="Challenge time"
+                label={<Text color="transparent">.</Text>}
                 placeholder="0"
                 rightElement="min"
               />

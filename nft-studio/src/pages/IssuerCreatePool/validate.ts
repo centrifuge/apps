@@ -2,6 +2,7 @@ import {
   combine,
   combineAsync,
   imageFile,
+  integer,
   max,
   maxFileSize,
   maxImageSize,
@@ -21,8 +22,8 @@ export const validate = {
   assetClass: required(),
   maxReserve: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
 
-  epochDuration: combine(required(), nonNegativeNumber(), max(24 * 7 /* 1 week */)),
-  challengeTime: combine(required(), nonNegativeNumber(), max(60 * 24 /* 1 day */)),
+  epochHours: combine(required(), nonNegativeNumber(), integer(), max(24 * 7 /* 1 week */)),
+  epochMinutes: combine(required(), nonNegativeNumber(), integer(), max(59)),
   currency: required(),
 
   issuerName: combine(required(), maxLength(100)),
