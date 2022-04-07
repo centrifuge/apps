@@ -172,7 +172,6 @@ const CreatePoolForm: React.VFC = () => {
   const history = useHistory()
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
 
-
   const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
     'Create pool',
     (cent) => cent.pools.createPool

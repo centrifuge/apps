@@ -51,7 +51,7 @@ const UploadButton = styled.button<{ $active?: boolean }>`
   justify-content: center;
   align-items: center;
   border: 1px dashed
-    ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundSecondary : theme.colors.borderPrimary)};
+    ${({ theme, disabled }) => (disabled ? theme.colors.backgroundSecondary : theme.colors.borderPrimary)};
   border-radius: ${({ theme }) => theme.radii.card}px;
   background: transparent;
   appearance: none;

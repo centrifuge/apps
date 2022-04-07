@@ -52,9 +52,9 @@ export const TrancheInput: React.FC = () => {
                   <Field name={`tranches.${index}.symbolName`} validate={validate.symbolName}>
                     {({ field, form, meta }: FieldProps) => (
                       <TextInput
+                        {...field}
                         onChange={(e) => form.setFieldValue(field.name, e.target.value.toUpperCase())}
-                        onBlur={field.onBlur}
-                        errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                        errorMessage={meta.touched ? meta.error : undefined}
                         label="Token symbol"
                         placeholder=""
                         maxLength={6}
