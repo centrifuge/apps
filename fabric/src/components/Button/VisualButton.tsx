@@ -28,6 +28,7 @@ export type VisualButtonProps = React.PropsWithChildren<{
   iconRight?: React.ComponentType<IconProps> | React.ReactElement
   disabled?: boolean
   loading?: boolean
+  loadingMessage?: string
   active?: boolean
 }>
 
@@ -102,8 +103,23 @@ export const StyledButton = styled.span<StyledProps>(
   }
 )
 
-const SpinnerWrapper = styled.span<{ $loading?: boolean }>`
+const LoadingContent = styled(Shelf)`
+  pointer-events: none;
+`
+const DefaultContent = styled(Shelf)``
+
+const LoadingWrapper = styled.span<{ $loading?: boolean }>`
   position: relative;
+  display: grid;
+  align-items: center;
+  grid-template-columns: 100%;
+  grid-template-rows: auto;
+  grid-template-areas: 'unit';
+
+  ${LoadingContent}, ${DefaultContent} {
+    grid-area: unit;
+    justify-self: center;
+  }
 
   > :last-child {
     opacity: 0;
@@ -122,13 +138,6 @@ const SpinnerWrapper = styled.span<{ $loading?: boolean }>`
 `
 
 const Spinner = styled(IconSpinner)`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  margin: auto;
-  pointer-events: none;
   animation: ${rotate} 600ms linear infinite;
 `
 
@@ -148,6 +157,7 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
   iconRight: IconRightComp,
   disabled,
   loading,
+  loadingMessage,
   children,
   active,
 }) => {
@@ -155,8 +165,8 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
 
   return (
     <StyledButton $variant={variant} $disabled={disabled} $small={small} $active={active}>
-      <SpinnerWrapper $loading={loading}>
-        <Shelf gap={1} px={variant === 'text' ? 0 : 2} py={small ? '5px' : '8px'} position="relative">
+      <LoadingWrapper $loading={loading}>
+        <DefaultContent gap={1} px={variant === 'text' ? 0 : 2} py={small ? '5px' : '8px'} position="relative">
           {variant === 'text' && <ClickableArea />}
           {IconComp && <Flex bleedY="5px">{isComponent(IconComp) ? <IconComp size={iconSize} /> : IconComp}</Flex>}
           {children && (
@@ -165,9 +175,16 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
             </Text>
           )}
           {IconRightComp && (isComponent(IconRightComp) ? <IconRightComp size="iconSmall" /> : IconRightComp)}
-        </Shelf>
-        <Spinner size={small ? 'iconSmall' : 'iconMedium'} />
-      </SpinnerWrapper>
+        </DefaultContent>
+        <LoadingContent px={variant === 'text' ? 0 : 2} gap={1} justifyContent="center">
+          <Spinner size={small ? 'iconSmall' : 'iconMedium'} />
+          {loadingMessage && (
+            <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
+              {loadingMessage}
+            </Text>
+          )}
+        </LoadingContent>
+      </LoadingWrapper>
     </StyledButton>
   )
 }
