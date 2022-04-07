@@ -13,7 +13,7 @@ RUN yarn install
 RUN apt-get update -y
 RUN apt-get install -y rsync
 
-RUN yarn build
+RUN yarn run build
 
 EXPOSE 3001
 
