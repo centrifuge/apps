@@ -710,7 +710,7 @@ export interface CoreapiResponseHeader {
    * @type {string}
    * @memberof CoreapiResponseHeader
    */
-  documentId?: string
+  document_id?: string
   /**
    *
    * @type {string}
@@ -722,7 +722,7 @@ export interface CoreapiResponseHeader {
    * @type {string}
    * @memberof CoreapiResponseHeader
    */
-  jobId?: string
+  job_id?: string
   /**
    *
    * @type {string}
