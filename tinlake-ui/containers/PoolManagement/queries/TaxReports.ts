@@ -28,7 +28,7 @@ const sumTransactionFees = (orders: any[]) => {
 
 const getBalanceOnFirstDay = (executionsBeforeYearStart: any[]) => {
   return executionsBeforeYearStart.reduce((balance: number, result: any) => {
-    const amount = new BN(result.currencyAmount).div(new BN(10).pow(new BN(18))).toNumber()
+    const amount = new BN(result.currencyAmount).div(new BN(10).pow(new BN(18 - 6))).toNumber() / 10 ** 6
     if (result.type === 'INVEST_EXECUTION') return balance + amount
     return balance - amount
   }, 0)
@@ -144,7 +144,8 @@ const calculateInterestAccrued = (
     }
   }
   const executionsBeforeYearStart = executions.filter((result) => date(result.timestamp) < yearStart)
-  const balanceOnFirstDay = getBalanceOnFirstDay(executionsBeforeYearStart)
+  const balanceOnFirstDay = getBalanceOnFirstDay(executionsBeforeYearStart) //currencyAmount
+  const tokensOnFirstDay = balanceOnFirstDay / tokenPriceFirstDay
 
   let totalBought = 0
   const operations: Operation[] = executions.map((execution) => {
@@ -154,8 +155,9 @@ const calculateInterestAccrued = (
         : new BN(execution.currencyAmount)
             .mul(e27)
             .div(new BN(execution.tokenPrice))
-            .div(new BN(10).pow(new BN(18)))
-            .toNumber()
+            .div(new BN(10).pow(new BN(18 - 6)))
+            .toNumber() /
+          10 ** 6
 
     if (execution.type === 'INVEST_EXECUTION') {
       totalBought += tokenAmount
@@ -181,10 +183,14 @@ const calculateInterestAccrued = (
     }
   })
 
-  const balanceOnLastDay = operations.reduce((last: number, operation: Operation) => {
+  let balanceOnLastDay = operations.reduce((last: number, operation: Operation) => {
+    console.log('type: ', operation.type, ' amount!!!: ', operation.amount, ' sum: ', last)
     if (operation.type === 'BUY') return last + operation.amount
     return last - operation.amount
   }, 0)
+  console.log(balanceOnLastDay)
+  balanceOnLastDay = balanceOnLastDay < 10 ** -6 ? 0 : balanceOnLastDay
+  const tokensOnLastDay = balanceOnLastDay / tokenPriceLastDay
 
   // Add a buy order on the first day of the year, with the balance at the start
   const operationsAggregratedYearStart =
@@ -220,7 +226,9 @@ const calculateInterestAccrued = (
     // console.log(operations)
     return {
       balanceOnFirstDay,
+      tokensOnFirstDay,
       balanceOnLastDay,
+      tokensOnLastDay,
       interestAccrued: aggregateByYear(calculateFIFOCapitalGains(operationsWithAssumedYearEndSale)),
     }
   } catch (e) {
@@ -228,7 +236,10 @@ const calculateInterestAccrued = (
     const year = yearStart.getFullYear()
     return {
       balanceOnFirstDay,
+      tokensOnFirstDay,
       balanceOnLastDay,
+      tokensOnLastDay,
+      tokenPriceLastDay,
       interestAccrued: { [year]: 0 },
     }
   }
@@ -292,8 +303,10 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
       'Realized capital gains',
       'Interest accrued',
       'Transaction fees paid',
-      'Balance Jan 1',
-      'Balance Dec 31',
+      'Currency Balance Jan 1',
+      'Token Balance Jan 1',
+      'Currency Balance Dec 31',
+      'Token Balance Dec 31',
       'Number of invest executions',
       'Number of redeem executions',
       'Number of transfers in',
@@ -329,14 +342,15 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
         investor,
         yearStart
       )
-      const { interestAccrued, balanceOnFirstDay, balanceOnLastDay } = calculateInterestAccrued(
-        executions,
-        symbol,
-        tokenPricesYearStart[tokenSymbolIsJunior(symbol) ? 'junior' : 'senior'],
-        tokenPricesYearEnd[tokenSymbolIsJunior(symbol) ? 'junior' : 'senior'],
-        yearStart,
-        yearEnd
-      ) as any
+      const { interestAccrued, balanceOnFirstDay, tokensOnFirstDay, balanceOnLastDay, tokensOnLastDay } =
+        calculateInterestAccrued(
+          executions,
+          symbol,
+          tokenPricesYearStart[tokenSymbolIsJunior(symbol) ? 'junior' : 'senior'],
+          tokenPricesYearEnd[tokenSymbolIsJunior(symbol) ? 'junior' : 'senior'],
+          yearStart,
+          yearEnd
+        ) as any
 
       const transactionFees = sumTransactionFees(orders)
       const counts = countTypes(
@@ -354,7 +368,9 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
         interestAccrued['2021'] || 0,
         transactionFees,
         balanceOnFirstDay,
+        tokensOnFirstDay,
         balanceOnLastDay,
+        tokensOnLastDay,
         counts['INVEST_EXECUTION'],
         counts['REDEEM_EXECUTION'],
         counts['TRANSFER_IN'],
