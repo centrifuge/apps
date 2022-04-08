@@ -79,6 +79,46 @@ export class MailerService {
       this.logger.error(JSON.stringify(e))
     }
   }
+
+  async sendKycStatusEmail(user: User, status: string) {
+    this.logger.log(`Sending KYC status email to ${user.fullName}`)
+
+    let template_id = config.sendgrid.kycRejectedTemplate //Rejection by default
+
+    if (status == 'manualReview') {
+      template_id = config.sendgrid.kycManualReviewTemplate
+    }
+    if (status == 'expired') {
+      template_id = config.sendgrid.kycExpiredTemplate
+    }
+
+    const message = {
+      personalizations: [
+        {
+          to: [
+            {
+              email: user.email,
+              name: user.fullName,
+            },
+          ],
+          dynamic_template_data: {
+            investorName: user.fullName,
+          },
+        },
+      ],
+      from: {
+        name: `Centrifuge`,
+        email: `onboarding@centrifuge.io`,
+      },
+      template_id,
+    }
+    try {
+      await client.send(message)
+      this.logger.log('KYC status mail sent successfully')
+    } catch (e) {
+      this.logger.error(JSON.stringify(e))
+    }
+  }
 }
 
 export default MailerService
