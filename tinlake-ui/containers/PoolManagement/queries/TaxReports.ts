@@ -184,11 +184,9 @@ const calculateInterestAccrued = (
   })
 
   let balanceOnLastDay = operations.reduce((last: number, operation: Operation) => {
-    console.log('type: ', operation.type, ' amount!!!: ', operation.amount, ' sum: ', last)
     if (operation.type === 'BUY') return last + operation.amount
     return last - operation.amount
   }, 0)
-  console.log(balanceOnLastDay)
   balanceOnLastDay = balanceOnLastDay < 10 ** -6 ? 0 : balanceOnLastDay
   const tokensOnLastDay = balanceOnLastDay / tokenPriceLastDay
 
@@ -254,9 +252,18 @@ const countTypes = (transactions: any[], transfersFrom: any[], transfersTo: any[
   }
 }
 
-async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: PoolData; taxYear: number }) {
-  const yearStart = new Date(taxYear, 0, 1)
-  const yearEnd = new Date(taxYear, 11, 31)
+async function taxReportByYear({
+  poolId,
+  yearStart,
+  yearEnd,
+}: {
+  poolId: string
+  poolData: PoolData
+  yearStart: Date
+  yearEnd: Date
+}) {
+  // const yearStart = new Date(taxYear, 0, 1)
+  // const yearEnd = new Date(taxYear, 11, 31)
 
   const transactions = await getAllTransactions(poolId)
   const symbols = transactions.map((tx) => tx.symbol).filter(onlyUnique)
@@ -379,15 +386,15 @@ async function taxReportByYear({ poolId, taxYear }: { poolId: string; poolData: 
     })
   })
 
-  downloadCSV(rows, csvName(`Tax Report ${taxYear}`))
+  downloadCSV(rows, csvName(`Tax Report ${yearStart.getFullYear()}`))
 
   return true
 }
 
 export function taxReport2020({ poolId, poolData }: { poolId: string; poolData: PoolData }) {
-  return taxReportByYear({ poolId, poolData, taxYear: 2020 })
+  return taxReportByYear({ poolId, poolData, yearStart: new Date(2020, 0, 1), yearEnd: new Date(2020, 11, 31) })
 }
 
 export function taxReport2021({ poolId, poolData }: { poolId: string; poolData: PoolData }) {
-  return taxReportByYear({ poolId, poolData, taxYear: 2021 })
+  return taxReportByYear({ poolId, poolData, yearStart: new Date(2021, 0, 1), yearEnd: new Date(2021, 11, 31) })
 }
