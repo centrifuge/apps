@@ -12,7 +12,7 @@
  * Do not edit the file manually.
  */
 
-import * as isomorphicFetch from 'isomorphic-fetch'
+import isomorphicFetch from 'isomorphic-fetch'
 import * as url from 'url'
 import { Configuration } from './configuration'
 
