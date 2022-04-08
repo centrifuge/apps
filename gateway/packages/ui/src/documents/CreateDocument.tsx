@@ -120,13 +120,13 @@ export const CreateDocument: FunctionComponent<Props> = (props) => {
 
       const result = await httpClient.documents.create(
         {
-          document_id: createResult.header!.documentId,
+          document_id: createResult.header!.document_id,
           header: createResult.header,
           attributes: {
             ...createResult.attributes,
             [HARDCODED_FIELDS.ASSET_IDENTIFIER]: {
               type: 'bytes',
-              value: createResult.header!.documentId,
+              value: createResult.header!.document_id,
             } as any,
           },
           template: createResult.template,

@@ -89,7 +89,7 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
        * We need to create a new version when updating a doc.
        * TODO this might need to change if we do not auto commit anymore
        * */
-      newDoc.document_id = newDoc!.header!.documentId
+      newDoc.document_id = newDoc!.header!.document_id
       document = (await httpClient.documents.create(newDoc, token!)).data
       setState({
         loadingMessage: null,
