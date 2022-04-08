@@ -7,7 +7,7 @@ type Props = {
   walletShown?: boolean
 }
 
-export const ContextActions: React.FC<Props> = ({ actions, walletShown = true }) => {
+export const ContextActions: React.FC<Props> = ({ actions, walletShown }) => {
   return (
     <Shelf gap={2}>
       {actions && (

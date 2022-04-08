@@ -111,7 +111,9 @@ const SelectInputInt: React.FC<SelectIntProps> = (props) => {
                 {state.selectedItem ? state.selectedItem.rendered : props.placeholder}
               </Text>
             }
-            rightElement={<IconComp color={props.isDisabled ? 'textSecondary' : 'textPrimary'} />}
+            rightElement={
+              <IconComp color={props.isDisabled ? 'textSecondary' : 'textPrimary'} style={{ margin: '-8px 0' }} />
+            }
           />
         </StyledTrigger>
         <HiddenSelect state={state} triggerRef={ref} label={props.label} name={props.name} />

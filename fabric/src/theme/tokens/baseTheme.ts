@@ -8,11 +8,14 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
   typography,
   space,
   sizes: {
+    dialog: 564,
     container: 1152,
     iconSmall: 16,
     iconMedium: 24,
+    iconLarge: 40,
   },
   radii: {
+    tooltip: 4,
     card: 8,
     input: 10,
   },

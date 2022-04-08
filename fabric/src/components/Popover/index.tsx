@@ -2,7 +2,7 @@ import { FocusScope } from '@react-aria/focus'
 import { useOverlay, useOverlayTrigger } from '@react-aria/overlays'
 import { OverlayTriggerState, useOverlayTriggerState } from '@react-stately/overlays'
 import * as React from 'react'
-import { Positioner } from './Positioner'
+import { Positioner } from '../Positioner'
 
 type Props = {
   renderTrigger: (

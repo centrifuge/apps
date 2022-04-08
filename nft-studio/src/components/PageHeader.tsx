@@ -5,7 +5,7 @@ import { ContextActions } from './ContextActions'
 import { RouterTextLink } from './TextLink'
 
 type Props = {
-  title: string
+  title: React.ReactNode
   titleAddition?: React.ReactNode
   subtitle?: React.ReactNode
   subtitleLink?: {
@@ -20,6 +20,7 @@ type Props = {
   actions?: React.ReactNode
   icon?: React.ReactNode
   walletShown?: boolean
+  border?: boolean
 }
 
 export const PageHeader: React.FC<Props> = ({
@@ -31,6 +32,7 @@ export const PageHeader: React.FC<Props> = ({
   icon,
   actions,
   walletShown,
+  border = true,
 }) => {
   const theme = useTheme()
 
@@ -43,21 +45,11 @@ export const PageHeader: React.FC<Props> = ({
       top={0}
       backgroundColor="backgroundPage"
       style={{
-        boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
+        boxShadow: border ? `0 1px 0 ${theme.colors.borderSecondary}` : undefined,
       }}
       zIndex={4}
       p={3}
     >
-      {/* <Box
-        position="absolute"
-        top="-24px"
-        bottom={0}
-        right="-12px"
-        left="-12px"
-        zIndex={-1}
-        backgroundColor="backgroundPage"
-      /> */}
-
       <Shelf gap={2}>
         {icon}
         <Stack gap={0}>

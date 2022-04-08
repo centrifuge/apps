@@ -1,4 +1,4 @@
-import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { useAddress } from '../utils/useAddress'
@@ -6,7 +6,6 @@ import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { isSameAddress } from '../utils/web3'
 import { ButtonGroup } from './ButtonGroup'
-import { Dialog } from './Dialog'
 import { TextInput } from './TextInput'
 
 type Props = {
