@@ -29,6 +29,18 @@ export function useOrder(poolId: string, trancheId: number, address?: string) {
   return result
 }
 
+export function usePendingCollect(poolId: string, trancheId: number, address?: string) {
+  const [result] = useCentrifugeQuery(
+    ['pendingCollect', poolId, trancheId, address],
+    (cent) => cent.pools.getPendingCollect([address!, poolId, trancheId]),
+    {
+      enabled: !!address,
+    }
+  )
+
+  return result
+}
+
 export type PoolMetadata = {
   pool: {
     name: string
