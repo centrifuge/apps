@@ -460,25 +460,25 @@ export interface CoreapiMintNFTRequest {
    * @type {string}
    * @memberof CoreapiMintNFTRequest
    */
-  assetManagerAddress?: string
+  asset_manager_address?: string
   /**
    *
    * @type {string}
    * @memberof CoreapiMintNFTRequest
    */
-  depositAddress?: string
+  deposit_address?: string
   /**
    *
    * @type {string}
    * @memberof CoreapiMintNFTRequest
    */
-  documentId?: string
+  document_id?: string
   /**
    *
    * @type {Array<string>}
    * @memberof CoreapiMintNFTRequest
    */
-  proofFields?: Array<string>
+  proof_fields?: Array<string>
 }
 /**
  *
