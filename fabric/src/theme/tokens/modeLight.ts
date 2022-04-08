@@ -45,13 +45,13 @@ const lightColors = {
   borderPrimary: grayScale.gray300,
   borderSecondary: grayScale.gray200,
 
-  secondarySelectedBackground: blueScale.blue50,
   primarySelectedBackground: blueScale.blue500,
+  secondarySelectedBackground: blueScale.blue50,
   borderFocus: blueScale.blue500,
-  textSelected: blueScale.blue500,
-  alertHeaderText: blueScale.blue500,
-  interactiveLinks: blueScale.blue500,
   borderSelected: blueScale.blue500,
+  textSelected: blueScale.blue500,
+  textInteractive: blueScale.blue500,
+  textInteractiveHover: blueScale.blue500,
 
   statusDefault,
   statusInfo,

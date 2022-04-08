@@ -1,16 +1,32 @@
+import { Pool } from '@centrifuge/centrifuge-js'
 import { Box, IconHome, IconNft, IconPieChart, IconUser, Shelf } from '@centrifuge/fabric'
 import React from 'react'
 import { useRouteMatch } from 'react-router'
 import logoCentrifuge from '../assets/images/logoCentrifuge.svg'
+import { useAddress } from '../utils/useAddress'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
+import { usePermissions } from '../utils/usePermissions'
+import { usePoolMetadata, usePools } from '../utils/usePools'
 import { NavigationItem } from './NavigationItem'
+import { RouterLinkButton } from './RouterLinkButton'
 
 type Props = {}
 
 export const Menu: React.FC<Props> = () => {
   const investmentsMatch = useRouteMatch('/investments')
-  const issuersMatch = useRouteMatch('/issuers')
+  const issuersMatch = useRouteMatch('/issuer')
   const isDesktop = useIsAboveBreakpoint('M')
+
+  const allPools = usePools()
+  const address = useAddress()
+  const permissions = usePermissions(address)
+
+  const pools = React.useMemo(() => {
+    if (!allPools || !permissions) {
+      return []
+    }
+    return allPools.filter(({ id }) => permissions[id]?.roles.includes('PoolAdmin'))
+  }, [allPools, permissions])
 
   return (
     <Box backgroundColor="backgroundPrimary" position="sticky" top={0} px={[0, 2]}>
@@ -38,13 +54,25 @@ export const Menu: React.FC<Props> = () => {
           <NavigationItem label="Portfolio" href="/investments/portfolio" />
           <NavigationItem label="Rewards" href="/investments/rewards" />
         </NavigationItem>
-        <NavigationItem label="Issuers" href="issuers" icon={<IconUser size="16px" />} defaultOpen={!!issuersMatch}>
-          <NavigationItem label="Managed pools" href="/issuers/managed-pools" />
-          <NavigationItem label="Assets" href="/issuers/assets" />
-          <NavigationItem label="Schemas" href="/issuers/schemas" />
-          <NavigationItem label="Contacts" href="/issuers/contacts" />
+        <NavigationItem label="Issuer" href="issuer" icon={<IconUser size="16px" />} defaultOpen={!!issuersMatch}>
+          {pools.map((pool) => (
+            <PoolNavigationItem key={pool.id} pool={pool} />
+          ))}
+          {address && (
+            <Shelf justifyContent="center" mt={1}>
+              <RouterLinkButton to="/issuer/create-pool" variant="outlined" small>
+                Create Pool
+              </RouterLinkButton>
+            </Shelf>
+          )}
         </NavigationItem>
       </Shelf>
     </Box>
   )
+}
+
+const PoolNavigationItem: React.FC<{ pool: Pool }> = ({ pool }) => {
+  const { data: metadata } = usePoolMetadata(pool)
+
+  return <NavigationItem label={metadata?.pool?.name ?? pool.id} href={`/issuer/${pool.id}`} />
 }

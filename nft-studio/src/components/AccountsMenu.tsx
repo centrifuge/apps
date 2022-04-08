@@ -1,4 +1,4 @@
-import { Box, Button, IconCheck, IconChevronDown, Menu, MenuItem } from '@centrifuge/fabric'
+import { Box, Button, IconCheck, IconChevronDown, Menu, MenuItem, Popover } from '@centrifuge/fabric'
 import { encodeAddress } from '@polkadot/keyring'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
@@ -6,7 +6,6 @@ import styled from 'styled-components'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { truncateAddress } from '../utils/web3'
 import { ConnectButton } from './ConnectButton'
-import { Popover } from './Popover'
 import { useWeb3 } from './Web3Provider'
 
 export const AccountsMenu: React.FC = () => {

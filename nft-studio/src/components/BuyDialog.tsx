@@ -1,4 +1,4 @@
-import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { Dec } from '../utils/Decimal'
@@ -7,7 +7,6 @@ import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useNFT } from '../utils/useNFTs'
 import { ButtonGroup } from './ButtonGroup'
-import { Dialog } from './Dialog'
 
 type Props = {
   open: boolean

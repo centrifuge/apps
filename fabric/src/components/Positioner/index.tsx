@@ -1,6 +1,7 @@
 import { AriaPositionProps, OverlayContainer, useOverlayPosition } from '@react-aria/overlays'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
+import { TextContext } from '../Text'
 
 type Props = {
   isShown?: boolean
@@ -34,7 +35,9 @@ const PositionerInner: React.FC<Props> = ({
 export const Positioner: React.FC<Props> = (props) => {
   return props.isShown ? (
     <OverlayContainer>
-      <PositionerInner {...props} />
+      <TextContext.Provider value={false}>
+        <PositionerInner {...props} />
+      </TextContext.Provider>
     </OverlayContainer>
   ) : null
 }

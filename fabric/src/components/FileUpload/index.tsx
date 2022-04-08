@@ -2,8 +2,8 @@ import React, { useRef, useState } from 'react'
 import styled, { css, keyframes } from 'styled-components'
 import { IconFileText } from '../..'
 import IconAlertCircle from '../../icon/IconAlertCircle'
-import IconPlus from '../../icon/IconPlus'
 import IconSpinner from '../../icon/IconSpinner'
+import IconUpload from '../../icon/IconUpload'
 import IconX from '../../icon/IconX'
 import useControlledState from '../../utils/useControlledState'
 import { Box } from '../Box'
@@ -27,9 +27,9 @@ const FileUploadContainer = styled(Stack)<{ $disabled?: boolean }>`
   justify-content: center;
   width: 100%;
   background: ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundPage : theme.colors.backgroundInput)};
-  outline: 1px dashed
-    ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundSecondary : theme.colors.textSecondary)};
-  outline-offset: -1px;
+  /* outline: 1px dashed
+    ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundSecondary : theme.colors.borderPrimary)};
+  outline-offset: -1px; */
   border-radius: ${({ theme }) => theme.radii.card}px;
   cursor: pointer;
   pointer-events: ${({ $disabled }) => ($disabled ? 'none' : 'initial')};
@@ -50,7 +50,8 @@ const UploadButton = styled.button<{ $active?: boolean }>`
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid transparent;
+  border: 1px dashed
+    ${({ theme, disabled }) => (disabled ? theme.colors.backgroundSecondary : theme.colors.borderPrimary)};
   border-radius: ${({ theme }) => theme.radii.card}px;
   background: transparent;
   appearance: none;
@@ -105,7 +106,7 @@ const Spinner = styled(IconSpinner)`
 `
 
 type FileUploadProps = {
-  file?: File | null
+  file?: File | string | null
   onFileChange?: (file: File | null) => void
   validate?: (file: File) => string | undefined
   errorMessage?: string
@@ -128,7 +129,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   label,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [curFile, setCurFile] = useControlledState<File | null>(null, fileProp, onFileChange)
+  const [curFile, setCurFile] = useControlledState<File | string | null>(null, fileProp, onFileChange)
   const [error, setError] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
 
@@ -238,10 +239,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {curFile.name}
+                  {typeof curFile === 'string' ? curFile : curFile.name}
                 </Text>
                 <Box display="flex" position="relative" zIndex={1} ml="auto" my="-10px" minWidth="iconMedium">
-                  <Button variant="text" onClick={handleClear} icon={IconX} disabled={disabled} />
+                  {!disabled && <Button variant="text" onClick={handleClear} icon={IconX} disabled={disabled} />}
                 </Box>
               </Shelf>
             </>
@@ -249,7 +250,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             <>
               <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver}></UploadButton>
               <AddButton gap={1} justifyContent="center">
-                <IconPlus />
+                <IconUpload />
                 <Text variant="body1" color="currentcolor">
                   {placeholder}
                 </Text>

@@ -33,6 +33,7 @@ export type PoolMetadata = {
   pool: {
     name: string
     description: string
+    icon: string
     asset: {
       class: string
       averageMaturity: string
@@ -40,17 +41,13 @@ export type PoolMetadata = {
     issuer: {
       name: string
       email: string
-    }
-    attributes: {
-      Links: {
-        'Executive Summary': string
-        'Forum Discussion': string
-        Website: string
-      }
-    }
-    media: {
+      description: string
       logo: string
-      icon: string
+    }
+    links: {
+      executiveSummary: string
+      forum: string
+      website: string
     }
     status: 'open' | 'upcoming' | 'hidden'
   }

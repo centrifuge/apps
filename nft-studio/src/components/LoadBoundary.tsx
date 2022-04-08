@@ -5,33 +5,45 @@ import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { useQueryErrorResetBoundary } from 'react-query'
 import { Spinner } from './Spinner'
 
-export const LoadBoundary: React.FC = ({ children }) => {
+type ErrorCb = (args: { error: any; retry: () => void }) => React.ReactElement | null
+
+export const LoadBoundary: React.FC<{ fallback?: React.ReactNode; renderError?: ErrorCb }> = ({
+  children,
+  fallback,
+  renderError,
+}) => {
   return (
     <React.Suspense
       fallback={
-        <Box mt={8}>
-          <Spinner />
-        </Box>
+        fallback || (
+          <Box mt={8}>
+            <Spinner />
+          </Box>
+        )
       }
     >
-      <ErrorBoundary>
+      <ErrorBoundary renderError={renderError}>
         <Subscribe>{children}</Subscribe>
       </ErrorBoundary>
     </React.Suspense>
   )
 }
 
-const ErrorBoundary: React.FC = ({ children }) => {
+const ErrorBoundary: React.FC<{ renderError?: ErrorCb }> = ({ children, renderError }) => {
   const { reset } = useQueryErrorResetBoundary()
   return (
     <ReactErrorBoundary
       onReset={reset}
-      fallbackRender={({ resetErrorBoundary }) => (
-        <Stack gap={2} mt={8} alignItems="center">
-          <Text>Something went wrong</Text>
-          <Button onClick={() => resetErrorBoundary()}>Try again</Button>
-        </Stack>
-      )}
+      fallbackRender={({ error, resetErrorBoundary }) =>
+        renderError ? (
+          renderError({ error, retry: resetErrorBoundary })
+        ) : (
+          <Stack gap={2} mt={8} alignItems="center">
+            <Text>Something went wrong</Text>
+            <Button onClick={() => resetErrorBoundary()}>Try again</Button>
+          </Stack>
+        )
+      }
     >
       {children}
     </ReactErrorBoundary>

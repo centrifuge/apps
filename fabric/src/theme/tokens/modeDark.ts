@@ -13,6 +13,19 @@ const grayScale = {
   gray950: '#171717',
 }
 
+const blueScale = {
+  blue30: '#FAFBFF',
+  blue50: '#F0F4FF',
+  blue100: '#DBE5FF',
+  blue200: '#B3C8FF',
+  blue300: '#7A9FFF',
+  blue400: '#4C7EFF',
+  blue500: '#1253FF',
+  blue600: '#003CDB',
+  blue700: '#002B9E',
+  blue800: '#001C66',
+}
+
 const statusDefault = grayScale.gray600
 const statusInfo = '#006EF5'
 const statusOk = '#598232'
@@ -31,6 +44,14 @@ const darkColors = {
 
   borderPrimary: grayScale.gray700,
   borderSecondary: grayScale.gray800,
+
+  primarySelectedBackground: blueScale.blue500,
+  secondarySelectedBackground: blueScale.blue700,
+  borderFocus: blueScale.blue500,
+  borderSelected: blueScale.blue500,
+  textSelected: blueScale.blue300,
+  textInteractive: blueScale.blue300,
+  textInteractiveHover: blueScale.blue300,
 
   statusDefault,
   statusInfo,

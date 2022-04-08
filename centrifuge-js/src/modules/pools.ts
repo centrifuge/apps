@@ -1,10 +1,11 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
-import { combineLatest, firstValueFrom, of } from 'rxjs'
+import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { isSameAddress } from '..'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
+import { getRandomUint } from '../utils'
 
 const Balance = new BN(10).pow(new BN(18))
 const Perquintill = new BN(10).pow(new BN(18))
@@ -225,6 +226,8 @@ export type TrancheInput = {
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
+const MAX_ATTEMPTS = 10
+
 export function getPoolsModule(inst: CentrifugeBase) {
   function createPool(
     args: [
@@ -234,22 +237,28 @@ export function getPoolsModule(inst: CentrifugeBase) {
       tranches: TrancheInput[],
       currency: string,
       maxReserve: BN,
-      metadata: string
+      metadata: string,
+      minEpochTime: number,
+      writeOffGroups: { overdueDays: number; percentage: string }[]
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata] = args
+    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, minEpochTime, writeOffGroups] = args
 
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.utility.batchAll([
-          api.tx.uniques.create(collectionId, LoanPalletAccountId),
-          api.tx.pools.create(admin, poolId, tranches, currency, maxReserve.toString()),
-          api.tx.pools.setMetadata(poolId, metadata),
-          api.tx.loans.initialisePool(poolId, collectionId),
-        ])
+        const submittable = api.tx.utility.batchAll(
+          [
+            api.tx.uniques.create(collectionId, LoanPalletAccountId),
+            api.tx.pools.create(admin, poolId, tranches, currency, maxReserve.toString()),
+            api.tx.pools.update(poolId, minEpochTime.toString(), '5', '60'),
+            api.tx.pools.setMetadata(poolId, metadata),
+            api.tx.permissions.addPermission('PoolAdmin', inst.getSignerAddress(), poolId, 'RiskAdmin'),
+            api.tx.loans.initialisePool(poolId, collectionId),
+          ].concat(writeOffGroups.map((g) => api.tx.loans.addWriteOffGroup(poolId, [g.percentage, g.overdueDays])))
+        )
         return inst.wrapSignAndSendRx(api, submittable, options)
       })
     )
@@ -964,6 +973,36 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
+  async function getAvailablePoolId() {
+    const $api = inst.getApi()
+
+    try {
+      const res = await firstValueFrom(
+        $api.pipe(
+          map((api) => ({
+            api,
+            id: null,
+            triesLeft: MAX_ATTEMPTS,
+          })),
+          expand(({ api, triesLeft }) => {
+            const id = String(getRandomUint())
+            if (triesLeft <= 0) return EMPTY
+
+            return api.query.pools.pool(id).pipe(
+              map((res) => ({ api, id: res.toJSON() === null ? id : null, triesLeft: triesLeft - 1 })),
+              take(1)
+            )
+          }),
+          filter(({ id }) => !!id)
+        )
+      )
+
+      return res.id as string
+    } catch (e) {
+      throw new Error(`Could not find an available pool ID in ${MAX_ATTEMPTS} attempts`)
+    }
+  }
+
   return {
     createPool,
     updatePool,
@@ -991,6 +1030,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     addWriteOffGroup,
     adminWriteOff,
     getLoanCollectionIdForPool,
+    getAvailablePoolId,
   }
 }
 
