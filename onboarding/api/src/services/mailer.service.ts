@@ -80,29 +80,33 @@ export class MailerService {
     }
   }
 
-  async sendKycStatusEmail(user: User, status: string) {
-    this.logger.log(`Sending KYC status email to ${user.fullName}`)
+  async sendKycStatusEmail(investorName: string, investorEmail: string, status: string) {
+    this.logger.log(`Sending KYC status email to ${investorName}`)
 
-    let template_id = config.sendgrid.kycRejectedTemplate //Rejection by default
+    let template_id
 
-    if (status == 'manualReview') {
+    if (status == 'rejected') {
+      template_id = config.sendgrid.kycRejectedTemplate
+    }
+    if (status == 'manual-review') {
       template_id = config.sendgrid.kycManualReviewTemplate
     }
     if (status == 'expired') {
       template_id = config.sendgrid.kycExpiredTemplate
     }
+    if (!template_id) return //only sending rejected, manual-review & expired emails for now
 
     const message = {
       personalizations: [
         {
           to: [
             {
-              email: user.email,
-              name: user.fullName,
+              email: investorEmail,
+              name: investorName,
             },
           ],
           dynamic_template_data: {
-            investorName: user.fullName,
+            investorName: investorName,
           },
         },
       ],
