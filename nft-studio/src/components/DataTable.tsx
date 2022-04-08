@@ -8,6 +8,7 @@ type Props<T> = {
   columns: Column[]
   keyField?: string
   onRowClicked?: (row: T) => void
+  defaultSortKey?: string
 }
 
 export type OrderBy = 'asc' | 'desc'
@@ -27,14 +28,22 @@ const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, s
   return data.sort((a, b) => b[sortKey] - a[sortKey])
 }
 
-export const DataTable = <T extends Record<string, any>>({ data, columns, keyField, onRowClicked }: Props<T>) => {
-  const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>({})
-  const [currentSortKey, setCurrentSortKey] = React.useState('')
+export const DataTable = <T extends Record<string, any>>({
+  data,
+  columns,
+  keyField,
+  onRowClicked,
+  defaultSortKey,
+}: Props<T>) => {
+  const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
+    defaultSortKey ? { [defaultSortKey]: 'desc' } : {}
+  )
+  const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
 
   const updateSortOrder = (sortKey: Column['sortKey']) => {
     if (!sortKey) return
     const updatedOrderBy = orderBy[sortKey] === 'asc' ? 'desc' : 'asc'
-    setOrderBy({ ...orderBy, [sortKey]: updatedOrderBy })
+    setOrderBy({ [sortKey]: updatedOrderBy })
     setCurrentSortKey(sortKey)
   }
 
@@ -121,7 +130,7 @@ const DataCol = styled.div<{ align: Column['align'] }>`
     cursor: pointer;
   }
   &:first-child {
-    paddingright: '16px';
+    padding-right: '16px';
   }
   ${({ align }) => {
     switch (align) {
@@ -137,13 +146,7 @@ const DataCol = styled.div<{ align: Column['align'] }>`
         return css({
           textAlign: 'right',
           justifyContent: 'flex-end',
-          // '$:last-of-type': {
-          //   paddingRight: '24px',
-          // },
-          // paddingRight: '16px',
-          // '&:last-of-type': {
-          //   paddingRight: '24px',
-          // },
+
           '&:last-child': {
             paddingRight: '16px',
           },
