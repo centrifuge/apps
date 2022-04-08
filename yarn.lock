@@ -2734,6 +2734,7 @@ __metadata:
     formik: 1.5.8
     grommet: 2.15.0
     grommet-icons: ^4.2.0
+    isomorphic-fetch: ^3.0.0
     lodash: ^4.17.14
     prettier: ^1.14.2
     qrcode: ^1.4.4
@@ -28807,6 +28808,16 @@ __metadata:
     node-fetch: ^1.0.1
     whatwg-fetch: ">=0.10.0"
   checksum: a4174e332ae98fc93269162f1d8a3ee1f7255257d4eaeea5145d4068f64ac2dbff7e7f681889097238e1e009f7a74ba1a23ffd8ed967402777a32cca96204508
+  languageName: node
+  linkType: hard
+
+"isomorphic-fetch@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "isomorphic-fetch@npm:3.0.0"
+  dependencies:
+    node-fetch: ^2.6.1
+    whatwg-fetch: ^3.4.1
+  checksum: 999c2845d440a6d53755d7954af40e55b38a25140a81f782aced55d56698f05aae8a0528ba6fd5630cc1040ecbf330c9858340a63b25645c0f81fa2f057fd0bb
   languageName: node
   linkType: hard
 
