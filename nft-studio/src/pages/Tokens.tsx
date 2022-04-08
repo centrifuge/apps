@@ -46,7 +46,10 @@ const TokenOverview: React.FC = () => {
     [dataTokens]
   )
 
-  const totalValueLocked = tokens?.reduce((prev, curr) => new BN(prev).add(new BN(curr?.valueLocked as any)), new BN(0))
+  const totalValueLocked = React.useMemo(
+    () => tokens?.reduce((prev, curr) => new BN(prev).add(new BN(curr?.valueLocked as any)), new BN(0)),
+    [tokens]
+  )
 
   const pageSummaryData = [
     { label: 'Total Value Locked (TVL)', value: formatCurrencyAmount(totalValueLocked, 'USD') },
@@ -54,7 +57,7 @@ const TokenOverview: React.FC = () => {
   ]
 
   return (
-    <Stack gap={0} flex={1}>
+    <Stack gap={0} flex={1} mb="6">
       <PageHeader subtitle="Art NFTs" title="Investment tokens" walletShown={false} />
       {tokens?.length ? (
         <>

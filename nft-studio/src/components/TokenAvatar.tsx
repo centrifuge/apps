@@ -23,22 +23,22 @@ const StyledAvatar = styled(Box)<Partial<TokenAvatarProps>>`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  ${({ size }) => {
+  ${({ size, theme }) => {
     switch (size) {
       case 'large':
         return css({
           lineHeight: '0.9',
           fontSize: '12px',
-          height: '40px',
-          width: '40px',
+          height: theme.sizes.iconLarge,
+          width: theme.sizes.iconLarge,
         })
       case 'small':
       default:
         return css({
           lineHeight: '1',
           fontSize: '8px',
-          height: '24px',
-          width: '24px',
+          height: theme.sizes.iconMedium,
+          width: theme.sizes.iconMedium,
         })
     }
   }}
