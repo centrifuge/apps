@@ -7,4 +7,5 @@ export const FEATURED_COLLECTIONS = [
   '1298321265',
   '353744957',
   '2324338051',
+  '2980619731',
 ]
