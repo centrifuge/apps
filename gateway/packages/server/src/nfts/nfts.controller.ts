@@ -26,10 +26,10 @@ export class NftsController {
   async mintNFT(@Req() request, @Body() body: MintNftRequest) {
     const docId = body.document_id
     const payload: CoreapiMintNFTRequest = {
-      assetManagerAddress: body.asset_manager_address,
-      documentId: body.document_id,
-      proofFields: body.proof_fields,
-      depositAddress: body.deposit_address,
+      asset_manager_address: body.asset_manager_address,
+      document_id: body.document_id,
+      proof_fields: body.proof_fields,
+      deposit_address: body.deposit_address,
     }
     const docsFromDb = (await this.databaseService.documents.update(
       { 'header.document_id': docId },
