@@ -160,15 +160,30 @@ export function getNftsModule(inst: CentrifugeBase) {
   }
 
   async function mintNft(
-    args: [collectionId: string, nftId: string, owner: string, metadataUri: string],
+    args: [collectionId: string, nftId: string, owner: string, metadataUri: string, amount?: number],
     options?: TransactionOptions
   ) {
-    const [collectionId, nftId, owner, metadataUri] = args
+    const [collectionId, nftId, owner, metadataUri, amount] = args
     const api = await inst.getApi()
-    const submittable = api.tx.utility.batchAll([
-      api.tx.uniques.mint(collectionId, nftId, owner),
-      api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
-    ])
+
+    let submittable
+    if (amount && amount > 1) {
+      let tx: any[] = []
+      for (let i = 0; i < amount; i++) {
+        const nftId = await getAvailableNftId(collectionId)
+        tx = tx.concat([
+          api.tx.uniques.mint(collectionId, nftId, owner),
+          api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
+        ])
+      }
+
+      submittable = api.tx.utility.batchAll(tx)
+    } else {
+      submittable = api.tx.utility.batchAll([
+        api.tx.uniques.mint(collectionId, nftId, owner),
+        api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
+      ])
+    }
 
     return inst.wrapSignAndSend(api, submittable, options)
   }

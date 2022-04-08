@@ -8,7 +8,7 @@ export const defaultUser: User = {
   name: 'Default User',
   account: '0xB198358FE22Ee4A8Ee9c739939B0eC5a1204bb6A',
   chain: {
-    centrifuge_chain_account: {
+    centrifugeChainAccount: {
       id: 'testid',
       secret: 'testsecret',
       ss_58_address: 'testaddress',
