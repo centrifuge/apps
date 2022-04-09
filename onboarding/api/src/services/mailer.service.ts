@@ -50,7 +50,6 @@ export class MailerService {
   async sendSubscriptionAgreementEmail(user: User, pool: any, tranche: string) {
     this.logger.log('Sending subscription agreement signed email')
 
-    const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
     const message = {
       personalizations: [
         {
@@ -69,13 +68,57 @@ export class MailerService {
       ],
       from: {
         name: pool.profile?.issuer?.name,
-        email: `issuer+${issuerName}@centrifuge.io`,
+        email: `issuer+${pool.metadata?.slug}@centrifuge.io`,
       },
       template_id: config.sendgrid.subscriptionAgreementTemplate,
     }
     try {
       await client.send(message)
       this.logger.log('Mail sent successfully')
+    } catch (e) {
+      this.logger.error(JSON.stringify(e))
+    }
+  }
+
+  async sendKycStatusEmail(investorName: string, investorEmail: string, status: string) {
+    this.logger.log(`Sending KYC status email to ${investorName}`)
+
+    let template_id
+
+    if (status == 'rejected') {
+      template_id = config.sendgrid.kycRejectedTemplate
+    }
+    if (status == 'manual-review') {
+      template_id = config.sendgrid.kycManualReviewTemplate
+    }
+    if (status == 'expired') {
+      template_id = config.sendgrid.kycExpiredTemplate
+    }
+    if (!template_id) return //only sending rejected, manual-review & expired emails for now
+
+    const message = {
+      personalizations: [
+        {
+          to: [
+            {
+              email: investorEmail,
+              name: investorName,
+            },
+          ],
+          dynamic_template_data: {
+            investorName: investorName,
+          },
+        },
+      ],
+      from: {
+        name: `Centrifuge`,
+        email: `onboarding@centrifuge.io`,
+      },
+      template_id,
+    }
+    try {
+      await client.send(message)
+      this.logger.log('KYC status mail sent successfully')
     } catch (e) {
       this.logger.error(JSON.stringify(e))
     }
