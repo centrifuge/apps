@@ -160,6 +160,7 @@ export type Pool = {
 }
 
 export type DetailedPool = Omit<Pool, 'tranches'> & {
+  createdAt: string | null
   tranches: TrancheWithTokenPrice[]
 }
 
@@ -632,12 +633,24 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const $api = inst.getApi()
 
+    const $query = inst.getOptionalSubqueryObservable(
+      `query($poolId: String!) {
+        pool(id: $poolId) {
+          createdAt
+        }
+      }`,
+      {
+        poolId,
+      }
+    )
+
     return $api.pipe(
       switchMap((api) =>
-        combineLatest([api.query.pools.pool(poolId), api.query.loans.poolNAV(poolId)]).pipe(
-          switchMap(([poolValue, navValue]) => {
+        combineLatest([api.query.pools.pool(poolId), api.query.loans.poolNAV(poolId), $query]).pipe(
+          switchMap(([poolValue, navValue, queryData]) => {
             const pool = poolValue.toJSON() as unknown as PoolDetailsData
             const nav = navValue.toJSON() as unknown as NAVDetailsData
+            const createdAt = queryData?.pool.createdAt
             const metadata = (poolValue.toHuman() as any).metadata
 
             const $tokenIssuance = combineLatest(
@@ -654,6 +667,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
                 const detailedPool: DetailedPool = {
                   id: poolId,
+                  createdAt,
                   owner: pool.owner,
                   metadata,
                   currency: Object.keys(pool.currency)[0],
