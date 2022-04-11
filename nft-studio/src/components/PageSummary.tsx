@@ -28,7 +28,7 @@ export const PageSummary: React.FC<Props> = ({ data, children }) => {
           </Text>
           <Text variant="heading3">{value}</Text>
         </Stack>
-      )) || { children }}
+      )) || children}
     </Shelf>
   )
 }
