@@ -14,7 +14,7 @@ import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 
-export const TokenPage: React.FC = () => {
+export const InvestmentsTokenPage: React.FC = () => {
   return (
     <PageWithSideBar>
       <Token />

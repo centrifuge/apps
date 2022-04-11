@@ -637,6 +637,64 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
+  function getTokens() {
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap(
+        (api) => api.query.pools.pool.entries(),
+        (api, pools) => ({ api, pools })
+      ),
+      switchMap(({ api, pools: rawPools }) => {
+        // read pools and poolIds from observable
+        const pools = rawPools.map(
+          ([poolKeys, poolValue]) =>
+            [formatPoolKey(poolKeys as any), poolValue.toJSON() as unknown as PoolDetailsData] as const
+        )
+        const poolsMetadata = rawPools.map(([_, poolValue]) => (poolValue.toHuman() as any).metadata)
+
+        // array of args for $epoch query (by poolId and trancheIndex)
+        const epochKeys = pools
+          .map(([poolId, pool]) => {
+            return pool.tranches.map((_, trancheIndex) => [[poolId, trancheIndex], pool.lastEpochExecuted] as const)
+          })
+          .flat()
+        // modify keys for $issuance query [Tranche: [poolId, trancheIndex]]
+        const issuanceKeys = epochKeys.map(([poolTrancheKey]) => ({ Tranche: poolTrancheKey }))
+
+        const $epochs = api.query.pools.epoch.multi(epochKeys)
+        const $issuance = api.query.ormlTokens.totalIssuance.multi(issuanceKeys)
+
+        // emit changes from $epochs and $issuance to construct final array of tokens
+        return combineLatest([$epochs, $issuance]).pipe(
+          map(([rawEpochs, rawIssuances]) => {
+            const epochs = rawEpochs.map((value) => (!value.isEmpty ? (value as any).toJSON() : null))
+
+            return epochs.map((epoch, epochIndex) => {
+              const [[poolId, trancheIndex]] = epochKeys[epochIndex]
+              const metadata = poolsMetadata[epochIndex]
+              const [, pool] = pools.find(([key]) => key === poolId)!
+
+              return {
+                index: trancheIndex,
+                tokenPrice: epoch ? parseHex(epoch.tokenPrice) : new BN(10).pow(new BN(27)).toString(),
+                name: tokenIndexToName(trancheIndex, pool.tranches.length),
+                currency: pool.currency,
+                tokenIssuance: rawIssuances[epochIndex].toString(),
+                poolId,
+                poolMetadata: metadata,
+                interestPerSec: parseBN(
+                  pool.tranches.find((_, tIndex) => trancheIndex === tIndex)?.interestPerSec || new BN(0)
+                ),
+                ratio: parseBN(pool.tranches.find((_, tIndex) => trancheIndex === tIndex)?.ratio || new BN(0)),
+              }
+            })
+          })
+        )
+      })
+    )
+  }
+
   function getPool(args: [poolId: string]) {
     const [poolId] = args
     const $api = inst.getApi()
@@ -1030,6 +1088,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     addWriteOffGroup,
     adminWriteOff,
     getLoanCollectionIdForPool,
+    getTokens,
     getAvailablePoolId,
   }
 }
