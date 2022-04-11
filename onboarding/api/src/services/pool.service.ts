@@ -6,12 +6,12 @@ import { Tranche } from '../controllers/types'
 import { AddressEntity, AddressRepo } from '../repos/address.repo'
 import { InvestmentRepo } from '../repos/investment.repo'
 import { User, UserRepo } from '../repos/user.repo'
-import Mailer from '../utils/mailer'
 import contractAbiMemberAdmin from '../utils/MemberAdmin.abi'
 import contractAbiMemberlist from '../utils/Memberlist.abi'
 import contractAbiPoolRegistry from '../utils/PoolRegistry.abi'
 import contractAbiRwaMarketPermissionManager from '../utils/RwaMarketPermissionManager.abi'
 import { TransactionManager } from '../utils/tx-manager'
+import MailerService from './mailer.service'
 
 const fetch = require('@vercel/fetch-retry')(require('node-fetch'))
 
@@ -40,7 +40,7 @@ export class PoolService {
         this.signer
       )
     : undefined
-  mailer = new Mailer()
+  mailer = new MailerService()
 
   constructor(
     private readonly addressRepo: AddressRepo,

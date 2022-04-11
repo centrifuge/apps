@@ -62,5 +62,5 @@ jobs:
           context: .
           file: ./onboarding/api/docker/Dockerfile
           push: true
-          # tags: centrifugeio/onboard-api:latest
-          tags: centrifugeio/onboard-api:${{ steps.tag.outputs.TAG_NAME }}
+          tags: centrifugeio/onboard-api:latest
+          # tags: centrifugeio/onboard-api:${{ steps.tag.outputs.TAG_NAME }}
