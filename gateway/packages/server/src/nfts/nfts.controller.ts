@@ -112,7 +112,7 @@ export class NftsController {
       body.document_id
     )
 
-    const { jobStatus } = await this.centrifugeService.pullForJobComplete(oraclePushResult.jobId, request.user.account)
+    const { jobStatus } = await this.centrifugeService.pullForJobComplete(oraclePushResult.job_id, request.user.account)
 
     if (jobStatus) {
       console.log('pushing to oracle succeeded', oraclePushResult)
