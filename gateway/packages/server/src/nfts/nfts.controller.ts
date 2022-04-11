@@ -48,9 +48,12 @@ export class NftsController {
     try {
       mintingResult = await this.centrifugeService.nft.mintNft(payload, request.user.account, body.registry_address)
 
-      const mint = await this.centrifugeService.pullForJobComplete(mintingResult.header.job_id, request.user.account)
+      const { jobStatus } = await this.centrifugeService.pullForJobComplete(
+        mintingResult.header.job_id,
+        request.user.account
+      )
 
-      if (mint.finished) {
+      if (!jobStatus) {
         throw new InternalServerErrorException('Minting job failed')
       }
 
@@ -109,9 +112,9 @@ export class NftsController {
       body.document_id
     )
 
-    const push = await this.centrifugeService.pullForJobComplete(oraclePushResult.jobId, request.user.account)
+    const { jobStatus } = await this.centrifugeService.pullForJobComplete(oraclePushResult.jobId, request.user.account)
 
-    if (push.finished) {
+    if (jobStatus) {
       console.log('pushing to oracle succeeded', oraclePushResult)
     } else {
       console.log('pushing to oracle failed', oraclePushResult)
