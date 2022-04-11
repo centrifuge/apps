@@ -52,7 +52,7 @@ const columns: Column[] = [
     sortKey: 'protection',
   },
   {
-    header: (orderBy: OrderBy) => <SortableHeader label="Value Locked" orderBy={orderBy} />,
+    header: (orderBy: OrderBy) => <SortableHeader label="Value locked" orderBy={orderBy} />,
     cell: (token: Token) => <ValueLocked token={token} />,
     flex: '4',
     sortKey: 'valueLocked',

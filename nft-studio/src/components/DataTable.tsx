@@ -42,7 +42,7 @@ export const DataTable = <T extends Record<string, any>>({
 
   const updateSortOrder = (sortKey: Column['sortKey']) => {
     if (!sortKey) return
-    const updatedOrderBy = orderBy[sortKey] === 'asc' ? 'desc' : 'asc'
+    const updatedOrderBy = orderBy[sortKey] === 'desc' ? 'asc' : 'desc'
     setOrderBy({ [sortKey]: updatedOrderBy })
     setCurrentSortKey(sortKey)
   }
