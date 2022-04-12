@@ -13,8 +13,9 @@ RUN yarn install
 RUN apt-get update -y
 RUN apt-get install -y rsync
 
-RUN yarn build
+RUN yarn workspace centrifuge-gateway build
+RUN yarn workspace centrifuge-gateway move:assets
 
 EXPOSE 3001
 
-CMD ["yarn", "run", "start:prod"]
+CMD ["yarn", "workspace", "centrifuge-gateway", "run", "start:prod"]

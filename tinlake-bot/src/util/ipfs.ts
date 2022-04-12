@@ -54,6 +54,7 @@ export interface Pool {
   addresses: { [key: string]: string }
   network: 'mainnet' | 'kovan'
   profile?: Profile
+  versions: { [key: string]: number }
 }
 
 export interface Profile {

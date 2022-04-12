@@ -46,11 +46,14 @@ export class NftsController {
 
     let mintingResult
     try {
-      mintingResult = await this.centrifugeService.nft.mintNft(request.user.account, body.registry_address, payload)
+      mintingResult = await this.centrifugeService.nft.mintNft(payload, request.user.account, body.registry_address)
 
-      const mint = await this.centrifugeService.pullForJobComplete(mintingResult.header.job_id, request.user.account)
+      const { jobStatus } = await this.centrifugeService.pullForJobComplete(
+        mintingResult.header.job_id,
+        request.user.account
+      )
 
-      if (mint.status !== 'success') {
+      if (!jobStatus) {
         throw new InternalServerErrorException('Minting job failed')
       }
 
@@ -99,19 +102,19 @@ export class NftsController {
     }
 
     const oraclePushResult = await this.centrifugeService.nft.pushAttributeOracle(
-      request.user.account,
       {
         // TODO: this attribute key is a hardcoded hash of 'result' --  we should update this when we have a UI mockup
         attribute_key: '0xf6a214f7a5fcda0c2cee9660b7fc29f5649e3c68aad48e20e950137c98913a68',
         oracle_address: body.oracle_address,
         token_id: mintingResult.token_id,
       },
+      request.user.account,
       body.document_id
     )
 
-    const push = await this.centrifugeService.pullForJobComplete(oraclePushResult.job_id, request.user.account)
+    const { jobStatus } = await this.centrifugeService.pullForJobComplete(oraclePushResult.job_id, request.user.account)
 
-    if (push.status === 'success') {
+    if (jobStatus) {
       console.log('pushing to oracle succeeded', oraclePushResult)
     } else {
       console.log('pushing to oracle failed', oraclePushResult)
