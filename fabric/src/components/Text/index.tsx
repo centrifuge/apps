@@ -65,4 +65,4 @@ const Text: React.FC<TextProps> = (props) => {
   )
 }
 
-export { Text, TextProps, useTextContext }
+export { Text, TextProps, useTextContext, TextContext }

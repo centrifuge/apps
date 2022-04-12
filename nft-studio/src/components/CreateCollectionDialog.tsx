@@ -1,9 +1,19 @@
-import { Box, Button, Checkbox, FileUpload, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  Checkbox,
+  Dialog,
+  FileUpload,
+  Shelf,
+  Stack,
+  Text,
+  TextAreaInput,
+  TextInput,
+} from '@centrifuge/fabric'
 import React, { useEffect, useState } from 'react'
 import { useQueryClient } from 'react-query'
 import { Redirect } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
-import { Dialog } from '../components/Dialog'
 import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
 import { createCollectionMetadata } from '../utils/createCollectionMetadata'

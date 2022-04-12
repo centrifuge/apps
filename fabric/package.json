@@ -63,7 +63,12 @@
   },
   "dependencies": {
     "@react-aria/button": "^3.3.4",
+    "@react-aria/dialog": "^3.1.4",
+    "@react-aria/focus": "^3.5.0",
+    "@react-aria/overlays": "^3.7.2",
     "@react-aria/select": "^3.6.0",
+    "@react-aria/tooltip": "^3.1.7",
+    "@react-stately/tooltip": "^3.0.8",
     "@styled-system/css": "^5.1.5",
     "@styled-system/should-forward-prop": "^5.1.5",
     "styled-system": "^5.1.5"

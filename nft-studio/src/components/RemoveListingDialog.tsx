@@ -1,11 +1,10 @@
-import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useNFT } from '../utils/useNFTs'
 import { ButtonGroup } from './ButtonGroup'
 import { useCentrifuge } from './CentrifugeProvider'
-import { Dialog } from './Dialog'
 import { useWeb3 } from './Web3Provider'
 
 type Props = {
