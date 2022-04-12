@@ -30,11 +30,12 @@ export function useOrder(poolId: string, trancheId: number, address?: string) {
 }
 
 export function usePendingCollect(poolId: string, trancheId: number, address?: string) {
+  const pool = usePool(poolId)
   const [result] = useCentrifugeQuery(
     ['pendingCollect', poolId, trancheId, address],
-    (cent) => cent.pools.getPendingCollect([address!, poolId, trancheId]),
+    (cent) => cent.pools.getPendingCollect([address!, poolId, trancheId, pool!.epoch.lastExecuted]),
     {
-      enabled: !!address,
+      enabled: !!address && !!pool,
     }
   )
 

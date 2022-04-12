@@ -1,9 +1,8 @@
-import { Box, Button, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import styled from 'styled-components'
 import { Dec } from '../utils/Decimal'
 import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
@@ -11,10 +10,8 @@ import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { usePermissions } from '../utils/usePermissions'
 import { useOrder, usePendingCollect, usePool, usePoolMetadata } from '../utils/usePools'
 import { ButtonGroup } from './ButtonGroup'
-import { TextInput } from './form/base/TextInput'
 import { LoadBoundary } from './LoadBoundary'
 import { Spinner } from './Spinner'
-import { ButtonTextLink } from './TextLink'
 import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
@@ -32,6 +29,26 @@ export const InvestRedeem: React.VFC<Props> = (props) => {
   )
 }
 
+type Balances = Exclude<ReturnType<typeof useBalances>, undefined>
+
+const currencySymbols = {
+  native: 'AIR',
+  usd: 'kUSD',
+}
+
+function getCurrencySymbol(currency?: string) {
+  return (currency && currencySymbols[currency as keyof typeof currencySymbols]) || ''
+}
+
+function getBalanceDec(balances: Balances, currency: string) {
+  if (currency === 'native') {
+    return Dec(balances.native.balance).div(Dec(10).pow(balances.native.decimals))
+  }
+  const entry = balances.currencies.find((c) => c.currency === currency)
+  if (!entry) throw new Error(`invalid currency: ${currency}`)
+  return Dec(entry.balance).div('1e18')
+}
+
 const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
   const [view, setView] = React.useState<'start' | 'invest' | 'redeem'>('start')
   const address = useAddress()
@@ -42,7 +59,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
   const pendingCollect = usePendingCollect(poolId, trancheId, address)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
 
-  console.log('order', order, pendingCollect)
+  console.log('order', order, pendingCollect, balances)
   const isDataLoading =
     balances === undefined || order === undefined || pendingCollect === undefined || permissions === undefined
 
@@ -68,7 +85,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
         <Shelf justifyContent="space-between">
           <Text variant="heading3">Investment value</Text>
           <TextWithPlaceholder variant="heading3" isLoading={isDataLoading}>
-            {invested.toFixed(0)} {pool?.currency}
+            {invested.toFixed(0)} {getCurrencySymbol(pool?.currency)}
           </TextWithPlaceholder>
         </Shelf>
         <Shelf justifyContent="space-between">
@@ -117,12 +134,13 @@ type InvestFormProps = {
 
 const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel }) => {
   const address = useAddress()
-  const order = useOrder(poolId, trancheId, address)
+  // const order = useOrder(poolId, trancheId, address)
   const balances = useBalances(address)
+  const pendingCollect = usePendingCollect(poolId, trancheId, address)
   const pool = usePool(poolId)
   const tranche = pool?.tranches[trancheId]
-  const balance = Dec(balances?.tokens.find((b) => b.currency === pool?.currency)?.balance ?? 0).div('1e18')
-  const orderInvest = Dec(order?.invest ?? 0).div('1e18')
+  const balance = balances && pool ? getBalanceDec(balances, pool.currency) : Dec(0)
+  // const orderInvest = Dec(order?.invest ?? 0).div('1e18')
 
   const { execute: doInvestTransaction, isLoading } = useCentrifugeTransaction(
     'Invest',
@@ -147,10 +165,11 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel })
 
   const totalReserve = Dec(pool?.reserve.total ?? '0').div('1e18')
   const maxReserve = Dec(pool?.reserve.max ?? '0').div('1e18')
+  const pendingInvest = Dec(pendingCollect?.remainingInvestCurrency ?? '0').div('1e18')
   const investmentCapacity = min(maxReserve.minus(totalReserve)) // TODO: check risk buffer and outstanding invest orders
-  const needsToCollect =
-    order && pool && order.epoch <= pool.epoch.lastExecuted && order.epoch > 0 && order.invest !== '0'
-  const hasPendingOrder = !orderInvest.isZero() && !needsToCollect
+  const needsToCollect = pendingCollect?.payoutCurrencyAmount !== '0' || pendingCollect?.payoutTokenAmount !== '0'
+  // order && pool && order.epoch <= pool.epoch.lastExecuted && order.epoch > 0 && order.invest !== '0'
+  const hasPendingOrder = !pendingInvest.isZero()
 
   const form = useFormik({
     initialValues: {
@@ -176,37 +195,28 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel })
 
   function renderInput() {
     return (
-      <Stack gap={3}>
-        <Stack>
-          <Field name="amount">
-            {({ field: { value, ...fieldProps } }: any) => (
-              <NumberInput
-                {...fieldProps}
-                value={value instanceof Decimal ? value.toNumber() : value}
-                label="Amount"
-                type="number"
-                min="0"
-                disabled={isLoading || isLoadingCancel}
-              />
-            )}
-          </Field>
-
-          <Text>
-            <ButtonTextLink
-              onClick={() => {
-                form.setFieldValue('amount', balance)
-              }}
-            >
-              Set max
-            </ButtonTextLink>
-          </Text>
-        </Stack>
+      <Stack gap={2}>
+        <Field name="amount">
+          {({ field: { value, ...fieldProps } }: any) => (
+            <CurrencyInput
+              {...fieldProps}
+              value={value instanceof Decimal ? value.toNumber() : value}
+              label="Amount"
+              type="number"
+              min="0"
+              disabled={isLoading || isLoadingCancel}
+              onSetMax={() => form.setFieldValue('amount', balance)}
+              currency={getCurrencySymbol(pool?.currency)}
+              secondaryLabel={pool && balance && `${balance.toFixed(0)} ${getCurrencySymbol(pool?.currency)} balance`}
+            />
+          )}
+        </Field>
         {inputToNumber(form.values.amount) > 0 && inputAmountCoveredByCapacity && (
           <Text variant="label2" color="statusOk">
             Full amount covered by investment capacity ✓
           </Text>
         )}
-        <Stack p={1} gap={1}>
+        <Stack px={1} gap={1}>
           <Button type="submit" variant="containedSecondary" disabled={!form.isValid} loading={isLoading}>
             Invest
           </Button>
@@ -225,7 +235,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel })
       <Box backgroundColor="secondarySelectedBackground">
         <Box p={2}>
           <Text>
-            you have <Text fontWeight={600}>{orderInvest.toFixed(0)} usd</Text> pending investment
+            you have <Text fontWeight={600}>{pendingInvest.toFixed(0)} usd</Text> pending investment
           </Text>
         </Box>
         <Shelf justifyContent="space-evenly">
@@ -336,26 +346,17 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
           <Stack>
             <Field name="amount">
               {({ field: { value, ...fieldProps } }: any) => (
-                <NumberInput
+                <CurrencyInput
                   {...fieldProps}
                   value={value instanceof Decimal ? value.toNumber() : value}
                   label="Amount"
                   type="number"
                   min="0"
                   disabled={isLoading || isLoadingCancel || isLoadingCollect}
+                  onSetMax={() => form.setFieldValue('amount', balance)}
                 />
               )}
             </Field>
-
-            <Text>
-              <ButtonTextLink
-                onClick={() => {
-                  form.setFieldValue('amount', balance)
-                }}
-              >
-                Set max
-              </ButtonTextLink>
-            </Text>
           </Stack>
           {inputToNumber(form.values.amount) > 0 && inputAmountCoveredByCapacity && (
             <Text variant="label2" color="statusOk">
@@ -409,19 +410,6 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
       </Form>
     </FormikProvider>
   )
-}
-
-const NumberInput = styled(TextInput)`
-  -moz-appearance: textfield;
-
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-`
-NumberInput.defaultProps = {
-  type: 'number',
 }
 
 function min(...nums: Decimal[]) {
