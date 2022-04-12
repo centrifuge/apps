@@ -45,7 +45,7 @@ export const TransactionToasts: React.FC = () => {
                 <AnchorButton
                   variant="text"
                   target="_blank"
-                  href={`${process.env.REACT_APP_SUBSCAN_URL}/extrinsic/${tx.hash}`}
+                  href={`${import.meta.env.VITE_SUBSCAN_URL}/extrinsic/${tx.hash}`}
                   icon={IconExternalLink}
                 />
               ) : undefined

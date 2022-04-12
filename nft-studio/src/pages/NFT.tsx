@@ -221,7 +221,7 @@ const NFT: React.FC = () => {
                         by
                       </Text>
                       <AnchorPillButton
-                        href={`${process.env.REACT_APP_SUBSCAN_URL}/account/${nft.owner}`}
+                        href={`${import.meta.env.VITE_SUBSCAN_URL}/account/${nft.owner}`}
                         target="_blank"
                       >
                         <Identity address={collection.owner} />

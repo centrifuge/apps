@@ -105,7 +105,7 @@ const Collection: React.FC = () => {
               <Text variant="body2">by</Text>
             </Box>
             <AnchorPillButton
-              href={`${process.env.REACT_APP_SUBSCAN_URL}/account/${collection?.owner ?? ''}`}
+              href={`${import.meta.env.VITE_SUBSCAN_URL}/account/${collection?.owner ?? ''}`}
               target="_blank"
             >
               {collection?.owner && <Identity address={collection.owner} clickToCopy />}

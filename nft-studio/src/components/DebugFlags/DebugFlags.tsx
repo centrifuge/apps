@@ -1,6 +1,6 @@
 import { Box, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
-import ControlPanel, { Checkbox, Select, Text } from 'react-control-panel'
+// import ControlPanel, { Checkbox, Select, Text } from 'react-control-panel'
 import styled from 'styled-components'
 import { FlagsState, initialFlagsState, useDebugFlags } from '.'
 import { flagsConfig } from './config'
@@ -73,7 +73,7 @@ const Panel: React.FC<{ state: FlagsState; usedKeys: Set<any>; onChange: (key: K
       >
         {open ? 'close' : 'open'} debug panel
       </Shelf>
-      {open && (
+      {/* {open && (
         <ControlPanel state={state} onChange={onChange} width={400}>
           {Object.entries(flagsConfig).map(([key, obj]) => {
             let el
@@ -94,7 +94,7 @@ const Panel: React.FC<{ state: FlagsState; usedKeys: Set<any>; onChange: (key: K
             ) : null
           })}
         </ControlPanel>
-      )}
+      )} */}
     </StyledPanel>
   )
 }

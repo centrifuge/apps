@@ -3,7 +3,7 @@ import { brandCentrifuge } from './tokens/brandCentrifuge'
 import { modeDark } from './tokens/modeDark'
 import { FabricTheme } from './types'
 
-const centrifugeDark: FabricTheme = {
+export const centrifugeDark: FabricTheme = {
   ...baseTheme,
   scheme: 'dark',
   colors: {
