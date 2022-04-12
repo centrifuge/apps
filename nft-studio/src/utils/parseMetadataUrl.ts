@@ -1,4 +1,4 @@
-const IFPS_GATEWAY = import.meta.env.VITE_IPFS_GATEWAY
+const IFPS_GATEWAY = import.meta.env.REACT_APP_IPFS_GATEWAY
 
 export function isUrl(url: string) {
   try {

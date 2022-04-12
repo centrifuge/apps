@@ -1,6 +1,6 @@
 import { addressEq, encodeAddress } from '@polkadot/util-crypto'
 
-const { VITE_WHITELISTED_ACCOUNTS: whitelistConfig } = import.meta.env
+const { REACT_APP_WHITELISTED_ACCOUNTS: whitelistConfig } = import.meta.env
 
 const whitelistedAccounts = whitelistConfig
   ? (whitelistConfig as string).split(',').map((a) => {

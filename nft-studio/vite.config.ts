@@ -8,6 +8,7 @@ export default defineConfig({
     // prebundle local libraries in workspace
     include: ['@centrifuge/centrifuge-js', '@centrifuge/fabric'],
   },
+  envPrefix: 'REACT_APP_',
   build: {
     target: 'modules',
     outDir: 'build',
