@@ -1,4 +1,4 @@
-import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
 import { initialFlagsState, useDebugFlags } from '.'
@@ -85,7 +85,7 @@ const Panel: React.FC<{
                 </select>
               )
             } else {
-              el = <Text color="#ddd">{key}</Text>
+              el = <input onChange={onChange} type="text" color="#ddd" />
             }
 
             const used = usedKeys.has(key)
