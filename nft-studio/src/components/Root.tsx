@@ -20,7 +20,7 @@ import { PoolPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
-// import { DebugFlags } from './DebugFlags'
+import { DebugFlags } from './DebugFlags'
 import { GlobalStyle } from './GlobalStyle'
 import { HostPermissionsProvider } from './HostPermissions'
 import { LoadBoundary } from './LoadBoundary'
@@ -66,16 +66,16 @@ export const Root: React.VFC = () => {
         <HostPermissionsProvider>
           <Web3Provider>
             <CentrifugeProvider>
-              {/* <DebugFlags> */}
-              <TransactionProvider>
-                <TransactionToasts />
-                <Router>
-                  <LoadBoundary>
-                    <Routes />
-                  </LoadBoundary>
-                </Router>
-              </TransactionProvider>
-              {/* </DebugFlags> */}
+              <DebugFlags>
+                <TransactionProvider>
+                  <TransactionToasts />
+                  <Router>
+                    <LoadBoundary>
+                      <Routes />
+                    </LoadBoundary>
+                  </Router>
+                </TransactionProvider>
+              </DebugFlags>
             </CentrifugeProvider>
           </Web3Provider>
         </HostPermissionsProvider>
