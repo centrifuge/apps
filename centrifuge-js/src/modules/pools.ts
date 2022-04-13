@@ -449,7 +449,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api, [events]) => ({ api, events })
       ),
       filter(({ api, events }) => {
+        // @ts-expect-error
         const event = events.find(
+          // @ts-expect-error
           ({ event }) => api.events.pools.RoleApproved.is(event) || api.events.pools.RoleRevoked.is(event)
         )
 
@@ -568,6 +570,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api, [events]) => ({ api, events })
       ),
       filter(({ api, events }) => {
+        // @ts-expect-error
         const event = events.find(({ event }) => api.events.pools.Created.is(event))
         return !!event
       })
@@ -835,7 +838,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api, [events]) => ({ api, events })
       ),
       filter(({ api, events }) => {
+        // @ts-ignore
         const event = events.find(
+          // @ts-ignore
           ({ event }) =>
             api.events.loans.Created.is(event) ||
             api.events.loans.Closed.is(event) ||

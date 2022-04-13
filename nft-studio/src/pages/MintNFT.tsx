@@ -1,5 +1,4 @@
-import { Box, Button, NumberInput, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
-import { Flex } from '@centrifuge/fabric/dist/components/Flex'
+import { Box, Button, Flex, NumberInput, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import React, { useReducer, useState } from 'react'
 import { useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router'

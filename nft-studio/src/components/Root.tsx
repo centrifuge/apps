@@ -1,5 +1,4 @@
-import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
-import centrifugeLight from '@centrifuge/fabric/dist/theme/centrifugeLight'
+import { centrifugeLight, FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
