@@ -54,7 +54,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         (api, events) => ({ api, events })
       ),
       filter(({ api, events }) => {
-        // @ts-ignore
+        // @ts-expect-error
         const event = events.find(({ event }) => api.events.uniques.Created.is(event))
         return !!event
       }),
@@ -67,13 +67,13 @@ export function getNftsModule(inst: CentrifugeBase) {
       ),
       map(([metas, collections]) => {
         const metasObj = metas.reduce((acc, [keys, value]) => {
-          // @ts-ignore
+          // @ts-expect-error
           acc[formatClassKey(keys)] = value.toHuman()
           return acc
         }, {} as any)
 
         const mapped = collections.map(([keys, value]) => {
-          // @ts-ignore
+          // @ts-expect-error
           const id = formatClassKey(keys)
           const collectionValue = value.toJSON() as Class
           const collection: Collection = {
@@ -128,9 +128,9 @@ export function getNftsModule(inst: CentrifugeBase) {
         (api, events) => ({ api, events })
       ),
       filter(({ api, events }) => {
-        // @ts-ignore
+        // @ts-expect-error
         const event = events.find(
-          // @ts-ignore
+          // @ts-expect-error
           ({ event }) => api.events.uniques.Transferred.is(event) || api.events.uniques.Issued.is(event)
         )
         if (!event) return false
@@ -151,7 +151,7 @@ export function getNftsModule(inst: CentrifugeBase) {
       ),
       map(([metas, nfts, sales]) => {
         const metasObj = metas.reduce((acc, [keys, value]) => {
-          // @ts-ignore
+          // @ts-expect-error
           acc[formatInstanceKey(keys)] = value.toHuman()
           return acc
         }, {} as any)
@@ -162,7 +162,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         }, {} as any)
 
         const mapped = nfts.map(([keys, value]) => {
-          // @ts-ignore
+          // @ts-expect-error
           const id = formatInstanceKey(keys)
           const nftValue = value.toJSON() as Instance
           const nft: NFT = {
@@ -221,9 +221,9 @@ export function getNftsModule(inst: CentrifugeBase) {
       ),
 
       filter(({ api, events }) => {
-        // @ts-ignore
+        // @ts-expect-error
         const event = events.find(
-          // @ts-ignore
+          // @ts-expect-error
           ({ event }) => api.events.uniques.Transferred.is(event) || api.events.uniques.Issued.is(event)
         )
         if (!event) return false
