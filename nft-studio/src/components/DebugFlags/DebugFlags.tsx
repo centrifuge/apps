@@ -79,8 +79,10 @@ const Panel: React.FC<{
             } else if (obj.type === 'select' && obj.options) {
               el = (
                 <select name={key} onChange={onChange}>
-                  {Object.keys(obj.options).map((option) => (
-                    <option value={option}>{option}</option>
+                  {Object.keys(obj.options).map((option, index) => (
+                    <option key={`${option}-${index}`} value={option}>
+                      {option}
+                    </option>
                   ))}
                 </select>
               )
