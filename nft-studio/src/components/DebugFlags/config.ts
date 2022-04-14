@@ -1,6 +1,6 @@
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug =
-  process.env.NODE_ENV === 'development' || params.get('debug') != null || !!localStorage.getItem('debug')
+  import.meta.env.NODE_ENV === 'development' || params.get('debug') != null || !!localStorage.getItem('debug')
 
 type DebugFlagConfig = {
   type: string
@@ -16,6 +16,10 @@ export const flagsConfig: Record<string, DebugFlagConfig> = {
   showOnlyNFT: {
     type: 'checkbox',
     default: true,
+  },
+  batchMintNFTs: {
+    type: 'checkbox',
+    default: false,
   },
   alwaysShowPanel: {
     type: 'checkbox',

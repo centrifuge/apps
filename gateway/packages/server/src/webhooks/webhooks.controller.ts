@@ -14,9 +14,9 @@ export enum DocumentTypes {
 }
 
 export enum EventTypes {
-  DOCUMENT = 1,
-  JOB = 1,
-  ERROR = 0,
+  DOCUMENT = <any>'document',
+  JOB = <any>'job',
+  ERROR = <any>'ERROR',
 }
 
 @Controller(ROUTES.WEBHOOKS)
@@ -35,22 +35,26 @@ export class WebhooksController {
   // TODO: refactor/rethink to remove code duplication in functionality
   async receiveMessage(@Body() notification: NotificationMessage) {
     try {
-      if (notification.event_type === EventTypes.DOCUMENT) {
+      // @ts-ignore
+      if (notification.eventType === EventTypes.DOCUMENT) {
         // Search for the user in the database
         const user = await this.databaseService.users.findOne({
-          $or: [{ account: notification.to_id!.toLowerCase() }, { account: notification.to_id }],
+          $or: [{ account: notification.document.to!.toLowerCase() }, { account: notification.document.to }],
         })
         if (!user) {
           throw new Error('User is not present in database')
         }
 
-        if (notification.document_type === DocumentTypes.GENERIC_DOCUMENT) {
-          const result = await this.centrifugeService.documents.getDocument(user.account, notification.document_id!)
+        if (notification.eventType === DocumentTypes.GENERIC_DOCUMENT) {
+          const result = await this.centrifugeService.documents.getCommittedDocument(
+            user.account,
+            notification.document.id!
+          )
 
           const unflattenedAttributes = unflatten(result.attributes)
           const updated = await this.databaseService.documents.update(
             {
-              'header.document_id': notification.document_id,
+              'header.document_id': notification.document.id,
               organizationId: user.account.toLowerCase(),
             },
             {
@@ -62,14 +66,14 @@ export class WebhooksController {
                 data: result.data,
                 attributes: unflattenedAttributes,
                 scheme: result.scheme,
-                fromId: notification.from_id,
+                fromId: notification.document.from,
                 document_status: DocumentStatus.Created, // webhook always follows commit, so creation is guaranteed
               },
             },
             { multi: true, upsert: true, returnUpdatedDocs: true }
           )
         } else {
-          throw new Error(`Document type ${notification.document_type} not supported`)
+          throw new Error(`Document type ${notification.eventType} not supported`)
         }
       }
     } catch (e) {

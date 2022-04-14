@@ -7,6 +7,7 @@ import { PropsOf } from '../../helpers'
 const Pill = styled.button(
   css({
     color: 'textPrimary',
+    whiteSpace: 'nowrap',
     backgroundColor: 'backgroundSecondary',
     '&:visited,&:active': {
       color: 'textPrimary',

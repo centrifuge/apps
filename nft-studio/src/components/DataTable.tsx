@@ -48,7 +48,7 @@ export const DataTable = <T extends Record<string, any>>({
   }
 
   const sortedData = React.useMemo(
-    () => sorter(data, orderBy[currentSortKey], currentSortKey),
+    () => sorter([...data], orderBy[currentSortKey], currentSortKey),
     [orderBy, data, currentSortKey]
   )
 

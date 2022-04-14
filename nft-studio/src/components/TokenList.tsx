@@ -1,11 +1,10 @@
 import { formatCurrencyAmount, formatPercentage } from '@centrifuge/centrifuge-js'
-import { IconArrowDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
+import { Avatar, IconArrowDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
 import { BN } from '@polkadot/util'
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, OrderBy } from './DataTable'
-import { TokenAvatar } from './TokenAvatar'
 
 export type Token = {
   poolMetadata: string
@@ -84,7 +83,7 @@ const TokenName: React.VFC<RowProps> = ({ token }) => {
   const symbol = metadata?.tranches?.find((_, index) => index === token.index)?.symbol
   return (
     <Shelf gap="2">
-      <TokenAvatar label={symbol || ''} size="small" />
+      <Avatar label={symbol || ''} size="small" />
       <Text variant="body2" color="textPrimary" fontWeight={600}>
         {metadata?.pool?.name} {token?.name}
       </Text>

@@ -3,7 +3,7 @@ import { brandAltair } from './tokens/brandAltair'
 import { modeDark } from './tokens/modeDark'
 import { FabricTheme } from './types'
 
-const altairDark: FabricTheme = {
+export const altairDark: FabricTheme = {
   ...baseTheme,
   scheme: 'dark',
   colors: {

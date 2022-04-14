@@ -1,28 +1,41 @@
-import { Box } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled, { css } from 'styled-components'
+import { Text } from '../Text'
 
-type TokenAvatarProps = {
+type AvatarProps = {
   label: string
-  size: 'small' | 'large'
+  type?: 'token' | 'pool'
+  size?: 'small' | 'large'
 }
 
-export const TokenAvatar: React.VFC<TokenAvatarProps> = ({ label, ...props }) => {
+export const Avatar: React.VFC<AvatarProps> = ({ label, ...props }) => {
   return (
-    <StyledAvatar {...props}>
+    <StyledAvatar variant="body2" {...props}>
       <div>{label.slice(0, 3)}</div>
       <div>{label.slice(3, 6)}</div>
     </StyledAvatar>
   )
 }
 
-const StyledAvatar = styled(Box)<Partial<TokenAvatarProps>>`
+const StyledAvatar = styled(Text)<Partial<AvatarProps>>`
   background: ${({ theme }) => theme.colors.accentSecondary};
-  border-radius: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  ${({ type }) => {
+    switch (type) {
+      case 'pool':
+        return css({
+          borderRadius: '4px',
+        })
+      case 'token':
+      default:
+        return css({
+          borderRadius: '100%',
+        })
+    }
+  }};
   ${({ size, theme }) => {
     switch (size) {
       case 'large':
