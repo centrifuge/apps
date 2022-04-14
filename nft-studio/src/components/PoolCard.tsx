@@ -4,6 +4,7 @@ import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { PoolMetadata } from '../utils/usePools'
+import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'
 import { AnchorPillButton } from './PillButton'
 import { Tooltips } from './Tooltips'
 
@@ -21,6 +22,7 @@ const poolCardSummaryData = [
 export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
   console.log('🚀 ~ pool', pool)
   const theme = useTheme()
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false)
 
   return (
     <Stack m="3" gap="2">
@@ -76,9 +78,12 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
               <Stack gap="1">
                 {metadata?.pool?.links.executiveSummary && (
                   <Shelf>
-                    <AnchorPillButton href={parseMetadataUrl(metadata?.pool?.links.executiveSummary)}>
-                      Executive summary
-                    </AnchorPillButton>
+                    <AnchorPillButton onClick={() => setIsDialogOpen(true)}>Executive summary</AnchorPillButton>
+                    <ExecutiveSummaryDialog
+                      href={parseMetadataUrl(metadata?.pool?.links.executiveSummary)}
+                      open={isDialogOpen}
+                      onClose={() => setIsDialogOpen(false)}
+                    />
                   </Shelf>
                 )}
                 {metadata?.pool?.links.website && (
