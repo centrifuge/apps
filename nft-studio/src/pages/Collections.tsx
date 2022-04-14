@@ -2,7 +2,7 @@ import { Button, IconPlus, LayoutGrid, LayoutGridItem, Shelf, Stack, Text } from
 import * as React from 'react'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
-import { CreateCollectionDialog } from '../components/CreateCollectionDialog'
+import { CreateCollectionDialog } from '../components/Dialogs/CreateCollectionDialog'
 import { Identity } from '../components/Identity'
 import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/PageWithSideBar'
