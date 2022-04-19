@@ -24,8 +24,8 @@
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
-    "@polkadot/api": "^6.2.1",
-    "@polkadot/util-crypto": "^7.4.1",
+    "@polkadot/api": "^8.0.1",
+    "@polkadot/util-crypto": "^9.0.1",
     "bn.js": "^5.2.0",
     "decimal.js-light": "^2.5.1",
     "isomorphic-fetch": "^3.0.0",

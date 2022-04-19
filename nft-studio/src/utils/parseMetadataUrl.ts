@@ -1,4 +1,4 @@
-const IFPS_GATEWAY = process.env.REACT_APP_IPFS_GATEWAY
+const IFPS_GATEWAY = import.meta.env.REACT_APP_IPFS_GATEWAY
 
 export function isUrl(url: string) {
   try {
@@ -15,9 +15,9 @@ export function parseMetadataUrl(url: string) {
 
     if (!url.includes(':')) {
       // string without protocol is assumed to be an IPFS hash
-      newUrl = new URL(`ipfs/${url}`, IFPS_GATEWAY)
+      newUrl = new URL(`ipfs/${url}`, IFPS_GATEWAY as string)
     } else if (url.startsWith('ipfs://')) {
-      newUrl = new URL(url.substr(7), IFPS_GATEWAY)
+      newUrl = new URL(url.substr(7), IFPS_GATEWAY as string)
     } else {
       newUrl = new URL(url)
     }

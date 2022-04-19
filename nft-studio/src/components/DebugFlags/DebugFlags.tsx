@@ -1,10 +1,9 @@
-import { Box, Shelf } from '@centrifuge/fabric'
+import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import ControlPanel, { Checkbox, Select, Text } from 'react-control-panel'
 import styled from 'styled-components'
-import { FlagsState, initialFlagsState, useDebugFlags } from '.'
-import { flagsConfig } from './config'
-import { DebugFlagsContext, Key } from './context'
+import { initialFlagsState, useDebugFlags } from '.'
+import { flagsConfig, Key } from './config'
+import { DebugFlagsContext, FlagsState } from './context'
 
 const DebugFlagsImpl: React.FC = ({ children }) => {
   const [state, setState] = React.useState(initialFlagsState)
@@ -14,7 +13,7 @@ const DebugFlagsImpl: React.FC = ({ children }) => {
     () => ({
       flags: Object.entries(state).reduce((obj, [key, value]) => {
         const conf = flagsConfig[key as Key]
-        obj[key] = conf.options ? conf.options[value as string] : value
+        obj[key] = 'options' in conf ? conf.options[value as string] : value
         return obj
       }, {} as any),
       register(id: number, keys: string[]) {
@@ -41,11 +40,11 @@ const DebugFlagsImpl: React.FC = ({ children }) => {
   )
 }
 
-const Panel: React.FC<{ state: FlagsState; usedKeys: Set<any>; onChange: (key: Key, val: any) => void }> = ({
-  state,
-  usedKeys,
-  onChange,
-}) => {
+const Panel: React.FC<{
+  state: FlagsState
+  usedKeys: Set<any>
+  onChange: (key: Key, val: any) => void
+}> = ({ state, usedKeys, onChange }) => {
   const [open, setOpen] = React.useState(false)
   const { showUnusedFlags, alwaysShowPanel } = useDebugFlags()
 
@@ -74,49 +73,83 @@ const Panel: React.FC<{ state: FlagsState; usedKeys: Set<any>; onChange: (key: K
         {open ? 'close' : 'open'} debug panel
       </Shelf>
       {open && (
-        <ControlPanel state={state} onChange={onChange} width={400}>
+        <StyledOpenPanel width={400} gap="1">
           {Object.entries(flagsConfig).map(([key, obj]) => {
+            const used = usedKeys.has(key)
+            const value = state[key as Key]
+            const visible = used || !!showUnusedFlags
+
             let el
             if (obj.type === 'checkbox') {
-              el = <Checkbox label={key} />
+              el = (
+                <input
+                  type="checkbox"
+                  name={key}
+                  checked={value as boolean}
+                  onChange={(e) => onChange(key as Key, e.target.checked)}
+                  disabled={!used}
+                />
+              )
             } else if (obj.type === 'select' && obj.options) {
-              el = <Select label={key} options={Object.keys(obj.options)} />
+              el = (
+                <select
+                  name={key}
+                  value={value as string}
+                  onChange={(e) => onChange(key as Key, e.target.value)}
+                  disabled={!used}
+                >
+                  {Object.keys(obj.options).map((option, index) => (
+                    <option key={`${option}-${index}`} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              )
             } else {
-              el = <Text label={key} />
+              el = (
+                <input
+                  value={value as string}
+                  onChange={(e) => onChange(key as Key, e.target.value)}
+                  type="text"
+                  color="#ddd"
+                  disabled={!used}
+                />
+              )
             }
 
-            const used = usedKeys.has(key)
-
-            return used || showUnusedFlags ? (
-              <VisibilityWrapper visible={used} key={key}>
-                {el}
-              </VisibilityWrapper>
+            return visible ? (
+              <Shelf
+                as="label"
+                justifyContent="space-between"
+                key={key}
+                style={{ pointerEvents: used ? 'initial' : 'none' }}
+              >
+                <Text
+                  fontSize="inherit"
+                  fontFamily="inherit"
+                  color="white"
+                  style={{ opacity: used ? 1 : 0.6, flex: '0 0 50%' }}
+                >
+                  {key}
+                </Text>
+                <Box flex="0 0 50%">{el}</Box>
+              </Shelf>
             ) : null
           })}
-        </ControlPanel>
+        </StyledOpenPanel>
       )}
     </StyledPanel>
   )
 }
 
-const StyledPanel = styled(Box)`
-  .control-panel {
-    background: black !important;
-    opacity: 1 !important;
-  }
-`
+const StyledPanel = styled(Box)``
 
-const VisibilityWrapper = styled.label<{ visible: boolean }>`
-  pointer-events: ${(props) => (props.visible ? 'initial' : 'none')};
-
-  div {
-    opacity: ${(props) => (props.visible ? 1 : 0.6)};
-  }
-
-  input:checked + label {
-    box-sizing: content-box;
-    background-color: #eee !important;
-  }
+const StyledOpenPanel = styled(Stack)`
+  background: black;
+  padding: 16px;
+  color: white;
+  font-family: Hack, monospace;
+  font-size: 11px;
 `
 
 export default DebugFlagsImpl

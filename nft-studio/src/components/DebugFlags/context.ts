@@ -1,7 +1,6 @@
 import * as React from 'react'
-import { debug, flagsConfig } from './config'
+import { debug, flagsConfig, Key } from './config'
 
-export type Key = keyof typeof flagsConfig
 export type Flags = {
   [T in Key]: typeof flagsConfig[T] extends { options: { [key: string]: infer Y } }
     ? Y
@@ -18,7 +17,7 @@ interface Context {
 }
 
 export const defaultFlags: Flags = Object.entries(flagsConfig).reduce((obj, [k, v]) => {
-  obj[k] = v.options ? v.options[v.default as string] : v.default
+  obj[k] = 'options' in v ? v.options[v.default as string] : v.default
   return obj
 }, {} as any)
 

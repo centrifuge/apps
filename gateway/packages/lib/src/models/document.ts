@@ -1,8 +1,8 @@
-import { CoreapiCreateDocumentRequest, CoreapiDocumentResponse } from '../centrifuge-node-client'
+import { CoreapiDocumentResponse, V2CreateDocumentRequest } from '../centrifuge-node-client'
 import { Collaborator, collaboratorsToAccessList } from './collaborator'
 import { Contact, extendContactLikeObjects } from './contact'
 
-export interface DocumentRequest extends CoreapiCreateDocumentRequest {
+export interface DocumentRequest extends V2CreateDocumentRequest {
   _id?: string
 }
 
