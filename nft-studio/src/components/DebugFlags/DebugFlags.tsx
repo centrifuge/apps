@@ -2,8 +2,8 @@ import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
 import { initialFlagsState, useDebugFlags } from '.'
-import { flagsConfig } from './config'
-import { DebugFlagsContext, FlagsState, Key } from './context'
+import { flagsConfig, Key } from './config'
+import { DebugFlagsContext, FlagsState } from './context'
 
 const DebugFlagsImpl: React.FC = ({ children }) => {
   const [state, setState] = React.useState(initialFlagsState)
@@ -13,7 +13,7 @@ const DebugFlagsImpl: React.FC = ({ children }) => {
     () => ({
       flags: Object.entries(state).reduce((obj, [key, value]) => {
         const conf = flagsConfig[key as Key]
-        obj[key] = conf?.options ? conf.options[value as string] : value
+        obj[key] = 'options' in conf ? conf.options[value as string] : value
         return obj
       }, {} as any),
       register(id: number, keys: string[]) {
@@ -76,6 +76,7 @@ const Panel: React.FC<{
         <StyledOpenPanel width={400} gap="1">
           {Object.entries(flagsConfig).map(([key, obj]) => {
             const used = usedKeys.has(key)
+            const value = state[key as Key]
             const visible = used || !!showUnusedFlags
 
             let el
@@ -84,8 +85,8 @@ const Panel: React.FC<{
                 <input
                   type="checkbox"
                   name={key}
-                  checked={state[key] as boolean}
-                  onChange={(e) => onChange(key, e.target.checked)}
+                  checked={value as boolean}
+                  onChange={(e) => onChange(key as Key, e.target.checked)}
                   disabled={!used}
                 />
               )
@@ -93,8 +94,8 @@ const Panel: React.FC<{
               el = (
                 <select
                   name={key}
-                  value={state[key] as string}
-                  onChange={(e) => onChange(key, e.target.value)}
+                  value={value as string}
+                  onChange={(e) => onChange(key as Key, e.target.value)}
                   disabled={!used}
                 >
                   {Object.keys(obj.options).map((option, index) => (
@@ -107,8 +108,8 @@ const Panel: React.FC<{
             } else {
               el = (
                 <input
-                  value={state[key] as string}
-                  onChange={(e) => onChange(key, e.target.value)}
+                  value={value as string}
+                  onChange={(e) => onChange(key as Key, e.target.value)}
                   type="text"
                   color="#ddd"
                   disabled={!used}

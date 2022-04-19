@@ -2,7 +2,7 @@ const params = new URLSearchParams(typeof window !== 'undefined' ? window.locati
 export const debug =
   import.meta.env.MODE === 'development' || params.get('debug') != null || !!localStorage.getItem('debug')
 
-type DebugFlagConfig =
+export type DebugFlagConfig =
   | {
       type: 'text'
       default: string
