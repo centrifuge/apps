@@ -682,7 +682,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 index: trancheIndex,
                 tokenPrice: epoch ? parseHex(epoch.tokenPrice) : new BN(10).pow(new BN(27)).toString(),
                 name: tokenIndexToName(trancheIndex, pool.tranches.length),
-                currency: pool.currency,
+                currency: Object.keys(pool.currency)[0],
                 tokenIssuance: rawIssuances[epochIndex].toString(),
                 poolId,
                 poolMetadata: metadata,
