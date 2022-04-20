@@ -23,7 +23,7 @@ import { PoolMetadata, usePool, usePoolMetadata } from '../utils/usePools'
 
 export const PoolPage: React.FC = () => {
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar>
       <Pool />
     </PageWithSideBar>
   )

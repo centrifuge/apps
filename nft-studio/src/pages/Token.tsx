@@ -1,4 +1,4 @@
-import { feeToApr, formatCurrencyAmount } from '@centrifuge/centrifuge-js'
+import { feeToApr, formatCurrencyAmount, formatPercentage } from '@centrifuge/centrifuge-js'
 import { Avatar, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -19,41 +19,12 @@ export const TokenDetailPage: React.FC = () => {
 }
 
 const TokenDetail: React.FC = () => {
-  // const theme = useTheme()
-  // const dataTokens = useTokens()
   const {
     params: { pid: poolId, tid: trancheId },
   } = useRouteMatch<{ pid: string; tid: string }>()
   const pool = usePool(poolId)
   const token = pool?.tranches.find((token) => token.index === parseInt(trancheId, 10))
   const { data: metadata } = usePoolMetadata(pool)
-
-  // const tokens: Token[] | undefined = React.useMemo(
-  //   () =>
-  //     dataTokens
-  //       ?.map((tranche) => {
-  //         return {
-  //           ...tranche,
-  //           poolId: tranche.poolId,
-  //           poolMetadata: tranche.poolMetadata,
-  //           // feeToApr is a temporary solution for calculating yield
-  //           // bc we don't have a way to query for historical token prices yet
-  //           // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
-  //           yield: tranche?.interestPerSec ? feeToApr(tranche?.interestPerSec) : '',
-  //           // for now proctection is being calculated as a percentage of the ratio
-  //           // replace with proper protection calculation when token prices are available
-  //           protection: tranche.ratio,
-  //           valueLocked: tranche.tokenPrice
-  //             ? new BN(tranche.tokenIssuance)
-  //                 .mul(new BN(tranche.tokenPrice))
-  //                 .div(new BN(10).pow(new BN(27)))
-  //                 .toString()
-  //             : '0',
-  //         }
-  //       })
-  //       .flat() || [],
-  //   [dataTokens]
-  // )
 
   const valueLocked = token?.tokenPrice
     ? new BN(token.totalIssuance)
@@ -80,9 +51,10 @@ const TokenDetail: React.FC = () => {
       value: (
         <Text variant="heading3">
           {parseInt(trancheId) > 0 ? (
-            <>
-              16.66% <Text variant="body3">minimun 15%</Text>
-            </>
+            <Text>
+              {formatPercentage(new BN(token?.ratio || ''), new BN(10).pow(new BN(27)))}{' '}
+              <Text variant="body3">minimun 15%</Text>
+            </Text>
           ) : (
             '0%'
           )}

@@ -174,7 +174,13 @@ const CreatePoolForm: React.VFC = () => {
 
   const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
     'Create pool',
-    (cent) => cent.pools.createPool
+    (cent) => cent.pools.createPool,
+    {
+      onSuccess: (args) => {
+        const [_, poolId] = args
+        history.push(`/pools/${poolId}`)
+      },
+    }
   )
 
   const form = useFormik({
@@ -251,6 +257,7 @@ const CreatePoolForm: React.VFC = () => {
       ])
 
       setSubmitting(false)
+      history.push(`/${poolId}`)
     },
   })
 

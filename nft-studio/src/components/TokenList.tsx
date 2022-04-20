@@ -3,6 +3,7 @@ import { Avatar, IconArrowDown, IconChevronRight, Shelf, Text } from '@centrifug
 import { BN } from '@polkadot/util'
 import * as React from 'react'
 import { useHistory } from 'react-router'
+import styled from 'styled-components'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, OrderBy } from './DataTable'
 
@@ -71,6 +72,7 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
       data={tokens}
       columns={columns}
       defaultSortKey="valueLocked"
+      rounded={false}
       onRowClicked={(token: Token) => {
         history.push(`/tokens/${token.poolId}/${token.index}`)
       }}
@@ -115,13 +117,22 @@ const ValueLocked: React.VFC<RowProps> = ({ token }) => {
 
 const SortableHeader: React.VFC<{ label: string; orderBy?: OrderBy }> = ({ label, orderBy }) => {
   return (
-    <Shelf>
+    <StyledHeader>
       {label}
       <IconArrowDown
-        color={orderBy ? 'textSecondary' : 'transparent'}
+        color={orderBy ? 'currentColor' : 'transparent'}
         size={16}
         style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
       />
-    </Shelf>
+    </StyledHeader>
   )
 }
+
+const StyledHeader = styled(Shelf)`
+  color: ${({ theme }) => theme.colors.textSecondary};
+
+  &:hover,
+  &:hover > svg {
+    color: ${({ theme }) => theme.colors.textInteractiveHover};
+  }
+`
