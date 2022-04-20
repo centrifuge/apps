@@ -1467,7 +1467,7 @@ export interface V2Role {
    */
   collaborators?: Array<string>
   /**
-   * description of the Job
+   *
    * @type {string}
    * @memberof V2Role
    */
@@ -1480,42 +1480,25 @@ export interface V2Role {
  */
 export interface V2SignedAttributeRequest {
   /**
-   * job status
-   * @type {boolean}
-   * @memberof V2Job
-   */
-  finished?: boolean
-  /**
-   * Job finished at. If empty, job is not complete yet
+   *
    * @type {string}
    * @memberof V2SignedAttributeRequest
    */
   label?: string
   /**
-   * overrides for the Job
-   * @type {any}
-   * @memberof V2Job
-   */
-  overrides?: any
-  /**
-   * name of the Runner
+   *
    * @type {string}
    * @memberof V2SignedAttributeRequest
    */
   payload?: string
   /**
-   * list of tasks ran under this Job
-   * @type {Array<GoceleryTask>}
-   * @memberof V2Job
-   */
-  tasks?: Array<GoceleryTask>
-  /**
-   * validity of the job
+   *
    * @type {string}
    * @memberof V2SignedAttributeRequest
    */
   type?: V2SignedAttributeRequest.TypeEnum
 }
+
 /**
  * @export
  * @namespace V2SignedAttributeRequest
@@ -1894,6 +1877,7 @@ export const AccountsApiFp = function (configuration?: Configuration) {
     },
   }
 }
+
 /**
  * AccountsApi - factory interface
  * @export
@@ -1942,6 +1926,7 @@ export const AccountsApiFactory = function (configuration?: Configuration, fetch
     },
   }
 }
+
 /**
  * AccountsApi - object-oriented interface
  * @export
