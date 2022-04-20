@@ -62,7 +62,9 @@ const TokenDetail: React.FC = () => {
             {parseInt(trancheId, 10) > 0 ? (
               <Text>
                 {formatPercentage(new BN(token?.ratio || ''), new BN(10).pow(new BN(27)))}{' '}
-                <Text variant="body3">minimun 15%</Text>
+                <Text variant="body3">
+                  minimum {formatPercentage(new BN(token?.minRiskBuffer || ''), new BN(10).pow(new BN(27)))}
+                </Text>
               </Text>
             ) : (
               '0%'
@@ -91,7 +93,10 @@ const TokenDetail: React.FC = () => {
       {pool ? (
         <>
           <PageSummary data={pageSummaryData} />
-          <PoolCard pool={pool} metadata={metadata} />
+          <Stack m="3" gap="2" as="section">
+            <Text variant="heading2">Token pool</Text>
+            <PoolCard pool={pool} metadata={metadata} />
+          </Stack>
         </>
       ) : (
         <Shelf justifyContent="center" textAlign="center">

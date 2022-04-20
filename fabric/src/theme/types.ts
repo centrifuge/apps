@@ -80,6 +80,7 @@ type TypographyValue = Partial<{
   lineHeight: ResponsiveValue<number>
   fontWeight: ResponsiveValue<number>
   color: ColorName
+  letterSpacing: ResponsiveValue<number | string>
 }>
 
 export type ThemeTypography = {

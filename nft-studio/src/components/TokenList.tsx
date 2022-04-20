@@ -12,7 +12,7 @@ export type Token = {
   yield: string
   protection: string
   valueLocked: string
-  currency: Record<string, any>
+  currency: string
   name: string
   index: number
   poolId: string
@@ -112,7 +112,7 @@ const Protection: React.VFC<RowProps> = ({ token }) => {
 }
 
 const ValueLocked: React.VFC<RowProps> = ({ token }) => {
-  return <Text variant="body2">{formatCurrencyAmount(token?.valueLocked)}</Text>
+  return <Text variant="body2">{formatCurrencyAmount(token?.valueLocked, token.currency)}</Text>
 }
 
 const SortableHeader: React.VFC<{ label: string; orderBy?: OrderBy }> = ({ label, orderBy }) => {
