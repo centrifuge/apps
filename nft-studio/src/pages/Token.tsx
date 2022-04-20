@@ -23,46 +23,57 @@ const TokenDetail: React.FC = () => {
     params: { pid: poolId, tid: trancheId },
   } = useRouteMatch<{ pid: string; tid: string }>()
   const pool = usePool(poolId)
-  const token = pool?.tranches.find((token) => token.index === parseInt(trancheId, 10))
   const { data: metadata } = usePoolMetadata(pool)
 
-  const valueLocked = token?.tokenPrice
-    ? new BN(token.totalIssuance)
-        .mul(new BN(token.tokenPrice))
-        .div(new BN(10).pow(new BN(27)))
-        .toString()
-    : '0'
+  const token = React.useMemo(
+    () => pool?.tranches.find((token) => token.index === parseInt(trancheId, 10)),
+    [pool, trancheId]
+  )
 
-  const pageSummaryData = [
-    {
-      label: <Tooltips type="assetClass" />,
-      value: metadata?.pool?.asset.class,
-    },
-    {
-      label: <Tooltips type="apy" />,
-      value: (
-        <Text variant="heading3">
-          {feeToApr(token?.interestPerSec || '')}% <Text variant="body3">target</Text>
-        </Text>
-      ),
-    },
-    {
-      label: <Tooltips type="protection" />,
-      value: (
-        <Text variant="heading3">
-          {parseInt(trancheId) > 0 ? (
-            <Text>
-              {formatPercentage(new BN(token?.ratio || ''), new BN(10).pow(new BN(27)))}{' '}
-              <Text variant="body3">minimun 15%</Text>
-            </Text>
-          ) : (
-            '0%'
-          )}
-        </Text>
-      ),
-    },
-    { label: <Tooltips type="valueLocked" />, value: `${formatCurrencyAmount(valueLocked, pool?.currency)}` },
-  ]
+  const valueLocked = React.useMemo(
+    () =>
+      token?.tokenPrice
+        ? new BN(token.totalIssuance)
+            .mul(new BN(token.tokenPrice))
+            .div(new BN(10).pow(new BN(27)))
+            .toString()
+        : '0',
+    [token]
+  )
+
+  const pageSummaryData = React.useMemo(
+    () => [
+      {
+        label: <Tooltips type="assetClass" />,
+        value: metadata?.pool?.asset.class,
+      },
+      {
+        label: <Tooltips type="apy" />,
+        value: (
+          <Text variant="heading3">
+            {feeToApr(token?.interestPerSec || '')}% <Text variant="body3">target</Text>
+          </Text>
+        ),
+      },
+      {
+        label: <Tooltips type="protection" />,
+        value: (
+          <Text variant="heading3">
+            {parseInt(trancheId, 10) > 0 ? (
+              <Text>
+                {formatPercentage(new BN(token?.ratio || ''), new BN(10).pow(new BN(27)))}{' '}
+                <Text variant="body3">minimun 15%</Text>
+              </Text>
+            ) : (
+              '0%'
+            )}
+          </Text>
+        ),
+      },
+      { label: <Tooltips type="valueLocked" />, value: `${formatCurrencyAmount(valueLocked, pool?.currency)}` },
+    ],
+    [metadata, token, pool, trancheId, valueLocked]
+  )
 
   return (
     <Stack gap={0} flex={1} mb="6">
@@ -73,7 +84,7 @@ const TokenDetail: React.FC = () => {
         icon={
           <Avatar
             size="large"
-            label={metadata?.tranches?.find((_, index) => index === parseInt(trancheId))?.symbol || ''}
+            label={metadata?.tranches?.find((_, index) => index === parseInt(trancheId, 10))?.symbol || ''}
           />
         }
       />

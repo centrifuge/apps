@@ -1,8 +1,10 @@
-import { Pool } from '@centrifuge/centrifuge-js'
+import { formatCurrencyAmount, Pool } from '@centrifuge/centrifuge-js'
 import { Avatar, Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
+import { useLoans } from '../utils/useLoans'
 import { PoolMetadata } from '../utils/usePools'
 import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'
 import { AnchorPillButton } from './PillButton'
@@ -13,16 +15,41 @@ type PoolCardProps = {
   metadata?: Partial<PoolMetadata>
 }
 
-const poolCardSummaryData = [
-  { label: <Tooltips type="valueLocked" variant="lowercase" />, value: '15M kUSD' },
-  { label: <Tooltips type="age" variant="lowercase" />, value: '10 Months' },
-  { label: <Tooltips type="averageAssetMaturity" variant="lowercase" />, value: '12.3 Months' },
-]
-
 export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
-  console.log('🚀 ~ pool', pool)
   const theme = useTheme()
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
+  const loans = useLoans(pool.id)
+  console.log('🚀 ~ loans', loans)
+
+  // const ongoingAssets = loans ? loans.filter((asset) => asset.status && asset.status === 'ongoing') : undefined
+  // const ongoingAssetsWithEnoughData = ongoingAssets
+  // ? ongoingAssets.filter(
+  //     (asset) => asset.interestRate && asset.maturityDate && asset.financingDate && asset.debt && !asset.debt.isZero()
+  //   )
+  // : undefined
+
+  // const avgMaturity = ongoingAssetsWithEnoughData?.length
+  // ? ongoingAssetsWithEnoughData
+  //     .filter((asset) => asset.maturityDate && asset.financingDate)
+  //     .reduce((sum, asset) => {
+  //       const a =
+  //         sum +
+  //         (((asset.maturityDate! - asset.financingDate!) / SecondsInDay) * Number(asset.debt.toString())) / 10 ** 18
+  //       return a
+  //     }, 0) / totalOutstandingNum!
+  // : undefined
+
+  const poolCardSummaryData = React.useMemo(
+    () => [
+      {
+        label: <Tooltips type="valueLocked" variant="lowercase" />,
+        value: formatCurrencyAmount(new BN(pool.nav.latest).add(new BN(pool.reserve.total)).toString()),
+      },
+      { label: <Tooltips type="age" variant="lowercase" />, value: '10 Months' },
+      { label: <Tooltips type="averageAssetMaturity" variant="lowercase" />, value: '12.3 Months' },
+    ],
+    [pool]
+  )
 
   return (
     <Stack m="3" gap="2">
@@ -37,7 +64,7 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
           }}
         >
           {metadata?.pool?.icon ? (
-            <img src={parseMetadataUrl(metadata?.pool?.icon || '')} height="24" width="24" />
+            <img src={parseMetadataUrl(metadata?.pool?.icon || '')} alt="" height="24" width="24" />
           ) : (
             <Avatar type="pool" label="LP" size="small" />
           )}
