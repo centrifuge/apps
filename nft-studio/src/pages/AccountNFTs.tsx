@@ -6,6 +6,7 @@ import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
+import { useAddress } from '../utils/useAddress'
 import { useCollections } from '../utils/useCollections'
 import { useAccountNfts } from '../utils/useNFTs'
 
@@ -20,8 +21,9 @@ export const AccountNFTsPage: React.FC = () => {
 const COUNT_PER_PAGE = 16
 
 const AccountNFTs: React.FC = () => {
-  const { selectedAccount, isConnecting, connect } = useWeb3()
-  const nfts = useAccountNfts(selectedAccount?.address)
+  const { isConnecting, connect } = useWeb3()
+  const address = useAddress()
+  const nfts = useAccountNfts(address)
   const collections = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const centrifuge = useCentrifuge()
@@ -38,7 +40,7 @@ const AccountNFTs: React.FC = () => {
     [nfts]
   )
 
-  if (!selectedAccount) {
+  if (!address) {
     return (
       <Shelf justifyContent="center">
         <Button onClick={() => connect()} loading={isConnecting}>

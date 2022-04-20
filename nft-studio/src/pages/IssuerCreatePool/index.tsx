@@ -257,7 +257,6 @@ const CreatePoolForm: React.VFC = () => {
       ])
 
       setSubmitting(false)
-      history.push(`/${poolId}`)
     },
   })
 

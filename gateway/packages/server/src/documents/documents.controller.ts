@@ -57,7 +57,7 @@ export class DocumentsController {
       document.header.document_id
     )
 
-    const updated = await this.centrifugeService.pullForJobComplete(commitResult.header.job_id, user.account)
+    const { jobStatus } = await this.centrifugeService.pullForJobComplete(commitResult.header.job_id, user.account)
 
     const updatedDocs = await this.databaseService.documents.update(
       {
@@ -66,7 +66,7 @@ export class DocumentsController {
       },
       {
         $set: {
-          document_status: updated.finished ? DocumentStatus.Created : DocumentStatus.CreationFail,
+          document_status: jobStatus ? DocumentStatus.Created : DocumentStatus.CreationFail,
         },
       },
       {

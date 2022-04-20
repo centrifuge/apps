@@ -21,7 +21,6 @@ export default defineConfig({
     // resolve every package version to the one in this projects package.json
     dedupe: ['styled-components', 'react', 'styled-system', '@polkadot/util-crypto', '@polkadot/api'],
   },
-  server: { port: 8888 },
   plugins: [
     react({
       babel: {
