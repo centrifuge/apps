@@ -26,8 +26,7 @@ import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { usePermissions } from '../utils/usePermissions'
-import { useOrder, usePendingCollect, usePool, usePoolMetadata } from '../utils/usePools'
-import { ButtonGroup } from './ButtonGroup'
+import { usePendingCollect, usePool, usePoolMetadata } from '../utils/usePools'
 import { LoadBoundary } from './LoadBoundary'
 import { Spinner } from './Spinner'
 import { AnchorTextLink } from './TextLink'
@@ -59,9 +58,9 @@ function getBalanceDec(balances: Balances, currency: string) {
   return Dec(entry.balance).div('1e18')
 }
 
-function min(...nums: Decimal[]) {
-  return nums.reduce((a, b) => (a.greaterThan(b) ? b : a))
-}
+// function min(...nums: Decimal[]) {
+//   return nums.reduce((a, b) => (a.greaterThan(b) ? b : a))
+// }
 
 function inputToNumber(num: number | Decimal | '') {
   return num instanceof Decimal ? num.toNumber() : num || 0
@@ -70,7 +69,7 @@ function inputToDecimal(num: number | Decimal | string) {
   return Dec(num || 0)
 }
 
-function validateNumberInput(value: number | string, min: number | Decimal, max?: number | Decimal) {
+function validateNumberInput(value: number | string | Decimal, min: number | Decimal, max?: number | Decimal) {
   if (value === '') {
     return 'Not a valid number'
   }
@@ -185,9 +184,10 @@ type InvestFormProps = {
   poolId: string
   trancheId: number
   onCancel?: () => void
+  hasInvestment?: boolean
 }
 
-const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel }) => {
+const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, hasInvestment }) => {
   const address = useAddress()
   const balances = useBalances(address)
   const order = usePendingCollect(poolId, trancheId, address)
@@ -227,8 +227,12 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel })
   // const investmentCapacity = min(maxReserve.minus(totalReserve)) // TODO: check risk buffer and outstanding invest orders
   // const needsToCollect = order?.payoutCurrencyAmount !== '0' || order?.payoutTokenAmount !== '0'
   const hasPendingOrder = !pendingInvest.isZero()
+  // const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(investmentCapacity)
 
-  const form = useFormik({
+  const loadingMessage =
+    lastCreatedTransaction?.status === 'pending' ? 'Awaiting confirmation...' : 'Signing transaction...'
+
+  const form = useFormik<{ amount: number | Decimal }>({
     initialValues: {
       amount: 0,
     },
@@ -249,11 +253,6 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel })
       return errors
     },
   })
-
-  // const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(investmentCapacity)
-
-  const loadingMessage =
-    lastCreatedTransaction?.status === 'pending' ? 'Awaiting confirmation...' : 'Signing transaction...'
 
   function renderInput(cancelCb?: () => void) {
     return (
@@ -279,7 +278,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel })
             Full amount covered by investment capacity ✓
           </Text>
         )} */}
-        {form.values.amount ? (
+        {inputToNumber(form.values.amount) > 0 ? (
           <Stack px={2} gap="4px">
             <Shelf justifyContent="space-between">
               <Text variant="body3">Token amount</Text>
@@ -290,9 +289,11 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel })
               </TextWithPlaceholder>
             </Shelf>
 
-            <Text variant="body3" color="textSecondary">
-              The investment amount will be locked and executed at the end of the current epoch.
-            </Text>
+            {!hasInvestment && (
+              <Text variant="body3" color="textSecondary">
+                The investment amount will be locked and executed at the end of the current epoch.
+              </Text>
+            )}
           </Stack>
         ) : null}
         <Stack px={1} gap={1}>
@@ -315,63 +316,26 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel })
     )
   }
 
-  function renderPendingOrder() {
-    return (
-      <Stack gap={2}>
-        <Stack gap="1px">
-          <Stack
-            p={2}
-            gap={1}
-            backgroundColor="secondarySelectedBackground"
-            borderTopLeftRadius="card"
-            borderTopRightRadius="card"
-          >
-            <Shelf gap={1}>
-              <IconClock size="iconSmall" />
-              <Text variant="body2" fontWeight={600}>
-                {pendingInvest.toFixed(0)} {getCurrencySymbol(pool?.currency)} investment locked
-              </Text>
-            </Shelf>
-            <Text variant="body3">
-              Locked investments are executed at the end of the epoch ({getEpochHoursRemaining(pool!)} hrs remaining).{' '}
-              <br />
-              <AnchorTextLink href="about:blank">Learn more</AnchorTextLink>
-            </Text>
-          </Stack>
-          <Grid gap="1px" columns={2} equalColumns>
-            <LightButton
-              type="button"
-              $left
-              onClick={() => doCancel([poolId, trancheId, new BN(0)])}
-              disabled={isLoadingCancel}
-            >
-              <VisualButton variant="text" loading={isLoadingCancel} small>
-                Cancel
-              </VisualButton>
-            </LightButton>
-            <LightButton
-              type="button"
-              onClick={() => {
-                form.resetForm()
-                setChangeOrderFormShown(true)
-              }}
-              disabled={isLoadingCancel}
-            >
-              <VisualButton variant="text" small>
-                Change order
-              </VisualButton>
-            </LightButton>
-          </Grid>
-        </Stack>
-        <TransactionsLink />
-      </Stack>
-    )
-  }
-
   return (
     <FormikProvider value={form}>
       <Form noValidate>
-        {changeOrderFormShown ? renderInput() : hasPendingOrder ? renderPendingOrder() : renderInput(onCancel)}
+        {changeOrderFormShown ? (
+          renderInput()
+        ) : hasPendingOrder ? (
+          <PendingOrder
+            type="invest"
+            pool={pool!}
+            amount={pendingInvest}
+            onCancelOrder={() => doCancel([poolId, trancheId, new BN(0)])}
+            isCancelling={isLoadingCancel}
+            onChangeOrder={() => {
+              form.resetForm()
+              setChangeOrderFormShown(true)
+            }}
+          />
+        ) : (
+          renderInput(onCancel)
+        )}
       </Form>
     </FormikProvider>
   )
@@ -380,32 +344,39 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel })
 type RedeemFormProps = {
   poolId: string
   trancheId: number
-  onCancel?: () => void
+  onCancel: () => void
 }
 
 const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel }) => {
   const address = useAddress()
-  const order = useOrder(poolId, trancheId, address)
   const balances = useBalances(address)
+  const order = usePendingCollect(poolId, trancheId, address)
   const pool = usePool(poolId)
+  const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
+  const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
 
-  const { data: metadata } = usePoolMetadata(pool)
   const tranche = pool?.tranches[trancheId]
-  const balance = Dec(
+  const collectedBalance = Dec(
     balances?.tranches.find((b) => b.poolId === poolId && b.trancheId === trancheId)?.balance ?? 0
   ).div('1e18')
-  const pendingRedeem = Dec(order?.redeem ?? 0).div('1e18')
+  const uncollectedBalance = Dec(order?.payoutTokenAmount ?? '0').div('1e18')
+  const balance = collectedBalance.add(uncollectedBalance)
   const price = Dec(tranche?.tokenPrice ?? 0).div('1e27')
+  const maxRedeem = balance.mul(price)
+  const pendingRedeem = Dec(order?.remainingRedeemToken ?? '0').div('1e18')
+  const tokenSymbol = metadata?.tranches?.[trancheId]?.symbol ?? ''
 
-  const { execute: doRedeemTransaction, isLoading } = useCentrifugeTransaction(
-    'Invest',
-    (cent) => cent.pools.updateRedeemOrder,
-    {
-      onSuccess: () => {
-        form.resetForm()
-      },
-    }
-  )
+  if (pool && !tranche) throw new Error('Nonexistent tranche')
+
+  const {
+    execute: doRedeemTransaction,
+    isLoading,
+    lastCreatedTransaction,
+  } = useCentrifugeTransaction('Redeem', (cent) => cent.pools.updateRedeemOrder, {
+    onSuccess: () => {
+      form.resetForm()
+    },
+  })
   const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
     'Cancel order',
     (cent) => cent.pools.updateRedeemOrder,
@@ -416,108 +387,118 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
     }
   )
 
-  const { execute: doCollect, isLoading: isLoadingCollect } = useCentrifugeTransaction(
-    'Collect',
-    (cent) => cent.pools.collect
-  )
+  // const availableReserve = Dec(pool?.reserve.available ?? '0').div('1e18')
+  // const redeemCapacity = min(availableReserve.div(price)) // TODO: check risk buffer
+  // const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(redeemCapacity)
+  const hasPendingOrder = !pendingRedeem.isZero()
 
-  if (pool && !tranche) throw new Error('Nonexistent tranche')
+  const loadingMessage =
+    lastCreatedTransaction?.status === 'pending' ? 'Awaiting confirmation...' : 'Signing transaction...'
 
-  const availableReserve = Dec(pool?.reserve.available ?? '0').div('1e18')
-  const redeemCapacity = min(availableReserve.div(price)) // TODO: check risk buffer
-  const needsToCollect =
-    order && pool && order.epoch <= pool.epoch.lastExecuted && order.epoch > 0 && order.redeem !== '0'
-
-  const form = useFormik({
+  /**
+   * The form field for amount is in the pool currency, but redeem orders are placed by passing an amount of tranche tokens to redeem.
+   * When submitting the form, the amount gets divided by the price to get the amount of tranche tokens to redeem.
+   * When clicking on the "max" button in the input box, we set the amount to a Decimal representing the number of tranche tokens the user has.
+   * This to avoid possibly losing precision if we were to convert it to the pool currency and then back again when submitting the form.
+   */
+  const form = useFormik<{ amount: number | Decimal }>({
     initialValues: {
       amount: 0,
     },
     onSubmit: (values, actions) => {
-      const amount = Dec(values.amount).mul('1e18').toString()
+      const amount = (values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price))
+        .mul('1e18')
+        .toFixed(0)
+      console.log('amount', amount)
       doRedeemTransaction([poolId, trancheId, new BN(amount)])
       actions.setSubmitting(false)
     },
     validate: (values) => {
       const errors: FormikErrors<InvestValues> = {}
 
-      if (validateNumberInput(values.amount, 0, balance)) {
-        errors.amount = validateNumberInput(values.amount, 0, balance)
+      if (!(values.amount instanceof Decimal) && validateNumberInput(values.amount, 0, maxRedeem)) {
+        errors.amount = validateNumberInput(values.amount, 0, maxRedeem)
+      } else if (hasPendingOrder && inputToDecimal(values.amount).eq(pendingRedeem)) {
+        errors.amount = 'Equals current order'
       }
 
       return errors
     },
   })
 
-  const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(redeemCapacity)
+  function renderInput(cancelCb?: () => void) {
+    return (
+      <Stack gap={2}>
+        <Field name="amount">
+          {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
+            <CurrencyInput
+              {...fieldProps}
+              value={value instanceof Decimal ? value.mul(price).toNumber() : value}
+              errorMessage={meta.touched ? meta.error : undefined}
+              label="Amount"
+              type="number"
+              min="0"
+              disabled={isLoading || isLoadingCancel}
+              onSetMax={() => form.setFieldValue('amount', balance)}
+              currency={getCurrencySymbol(pool?.currency)}
+            />
+          )}
+        </Field>
+        {inputToNumber(form.values.amount) > 0 ? (
+          <Stack px={2} gap="4px">
+            <Shelf justifyContent="space-between">
+              <Text variant="body3">Token amount</Text>
+              <TextWithPlaceholder variant="body3" isLoading={isMetadataLoading} width={12} variance={0}>
+                {price.isZero()
+                  ? `~ ∞ ${tokenSymbol}`
+                  : `~${formatBalance(
+                      form.values.amount instanceof Decimal ? form.values.amount : Dec(form.values.amount).div(price),
+                      tokenSymbol
+                    )}`}
+              </TextWithPlaceholder>
+            </Shelf>
+          </Stack>
+        ) : null}
+        <Stack px={1} gap={1}>
+          <Button
+            type="submit"
+            variant="containedSecondary"
+            disabled={!form.isValid}
+            loading={isLoading}
+            loadingMessage={loadingMessage}
+          >
+            Redeem
+          </Button>
+          {cancelCb && (
+            <Button variant="outlined" onClick={cancelCb}>
+              Cancel
+            </Button>
+          )}
+        </Stack>
+      </Stack>
+    )
+  }
 
   return (
     <FormikProvider value={form}>
       <Form noValidate>
-        <Stack gap={3}>
-          <Stack>
-            <Field name="amount">
-              {({ field: { value, ...fieldProps } }: any) => (
-                <CurrencyInput
-                  {...fieldProps}
-                  value={value instanceof Decimal ? value.toNumber() : value}
-                  label="Amount"
-                  type="number"
-                  min="0"
-                  disabled={isLoading || isLoadingCancel || isLoadingCollect}
-                  onSetMax={() => form.setFieldValue('amount', balance)}
-                />
-              )}
-            </Field>
-          </Stack>
-          {inputToNumber(form.values.amount) > 0 && inputAmountCoveredByCapacity && (
-            <Text variant="label2" color="statusOk">
-              Full amount covered by pool reserve ✓
-            </Text>
-          )}
-          {pendingRedeem.isZero() ? (
-            <ButtonGroup>
-              <Button type="submit" disabled={!form.isValid} loading={isLoading}>
-                Redeem
-              </Button>
-            </ButtonGroup>
-          ) : needsToCollect ? (
-            <>
-              <Box backgroundColor="backgroundSecondary" p={2}>
-                <Text>you need to collect before you can make another redeem order</Text>
-              </Box>
-              <ButtonGroup>
-                <Button onClick={() => doCollect([poolId, trancheId])} loading={isLoadingCollect}>
-                  Collect
-                </Button>
-              </ButtonGroup>
-            </>
-          ) : (
-            <>
-              <Box backgroundColor="backgroundSecondary" p={2}>
-                <Text>
-                  you have{' '}
-                  <Text fontWeight={600}>
-                    {pendingRedeem.toFixed(0)} {metadata?.tranches?.[trancheId]?.symbol ?? ''}
-                  </Text>{' '}
-                  pending redemption
-                </Text>
-              </Box>
-              <ButtonGroup>
-                <Button type="submit" disabled={!form.isValid} loading={isLoading}>
-                  Update
-                </Button>
-                <Button
-                  onClick={() => {
-                    doCancel([poolId, trancheId, new BN(0)])
-                  }}
-                  loading={isLoadingCancel}
-                >
-                  Cancel order
-                </Button>
-              </ButtonGroup>
-            </>
-          )}
-        </Stack>
+        {changeOrderFormShown ? (
+          renderInput()
+        ) : hasPendingOrder ? (
+          <PendingOrder
+            type="redeem"
+            pool={pool!}
+            amount={pendingRedeem}
+            onCancelOrder={() => doCancel([poolId, trancheId, new BN(0)])}
+            isCancelling={isLoadingCancel}
+            onChangeOrder={() => {
+              form.resetForm()
+              setChangeOrderFormShown(true)
+            }}
+          />
+        ) : (
+          renderInput(onCancel)
+        )}
       </Form>
     </FormikProvider>
   )
@@ -561,14 +542,60 @@ const LightButton = styled.button<{ $left?: boolean }>(
     border: 0,
     appearance: 'none',
     height: 36,
+    cursor: 'pointer',
   },
   (props) =>
     css({
       borderBottomLeftRadius: props.$left ? 'card' : undefined,
       borderBottomRightRadius: props.$left ? undefined : 'card',
       backgroundColor: 'secondarySelectedBackground',
-      // '&:hover, &:focus-visible': {
-      //   color: 'textSelected'
-      // }
     })
 )
+
+const PendingOrder: React.FC<{
+  type: 'invest' | 'redeem'
+  amount: Decimal
+  pool: DetailedPool
+  onCancelOrder: () => void
+  isCancelling: boolean
+  onChangeOrder: () => void
+}> = ({ type, amount, pool, onCancelOrder, isCancelling, onChangeOrder }) => {
+  return (
+    <Stack gap={2}>
+      <Stack gap="1px">
+        <Stack
+          p={2}
+          gap={1}
+          backgroundColor="secondarySelectedBackground"
+          borderTopLeftRadius="card"
+          borderTopRightRadius="card"
+        >
+          <Shelf gap={1}>
+            <IconClock size="iconSmall" />
+            <Text variant="body2" fontWeight={600}>
+              {formatBalance(amount, pool.currency)} {type === 'invest' ? 'investment' : 'redemption'} locked
+            </Text>
+          </Shelf>
+          <Text variant="body3">
+            Locked {type === 'invest' ? 'investments' : 'redemptions'} are executed at the end of the epoch (
+            {getEpochHoursRemaining(pool!)} hrs remaining).{' '}
+            <AnchorTextLink href="about:blank">Learn more</AnchorTextLink>
+          </Text>
+        </Stack>
+        <Grid gap="1px" columns={2} equalColumns>
+          <LightButton type="button" $left onClick={onCancelOrder} disabled={isCancelling}>
+            <VisualButton variant="text" loading={isCancelling} small>
+              Cancel
+            </VisualButton>
+          </LightButton>
+          <LightButton type="button" onClick={onChangeOrder} disabled={isCancelling}>
+            <VisualButton variant="text" small>
+              Change order
+            </VisualButton>
+          </LightButton>
+        </Grid>
+      </Stack>
+      <TransactionsLink />
+    </Stack>
+  )
+}

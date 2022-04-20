@@ -10,6 +10,8 @@ export function getCurrencySymbol(currency?: string) {
 }
 
 export function formatBalance(amount: Decimal | number, currency?: string) {
-  const formattedAmount = (amount instanceof Decimal ? amount.toNumber() : amount).toLocaleString('en')
+  const formattedAmount = (amount instanceof Decimal ? amount.toNumber() : amount).toLocaleString('en', {
+    maximumFractionDigits: 0,
+  })
   return currency ? `${formattedAmount} ${getCurrencySymbol(currency)}` : formattedAmount
 }
