@@ -9,12 +9,12 @@ import { ConnectButton } from '../components/ConnectButton'
 import { InvestRedeemDialog } from '../components/InvestRedeemDialog'
 import { LabelValueList } from '../components/LabelValueList'
 import { PageHeader } from '../components/PageHeader'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 
-export const TokenPage: React.FC = () => {
+export const InvestmentsTokenPage: React.FC = () => {
   return (
     <PageWithSideBar>
       <Token />
@@ -25,8 +25,8 @@ export const TokenPage: React.FC = () => {
 const Token: React.FC = () => {
   const { pid: poolId, tid } = useParams<{ pid: string; tid: string }>()
   const address = useAddress()
-  const { data: balances } = useBalances(address)
-  const { data: pool } = usePool(poolId)
+  const balances = useBalances(address)
+  const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const centrifuge = useCentrifuge()
   const trancheId = Number(tid)

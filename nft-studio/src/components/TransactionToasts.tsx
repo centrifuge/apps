@@ -1,6 +1,5 @@
 import { AnchorButton, IconExternalLink, Stack, Toast, ToastStatus } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useTheme } from 'styled-components'
 import { useTransactions } from './TransactionsProvider'
 
 const toastStatus: { [key: string]: ToastStatus } = {
@@ -23,21 +22,11 @@ const TOAST_DURATION = 5000
 
 export const TransactionToasts: React.FC = () => {
   const { transactions, updateTransaction } = useTransactions()
-  const {
-    sizes: { navBarHeight, navBarHeightMobile },
-  } = useTheme()
 
   const dismiss = (txId: string) => () => updateTransaction(txId, { dismissed: true })
 
   return (
-    <Stack
-      width={330}
-      gap={2}
-      position="fixed"
-      top={[navBarHeightMobile, navBarHeightMobile, navBarHeight]}
-      right={1}
-      zIndex={11}
-    >
+    <Stack width={330} gap={2} position="fixed" top={80} right={1} zIndex={11}>
       {transactions
         .filter((tx) => !tx.dismissed && !['creating', 'unconfirmed'].includes(tx.status))
         .map((tx) => (
@@ -56,7 +45,7 @@ export const TransactionToasts: React.FC = () => {
                 <AnchorButton
                   variant="text"
                   target="_blank"
-                  href={`${process.env.REACT_APP_SUBSCAN_URL}/extrinsic/${tx.hash}`}
+                  href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${tx.hash}`}
                   icon={IconExternalLink}
                 />
               ) : undefined

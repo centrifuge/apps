@@ -1,14 +1,12 @@
-import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
-import { useQueryClient } from 'react-query'
 import { Dec } from '../utils/Decimal'
 import { useAddress } from '../utils/useAddress'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useNFT } from '../utils/useNFTs'
 import { ButtonGroup } from './ButtonGroup'
-import { Dialog } from './Dialog'
 
 type Props = {
   open: boolean
@@ -20,9 +18,8 @@ type Props = {
 const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
-  const queryClient = useQueryClient()
   const address = useAddress()
-  const { data: balance } = useBalance()
+  const balance = useBalance()
   const nft = useNFT(collectionId, nftId)
 
   const isConnected = !!address
@@ -32,12 +29,7 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
     lastCreatedTransaction,
-  } = useCentrifugeTransaction('Buy NFT', (cent) => cent.nfts.buyNft, {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['nfts', collectionId])
-      queryClient.invalidateQueries(['accountNfts', address])
-    },
-  })
+  } = useCentrifugeTransaction('Buy NFT', (cent) => cent.nfts.buyNft)
 
   React.useEffect(() => {
     if (lastCreatedTransaction?.status === 'pending') {

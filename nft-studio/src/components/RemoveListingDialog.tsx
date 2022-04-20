@@ -1,12 +1,10 @@
-import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useQueryClient } from 'react-query'
 import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useNFT } from '../utils/useNFTs'
 import { ButtonGroup } from './ButtonGroup'
 import { useCentrifuge } from './CentrifugeProvider'
-import { Dialog } from './Dialog'
 import { useWeb3 } from './Web3Provider'
 
 type Props = {
@@ -19,9 +17,8 @@ type Props = {
 const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
-  const queryClient = useQueryClient()
   const { selectedAccount } = useWeb3()
-  const { data: balance } = useBalance()
+  const balance = useBalance()
   const centrifuge = useCentrifuge()
   const nft = useNFT(collectionId, nftId)
 
@@ -32,11 +29,7 @@ export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collection
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
     lastCreatedTransaction,
-  } = useCentrifugeTransaction('Remove NFT listing', (cent) => cent.nfts.removeNftListing, {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['nfts', collectionId])
-    },
-  })
+  } = useCentrifugeTransaction('Remove NFT listing', (cent) => cent.nfts.removeNftListing)
 
   React.useEffect(() => {
     if (lastCreatedTransaction?.status === 'pending') {

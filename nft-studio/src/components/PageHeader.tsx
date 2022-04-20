@@ -1,129 +1,82 @@
-import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
-import css from '@styled-system/css'
+import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Link, NavLink } from 'react-router-dom'
-import styled from 'styled-components'
-import logoUrl from '../assets/images/altair-wordmark-light.svg'
+import { useTheme } from 'styled-components'
 import { ContextActions } from './ContextActions'
-import { useDebugFlags } from './DebugFlags'
-import { PAGE_PX } from './shared/PageWithSideBar'
 import { RouterTextLink } from './TextLink'
 
 type Props = {
-  title: string
+  title: React.ReactNode
   titleAddition?: React.ReactNode
   subtitle?: React.ReactNode
   subtitleLink?: {
     to: string
     label: string
   }
+  pretitle?: string
   parent?: {
     to: string
     label: string
   }
   actions?: React.ReactNode
+  icon?: React.ReactNode
   walletShown?: boolean
+  border?: boolean
 }
-
-const BackLink = styled(Link)(
-  css({
-    position: 'relative',
-    color: 'accentPrimary',
-    '&:visited': {
-      color: 'accentPrimary',
-    },
-  })
-)
-
-const AnchorHover = styled(NavLink)(
-  css({
-    '.AnchorHoverText:hover': {
-      color: 'accentPrimary',
-    },
-  })
-)
 
 export const PageHeader: React.FC<Props> = ({
   title,
   titleAddition,
   subtitle,
   subtitleLink,
-  parent,
+  pretitle,
+  icon,
   actions,
-  walletShown = true,
+  walletShown,
+  border = true,
 }) => {
-  const showOnlyNFT = useDebugFlags().showOnlyNFT
+  const theme = useTheme()
 
-  if (showOnlyNFT) {
-    return (
-      <Shelf
-        as="header"
-        position="sticky"
-        top="0"
-        height="80px"
-        alignItems="center"
-        backgroundColor="backgroundPage"
-        bleedX={PAGE_PX}
-        px={PAGE_PX}
-        borderBottomColor="borderPrimary"
-        borderBottomWidth="1px"
-        borderBottomStyle="solid"
-        zIndex={10}
-      >
-        <Box flex="1">
-          <NavLink to="/">
-            <img src={logoUrl} alt="" height="48px" width="60px" />
-          </NavLink>
-        </Box>
-        <AnchorHover to="/nfts">
-          <Text className="AnchorHoverText" variant="heading2">
-            NFT Playground
-          </Text>
-        </AnchorHover>
-        <Shelf flex="1" justifyContent="flex-end">
-          <ContextActions actions={actions} walletShown={walletShown} />
-        </Shelf>
-      </Shelf>
-    )
-  }
   return (
-    <Shelf as="header" justifyContent="space-between" alignItems="flex-start" position="sticky" top="24px">
-      <Box
-        position="absolute"
-        top="-24px"
-        bottom={0}
-        right="-12px"
-        left="-12px"
-        zIndex={-1}
-        backgroundColor="backgroundPage"
-      />
-
-      <Stack gap={1}>
-        <Shelf minHeight={20}>
-          {parent && (
-            <Text variant="interactive1">
-              <BackLink to={parent.to}>{parent.label}</BackLink>
+    <Shelf
+      as="header"
+      justifyContent="space-between"
+      alignItems="flex-start"
+      position="sticky"
+      top={0}
+      backgroundColor="backgroundPage"
+      style={{
+        boxShadow: border ? `0 1px 0 ${theme.colors.borderSecondary}` : undefined,
+      }}
+      zIndex={4}
+      p={3}
+    >
+      <Shelf gap={2}>
+        {icon}
+        <Stack gap={0}>
+          {pretitle && (
+            <Text variant="label2" color="textPrimary" style={{ textTransform: 'uppercase' }}>
+              {pretitle}
             </Text>
           )}
-        </Shelf>
-        <Shelf gap={1}>
-          <Text variant="heading2" as="h1" style={{ wordBreak: 'break-word' }}>
-            {title}
-          </Text>
-          {titleAddition}
-        </Shelf>
-        {subtitle && (
-          <Text variant="heading6" fontWeight={500}>
-            {subtitle}
-            {subtitleLink && (
-              <>
-                {' '}
-                • <RouterTextLink to={subtitleLink.to}>{subtitleLink.label}</RouterTextLink>
-              </>
-            )}
-          </Text>
-        )}
-      </Stack>
+          <Shelf gap={1}>
+            <Text variant="heading1" as="h1" style={{ wordBreak: 'break-word' }}>
+              {title}
+            </Text>
+            {titleAddition}
+          </Shelf>
+          {subtitle && (
+            <Text variant="heading6">
+              {subtitle}
+              {subtitleLink && (
+                <>
+                  {' '}
+                  • <RouterTextLink to={subtitleLink.to}>{subtitleLink.label}</RouterTextLink>
+                </>
+              )}
+            </Text>
+          )}
+        </Stack>
+      </Shelf>
 
       <ContextActions actions={actions} walletShown={walletShown} />
     </Shelf>

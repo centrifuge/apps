@@ -1,9 +1,19 @@
-import { Box, Button, Checkbox, FileUpload, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  Checkbox,
+  Dialog,
+  FileUpload,
+  Shelf,
+  Stack,
+  Text,
+  TextAreaInput,
+  TextInput,
+} from '@centrifuge/fabric'
 import React, { useEffect, useState } from 'react'
 import { useQueryClient } from 'react-query'
 import { Redirect } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
-import { Dialog } from '../components/Dialog'
 import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
 import { createCollectionMetadata } from '../utils/createCollectionMetadata'
@@ -27,7 +37,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   const [description, setDescription] = useState<string>('')
   const [logo, setLogo] = useState<File | null>(null)
   const cent = useCentrifuge()
-  const { data: balance } = useBalance()
+  const balance = useBalance()
   const [redirect, setRedirect] = useState<string>('')
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
@@ -41,8 +51,6 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     isLoading: transactionIsPending,
   } = useCentrifugeTransaction('Create collection', (cent) => cent.nfts.createCollection, {
     onSuccess: ([collectionId]) => {
-      queryClient.invalidateQueries('collections')
-      queryClient.invalidateQueries('balance')
       setRedirect(`/collection/${collectionId}`)
     },
   })

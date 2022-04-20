@@ -22,7 +22,7 @@ type IconProps = {
 }
 
 export type VisualButtonProps = React.PropsWithChildren<{
-  variant?: 'contained' | 'outlined' | 'text'
+  variant?: 'contained' | 'containedSecondary' | 'outlined' | 'text'
   small?: boolean
   icon?: React.ComponentType<IconProps> | React.ReactElement
   iconRight?: React.ComponentType<IconProps> | React.ReactElement
@@ -32,7 +32,7 @@ export type VisualButtonProps = React.PropsWithChildren<{
 }>
 
 type StyledProps = {
-  $variant?: 'contained' | 'outlined' | 'text'
+  $variant?: 'contained' | 'containedSecondary' | 'outlined' | 'text'
   $small?: boolean
   $disabled?: boolean
   $active?: boolean
@@ -52,14 +52,26 @@ export const StyledButton = styled.span<StyledProps>(
     userSelect: 'none',
   },
   ({ $variant, $disabled, $small, $active, theme }) => {
+    if ($disabled && $variant === 'containedSecondary') {
+      $variant = 'contained'
+    }
     let fg = $disabled ? 'textDisabled' : 'textPrimary'
-    let bg = $variant === 'contained' ? 'backgroundPrimary' : 'transparent'
+    let bg =
+      $variant === 'contained'
+        ? 'backgroundPrimary'
+        : $variant === 'containedSecondary'
+        ? 'accentSecondary'
+        : 'transparent'
     let fgHover = 'accentPrimary'
     let bgHover = ''
     const borderWidth = $variant === 'outlined' ? 1 : 0
 
     if ($variant === 'contained') {
       ;[fg, bg, fgHover, bgHover] = [bg, fg, bgHover, fgHover]
+    }
+    if ($variant === 'containedSecondary') {
+      fgHover = 'backgroundPrimary'
+      bgHover = 'accentPrimary'
     }
 
     return css({
@@ -77,7 +89,8 @@ export const StyledButton = styled.span<StyledProps>(
       },
 
       '&:active': {
-        '--fabric-color-focus': theme.colors[$variant === 'contained' ? bg : fgHover],
+        '--fabric-color-focus':
+          theme.colors[$variant === 'contained' ? bg : $variant === 'containedSecondary' ? 'textPrimary' : fgHover],
         boxShadow: $variant !== 'text' ? 'buttonFocused' : 'none',
       },
 

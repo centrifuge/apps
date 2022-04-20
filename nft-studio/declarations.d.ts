@@ -1,1 +1,1 @@
-declare module 'react-control-panel'
+/// <reference types="vite/client" />

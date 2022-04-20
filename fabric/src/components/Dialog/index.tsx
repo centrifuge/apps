@@ -1,8 +1,11 @@
-import { Box, Button, Card, IconX } from '@centrifuge/fabric'
 import { useDialog } from '@react-aria/dialog'
 import { FocusScope } from '@react-aria/focus'
 import { OverlayContainer, useModal, useOverlay, usePreventScroll } from '@react-aria/overlays'
 import * as React from 'react'
+import { IconX } from '../../icon'
+import { Box } from '../Box'
+import { Button } from '../Button'
+import { Card } from '../Card'
 
 type Props = {
   isOpen: boolean

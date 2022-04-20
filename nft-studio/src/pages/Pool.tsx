@@ -12,15 +12,14 @@ import { LabelValueStack } from '../components/LabelValueStack'
 import { LoanList } from '../components/LoanList'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLoans } from '../utils/useLoans'
 import { usePermissions } from '../utils/usePermissions'
-import { usePool, usePoolMetadata } from '../utils/usePools'
-import { isSameAddress } from '../utils/web3'
+import { PoolMetadata, usePool, usePoolMetadata } from '../utils/usePools'
 
 export const PoolPage: React.FC = () => {
   return (
@@ -30,29 +29,32 @@ export const PoolPage: React.FC = () => {
   )
 }
 
+type LinkKey = keyof PoolMetadata['pool']['links']
+const linkLabels = {
+  executiveSummary: 'Executive Summary',
+  forum: 'Forum Discussion',
+  website: 'Website',
+}
+
 const Pool: React.FC = () => {
   const {
     params: { pid: poolId },
   } = useRouteMatch<{ pid: string }>()
-  const { data: pool, refetch: refetchPool } = usePool(poolId)
-  const { data: loans } = useLoans(poolId)
+  const pool = usePool(poolId)
+  const loans = useLoans(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const history = useHistory()
   const address = useAddress()
-  const { data: balances } = useBalances(address)
 
-  const { data: permissions } = usePermissions(address)
+  const permissions = usePermissions(address)
+  const balances = useBalances(address)
 
   const centrifuge = useCentrifuge()
 
-  const canSetMaxReserve = useMemo(
-    () => !!(address && permissions && permissions[poolId]?.roles.includes('LiquidityAdmin')),
+  const isPoolAdmin = useMemo(
+    () => !!(address && permissions && permissions[poolId]?.roles.includes('PoolAdmin')),
     [poolId, address, permissions]
   )
-
-  const isManagedPool = useMemo(() => (pool && address ? isSameAddress(pool.owner, address) : false), [pool, address])
-
-  console.log('pool', pool, loans)
 
   const { execute: closeEpochTx } = useCentrifugeTransaction('Close epoch', (cent) => cent.pools.closeEpoch, {
     onSuccess: () => {
@@ -65,11 +67,7 @@ const Pool: React.FC = () => {
     closeEpochTx([pool.id])
   }
 
-  const { execute: setMaxReserveTx } = useCentrifugeTransaction('Set max reserve', (cent) => cent.pools.setMaxReserve, {
-    onSuccess: () => {
-      refetchPool()
-    },
-  })
+  const { execute: setMaxReserveTx } = useCentrifugeTransaction('Set max reserve', (cent) => cent.pools.setMaxReserve)
 
   const promptMaxReserve = () => {
     if (!pool) return
@@ -83,11 +81,11 @@ const Pool: React.FC = () => {
     <Stack gap={5} flex={1}>
       <PageHeader
         title={metadata?.pool?.name ?? ''}
-        parent={{ to: '/issuers/managed-pools', label: isManagedPool ? 'Managed pools' : 'Pools' }}
+        parent={{ to: '/pools', label: 'Pools' }}
         subtitle={metadata?.pool?.asset?.class}
         actions={
           <>
-            {isManagedPool && (
+            {isPoolAdmin && (
               <Button small variant="text" icon={<IconArrowRight />} onClick={closeEpoch} disabled={!pool}>
                 Close epoch
               </Button>
@@ -113,7 +111,7 @@ const Pool: React.FC = () => {
           value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.max, pool?.currency)}
         />
 
-        {isManagedPool && canSetMaxReserve && (
+        {isPoolAdmin && (
           <Button variant="text" icon={<IconArrowRight />} onClick={promptMaxReserve}>
             Set maximum
           </Button>
@@ -190,14 +188,20 @@ const Pool: React.FC = () => {
 
             <Shelf gap={4} flex="1 1 45%">
               <Stack gap={3} alignItems="center">
-                <img src={metadata?.pool?.media?.logo} style={{ maxHeight: '120px', maxWidth: '100%' }} alt="" />
-                {metadata?.pool?.attributes?.Links && (
+                <img src={metadata?.pool?.issuer?.logo} style={{ maxHeight: '120px', maxWidth: '100%' }} alt="" />
+                {(metadata?.pool?.links || metadata?.pool?.issuer?.email) && (
                   <Shelf gap={2} rowGap={1} flexWrap="wrap">
-                    {Object.entries(metadata.pool.attributes.Links).map(([label, value]) => (
-                      <AnchorPillButton href={value as string} target="_blank" rel="noopener noreferrer" key={label}>
-                        {label}
+                    {metadata.pool.links &&
+                      Object.entries(metadata.pool.links).map(([label, value]) => (
+                        <AnchorPillButton href={value as string} target="_blank" rel="noopener noreferrer" key={label}>
+                          {linkLabels[label as LinkKey] ?? label}
+                        </AnchorPillButton>
+                      ))}
+                    {metadata.pool.issuer?.email && (
+                      <AnchorPillButton href={`mailto:${metadata.pool.issuer.email}`}>
+                        Contact the issuer
                       </AnchorPillButton>
-                    ))}
+                    )}
                   </Shelf>
                 )}
               </Stack>

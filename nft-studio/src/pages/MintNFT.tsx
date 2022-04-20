@@ -1,15 +1,4 @@
-import {
-  Box,
-  Button,
-  IconArrowLeft,
-  NumberInput,
-  Shelf,
-  Stack,
-  Text,
-  TextAreaInput,
-  TextInput,
-} from '@centrifuge/fabric'
-import { Flex } from '@centrifuge/fabric/dist/components/Flex'
+import { Box, Button, Flex, NumberInput, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import React, { useReducer, useState } from 'react'
 import { useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router'
@@ -18,8 +7,8 @@ import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useDebugFlags } from '../components/DebugFlags'
 import { FileImageUpload } from '../components/FileImageUpload'
 import { PageHeader } from '../components/PageHeader'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { RouterLinkButton } from '../components/RouterLinkButton'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { SplitView } from '../components/SplitView'
 import { nftMetadataSchema } from '../schemas'
 import { createNFTMetadata } from '../utils/createNFTMetadata'
@@ -51,7 +40,7 @@ const MintNFT: React.FC = () => {
   const queryClient = useQueryClient()
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collectionId)
-  const { data: balance } = useBalance()
+  const balance = useBalance()
   const address = useAddress()
   const cent = useCentrifuge()
   const [version, setNextVersion] = useReducer((s) => s + 1, 0)
@@ -73,10 +62,6 @@ const MintNFT: React.FC = () => {
     isLoading: transactionIsPending,
   } = useCentrifugeTransaction('Mint NFT', (cent) => cent.nfts.mintNft, {
     onSuccess: ([, nftId]) => {
-      queryClient.invalidateQueries(['nfts', collectionId])
-      queryClient.invalidateQueries(['collectionPreview', collectionId])
-      queryClient.invalidateQueries('balance')
-      queryClient.invalidateQueries(['accountNfts', address])
       reset()
 
       if (isPageUnchanged()) {
@@ -140,30 +125,23 @@ const MintNFT: React.FC = () => {
 
       <SplitView
         left={
-          <Box>
-            <Box pt={1}>
-              <RouterLinkButton icon={IconArrowLeft} to={`/collection/${collectionId}`} variant="text">
-                Back
-              </RouterLinkButton>
-            </Box>
-            <Flex alignItems="stretch" justifyContent="center" height="100%" p={[2, 4, 0]} mx={8} mt={2}>
-              <FileImageUpload
-                key={version}
-                onFileUpdate={async (file) => {
-                  if (file) {
-                    setFileName(file.name)
-                    setFileDataUri(await getFileDataURI(file))
-                    if (!nftName) {
-                      setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
-                    }
-                  } else {
-                    setFileName('')
-                    setFileDataUri('')
+          <Flex alignItems="stretch" justifyContent="center" height="100%" p={[2, 4, 0]} mx={8} mt={2}>
+            <FileImageUpload
+              key={version}
+              onFileUpdate={async (file) => {
+                if (file) {
+                  setFileName(file.name)
+                  setFileDataUri(await getFileDataURI(file))
+                  if (!nftName) {
+                    setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
                   }
-                }}
-              />
-            </Flex>
-          </Box>
+                } else {
+                  setFileName('')
+                  setFileDataUri('')
+                }
+              }}
+            />
+          </Flex>
         }
         right={
           <Box px={[2, 4, 8]} py={9}>

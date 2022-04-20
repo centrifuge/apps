@@ -1,57 +1,47 @@
-import { DetailedPool, Pool } from '@centrifuge/centrifuge-js'
-import { useQuery } from 'react-query'
-import { useCentrifuge } from '../components/CentrifugeProvider'
+import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 
 export function usePools() {
-  const centrifuge = useCentrifuge()
-  const query = useQuery<Pool[]>(
-    ['pools'],
-    async () => {
-      return centrifuge.pools.getPools()
-    },
-    {
-      suspense: true,
-    }
-  )
+  const [result] = useCentrifugeQuery(['pools'], (cent) => cent.pools.getPools(), {
+    suspense: true,
+  })
 
-  return query
+  return result
 }
 
 export function usePool(id: string) {
-  const centrifuge = useCentrifuge()
-  const query = useQuery<DetailedPool>(
-    ['pool', id],
-    async () => {
-      return centrifuge.pools.getPool([id])
-    },
-    {
-      suspense: true,
-    }
-  )
+  const [result] = useCentrifugeQuery(['pool', id], (cent) => cent.pools.getPool([id]), {
+    suspense: true,
+  })
 
-  return query
+  return result
+}
+
+export function useTokens() {
+  const [result] = useCentrifugeQuery(['tokens'], (cent) => cent.pools.getTokens(), {
+    suspense: true,
+  })
+
+  return result
 }
 
 export function useOrder(poolId: string, trancheId: number, address?: string) {
-  const centrifuge = useCentrifuge()
-  const query = useQuery(
+  const [result] = useCentrifugeQuery(
     ['order', poolId, trancheId, address],
-    async () => {
-      return centrifuge.pools.getOrder([address!, poolId, trancheId])
-    },
+    (cent) => cent.pools.getOrder([address!, poolId, trancheId]),
     {
       enabled: !!address,
     }
   )
 
-  return query
+  return result
 }
 
 export type PoolMetadata = {
   pool: {
     name: string
     description: string
+    icon: string
     asset: {
       class: string
       averageMaturity: string
@@ -59,17 +49,13 @@ export type PoolMetadata = {
     issuer: {
       name: string
       email: string
-    }
-    attributes: {
-      Links: {
-        'Executive Summary': string
-        'Forum Discussion': string
-        Website: string
-      }
-    }
-    media: {
+      description: string
       logo: string
-      icon: string
+    }
+    links: {
+      executiveSummary: string
+      forum: string
+      website: string
     }
     status: 'open' | 'upcoming' | 'hidden'
   }
@@ -112,6 +98,6 @@ export type PoolMetadata = {
   }
 }
 
-export function usePoolMetadata(pool?: Pool) {
+export function usePoolMetadata(pool?: { metadata?: string }) {
   return useMetadata<PoolMetadata>(pool?.metadata)
 }

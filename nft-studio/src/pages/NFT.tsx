@@ -1,15 +1,15 @@
-import { Box, Button, IconArrowLeft, IconArrowRight, IconNft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, IconArrowRight, IconNft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { NavLink, useParams } from 'react-router-dom'
 import { BuyDialog } from '../components/BuyDialog'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Identity } from '../components/Identity'
 import { PageHeader } from '../components/PageHeader'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
 import { RemoveListingDialog } from '../components/RemoveListingDialog'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { SellDialog } from '../components/SellDialog'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { SplitView } from '../components/SplitView'
 import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { TransferDialog } from '../components/TransferDialog'
@@ -32,9 +32,8 @@ export const NFTPage: React.FC = () => {
 
 const NFT: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
-
   const address = useAddress()
-  const { data: permissions } = usePermissions(address)
+  const permissions = usePermissions(address)
   const nft = useNFT(collectionId, nftId)
   const { data: nftMetadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)
@@ -144,38 +143,31 @@ const NFT: React.FC = () => {
       </Box>
       <SplitView
         left={
-          <Box>
-            <Box mt={1}>
-              <RouterLinkButton icon={IconArrowLeft} to={`/collection/${collectionId}`} variant="text">
-                Back
-              </RouterLinkButton>
-            </Box>
-            <Box display="flex" alignItems="center" justifyContent="center" py={2} height="100%">
-              {imageUrl ? (
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  maxWidth={800}
-                  style={{ aspectRatio: '1 / 1' }}
-                >
-                  <Box as="img" maxWidth="100%" src={imageUrl} />
-                </Box>
-              ) : (
-                <Box
-                  bg="borderSecondary"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  // maxHeight="60vh"
-                  maxWidth={800}
-                  borderRadius="10px"
-                  style={{ aspectRatio: '1 / 1' }}
-                >
-                  <IconNft color="backgroundPrimary" size="50%" />
-                </Box>
-              )}
-            </Box>
+          <Box display="flex" alignItems="center" justifyContent="center" py={2} height="100%">
+            {imageUrl ? (
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                maxWidth={800}
+                style={{ aspectRatio: '1 / 1' }}
+              >
+                <Box as="img" maxWidth="100%" src={imageUrl} />
+              </Box>
+            ) : (
+              <Box
+                bg="borderSecondary"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                // maxHeight="60vh"
+                maxWidth={800}
+                borderRadius="10px"
+                style={{ aspectRatio: '1 / 1' }}
+              >
+                <IconNft color="backgroundPrimary" size="50%" />
+              </Box>
+            )}
           </Box>
         }
         right={
@@ -229,7 +221,7 @@ const NFT: React.FC = () => {
                         by
                       </Text>
                       <AnchorPillButton
-                        href={`${process.env.REACT_APP_SUBSCAN_URL}/account/${nft.owner}`}
+                        href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/account/${nft.owner}`}
                         target="_blank"
                       >
                         <Identity address={collection.owner} />

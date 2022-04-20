@@ -70,7 +70,7 @@ const AssetDescription: React.VFC<{ loan: Loan }> = ({ loan }) => {
 }
 
 const PoolName: React.VFC<{ loan: Loan }> = ({ loan }) => {
-  const { data: pool } = usePool(loan.poolId)
+  const pool = usePool(loan.poolId)
   const { data } = usePoolMetadata(pool)
   return <Text variant="body2">{data?.pool?.name}</Text>
 }

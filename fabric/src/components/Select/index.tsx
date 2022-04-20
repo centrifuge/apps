@@ -6,9 +6,10 @@ import { AriaSelectOptions, HiddenSelect, useSelect } from '@react-aria/select'
 import { Item } from '@react-stately/collections'
 import { SelectState, useSelectState } from '@react-stately/select'
 import { CollectionElement, Node } from '@react-types/shared'
-import React from 'react'
+import React, { FocusEvent } from 'react'
 import styled from 'styled-components'
 import { IconChevronDown, IconChevronUp } from '../..'
+import { Box } from '../Box'
 import { InputBox } from '../InputBox'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
@@ -38,6 +39,7 @@ export type SelectOptionItem = {
 type SelectProps = {
   options: SelectOptionItem[]
   onSelect?: OnSelectCallback
+  onBlur?: (e: FocusEvent) => void
   value?: string
   label: string
   placeholder: string
@@ -48,6 +50,7 @@ type SelectProps = {
 export const Select: React.FC<SelectProps> = ({
   options,
   onSelect,
+  onBlur,
   label,
   placeholder,
   value,
@@ -71,6 +74,7 @@ export const Select: React.FC<SelectProps> = ({
       onSelectionChange={onSelect}
       isDisabled={disabled}
       errorMessage={errorMessage}
+      onBlur={onBlur}
     >
       {items}
     </SelectInputInt>
@@ -85,36 +89,48 @@ const SelectInputInt: React.FC<SelectIntProps> = (props) => {
   const IconComp = state.isOpen ? IconChevronUp : IconChevronDown
 
   return (
-    <Stack position="relative" width="100%">
-      <StyledTrigger {...buttonProps} ref={ref}>
-        <InputBox
-          label={props.label}
-          as="div"
-          disabled={props.isDisabled}
-          active={(state.isOpen || state.isFocused) && !props.isDisabled}
-          inputElement={
-            <Text
-              color={
-                !state.selectedItem || props.isDisabled
-                  ? 'textDisabled'
-                  : state.isFocused
-                  ? 'accentPrimary'
-                  : 'textPrimary'
-              }
-              {...valueProps}
-            >
-              {state.selectedItem ? state.selectedItem.rendered : props.placeholder}
-            </Text>
-          }
-          rightElement={<IconComp color={props.isDisabled ? 'textSecondary' : 'textPrimary'} />}
-        />
-      </StyledTrigger>
-      <HiddenSelect state={state} triggerRef={ref} label={props.label} name={props.name} />
+    <Stack gap={1} width="100%">
+      <Stack position="relative" width="100%">
+        <StyledTrigger {...buttonProps} ref={ref}>
+          <InputBox
+            label={props.label}
+            as="div"
+            disabled={props.isDisabled}
+            active={(state.isOpen || state.isFocused) && !props.isDisabled}
+            inputElement={
+              <Text
+                color={
+                  !state.selectedItem || props.isDisabled
+                    ? 'textDisabled'
+                    : state.isFocused
+                    ? 'accentPrimary'
+                    : 'textPrimary'
+                }
+                {...valueProps}
+              >
+                {state.selectedItem ? state.selectedItem.rendered : props.placeholder}
+              </Text>
+            }
+            rightElement={
+              <IconComp color={props.isDisabled ? 'textSecondary' : 'textPrimary'} style={{ margin: '-8px 0' }} />
+            }
+          />
+        </StyledTrigger>
+        <HiddenSelect state={state} triggerRef={ref} label={props.label} name={props.name} />
 
-      {state.isOpen && (
-        <Popover isOpen={state.isOpen} onClose={state.close}>
-          <ListBox {...menuProps} state={state} />
-        </Popover>
+        {state.isOpen && (
+          <Popover isOpen={state.isOpen} onClose={state.close}>
+            <ListBox {...menuProps} state={state} />
+          </Popover>
+        )}
+      </Stack>
+
+      {props.errorMessage && (
+        <Box px={2}>
+          <Text variant="label2" color="statusCritical">
+            {props.errorMessage}
+          </Text>
+        </Box>
       )}
     </Stack>
   )

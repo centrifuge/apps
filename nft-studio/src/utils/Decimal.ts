@@ -7,8 +7,6 @@ Decimal.set({
   rounding: Decimal.ROUND_HALF_CEIL,
 })
 
-console.log('Decimal.config', Decimal.config)
-
 export function Dec(value: Numeric) {
   return new Decimal(value)
 }
