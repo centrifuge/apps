@@ -111,6 +111,7 @@ type PoolDetailsData = {
   availableReserve: BN
   totalReserve: BN
   metadata: string
+  minEpochTime: number
 }
 
 type NAVDetailsData = {
@@ -158,6 +159,7 @@ export type Pool = {
     lastUpdated: number
   }
   value: string
+  minEpochTime: number
 }
 
 export type DetailedPool = Omit<Pool, 'tranches'> & {
@@ -306,6 +308,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       combineLatestWith(getPool([poolId])),
       combineLatestWith(getOrder([address, poolId, trancheId])),
+      take(1),
       switchMap(([[api, pool], order]) => {
         let submittable
         if (
@@ -333,6 +336,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       combineLatestWith(getPool([poolId])),
       combineLatestWith(getOrder([address, poolId, trancheId])),
+      take(1),
       switchMap(([[api, pool], order]) => {
         let submittable
         if (
@@ -625,6 +629,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
               lastExecuted: pool.lastEpochExecuted,
               inSubmissionPeriod: pool.submissionPeriodEpoch,
             },
+            minEpochTime: pool.minEpochTime,
             nav: {
               latest: navData ? parseBN(navData.latest) : '0',
               lastUpdated: navData?.lastUpdated ?? 0,
@@ -773,6 +778,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
                     lastExecuted: pool.lastEpochExecuted,
                     inSubmissionPeriod: pool.submissionPeriodEpoch,
                   },
+                  minEpochTime: pool.minEpochTime,
                 }
                 return detailedPool
               })
@@ -799,7 +805,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           tranches: [] as TrancheBalance[],
           currencies: [] as CurrencyBalance[],
           native: {
-            balance: nativeBalance.data.free.toString(),
+            balance: (nativeBalance as any).data.free.toString(),
             decimals: api.registry.chainDecimals[0],
           },
         }
@@ -845,6 +851,82 @@ export function getPoolsModule(inst: CentrifugeBase) {
           redeem: parseHex(order.redeem),
           epoch: order.epoch as number,
         }
+      })
+    )
+  }
+
+  function getPendingCollect(args: [address: Account, poolId: string, trancheId: number, executedEpoch: number]) {
+    const [address, poolId, trancheId, executedEpoch] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      combineLatestWith(getOrder([address, poolId, trancheId])),
+      switchMap(([api, order]) => {
+        if (order.epoch <= executedEpoch && order.epoch > 0 && (order.invest !== '0' || order.redeem !== '0')) {
+          const epochKeys = Array.from({ length: executedEpoch + 1 - order.epoch }, (_, i) => [
+            [poolId, trancheId],
+            order.epoch + i,
+          ])
+          const $epochs = api.query.pools.epoch.multi(epochKeys)
+
+          return $epochs.pipe(
+            map((epochs) => {
+              let payoutCurrencyAmount = new BN(0)
+              let payoutTokenAmount = new BN(0)
+              let remainingInvestCurrency = new BN(order.invest)
+              let remainingRedeemToken = new BN(order.redeem)
+
+              for (const epoch of epochs) {
+                if (remainingInvestCurrency.isZero() && remainingRedeemToken.isZero()) break
+
+                let { investFulfillment, redeemFulfillment, tokenPrice } = epoch.toJSON() as any
+
+                investFulfillment = hexToBN(investFulfillment)
+                redeemFulfillment = hexToBN(redeemFulfillment)
+                tokenPrice = hexToBN(tokenPrice)
+
+                if (!remainingInvestCurrency.isZero()) {
+                  // Multiply invest fulfilment in this epoch with outstanding order amount to get executed amount
+                  const amount = remainingInvestCurrency.mul(investFulfillment).div(Perquintill)
+                  // Divide by the token price to get the payout in tokens
+                  if (!amount.isZero()) {
+                    payoutTokenAmount = payoutTokenAmount.add(amount.mul(Price).div(tokenPrice))
+                    remainingInvestCurrency = remainingInvestCurrency.sub(amount)
+                  }
+                }
+
+                if (!remainingRedeemToken.isZero()) {
+                  // Multiply redeem fulfilment in this epoch with outstanding order amount to get executed amount
+                  const amount = remainingRedeemToken.mul(redeemFulfillment).div(Perquintill)
+                  // Multiply by the token price to get the payout in currency
+                  if (!amount.isZero()) {
+                    payoutCurrencyAmount = payoutCurrencyAmount.add(amount.mul(tokenPrice).div(Price))
+                    remainingRedeemToken = remainingRedeemToken.sub(amount)
+                  }
+                }
+              }
+
+              return {
+                investCurrency: order.invest,
+                redeemToken: order.redeem,
+                epoch: order.epoch,
+                payoutCurrencyAmount: payoutCurrencyAmount.toString(),
+                payoutTokenAmount: payoutTokenAmount.toString(),
+                remainingInvestCurrency: remainingInvestCurrency.toString(),
+                remainingRedeemToken: remainingRedeemToken.toString(),
+              }
+            })
+          )
+        }
+        return of({
+          investCurrency: order.invest,
+          redeemToken: order.redeem,
+          epoch: order.epoch,
+          payoutCurrencyAmount: '0',
+          payoutTokenAmount: '0',
+          remainingInvestCurrency: order.invest,
+          remainingRedeemToken: order.redeem,
+        })
       })
     )
   }
@@ -902,77 +984,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
         })
       }),
       repeatWhen(() => $events)
-    )
-  }
-
-  function getPendingCollect(args: [address: Account, poolId: string, trancheId: number, executedEpoch: number]) {
-    const [address, poolId, trancheId, executedEpoch] = args
-    const $api = inst.getApi()
-
-    return $api.pipe(
-      combineLatestWith(getOrder([address, poolId, trancheId])),
-      switchMap(([api, order]) => {
-        if (order.epoch <= executedEpoch && order.epoch > 0 && (order.invest !== '0' || order.redeem !== '0')) {
-          const epochKeys = Array.from({ length: executedEpoch + 1 - order.epoch }, (_, i) => [
-            [poolId, trancheId],
-            order.epoch + i,
-          ])
-          const $epochs = api.query.pools.epoch.multi(epochKeys)
-
-          return $epochs.pipe(
-            map((epochs) => {
-              let payoutCurrencyAmount = new BN(0)
-              let payoutTokenAmount = new BN(0)
-              let remainingInvestCurrency = new BN(order.invest)
-              let remainingRedeemToken = new BN(order.redeem)
-
-              for (const epoch of epochs) {
-                if (remainingInvestCurrency.isZero() && remainingRedeemToken.isZero()) break
-
-                let { investFulfillment, redeemFulfillment, tokenPrice } = epoch.toJSON() as any
-
-                investFulfillment = hexToBN(investFulfillment)
-                redeemFulfillment = hexToBN(redeemFulfillment)
-                tokenPrice = hexToBN(tokenPrice)
-
-                if (!remainingInvestCurrency.isZero()) {
-                  // Multiply invest fulfilment in this epoch with outstanding order amount to get executed amount
-                  const amount = remainingInvestCurrency.mul(investFulfillment).div(Perquintill)
-                  // Divide by the token price to get the payout in tokens
-                  if (!amount.isZero()) {
-                    payoutTokenAmount = payoutTokenAmount.add(amount.mul(Price).div(tokenPrice))
-                    remainingInvestCurrency = remainingInvestCurrency.sub(amount)
-                  }
-                }
-
-                if (!remainingRedeemToken.isZero()) {
-                  // Multiply redeem fulfilment in this epoch with outstanding order amount to get executed amount
-                  const amount = remainingRedeemToken.mul(redeemFulfillment).div(Perquintill)
-                  // Multiply by the token price to get the payout in currency
-                  if (!amount.isZero()) {
-                    payoutCurrencyAmount = payoutCurrencyAmount.add(amount.mul(tokenPrice).div(Price))
-                    remainingRedeemToken = remainingRedeemToken.sub(amount)
-                  }
-                }
-              }
-
-              return {
-                payoutCurrencyAmount: payoutCurrencyAmount.toString(),
-                payoutTokenAmount: payoutTokenAmount.toString(),
-                remainingInvestCurrency: remainingInvestCurrency.toString(),
-                remainingRedeemToken: remainingRedeemToken.toString(),
-              }
-            })
-          )
-        }
-        return of({
-          payoutCurrencyAmount: '0',
-          payoutTokenAmount: '0',
-          remainingInvestCurrency: order.invest,
-          remainingRedeemToken: order.redeem,
-          epoch: order.epoch,
-        })
-      })
     )
   }
 

@@ -83,7 +83,7 @@ export const StyledButton = styled.span<StyledProps>(
       pointerEvents: $disabled ? 'none' : 'initial',
       minHeight: $small ? 32 : 40,
 
-      '&:hover, &:active': {
+      '&:hover, &:active, button:hover &, a:hover &, button:active &, a:active &': {
         color: fgHover,
         borderColor: fgHover,
         backgroundColor: bgHover,
