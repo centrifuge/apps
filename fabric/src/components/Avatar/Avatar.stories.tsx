@@ -10,14 +10,15 @@ export default {
 
 type AvatarStory = ComponentStory<typeof Avatar>
 const Template: AvatarStory = (args) => (
-  <Shelf>
-    <Avatar {...args} />
+  <Shelf gap={2}>
+    <Avatar {...args} type="token" />
+    <Avatar {...args} type="pool" />
   </Shelf>
 )
 
 export const Default = Template.bind({})
 Default.args = {
   label: 'TP2SEN',
-  size: 'small',
+  size: 'large',
   type: 'token',
 }
