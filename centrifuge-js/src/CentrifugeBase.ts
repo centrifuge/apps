@@ -1,8 +1,9 @@
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { Signer } from '@polkadot/types/types'
-import fetch from 'isomorphic-fetch'
-import { firstValueFrom, from, of, throwError } from 'rxjs'
+import 'isomorphic-fetch'
+import { firstValueFrom, of, throwError } from 'rxjs'
+import { fromFetch } from 'rxjs/fetch'
 import { takeWhile, tap } from 'rxjs/operators'
 import { TransactionOptions } from './types'
 import { getPolkadotApi } from './utils/web3'
@@ -107,12 +108,24 @@ export class CentrifugeBase {
       body: JSON.stringify({ query, variables }),
     })
     const { data, errors } = await res.json()
-    if (errors?.length) errors
+    if (errors?.length) throw errors
     return data as T
   }
 
   getOptionalSubqueryObservable<T = any>(query: string, variables?: any) {
-    return from(this.querySubquery(query, variables).catch(() => null) as Promise<T | null>)
+    return fromFetch<T | null>(this.subqueryUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({ query, variables }),
+      selector: async (res) => {
+        const { data, errors } = await res.json()
+        if (errors?.length) return null
+        return data as T
+      },
+    })
   }
 
   getApi() {
