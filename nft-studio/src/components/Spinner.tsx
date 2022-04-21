@@ -13,9 +13,10 @@ const rotate = keyframes`
 	}
 `
 
-const StyledSpinner = styled.div`
-  width: 100%;
-  height: 100%;
+const StyledSpinner = styled.div<{ $size: string }>`
+  font-size: ${(props) => props.$size};
+  width: 1em;
+  height: 1em;
   border-width: max(0.0625em, 2px);
   border-style: solid;
   border-color: currentcolor;
@@ -28,8 +29,8 @@ export const Spinner: React.FC<{ size?: string | number }> = ({ size = '48px' })
   const theme = useTheme()
   const sizePx = toPx(theme.sizes[size as ThemeSize] || size)
   return (
-    <Shelf justifyContent="center" width={sizePx} height={sizePx} style={{ fontSize: sizePx }}>
-      <StyledSpinner />
+    <Shelf justifyContent="center">
+      <StyledSpinner $size={sizePx} />
     </Shelf>
   )
 }

@@ -6,9 +6,9 @@ import {
   Card,
   CurrencyInput,
   Grid,
-  IconCheckCircle,
+  IconArrowUpRight,
+  IconCheckInCircle,
   IconClock,
-  IconExternalLink,
   Shelf,
   Stack,
   Text,
@@ -507,7 +507,7 @@ const TransactionsLink: React.FC = () => {
     <Box alignSelf="flex-end">
       <AnchorButton
         variant="text"
-        iconRight={IconExternalLink}
+        iconRight={IconArrowUpRight}
         href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/account/${address}`}
         target="_blank"
         small
@@ -521,7 +521,7 @@ const SuccessBanner: React.FC<{ title: string; body?: string }> = ({ title, body
   return (
     <Stack p={2} gap={1} backgroundColor="secondarySelectedBackground" borderRadius="card">
       <Shelf gap={1}>
-        <IconCheckCircle size="iconSmall" />
+        <IconCheckInCircle size="20px" />
         <Text variant="body2" fontWeight={600}>
           {title}
         </Text>
@@ -572,7 +572,7 @@ const PendingOrder: React.FC<{
           borderTopRightRadius="card"
         >
           <Shelf gap={1}>
-            <IconClock size="iconSmall" />
+            <IconClock size="20px" />
             <Text variant="body2" fontWeight={600}>
               {formatBalance(amount, pool.currency)} {type === 'invest' ? 'investment' : 'redemption'} locked
             </Text>
