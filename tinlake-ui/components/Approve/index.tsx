@@ -59,7 +59,7 @@ class Approve extends React.Component<Props, State> {
       this.setState({ is: 'success' })
     } catch (e) {
       console.error(e)
-      this.setState({ is: 'error', errorMsg: e.message })
+      this.setState({ is: 'error', errorMsg: (e as Error).message })
     }
   }
 
