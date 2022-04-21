@@ -22,10 +22,9 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const loans = useLoans(pool.id)
 
-  const assets = loans?.filter((asset) => asset?.status === 'Active' || asset?.status === 'Created') || []
-
   // in days
   const avgMaturity = React.useMemo(() => {
+    const assets = loans?.filter((asset) => asset?.status === 'Active' || asset?.status === 'Created') || []
     const maturityPerAsset = assets
       ?.filter(
         (asset) =>
@@ -48,7 +47,7 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
     const totalOutstandingDebt = Number(totalOutstandingDebtBN.toString()) / 10 ** 18
 
     return maturityPerAsset / totalOutstandingDebt
-  }, [assets])
+  }, [loans])
 
   const poolCardSummaryData = [
     {
