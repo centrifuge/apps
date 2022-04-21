@@ -649,12 +649,15 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api, pools) => ({ api, pools })
       ),
       switchMap(({ api, pools: rawPools }) => {
-        // read pools and poolIds from observable
+        // read pools, poolIds, from observable
         const pools = rawPools.map(
           ([poolKeys, poolValue]) =>
-            [formatPoolKey(poolKeys as any), poolValue.toJSON() as unknown as PoolDetailsData] as const
+            [
+              formatPoolKey(poolKeys as any),
+              poolValue.toJSON() as unknown as PoolDetailsData,
+              (poolValue as any).toHuman(),
+            ] as const
         )
-        const poolsMetadata = rawPools.map(([_, poolValue]) => (poolValue.toHuman() as any).metadata)
 
         // array of args for $epoch query (by poolId and trancheIndex)
         const epochKeys = pools
@@ -675,8 +678,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
             return epochs.map((epoch, epochIndex) => {
               const [[poolId, trancheIndex]] = epochKeys[epochIndex]
-              const metadata = poolsMetadata[epochIndex]
-              const [, pool] = pools.find(([key]) => key === poolId)!
+              const [, pool, poolMetadata] = pools.find(([key]) => key === poolId)!
 
               return {
                 index: trancheIndex,
@@ -685,7 +687,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 currency: Object.keys(pool.currency)[0],
                 tokenIssuance: rawIssuances[epochIndex].toString(),
                 poolId,
-                poolMetadata: metadata,
+                pool,
+                poolMetadata: poolMetadata?.metadata,
                 interestPerSec: parseBN(
                   pool.tranches.find((_, tIndex) => trancheIndex === tIndex)?.interestPerSec || new BN(0)
                 ),
