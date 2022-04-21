@@ -1154,19 +1154,19 @@ export interface OraclePushAttributeToOracleRequest {
    * @type {string}
    * @memberof OraclePushAttributeToOracleRequest
    */
-  attributeKey?: string
+  attribute_key?: string
   /**
    * hex value of the Oracle address
    * @type {string}
    * @memberof OraclePushAttributeToOracleRequest
    */
-  oracleAddress?: string
+  oracle_address?: string
   /**
    * hex value of the NFT token
    * @type {string}
    * @memberof OraclePushAttributeToOracleRequest
    */
-  tokenId?: string
+  token_id?: string
 }
 /**
  *
@@ -1179,25 +1179,25 @@ export interface OraclePushToOracleResponse {
    * @type {string}
    * @memberof OraclePushToOracleResponse
    */
-  attributeKey?: string
+  attribute_key?: string
   /**
    *
    * @type {string}
    * @memberof OraclePushToOracleResponse
    */
-  jobId?: string
+  job_id?: string
   /**
    * hex value of the Oracle address
    * @type {string}
    * @memberof OraclePushToOracleResponse
    */
-  oracleAddress?: string
+  oracle_address?: string
   /**
    * hex value of the NFT token
    * @type {string}
    * @memberof OraclePushToOracleResponse
    */
-  tokenId?: string
+  token_id?: string
 }
 /**
  *
