@@ -12,7 +12,6 @@ import {
   Shelf,
   Stack,
   Text,
-  VisualButton,
 } from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import BN from 'bn.js'
@@ -544,9 +543,13 @@ const LightButton = styled.button<{ $left?: boolean }>(
   },
   (props) =>
     css({
+      color: 'textPrimary',
       borderBottomLeftRadius: props.$left ? 'card' : undefined,
       borderBottomRightRadius: props.$left ? undefined : 'card',
       backgroundColor: 'secondarySelectedBackground',
+      '&:hover, &:focus-visible': {
+        color: 'textSelected',
+      },
     })
 )
 
@@ -577,19 +580,23 @@ const PendingOrder: React.FC<{
           <Text variant="body3">
             Locked {type === 'invest' ? 'investments' : 'redemptions'} are executed at the end of the epoch (
             {getEpochHoursRemaining(pool!)} hrs remaining).{' '}
-            <AnchorTextLink href="about:blank">Learn more</AnchorTextLink>
+            <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
           </Text>
         </Stack>
         <Grid gap="1px" columns={2} equalColumns>
           <LightButton type="button" $left onClick={onCancelOrder} disabled={isCancelling}>
-            <VisualButton variant="text" loading={isCancelling} small>
-              Cancel
-            </VisualButton>
+            {isCancelling ? (
+              <Spinner size="iconSmall" />
+            ) : (
+              <Text variant="body2" color="inherit">
+                Cancel
+              </Text>
+            )}
           </LightButton>
           <LightButton type="button" onClick={onChangeOrder} disabled={isCancelling}>
-            <VisualButton variant="text" small>
+            <Text variant="body2" color="inherit">
               Change order
-            </VisualButton>
+            </Text>
           </LightButton>
         </Grid>
       </Stack>
