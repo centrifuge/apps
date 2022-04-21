@@ -1,5 +1,5 @@
 import { feeToApr, formatCurrencyAmount, formatPercentage } from '@centrifuge/centrifuge-js'
-import { Avatar, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
@@ -84,7 +84,7 @@ const TokenDetail: React.FC = () => {
         title={`${metadata?.pool?.name} ${token?.name}`}
         walletShown={false}
         icon={
-          <Avatar
+          <Thumbnail
             size="large"
             label={metadata?.tranches?.find((_, index) => index === parseInt(trancheId, 10))?.symbol || ''}
           />

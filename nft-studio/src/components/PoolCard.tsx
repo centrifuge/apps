@@ -1,5 +1,5 @@
 import { formatCurrencyAmount, Pool } from '@centrifuge/centrifuge-js'
-import { Avatar, Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Card, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -78,7 +78,7 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
         {metadata?.pool?.icon ? (
           <img src={parseMetadataUrl(metadata?.pool?.icon || '')} alt="" height="24" width="24" />
         ) : (
-          <Avatar type="pool" label="LP" size="small" />
+          <Thumbnail type="pool" label="LP" size="small" />
         )}
 
         <Text variant="heading2" color={theme.colors.textInteractive}>

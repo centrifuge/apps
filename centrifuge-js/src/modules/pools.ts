@@ -649,7 +649,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api, pools) => ({ api, pools })
       ),
       switchMap(({ api, pools: rawPools }) => {
-        // read pools, poolIds, from observable
+        // read pools, poolIds and metadata from observable
         const pools = rawPools.map(
           ([poolKeys, poolValue]) =>
             [

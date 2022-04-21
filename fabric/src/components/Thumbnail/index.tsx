@@ -2,22 +2,22 @@ import * as React from 'react'
 import styled, { css } from 'styled-components'
 import { Text } from '../Text'
 
-type AvatarProps = {
+type ThumbnailProps = {
   label: string
   type?: 'token' | 'pool'
   size?: 'small' | 'large'
 }
 
-export const Avatar: React.VFC<AvatarProps> = ({ label, ...props }) => {
+export const Thumbnail: React.VFC<ThumbnailProps> = ({ label, ...props }) => {
   return (
-    <StyledAvatar variant="body2" {...props}>
+    <StyledThumbnail variant="body2" {...props}>
       <div>{label.slice(0, 3)}</div>
       <div>{label.slice(3, 6)}</div>
-    </StyledAvatar>
+    </StyledThumbnail>
   )
 }
 
-const StyledAvatar = styled(Text)<Partial<AvatarProps>>`
+const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
   background: ${({ theme }) => theme.colors.accentSecondary};
   display: flex;
   flex-direction: column;

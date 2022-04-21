@@ -1,5 +1,5 @@
 import { formatCurrencyAmount, formatPercentage } from '@centrifuge/centrifuge-js'
-import { Avatar, IconArrowDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
+import { IconArrowDown, IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import { BN } from '@polkadot/util'
 import * as React from 'react'
 import { useHistory } from 'react-router'
@@ -85,7 +85,7 @@ const TokenName: React.VFC<RowProps> = ({ token }) => {
   const symbol = metadata?.tranches?.find((_, index) => index === token.index)?.symbol
   return (
     <Shelf gap="2">
-      <Avatar label={symbol || ''} size="small" />
+      <Thumbnail label={symbol || ''} size="small" />
       <Text variant="body2" color="textPrimary" fontWeight={600}>
         {metadata?.pool?.name} {token?.name}
       </Text>
