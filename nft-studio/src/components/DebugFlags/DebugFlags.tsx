@@ -32,8 +32,9 @@ const DebugFlagsImpl: React.FC = ({ children }) => {
     <DebugFlagsContext.Provider value={ctx}>
       {children}
       <Panel
+        state={state}
         usedKeys={usedKeys}
-        onChange={(e: any) => setState((prev) => ({ ...prev, [e.target.name]: e.target.checked }))}
+        onChange={(key: Key, val: any) => setState((prev) => ({ ...prev, [key]: val }))}
       />
     </DebugFlagsContext.Provider>
   )

@@ -2,7 +2,7 @@ import { feeToApr, formatCurrencyAmount, formatPercentage } from '@centrifuge/ce
 import { Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
-import { useRouteMatch } from 'react-router'
+import { useParams } from 'react-router'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
@@ -19,9 +19,7 @@ export const TokenDetailPage: React.FC = () => {
 }
 
 const TokenDetail: React.FC = () => {
-  const {
-    params: { pid: poolId, tid: trancheId },
-  } = useRouteMatch<{ pid: string; tid: string }>()
+  const { pid: poolId, tid: trancheId } = useParams<{ pid: string; tid: string }>()
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
 
