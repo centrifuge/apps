@@ -855,6 +855,62 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
+  function getLoans(args: [poolId: string]) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    const $events = $api.pipe(
+      switchMap(
+        (api) => combineLatest([api.query.system.events(), api.query.system.number()]),
+        (api, [events]) => ({ api, events })
+      ),
+      filter(({ api, events }) => {
+        // @ts-ignore
+        const event = events.find(
+          // @ts-ignore
+          ({ event }) =>
+            api.events.loans.Created.is(event) ||
+            api.events.loans.Closed.is(event) ||
+            api.events.loans.Priced.is(event) ||
+            api.events.loans.Borrowed.is(event)
+        )
+        return !!event
+      })
+    )
+
+    return $api.pipe(
+      switchMap((api) => api.query.loans.loanInfo.entries(poolId)),
+      map((loanValues) => {
+        return loanValues.map(([key, value]) => {
+          const loan = value.toJSON() as unknown as LoanDetailsData
+          const assetKey = (value.toHuman() as any).asset
+          const mapped: Loan = {
+            id: formatLoanKey(key as StorageKey<[u32, u32]>),
+            poolId,
+            financedAmount: parseBN(loan.borrowedAmount),
+            financingFee: parseBN(loan.ratePerSec),
+            outstandingDebt: new BN(parseBN(loan.principalDebt))
+              .mul(new BN(parseBN(loan.accumulatedRate)))
+              .div(new BN(10).pow(new BN(27)))
+              .toString(),
+            lastUpdated: loan.lastUpdated,
+            originationDate: loan.originationDate,
+            status: loan.status,
+            loanInfo: getLoanInfo(loan.loanType),
+            adminWrittenOff: loan.adminWrittenOff,
+            writeOffIndex: loan.writeOffIndex,
+            asset: {
+              collectionId: assetKey[0].replace(/\D/g, ''),
+              nftId: assetKey[1].replace(/\D/g, ''),
+            },
+          }
+          return mapped
+        })
+      }),
+      repeatWhen(() => $events)
+    )
+  }
+
   function getPendingCollect(args: [address: Account, poolId: string, trancheId: number, executedEpoch: number]) {
     const [address, poolId, trancheId, executedEpoch] = args
     const $api = inst.getApi()
@@ -928,62 +984,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
           remainingRedeemToken: order.redeem,
         })
       })
-    )
-  }
-
-  function getLoans(args: [poolId: string]) {
-    const [poolId] = args
-    const $api = inst.getApi()
-
-    const $events = $api.pipe(
-      switchMap(
-        (api) => combineLatest([api.query.system.events(), api.query.system.number()]),
-        (api, [events]) => ({ api, events })
-      ),
-      filter(({ api, events }) => {
-        // @ts-ignore
-        const event = events.find(
-          // @ts-ignore
-          ({ event }) =>
-            api.events.loans.Created.is(event) ||
-            api.events.loans.Closed.is(event) ||
-            api.events.loans.Priced.is(event) ||
-            api.events.loans.Borrowed.is(event)
-        )
-        return !!event
-      })
-    )
-
-    return $api.pipe(
-      switchMap((api) => api.query.loans.loanInfo.entries(poolId)),
-      map((loanValues) => {
-        return loanValues.map(([key, value]) => {
-          const loan = value.toJSON() as unknown as LoanDetailsData
-          const assetKey = (value.toHuman() as any).asset
-          const mapped: Loan = {
-            id: formatLoanKey(key as StorageKey<[u32, u32]>),
-            poolId,
-            financedAmount: parseBN(loan.borrowedAmount),
-            financingFee: parseBN(loan.ratePerSec),
-            outstandingDebt: new BN(parseBN(loan.principalDebt))
-              .mul(new BN(parseBN(loan.accumulatedRate)))
-              .div(new BN(10).pow(new BN(27)))
-              .toString(),
-            lastUpdated: loan.lastUpdated,
-            originationDate: loan.originationDate,
-            status: loan.status,
-            loanInfo: getLoanInfo(loan.loanType),
-            adminWrittenOff: loan.adminWrittenOff,
-            writeOffIndex: loan.writeOffIndex,
-            asset: {
-              collectionId: assetKey[0].replace(/\D/g, ''),
-              nftId: assetKey[1].replace(/\D/g, ''),
-            },
-          }
-          return mapped
-        })
-      }),
-      repeatWhen(() => $events)
     )
   }
 

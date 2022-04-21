@@ -97,7 +97,6 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
   const order = usePendingCollect(poolId, trancheId, address)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
 
-  console.log('order', order, balances)
   const isDataLoading = balances === undefined || order === undefined || permissions === undefined
 
   const allowedToInvest = permissions?.[poolId]?.tranches.includes(trancheId)
@@ -409,7 +408,6 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
       const amount = (values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price))
         .mul('1e18')
         .toFixed(0)
-      console.log('amount', amount)
       doRedeemTransaction([poolId, trancheId, new BN(amount)])
       actions.setSubmitting(false)
     },
