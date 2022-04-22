@@ -653,9 +653,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
         const pools = rawPools.map(
           ([poolKeys, poolValue]) =>
             [
-              formatPoolKey(poolKeys as any),
-              poolValue.toJSON() as unknown as PoolDetailsData,
-              (poolValue as any).toHuman(),
+              formatPoolKey(poolKeys as any), // poolId
+              poolValue.toJSON() as unknown as PoolDetailsData, // pool data
+              (poolValue as any)?.toHuman(), // pool metadata
             ] as const
         )
 
@@ -678,21 +678,21 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
             return epochs.map((epoch, epochIndex) => {
               const [[poolId, trancheIndex]] = epochKeys[epochIndex]
-              const [, pool, poolMetadata] = pools.find(([key]) => key === poolId)!
+              const pool = pools?.find(([key]) => key === poolId) || []
 
               return {
                 index: trancheIndex,
                 tokenPrice: epoch ? parseHex(epoch.tokenPrice) : new BN(10).pow(new BN(27)).toString(),
-                name: tokenIndexToName(trancheIndex, pool.tranches.length),
-                currency: Object.keys(pool.currency)[0],
+                name: tokenIndexToName(trancheIndex, pool?.[1]?.tranches.length || 0),
+                currency: Object.keys(pool?.[1]?.currency || {})?.[0],
                 tokenIssuance: rawIssuances[epochIndex].toString(),
                 poolId,
                 pool,
-                poolMetadata: poolMetadata?.metadata,
+                poolMetadata: pool?.[2]?.metadata,
                 interestPerSec: parseBN(
-                  pool.tranches.find((_, tIndex) => trancheIndex === tIndex)?.interestPerSec || new BN(0)
+                  pool?.[1]?.tranches.find((_, tIndex) => trancheIndex === tIndex)?.interestPerSec || new BN(0)
                 ),
-                ratio: parseBN(pool.tranches.find((_, tIndex) => trancheIndex === tIndex)?.ratio || new BN(0)),
+                ratio: parseBN(pool?.[1]?.tranches.find((_, tIndex) => trancheIndex === tIndex)?.ratio || new BN(0)),
               }
             })
           })
