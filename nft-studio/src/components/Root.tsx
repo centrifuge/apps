@@ -18,6 +18,7 @@ import { NFTPage } from '../pages/NFT'
 import { NotFoundPage } from '../pages/NotFound'
 import { PoolPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
+import { TokenDetailPage } from '../pages/Token'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
 import { DebugFlags } from './DebugFlags'
@@ -131,6 +132,9 @@ const Routes: React.VFC = () => {
       </Route>
       <Route path="/issuers/managed-pools">
         <ManagedPoolsPage />
+      </Route>
+      <Route path="/tokens/:pid/:tid">
+        <TokenDetailPage />
       </Route>
       <Route path="/tokens">
         <TokenOverviewPage />

@@ -1,11 +1,12 @@
 import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
-import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
-import { useNFT } from '../utils/useNFTs'
-import { ButtonGroup } from './ButtonGroup'
-import { useCentrifuge } from './CentrifugeProvider'
-import { useWeb3 } from './Web3Provider'
+import { useAddress } from '../../utils/useAddress'
+import { useBalance } from '../../utils/useBalance'
+import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
+import { isSameAddress } from '../../utils/web3'
+import { ButtonGroup } from '../ButtonGroup'
+import { TextInput } from '../TextInput'
 
 type Props = {
   open: boolean
@@ -16,20 +17,20 @@ type Props = {
 // TODO: replace with better fee estimate
 const TRANSFER_FEE_ESTIMATE = 0.1
 
-export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
-  const { selectedAccount } = useWeb3()
+export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
+  const [address, setAddress] = React.useState('')
+  const [touched, setTouched] = React.useState(false)
+  const connectedAddress = useAddress()
   const balance = useBalance()
-  const centrifuge = useCentrifuge()
-  const nft = useNFT(collectionId, nftId)
 
-  const isConnected = !!selectedAccount?.address
+  const isConnected = !!connectedAddress
 
   const {
     execute: doTransaction,
     reset: resetLastTransaction,
     isLoading: transactionIsPending,
     lastCreatedTransaction,
-  } = useCentrifugeTransaction('Remove NFT listing', (cent) => cent.nfts.removeNftListing)
+  } = useCentrifugeTransaction('Transfer NFT', (cent) => cent.nfts.transferNft)
 
   React.useEffect(() => {
     if (lastCreatedTransaction?.status === 'pending') {
@@ -40,12 +41,14 @@ export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collection
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
-    if (!isConnected) return
+    if (!isConnected || !!error) return
 
-    doTransaction([collectionId, nftId])
+    doTransaction([collectionId, nftId, address])
   }
 
   function reset() {
+    setAddress('')
+    setTouched(false)
     resetLastTransaction()
   }
 
@@ -54,23 +57,39 @@ export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collection
     onClose()
   }
 
+  function getError() {
+    if (!address) return 'No address provided'
+    if (!isAddress(address)) return 'Not a valid address'
+    if (isSameAddress(address, connectedAddress)) return 'Address is the same as the current owner'
+    return null
+  }
+
+  const error = getError()
+
   const balanceLow = !balance || balance < TRANSFER_FEE_ESTIMATE
 
-  const disabled = balanceLow
+  const disabled = !!error || balanceLow
 
   return (
     <Dialog isOpen={open} onClose={close}>
       <form onSubmit={submit}>
         <Stack gap={3}>
           <Text variant="heading2" as="h2">
-            Are you sure about removing this listing?
+            Transfer NFT
           </Text>
-          <Stack>
-            <Shelf gap={1} alignItems="baseline">
-              <Text variant="heading1" fontWeight={400}>
-                {nft?.sellPrice && centrifuge.utils.formatCurrencyAmount(nft.sellPrice, 'AIR')}
+          <Text variant="body2">Transfer the NFT ownership</Text>
+          <Stack gap={1}>
+            <TextInput
+              label="Recipient address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              onBlur={() => setTouched(true)}
+            />
+            {touched && error && (
+              <Text variant="label2" color="criticalForeground">
+                {error}
               </Text>
-            </Shelf>
+            )}
           </Stack>
           <Shelf justifyContent="space-between">
             {balanceLow && (
@@ -83,7 +102,7 @@ export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collection
                 Cancel
               </Button>
               <Button type="submit" disabled={disabled} loading={transactionIsPending}>
-                Remove listing
+                Transfer
               </Button>
             </ButtonGroup>
           </Shelf>
