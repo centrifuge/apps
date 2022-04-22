@@ -20,6 +20,7 @@ const StyledTrigger = styled(Text)`
   background: transparent;
   position: relative;
   text-decoration: underline dotted;
+  cursor: pointer;
 `
 
 export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disabled, delay = 1000, ...textProps }) => {

@@ -69,6 +69,7 @@ const typography: ThemeTypography = {
     lineHeight: 1.25,
     fontWeight: 400,
     color: 'textPrimary',
+    letterSpacing: 0.01,
   },
   label1: {
     fontSize: 14,

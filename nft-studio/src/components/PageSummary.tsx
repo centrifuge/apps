@@ -22,10 +22,7 @@ export const PageSummary: React.FC<Props> = ({ data, children }) => {
     >
       {data?.map(({ label, value }, index) => (
         <Stack gap="4px" key={`${value}-${label}-${index}`}>
-          <Text variant="body2" underline>
-            {/* // TODO: placeholder for tooltip */}
-            {label}
-          </Text>
+          <Text variant="body3">{label}</Text>
           <Text variant="heading3">{value}</Text>
         </Stack>
       )) || children}

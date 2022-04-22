@@ -4,9 +4,11 @@ import { defineConfig } from 'vite'
 // https://vitejs.dev/config/
 // when making changes to this file start vite with --force flag
 export default defineConfig({
-  optimizeDeps: {
-    // prebundle local libraries in workspace
-    include: ['@centrifuge/centrifuge-js', '@centrifuge/fabric'],
+  server: {
+    watch: {
+      // configuration to allow HMR in other modules in yarn
+      ignored: ['!../centrifuge-js/dist/**', '!../fabric/dist/**'],
+    },
   },
   envPrefix: 'REACT_APP_',
   build: {
@@ -14,7 +16,7 @@ export default defineConfig({
     outDir: 'build',
     commonjsOptions: {
       // ensure all packages are converted to ES6 for rollup bundle
-      include: [/fabric/, /node_modules/],
+      include: [/node_modules/],
     },
   },
   resolve: {

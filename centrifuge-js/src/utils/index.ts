@@ -82,7 +82,8 @@ export function addThousandsSeparators(x: string | BN | number) {
 }
 
 export function formatCurrencyAmount(bn: BN | string | undefined, currency?: string, precise?: boolean) {
-  const currencyStr = currency || 'Usd'
+  // TODO: get currency based on env
+  const currencyStr = currency === 'native' ? 'AIR' : currency || 'Usd'
   if (!bn) return ''
   return `${addThousandsSeparators(toPrecision(baseToDisplay(new BN(bn), 18), precise ? 4 : 0))} ${currencyStr}`
 }

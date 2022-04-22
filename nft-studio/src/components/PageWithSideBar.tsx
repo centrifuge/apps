@@ -16,9 +16,9 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar }) => {
   return (
     <Box
       display="grid"
-      gridTemplateAreas={[`"main" "sidebar" "menu"`, `"main" "sidebar" "menu"`, `"menu main sidebar"`]}
-      gridTemplateColumns={['1fr', '1fr', 'minmax(0, 2fr) 7fr 3fr']}
-      gridAutoRows={['1fr auto auto', '1fr auto auto', 'auto']}
+      gridTemplateAreas={`"menu main sidebar"`}
+      gridTemplateColumns={['80px 7fr 3fr', '80px 7fr 3fr', 'minmax(0, 2fr) 7fr 3fr']}
+      gridAutoRows="auto"
       minHeight="100vh"
     >
       <Box
@@ -34,7 +34,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar }) => {
         <Menu />
       </Box>
       <Box
-        gridArea={sidebar ? 'main' : ['main', 'main', '1 / 2 / 1 / 4']}
+        gridArea={sidebar ? 'main' : '1 / 2 / 1 / 4'}
         as="main"
         style={{
           boxShadow: `1px 0 0 ${theme.colors.borderSecondary}`,

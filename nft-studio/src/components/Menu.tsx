@@ -2,9 +2,10 @@ import { Pool } from '@centrifuge/centrifuge-js'
 import { Box, IconCircle, IconHome, IconNft, IconPieChart, IconUser, Shelf } from '@centrifuge/fabric'
 import React from 'react'
 import { useRouteMatch } from 'react-router'
+import { Link } from 'react-router-dom'
 import logoCentrifuge from '../assets/images/logoCentrifuge.svg'
+import logoCentrifugeFull from '../assets/images/logoCentrifugeFull.svg'
 import { useAddress } from '../utils/useAddress'
-import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { usePermissions } from '../utils/usePermissions'
 import { usePoolMetadata, usePools } from '../utils/usePools'
 import { NavigationItem } from './NavigationItem'
@@ -15,7 +16,6 @@ type Props = {}
 export const Menu: React.FC<Props> = () => {
   const investmentsMatch = useRouteMatch('/investments')
   const issuersMatch = useRouteMatch('/issuer')
-  const isDesktop = useIsAboveBreakpoint('M')
 
   const allPools = usePools()
   const address = useAddress()
@@ -29,19 +29,16 @@ export const Menu: React.FC<Props> = () => {
   }, [allPools, permissions])
 
   return (
-    <Box backgroundColor="backgroundPrimary" position="sticky" top={0} px={[0, 2]}>
-      {isDesktop && (
-        <Box py={3} px={1} mb={10}>
+    <Box backgroundColor="backgroundPrimary" position="sticky" top={0} px={2}>
+      <Link to="/">
+        <Box py={3} px={1} mb={10} display={['none', 'none', 'block']}>
+          <img src={logoCentrifugeFull} alt="" />
+        </Box>
+        <Box py={3} px={1} mb={10} display={['block', 'block', 'none']}>
           <img src={logoCentrifuge} alt="" />
         </Box>
-      )}
-      <Shelf
-        gap={1}
-        flexDirection={['row', 'row', 'column']}
-        alignItems={['center', 'center', 'stretch']}
-        justifyContent="space-evenly"
-        px={[2, 2, 0]}
-      >
+      </Link>
+      <Shelf gap={1} flexDirection="column" alignItems="stretch" justifyContent="space-evenly" px={[2, 2, 0]}>
         <NavigationItem label="Tokens" href="/tokens" icon={<IconCircle size="16px" />} />
         <NavigationItem label="Pools" href="/pools" icon={<IconHome size="16px" />} />
         <NavigationItem label="NFTs" href="/nfts" icon={<IconNft size="16px" />} />
