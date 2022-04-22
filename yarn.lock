@@ -2557,6 +2557,7 @@ __metadata:
     "@polkadot/api": ^8.0.1
     "@polkadot/util-crypto": ^9.0.1
     "@types/bn.js": ^5
+    "@types/isomorphic-fetch": ^0.0.36
     "@types/jest": ^27.0.3
     "@types/node": ^16.11.12
     "@typescript-eslint/eslint-plugin": ^4.32.0
@@ -2567,6 +2568,7 @@ __metadata:
     eslint: ^7.32.0
     eslint-config-prettier: ^8.3.0
     eslint-plugin-prettier: ^4.0.0
+    isomorphic-fetch: ^3.0.0
     jest: ^27.4.3
     npm-run-all: 4.1.5
     rxjs: ^7.4.0
@@ -11317,6 +11319,13 @@ __metadata:
   version: 1.0.1
   resolution: "@types/is-function@npm:1.0.1"
   checksum: d3006c67c6f0231fccb8fc5c0ad979c2629f3f95049f490c5bf2926375f318271200410ce34e5115527b6710ac8223b487f85b152e7975fca5ae524a25b4bf4f
+  languageName: node
+  linkType: hard
+
+"@types/isomorphic-fetch@npm:^0.0.36":
+  version: 0.0.36
+  resolution: "@types/isomorphic-fetch@npm:0.0.36"
+  checksum: 131e22124d8153bcec52a9a6b9979317ced00712b5ffcebb1ec5feb0829ae620c87a5fc865198300967d2d6ad4a5c5de5d664d6d380b89a7ba0767046388fd9d
   languageName: node
   linkType: hard
 

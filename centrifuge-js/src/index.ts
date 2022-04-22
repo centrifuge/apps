@@ -1,12 +1,12 @@
 import { Centrifuge } from './Centrifuge'
 export { Collection, NFT } from './modules/nfts'
 export {
+  CurrencyBalance,
   DetailedPool,
   Loan,
   LoanStatus,
   Pool,
   PoolRoles,
-  TokenBalance,
   Tranche,
   TrancheBalance,
   TrancheWithTokenPrice,

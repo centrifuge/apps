@@ -21,6 +21,7 @@ export const AnchorButton: React.FC<AnchorButtonProps> = ({
   iconRight,
   disabled,
   loading,
+  loadingMessage,
   children,
   active,
   ...anchorProps
@@ -34,6 +35,7 @@ export const AnchorButton: React.FC<AnchorButtonProps> = ({
         iconRight={iconRight}
         disabled={disabled}
         loading={loading}
+        loadingMessage={loadingMessage}
         active={active}
       >
         {children}
