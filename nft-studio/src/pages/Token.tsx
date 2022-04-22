@@ -49,7 +49,7 @@ const TokenDetail: React.FC = () => {
         label: <Tooltips type="apy" />,
         value: (
           <Text variant="heading3">
-            {feeToApr(token?.interestPerSec || '')}% <Text variant="body3">target</Text>
+            {feeToApr(token?.interestPerSec || new BN(0))}% <Text variant="body3">target</Text>
           </Text>
         ),
       },
