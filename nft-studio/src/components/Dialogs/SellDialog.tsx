@@ -1,10 +1,10 @@
 import { Button, CurrencyInput, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
-import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
-import { ButtonGroup } from './ButtonGroup'
-import { useWeb3 } from './Web3Provider'
+import { useBalance } from '../../utils/useBalance'
+import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
+import { ButtonGroup } from '../ButtonGroup'
+import { useWeb3 } from '../Web3Provider'
 
 const e18 = new BN(10).pow(new BN(18))
 

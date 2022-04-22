@@ -17,7 +17,7 @@ const Template: ButtonStory = (args): React.ReactElement => (
   <Grid columns={5} gap={3} justifyItems="start" maxWidth={800} equalColumns>
     {(['contained', 'containedSecondary', 'outlined', 'text'] as const).flatMap((variant) =>
       [false, true].map((small) => (
-        <>
+        <React.Fragment key={`${small}-${variant}`}>
           <ButtonComp {...args} variant={variant} small={small}>
             Connect
           </ButtonComp>
@@ -31,7 +31,7 @@ const Template: ButtonStory = (args): React.ReactElement => (
             Connect
           </ButtonComp>
           <ButtonComp {...args} variant={variant} small={small} icon={IconClock} />
-        </>
+        </React.Fragment>
       ))
     )}
   </Grid>

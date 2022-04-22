@@ -6,6 +6,7 @@ import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { Token, TokenList } from '../components/TokenList'
+import { Tooltips } from '../components/Tooltips'
 import { useTokens } from '../utils/usePools'
 
 export const TokenOverviewPage: React.FC = () => {
@@ -30,7 +31,7 @@ const TokenOverview: React.FC = () => {
             // feeToApr is a temporary solution for calculating yield
             // bc we don't have a way to query for historical token prices yet
             // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
-            yield: tranche?.interestPerSec ? feeToApr(tranche?.interestPerSec) : 'blaaah',
+            yield: tranche?.interestPerSec ? feeToApr(tranche?.interestPerSec) : '',
             // for now proctection is being calculated as a percentage of the ratio
             // replace with proper protection calculation when token prices are available
             protection: tranche.ratio,
@@ -46,14 +47,15 @@ const TokenOverview: React.FC = () => {
     [dataTokens]
   )
 
+  // TODO: convert everything to one currency, USD?
   const totalValueLocked = React.useMemo(
     () => tokens?.reduce((prev, curr) => new BN(prev).add(new BN(curr?.valueLocked as any)), new BN(0)),
     [tokens]
   )
 
   const pageSummaryData = [
-    { label: 'Total Value Locked (TVL)', value: formatCurrencyAmount(totalValueLocked, 'USD') },
-    { label: 'Tokens', value: tokens?.length || 0 },
+    { label: <Tooltips type="tvl" />, value: formatCurrencyAmount(totalValueLocked, 'USD') },
+    { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
   ]
 
   return (

@@ -9,6 +9,7 @@ type Props<T> = {
   keyField?: string
   onRowClicked?: (row: T) => void
   defaultSortKey?: string
+  rounded?: boolean
 }
 
 export type OrderBy = 'asc' | 'desc'
@@ -34,6 +35,7 @@ export const DataTable = <T extends Record<string, any>>({
   keyField,
   onRowClicked,
   defaultSortKey,
+  rounded = true,
 }: Props<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: 'desc' } : {}
@@ -48,7 +50,7 @@ export const DataTable = <T extends Record<string, any>>({
   }
 
   const sortedData = React.useMemo(
-    () => sorter(data, orderBy[currentSortKey], currentSortKey),
+    () => sorter([...data], orderBy[currentSortKey], currentSortKey),
     [orderBy, data, currentSortKey]
   )
 
@@ -70,9 +72,10 @@ export const DataTable = <T extends Record<string, any>>({
           </HeaderCol>
         ))}
       </Shelf>
-      <Card>
+      <Stack as={rounded ? Card : Stack}>
         {sortedData?.map((row, i) => (
           <Row
+            rounded={rounded}
             as={onRowClicked ? 'button' : 'div'}
             key={keyField ? row[keyField] : i}
             onClick={onRowClicked && (() => onRowClicked(row))}
@@ -85,40 +88,45 @@ export const DataTable = <T extends Record<string, any>>({
             ))}
           </Row>
         ))}
-      </Card>
+      </Stack>
     </Stack>
   )
 }
 
-const Row = styled(Shelf)(
-  css({
-    width: '100%',
-    minHeight: 56,
-    appearance: 'none',
-    border: 'none',
-    backgroundColor: 'transparent',
-    '&:not(:last-child)': {
-      borderWidth: '0 0 1px',
-      borderStyle: 'solid',
-      borderColor: 'borderPrimary',
-    },
-    'button&:hover': {
-      backgroundColor: 'backgroundSecondary',
-      cursor: 'pointer',
-    },
-    '&:focus-visible': {
-      boxShadow: 'inset 0 0 0 3px var(--fabric-color-focus)',
-    },
-    '&:first-child': {
-      borderTopLeftRadius: 'card',
-      borderTopRightRadius: 'card',
-    },
-    '&:last-child': {
-      borderBottomLeftRadius: 'card',
-      borderBottomRightRadius: 'card',
-    },
-  })
-)
+const Row = styled(Shelf)<any>`
+  ${({ rounded }) =>
+    css({
+      width: '100%',
+      height: '48px',
+      appearance: 'none',
+      border: 'none',
+      backgroundColor: 'transparent',
+      '&:not(:last-child)': {
+        borderWidth: '0 0 1px',
+        borderStyle: 'solid',
+        borderColor: 'borderPrimary',
+      },
+      'button&:hover': {
+        backgroundColor: 'backgroundSecondary',
+        cursor: 'pointer',
+      },
+      '&:focus-visible': {
+        boxShadow: 'inset 0 0 0 3px var(--fabric-color-focus)',
+      },
+      '&:first-child': rounded
+        ? {
+            borderTopLeftRadius: 'card',
+            borderTopRightRadius: 'card',
+          }
+        : {},
+      '&:last-child': rounded
+        ? {
+            borderBottomLeftRadius: 'card',
+            borderBottomRightRadius: 'card',
+          }
+        : {},
+    })}
+`
 
 const DataCol = styled.div<{ align: Column['align'] }>`
   background: initial;
