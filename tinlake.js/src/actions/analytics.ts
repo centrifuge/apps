@@ -1,4 +1,5 @@
 import BN from 'bn.js'
+import { ethers } from 'ethers'
 import { ZERO_ADDRESS } from '../services/ethereum'
 import { Constructor, TinlakeParams } from '../Tinlake'
 import { Investor, Loan, ScoreCard } from '../types/tinlake'
@@ -311,6 +312,20 @@ export function AnalyticsActions<ActionsBase extends Constructor<TinlakeParams>>
       const poolData = await registry.pools(0)
       return poolData[3]
     }
+
+    getRwaMarketAUsdcBalance = async (user: string) => {
+      const lendingPoolAbi = ['function balanceOf(address user) external view override returns (uint256)']
+
+      const contract = new ethers.Contract(
+        '0x9bc94a6a0d99fe559fa4dc5354ce3b96b210c210',
+        lendingPoolAbi,
+        this.signer || this.provider
+      )
+      return await this.toBN(contract.balanceOf(user))
+
+      // TODO: add contract configuration and replace the method body with the following:
+      // return await await this.toBN(this.contract('RWA_MARKET_AUSDC').balanceOf(user))
+    }
   }
 }
 
@@ -365,6 +380,7 @@ export type IAnalyticsActions = {
   getJuniorOrderedInEpoch(user: string): Promise<number>
   getAvailableFunds(): Promise<BN>
   getPoolRegistryHash(registryAddress: string): Promise<string>
+  getRwaMarketAUsdcBalance(user: string): Promise<BN>
 }
 
 export default AnalyticsActions

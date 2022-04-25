@@ -74,7 +74,8 @@ const getPoolGroupIndex = (p: PoolData): number => {
 }
 
 const PoolList: React.FC<Props> = ({ poolsData }) => {
-  const { showAll, showArchived, showCapacity } = useDebugFlags()
+  const { showAll, showArchived, showCapacity, showRwaDetail } = useDebugFlags()
+
   const isMobile = useMedia({ below: 'medium' })
 
   const pools = poolsData?.pools?.filter((p) => showArchived || !p.isArchived)
@@ -180,8 +181,8 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
           })}
         </Header>
       )}
-      <Link href={'https://rwamarket.io/'} passHref key="rwa-market">
-        <RwaMarketRow isMobile={isMobile as boolean} interactive as="a" target="_blank" />
+      <Link href={showRwaDetail ? '/pool/rwa' : 'https://rwamarket.io/'} passHref key="rwa-market">
+        <RwaMarketRow isMobile={isMobile as boolean} interactive as="a" target={showRwaDetail ? '' : '_blank'} />
       </Link>
       {pools?.map((p, i) => (
         <Link href={p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`} shallow passHref key={`${p.id}-${i}`}>

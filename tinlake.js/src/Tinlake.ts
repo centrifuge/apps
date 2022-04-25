@@ -31,6 +31,7 @@ const contractNames = [
   'POOL_ADMIN',
   'CLAIM_CFG',
   'CLERK',
+  'RWA_MARKET_AUSDC',
 ] as const
 
 export type PendingTransaction = {

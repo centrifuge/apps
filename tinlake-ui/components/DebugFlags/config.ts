@@ -299,6 +299,10 @@ export const flagsConfig = {
     type: 'checkbox',
     default: params.get('show_close_epoch') != null,
   },
+  showRwaDetail: {
+    type: 'checkbox',
+    default: params.get('showRwaDetail') != null,
+  },
   allowMultipleBorrow: {
     type: 'checkbox',
     default: params.get('allowMultipleBorrow') != null,
