@@ -1,18 +1,18 @@
 import { formatCurrencyAmount, formatPercentage } from '@centrifuge/centrifuge-js'
-import { IconArrowDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
+import { IconArrowDown, IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import { BN } from '@polkadot/util'
 import * as React from 'react'
 import { useHistory } from 'react-router'
+import styled from 'styled-components'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, OrderBy } from './DataTable'
-import { TokenAvatar } from './TokenAvatar'
 
 export type Token = {
   poolMetadata: string
   yield: string
   protection: string
   valueLocked: string
-  currency: Record<string, any>
+  currency: string
   name: string
   index: number
   poolId: string
@@ -72,6 +72,7 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
       data={tokens}
       columns={columns}
       defaultSortKey="valueLocked"
+      rounded={false}
       onRowClicked={(token: Token) => {
         history.push(`/tokens/${token.poolId}/${token.index}`)
       }}
@@ -84,7 +85,7 @@ const TokenName: React.VFC<RowProps> = ({ token }) => {
   const symbol = metadata?.tranches?.find((_, index) => index === token.index)?.symbol
   return (
     <Shelf gap="2">
-      <TokenAvatar label={symbol || ''} size="small" />
+      <Thumbnail label={symbol || ''} size="small" />
       <Text variant="body2" color="textPrimary" fontWeight={600}>
         {metadata?.pool?.name} {token?.name}
       </Text>
@@ -111,18 +112,27 @@ const Protection: React.VFC<RowProps> = ({ token }) => {
 }
 
 const ValueLocked: React.VFC<RowProps> = ({ token }) => {
-  return <Text variant="body2">{formatCurrencyAmount(token?.valueLocked)}</Text>
+  return <Text variant="body2">{formatCurrencyAmount(token?.valueLocked, token.currency)}</Text>
 }
 
 const SortableHeader: React.VFC<{ label: string; orderBy?: OrderBy }> = ({ label, orderBy }) => {
   return (
-    <Shelf>
+    <StyledHeader>
       {label}
       <IconArrowDown
-        color={orderBy ? 'textSecondary' : 'transparent'}
+        color={orderBy ? 'currentColor' : 'transparent'}
         size={16}
         style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
       />
-    </Shelf>
+    </StyledHeader>
   )
 }
+
+const StyledHeader = styled(Shelf)`
+  color: ${({ theme }) => theme.colors.textSecondary};
+
+  &:hover,
+  &:hover > svg {
+    color: ${({ theme }) => theme.colors.textInteractiveHover};
+  }
+`

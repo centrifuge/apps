@@ -6,7 +6,8 @@ import { ButtonGroup } from '../components/ButtonGroup'
 import { CardHeader } from '../components/CardHeader'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { ConnectButton } from '../components/ConnectButton'
-import { InvestRedeemDialog } from '../components/InvestRedeemDialog'
+import { InvestRedeemDialog } from '../components/Dialogs/InvestRedeemDialog'
+import { InvestRedeem } from '../components/InvestRedeem'
 import { LabelValueList } from '../components/LabelValueList'
 import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/PageWithSideBar'
@@ -15,8 +16,10 @@ import { useBalances } from '../utils/useBalances'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 
 export const InvestmentsTokenPage: React.FC = () => {
+  const { pid: poolId, tid } = useParams<{ pid: string; tid: string }>()
+  const trancheId = Number(tid)
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar={<InvestRedeem poolId={poolId} trancheId={trancheId} />}>
       <Token />
     </PageWithSideBar>
   )

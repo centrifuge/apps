@@ -13,7 +13,7 @@ type Props = {
 
 const NavigationClickable = styled(Shelf)<{ $active?: boolean }>`
   cursor: pointer;
-  background: ${({ $active, theme }) => $active && theme.colors.backgroundSecondary};
+  background: ${({ $active }) => $active && '#EDF2FF'};
   :hover {
     color: ${({ theme }) => theme.colors.accentPrimary};
   }
@@ -37,9 +37,9 @@ export const NavigationItem: React.FC<Props> = ({ label, icon, href, children, d
       {isDesktop ? (
         <>
           <NavigationClickable
-            paddingLeft={1}
-            paddingRight={1}
-            borderRadius={4}
+            px={2}
+            py={1}
+            borderRadius={16}
             height={32}
             justifyContent="space-between"
             alignItems="center"
