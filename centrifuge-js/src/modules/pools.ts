@@ -160,6 +160,7 @@ export type Pool = {
   }
   value: string
   minEpochTime: number
+  createdAt?: string | null
 }
 
 export type DetailedPool = Omit<Pool, 'tranches'> & {

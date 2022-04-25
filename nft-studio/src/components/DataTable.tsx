@@ -55,7 +55,7 @@ export const DataTable = <T extends Record<string, any>>({
   )
 
   return (
-    <Stack>
+    <Stack as={rounded ? Card : Stack}>
       <Shelf>
         {columns.map((col, i) => (
           <HeaderCol
@@ -72,7 +72,7 @@ export const DataTable = <T extends Record<string, any>>({
           </HeaderCol>
         ))}
       </Shelf>
-      <Stack as={rounded ? Card : Stack}>
+      <Stack>
         {sortedData?.map((row, i) => (
           <Row
             rounded={rounded}
@@ -101,11 +101,6 @@ const Row = styled(Shelf)<any>`
       appearance: 'none',
       border: 'none',
       backgroundColor: 'transparent',
-      '&:not(:last-child)': {
-        borderWidth: '0 0 1px',
-        borderStyle: 'solid',
-        borderColor: 'borderPrimary',
-      },
       'button&:hover': {
         backgroundColor: 'backgroundSecondary',
         cursor: 'pointer',
@@ -113,12 +108,6 @@ const Row = styled(Shelf)<any>`
       '&:focus-visible': {
         boxShadow: 'inset 0 0 0 3px var(--fabric-color-focus)',
       },
-      '&:first-child': rounded
-        ? {
-            borderTopLeftRadius: 'card',
-            borderTopRightRadius: 'card',
-          }
-        : {},
       '&:last-child': rounded
         ? {
             borderBottomLeftRadius: 'card',
