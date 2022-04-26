@@ -79,7 +79,7 @@ export const RiskGroupsInput: React.FC = () => {
                   validate={validate.lossGivenDefault}
                 />
                 <TextInput
-                  label="Expected loss"
+                  label="Risk adjustment"
                   disabled
                   value={Math.max(
                     Math.min(

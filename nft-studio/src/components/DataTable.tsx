@@ -16,7 +16,7 @@ export type OrderBy = 'asc' | 'desc'
 
 export type Column = {
   header: string | ((orderBy: OrderBy) => React.ReactNode)
-  cell: (row: any) => React.ReactNode
+  cell: (row: any, index: number) => React.ReactNode
   align?: string
   flex?: string
   sortKey?: string
@@ -83,7 +83,7 @@ export const DataTable = <T extends Record<string, any>>({
           >
             {columns.map((col) => (
               <DataCol style={{ flex: col.flex }} align={col?.align} key={`${col.header}-${i}`}>
-                {col.cell(row)}
+                {col.cell(row, i)}
               </DataCol>
             ))}
           </Row>
@@ -145,6 +145,13 @@ const DataCol = styled.div<{ align: Column['align'] }>`
       case 'left':
         return css({
           justifyContent: 'flex-start',
+          '&:last-child': {
+            paddingRight: '16px',
+          },
+        })
+      case 'center':
+        return css({
+          justifyContent: 'center',
           '&:last-child': {
             paddingRight: '16px',
           },

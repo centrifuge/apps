@@ -2,6 +2,7 @@ import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
+import { useDebugFlags } from '../../components/DebugFlags'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
@@ -18,6 +19,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   const pool = usePool(pid)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const theme = useTheme()
+  const { showAdditionalIssuerTabs } = useDebugFlags()
 
   const basePath = `/issuer/${pid}`
 
@@ -59,8 +61,10 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
           <NavigationTabsItem to={`${basePath}`}>Portfolio</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}`}>Assets</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}`}>Liquidity</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}`}>Investors</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}/configuration`}>Configuration</NavigationTabsItem>
+          {showAdditionalIssuerTabs && <NavigationTabsItem to={`${basePath}`}>Investors</NavigationTabsItem>}
+          {showAdditionalIssuerTabs && (
+            <NavigationTabsItem to={`${basePath}/configuration`}>Configuration</NavigationTabsItem>
+          )}
           <NavigationTabsItem to={`${basePath}`}>Data</NavigationTabsItem>
         </NavigationTabs>
       </Shelf>
