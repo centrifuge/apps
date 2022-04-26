@@ -104,3 +104,10 @@ export const EmptyParagraph = styled.p`
   line-height: 32px;
   font-weight: 500;
 `
+
+export const RwaLabel = styled.span`
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 20px;
+  color: #777777;
+`

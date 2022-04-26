@@ -4,13 +4,15 @@ import Link from 'next/link'
 import * as React from 'react'
 import { Button } from '../../components/Button'
 import { ButtonGroup } from '../../components/ButtonGroup'
+import { useDebugFlags } from '../../components/DebugFlags'
 import { Box, Stack, Wrap } from '../../components/Layout'
-import PoolList from '../../components/PoolList'
+import PoolList, { RwaMarketStandaloneRow } from '../../components/PoolList'
 import PoolsMetrics from '../../components/PoolsMetrics'
 import { Text } from '../../components/Text'
 import TinlakeExplainer from '../../components/TinlakeExplainer'
 import { IpfsPools } from '../../config'
 import { useAddress } from '../../utils/useAddress'
+import { useMedia } from '../../utils/useMedia'
 import { useInvestorOnboardingState } from '../../utils/useOnboardingState'
 import { usePools } from '../../utils/usePools'
 
@@ -22,11 +24,13 @@ const Dashboard: React.FC<Props> = () => {
   const pools = usePools()
   const address = useAddress()
   const { data } = useInvestorOnboardingState()
+  const isMobile = useMedia({ below: 'medium' })
+  const { showRwaDetail } = useDebugFlags()
 
   return !pools.data ? (
     <Spinner height={'calc(100vh - 89px - 84px)'} message={'Loading...'} />
   ) : (
-    <Stack gap="xlarge" pt="xlarge">
+    <Stack gap="medium" pt="xlarge">
       {address ? (
         data &&
         !data.completed && (
@@ -52,8 +56,13 @@ const Dashboard: React.FC<Props> = () => {
           <TinlakeExplainer />
         </Box>
       )}
-
       <PoolsMetrics totalValue={pools.data.totalValue} />
+      {showRwaDetail && (
+        <Link href="/pool/rwa" passHref>
+          <RwaMarketStandaloneRow isMobile={!!isMobile} interactive as="a" target="" />
+        </Link>
+      )}
+
       <PoolList poolsData={pools.data} />
     </Stack>
   )

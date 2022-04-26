@@ -33,6 +33,7 @@ import {
   Icon,
   Name,
   PoolRow,
+  RwaLabel,
   SubNumber,
   Type,
 } from './styles'
@@ -181,9 +182,11 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
           })}
         </Header>
       )}
-      <Link href={showRwaDetail ? '/pool/rwa' : 'https://rwamarket.io/'} passHref key="rwa-market">
-        <RwaMarketRow isMobile={isMobile as boolean} interactive as="a" target={showRwaDetail ? '' : '_blank'} />
-      </Link>
+      {!showRwaDetail && (
+        <Link href="https://rwamarket.io/" passHref key="rwa-market">
+          <RwaMarketRow isMobile={isMobile as boolean} interactive as="a" target="_blank" />
+        </Link>
+      )}
       {pools?.map((p, i) => (
         <Link href={p.isArchived ? `/pool/${p.slug}` : `/pool/${p.id}/${p.slug}`} shallow passHref key={`${p.id}-${i}`}>
           <Row
@@ -289,7 +292,7 @@ const fetchReserves = async (): Promise<any> => {
   })
 }
 
-export const RwaMarketRow: React.FC<RwaMarketRowProps & PropsOf<typeof PoolRow>> = ({ isMobile, ...rest }) => {
+const RwaMarketRow: React.FC<RwaMarketRowProps & PropsOf<typeof PoolRow>> = ({ isMobile, ...rest }) => {
   const poolIcon = <Icon src={'/static/rwa-market-icon.png'} />
   const poolTitle = (
     <Stack gap="xsmall" flex="1 1 auto">
@@ -323,6 +326,86 @@ export const RwaMarketRow: React.FC<RwaMarketRowProps & PropsOf<typeof PoolRow>>
       subHeader: '30 days',
       cell: () => {
         return <SubNumber>Target: 3.5 % APR</SubNumber>
+      },
+    },
+  ]
+    .filter(Boolean)
+    .flat() as Column[]
+
+  const getMarketData = async () => {
+    const reserves = await fetchReserves()
+    setMarketSize(new BN(reserves.data.reserves[0].totalLiquidity).div(new BN(10).pow(new BN(6))))
+  }
+
+  React.useEffect(() => {
+    getMarketData()
+  }, [])
+
+  return (
+    <PoolRow {...rest}>
+      {isMobile ? (
+        <Stack gap="small">
+          <Shelf gap="xsmall">
+            {poolIcon}
+            {poolTitle}
+          </Shelf>
+          <Divider bleedX="small" width="auto" />
+          <ValuePairList
+            variant="primary"
+            items={columns.map((col) => ({ term: col.header, termSuffix: col.subHeader, value: col.cell() }))}
+          />
+        </Stack>
+      ) : (
+        <Shelf gap="small">
+          {poolIcon}
+          {poolTitle}
+          {columns.map((col) => {
+            const Col = isAlignedLeft(col) ? DataColLeft : DataCol
+            return <Col>{col.cell()}</Col>
+          })}
+        </Shelf>
+      )}
+    </PoolRow>
+  )
+}
+
+export const RwaMarketStandaloneRow: React.FC<RwaMarketRowProps & PropsOf<typeof PoolRow>> = ({
+  isMobile,
+  ...rest
+}) => {
+  const poolIcon = <Icon src={'/static/rwa-market-icon.png'} />
+  const poolTitle = (
+    <Stack gap="xsmall" flex="1 1 auto">
+      <Name>Real-World Asset Market</Name>
+      <Type>An index of Tinlake pools built on Centrifuge &amp; Aave</Type>
+    </Stack>
+  )
+
+  const [marketSize, setMarketSize] = React.useState(new BN(0))
+
+  const columns: any[] = [
+    {
+      header: 'Market size',
+      cell: () => (
+        <Stack alignItems="center">
+          <Value value={toNumber(marketSize, 0)} unit={'USDC'} />
+          {!isMobile && <RwaLabel>Market size</RwaLabel>}
+        </Stack>
+      ),
+    },
+    {
+      header: (
+        <Tooltip id="seniorApy" underline>
+          DROP APY
+        </Tooltip>
+      ),
+      cell: () => {
+        return (
+          <Stack alignItems="center">
+            <SubNumber>Target: 3.5 % APR</SubNumber>
+            {!isMobile && <RwaLabel>DROP APY</RwaLabel>}
+          </Stack>
+        )
       },
     },
   ]
