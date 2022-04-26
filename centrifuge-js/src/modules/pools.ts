@@ -728,7 +728,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           switchMap(([poolValue, navValue, queryData]) => {
             const pool = poolValue.toJSON() as unknown as PoolDetailsData
             const nav = navValue.toJSON() as unknown as NAVDetailsData
-            const createdAt = queryData?.pool.createdAt ?? null
+            const createdAt = queryData?.pool?.createdAt ?? null
             const metadata = (poolValue.toHuman() as any).metadata
 
             const $tokenIssuance = combineLatest(
