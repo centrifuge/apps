@@ -123,7 +123,6 @@ export default class Tinlake {
     this.contracts = {}
     // set root & proxy contracts
     contractNames.forEach((name) => {
-      console.log(name, this.contractAbis[name], this.contractAddresses[name])
       if (this.contractAbis[name] && this.contractAddresses[name]) {
         this.contracts[name] = this.createContract(this.contractAddresses[name]!, name)
       }
