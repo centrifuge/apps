@@ -20,7 +20,12 @@ const lightTheme: DefaultTheme = { ...centrifugeLight }
 const Home: React.FC<Props> = (props: Props) => {
   return (
     <IpfsPoolsProvider value={props.ipfsPools}>
-      <TinlakeProvider>
+      <TinlakeProvider
+        addresses={{
+          RWA_MARKET_LENDING_POOL: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+          RWA_MARKET_AUSDC: '0x9bc94a6a0d99fe559fa4dc5354ce3b96b210c210',
+        }}
+      >
         <ThemeProvider theme={lightTheme}>
           <WithFooter>
             <Head>

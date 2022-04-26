@@ -269,6 +269,25 @@ export function LenderActions<ActionBase extends Constructor<TinlakeParams>>(Bas
     calcJuniorDisburse = async (user: string) => {
       return disburseToBN(await this.contract('JUNIOR_TRANCHE')['calcDisburse(address)'](user))
     }
+
+    depositRwaMarket = async (amount: string, senderAddress: string) => {
+      const allowance = (await (this as any).getRwaMarketAllowance(senderAddress)) || new BN(0)
+
+      if (allowance.lt(new BN(amount))) {
+        const approvalTx = await (this as any).approveRwaMarket(maxUint256)
+        await this.getTransactionReceipt(approvalTx)
+      }
+
+      return this.pending(
+        this.contract('RWA_MARKET_LENDING_POOL').deposit(
+          '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+          amount,
+          senderAddress,
+          0,
+          this.overrides
+        )
+      )
+    }
   }
 }
 
@@ -317,6 +336,7 @@ export type ILenderActions = {
   submitSeniorRedeemOrderWithAllowance(amount: string, senderAddress: string): Promise<PendingTransaction>
   submitJuniorSupplyOrderWithAllowance(amount: string, senderAddress: string): Promise<PendingTransaction>
   submitJuniorRedeemOrderWithAllowance(amount: string, senderAddress: string): Promise<PendingTransaction>
+  depositRwaMarket(amount: string, senderAddress: string): Promise<PendingTransaction>
 }
 
 export default LenderActions

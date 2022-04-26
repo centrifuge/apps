@@ -75,7 +75,12 @@ export const RwaContextProvider: React.FC = ({ children }) => {
 
     if (!reservesUSDC || !mounted) return
 
-    setMarketSize(new BN(reservesUSDC.totalLiquidity).div(new BN(10).pow(new BN(6))))
+    // TODO unit need to be converted to USDC
+    const liquiditySum = resp.reduce((acc, rsv) => {
+      return acc.add(new BN(rsv.totalLiquidity))
+    }, new BN(0))
+
+    setMarketSize(liquiditySum)
     setTotalBorrowed(new BN(reservesUSDC.totalCurrentVariableDebt))
     setReserves(resp)
   }

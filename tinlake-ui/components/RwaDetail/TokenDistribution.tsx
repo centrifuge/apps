@@ -1,3 +1,4 @@
+import { addThousandsSeparators, baseToDisplay, toPrecision } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import React, { useMemo } from 'react'
 import { Cell, Pie, PieChart, PieLabelRenderProps } from 'recharts'
@@ -43,19 +44,20 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, pay
   )
 }
 
+const formatUsdc = (usdc: string) => addThousandsSeparators(toPrecision(baseToDisplay(usdc || '0', 6), 4))
+
 export const TokenDistribution: React.FC = () => {
   const { reserves } = useRwaContext()
   const tokenReserves = reserves?.filter((res) => res.symbol !== 'USDC')
 
   const chartData = tokenReserves?.map((res) => ({
     name: res.symbol,
-    value:
-      parseFloat(res.totalCurrentVariableDebt) || 1e-18 /*  || 1e-18 is a fix to show chart if all the values are 0 */,
+    value: parseFloat(res.totalLiquidity) || 1e-18 /*  || 1e-18 is a fix to show chart if all the values are 0 */,
   }))
 
   const totalBorrowedBN = useMemo<BN>(() => {
     if (!tokenReserves) return new BN(0)
-    return tokenReserves.reduce((acc, res) => acc.add(new BN(res.totalCurrentVariableDebt)), new BN(0))
+    return tokenReserves.reduce((acc, res) => acc.add(new BN(res.totalLiquidity)), new BN(0))
   }, [tokenReserves])
 
   return (
@@ -86,12 +88,12 @@ export const TokenDistribution: React.FC = () => {
             <TokenIcon src={assetsList.find((a) => a.symbol === res.symbol)?.icon} />
             <SymbolId>{res.symbol}</SymbolId>
             <BodyText>{res.name}</BodyText>
-            <TokenListItemVal>{res.totalCurrentVariableDebt}</TokenListItemVal>
+            <TokenListItemVal>{formatUsdc(res.totalLiquidity)} USDC</TokenListItemVal>
           </TokenListItem>
         ))}
         <TokenListItem>
           <SymbolId>Total borrowed</SymbolId>
-          <TokenListItemVal>{totalBorrowedBN.toString()}</TokenListItemVal>
+          <TokenListItemVal>{formatUsdc(totalBorrowedBN.toString())} USDC</TokenListItemVal>
         </TokenListItem>
       </TokenList>
     </Stack>

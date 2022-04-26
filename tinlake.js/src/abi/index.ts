@@ -17,6 +17,8 @@ import contractAbiProxy from './Proxy.abi.json'
 import contractAbiProxyRegistry from './ProxyRegistry.abi.json'
 import contractAbiReserve from './Reserve.abi.json'
 import contractAbiCurrency from './RestrictedToken.abi.json'
+import contractAbiRwaMarket from './RwaMarketAusdc.abi.json'
+import contractAbiRwaMarketLendingPool from './RwaMarketLendingPool.abi.json'
 import contractAbiShelf from './Shelf.abi.json'
 import contractAbiNFT from './test/SimpleNFT.abi.json'
 import contractAbiRoot from './TinlakeRoot.abi.json'
@@ -53,4 +55,6 @@ export default {
   CLAIM_CFG: contractAbiClaimCFG,
   FEED_V2: contractAbiNavFeed_V2,
   POOL_ADMIN_V2: contractAbiPoolAdmin,
+  RWA_MARKET_AUSDC: contractAbiRwaMarket,
+  RWA_MARKET_LENDING_POOL: contractAbiRwaMarketLendingPool,
 } as ContractAbis

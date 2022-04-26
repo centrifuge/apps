@@ -56,6 +56,15 @@ export function CurrencyActions<ActionsBase extends Constructor<TinlakeParams>>(
       const tokenContract = this.contract('SENIOR_TOKEN')
       return this.pending(tokenContract.approve(this.contractAddresses['SENIOR_TRANCHE'], tokenAmount, this.overrides))
     }
+
+    getRwaMarketAllowance = async (owner: string, spender: string) => {
+      if (!this.contractAddresses['RWA_MARKET_AUSDC']) return
+      return await this.toBN(this.contract('RWA_MARKET_AUSDC').allowance(owner, spender))
+    }
+
+    approveRwaMarket = async (user: string, currencyAmount: string) => {
+      return this.pending(this.contract('RWA_MARKET_AUSDC').approve(user, currencyAmount, this.overrides))
+    }
   }
 }
 
@@ -72,6 +81,8 @@ export type ICurrencyActions = {
   approveJuniorForToken: (tokenAmount: string) => Promise<PendingTransaction>
   getJuniorTokenBalance(usr: string): Promise<BN>
   getSeniorTokenBalance(usr: string): Promise<BN>
+  getRwaMarketAllowance(owner: string, spender: string): Promise<BN | undefined>
+  approveRwaMarket: (user: string, currencyAmount: string) => Promise<PendingTransaction>
 }
 
 export default CurrencyActions

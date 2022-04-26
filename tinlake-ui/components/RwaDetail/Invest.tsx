@@ -12,20 +12,38 @@ export const Invest: React.FC = () => {
   const tinlake = useTinlake()
   const [usdcValue, setUsdcValue] = useState<string>('0')
   const [error] = useState<string>()
-  const [balance, setBalance] = useState<BN>()
+  const [ausdcBalance, setAusdcBalance] = useState<BN>()
+  const [usdcBalance, setUsdcBalance] = useState<BN>()
   const address = useAddress()
 
-  const balanceFormatted = addThousandsSeparators(toPrecision(baseToDisplay(balance || '0', 6), 4))
+  const ausdcBalanceFormatted = addThousandsSeparators(toPrecision(baseToDisplay(ausdcBalance || '0', 6), 4))
 
-  const loadBalance = async () => {
+  const loadAusdcBalance = async () => {
     if (address) {
       const bal = await tinlake.getRwaMarketAUsdcBalance(address)
-      setBalance(bal)
+      setAusdcBalance(bal)
+    }
+  }
+
+  const loadUsdcBalance = async () => {
+    if (address) {
+      const bal = await tinlake.getRwaMarketUsdcBalance(address)
+      setUsdcBalance(bal)
+    }
+  }
+
+  const deposit = async () => {
+    const usdcValueBN = new BN(usdcValue)
+
+    if (address && usdcBalance?.gte(usdcValueBN)) {
+      console.log('calling depositRwaMarket', usdcValue, address)
+      await tinlake.depositRwaMarket(usdcValue, address)
     }
   }
 
   useEffect(() => {
-    loadBalance()
+    loadAusdcBalance()
+    loadUsdcBalance()
   }, [address])
 
   return (
@@ -33,14 +51,14 @@ export const Invest: React.FC = () => {
       <Title>Invest</Title>
       <Shelf justifyContent="space-between">
         <BodyText>Your balance</BodyText>
-        <BodyText>{balanceFormatted} aUSDC</BodyText>
+        <BodyText>{ausdcBalanceFormatted} aUSDC</BodyText>
       </Shelf>
       <div>
         <TokenInput
           token={{ symbol: 'USDC', img: '/static/rwa/USDC.svg', decimals: 6, precision: 18 }}
           value={usdcValue}
           error={error || undefined}
-          maxValue={balance}
+          maxValue={usdcBalance}
           limitLabel="Your balance"
           onChange={(val: string) => {
             setUsdcValue(val)
@@ -49,8 +67,8 @@ export const Invest: React.FC = () => {
         />
       </div>
       <Shelf paddingTop="24px" gap="16px" justifyContent="flex-end">
-        <Button label="Cancel" />
-        <Button primary label="Deposit" />
+        <Button label="Cancel" onClick={() => setUsdcValue('0')} />
+        <Button primary label="Deposit" onClick={deposit} />
       </Shelf>
     </Stack>
   )
