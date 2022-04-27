@@ -8,20 +8,22 @@ import { Text } from '../Text'
 export type TabsProps = {
   selectedIndex: number
   onChange?: (index: number) => void
-  children: React.ReactElement[]
+  children: React.ReactNode[]
 }
 
 export const Tabs: React.VFC<TabsProps> = ({ selectedIndex, onChange, children }) => {
   return (
     <Shelf>
-      {React.Children.map(children, (child: React.ReactElement, index) =>
-        React.cloneElement(child, {
-          active: index === selectedIndex,
-          onClick: () => {
-            if (selectedIndex !== index) onChange?.(index)
-          },
-          tabIndex: index === selectedIndex ? -1 : undefined,
-        })
+      {React.Children.map(children, (child, index) =>
+        React.isValidElement(child)
+          ? React.cloneElement(child, {
+              active: index === selectedIndex,
+              onClick: () => {
+                if (selectedIndex !== index) onChange?.(index)
+              },
+              tabIndex: index === selectedIndex ? -1 : undefined,
+            })
+          : child
       )}
     </Shelf>
   )

@@ -62,7 +62,7 @@ export const SearchInput: React.FC<Omit<TextInputProps, 'rightElement'>> = ({
       disabled={disabled}
       errorMessage={errorMessage}
       inputElement={<StyledTextInput type="search" disabled={disabled} {...inputProps} />}
-      rightElement={<IconSearch size="iconSmall" color="textPrimary" />}
+      rightElement={<IconSearch size="iconMedium" color="textPrimary" />}
     />
   )
 }
