@@ -24,7 +24,7 @@ type ColorValue = string
 
 type ThemeColors = {
   [k in ColorName]: ColorValue
-}
+} & { accentScale: Record<number, string> }
 
 // Lengths
 
