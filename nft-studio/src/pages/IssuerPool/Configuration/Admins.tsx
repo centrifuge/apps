@@ -47,7 +47,7 @@ export const Admins: React.FC = () => {
     [poolPermissions]
   )
 
-  const { execute, isLoading } = useCentrifugeTransaction('Create pool', (cent) => cent.pools.updateRoles, {
+  const { execute, isLoading } = useCentrifugeTransaction('Update admins', (cent) => cent.pools.updateRoles, {
     onSuccess: () => {
       setIsEditing(false)
     },
