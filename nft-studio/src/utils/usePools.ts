@@ -81,12 +81,12 @@ export type PoolMetadata = {
   ]
   riskGroups: [
     {
-      id: string
-      advance_rate: string
-      financing_fee: string
-      probability_of_default: string
-      loss_given_default: string
-      discount_rate: string
+      advanceRate: string
+      financingFee: string
+      probabilityOfDefault: string
+      lossGivenDefault: string
+      discountRate: string
+      name: string
     }
   ]
   onboarding: {

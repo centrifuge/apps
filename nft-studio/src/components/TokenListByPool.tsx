@@ -1,23 +1,20 @@
-import { formatPercentage } from '@centrifuge/centrifuge-js'
+import { feeToApr, formatPercentage } from '@centrifuge/centrifuge-js'
 import { IconArrowDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
 import { BN } from '@polkadot/util'
 import * as React from 'react'
-import { useHistory } from 'react-router'
+import { useHistory, useParams } from 'react-router'
 import styled from 'styled-components'
+import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, OrderBy } from './DataTable'
 
 export type TokenByPool = {
-  apy?: string
+  apy: string
   protection: string
   name: string
   symbol: string
-  poolName?: string
+  poolName: string
   index: number
   poolId: string
-}
-
-type Props = {
-  tokens: TokenByPool[]
 }
 
 type RowProps = {
@@ -64,8 +61,27 @@ const columns: Column[] = [
   },
 ]
 
-export const TokenListByPool: React.FC<Props> = ({ tokens }) => {
+export const TokenListByPool: React.FC = () => {
   const history = useHistory()
+  const { pid } = useParams<{ pid: string }>()
+  const pool = usePool(pid)
+  const { data: metadata } = usePoolMetadata(pool)
+
+  if (!pool || !pool.tranches) return null
+
+  const tokens: TokenByPool[] = pool?.tranches
+    .map((tranche) => {
+      return {
+        apy: tranche?.interestPerSec ? feeToApr(tranche?.interestPerSec) : '',
+        protection: tranche.ratio,
+        name: tranche.name,
+        symbol: metadata?.tranches?.find((_, index) => index === tranche.index)?.symbol || '',
+        poolName: metadata?.pool?.name || '',
+        index: tranche.index,
+        poolId: pid,
+      }
+    })
+    .reverse()
 
   return (
     <DataTable

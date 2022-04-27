@@ -1,9 +1,10 @@
-import { feeToApr, formatCurrencyAmount } from '@centrifuge/centrifuge-js'
+import { formatCurrencyAmount } from '@centrifuge/centrifuge-js'
 import { Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
+import { AssetByRiskGroup } from '../../../components/AssetByRiskGroup'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSummary } from '../../../components/PageSummary'
@@ -52,36 +53,20 @@ const PoolDetailOverview: React.FC = () => {
     { label: <Tooltips type="averageAssetMaturity" />, value: avgMaturity },
   ]
 
-  const tokens = pool?.tranches
-    .map((tranche) => {
-      return {
-        apy: tranche?.interestPerSec ? feeToApr(tranche?.interestPerSec) : '',
-        protection: tranche.ratio,
-        name: tranche.name,
-        symbol: metadata?.tranches?.find((_, index) => index === tranche.index)?.symbol || '',
-        poolName: metadata?.pool?.name,
-        index: tranche.index,
-        poolId: pid,
-      }
-    })
-    .reverse()
-
   return (
     <>
       <PageSummary data={pageSummaryData} />
-      {tokens && tokens.length && (
-        <Stack
-          p="3"
-          gap="2"
-          as="section"
-          style={{
-            boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
-          }}
-        >
-          <Text variant="heading2">Investment Tokens</Text>
-          <TokenListByPool tokens={tokens} />
-        </Stack>
-      )}
+      <Stack
+        p="3"
+        gap="2"
+        as="section"
+        style={{
+          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
+        }}
+      >
+        <Text variant="heading2">Investment Tokens</Text>
+        <TokenListByPool />
+      </Stack>
       <Stack
         p="3"
         gap="1"
@@ -92,6 +77,19 @@ const PoolDetailOverview: React.FC = () => {
       >
         <Text variant="heading2">Issuer</Text>
         <IssuerSection metadata={metadata} p="3" />
+      </Stack>
+      <Stack
+        p="3"
+        gap="1"
+        as="section"
+        style={{
+          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
+        }}
+      >
+        <Text variant="heading2">
+          Asset portfolio <Text variant="body3">By risk groups</Text>
+        </Text>
+        <AssetByRiskGroup />
       </Stack>
     </>
   )

@@ -729,7 +729,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           switchMap(([poolValue, navValue, queryData]) => {
             const pool = poolValue.toJSON() as unknown as PoolDetailsData
             const nav = navValue.toJSON() as unknown as NAVDetailsData
-            const createdAt = queryData?.pool.createdAt ?? null
+            const createdAt = queryData?.pool?.createdAt ?? null
             const metadata = (poolValue.toHuman() as any).metadata
 
             const $tokenIssuance = combineLatest(
@@ -887,6 +887,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
       map((loanValues) => {
         return loanValues.map(([key, value]) => {
           const loan = value.toJSON() as unknown as LoanDetailsData
+          console.log('🚀 ~ loan', loan)
           const assetKey = (value.toHuman() as any).asset
           const mapped: Loan = {
             id: formatLoanKey(key as StorageKey<[u32, u32]>),
