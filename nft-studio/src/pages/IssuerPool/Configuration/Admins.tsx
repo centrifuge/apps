@@ -78,6 +78,8 @@ export const Admins: React.FC = () => {
     [form.values.admins]
   )
 
+  const poolAdminCount = rows.filter((r) => r.roles.PoolAdmin).length
+
   return (
     <FormikProvider value={form}>
       <Form>
@@ -121,7 +123,7 @@ export const Admins: React.FC = () => {
                           name={`admins.${row.index}.roles.PoolAdmin`}
                           as={Checkbox}
                           type="checkbox"
-                          disabled={!isEditing || isLoading}
+                          disabled={!isEditing || isLoading || (poolAdminCount === 1 && row.roles.PoolAdmin)}
                         />
                       ),
                       flex: '0 0 100px',
@@ -199,7 +201,7 @@ export const Admins: React.FC = () => {
                             variant="text"
                             icon={IconMinusCircle}
                             onClick={() => fldArr.remove(row.index)}
-                            disabled={isLoading}
+                            disabled={isLoading || (poolAdminCount === 1 && row.roles.PoolAdmin)}
                           />
                         ),
                       flex: '0 0 72px',

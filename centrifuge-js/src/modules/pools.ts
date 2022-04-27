@@ -291,13 +291,18 @@ export function getPoolsModule(inst: CentrifugeBase) {
     options?: TransactionOptions
   ) {
     const [poolId, add, remove] = args
+    const signer = inst.getSignerAddress()
+    // Make sure a removal of the PoolAdmin role of the signer is the last tx in the batch, otherwise the later txs will fail
+    const sortedRemove = [...remove].sort(([addr, role]) =>
+      role === 'PoolAdmin' && isSameAddress(addr, signer) ? 1 : -1
+    )
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.utility.batchAll([
           ...add.map(([addr, role]) => api.tx.permissions.addPermission('PoolAdmin', addr, poolId, role)),
-          ...remove.map(([addr, role]) => api.tx.permissions.rmPermission('PoolAdmin', addr, poolId, role)),
+          ...sortedRemove.map(([addr, role]) => api.tx.permissions.rmPermission('PoolAdmin', addr, poolId, role)),
         ])
         return inst.wrapSignAndSendRx(api, submittable, options)
       })
