@@ -50,7 +50,7 @@ const DEFAULT_ASSET_CLASS = 'Art NFT'
 
 export const IssuerCreatePoolPage: React.FC = () => {
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar={false}>
       <CreatePoolForm />
     </PageWithSideBar>
   )
@@ -249,7 +249,7 @@ const CreatePoolForm: React.VFC = () => {
         poolId,
         collectionId,
         tranches,
-        DEFAULT_CURRENCY,
+        'Usd',
         new BN(values.maxReserve as number).mul(new BN(10).pow(new BN(18))),
         metadataHash,
         epochSeconds,
