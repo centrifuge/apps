@@ -106,7 +106,7 @@ export const AssetByRiskGroup: React.FC = () => {
           riskAdjustment: '0',
         } as AssetByRiskGroup
       }
-      const reducedLoans = filteredLoans.reduce<AssetByRiskGroup>((prev, curr) => {
+      return filteredLoans.reduce<AssetByRiskGroup>((prev, curr) => {
         const amount = new BN(prev?.amount || '0').add(new BN(curr.outstandingDebt))
         const share = amount
           ?.muln(100)
@@ -120,7 +120,6 @@ export const AssetByRiskGroup: React.FC = () => {
           riskAdjustment: Dec(group?.lossGivenDefault).mul(Dec(group.probabilityOfDefault)).div(100).toString(),
         }
       }, initialRow)
-      return reducedLoans
     })
     return mappedRiskGroups
   }, [metadata, loans, pool])

@@ -887,7 +887,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
       map((loanValues) => {
         return loanValues.map(([key, value]) => {
           const loan = value.toJSON() as unknown as LoanDetailsData
-          console.log('🚀 ~ loan', loan)
           const assetKey = (value.toHuman() as any).asset
           const mapped: Loan = {
             id: formatLoanKey(key as StorageKey<[u32, u32]>),
