@@ -10,6 +10,7 @@ type Props<T> = {
   onRowClicked?: (row: T) => void
   defaultSortKey?: string
   rounded?: boolean
+  summary?: T
 }
 
 export type OrderBy = 'asc' | 'desc'
@@ -36,6 +37,7 @@ export const DataTable = <T extends Record<string, any>>({
   onRowClicked,
   defaultSortKey,
   rounded = true,
+  summary,
 }: Props<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: 'desc' } : {}
@@ -88,6 +90,21 @@ export const DataTable = <T extends Record<string, any>>({
             ))}
           </Row>
         ))}
+        {/* summary row is not included in sorting */}
+        {summary && (
+          <Row
+            rounded={rounded}
+            as={onRowClicked ? 'button' : 'div'}
+            onClick={onRowClicked && (() => onRowClicked(summary))}
+            tabIndex={onRowClicked ? 0 : undefined}
+          >
+            {columns.map((col) => (
+              <DataCol style={{ flex: col.flex }} align={col?.align}>
+                {col.cell(summary)}
+              </DataCol>
+            ))}
+          </Row>
+        )}
       </Stack>
     </Stack>
   )
@@ -100,6 +117,8 @@ const Row = styled(Shelf)<any>`
       height: '48px',
       appearance: 'none',
       border: 'none',
+      borderBottom: '1px solid',
+      borderBottomColor: 'borderPrimary',
       backgroundColor: 'transparent',
       'button&:hover': {
         backgroundColor: 'backgroundSecondary',
