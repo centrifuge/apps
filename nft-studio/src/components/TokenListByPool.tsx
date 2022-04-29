@@ -43,7 +43,7 @@ const columns: Column[] = [
     sortKey: 'symbol',
   },
   {
-    header: (orderBy: OrderBy) => <SortableHeader label="Minimum Protection" orderBy={orderBy} />,
+    header: (orderBy: OrderBy) => <SortableHeader label="Min. Protection" orderBy={orderBy} />,
     cell: (token: TokenByPool) => <Protection token={token} />,
     flex: '2',
     sortKey: 'protection',

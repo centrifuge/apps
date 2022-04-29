@@ -249,7 +249,7 @@ const CreatePoolForm: React.VFC = () => {
         poolId,
         collectionId,
         tranches,
-        'Usd',
+        DEFAULT_CURRENCY,
         new BN(values.maxReserve as number).mul(new BN(10).pow(new BN(18))),
         metadataHash,
         epochSeconds,
