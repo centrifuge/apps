@@ -1,8 +1,6 @@
-import centrifugeLight from '@centrifuge/fabric/dist/theme/centrifugeLight'
 import { GetStaticProps } from 'next'
 import Head from 'next/head'
 import * as React from 'react'
-import { DefaultTheme, ThemeProvider } from 'styled-components'
 import Auth from '../../../components/Auth'
 import Header from '../../../components/Header'
 import { IpfsPoolsProvider } from '../../../components/IpfsPoolsProvider'
@@ -15,8 +13,6 @@ interface Props {
   ipfsPools: IpfsPools
 }
 
-const lightTheme: DefaultTheme = { ...centrifugeLight }
-
 const Home: React.FC<Props> = (props: Props) => {
   return (
     <IpfsPoolsProvider value={props.ipfsPools}>
@@ -26,22 +22,15 @@ const Home: React.FC<Props> = (props: Props) => {
           RWA_MARKET_AUSDC: '0x9bc94a6a0d99fe559fa4dc5354ce3b96b210c210',
         }}
       >
-        <ThemeProvider theme={lightTheme}>
-          <WithFooter>
-            <Head>
-              <title>Real-World Asset Market | Tinlake | Centrifuge</title>
-            </Head>
-            <Auth>
-              <Header
-                poolTitle="Real-World Asset Market"
-                selectedRoute={''}
-                menuItems={[]}
-                ipfsPools={props.ipfsPools}
-              />
-              <RwaDetail />
-            </Auth>
-          </WithFooter>
-        </ThemeProvider>
+        <WithFooter>
+          <Head>
+            <title>Real-World Asset Market | Tinlake | Centrifuge</title>
+          </Head>
+          <Auth>
+            <Header poolTitle="Real-World Asset Market" selectedRoute={''} menuItems={[]} ipfsPools={props.ipfsPools} />
+            <RwaDetail />
+          </Auth>
+        </WithFooter>
       </TinlakeProvider>
     </IpfsPoolsProvider>
   )

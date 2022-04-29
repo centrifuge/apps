@@ -1,4 +1,3 @@
-import { Flex } from '@centrifuge/fabric/dist/components/Flex'
 import * as React from 'react'
 import styled from 'styled-components'
 import { Stack } from '../Layout'
@@ -6,7 +5,7 @@ import { Stack } from '../Layout'
 export const PageTitle: React.FC = () => {
   return (
     <div>
-      <Flex justifyContent="flex-start" alignItems="center" height="112px">
+      <Flex>
         <Icon src="/static/rwa/rwa-detail-logo.svg" />
 
         <Stack gap="4px" marginLeft="24px">
@@ -21,6 +20,13 @@ export const PageTitle: React.FC = () => {
     </div>
   )
 }
+
+const Flex = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 112px;
+`
 
 const Icon = styled.img`
   width: 40px;

@@ -1,4 +1,3 @@
-// import { Grid, Shelf } from '@centrifuge/fabric'
 import { addThousandsSeparators, baseToDisplay, toPrecision } from '@centrifuge/tinlake-js'
 import * as React from 'react'
 import styled from 'styled-components'
