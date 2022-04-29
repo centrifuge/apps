@@ -30,6 +30,28 @@ const initialRow: AssetByRiskGroup = {
 
 const COLOR_SCALE_OFFSET = 300
 
+const SortableHeader: React.VFC<{ label: string; orderBy?: OrderBy }> = ({ label, orderBy }) => {
+  return (
+    <StyledHeader>
+      {label}
+      <IconArrowDown
+        color={orderBy ? 'currentColor' : 'transparent'}
+        size={16}
+        style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+      />
+    </StyledHeader>
+  )
+}
+
+const StyledHeader = styled(Shelf)`
+  color: ${({ theme }) => theme.colors.textSecondary};
+
+  &:hover,
+  &:hover > svg {
+    color: ${({ theme }) => theme.colors.textInteractiveHover};
+  }
+`
+
 const columns: Column[] = [
   {
     align: 'left',
@@ -58,7 +80,7 @@ const columns: Column[] = [
     sortKey: 'share',
   },
   {
-    header: (orderBy: OrderBy) => <SortableHeader label="Finanacing fee" orderBy={orderBy} />,
+    header: (orderBy: OrderBy) => <SortableHeader label="Financing fee" orderBy={orderBy} />,
     cell: ({ financingFee }: AssetByRiskGroup) => <Text variant="body2">{financingFee ? `${financingFee}%` : ''}</Text>,
     flex: '1',
     sortKey: 'financingFee',
@@ -125,10 +147,11 @@ export const AssetByRiskGroup: React.FC = () => {
   }, [metadata, loans, pool])
 
   // temp solution while assets are still manually priced (in the future there will be a select to choose a riskGroup)
+  // represents all assets that could not be sorted into a riskGroup
   const remainingAssets: AssetByRiskGroup[] = React.useMemo(() => {
     const amountsSum = riskGroups.reduce((curr, prev) => curr.add(new BN(prev?.amount || '0')), new BN('0')).toString()
     const sharesSum = riskGroups.reduce((curr, prev) => curr.add(new BN(prev.share || '0')), new BN('0')).toString()
-    return !new BN(sharesSum).eqn(100)
+    return !new BN(sharesSum).eqn(100) && !new BN(sharesSum).eqn(0)
       ? [
           {
             name: 'Other',
@@ -172,6 +195,7 @@ export const AssetByRiskGroup: React.FC = () => {
     }
   }, [riskGroups, remainingAssets])
 
+  // biggest share of pie gets darkest color
   const dataWithColor = [...riskGroups, ...remainingAssets]
     .sort((a, b) => Number(a.amount) - Number(b.amount))
     .map((item, index) => {
@@ -197,7 +221,7 @@ export const AssetByRiskGroup: React.FC = () => {
           <PieChart data={sharesForPie} />
         </Shelf>
       )}
-      {dataWithColor.length > 1 ? (
+      {dataWithColor.length > 0 ? (
         <DataTable data={[...dataWithColor] || []} columns={columns} summary={totalRow} />
       ) : (
         <Text variant="label1">No data</Text>
@@ -205,25 +229,3 @@ export const AssetByRiskGroup: React.FC = () => {
     </>
   )
 }
-
-const SortableHeader: React.VFC<{ label: string; orderBy?: OrderBy }> = ({ label, orderBy }) => {
-  return (
-    <StyledHeader>
-      {label}
-      <IconArrowDown
-        color={orderBy ? 'currentColor' : 'transparent'}
-        size={16}
-        style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
-      />
-    </StyledHeader>
-  )
-}
-
-const StyledHeader = styled(Shelf)`
-  color: ${({ theme }) => theme.colors.textSecondary};
-
-  &:hover,
-  &:hover > svg {
-    color: ${({ theme }) => theme.colors.textInteractiveHover};
-  }
-`
