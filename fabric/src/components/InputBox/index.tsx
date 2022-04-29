@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { Box } from '../Box'
 import { Shelf } from '../Shelf'
 import { Stack, StackProps } from '../Stack'
@@ -38,6 +38,7 @@ export const InputBox: React.FC<StackProps & InputBoxProps> = ({
   active,
   ...boxProps
 }) => {
+  const theme = useTheme()
   return (
     <Stack gap={1} width="100%">
       <InputWrapper gap="4px" px={2} py={1} as="label" $active={active} $disabled={disabled} {...boxProps}>
@@ -54,10 +55,12 @@ export const InputBox: React.FC<StackProps & InputBoxProps> = ({
               </Text>
             </Box>
             {rightElement && (
-              <Box flex="0 0 auto" display="flex">
-                <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'}>
-                  {rightElement}
-                </Text>
+              <Box
+                flex="0 0 auto"
+                display="flex"
+                style={{ color: theme.colors[disabled ? 'textDisabled' : 'textPrimary'] }}
+              >
+                {rightElement}
               </Box>
             )}
           </Shelf>
