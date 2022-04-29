@@ -1,3 +1,4 @@
+import React from 'react'
 import { Cell, Pie, PieChart as RechartsPieChart, PieLabelRenderProps } from 'recharts'
 import { useTheme } from 'styled-components'
 

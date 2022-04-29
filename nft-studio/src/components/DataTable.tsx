@@ -99,7 +99,7 @@ export const DataTable = <T extends Record<string, any>>({
             tabIndex={onRowClicked ? 0 : undefined}
           >
             {columns.map((col) => (
-              <DataCol style={{ flex: col.flex }} align={col?.align}>
+              <DataCol key={col.sortKey} style={{ flex: col.flex }} align={col?.align}>
                 {col.cell(summary)}
               </DataCol>
             ))}

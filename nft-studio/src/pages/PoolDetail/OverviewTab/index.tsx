@@ -4,11 +4,11 @@ import { BN } from 'bn.js'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
-import { AssetByRiskGroup } from '../../../components/AssetByRiskGroup'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
+import { RiskGroupList } from '../../../components/RiskGroupList'
 import { TokenListByPool } from '../../../components/TokenListByPool'
 import { Tooltips } from '../../../components/Tooltips'
 import { getAge } from '../../../utils/date'
@@ -89,7 +89,7 @@ const PoolDetailOverview: React.FC = () => {
         <Text variant="heading2">
           Asset portfolio <Text variant="body3">By risk groups</Text>
         </Text>
-        <AssetByRiskGroup />
+        <RiskGroupList />
       </Stack>
     </>
   )

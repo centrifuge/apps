@@ -28,8 +28,6 @@ const initialRow: AssetByRiskGroup = {
   riskAdjustment: '0',
 }
 
-const COLOR_SCALE_OFFSET = 300
-
 const SortableHeader: React.VFC<{ label: string; orderBy?: OrderBy }> = ({ label, orderBy }) => {
   return (
     <StyledHeader>
@@ -95,7 +93,7 @@ const columns: Column[] = [
   },
 ]
 
-export const AssetByRiskGroup: React.FC = () => {
+export const RiskGroupList: React.FC = () => {
   const { pid } = useParams<{ pid: string }>()
   const loans = useLoans(pid)
   const pool = usePool(pid)
@@ -120,7 +118,6 @@ export const AssetByRiskGroup: React.FC = () => {
       // temp solution while assets are still manually priced (in the future there will be a select to choose a riskGroup)
       if (filteredLoans.length === 0) {
         return {
-          color: theme.colors.accentScale[(metadata.riskGroups!.length - (index % 9)) * 100 + COLOR_SCALE_OFFSET],
           name: group.name,
           amount: '0',
           share: '0',
@@ -162,7 +159,7 @@ export const AssetByRiskGroup: React.FC = () => {
           },
         ]
       : []
-  }, [theme, pool, riskGroups])
+  }, [pool, riskGroups])
 
   const totalRow = React.useMemo(() => {
     const totalSharesSum = [...riskGroups, ...remainingAssets]
@@ -193,7 +190,7 @@ export const AssetByRiskGroup: React.FC = () => {
       financingFee: `Avg. ${avgFinancingFee.toString()}`,
       riskAdjustment: `Avg. ${avgRiskAdjustment.toString()}`,
     }
-  }, [riskGroups, remainingAssets])
+  }, [riskGroups, remainingAssets, pool?.nav.latest])
 
   // biggest share of pie gets darkest color
   const dataWithColor = [...riskGroups, ...remainingAssets]
