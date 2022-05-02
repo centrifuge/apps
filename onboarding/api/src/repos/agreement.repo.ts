@@ -96,7 +96,7 @@ export class AgreementRepo {
     name: string,
     templateId: string
   ): Promise<Agreement> {
-    // If the agtreement was declined or voided, we should not return it here,
+    // If the agreement was declined or voided, we should not return it here,
     // which causes a new one to be created.
     const [existingAgreement] = await this.db.sql`
       select *

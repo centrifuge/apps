@@ -41,10 +41,12 @@ export const globalTypes = {
 export const decorators = [
   (Story, context) => (
     <ThemeProvider theme={themes[context.globals.theme] || themes.centrifugeLight}>
-      <GlobalStyle />
-      <Box p={3} bg="backgroundPage" minHeight="100vh">
-        <Story />
-      </Box>
+      <>
+        <GlobalStyle />
+        <Box p={3} bg="backgroundPage" minHeight="100vh">
+          <Story />
+        </Box>
+      </>
     </ThemeProvider>
   ),
 ]

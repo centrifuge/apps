@@ -125,13 +125,22 @@ export interface Investor {
   email: string
   verificationStatus: 'none' | 'processing' | 'updates-required' | 'verified' | 'manual-review' | 'rejected' | 'expired'
   details: {
+    investorType: 'individual' | 'entity'
+    entityName?: string
     firstName?: string
     middleName?: string
     lastName?: string
     tax: any[]
     address?: {
       countryCode?: string
+      city?: string
+      entrance?: string
+      houseNumber?: string
+      street?: string
+      zip?: string
+      state?: string
     }
+    birthday?: string
   }
   domainInvestorDetails?: {
     taxInfo: any

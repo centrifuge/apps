@@ -39,13 +39,15 @@ export async function getNFT(registry: string, tinlake: ITinlake, tokenId: strin
   try {
     nftOwner = (await tinlake.getOwnerOfCollateral(registry, tokenId)).toString()
   } catch (e) {
-    if (e.message.match(/invalid address/i)) {
+    const errMessage = e instanceof Error ? e.message : 'Unknown error'
+    if (errMessage.match(/invalid address/i)) {
       return loggedError(e, 'Invalid address', tokenId)
     }
-    if (e.message.match(/call revert exception/i)) {
+    if (errMessage.match(/call revert exception/i)) {
       return loggedError(e, 'Address is not a registry', tokenId)
     }
-    if (e.data?.match(/reverted/i)) {
+
+    if ((e as { data?: string }).data?.match(/reverted/i)) {
       return loggedError(e, 'NFT does not exist in registry', tokenId)
     }
     return loggedError(e, 'Could not get NFT owner', tokenId)
@@ -270,12 +272,13 @@ export async function submitSeniorSupplyOrder(
     const permit = await tinlake.signSupplyPermit(amount, address, 'senior')
     return tinlake.submitSeniorSupplyOrderWithPermit(amount, permit)
   } catch (e) {
-    if (e.message.includes('Not supported on this device')) {
+    const errMessage = e instanceof Error ? e.message : ''
+    if (errMessage.includes('Not supported on this device')) {
       setAddressMemory(address, 'supportsPermits', false)
       return await tinlake.submitSeniorSupplyOrderWithAllowance(amount, address)
     }
 
-    return { status: 0, error: e.message }
+    return { status: 0, error: errMessage }
   }
 }
 
@@ -328,12 +331,14 @@ export async function submitJuniorSupplyOrder(
     const permit = await tinlake.signSupplyPermit(amount, address, 'junior')
     return tinlake.submitJuniorSupplyOrderWithPermit(amount, permit)
   } catch (e) {
-    if (e.message.includes('Not supported on this device')) {
+    const errMessage = e instanceof Error ? e.message : ''
+
+    if (errMessage.includes('Not supported on this device')) {
       setAddressMemory(address, 'supportsPermits', false)
       return await tinlake.submitJuniorSupplyOrderWithAllowance(amount, address)
     }
 
-    return { status: 0, error: e.message }
+    return { status: 0, error: errMessage }
   }
 }
 
@@ -386,12 +391,13 @@ export async function submitSeniorRedeemOrder(
     const permit = await tinlake.signRedeemPermit(amount, address, 'senior')
     return tinlake.submitSeniorRedeemOrderWithPermit(amount, permit)
   } catch (e) {
-    if (e.message.includes('Not supported on this device')) {
+    const errMessage = e instanceof Error ? e.message : ''
+    if (errMessage.includes('Not supported on this device')) {
       setAddressMemory(address, 'supportsPermits', false)
       return await tinlake.submitSeniorRedeemOrderWithAllowance(amount, address)
     }
 
-    return { status: 0, error: e.message }
+    return { status: 0, error: errMessage }
   }
 }
 
@@ -444,12 +450,14 @@ export async function submitJuniorRedeemOrder(
     const permit = await tinlake.signRedeemPermit(amount, address, 'junior')
     return tinlake.submitJuniorRedeemOrderWithPermit(amount, permit)
   } catch (e) {
-    if (e.message.includes('Not supported on this device')) {
+    const errMessage = e instanceof Error ? e.message : ''
+
+    if (errMessage.includes('Not supported on this device')) {
       setAddressMemory(address, 'supportsPermits', false)
       return await tinlake.submitJuniorRedeemOrderWithAllowance(amount, address)
     }
 
-    return { status: 0, error: e.message }
+    return { status: 0, error: errMessage }
   }
 }
 

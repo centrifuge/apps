@@ -1,18 +1,25 @@
 import { ResponsiveValue } from 'styled-system'
 
-type Status = 'default' | 'info' | 'ok' | 'warning' | 'critical'
+type Status = 'Default' | 'Info' | 'Ok' | 'Warning' | 'Critical'
 
 // Colors
 
-type StatusColorVariant = 'Primary' | 'Foreground' | 'Background'
-type StatusColorName = `${Status}${StatusColorVariant}`
+type StatusColorName = `status${Status}`
 
-type BrandColorName = 'brand'
+type AccentColorName =
+  | `accent${'Primary' | 'Secondary'}`
+  | 'primarySelectedBackground'
+  | 'secondarySelectedBackground'
+  | 'borderFocus'
+  | 'borderSelected'
+  | 'textSelected'
+  | 'textInteractive'
+  | 'textInteractiveHover'
 type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled'}`
 type BorderColorName = `border${'Primary' | 'Secondary'}`
-type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page'}`
+type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page' | 'Input'}`
 
-type ColorName = StatusColorName | BrandColorName | TextColorName | BorderColorName | BackgroundColorName
+type ColorName = StatusColorName | AccentColorName | TextColorName | BorderColorName | BackgroundColorName
 type ColorValue = string
 
 type ThemeColors = {
@@ -28,14 +35,14 @@ export type ThemeBreakpoints = BreakpointValue[] & {
   [k in BreakpointName]: BreakpointValue
 }
 
-type SizeName = 'container' | 'iconSmall' | 'iconMedium'
+type SizeName = 'dialog' | 'container' | 'iconSmall' | 'iconMedium' | 'iconLarge'
 type SizeValue = string | number
 
 type ThemeSizes = {
   [k in SizeName]: SizeValue
 }
 
-type RadiusName = 'card'
+type RadiusName = 'card' | 'input' | 'tooltip'
 type RadiusValue = number
 
 type ThemeRadii = {
@@ -59,18 +66,21 @@ export type TextVariantName =
   | 'heading5'
   | 'heading6'
   | 'emphasized'
-  | 'interactive'
+  | 'interactive1'
   | 'interactive2'
   | 'body1'
   | 'body2'
+  | 'body3'
   | 'label1'
   | 'label2'
+  | 'label3'
 
 type TypographyValue = Partial<{
   fontSize: ResponsiveValue<number | string>
   lineHeight: ResponsiveValue<number>
   fontWeight: ResponsiveValue<number>
   color: ColorName
+  letterSpacing: ResponsiveValue<number | string>
 }>
 
 export type ThemeTypography = {
@@ -94,6 +104,7 @@ type ThemeShadows = {
 }
 
 export type FabricTheme = {
+  scheme: 'light' | 'dark'
   colors: ThemeColors
   breakpoints: ThemeBreakpoints
   sizes: ThemeSizes

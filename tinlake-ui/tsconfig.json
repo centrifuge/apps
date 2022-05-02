@@ -23,7 +23,8 @@
       "dom",
       "dom.iterable",
       "esnext"
-    ]
+    ],
+    "incremental": true
   },
   "exclude": [
     "node_modules",
@@ -31,8 +32,14 @@
   ],
   "include": [
     "next-env.d.ts",
+    "next.config.js",
     "**/*.ts",
     "**/*.tsx",
     ".eslintrc.js"
-  ]
+  ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
 }

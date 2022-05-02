@@ -3,11 +3,24 @@ import { brandAltair } from './tokens/brandAltair'
 import { modeDark } from './tokens/modeDark'
 import { FabricTheme } from './types'
 
-const altairDark: FabricTheme = {
+const yellowScale = {
+  yellow500: '#FFC012',
+  yellow700: '#574000',
+}
+
+export const altairDark: FabricTheme = {
   ...baseTheme,
+  scheme: 'dark',
   colors: {
     ...brandAltair,
     ...modeDark.colors,
+    primarySelectedBackground: yellowScale.yellow500,
+    secondarySelectedBackground: yellowScale.yellow700,
+    borderFocus: yellowScale.yellow500,
+    borderSelected: yellowScale.yellow500,
+    textSelected: yellowScale.yellow500,
+    textInteractive: yellowScale.yellow500,
+    textInteractiveHover: yellowScale.yellow500,
   },
   shadows: {
     ...baseTheme.shadows,

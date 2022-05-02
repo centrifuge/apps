@@ -14,6 +14,7 @@ import config from '../config'
 import { AgreementRepo } from '../repos/agreement.repo'
 import { UserRepo } from '../repos/user.repo'
 import { DocusignService, InvestorRoleName, IssuerRoleName } from '../services/docusign.service'
+import MailerService from '../services/mailer.service'
 import { MemberlistService } from '../services/memberlist.service'
 import { CustomPoolIds, PoolService } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
@@ -28,7 +29,8 @@ export class AgreementController {
     private readonly userRepo: UserRepo,
     private readonly poolService: PoolService,
     private readonly sessionService: SessionService,
-    private readonly memberlistService: MemberlistService
+    private readonly memberlistService: MemberlistService,
+    private readonly mailerService: MailerService
   ) {}
 
   @Get('pools/:poolId/agreements/:provider/:providerTemplateId/redirect')
@@ -84,6 +86,7 @@ export class AgreementController {
     if (!agreement.signedAt && status.signed) {
       this.logger.log(`Agreement ${agreement.id} has been signed`)
       await this.agreementRepo.setSigned(agreement.id)
+      await this.mailerService.sendSubscriptionAgreementEmail(user, pool, agreement.tranche)
     }
 
     const returnUrl = CustomPoolIds.includes(params.poolId)
@@ -123,6 +126,9 @@ export class AgreementController {
 
     if (!agreement.signedAt && status.signed) {
       await this.agreementRepo.setSigned(agreement.id)
+      const user = await this.userRepo.find(agreement.userId)
+      const pool = await this.poolService.get(agreement.poolId)
+      await this.mailerService.sendSubscriptionAgreementEmail(user, pool, agreement.tranche)
     }
 
     if (!agreement.counterSignedAt && status.counterSigned) {
