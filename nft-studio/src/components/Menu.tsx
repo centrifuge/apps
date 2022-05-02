@@ -25,7 +25,7 @@ export const Menu: React.FC<Props> = () => {
     if (!allPools || !permissions) {
       return []
     }
-    return allPools.filter(({ id }) => permissions[id]?.roles.includes('PoolAdmin'))
+    return allPools.filter(({ id }) => permissions.pools[id]?.roles.includes('PoolAdmin'))
   }, [allPools, permissions])
 
   return (

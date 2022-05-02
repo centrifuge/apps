@@ -1,13 +1,11 @@
-import { Loan as LoanType } from '@centrifuge/centrifuge-js'
+import { Balance, Loan as LoanType, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import { Box, Button, Card, Grid, IconNft, Shelf, Stack, Text } from '@centrifuge/fabric'
-import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import { Field, Form, Formik, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import styled from 'styled-components'
 import { CardHeader } from '../components/CardHeader'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { TextInput } from '../components/form/base/TextInput'
 import { RadioButton } from '../components/form/formik/RadioButton'
 import { TextInput as FormikTextInput } from '../components/form/formik/TextInput'
@@ -21,6 +19,7 @@ import { ButtonTextLink } from '../components/TextLink'
 import { nftMetadataSchema } from '../schemas'
 import { formatDate } from '../utils/date'
 import { Dec } from '../utils/Decimal'
+import { formatBalance, formatPercentage } from '../utils/formatting'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useAddress } from '../utils/useAddress'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
@@ -30,9 +29,6 @@ import { useLoanNft, useNFT } from '../utils/useNFTs'
 import { usePermissions } from '../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { isSameAddress } from '../utils/web3'
-
-const e27 = new BN(10).pow(new BN(27))
-const e18 = new BN(10).pow(new BN(18))
 
 export const LoanPage: React.FC = () => {
   return (
@@ -56,17 +52,17 @@ const Loan: React.FC = () => {
   const nft = useNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const loanNft = useLoanNft(pid, aid)
   const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
-  const centrifuge = useCentrifuge()
   const address = useAddress()
   const permissions = usePermissions(address)
 
-  const canPrice = permissions?.[pid]?.roles.includes('PricingAdmin')
+  const canPrice = permissions?.pools[pid]?.roles.includes('PricingAdmin')
   const isLoanOwner = isSameAddress(loanNft?.owner, address)
-  const canBorrow = permissions?.[pid]?.roles.includes('Borrower') && isLoanOwner
+  const canBorrow = permissions?.pools[pid]?.roles.includes('Borrower') && isLoanOwner
 
   const name = truncate(nftMetadata?.name || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? parseMetadataUrl(nftMetadata.image) : ''
 
+  console.log('loan', loan, pool)
   return (
     <Stack gap={3} flex={1}>
       <PageHeader
@@ -89,27 +85,27 @@ const Loan: React.FC = () => {
                   <LabelValueList
                     items={
                       [
-                        { label: 'Value', value: `${centrifuge.utils.formatCurrencyAmount(loan.loanInfo.value)}` },
+                        { label: 'Value', value: formatBalance(loan.loanInfo.value.toFloat()) },
                         'maturityDate' in loan.loanInfo && {
                           label: 'Maturity date',
                           value: formatDate(loan.loanInfo.maturityDate),
                         },
                         'probabilityOfDefault' in loan.loanInfo && {
                           label: 'Probability of default',
-                          value: `${centrifuge.utils.formatPercentage(loan.loanInfo.probabilityOfDefault, e27)}`,
+                          value: formatPercentage(loan.loanInfo.probabilityOfDefault.toPercent()),
                         },
                         'lossGivenDefault' in loan.loanInfo && {
                           label: 'Loss given default',
-                          value: `${centrifuge.utils.formatPercentage(loan.loanInfo.lossGivenDefault, e27)}`,
+                          value: formatPercentage(loan.loanInfo.lossGivenDefault.toPercent()),
                         },
-                        { label: 'Financing fee', value: `${centrifuge.utils.feeToApr(loan.financingFee)}%` },
+                        { label: 'Financing fee', value: formatPercentage(loan.interestRatePerSec.toAprPercent()) },
                         {
                           label: 'Advance rate',
-                          value: `${centrifuge.utils.formatPercentage(loan.loanInfo.advanceRate, e27)}`,
+                          value: formatPercentage(loan.loanInfo.advanceRate.toPercent()),
                         },
                         'discountRate' in loan.loanInfo && {
                           label: 'Discount rate',
-                          value: `${centrifuge.utils.feeToApr(loan.loanInfo.discountRate)}%`,
+                          value: formatPercentage(loan.loanInfo.discountRate.toAprPercent()),
                         },
                       ].filter(Boolean) as any
                     }
@@ -202,7 +198,6 @@ function validateNumberInput(value: number | string, min: number | Decimal, max?
 }
 
 const PricingForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
-  const centrifuge = useCentrifuge()
   const { execute: doTransaction, isLoading } = useCentrifugeTransaction(
     'Price asset',
     (cent) => cent.pools.priceLoan as any
@@ -221,16 +216,16 @@ const PricingForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
     },
     onSubmit: (values, { setSubmitting }) => {
       const loanInfoValues = {
-        value: new BN(values.value).mul(e18).toString(),
-        maturityDate: Math.floor(new Date(form.values.maturityDate).getTime() / 1000).toString(),
-        probabilityOfDefault: centrifuge.utils.toRate((values.probabilityOfDefault as number) / 100),
-        lossGivenDefault: centrifuge.utils.toRate((values.lossGivenDefault as number) / 100),
-        discountRate: centrifuge.utils.aprToFee((values.discountRate as number) / 100),
-        advanceRate: centrifuge.utils.toRate((values.advanceRate as number) / 100),
+        value: Balance.fromFloat(values.value),
+        maturityDate: new Date(form.values.maturityDate).toISOString(),
+        probabilityOfDefault: Rate.fromPercent(values.probabilityOfDefault),
+        lossGivenDefault: Rate.fromPercent(values.lossGivenDefault),
+        discountRate: Rate.fromAprPercent(values.discountRate),
+        advanceRate: Rate.fromPercent(values.advanceRate),
       }
       const loanInfoFields = LOAN_FIELDS[values.loanType] as LoanInfoKey[]
       const loanInfo = loanInfoFields.map((key) => loanInfoValues[key])
-      const ratePerSec = centrifuge.utils.aprToFee((values.interestRate as number) / 100)
+      const ratePerSec = Rate.fromAprPercent(values.interestRate)
 
       doTransaction([loan.poolId, loan.id, ratePerSec, values.loanType, loanInfo])
       setSubmitting(false)
@@ -336,7 +331,6 @@ type RepayValues = {
 
 const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const pool = usePool(loan.poolId)
-  const centrifuge = useCentrifuge()
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
     (cent) => cent.pools.financeLoan
@@ -356,11 +350,11 @@ const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
     doRepayAllTransaction([loan.poolId, loan.id])
   }
 
-  const debt = Dec(loan.outstandingDebt).div('1e18')
-  const poolReserve = Dec(pool?.reserve.available ?? 0).div('1e18')
-  let ceiling = Dec(loan.loanInfo.value).div('1e18').mul(loan.loanInfo.advanceRate).div('1e27')
+  const debt = loan.outstandingDebt.toDecimal()
+  const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
+  let ceiling = loan.loanInfo.value.toDecimal().mul(loan.loanInfo.advanceRate.toDecimal())
   if (loan.loanInfo.type === 'BulletLoan') {
-    ceiling = ceiling.minus(Dec(loan.financedAmount).div('1e18'))
+    ceiling = ceiling.minus(loan.totalBorrowed.toDecimal())
   } else {
     ceiling = ceiling.minus(debt)
     ceiling = ceiling.isNegative() ? Dec(0) : ceiling
@@ -375,11 +369,11 @@ const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
         <PageSummary>
           <LabelValueStack
             label="Total borrowed amount"
-            value={`${centrifuge.utils.formatCurrencyAmount(loan?.financedAmount, pool?.currency)}`}
+            value={`${formatBalance(loan?.totalBorrowed, pool?.currency)}`}
           />
           <LabelValueStack
             label="Current debt"
-            value={`${centrifuge.utils.formatCurrencyAmount(loan?.outstandingDebt, pool?.currency, true)}`}
+            value={`${formatBalance(loan?.outstandingDebt, pool?.currency, true)}`}
           />
         </PageSummary>
         <Grid columns={[1, 2]} equalColumns gap={3} rowGap={5}>
@@ -388,8 +382,9 @@ const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
               amount: 0,
             }}
             onSubmit={(values, actions) => {
-              const amount = Dec(values.amount).mul('1e18').toString()
-              doFinanceTransaction([loan.poolId, loan.id, new BN(amount)])
+              const amount = Balance.fromFloat(values.amount)
+              console.log('amount', amount, amount, Balance, Perquintill)
+              doFinanceTransaction([loan.poolId, loan.id, amount])
               actions.setSubmitting(false)
             }}
             validate={(values) => {
@@ -443,8 +438,8 @@ const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
               amount: 0,
             }}
             onSubmit={(values, actions) => {
-              const amountBN = new BN(values.amount).mul(e18)
-              doRepayTransaction([loan.poolId, loan.id, amountBN])
+              const amount = Balance.fromFloat(values.amount)
+              doRepayTransaction([loan.poolId, loan.id, amount])
               actions.setSubmitting(false)
             }}
             validate={(values) => {

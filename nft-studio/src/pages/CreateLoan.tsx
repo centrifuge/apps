@@ -35,7 +35,7 @@ const CreateLoan: React.FC = () => {
   const history = useHistory()
 
   const poolIds = permissions
-    ? Object.entries(permissions)
+    ? Object.entries(permissions.pools)
         .filter(([_, p]) => p.roles.includes('Borrower'))
         .map(([poolId]) => poolId)
     : []
@@ -46,7 +46,7 @@ const CreateLoan: React.FC = () => {
     allowedPools.map((pool) => {
       return {
         queryKey: ['metadata', pool.metadata],
-        queryFn: () => fetchMetadata(pool.metadata),
+        queryFn: () => fetchMetadata(pool.metadata!),
         enabled: !!pool.metadata,
       }
     })

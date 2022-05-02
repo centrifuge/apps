@@ -1,23 +1,22 @@
 import { Button, Card, Grid, Stack, Text } from '@centrifuge/fabric'
-import BN from 'bn.js'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { CardHeader } from '../components/CardHeader'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { ConnectButton } from '../components/ConnectButton'
 import { InvestRedeemDialog } from '../components/Dialogs/InvestRedeemDialog'
 import { InvestRedeem } from '../components/InvestRedeem'
 import { LabelValueList } from '../components/LabelValueList'
 import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/PageWithSideBar'
+import { Dec } from '../utils/Decimal'
+import { formatBalance, formatPercentage } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 
 export const InvestmentsTokenPage: React.FC = () => {
-  const { pid: poolId, tid } = useParams<{ pid: string; tid: string }>()
-  const trancheId = Number(tid)
+  const { pid: poolId, tid: trancheId } = useParams<{ pid: string; tid: string }>()
   return (
     <PageWithSideBar sidebar={<InvestRedeem poolId={poolId} trancheId={trancheId} />}>
       <Token />
@@ -26,17 +25,17 @@ export const InvestmentsTokenPage: React.FC = () => {
 }
 
 const Token: React.FC = () => {
-  const { pid: poolId, tid } = useParams<{ pid: string; tid: string }>()
+  const { pid: poolId, tid: trancheId } = useParams<{ pid: string; tid: string }>()
   const address = useAddress()
   const balances = useBalances(address)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
-  const centrifuge = useCentrifuge()
-  const trancheId = Number(tid)
 
   const token = balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)
-  const tranche = pool?.tranches[trancheId]
-  const trancheMeta = metadata?.tranches?.[trancheId]
+  const tranche = pool?.tranches.find((t) => t.id === trancheId)
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+
+  if (pool && !tranche) throw new Error('Token not found')
 
   return (
     <Stack gap={8} flex={1}>
@@ -53,48 +52,34 @@ const Token: React.FC = () => {
             <LabelValueList
               items={
                 [
-                  tranche.name !== 'Junior' && {
+                  tranche.interestRatePerSec && {
                     label: 'APR',
-                    value: `${centrifuge.utils.feeToApr(tranche.interestPerSec)}%`,
+                    value: formatPercentage(tranche.interestRatePerSec.toAprPercent()),
                   },
                   {
                     label: 'Value',
-                    value: centrifuge.utils.formatCurrencyAmount(
-                      new BN(tranche.debt).mul(new BN(tranche.tokenPrice)).div(new BN(10).pow(new BN(27))),
+                    value: formatBalance(
+                      tranche.debt.toDecimal().mul(tranche.tokenPrice.toDecimal()),
                       pool.currency,
                       true
                     ),
                   },
                   {
                     label: 'Price',
-                    value: centrifuge.utils.formatCurrencyAmount(
-                      new BN(tranche.tokenPrice).div(new BN(1e9)),
-                      pool.currency,
-                      true
-                    ),
+                    value: formatBalance(tranche.tokenPrice.toFloat(), pool.currency, true),
                   },
-                  tranche.name !== 'Junior' && {
+                  tranche.minRiskBuffer && {
                     label: 'Risk protection',
                     value: (
                       <>
-                        <Text color="textSecondary">
-                          Min.{' '}
-                          {centrifuge.utils.formatPercentage(
-                            tranche.minRiskBuffer,
-                            new BN(10).pow(new BN(18)).toString()
-                          )}
-                        </Text>{' '}
-                        {centrifuge.utils.formatPercentage(tranche.ratio, new BN(10).pow(new BN(18)).toString())}
+                        <Text color="textSecondary">Min. {formatPercentage(tranche.minRiskBuffer)}</Text>{' '}
+                        {formatPercentage(tranche.ratio)}
                       </>
                     ),
                   },
                   {
                     label: 'Reserve',
-                    value: (
-                      <Text color="statusOk">
-                        {centrifuge.utils.formatCurrencyAmount(tranche.reserve, pool.currency, true)}
-                      </Text>
-                    ),
+                    value: <Text color="statusOk">{formatBalance(tranche.reserve, pool.currency, true)}</Text>,
                   },
                 ].filter(Boolean) as any
               }
@@ -107,18 +92,12 @@ const Token: React.FC = () => {
                 items={[
                   {
                     label: 'Balance',
-                    value: centrifuge.utils.formatCurrencyAmount(
-                      token?.balance ?? '0',
-                      trancheMeta?.symbol || ' ',
-                      true
-                    ),
+                    value: formatBalance(token?.balance ?? 0, trancheMeta?.symbol || ' ', true),
                   },
                   {
                     label: 'Value',
-                    value: centrifuge.utils.formatCurrencyAmount(
-                      new BN(token?.balance ?? 0)
-                        .mul(new BN(pool.tranches[trancheId].tokenPrice))
-                        .div(new BN(10).pow(new BN(27))),
+                    value: formatBalance(
+                      (token?.balance.toDecimal() ?? Dec(0)).mul(tranche.tokenPrice.toDecimal()),
                       pool.currency,
                       true
                     ),
@@ -143,7 +122,7 @@ const Token: React.FC = () => {
   )
 }
 
-export const InvestAction: React.FC<{ poolId: string; trancheId: number }> = ({ poolId, trancheId }) => {
+export const InvestAction: React.FC<{ poolId: string; trancheId: string }> = ({ poolId, trancheId }) => {
   const [open, setOpen] = React.useState(false)
   return (
     <>
@@ -163,7 +142,7 @@ export const InvestAction: React.FC<{ poolId: string; trancheId: number }> = ({ 
   )
 }
 
-export const RedeemAction: React.FC<{ poolId: string; trancheId: number }> = ({ poolId, trancheId }) => {
+export const RedeemAction: React.FC<{ poolId: string; trancheId: string }> = ({ poolId, trancheId }) => {
   const [open, setOpen] = React.useState(false)
   return (
     <>

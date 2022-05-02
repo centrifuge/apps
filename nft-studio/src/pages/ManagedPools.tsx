@@ -1,12 +1,12 @@
 import { IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
-import React, { useMemo } from 'react'
+import React from 'react'
 import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolList } from '../components/PoolList'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { useAddress } from '../utils/useAddress'
+import { usePermissions } from '../utils/usePermissions'
 import { usePools } from '../utils/usePools'
-import { isSameAddress } from '../utils/web3'
 
 export const ManagedPoolsPage: React.FC = () => {
   return (
@@ -19,13 +19,14 @@ export const ManagedPoolsPage: React.FC = () => {
 const ManagedPools: React.FC = () => {
   const allPools = usePools()
   const address = useAddress()
+  const permissions = usePermissions(address)
 
-  const pools = useMemo(() => {
-    if (!allPools || !address) {
+  const pools = React.useMemo(() => {
+    if (!allPools || !permissions) {
       return []
     }
-    return allPools.filter(({ owner }) => isSameAddress(owner, address))
-  }, [allPools, address])
+    return allPools.filter(({ id }) => permissions.pools[id]?.roles.includes('PoolAdmin'))
+  }, [allPools, permissions])
 
   return (
     <Stack gap={8} flex={1}>

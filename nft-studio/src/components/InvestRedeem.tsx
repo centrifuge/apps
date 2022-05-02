@@ -1,4 +1,4 @@
-import { DetailedPool } from '@centrifuge/centrifuge-js'
+import { Balance, DetailedPool } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -33,7 +33,7 @@ import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   poolId: string
-  trancheId: number
+  trancheId: string
   action?: 'invest' | 'redeem'
   showTabs?: boolean
 }
@@ -50,11 +50,11 @@ type Balances = Exclude<ReturnType<typeof useBalances>, undefined>
 
 function getBalanceDec(balances: Balances, currency: string) {
   if (currency === 'native') {
-    return Dec(balances.native.balance).div(Dec(10).pow(balances.native.decimals))
+    return Dec(balances.native.balance.toString()).div(Dec(10).pow(balances.native.decimals))
   }
   const entry = balances.currencies.find((c) => c.currency === currency)
   if (!entry) throw new Error(`invalid currency: ${currency}`)
-  return Dec(entry.balance).div('1e18')
+  return entry.balance.toDecimal()
 }
 
 // function min(...nums: Decimal[]) {
@@ -81,8 +81,8 @@ function validateNumberInput(value: number | string | Decimal, min: number | Dec
 }
 
 function getEpochHoursRemaining(pool: DetailedPool) {
-  const last = pool.epoch.lastClosed * 1000
-  const min = pool.minEpochTime * 1000
+  const last = new Date(pool.epoch.lastClosed).getTime()
+  const min = pool.parameters.minEpochTime * 1000
   const now = Date.now()
   return Math.max(0, last + min - now) / (1000 * 60 * 60)
 }
@@ -98,20 +98,21 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
 
   const isDataLoading = balances === undefined || order === undefined || permissions === undefined
 
-  const allowedToInvest = permissions?.[poolId]?.tranches.includes(trancheId)
-  const tranche = pool?.tranches[trancheId]
-  const trancheBalance = Dec(
-    balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)?.balance ?? '0'
-  ).div('1e18')
-  const price = Dec(tranche?.tokenPrice ?? 0).div('1e27')
-  const investToCollect = Dec(order?.payoutTokenAmount || 0).div('1e18')
-  const redeemToCollect = Dec(order?.payoutCurrencyAmount || 0).div('1e18')
+  const allowedToInvest = permissions?.pools[poolId]?.tranches.includes(trancheId)
+  const tranche = pool?.tranches.find((t) => t.id === trancheId)
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+  const trancheBalance =
+    balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)?.balance.toDecimal() ?? Dec(0)
+
+  const price = tranche?.tokenPrice.toDecimal() ?? Dec(0)
+  const investToCollect = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
+  const redeemToCollect = order?.payoutCurrencyAmount.toDecimal() ?? Dec(0)
   const invested = trancheBalance.add(investToCollect).mul(price).minus(redeemToCollect)
 
   let actualView = view
   if (order) {
-    if (order.remainingInvestCurrency !== '0') actualView = 'invest'
-    if (order.remainingRedeemToken !== '0') actualView = 'redeem'
+    if (!order.remainingInvestCurrency.isZero()) actualView = 'invest'
+    if (!order.remainingRedeemToken.isZero()) actualView = 'redeem'
   }
 
   if (!address) return null
@@ -128,7 +129,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
         <Shelf justifyContent="space-between">
           <Text variant="label1">Token balance</Text>
           <TextWithPlaceholder variant="label1" isLoading={isDataLoading || isMetadataLoading} width={12} variance={0}>
-            {formatBalance(trancheBalance, metadata?.tranches?.[trancheId]?.symbol)}
+            {formatBalance(trancheBalance, trancheMeta?.symbol)}
           </TextWithPlaceholder>
         </Shelf>
       </Stack>
@@ -141,15 +142,12 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
         ) : actualView === 'start' ? (
           <>
             {order &&
-              (order.payoutTokenAmount !== '0' ? (
+              (!order.payoutTokenAmount.isZero() ? (
                 <SuccessBanner
                   title="Investment successful"
-                  body={`${formatBalance(
-                    Dec(order.investCurrency).div('1e18'),
-                    pool?.currency
-                  )} USD was successfully invested`}
+                  body={`${formatBalance(order.investCurrency, pool?.currency)} USD was successfully invested`}
                 />
-              ) : order.payoutCurrencyAmount !== '0' ? (
+              ) : !order.payoutCurrencyAmount.isZero() ? (
                 <SuccessBanner title="Redemption successful" />
               ) : null)}
             <Stack p={1} gap={1}>
@@ -180,7 +178,7 @@ type InvestValues = {
 
 type InvestFormProps = {
   poolId: string
-  trancheId: number
+  trancheId: string
   onCancel?: () => void
   hasInvestment?: boolean
 }
@@ -190,14 +188,15 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
   const balances = useBalances(address)
   const order = usePendingCollect(poolId, trancheId, address)
   const pool = usePool(poolId)
-  const tranche = pool?.tranches[trancheId]
+  const tranche = pool?.tranches.find((t) => t.id === trancheId)
   const balance = balances && pool ? getBalanceDec(balances, pool.currency) : Dec(0)
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')
 
-  const price = Dec(tranche?.tokenPrice ?? 0).div('1e27')
+  const price = tranche?.tokenPrice.toDecimal() ?? Dec(0)
 
   const {
     execute: doInvestTransaction,
@@ -221,7 +220,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
 
   // const totalReserve = Dec(pool?.reserve.total ?? '0').div('1e18')
   // const maxReserve = Dec(pool?.reserve.max ?? '0').div('1e18')
-  const pendingInvest = Dec(order?.remainingInvestCurrency ?? '0').div('1e18')
+  const pendingInvest = order?.remainingInvestCurrency.toDecimal() ?? Dec(0)
   // const investmentCapacity = min(maxReserve.minus(totalReserve)) // TODO: check risk buffer and outstanding invest orders
   // const needsToCollect = order?.payoutCurrencyAmount !== '0' || order?.payoutTokenAmount !== '0'
   const hasPendingOrder = !pendingInvest.isZero()
@@ -235,8 +234,8 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
       amount: 0,
     },
     onSubmit: (values, actions) => {
-      const amount = Dec(values.amount).mul('1e18').toString()
-      doInvestTransaction([poolId, trancheId, new BN(amount)])
+      const amount = Balance.fromFloat(values.amount)
+      doInvestTransaction([poolId, trancheId, amount])
       actions.setSubmitting(false)
     },
     validate: (values) => {
@@ -282,8 +281,8 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
               <Text variant="body3">Token amount</Text>
               <TextWithPlaceholder variant="body3" isLoading={isMetadataLoading} width={12} variance={0}>
                 {price.isZero()
-                  ? `~ ∞ ${metadata?.tranches?.[trancheId]?.symbol}`
-                  : `~${formatBalance(Dec(form.values.amount).div(price), metadata?.tranches?.[trancheId]?.symbol)}`}
+                  ? `~ ∞ ${trancheMeta?.symbol}`
+                  : `~${formatBalance(Dec(form.values.amount).div(price), trancheMeta?.symbol)}`}
               </TextWithPlaceholder>
             </Shelf>
 
@@ -341,7 +340,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
 
 type RedeemFormProps = {
   poolId: string
-  trancheId: number
+  trancheId: string
   onCancel: () => void
 }
 
@@ -353,16 +352,18 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
 
-  const tranche = pool?.tranches[trancheId]
-  const collectedBalance = Dec(
-    balances?.tranches.find((b) => b.poolId === poolId && b.trancheId === trancheId)?.balance ?? 0
-  ).div('1e18')
-  const uncollectedBalance = Dec(order?.payoutTokenAmount ?? '0').div('1e18')
+  const tranche = pool?.tranches.find((t) => t.id === trancheId)
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+
+  const collectedBalance =
+    balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)?.balance.toDecimal() ?? Dec(0)
+
+  const uncollectedBalance = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
   const balance = collectedBalance.add(uncollectedBalance)
-  const price = Dec(tranche?.tokenPrice ?? 0).div('1e27')
+  const price = tranche?.tokenPrice.toDecimal() ?? Dec(0)
   const maxRedeem = balance.mul(price)
-  const pendingRedeem = Dec(order?.remainingRedeemToken ?? '0').div('1e18')
-  const tokenSymbol = metadata?.tranches?.[trancheId]?.symbol ?? ''
+  const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
+  const tokenSymbol = trancheMeta?.symbol ?? ''
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')
 

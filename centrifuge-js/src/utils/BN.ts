@@ -4,10 +4,9 @@ import { Dec } from './Decimal'
 
 class BNSubType extends BN {
   static decimals: number
-  static _fromNumber<T extends BNSubType = BNSubType>(number: Numeric) {
-    return new (this.constructor as typeof BNSubType)(
-      Dec(number).mul(Dec(10).pow(this.decimals)).toDecimalPlaces(0).toString()
-    ) as T
+  static _fromFloat<T extends BNSubType = BNSubType>(number: Numeric) {
+    const n = Dec(number).mul(Dec(10).pow(this.decimals)).toDecimalPlaces(0).toString()
+    return new (this as typeof BNSubType)(n) as T
   }
   constructor(number: number | string | number[] | Uint8Array | Buffer | BN) {
     super(BN.isBN(number) ? number.toString() : number)
@@ -25,25 +24,25 @@ class BNSubType extends BN {
 
 export class Balance extends BNSubType {
   static decimals = 18
-  static fromNumber(number: Numeric) {
-    return Balance._fromNumber<Balance>(number)
+  static fromFloat(number: Numeric) {
+    return Balance._fromFloat<Balance>(number)
   }
 }
 
 export class Price extends BNSubType {
   static decimals = 27
-  static fromNumber(number: Numeric) {
-    return Price._fromNumber<Price>(number)
+  static fromFloat(number: Numeric) {
+    return Price._fromFloat<Price>(number)
   }
 }
 
 export class Perquintill extends BNSubType {
   static decimals = 18
-  static fromNumber(number: Numeric) {
-    return Perquintill._fromNumber<Perquintill>(number)
+  static fromFloat(number: Numeric) {
+    return Perquintill._fromFloat<Perquintill>(number)
   }
   static fromPercent(number: Numeric) {
-    return Perquintill.fromNumber(Dec(number).div(100))
+    return Perquintill.fromFloat(Dec(number).div(100))
   }
   toPercent() {
     return this.toDecimal().mul(100)
@@ -54,13 +53,16 @@ const secondsPerYear = Dec(60 * 60 * 24 * 365)
 
 export class Rate extends BNSubType {
   static decimals = 27
-  static fromNumber(number: Numeric) {
-    return Rate._fromNumber<Rate>(number)
+  static fromFloat(number: Numeric) {
+    return Rate._fromFloat<Rate>(number)
+  }
+  static fromPercent(number: Numeric) {
+    return Rate.fromFloat(Dec(number).div(100))
   }
   static fromApr(apr: Numeric) {
     const i = Dec(apr)
     const rate = i.div(secondsPerYear).plus(1).mul(Dec(10).pow(this.decimals))
-    return Rate.fromNumber(rate)
+    return Rate.fromFloat(rate)
   }
   static fromAprPercent(apr: Numeric) {
     return this.fromApr(Dec(apr).div(100))
@@ -75,10 +77,10 @@ export class Rate extends BNSubType {
       return rate
     }
 
-    const i = Dec(rate).div(Dec(10).pow(this.getDecimals())).minus(1).times(secondsPerYear)
+    const i = rate.minus(1).times(secondsPerYear)
     return i
   }
   toAprPercent() {
-    this.toApr().mul(100)
+    return this.toApr().mul(100)
   }
 }

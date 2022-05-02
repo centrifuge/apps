@@ -1,8 +1,9 @@
-import { formatCurrencyAmount, Pool } from '@centrifuge/centrifuge-js'
+import { Pool } from '@centrifuge/centrifuge-js'
 import { Box, Card, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
+import { formatBalance } from '../utils/formatting'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useLoans } from '../utils/useLoans'
 import { PoolMetadata } from '../utils/usePools'
@@ -43,8 +44,7 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
         0
       )
 
-    const totalOutstandingDebtBN = assets.reduce((sum, asset) => sum.add(new BN(asset.outstandingDebt)), new BN(0))
-    const totalOutstandingDebt = Number(totalOutstandingDebtBN.toString()) / 10 ** 18
+    const totalOutstandingDebt = assets.reduce((sum, asset) => sum + asset.outstandingDebt.toNumber(), 0)
 
     return maturityPerAsset / totalOutstandingDebt
   }, [loans])
@@ -52,7 +52,7 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
   const poolCardSummaryData = [
     {
       label: <Tooltips type="valueLocked" variant="lowercase" />,
-      value: formatCurrencyAmount(new BN(pool.nav.latest).add(new BN(pool.reserve.total)).toString()),
+      value: formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat()),
     },
     { label: <Tooltips type="age" variant="lowercase" />, value: '10 Months' },
     {

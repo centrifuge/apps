@@ -16,6 +16,8 @@ export const PoolsPage: React.FC = () => {
 const Pools: React.FC = () => {
   const pools = usePools()
 
+  console.log('pool', pools)
+
   return (
     <Stack gap={8} flex={1}>
       <PageHeader title="Pools" />

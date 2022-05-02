@@ -1,5 +1,5 @@
+import { Balance } from '@centrifuge/centrifuge-js'
 import { Box, Button, Card, Grid, IconArrowRight, Shelf, Stack, Text } from '@centrifuge/fabric'
-import BN from 'bn.js'
 import React, { useMemo } from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
@@ -14,6 +14,7 @@ import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
+import { formatBalance, formatPercentage } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
@@ -52,7 +53,7 @@ const Pool: React.FC = () => {
   const centrifuge = useCentrifuge()
 
   const isPoolAdmin = useMemo(
-    () => !!(address && permissions && permissions[poolId]?.roles.includes('PoolAdmin')),
+    () => !!(address && permissions?.pools[poolId]?.roles.includes('PoolAdmin')),
     [poolId, address, permissions]
   )
 
@@ -74,7 +75,7 @@ const Pool: React.FC = () => {
     const maxReserve = Number.parseFloat(prompt('Insert max reserve') || 'a')
     if (Number.isNaN(maxReserve)) return
 
-    setMaxReserveTx([pool.id, new BN(maxReserve).mul(new BN(10).pow(new BN(18)))])
+    setMaxReserveTx([pool.id, Balance.fromFloat(maxReserve)])
   }
 
   return (
@@ -119,62 +120,55 @@ const Pool: React.FC = () => {
       </PageSummary>
       <Grid columns={[1, 2]} gap={3} equalColumns>
         {pool &&
-          pool.tranches.map((tranche, i) => {
-            const tokenBalance = balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === i)?.balance
+          pool.tranches.map((tranche) => {
+            const tokenBalance = balances?.tranches.find(
+              (t) => t.poolId === poolId && t.trancheId === tranche.id
+            )?.balance
             return (
-              <Card p={3} variant="interactive" key={i}>
+              <Card p={3} variant="interactive" key={tranche.id}>
                 <Stack gap={2}>
                   <CardHeader
                     pretitle="Tranche token"
-                    title={metadata?.tranches?.[i]?.symbol ?? ''}
-                    titleAddition={centrifuge.utils.formatCurrencyAmount(
-                      new BN(tranche.totalIssuance).mul(new BN(tranche.tokenPrice)).div(new BN(10).pow(new BN(27))),
+                    title={metadata?.tranches?.[tranche.seniority]?.symbol ?? ''}
+                    titleAddition={formatBalance(
+                      tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()),
                       pool.currency,
                       true
                     )}
-                    subtitle={metadata?.tranches?.[i]?.name || `${metadata?.pool?.name} ${tranche.name} tranche`}
                   />
                   <LabelValueList
                     items={
                       [
-                        tranche.name !== 'Junior' && {
+                        tranche.minRiskBuffer && {
                           label: 'Risk protection',
                           value: (
                             <>
                               <Text color="textSecondary">
-                                Min.{' '}
-                                {centrifuge.utils.formatPercentage(
-                                  tranche.minRiskBuffer,
-                                  new BN(10).pow(new BN(18)).toString()
-                                )}
+                                Min. {formatPercentage(tranche.minRiskBuffer.toPercent())}
                               </Text>{' '}
-                              {centrifuge.utils.formatPercentage(tranche.ratio, new BN(10).pow(new BN(18)).toString())}
+                              {formatPercentage(tranche.ratio.toPercent())}
                             </>
                           ),
                         },
-                        tranche.name !== 'Junior' && {
+                        tranche.interestRatePerSec && {
                           label: 'APR',
-                          value: `${centrifuge.utils.feeToApr(tranche.interestPerSec)}%`,
+                          value: `${formatPercentage(tranche.interestRatePerSec.toPercent())}`,
                         },
                         {
                           label: 'Token price',
-                          value: centrifuge.utils.formatCurrencyAmount(
-                            new BN(tranche.tokenPrice).div(new BN(1e9)),
-                            pool.currency,
-                            true
-                          ),
+                          value: formatBalance(tranche.tokenPrice.toFloat(), pool.currency, true),
                         },
                         {
                           label: 'Currently locked investment',
-                          value: centrifuge.utils.formatCurrencyAmount(
-                            new BN(tokenBalance ?? 0).mul(new BN(tranche.tokenPrice)).div(new BN(10).pow(new BN(27))),
+                          value: formatBalance(
+                            (tokenBalance?.toFloat() ?? 0) * tranche.tokenPrice.toFloat(),
                             pool.currency
                           ),
                         },
                       ].filter(Boolean) as any
                     }
                   />
-                  <InvestAction poolId={poolId} trancheId={i} />
+                  <InvestAction poolId={poolId} trancheId={tranche.id} />
                 </Stack>
               </Card>
             )
@@ -229,7 +223,7 @@ const Pool: React.FC = () => {
   )
 }
 
-export const InvestAction: React.FC<{ poolId: string; trancheId: number }> = ({ poolId, trancheId }) => {
+export const InvestAction: React.FC<{ poolId: string; trancheId: string }> = ({ poolId, trancheId }) => {
   const [open, setOpen] = React.useState(false)
   const address = useAddress()
   return (

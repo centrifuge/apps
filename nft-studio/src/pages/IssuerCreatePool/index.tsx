@@ -1,4 +1,4 @@
-import { aprToFee, toPerquintill } from '@centrifuge/centrifuge-js'
+import { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import {
   Box,
   Button,
@@ -11,7 +11,6 @@ import {
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
@@ -232,14 +231,14 @@ const CreatePoolForm: React.VFC = () => {
       const tranches = [
         {}, // most junior tranche
         ...noJuniorTranches.map((tranche) => ({
-          interestPerSec: aprToFee((tranche.interestRate as number) / 100),
-          minRiskBuffer: toPerquintill((tranche.minRiskBuffer as number) / 100),
+          interestPerSec: Rate.fromAprPercent(tranche.interestRate),
+          minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
         })),
       ]
 
       const writeOffGroups = values.writeOffGroups.map((g) => ({
         overdueDays: g.days as number,
-        percentage: centrifuge.utils.toRate((g.writeOff as number) / 100),
+        percentage: Rate.fromPercent(g.writeOff),
       }))
 
       const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
@@ -250,7 +249,7 @@ const CreatePoolForm: React.VFC = () => {
         collectionId,
         tranches,
         DEFAULT_CURRENCY,
-        new BN(values.maxReserve as number).mul(new BN(10).pow(new BN(18))),
+        Balance.fromFloat(values.maxReserve),
         metadataHash,
         epochSeconds,
         writeOffGroups,

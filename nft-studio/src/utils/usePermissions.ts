@@ -4,6 +4,6 @@ export function usePermissions(address?: string) {
   const [result] = useCentrifugeQuery(['permissions', address], (cent) => cent.pools.getUserPermissions([address!]), {
     enabled: !!address,
   })
-
+  console.log('result', result)
   return result
 }
