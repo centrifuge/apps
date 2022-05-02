@@ -1,11 +1,10 @@
 import { feeToApr, formatPercentage } from '@centrifuge/centrifuge-js'
-import { IconArrowDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
+import { IconChevronRight, Text } from '@centrifuge/fabric'
 import { BN } from '@polkadot/util'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
-import styled from 'styled-components'
 import { usePool, usePoolMetadata } from '../utils/usePools'
-import { Column, DataTable, OrderBy } from './DataTable'
+import { Column, DataTable, OrderBy, SortableTableHeader } from './DataTable'
 
 export type TokenByPool = {
   apy: string
@@ -24,7 +23,7 @@ type RowProps = {
 const columns: Column[] = [
   {
     align: 'left',
-    header: (orderBy: OrderBy) => <SortableHeader label="Seniority" orderBy={orderBy} />,
+    header: (orderBy: OrderBy) => <SortableTableHeader label="Seniority" orderBy={orderBy} />,
     cell: (token: TokenByPool) => <Text variant="body2"> {token.index + 1}</Text>,
     flex: '2',
     sortKey: 'index',
@@ -43,13 +42,13 @@ const columns: Column[] = [
     sortKey: 'symbol',
   },
   {
-    header: (orderBy: OrderBy) => <SortableHeader label="Min. Protection" orderBy={orderBy} />,
+    header: (orderBy: OrderBy) => <SortableTableHeader label="Min. Protection" orderBy={orderBy} />,
     cell: (token: TokenByPool) => <Protection token={token} />,
     flex: '2',
     sortKey: 'protection',
   },
   {
-    header: (orderBy: OrderBy) => <SortableHeader label="APY" orderBy={orderBy} />,
+    header: (orderBy: OrderBy) => <SortableTableHeader label="APY" orderBy={orderBy} />,
     cell: (token: TokenByPool) => <APY token={token} />,
     flex: '2',
     sortKey: 'apy',
@@ -111,25 +110,3 @@ const APY: React.VFC<RowProps> = ({ token }) => {
 const Protection: React.VFC<RowProps> = ({ token }) => {
   return <Text variant="body2">{formatPercentage(token.protection, new BN(10).pow(new BN(18)).toString())}</Text>
 }
-
-const SortableHeader: React.VFC<{ label: string; orderBy?: OrderBy }> = ({ label, orderBy }) => {
-  return (
-    <StyledHeader>
-      {label}
-      <IconArrowDown
-        color={orderBy ? 'currentColor' : 'transparent'}
-        size={16}
-        style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
-      />
-    </StyledHeader>
-  )
-}
-
-const StyledHeader = styled(Shelf)`
-  color: ${({ theme }) => theme.colors.textSecondary};
-
-  &:hover,
-  &:hover > svg {
-    color: ${({ theme }) => theme.colors.textInteractiveHover};
-  }
-`

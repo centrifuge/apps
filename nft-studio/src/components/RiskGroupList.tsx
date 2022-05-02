@@ -1,13 +1,13 @@
 import { feeToApr, formatCurrencyAmount, fromRate } from '@centrifuge/centrifuge-js'
-import { Box, IconArrowDown, Shelf, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { Dec } from '../utils/Decimal'
 import { useLoans } from '../utils/useLoans'
 import { usePool, usePoolMetadata } from '../utils/usePools'
-import { Column, DataTable, OrderBy } from './DataTable'
+import { Column, DataTable, OrderBy, SortableTableHeader } from './DataTable'
 import { PieChart } from './PieChart'
 
 export type AssetByRiskGroup = {
@@ -28,32 +28,10 @@ const initialRow: AssetByRiskGroup = {
   riskAdjustment: '0',
 }
 
-const SortableHeader: React.VFC<{ label: string; orderBy?: OrderBy }> = ({ label, orderBy }) => {
-  return (
-    <StyledHeader>
-      {label}
-      <IconArrowDown
-        color={orderBy ? 'currentColor' : 'transparent'}
-        size={16}
-        style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
-      />
-    </StyledHeader>
-  )
-}
-
-const StyledHeader = styled(Shelf)`
-  color: ${({ theme }) => theme.colors.textSecondary};
-
-  &:hover,
-  &:hover > svg {
-    color: ${({ theme }) => theme.colors.textInteractiveHover};
-  }
-`
-
 const columns: Column[] = [
   {
     align: 'left',
-    header: (orderBy: OrderBy) => <SortableHeader label="Risk group" orderBy={orderBy} />,
+    header: (orderBy: OrderBy) => <SortableTableHeader label="Risk group" orderBy={orderBy} />,
     cell: (riskGroup: AssetByRiskGroup) => (
       <Shelf gap="1">
         {riskGroup?.color && <Box width="10px" height="10px" backgroundColor={riskGroup.color} />}
@@ -66,25 +44,25 @@ const columns: Column[] = [
     sortKey: 'name',
   },
   {
-    header: (orderBy: OrderBy) => <SortableHeader label="Amount" orderBy={orderBy} />,
+    header: (orderBy: OrderBy) => <SortableTableHeader label="Amount" orderBy={orderBy} />,
     cell: ({ amount }: AssetByRiskGroup) => <Text variant="body2">{formatCurrencyAmount(amount)}</Text>,
     flex: '1',
     sortKey: 'amount',
   },
   {
-    header: (orderBy: OrderBy) => <SortableHeader label="Share" orderBy={orderBy} />,
+    header: (orderBy: OrderBy) => <SortableTableHeader label="Share" orderBy={orderBy} />,
     cell: ({ share }: AssetByRiskGroup) => <Text variant="body2">{share}%</Text>,
     flex: '1',
     sortKey: 'share',
   },
   {
-    header: (orderBy: OrderBy) => <SortableHeader label="Financing fee" orderBy={orderBy} />,
+    header: (orderBy: OrderBy) => <SortableTableHeader label="Financing fee" orderBy={orderBy} />,
     cell: ({ financingFee }: AssetByRiskGroup) => <Text variant="body2">{financingFee ? `${financingFee}%` : ''}</Text>,
     flex: '1',
     sortKey: 'financingFee',
   },
   {
-    header: (orderBy: OrderBy) => <SortableHeader label="Risk adjustment" orderBy={orderBy} />,
+    header: (orderBy: OrderBy) => <SortableTableHeader label="Risk adjustment" orderBy={orderBy} />,
     cell: ({ riskAdjustment }: AssetByRiskGroup) => (
       <Text variant="body2">{riskAdjustment ? `${riskAdjustment}%` : ''}</Text>
     ),

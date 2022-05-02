@@ -1,4 +1,4 @@
-import { Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Card, IconArrowDown, Shelf, Stack, Text } from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import * as React from 'react'
 import styled from 'styled-components'
@@ -93,9 +93,9 @@ export const DataTable = <T extends Record<string, any>>({
         {/* summary row is not included in sorting */}
         {summary && (
           <Row rounded={rounded}>
-            {columns.map((col) => (
+            {columns.map((col, i) => (
               <DataCol key={col.sortKey} style={{ flex: col.flex }} align={col?.align}>
-                {col.cell(summary)}
+                {col.cell(summary, i)}
               </DataCol>
             ))}
           </Row>
@@ -174,3 +174,25 @@ const DataCol = styled.div<{ align: Column['align'] }>`
 `
 
 const HeaderCol = styled(DataCol)``
+
+export const SortableTableHeader: React.VFC<{ label: string; orderBy?: OrderBy }> = ({ label, orderBy }) => {
+  return (
+    <StyledHeader>
+      {label}
+      <IconArrowDown
+        color={orderBy ? 'currentColor' : 'transparent'}
+        size={16}
+        style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+      />
+    </StyledHeader>
+  )
+}
+
+const StyledHeader = styled(Shelf)`
+  color: ${({ theme }) => theme.colors.textSecondary};
+
+  &:hover,
+  &:hover > svg {
+    color: ${({ theme }) => theme.colors.textInteractiveHover};
+  }
+`
