@@ -144,7 +144,7 @@ const calculateInterestAccrued = (
     }
   }
   const executionsBeforeYearStart = executions.filter((result) => date(result.timestamp) < yearStart)
-  const balanceOnFirstDay = getBalanceOnFirstDay(executionsBeforeYearStart) //currencyAmount
+  const balanceOnFirstDay = getBalanceOnFirstDay(executionsBeforeYearStart) // currencyAmount
   const tokensOnFirstDay = balanceOnFirstDay / tokenPriceFirstDay
 
   let totalBought = 0
