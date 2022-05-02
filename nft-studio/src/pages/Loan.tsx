@@ -85,7 +85,7 @@ const Loan: React.FC = () => {
                   <LabelValueList
                     items={
                       [
-                        { label: 'Value', value: formatBalance(loan.loanInfo.value.toFloat()) },
+                        { label: 'Value', value: formatBalance(loan.loanInfo.value.toFloat(), pool?.currency) },
                         'maturityDate' in loan.loanInfo && {
                           label: 'Maturity date',
                           value: formatDate(loan.loanInfo.maturityDate),

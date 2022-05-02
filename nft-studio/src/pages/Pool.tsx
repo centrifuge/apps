@@ -14,13 +14,14 @@ import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
+import { PoolMetadata } from '../types'
 import { formatBalance, formatPercentage } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLoans } from '../utils/useLoans'
 import { usePermissions } from '../utils/usePermissions'
-import { PoolMetadata, usePool, usePoolMetadata } from '../utils/usePools'
+import { usePool, usePoolMetadata } from '../utils/usePools'
 
 export const PoolPage: React.FC = () => {
   return (
@@ -200,7 +201,7 @@ const Pool: React.FC = () => {
                 )}
               </Stack>
               <Box flex="1 1 55%">
-                <Text>{metadata?.pool?.description}</Text>
+                <Text>{metadata?.pool?.issuer?.description}</Text>
               </Box>
             </Shelf>
           </Stack>

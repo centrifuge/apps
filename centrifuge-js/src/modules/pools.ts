@@ -1053,7 +1053,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   }
 
   function getPendingCollect(args: [address: Account, poolId: string, trancheId: string, executedEpoch: number]) {
-    const [address, poolId, trancheId, executedEpoch] = args
+    const [address, , trancheId, executedEpoch] = args
     const $api = inst.getApi()
 
     return $api.pipe(
@@ -1061,7 +1061,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
       switchMap(([api, order]) => {
         if (order.epoch <= executedEpoch && order.epoch > 0 && (!order.invest.isZero() || !order.redeem.isZero())) {
           const epochKeys = Array.from({ length: executedEpoch + 1 - order.epoch }, (_, i) => [
-            [poolId, trancheId],
+            trancheId,
             order.epoch + i,
           ])
           const $epochs = api.query.pools.epoch.multi(epochKeys)

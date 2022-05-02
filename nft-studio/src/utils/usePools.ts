@@ -1,3 +1,4 @@
+import { PoolMetadata } from '../types'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 
@@ -56,67 +57,6 @@ export function usePoolPermissions(poolId?: string) {
   })
 
   return result
-}
-
-export type PoolMetadata = {
-  pool: {
-    name: string
-    description: string
-    icon: string
-    asset: {
-      class: string
-      averageMaturity: string
-    }
-    issuer: {
-      name: string
-      email: string
-      description: string
-      logo: string
-    }
-    links: {
-      executiveSummary: string
-      forum: string
-      website: string
-    }
-    status: 'open' | 'upcoming' | 'hidden'
-  }
-  tranches: [
-    {
-      name: string
-      symbol: string
-      icon: string
-    }
-  ]
-  riskGroups: [
-    {
-      id: string
-      advance_rate: string
-      financing_fee: string
-      probability_of_default: string
-      loss_given_default: string
-      discount_rate: string
-    }
-  ]
-  onboarding: {
-    live: boolean
-    agreements: {
-      name: string
-      provider: 'docusign'
-      providerTemplateId: string
-      tranche: string
-      country: 'us | non-us'
-    }[]
-    issuer: {
-      name: string
-      email: string
-      restrictedCountryCodes: string[]
-      minInvestmentCurrency: number
-      nonSolicitationNotice: 'all' | 'non-us' | 'none'
-    }
-  }
-  bot: {
-    channelId: string
-  }
 }
 
 export function usePoolMetadata(pool?: { metadata?: string }) {

@@ -7,10 +7,11 @@ import { useCentrifuge } from '../components/CentrifugeProvider'
 import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { useWeb3 } from '../components/Web3Provider'
+import { PoolMetadata } from '../types'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { fetchMetadata } from '../utils/useMetadata'
 import { usePermissions } from '../utils/usePermissions'
-import { PoolMetadata, usePools } from '../utils/usePools'
+import { usePools } from '../utils/usePools'
 
 export const CreateLoanPage: React.FC = () => {
   return (

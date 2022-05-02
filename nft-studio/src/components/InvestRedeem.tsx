@@ -26,6 +26,7 @@ import { useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { usePermissions } from '../utils/usePermissions'
 import { usePendingCollect, usePool, usePoolMetadata } from '../utils/usePools'
+import { useDebugFlags } from './DebugFlags'
 import { LoadBoundary } from './LoadBoundary'
 import { Spinner } from './Spinner'
 import { AnchorTextLink } from './TextLink'
@@ -145,7 +146,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
               (!order.payoutTokenAmount.isZero() ? (
                 <SuccessBanner
                   title="Investment successful"
-                  body={`${formatBalance(order.investCurrency, pool?.currency)} USD was successfully invested`}
+                  body={`${formatBalance(order.investCurrency, pool?.currency)} was successfully invested`}
                 />
               ) : !order.payoutCurrencyAmount.isZero() ? (
                 <SuccessBanner title="Redemption successful" />
@@ -193,6 +194,11 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+  const isFirstInvestment = order?.epoch === 0 && order.investCurrency.isZero()
+  const minInvest = trancheMeta?.minInitialInvestment
+    ? new Balance(trancheMeta.minInitialInvestment)
+    : Balance.fromFloat(0)
+  const { allowInvestBelowMin } = useDebugFlags()
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')
 
@@ -245,6 +251,8 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
         errors.amount = validateNumberInput(values.amount, 0, balance)
       } else if (hasPendingOrder && inputToDecimal(values.amount).eq(pendingInvest)) {
         errors.amount = 'Equals current order'
+      } else if (!allowInvestBelowMin && isFirstInvestment && Dec(form.values.amount).lt(minInvest.toDecimal())) {
+        errors.amount = 'Investment amount too low'
       }
 
       return errors
@@ -260,7 +268,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
               {...fieldProps}
               value={value instanceof Decimal ? value.toNumber() : value}
               errorMessage={meta.touched ? meta.error : undefined}
-              label="Amount"
+              label={`Amount ${isFirstInvestment ? `(min: ${formatBalance(minInvest, pool?.currency)})` : ''}`}
               type="number"
               min="0"
               disabled={isLoading || isLoadingCancel}

@@ -170,6 +170,14 @@ const CreatePoolForm: React.VFC = () => {
   const centrifuge = useCentrifuge()
   const history = useHistory()
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
+  const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
+
+  React.useEffect(() => {
+    // If the hash can't be find on Pinata the request can take a long time to time out
+    // During which the name/description can't be edited
+    // Set a deadline for how long we're willing to wait on a stored issuer
+    setTimeout(() => setWaitingForStoredIssuer(false), 10000)
+  }, [])
 
   const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
     'Create pool',
@@ -260,7 +268,7 @@ const CreatePoolForm: React.VFC = () => {
   })
 
   React.useEffect(() => {
-    if (!isStoredIssuerLoading && storedIssuer) {
+    if (!isStoredIssuerLoading && storedIssuer && waitingForStoredIssuer) {
       if (storedIssuer.name) {
         form.setFieldValue('issuerName', storedIssuer.name, false)
       }
@@ -278,7 +286,7 @@ const CreatePoolForm: React.VFC = () => {
           icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
           title={form.values.poolName || 'New Pool'}
           subtitle={
-            <TextWithPlaceholder isLoading={isStoredIssuerLoading} width={15}>
+            <TextWithPlaceholder isLoading={waitingForStoredIssuer} width={15}>
               by {form.values.issuerName || address}
             </TextWithPlaceholder>
           }
@@ -400,7 +408,7 @@ const CreatePoolForm: React.VFC = () => {
                 label="Issuer name"
                 placeholder="Name..."
                 maxLength={100}
-                disabled={isStoredIssuerLoading}
+                disabled={waitingForStoredIssuer}
               />
             </Box>
             <Box gridColumn="span 3" width="100%">
@@ -428,7 +436,7 @@ const CreatePoolForm: React.VFC = () => {
                 label="Description"
                 placeholder="Description..."
                 maxLength={800}
-                disabled={isStoredIssuerLoading}
+                disabled={waitingForStoredIssuer}
               />
             </Box>
             <Box gridColumn="span 6">
