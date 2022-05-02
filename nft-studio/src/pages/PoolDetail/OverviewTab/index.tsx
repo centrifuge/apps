@@ -8,6 +8,7 @@ import { IssuerSection } from '../../../components/IssuerSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
+import { ReserveChart } from '../../../components/ReserveChart'
 import { RiskGroupList } from '../../../components/RiskGroupList'
 import { TokenListByPool } from '../../../components/TokenListByPool'
 import { Tooltips } from '../../../components/Tooltips'
@@ -56,6 +57,17 @@ const PoolDetailOverview: React.FC = () => {
   return (
     <>
       <PageSummary data={pageSummaryData} />
+      <Stack
+        p="3"
+        gap="2"
+        as="section"
+        style={{
+          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
+        }}
+      >
+        <Text variant="heading2">Pool value, asset value & reserve</Text>
+        <ReserveChart />
+      </Stack>
       <Stack
         p="3"
         gap="2"

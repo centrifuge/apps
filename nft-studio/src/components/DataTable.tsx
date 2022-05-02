@@ -92,12 +92,7 @@ export const DataTable = <T extends Record<string, any>>({
         ))}
         {/* summary row is not included in sorting */}
         {summary && (
-          <Row
-            rounded={rounded}
-            as={onRowClicked ? 'button' : 'div'}
-            onClick={onRowClicked && (() => onRowClicked(summary))}
-            tabIndex={onRowClicked ? 0 : undefined}
-          >
+          <Row rounded={rounded}>
             {columns.map((col) => (
               <DataCol key={col.sortKey} style={{ flex: col.flex }} align={col?.align}>
                 {col.cell(summary)}

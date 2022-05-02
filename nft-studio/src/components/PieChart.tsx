@@ -25,7 +25,6 @@ export const PieChart: React.VFC<PieChartProps> = ({ data }) => {
           fill={theme.colors.textSecondary}
           textAnchor={xOuter > (cx as number) ? 'start' : 'end'}
           dominantBaseline="central"
-          fontFamily="Inter, Arial"
           fontSize="10"
         >
           {payload.name}
@@ -37,7 +36,6 @@ export const PieChart: React.VFC<PieChartProps> = ({ data }) => {
             fill={payload.labelColor}
             textAnchor={xInner > (cx as number) ? 'start' : 'end'}
             dominantBaseline="central"
-            fontFamily="Inter, Arial"
             fontSize="10"
           >
             {`${(percent * 100).toFixed(0)}%`}
@@ -48,7 +46,7 @@ export const PieChart: React.VFC<PieChartProps> = ({ data }) => {
   }
 
   return (
-    <RechartsPieChart width={250} height={250}>
+    <RechartsPieChart width={250} height={250} style={{ fontFamily: 'Inter' }}>
       <Pie
         data={data}
         cx="50%"
