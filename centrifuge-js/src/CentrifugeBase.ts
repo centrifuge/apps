@@ -1,10 +1,21 @@
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
-import { Signer } from '@polkadot/types/types'
+import { Codec, IEventRecord, Signer } from '@polkadot/types/types'
 import 'isomorphic-fetch'
-import { firstValueFrom, of, throwError } from 'rxjs'
+import {
+  bufferCount,
+  filter,
+  firstValueFrom,
+  map,
+  Observable,
+  of,
+  share,
+  switchMap,
+  takeWhile,
+  tap,
+  throwError,
+} from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
-import { takeWhile, tap } from 'rxjs/operators'
 import { TransactionOptions } from './types'
 import { getPolkadotApi } from './utils/web3'
 
@@ -126,6 +137,24 @@ export class CentrifugeBase {
         return data as T
       },
     })
+  }
+
+  _$blockEvents: null | Observable<{ api: ApiRx; events: (IEventRecord<any> & Codec)[] }> = null
+
+  getBlockEvents() {
+    if (this._$blockEvents) return this._$blockEvents
+    const $api = this.getApi()
+
+    return (this._$blockEvents = $api.pipe(
+      switchMap((api) =>
+        api.queryMulti([api.query.system.events, api.query.system.number]).pipe(
+          bufferCount(2, 1), // Delay the events by one block, to make sure storage has been updated
+          filter(([[events]]) => !!(events as any)?.length),
+          map(([[events]]) => ({ api, events: events as any }))
+        )
+      ),
+      share()
+    ))
   }
 
   getApi() {

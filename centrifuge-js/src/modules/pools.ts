@@ -2,10 +2,9 @@ import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
-import { isSameAddress } from '..'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
-import { getRandomUint } from '../utils'
+import { getRandomUint, isSameAddress } from '../utils'
 
 const Balance = new BN(10).pow(new BN(18))
 const Perquintill = new BN(10).pow(new BN(18))
@@ -288,6 +287,29 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
+  function updateRoles(
+    args: [poolId: string, add: [Account, AdminRole][], remove: [Account, AdminRole][]],
+    options?: TransactionOptions
+  ) {
+    const [poolId, add, remove] = args
+    const signer = inst.getSignerAddress()
+    // Make sure a removal of the PoolAdmin role of the signer is the last tx in the batch, otherwise the later txs will fail
+    const sortedRemove = [...remove].sort(([addr, role]) =>
+      role === 'PoolAdmin' && isSameAddress(addr, signer) ? 1 : -1
+    )
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.utility.batchAll([
+          ...add.map(([addr, role]) => api.tx.permissions.addPermission('PoolAdmin', addr, poolId, role)),
+          ...sortedRemove.map(([addr, role]) => api.tx.permissions.rmPermission('PoolAdmin', addr, poolId, role)),
+        ])
+        return inst.wrapSignAndSendRx(api, submittable, options)
+      })
+    )
+  }
+
   function setMaxReserve(args: [poolId: string, maxReserve: BN], options?: TransactionOptions) {
     const [poolId, maxReserve] = args
     const $api = inst.getApi()
@@ -445,25 +467,17 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  function getRolesByPool(args: [address: Account]) {
+  function getUserPermissions(args: [address: Account]) {
     const [address] = args
     const $api = inst.getApi()
 
-    const $events = $api.pipe(
-      switchMap(
-        (api) => combineLatest([api.query.system.events(), api.query.system.number()]),
-        (api, [events]) => ({ api, events })
-      ),
+    const $events = inst.getBlockEvents().pipe(
       filter(({ api, events }) => {
-        // @ts-expect-error
         const event = events.find(
-          // @ts-expect-error
-          ({ event }) => api.events.pools.RoleApproved.is(event) || api.events.pools.RoleRevoked.is(event)
+          ({ event }) => api.events.permissions.RoleAdded.is(event) || api.events.permissions.RoleRemoved.is(event)
         )
-
         if (!event) return false
-
-        const [, , accountId] = (event.toJSON() as any).event.data
+        const [accountId] = (event.toJSON() as any).event.data
         return isSameAddress(address, accountId)
       })
     )
@@ -486,6 +500,61 @@ export function getPoolsModule(inst: CentrifugeBase) {
         })
         return roles
       }),
+      repeatWhen(() => $events)
+    )
+  }
+
+  function getPoolPermissions(args: [poolId: string]) {
+    const [poolId] = args
+
+    const $api = inst.getApi()
+
+    const $events = inst.getBlockEvents().pipe(
+      filter(({ api, events }) => {
+        const event = events.find(
+          ({ event }) => api.events.permissions.RoleAdded.is(event) || api.events.permissions.RoleRemoved.is(event)
+        )
+        if (!event) return false
+        const [, eventPoolId] = (event.toHuman() as any).event.data
+        return poolId === eventPoolId.replace(/\D/g, '')
+      })
+    )
+
+    return $api.pipe(
+      switchMap(
+        (api) => api.query.permissions.permission.keys(),
+        (api, keys) => ({ api, keys })
+      ),
+      switchMap(({ keys, api }) => {
+        const poolKeys = keys
+          .map((key) => {
+            const poolId = (key.toHuman() as string[])[1].replace(/\D/g, '')
+            const account = (key.toHuman() as string[])[0]
+            return [account, poolId]
+          })
+          .filter(([, pid]) => {
+            return pid === poolId
+          })
+        return api.query.permissions.permission.multi(poolKeys).pipe(
+          map((permissionsData) => {
+            const roles: { [account: string]: PoolRoles } = {}
+            permissionsData.forEach((value, i) => {
+              const account = poolKeys[i][0]
+              const permissions = value.toJSON() as any
+              roles[account] = {
+                roles: (
+                  ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'RiskAdmin'] as const
+                ).filter((role) => AdminRoleBits[role] & permissions.admin.bits),
+                tranches: permissions.trancheInvestor.info
+                  .filter((info: any) => info.permissionedTill * 1000 > Date.now())
+                  .map((info: any) => info.trancheId),
+              }
+            })
+            return roles
+          })
+        )
+      }),
+      take(1),
       repeatWhen(() => $events)
     )
   }
@@ -1108,7 +1177,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
     closeEpoch,
     submitSolution,
     approveRoles,
-    getRolesByPool,
+    getUserPermissions,
+    getPoolPermissions,
+    updateRoles,
     getNextLoanId,
     createLoan,
     priceLoan,

@@ -50,6 +50,14 @@ export function usePendingCollect(poolId: string, trancheId: number, address?: s
   return result
 }
 
+export function usePoolPermissions(poolId?: string) {
+  const [result] = useCentrifugeQuery(['poolPermissions', poolId], (cent) => cent.pools.getPoolPermissions([poolId!]), {
+    enabled: !!poolId,
+  })
+
+  return result
+}
+
 export type PoolMetadata = {
   pool: {
     name: string

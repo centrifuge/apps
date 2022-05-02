@@ -2,7 +2,7 @@
   "name": "@centrifuge/nft-studio",
   "private": true,
   "scripts": {
-    "start": "run-p start:centjs start:fabric start:types netlify:dev",
+    "start": "run-p -l start:centjs start:fabric start:types netlify:dev",
     "netlify:dev": "netlify dev",
     "start:app": "vite",
     "start:types": "tsc --watch",

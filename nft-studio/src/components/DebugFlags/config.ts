@@ -17,7 +17,7 @@ export type DebugFlagConfig =
       options: Record<string, any>
     }
 
-export type Key = 'address' | 'batchMintNFTs' | 'alwaysShowPanel' | 'showUnusedFlags'
+export type Key = 'address' | 'batchMintNFTs' | 'alwaysShowPanel' | 'showUnusedFlags' | 'showAdditionalIssuerTabs'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -33,6 +33,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: !!localStorage.getItem('debug'),
   },
   showUnusedFlags: {
+    type: 'checkbox',
+    default: false,
+  },
+  showAdditionalIssuerTabs: {
     type: 'checkbox',
     default: false,
   },

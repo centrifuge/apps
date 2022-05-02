@@ -5,13 +5,14 @@ import { Link } from 'react-router-dom'
 
 type Props = {
   basePath?: string
-  children: React.ReactElement[]
+  children: React.ReactNode[]
 }
 
 export const NavigationTabs: React.VFC<Props> = ({ basePath = '', children }) => {
   const match = useRouteMatch<{ tab: string }>(`${basePath}/:tab`)
   let matchedIndex = -1
   React.Children.forEach(children, (child, i) => {
+    if (!React.isValidElement(child)) return
     if (child.props.to?.endsWith(match?.params.tab)) {
       matchedIndex = i
     }
