@@ -862,6 +862,40 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
+  function getDailyPoolStates(args: [poolId: string]) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    const $query = inst.getOptionalSubqueryObservable<{ dailyPoolStates: { nodes: any } }>(
+      `query($poolId: String!) {
+        dailyPoolStates(filter: {id:{startsWith: $poolId}}) {
+          nodes {
+            timestamp
+            poolState {
+              id
+              totalReserve
+              netAssetValue
+            }
+          }
+        }
+      }
+      `,
+      {
+        poolId,
+      }
+    )
+
+    return $api.pipe(
+      switchMap(() =>
+        combineLatest([$query]).pipe(
+          switchMap((queryData) => {
+            return queryData ?? null
+          })
+        )
+      )
+    )
+  }
+
   function getBalances(args: [address: Account]) {
     const [address] = args
     const $api = inst.getApi()
@@ -1198,6 +1232,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     getLoanCollectionIdForPool,
     getTokens,
     getAvailablePoolId,
+    getDailyPoolStates,
   }
 }
 

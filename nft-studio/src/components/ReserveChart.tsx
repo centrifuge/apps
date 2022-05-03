@@ -2,6 +2,7 @@ import { formatCurrencyAmount } from '@centrifuge/centrifuge-js'
 import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { BN } from 'bn.js'
 import React from 'react'
+import { useParams } from 'react-router'
 import {
   Area,
   CartesianGrid,
@@ -15,10 +16,8 @@ import {
   YAxis,
 } from 'recharts'
 import { useTheme } from 'styled-components'
-import data from './mockData.json'
+import { useDailyPoolStates } from '../utils/usePools'
 import { Tooltips } from './Tooltips'
-
-const scientificNotationToBN = (num: number) => new BN(num.toLocaleString('fullwide', { useGrouping: false }))
 
 type CustomizedTooltipProps = TooltipProps<any, any> & {
   width?: number
@@ -32,17 +31,17 @@ type CustomizedTooltipProps = TooltipProps<any, any> & {
 const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active, width, initialData }) => {
   const theme = useTheme()
   let tooltipData = {
-    poolValue: scientificNotationToBN(initialData.poolValue),
-    assetValue: scientificNotationToBN(initialData.assetValue),
-    reserve: scientificNotationToBN(initialData.reserve[1]).sub(scientificNotationToBN(initialData.reserve[0])),
+    poolValue: new BN(initialData.poolValue),
+    assetValue: new BN(initialData.assetValue),
+    reserve: new BN(initialData.reserve[1]).sub(new BN(initialData.reserve[0])),
     date: new Date(),
   }
   if (payload && payload?.length > 0 && active) {
     const { poolValue, assetValue, reserve } = payload[0]?.payload
     tooltipData = {
-      poolValue: scientificNotationToBN(poolValue),
-      assetValue: scientificNotationToBN(assetValue),
-      reserve: scientificNotationToBN(reserve[1]).sub(scientificNotationToBN(reserve[0])),
+      poolValue: new BN(poolValue),
+      assetValue: new BN(assetValue),
+      reserve: new BN(reserve[1]).sub(new BN(reserve[0])),
       date: payload[0]?.payload?.day,
     }
   }
@@ -55,8 +54,8 @@ const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active,
           <Text variant="body2">{formatCurrencyAmount(tooltipData.poolValue)}</Text>
         </Stack>
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentSecondary}>
-          <Tooltips type="reserve" variant="lowercase" />
-          <Text variant="body2">{formatCurrencyAmount(tooltipData.reserve)}</Text>
+          <Tooltips type="assetValue" variant="lowercase" />
+          <Text variant="body2">{formatCurrencyAmount(tooltipData.assetValue)}</Text>
         </Stack>
         <Stack
           borderLeftWidth="3px"
@@ -64,8 +63,8 @@ const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active,
           borderLeftStyle="solid"
           borderLeftColor={theme.colors.backgroundSecondary}
         >
-          <Tooltips type="assetValue" variant="lowercase" />
-          <Text variant="body2">{formatCurrencyAmount(tooltipData.assetValue)}</Text>
+          <Tooltips type="reserve" variant="lowercase" />
+          <Text variant="body2">{formatCurrencyAmount(tooltipData.reserve)}</Text>
         </Stack>
         <Box alignSelf="flex-end" justifySelf="end">
           <Text variant="body2">{date}</Text>
@@ -92,7 +91,15 @@ const CustomizedXAxisTick: React.VFC<CustomizedXAxisTickProps> = ({ payload, x, 
 
 export const ReserveChart: React.VFC = () => {
   const theme = useTheme()
+  const { pid } = useParams<{ pid: string }>()
   const ref = React.useRef<HTMLDivElement>(null)
+  const poolStates = useDailyPoolStates(pid)
+
+  const data = poolStates?.dailyPoolStates.nodes.map((day) => {
+    const assetValue = day.poolState.netAssetValue
+    const poolValue = new BN(day.poolState.netAssetValue).add(new BN(assetValue)).toString()
+    return { day: new Date(day.timestamp), poolValue: poolValue, assetValue, reserve: [assetValue, poolValue] }
+  })
 
   return (
     <div ref={ref}>
@@ -101,20 +108,7 @@ export const ReserveChart: React.VFC = () => {
         style={{ fontFamily: 'Inter', fontSize: '10px', color: theme.colors.textSecondary, width: '100%' }}
       >
         <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-          <ComposedChart
-            width={754}
-            height={173}
-            data={data
-              //  @ts-expect-error
-              .sort((a, b) => a.day - b.day)
-              .map((item) => ({
-                reserve: [Number(item.reserve[0]) * 1e22, Number(item.reserve[1]) * 1e22],
-                poolValue: Number(item.poolValue) * 1e22,
-                assetValue: Number(item.assetValue) * 1e22,
-                day: item.day,
-              }))}
-            margin={{ top: 60 }}
-          >
+          <ComposedChart width={754} height={173} data={data} margin={{ top: 60 }}>
             <XAxis interval={10} dataKey="day" tick={<CustomizedXAxisTick />} tickLine={false} />
             <YAxis
               tickLine={false}
@@ -151,7 +145,7 @@ export const ReserveChart: React.VFC = () => {
                 <CustomizedTooltip
                   width={ref?.current?.offsetWidth}
                   //   fill with values from today
-                  initialData={{ reserve: [7.45e25, 8.9e25], poolValue: 8.9e25, assetValue: 7.45e25 }}
+                  initialData={data[data.length - 1]}
                 />
               }
               position={{ x: 0, y: -10 }}

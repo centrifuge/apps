@@ -25,6 +25,14 @@ export function useTokens() {
   return result
 }
 
+export function useDailyPoolStates(poolId: string) {
+  const [result] = useCentrifugeQuery(['dailyPoolStates'], (cent) => cent.pools.getDailyPoolStates([poolId]), {
+    suspense: true,
+  })
+
+  return result
+}
+
 export function useOrder(poolId: string, trancheId: number, address?: string) {
   const [result] = useCentrifugeQuery(
     ['order', poolId, trancheId, address],
