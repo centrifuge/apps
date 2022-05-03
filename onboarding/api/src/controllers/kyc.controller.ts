@@ -78,7 +78,11 @@ export class KycController {
     )
     //Send KYC status email if status is updated
     if (kyc.status !== investor.verificationStatus) {
-      await this.mailer.sendKycStatusEmail(investor.fullName, investor.email, investor.verificationStatus)
+      if (kyc.status === 'processing' && investor.verificationStatus === 'manual-review') {
+      } //do nothing
+      else {
+        await this.mailer.sendKycStatusEmail(investor.fullName, investor.email, investor.verificationStatus)
+      }
     }
 
     // Link user to pool/tranche so we know which pools a user has shown interest in
@@ -144,7 +148,11 @@ export class KycController {
 
     //Send KYC status email if status is updated
     if (kyc.status !== investor.verificationStatus) {
-      await this.mailer.sendKycStatusEmail(investor.fullName, investor.email, investor.verificationStatus)
+      if (kyc.status === 'processing' && investor.verificationStatus === 'manual-review') {
+      } //do nothing
+      else {
+        await this.mailer.sendKycStatusEmail(investor.fullName, investor.email, investor.verificationStatus)
+      }
     }
 
     // Create session and redirect user
