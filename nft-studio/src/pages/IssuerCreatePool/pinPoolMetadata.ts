@@ -60,7 +60,7 @@ export const pinPoolMetadata = async (poolFormData: PoolFormValues): Promise<str
     riskGroups: riskGroups.map((group) => ({
       name: group.groupName,
       advanceRate: Rate.fromPercent(group.advanceRate).toString(),
-      financingFee: Rate.fromAprPercent(group.fee).toString(),
+      interestRatePerSec: Rate.fromAprPercent(group.fee).toString(),
       probabilityOfDefault: Rate.fromPercent(group.probabilityOfDefault).toString(),
       lossGivenDefault: Rate.fromPercent(group.lossGivenDefault).toString(),
       discountRate: Rate.fromAprPercent(group.discountRate).toString(),

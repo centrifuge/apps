@@ -116,7 +116,7 @@ type TrancheDetailsData = {
   lastUpdatedInterest: number
 }
 
-type CurrencyData = { [key: string]: null } | { permissioned: { [key: string]: null } }
+type CurrencyData = { [key: string]: null } | { permissioned: string }
 
 type PoolDetailsData = {
   currency: CurrencyData
@@ -1276,7 +1276,7 @@ function hexToBN(value: string | number) {
 function getCurrency(data?: CurrencyData | string) {
   if (!data) return ''
   if (typeof data === 'string') return data
-  return Object.keys('permissioned' in data ? data.permissioned! : data)[0]
+  return 'permissioned' in data ? data.permissioned! : Object.keys(data)[0]
 }
 
 function getLoanInfo(loanType: LoanInfoData): LoanInfo {

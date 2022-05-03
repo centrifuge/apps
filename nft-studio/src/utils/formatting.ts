@@ -4,6 +4,7 @@ import Decimal from 'decimal.js-light'
 const currencySymbols = {
   native: 'AIR',
   usd: 'kUSD',
+  PermissionedEur: 'EUR',
 }
 
 export function getCurrencySymbol(currency?: string) {

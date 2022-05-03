@@ -39,6 +39,10 @@ export const CURRENCIES = [
     label: 'kUSD',
     value: 'Usd',
   },
+  {
+    label: 'EUR',
+    value: 'PermissionedEur',
+  },
 ]
 const DEFAULT_CURRENCY = 'Native'
 const ASSET_CLASSES = ['Art NFT'].map((label) => ({
@@ -271,7 +275,7 @@ const CreatePoolForm: React.VFC = () => {
       const tranches = [
         {}, // most junior tranche
         ...noJuniorTranches.map((tranche) => ({
-          interestPerSec: Rate.fromAprPercent(tranche.interestRate),
+          interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
           minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
         })),
       ]
@@ -283,12 +287,14 @@ const CreatePoolForm: React.VFC = () => {
 
       const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
+      const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
+
       createPoolTx([
         address,
         poolId,
         collectionId,
         tranches,
-        DEFAULT_CURRENCY,
+        currency,
         Balance.fromFloat(values.maxReserve),
         metadataHash,
         epochSeconds,
