@@ -1,4 +1,4 @@
-import { Balance, Loan as LoanType, Perquintill, Rate } from '@centrifuge/centrifuge-js'
+import { Balance, Loan as LoanType, Rate } from '@centrifuge/centrifuge-js'
 import { Box, Button, Card, Grid, IconNft, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, Form, Formik, FormikErrors, FormikProvider, useFormik } from 'formik'
@@ -62,7 +62,6 @@ const Loan: React.FC = () => {
   const name = truncate(nftMetadata?.name || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? parseMetadataUrl(nftMetadata.image) : ''
 
-  console.log('loan', loan, pool)
   return (
     <Stack gap={3} flex={1}>
       <PageHeader
@@ -383,7 +382,6 @@ const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
             }}
             onSubmit={(values, actions) => {
               const amount = Balance.fromFloat(values.amount)
-              console.log('amount', amount, amount, Balance, Perquintill)
               doFinanceTransaction([loan.poolId, loan.id, amount])
               actions.setSubmitting(false)
             }}
