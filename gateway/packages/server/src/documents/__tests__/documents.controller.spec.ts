@@ -85,7 +85,7 @@ describe('DocumentsController', () => {
     const databaseService = documentsModule.get<DatabaseService>(DatabaseService)
     insertedDocument = await databaseService.documents.insert({
       header: {
-        documentId: '0x39393939',
+        document_id: '0x39393939',
       },
       ...documentToInsert,
       organizationId: user.account,

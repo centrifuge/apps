@@ -4,11 +4,6 @@ import {} from 'styled-components'
 
 declare module 'styled-components' {
   export interface DefaultTheme extends FabricTheme {
-    sizes: FabricTheme['sizes'] & {
-      navBarHeight: number
-      navBarHeightMobile: number
-      dialog: number
-    }
     colors: FabricTheme['color'] & {
       placeholderBackground: string
     }

@@ -1,21 +1,28 @@
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug =
-  process.env.NODE_ENV === 'development' || params.get('debug') != null || !!localStorage.getItem('debug')
+  import.meta.env.MODE === 'development' || params.get('debug') != null || !!localStorage.getItem('debug')
 
-type DebugFlagConfig = {
-  type: string
-  default: boolean | string | number
-  options?: Record<string, unknown>
-}
+export type DebugFlagConfig =
+  | {
+      type: 'text'
+      default: string
+    }
+  | {
+      type: 'checkbox'
+      default: boolean
+    }
+  | {
+      type: 'select'
+      default: string
+      options: Record<string, any>
+    }
 
-export const flagsConfig: Record<string, DebugFlagConfig> = {
+export type Key = 'address' | 'batchMintNFTs' | 'alwaysShowPanel' | 'showUnusedFlags' | 'showAdditionalIssuerTabs'
+
+export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
     type: 'text',
     default: '',
-  },
-  showOnlyNFT: {
-    type: 'checkbox',
-    default: true,
   },
   batchMintNFTs: {
     type: 'checkbox',
@@ -26,6 +33,10 @@ export const flagsConfig: Record<string, DebugFlagConfig> = {
     default: !!localStorage.getItem('debug'),
   },
   showUnusedFlags: {
+    type: 'checkbox',
+    default: false,
+  },
+  showAdditionalIssuerTabs: {
     type: 'checkbox',
     default: false,
   },

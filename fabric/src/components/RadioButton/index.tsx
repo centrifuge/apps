@@ -47,7 +47,7 @@ const StyledOutline = styled.span`
 
 const StyledWrapper = styled(Flex)`
   position: relative;
-  top: 1px;
+  top: 3px;
 
   &::before {
     content: '.';

@@ -3,7 +3,7 @@ import * as React from 'react'
 import { useHistory } from 'react-router'
 import { LoanList } from '../components/LoanList'
 import { PageHeader } from '../components/PageHeader'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { useLoansAcrossPools } from '../utils/useLoans'
 import { usePools } from '../utils/usePools'
 
@@ -16,9 +16,9 @@ export const LoansPage: React.FC = () => {
 }
 
 const Loans: React.FC = () => {
-  const { data: pools } = usePools()
+  const pools = usePools()
   const managedPoolIds = pools?.filter((p) => true)?.map((p) => p.id)
-  const { data: loans } = useLoansAcrossPools(managedPoolIds)
+  const loans = useLoansAcrossPools(managedPoolIds)
   const history = useHistory()
 
   return (

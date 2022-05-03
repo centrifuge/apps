@@ -1,22 +1,26 @@
-import { useQuery } from 'react-query'
-import { useCentrifuge } from '../components/CentrifugeProvider'
+import { map, switchMap } from 'rxjs/operators'
 import { useAddress } from './useAddress'
+import { useCentrifugeQuery } from './useCentrifugeQuery'
 
 export function useBalance() {
-  const cent = useCentrifuge()
   const address = useAddress()
-  const query = useQuery(
+  const [result] = useCentrifugeQuery(
     ['balance', address],
-    async () => {
-      const api = await cent.getApi()
-      const balances = await api.query.system.account(address!)
-      return Number(balances.data.free.toString()) / 10 ** (api.registry.chainDecimals as any)
-    },
+    (cent) =>
+      cent.getApi().pipe(
+        switchMap(
+          (api) => api.query.system.account(address),
+          (api, balances) => ({ api, balances })
+        ),
+        map(
+          ({ api, balances }) =>
+            Number((balances as any).data.free.toString()) / 10 ** (api.registry.chainDecimals as any)
+        )
+      ),
     {
       enabled: !!address,
-      staleTime: 60 * 1000,
     }
   )
 
-  return query
+  return result
 }

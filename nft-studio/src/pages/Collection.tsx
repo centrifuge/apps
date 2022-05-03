@@ -1,20 +1,19 @@
-import { Box, Grid, IconArrowLeft, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
-import { useDebugFlags } from '../components/DebugFlags'
 import { Identity } from '../components/Identity'
 import { LogoAltair } from '../components/LogoAltair'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { VisibilityChecker } from '../components/VisibilityChecker'
-import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
+import { useAddress } from '../utils/useAddress'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFTs } from '../utils/useNFTs'
@@ -34,16 +33,15 @@ const Collection: React.FC = () => {
   const {
     params: { cid: collectionId },
   } = useRouteMatch<{ cid: string }>()
-  const { selectedAccount } = useWeb3()
+  const address = useAddress()
   const collection = useCollection(collectionId)
+  const nfts = useNFTs(collectionId)
   const { data: metadata, isLoading } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
-  const { data: nfts } = useNFTs(collectionId)
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const centrifuge = useCentrifuge()
-  const { showOnlyNFT } = useDebugFlags()
 
   const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
-  const canMint = !isLoanCollection && isSameAddress(selectedAccount?.address, collection?.owner)
+  const canMint = !isLoanCollection && isSameAddress(address, collection?.owner)
 
   return (
     <Stack flex={1} pb={8}>
@@ -65,12 +63,7 @@ const Collection: React.FC = () => {
           )
         }
       />
-      <Box mt={1}>
-        <RouterLinkButton icon={IconArrowLeft} to="/nfts" variant="text">
-          {showOnlyNFT ? 'Home' : 'Back'}
-        </RouterLinkButton>
-      </Box>
-      <Stack alignItems="center" gap={2} mb={5} mt="-16px">
+      <Stack alignItems="center" gap={2} mb={5}>
         {metadata?.image ? (
           <Box
             as="img"
@@ -112,7 +105,7 @@ const Collection: React.FC = () => {
               <Text variant="body2">by</Text>
             </Box>
             <AnchorPillButton
-              href={`${process.env.REACT_APP_SUBSCAN_URL}/account/${collection?.owner ?? ''}`}
+              href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/account/${collection?.owner ?? ''}`}
               target="_blank"
             >
               {collection?.owner && <Identity address={collection.owner} clickToCopy />}

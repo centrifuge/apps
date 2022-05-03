@@ -54,19 +54,19 @@ export class DocumentsController {
 
     const commitResult = await this.centrifugeService.documents.commitDocumentV2(
       user.account,
-      document.header.documentId
+      document.header.document_id
     )
 
-    const updated = await this.centrifugeService.pullForJobComplete(commitResult.header.jobId, user.account)
+    const { jobStatus } = await this.centrifugeService.pullForJobComplete(commitResult.header.job_id, user.account)
 
     const updatedDocs = await this.databaseService.documents.update(
       {
-        'header.document_id': document.header.documentId,
+        'header.document_id': document.header.document_id,
         organizationId: user.account.toLowerCase(),
       },
       {
         $set: {
-          document_status: updated.finished ? DocumentStatus.Created : DocumentStatus.CreationFail,
+          document_status: jobStatus ? DocumentStatus.Created : DocumentStatus.CreationFail,
         },
       },
       {
@@ -107,7 +107,7 @@ export class DocumentsController {
 
     const updated = (await this.databaseService.documents.update(
       {
-        'header.document_id': createResult.header.documentId,
+        'header.document_id': createResult.header.document_id,
         organizationId: user.account.toLowerCase(),
       },
       {
@@ -237,7 +237,7 @@ export class DocumentsController {
     try {
       const docFromNode = await this.centrifugeService.documents.getCommittedDocument(
         request.user.account,
-        document.header.documentId
+        document.header.document_id
       )
 
       docFromNode.attributes = {
@@ -250,7 +250,7 @@ export class DocumentsController {
        * */
       const docs: any = await this.databaseService.documents.update(
         {
-          'header.document_id': docFromNode.header.documentId,
+          'header.document_id': docFromNode.header.document_id,
           organizationId: request.user.account.toLowerCase(),
         },
         {
@@ -295,7 +295,7 @@ export class DocumentsController {
         scheme: SchemeEnum.Generic,
       },
       request.user.account,
-      documentFromDb.header.documentId
+      documentFromDb.header.document_id
     )
     const unflattenAttr = unflatten(updateResult.attributes)
     return await this.databaseService.documents.updateById(params.id, {

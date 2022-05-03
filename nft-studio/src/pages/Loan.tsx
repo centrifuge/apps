@@ -16,7 +16,7 @@ import { LabelValueStack } from '../components/LabelValueStack'
 import LoanLabel from '../components/LoanLabel'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { ButtonTextLink } from '../components/TextLink'
 import { nftMetadataSchema } from '../schemas'
 import { formatDate } from '../utils/date'
@@ -50,15 +50,15 @@ const LOAN_TYPE_LABELS = {
 
 const Loan: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
-  const { data: pool } = usePool(pid)
-  const { data: loan, refetch } = useLoan(pid, aid)
+  const pool = usePool(pid)
+  const loan = useLoan(pid, aid)
   const { data: poolMetadata } = usePoolMetadata(pool)
-  const nft = useNFT(loan?.asset.collectionId, loan?.asset.nftId)
+  const nft = useNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const loanNft = useLoanNft(pid, aid)
   const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const centrifuge = useCentrifuge()
   const address = useAddress()
-  const { data: permissions } = usePermissions(address)
+  const permissions = usePermissions(address)
 
   const canPrice = permissions?.[pid]?.roles.includes('PricingAdmin')
   const isLoanOwner = isSameAddress(loanNft?.owner, address)
@@ -126,7 +126,7 @@ const Loan: React.FC = () => {
             </Card>
           </>
         ) : canPrice ? (
-          <PricingForm loan={loan} refetch={refetch} />
+          <PricingForm loan={loan} />
         ) : (
           <Card p={3}>
             <Stack gap={3}>
@@ -137,7 +137,7 @@ const Loan: React.FC = () => {
         ))}
       {loan &&
         (loan.status === 'Active' && canBorrow ? (
-          <FinanceForm loan={loan} refetch={refetch} />
+          <FinanceForm loan={loan} />
         ) : loan.status === 'Active' ? (
           <Card p={3}>
             <Stack gap={3}>
@@ -201,16 +201,11 @@ function validateNumberInput(value: number | string, min: number | Decimal, max?
   }
 }
 
-const PricingForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan, refetch }) => {
+const PricingForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const centrifuge = useCentrifuge()
   const { execute: doTransaction, isLoading } = useCentrifugeTransaction(
-    'Create asset',
-    (cent) => cent.pools.priceLoan as any,
-    {
-      onSuccess: () => {
-        refetch()
-      },
-    }
+    'Price asset',
+    (cent) => cent.pools.priceLoan as any
   )
 
   const form = useFormik<PricingFormValues>({
@@ -339,33 +334,22 @@ type RepayValues = {
   amount: number | Decimal
 }
 
-const FinanceForm: React.VFC<{ loan: LoanType; refetch: () => void }> = ({ loan, refetch }) => {
-  const { data: pool } = usePool(loan.poolId)
+const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
+  const pool = usePool(loan.poolId)
   const centrifuge = useCentrifuge()
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
-    (cent) => cent.pools.financeLoan,
-    {
-      onSuccess: () => refetch(),
-    }
+    (cent) => cent.pools.financeLoan
   )
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Repay asset',
-    (cent) => cent.pools.repayLoanPartially,
-    {
-      onSuccess: () => refetch(),
-    }
+    (cent) => cent.pools.repayLoanPartially
   )
 
   const { execute: doRepayAllTransaction, isLoading: isRepayAllLoading } = useCentrifugeTransaction(
     'Repay asset',
-    (cent) => cent.pools.repayAndCloseLoan,
-    {
-      onSuccess: () => {
-        refetch()
-      },
-    }
+    (cent) => cent.pools.repayAndCloseLoan
   )
 
   function repayAll() {

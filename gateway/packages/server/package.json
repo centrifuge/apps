@@ -80,6 +80,6 @@
     "ts-loader": "^4.4.2",
     "ts-node": "^7.0.1",
     "tsconfig-paths": "^3.5.0",
-    "typescript": "4.1.2"
+    "typescript": "~4.4.4"
   }
 }

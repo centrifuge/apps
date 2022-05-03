@@ -1,179 +1,108 @@
-import { Button, Card, Grid, Stack, Text } from '@centrifuge/fabric'
+import { feeToApr, formatCurrencyAmount, formatPercentage } from '@centrifuge/centrifuge-js'
+import { Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { ButtonGroup } from '../components/ButtonGroup'
-import { CardHeader } from '../components/CardHeader'
-import { useCentrifuge } from '../components/CentrifugeProvider'
-import { ConnectButton } from '../components/ConnectButton'
-import { InvestRedeemDialog } from '../components/InvestRedeemDialog'
-import { LabelValueList } from '../components/LabelValueList'
 import { PageHeader } from '../components/PageHeader'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
-import { useAddress } from '../utils/useAddress'
-import { useBalances } from '../utils/useBalances'
+import { PageSummary } from '../components/PageSummary'
+import { PageWithSideBar } from '../components/PageWithSideBar'
+import { PoolCard } from '../components/PoolCard'
+import { Tooltips } from '../components/Tooltips'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 
-export const TokenPage: React.FC = () => {
+export const TokenDetailPage: React.FC = () => {
   return (
-    <PageWithSideBar>
-      <Token />
+    <PageWithSideBar sidebar>
+      <TokenDetail />
     </PageWithSideBar>
   )
 }
 
-const Token: React.FC = () => {
-  const { pid: poolId, tid } = useParams<{ pid: string; tid: string }>()
-  const address = useAddress()
-  const { data: balances } = useBalances(address)
-  const { data: pool } = usePool(poolId)
+const TokenDetail: React.FC = () => {
+  const { pid: poolId, tid: trancheId } = useParams<{ pid: string; tid: string }>()
+  const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
-  const centrifuge = useCentrifuge()
-  const trancheId = Number(tid)
 
-  const token = balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)
-  const tranche = pool?.tranches[trancheId]
-  const trancheMeta = metadata?.tranches?.[trancheId]
+  const token = React.useMemo(
+    () => pool?.tranches.find((token) => token.index === parseInt(trancheId, 10)),
+    [pool, trancheId]
+  )
+
+  const valueLocked = React.useMemo(
+    () =>
+      token?.tokenPrice
+        ? new BN(token.totalIssuance)
+            .mul(new BN(token.tokenPrice))
+            .div(new BN(10).pow(new BN(27)))
+            .toString()
+        : '0',
+    [token]
+  )
+
+  const pageSummaryData = React.useMemo(
+    () => [
+      {
+        label: <Tooltips type="assetClass" />,
+        value: metadata?.pool?.asset.class,
+      },
+      {
+        label: <Tooltips type="apy" />,
+        value: (
+          <Text variant="heading3">
+            {feeToApr(token?.interestPerSec || new BN(0))}% <Text variant="body3">target</Text>
+          </Text>
+        ),
+      },
+      {
+        label: <Tooltips type="protection" />,
+        value: (
+          <Text variant="heading3">
+            {parseInt(trancheId, 10) > 0 ? (
+              <Text>
+                {formatPercentage(new BN(token?.ratio || ''), new BN(10).pow(new BN(27)))}{' '}
+                <Text variant="body3">
+                  minimum {formatPercentage(new BN(token?.minRiskBuffer || ''), new BN(10).pow(new BN(27)))}
+                </Text>
+              </Text>
+            ) : (
+              '0%'
+            )}
+          </Text>
+        ),
+      },
+      { label: <Tooltips type="valueLocked" />, value: `${formatCurrencyAmount(valueLocked, pool?.currency)}` },
+    ],
+    [metadata, token, pool, trancheId, valueLocked]
+  )
 
   return (
-    <Stack gap={8} flex={1}>
+    <Stack gap={0} flex={1} mb="6">
       <PageHeader
-        parent={{ label: 'Tokens', to: '/investments/tokens' }}
-        title={trancheMeta?.symbol ?? ''}
-        subtitle={trancheMeta?.name ?? ''}
-        subtitleLink={{ label: metadata?.pool?.name ?? '', to: `/pools/${poolId}` }}
+        subtitle="Token"
+        title={`${metadata?.pool?.name} ${token?.name}`}
+        walletShown={false}
+        icon={
+          <Thumbnail
+            size="large"
+            label={metadata?.tranches?.find((_, index) => index === parseInt(trancheId, 10))?.symbol || ''}
+          />
+        }
       />
-
-      {pool && tranche && (
-        <Grid columns={[1, 2]} gap={3} equalColumns>
-          <Card p={3}>
-            <LabelValueList
-              items={
-                [
-                  tranche.name !== 'Junior' && {
-                    label: 'APR',
-                    value: `${centrifuge.utils.feeToApr(tranche.interestPerSec)}%`,
-                  },
-                  {
-                    label: 'Value',
-                    value: centrifuge.utils.formatCurrencyAmount(
-                      new BN(tranche.debt).mul(new BN(tranche.tokenPrice)).div(new BN(10).pow(new BN(27))),
-                      pool.currency,
-                      true
-                    ),
-                  },
-                  {
-                    label: 'Price',
-                    value: centrifuge.utils.formatCurrencyAmount(
-                      new BN(tranche.tokenPrice).div(new BN(1e9)),
-                      pool.currency,
-                      true
-                    ),
-                  },
-                  tranche.name !== 'Junior' && {
-                    label: 'Risk protection',
-                    value: (
-                      <>
-                        <Text color="textSecondary">
-                          Min.{' '}
-                          {centrifuge.utils.formatPercentage(
-                            tranche.minRiskBuffer,
-                            new BN(10).pow(new BN(18)).toString()
-                          )}
-                        </Text>{' '}
-                        {centrifuge.utils.formatPercentage(tranche.ratio, new BN(10).pow(new BN(18)).toString())}
-                      </>
-                    ),
-                  },
-                  {
-                    label: 'Reserve',
-                    value: (
-                      <Text color="statusOk">
-                        {centrifuge.utils.formatCurrencyAmount(tranche.reserve, pool.currency, true)}
-                      </Text>
-                    ),
-                  },
-                ].filter(Boolean) as any
-              }
-            />
-          </Card>
-          <Card p={3}>
-            <Stack gap={2}>
-              <CardHeader title="My investment" />
-              <LabelValueList
-                items={[
-                  {
-                    label: 'Balance',
-                    value: centrifuge.utils.formatCurrencyAmount(
-                      token?.balance ?? '0',
-                      trancheMeta?.symbol || ' ',
-                      true
-                    ),
-                  },
-                  {
-                    label: 'Value',
-                    value: centrifuge.utils.formatCurrencyAmount(
-                      new BN(token?.balance ?? 0)
-                        .mul(new BN(pool.tranches[trancheId].tokenPrice))
-                        .div(new BN(10).pow(new BN(27))),
-                      pool.currency,
-                      true
-                    ),
-                  },
-                ]}
-              />
-              <ButtonGroup>
-                {address ? (
-                  <>
-                    <RedeemAction poolId={poolId} trancheId={trancheId} />
-                    <InvestAction poolId={poolId} trancheId={trancheId} />
-                  </>
-                ) : (
-                  <ConnectButton />
-                )}
-              </ButtonGroup>
-            </Stack>
-          </Card>
-        </Grid>
+      {pool ? (
+        <>
+          <PageSummary data={pageSummaryData} />
+          <Stack m="3" gap="2" as="section">
+            <Text variant="heading2">Token pool</Text>
+            <PoolCard pool={pool} metadata={metadata} />
+          </Stack>
+        </>
+      ) : (
+        <Shelf justifyContent="center" textAlign="center">
+          <Text variant="heading2" color="textSecondary">
+            Token does not exist
+          </Text>
+        </Shelf>
       )}
     </Stack>
-  )
-}
-
-export const InvestAction: React.FC<{ poolId: string; trancheId: number }> = ({ poolId, trancheId }) => {
-  const [open, setOpen] = React.useState(false)
-  return (
-    <>
-      <ButtonGroup>
-        <Button variant="outlined" onClick={() => setOpen(true)}>
-          Invest
-        </Button>
-      </ButtonGroup>
-      <InvestRedeemDialog
-        poolId={poolId}
-        trancheId={trancheId}
-        open={open}
-        onClose={() => setOpen(false)}
-        action="invest"
-      />
-    </>
-  )
-}
-
-export const RedeemAction: React.FC<{ poolId: string; trancheId: number }> = ({ poolId, trancheId }) => {
-  const [open, setOpen] = React.useState(false)
-  return (
-    <>
-      <ButtonGroup>
-        <Button onClick={() => setOpen(true)}>Redeem</Button>
-      </ButtonGroup>
-      <InvestRedeemDialog
-        poolId={poolId}
-        trancheId={trancheId}
-        open={open}
-        onClose={() => setOpen(false)}
-        action="redeem"
-      />
-    </>
   )
 }

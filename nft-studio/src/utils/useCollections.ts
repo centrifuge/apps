@@ -1,28 +1,22 @@
 import * as React from 'react'
-import { useQuery } from 'react-query'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { FEATURED_COLLECTIONS } from '../config'
 import { collectionMetadataSchema } from '../schemas'
+import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 
 export function useCollections() {
-  const cent = useCentrifuge()
-  const query = useQuery(
-    ['collections'],
-    async () => {
-      return cent.nfts.getCollections()
-    },
-    {
-      suspense: true,
-    }
-  )
+  const [result] = useCentrifugeQuery(['collections'], (cent) => cent.nfts.getCollections(), { suspense: true })
 
-  return query
+  return result
 }
 
 export function useCollection(id?: string) {
-  const { data } = useCollections()
-  return React.useMemo(() => data?.find((c) => c.id === id), [data, id])
+  const [result] = useCentrifugeQuery(['collection', id], (cent) => cent.nfts.getCollection([id!]), {
+    suspense: true,
+    enabled: !!id,
+  })
+
+  return result
 }
 
 export function useCollectionMetadata(id?: string) {
@@ -31,7 +25,7 @@ export function useCollectionMetadata(id?: string) {
 }
 
 export function useFeaturedCollections() {
-  const { data } = useCollections()
+  const data = useCollections()
   return React.useMemo(() => {
     return data?.filter((c) => FEATURED_COLLECTIONS.includes(c.id))
   }, [data])

@@ -8,7 +8,7 @@ const typography: ThemeTypography = {
     color: 'textPrimary',
   },
   heading2: {
-    fontSize: [18, 20],
+    fontSize: 18,
     lineHeight: 1.25,
     fontWeight: 600,
     color: 'textPrimary',
@@ -69,6 +69,7 @@ const typography: ThemeTypography = {
     lineHeight: 1.25,
     fontWeight: 400,
     color: 'textPrimary',
+    letterSpacing: 0.01,
   },
   label1: {
     fontSize: 14,

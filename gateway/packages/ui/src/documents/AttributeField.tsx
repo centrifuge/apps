@@ -40,7 +40,6 @@ export const AttributeField: FunctionComponent<Props> = (props: Props) => {
           if (attr.options && attr.options.length > 0) {
             return (
               <Select
-                disabled={isViewMode}
                 options={attr.options}
                 {...commonProps}
                 onChange={(ev: any) => {

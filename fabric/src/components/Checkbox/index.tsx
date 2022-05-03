@@ -1,5 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
+import { Box } from '../Box'
 import { Flex } from '../Flex'
 import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
@@ -14,21 +15,30 @@ export const Checkbox: React.VFC<CheckboxProps> = ({ label, errorMessage, ...che
   return (
     <label>
       <Shelf as={Text} gap={1} alignItems="baseline">
-        <StyledWrapper minWidth="18px" height="18px" flex="0 0 18px">
+        <StyledWrapper minWidth="18px" height="18px" flex="0 0 18px" $hasLabel={!!label}>
           <StyledCheckbox type="checkbox" {...checkboxProps} />
           <StyledOutline />
         </StyledWrapper>
-        <Stack gap={1} flex={1}>
-          <Text variant="body1" color={checkboxProps.disabled ? 'textDisabled' : 'textPrimary'}>
-            {label}
-          </Text>
-          {errorMessage && (
-            <Text variant="label2" color="statusCritical">
-              {errorMessage}
+        {label && (
+          <Stack gap={1} flex={1}>
+            <Text variant="body1" color={checkboxProps.disabled ? 'textDisabled' : 'textPrimary'}>
+              {label}
             </Text>
-          )}
-        </Stack>
+            {errorMessage && (
+              <Text variant="label2" color="statusCritical">
+                {errorMessage}
+              </Text>
+            )}
+          </Stack>
+        )}
       </Shelf>
+      {!label && errorMessage && (
+        <Box mt={1}>
+          <Text variant="label2" color="statusCritical">
+            {errorMessage}
+          </Text>
+        </Box>
+      )}
     </label>
   )
 }
@@ -48,9 +58,9 @@ const StyledOutline = styled.span`
   border-radius: 4px;
 `
 
-const StyledWrapper = styled(Flex)`
+const StyledWrapper = styled(Flex)<{ $hasLabel: boolean }>`
   position: relative;
-  top: 2px;
+  top: ${(props) => (props.$hasLabel ? '3px' : 0)};
 
   &::before {
     content: '.';

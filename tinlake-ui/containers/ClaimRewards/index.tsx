@@ -52,7 +52,7 @@ const ClaimRewards: React.FC<Props> = ({ activeLink, portfolioValue, portfolioDr
       setStatus('succeeded')
     } catch (e) {
       setStatus('failed')
-      setError(e)
+      setError((e as Error).toString())
     }
   }
 

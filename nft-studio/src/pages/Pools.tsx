@@ -1,21 +1,20 @@
 import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { PageHeader } from '../components/PageHeader'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolList } from '../components/PoolList'
-import { PageWithSideBar } from '../components/shared/PageWithSideBar'
 import { usePools } from '../utils/usePools'
 
 export const PoolsPage: React.FC = () => {
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar>
       <Pools />
     </PageWithSideBar>
   )
 }
 
 const Pools: React.FC = () => {
-  const { data: pools } = usePools()
-  console.log('pools', pools)
+  const pools = usePools()
 
   return (
     <Stack gap={8} flex={1}>

@@ -28,25 +28,29 @@ export function useMetadata<T extends Schema>(uri: string | undefined, schema?: 
   const query = useQuery(
     ['metadata', uri],
     async () => {
-      const res = await fetchMetadata(uri!)
+      try {
+        const res = await fetchMetadata(uri!)
 
-      if (!schema) return res
+        if (!schema) return res
 
-      const result: any = {}
+        const result: any = {}
 
-      for (const key in schema) {
-        const { maxLength, optional, type } = schema[key]
-        let value = res[key]
-        if (!value) {
-          if (optional) continue
-          return null
+        for (const key in schema) {
+          const { maxLength, optional, type } = schema[key]
+          let value = res[key]
+          if (!value) {
+            if (optional) continue
+            return null
+          }
+          if (typeof value !== type) return null
+          if (maxLength) value = value.slice(0, maxLength)
+          result[key] = value
         }
-        if (typeof value !== type) return null
-        if (maxLength) value = value.slice(0, maxLength)
-        result[key] = value
-      }
 
-      return result as Result<T>
+        return result as Result<T>
+      } catch (error) {
+        console.warn('Query error', error)
+      }
     },
     {
       enabled: !!uri && !!parseMetadataUrl(uri) && allowed,

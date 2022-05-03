@@ -1,26 +1,28 @@
-import * as React from 'react'
 import { useQuery } from 'react-query'
+import { firstValueFrom } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { useCentrifugeQuery } from './useCentrifugeQuery'
 
 export function useNFTs(collectionId?: string) {
-  const cent = useCentrifuge()
-  const query = useQuery(
-    ['nfts', collectionId],
-    async () => {
-      return cent.nfts.getCollectionNfts([collectionId!])
-    },
+  const [result] = useCentrifugeQuery(['nfts', collectionId], (cent) => cent.nfts.getCollectionNfts([collectionId!]), {
+    suspense: true,
+    enabled: !!collectionId,
+  })
+
+  return result
+}
+
+export function useNFT(collectionId?: string, nftId?: string, suspense = true) {
+  const [result] = useCentrifugeQuery(
+    ['nft', collectionId, nftId],
+    (cent) => cent.nfts.getNft([collectionId!, nftId!]),
     {
-      suspense: true,
-      enabled: !!collectionId,
+      suspense,
+      enabled: !!collectionId && !!nftId,
     }
   )
 
-  return query
-}
-
-export function useNFT(collectionId?: string, nftId?: string) {
-  const { data } = useNFTs(collectionId)
-  return React.useMemo(() => data?.find((c) => c.id === nftId), [data, nftId])
+  return result
 }
 
 export function useLoanNft(poolId?: string, loanId?: string) {
@@ -28,29 +30,21 @@ export function useLoanNft(poolId?: string, loanId?: string) {
   const { data: collectionId } = useQuery(
     ['poolToLoanCollection', poolId],
     async () => {
-      return cent.pools.getLoanCollectionIdForPool([poolId!])
+      return firstValueFrom(cent.pools.getLoanCollectionIdForPool([poolId!]))
     },
     {
-      suspense: true,
       enabled: !!poolId,
       staleTime: Infinity,
     }
   )
-  return useNFT(collectionId, loanId)
+  return useNFT(collectionId, loanId, false)
 }
 
 export function useAccountNfts(address?: string, suspense = true) {
-  const cent = useCentrifuge()
-  const query = useQuery(
-    ['accountNfts', address],
-    async () => {
-      return cent.nfts.getAccountNfts([address!])
-    },
-    {
-      suspense,
-      enabled: !!address,
-    }
-  )
+  const [result] = useCentrifugeQuery(['accountNfts', address], (cent) => cent.nfts.getAccountNfts([address!]), {
+    suspense,
+    enabled: !!address,
+  })
 
-  return query
+  return result
 }
