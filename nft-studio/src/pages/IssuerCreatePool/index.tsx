@@ -1,4 +1,4 @@
-import { aprToFee, toPerquintill } from '@centrifuge/centrifuge-js'
+import { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import {
   Box,
   Button,
@@ -11,7 +11,6 @@ import {
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
@@ -171,6 +170,14 @@ const CreatePoolForm: React.VFC = () => {
   const centrifuge = useCentrifuge()
   const history = useHistory()
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
+  const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
+
+  React.useEffect(() => {
+    // If the hash can't be find on Pinata the request can take a long time to time out
+    // During which the name/description can't be edited
+    // Set a deadline for how long we're willing to wait on a stored issuer
+    setTimeout(() => setWaitingForStoredIssuer(false), 10000)
+  }, [])
 
   const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
     'Create pool',
@@ -232,14 +239,14 @@ const CreatePoolForm: React.VFC = () => {
       const tranches = [
         {}, // most junior tranche
         ...noJuniorTranches.map((tranche) => ({
-          interestPerSec: aprToFee((tranche.interestRate as number) / 100),
-          minRiskBuffer: toPerquintill((tranche.minRiskBuffer as number) / 100),
+          interestPerSec: Rate.fromAprPercent(tranche.interestRate),
+          minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
         })),
       ]
 
       const writeOffGroups = values.writeOffGroups.map((g) => ({
         overdueDays: g.days as number,
-        percentage: centrifuge.utils.toRate((g.writeOff as number) / 100),
+        percentage: Rate.fromPercent(g.writeOff),
       }))
 
       const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
@@ -250,7 +257,7 @@ const CreatePoolForm: React.VFC = () => {
         collectionId,
         tranches,
         DEFAULT_CURRENCY,
-        new BN(values.maxReserve as number).mul(new BN(10).pow(new BN(18))),
+        Balance.fromFloat(values.maxReserve),
         metadataHash,
         epochSeconds,
         writeOffGroups,
@@ -261,7 +268,7 @@ const CreatePoolForm: React.VFC = () => {
   })
 
   React.useEffect(() => {
-    if (!isStoredIssuerLoading && storedIssuer) {
+    if (!isStoredIssuerLoading && storedIssuer && waitingForStoredIssuer) {
       if (storedIssuer.name) {
         form.setFieldValue('issuerName', storedIssuer.name, false)
       }
@@ -279,7 +286,7 @@ const CreatePoolForm: React.VFC = () => {
           icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
           title={form.values.poolName || 'New Pool'}
           subtitle={
-            <TextWithPlaceholder isLoading={isStoredIssuerLoading} width={15}>
+            <TextWithPlaceholder isLoading={waitingForStoredIssuer} width={15}>
               by {form.values.issuerName || address}
             </TextWithPlaceholder>
           }
@@ -401,7 +408,7 @@ const CreatePoolForm: React.VFC = () => {
                 label="Issuer name"
                 placeholder="Name..."
                 maxLength={100}
-                disabled={isStoredIssuerLoading}
+                disabled={waitingForStoredIssuer}
               />
             </Box>
             <Box gridColumn="span 3" width="100%">
@@ -429,7 +436,7 @@ const CreatePoolForm: React.VFC = () => {
                 label="Description"
                 placeholder="Description..."
                 maxLength={800}
-                disabled={isStoredIssuerLoading}
+                disabled={waitingForStoredIssuer}
               />
             </Box>
             <Box gridColumn="span 6">

@@ -23,7 +23,7 @@ const IssuerPoolConfiguration: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const address = useAddress()
   const permissions = usePermissions(address)
-  const isPoolAdmin = address && permissions && permissions[poolId]?.roles.includes('PoolAdmin')
+  const isPoolAdmin = address && permissions?.pools[poolId]?.roles.includes('PoolAdmin')
 
   return <Stack>{isPoolAdmin && <Admins />}</Stack>
 }

@@ -1,20 +1,20 @@
-import { formatCurrencyAmount, formatPercentage } from '@centrifuge/centrifuge-js'
 import { IconArrowDown, IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
-import { BN } from '@polkadot/util'
+import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import styled from 'styled-components'
-import { usePoolMetadata } from '../utils/usePools'
+import { formatBalance, formatPercentage } from '../utils/formatting'
+import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, OrderBy } from './DataTable'
 
 export type Token = {
-  poolMetadata: string
-  yield: string
-  protection: string
-  valueLocked: string
+  poolMetadata?: string
+  yield: Decimal | null
+  protection: Decimal
+  valueLocked: Decimal
   currency: string
-  name: string
-  index: number
+  id: string
+  seniority: number
   poolId: string
 }
 
@@ -74,7 +74,7 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
       defaultSortKey="valueLocked"
       rounded={false}
       onRowClicked={(token: Token) => {
-        history.push(`/tokens/${token.poolId}/${token.index}`)
+        history.push(`/tokens/${token.poolId}/${token.id}`)
       }}
     />
   )
@@ -82,12 +82,15 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
   const { data: metadata } = usePoolMetadata({ metadata: token.poolMetadata })
-  const symbol = metadata?.tranches?.find((_, index) => index === token.index)?.symbol
+  const pool = usePool(token.poolId)
+  const tranche = pool?.tranches.find((t) => t.id === token.id)
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+  const symbol = trancheMeta?.symbol
   return (
     <Shelf gap="2">
       <Thumbnail label={symbol || ''} size="small" />
       <Text variant="body2" color="textPrimary" fontWeight={600}>
-        {metadata?.pool?.name} {token?.name}
+        {trancheMeta?.name}
       </Text>
     </Shelf>
   )
@@ -99,20 +102,19 @@ const AssetClass: React.VFC<RowProps> = ({ token }) => {
 }
 
 const Yield: React.VFC<RowProps> = ({ token }) => {
-  const apr = parseInt(token.yield, 10)
-  return <Text variant="body2">{apr > 0 ? `Target: ${apr.toPrecision(3)}%` : ''}</Text>
-}
-
-const Protection: React.VFC<RowProps> = ({ token }) => {
   return (
     <Text variant="body2">
-      {parseInt(token.protection, 10) > 0 && formatPercentage(token.protection, new BN(10).pow(new BN(18)).toString())}
+      {token.yield && !token.yield?.isZero() ? `Target: ${formatPercentage(token.yield)}` : ''}
     </Text>
   )
 }
 
+const Protection: React.VFC<RowProps> = ({ token }) => {
+  return <Text variant="body2">{!token.protection.isZero() && formatPercentage(token.protection)}</Text>
+}
+
 const ValueLocked: React.VFC<RowProps> = ({ token }) => {
-  return <Text variant="body2">{formatCurrencyAmount(token?.valueLocked, token.currency)}</Text>
+  return <Text variant="body2">{formatBalance(token?.valueLocked, token.currency)}</Text>
 }
 
 const SortableHeader: React.VFC<{ label: string; orderBy?: OrderBy }> = ({ label, orderBy }) => {

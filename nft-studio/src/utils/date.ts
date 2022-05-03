@@ -1,13 +1,13 @@
-export const formatDate = (timestampSeconds: number) => {
-  return new Date(timestampSeconds * 1000).toLocaleDateString('en-US', {
+export const formatDate = (timestamp: number | string) => {
+  return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   })
 }
 
-export const formatDateTechnical = (timestampSeconds: number) => {
-  return new Date(timestampSeconds).toLocaleDateString('en-US')
+export const formatDateTechnical = (timestamp: number | string) => {
+  return new Date(timestamp).toLocaleDateString('en-US')
 }
 
 export const daysBetween = (unixFrom: number, unixTo: number) => {

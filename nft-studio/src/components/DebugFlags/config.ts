@@ -17,7 +17,13 @@ export type DebugFlagConfig =
       options: Record<string, any>
     }
 
-export type Key = 'address' | 'batchMintNFTs' | 'alwaysShowPanel' | 'showUnusedFlags' | 'showAdditionalIssuerTabs'
+export type Key =
+  | 'address'
+  | 'batchMintNFTs'
+  | 'alwaysShowPanel'
+  | 'showUnusedFlags'
+  | 'showAdditionalIssuerTabs'
+  | 'allowInvestBelowMin'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -37,6 +43,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   showAdditionalIssuerTabs: {
+    type: 'checkbox',
+    default: false,
+  },
+  allowInvestBelowMin: {
     type: 'checkbox',
     default: false,
   },
