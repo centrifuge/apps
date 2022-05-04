@@ -1,10 +1,9 @@
 import { TrancheBalance } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Text } from '@centrifuge/fabric'
-import BN from 'bn.js'
 import * as React from 'react'
 import { useHistory } from 'react-router'
+import { formatBalance } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
-import { useCentrifuge } from './CentrifugeProvider'
 import { DataTable } from './DataTable'
 
 type Props = {
@@ -51,9 +50,11 @@ export const InvestmentsList: React.FC<Props> = ({ investments }) => {
 const TokenSymbol: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
+  const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
   return (
     <Text variant="body2" fontWeight={600}>
-      {metadata?.tranches?.[investment.trancheId]?.symbol}
+      {trancheMeta?.symbol}
     </Text>
   )
 }
@@ -61,21 +62,18 @@ const TokenSymbol: React.VFC<{ investment: TrancheBalance }> = ({ investment }) 
 const TrancheName: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
-  return <Text variant="body2">{metadata?.tranches?.[investment.trancheId]?.name}</Text>
+  const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+  return <Text variant="body2">{trancheMeta?.name}</Text>
 }
 
 const TokenValue: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
-  const centrifuge = useCentrifuge()
+  const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
 
   return (
     <Text variant="body2">
-      {centrifuge.utils.formatCurrencyAmount(
-        new BN(investment.balance)
-          .mul(new BN(pool?.tranches[investment.trancheId].tokenPrice ?? 1))
-          .div(new BN(10).pow(new BN(27))),
-        pool?.currency
-      )}
+      {formatBalance(investment.balance.toFloat() * (tranche?.tokenPrice.toFloat() ?? 1), pool?.currency)}
     </Text>
   )
 }

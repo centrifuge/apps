@@ -1,8 +1,9 @@
+import { Balance, Rate } from '@centrifuge/centrifuge-js'
 import { PoolFormValues } from '.'
+import { PoolMetadata } from '../../types'
 import { fetchLambda } from '../../utils/fetchLambda'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { promiseAllObject } from '../../utils/promiseAllObject'
-import { PoolMetadata } from './types'
 
 const getFileIpfsUri = async (file?: File | null): Promise<string | null> => {
   if (!file) return null
@@ -54,14 +55,15 @@ export const pinPoolMetadata = async (poolFormData: PoolFormValues): Promise<str
     tranches: tranches.map((tranche) => ({
       name: tranche.tokenName,
       symbol: tranche.symbolName,
+      minInitialInvestment: Balance.fromFloat(tranche.minInvestment).toString(),
     })),
     riskGroups: riskGroups.map((group) => ({
       name: group.groupName,
-      advanceRate: Number(group.advanceRate),
-      financingFee: Number(group.fee),
-      probabilityOfDefault: Number(group.probabilityOfDefault),
-      lossGivenDefault: Number(group.lossGivenDefault),
-      discountRate: Number(group.discountRate),
+      advanceRate: Rate.fromPercent(group.advanceRate).toString(),
+      financingFee: Rate.fromAprPercent(group.fee).toString(),
+      probabilityOfDefault: Rate.fromPercent(group.probabilityOfDefault).toString(),
+      lossGivenDefault: Rate.fromPercent(group.lossGivenDefault).toString(),
+      discountRate: Rate.fromAprPercent(group.discountRate).toString(),
     })),
   }
 

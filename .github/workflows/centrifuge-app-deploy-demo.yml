@@ -1,0 +1,28 @@
+name: 'centrifuge-app Demo'
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'nft-studio/**'
+      - 'fabric/**' # dependency
+      - 'centrifuge-js/**' # dependency
+      - '.github/workflows/nft-studio-build-and-deploy.yml' # dependency
+      - '.github/workflows/centrifuge-app-deploy-demo.yml'
+
+jobs:
+  dev:
+    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
+    with:
+      netlify-alias: ''
+      ipfs-gateway: https://altair.mypinata.cloud/
+      collator-wss-url: wss://fullnode.demo.cntrfg.com
+      relay-wss-url: wss://fullnode-relay.demo.cntrfg.com
+      subscan-url: https://rococo.subscan.io
+      whitelisted-accounts: ''
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      netlify-site-id: ${{ secrets.CENTRIFUGE_APP_DEMO_NETLIFY_SITE_ID }}
+      pinata-api-key: ${{ secrets.PINATA_API_KEY }}
+      pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}

@@ -84,6 +84,7 @@ module.exports = {
       {
         selector: ['method'],
         format: ['camelCase'],
+        leadingUnderscore: 'allow',
       },
       {
         selector: ['typeLike'],

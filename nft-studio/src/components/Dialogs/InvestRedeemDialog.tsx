@@ -4,7 +4,7 @@ import { InvestRedeem } from '../InvestRedeem'
 
 export const InvestRedeemDialog: React.FC<{
   poolId: string
-  trancheId: number
+  trancheId: string
   open: boolean
   onClose: () => void
   action?: 'invest' | 'redeem'
