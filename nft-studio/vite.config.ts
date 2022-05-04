@@ -21,7 +21,14 @@ export default defineConfig({
   },
   resolve: {
     // resolve every package version to the one in this projects package.json
-    dedupe: ['styled-components', 'react', 'styled-system', '@polkadot/util-crypto', '@polkadot/api'],
+    dedupe: [
+      'styled-components',
+      'react',
+      'styled-system',
+      '@polkadot/util-crypto',
+      '@polkadot/api',
+      'decimal.js-light',
+    ],
   },
   plugins: [
     react({

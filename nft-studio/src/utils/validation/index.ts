@@ -19,6 +19,9 @@ export const required = (err?: CustomError) => (val?: any) =>
 export const nonNegativeNumber = (err?: CustomError) => (val?: any) =>
   Number.isFinite(val) && val >= 0 ? '' : getError(`Value must be positive`, err, val)
 
+export const positiveNumber = (err?: CustomError) => (val?: any) =>
+  Number.isFinite(val) && val > 0 ? '' : getError(`Value must be positive`, err, val)
+
 export const integer = (err?: CustomError) => (val?: any) =>
   Number.isFinite(val) && Math.floor(val) === val ? '' : getError(`Value must whole number`, err, val)
 

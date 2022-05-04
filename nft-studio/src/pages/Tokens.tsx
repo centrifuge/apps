@@ -44,7 +44,7 @@ const TokenOverview: React.FC = () => {
 
   // TODO: convert everything to one currency, USD?
   const totalValueLocked = React.useMemo(
-    () => tokens?.reduce((prev, curr) => prev.add(curr?.valueLocked), Dec(0)),
+    () => tokens?.reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)),
     [tokens]
   )
 

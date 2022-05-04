@@ -39,6 +39,10 @@ export const CURRENCIES = [
     label: 'kUSD',
     value: 'Usd',
   },
+  {
+    label: 'pEUR',
+    value: 'PermissionedEur',
+  },
 ]
 const DEFAULT_CURRENCY = 'Native'
 const ASSET_CLASSES = ['Art NFT'].map((label) => ({
@@ -194,6 +198,7 @@ const CreatePoolForm: React.VFC = () => {
     initialValues,
     validate: (values) => {
       let errors: FormikErrors<any> = {}
+
       const tokenNames = new Set<string>()
       const tokenSymbols = new Set<string>()
       let prevInterest = Infinity
@@ -223,6 +228,37 @@ const CreatePoolForm: React.VFC = () => {
           prevRiskBuffer = t.minRiskBuffer
         }
       })
+
+      const writeOffGroups = values.writeOffGroups
+        .filter((g) => typeof g.days === 'number')
+        .sort((a, b) => (a.days as number) - (b.days as number))
+      let highestWriteOff = 0
+      let previousDays = -1
+      writeOffGroups.forEach((g) => {
+        if (g.writeOff <= highestWriteOff) {
+          const index = values.writeOffGroups.findIndex((gr) => gr.days === g.days && gr.writeOff === g.writeOff)
+          errors = setIn(
+            errors,
+            `writeOffGroups.${index}.writeOff`,
+            'Write-off percentage must increase as days increase'
+          )
+        } else {
+          highestWriteOff = g.writeOff as number
+        }
+        if (g.days === previousDays) {
+          const index = values.writeOffGroups.findIndex((gr) => gr.days === g.days && gr.writeOff === g.writeOff)
+          errors = setIn(errors, `writeOffGroups.${index}.days`, 'Days must be unique')
+        }
+        previousDays = g.days as number
+      })
+      if (highestWriteOff !== 100) {
+        errors = setIn(
+          errors,
+          `writeOffGroups.${values.writeOffGroups.length - 1}.writeOff`,
+          'Must have one group with 100% write-off'
+        )
+      }
+
       return errors
     },
     validateOnMount: true,
@@ -239,7 +275,7 @@ const CreatePoolForm: React.VFC = () => {
       const tranches = [
         {}, // most junior tranche
         ...noJuniorTranches.map((tranche) => ({
-          interestPerSec: Rate.fromAprPercent(tranche.interestRate),
+          interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
           minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
         })),
       ]
@@ -251,12 +287,14 @@ const CreatePoolForm: React.VFC = () => {
 
       const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
+      const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
+
       createPoolTx([
         address,
         poolId,
         collectionId,
         tranches,
-        DEFAULT_CURRENCY,
+        currency,
         Balance.fromFloat(values.maxReserve),
         metadataHash,
         epochSeconds,

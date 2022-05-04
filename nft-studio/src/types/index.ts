@@ -29,7 +29,7 @@ export type PoolMetadata = {
   riskGroups: {
     name: string | undefined
     advanceRate: string
-    financingFee: string
+    interestRatePerSec: string
     probabilityOfDefault: string
     lossGivenDefault: string
     discountRate: string
