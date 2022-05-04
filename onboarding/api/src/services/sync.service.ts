@@ -70,6 +70,10 @@ export class SyncService {
 
       //Send KYC status email if status is updated
       if (investor && investor.verificationStatus !== kyc.status) {
+        if (kyc.status === 'processing' && investor.verificationStatus === 'manual-review') {
+          // they're both same status. do nothing
+          return
+        }
         await this.mailer.sendKycStatusEmail(investor.fullName, investor.email, investor.verificationStatus)
       }
     })

@@ -5,7 +5,6 @@ import BN from 'bn.js'
 import { firstValueFrom, lastValueFrom } from 'rxjs'
 
 const Currency = new BN(10).pow(new BN(18))
-const Rate = new BN(10).pow(new BN(27))
 
 const run = async () => {
   const keyring = new Keyring({ type: 'sr25519' })
@@ -13,8 +12,8 @@ const run = async () => {
 
   const centrifuge = new Centrifuge({
     network: 'centrifuge',
-    polkadotWsUrl: 'wss://fullnode-relay-2.development.cntrfg.com',
-    centrifugeWsUrl: 'wss://fullnode-collator-2.development.cntrfg.com',
+    polkadotWsUrl: 'wss://fullnode-relay.demo.cntrfg.com/',
+    centrifugeWsUrl: 'wss://fullnode.demo.cntrfg.com/',
     signingAddress: Alice,
     printExtrinsics: true,
   })
@@ -36,44 +35,29 @@ const run = async () => {
       'Usd',
       new BN(1000).mul(Currency),
       'QmTPNcy1R18o6Z2NW2nD8a43GoHs5HZoWQUxoY89kV188g',
+      1,
+      [{ overdueDays: 1, percentage: new BN(centrifuge.utils.toPerquintill(0.5)) }],
     ])
   )
 
-  await lastValueFrom(centrifuge.pools.updatePool([poolId, new BN(0), new BN(0), new BN(10000)]))
+  await lastValueFrom(centrifuge.pools.updatePool([poolId, 0, 0, 10000]))
 
   const SEC_PER_YEAR = 365 * 24 * 60 * 60
 
+  const pool = await firstValueFrom(centrifuge.pools.getPool([poolId]))
+
   await lastValueFrom(
-    centrifuge.pools.approveRoles([
+    centrifuge.pools.updatePoolRoles([
       poolId,
       [
-        'Borrower',
-        'RiskAdmin',
-        'PricingAdmin',
-        { TrancheInvestor: [0, SEC_PER_YEAR] },
-        { TrancheInvestor: [1, SEC_PER_YEAR] },
-        'Borrower',
-        'RiskAdmin',
-        'PricingAdmin',
-        { TrancheInvestor: [0, SEC_PER_YEAR] },
-        { TrancheInvestor: [1, SEC_PER_YEAR] },
+        [Alice.address, 'Borrower'],
+        [Alice.address, 'PricingAdmin'],
+        [Alice.address, { TrancheInvestor: [pool.tranches[0].id, SEC_PER_YEAR] }],
+        [Alice.address, { TrancheInvestor: [pool.tranches[1].id, SEC_PER_YEAR] }],
       ],
-      [
-        Alice.address,
-        Alice.address,
-        Alice.address,
-        Alice.address,
-        Alice.address,
-        '5CHxUQgq69ay2Sw36Duo78txL9RynKH4tAE5NxergqJZWw3f',
-        '5CHxUQgq69ay2Sw36Duo78txL9RynKH4tAE5NxergqJZWw3f',
-        '5CHxUQgq69ay2Sw36Duo78txL9RynKH4tAE5NxergqJZWw3f',
-        '5CHxUQgq69ay2Sw36Duo78txL9RynKH4tAE5NxergqJZWw3f',
-        '5CHxUQgq69ay2Sw36Duo78txL9RynKH4tAE5NxergqJZWw3f',
-      ],
+      [],
     ])
   )
-
-  await lastValueFrom(centrifuge.pools.addWriteOffGroup([poolId, new BN(centrifuge.utils.toRate(0.5)), 1]))
 
   await lastValueFrom(
     centrifuge.nfts.createCollection([
@@ -91,8 +75,9 @@ const run = async () => {
     ])
   )
 
-  let loanId = await centrifuge.pools.getNextLoanId()
+  const loanId = await centrifuge.pools.getNextLoanId()
   await lastValueFrom(centrifuge.pools.createLoan([poolId, assetCollectionId, assetNftId]))
+
   await lastValueFrom(
     centrifuge.pools.priceLoan([
       poolId,
@@ -110,8 +95,11 @@ const run = async () => {
     ])
   )
 
-  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, 1, new BN(200).mul(Currency)]))
-  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, 0, new BN(100).mul(Currency)]))
+  const JUN = pool.tranches[0].id
+  const SEN = pool.tranches[1].id
+
+  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, SEN, new BN(200).mul(Currency)]))
+  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, JUN, new BN(100).mul(Currency)]))
   await lastValueFrom(centrifuge.pools.closeEpoch([poolId]))
   await lastValueFrom(centrifuge.pools.collect([poolId]))
   console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
@@ -119,11 +107,11 @@ const run = async () => {
   await lastValueFrom(centrifuge.pools.financeLoan([poolId, loanId, new BN(50).mul(Currency)]))
   console.log(JSON.stringify(await centrifuge.pools.getLoan([poolId, loanId]), null, 4))
 
-  await lastValueFrom(centrifuge.pools.updateRedeemOrder([poolId, 1, new BN(200).mul(Currency)]))
+  await lastValueFrom(centrifuge.pools.updateRedeemOrder([poolId, SEN, new BN(200).mul(Currency)]))
   console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
 
   await lastValueFrom(centrifuge.pools.closeEpoch([poolId]))
-  await lastValueFrom(centrifuge.pools.collect([poolId, 0]))
+  await lastValueFrom(centrifuge.pools.collect([poolId, JUN]))
   await lastValueFrom(
     centrifuge.pools.submitSolution([
       poolId,
@@ -147,7 +135,7 @@ const run = async () => {
 
   console.log(JSON.stringify(await firstValueFrom(centrifuge.pools.getPool([poolId])), null, 4))
 
-  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, 1, new BN(10).mul(Currency)]))
+  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, SEN, new BN(10).mul(Currency)]))
   await lastValueFrom(centrifuge.pools.closeEpoch([poolId]))
   await lastValueFrom(centrifuge.pools.collect([poolId]))
 }

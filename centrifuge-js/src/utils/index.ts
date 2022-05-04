@@ -1,17 +1,11 @@
 import { addressEq } from '@polkadot/util-crypto'
 import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
+import { Dec } from './Decimal'
 
 const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
 
-Decimal.set({
-  precision: 28,
-  toExpNeg: -7,
-  toExpPos: 29,
-  rounding: Decimal.ROUND_HALF_CEIL,
-})
-
-const secondsPerYear = new Decimal(60 * 60 * 24 * 365)
+const secondsPerYear = Dec(60 * 60 * 24 * 365)
 const percentFormatter = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 4,
@@ -37,7 +31,7 @@ export function toPerquintill(rate: number) {
 }
 
 export function aprToFee(apr: number) {
-  const i = new Decimal(apr)
+  const i = Dec(apr)
   const fee = i.div(secondsPerYear).plus(1).mul('1e27').toDecimalPlaces(0)
   return fee.toString()
 }
@@ -52,7 +46,7 @@ export function feeToApr(fee: string | BN) {
     return feeToConvert.toString()
   }
 
-  const i = new Decimal(feeToConvert).div('1e27').minus(1).times(secondsPerYear)
+  const i = Dec(feeToConvert).div('1e27').minus(1).times(secondsPerYear)
   return i.mul(100).toDecimalPlaces(2).toString()
 }
 
@@ -71,12 +65,12 @@ export function baseToDisplay(base: string | BN, decimals: number): string {
 }
 
 export function toPrecision(value: string, precision: number) {
-  const zero = new Decimal('0').toFixed(precision)
-  const result = new Decimal(value.toString()).toFixed(precision)
+  const zero = Dec('0').toFixed(precision)
+  const result = Dec(value.toString()).toFixed(precision)
 
   // If value >= 0.0 but will be rounded to 0.0, round up.
   // Otherwise, 183542 base units as precision 18 will be rounded to 0.00.
-  if (zero === result) return new Decimal(value.toString()).toFixed(precision, Decimal.ROUND_UP)
+  if (zero === result) return Dec(value.toString()).toFixed(precision, Decimal.ROUND_UP)
 
   return result
 }

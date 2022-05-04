@@ -1,9 +1,9 @@
-import { formatCurrencyAmount, Pool } from '@centrifuge/centrifuge-js'
+import { Pool } from '@centrifuge/centrifuge-js'
 import { Card, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { getAge } from '../utils/date'
+import { formatBalance } from '../utils/formatting'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useAverageMaturity } from '../utils/useAverageMaturity'
 import { PoolMetadata } from '../utils/usePools'
@@ -22,7 +22,7 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
   const poolCardSummaryData = [
     {
       label: <Tooltips type="valueLocked" variant="lowercase" />,
-      value: formatCurrencyAmount(new BN(pool.nav.latest).add(new BN(pool.reserve.total)).toString()),
+      value: formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency),
     },
     {
       label: <Tooltips type="age" variant="lowercase" />,

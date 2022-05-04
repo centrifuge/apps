@@ -48,7 +48,7 @@ const NFT: React.FC = () => {
 
   const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
   const canCreateLoan =
-    !isLoanCollection && permissions && Object.values(permissions).some((p) => p.roles.includes('Borrower'))
+    !isLoanCollection && permissions && Object.values(permissions.pools).some((p) => p.roles.includes('Borrower'))
 
   return (
     <Stack flex={1}>

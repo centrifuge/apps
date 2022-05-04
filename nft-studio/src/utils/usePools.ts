@@ -33,10 +33,10 @@ export function useDailyPoolStates(poolId: string) {
   return result
 }
 
-export function useOrder(poolId: string, trancheId: number, address?: string) {
+export function useOrder(trancheId: string, address?: string) {
   const [result] = useCentrifugeQuery(
-    ['order', poolId, trancheId, address],
-    (cent) => cent.pools.getOrder([address!, poolId, trancheId]),
+    ['order', trancheId, address],
+    (cent) => cent.pools.getOrder([address!, trancheId]),
     {
       enabled: !!address,
     }
@@ -45,7 +45,7 @@ export function useOrder(poolId: string, trancheId: number, address?: string) {
   return result
 }
 
-export function usePendingCollect(poolId: string, trancheId: number, address?: string) {
+export function usePendingCollect(poolId: string, trancheId: string, address?: string) {
   const pool = usePool(poolId)
   const [result] = useCentrifugeQuery(
     ['pendingCollect', poolId, trancheId, address],

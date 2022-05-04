@@ -13,5 +13,6 @@ export {
 } from './modules/pools'
 export * from './types'
 export * from './utils'
+export * from './utils/BN'
 
 export default Centrifuge
