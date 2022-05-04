@@ -573,10 +573,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
         const poolKeys = keys
           .map((key) => {
             const [account, scope] = key.toHuman() as any[]
-            return [account, scope]
+            return [account, scope.Pool ? { Pool: scope.Pool.replace(/\D/g, '') } : null]
           })
           .filter(([, scope]) => {
-            return scope.Pool?.replace(/\D/g, '') === poolId
+            return scope?.Pool === poolId
           })
         return api.query.permissions.permission.multi(poolKeys).pipe(
           map((permissionsData) => {
@@ -952,9 +952,15 @@ export function getPoolsModule(inst: CentrifugeBase) {
         }
 
         rawBalances.forEach(([rawKey, rawValue]) => {
-          const key = (rawKey.toHuman() as any)[1] as string | { Tranche: [string, string] }
+          const key = (rawKey.toHuman() as any)[1] as string | { Tranche: [string, string] } | { Permissioned: string }
           const value = rawValue.toJSON() as { free: string | number }
-          if (typeof key !== 'string') {
+
+          if (typeof key === 'string') {
+            balances.currencies.push({
+              currency: key,
+              balance: new Balance(hexToBN(value.free)),
+            })
+          } else if ('Tranche' in key) {
             const [poolId, trancheId] = key.Tranche
             if (value.free !== 0) {
               balances.tranches.push({
@@ -964,10 +970,12 @@ export function getPoolsModule(inst: CentrifugeBase) {
               })
             }
           } else {
-            balances.currencies.push({
-              currency: key.toLowerCase(),
-              balance: new Balance(hexToBN(value.free)),
-            })
+            if (value.free !== 0) {
+              balances.currencies.push({
+                currency: key.Permissioned,
+                balance: new Balance(hexToBN(value.free)),
+              })
+            }
           }
         })
 

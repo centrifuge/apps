@@ -40,7 +40,7 @@ export const CURRENCIES = [
     value: 'Usd',
   },
   {
-    label: 'EUR',
+    label: 'pEUR',
     value: 'PermissionedEur',
   },
 ]
