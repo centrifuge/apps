@@ -961,7 +961,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
           if (typeof key === 'string') {
             balances.currencies.push({
-              currency: key,
+              currency: key.toLowerCase(),
               balance: new Balance(hexToBN(value.free)),
             })
           } else if ('Tranche' in key) {
@@ -976,7 +976,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           } else {
             if (value.free !== 0) {
               balances.currencies.push({
-                currency: key.Permissioned,
+                currency: key.Permissioned.toLowerCase(),
                 balance: new Balance(hexToBN(value.free)),
               })
             }
@@ -1287,8 +1287,9 @@ function hexToBN(value: string | number) {
 
 function getCurrency(data?: CurrencyData | string) {
   if (!data) return ''
-  if (typeof data === 'string') return data
-  return 'permissioned' in data ? data.permissioned! : Object.keys(data)[0]
+  if (typeof data === 'string') return data.toLowerCase()
+  const cur = 'permissioned' in data ? data.permissioned! : Object.keys(data)[0]
+  return cur.toLowerCase()
 }
 
 function getLoanInfo(loanType: LoanInfoData): LoanInfo {
