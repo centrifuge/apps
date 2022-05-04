@@ -59,15 +59,5 @@ Error:  `data and hash arguments required`
 
 Delete the UsersDb file from gateway/packages/server/db and run the command again
 
-### Deploying your changes on dev
-
-Prerequisites:
-- Make sure you have access to google cloud and if not get help from devops team.
-- Connect to the dev vpn
-
-Run the following commands to deploy the latest changes from your Pull Request -  
-- `gcloud container clusters get-credentials centrifuge-dev --zone europe-west3-a --project peak-vista-185616`
-- `kubectl rollout restart deploy gateway-0 --namespace catalyst`
-
 ### Logs
 - `kubectl logs -f podname -n catalyst`
