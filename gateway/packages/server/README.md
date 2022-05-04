@@ -11,7 +11,7 @@ Gateway requires a Centrifuge Node to run. Either connect via VPN to a deployed 
 #### Connect with deployed Amber node
 
 ```
-NODE_ENV=production ETH_NETWORK=kovan ETH_PROVIDER=https://kovan.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5 CENTRIFUGE_URL=http://34.89.251.225:8082 CENTRIFUGE_ADMIN_ACCOUNT=0x0A735602a357802f553113F5831FE2fbf2F0E2e0 yarn start
+NODE_ENV=development REACT_APP_DISABLE_2FA=true REACT_APP_ADMIN_USER=gateway@centrifuge.io REACT_APP_ADMIN_PASSWORD=admin ETH_NETWORK=kovan ETH_PROVIDER=https://kovan.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5 CENTRIFUGE_URL=http://35.246.189.215:8082 CENTRIFUGE_ADMIN_ACCOUNT=0x25C2583cd6a9E7B3dA312c4D7D6654E1456C95D9 JWT_PRIV_KEY=$(cat jwtRS256.key) JWT_PUB_KEY=$(cat jwtRS256.key.pub) yarn start
 ```
 
 #### Connect with local node
@@ -48,3 +48,26 @@ openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
 cat jwtRS256.key
 cat jwtRS256.key.pub
 ```
+
+### Troubleshooting
+
+Error: `cat: jwtRS256.key: No such file or directory`
+
+Make sure you have generated jwtRS256.key & jwtRS256.key.pub using the above section and make sure they're in the gateway/ folder
+
+Error:  `data and hash arguments required`
+
+Delete the UsersDb file from gateway/packages/server/db and run the command again
+
+### Deploying your changes on dev
+
+Prerequisites:
+- Make sure you have access to google cloud and if not get help from devops team.
+- Connect to the dev vpn
+
+Run the following commands to deploy the latest changes from your Pull Request -  
+- `gcloud container clusters get-credentials centrifuge-dev --zone europe-west3-a --project peak-vista-185616`
+- `kubectl rollout restart deploy gateway-0 --namespace catalyst`
+
+### Logs
+- `kubectl logs -f podname -n catalyst`
