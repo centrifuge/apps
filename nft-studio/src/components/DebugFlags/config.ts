@@ -44,7 +44,7 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   },
   showAdditionalIssuerTabs: {
     type: 'checkbox',
-    default: false,
+    default: true,
   },
   allowInvestBelowMin: {
     type: 'checkbox',

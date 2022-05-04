@@ -272,12 +272,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
       currency: string | { permissioned: string },
       maxReserve: BN,
       metadata: string,
-      minEpochTime: number,
       writeOffGroups: { overdueDays: number; percentage: BN }[]
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, minEpochTime, writeOffGroups] = args
+    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, writeOffGroups] = args
 
     const $api = inst.getApi()
 
@@ -293,7 +292,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
           [
             api.tx.uniques.create(collectionId, LoanPalletAccountId),
             api.tx.pools.create(admin, poolId, trancheInput, currency, maxReserve.toString()),
-            api.tx.pools.update(poolId, minEpochTime, 5, 60),
             api.tx.pools.setMetadata(poolId, metadata),
             api.tx.permissions.add(
               { PoolRole: 'PoolAdmin' },
@@ -347,7 +345,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
             api.tx.permissions.add({ PoolRole: 'PoolAdmin' }, addr, { Pool: poolId }, { PoolRole: role })
           ),
           ...sortedRemove.map(([addr, role]) =>
-            api.tx.permissions.rmPermission({ PoolRole: 'PoolAdmin' }, addr, { Pool: poolId }, { PoolRole: role })
+            api.tx.permissions.remove({ PoolRole: 'PoolAdmin' }, addr, { Pool: poolId }, { PoolRole: role })
           ),
         ])
         return inst.wrapSignAndSendRx(api, submittable, options)

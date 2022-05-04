@@ -49,7 +49,7 @@ const IssuerPoolInvestors: React.FC = () => {
   return <>{canEditInvestors && <Investors />}</>
 }
 
-const SevenDaysMs = 7 * 24 * 60 * 60 * 1000
+const SevenDaysMs = 7 * 25 * 60 * 60 * 1000 // 1 hour margin
 
 export const Investors: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
@@ -75,11 +75,12 @@ export const Investors: React.FC = () => {
     if (!validAddress) return
     const isAllowed = allowedTranches.includes(trancheId)
     const TenYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
+    const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
 
     if (isAllowed) {
       execute([poolId, [], [[validAddress, { TrancheInvestor: [trancheId, TenYearsFromNow] }]]])
     } else {
-      execute([poolId, [[validAddress, { TrancheInvestor: [trancheId, TenYearsFromNow] }]], []])
+      execute([poolId, [[validAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow] }]], []])
     }
     setPendingTrancheId(trancheId)
   }
