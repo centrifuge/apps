@@ -93,6 +93,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       id,
       title,
       status: 'creating',
+      args,
     }
     addTransaction(tx)
     setLastId(id)

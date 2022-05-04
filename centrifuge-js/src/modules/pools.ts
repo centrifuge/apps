@@ -18,7 +18,7 @@ type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 
 
 type CurrencyRole = 'PermissionedAssetManager' | 'PermissionedAssetIssuer'
 
-export type PoolRoleInput = AdminRole | { TrancheInvestor: [trancheId: string, delta: number] }
+export type PoolRoleInput = AdminRole | { TrancheInvestor: [trancheId: string, permissionedTill: number] }
 
 export type Currency = string
 
@@ -38,7 +38,7 @@ const AdminRoleBits = {
 
 export type PoolRoles = {
   roles: AdminRole[]
-  tranches: string[]
+  tranches: { [key: string]: string } // trancheId -> permissionedTill
 }
 
 export type LoanInfoInput = {
@@ -536,10 +536,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
               roles: (
                 ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'RiskAdmin'] as const
               ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
-              tranches: permissions.trancheInvestor.info
-                .filter((info: any) => info.permissionedTill * 1000 > Date.now())
-                .map((info: any) => info.trancheId),
+              tranches: {},
             }
+            permissions.trancheInvestor.info
+              .filter((info: any) => info.permissionedTill * 1000 > Date.now())
+              .forEach((info: any) => {
+                roles.pools[poolId].tranches[info.trancheId] = new Date(info.permissionedTill * 1000).toISOString()
+              })
           }
         })
         return roles
@@ -588,10 +591,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 roles: (
                   ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'RiskAdmin'] as const
                 ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
-                tranches: permissions.trancheInvestor.info
-                  .filter((info: any) => info.permissionedTill * 1000 > Date.now())
-                  .map((info: any) => info.trancheId),
+                tranches: {},
               }
+              permissions.trancheInvestor.info
+                .filter((info: any) => info.permissionedTill * 1000 > Date.now())
+                .forEach((info: any) => {
+                  roles[account].tranches[info.trancheId] = new Date(info.permissionedTill * 1000).toISOString()
+                })
             })
             return roles
           })
