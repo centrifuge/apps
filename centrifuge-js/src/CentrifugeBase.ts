@@ -4,6 +4,7 @@ import { Codec, IEventRecord, Signer } from '@polkadot/types/types'
 import 'isomorphic-fetch'
 import {
   bufferCount,
+  catchError,
   filter,
   firstValueFrom,
   map,
@@ -136,7 +137,7 @@ export class CentrifugeBase {
         if (errors?.length) return null
         return data as T
       },
-    })
+    }).pipe(catchError(() => of(null)))
   }
 
   _$blockEvents: null | Observable<{ api: ApiRx; events: (IEventRecord<any> & Codec)[] }> = null

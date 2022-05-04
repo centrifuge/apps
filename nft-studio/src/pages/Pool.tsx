@@ -4,7 +4,6 @@ import React, { useMemo } from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
 import { ButtonGroup } from '../components/ButtonGroup'
 import { CardHeader } from '../components/CardHeader'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { ConnectButton } from '../components/ConnectButton'
 import { InvestRedeemDialog } from '../components/Dialogs/InvestRedeemDialog'
 import { LabelValueList } from '../components/LabelValueList'
@@ -51,8 +50,6 @@ const Pool: React.FC = () => {
   const permissions = usePermissions(address)
   const balances = useBalances(address)
 
-  const centrifuge = useCentrifuge()
-
   const isPoolAdmin = useMemo(
     () => !!(address && permissions?.pools[poolId]?.roles.includes('PoolAdmin')),
     [poolId, address, permissions]
@@ -96,22 +93,10 @@ const Pool: React.FC = () => {
         }
       />
       <PageSummary>
-        <LabelValueStack
-          label="Pool value"
-          value={centrifuge.utils.formatCurrencyAmount(pool ? pool.value : '0', pool?.currency, true)}
-        />
-        <LabelValueStack
-          label="Asset value"
-          value={centrifuge.utils.formatCurrencyAmount(pool?.nav.latest, pool?.currency, true)}
-        />
-        <LabelValueStack
-          label="Reserve"
-          value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.total, pool?.currency, true)}
-        />
-        <LabelValueStack
-          label="Max. Reserve"
-          value={centrifuge.utils.formatCurrencyAmount(pool?.reserve.max, pool?.currency)}
-        />
+        <LabelValueStack label="Pool value" value={formatBalance(pool?.value ?? 0, pool?.currency, true)} />
+        <LabelValueStack label="Asset value" value={formatBalance(pool?.nav.latest ?? 0, pool?.currency, true)} />
+        <LabelValueStack label="Reserve" value={formatBalance(pool?.reserve.total ?? 0, pool?.currency, true)} />
+        <LabelValueStack label="Max. Reserve" value={formatBalance(pool?.reserve.max ?? 0, pool?.currency)} />
 
         {isPoolAdmin && (
           <Button variant="text" icon={<IconArrowRight />} onClick={promptMaxReserve}>

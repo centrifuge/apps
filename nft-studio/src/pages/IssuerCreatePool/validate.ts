@@ -11,6 +11,7 @@ import {
   minLength,
   nonNegativeNumber,
   pattern,
+  positiveNumber,
   required,
 } from '../../utils/validation'
 
@@ -50,6 +51,6 @@ export const validate = {
   lossGivenDefault: combine(required(), nonNegativeNumber(), max(100)),
 
   // write-off groups
-  days: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
-  writeOff: combine(required(), nonNegativeNumber(), max(100)),
+  days: combine(required(), integer(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
+  writeOff: combine(required(), positiveNumber(), max(100)),
 }

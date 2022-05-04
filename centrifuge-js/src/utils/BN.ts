@@ -61,7 +61,7 @@ export class Rate extends BNSubType {
   }
   static fromApr(apr: Numeric) {
     const i = Dec(apr)
-    const rate = i.div(secondsPerYear).plus(1).mul(Dec(10).pow(this.decimals))
+    const rate = i.div(secondsPerYear).plus(1)
     return Rate.fromFloat(rate)
   }
   static fromAprPercent(apr: Numeric) {

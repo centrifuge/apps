@@ -85,7 +85,7 @@ function getEpochHoursRemaining(pool: DetailedPool) {
   const last = new Date(pool.epoch.lastClosed).getTime()
   const min = pool.parameters.minEpochTime * 1000
   const now = Date.now()
-  return Math.max(0, last + min - now) / (1000 * 60 * 60)
+  return Math.ceil(Math.max(0, last + min - now) / (1000 * 60 * 60))
 }
 
 const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
