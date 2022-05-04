@@ -28,8 +28,7 @@ export const useAverageMaturity = (poolId: string) => {
         0
       )
 
-    const totalOutstandingDebtBN = assets.reduce((sum, asset) => sum.add(new BN(asset.outstandingDebt)), new BN(0))
-    const totalOutstandingDebt = Number(totalOutstandingDebtBN.toString()) / 10 ** 18
+    const totalOutstandingDebt = assets.reduce((sum, asset) => sum + asset.outstandingDebt.toFloat(), 0)
 
     return maturityPerAsset / totalOutstandingDebt
   }, [loans])

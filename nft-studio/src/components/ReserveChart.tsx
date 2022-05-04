@@ -29,6 +29,78 @@ type ChartData = {
   reserve: [number, number]
 }
 
+export const ReserveChart: React.VFC = () => {
+  const theme = useTheme()
+  const { pid } = useParams<{ pid: string }>()
+  const ref = React.useRef<HTMLDivElement>(null)
+  const poolStates = useDailyPoolStates(pid)
+
+  const data: ChartData[] =
+    poolStates?.map((day) => {
+      // display decimals on y axis chart ?
+      const assetValue = new BN(day.poolState.netAssetValue).div(TABLE_SCALE_FACTOR).toNumber()
+      const poolValue = new BN(day.poolValue).div(TABLE_SCALE_FACTOR).toNumber()
+      return { day: new Date(day.timestamp), poolValue, assetValue, reserve: [assetValue, poolValue] }
+    }) || []
+
+  return (
+    <div ref={ref}>
+      <StyledWrapper
+        gap="4"
+        style={{ fontFamily: 'Inter, Arial', fontSize: '10px', color: theme.colors.textSecondary, width: '100%' }}
+      >
+        {data?.length ? (
+          <ResponsiveContainer width="100%" height="100%" minHeight="200px">
+            <ComposedChart width={754} height={173} data={data} margin={{ top: 60 }}>
+              <XAxis
+                dataKey="day"
+                tick={<CustomizedXAxisTick variant={data.length > 30 ? 'months' : 'days'} />}
+                tickLine={false}
+                interval={0}
+                type="category"
+              />
+              <YAxis
+                allowDecimals
+                tickLine={false}
+                tickFormatter={
+                  (tick) => tick
+                  // use new formatting utils after merge main
+                  // formatCurrencyAmount(new BN(tick.toLocaleString('fullwide', { useGrouping: false })))
+                }
+              />
+              <CartesianGrid stroke={theme.colors.borderSecondary} />
+              <Area
+                fill={theme.colors.backgroundSecondary}
+                dataKey="reserve"
+                stroke={theme.colors.backgroundSecondary}
+                fillOpacity={1}
+              />
+              <Line dataKey="assetValue" stroke={theme.colors.accentSecondary} fill="transparent" dot={false} />
+              <Line dot={false} dataKey="poolValue" stroke={theme.colors.accentPrimary} fill="transparent" />
+              <Tooltip
+                content={<CustomizedTooltip width={ref?.current?.offsetWidth} initialData={data[data.length - 1]} />}
+                position={{ x: 0, y: -10 }}
+                wrapperStyle={{ visibility: 'visible' }}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        ) : (
+          <Text variant="label1">No data</Text>
+        )}
+      </StyledWrapper>
+    </div>
+  )
+}
+
+const StyledWrapper = styled(Shelf)(
+  css({
+    fontFamily: 'Inter',
+    fontSize: '10px',
+    color: 'textSecondary',
+    width: '100%',
+  })
+)
+
 type CustomizedTooltipProps = TooltipProps<any, any> & {
   width?: number
   initialData: ChartData
@@ -97,79 +169,9 @@ const CustomizedXAxisTick: React.VFC<CustomizedXAxisTickProps> = ({ payload, x, 
 
   return (
     <g transform={`translate(${x},${y})`}>
-      <text x={0} y={0} dy={16} fontSize="10px" textAnchor="center" fill="#666">
+      <text x={0} y={0} dy={16} fontSize="10px" textAnchor="center">
         {tick}
       </text>
     </g>
   )
 }
-
-export const ReserveChart: React.VFC = () => {
-  const theme = useTheme()
-  const { pid } = useParams<{ pid: string }>()
-  const ref = React.useRef<HTMLDivElement>(null)
-  const poolStates = useDailyPoolStates(pid)
-
-  const data: ChartData[] =
-    poolStates?.map((day) => {
-      // display decimals on y axis chart ?
-      const assetValue = new BN(day.poolState.netAssetValue).div(TABLE_SCALE_FACTOR).toNumber()
-      const poolValue = new BN(day.poolValue).div(TABLE_SCALE_FACTOR).toNumber()
-      return { day: new Date(day.timestamp), poolValue, assetValue, reserve: [assetValue, poolValue] }
-    }) || []
-
-  return (
-    <div ref={ref}>
-      <StyledWrapper
-        gap="4"
-        style={{ fontFamily: 'Inter, Arial', fontSize: '10px', color: theme.colors.textSecondary, width: '100%' }}
-      >
-        {data?.length && (
-          <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart width={754} height={173} data={data} margin={{ top: 60 }}>
-              <XAxis
-                dataKey="day"
-                tick={<CustomizedXAxisTick variant={data.length > 30 ? 'months' : 'days'} />}
-                tickLine={false}
-                interval={0}
-                type="category"
-              />
-              <YAxis
-                allowDecimals
-                tickLine={false}
-                tickFormatter={
-                  (tick) => tick
-                  // use new formatting utils after merge main
-                  // formatCurrencyAmount(new BN(tick.toLocaleString('fullwide', { useGrouping: false })))
-                }
-              />
-              <CartesianGrid stroke={theme.colors.borderSecondary} />
-              <Area
-                fill={theme.colors.backgroundSecondary}
-                dataKey="reserve"
-                stroke={theme.colors.backgroundSecondary}
-                fillOpacity={1}
-              />
-              <Line dataKey="assetValue" stroke={theme.colors.accentSecondary} fill="transparent" dot={false} />
-              <Line dot={false} dataKey="poolValue" stroke={theme.colors.accentPrimary} fill="transparent" />
-              <Tooltip
-                content={<CustomizedTooltip width={ref?.current?.offsetWidth} initialData={data[data.length - 1]} />}
-                position={{ x: 0, y: -10 }}
-                wrapperStyle={{ visibility: 'visible' }}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-        )}
-      </StyledWrapper>
-    </div>
-  )
-}
-
-const StyledWrapper = styled(Shelf)(
-  css({
-    fontFamily: 'Inter',
-    fontSize: '10px',
-    color: 'textSecondary',
-    width: '100%',
-  })
-)

@@ -6,50 +6,50 @@ import { useHistory, useParams } from 'react-router'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, OrderBy, SortableTableHeader } from './DataTable'
 
-export type TokenByPool = {
+export type TokenByPoolTableData = {
   apy: string
   protection: string
   name: string
   symbol: string
   poolName: string
-  index: number
+  seniority: number
   poolId: string
 }
 
 type RowProps = {
-  token: TokenByPool
+  token: TokenByPoolTableData
 }
 
 const columns: Column[] = [
   {
     align: 'left',
     header: (orderBy: OrderBy) => <SortableTableHeader label="Seniority" orderBy={orderBy} />,
-    cell: (token: TokenByPool) => <Text variant="body2"> {token.index + 1}</Text>,
+    cell: (token: TokenByPoolTableData) => <Text variant="body2"> {token.seniority + 1}</Text>,
     flex: '2',
-    sortKey: 'index',
+    sortKey: 'id',
   },
   {
     align: 'left',
     header: 'Name',
-    cell: (token: TokenByPool) => <TokenName token={token} />,
+    cell: (token: TokenByPoolTableData) => <TokenName token={token} />,
     flex: '3',
   },
   {
     header: 'Symbol',
-    cell: (token: TokenByPool) => <Text variant="body2">{token?.symbol}</Text>,
+    cell: (token: TokenByPoolTableData) => <Text variant="body2">{token?.symbol}</Text>,
     flex: '2',
     align: 'left',
     sortKey: 'symbol',
   },
   {
     header: (orderBy: OrderBy) => <SortableTableHeader label="Min. Protection" orderBy={orderBy} />,
-    cell: (token: TokenByPool) => <Protection token={token} />,
+    cell: (token: TokenByPoolTableData) => <Protection token={token} />,
     flex: '2',
     sortKey: 'protection',
   },
   {
     header: (orderBy: OrderBy) => <SortableTableHeader label="APY" orderBy={orderBy} />,
-    cell: (token: TokenByPool) => <APY token={token} />,
+    cell: (token: TokenByPoolTableData) => <APY token={token} />,
     flex: '2',
     sortKey: 'apy',
   },
@@ -68,15 +68,15 @@ export const TokenListByPool: React.FC = () => {
 
   if (!pool || !pool.tranches) return null
 
-  const tokens: TokenByPool[] = pool?.tranches
+  const tokens: TokenByPoolTableData[] = pool?.tranches
     .map((tranche) => {
       return {
-        apy: tranche?.interestPerSec ? feeToApr(tranche?.interestPerSec) : '',
-        protection: tranche.ratio,
-        name: tranche.name,
+        apy: tranche?.interestRatePerSec ? feeToApr(tranche?.interestRatePerSec) : '',
+        protection: tranche.minRiskBuffer?.toString() || '',
+        name: metadata?.tranches?.find((_, index) => index === tranche.index)?.name || '',
         symbol: metadata?.tranches?.find((_, index) => index === tranche.index)?.symbol || '',
         poolName: metadata?.pool?.name || '',
-        index: tranche.index,
+        seniority: tranche.seniority,
         poolId: pid,
       }
     })
@@ -86,9 +86,9 @@ export const TokenListByPool: React.FC = () => {
     <DataTable
       data={tokens}
       columns={columns}
-      defaultSortKey="valueLocked"
-      onRowClicked={(token: TokenByPool) => {
-        history.push(`/tokens/${token.poolId}/${token.index}`)
+      defaultSortKey="seniority"
+      onRowClicked={(token: TokenByPoolTableData) => {
+        history.push(`/tokens/${token.poolId}/${token.seniority}`)
       }}
     />
   )

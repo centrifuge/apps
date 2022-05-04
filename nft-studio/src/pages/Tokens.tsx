@@ -3,7 +3,7 @@ import * as React from 'react'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
-import { Token, TokenList } from '../components/TokenList'
+import { TokenList, TokenTableData } from '../components/TokenList'
 import { Tooltips } from '../components/Tooltips'
 import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
@@ -20,7 +20,7 @@ export const TokenOverviewPage: React.FC = () => {
 const TokenOverview: React.FC = () => {
   const dataTokens = useTokens()
 
-  const tokens: Token[] | undefined = React.useMemo(
+  const tokens: TokenTableData[] | undefined = React.useMemo(
     () =>
       dataTokens
         ?.map((tranche) => {

@@ -6,7 +6,7 @@ import { formatBalance, formatPercentage } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, OrderBy, SortableTableHeader } from './DataTable'
 
-export type Token = {
+export type TokenTableData = {
   poolMetadata?: string
   yield: Decimal | null
   protection: Decimal
@@ -18,41 +18,41 @@ export type Token = {
 }
 
 type Props = {
-  tokens: Token[]
+  tokens: TokenTableData[]
 }
 
 type RowProps = {
-  token: Token
+  token: TokenTableData
 }
 
 const columns: Column[] = [
   {
     align: 'left',
     header: 'Token',
-    cell: (token: Token) => <TokenName token={token} />,
+    cell: (token: TokenTableData) => <TokenName token={token} />,
     flex: '9',
   },
   {
     align: 'left',
     header: 'Asset class',
-    cell: (token: Token) => <AssetClass token={token} />,
+    cell: (token: TokenTableData) => <AssetClass token={token} />,
     flex: '4',
   },
   {
     header: (orderBy: OrderBy) => <SortableTableHeader label="Yield" orderBy={orderBy} />,
-    cell: (token: Token) => <Yield token={token} />,
+    cell: (token: TokenTableData) => <Yield token={token} />,
     flex: '4',
     sortKey: 'yield',
   },
   {
     header: (orderBy: OrderBy) => <SortableTableHeader label="Protection" orderBy={orderBy} />,
-    cell: (token: Token) => <Protection token={token} />,
+    cell: (token: TokenTableData) => <Protection token={token} />,
     flex: '4',
     sortKey: 'protection',
   },
   {
     header: (orderBy: OrderBy) => <SortableTableHeader label="Value locked" orderBy={orderBy} />,
-    cell: (token: Token) => <ValueLocked token={token} />,
+    cell: (token: TokenTableData) => <ValueLocked token={token} />,
     flex: '4',
     sortKey: 'valueLocked',
   },
@@ -72,7 +72,7 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
       columns={columns}
       defaultSortKey="valueLocked"
       rounded={false}
-      onRowClicked={(token: Token) => {
+      onRowClicked={(token: TokenTableData) => {
         history.push(`/tokens/${token.poolId}/${token.id}`)
       }}
     />
