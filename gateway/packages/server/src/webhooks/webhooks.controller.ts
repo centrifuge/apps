@@ -44,37 +44,32 @@ export class WebhooksController {
         if (!user) {
           throw new Error('User is not present in database')
         }
+        const result = await this.centrifugeService.documents.getCommittedDocument(
+          user.account,
+          notification.document.id!
+        )
 
-        if (notification.eventType === DocumentTypes.GENERIC_DOCUMENT) {
-          const result = await this.centrifugeService.documents.getCommittedDocument(
-            user.account,
-            notification.document.id!
-          )
-
-          const unflattenedAttributes = unflatten(result.attributes)
-          const updated = await this.databaseService.documents.update(
-            {
-              'header.document_id': notification.document.id,
+        const unflattenedAttributes = unflatten(result.attributes)
+        const updated = await this.databaseService.documents.update(
+          {
+            'header.document_id': notification.document.id,
+            organizationId: user.account.toLowerCase(),
+          },
+          {
+            $set: {
+              ...result,
+              ownerId: user._id,
               organizationId: user.account.toLowerCase(),
+              header: result.header,
+              data: result.data,
+              attributes: unflattenedAttributes,
+              scheme: result.scheme,
+              fromId: notification.document.from,
+              document_status: DocumentStatus.Created, // webhook always follows commit, so creation is guaranteed
             },
-            {
-              $set: {
-                ...result,
-                ownerId: user._id,
-                organizationId: user.account.toLowerCase(),
-                header: result.header,
-                data: result.data,
-                attributes: unflattenedAttributes,
-                scheme: result.scheme,
-                fromId: notification.document.from,
-                document_status: DocumentStatus.Created, // webhook always follows commit, so creation is guaranteed
-              },
-            },
-            { multi: true, upsert: true, returnUpdatedDocs: true }
-          )
-        } else {
-          throw new Error(`Document type ${notification.eventType} not supported`)
-        }
+          },
+          { multi: true, upsert: true, returnUpdatedDocs: true }
+        )
       }
     } catch (e) {
       throw new Error(`Webhook Error: ${e.message}`)
