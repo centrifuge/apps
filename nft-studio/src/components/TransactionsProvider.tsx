@@ -2,6 +2,7 @@ import * as React from 'react'
 
 export type TransactionStatus = 'creating' | 'unconfirmed' | 'pending' | 'succeeded' | 'failed'
 export type Transaction = {
+  args: any[]
   id: string
   title: string
   status: TransactionStatus
