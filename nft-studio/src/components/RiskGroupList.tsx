@@ -143,23 +143,16 @@ export const RiskGroupList: React.FC = () => {
     const totalSharesSum = [...riskGroups, ...remainingAssets]
       .reduce((curr, prev) => curr.add(new BN(prev.share || '0')), new BN('0'))
       .toString()
-    const avgFinancingFee = riskGroups.reduce(
-      (curr, prev) =>
-        Dec(curr)
-          .add(Dec(prev.financingFee || '0'))
-          .div(Dec(riskGroups.length))
-          .toDecimalPlaces(2),
-      Dec('0')
-    )
 
-    const avgRiskAdjustment = riskGroups.reduce(
-      (curr, prev) =>
-        Dec(curr)
-          .add(Dec(prev.riskAdjustment || '0'))
-          .div(Dec(riskGroups.length))
-          .toDecimalPlaces(2),
-      Dec('0')
-    )
+    const avgFinancingFee = riskGroups
+      .reduce((curr, prev) => Dec(curr).add(Dec(prev.financingFee || '0')), Dec('0'))
+      .div(Dec(riskGroups.length))
+      .toDecimalPlaces(2)
+
+    const avgRiskAdjustment = riskGroups
+      .reduce((curr, prev) => Dec(curr).add(Dec(prev.riskAdjustment || '0')), Dec('0'))
+      .div(Dec(riskGroups.length))
+      .toDecimalPlaces(2)
 
     return {
       share: totalSharesSum,
@@ -171,7 +164,7 @@ export const RiskGroupList: React.FC = () => {
   }, [riskGroups, remainingAssets, pool?.nav.latest])
 
   // biggest share of pie gets darkest color
-  const dataWithColor = [...riskGroups, ...remainingAssets]
+  const tableDataWithColor = [...riskGroups, ...remainingAssets]
     .sort((a, b) => Number(a.amount) - Number(b.amount))
     .map((item, index) => {
       if (metadata?.riskGroups!.length) {
@@ -185,7 +178,7 @@ export const RiskGroupList: React.FC = () => {
       return item
     })
 
-  const sharesForPie = dataWithColor.map(({ name, color, labelColor, share }) => {
+  const sharesForPie = tableDataWithColor.map(({ name, color, labelColor, share }) => {
     return { value: Number(share), name, color, labelColor }
   })
 
@@ -196,8 +189,8 @@ export const RiskGroupList: React.FC = () => {
           <PieChart data={sharesForPie} />
         </Shelf>
       )}
-      {dataWithColor.length > 0 ? (
-        <DataTable data={[...dataWithColor] || []} columns={columns} summary={totalRow} />
+      {tableDataWithColor.length > 0 ? (
+        <DataTable data={[...tableDataWithColor] || []} columns={columns} summary={totalRow} />
       ) : (
         <Text variant="label1">No data</Text>
       )}

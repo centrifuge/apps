@@ -226,6 +226,41 @@ export type TrancheInput = {
   seniority?: number
 }
 
+type SubqueryTrancheState = {
+  __typename?: 'TrancheState'
+  id: string
+  poolState: SubqueryPoolState
+  supply: number
+  price: number
+  outstandingInvestOrders: number
+  outstandingRedeemOrders: number
+  yield30Days?: number | null
+  yield90Days?: number | null
+  yieldSinceInception?: number | null
+}
+
+type SubqueryPoolState = {
+  __typename?: 'PoolState'
+  id: string
+  netAssetValue: number
+  totalReserve: number
+  availableReserve: number
+  maxReserve: number
+  totalDebt?: number | null
+  trancheStates?: Array<SubqueryTrancheState | null> | null
+}
+
+export type SubqueryDailyPoolState = {
+  __typename?: 'DailyPoolState'
+  id: string
+  timestamp: string
+  poolState: SubqueryPoolState
+  totalBorrowed?: number | null
+  totalRepaid?: number | null
+  totalInvested?: number | null
+  totalRedeemed?: number | null
+}
+
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
@@ -866,7 +901,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const $api = inst.getApi()
 
-    const $query = inst.getOptionalSubqueryObservable<{ dailyPoolStates: { nodes: any } }>(
+    const $query = inst.getOptionalSubqueryObservable<{ dailyPoolStates: { nodes: SubqueryDailyPoolState[] } }>(
       `query($poolId: String!) {
         dailyPoolStates(filter: {id:{startsWith: $poolId}}) {
           nodes {
@@ -887,9 +922,22 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return $api.pipe(
       switchMap(() =>
-        combineLatest([$query]).pipe(
-          switchMap((queryData) => {
-            return queryData ?? null
+        combineLatest([$query, getPool([poolId])]).pipe(
+          switchMap(([queryData, poolData]) => {
+            return [
+              queryData?.dailyPoolStates.nodes.map((state) => {
+                if (new Date(state.timestamp).toDateString() === new Date().toDateString()) {
+                  const netAssetValue = poolData.nav.latest
+                  const totalReserve = poolData.reserve.total
+                  const poolValue = new BN(netAssetValue).add(new BN(totalReserve)).toString()
+                  return { ...state, poolValue, netAssetValue, totalReserve }
+                }
+                const poolValue = new BN(state?.poolState.netAssetValue || '0')
+                  .add(new BN(state?.poolState.totalReserve || '0'))
+                  .toString()
+                return { ...state, poolValue }
+              }) as (SubqueryDailyPoolState & { poolValue: string })[],
+            ]
           })
         )
       )
