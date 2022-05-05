@@ -285,7 +285,7 @@ const CreatePoolForm: React.VFC = () => {
         percentage: Rate.fromPercent(g.writeOff),
       }))
 
-      const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
+      // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
       const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
 
@@ -297,7 +297,6 @@ const CreatePoolForm: React.VFC = () => {
         currency,
         Balance.fromFloat(values.maxReserve),
         metadataHash,
-        epochSeconds,
         writeOffGroups,
       ])
 
@@ -414,7 +413,7 @@ const CreatePoolForm: React.VFC = () => {
                 rightElement={CURRENCIES.find((c) => c.value === form.values.currency)?.label}
               />
             </Box>
-            <Box gridColumn="span 1">
+            {/* <Box gridColumn="span 1">
               <FieldWithErrorMessage
                 validate={validate.epochHours}
                 name="epochHours"
@@ -433,7 +432,7 @@ const CreatePoolForm: React.VFC = () => {
                 placeholder="0"
                 rightElement="min"
               />
-            </Box>
+            </Box> */}
           </Grid>
         </PageSection>
         <PageSection title="Issuer">

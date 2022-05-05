@@ -99,7 +99,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
 
   const isDataLoading = balances === undefined || order === undefined || permissions === undefined
 
-  const allowedToInvest = permissions?.pools[poolId]?.tranches.includes(trancheId)
+  const allowedToInvest = !!permissions?.pools[poolId]?.tranches[trancheId]
   const tranche = pool?.tranches.find((t) => t.id === trancheId)
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
   const trancheBalance =

@@ -18,7 +18,7 @@ type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 
 
 type CurrencyRole = 'PermissionedAssetManager' | 'PermissionedAssetIssuer'
 
-export type PoolRoleInput = AdminRole | { TrancheInvestor: [trancheId: string, delta: number] }
+export type PoolRoleInput = AdminRole | { TrancheInvestor: [trancheId: string, permissionedTill: number] }
 
 export type Currency = string
 
@@ -38,7 +38,7 @@ const AdminRoleBits = {
 
 export type PoolRoles = {
   roles: AdminRole[]
-  tranches: string[]
+  tranches: { [key: string]: string } // trancheId -> permissionedTill
 }
 
 export type LoanInfoInput = {
@@ -307,12 +307,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
       currency: string | { permissioned: string },
       maxReserve: BN,
       metadata: string,
-      minEpochTime: number,
       writeOffGroups: { overdueDays: number; percentage: BN }[]
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, minEpochTime, writeOffGroups] = args
+    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, writeOffGroups] = args
 
     const $api = inst.getApi()
 
@@ -328,7 +327,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
           [
             api.tx.uniques.create(collectionId, LoanPalletAccountId),
             api.tx.pools.create(admin, poolId, trancheInput, currency, maxReserve.toString()),
-            api.tx.pools.update(poolId, minEpochTime, 5, 60),
             api.tx.pools.setMetadata(poolId, metadata),
             api.tx.permissions.add(
               { PoolRole: 'PoolAdmin' },
@@ -382,7 +380,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
             api.tx.permissions.add({ PoolRole: 'PoolAdmin' }, addr, { Pool: poolId }, { PoolRole: role })
           ),
           ...sortedRemove.map(([addr, role]) =>
-            api.tx.permissions.rmPermission({ PoolRole: 'PoolAdmin' }, addr, { Pool: poolId }, { PoolRole: role })
+            api.tx.permissions.remove({ PoolRole: 'PoolAdmin' }, addr, { Pool: poolId }, { PoolRole: role })
           ),
         ])
         return inst.wrapSignAndSendRx(api, submittable, options)
@@ -571,10 +569,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
               roles: (
                 ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'RiskAdmin'] as const
               ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
-              tranches: permissions.trancheInvestor.info
-                .filter((info: any) => info.permissionedTill * 1000 > Date.now())
-                .map((info: any) => info.trancheId),
+              tranches: {},
             }
+            permissions.trancheInvestor.info
+              .filter((info: any) => info.permissionedTill * 1000 > Date.now())
+              .forEach((info: any) => {
+                roles.pools[poolId].tranches[info.trancheId] = new Date(info.permissionedTill * 1000).toISOString()
+              })
           }
         })
         return roles
@@ -623,10 +624,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 roles: (
                   ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'RiskAdmin'] as const
                 ).filter((role) => AdminRoleBits[role] & permissions.poolAdmin.bits),
-                tranches: permissions.trancheInvestor.info
-                  .filter((info: any) => info.permissionedTill * 1000 > Date.now())
-                  .map((info: any) => info.trancheId),
+                tranches: {},
               }
+              permissions.trancheInvestor.info
+                .filter((info: any) => info.permissionedTill * 1000 > Date.now())
+                .forEach((info: any) => {
+                  roles[account].tranches[info.trancheId] = new Date(info.permissionedTill * 1000).toISOString()
+                })
             })
             return roles
           })
@@ -1039,7 +1043,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
           if (typeof key === 'string') {
             balances.currencies.push({
-              currency: key,
+              currency: key.toLowerCase(),
               balance: new Balance(hexToBN(value.free)),
             })
           } else if ('Tranche' in key) {
@@ -1054,7 +1058,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           } else {
             if (value.free !== 0) {
               balances.currencies.push({
-                currency: key.Permissioned,
+                currency: key.Permissioned.toLowerCase(),
                 balance: new Balance(hexToBN(value.free)),
               })
             }
@@ -1366,8 +1370,9 @@ function hexToBN(value: string | number) {
 
 function getCurrency(data?: CurrencyData | string) {
   if (!data) return ''
-  if (typeof data === 'string') return data
-  return 'permissioned' in data ? data.permissioned! : Object.keys(data)[0]
+  if (typeof data === 'string') return data.toLowerCase()
+  const cur = 'permissioned' in data ? data.permissioned! : Object.keys(data)[0]
+  return cur.toLowerCase()
 }
 
 function getLoanInfo(loanType: LoanInfoData): LoanInfo {

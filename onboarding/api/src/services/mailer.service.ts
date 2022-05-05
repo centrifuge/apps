@@ -28,9 +28,6 @@ export class MailerService {
             issuerName: pool.profile?.issuer?.name,
             issuerEmail: pool.profile?.issuer?.email,
           },
-          headers: {
-            'Content-Type': 'text/html',
-          },
         },
       ],
       from: {
