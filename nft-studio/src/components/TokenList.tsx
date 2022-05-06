@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useHistory } from 'react-router'
 import { formatBalance, formatPercentage } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
-import { Column, DataTable, OrderBy, SortableTableHeader } from './DataTable'
+import { Column, DataTable, SortableTableHeader } from './DataTable'
 
 export type TokenTableData = {
   poolMetadata?: string
@@ -39,19 +39,19 @@ const columns: Column[] = [
     flex: '4',
   },
   {
-    header: (orderBy: OrderBy) => <SortableTableHeader label="Yield" orderBy={orderBy} />,
+    header: () => <SortableTableHeader label="Yield" />,
     cell: (token: TokenTableData) => <Yield token={token} />,
     flex: '4',
     sortKey: 'yield',
   },
   {
-    header: (orderBy: OrderBy) => <SortableTableHeader label="Protection" orderBy={orderBy} />,
+    header: () => <SortableTableHeader label="Protection" />,
     cell: (token: TokenTableData) => <Protection token={token} />,
     flex: '4',
     sortKey: 'protection',
   },
   {
-    header: (orderBy: OrderBy) => <SortableTableHeader label="Value locked" orderBy={orderBy} />,
+    header: () => <SortableTableHeader label="Value locked" />,
     cell: (token: TokenTableData) => <ValueLocked token={token} />,
     flex: '4',
     sortKey: 'valueLocked',

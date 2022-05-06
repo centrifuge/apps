@@ -7,7 +7,7 @@ import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
 import { useLoans } from '../utils/useLoans'
 import { usePool, usePoolMetadata } from '../utils/usePools'
-import { Column, DataTable, OrderBy, SortableTableHeader } from './DataTable'
+import { Column, DataTable, SortableTableHeader } from './DataTable'
 import { PieChart } from './PieChart'
 
 export type AssetByRiskGroup = {
@@ -31,7 +31,7 @@ const initialRow: AssetByRiskGroup = {
 const columns: Column[] = [
   {
     align: 'left',
-    header: (orderBy: OrderBy) => <SortableTableHeader label="Risk group" orderBy={orderBy} />,
+    header: () => <SortableTableHeader label="Risk group" />,
     cell: (riskGroup: AssetByRiskGroup) => (
       <Shelf gap="1">
         {riskGroup?.color && <Box width="10px" height="10px" backgroundColor={riskGroup.color} />}
@@ -44,13 +44,13 @@ const columns: Column[] = [
     sortKey: 'name',
   },
   {
-    header: (orderBy: OrderBy) => <SortableTableHeader label="Amount" orderBy={orderBy} />,
+    header: () => <SortableTableHeader label="Amount" />,
     cell: (props: AssetByRiskGroup) => <Amount {...props} />,
     flex: '1',
     sortKey: 'amount',
   },
   {
-    header: (orderBy: OrderBy) => <SortableTableHeader label="Share" orderBy={orderBy} />,
+    header: () => <SortableTableHeader label="Share" />,
     cell: ({ share }: AssetByRiskGroup) => {
       // console.log('🚀 ~ share cell', share.toString())
       return <Text variant="body2">{share}%</Text>
@@ -59,7 +59,7 @@ const columns: Column[] = [
     sortKey: 'share',
   },
   {
-    header: (orderBy: OrderBy) => <SortableTableHeader label="Financing fee" orderBy={orderBy} />,
+    header: () => <SortableTableHeader label="Financing fee" />,
     cell: ({ interestRatePerSec }: AssetByRiskGroup) => {
       return <Text variant="body2">{interestRatePerSec ? `${interestRatePerSec}%` : ''}</Text>
     },
@@ -67,7 +67,7 @@ const columns: Column[] = [
     sortKey: 'financingFee',
   },
   {
-    header: (orderBy: OrderBy) => <SortableTableHeader label="Risk adjustment" orderBy={orderBy} />,
+    header: () => <SortableTableHeader label="Risk adjustment" />,
     cell: ({ riskAdjustment }: AssetByRiskGroup) => (
       <Text variant="body2">{riskAdjustment ? `${riskAdjustment}%` : ''}</Text>
     ),

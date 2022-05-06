@@ -16,8 +16,8 @@ type Props<T> = {
 export type OrderBy = 'asc' | 'desc'
 
 export type Column = {
-  header: string | ((orderBy: OrderBy) => React.ReactNode)
-  cell: (row: any, index: number) => React.ReactNode
+  header: string | (() => React.ReactElement)
+  cell: (row: any, index: number) => React.ReactElement
   align?: string
   flex?: string
   sortKey?: string
@@ -69,7 +69,9 @@ export const DataTable = <T extends Record<string, any>>({
             align={col?.align}
           >
             <Text variant="label2">
-              {typeof col?.header !== 'string' && col?.sortKey ? col.header(orderBy[col.sortKey]) : col.header}
+              {typeof col?.header !== 'string' && col?.sortKey
+                ? React.cloneElement(col.header(), { align: col?.align, orderBy: orderBy[col.sortKey] })
+                : col.header}
             </Text>
           </HeaderCol>
         ))}
@@ -175,15 +177,28 @@ const DataCol = styled.div<{ align: Column['align'] }>`
 
 const HeaderCol = styled(DataCol)``
 
-export const SortableTableHeader: React.VFC<{ label: string; orderBy?: OrderBy }> = ({ label, orderBy }) => {
+export const SortableTableHeader: React.VFC<{ label: string; orderBy?: OrderBy; align?: Column['align'] }> = ({
+  label,
+  orderBy,
+  align,
+}) => {
   return (
     <StyledHeader>
+      {!align && (
+        <IconArrowDown
+          color={orderBy ? 'currentColor' : 'transparent'}
+          size={16}
+          style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        />
+      )}
       {label}
-      <IconArrowDown
-        color={orderBy ? 'currentColor' : 'transparent'}
-        size={16}
-        style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
-      />
+      {align && align === 'left' && (
+        <IconArrowDown
+          color={orderBy ? 'currentColor' : 'transparent'}
+          size={16}
+          style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        />
+      )}
     </StyledHeader>
   )
 }

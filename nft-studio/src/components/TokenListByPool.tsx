@@ -4,7 +4,7 @@ import { BN } from '@polkadot/util'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
 import { usePool, usePoolMetadata } from '../utils/usePools'
-import { Column, DataTable, OrderBy, SortableTableHeader } from './DataTable'
+import { Column, DataTable, SortableTableHeader } from './DataTable'
 
 export type TokenByPoolTableData = {
   apy: string
@@ -23,7 +23,7 @@ type RowProps = {
 const columns: Column[] = [
   {
     align: 'left',
-    header: (orderBy: OrderBy) => <SortableTableHeader label="Seniority" orderBy={orderBy} />,
+    header: () => <SortableTableHeader label="Seniority" />,
     cell: (token: TokenByPoolTableData) => <Text variant="body2"> {token.seniority + 1}</Text>,
     flex: '2',
     sortKey: 'id',
@@ -42,13 +42,13 @@ const columns: Column[] = [
     sortKey: 'symbol',
   },
   {
-    header: (orderBy: OrderBy) => <SortableTableHeader label="Min. Protection" orderBy={orderBy} />,
+    header: () => <SortableTableHeader label="Min. Protection" />,
     cell: (token: TokenByPoolTableData) => <Protection token={token} />,
     flex: '2',
     sortKey: 'protection',
   },
   {
-    header: (orderBy: OrderBy) => <SortableTableHeader label="APY" orderBy={orderBy} />,
+    header: () => <SortableTableHeader label="APY" />,
     cell: (token: TokenByPoolTableData) => <APY token={token} />,
     flex: '2',
     sortKey: 'apy',
