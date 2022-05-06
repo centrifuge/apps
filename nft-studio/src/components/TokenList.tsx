@@ -89,7 +89,7 @@ const TokenName: React.VFC<RowProps> = ({ token }) => {
     <Shelf gap="2">
       <Thumbnail label={symbol || ''} size="small" />
       <Text variant="body2" color="textPrimary" fontWeight={600}>
-        {trancheMeta?.name}
+        {metadata?.pool?.name} {trancheMeta?.name}
       </Text>
     </Shelf>
   )

@@ -1,10 +1,10 @@
-import { feeToApr, formatCurrencyAmount, fromRate } from '@centrifuge/centrifuge-js'
+import { Balance, Rate } from '@centrifuge/centrifuge-js'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
-import BN from 'bn.js'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { Dec } from '../utils/Decimal'
+import { formatBalance } from '../utils/formatting'
 import { useLoans } from '../utils/useLoans'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, OrderBy, SortableTableHeader } from './DataTable'
@@ -14,17 +14,17 @@ export type AssetByRiskGroup = {
   color?: string
   labelColor?: string
   name: string
-  amount: string
+  amount: Balance
   share: string
-  financingFee: string
+  interestRatePerSec: string
   riskAdjustment: string
 }
 
 const initialRow: AssetByRiskGroup = {
   name: '',
-  amount: '0',
+  amount: new Balance(0),
   share: '0',
-  financingFee: '0',
+  interestRatePerSec: '0',
   riskAdjustment: '0',
 }
 
@@ -45,19 +45,24 @@ const columns: Column[] = [
   },
   {
     header: (orderBy: OrderBy) => <SortableTableHeader label="Amount" orderBy={orderBy} />,
-    cell: ({ amount }: AssetByRiskGroup) => <Text variant="body2">{formatCurrencyAmount(amount)}</Text>,
+    cell: ({ amount }: AssetByRiskGroup) => <Text variant="body2">{formatBalance(amount)}</Text>,
     flex: '1',
     sortKey: 'amount',
   },
   {
     header: (orderBy: OrderBy) => <SortableTableHeader label="Share" orderBy={orderBy} />,
-    cell: ({ share }: AssetByRiskGroup) => <Text variant="body2">{share}%</Text>,
+    cell: ({ share }: AssetByRiskGroup) => {
+      // console.log('🚀 ~ share cell', share.toString())
+      return <Text variant="body2">{share}%</Text>
+    },
     flex: '1',
     sortKey: 'share',
   },
   {
     header: (orderBy: OrderBy) => <SortableTableHeader label="Financing fee" orderBy={orderBy} />,
-    cell: ({ financingFee }: AssetByRiskGroup) => <Text variant="body2">{financingFee ? `${financingFee}%` : ''}</Text>,
+    cell: ({ interestRatePerSec }: AssetByRiskGroup) => {
+      return <Text variant="body2">{interestRatePerSec ? `${interestRatePerSec}%` : ''}</Text>
+    },
     flex: '1',
     sortKey: 'financingFee',
   },
@@ -80,59 +85,60 @@ export const RiskGroupList: React.FC = () => {
 
   const riskGroups = React.useMemo(() => {
     if (!metadata?.riskGroups || !loans || !loans.length) return []
-    const mappedRiskGroups = metadata?.riskGroups?.map((group, index) => {
+    return metadata?.riskGroups?.map((group) => {
       const filteredLoans = loans?.filter((loan) => {
         return (
           loan.loanInfo.type === 'BulletLoan' &&
           // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
-          fromRate(loan.loanInfo?.lossGivenDefault) === Dec(group.lossGivenDefault).div(100).toString() &&
-          fromRate(loan.loanInfo?.probabilityOfDefault) === Dec(group.probabilityOfDefault).div(100).toString() &&
-          fromRate(loan.loanInfo?.lossGivenDefault) === Dec(group.lossGivenDefault).div(100).toString() &&
-          fromRate(loan.loanInfo?.advanceRate) === Dec(group.advanceRate).div(100).toString() &&
-          feeToApr(loan?.financingFee) === Dec(group.financingFee).toDecimalPlaces(2).toString()
+          (loan.loanInfo?.lossGivenDefault).toString() === Dec(group?.lossGivenDefault || 0).toString() &&
+          loan.loanInfo?.probabilityOfDefault.toString() === Dec(group?.probabilityOfDefault || 0).toString() &&
+          loan.loanInfo?.advanceRate.toString() === Dec(group?.advanceRate || 0).toString() &&
+          loan?.interestRatePerSec.toString() === Dec(group?.interestRatePerSec || 0).toString()
         )
       })
+
+      const lgd = new Rate(group?.lossGivenDefault).toPercent()
+      const pod = new Rate(group.probabilityOfDefault).toPercent()
+      const riskAdjustment = lgd.mul(pod).div(100).toDecimalPlaces(2).toString()
+      const interestRatePerSec = new Rate(group.interestRatePerSec).toAprPercent().toDecimalPlaces(2).toString()
 
       // temp solution while assets are still manually priced (in the future there will be a select to choose a riskGroup)
       if (filteredLoans.length === 0) {
         return {
+          ...initialRow,
           name: group.name,
-          amount: '0',
-          share: '0',
-          financingFee: '0',
-          riskAdjustment: '0',
+          riskAdjustment,
+          interestRatePerSec,
         } as AssetByRiskGroup
       }
       return filteredLoans.reduce<AssetByRiskGroup>((prev, curr) => {
-        const amount = new BN(prev?.amount || '0').add(new BN(curr.outstandingDebt))
-        const share = amount
-          ?.muln(100)
-          .div(new BN(pool?.nav.latest || '1'))
-          .toString()
+        const amount = new Balance(prev?.amount.add(curr.outstandingDebt))
+        const share = pool && pool?.nav.latest.toString() !== '0' ? amount.div(pool.nav.latest).toString() : '0'
+
         return {
           name: group.name,
-          amount: amount?.toString(),
+          amount,
           share,
-          financingFee: Dec(group?.financingFee).toDecimalPlaces(2).toString(),
-          riskAdjustment: Dec(group?.lossGivenDefault).mul(Dec(group.probabilityOfDefault)).div(100).toString(),
-        }
+          interestRatePerSec,
+          riskAdjustment,
+        } as AssetByRiskGroup
       }, initialRow)
     })
-    return mappedRiskGroups
   }, [metadata, loans, pool])
 
   // temp solution while assets are still manually priced (in the future there will be a select to choose a riskGroup)
   // represents all assets that could not be sorted into a riskGroup
   const remainingAssets: AssetByRiskGroup[] = React.useMemo(() => {
-    const amountsSum = riskGroups.reduce((curr, prev) => curr.add(new BN(prev?.amount || '0')), new BN('0')).toString()
-    const sharesSum = riskGroups.reduce((curr, prev) => curr.add(new BN(prev.share || '0')), new BN('0')).toString()
-    return !new BN(sharesSum).eqn(100) && !new BN(sharesSum).eqn(0)
+    const amountsSum = riskGroups.reduce((curr, prev) => new Balance(curr.add(prev.amount)), new Balance('0'))
+    const sharesSum = riskGroups.reduce((curr, prev) => curr + Number(prev.share) * 100, 0)
+
+    return sharesSum !== 100 && sharesSum !== 0
       ? [
           {
             name: 'Other',
-            amount: new BN(pool?.nav.latest || '0').sub(new BN(amountsSum)).toString(),
-            share: (100 - Number(sharesSum)).toString(),
-            financingFee: '',
+            amount: new Balance(pool?.nav.latest.sub(amountsSum) || 0),
+            share: '0',
+            interestRatePerSec: '',
             riskAdjustment: '',
           },
         ]
@@ -141,24 +147,24 @@ export const RiskGroupList: React.FC = () => {
 
   const totalRow = React.useMemo(() => {
     const totalSharesSum = [...riskGroups, ...remainingAssets]
-      .reduce((curr, prev) => curr.add(new BN(prev.share || '0')), new BN('0'))
+      .reduce((curr, prev) => curr.add(prev.share), Dec(0))
       .toString()
 
-    const avgFinancingFee = riskGroups
-      .reduce((curr, prev) => Dec(curr).add(Dec(prev.financingFee || '0')), Dec('0'))
-      .div(Dec(riskGroups.length))
+    const avgInterestRatePerSec = riskGroups
+      .reduce<any>((curr, prev) => curr.add(prev.interestRatePerSec), Dec(0))
+      .dividedBy(riskGroups.length)
       .toDecimalPlaces(2)
 
     const avgRiskAdjustment = riskGroups
-      .reduce((curr, prev) => Dec(curr).add(Dec(prev.riskAdjustment || '0')), Dec('0'))
-      .div(Dec(riskGroups.length))
+      .reduce<any>((curr, prev) => curr.add(prev.riskAdjustment), Dec(0))
+      .dividedBy(riskGroups.length)
       .toDecimalPlaces(2)
 
     return {
-      share: totalSharesSum,
-      amount: pool?.nav.latest || '',
+      share: totalSharesSum.toString(),
+      amount: new Balance(pool?.nav.latest || '0'),
       name: 'Total',
-      financingFee: `Avg. ${avgFinancingFee.toString()}`,
+      interestRatePerSec: `Avg ${avgInterestRatePerSec.toString()}`,
       riskAdjustment: `Avg. ${avgRiskAdjustment.toString()}`,
     }
   }, [riskGroups, remainingAssets, pool?.nav.latest])
