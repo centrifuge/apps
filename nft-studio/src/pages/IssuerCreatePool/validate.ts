@@ -28,7 +28,7 @@ export const validate = {
   currency: required(),
 
   issuerName: combine(required(), maxLength(100)),
-  issuerDescription: combine(minLength(100), maxLength(800)),
+  issuerDescription: combine(minLength(100), maxLength(1000)),
   issuerLogo: combineAsync(imageFile(), maxFileSize(5 * MB), maxImageSize(480, 480)),
   executiveSummary: combine(required(), mimeType('application/pdf'), maxFileSize(5 * MB)),
   website: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),

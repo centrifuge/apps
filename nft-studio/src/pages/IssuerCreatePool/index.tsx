@@ -472,7 +472,7 @@ const CreatePoolForm: React.VFC = () => {
                 as={TextAreaInput}
                 label="Description"
                 placeholder="Description..."
-                maxLength={800}
+                maxLength={1000}
                 disabled={waitingForStoredIssuer}
               />
             </Box>

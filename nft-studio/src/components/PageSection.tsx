@@ -38,7 +38,7 @@ export const PageSection: React.FC<Props> = ({ title, titleAddition, subtitle, h
         </Stack>
         {headerRight}
       </Shelf>
-      <Box pl={3}>{children}</Box>
+      <Box px={3}>{children}</Box>
     </Stack>
   )
 }

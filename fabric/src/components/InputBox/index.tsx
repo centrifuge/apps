@@ -56,6 +56,7 @@ export const InputBox: React.FC<StackProps & InputBoxProps> = ({
             </Box>
             {rightElement && (
               <Box
+                as={Text}
                 flex="0 0 auto"
                 display="flex"
                 style={{ color: theme.colors[disabled ? 'textDisabled' : 'textPrimary'] }}
