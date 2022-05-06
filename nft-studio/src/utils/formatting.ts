@@ -26,9 +26,9 @@ export function formatBalanceAbbreviated(amount: Balance | Decimal | number, cur
     amount instanceof Balance ? amount.toFloat() : amount instanceof Decimal ? amount.toNumber() : amount
   let formattedAmount = ''
   if (amountNumber > 999 && amountNumber < 1e6) {
-    formattedAmount = (amountNumber / 1e3).toFixed(1) + 'K' // convert to K for number from > 1000 < 1 million
+    formattedAmount = `${(amountNumber / 1e3).toFixed(1)}K`
   } else if (amountNumber > 1e6) {
-    formattedAmount = (amountNumber / 1e6).toFixed(1) + 'M' // convert to M for number from > 1 million
+    formattedAmount = `${(amountNumber / 1e6).toFixed(1)}M`
   } else if (amountNumber <= 999) {
     formattedAmount = String(amountNumber)
   }

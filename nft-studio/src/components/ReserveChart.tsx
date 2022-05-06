@@ -113,8 +113,8 @@ const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active,
   if (payload && payload?.length > 0 && active) {
     const { poolValue, assetValue, reserve } = payload[0]?.payload
     tooltipData = {
-      poolValue: poolValue,
-      assetValue: assetValue,
+      poolValue,
+      assetValue,
       reserve: reserve[1] - reserve[0],
       date: payload[0]?.payload?.day,
     }
