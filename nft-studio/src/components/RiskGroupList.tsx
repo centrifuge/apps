@@ -45,7 +45,7 @@ const columns: Column[] = [
   },
   {
     header: (orderBy: OrderBy) => <SortableTableHeader label="Amount" orderBy={orderBy} />,
-    cell: ({ amount }: AssetByRiskGroup) => <Text variant="body2">{formatBalance(amount)}</Text>,
+    cell: (props: AssetByRiskGroup) => <Amount {...props} />,
     flex: '1',
     sortKey: 'amount',
   },
@@ -76,6 +76,13 @@ const columns: Column[] = [
   },
 ]
 
+const Amount: React.VFC<AssetByRiskGroup> = ({ amount }) => {
+  const { pid } = useParams<{ pid: string }>()
+  const pool = usePool(pid)
+
+  return <Text variant="body2">{formatBalance(amount, pool?.currency)}</Text>
+}
+
 export const RiskGroupList: React.FC = () => {
   const { pid } = useParams<{ pid: string }>()
   const loans = useLoans(pid)
@@ -84,16 +91,16 @@ export const RiskGroupList: React.FC = () => {
   const { data: metadata } = usePoolMetadata(pool)
 
   const riskGroups = React.useMemo(() => {
-    if (!metadata?.riskGroups || !loans || !loans.length) return []
+    if (!metadata?.riskGroups) return []
     return metadata?.riskGroups?.map((group) => {
-      const filteredLoans = loans?.filter((loan) => {
+      const loansByRiskGroup = loans?.filter((loan) => {
         return (
           loan.loanInfo.type === 'BulletLoan' &&
           // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
-          (loan.loanInfo?.lossGivenDefault).toString() === Dec(group?.lossGivenDefault || 0).toString() &&
-          loan.loanInfo?.probabilityOfDefault.toString() === Dec(group?.probabilityOfDefault || 0).toString() &&
-          loan.loanInfo?.advanceRate.toString() === Dec(group?.advanceRate || 0).toString() &&
-          loan?.interestRatePerSec.toString() === Dec(group?.interestRatePerSec || 0).toString()
+          loan.loanInfo?.lossGivenDefault.toString() === group?.lossGivenDefault &&
+          loan.loanInfo?.probabilityOfDefault.toString() === group?.probabilityOfDefault &&
+          loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
+          loan?.interestRatePerSec.toString() === group?.interestRatePerSec
         )
       })
 
@@ -103,7 +110,7 @@ export const RiskGroupList: React.FC = () => {
       const interestRatePerSec = new Rate(group.interestRatePerSec).toAprPercent().toDecimalPlaces(2).toString()
 
       // temp solution while assets are still manually priced (in the future there will be a select to choose a riskGroup)
-      if (filteredLoans.length === 0) {
+      if (!loansByRiskGroup || loansByRiskGroup?.length === 0) {
         return {
           ...initialRow,
           name: group.name,
@@ -111,9 +118,10 @@ export const RiskGroupList: React.FC = () => {
           interestRatePerSec,
         } as AssetByRiskGroup
       }
-      return filteredLoans.reduce<AssetByRiskGroup>((prev, curr) => {
+      return loansByRiskGroup.reduce<AssetByRiskGroup>((prev, curr) => {
         const amount = new Balance(prev?.amount.add(curr.outstandingDebt))
-        const share = pool && pool?.nav.latest.toString() !== '0' ? amount.div(pool.nav.latest).toString() : '0'
+        const share =
+          pool && pool?.nav.latest.toString() !== '0' ? amount.muln(100).div(pool.nav.latest).toString() : '0'
 
         return {
           name: group.name,
@@ -137,7 +145,7 @@ export const RiskGroupList: React.FC = () => {
           {
             name: 'Other',
             amount: new Balance(pool?.nav.latest.sub(amountsSum) || 0),
-            share: '0',
+            share: `${100 - sharesSum / 100}`,
             interestRatePerSec: '',
             riskAdjustment: '',
           },
@@ -145,7 +153,7 @@ export const RiskGroupList: React.FC = () => {
       : []
   }, [pool, riskGroups])
 
-  const totalRow = React.useMemo(() => {
+  const summaryRow = React.useMemo(() => {
     const totalSharesSum = [...riskGroups, ...remainingAssets]
       .reduce((curr, prev) => curr.add(prev.share), Dec(0))
       .toString()
@@ -190,13 +198,13 @@ export const RiskGroupList: React.FC = () => {
 
   return (
     <>
-      {sharesForPie.length > 0 && (
+      {sharesForPie.length > 0 && summaryRow.share !== '0' && (
         <Shelf justifyContent="center">
           <PieChart data={sharesForPie} />
         </Shelf>
       )}
       {tableDataWithColor.length > 0 ? (
-        <DataTable data={[...tableDataWithColor] || []} columns={columns} summary={totalRow} />
+        <DataTable data={[...tableDataWithColor] || []} columns={columns} summary={summaryRow} />
       ) : (
         <Text variant="label1">No data</Text>
       )}

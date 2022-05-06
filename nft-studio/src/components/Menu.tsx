@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Box, IconCircle, IconHome, IconNft, IconPieChart, IconUser, Shelf } from '@centrifuge/fabric'
+import { Box, IconCircle, IconNft, IconPieChart, IconSquare, IconUser, Shelf } from '@centrifuge/fabric'
 import React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
@@ -40,7 +40,7 @@ export const Menu: React.FC<Props> = () => {
       </Link>
       <Shelf gap={1} flexDirection="column" alignItems="stretch" justifyContent="space-evenly" px={[2, 2, 0]}>
         <NavigationItem label="Tokens" href="/tokens" icon={<IconCircle size="16px" />} />
-        <NavigationItem label="Pools" href="/pools" icon={<IconHome size="16px" />} />
+        <NavigationItem label="Pools" href="/pools" icon={<IconSquare size="16px" />} />
         <NavigationItem label="NFTs" href="/nfts" icon={<IconNft size="16px" />} />
         <NavigationItem
           label="Investments"

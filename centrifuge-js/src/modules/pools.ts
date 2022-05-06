@@ -140,7 +140,7 @@ type PoolDetailsData = {
 }
 
 type NAVDetailsData = {
-  latestNav: string
+  latest: string
   lastUpdated: number
 }
 
@@ -742,7 +742,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           const poolId = formatPoolKey(key as StorageKey<[u32]>)
           const nav = navValue.toJSON() as unknown as NAVDetailsData
           acc[poolId] = {
-            latest: nav ? nav.latestNav : '0',
+            latest: nav ? nav.latest : '0',
             lastUpdated: nav ? nav.lastUpdated : 0,
           }
           return acc
@@ -953,12 +953,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
                     ...pool.parameters,
                   },
                   nav: {
-                    latest: nav?.latestNav ? new Balance(hexToBN(nav.latestNav)) : new Balance(0),
+                    latest: nav?.latest ? new Balance(hexToBN(nav.latest)) : new Balance(0),
                     lastUpdated: new Date((nav?.lastUpdated ?? 0) * 1000).toISOString(),
                   },
-                  value: new Balance(
-                    hexToBN(pool.reserve.total).add(new BN(nav?.latestNav ? hexToBN(nav.latestNav) : 0))
-                  ),
+                  value: new Balance(hexToBN(pool.reserve.total).add(new BN(nav?.latest ? hexToBN(nav.latest) : 0))),
                 }
                 return detailedPool
               })

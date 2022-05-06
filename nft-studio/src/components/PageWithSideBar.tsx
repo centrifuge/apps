@@ -17,7 +17,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
     <Box
       display="grid"
       gridTemplateAreas={`"menu main sidebar"`}
-      gridTemplateColumns={['80px 7fr 3fr', '80px 7fr 3fr', 'minmax(0, 2fr) 7fr 3fr']}
+      gridTemplateColumns={['80px auto 80px', '80px auto 80px', '200px auto 200px']}
       gridAutoRows="auto"
       minHeight="100vh"
     >

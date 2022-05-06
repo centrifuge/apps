@@ -1,6 +1,4 @@
-import { formatCurrencyAmount } from '@centrifuge/centrifuge-js'
 import { Stack, Text } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
@@ -13,6 +11,7 @@ import { RiskGroupList } from '../../../components/RiskGroupList'
 import { TokenListByPool } from '../../../components/TokenListByPool'
 import { Tooltips } from '../../../components/Tooltips'
 import { getAge } from '../../../utils/date'
+import { formatBalance } from '../../../utils/formatting'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
@@ -35,21 +34,9 @@ const PoolDetailOverview: React.FC = () => {
   const avgMaturity = useAverageMaturity(pid)
   const theme = useTheme()
 
-  const valueLocked = React.useMemo(
-    () =>
-      pool?.tranches
-        .reduce((prev, curr) => {
-          return new BN(prev).add(
-            new BN(curr.totalIssuance).mul(new BN(curr.tokenPrice)).div(new BN(10).pow(new BN(27)))
-          )
-        }, new BN('0'))
-        .toString(),
-    [pool]
-  )
-
   const pageSummaryData = [
     { label: <Tooltips type="assetClass" />, value: metadata?.pool?.asset.class },
-    { label: <Tooltips type="valueLocked" />, value: formatCurrencyAmount(valueLocked, pool?.currency) },
+    { label: <Tooltips type="valueLocked" />, value: formatBalance(pool?.value || 0, pool?.currency) },
     { label: <Tooltips type="age" />, value: getAge(pool?.createdAt) },
     { label: <Tooltips type="averageAssetMaturity" />, value: avgMaturity },
   ]
