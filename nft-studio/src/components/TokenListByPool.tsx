@@ -26,7 +26,7 @@ const columns: Column[] = [
     header: () => <SortableTableHeader label="Seniority" />,
     cell: (token: TokenByPoolTableData) => <Text variant="body2"> {token.seniority + 1}</Text>,
     flex: '2',
-    sortKey: 'id',
+    sortKey: 'seniority',
   },
   {
     align: 'left',
@@ -76,7 +76,7 @@ export const TokenListByPool: React.FC = () => {
         name: metadata?.tranches?.find((_, index) => index === tranche.index)?.name || '',
         symbol: metadata?.tranches?.find((_, index) => index === tranche.index)?.symbol || '',
         poolName: metadata?.pool?.name || '',
-        seniority: tranche.seniority,
+        seniority: Number(tranche.seniority),
         poolId: pid,
       }
     })

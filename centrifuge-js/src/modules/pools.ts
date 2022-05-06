@@ -4,6 +4,7 @@ import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
+import { SubqueryDailyPoolState } from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
 import { Balance, Perquintill, Price, Rate } from '../utils/BN'
 
@@ -257,39 +258,13 @@ export type TrancheInput = {
   seniority?: number
 }
 
-type SubqueryTrancheState = {
-  __typename?: 'TrancheState'
-  id: string
-  poolState: SubqueryPoolState
-  supply: number
-  price: number
-  outstandingInvestOrders: number
-  outstandingRedeemOrders: number
-  yield30Days?: number | null
-  yield90Days?: number | null
-  yieldSinceInception?: number | null
-}
-
-type SubqueryPoolState = {
-  __typename?: 'PoolState'
-  id: string
-  netAssetValue: number
-  totalReserve: number
-  availableReserve: number
-  maxReserve: number
-  totalDebt?: number | null
-  trancheStates?: Array<SubqueryTrancheState | null> | null
-}
-
-export type SubqueryDailyPoolState = {
-  __typename?: 'DailyPoolState'
-  id: string
+export type DailyPoolState = {
+  poolState: {
+    netAssetValue: Balance
+  }
+  poolValue: Balance
+  currency: string
   timestamp: string
-  poolState: SubqueryPoolState
-  totalBorrowed?: number | null
-  totalRepaid?: number | null
-  totalInvested?: number | null
-  totalRedeemed?: number | null
 }
 
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
@@ -996,17 +971,21 @@ export function getPoolsModule(inst: CentrifugeBase) {
           switchMap(([queryData, poolData]) => {
             return [
               queryData?.dailyPoolStates.nodes.map((state) => {
-                if (new Date(state.timestamp).toDateString() === new Date().toDateString()) {
-                  const netAssetValue = poolData.nav.latest
-                  const totalReserve = poolData.reserve.total
-                  const poolValue = new BN(netAssetValue).add(new BN(totalReserve)).toString()
-                  return { ...state, poolValue, netAssetValue, totalReserve }
+                const currency = poolData.currency
+                const poolState = {
+                  ...state.poolState,
+                  netAssetValue: new Balance(state.poolState.netAssetValue),
                 }
-                const poolValue = new BN(state?.poolState.netAssetValue || '0')
-                  .add(new BN(state?.poolState.totalReserve || '0'))
-                  .toString()
-                return { ...state, poolValue }
-              }) as (SubqueryDailyPoolState & { poolValue: string })[],
+                if (new Date(state.timestamp).toDateString() === new Date().toDateString()) {
+                  return { ...state, poolState, poolValue: new Balance(poolData.value), currency }
+                }
+                const poolValue = new Balance(
+                  new Balance(state?.poolState.netAssetValue || '0').add(
+                    new Balance(state?.poolState.totalReserve || '0')
+                  )
+                )
+                return { ...state, poolState, poolValue, currency }
+              }) as unknown as DailyPoolState[],
             ]
           })
         )

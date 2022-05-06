@@ -64,7 +64,7 @@ const columns: Column[] = [
       return <Text variant="body2">{interestRatePerSec ? `${interestRatePerSec}%` : ''}</Text>
     },
     flex: '1',
-    sortKey: 'financingFee',
+    sortKey: 'interestRatePerSec',
   },
   {
     header: () => <SortableTableHeader label="Risk adjustment" />,
@@ -204,7 +204,7 @@ export const RiskGroupList: React.FC = () => {
         </Shelf>
       )}
       {tableDataWithColor.length > 0 ? (
-        <DataTable data={[...tableDataWithColor] || []} columns={columns} summary={summaryRow} />
+        <DataTable defaultSortKey="share" data={[...tableDataWithColor] || []} columns={columns} summary={summaryRow} />
       ) : (
         <Text variant="label1">No data</Text>
       )}
