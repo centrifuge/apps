@@ -20,6 +20,9 @@ on:
       whitelisted-accounts:
         required: true
         type: string
+      subquery-url:
+        required: true
+        type: string
 
     secrets:
       github-token:
