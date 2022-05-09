@@ -196,5 +196,3 @@ function truncate(txt: string, num: number) {
   }
   return txt
 }
-
-

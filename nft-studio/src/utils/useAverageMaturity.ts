@@ -1,36 +1,23 @@
-import { BN } from 'bn.js'
 import React from 'react'
-import { formatAge } from './date'
+import { daysBetween, formatAge } from './date'
+import { Dec } from './Decimal'
 import { useLoans } from './useLoans'
-
-const SECONDS_PER_DAY = 60 * 60 * 24
 
 export const useAverageMaturity = (poolId: string) => {
   const loans = useLoans(poolId)
 
   const avgMaturity = React.useMemo(() => {
     const assets = loans?.filter((asset) => asset?.status === 'Active' || asset?.status === 'Created') || []
-    const maturityPerAsset = assets
-      ?.filter(
-        (asset) =>
-          // only assets that have outstanding debt, have been borrowed against, and have a maturity date (CreditLines do not)
-          new BN(asset.outstandingDebt).gt(new BN(0)) &&
-          asset.originationDate &&
-          Object.keys(asset.loanInfo).includes('maturityDate')
+    const maturityPerAsset = assets.reduce((sum, asset) => {
+      if (asset.loanInfo.type !== 'BulletLoan' || !asset.outstandingDebt.gtn(0)) return sum
+      return sum.add(
+        Dec(daysBetween(asset.originationDate, asset.loanInfo.maturityDate)).mul(asset.outstandingDebt.toDecimal())
       )
-      // number of days until maturity weighted by outstanding debt
-      .reduce(
-        (sum, asset: any) =>
-          sum +
-          (((asset.loanInfo.maturityDate! - asset.originationDate!) / SECONDS_PER_DAY) *
-            Number(asset.outstandingDebt.toString())) /
-            1e18,
-        0
-      )
+    }, Dec(0))
 
-    const totalOutstandingDebt = assets.reduce((sum, asset) => sum + asset.outstandingDebt.toFloat(), 0)
+    const totalOutstandingDebt = assets.reduce((sum, asset) => sum.add(asset.outstandingDebt.toDecimal()), Dec(0))
 
-    return maturityPerAsset / totalOutstandingDebt
+    return maturityPerAsset.div(totalOutstandingDebt).toNumber()
   }, [loans])
 
   return formatAge(avgMaturity)

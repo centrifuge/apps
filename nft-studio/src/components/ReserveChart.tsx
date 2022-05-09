@@ -52,7 +52,7 @@ export const ReserveChart: React.VFC = () => {
     },
   ]
 
-  const poolCurrency = poolStates?.[0].currency || ''
+  const poolCurrency = poolStates?.[0]?.currency || ''
   return (
     <div ref={ref}>
       <StyledWrapper gap="4">

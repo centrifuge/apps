@@ -26,7 +26,7 @@ export const getAge = (createdAt: string | undefined | null) => {
   if (createdAt) {
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
-    return formatAge(daysBetween(new Date(createdAt).getTime() / 1000, today.getTime() / 1000))
+    return formatAge(daysBetween(createdAt, today))
   }
   return '0 days'
 }
