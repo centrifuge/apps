@@ -967,24 +967,20 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return $api.pipe(
       switchMap(() =>
-        combineLatest([$query, getPool([poolId])]).pipe(
-          switchMap(([queryData, poolData]) => {
+        combineLatest([$query]).pipe(
+          switchMap(([queryData]) => {
             return [
               queryData?.dailyPoolStates.nodes.map((state) => {
-                const currency = poolData.currency
                 const poolState = {
                   ...state.poolState,
                   netAssetValue: new Balance(state.poolState.netAssetValue),
-                }
-                if (new Date(state.timestamp).toDateString() === new Date().toDateString()) {
-                  return { ...state, poolState, poolValue: new Balance(poolData.value), currency }
                 }
                 const poolValue = new Balance(
                   new Balance(state?.poolState.netAssetValue || '0').add(
                     new Balance(state?.poolState.totalReserve || '0')
                   )
                 )
-                return { ...state, poolState, poolValue, currency }
+                return { ...state, poolState, poolValue }
               }) as unknown as DailyPoolState[],
             ]
           })

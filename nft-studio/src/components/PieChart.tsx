@@ -48,7 +48,7 @@ export const PieChart: React.VFC<PieChartProps> = ({ data }) => {
   }
 
   return (
-    <RechartsPieChart width={250} height={250} style={{ fontFamily: 'Inter' }}>
+    <RechartsPieChart width={300} height={250} style={{ fontFamily: 'Inter' }}>
       <Pie
         data={data}
         cx="50%"
@@ -58,7 +58,6 @@ export const PieChart: React.VFC<PieChartProps> = ({ data }) => {
         outerRadius={88}
         dataKey="value"
         isAnimationActive={false}
-        blendStroke
         startAngle={-270}
       >
         {data.map((item, index) => (

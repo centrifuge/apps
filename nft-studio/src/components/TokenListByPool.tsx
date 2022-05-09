@@ -14,6 +14,7 @@ export type TokenByPoolTableData = {
   poolName: string
   seniority: number
   poolId: string
+  id: string
 }
 
 type RowProps = {
@@ -78,6 +79,7 @@ export const TokenListByPool: React.FC = () => {
         poolName: metadata?.pool?.name || '',
         seniority: Number(tranche.seniority),
         poolId: pid,
+        id: tranche.id,
       }
     })
     .reverse()
@@ -88,7 +90,7 @@ export const TokenListByPool: React.FC = () => {
       columns={columns}
       defaultSortKey="seniority"
       onRowClicked={(token: TokenByPoolTableData) => {
-        history.push(`/tokens/${token.poolId}/${token.seniority}`)
+        history.push(`/tokens/${token.poolId}/${token.id}`)
       }}
     />
   )

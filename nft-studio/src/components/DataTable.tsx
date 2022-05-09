@@ -17,7 +17,7 @@ export type OrderBy = 'asc' | 'desc'
 
 export type Column = {
   header: string | (() => React.ReactElement)
-  cell: (row: any, index: number) => React.ReactElement
+  cell: (row: any, index: number) => React.ReactNode
   align?: string
   flex?: string
   sortKey?: string
@@ -69,7 +69,7 @@ export const DataTable = <T extends Record<string, any>>({
             align={col?.align}
           >
             <Text variant="label2">
-              {typeof col?.header !== 'string' && col?.sortKey
+              {col?.header && typeof col.header !== 'string' && col?.sortKey && React.isValidElement(col.header())
                 ? React.cloneElement(col.header(), { align: col?.align, orderBy: orderBy[col.sortKey] })
                 : col.header}
             </Text>

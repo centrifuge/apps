@@ -1,3 +1,4 @@
+import { Perquintill } from '@centrifuge/centrifuge-js'
 import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { PageHeader } from '../components/PageHeader'
@@ -32,9 +33,7 @@ const TokenOverview: React.FC = () => {
             // bc we don't have a way to query for historical token prices yet
             // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
             yield: tranche.interestRatePerSec ? tranche.interestRatePerSec.toAprPercent() : null,
-            // for now proctection is being calculated as a percentage of the ratio
-            // replace with proper protection calculation when token prices are available
-            protection: tranche.ratio.toPercent(),
+            protection: tranche.minRiskBuffer?.toPercent() || new Perquintill(0).toPercent(),
             valueLocked: tranche.tokenIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()),
           }
         })
@@ -42,14 +41,14 @@ const TokenOverview: React.FC = () => {
     [dataTokens]
   )
 
-  // TODO: convert everything to one currency, USD?
   const totalValueLocked = React.useMemo(
     () => tokens?.reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)),
     [tokens]
   )
 
   const pageSummaryData = [
-    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, 'USD') },
+    // TODO: sort out currency for TVL (kUSD vs AIR vs ...), assuming everything uses the same currency
+    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, tokens[0].currency) },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
   ]
 

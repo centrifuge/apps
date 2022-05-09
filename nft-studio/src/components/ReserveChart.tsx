@@ -16,7 +16,7 @@ import {
 } from 'recharts'
 import styled, { useTheme } from 'styled-components'
 import { formatBalance, formatBalanceAbbreviated } from '../utils/formatting'
-import { useDailyPoolStates } from '../utils/usePools'
+import { useDailyPoolStates, usePool } from '../utils/usePools'
 import { Tooltips } from './Tooltips'
 
 type ChartData = {
@@ -28,9 +28,10 @@ type ChartData = {
 
 export const ReserveChart: React.VFC = () => {
   const theme = useTheme()
-  const { pid } = useParams<{ pid: string }>()
+  const { pid: poolId } = useParams<{ pid: string }>()
   const ref = React.useRef<HTMLDivElement>(null)
-  const poolStates = useDailyPoolStates(pid)
+  const poolStates = useDailyPoolStates(poolId)
+  const pool = usePool(poolId)
 
   const data: ChartData[] =
     poolStates?.map((day) => {
@@ -39,16 +40,28 @@ export const ReserveChart: React.VFC = () => {
       return { day: new Date(day.timestamp), poolValue, assetValue, reserve: [assetValue, poolValue] }
     }) || []
 
+  const todayPoolValue = pool?.value.toDecimal().toNumber() || 0
+  const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
+  const dataIncludingToday: ChartData[] = [
+    ...data,
+    {
+      day: new Date(),
+      poolValue: todayPoolValue,
+      assetValue: todayAssetValue,
+      reserve: [todayAssetValue, todayPoolValue],
+    },
+  ]
+
   const poolCurrency = poolStates?.[0].currency || ''
   return (
     <div ref={ref}>
       <StyledWrapper gap="4">
-        {data?.length ? (
+        {dataIncludingToday?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart width={754} height={173} data={data} margin={{ top: 60 }}>
+            <ComposedChart width={754} height={173} data={dataIncludingToday} margin={{ top: 60 }}>
               <XAxis
                 dataKey="day"
-                tick={<CustomizedXAxisTick variant={data.length > 30 ? 'months' : 'days'} />}
+                tick={<CustomizedXAxisTick variant={dataIncludingToday.length > 30 ? 'months' : 'days'} />}
                 tickLine={false}
                 interval={0}
                 type="category"
@@ -67,7 +80,7 @@ export const ReserveChart: React.VFC = () => {
                 content={
                   <CustomizedTooltip
                     width={ref?.current?.offsetWidth}
-                    initialData={data[data.length - 1]}
+                    initialData={dataIncludingToday[dataIncludingToday.length - 1]}
                     currency={poolCurrency}
                   />
                 }

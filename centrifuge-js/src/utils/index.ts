@@ -15,17 +15,6 @@ export function getRandomUint() {
   return (Math.random() * (2 ** 53 - 1)) >>> 0
 }
 
-/** Converts fraction into BN */
-export function toRate(rate: number) {
-  return new BN(rate * 10 ** 6).mul(new BN(10).pow(new BN(27 - 6))).toString()
-}
-
-/** Converts BN to fraction */
-export function fromRate(rate: string) {
-  const bnRate = new BN(rate).div(new BN(10).pow(new BN(27 - 6))).toString()
-  return new Decimal(bnRate).div(1e6).toString()
-}
-
 export function toPerquintill(rate: number) {
   return new BN(rate * 10 ** 6).mul(new BN(10).pow(new BN(18 - 6))).toString()
 }

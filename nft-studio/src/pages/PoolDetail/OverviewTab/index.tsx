@@ -4,6 +4,7 @@ import { useHistory, useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
+import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { ReserveChart } from '../../../components/ReserveChart'
@@ -92,41 +93,15 @@ const PoolDetailOverview: React.FC = () => {
         <Text variant="heading2">Pool value, asset value & reserve</Text>
         <ReserveChart />
       </Stack>
-      <Stack
-        p="3"
-        gap="2"
-        as="section"
-        style={{
-          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
-        }}
-      >
-        <Text variant="heading2">Investment Tokens</Text>
+      <PageSection title="Investment Tokens">
         <TokenListByPool />
-      </Stack>
-      <Stack
-        p="3"
-        gap="1"
-        as="section"
-        style={{
-          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
-        }}
-      >
-        <Text variant="heading2">Issuer</Text>
+      </PageSection>
+      <PageSection title="Issuer">
         <IssuerSection metadata={metadata} p="3" />
-      </Stack>
-      <Stack
-        p="3"
-        gap="1"
-        as="section"
-        style={{
-          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
-        }}
-      >
-        <Text variant="heading2">
-          Asset portfolio <Text variant="body3">By risk groups</Text>
-        </Text>
+      </PageSection>
+      <PageSection title=" Asset portfolio" titleAddition="By risk groups">
         <RiskGroupList />
-      </Stack>
+      </PageSection>
     </>
   )
 }
