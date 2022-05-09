@@ -13,6 +13,7 @@ export const PageSummary: React.FC<Props> = ({ data, children }) => {
   const theme = useTheme()
   return (
     <Shelf
+      bg={theme.colors.backgroundSecondary}
       gap="6"
       pl="6"
       py="3"
