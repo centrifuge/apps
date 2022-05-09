@@ -196,13 +196,15 @@ export const Admins: React.FC = () => {
                     {
                       header: '',
                       cell: (row: Row) =>
-                        isEditing && (
+                        isEditing ? (
                           <Button
                             variant="text"
                             icon={IconMinusCircle}
                             onClick={() => fldArr.remove(row.index)}
                             disabled={isLoading || (poolAdminCount === 1 && row.roles.PoolAdmin)}
                           />
+                        ) : (
+                          <></>
                         ),
                       flex: '0 0 72px',
                     },

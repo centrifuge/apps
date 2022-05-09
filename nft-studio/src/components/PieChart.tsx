@@ -19,27 +19,29 @@ export const PieChart: React.VFC<PieChartProps> = ({ data }) => {
     const yInner = (cy as number) + innerLabelRadius * Math.sin(-midAngle * RADIAN)
     return (
       <>
-        <text
-          x={xOuter}
-          y={yOuter}
-          fill={theme.colors.textSecondary}
-          textAnchor={xOuter > (cx as number) ? 'start' : 'end'}
-          dominantBaseline="central"
-          fontSize="10"
-        >
-          {payload.name}
-        </text>
         {percent && percent > 0.03 && (
-          <text
-            x={xInner}
-            y={yInner}
-            fill={payload.labelColor}
-            textAnchor={xInner > (cx as number) ? 'start' : 'end'}
-            dominantBaseline="central"
-            fontSize="10"
-          >
-            {`${(percent * 100).toFixed(0)}%`}
-          </text>
+          <>
+            <text
+              x={xOuter}
+              y={yOuter}
+              fill={theme.colors.textSecondary}
+              textAnchor={xOuter > (cx as number) ? 'start' : 'end'}
+              dominantBaseline="central"
+              fontSize="10"
+            >
+              {payload.name}
+            </text>
+            <text
+              x={xInner}
+              y={yInner}
+              fill={payload.labelColor}
+              textAnchor={xInner > (cx as number) ? 'start' : 'end'}
+              dominantBaseline="central"
+              fontSize="10"
+            >
+              {`${(percent * 100).toFixed(0)}%`}
+            </text>
+          </>
         )}
       </>
     )

@@ -51,18 +51,15 @@ const columns: Column[] = [
   },
   {
     header: () => <SortableTableHeader label="Share" />,
-    cell: ({ share }: AssetByRiskGroup) => {
-      // console.log('🚀 ~ share cell', share.toString())
-      return <Text variant="body2">{share}%</Text>
-    },
+    cell: ({ share }: AssetByRiskGroup) => <Text variant="body2">{share}%</Text>,
     flex: '1',
     sortKey: 'share',
   },
   {
     header: () => <SortableTableHeader label="Financing fee" />,
-    cell: ({ interestRatePerSec }: AssetByRiskGroup) => {
-      return <Text variant="body2">{interestRatePerSec ? `${interestRatePerSec}%` : ''}</Text>
-    },
+    cell: ({ interestRatePerSec }: AssetByRiskGroup) => (
+      <Text variant="body2">{interestRatePerSec ? `${interestRatePerSec}%` : ''}</Text>
+    ),
     flex: '1',
     sortKey: 'interestRatePerSec',
   },
@@ -204,7 +201,9 @@ export const RiskGroupList: React.FC = () => {
         </Shelf>
       )}
       {tableDataWithColor.length > 0 ? (
-        <DataTable defaultSortKey="share" data={[...tableDataWithColor] || []} columns={columns} summary={summaryRow} />
+        <Box mt={sharesForPie.length > 0 && summaryRow.share !== '0' ? '0' : '3'}>
+          <DataTable defaultSortKey="share" data={tableDataWithColor} columns={columns} summary={summaryRow} />
+        </Box>
       ) : (
         <Text variant="label1">No data</Text>
       )}

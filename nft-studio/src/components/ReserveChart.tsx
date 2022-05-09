@@ -42,10 +42,7 @@ export const ReserveChart: React.VFC = () => {
   const poolCurrency = poolStates?.[0].currency || ''
   return (
     <div ref={ref}>
-      <StyledWrapper
-        gap="4"
-        style={{ fontFamily: 'Inter', fontSize: '10px', color: theme.colors.textSecondary, width: '100%' }}
-      >
+      <StyledWrapper gap="4">
         {data?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
             <ComposedChart width={754} height={173} data={data} margin={{ top: 60 }}>

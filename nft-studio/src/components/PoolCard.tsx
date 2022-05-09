@@ -1,4 +1,4 @@
-import { Pool } from '@centrifuge/centrifuge-js'
+import { DetailedPool } from '@centrifuge/centrifuge-js'
 import { Card, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useTheme } from 'styled-components'
@@ -11,7 +11,7 @@ import { IssuerSection } from './IssuerSection'
 import { Tooltips } from './Tooltips'
 
 type PoolCardProps = {
-  pool: Pool
+  pool: DetailedPool
   metadata: Partial<PoolMetadata> | undefined
 }
 
