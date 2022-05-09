@@ -1,4 +1,3 @@
-import { Loan as LoanType, Rate } from '@centrifuge/centrifuge-js'
 import { Box, Card, IconChevronLeft, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
@@ -13,7 +12,6 @@ import { AnchorPillButton } from '../../components/PillButton'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { nftMetadataSchema } from '../../schemas'
-import { PoolMetadata } from '../../types'
 import { formatBalance } from '../../utils/formatting'
 import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
 import { useAddress } from '../../utils/useAddress'
@@ -26,6 +24,7 @@ import { isSameAddress } from '../../utils/web3'
 import { FinanceForm } from './FinanceForm'
 import { PricingForm } from './PricingForm'
 import { RiskGroupValues } from './RiskGroupValues'
+import { getMatchingRiskGroupIndex, LOAN_TYPE_LABELS } from './utils'
 
 export const LoanPage: React.FC = () => {
   return (
@@ -33,12 +32,6 @@ export const LoanPage: React.FC = () => {
       <Loan />
     </PageWithSideBar>
   )
-}
-
-const LOAN_TYPE_LABELS = {
-  BulletLoan: 'Bullet loan',
-  CreditLine: 'Credit line',
-  CreditLineWithMaturity: 'Credit line with maturity',
 }
 
 const Loan: React.FC = () => {
@@ -204,22 +197,4 @@ function truncate(txt: string, num: number) {
   return txt
 }
 
-function getMatchingRiskGroupIndex(loan: LoanType, riskGroups: PoolMetadata['riskGroups']) {
-  const loanInterestRatePerSec = loan.interestRatePerSec.toApr().toFixed(4)
-  const loanAdvanceRate = loan.loanInfo.advanceRate.toFloat().toFixed(4)
-  const loanLossGivenDefault =
-    'lossGivenDefault' in loan.loanInfo ? loan.loanInfo.lossGivenDefault.toFloat().toFixed(4) : null
-  const loanProbabilityOfDefault =
-    'probabilityOfDefault' in loan.loanInfo ? loan.loanInfo.probabilityOfDefault.toFloat().toFixed(4) : null
-  const loanDiscountRate = 'discountRate' in loan.loanInfo ? loan.loanInfo.discountRate.toApr().toFixed(4) : null
 
-  return riskGroups.findIndex(
-    (g) =>
-      loanInterestRatePerSec === new Rate(g.interestRatePerSec).toApr().toFixed(4) &&
-      loanAdvanceRate === new Rate(g.advanceRate).toFloat().toFixed(4) &&
-      (!loanDiscountRate || loanDiscountRate === new Rate(g.discountRate).toApr().toFixed(4)) &&
-      (!loanProbabilityOfDefault ||
-        loanProbabilityOfDefault === new Rate(g.probabilityOfDefault).toFloat().toFixed(4)) &&
-      (!loanLossGivenDefault || loanLossGivenDefault === new Rate(g.lossGivenDefault).toFloat().toFixed(4))
-  )
-}
