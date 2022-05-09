@@ -3,7 +3,7 @@ import * as React from 'react'
 
 const CentrifugeContext = React.createContext<Centrifuge>(null as any)
 
-const { REACT_APP_RELAY_WSS_URL, REACT_APP_COLLATOR_WSS_URL } = import.meta.env
+const { REACT_APP_RELAY_WSS_URL, REACT_APP_COLLATOR_WSS_URL, REACT_APP_SUBQUERY_URL } = import.meta.env
 
 export const CentrifugeProvider: React.FC = ({ children }) => {
   const ctx = React.useMemo(
@@ -13,6 +13,8 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
         polkadotWsUrl: REACT_APP_RELAY_WSS_URL as string,
         centrifugeWsUrl: REACT_APP_COLLATOR_WSS_URL as string,
         printExtrinsics: import.meta.env.NODE_ENV === 'development',
+        centrifugeSubqueryUrl: REACT_APP_SUBQUERY_URL as string,
+        altairSubqueryUrl: REACT_APP_SUBQUERY_URL as string,
       }),
     []
   )
