@@ -10,13 +10,7 @@ import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { usePoolMetadata } from '../../utils/usePools'
 import { combine, max, positiveNumber, required } from '../../utils/validation'
 import { RiskGroupValues } from './RiskGroupValues'
-import { LOAN_FIELDS } from './utils'
-
-const LOAN_TYPE_LABELS = {
-  BulletLoan: 'Bullet loan',
-  CreditLine: 'Credit line',
-  CreditLineWithMaturity: 'Credit line with maturity',
-}
+import { LOAN_FIELDS, LOAN_TYPE_LABELS } from './utils'
 
 type PricingFormValues = {
   loanType: 'BulletLoan' | 'CreditLine' | 'CreditLineWithMaturity'
