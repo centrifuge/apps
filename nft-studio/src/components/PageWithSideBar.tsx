@@ -11,7 +11,7 @@ type Props = {
 
 export const PAGE_GUTTER = ['gutterMobile', 'gutterTablet', 'gutterDesktop']
 
-export const PageWithSideBar: React.FC<Props> = ({ children, sidebar }) => {
+export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) => {
   const theme = useTheme()
   return (
     <Box

@@ -40,7 +40,7 @@ export const PageHeader: React.FC<Props> = ({
     <Shelf
       as="header"
       justifyContent="space-between"
-      alignItems="flex-start"
+      alignItems="center"
       position="sticky"
       top={0}
       backgroundColor="backgroundPage"

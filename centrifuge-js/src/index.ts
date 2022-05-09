@@ -4,6 +4,7 @@ export {
   CurrencyBalance,
   DetailedPool,
   Loan,
+  LoanInfoInput,
   LoanStatus,
   Pool,
   PoolRoles,
