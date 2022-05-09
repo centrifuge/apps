@@ -42,10 +42,51 @@ export type PoolRoles = {
   tranches: { [key: string]: string } // trancheId -> permissionedTill
 }
 
-export type LoanInfoInput = {
-  BulletLoan: [BN, BN, BN, BN, BN, string]
-  CreditLine: [BN, BN]
-  CreditLineWithMaturity: [BN, BN, BN, BN, BN, string]
+export type LoanInfoInput =
+  | {
+      type: 'BulletLoan'
+      advanceRate: BN
+      probabilityOfDefault: BN
+      lossGivenDefault: BN
+      value: BN
+      discountRate: BN
+      maturityDate: string
+    }
+  | {
+      type: 'CreditLine'
+      advanceRate: BN
+      value: BN
+    }
+  | {
+      type: 'CreditLineWithMaturity'
+      advanceRate: BN
+      probabilityOfDefault: BN
+      value: BN
+      discountRate: BN
+      maturityDate: string
+      lossGivenDefault: BN
+    }
+
+const LOAN_INPUT_TRANSFORM = {
+  value: (v: BN) => v.toString(),
+  maturityDate: (v: string) => new Date(v).getTime() / 1000,
+  probabilityOfDefault: (v: BN) => v.toString(),
+  lossGivenDefault: (v: BN) => v.toString(),
+  discountRate: (v: BN) => v.toString(),
+  advanceRate: (v: BN) => v.toString(),
+}
+
+const LOAN_FIELDS = {
+  BulletLoan: ['advanceRate', 'probabilityOfDefault', 'lossGivenDefault', 'value', 'discountRate', 'maturityDate'],
+  CreditLine: ['advanceRate', 'value'],
+  CreditLineWithMaturity: [
+    'advanceRate',
+    'probabilityOfDefault',
+    'lossGivenDefault',
+    'value',
+    'discountRate',
+    'maturityDate',
+  ],
 }
 
 type LoanInfoData = {
@@ -635,17 +676,19 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  function priceLoan<T extends keyof LoanInfoInput, I extends LoanInfoInput[T]>(
-    args: [poolId: string, loanId: string, ratePerSec: string, loanType: T, loanInfo: I],
+  function priceLoan(
+    args: [poolId: string, loanId: string, interestRatePerSec: string, loanInfoInput: LoanInfoInput],
     options?: TransactionOptions
   ) {
-    const [poolId, loanId, ratePerSec, loanType, loanInfo] = args
+    const [poolId, loanId, ratePerSec, loanInfoInput] = args
+    const loanInfoFields = LOAN_FIELDS[loanInfoInput.type]
+    const loanInfo = loanInfoFields.map((key) => (LOAN_INPUT_TRANSFORM as any)[key]((loanInfoInput as any)[key]))
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.price(poolId, loanId, ratePerSec, {
-          [loanType]: loanInfo.map((n, i) => (i === 5 ? new Date(n as string).getTime() / 1000 : n.toString())),
+          [loanInfoInput.type]: loanInfo,
         })
         return inst.wrapSignAndSendRx(api, submittable, options)
       })

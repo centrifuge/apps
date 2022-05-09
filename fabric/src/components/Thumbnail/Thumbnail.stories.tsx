@@ -13,6 +13,7 @@ const Template: ThumbnailStory = (args) => (
   <Shelf gap={2}>
     <Thumbnail {...args} type="token" />
     <Thumbnail {...args} type="pool" />
+    <Thumbnail {...args} type="asset" />
   </Shelf>
 )
 
