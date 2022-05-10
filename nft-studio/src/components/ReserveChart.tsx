@@ -52,13 +52,13 @@ export const ReserveChart: React.VFC = () => {
     },
   ]
 
-  const poolCurrency = poolStates?.[0]?.currency || ''
+  const poolCurrency = pool?.currency || ''
   return (
     <div ref={ref}>
       <StyledWrapper gap="4">
         {dataIncludingToday?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart width={754} height={173} data={dataIncludingToday} margin={{ top: 60 }}>
+            <ComposedChart width={754} height={173} data={dataIncludingToday} margin={{ top: 60, left: -30 }}>
               <XAxis
                 dataKey="day"
                 tick={<CustomizedXAxisTick variant={dataIncludingToday.length > 30 ? 'months' : 'days'} />}
@@ -84,7 +84,7 @@ export const ReserveChart: React.VFC = () => {
                     currency={poolCurrency}
                   />
                 }
-                position={{ x: 0, y: -10 }}
+                position={{ x: -20, y: -10 }}
                 wrapperStyle={{ visibility: 'visible' }}
               />
             </ComposedChart>
@@ -136,17 +136,35 @@ const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active,
   }).format(new Date(Number(tooltipData.date) || 0))
   return (
     <Shelf bg="white" width={width || '100%'} gap="2" position="relative">
-      <Grid pl="55px" pt="10px" columns={4} gap="4" width="100%" equalColumns>
-        <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentPrimary}>
-          <Tooltips type="poolValue" variant="lowercase" />
+      <Grid pl="55px" pt="10px" columns={4} gap="4" width="100%">
+        <Stack
+          borderLeftWidth="3px"
+          pl="4px"
+          borderLeftStyle="solid"
+          borderLeftColor={theme.colors.accentPrimary}
+          minWidth="148px"
+        >
+          <Tooltips type="poolValue" variant="secondary" />
           <Text variant="body2">{formatBalance(tooltipData.poolValue, currency)}</Text>
         </Stack>
-        <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentSecondary}>
-          <Tooltips type="assetValue" variant="lowercase" />
+        <Stack
+          minWidth="148px"
+          borderLeftWidth="3px"
+          pl="4px"
+          borderLeftStyle="solid"
+          borderLeftColor={theme.colors.accentSecondary}
+        >
+          <Tooltips type="assetValue" variant="secondary" />
           <Text variant="body2">{formatBalance(tooltipData.assetValue, currency)}</Text>
         </Stack>
-        <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.borderSecondary}>
-          <Tooltips type="reserve" variant="lowercase" />
+        <Stack
+          minWidth="148px"
+          borderLeftWidth="3px"
+          pl="4px"
+          borderLeftStyle="solid"
+          borderLeftColor={theme.colors.borderSecondary}
+        >
+          <Tooltips type="reserve" variant="secondary" />
           <Text variant="body2">{formatBalance(tooltipData.reserve, currency)}</Text>
         </Stack>
         <Box alignSelf="flex-end" justifySelf="end">

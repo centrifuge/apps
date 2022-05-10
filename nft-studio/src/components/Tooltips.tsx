@@ -61,19 +61,15 @@ const tooltipText = {
 
 type TooltipsProps = {
   type: keyof typeof tooltipText
-  variant?: 'uppercase' | 'lowercase'
+  variant?: 'primary' | 'secondary'
 }
 
-export const Tooltips: React.VFC<TooltipsProps> = ({ type, variant = 'uppercase' }) => {
+export const Tooltips: React.VFC<TooltipsProps> = ({ type, variant = 'primary' }) => {
   const { label, title, body } = tooltipText[type]
-  const isUppercase = variant === 'uppercase'
+  const isPrimary = variant === 'primary'
   return (
     <FabricTooltip title={title} body={body}>
-      <Text
-        textAlign="left"
-        variant={isUppercase ? 'body3' : 'label2'}
-        style={isUppercase ? { textTransform: 'uppercase' } : {}}
-      >
+      <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
         {label}
       </Text>
     </FabricTooltip>

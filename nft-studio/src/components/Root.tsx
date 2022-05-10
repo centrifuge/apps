@@ -140,7 +140,7 @@ const Routes: React.VFC = () => {
         <TokenOverviewPage />
       </Route>
       <Route exact path="/">
-        <PoolsPage />
+        <TokenOverviewPage />
       </Route>
       <Route>
         <NotFoundPage />

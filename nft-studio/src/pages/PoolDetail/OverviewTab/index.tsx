@@ -1,4 +1,4 @@
-import { Button, IconArrowRight, IconChevronLeft, Stack, Text } from '@centrifuge/fabric'
+import { Button, IconArrowRight, IconChevronLeft } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
 import { useTheme } from 'styled-components'
@@ -82,22 +82,14 @@ const PoolDetailOverview: React.FC = () => {
   return (
     <>
       <PageSummary data={pageSummaryData} />
-      <Stack
-        p="3"
-        gap="2"
-        as="section"
-        style={{
-          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
-        }}
-      >
-        <Text variant="heading2">Pool value, asset value & reserve</Text>
+      <PageSection title="Pool value, asset value & reserve">
         <ReserveChart />
-      </Stack>
+      </PageSection>
       <PageSection title="Investment Tokens">
         <TokenListByPool />
       </PageSection>
       <PageSection title="Issuer">
-        <IssuerSection metadata={metadata} p="3" />
+        <IssuerSection metadata={metadata} />
       </PageSection>
       <PageSection title=" Asset portfolio" titleAddition="By risk groups">
         <RiskGroupList />

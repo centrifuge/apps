@@ -1,7 +1,7 @@
 import { DetailedPool } from '@centrifuge/centrifuge-js'
-import { Card, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import { InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useTheme } from 'styled-components'
+import { useHistory } from 'react-router'
 import { PoolMetadata } from '../types'
 import { getAge } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
@@ -16,53 +16,38 @@ type PoolCardProps = {
 }
 
 export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
-  const theme = useTheme()
   const avgMaturity = useAverageMaturity(pool.id)
+  const history = useHistory()
 
   const poolCardSummaryData = [
     {
-      label: <Tooltips type="valueLocked" variant="lowercase" />,
+      label: <Tooltips type="valueLocked" variant="secondary" />,
       value: formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency),
     },
     {
-      label: <Tooltips type="age" variant="lowercase" />,
+      label: <Tooltips type="age" variant="secondary" />,
       value: getAge(pool?.createdAt),
     },
     {
-      label: <Tooltips type="averageAssetMaturity" variant="lowercase" />,
+      label: <Tooltips type="averageAssetMaturity" variant="secondary" />,
       value: avgMaturity,
     },
   ]
 
   return (
-    <Card ml="3">
-      {/* pool logo */}
-      <Shelf
-        p="2"
-        gap="1"
-        style={{
-          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
-        }}
-      >
-        {metadata?.pool?.icon ? (
+    <InteractiveCard
+      icon={
+        metadata?.pool?.icon ? (
           <img src={parseMetadataUrl(metadata?.pool?.icon || '')} alt="" height="24" width="24" />
         ) : (
           <Thumbnail type="pool" label="LP" size="small" />
-        )}
-
-        <Text variant="heading2" color={theme.colors.textInteractive}>
-          {metadata?.pool?.name}
-        </Text>
-      </Shelf>
-      {/* pool summary */}
-      <Shelf>
-        <Shelf
-          gap="6"
-          p="2"
-          style={{
-            boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
-          }}
-        >
+        )
+      }
+      variant="button"
+      title={metadata?.pool?.name}
+      onClick={() => history.push(`/pools/${pool.id}`)}
+      secondaryHeader={
+        <Shelf gap="6" justifyContent="flex-start">
           {poolCardSummaryData?.map(({ label, value }, index) => (
             <Stack gap="2px" key={`${value}-${label}-${index}`}>
               <Text variant="label2">{label}</Text>
@@ -70,9 +55,9 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
             </Stack>
           ))}
         </Shelf>
-      </Shelf>
-      {/* pool issuer section */}
+      }
+    >
       <IssuerSection metadata={metadata} />
-    </Card>
+    </InteractiveCard>
   )
 }
