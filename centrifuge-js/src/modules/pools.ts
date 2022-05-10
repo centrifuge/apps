@@ -10,7 +10,6 @@ import { Balance, Perquintill, Price, Rate } from '../utils/BN'
 const BalanceBN = new BN(10).pow(new BN(18))
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
-const RateBN = new BN(10).pow(new BN(27))
 
 const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
 
@@ -267,6 +266,7 @@ export type Loan = {
   poolId: string
   interestRatePerSec: Rate
   outstandingDebt: Balance
+  principalDebt: Balance
   totalBorrowed: Balance
   totalRepaid: Balance
   lastUpdated: string
@@ -716,9 +716,12 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       combineLatestWith(getLoan([poolId, loanId])),
       switchMap(([api, loan]) => {
-        // Add small buffer to repayment amount
-        // TODO: calculate accumulatedRate 1 minute from now and up to date outstanding debt
-        const amount = new BN(loan.outstandingDebt).mul(new BN(1).mul(BalanceBN))
+        // Calculate the debt an hour from now to have some margin
+        const secondsPerHour = 60 * 60
+        const debtWithMargin = loan.outstandingDebt
+          .toDecimal()
+          .add(loan.principalDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(secondsPerHour)))
+        const amount = Balance.fromFloat(debtWithMargin).toString()
         const submittable = api.tx.utility.batchAll([
           api.tx.loans.repay(poolId, loanId, amount),
           api.tx.loans.close(poolId, loanId),
@@ -1086,7 +1089,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
             id: formatLoanKey(key as StorageKey<[u32, u32]>),
             poolId,
             interestRatePerSec: new Rate(hexToBN(loan.interestRatePerSec)),
-            outstandingDebt: new Balance(hexToBN(loan.principalDebt).mul(hexToBN(loan.accumulatedRate)).div(RateBN)),
+            outstandingDebt: getOutstandingDebt(loan),
+            principalDebt: new Balance(hexToBN(loan.principalDebt)),
             totalBorrowed: new Balance(hexToBN(loan.totalBorrowed)),
             totalRepaid: new Balance(hexToBN(loan.totalRepaid)),
             lastUpdated: new Date(loan.lastUpdated * 1000).toISOString(),
@@ -1197,9 +1201,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
           id: loanId,
           poolId,
           interestRatePerSec: new Rate(hexToBN(loanValue.interestRatePerSec)),
-          outstandingDebt: new Balance(
-            hexToBN(loanValue.principalDebt).mul(hexToBN(loanValue.accumulatedRate)).div(RateBN)
-          ),
+          outstandingDebt: getOutstandingDebt(loanValue),
+          principalDebt: new Balance(hexToBN(loanValue.principalDebt)),
           totalBorrowed: new Balance(hexToBN(loanValue.totalBorrowed)),
           totalRepaid: new Balance(hexToBN(loanValue.totalRepaid)),
           lastUpdated: new Date(loanValue.lastUpdated * 1000).toISOString(),
@@ -1367,4 +1370,17 @@ function getLoanInfo(loanType: LoanInfoData): LoanInfo {
   }
 
   throw new Error(`Unrecognized loan info: ${JSON.stringify(loanType)}`)
+}
+
+function getOutstandingDebt(loan: LoanDetailsData) {
+  const accRate = new Rate(hexToBN(loan.accumulatedRate)).toDecimal()
+  const rate = new Rate(hexToBN(loan.interestRatePerSec)).toDecimal()
+  const principalDebt = new Balance(hexToBN(loan.principalDebt)).toDecimal()
+  const secondsSinceUpdated = Date.now() / 1000 - loan.lastUpdated
+
+  const debtFromAccRate = principalDebt.mul(accRate)
+  const debtSinceUpdated = principalDebt.mul(rate.minus(1).mul(secondsSinceUpdated))
+  const debt = debtFromAccRate.add(debtSinceUpdated)
+
+  return Balance.fromFloat(debt)
 }
