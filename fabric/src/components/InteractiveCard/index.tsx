@@ -14,6 +14,7 @@ export type InteractiveCardProps = {
   titleAddition?: React.ReactNode
   secondaryHeader?: React.ReactNode
   onClick?: React.MouseEventHandler<HTMLButtonElement>
+  bodyPadding?: string
 }
 
 export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'variant'>> = ({
@@ -24,6 +25,7 @@ export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'v
   secondaryHeader,
   children,
   onClick,
+  bodyPadding,
   ...rest
 }) => {
   const [hovered, setHovered] = React.useState(false)
@@ -86,7 +88,7 @@ export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'v
       )}
       {(variant !== 'collabsible' || open) && (
         <Box
-          p={2}
+          p={bodyPadding || 2}
           backgroundColor={variant === 'collabsible' ? 'backgroundSecondary' : undefined}
           borderBottomLeftRadius="card"
           borderBottomRightRadius="card"

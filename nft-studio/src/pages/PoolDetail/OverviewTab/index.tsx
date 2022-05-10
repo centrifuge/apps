@@ -97,7 +97,7 @@ const PoolDetailOverview: React.FC = () => {
         <TokenListByPool />
       </PageSection>
       <PageSection title="Issuer">
-        <IssuerSection metadata={metadata} p="3" />
+        <IssuerSection metadata={metadata} />
       </PageSection>
       <PageSection title=" Asset portfolio" titleAddition="By risk groups">
         <RiskGroupList />

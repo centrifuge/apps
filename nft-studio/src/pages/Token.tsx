@@ -2,6 +2,7 @@ import { Button, IconChevronLeft, Shelf, Stack, Text, Thumbnail } from '@centrif
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
 import { PageHeader } from '../components/PageHeader'
+import { PageSection } from '../components/PageSection'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolCard } from '../components/PoolCard'
@@ -88,10 +89,9 @@ const TokenDetail: React.FC = () => {
       {pool ? (
         <>
           <PageSummary data={pageSummaryData} />
-          <Stack m="3" gap="2" as="section">
-            <Text variant="heading2">Token pool</Text>
+          <PageSection title="Token pool">
             <PoolCard pool={pool} metadata={metadata} />
-          </Stack>
+          </PageSection>
         </>
       ) : (
         <Shelf justifyContent="center" textAlign="center">
