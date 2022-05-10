@@ -1,7 +1,6 @@
 import { Button, IconArrowRight, IconChevronLeft } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
-import { useTheme } from 'styled-components'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
@@ -70,7 +69,6 @@ const PoolDetailOverview: React.FC = () => {
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const avgMaturity = useAverageMaturity(poolId)
-  const theme = useTheme()
 
   const pageSummaryData = [
     { label: <Tooltips type="assetClass" />, value: metadata?.pool?.asset.class },
