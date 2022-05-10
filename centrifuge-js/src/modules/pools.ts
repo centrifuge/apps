@@ -7,7 +7,6 @@ import { Account, TransactionOptions } from '../types'
 import { getRandomUint, isSameAddress } from '../utils'
 import { Balance, Perquintill, Price, Rate } from '../utils/BN'
 
-const BalanceBN = new BN(10).pow(new BN(18))
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
 
