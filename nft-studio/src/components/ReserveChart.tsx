@@ -84,7 +84,7 @@ export const ReserveChart: React.VFC = () => {
                     currency={poolCurrency}
                   />
                 }
-                position={{ x: 0, y: -10 }}
+                position={{ x: -20, y: -10 }}
                 wrapperStyle={{ visibility: 'visible' }}
               />
             </ComposedChart>
