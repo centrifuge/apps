@@ -23,15 +23,15 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
 
   const poolCardSummaryData = [
     {
-      label: <Tooltips type="valueLocked" variant="lowercase" />,
+      label: <Tooltips type="valueLocked" variant="secondary" />,
       value: formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency),
     },
     {
-      label: <Tooltips type="age" variant="lowercase" />,
+      label: <Tooltips type="age" variant="secondary" />,
       value: getAge(pool?.createdAt),
     },
     {
-      label: <Tooltips type="averageAssetMaturity" variant="lowercase" />,
+      label: <Tooltips type="averageAssetMaturity" variant="secondary" />,
       value: avgMaturity,
     },
   ]

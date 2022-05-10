@@ -144,7 +144,7 @@ const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active,
           borderLeftColor={theme.colors.accentPrimary}
           minWidth="148px"
         >
-          <Tooltips type="poolValue" variant="lowercase" />
+          <Tooltips type="poolValue" variant="secondary" />
           <Text variant="body2">{formatBalance(tooltipData.poolValue, currency)}</Text>
         </Stack>
         <Stack
@@ -154,7 +154,7 @@ const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active,
           borderLeftStyle="solid"
           borderLeftColor={theme.colors.accentSecondary}
         >
-          <Tooltips type="assetValue" variant="lowercase" />
+          <Tooltips type="assetValue" variant="secondary" />
           <Text variant="body2">{formatBalance(tooltipData.assetValue, currency)}</Text>
         </Stack>
         <Stack
@@ -164,7 +164,7 @@ const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active,
           borderLeftStyle="solid"
           borderLeftColor={theme.colors.borderSecondary}
         >
-          <Tooltips type="reserve" variant="lowercase" />
+          <Tooltips type="reserve" variant="secondary" />
           <Text variant="body2">{formatBalance(tooltipData.reserve, currency)}</Text>
         </Stack>
         <Box alignSelf="flex-end" justifySelf="end">
