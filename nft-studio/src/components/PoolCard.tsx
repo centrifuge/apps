@@ -2,7 +2,6 @@ import { DetailedPool } from '@centrifuge/centrifuge-js'
 import { InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory } from 'react-router'
-import { useTheme } from 'styled-components'
 import { PoolMetadata } from '../types'
 import { getAge } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
@@ -17,7 +16,6 @@ type PoolCardProps = {
 }
 
 export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
-  const theme = useTheme()
   const avgMaturity = useAverageMaturity(pool.id)
   const history = useHistory()
 
