@@ -38,7 +38,6 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
 
   return (
     <InteractiveCard
-      bodyPadding="0"
       icon={
         metadata?.pool?.icon ? (
           <img src={parseMetadataUrl(metadata?.pool?.icon || '')} alt="" height="24" width="24" />
@@ -49,13 +48,8 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
       variant="button"
       title={metadata?.pool?.name}
       onClick={() => history.push(`/pools/${pool.id}`)}
-    >
-      <Shelf
-        style={{
-          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
-        }}
-      >
-        <Shelf gap="6" p="2" justifyContent="flex-start">
+      secondaryHeader={
+        <Shelf gap="6" justifyContent="flex-start">
           {poolCardSummaryData?.map(({ label, value }, index) => (
             <Stack gap="2px" key={`${value}-${label}-${index}`}>
               <Text variant="label2">{label}</Text>
@@ -63,8 +57,9 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
             </Stack>
           ))}
         </Shelf>
-      </Shelf>
-      <IssuerSection metadata={metadata} p="2" />
+      }
+    >
+      <IssuerSection metadata={metadata} />
     </InteractiveCard>
   )
 }
