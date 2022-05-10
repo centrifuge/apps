@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useHistory } from 'react-router'
 import { formatBalance } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
-import { DataTable } from './DataTable'
+import { Column, DataTable } from './DataTable'
 
 type Props = {
   pools: Pool[]
@@ -13,7 +13,7 @@ type Props = {
 export const PoolList: React.FC<Props> = ({ pools }) => {
   const history = useHistory()
 
-  const columns = [
+  const columns: Column[] = [
     {
       align: 'left',
       header: 'Pool',

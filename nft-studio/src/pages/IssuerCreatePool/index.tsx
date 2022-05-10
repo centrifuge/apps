@@ -53,7 +53,7 @@ const DEFAULT_ASSET_CLASS = 'Art NFT'
 
 export const IssuerCreatePoolPage: React.FC = () => {
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar={false}>
       <CreatePoolForm />
     </PageWithSideBar>
   )

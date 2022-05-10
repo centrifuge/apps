@@ -42,6 +42,21 @@ const tooltipText = {
     title: 'placeholder title',
     body: 'placeholder body',
   },
+  poolValue: {
+    label: 'Pool value',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  reserve: {
+    label: 'Reserve',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  assetValue: {
+    label: 'Asset value',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
 }
 
 type TooltipsProps = {
@@ -54,7 +69,11 @@ export const Tooltips: React.VFC<TooltipsProps> = ({ type, variant = 'uppercase'
   const isUppercase = variant === 'uppercase'
   return (
     <FabricTooltip title={title} body={body}>
-      <Text variant={isUppercase ? 'body3' : 'label2'} style={isUppercase ? { textTransform: 'uppercase' } : {}}>
+      <Text
+        textAlign="left"
+        variant={isUppercase ? 'body3' : 'label2'}
+        style={isUppercase ? { textTransform: 'uppercase' } : {}}
+      >
         {label}
       </Text>
     </FabricTooltip>

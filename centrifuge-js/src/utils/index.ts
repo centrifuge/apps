@@ -15,10 +15,6 @@ export function getRandomUint() {
   return (Math.random() * (2 ** 53 - 1)) >>> 0
 }
 
-export function toRate(rate: number) {
-  return new BN(rate * 10 ** 6).mul(new BN(10).pow(new BN(27 - 6))).toString()
-}
-
 export function toPerquintill(rate: number) {
   return new BN(rate * 10 ** 6).mul(new BN(10).pow(new BN(18 - 6))).toString()
 }

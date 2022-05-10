@@ -5,7 +5,7 @@ import { nftMetadataSchema } from '../schemas'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFT } from '../utils/useNFTs'
 import { usePool, usePoolMetadata } from '../utils/usePools'
-import { DataTable } from './DataTable'
+import { Column, DataTable } from './DataTable'
 import LoanLabel from './LoanLabel'
 
 type Props = {
@@ -14,7 +14,7 @@ type Props = {
 }
 
 export const LoanList: React.FC<Props> = ({ loans, onLoanClicked }) => {
-  const columns = [
+  const columns: Column[] = [
     {
       align: 'left',
       header: 'Name',

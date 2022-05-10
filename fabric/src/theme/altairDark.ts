@@ -4,8 +4,8 @@ import { modeDark } from './tokens/modeDark'
 import { FabricTheme } from './types'
 
 const yellowScale = {
-  yellow500: '#FFC012',
-  yellow700: '#574000',
+  500: '#FFC012',
+  700: '#574000',
 }
 
 export const altairDark: FabricTheme = {
@@ -14,13 +14,14 @@ export const altairDark: FabricTheme = {
   colors: {
     ...brandAltair,
     ...modeDark.colors,
-    primarySelectedBackground: yellowScale.yellow500,
-    secondarySelectedBackground: yellowScale.yellow700,
-    borderFocus: yellowScale.yellow500,
-    borderSelected: yellowScale.yellow500,
-    textSelected: yellowScale.yellow500,
-    textInteractive: yellowScale.yellow500,
-    textInteractiveHover: yellowScale.yellow500,
+    primarySelectedBackground: yellowScale[500],
+    secondarySelectedBackground: yellowScale[700],
+    borderFocus: yellowScale[500],
+    borderSelected: yellowScale[500],
+    textSelected: yellowScale[500],
+    textInteractive: yellowScale[500],
+    textInteractiveHover: yellowScale[500],
+    accentScale: yellowScale,
   },
   shadows: {
     ...baseTheme.shadows,
