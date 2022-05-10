@@ -1,4 +1,4 @@
-import { Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Card, IconArrowDown, Shelf, Stack, Text } from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import * as React from 'react'
 import styled from 'styled-components'
@@ -10,12 +10,13 @@ type Props<T> = {
   onRowClicked?: (row: T) => void
   defaultSortKey?: string
   rounded?: boolean
+  summary?: T
 }
 
 export type OrderBy = 'asc' | 'desc'
 
 export type Column = {
-  header: string | ((orderBy: OrderBy) => React.ReactNode)
+  header: string | (() => React.ReactElement)
   cell: (row: any, index: number) => React.ReactNode
   align?: string
   flex?: string
@@ -36,6 +37,7 @@ export const DataTable = <T extends Record<string, any>>({
   onRowClicked,
   defaultSortKey,
   rounded = true,
+  summary,
 }: Props<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: 'desc' } : {}
@@ -55,7 +57,7 @@ export const DataTable = <T extends Record<string, any>>({
   )
 
   return (
-    <Stack>
+    <Stack as={rounded ? Card : Stack}>
       <Shelf>
         {columns.map((col, i) => (
           <HeaderCol
@@ -67,12 +69,14 @@ export const DataTable = <T extends Record<string, any>>({
             align={col?.align}
           >
             <Text variant="label2">
-              {typeof col?.header !== 'string' && col?.sortKey ? col.header(orderBy[col.sortKey]) : col.header}
+              {col?.header && typeof col.header !== 'string' && col?.sortKey && React.isValidElement(col.header())
+                ? React.cloneElement(col.header(), { align: col?.align, orderBy: orderBy[col.sortKey] })
+                : col.header}
             </Text>
           </HeaderCol>
         ))}
       </Shelf>
-      <Stack as={rounded ? Card : Stack}>
+      <Stack>
         {sortedData?.map((row, i) => (
           <Row
             rounded={rounded}
@@ -88,6 +92,16 @@ export const DataTable = <T extends Record<string, any>>({
             ))}
           </Row>
         ))}
+        {/* summary row is not included in sorting */}
+        {summary && (
+          <Row rounded={rounded}>
+            {columns.map((col, i) => (
+              <DataCol key={col.sortKey} style={{ flex: col.flex }} align={col?.align}>
+                {col.cell(summary, i)}
+              </DataCol>
+            ))}
+          </Row>
+        )}
       </Stack>
     </Stack>
   )
@@ -100,12 +114,9 @@ const Row = styled(Shelf)<any>`
       height: '48px',
       appearance: 'none',
       border: 'none',
+      borderBottom: '1px solid',
+      borderBottomColor: 'borderPrimary',
       backgroundColor: 'transparent',
-      '&:not(:last-child)': {
-        borderWidth: '0 0 1px',
-        borderStyle: 'solid',
-        borderColor: 'borderPrimary',
-      },
       'button&:hover': {
         backgroundColor: 'backgroundSecondary',
         cursor: 'pointer',
@@ -113,12 +124,6 @@ const Row = styled(Shelf)<any>`
       '&:focus-visible': {
         boxShadow: 'inset 0 0 0 3px var(--fabric-color-focus)',
       },
-      '&:first-child': rounded
-        ? {
-            borderTopLeftRadius: 'card',
-            borderTopRightRadius: 'card',
-          }
-        : {},
       '&:last-child': rounded
         ? {
             borderBottomLeftRadius: 'card',
@@ -171,3 +176,38 @@ const DataCol = styled.div<{ align: Column['align'] }>`
 `
 
 const HeaderCol = styled(DataCol)``
+
+export const SortableTableHeader: React.VFC<{ label: string; orderBy?: OrderBy; align?: Column['align'] }> = ({
+  label,
+  orderBy,
+  align,
+}) => {
+  return (
+    <StyledHeader>
+      {!align && (
+        <IconArrowDown
+          color={orderBy ? 'currentColor' : 'transparent'}
+          size={16}
+          style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        />
+      )}
+      {label}
+      {align && align === 'left' && (
+        <IconArrowDown
+          color={orderBy ? 'currentColor' : 'transparent'}
+          size={16}
+          style={{ transform: orderBy === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        />
+      )}
+    </StyledHeader>
+  )
+}
+
+const StyledHeader = styled(Shelf)`
+  color: ${({ theme }) => theme.colors.textSecondary};
+
+  &:hover,
+  &:hover > svg {
+    color: ${({ theme }) => theme.colors.textInteractiveHover};
+  }
+`

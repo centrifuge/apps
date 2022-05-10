@@ -1,7 +1,8 @@
-import { Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import { Button, IconChevronLeft, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams } from 'react-router'
+import { useHistory, useParams } from 'react-router'
 import { PageHeader } from '../components/PageHeader'
+import { PageSection } from '../components/PageSection'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolCard } from '../components/PoolCard'
@@ -19,6 +20,7 @@ export const TokenDetailPage: React.FC = () => {
 }
 
 const TokenDetail: React.FC = () => {
+  const history = useHistory()
   const { pid: poolId, tid: trancheId } = useParams<{ pid: string; tid: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
@@ -73,14 +75,23 @@ const TokenDetail: React.FC = () => {
         title={<TextWithPlaceholder isLoading={isMetadataLoading}> {trancheMeta?.name}</TextWithPlaceholder>}
         walletShown={false}
         icon={<Thumbnail size="large" label={trancheMeta?.symbol || ''} />}
+        actions={
+          <Button
+            onClick={() => history.push(`/pools/${poolId}`)}
+            small
+            icon={<IconChevronLeft width="16" />}
+            variant="text"
+          >
+            {metadata?.pool?.name}
+          </Button>
+        }
       />
       {pool ? (
         <>
           <PageSummary data={pageSummaryData} />
-          <Stack m="3" gap="2" as="section">
-            <Text variant="heading2">Token pool</Text>
+          <PageSection title="Token pool">
             <PoolCard pool={pool} metadata={metadata} />
-          </Stack>
+          </PageSection>
         </>
       ) : (
         <Shelf justifyContent="center" textAlign="center">

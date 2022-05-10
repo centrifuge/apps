@@ -42,19 +42,34 @@ const tooltipText = {
     title: 'placeholder title',
     body: 'placeholder body',
   },
+  poolValue: {
+    label: 'Pool value',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  reserve: {
+    label: 'Reserve',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  assetValue: {
+    label: 'Asset value',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
 }
 
 type TooltipsProps = {
   type: keyof typeof tooltipText
-  variant?: 'uppercase' | 'lowercase'
+  variant?: 'primary' | 'secondary'
 }
 
-export const Tooltips: React.VFC<TooltipsProps> = ({ type, variant = 'uppercase' }) => {
+export const Tooltips: React.VFC<TooltipsProps> = ({ type, variant = 'primary' }) => {
   const { label, title, body } = tooltipText[type]
-  const isUppercase = variant === 'uppercase'
+  const isPrimary = variant === 'primary'
   return (
     <FabricTooltip title={title} body={body}>
-      <Text variant={isUppercase ? 'body3' : 'label2'} style={isUppercase ? { textTransform: 'uppercase' } : {}}>
+      <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
         {label}
       </Text>
     </FabricTooltip>

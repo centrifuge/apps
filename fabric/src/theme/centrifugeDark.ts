@@ -4,16 +4,16 @@ import { modeDark } from './tokens/modeDark'
 import { FabricTheme } from './types'
 
 const blueScale = {
-  blue30: '#FAFBFF',
-  blue50: '#F0F4FF',
-  blue100: '#DBE5FF',
-  blue200: '#B3C8FF',
-  blue300: '#7A9FFF',
-  blue400: '#4C7EFF',
-  blue500: '#1253FF',
-  blue600: '#003CDB',
-  blue700: '#002B9E',
-  blue800: '#001C66',
+  30: '#FAFBFF',
+  50: '#F0F4FF',
+  100: '#DBE5FF',
+  200: '#B3C8FF',
+  300: '#7A9FFF',
+  400: '#4C7EFF',
+  500: '#1253FF',
+  600: '#003CDB',
+  700: '#002B9E',
+  800: '#001C66',
 }
 
 export const centrifugeDark: FabricTheme = {
@@ -22,13 +22,14 @@ export const centrifugeDark: FabricTheme = {
   colors: {
     ...brandCentrifuge,
     ...modeDark.colors,
-    primarySelectedBackground: blueScale.blue500,
-    secondarySelectedBackground: blueScale.blue700,
-    borderFocus: blueScale.blue500,
-    borderSelected: blueScale.blue500,
-    textSelected: blueScale.blue400,
-    textInteractive: blueScale.blue400,
-    textInteractiveHover: blueScale.blue400,
+    primarySelectedBackground: blueScale[500],
+    secondarySelectedBackground: blueScale[700],
+    borderFocus: blueScale[500],
+    borderSelected: blueScale[500],
+    textSelected: blueScale[400],
+    textInteractive: blueScale[400],
+    textInteractiveHover: blueScale[400],
+    accentScale: blueScale,
   },
   shadows: {
     ...baseTheme.shadows,

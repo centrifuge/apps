@@ -4,6 +4,7 @@ import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
+import { SubqueryDailyPoolState } from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
 import { Balance, Perquintill, Price, Rate } from '../utils/BN'
 
@@ -179,7 +180,7 @@ type PoolDetailsData = {
 }
 
 type NAVDetailsData = {
-  latestNav: string
+  latest: string
   lastUpdated: number
 }
 
@@ -295,6 +296,15 @@ export type TrancheInput = {
   interestRatePerSec?: BN
   minRiskBuffer?: BN
   seniority?: number
+}
+
+export type DailyPoolState = {
+  poolState: {
+    netAssetValue: Balance
+  }
+  poolValue: Balance
+  currency: string
+  timestamp: string
 }
 
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
@@ -752,7 +762,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           const poolId = formatPoolKey(key as StorageKey<[u32]>)
           const nav = navValue.toJSON() as unknown as NAVDetailsData
           acc[poolId] = {
-            latest: nav ? nav.latestNav : '0',
+            latest: nav ? nav.latest : '0',
             lastUpdated: nav ? nav.lastUpdated : 0,
           }
           return acc
@@ -963,16 +973,61 @@ export function getPoolsModule(inst: CentrifugeBase) {
                     ...pool.parameters,
                   },
                   nav: {
-                    latest: nav?.latestNav ? new Balance(hexToBN(nav.latestNav)) : new Balance(0),
+                    latest: nav?.latest ? new Balance(hexToBN(nav.latest)) : new Balance(0),
                     lastUpdated: new Date((nav?.lastUpdated ?? 0) * 1000).toISOString(),
                   },
-                  value: new Balance(
-                    hexToBN(pool.reserve.total).add(new BN(nav?.latestNav ? hexToBN(nav.latestNav) : 0))
-                  ),
+                  value: new Balance(hexToBN(pool.reserve.total).add(new BN(nav?.latest ? hexToBN(nav.latest) : 0))),
                 }
                 return detailedPool
               })
             )
+          })
+        )
+      )
+    )
+  }
+
+  function getDailyPoolStates(args: [poolId: string]) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    const $query = inst.getOptionalSubqueryObservable<{ dailyPoolStates: { nodes: SubqueryDailyPoolState[] } }>(
+      `query($poolId: String!) {
+        dailyPoolStates(filter: {id:{startsWith: $poolId}}) {
+          nodes {
+            timestamp
+            poolState {
+              id
+              totalReserve
+              netAssetValue
+            }
+          }
+        }
+      }
+      `,
+      {
+        poolId,
+      }
+    )
+
+    return $api.pipe(
+      switchMap(() =>
+        combineLatest([$query]).pipe(
+          switchMap(([queryData]) => {
+            return [
+              queryData?.dailyPoolStates.nodes.map((state) => {
+                const poolState = {
+                  ...state.poolState,
+                  netAssetValue: new Balance(state.poolState.netAssetValue),
+                }
+                const poolValue = new Balance(
+                  new Balance(state?.poolState.netAssetValue || '0').add(
+                    new Balance(state?.poolState.totalReserve || '0')
+                  )
+                )
+                return { ...state, poolState, poolValue }
+              }) as unknown as DailyPoolState[],
+            ]
           })
         )
       )
@@ -1322,6 +1377,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     getLoanCollectionIdForPool,
     getTokens,
     getAvailablePoolId,
+    getDailyPoolStates,
   }
 }
 
