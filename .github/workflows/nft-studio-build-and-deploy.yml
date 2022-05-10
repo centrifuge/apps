@@ -17,10 +17,10 @@ on:
       subscan-url:
         required: true
         type: string
-      whitelisted-accounts:
+      subquery-url:
         required: true
         type: string
-      subquery-url:
+      whitelisted-accounts:
         required: true
         type: string
 
