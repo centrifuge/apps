@@ -46,18 +46,21 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
         }
         border={false}
         actions={actions}
-      />
-      <Shelf
-        style={{
-          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
-        }}
       >
-        <NavigationTabs basePath={basePath}>
-          <NavigationTabsItem to={`${basePath}`}>Overview</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}/assets`}>Assets</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}/liquidity`}>Liquidity</NavigationTabsItem>
-        </NavigationTabs>
-      </Shelf>
+        <Shelf
+          bg={theme.colors.backgroundPrimary}
+          zIndex={theme.zIndex.sticky}
+          style={{
+            boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
+          }}
+        >
+          <NavigationTabs basePath={basePath}>
+            <NavigationTabsItem to={`${basePath}`}>Overview</NavigationTabsItem>
+            <NavigationTabsItem to={`${basePath}/assets`}>Assets</NavigationTabsItem>
+            <NavigationTabsItem to={`${basePath}/liquidity`}>Liquidity</NavigationTabsItem>
+          </NavigationTabs>
+        </Shelf>
+      </PageHeader>
     </>
   )
 }

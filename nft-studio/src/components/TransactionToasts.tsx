@@ -1,5 +1,6 @@
 import { AnchorButton, IconExternalLink, Stack, Toast, ToastStatus } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useTheme } from 'styled-components'
 import { useTransactions } from './TransactionsProvider'
 
 const toastStatus: { [key: string]: ToastStatus } = {
@@ -21,12 +22,13 @@ const toastSublabel = {
 const TOAST_DURATION = 5000
 
 export const TransactionToasts: React.FC = () => {
+  const theme = useTheme()
   const { transactions, updateTransaction } = useTransactions()
 
   const dismiss = (txId: string) => () => updateTransaction(txId, { dismissed: true })
 
   return (
-    <Stack width={330} gap={2} position="fixed" top={80} right={1} zIndex={11}>
+    <Stack width={330} gap={2} position="fixed" top={80} right={1} zIndex={theme.zIndex.overlay}>
       {transactions
         .filter((tx) => !tx.dismissed && !['creating', 'unconfirmed'].includes(tx.status))
         .map((tx) => (

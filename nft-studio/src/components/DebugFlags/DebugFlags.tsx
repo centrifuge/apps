@@ -1,6 +1,6 @@
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { initialFlagsState, useDebugFlags } from '.'
 import { flagsConfig, Key } from './config'
 import { DebugFlagsContext, FlagsState } from './context'
@@ -45,6 +45,7 @@ const Panel: React.FC<{
   usedKeys: Set<any>
   onChange: (key: Key, val: any) => void
 }> = ({ state, usedKeys, onChange }) => {
+  const theme = useTheme()
   const [open, setOpen] = React.useState(false)
   const { showUnusedFlags, alwaysShowPanel } = useDebugFlags()
 
@@ -58,7 +59,7 @@ const Panel: React.FC<{
   }, [alwaysShowPanel])
 
   return (
-    <StyledPanel position="fixed" bottom={0} right={0} zIndex={10}>
+    <StyledPanel position="fixed" bottom={0} right={0} zIndex={theme.zIndex.overlay}>
       <Shelf
         justifyContent="center"
         width="400px"

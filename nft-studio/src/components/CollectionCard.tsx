@@ -2,7 +2,7 @@ import { Collection } from '@centrifuge/centrifuge-js'
 import { Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { collectionMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useMetadata } from '../utils/useMetadata'
@@ -58,6 +58,7 @@ type InnerProps = {
 
 export const CollectionCardInner = React.forwardRef<HTMLAnchorElement, InnerProps>(
   ({ isLoading, count, to, title, label, description, image }, ref) => {
+    const theme = useTheme()
     const [imageShown, setImageShown] = React.useState(false)
 
     return (
@@ -80,7 +81,7 @@ export const CollectionCardInner = React.forwardRef<HTMLAnchorElement, InnerProp
                 width="100%"
                 height="100%"
                 position="relative"
-                zIndex={1}
+                zIndex={theme.zIndex.above}
                 style={{ objectFit: 'cover', transition: 'opacity 200ms', opacity: imageShown ? 1 : 0 }}
                 onLoad={() => setImageShown(true)}
               />
@@ -92,7 +93,7 @@ export const CollectionCardInner = React.forwardRef<HTMLAnchorElement, InnerProp
               height="100%"
               top={0}
               left={0}
-              zIndex={0}
+              zIndex={theme.zIndex.base}
               backgroundColor="black"
               style={{ transition: 'opacity 200ms', opacity: imageShown ? 0 : 1 }}
             >
@@ -100,7 +101,7 @@ export const CollectionCardInner = React.forwardRef<HTMLAnchorElement, InnerProp
             </Shelf>
 
             {count != null ? (
-              <Count px={1} py="4px" position="absolute" bottom={1} right={1} zIndex={1}>
+              <Count px={1} py="4px" position="absolute" bottom={1} right={1} zIndex={theme.zIndex.above}>
                 <Text variant="label2" color="textPrimary">
                   {count} NFTs
                 </Text>

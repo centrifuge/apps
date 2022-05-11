@@ -25,7 +25,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
         gridArea="menu"
         position="sticky"
         bottom={0}
-        zIndex={5}
+        zIndex={theme.zIndex.above}
         background="backgroundPrimary"
         style={{
           boxShadow: `0 -1px 0 ${theme.colors.borderSecondary}, 1px 0 0 ${theme.colors.borderSecondary}`,
@@ -43,7 +43,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
         <LoadBoundary>{children}</LoadBoundary>
       </Box>
       {sidebar && (
-        <Box gridArea="sidebar" as="aside" zIndex={5}>
+        <Box gridArea="sidebar" as="aside" zIndex={theme.zIndex.sticky}>
           <Box position="sticky" top={0} p={[0, 0, 3]}>
             <Shelf justifyContent="center" pb={3}>
               <AccountsMenu />

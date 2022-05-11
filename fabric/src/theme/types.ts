@@ -103,6 +103,12 @@ type ThemeShadows = {
   [k in ShadowName]: ShadowValue
 }
 
+type ZIndexName = 'below' | 'base' | 'above' | 'sticky' | 'overlay' | 'onTopOfTheWorld'
+type ZIndexValue = number
+type ThemeZIndices = {
+  [k in ZIndexName]: ZIndexValue
+}
+
 export type FabricTheme = {
   scheme: 'light' | 'dark'
   colors: ThemeColors
@@ -113,4 +119,5 @@ export type FabricTheme = {
   fonts: ThemeFonts
   space: ThemeSpace
   shadows: ThemeShadows
+  zIndex: ThemeZIndices
 }

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import styled, { css } from 'styled-components'
+import styled, { css, useTheme } from 'styled-components'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
@@ -10,9 +10,10 @@ type ThumbnailProps = {
 }
 
 export const Thumbnail: React.VFC<ThumbnailProps> = ({ label, ...props }) => {
+  const theme = useTheme()
   return (
     <StyledThumbnail fontWeight={500} {...props}>
-      <Stack position="relative" zIndex={1}>
+      <Stack position="relative" zIndex={theme.zIndex.above}>
         <span>{label.slice(0, 3)}</span>
         <span>{label.slice(3, 6)}</span>
       </Stack>
@@ -46,7 +47,7 @@ const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
             bottom: 0,
             right: 0,
             margin: 'auto',
-            zIndex: 0,
+            zIndex: theme.zIndex.base,
             transform: 'rotate(45deg)',
             background: theme.colors.accentSecondary,
             borderRadius: '4px',

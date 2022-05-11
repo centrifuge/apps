@@ -28,4 +28,12 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
     cardOverlay: '4px 8px 24px rgba(0, 0, 0, 0.2)',
     buttonFocused: `4px 4px 1px var(--fabric-color-focus)`,
   },
+  zIndex: {
+    below: -1,
+    base: 0,
+    above: 1,
+    sticky: 100,
+    overlay: 200,
+    onTopOfTheWorld: 1000, // use sparingly, only for edge cases
+  },
 }
