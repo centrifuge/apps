@@ -1,4 +1,4 @@
-import { centrifugeLight, FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
+import { altairDark, centrifugeLight, FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
@@ -21,7 +21,7 @@ import { PoolsPage } from '../pages/Pools'
 import { TokenDetailPage } from '../pages/Token'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
-import { DebugFlags } from './DebugFlags'
+import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { GlobalStyle } from './GlobalStyle'
 import { HostPermissionsProvider } from './HostPermissions'
 import { LoadBoundary } from './LoadBoundary'
@@ -37,7 +37,7 @@ const queryClient = new QueryClient({
   },
 })
 
-const darkTheme: DefaultTheme = {
+const lightTheme: DefaultTheme = {
   ...centrifugeLight,
   sizes: {
     ...centrifugeLight.sizes,
@@ -57,17 +57,38 @@ const darkTheme: DefaultTheme = {
     },
   },
 }
+const darkTheme: DefaultTheme = {
+  ...altairDark,
+  sizes: {
+    ...altairDark.sizes,
+    container: '100%',
+  },
+  colors: {
+    ...altairDark.colors,
+    placeholderBackground: altairDark.colors.backgroundSecondary,
+  },
+  typography: {
+    ...altairDark.typography,
+    headingLarge: {
+      fontSize: [24, 24, 36],
+      lineHeight: 1.25,
+      fontWeight: 600,
+      color: 'textPrimary',
+    },
+  },
+}
 
 export const Root: React.VFC = () => {
+  const [isDark, setIsDark] = React.useState(!!initialFlagsState.darkMode)
   return (
     <QueryClientProvider client={queryClient}>
-      <FabricProvider theme={darkTheme}>
+      <FabricProvider theme={isDark ? darkTheme : lightTheme}>
         <GlobalStyle />
         <FabricGlobalStyle />
         <HostPermissionsProvider>
           <Web3Provider>
             <CentrifugeProvider>
-              <DebugFlags>
+              <DebugFlags onChange={(state) => setIsDark(!!state.darkMode)}>
                 <TransactionProvider>
                   <TransactionToasts />
                   <Router>
