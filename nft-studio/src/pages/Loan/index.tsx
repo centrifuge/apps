@@ -28,9 +28,32 @@ import { getMatchingRiskGroupIndex, LOAN_TYPE_LABELS } from './utils'
 
 export const LoanPage: React.FC = () => {
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar={<LoanSidebar />}>
       <Loan />
     </PageWithSideBar>
+  )
+}
+
+const LoanSidebar: React.FC = () => {
+  const { pid, aid } = useParams<{ pid: string; aid: string }>()
+  const loan = useLoan(pid, aid)
+  const address = useAddress()
+  const loanNft = useLoanNft(pid, aid)
+  const permissions = usePermissions(address)
+  const isLoanOwner = isSameAddress(loanNft?.owner, address)
+  const canBorrow = permissions?.pools[pid]?.roles.includes('Borrower') && isLoanOwner
+
+  if (!loan || loan.status === 'Created' || !permissions) return null
+
+  return canBorrow ? (
+    <FinanceForm loan={loan} />
+  ) : (
+    <Card p={2}>
+      <Stack gap={2}>
+        <CardHeader title="Finance &amp; Repay" />
+        <Text variant="body2">You don&rsquo;t have permission to finance this asset</Text>
+      </Stack>
+    </Card>
   )
 }
 
@@ -40,7 +63,6 @@ const Loan: React.FC = () => {
   const loan = useLoan(pid, aid)
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const nft = useNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
-  const loanNft = useLoanNft(pid, aid)
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const address = useAddress()
   const permissions = usePermissions(address)
@@ -48,8 +70,6 @@ const Loan: React.FC = () => {
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
 
   const canPrice = permissions?.pools[pid]?.roles.includes('PricingAdmin')
-  const isLoanOwner = isSameAddress(loanNft?.owner, address)
-  const canBorrow = permissions?.pools[pid]?.roles.includes('Borrower') && isLoanOwner
 
   const name = truncate(nftMetadata?.name || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? parseMetadataUrl(nftMetadata.image) : ''
@@ -168,24 +188,6 @@ const Loan: React.FC = () => {
           </InteractiveCard>
         </PageSection>
       )}
-      {loan &&
-        (loan.status === 'Active' && canBorrow ? (
-          <FinanceForm loan={loan} />
-        ) : loan.status === 'Active' ? (
-          <Card p={3}>
-            <Stack gap={3}>
-              <CardHeader title="Finance &amp; Repay" />
-              <Text variant="body2">You don&rsquo;t have permission to finance this asset</Text>
-            </Stack>
-          </Card>
-        ) : loan.status === 'Created' ? (
-          <Card p={3}>
-            <Stack gap={3}>
-              <CardHeader title="Finance &amp; Repay" />
-              <Text variant="body2">Finance &amp; repay requires the asset to be priced first.</Text>
-            </Stack>
-          </Card>
-        ) : null)}
     </Stack>
   )
 }
