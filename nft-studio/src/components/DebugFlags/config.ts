@@ -27,7 +27,7 @@ export type Key =
   | 'showUnusedFlags'
   | 'showAdditionalIssuerTabs'
   | 'allowInvestBelowMin'
-  | 'darkMode'
+  | 'altairDarkMode'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -54,7 +54,7 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
     default: false,
   },
-  darkMode: {
+  altairDarkMode: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,

@@ -79,7 +79,7 @@ const darkTheme: DefaultTheme = {
 }
 
 export const Root: React.VFC = () => {
-  const [isDark, setIsDark] = React.useState(!!initialFlagsState.darkMode)
+  const [isDark, setIsDark] = React.useState(!!initialFlagsState.altairDarkMode)
   return (
     <QueryClientProvider client={queryClient}>
       <FabricProvider theme={isDark ? darkTheme : lightTheme}>
@@ -88,7 +88,7 @@ export const Root: React.VFC = () => {
         <HostPermissionsProvider>
           <Web3Provider>
             <CentrifugeProvider>
-              <DebugFlags onChange={(state) => setIsDark(!!state.darkMode)}>
+              <DebugFlags onChange={(state) => setIsDark(!!state.altairDarkMode)}>
                 <TransactionProvider>
                   <TransactionToasts />
                   <Router>
