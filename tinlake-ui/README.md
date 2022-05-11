@@ -93,10 +93,10 @@ There are a few flags you can use in your url query string to debug Tinlake:
 | -------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | Kovan Pull Request   | <ul><li>Deploys from a pull request</li><li>Points to Kovan testnet</li><li>Unstable</li></ul>           | `pr-<pull-request-number>--kovan-dev-tinlake.netlify.app`                                     |
 | Mainnet Pull Request | <ul><li>Deploys from a pull request</li><li>Points to mainnet</li><li>Unstable</li></ul>                 | `pr-<pull-request-number>--dev-tinlake.netlify.app`                                           |
-| Kovan Dev            | <ul><li>Deploys from the `main` branch</li><li>Points to Kovan testnet</li><li>Unstable</li></ul>        | <a href="https://kovan.dev.tinlake.centrifuge.io">kovan.dev.tinlake.centrifuge.io</a>         |
-| Mainnet Dev          | <ul><li>Deploys from the `main` branch</li><li>Points to mainnet</li><li>Unstable</li></ul>              | <a href="https://dev.tinlake.centrifuge.io">dev.tinlake.centrifuge.io</a>                     |
-| Kovan Staging        | <ul><li>Deploys from a release candidate branch</li><li>Points to Kovan testnet</li><li>Stable</li></ul> | <a href="https://kovan.staging.tinlake.centrifuge.io">kovan.staging.tinlake.centrifuge.io</a> |
-| Mainnet Staging      | <ul><li>Deploys from a release candidate branch</li><li>Points to mainnet</li><li>Stable</li></ul>       | <a href="https://staging.tinlake.centrifuge.io">staging.tinlake.centrifuge.io</a>             |
+| Kovan Dev            | <ul><li>Deploys from the `main` branch</li><li>Points to Kovan testnet</li><li>Unstable</li></ul>        | <a href="https://kovan.dev.tinlake.cntrfg.com">kovan.dev.tinlake.cntrfg.com</a>         |
+| Mainnet Dev          | <ul><li>Deploys from the `main` branch</li><li>Points to mainnet</li><li>Unstable</li></ul>              | <a href="https://dev.tinlake.cntrfg.com">dev.tinlake.cntrfg.com</a>                     |
+| Kovan Staging        | <ul><li>Deploys from a release candidate branch</li><li>Points to Kovan testnet</li><li>Stable</li></ul> | <a href="https://kovan.staging.tinlake.cntrfg.com">kovan.staging.tinlake.cntrfg.com</a> |
+| Mainnet Staging      | <ul><li>Deploys from a release candidate branch</li><li>Points to mainnet</li><li>Stable</li></ul>       | <a href="https://staging.tinlake.cntrfg.com">staging.tinlake.cntrfg.com</a>             |
 | Prod                 | <ul><li>Deploys from a release tag</li><li>Points to mainnet</li><li>Production environment</li></ul>    | <a href="https://tinlake.centrifuge.io">tinlake.centrifuge.io</a>                             |
 
 ### Release
@@ -115,7 +115,7 @@ Deploys to `pr-<pull-request-number>--kovan.dev-tinlake.netlify.app` and `pr-<pu
 
 ##### Deploy To Development
 
-Deploys to <a href="https://kovan.dev.tinlake.centrifuge.io">kovan.dev.tinlake.centrifuge.io</a> and <a href="https://dev.tinlake.centrifuge.io">dev.tinlake.centrifuge.io</a> are automatically triggered when changes are push/merged to the `main` branch that contains changes to the `tinlake-ui` subdirectory
+Deploys to <a href="https://kovan.dev.tinlake.cntrfg.com">kovan.dev.tinlake.cntrfg.com</a> and <a href="https://dev.tinlake.cntrfg.com">dev.tinlake.cntrfg.com</a> are automatically triggered when changes are push/merged to the `main` branch that contains changes to the `tinlake-ui` subdirectory
 
 ##### Deploy To Staging
 
@@ -129,8 +129,8 @@ $ git push origin rc/tinlake-ui/release-3
 
 This will trigger a deploy of `tinlake-ui` to two domains:
 
-1. <a href="https://kovan.staging.tinlake.centrifuge.io">kovan.staging.tinlake.centrifuge.io</a> - points to Kovan testnet
-2. <a href="https://staging.tinlake.centrifuge.io">staging.tinlake.centrifuge.io</a> - points to mainnet
+1. <a href="https://kovan.staging.tinlake.cntrfg.com">kovan.staging.tinlake.cntrfg.com</a> - points to Kovan testnet
+2. <a href="https://staging.tinlake.cntrfg.com">staging.tinlake.cntrfg.com</a> - points to mainnet
 
 Once deployed, smoke test both staging deployments
 
@@ -167,8 +167,8 @@ $ git push origin rc/tinlake-ui/release-3-hotfix-1
 
 This will trigger a deploy of `tinlake-ui` to the two domains:
 
-1. <a href="https://kovan.staging.tinlake.centrifuge.io">kovan.staging.tinlake.centrifuge.io</a> - points to Kovan testnet
-2. <a href="https://staging.tinlake.centrifuge.io">staging.tinlake.centrifuge.io</a> - points to mainnet
+1. <a href="https://kovan.staging.tinlake.cntrfg.com">kovan.staging.tinlake.cntrfg.com</a> - points to Kovan testnet
+2. <a href="https://staging.tinlake.cntrfg.com">staging.tinlake.cntrfg.com</a> - points to mainnet
 
 While this is deploying, submit a pull request with the necessary code changes against the latest release candidate branch
 
