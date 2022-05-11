@@ -1,9 +1,8 @@
-import { Text } from '@centrifuge/fabric'
+import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList } from '../../../components/LoanList'
-import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { Tooltips } from '../../../components/Tooltips'
@@ -39,14 +38,13 @@ const PoolDetailAssets: React.FC = () => {
   const avgInterestRatePerSec = ongoingAssets
     ?.reduce<any>((curr, prev) => curr.add(prev.interestRatePerSec.toAprPercent()), Dec(0))
     .dividedBy(ongoingAssets?.length)
-    .toDecimalPlaces(2)
+    .toFixed(2)
     .toString()
 
   const avgAmount = ongoingAssets
-    ?.reduce<any>((curr, prev) => curr.add(prev.outstandingDebt.toDecimal()), Dec(0))
+    ?.reduce<any>((curr, prev) => curr.add(prev.loanInfo.value.toDecimal()), Dec(0))
     .dividedBy(ongoingAssets?.length)
     .toDecimalPlaces(2)
-    .toString()
 
   const pageSummaryData = [
     { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets?.length || 0 },
@@ -58,18 +56,20 @@ const PoolDetailAssets: React.FC = () => {
   return (
     <>
       <PageSummary data={pageSummaryData} />
-      <PageSection title="Assets">
-        {loans.length ? (
+      {loans.length ? (
+        <Box px="5" py="2">
           <LoanList
             loans={ongoingAssets}
             onLoanClicked={(loan) => {
               history.push(`/pools/${pool.id}/assets/${loan.id}`)
             }}
           />
-        ) : (
+        </Box>
+      ) : (
+        <Shelf p="4">
           <Text>No assets have been originated yet</Text>
-        )}
-      </PageSection>
+        </Shelf>
+      )}
     </>
   )
 }

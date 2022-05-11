@@ -38,16 +38,16 @@ export const PageHeader: React.FC<Props> = ({
   const theme = useTheme()
 
   return (
-    <Box as="header" position="sticky" top={0} zIndex={theme.zIndex.sticky}>
-      <Shelf
-        justifyContent="space-between"
-        alignItems="center"
-        backgroundColor="backgroundPage"
-        style={{
-          boxShadow: border ? `0 1px 0 ${theme.colors.borderSecondary}` : undefined,
-        }}
-        p={3}
-      >
+    <Box
+      as="header"
+      position="sticky"
+      top={0}
+      zIndex={theme.zIndex.sticky}
+      style={{
+        boxShadow: border ? `0 1px 0 ${theme.colors.borderSecondary}` : undefined,
+      }}
+    >
+      <Shelf p={3} justifyContent="space-between" alignItems="center" backgroundColor="backgroundPage">
         <Shelf gap={2}>
           {icon}
           <Stack gap={0}>

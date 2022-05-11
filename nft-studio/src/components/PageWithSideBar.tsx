@@ -25,7 +25,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
         gridArea="menu"
         position="sticky"
         bottom={0}
-        zIndex={theme.zIndex.above}
+        zIndex={theme.zIndex.sticky + 1}
         background="backgroundPrimary"
         style={{
           boxShadow: `0 -1px 0 ${theme.colors.borderSecondary}, 1px 0 0 ${theme.colors.borderSecondary}`,
