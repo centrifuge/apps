@@ -1,3 +1,4 @@
+import Decimal from 'decimal.js-light'
 import { getImageDimensions } from '../getImageDimensions'
 
 const isImageFile = (file: any): boolean => file instanceof File && !!file.type.match(/^image\//)
@@ -16,17 +17,23 @@ const getError = (defaultError: string, err: CustomError | undefined, val: any) 
 export const required = (err?: CustomError) => (val?: any) =>
   val != null && val !== '' ? '' : getError(`This field is required`, err, val)
 
-export const nonNegativeNumber = (err?: CustomError) => (val?: any) =>
-  Number.isFinite(val) && val >= 0 ? '' : getError(`Value must be positive`, err, val)
+export const nonNegativeNumber = (err?: CustomError) => (val?: any) => {
+  const num = val instanceof Decimal ? val.toNumber() : val
+  return Number.isFinite(num) && num >= 0 ? '' : getError(`Value must be positive`, err, num)
+}
 
-export const positiveNumber = (err?: CustomError) => (val?: any) =>
-  Number.isFinite(val) && val > 0 ? '' : getError(`Value must be positive`, err, val)
+export const positiveNumber = (err?: CustomError) => (val?: any) => {
+  const num = val instanceof Decimal ? val.toNumber() : val
+  return Number.isFinite(num) && num > 0 ? '' : getError(`Value must be positive`, err, num)
+}
 
 export const integer = (err?: CustomError) => (val?: any) =>
   Number.isFinite(val) && Math.floor(val) === val ? '' : getError(`Value must whole number`, err, val)
 
-export const max = (maxValue: number, err?: CustomError) => (val?: any) =>
-  val <= maxValue ? '' : getError(`Value too large`, err, val)
+export const max = (maxValue: number, err?: CustomError) => (val?: any) => {
+  const num = val instanceof Decimal ? val.toNumber() : val
+  return num <= maxValue ? '' : getError(`Value too large`, err, num)
+}
 
 export const maxFileSize = (maxBytes: number, err?: CustomError) => (val?: any) => {
   return val instanceof File && val.size > maxBytes ? getError(`File too large`, err, val) : ''

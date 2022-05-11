@@ -13,10 +13,11 @@ const LoanLabel: React.FC<Props> = ({ loan }) => {
   function getLabelStatus(l: Loan): [LabelStatus, string] {
     const today = new Date()
     today.setUTCHours(0, 0, 0, 0)
-    if (l.status === 'Closed') return ['info', 'Closed']
-    if (l.status === 'Created') return ['info', 'Created']
-    if (!l.interestRatePerSec.isZero()) return ['ok', 'Ongoing']
-    if (!('maturityDate' in l.loanInfo)) return ['ok', 'Ongoing']
+    if (l.adminWrittenOff) return ['critical', 'Write-off']
+    if (l.status === 'Closed') return ['ok', 'Repaid']
+    if (l.status === 'Created') return ['default', 'Created']
+    if (!l.interestRatePerSec.isZero() && l.totalBorrowed.isZero()) return ['default', 'Ready']
+    if (!('maturityDate' in l.loanInfo)) return ['info', 'Ongoing']
 
     const days = daysBetween(today, l.loanInfo.maturityDate)
 
@@ -24,7 +25,7 @@ const LoanLabel: React.FC<Props> = ({ loan }) => {
     if (l.status === 'Active' && days === 1) return ['warning', 'due tomorrow']
     if (l.status === 'Active' && days > 1 && days <= 5) return ['warning', `due in ${days} days`]
     if (l.status === 'Active' && days < 0) return ['critical', `due ${Math.abs(days)} days ago`]
-    return ['ok', 'Ongoing']
+    return ['info', 'Ongoing']
   }
 
   const [status, text] = getLabelStatus(loan)
