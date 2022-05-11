@@ -5,7 +5,7 @@ import { initialFlagsState, useDebugFlags } from '.'
 import { flagsConfig, Key } from './config'
 import { DebugFlagsContext, FlagsState } from './context'
 
-const DebugFlagsImpl: React.FC = ({ children }) => {
+const DebugFlagsImpl: React.FC<{ onChange?: (state: FlagsState) => void }> = ({ children, onChange }) => {
   const [state, setState] = React.useState(initialFlagsState)
   const [tracked, setTracked] = React.useState({})
 
@@ -27,6 +27,11 @@ const DebugFlagsImpl: React.FC = ({ children }) => {
   )
 
   const usedKeys = new Set(Object.values(tracked).flat())
+
+  React.useEffect(() => {
+    onChange?.(state)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state])
 
   return (
     <DebugFlagsContext.Provider value={ctx}>
@@ -76,7 +81,7 @@ const Panel: React.FC<{
       {open && (
         <StyledOpenPanel width={400} gap="1">
           {Object.entries(flagsConfig).map(([key, obj]) => {
-            const used = usedKeys.has(key)
+            const used = usedKeys.has(key) || obj.alwaysShow
             const value = state[key as Key]
             const visible = used || !!showUnusedFlags
 

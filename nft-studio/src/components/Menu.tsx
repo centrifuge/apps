@@ -28,7 +28,7 @@ export const Menu: React.FC<Props> = () => {
   }, [allPools, permissions])
 
   return (
-    <Box backgroundColor="backgroundPrimary" position="sticky" top={0} px={[0, 0, 2]}>
+    <Box position="sticky" top={0} px={[0, 0, 2]}>
       <Link to="/">
         <Box py={[0, 0, 3]} px={1} mb={[2, 2, 10]}>
           <img src={logoCentrifugeFull} alt="" />

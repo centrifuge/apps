@@ -127,7 +127,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
         <Spinner />
       ) : allowedToInvest ? (
         balances !== undefined &&
-        (trancheBalance.isZero() ? (
+        (order.payoutTokenAmount.isZero() && trancheBalance.isZero() ? (
           <InvestForm poolId={poolId} trancheId={trancheId} />
         ) : actualView === 'start' ? (
           <>
