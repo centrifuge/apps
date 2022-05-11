@@ -119,5 +119,5 @@ export type FabricTheme = {
   fonts: ThemeFonts
   space: ThemeSpace
   shadows: ThemeShadows
-  zIndex: ThemeZIndices
+  zIndices: ThemeZIndices
 }

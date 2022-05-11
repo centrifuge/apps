@@ -2,7 +2,6 @@ import { useDialog } from '@react-aria/dialog'
 import { FocusScope } from '@react-aria/focus'
 import { OverlayContainer, useModal, useOverlay, usePreventScroll } from '@react-aria/overlays'
 import * as React from 'react'
-import { useTheme } from 'styled-components'
 import { IconX } from '../../icon'
 import { Box } from '../Box'
 import { Button } from '../Button'
@@ -15,7 +14,6 @@ type Props = {
 }
 
 const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dialog' }) => {
-  const theme = useTheme()
   const ref = React.useRef<HTMLDivElement>(null)
   const { overlayProps, underlayProps } = useOverlay({ isOpen, onClose, isDismissable: true }, ref)
 
@@ -27,7 +25,7 @@ const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dial
   return (
     <Box
       position="fixed"
-      zIndex={theme.zIndex.overlay}
+      zIndex="overlay"
       top={0}
       left={0}
       bottom={0}

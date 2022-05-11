@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import styled, { css, keyframes, useTheme } from 'styled-components'
+import styled, { css, keyframes } from 'styled-components'
 import { IconFileText } from '../..'
 import IconAlertCircle from '../../icon/IconAlertCircle'
 import IconSpinner from '../../icon/IconSpinner'
@@ -128,7 +128,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   placeholder,
   label,
 }) => {
-  const theme = useTheme()
   const inputRef = useRef<HTMLInputElement>(null)
   const [curFile, setCurFile] = useControlledState<File | string | null>(null, fileProp, onFileChange)
   const [error, setError] = useState<string | null>(null)
@@ -242,14 +241,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 >
                   {typeof curFile === 'string' ? curFile : curFile.name}
                 </Text>
-                <Box
-                  display="flex"
-                  position="relative"
-                  zIndex={theme.zIndex.above}
-                  ml="auto"
-                  my="-10px"
-                  minWidth="iconMedium"
-                >
+                <Box display="flex" position="relative" zIndex="above" ml="auto" my="-10px" minWidth="iconMedium">
                   {!disabled && <Button variant="text" onClick={handleClear} icon={IconX} disabled={disabled} />}
                 </Box>
               </Shelf>

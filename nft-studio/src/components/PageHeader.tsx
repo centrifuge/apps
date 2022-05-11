@@ -42,7 +42,7 @@ export const PageHeader: React.FC<Props> = ({
       as="header"
       position="sticky"
       top={0}
-      zIndex={theme.zIndex.sticky}
+      zIndex="sticky"
       style={{
         boxShadow: border ? `0 1px 0 ${theme.colors.borderSecondary}` : undefined,
       }}
