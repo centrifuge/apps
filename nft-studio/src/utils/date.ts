@@ -17,9 +17,12 @@ export function daysBetween(from: number | string | Date, to: number | string | 
 }
 
 export const formatAge = (ageInDays: number) => {
-  return ageInDays > 90
-    ? `${Math.round(((ageInDays || 0) / (365 / 12)) * 10) / 10} months`
-    : `${Math.round((ageInDays || 0) * 10) / 10} days`
+  if (ageInDays > 90) {
+    return `${Math.round(((ageInDays || 0) / (365 / 12)) * 10) / 10} months`
+  } else if (ageInDays > 365) {
+    return `${Math.round(((ageInDays || 0) / 365) * 10) / 10} years`
+  }
+  return `${Math.round((ageInDays || 0) * 10) / 10} days`
 }
 
 export const getAge = (createdAt: string | undefined | null) => {
