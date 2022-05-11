@@ -13,7 +13,7 @@ export const AccountsMenu: React.FC = () => {
   return selectedAccount && accounts?.length ? (
     <Accounts />
   ) : accounts && !accounts.length ? (
-    <Button disabled variant="text">
+    <Button disabled variant="tertiary">
       No accounts available
     </Button>
   ) : (
@@ -37,7 +37,7 @@ const Accounts: React.FC = () => {
             }
             active={state.isOpen}
             iconRight={isDesktop ? IconChevronDown : undefined}
-            variant="text"
+            variant="tertiary"
             small
             {...props}
           >

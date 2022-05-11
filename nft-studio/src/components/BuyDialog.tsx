@@ -89,7 +89,7 @@ export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId 
           <Shelf justifyContent="space-between">
             {message && <Text variant="label2">{message}</Text>}
             <ButtonGroup ml="auto">
-              <Button variant="outlined" onClick={close}>
+              <Button variant="secondary" onClick={close}>
                 Cancel
               </Button>
               <Button type="submit" disabled={disabled} loading={transactionIsPending}>

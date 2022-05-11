@@ -60,7 +60,7 @@ export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'v
         </Shelf>
         <Box my="-10px">
           <VisualButton
-            variant="text"
+            variant="tertiary"
             active={hovered}
             icon={
               variant === 'default'

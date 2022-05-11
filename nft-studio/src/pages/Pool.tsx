@@ -85,7 +85,7 @@ const Pool: React.FC = () => {
         actions={
           <>
             {isPoolAdmin && (
-              <Button small variant="text" icon={<IconArrowRight />} onClick={closeEpoch} disabled={!pool}>
+              <Button small variant="tertiary" icon={<IconArrowRight />} onClick={closeEpoch} disabled={!pool}>
                 Close epoch
               </Button>
             )}
@@ -99,7 +99,7 @@ const Pool: React.FC = () => {
         <LabelValueStack label="Max. Reserve" value={formatBalance(pool?.reserve.max ?? 0, pool?.currency)} />
 
         {isPoolAdmin && (
-          <Button variant="text" icon={<IconArrowRight />} onClick={promptMaxReserve}>
+          <Button variant="tertiary" icon={<IconArrowRight />} onClick={promptMaxReserve}>
             Set maximum
           </Button>
         )}
@@ -216,11 +216,11 @@ export const InvestAction: React.FC<{ poolId: string; trancheId: string }> = ({ 
     <>
       <ButtonGroup>
         {address ? (
-          <Button small variant="outlined" onClick={() => setOpen(true)}>
+          <Button small variant="secondary" onClick={() => setOpen(true)}>
             Invest
           </Button>
         ) : (
-          <ConnectButton small variant="outlined" />
+          <ConnectButton small variant="secondary" />
         )}
       </ButtonGroup>
       <InvestRedeemDialog

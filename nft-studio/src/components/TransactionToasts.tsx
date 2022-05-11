@@ -43,7 +43,7 @@ export const TransactionToasts: React.FC = () => {
             action={
               tx.hash ? (
                 <AnchorButton
-                  variant="text"
+                  variant="tertiary"
                   target="_blank"
                   href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/extrinsic/${tx.hash}`}
                   icon={IconExternalLink}

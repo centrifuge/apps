@@ -1,42 +1,79 @@
-const grayScale = {
-  gray50: '#FAFAFA',
-  gray80: '#F8F8F8',
-  gray100: '#F5F5F5',
-  gray200: '#EEEEEE',
-  gray300: '#E0E0E0',
-  gray400: '#BDBDBD',
-  gray500: '#9E9E9E',
-  gray600: '#757575',
-  gray700: '#616161',
-  gray800: '#424242',
-  gray900: '#212121',
-  gray950: '#171717',
-}
+import { altairYellow, blueScale, centrifugeBlue, grayScale } from './colors'
 
-const statusDefault = grayScale.gray600
-const statusInfo = '#006EF5'
-const statusOk = '#5DA01D'
-const statusWarning = '#A86500'
-const statusCritical = '#D43F2B'
+const statusDefault = grayScale[600]
+const statusInfo = '#006ef5'
+const statusOk = '#5da01d'
+const statusWarning = '#a86500'
+const statusCritical = '#d43f2b'
 
 const lightColors = {
   textPrimary: 'black',
-  textSecondary: grayScale.gray700,
-  textDisabled: grayScale.gray500,
+  textSecondary: grayScale[700],
+  textDisabled: grayScale[500],
 
   backgroundPrimary: 'white',
-  backgroundSecondary: grayScale.gray100,
+  backgroundSecondary: grayScale[100],
   backgroundPage: 'white',
-  backgroundInput: grayScale.gray50,
+  backgroundInput: grayScale[50],
 
-  borderPrimary: grayScale.gray300,
-  borderSecondary: grayScale.gray200,
+  borderPrimary: grayScale[300],
+  borderSecondary: grayScale[200],
 
   statusDefault,
   statusInfo,
   statusOk,
   statusWarning,
   statusCritical,
+
+  backgroundButtonPrimary: altairYellow,
+  backgroundButtonPrimaryFocus: altairYellow,
+  backgroundButtonPrimaryHover: 'black',
+  backgroundButtonPrimaryPressed: 'black',
+  backgroundButtonPrimaryDisabled: grayScale[600],
+  textButtonPrimary: 'black',
+  textButtonPrimaryFocus: 'black',
+  textButtonPrimaryHover: 'white',
+  textButtonPrimaryPressed: 'white',
+  textButtonPrimaryDisabled: 'white',
+  borderButtonPrimary: altairYellow,
+  borderButtonPrimaryFocus: 'black',
+  borderButtonPrimaryHover: 'black',
+  borderButtonPrimaryPressed: 'black',
+  borderButtonPrimaryDisabled: grayScale[600],
+  shadowButtonPrimaryPressed: altairYellow,
+
+  backgroundButtonSecondary: 'transparent',
+  backgroundButtonSecondaryFocus: 'transparent',
+  backgroundButtonSecondaryHover: 'white',
+  backgroundButtonSecondaryPressed: 'white',
+  backgroundButtonSecondaryDisabled: 'transparent',
+  textButtonSecondary: 'black',
+  textButtonSecondaryFocus: 'black',
+  textButtonSecondaryHover: 'black',
+  textButtonSecondaryPressed: 'black',
+  textButtonSecondaryDisabled: grayScale[600],
+  borderButtonSecondary: grayScale[300],
+  borderButtonSecondaryFocus: 'black',
+  borderButtonSecondaryHover: grayScale[300],
+  borderButtonSecondaryPressed: 'black',
+  borderButtonSecondaryDisabled: grayScale[300],
+  shadowButtonSecondaryPressed: 'black',
+
+  backgroundButtonTertiary: 'transparent',
+  backgroundButtonTertiaryFocus: 'transparent',
+  backgroundButtonTertiaryHover: blueScale[50],
+  backgroundButtonTertiaryPressed: blueScale[50],
+  backgroundButtonTertiaryDisabled: 'transparent',
+  textButtonTertiary: 'black',
+  textButtonTertiaryFocus: centrifugeBlue,
+  textButtonTertiaryHover: centrifugeBlue,
+  textButtonTertiaryPressed: centrifugeBlue,
+  textButtonTertiaryDisabled: grayScale[500],
+  borderButtonTertiary: 'transparent',
+  borderButtonTertiaryFocus: 'transparent',
+  borderButtonTertiaryHover: 'transparent',
+  borderButtonTertiaryPressed: centrifugeBlue,
+  borderButtonTertiaryDisabled: 'transparent',
 }
 
 export const modeLight = {

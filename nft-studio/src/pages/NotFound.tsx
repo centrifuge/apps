@@ -21,7 +21,7 @@ const Pools: React.FC = () => {
       <PageHeader title="Page not found" />
       <Stack alignItems="center" gap="4">
         <Text variant="label1">The page {location.pathname} does not exist</Text>
-        <RouterLinkButton variant="outlined" to="/">
+        <RouterLinkButton variant="secondary" to="/">
           Go to the home page
         </RouterLinkButton>
       </Stack>

@@ -22,7 +22,7 @@ type IconProps = {
 }
 
 export type VisualButtonProps = React.PropsWithChildren<{
-  variant?: 'contained' | 'containedSecondary' | 'outlined' | 'text'
+  variant?: 'primary' | 'secondary' | 'tertiary'
   small?: boolean
   icon?: React.ComponentType<IconProps> | React.ReactElement
   iconRight?: React.ComponentType<IconProps> | React.ReactElement
@@ -33,7 +33,8 @@ export type VisualButtonProps = React.PropsWithChildren<{
 }>
 
 type StyledProps = {
-  $variant?: 'contained' | 'containedSecondary' | 'outlined' | 'text'
+  $variant: 'primary' | 'secondary' | 'tertiary'
+  $iconOnly?: boolean
   $small?: boolean
   $disabled?: boolean
   $active?: boolean
@@ -52,52 +53,53 @@ export const StyledButton = styled.span<StyledProps>(
     borderStyle: 'solid',
     userSelect: 'none',
   },
-  ({ $variant, $disabled, $small, $active, theme }) => {
-    if ($disabled && $variant === 'containedSecondary') {
-      $variant = 'contained'
-    }
-    let fg = $disabled ? 'textDisabled' : 'textPrimary'
-    let bg =
-      $variant === 'contained'
-        ? 'backgroundPrimary'
-        : $variant === 'containedSecondary'
-        ? 'accentSecondary'
-        : 'transparent'
-    let fgHover = 'accentPrimary'
-    let bgHover = ''
-    const borderWidth = $variant === 'outlined' ? 1 : 0
-
-    if ($variant === 'contained') {
-      ;[fg, bg, fgHover, bgHover] = [bg, fg, bgHover, fgHover]
-    }
-    if ($variant === 'containedSecondary') {
-      fgHover = 'backgroundPrimary'
-      bgHover = 'accentPrimary'
-    }
+  ({ $variant, $disabled, $small, $active, $iconOnly, theme }) => {
+    const isTertiaryIcon = $variant === 'tertiary' && $iconOnly
+    const variantToken = $variant[0].toUpperCase().concat($variant.slice(1))
+    const bg = `backgroundButton${variantToken}`
+    const bgFocus = `backgroundButton${variantToken}Focus`
+    const bgHover = `backgroundButton${variantToken}Hover`
+    const bgPressed = `backgroundButton${variantToken}Pressed`
+    const bgDisabled = `backgroundButton${variantToken}Disabled`
+    const fg = `textButton${variantToken}`
+    const fgFocus = `textButton${variantToken}Focus`
+    const fgHover = `textButton${variantToken}Hover`
+    const fgPressed = `textButton${variantToken}Pressed`
+    const fgDisabled = `textButton${variantToken}Disabled`
+    const border = `borderButton${variantToken}`
+    const borderFocus = `borderButton${variantToken}Focus`
+    const borderHover = `borderButton${variantToken}Hover`
+    const borderPressed = `borderButton${variantToken}Pressed`
+    const borderDisabled = `borderButton${variantToken}Disabled`
+    const shadow = `shadowButton${variantToken}Pressed`
 
     return css({
-      color: ($active && fgHover) || fg,
-      backgroundColor: ($active && bgHover) || bg,
-      borderColor: ($active && fgHover) || fg,
-      borderWidth,
+      color: $disabled ? fgDisabled : $active ? fgHover : fg,
+      backgroundColor: $disabled ? bgDisabled : $active && !isTertiaryIcon ? bgHover : bg,
+      borderColor: $disabled ? borderDisabled : $active ? borderHover : border,
+      borderWidth: 1,
       pointerEvents: $disabled ? 'none' : 'initial',
       minHeight: $small ? 32 : 40,
+      '--fabric-color-focus': theme.colors[shadow],
+      boxShadow: $active && $variant === 'secondary' ? 'buttonActive' : 'none',
 
-      '&:hover, &:active': {
+      '&:hover': {
         color: fgHover,
-        borderColor: fgHover,
-        backgroundColor: bgHover,
+        backgroundColor: isTertiaryIcon ? undefined : bgHover,
+        borderColor: isTertiaryIcon ? undefined : borderHover,
+        boxShadow: $variant === 'secondary' ? 'buttonActive' : 'none',
       },
-
       '&:active': {
-        '--fabric-color-focus':
-          theme.colors[$variant === 'contained' ? bg : $variant === 'containedSecondary' ? 'textPrimary' : fgHover],
-        boxShadow: $variant !== 'text' ? 'buttonFocused' : 'none',
+        color: fgPressed,
+        backgroundColor: isTertiaryIcon ? undefined : bgPressed,
+        borderColor: isTertiaryIcon ? undefined : borderPressed,
+        boxShadow: $variant !== 'tertiary' ? 'buttonActive' : 'none',
       },
 
       'a:focus-visible &, button:focus-visible &': {
-        boxShadow: $variant !== 'text' ? 'buttonFocused' : 'none !important', // styled components renders the focus style also when $variant === 'text' for some reason
-        color: $variant === 'text' ? fgHover : undefined,
+        color: fgFocus,
+        backgroundColor: isTertiaryIcon ? undefined : bgFocus,
+        borderColor: borderFocus,
       },
     })
   }
@@ -141,17 +143,8 @@ const Spinner = styled(IconSpinner)`
   animation: ${rotate} 600ms linear infinite;
 `
 
-const ClickableArea = styled.div`
-  width: auto;
-  height: 100%;
-  position: absolute;
-  left: -8px;
-  right: -8px;
-  top: 0;
-`
-
 export const VisualButton: React.FC<VisualButtonProps> = ({
-  variant = 'contained',
+  variant = 'primary',
   small,
   icon: IconComp,
   iconRight: IconRightComp,
@@ -161,13 +154,14 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
   children,
   active,
 }) => {
-  const iconSize = variant !== 'text' || small ? 'iconSmall' : 'iconMedium'
+  const isTertiaryIcon = variant === 'tertiary' && !children
+  const px = isTertiaryIcon ? 1 : variant === 'tertiary' || small ? 2 : 3
+  const iconSize = isTertiaryIcon && !small ? 'iconMedium' : 'iconSmall'
 
   return (
-    <StyledButton $variant={variant} $disabled={disabled} $small={small} $active={active}>
+    <StyledButton $variant={variant} $disabled={disabled} $small={small} $active={active} $iconOnly={!children}>
       <LoadingWrapper $loading={loading}>
-        <DefaultContent gap={1} px={variant === 'text' ? 0 : 2} py={small ? '5px' : '8px'} position="relative">
-          {variant === 'text' && <ClickableArea />}
+        <DefaultContent gap={1} px={px} py={small ? '5px' : '8px'} position="relative">
           {IconComp && <Flex bleedY="5px">{isComponent(IconComp) ? <IconComp size={iconSize} /> : IconComp}</Flex>}
           {children && (
             <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
@@ -176,7 +170,7 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
           )}
           {IconRightComp && (isComponent(IconRightComp) ? <IconRightComp size="iconSmall" /> : IconRightComp)}
         </DefaultContent>
-        <LoadingContent px={variant === 'text' ? 0 : 2} gap={1} justifyContent="center">
+        <LoadingContent px={px} gap={1} justifyContent="center">
           <Spinner size={small ? 'iconSmall' : 'iconMedium'} />
           {loadingMessage && (
             <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>

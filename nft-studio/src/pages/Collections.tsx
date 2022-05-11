@@ -66,7 +66,7 @@ const Collections: React.FC = () => {
       <PageHeader
         title="NFTs"
         actions={
-          <Button onClick={() => setCreateOpen(true)} variant="text" small icon={IconPlus} disabled={!address}>
+          <Button onClick={() => setCreateOpen(true)} variant="tertiary" small icon={IconPlus} disabled={!address}>
             Create Collection
           </Button>
         }

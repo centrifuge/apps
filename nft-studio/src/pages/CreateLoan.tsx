@@ -101,7 +101,7 @@ const CreateLoan: React.FC = () => {
             title="Create asset"
             actions={
               <>
-                <Button variant="outlined" onClick={() => history.goBack()}>
+                <Button variant="secondary" onClick={() => history.goBack()}>
                   Cancel
                 </Button>
                 <Button type="submit" loading={isLoading} disabled={!form.values.poolId}>

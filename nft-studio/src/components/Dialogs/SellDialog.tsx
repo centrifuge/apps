@@ -95,7 +95,7 @@ export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId
               </Text>
             )}
             <ButtonGroup ml="auto">
-              <Button variant="outlined" onClick={close}>
+              <Button variant="secondary" onClick={close}>
                 Cancel
               </Button>
               <Button type="submit" disabled={disabled} loading={transactionIsPending}>

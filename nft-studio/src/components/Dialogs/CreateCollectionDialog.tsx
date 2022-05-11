@@ -165,7 +165,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
                 </Text>
               )}
               <ButtonGroup ml="auto">
-                <Button variant="outlined" onClick={close}>
+                <Button variant="secondary" onClick={close}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={disabled}>
@@ -189,7 +189,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
             <Shelf justifyContent="space-between">
               <ButtonGroup ml="auto">
                 {uploadError && <Text color="criticalPrimary">Failed to create collection</Text>}
-                <Button variant="outlined" onClick={() => setConfirmOpen(false)}>
+                <Button variant="secondary" onClick={() => setConfirmOpen(false)}>
                   Cancel
                 </Button>
                 <Button type="submit" loading={isTxPending} disabled={confirmDisabled}>

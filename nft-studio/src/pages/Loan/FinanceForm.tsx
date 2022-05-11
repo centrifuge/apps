@@ -109,12 +109,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                   )}
                 </Field>
                 <Stack px={1}>
-                  <Button
-                    type="submit"
-                    variant="containedSecondary"
-                    disabled={!form.isValid}
-                    loading={isFinanceLoading}
-                  >
+                  <Button type="submit" disabled={!form.isValid} loading={isFinanceLoading}>
                     Finance asset
                   </Button>
                 </Stack>
@@ -159,11 +154,11 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                   secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency)} balance`}
                 />
                 <Stack gap={1} px={1}>
-                  <Button type="submit" variant="containedSecondary" disabled={!form.isValid} loading={isRepayLoading}>
+                  <Button type="submit" disabled={!form.isValid} loading={isRepayLoading}>
                     Repay asset
                   </Button>
                   <Button
-                    variant="outlined"
+                    variant="secondary"
                     loading={isRepayAllLoading}
                     disabled={!canRepayAll}
                     onClick={() => repayAll()}
