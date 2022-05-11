@@ -7,7 +7,7 @@ import { FieldWithErrorMessage } from '../../components/form/formik/FieldWithErr
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
-import { useBalances } from '../../utils/useBalances'
+import { getBalanceDec, useBalances } from '../../utils/useBalances'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
@@ -178,15 +178,4 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
       </Stack>
     </Stack>
   )
-}
-
-type Balances = Exclude<ReturnType<typeof useBalances>, undefined>
-
-function getBalanceDec(balances: Balances, currency: string) {
-  if (currency === 'native') {
-    return Dec(balances.native.balance.toString()).div(Dec(10).pow(balances.native.decimals))
-  }
-  const entry = balances.currencies.find((c) => c.currency === currency)
-  if (!entry) throw new Error(`invalid currency: ${currency}`)
-  return entry.balance.toDecimal()
 }
