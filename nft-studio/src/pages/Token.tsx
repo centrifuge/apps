@@ -1,6 +1,7 @@
 import { Button, IconChevronLeft, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
+import { InvestRedeem } from '../components/InvestRedeem'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { PageSummary } from '../components/PageSummary'
@@ -12,8 +13,9 @@ import { formatBalance, formatPercentage } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 
 export const TokenDetailPage: React.FC = () => {
+  const { pid, tid } = useParams<{ pid: string; tid: string }>()
   return (
-    <PageWithSideBar sidebar>
+    <PageWithSideBar sidebar={<InvestRedeem poolId={pid} trancheId={tid} />}>
       <TokenDetail />
     </PageWithSideBar>
   )
