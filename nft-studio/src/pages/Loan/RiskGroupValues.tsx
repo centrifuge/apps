@@ -2,6 +2,7 @@ import { Rate } from '@centrifuge/centrifuge-js'
 import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
+import { formatDate } from '../../utils/date'
 import { formatPercentage } from '../../utils/formatting'
 import { LOAN_FIELDS } from './utils'
 
@@ -12,9 +13,11 @@ export const RiskGroupValues: React.FC<{
     probabilityOfDefault?: string | BN
     lossGivenDefault?: string | BN
     discountRate?: string | BN
+    maturityDate?: string
   }
   loanType: 'BulletLoan' | 'CreditLine' | 'CreditLineWithMaturity'
-}> = ({ values, loanType }) => {
+  showMaturityDate?: boolean
+}> = ({ values, loanType, showMaturityDate }) => {
   const shownFields = LOAN_FIELDS[loanType]
 
   const advanceRate = values?.advanceRate ? new Rate(values.advanceRate) : undefined
@@ -25,6 +28,12 @@ export const RiskGroupValues: React.FC<{
 
   return (
     <Shelf gap={3} flexWrap="wrap">
+      {showMaturityDate && values.maturityDate && (
+        <Stack gap="4px">
+          <Text variant="label2">Maturity date</Text>
+          <Text variant="body2">{formatDate(values.maturityDate)}</Text>
+        </Stack>
+      )}
       <Stack gap="4px">
         <Text variant="label2">Advance rate</Text>
         <Text variant="body2">{advanceRate && formatPercentage(advanceRate.toPercent())}</Text>

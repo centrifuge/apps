@@ -118,6 +118,7 @@ const Loan: React.FC = () => {
               <RiskGroupValues
                 values={{ ...loan.loanInfo, interestRatePerSec: loan.interestRatePerSec }}
                 loanType={loan.loanInfo.type}
+                showMaturityDate
               />
             </PageSection>
           </>
