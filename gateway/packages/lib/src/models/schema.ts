@@ -151,7 +151,7 @@ export class Schema {
       registries: [
         {
           label: 'registry_name',
-          tinlakePool: 'https://kovan.staging.tinlake.centrifuge.io/0xbb53072d054de55d56dbb4ee95840de3262e4097',
+          tinlakePool: 'https://kovan.staging.tinlake.cntrfg.com/0xbb53072d054de55d56dbb4ee95840de3262e4097',
           tinlakePoolsMetadata: {
             poolId: '',
             poolSlug: '',
