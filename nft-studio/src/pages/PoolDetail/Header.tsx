@@ -4,6 +4,7 @@ import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
+import { PAGE_GUTTER } from '../../components/PageWithSideBar'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
@@ -48,8 +49,8 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
         actions={actions}
       >
         <Shelf
+          px={PAGE_GUTTER}
           bg={theme.colors.backgroundPrimary}
-          zIndex={theme.zIndex.sticky}
           style={{
             boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
           }}

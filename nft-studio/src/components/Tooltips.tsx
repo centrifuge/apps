@@ -57,6 +57,21 @@ const tooltipText = {
     title: 'placeholder title',
     body: 'placeholder body',
   },
+  ongoingAssets: {
+    label: 'Ongoing assets',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  averageFinancingFee: {
+    label: 'Average financing fee',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  averageAmount: {
+    label: 'Average amount',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
 }
 
 type TooltipsProps = {
