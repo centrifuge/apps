@@ -49,24 +49,28 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
         }
         border={false}
         actions={actions}
-      />
-      <Shelf
-        px={PAGE_GUTTER}
-        style={{
-          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
-        }}
       >
-        <NavigationTabs basePath={basePath}>
-          <NavigationTabsItem to={`${basePath}/overview`}>Overview</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}`}>Portfolio</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}/assets`}>Assets</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}/liquidity`}>Liquidity</NavigationTabsItem>
-          {showAdditionalIssuerTabs && <NavigationTabsItem to={`${basePath}/investors`}>Investors</NavigationTabsItem>}
-          {showAdditionalIssuerTabs && (
-            <NavigationTabsItem to={`${basePath}/configuration`}>Configuration</NavigationTabsItem>
-          )}
-        </NavigationTabs>
-      </Shelf>
+        <Shelf
+          px={PAGE_GUTTER}
+          bg="backgroundPage"
+          style={{
+            boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
+          }}
+        >
+          <NavigationTabs basePath={basePath}>
+            <NavigationTabsItem to={`${basePath}/overview`}>Overview</NavigationTabsItem>
+            <NavigationTabsItem to={`${basePath}`}>Portfolio</NavigationTabsItem>
+            <NavigationTabsItem to={`${basePath}/assets`}>Assets</NavigationTabsItem>
+            <NavigationTabsItem to={`${basePath}/liquidity`}>Liquidity</NavigationTabsItem>
+            {showAdditionalIssuerTabs && (
+              <NavigationTabsItem to={`${basePath}/investors`}>Investors</NavigationTabsItem>
+            )}
+            {showAdditionalIssuerTabs && (
+              <NavigationTabsItem to={`${basePath}/configuration`}>Configuration</NavigationTabsItem>
+            )}
+          </NavigationTabs>
+        </Shelf>
+      </PageHeader>
     </>
   )
 }

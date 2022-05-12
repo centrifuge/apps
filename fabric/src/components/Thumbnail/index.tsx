@@ -46,7 +46,7 @@ const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
             bottom: 0,
             right: 0,
             margin: 'auto',
-            zIndex: 'base',
+            zIndex: 0,
             transform: 'rotate(45deg)',
             background: theme.colors.accentSecondary,
             borderRadius: '4px',
