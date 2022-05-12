@@ -154,7 +154,7 @@ const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active,
           borderLeftStyle="solid"
           borderLeftColor={theme.colors.accentSecondary}
         >
-          <Text variant="label2">Asset value`</Text>
+          <Text variant="label2">Asset value</Text>
           <Text variant="body2">{formatBalance(tooltipData.assetValue, currency)}</Text>
         </Stack>
         <Stack
