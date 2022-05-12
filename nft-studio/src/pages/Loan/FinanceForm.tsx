@@ -3,7 +3,7 @@ import { Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fab
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, Formik } from 'formik'
 import * as React from 'react'
-import { FieldWithErrorMessage } from '../../components/form/formik/FieldWithErrorMessage'
+import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'

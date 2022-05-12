@@ -1,6 +1,7 @@
 import { Box, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
 import { AccountsMenu } from './AccountsMenu'
+import { ButtonGroup } from './ButtonGroup'
 
 type Props = {
   actions?: React.ReactNode
@@ -9,13 +10,13 @@ type Props = {
 
 export const ContextActions: React.FC<Props> = ({ actions, walletShown }) => {
   return (
-    <Shelf gap={2}>
+    <ButtonGroup variant="small">
       {actions && (
         <Box display={['none', 'block']}>
           <Shelf gap={1}>{actions}</Shelf>
         </Box>
       )}
       {walletShown && <AccountsMenu />}
-    </Shelf>
+    </ButtonGroup>
   )
 }

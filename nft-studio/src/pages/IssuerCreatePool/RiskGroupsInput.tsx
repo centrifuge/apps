@@ -2,7 +2,7 @@ import { Box, Button, Grid, IconMinusCircle, NumberInput, Stack, Text, TextInput
 import { FieldArray, useFormikContext } from 'formik'
 import React from 'react'
 import { createEmptyRiskGroup, PoolFormValues } from '.'
-import { FieldWithErrorMessage } from '../../components/form/formik/FieldWithErrorMessage'
+import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { validate } from './validate'
 

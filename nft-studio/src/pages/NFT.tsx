@@ -8,10 +8,10 @@ import { SellDialog } from '../components/Dialogs/SellDialog'
 import { TransferDialog } from '../components/Dialogs/TransferDialog'
 import { Identity } from '../components/Identity'
 import { PageHeader } from '../components/PageHeader'
+import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
-import { SplitView } from '../components/SplitView'
 import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
@@ -74,17 +74,17 @@ const NFT: React.FC = () => {
                         to={`/collection/${collectionId}/object/${nftId}/new-asset`}
                         icon={IconPlus}
                         small
-                        variant="tertiary"
+                        variant="secondary"
                       >
                         Create asset
                       </RouterLinkButton>
                     )}
                     {nft.sellPrice !== null ? (
-                      <Button onClick={() => setUnlistOpen(true)} small variant="tertiary">
+                      <Button onClick={() => setUnlistOpen(true)} small variant="secondary">
                         Remove listing
                       </Button>
                     ) : (
-                      <Button onClick={() => setSellOpen(true)} small variant="tertiary">
+                      <Button onClick={() => setSellOpen(true)} small variant="secondary">
                         Sell
                       </Button>
                     )}
@@ -92,7 +92,7 @@ const NFT: React.FC = () => {
                       onClick={() => setTransferOpen(true)}
                       icon={IconArrowRight}
                       small
-                      variant="tertiary"
+                      variant="secondary"
                       disabled={nft.sellPrice !== null}
                     >
                       Transfer
@@ -141,27 +141,32 @@ const NFT: React.FC = () => {
           }
         />
       </Box>
-      <SplitView
-        left={
-          <Box display="flex" alignItems="center" justifyContent="center" py={2} height="100%">
+      <PageSection>
+        <Shelf alignItems="stretch" gap={4} flexWrap="wrap">
+          <Box
+            display="flex"
+            alignItems="stretch"
+            justifyContent="center"
+            height="100%"
+            flex="1 1 60%"
+            style={{ aspectRatio: '1 / 1' }}
+            position="relative"
+          >
             {imageUrl ? (
               <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                maxWidth={800}
-                style={{ aspectRatio: '1 / 1' }}
-              >
-                <Box as="img" maxWidth="100%" src={imageUrl} />
-              </Box>
+                as="img"
+                width="100%"
+                height="100%"
+                src={imageUrl}
+                position="absolute"
+                style={{ objectFit: 'contain' }}
+              />
             ) : (
               <Box
                 bg="borderSecondary"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-                // maxHeight="60vh"
-                maxWidth={800}
                 borderRadius="10px"
                 style={{ aspectRatio: '1 / 1' }}
               >
@@ -169,112 +174,69 @@ const NFT: React.FC = () => {
               </Box>
             )}
           </Box>
-        }
-        right={
-          <Shelf
-            pt={8}
-            px={[2, 4, 8]}
-            gap={[4, 4, 8]}
-            alignItems="flex-start"
-            justifyContent="space-between"
-            flexDirection={['column', 'row', 'column']}
-          >
+          <Stack gap={3} flex="1 1 30%" minWidth={250}>
             {!nft && (
               <Stack gap={3}>
-                <Text variant="headingLarge" as="h1">
+                <Text variant="heading3" as="h12">
                   NFT Not Found
                 </Text>
               </Stack>
             )}
             {nft && collection && (
               <>
-                <Stack gap={3}>
-                  {/* <Stack>
-                  <Text variant="label1">Creation date</Text>
-                  <Text variant="heading3">
-                    {metadata.createdAt &&
-                      new Date(metadata.createdAt).toLocaleDateString('en', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                  </Text>
-                </Stack> */}
-
-                  <Stack gap={1} mb={6}>
-                    <NavLink to={`/collection/${collectionId}`}>
-                      <TextWithPlaceholder isLoading={isCollectionMetadataLoading} variant="heading3" underline>
-                        {collectionMetadata?.name}
-                      </TextWithPlaceholder>
-                    </NavLink>
-                    <TextWithPlaceholder
-                      isLoading={isLoading}
-                      variant="heading1"
-                      fontSize="36px"
-                      fontWeight="700"
-                      mb="4px"
-                    >
-                      {nftMetadata?.name}
+                <Stack gap={1}>
+                  <NavLink to={`/collection/${collectionId}`}>
+                    <TextWithPlaceholder isLoading={isCollectionMetadataLoading} variant="heading3" underline>
+                      {collectionMetadata?.name}
                     </TextWithPlaceholder>
-                    <Shelf gap={1}>
-                      <Text variant="heading3" color="textSecondary">
-                        by
-                      </Text>
-                      <AnchorPillButton
-                        href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/account/${nft.owner}`}
-                        target="_blank"
-                      >
-                        <Identity address={collection.owner} />
-                      </AnchorPillButton>
-                    </Shelf>
-                  </Stack>
-
-                  <Stack gap={1}>
-                    <Text variant="label1">Description</Text>
-                    <TextWithPlaceholder
-                      isLoading={isLoading}
-                      words={2}
-                      width={80}
-                      variance={30}
-                      variant="body2"
-                      style={{ wordBreak: 'break-word' }}
-                    >
-                      {nftMetadata?.description || 'No description'}
-                    </TextWithPlaceholder>
-                  </Stack>
-
-                  {imageUrl && (
-                    <Stack gap={1} alignItems="flex-start">
-                      <Text variant="label1">Image</Text>
-                      <AnchorPillButton
-                        href={imageUrl}
-                        target="_blank"
-                        style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
-                      >
-                        Source file
-                      </AnchorPillButton>
-                    </Stack>
-                  )}
-
-                  <Stack gap={1}>
-                    <Text variant="label1">Owner</Text>
-                    <Text variant="label2" color="textPrimary">
-                      <Identity address={nft.owner} clickToCopy />
-                    </Text>
-                  </Stack>
-
-                  {nft.sellPrice !== null && (
-                    <Stack gap={1}>
-                      <Text variant="label1">Price</Text>
-                      <Text variant="heading3">{centrifuge.utils.formatCurrencyAmount(nft.sellPrice, 'AIR')}</Text>
-                    </Stack>
-                  )}
+                  </NavLink>
                 </Stack>
+
+                <Stack gap={1}>
+                  <Text variant="label1">Description</Text>
+                  <TextWithPlaceholder
+                    isLoading={isLoading}
+                    words={2}
+                    width={80}
+                    variance={30}
+                    variant="body2"
+                    style={{ wordBreak: 'break-word' }}
+                  >
+                    {nftMetadata?.description || 'No description'}
+                  </TextWithPlaceholder>
+                </Stack>
+
+                {imageUrl && (
+                  <Stack gap={1} alignItems="flex-start">
+                    <Text variant="label1">Image</Text>
+                    <AnchorPillButton
+                      href={imageUrl}
+                      target="_blank"
+                      style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
+                    >
+                      Source file
+                    </AnchorPillButton>
+                  </Stack>
+                )}
+
+                <Stack gap={1}>
+                  <Text variant="label1">Owner</Text>
+                  <Text variant="label2" color="textPrimary">
+                    <Identity address={nft.owner} clickToCopy />
+                  </Text>
+                </Stack>
+
+                {nft.sellPrice !== null && (
+                  <Stack gap={1}>
+                    <Text variant="label1">Price</Text>
+                    <Text variant="heading3">{centrifuge.utils.formatCurrencyAmount(nft.sellPrice, 'AIR')}</Text>
+                  </Stack>
+                )}
               </>
             )}
-          </Shelf>
-        }
-      />
+          </Stack>
+        </Shelf>
+      </PageSection>
     </Stack>
   )
 }

@@ -1,10 +1,11 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Text } from '@centrifuge/fabric'
+import { IconChevronRight } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { formatBalance } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
+import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   pools: Pool[]
@@ -37,6 +38,7 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
   ]
   return (
     <DataTable
+      rounded={false}
       data={pools}
       columns={columns}
       onRowClicked={(p: Pool) => {
@@ -47,15 +49,19 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
 }
 
 const PoolName: React.VFC<{ pool: Pool }> = ({ pool }) => {
-  const { data } = usePoolMetadata(pool)
+  const { data, isLoading } = usePoolMetadata(pool)
   return (
-    <Text variant="body2" fontWeight={600}>
-      {data?.pool?.name}
-    </Text>
+    <TextWithPlaceholder isLoading={isLoading} variant="body2" fontWeight={600}>
+      {data?.pool?.name ?? 'Unnamed Pool'}
+    </TextWithPlaceholder>
   )
 }
 
 const AssetClass: React.VFC<{ pool: Pool }> = ({ pool }) => {
-  const { data } = usePoolMetadata(pool)
-  return <Text variant="body2">{data?.pool?.asset?.class}</Text>
+  const { data, isLoading } = usePoolMetadata(pool)
+  return (
+    <TextWithPlaceholder isLoading={isLoading} variant="body2">
+      {data?.pool?.asset?.class ?? 'n/a'}
+    </TextWithPlaceholder>
+  )
 }

@@ -6,6 +6,7 @@ import { Identity } from '../components/Identity'
 import { LogoAltair } from '../components/LogoAltair'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'
+import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
@@ -134,14 +135,13 @@ const Collection: React.FC = () => {
       </Stack>
       {nfts?.length ? (
         <>
-          <Box mb={2}>
-            <Text variant="heading3">{collection?.instances ?? 0} NFTs</Text>
-          </Box>
-          <Grid gap={[2, 3]} columns={[2, 2, 3, 4]} equalColumns>
-            {nfts.slice(0, shownCount).map((nft) => (
-              <NFTCard nft={nft} key={nft.id} />
-            ))}
-          </Grid>
+          <PageSection title={`${collection?.instances ?? 0} NFTs`}>
+            <Grid gap={[2, 3]} columns={[2, 2, 3, 4]} equalColumns>
+              {nfts.slice(0, shownCount).map((nft) => (
+                <NFTCard nft={nft} key={nft.id} />
+              ))}
+            </Grid>
+          </PageSection>
           {nfts.length > shownCount && (
             <VisibilityChecker marginTop={400} onEnter={() => setShownCount((count) => count + COUNT_PER_PAGE)} />
           )}
