@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 
 type Props = {
-  label: string
+  label: React.ReactNode
   icon?: React.ReactElement
   href?: string
   defaultOpen?: boolean
