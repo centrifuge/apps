@@ -120,6 +120,47 @@ export class MailerService {
       this.logger.error(JSON.stringify(e))
     }
   }
+
+  async sendAgreementVoidedEmail(user: User, pool: any, data: any, status: string) {
+    this.logger.log('Sending agreement voided/declined email')
+    let templateId
+    if (status === 'declined') {
+      templateId = config.sendgrid.subscriptionAgreementDeclined
+    } else {
+      templateId = config.sendgrid.subscriptionAgreementVoided
+    }
+    const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
+    const message = {
+      personalizations: [
+        {
+          to: [
+            {
+              email: user.email,
+              name: user.fullName,
+            },
+          ],
+          dynamic_template_data: {
+            investorName: user.fullName,
+            poolName: pool.metadata?.name,
+            token: `${pool.metadata?.name} ${data.tranche}`,
+            issuerName: pool.profile?.issuer?.name,
+            issuerEmail: pool.profile?.issuer?.email,
+          },
+        },
+      ],
+      from: {
+        name: pool.profile?.issuer?.name,
+        email: `issuer+${issuerName}@centrifuge.io`,
+      },
+      template_id: config.sendgrid.subscriptionAgreementVoided,
+    }
+    try {
+      await client.send(message)
+      this.logger.log('Mail sent successfully')
+    } catch (e) {
+      this.logger.error(JSON.stringify(e))
+    }
+  }
 }
 
 export default MailerService

@@ -108,11 +108,19 @@ export class AgreementController {
 
     if (content.status === 'declined') {
       this.agreementRepo.setDeclined(agreement.id)
+      if (!agreement.declinedAt) {
+        const user = await this.userRepo.find(agreement.userId)
+        const pool = await this.poolService.get(agreement.poolId)
+        this.mailerService.sendAgreementVoidedEmail(user, pool, agreement.tranche, 'declined')
+      }
       return 'OK'
     }
 
     if (content.status === 'voided') {
       this.agreementRepo.setVoided(agreement.id)
+      const user = await this.userRepo.find(agreement.userId)
+      const pool = await this.poolService.get(agreement.poolId)
+      this.mailerService.sendAgreementVoidedEmail(user, pool, agreement.tranche, 'voided')
       return 'OK'
     }
 
