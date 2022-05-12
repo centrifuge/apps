@@ -20,7 +20,7 @@ export const RiskGroupsInput: React.FC = () => {
           subtitle="At least one risk group is required"
           headerRight={
             <Button
-              variant="outlined"
+              variant="secondary"
               onClick={() => {
                 fldArr.push(createEmptyRiskGroup())
               }}
@@ -101,7 +101,9 @@ export const RiskGroupsInput: React.FC = () => {
                   validate={validate.discountRate}
                 />
                 <Box p={1}>
-                  {index !== 0 && <Button variant="text" icon={IconMinusCircle} onClick={() => fldArr.remove(index)} />}
+                  {index !== 0 && (
+                    <Button variant="tertiary" icon={IconMinusCircle} onClick={() => fldArr.remove(index)} />
+                  )}
                 </Box>
               </React.Fragment>
             ))}

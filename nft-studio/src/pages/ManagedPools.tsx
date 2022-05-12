@@ -33,7 +33,7 @@ const ManagedPools: React.FC = () => {
       <PageHeader
         title="Managed pools"
         actions={
-          <RouterLinkButton variant="text" to="/pool/new" icon={<IconPlus size="iconSmall" />}>
+          <RouterLinkButton variant="tertiary" to="/pool/new" icon={<IconPlus size="iconSmall" />}>
             <Text variant="interactive1" color="currentColor">
               Create pool
             </Text>

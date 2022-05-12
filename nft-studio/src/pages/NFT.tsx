@@ -74,17 +74,17 @@ const NFT: React.FC = () => {
                         to={`/collection/${collectionId}/object/${nftId}/new-asset`}
                         icon={IconPlus}
                         small
-                        variant="text"
+                        variant="tertiary"
                       >
                         Create asset
                       </RouterLinkButton>
                     )}
                     {nft.sellPrice !== null ? (
-                      <Button onClick={() => setUnlistOpen(true)} small variant="text">
+                      <Button onClick={() => setUnlistOpen(true)} small variant="tertiary">
                         Remove listing
                       </Button>
                     ) : (
-                      <Button onClick={() => setSellOpen(true)} small variant="text">
+                      <Button onClick={() => setSellOpen(true)} small variant="tertiary">
                         Sell
                       </Button>
                     )}
@@ -92,7 +92,7 @@ const NFT: React.FC = () => {
                       onClick={() => setTransferOpen(true)}
                       icon={IconArrowRight}
                       small
-                      variant="text"
+                      variant="tertiary"
                       disabled={nft.sellPrice !== null}
                     >
                       Transfer

@@ -141,10 +141,10 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
                 <SuccessBanner title="Redemption successful" />
               ) : null)}
             <Stack p={1} gap={1}>
-              <Button variant="outlined" onClick={() => setView('invest')}>
+              <Button variant="secondary" onClick={() => setView('invest')}>
                 Invest more
               </Button>
-              <Button variant="outlined" onClick={() => setView('redeem')}>
+              <Button variant="secondary" onClick={() => setView('redeem')}>
                 Redeem
               </Button>
               <TransactionsLink />
@@ -291,17 +291,11 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
           </Stack>
         ) : null}
         <Stack px={1} gap={1}>
-          <Button
-            type="submit"
-            variant="containedSecondary"
-            disabled={!form.isValid}
-            loading={isLoading}
-            loadingMessage={loadingMessage}
-          >
+          <Button type="submit" disabled={!form.isValid} loading={isLoading} loadingMessage={loadingMessage}>
             Invest
           </Button>
           {cancelCb && (
-            <Button variant="outlined" onClick={cancelCb}>
+            <Button variant="secondary" onClick={cancelCb}>
               Cancel
             </Button>
           )}
@@ -455,17 +449,11 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
           </Stack>
         ) : null}
         <Stack px={1} gap={1}>
-          <Button
-            type="submit"
-            variant="containedSecondary"
-            disabled={!form.isValid}
-            loading={isLoading}
-            loadingMessage={loadingMessage}
-          >
+          <Button type="submit" disabled={!form.isValid} loading={isLoading} loadingMessage={loadingMessage}>
             Redeem
           </Button>
           {cancelCb && (
-            <Button variant="outlined" onClick={cancelCb}>
+            <Button variant="secondary" onClick={cancelCb}>
               Cancel
             </Button>
           )}
@@ -504,7 +492,7 @@ const TransactionsLink: React.FC = () => {
   return (
     <Box alignSelf="flex-end">
       <AnchorButton
-        variant="text"
+        variant="tertiary"
         iconRight={IconArrowUpRight}
         href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/account/${address}`}
         target="_blank"

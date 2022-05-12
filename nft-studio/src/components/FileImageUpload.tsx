@@ -107,7 +107,7 @@ export const FileImageUpload: React.FC<Props> = ({
             </Text>
           </Box>
           <Box mb={4} mt={1}>
-            <Button variant="outlined">Choose file</Button>
+            <Button variant="secondary">Choose file</Button>
           </Box>
 
           <Text variant="body2" color="textSecondary">

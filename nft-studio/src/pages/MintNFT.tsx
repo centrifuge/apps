@@ -198,7 +198,7 @@ const MintNFT: React.FC = () => {
                   <Button disabled={submitDisabled} type="submit" loading={isMinting}>
                     Mint
                   </Button>
-                  <RouterLinkButton to={`/collection/${collectionId}`} variant="outlined" disabled={submitDisabled}>
+                  <RouterLinkButton to={`/collection/${collectionId}`} variant="secondary" disabled={submitDisabled}>
                     Cancel
                   </RouterLinkButton>
                   {(balanceLow || !canMint) && (

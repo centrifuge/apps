@@ -47,11 +47,22 @@ export const PoolDetailOverviewTab: React.FC = () => {
         actions={
           <>
             {isPoolAdmin && (
-              <Button small variant="text" icon={<IconArrowRight width="16" />} onClick={closeEpoch} disabled={!pool}>
+              <Button
+                small
+                variant="tertiary"
+                icon={<IconArrowRight width="16" />}
+                onClick={closeEpoch}
+                disabled={!pool}
+              >
                 Close epoch
               </Button>
             )}
-            <Button onClick={() => history.push('/pools')} small icon={<IconChevronLeft width="16" />} variant="text">
+            <Button
+              onClick={() => history.push('/pools')}
+              small
+              icon={<IconChevronLeft width="16" />}
+              variant="tertiary"
+            >
               Pools
             </Button>
           </>

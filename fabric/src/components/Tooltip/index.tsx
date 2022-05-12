@@ -2,8 +2,8 @@ import { useTooltip, useTooltipTrigger } from '@react-aria/tooltip'
 import { useTooltipTriggerState } from '@react-stately/tooltip'
 import * as React from 'react'
 import styled from 'styled-components'
-import { Box } from '../Box'
 import { Positioner } from '../Positioner'
+import { Stack } from '../Stack'
 import { Text, TextProps } from '../Text'
 
 type TooltipProps = TextProps & {
@@ -44,7 +44,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
           targetRef={triggerRef}
           overlayRef={overlayRef}
           render={(positionProps) => (
-            <Box
+            <Stack
               {...tooltipElementProps}
               {...positionProps}
               ref={overlayRef}
@@ -59,7 +59,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
               <Text variant="body3" color="backgroundPrimary">
                 {body}
               </Text>
-            </Box>
+            </Stack>
           )}
         />
       )}

@@ -25,8 +25,8 @@ const pool = networkConfigs.find(
 )
 
 export const config: Config = {
-  gatewayUrl: process.env.GATEWAY_URL || 'https://gateway.amber.centrifuge.io/',
-  tinlakeUrl: process.env.TINLAKE_URL || 'https://kovan.staging.tinlake.centrifuge.io/',
+  gatewayUrl: process.env.GATEWAY_URL || 'https://gateway.amber.cntrfg.com/',
+  tinlakeUrl: process.env.TINLAKE_URL || 'https://kovan.staging.tinlake.cntrfg.com/',
   rpcUrl: process.env.RPC_URL || '',
   ethNetwork: network,
   ethAdminAddress: process.env.ETH_ADMIN_ADDRESS || '',

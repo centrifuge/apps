@@ -41,7 +41,7 @@ export const FileInput: React.FC<Props> = ({ onFileUpdate, onBeforeFileUpdate })
     <FileUploadContainer>
       <Shelf>
         <FileInputWrapper>
-          <Button variant="outlined">Choose file</Button>
+          <Button variant="secondary">Choose file</Button>
           <FileInputOverlay onFilesUpdate={handleNewFileUpload} />
         </FileInputWrapper>
         <Box pl={2}>

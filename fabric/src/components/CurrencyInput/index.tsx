@@ -52,7 +52,7 @@ const StyledMaxButton = styled(Box)`
   }
 
   &:focus-visible {
-    box-shadow: ${({ theme }) => theme.shadows.buttonFocused};
+    box-shadow: ${({ theme }) => theme.shadows.buttonActive};
   }
 `.withComponent('button')
 

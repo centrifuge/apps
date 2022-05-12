@@ -49,7 +49,7 @@ const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dial
         >
           {children}
           <Box position="absolute" top={1} right={2}>
-            <Button variant="text" icon={IconX} onClick={() => onClose()} />
+            <Button variant="tertiary" icon={IconX} onClick={() => onClose()} />
           </Box>
         </Card>
       </FocusScope>

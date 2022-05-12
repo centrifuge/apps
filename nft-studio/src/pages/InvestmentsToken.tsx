@@ -127,7 +127,7 @@ export const InvestAction: React.FC<{ poolId: string; trancheId: string }> = ({ 
   return (
     <>
       <ButtonGroup>
-        <Button variant="outlined" onClick={() => setOpen(true)}>
+        <Button variant="secondary" onClick={() => setOpen(true)}>
           Invest
         </Button>
       </ButtonGroup>

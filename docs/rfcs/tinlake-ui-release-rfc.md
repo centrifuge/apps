@@ -12,7 +12,7 @@ The current release process has a few limitations that can be addressed:
 - As the team grows, development speed could be strained and the communication around releases could become a burden as there would have to be a freeze on the `main` branch until the changes were smoke tested, confirmed, and merged into the `production` branch.
 - Following release conventions by using `git tag`'ing establishes a clear release history for documentation and historical purposes.
 - The [Netlify Github app](https://github.com/apps/netlify) currently being used is causing issues around automating preview links within pull requests that can be fixed by switching to using the [Netlify Github Action](https://github.com/marketplace/actions/netlify-actions). This will offer more control and flexibility over the build and deployment process.
-- The current `staging` environment deploys using only the Kovan testnet. Perhaps, it would be more semantically correct to have a `staging.tinlake.centrifuge.io` (mainnet) and a `kovan.staging.tinlake.centrifuge.io` (Kovan) in order to have more genuine staging environments.
+- The current `staging` environment deploys using only the Kovan testnet. Perhaps, it would be more semantically correct to have a `staging.tinlake.cntrfg.com` (mainnet) and a `kovan.staging.tinlake.cntrfg.com` (Kovan) in order to have more genuine staging environments.
 - This flow is agnostic from any platform like Netlify so by managing CI/CD workflows more explicitly, cutting over to IPFS or any other hosting provider in the future would be more seamless.
 
 ## Explanation
@@ -40,8 +40,8 @@ Below are the setup actions in order to implement this proposal:
 1. Switch away from the [Netlify Github app](https://github.com/apps/netlify) and instead use the [Netlify Github Action](https://github.com/marketplace/actions/netlify-actions)
 2. [Stop builds](https://docs.netlify.com/configure-builds/stop-or-activate-builds/#stop-builds) in Netlify for all `tinlake-ui` sites
 3. [Turn on auto publish](https://docs.netlify.com/site-deploys/manage-deploys/#unlock-a-locked-deploy) in Netlify for all `tinlake-ui` sites
-4. Set up a `dev.tinlake.centrifuge.io` site in Netlify
-5. Set up a `staging.tinlake.centrifuge.io` site in Netlify
+4. Set up a `dev.tinlake.cntrfg.com` site in Netlify
+5. Set up a `staging.tinlake.cntrfg.com` site in Netlify
 6. Delete `production` branch and only use `main` branch going forward
 7. Remove `version` property from the [package.json](https://github.com/centrifuge/apps/blob/4547082ce44d99303af748aa503fec1f58501ee8/tinlake-ui/package.json#L4) in `tinlake-ui` directory
 8. Add corresponding site id's to Github secrets

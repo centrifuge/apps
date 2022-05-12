@@ -15,7 +15,7 @@ type AnchorButtonStory = ComponentStory<typeof AnchorButtonComp>
 
 const Template: ButtonStory = (args): React.ReactElement => (
   <Grid columns={5} gap={3} justifyItems="start" maxWidth={800} equalColumns>
-    {(['contained', 'containedSecondary', 'outlined', 'text'] as const).flatMap((variant) =>
+    {(['primary', 'secondary', 'tertiary'] as const).flatMap((variant) =>
       [false, true].map((small) => (
         <React.Fragment key={`${small}-${variant}`}>
           <ButtonComp {...args} variant={variant} small={small}>
@@ -45,11 +45,13 @@ Button.args = {
 
 export const AnchorButton: AnchorButtonStory = (args) => (
   <Shelf gap={3}>
-    <AnchorButtonComp {...args}>External link</AnchorButtonComp>
-    <AnchorButtonComp {...args} variant="outlined">
+    <AnchorButtonComp {...args} target="_blank">
       External link
     </AnchorButtonComp>
-    <AnchorButtonComp {...args} variant="text">
+    <AnchorButtonComp {...args} target="_blank" variant="secondary">
+      External link
+    </AnchorButtonComp>
+    <AnchorButtonComp {...args} target="_blank" variant="tertiary">
       External link
     </AnchorButtonComp>
   </Shelf>
