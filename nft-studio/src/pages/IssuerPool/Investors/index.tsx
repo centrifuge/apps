@@ -144,7 +144,7 @@ export const Investors: React.FC = () => {
 
                   return (
                     <Button
-                      variant="text"
+                      variant="tertiary"
                       icon={isAllowed ? IconMinusCircle : IconPlus}
                       onClick={() => toggleAllowed(row.id)}
                       loading={isTransactionPending && pendingTrancheId === row.id}

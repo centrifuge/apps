@@ -92,7 +92,7 @@ export const Admins: React.FC = () => {
                 Done
               </Button>
             ) : (
-              <Button variant="outlined" onClick={() => setIsEditing(true)} small key="edit">
+              <Button variant="secondary" onClick={() => setIsEditing(true)} small key="edit">
                 Edit
               </Button>
             )
@@ -198,7 +198,7 @@ export const Admins: React.FC = () => {
                       cell: (row: Row) =>
                         isEditing && (
                           <Button
-                            variant="text"
+                            variant="tertiary"
                             icon={IconMinusCircle}
                             onClick={() => fldArr.remove(row.index)}
                             disabled={isLoading || (poolAdminCount === 1 && row.roles.PoolAdmin)}
@@ -262,7 +262,7 @@ const SearchResult: React.FC<{ address: string; onAdd: () => void; existingAddre
           {truncated}
         </Text>
       </Shelf>
-      <Button variant="outlined" onClick={onAdd} small disabled={exists}>
+      <Button variant="secondary" onClick={onAdd} small disabled={exists}>
         Add address
       </Button>
       {exists && (

@@ -1,20 +1,8 @@
 import { baseTheme } from './tokens/baseTheme'
 import { brandCentrifuge } from './tokens/brandCentrifuge'
+import { blueScale } from './tokens/colors'
 import { modeDark } from './tokens/modeDark'
 import { FabricTheme } from './types'
-
-const blueScale = {
-  30: '#FAFBFF',
-  50: '#F0F4FF',
-  100: '#DBE5FF',
-  200: '#B3C8FF',
-  300: '#7A9FFF',
-  400: '#4C7EFF',
-  500: '#1253FF',
-  600: '#003CDB',
-  700: '#002B9E',
-  800: '#001C66',
-}
 
 export const centrifugeDark: FabricTheme = {
   ...baseTheme,

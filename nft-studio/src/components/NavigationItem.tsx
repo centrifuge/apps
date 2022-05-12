@@ -67,7 +67,7 @@ export const NavigationItem: React.FC<Props> = ({ label, icon, href, children, d
           onClick={() => {
             if (href) history.push(href)
           }}
-          variant="text"
+          variant="tertiary"
           icon={icon}
         />
       )}

@@ -1,12 +1,8 @@
 import { baseTheme } from './tokens/baseTheme'
 import { brandAltair } from './tokens/brandAltair'
+import { yellowScale } from './tokens/colors'
 import { modeDark } from './tokens/modeDark'
 import { FabricTheme } from './types'
-
-const yellowScale = {
-  500: '#FFC012',
-  700: '#574000',
-}
 
 export const altairDark: FabricTheme = {
   ...baseTheme,

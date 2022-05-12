@@ -20,7 +20,7 @@ export const WriteOffInput: React.FC = () => {
           subtitle="At least one write-off group is required"
           headerRight={
             <Button
-              variant="outlined"
+              variant="secondary"
               onClick={() => {
                 fldArr.push(createEmptyWriteOffGroup())
               }}
@@ -55,7 +55,9 @@ export const WriteOffInput: React.FC = () => {
                   validate={validate.writeOff}
                 />
                 <Box p={1}>
-                  {index !== 0 && <Button variant="text" icon={IconMinusCircle} onClick={() => fldArr.remove(index)} />}
+                  {index !== 0 && (
+                    <Button variant="tertiary" icon={IconMinusCircle} onClick={() => fldArr.remove(index)} />
+                  )}
                 </Box>
               </React.Fragment>
             ))}

@@ -18,8 +18,23 @@ type AccentColorName =
 type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled'}`
 type BorderColorName = `border${'Primary' | 'Secondary'}`
 type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page' | 'Input'}`
+type ButtonColorName =
+  | `${'background' | 'text' | 'border'}Button${'Primary' | 'Secondary' | 'Tertiary'}${
+      | ''
+      | 'Focus'
+      | 'Hover'
+      | 'Pressed'
+      | 'Disabled'}`
+  | 'shadowButtonPrimaryPressed'
+  | 'shadowButtonSecondaryPressed'
 
-type ColorName = StatusColorName | AccentColorName | TextColorName | BorderColorName | BackgroundColorName
+type ColorName =
+  | StatusColorName
+  | AccentColorName
+  | TextColorName
+  | BorderColorName
+  | BackgroundColorName
+  | ButtonColorName
 type ColorValue = string
 
 type ThemeColors = {
@@ -96,7 +111,7 @@ type ThemeFonts = {
 
 // Shadows
 
-type ShadowName = 'buttonFocused' | 'cardInteractive' | 'cardOverlay' | 'cardFocused'
+type ShadowName = 'buttonActive' | 'cardInteractive' | 'cardOverlay' | 'cardFocused'
 type ShadowValue = string
 
 type ThemeShadows = {

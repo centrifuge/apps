@@ -329,16 +329,11 @@ const CreatePoolForm: React.VFC = () => {
           }
           actions={
             <>
-              <Button variant="outlined" onClick={() => history.goBack()}>
+              <Button variant="secondary" onClick={() => history.goBack()}>
                 Cancel
               </Button>
 
-              <Button
-                loading={form.isSubmitting || transactionIsPending}
-                variant="contained"
-                type="submit"
-                disabled={!form.isValid}
-              >
+              <Button loading={form.isSubmitting || transactionIsPending} type="submit" disabled={!form.isValid}>
                 Create
               </Button>
             </>

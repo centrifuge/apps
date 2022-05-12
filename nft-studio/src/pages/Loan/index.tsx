@@ -89,7 +89,7 @@ const Loan: React.FC = () => {
           </TextWithPlaceholder>
         }
         actions={
-          <RouterLinkButton icon={IconChevronLeft} to={`/pools/${pid}`} variant="text" small>
+          <RouterLinkButton icon={IconChevronLeft} to={`/pools/${pid}`} variant="tertiary" small>
             {poolMetadata?.pool?.name ?? ''}
           </RouterLinkButton>
         }

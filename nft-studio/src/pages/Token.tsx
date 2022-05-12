@@ -82,7 +82,7 @@ const TokenDetail: React.FC = () => {
             onClick={() => history.push(`/pools/${poolId}`)}
             small
             icon={<IconChevronLeft width="16" />}
-            variant="text"
+            variant="tertiary"
           >
             {metadata?.pool?.name}
           </Button>

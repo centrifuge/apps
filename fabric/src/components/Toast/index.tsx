@@ -78,7 +78,7 @@ export const Toast: React.FC<ToastProps> = ({
         </Stack>
         <Shelf gap={2} ml="auto">
           {action}
-          {onDismiss && <Button variant="text" icon={IconX} onClick={onDismiss} />}
+          {onDismiss && <Button variant="tertiary" icon={IconX} onClick={onDismiss} />}
         </Shelf>
       </Shelf>
     </Card>

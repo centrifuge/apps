@@ -57,7 +57,7 @@ const Collection: React.FC = () => {
         }
         actions={
           canMint && (
-            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="outlined" small>
+            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="secondary" small>
               Mint NFT
             </RouterLinkButton>
           )

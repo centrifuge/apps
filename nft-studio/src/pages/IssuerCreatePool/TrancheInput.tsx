@@ -22,7 +22,7 @@ export const TrancheInput: React.FC = () => {
           subtitle="At least one tranche is required"
           headerRight={
             <Button
-              variant="outlined"
+              variant="secondary"
               onClick={() => {
                 fldArr.push(createEmptyTranche())
               }}
@@ -96,7 +96,7 @@ export const TrancheInput: React.FC = () => {
                   )}
                   <Box p={1}>
                     {index !== juniorTrancheIndex && (
-                      <Button variant="text" icon={IconMinusCircle} onClick={() => fldArr.remove(index)} />
+                      <Button variant="tertiary" icon={IconMinusCircle} onClick={() => fldArr.remove(index)} />
                     )}
                   </Box>
                 </React.Fragment>

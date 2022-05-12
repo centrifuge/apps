@@ -10,7 +10,7 @@ export const ConnectButton: React.FC<Props> = ({ label = 'Connect', ...rest }) =
   const { accounts, isConnecting, connect, selectedAccount } = useWeb3()
   return accounts ? (
     selectedAccount ? null : (
-      <Button disabled variant="text">
+      <Button disabled variant="tertiary">
         No account connected
       </Button>
     )

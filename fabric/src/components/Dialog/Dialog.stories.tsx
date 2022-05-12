@@ -25,7 +25,7 @@ export const Default: React.FC = () => {
             accusamus?
           </Text>
           <Shelf ml="auto" gap={1}>
-            <Button variant="outlined" onClick={() => setOpen(false)}>
+            <Button variant="secondary" onClick={() => setOpen(false)}>
               Close
             </Button>
             <Button onClick={() => setOpen(false)}>Also close</Button>
