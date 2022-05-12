@@ -57,15 +57,14 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
         }}
       >
         <NavigationTabs basePath={basePath}>
-          <NavigationTabsItem to={`${basePath}/dashboard`}>Dashboard</NavigationTabsItem>
+          <NavigationTabsItem to={`${basePath}/overview`}>Overview</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}`}>Portfolio</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}`}>Assets</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}`}>Liquidity</NavigationTabsItem>
+          <NavigationTabsItem to={`${basePath}/assets`}>Assets</NavigationTabsItem>
+          <NavigationTabsItem to={`${basePath}/liquidity`}>Liquidity</NavigationTabsItem>
           {showAdditionalIssuerTabs && <NavigationTabsItem to={`${basePath}/investors`}>Investors</NavigationTabsItem>}
           {showAdditionalIssuerTabs && (
             <NavigationTabsItem to={`${basePath}/configuration`}>Configuration</NavigationTabsItem>
           )}
-          <NavigationTabsItem to={`${basePath}`}>Data</NavigationTabsItem>
         </NavigationTabs>
       </Shelf>
     </>

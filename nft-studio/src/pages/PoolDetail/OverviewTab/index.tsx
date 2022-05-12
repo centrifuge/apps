@@ -75,7 +75,7 @@ export const PoolDetailOverviewTab: React.FC = () => {
   )
 }
 
-const PoolDetailOverview: React.FC = () => {
+export const PoolDetailOverview: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)

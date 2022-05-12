@@ -15,7 +15,7 @@ import { PoolDetailHeader } from '../Header'
 
 export const PoolDetailAssetsTab: React.FC = () => {
   return (
-    <PageWithSideBar sidebar>
+    <PageWithSideBar>
       <PoolDetailHeader />
       <LoadBoundary>
         <PoolDetailAssets />
@@ -24,7 +24,7 @@ export const PoolDetailAssetsTab: React.FC = () => {
   )
 }
 
-const PoolDetailAssets: React.FC = () => {
+export const PoolDetailAssets: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
@@ -33,21 +33,19 @@ const PoolDetailAssets: React.FC = () => {
 
   if (!pool || !loans) return null
 
-  const ongoingAssets = loans.filter((asset) => asset.status === 'Active')
-
-  const avgInterestRatePerSec = ongoingAssets
+  const avgInterestRatePerSec = loans
     ?.reduce<any>((curr, prev) => curr.add(prev.interestRatePerSec.toAprPercent()), Dec(0))
-    .dividedBy(ongoingAssets?.length)
+    .dividedBy(loans?.length)
     .toFixed(2)
     .toString()
 
-  const avgAmount = ongoingAssets
+  const avgAmount = loans
     ?.reduce<any>((curr, prev) => curr.add(prev.loanInfo.value.toDecimal()), Dec(0))
-    .dividedBy(ongoingAssets?.length)
+    .dividedBy(loans?.length)
     .toDecimalPlaces(2)
 
   const pageSummaryData = [
-    { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets?.length || 0 },
+    { label: <Tooltips type="ongoingAssets" />, value: loans?.length || 0 },
     { label: <Tooltips type="averageAssetMaturity" />, value: avgMaturity },
     { label: <Tooltips type="averageFinancingFee" />, value: formatPercentage(avgInterestRatePerSec) },
     { label: <Tooltips type="averageAmount" />, value: formatBalance(avgAmount, pool.currency) },
@@ -59,7 +57,7 @@ const PoolDetailAssets: React.FC = () => {
       {loans.length ? (
         <Box px="5" py="2">
           <LoanList
-            loans={ongoingAssets}
+            loans={loans}
             onLoanClicked={(loan) => {
               history.push(`/pools/${pool.id}/assets/${loan.id}`)
             }}
