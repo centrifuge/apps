@@ -116,51 +116,51 @@ const MintNFT: React.FC = () => {
   const batchMintNFTs = useDebugFlags().batchMintNFTs
 
   return (
-    <Stack>
-      <PageHeader
-        parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
-        title={nftName || DEFAULT_NFT_NAME}
-        subtitle={collectionMetadata?.name}
-        actions={
-          <>
-            {uploadError && <Text color="criticalPrimary">Image failed to upload</Text>}
-            {(balanceLow || !canMint) && (
-              <Text variant="label1" color="criticalForeground">
-                {!canMint
-                  ? `You're not the owner of the collection`
-                  : `Your balance is too low (${(balance || 0).toFixed(2)} AIR)`}
-              </Text>
-            )}
-            <Button disabled={submitDisabled} type="submit" loading={isMinting}>
-              Mint
-            </Button>
-            <RouterLinkButton to={`/collection/${collectionId}`} variant="secondary">
-              Cancel
-            </RouterLinkButton>
-          </>
-        }
-      />
-      <PageSection>
-        <Shelf alignItems="stretch" flexWrap="wrap" gap={4}>
-          <Flex alignItems="stretch" justifyContent="center" height="100%" flex="1 1 60%">
-            <FileImageUpload
-              key={version}
-              onFileUpdate={async (file) => {
-                if (file) {
-                  setFileName(file.name)
-                  setFileDataUri(await getFileDataURI(file))
-                  if (!nftName) {
-                    setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
+    <form onSubmit={execute} action="">
+      <Stack>
+        <PageHeader
+          parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
+          title={nftName || DEFAULT_NFT_NAME}
+          subtitle={collectionMetadata?.name}
+          actions={
+            <>
+              {uploadError && <Text color="criticalPrimary">Image failed to upload</Text>}
+              {(balanceLow || !canMint) && (
+                <Text variant="label1" color="criticalForeground">
+                  {!canMint
+                    ? `You're not the owner of the collection`
+                    : `Your balance is too low (${(balance || 0).toFixed(2)} AIR)`}
+                </Text>
+              )}
+              <Button disabled={submitDisabled} type="submit" loading={isMinting}>
+                Mint
+              </Button>
+              <RouterLinkButton to={`/collection/${collectionId}`} variant="secondary">
+                Cancel
+              </RouterLinkButton>
+            </>
+          }
+        />
+        <PageSection>
+          <Shelf alignItems="stretch" flexWrap="wrap" gap={4}>
+            <Flex alignItems="stretch" justifyContent="center" height="100%" flex="1 1 60%">
+              <FileImageUpload
+                key={version}
+                onFileUpdate={async (file) => {
+                  if (file) {
+                    setFileName(file.name)
+                    setFileDataUri(await getFileDataURI(file))
+                    if (!nftName) {
+                      setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
+                    }
+                  } else {
+                    setFileName('')
+                    setFileDataUri('')
                   }
-                } else {
-                  setFileName('')
-                  setFileDataUri('')
-                }
-              }}
-            />
-          </Flex>
-          <Box flex="1 1 30%" minWidth={250}>
-            <form onSubmit={execute} action="">
+                }}
+              />
+            </Flex>
+            <Box flex="1 1 30%" minWidth={250}>
               <Box mb={3}>
                 <TextInput
                   label="Name"
@@ -197,10 +197,10 @@ const MintNFT: React.FC = () => {
                   />
                 </Box>
               )}
-            </form>
-          </Box>
-        </Shelf>
-      </PageSection>
-    </Stack>
+            </Box>
+          </Shelf>
+        </PageSection>
+      </Stack>
+    </form>
   )
 }
