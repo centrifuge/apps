@@ -3,8 +3,9 @@ import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { formatBalance, formatPercentage } from '../utils/formatting'
-import { usePool, usePoolMetadata } from '../utils/usePools'
+import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
+import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 export type TokenTableData = {
   poolMetadata?: string
@@ -80,24 +81,26 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
 }
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
-  const { data: metadata } = usePoolMetadata({ metadata: token.poolMetadata })
-  const pool = usePool(token.poolId)
-  const tranche = pool?.tranches.find((t) => t.id === token.id)
-  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+  const { data: metadata, isLoading } = usePoolMetadata({ metadata: token.poolMetadata })
+  const trancheMeta = metadata?.tranches?.[token.seniority]
   const symbol = trancheMeta?.symbol
   return (
     <Shelf gap="2">
       <Thumbnail label={symbol || ''} size="small" />
-      <Text variant="body2" color="textPrimary" fontWeight={600}>
+      <TextWithPlaceholder isLoading={isLoading} variant="body2" color="textPrimary" fontWeight={600}>
         {metadata?.pool?.name} {trancheMeta?.name}
-      </Text>
+      </TextWithPlaceholder>
     </Shelf>
   )
 }
 
 const AssetClass: React.VFC<RowProps> = ({ token }) => {
-  const { data: metadata } = usePoolMetadata({ metadata: token.poolMetadata })
-  return <Text variant="body2">{metadata?.pool?.asset.class}</Text>
+  const { data: metadata, isLoading } = usePoolMetadata({ metadata: token.poolMetadata })
+  return (
+    <TextWithPlaceholder isLoading={isLoading} variant="body2">
+      {metadata?.pool?.asset.class}
+    </TextWithPlaceholder>
+  )
 }
 
 const Yield: React.VFC<RowProps> = ({ token }) => {
