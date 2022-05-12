@@ -33,6 +33,7 @@ const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
         return css({
           borderRadius: '4px',
           background: theme.colors.backgroundThumbnail,
+          color: theme.colors.textInverted,
         })
       case 'asset':
         return css({
