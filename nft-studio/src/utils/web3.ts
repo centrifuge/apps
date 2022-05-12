@@ -20,8 +20,8 @@ export function isWhitelistedAccount(address: string) {
 
 export function truncateAddress(address: string) {
   const encodedAddress = encodeAddress(address, 2)
-  const first = encodedAddress.slice(0, 6)
-  const last = encodedAddress.slice(-6)
+  const first = encodedAddress.slice(0, 5)
+  const last = encodedAddress.slice(-5)
 
   return `${first}...${last}`
 }

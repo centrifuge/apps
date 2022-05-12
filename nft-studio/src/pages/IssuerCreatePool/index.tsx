@@ -15,7 +15,7 @@ import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
-import { FieldWithErrorMessage } from '../../components/form/formik/FieldWithErrorMessage'
+import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { PageWithSideBar } from '../../components/PageWithSideBar'

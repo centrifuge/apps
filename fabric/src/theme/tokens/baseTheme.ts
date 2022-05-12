@@ -24,7 +24,7 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
   },
   shadows: {
     cardInteractive: '0 1px 5px rgba(0, 0, 0, 0.2)',
-    cardFocused: ' 0 0 0 1px var(--fabric-color-focus), 0 1px 5px rgba(0, 0, 0, 0.2)',
+    cardActive: ' 0 0 0 1px var(--fabric-color-focus), 0 1px 5px rgba(0, 0, 0, 0.2)',
     cardOverlay: '4px 8px 24px rgba(0, 0, 0, 0.2)',
     buttonActive: `4px 4px 1px var(--fabric-color-focus)`,
   },

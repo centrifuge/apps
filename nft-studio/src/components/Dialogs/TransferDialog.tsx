@@ -1,4 +1,4 @@
-import { Button, Dialog, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Dialog, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
 import { useAddress } from '../../utils/useAddress'
@@ -6,7 +6,6 @@ import { useBalance } from '../../utils/useBalance'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { isSameAddress } from '../../utils/web3'
 import { ButtonGroup } from '../ButtonGroup'
-import { TextInput } from '../TextInput'
 
 type Props = {
   open: boolean
@@ -61,7 +60,7 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
     if (!address) return 'No address provided'
     if (!isAddress(address)) return 'Not a valid address'
     if (isSameAddress(address, connectedAddress)) return 'Address is the same as the current owner'
-    return null
+    return undefined
   }
 
   const error = getError()
@@ -84,12 +83,8 @@ export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, n
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               onBlur={() => setTouched(true)}
+              errorMessage={touched ? error : undefined}
             />
-            {touched && error && (
-              <Text variant="label2" color="criticalForeground">
-                {error}
-              </Text>
-            )}
           </Stack>
           <Shelf justifyContent="space-between">
             {balanceLow && (

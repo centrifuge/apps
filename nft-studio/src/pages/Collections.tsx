@@ -1,10 +1,11 @@
-import { Button, IconPlus, LayoutGrid, LayoutGridItem, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, IconPlus, LayoutGrid, LayoutGridItem, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
 import { CreateCollectionDialog } from '../components/Dialogs/CreateCollectionDialog'
 import { Identity } from '../components/Identity'
 import { PageHeader } from '../components/PageHeader'
+import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { nftMetadataSchema } from '../schemas'
@@ -62,7 +63,7 @@ const Collections: React.FC = () => {
   )
 
   return (
-    <Stack gap={8} flex={1} pb={8}>
+    <Stack>
       <PageHeader
         title="NFTs"
         actions={
@@ -72,11 +73,7 @@ const Collections: React.FC = () => {
         }
       />
       {featuredCollections?.length ? (
-        <Stack gap={3}>
-          <Text variant="heading3" as="h2">
-            Featured collections
-          </Text>
-
+        <PageSection title="Featured collections">
           <LayoutGrid>
             {featuredCollections?.map((col) => (
               <LayoutGridItem span={[4, 2, 4, 3]} key={col.id}>
@@ -84,13 +81,11 @@ const Collections: React.FC = () => {
               </LayoutGridItem>
             ))}
           </LayoutGrid>
-        </Stack>
+        </PageSection>
       ) : null}
+
       {address && (
-        <Stack gap={3}>
-          <Text variant="heading3" as="h2">
-            My collections
-          </Text>
+        <PageSection title="My collections">
           {userCollections?.length || accountNfts?.length ? (
             <LayoutGrid>
               {accountNfts?.length ? (
@@ -116,18 +111,14 @@ const Collections: React.FC = () => {
               ))}
             </LayoutGrid>
           ) : (
-            <Shelf justifyContent="center" textAlign="center">
-              <Text variant="heading2" color="textSecondary">
-                You have no collections yet
-              </Text>
-            </Shelf>
+            <Text variant="heading2" color="textSecondary">
+              You have no collections yet
+            </Text>
           )}
-        </Stack>
+        </PageSection>
       )}
-      <Stack gap={3}>
-        <Text variant="heading3" as="h2">
-          {address || featuredCollections?.length ? 'Other collections' : 'Collections'}
-        </Text>
+
+      <PageSection title={address || featuredCollections?.length ? 'Other collections' : 'Collections'}>
         {otherCollections?.length ? (
           <>
             <LayoutGrid>
@@ -142,13 +133,12 @@ const Collections: React.FC = () => {
             )}
           </>
         ) : (
-          <Shelf justifyContent="center" textAlign="center">
-            <Text variant="heading2" color="textSecondary">
-              There are no collections yet
-            </Text>
-          </Shelf>
+          <Text variant="heading2" color="textSecondary">
+            There are no collections yet
+          </Text>
         )}
-      </Stack>
+      </PageSection>
+
       <CreateCollectionDialog open={createOpen} onClose={() => setCreateOpen(false)} />
     </Stack>
   )

@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 
 type Props = {
-  label: string
+  label: React.ReactNode
   icon?: React.ReactElement
   href?: string
   defaultOpen?: boolean
@@ -13,7 +13,8 @@ type Props = {
 
 const NavigationClickable = styled(Shelf)<{ $active?: boolean }>`
   cursor: pointer;
-  background: ${({ $active }) => $active && '#EDF2FF'};
+  background: ${({ $active, theme }) => $active && theme.colors.secondarySelectedBackground};
+  color: ${({ $active, theme }) => ($active ? theme.colors.accentPrimary : theme.colors.textPrimary)};
   :hover {
     color: ${({ theme }) => theme.colors.accentPrimary};
   }

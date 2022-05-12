@@ -73,7 +73,7 @@ const darkColors = {
   textButtonTertiaryDisabled: grayScale[600],
   borderButtonTertiary: 'transparent',
   borderButtonTertiaryFocus: 'transparent',
-  borderButtonTertiaryHover: blueScale[800],
+  borderButtonTertiaryHover: 'transparent',
   borderButtonTertiaryPressed: blueScale[400],
   borderButtonTertiaryDisabled: 'transparent',
 }

@@ -5,6 +5,7 @@ import { useQueries } from 'react-query'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { PageHeader } from '../components/PageHeader'
+import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { useWeb3 } from '../components/Web3Provider'
 import { PoolMetadata } from '../types'
@@ -96,7 +97,7 @@ const CreateLoan: React.FC = () => {
   return (
     <FormikProvider value={form}>
       <Form>
-        <Stack gap={3} flex={1}>
+        <Stack>
           <PageHeader
             title="Create asset"
             actions={
@@ -111,7 +112,7 @@ const CreateLoan: React.FC = () => {
             }
             walletShown={false}
           />
-          <Stack maxWidth={330}>
+          <PageSection>
             <Field name="poolId">
               {({ field, form }: any) => (
                 <Select
@@ -124,7 +125,7 @@ const CreateLoan: React.FC = () => {
                 />
               )}
             </Field>
-          </Stack>
+          </PageSection>
         </Stack>
       </Form>
     </FormikProvider>

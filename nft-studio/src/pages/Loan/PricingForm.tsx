@@ -2,7 +2,7 @@ import { Balance, Loan as LoanType, LoanInfoInput, Pool, Rate } from '@centrifug
 import { Button, DateInput, Grid, NumberInput, Select, Stack } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { FieldWithErrorMessage } from '../../components/form/formik/FieldWithErrorMessage'
+import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { PageSummary } from '../../components/PageSummary'
 import { getCurrencySymbol } from '../../utils/formatting'
