@@ -15,9 +15,9 @@ type AccentColorName =
   | 'textSelected'
   | 'textInteractive'
   | 'textInteractiveHover'
-type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled'}`
+type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled' | 'Inverted'}`
 type BorderColorName = `border${'Primary' | 'Secondary'}`
-type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page' | 'Input'}`
+type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page' | 'Input' | 'Thumbnail'}`
 type ButtonColorName =
   | `${'background' | 'text' | 'border'}Button${'Primary' | 'Secondary' | 'Tertiary'}${
       | ''

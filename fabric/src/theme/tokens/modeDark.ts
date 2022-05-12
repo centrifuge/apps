@@ -10,11 +10,13 @@ const darkColors = {
   textPrimary: 'white',
   textSecondary: grayScale[500],
   textDisabled: grayScale[600],
+  textInverted: 'black',
 
   backgroundPrimary: grayScale[900],
   backgroundSecondary: grayScale[800],
   backgroundPage: 'black',
   backgroundInput: grayScale[950],
+  backgroundThumbnail: grayScale[400],
 
   borderPrimary: grayScale[700],
   borderSecondary: grayScale[800],
