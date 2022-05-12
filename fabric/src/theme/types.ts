@@ -15,9 +15,9 @@ type AccentColorName =
   | 'textSelected'
   | 'textInteractive'
   | 'textInteractiveHover'
-type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled'}`
+type TextColorName = `text${'Primary' | 'Secondary' | 'Disabled' | 'Inverted'}`
 type BorderColorName = `border${'Primary' | 'Secondary'}`
-type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page' | 'Input'}`
+type BackgroundColorName = `background${'Primary' | 'Secondary' | 'Page' | 'Input' | 'Thumbnail'}`
 type ButtonColorName =
   | `${'background' | 'text' | 'border'}Button${'Primary' | 'Secondary' | 'Tertiary'}${
       | ''
@@ -118,6 +118,12 @@ type ThemeShadows = {
   [k in ShadowName]: ShadowValue
 }
 
+type ZIndexName = 'sticky' | 'overlay' | 'onTopOfTheWorld'
+type ZIndexValue = number
+type ThemeZIndices = {
+  [k in ZIndexName]: ZIndexValue
+}
+
 export type FabricTheme = {
   scheme: 'light' | 'dark'
   colors: ThemeColors
@@ -128,4 +134,5 @@ export type FabricTheme = {
   fonts: ThemeFonts
   space: ThemeSpace
   shadows: ThemeShadows
+  zIndices: ThemeZIndices
 }

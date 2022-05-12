@@ -10,11 +10,13 @@ const lightColors = {
   textPrimary: 'black',
   textSecondary: grayScale[700],
   textDisabled: grayScale[500],
+  textInverted: 'white',
 
   backgroundPrimary: 'white',
   backgroundSecondary: grayScale[100],
   backgroundPage: 'white',
   backgroundInput: grayScale[50],
+  backgroundThumbnail: grayScale[600],
 
   borderPrimary: grayScale[300],
   borderSecondary: grayScale[200],

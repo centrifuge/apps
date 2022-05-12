@@ -17,7 +17,6 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { formatBalance, formatBalanceAbbreviated } from '../utils/formatting'
 import { useDailyPoolStates, usePool } from '../utils/usePools'
-import { Tooltips } from './Tooltips'
 
 type ChartData = {
   day: Date
@@ -55,10 +54,10 @@ export const ReserveChart: React.VFC = () => {
   const poolCurrency = pool?.currency || ''
   return (
     <div ref={ref}>
-      <StyledWrapper gap="4">
+      <StyledWrapper gap="4" mt="5">
         {dataIncludingToday?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart width={754} height={173} data={dataIncludingToday} margin={{ top: 60, left: -30 }}>
+            <ComposedChart width={754} height={173} data={dataIncludingToday} margin={{ top: 10, left: -30 }}>
               <XAxis
                 dataKey="day"
                 tick={<CustomizedXAxisTick variant={dataIncludingToday.length > 30 ? 'months' : 'days'} />}
@@ -77,6 +76,7 @@ export const ReserveChart: React.VFC = () => {
               <Line dataKey="assetValue" stroke={theme.colors.accentSecondary} fill="transparent" dot={false} />
               <Line dot={false} dataKey="poolValue" stroke={theme.colors.accentPrimary} fill="transparent" />
               <Tooltip
+                allowEscapeViewBox={{ x: false, y: true }}
                 content={
                   <CustomizedTooltip
                     width={ref?.current?.offsetWidth}
@@ -135,7 +135,7 @@ const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active,
     day: 'numeric',
   }).format(new Date(Number(tooltipData.date) || 0))
   return (
-    <Shelf bg="white" width={width || '100%'} gap="2" position="relative">
+    <Shelf bg="white" width={'100%'} gap="2" position="relative" top={-50}>
       <Grid pl="55px" pt="10px" columns={4} gap="4" width="100%">
         <Stack
           borderLeftWidth="3px"
@@ -144,7 +144,7 @@ const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active,
           borderLeftColor={theme.colors.accentPrimary}
           minWidth="148px"
         >
-          <Tooltips type="poolValue" variant="secondary" />
+          <Text variant="label2">Pool value</Text>
           <Text variant="body2">{formatBalance(tooltipData.poolValue, currency)}</Text>
         </Stack>
         <Stack
@@ -154,7 +154,7 @@ const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active,
           borderLeftStyle="solid"
           borderLeftColor={theme.colors.accentSecondary}
         >
-          <Tooltips type="assetValue" variant="secondary" />
+          <Text variant="label2">Asset value</Text>
           <Text variant="body2">{formatBalance(tooltipData.assetValue, currency)}</Text>
         </Stack>
         <Stack
@@ -164,7 +164,7 @@ const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active,
           borderLeftStyle="solid"
           borderLeftColor={theme.colors.borderSecondary}
         >
-          <Tooltips type="reserve" variant="secondary" />
+          <Text variant="label2">Reserve</Text>
           <Text variant="body2">{formatBalance(tooltipData.reserve, currency)}</Text>
         </Stack>
         <Box alignSelf="flex-end" justifySelf="end">
@@ -185,7 +185,8 @@ const CustomizedXAxisTick: React.VFC<CustomizedXAxisTickProps> = ({ payload, x, 
   let tick
   if (variant === 'months') {
     const formatter = new Intl.DateTimeFormat('en', { month: 'short' })
-    tick = payload?.value && new Date(payload.value).getDate() === 2 ? formatter.format(payload?.value) : null
+    // show month tick only on the first of every month
+    tick = payload?.value && new Date(payload.value).getDate() === 1 ? formatter.format(payload?.value) : null
   } else {
     const formatter = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' })
     tick = formatter.format(payload?.value)

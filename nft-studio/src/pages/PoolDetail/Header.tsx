@@ -4,6 +4,7 @@ import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
+import { PAGE_GUTTER } from '../../components/PageWithSideBar'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
@@ -46,18 +47,21 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
         }
         border={false}
         actions={actions}
-      />
-      <Shelf
-        style={{
-          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
-        }}
       >
-        <NavigationTabs basePath={basePath}>
-          <NavigationTabsItem to={`${basePath}`}>Overview</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}/assets`}>Assets</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}/liquidity`}>Liquidity</NavigationTabsItem>
-        </NavigationTabs>
-      </Shelf>
+        <Shelf
+          px={PAGE_GUTTER}
+          bg={theme.colors.backgroundPrimary}
+          style={{
+            boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
+          }}
+        >
+          <NavigationTabs basePath={basePath}>
+            <NavigationTabsItem to={`${basePath}`}>Overview</NavigationTabsItem>
+            <NavigationTabsItem to={`${basePath}/assets`}>Assets</NavigationTabsItem>
+            <NavigationTabsItem to={`${basePath}/liquidity`}>Liquidity</NavigationTabsItem>
+          </NavigationTabs>
+        </Shelf>
+      </PageHeader>
     </>
   )
 }

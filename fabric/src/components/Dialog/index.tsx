@@ -25,7 +25,7 @@ const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dial
   return (
     <Box
       position="fixed"
-      zIndex={100}
+      zIndex="overlay"
       top={0}
       left={0}
       bottom={0}

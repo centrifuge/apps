@@ -1,11 +1,13 @@
 import { Loan } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Text } from '@centrifuge/fabric'
+import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { nftMetadataSchema } from '../schemas'
+import { daysBetween, formatAge, formatDate } from '../utils/date'
+import { formatBalance } from '../utils/formatting'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFT } from '../utils/useNFTs'
-import { usePool, usePoolMetadata } from '../utils/usePools'
-import { Column, DataTable } from './DataTable'
+import { usePool } from '../utils/usePools'
+import { Column, DataTable, SortableTableHeader } from './DataTable'
 import LoanLabel from './LoanLabel'
 
 type Props = {
@@ -17,36 +19,42 @@ export const LoanList: React.FC<Props> = ({ loans, onLoanClicked }) => {
   const columns: Column[] = [
     {
       align: 'left',
-      header: 'Name',
+      header: 'Asset',
       cell: (l: Loan) => <AssetName loan={l} />,
+      flex: '3',
     },
     {
-      align: 'left',
-      header: 'Description',
-      cell: (l: Loan) => <AssetDescription loan={l} />,
-      flex: '2 1 250px',
+      header: 'Maturity',
+      cell: (l: Loan) => (
+        <Text variant="body2">
+          {'maturityDate' in l.loanInfo ? formatAge(daysBetween(l.originationDate, l.loanInfo?.maturityDate)) : ''}
+        </Text>
+      ),
+      flex: '2',
     },
     {
-      align: 'left',
-      header: 'Pool',
-      cell: (l: Loan) => <PoolName loan={l} />,
+      header: 'Maturity Date',
+      cell: (l: Loan) => (
+        <Text variant="body2">{'maturityDate' in l.loanInfo ? formatDate(l.loanInfo.maturityDate) : ''}</Text>
+      ),
+      flex: '2',
     },
     {
-      align: 'left',
-      header: 'NFT ID',
-      cell: (l: Loan) => <Text variant="body2">{shorten(l.asset.nftId, 4)}</Text>,
-      flex: '1 1 100px',
+      header: () => <SortableTableHeader label="Amount" />,
+      cell: (l: Loan) => <AssetAmount loan={l} />,
+      flex: '2',
+      sortKey: 'principleDebt',
     },
     {
-      align: 'left',
       header: 'Status',
       cell: (l: Loan) => <LoanLabel loan={l} />,
-      flex: '1 1 100px',
+      flex: '2',
+      align: 'center',
     },
     {
       header: '',
       cell: () => <IconChevronRight size={24} color="textPrimary" />,
-      flex: '0 0 72px',
+      flex: '0 0 52px',
     },
   ]
 
@@ -57,23 +65,16 @@ const AssetName: React.VFC<{ loan: Loan }> = ({ loan }) => {
   const nft = useNFT(loan.asset.collectionId, loan.asset.nftId)
   const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   return (
-    <Text variant="body2" fontWeight={600}>
-      {metadata?.name || 'Unnamed asset'}
-    </Text>
+    <Shelf gap="1" overflowX="hidden">
+      <Thumbnail type="asset" label={loan.id} />
+      <Text variant="body2" fontWeight={600}>
+        {metadata?.name || 'Unnamed asset'}
+      </Text>
+    </Shelf>
   )
 }
 
-const AssetDescription: React.VFC<{ loan: Loan }> = ({ loan }) => {
-  const nft = useNFT(loan.asset.collectionId, loan.asset.nftId)
-  const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
-  return <Text variant="body2">{metadata?.description}</Text>
-}
-
-const PoolName: React.VFC<{ loan: Loan }> = ({ loan }) => {
+const AssetAmount: React.VFC<{ loan: Loan }> = ({ loan }) => {
   const pool = usePool(loan.poolId)
-  const { data } = usePoolMetadata(pool)
-  return <Text variant="body2">{data?.pool?.name}</Text>
+  return <Text variant="body2">{formatBalance(loan.loanInfo.value, pool?.currency)}</Text>
 }
-
-const shorten = (addr: string, visibleChars: number) =>
-  `${addr.substr(0, visibleChars)}...${addr.substr(addr.length - visibleChars)}`

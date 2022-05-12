@@ -14,6 +14,6 @@ export const PoolDetailLiquidityTab: React.FC = () => {
   )
 }
 
-const PoolDetailLiquidity: React.FC = () => {
+export const PoolDetailLiquidity: React.FC = () => {
   return <div>Liquidity</div>
 }

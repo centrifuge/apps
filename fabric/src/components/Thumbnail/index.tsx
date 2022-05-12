@@ -12,7 +12,7 @@ type ThumbnailProps = {
 export const Thumbnail: React.VFC<ThumbnailProps> = ({ label, ...props }) => {
   return (
     <StyledThumbnail fontWeight={500} {...props}>
-      <Stack position="relative" zIndex={1}>
+      <Stack position="relative" zIndex="1">
         <span>{label.slice(0, 3)}</span>
         <span>{label.slice(3, 6)}</span>
       </Stack>
@@ -21,7 +21,6 @@ export const Thumbnail: React.VFC<ThumbnailProps> = ({ label, ...props }) => {
 }
 
 const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
-  background: ${({ theme, type }) => (type === 'asset' ? 'transparent' : theme.colors.accentSecondary)};
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -33,9 +32,13 @@ const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
       case 'pool':
         return css({
           borderRadius: '4px',
+          background: theme.colors.backgroundThumbnail,
+          color: theme.colors.textInverted,
         })
       case 'asset':
         return css({
+          color: theme.colors.textInverted,
+          background: 'transparent',
           '&::before': {
             content: '""',
             width: '80%',
@@ -48,7 +51,8 @@ const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
             margin: 'auto',
             zIndex: 0,
             transform: 'rotate(45deg)',
-            background: theme.colors.accentSecondary,
+            background: theme.colors.backgroundThumbnail,
+            color: theme.colors.textInverted,
             borderRadius: '4px',
           },
         })
@@ -56,6 +60,7 @@ const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
       default:
         return css({
           borderRadius: '100%',
+          background: theme.colors.accentSecondary,
         })
     }
   }};

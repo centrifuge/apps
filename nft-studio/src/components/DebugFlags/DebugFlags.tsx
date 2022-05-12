@@ -63,7 +63,7 @@ const Panel: React.FC<{
   }, [alwaysShowPanel])
 
   return (
-    <StyledPanel position="fixed" bottom={0} right={0} zIndex={10}>
+    <StyledPanel position="fixed" bottom={0} right={0} zIndex="overlay">
       <Shelf
         justifyContent="center"
         width="400px"
