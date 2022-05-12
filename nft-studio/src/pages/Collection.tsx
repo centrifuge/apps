@@ -136,7 +136,7 @@ const Collection: React.FC = () => {
       {nfts?.length ? (
         <>
           <PageSection title={`${collection?.instances ?? 0} NFTs`}>
-            <Grid gap={[2, 3]} columns={[2, 2, 3, 4]} equalColumns>
+            <Grid gap={[2, 3]} columns={[1, 2, 2, 3, 4]} equalColumns>
               {nfts.slice(0, shownCount).map((nft) => (
                 <NFTCard nft={nft} key={nft.id} />
               ))}
