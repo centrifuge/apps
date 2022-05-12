@@ -12,7 +12,7 @@ type ThumbnailProps = {
 export const Thumbnail: React.VFC<ThumbnailProps> = ({ label, ...props }) => {
   return (
     <StyledThumbnail fontWeight={500} {...props}>
-      <Stack position="relative" zIndex="above">
+      <Stack position="relative" zIndex="1">
         <span>{label.slice(0, 3)}</span>
         <span>{label.slice(3, 6)}</span>
       </Stack>

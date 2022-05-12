@@ -118,7 +118,7 @@ type ThemeShadows = {
   [k in ShadowName]: ShadowValue
 }
 
-type ZIndexName = 'below' | 'base' | 'above' | 'sticky' | 'overlay' | 'onTopOfTheWorld'
+type ZIndexName = 'sticky' | 'overlay' | 'onTopOfTheWorld'
 type ZIndexValue = number
 type ThemeZIndices = {
   [k in ZIndexName]: ZIndexValue

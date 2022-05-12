@@ -29,9 +29,6 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
     buttonActive: `4px 4px 1px var(--fabric-color-focus)`,
   },
   zIndices: {
-    below: -1,
-    base: 0,
-    above: 1,
     sticky: 100,
     overlay: 200,
     onTopOfTheWorld: 1000, // use sparingly, only for edge cases

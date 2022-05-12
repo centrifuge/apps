@@ -241,7 +241,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 >
                   {typeof curFile === 'string' ? curFile : curFile.name}
                 </Text>
-                <Box display="flex" position="relative" zIndex="above" ml="auto" my="-10px" minWidth="iconMedium">
+                <Box display="flex" position="relative" zIndex="1" ml="auto" my="-10px" minWidth="iconMedium">
                   {!disabled && <Button variant="tertiary" onClick={handleClear} icon={IconX} disabled={disabled} />}
                 </Box>
               </Shelf>

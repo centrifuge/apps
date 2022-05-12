@@ -80,7 +80,7 @@ export const CollectionCardInner = React.forwardRef<HTMLAnchorElement, InnerProp
                 width="100%"
                 height="100%"
                 position="relative"
-                zIndex="above"
+                zIndex="1"
                 style={{ objectFit: 'cover', transition: 'opacity 200ms', opacity: imageShown ? 1 : 0 }}
                 onLoad={() => setImageShown(true)}
               />
@@ -92,7 +92,7 @@ export const CollectionCardInner = React.forwardRef<HTMLAnchorElement, InnerProp
               height="100%"
               top={0}
               left={0}
-              zIndex="base"
+              zIndex="0"
               backgroundColor="black"
               style={{ transition: 'opacity 200ms', opacity: imageShown ? 0 : 1 }}
             >
@@ -100,7 +100,7 @@ export const CollectionCardInner = React.forwardRef<HTMLAnchorElement, InnerProp
             </Shelf>
 
             {count != null ? (
-              <Count px={1} py="4px" position="absolute" bottom={1} right={1} zIndex="above">
+              <Count px={1} py="4px" position="absolute" bottom={1} right={1} zIndex="1">
                 <Text variant="label2" color="textPrimary">
                   {count} NFTs
                 </Text>
