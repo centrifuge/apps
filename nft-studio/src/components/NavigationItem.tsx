@@ -13,7 +13,8 @@ type Props = {
 
 const NavigationClickable = styled(Shelf)<{ $active?: boolean }>`
   cursor: pointer;
-  background: ${({ $active }) => $active && '#EDF2FF'};
+  background: ${({ $active, theme }) => $active && theme.colors.secondarySelectedBackground};
+  color: ${({ $active, theme }) => ($active ? theme.colors.accentPrimary : theme.colors.textPrimary)};
   :hover {
     color: ${({ theme }) => theme.colors.accentPrimary};
   }

@@ -22,6 +22,7 @@ export const altairDark: FabricTheme = {
   shadows: {
     ...baseTheme.shadows,
     cardInteractive: '0 1px 5px rgba(255, 255, 255, .8)',
+    cardActive: ' 0 0 0 1px var(--fabric-color-focus), 0 1px 5px rgba(255, 255, 255, .8)',
     cardOverlay: `0 0 0 1px ${modeDark.colors.borderPrimary}`,
   },
 }
