@@ -13,7 +13,7 @@ export const PageSection: React.FC<Props> = ({ title, titleAddition, subtitle, h
     <Stack
       as="section"
       pl={3}
-      pr={6}
+      pr={7}
       pt={3}
       pb={4}
       gap={3}
@@ -40,7 +40,7 @@ export const PageSection: React.FC<Props> = ({ title, titleAddition, subtitle, h
           {headerRight}
         </Shelf>
       )}
-      <Box px={3}>{children}</Box>
+      <Box pl={4}>{children}</Box>
     </Stack>
   )
 }

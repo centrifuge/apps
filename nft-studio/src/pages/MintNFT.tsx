@@ -2,14 +2,13 @@ import { Box, Button, Flex, NumberInput, Shelf, Stack, Text, TextAreaInput, Text
 import React, { useReducer, useState } from 'react'
 import { useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router'
-import { NavLink } from 'react-router-dom'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useDebugFlags } from '../components/DebugFlags'
 import { FileImageUpload } from '../components/FileImageUpload'
 import { PageHeader } from '../components/PageHeader'
+import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { RouterLinkButton } from '../components/RouterLinkButton'
-import { SplitView } from '../components/SplitView'
 import { nftMetadataSchema } from '../schemas'
 import { createNFTMetadata } from '../utils/createNFTMetadata'
 import { getFileDataURI } from '../utils/getFileDataURI'
@@ -117,15 +116,33 @@ const MintNFT: React.FC = () => {
   const batchMintNFTs = useDebugFlags().batchMintNFTs
 
   return (
-    <Stack flex={1}>
+    <Stack>
       <PageHeader
         parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
         title={nftName || DEFAULT_NFT_NAME}
+        subtitle={collectionMetadata?.name}
+        actions={
+          <>
+            {uploadError && <Text color="criticalPrimary">Image failed to upload</Text>}
+            {(balanceLow || !canMint) && (
+              <Text variant="label1" color="criticalForeground">
+                {!canMint
+                  ? `You're not the owner of the collection`
+                  : `Your balance is too low (${(balance || 0).toFixed(2)} AIR)`}
+              </Text>
+            )}
+            <Button disabled={submitDisabled} type="submit" loading={isMinting}>
+              Mint
+            </Button>
+            <RouterLinkButton to={`/collection/${collectionId}`} variant="secondary">
+              Cancel
+            </RouterLinkButton>
+          </>
+        }
       />
-
-      <SplitView
-        left={
-          <Flex alignItems="stretch" justifyContent="center" height="100%" p={[2, 4, 0]} mx={8} mt={2}>
+      <PageSection>
+        <Shelf alignItems="stretch" flexWrap="wrap" gap={4}>
+          <Flex alignItems="stretch" justifyContent="center" height="100%" flex="1 1 60%">
             <FileImageUpload
               key={version}
               onFileUpdate={async (file) => {
@@ -142,79 +159,48 @@ const MintNFT: React.FC = () => {
               }}
             />
           </Flex>
-        }
-        right={
-          <Box px={[2, 4, 8]} py={9}>
-            <Stack gap={6}>
-              <Stack gap={1}>
-                <NavLink to={`/collection/${collectionId}`}>
-                  <Text variant="heading3" underline style={{ wordBreak: 'break-word' }}>
-                    {collectionMetadata?.name}
-                  </Text>
-                </NavLink>
-                <Text variant="heading1" fontSize="36px" fontWeight="700" mb="4px" style={{ wordBreak: 'break-word' }}>
-                  {nftName || 'Untitled NFT'}
-                </Text>
-              </Stack>
-              <form onSubmit={execute} action="">
-                <Box mb={3}>
-                  <TextInput
-                    label="Name"
-                    placeholder={DEFAULT_NFT_NAME}
-                    value={nftName}
-                    maxLength={nftMetadataSchema.name.maxLength}
+          <Box flex="1 1 30%" minWidth={250}>
+            <form onSubmit={execute} action="">
+              <Box mb={3}>
+                <TextInput
+                  label="Name"
+                  placeholder={DEFAULT_NFT_NAME}
+                  value={nftName}
+                  maxLength={nftMetadataSchema.name.maxLength}
+                  onChange={({ target }) => {
+                    setNftName((target as HTMLInputElement).value)
+                  }}
+                  disabled={fieldDisabled}
+                />
+              </Box>
+              <TextAreaInput
+                label="Description"
+                value={nftDescription}
+                maxLength={nftMetadataSchema.description.maxLength}
+                onChange={({ target }) => {
+                  setNftDescription((target as HTMLTextAreaElement).value)
+                }}
+                disabled={fieldDisabled}
+              />
+              {batchMintNFTs && (
+                <Box mt={3}>
+                  <NumberInput
+                    value={nftAmount}
+                    label="Amount"
+                    type="number"
+                    min="1"
+                    max="1000"
                     onChange={({ target }) => {
-                      setNftName((target as HTMLInputElement).value)
+                      setNftAmount(Number((target as HTMLInputElement).value))
                     }}
                     disabled={fieldDisabled}
                   />
                 </Box>
-                <TextAreaInput
-                  label="Description"
-                  value={nftDescription}
-                  maxLength={nftMetadataSchema.description.maxLength}
-                  onChange={({ target }) => {
-                    setNftDescription((target as HTMLTextAreaElement).value)
-                  }}
-                  disabled={fieldDisabled}
-                />
-                {batchMintNFTs && (
-                  <Box mt={3}>
-                    <NumberInput
-                      value={nftAmount}
-                      label="Amount"
-                      type="number"
-                      min="1"
-                      max="1000"
-                      onChange={({ target }) => {
-                        setNftAmount(Number((target as HTMLInputElement).value))
-                      }}
-                      disabled={fieldDisabled}
-                    />
-                  </Box>
-                )}
-
-                <Shelf gap={2} mt={6}>
-                  <Button disabled={submitDisabled} type="submit" loading={isMinting}>
-                    Mint
-                  </Button>
-                  <RouterLinkButton to={`/collection/${collectionId}`} variant="secondary" disabled={submitDisabled}>
-                    Cancel
-                  </RouterLinkButton>
-                  {(balanceLow || !canMint) && (
-                    <Text variant="label1" color="criticalForeground">
-                      {!canMint
-                        ? `You're not the owner of the collection`
-                        : `Your balance is too low (${(balance || 0).toFixed(2)} AIR)`}
-                    </Text>
-                  )}
-                  {uploadError && <Text color="criticalPrimary">Image failed to upload</Text>}
-                </Shelf>
-              </form>
-            </Stack>
+              )}
+            </form>
           </Box>
-        }
-      />
+        </Shelf>
+      </PageSection>
     </Stack>
   )
 }
