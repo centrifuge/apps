@@ -1,12 +1,12 @@
 import { Button, IconArrowRight, IconChevronLeft } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
+import { PoolAssetReserveChart } from '../../../components/Charts/PoolAssetReserveChart'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { ReserveChart } from '../../../components/ReserveChart'
 import { RiskGroupList } from '../../../components/RiskGroupList'
 import { TokenListByPool } from '../../../components/TokenListByPool'
 import { Tooltips } from '../../../components/Tooltips'
@@ -92,7 +92,7 @@ export const PoolDetailOverview: React.FC = () => {
     <>
       <PageSummary data={pageSummaryData} />
       <PageSection title="Pool value, asset value & reserve" titleAddition={formatDate(new Date().toString())}>
-        <ReserveChart />
+        <PoolAssetReserveChart />
       </PageSection>
       <PageSection title="Investment Tokens">
         <TokenListByPool />

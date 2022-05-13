@@ -7,8 +7,8 @@ import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
 import { useLoans } from '../utils/useLoans'
 import { usePool, usePoolMetadata } from '../utils/usePools'
+import { RiskGroupSharesPieChart } from './Charts/RiskGroupSharesPieChart'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
-import { PieChart } from './PieChart'
 
 export type AssetByRiskGroup = {
   color?: string
@@ -197,7 +197,7 @@ export const RiskGroupList: React.FC = () => {
     <>
       {sharesForPie.length > 0 && summaryRow.share !== '0' && (
         <Shelf justifyContent="center">
-          <PieChart data={sharesForPie} />
+          <RiskGroupSharesPieChart data={sharesForPie} />
         </Shelf>
       )}
       {tableDataWithColor.length > 0 ? (

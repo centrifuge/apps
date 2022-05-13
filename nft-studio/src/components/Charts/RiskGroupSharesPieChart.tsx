@@ -8,7 +8,7 @@ type PieChartProps = {
 
 const RADIAN = Math.PI / 180
 
-export const PieChart: React.VFC<PieChartProps> = ({ data }) => {
+export const RiskGroupSharesPieChart: React.VFC<PieChartProps> = ({ data }) => {
   const theme = useTheme()
   const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, payload }: PieLabelRenderProps) => {
     const outerLabelRadius = (outerRadius as number) * 0.5 + 60

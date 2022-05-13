@@ -72,6 +72,36 @@ const tooltipText = {
     title: 'placeholder title',
     body: 'placeholder body',
   },
+  poolReserve: {
+    label: 'Pool reserve',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  invested30d: {
+    label: 'Invested (30d)',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  redeemed30d: {
+    label: 'Redeemed (30d)',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  repaid30d: {
+    label: 'Repaid (30d)',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  upcomingRepayments30d: {
+    label: 'Upcoming repayments (30d)',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  cashDrag: {
+    label: 'Cash drag',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
 }
 
 type TooltipsProps = {
