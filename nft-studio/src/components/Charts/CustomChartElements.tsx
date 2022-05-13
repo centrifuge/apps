@@ -1,4 +1,5 @@
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
+import * as React from 'react'
 import { AreaProps, TooltipProps } from 'recharts'
 import { useTheme } from 'styled-components'
 import { formatDate } from '../../utils/date'
