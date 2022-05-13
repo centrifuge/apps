@@ -17,6 +17,7 @@ import { useTheme } from 'styled-components'
 import { formatDate } from '../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../utils/formatting'
 import { useDailyPoolStates, usePool } from '../utils/usePools'
+import { Tooltips } from './Tooltips'
 
 type ChartData = {
   day: Date
@@ -130,17 +131,17 @@ const Legend: React.VFC<{
 
   return (
     <Shelf bg="white" width="100%" gap="2">
-      <Grid pl="4" py="4" columns={6} gap="3" width="100%">
+      <Grid pl="4" pb="4" columns={6} gap="3" width="100%">
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentPrimary}>
-          <Text variant="label2">Pool value</Text>
+          <Tooltips variant="secondary" type="poolValue" />
           <Text variant="body2">{formatBalance(data.poolValue, currency)}</Text>
         </Stack>
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentSecondary}>
-          <Text variant="label2">Asset value</Text>
+          <Tooltips variant="secondary" type="assetValue" />
           <Text variant="body2">{formatBalance(data.assetValue, currency)}</Text>
         </Stack>
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.borderSecondary}>
-          <Text variant="label2">Reserve</Text>
+          <Tooltips variant="secondary" type="reserve" />
           <Text variant="body2">{formatBalance(data.reserve[1] - data.reserve[0], currency)}</Text>
         </Stack>
       </Grid>
