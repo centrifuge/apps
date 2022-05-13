@@ -370,6 +370,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
   } = useCentrifugeTransaction('Redeem', (cent) => cent.pools.updateRedeemOrder, {
     onSuccess: () => {
       form.resetForm()
+      setChangeOrderFormShown(false)
     },
   })
   const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(

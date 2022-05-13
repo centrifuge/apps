@@ -37,10 +37,11 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
     (cent) => cent.pools.repayLoanPartially
   )
 
-  const { execute: doRepayAllTransaction, isLoading: isRepayAllLoading } = useCentrifugeTransaction(
-    'Repay asset',
-    (cent) => cent.pools.repayAndCloseLoan
-  )
+  const {
+    execute: doRepayAllTransaction,
+    isLoading: isRepayAllLoading,
+    lastCreatedTransaction,
+  } = useCentrifugeTransaction('Repay asset', (cent) => cent.pools.repayAndCloseLoan)
 
   function repayAll() {
     doRepayAllTransaction([loan.poolId, loan.id])
@@ -105,6 +106,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                       min="0"
                       onSetMax={() => form.setFieldValue('amount', maxBorrow)}
                       errorMessage={meta.touched ? meta.error : undefined}
+                      disabled={isFinanceLoading}
                     />
                   )}
                 </Field>
@@ -146,21 +148,26 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
             {(form) => (
               <Stack as={Form} gap={2} noValidate>
                 <FieldWithErrorMessage
-                  validate={combine(positiveNumber(), max(balance.toNumber(), 'amount exceeds balance'))}
+                  validate={combine(
+                    positiveNumber(),
+                    max(balance.toNumber(), 'amount exceeds balance'),
+                    max(debt.toNumber(), 'amount exceeds debt')
+                  )}
                   as={CurrencyInput}
                   name="amount"
                   label="Amount"
                   min="0"
+                  disabled={isRepayLoading || isRepayAllLoading}
                   secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency)} balance`}
                 />
                 <Stack gap={1} px={1}>
-                  <Button type="submit" disabled={!form.isValid} loading={isRepayLoading}>
+                  <Button type="submit" disabled={!form.isValid || isRepayAllLoading} loading={isRepayLoading}>
                     Repay asset
                   </Button>
                   <Button
                     variant="secondary"
                     loading={isRepayAllLoading}
-                    disabled={!canRepayAll}
+                    disabled={!canRepayAll || isRepayLoading}
                     onClick={() => repayAll()}
                   >
                     Repay all and close

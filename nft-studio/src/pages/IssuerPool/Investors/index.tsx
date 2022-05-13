@@ -154,7 +154,7 @@ export const Investors: React.FC = () => {
                     </Button>
                   )
                 },
-                flex: '0 0 150px',
+                flex: '0 0 180px',
               },
             ]}
           />

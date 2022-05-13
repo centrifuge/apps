@@ -724,6 +724,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return $api.pipe(
       combineLatestWith(getLoan([poolId, loanId])),
+      take(1),
       switchMap(([api, loan]) => {
         // Calculate the debt an hour from now to have some margin
         const secondsPerHour = 60 * 60
