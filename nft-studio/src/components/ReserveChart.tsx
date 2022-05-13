@@ -106,7 +106,7 @@ const CustomizedTooltip: React.VFC<TooltipProps<any, any> & { currency: string }
         </Text>
         {[poolPayload, assetPayload, reservePayload].map((item) => {
           return (
-            <Shelf gap="4px" justifyContent="space-between">
+            <Shelf key={item.dataKey} gap="4px" justifyContent="space-between">
               <Shelf gap="4px" alignItems="center">
                 <Box width="11px" height="11px" borderRadius="100%" backgroundColor={item.color} />
                 <Text variant="label2">{toSentenceCase(item.name)}</Text>
@@ -180,7 +180,7 @@ const toSentenceCase = (str: string) => {
     .split(/(?=[A-Z])/)
     .map((word, index) => {
       if (index === 0) return word.charAt(0).toUpperCase() + word.slice(1)
-      else return word.charAt(0).toLowerCase() + word.slice(1)
+      return word.charAt(0).toLowerCase() + word.slice(1)
     })
     .join(' ')
 }
