@@ -60,7 +60,6 @@ export const ReserveChart: React.VFC = () => {
                 tick={<CustomizedXAxisTick variant={[...data, today].length > 30 ? 'months' : 'days'} />}
                 tickLine={false}
                 interval={0}
-                style={{ fontSize: '10px', fontFamily: "'Inter'" }}
               />
               <YAxis
                 tickLine={false}
@@ -167,7 +166,7 @@ const CustomizedXAxisTick: React.VFC<CustomizedXAxisTickProps> = ({ payload, x, 
   }
 
   return (
-    <g transform={`translate(${x},${y})`}>
+    <g transform={`translate(${x},${y})`} style={{ fontSize: '10px', fontFamily: 'Inter' }}>
       <text x={0} y={0} dy={16} fontSize="10px" textAnchor="center">
         {tick}
       </text>
