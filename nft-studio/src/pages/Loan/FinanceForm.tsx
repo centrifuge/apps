@@ -37,11 +37,10 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
     (cent) => cent.pools.repayLoanPartially
   )
 
-  const {
-    execute: doRepayAllTransaction,
-    isLoading: isRepayAllLoading,
-    lastCreatedTransaction,
-  } = useCentrifugeTransaction('Repay asset', (cent) => cent.pools.repayAndCloseLoan)
+  const { execute: doRepayAllTransaction, isLoading: isRepayAllLoading } = useCentrifugeTransaction(
+    'Repay asset',
+    (cent) => cent.pools.repayAndCloseLoan
+  )
 
   function repayAll() {
     doRepayAllTransaction([loan.poolId, loan.id])
