@@ -10,7 +10,7 @@ import { ReserveChart } from '../../../components/ReserveChart'
 import { RiskGroupList } from '../../../components/RiskGroupList'
 import { TokenListByPool } from '../../../components/TokenListByPool'
 import { Tooltips } from '../../../components/Tooltips'
-import { getAge } from '../../../utils/date'
+import { formatDate, getAge } from '../../../utils/date'
 import { formatBalance } from '../../../utils/formatting'
 import { useAddress } from '../../../utils/useAddress'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
@@ -91,7 +91,7 @@ export const PoolDetailOverview: React.FC = () => {
   return (
     <>
       <PageSummary data={pageSummaryData} />
-      <PageSection title="Pool value, asset value & reserve">
+      <PageSection title="Pool value, asset value & reserve" titleAddition={formatDate(new Date().toString())}>
         <ReserveChart />
       </PageSection>
       <PageSection title="Investment Tokens">
