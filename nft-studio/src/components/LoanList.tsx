@@ -27,7 +27,9 @@ export const LoanList: React.FC<Props> = ({ loans, onLoanClicked }) => {
       header: 'Maturity',
       cell: (l: Loan) => (
         <Text variant="body2">
-          {'maturityDate' in l.loanInfo ? formatAge(daysBetween(l.originationDate, l.loanInfo?.maturityDate)) : ''}
+          {'maturityDate' in l.loanInfo && !l.interestRatePerSec.isZero() && !l.totalBorrowed.isZero()
+            ? formatAge(daysBetween(l.originationDate, l.loanInfo?.maturityDate))
+            : ''}
         </Text>
       ),
       flex: '2',
