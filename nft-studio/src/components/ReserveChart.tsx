@@ -1,5 +1,4 @@
 import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
-import css from '@styled-system/css'
 import React from 'react'
 import { useParams } from 'react-router'
 import {
@@ -14,9 +13,11 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
+import { formatDate } from '../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../utils/formatting'
 import { useDailyPoolStates, usePool } from '../utils/usePools'
+import { Tooltips } from './Tooltips'
 
 type ChartData = {
   day: Date
@@ -28,7 +29,6 @@ type ChartData = {
 export const ReserveChart: React.VFC = () => {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
-  const ref = React.useRef<HTMLDivElement>(null)
   const poolStates = useDailyPoolStates(poolId)
   const pool = usePool(poolId)
 
@@ -41,31 +41,31 @@ export const ReserveChart: React.VFC = () => {
 
   const todayPoolValue = pool?.value.toDecimal().toNumber() || 0
   const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
-  const dataIncludingToday: ChartData[] = [
-    ...data,
-    {
-      day: new Date(),
-      poolValue: todayPoolValue,
-      assetValue: todayAssetValue,
-      reserve: [todayAssetValue, todayPoolValue],
-    },
-  ]
+  const today: ChartData = {
+    day: new Date(),
+    poolValue: todayPoolValue,
+    assetValue: todayAssetValue,
+    reserve: [todayAssetValue, todayPoolValue],
+  }
 
-  const poolCurrency = pool?.currency || ''
   return (
-    <div ref={ref}>
-      <StyledWrapper gap="4" mt="5">
-        {dataIncludingToday?.length ? (
+    <Stack>
+      <Legend data={today} currency={pool?.currency || ''} />
+      <Shelf gap="4" width="100%" color="textSecondary">
+        {[...data, today]?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart width={754} height={173} data={dataIncludingToday} margin={{ top: 10, left: -30 }}>
+            <ComposedChart data={[...data, today]} margin={{ left: -30 }}>
               <XAxis
                 dataKey="day"
-                tick={<CustomizedXAxisTick variant={dataIncludingToday.length > 30 ? 'months' : 'days'} />}
+                tick={<CustomizedXAxisTick variant={[...data, today].length > 30 ? 'months' : 'days'} />}
                 tickLine={false}
                 interval={0}
-                type="category"
               />
-              <YAxis allowDecimals tickLine={false} tickFormatter={(tick: number) => formatBalanceAbbreviated(tick)} />
+              <YAxis
+                tickLine={false}
+                style={{ fontSize: '10px', fontFamily: "'Inter'" }}
+                tickFormatter={(tick: number) => formatBalanceAbbreviated(tick)}
+              />
               <CartesianGrid stroke={theme.colors.borderSecondary} />
               <Area
                 fill={theme.colors.backgroundSecondary}
@@ -73,103 +73,76 @@ export const ReserveChart: React.VFC = () => {
                 stroke={theme.colors.backgroundSecondary}
                 fillOpacity={1}
               />
-              <Line dataKey="assetValue" stroke={theme.colors.accentSecondary} fill="transparent" dot={false} />
-              <Line dot={false} dataKey="poolValue" stroke={theme.colors.accentPrimary} fill="transparent" />
-              <Tooltip
-                allowEscapeViewBox={{ x: false, y: true }}
-                content={
-                  <CustomizedTooltip
-                    width={ref?.current?.offsetWidth}
-                    initialData={dataIncludingToday[dataIncludingToday.length - 1]}
-                    currency={poolCurrency}
-                  />
-                }
-                position={{ x: -20, y: -10 }}
-                wrapperStyle={{ visibility: 'visible' }}
-              />
+              <Tooltip content={<CustomizedTooltip currency={pool?.currency || ''} />} />
+              <Line dot={false} dataKey="assetValue" stroke={theme.colors.accentSecondary} />
+              <Line dot={false} dataKey="poolValue" stroke={theme.colors.accentPrimary} />
             </ComposedChart>
           </ResponsiveContainer>
         ) : (
           <Text variant="label1">No data yet</Text>
         )}
-      </StyledWrapper>
-    </div>
+      </Shelf>
+    </Stack>
   )
 }
 
-const StyledWrapper = styled(Shelf)(
-  css({
-    fontFamily: 'Inter',
-    fontSize: '10px',
-    color: 'textSecondary',
-    width: '100%',
-  })
-)
-
-type CustomizedTooltipProps = TooltipProps<any, any> & {
-  width?: number
-  currency: string
-  initialData: ChartData
+const CustomizedTooltip: React.VFC<TooltipProps<any, any> & { currency: string }> = ({ payload, currency }) => {
+  const theme = useTheme()
+  if (payload && payload?.length > 0) {
+    const [reservePayload, assetPayload, poolPayload] = payload
+    return (
+      <Stack
+        bg="backgroundPage"
+        p="1"
+        style={{
+          boxShadow: `1px 3px 6px ${theme.colors.borderSecondary}`,
+        }}
+        minWidth="180px"
+        gap="4px"
+      >
+        <Text variant="label2" fontWeight="500">
+          {formatDate(payload[0].payload.day)}
+        </Text>
+        {[poolPayload, assetPayload, reservePayload].map((item) => {
+          return (
+            <Shelf key={item.dataKey} gap="4px" justifyContent="space-between">
+              <Shelf gap="4px" alignItems="center">
+                <Box width="11px" height="11px" borderRadius="100%" backgroundColor={item.color} />
+                <Text variant="label2">{toSentenceCase(item.name)}</Text>
+              </Shelf>
+              <Text alignSelf="flex-end" textAlign="right" variant="label2">
+                {formatBalance(item.name === 'reserve' ? item.value[1] - item.value[0] : item.value, currency)}
+              </Text>
+            </Shelf>
+          )
+        })}
+      </Stack>
+    )
+  }
+  return null
 }
 
-const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, active, width, initialData, currency }) => {
+const Legend: React.VFC<{
+  currency: string
+  data: ChartData
+}> = ({ data, currency }) => {
   const theme = useTheme()
-  let tooltipData = {
-    poolValue: initialData.poolValue,
-    assetValue: initialData.assetValue,
-    reserve: initialData.reserve[1] - initialData.reserve[0],
-    date: new Date(),
-  }
-  if (payload && payload?.length > 0 && active) {
-    const { poolValue, assetValue, reserve } = payload[0]?.payload
-    tooltipData = {
-      poolValue,
-      assetValue,
-      reserve: reserve[1] - reserve[0],
-      date: payload[0]?.payload?.day,
-    }
-  }
-  const date = new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(new Date(Number(tooltipData.date) || 0))
+
   return (
-    <Shelf bg="white" width={'100%'} gap="2" position="relative" top={-50}>
-      <Grid pl="55px" pt="10px" columns={4} gap="4" width="100%">
-        <Stack
-          borderLeftWidth="3px"
-          pl="4px"
-          borderLeftStyle="solid"
-          borderLeftColor={theme.colors.accentPrimary}
-          minWidth="148px"
-        >
-          <Text variant="label2">Pool value</Text>
-          <Text variant="body2">{formatBalance(tooltipData.poolValue, currency)}</Text>
+    <Shelf bg="white" width="100%" gap="2">
+      <Grid pl="4" pb="4" columns={6} gap="3" width="100%">
+        <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentPrimary}>
+          <Tooltips variant="secondary" type="poolValue" />
+          <Text variant="body2">{formatBalance(data.poolValue, currency)}</Text>
         </Stack>
-        <Stack
-          minWidth="148px"
-          borderLeftWidth="3px"
-          pl="4px"
-          borderLeftStyle="solid"
-          borderLeftColor={theme.colors.accentSecondary}
-        >
-          <Text variant="label2">Asset value</Text>
-          <Text variant="body2">{formatBalance(tooltipData.assetValue, currency)}</Text>
+        <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentSecondary}>
+          <Tooltips variant="secondary" type="assetValue" />
+          <Text variant="body2">{formatBalance(data.assetValue, currency)}</Text>
         </Stack>
-        <Stack
-          minWidth="148px"
-          borderLeftWidth="3px"
-          pl="4px"
-          borderLeftStyle="solid"
-          borderLeftColor={theme.colors.borderSecondary}
-        >
-          <Text variant="label2">Reserve</Text>
-          <Text variant="body2">{formatBalance(tooltipData.reserve, currency)}</Text>
+        <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.borderSecondary}>
+          <Tooltips variant="secondary" type="reserve" />
+          <Text variant="body2">{formatBalance(data.reserve[1] - data.reserve[0], currency)}</Text>
         </Stack>
-        <Box alignSelf="flex-end" justifySelf="end">
-          <Text variant="body2">{date}</Text>
-        </Box>
       </Grid>
     </Shelf>
   )
@@ -193,10 +166,20 @@ const CustomizedXAxisTick: React.VFC<CustomizedXAxisTickProps> = ({ payload, x, 
   }
 
   return (
-    <g transform={`translate(${x},${y})`}>
+    <g transform={`translate(${x},${y})`} style={{ fontSize: '10px', fontFamily: 'Inter' }}>
       <text x={0} y={0} dy={16} fontSize="10px" textAnchor="center">
         {tick}
       </text>
     </g>
   )
+}
+
+const toSentenceCase = (str: string) => {
+  return str
+    .split(/(?=[A-Z])/)
+    .map((word, index) => {
+      if (index === 0) return word.charAt(0).toUpperCase() + word.slice(1)
+      return word.charAt(0).toLowerCase() + word.slice(1)
+    })
+    .join(' ')
 }
