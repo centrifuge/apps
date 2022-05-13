@@ -1045,6 +1045,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api) => combineLatest([api.query.ormlTokens.accounts.entries(address), api.query.system.account(address)]),
         (api, [rawBalances, nativeBalance]) => ({ api, rawBalances, nativeBalance })
       ),
+      take(1),
       map(({ api, rawBalances, nativeBalance }) => {
         const balances = {
           tranches: [] as TrancheBalance[],
