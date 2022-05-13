@@ -96,8 +96,9 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
 
   const price = tranche?.tokenPrice.toDecimal() ?? Dec(0)
   const investToCollect = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
-  const redeemToCollect = order?.payoutCurrencyAmount.toDecimal() ?? Dec(0)
-  const invested = trancheBalance.add(investToCollect).mul(price).minus(redeemToCollect)
+  const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
+  const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
+  const invested = combinedBalance.mul(price)
 
   let actualView = view
   if (order) {
@@ -119,7 +120,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
         <Shelf justifyContent="space-between">
           <Text variant="label1">Token balance</Text>
           <TextWithPlaceholder variant="label1" isLoading={isDataLoading || isMetadataLoading} width={12} variance={0}>
-            {formatBalance(trancheBalance, trancheMeta?.symbol)}
+            {formatBalance(combinedBalance, trancheMeta?.symbol)}
           </TextWithPlaceholder>
         </Shelf>
       </Stack>
@@ -127,7 +128,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
         <Spinner />
       ) : allowedToInvest ? (
         balances !== undefined &&
-        (order.payoutTokenAmount.isZero() && trancheBalance.isZero() ? (
+        (order.payoutTokenAmount.isZero() && combinedBalance.isZero() && pendingRedeem.isZero() ? (
           <InvestForm poolId={poolId} trancheId={trancheId} />
         ) : actualView === 'start' ? (
           <>
@@ -221,6 +222,8 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
   const hasPendingOrder = !pendingInvest.isZero()
   // const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(investmentCapacity)
 
+  const combinedBalance = balance.add(pendingInvest)
+
   const loadingMessage =
     lastCreatedTransaction?.status === 'pending' ? 'Awaiting confirmation...' : 'Signing transaction...'
 
@@ -236,8 +239,8 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
     validate: (values) => {
       const errors: FormikErrors<InvestValues> = {}
 
-      if (validateNumberInput(values.amount, 0, balance)) {
-        errors.amount = validateNumberInput(values.amount, 0, balance)
+      if (validateNumberInput(values.amount, 0, combinedBalance)) {
+        errors.amount = validateNumberInput(values.amount, 0, combinedBalance)
       } else if (hasPendingOrder && inputToDecimal(values.amount).eq(pendingInvest)) {
         errors.amount = 'Equals current order'
       } else if (!allowInvestBelowMin && isFirstInvestment && Dec(form.values.amount).lt(minInvest.toDecimal())) {
@@ -308,7 +311,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
     <FormikProvider value={form}>
       <Form noValidate>
         {changeOrderFormShown ? (
-          renderInput()
+          renderInput(() => setChangeOrderFormShown(false))
         ) : hasPendingOrder ? (
           <PendingOrder
             type="invest"
@@ -318,6 +321,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
             isCancelling={isLoadingCancel}
             onChangeOrder={() => {
               form.resetForm()
+              form.setFieldValue('amount', pendingInvest, false)
               setChangeOrderFormShown(true)
             }}
           />
@@ -346,14 +350,15 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
   const tranche = pool?.tranches.find((t) => t.id === trancheId)
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
 
-  const collectedBalance =
+  const trancheBalance =
     balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)?.balance.toDecimal() ?? Dec(0)
 
-  const uncollectedBalance = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
-  const balance = collectedBalance.add(uncollectedBalance)
-  const price = tranche?.tokenPrice.toDecimal() ?? Dec(0)
-  const maxRedeem = balance.mul(price)
+  const investToCollect = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
   const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
+
+  const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
+  const price = tranche?.tokenPrice.toDecimal() ?? Dec(0)
+  const maxRedeem = combinedBalance.mul(price)
   const tokenSymbol = trancheMeta?.symbol ?? ''
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')
@@ -428,7 +433,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
               type="number"
               min="0"
               disabled={isLoading || isLoadingCancel}
-              onSetMax={() => form.setFieldValue('amount', balance)}
+              onSetMax={() => form.setFieldValue('amount', combinedBalance)}
               currency={getCurrencySymbol(pool?.currency)}
             />
           )}
@@ -466,7 +471,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
     <FormikProvider value={form}>
       <Form noValidate>
         {changeOrderFormShown ? (
-          renderInput()
+          renderInput(() => setChangeOrderFormShown(false))
         ) : hasPendingOrder ? (
           <PendingOrder
             type="redeem"
@@ -476,6 +481,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
             isCancelling={isLoadingCancel}
             onChangeOrder={() => {
               form.resetForm()
+              form.setFieldValue('amount', pendingRedeem, false)
               setChangeOrderFormShown(true)
             }}
           />
