@@ -196,6 +196,8 @@ export type Tranche = {
   outstandingInvestOrders: Balance
   outstandingRedeemOrders: Balance
   lastUpdatedInterest: string
+  investFulfillment?: Balance
+  redeemFulfillment?: Balance
 }
 
 export type TrancheWithTokenPrice = Tranche & {
@@ -958,6 +960,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
                       lastUpdatedInterest: new Date(tranche.lastUpdatedInterest * 1000).toISOString(),
                       totalIssuance: new Balance(tokenIssuanceValues[index].toString()),
                       tokenPrice: new Price(lastEpoch[index]?.tokenPrice.toString() ?? '0'),
+                      investFulfillment: new Balance(hexToBN(lastEpoch[index]?.investFulfillment ?? '0')),
+                      redeemFulfillment: new Balance(hexToBN(lastEpoch[index]?.redeemFulfillment ?? '0')),
                     }
                   }),
                   reserve: {
@@ -993,7 +997,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     const $query = inst.getOptionalSubqueryObservable<{ dailyPoolStates: { nodes: SubqueryDailyPoolState[] } }>(
       `query($poolId: String!) {
-        dailyPoolStates(filter: {id:{startsWith: $poolId}}) {
+        dailyPoolStates(
+          filter: { 
+            id: { startsWith: $poolId },
+          }) {
           nodes {
             timestamp
             poolState {

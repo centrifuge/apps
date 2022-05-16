@@ -102,20 +102,26 @@ const tooltipText = {
     title: 'placeholder title',
     body: 'placeholder body',
   },
+  epochTimeRemaining: {
+    label: '',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
 }
 
 type TooltipsProps = {
   type: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
+  dynamicLabel?: string
 }
 
-export const Tooltips: React.VFC<TooltipsProps> = ({ type, variant = 'primary' }) => {
+export const Tooltips: React.VFC<TooltipsProps> = ({ type, dynamicLabel, variant = 'primary' }) => {
   const { label, title, body } = tooltipText[type]
   const isPrimary = variant === 'primary'
   return (
     <FabricTooltip title={title} body={body}>
       <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
-        {label}
+        {dynamicLabel || label}
       </Text>
     </FabricTooltip>
   )
