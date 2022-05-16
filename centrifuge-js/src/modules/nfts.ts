@@ -195,7 +195,7 @@ export function getNftsModule(inst: CentrifugeBase) {
       map(([meta, nftData, sale]) => {
         const nftValue = nftData.toJSON() as Instance
         const saleValue = sale.toJSON() as any
-        if (!nftValue) throw new Error('NFT not found')
+        if (!nftValue) throw new Error(`NFT not found: collectionId: ${collectionId}, nftId: ${nftId}`)
         const nft: NFT = {
           id: nftId,
           collectionId,

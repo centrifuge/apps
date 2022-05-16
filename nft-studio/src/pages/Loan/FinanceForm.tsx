@@ -1,7 +1,7 @@
 import { Balance, Loan as LoanType } from '@centrifuge/centrifuge-js'
 import { Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
-import { Field, FieldProps, Form, Formik } from 'formik'
+import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { Dec } from '../../utils/Decimal'
@@ -29,12 +29,22 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const balance = balances && pool ? getBalanceDec(balances, pool.currency) : Dec(0)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
-    (cent) => cent.pools.financeLoan
+    (cent) => cent.pools.financeLoan,
+    {
+      onSuccess: () => {
+        financeForm.resetForm()
+      },
+    }
   )
 
   const { execute: doRepayTransaction, isLoading: isRepayLoading } = useCentrifugeTransaction(
     'Repay asset',
-    (cent) => cent.pools.repayLoanPartially
+    (cent) => cent.pools.repayLoanPartially,
+    {
+      onSuccess: () => {
+        repayForm.resetForm()
+      },
+    }
   )
 
   const { execute: doRepayAllTransaction, isLoading: isRepayAllLoading } = useCentrifugeTransaction(
@@ -62,6 +72,30 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const maxBorrow = poolReserve.lessThan(ceiling) ? poolReserve : ceiling
   const canRepayAll = debtWithMargin.lte(balance)
 
+  const financeForm = useFormik<FinanceValues>({
+    initialValues: {
+      amount: '',
+    },
+    onSubmit: (values, actions) => {
+      const amount = Balance.fromFloat(values.amount)
+      doFinanceTransaction([loan.poolId, loan.id, amount])
+      actions.setSubmitting(false)
+    },
+    validateOnMount: true,
+  })
+
+  const repayForm = useFormik<RepayValues>({
+    initialValues: {
+      amount: '',
+    },
+    onSubmit: (values, actions) => {
+      const amount = Balance.fromFloat(values.amount)
+      doRepayTransaction([loan.poolId, loan.id, amount])
+      actions.setSubmitting(false)
+    },
+    validateOnMount: true,
+  })
+
   return (
     <Stack gap={3}>
       <Stack as={Card} gap={2} p={2}>
@@ -76,46 +110,35 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
           </Shelf>
         </Stack>
         {loan.status === 'Active' && loan.totalBorrowed.toDecimal().lt(initialCeiling) && (
-          <Formik<FinanceValues>
-            initialValues={{
-              amount: '',
-            }}
-            onSubmit={(values, actions) => {
-              const amount = Balance.fromFloat(values.amount)
-              doFinanceTransaction([loan.poolId, loan.id, amount])
-              actions.setSubmitting(false)
-            }}
-            validateOnMount
-          >
-            {(form) => (
-              <Stack as={Form} gap={2} noValidate>
-                <Field
-                  name="amount"
-                  validate={combine(
-                    positiveNumber(),
-                    max(ceiling.toNumber(), 'amount exceeds available financing'),
-                    max(maxBorrow.toNumber(), 'amount exceeds pool reserve')
-                  )}
-                >
-                  {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
-                    <CurrencyInput
-                      {...fieldProps}
-                      value={value instanceof Decimal ? value.toNumber() : value}
-                      label="Amount"
-                      min="0"
-                      onSetMax={() => form.setFieldValue('amount', maxBorrow)}
-                      errorMessage={meta.touched ? meta.error : undefined}
-                    />
-                  )}
-                </Field>
-                <Stack px={1}>
-                  <Button type="submit" disabled={!form.isValid} loading={isFinanceLoading}>
-                    Finance asset
-                  </Button>
-                </Stack>
+          <FormikProvider value={financeForm}>
+            <Stack as={Form} gap={2} noValidate>
+              <Field
+                name="amount"
+                validate={combine(
+                  positiveNumber(),
+                  max(ceiling.toNumber(), 'amount exceeds available financing'),
+                  max(maxBorrow.toNumber(), 'amount exceeds pool reserve')
+                )}
+              >
+                {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
+                  <CurrencyInput
+                    {...fieldProps}
+                    value={value instanceof Decimal ? value.toNumber() : value}
+                    label="Amount"
+                    min="0"
+                    onSetMax={() => financeForm.setFieldValue('amount', maxBorrow)}
+                    errorMessage={meta.touched ? meta.error : undefined}
+                    disabled={isFinanceLoading}
+                  />
+                )}
+              </Field>
+              <Stack px={1}>
+                <Button type="submit" disabled={!financeForm.isValid} loading={isFinanceLoading}>
+                  Finance asset
+                </Button>
               </Stack>
-            )}
-          </Formik>
+            </Stack>
+          </FormikProvider>
         )}
       </Stack>
 
@@ -132,43 +155,36 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
         </Stack>
 
         {loan.status === 'Active' && !loan.outstandingDebt.isZero() && (
-          <Formik<RepayValues>
-            initialValues={{
-              amount: '',
-            }}
-            onSubmit={(values, actions) => {
-              const amount = Balance.fromFloat(values.amount)
-              doRepayTransaction([loan.poolId, loan.id, amount])
-              actions.setSubmitting(false)
-            }}
-            validateOnMount
-          >
-            {(form) => (
-              <Stack as={Form} gap={2} noValidate>
-                <FieldWithErrorMessage
-                  validate={combine(positiveNumber(), max(balance.toNumber(), 'amount exceeds balance'))}
-                  as={CurrencyInput}
-                  name="amount"
-                  label="Amount"
-                  min="0"
-                  secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency)} balance`}
-                />
-                <Stack gap={1} px={1}>
-                  <Button type="submit" disabled={!form.isValid} loading={isRepayLoading}>
-                    Repay asset
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    loading={isRepayAllLoading}
-                    disabled={!canRepayAll}
-                    onClick={() => repayAll()}
-                  >
-                    Repay all and close
-                  </Button>
-                </Stack>
+          <FormikProvider value={repayForm}>
+            <Stack as={Form} gap={2} noValidate>
+              <FieldWithErrorMessage
+                validate={combine(
+                  positiveNumber(),
+                  max(balance.toNumber(), 'amount exceeds balance'),
+                  max(debt.toNumber(), 'amount exceeds debt')
+                )}
+                as={CurrencyInput}
+                name="amount"
+                label="Amount"
+                min="0"
+                disabled={isRepayLoading || isRepayAllLoading}
+                secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency)} balance`}
+              />
+              <Stack gap={1} px={1}>
+                <Button type="submit" disabled={!repayForm.isValid || isRepayAllLoading} loading={isRepayLoading}>
+                  Repay asset
+                </Button>
+                <Button
+                  variant="secondary"
+                  loading={isRepayAllLoading}
+                  disabled={!canRepayAll || isRepayLoading}
+                  onClick={() => repayAll()}
+                >
+                  Repay all and close
+                </Button>
               </Stack>
-            )}
-          </Formik>
+            </Stack>
+          </FormikProvider>
         )}
       </Stack>
     </Stack>
