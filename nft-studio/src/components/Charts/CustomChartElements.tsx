@@ -12,6 +12,7 @@ type CustomizedXAxisTickProps = {
   Pick<AreaProps, 'y'>
 
 export const CustomizedXAxisTick: React.VFC<CustomizedXAxisTickProps> = ({ payload, x, y, variant }) => {
+  const theme = useTheme()
   let tick
   if (variant === 'months') {
     const formatter = new Intl.DateTimeFormat('en', { month: 'short' })
@@ -23,8 +24,16 @@ export const CustomizedXAxisTick: React.VFC<CustomizedXAxisTickProps> = ({ paylo
   }
 
   return (
-    <g transform={`translate(${x},${y})`} style={{ fontSize: '10px', fontFamily: 'Inter' }}>
-      <text x={0} y={0} dy={16} fontSize="10px" textAnchor="center">
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0}
+        y={0}
+        dy={16}
+        fontSize="10px"
+        fill={theme.colors.textSecondary}
+        fontFamily="Inter"
+        textAnchor="center"
+      >
         {tick}
       </text>
     </g>
