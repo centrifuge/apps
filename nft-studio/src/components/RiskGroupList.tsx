@@ -15,7 +15,7 @@ export type AssetByRiskGroup = {
   labelColor?: string
   name: string
   amount: Balance
-  share: string
+  share: string | React.ReactElement
   interestRatePerSec: string
   riskAdjustment: string
 }
@@ -58,7 +58,13 @@ const columns: Column[] = [
   {
     header: () => <SortableTableHeader label="Financing fee" />,
     cell: ({ interestRatePerSec }: AssetByRiskGroup) => (
-      <Text variant="body2">{interestRatePerSec ? `${interestRatePerSec}%` : ''}</Text>
+      <Text variant="body2">
+        {interestRatePerSec && typeof interestRatePerSec === 'string'
+          ? `${interestRatePerSec}%`
+          : React.isValidElement(interestRatePerSec)
+          ? interestRatePerSec
+          : ''}
+      </Text>
     ),
     flex: '1',
     sortKey: 'interestRatePerSec',
@@ -66,7 +72,13 @@ const columns: Column[] = [
   {
     header: () => <SortableTableHeader label="Risk adjustment" />,
     cell: ({ riskAdjustment }: AssetByRiskGroup) => (
-      <Text variant="body2">{riskAdjustment ? `${riskAdjustment}%` : ''}</Text>
+      <Text variant="body2">
+        {riskAdjustment && typeof riskAdjustment === 'string'
+          ? `${riskAdjustment}%`
+          : React.isValidElement(riskAdjustment)
+          ? riskAdjustment
+          : ''}
+      </Text>
     ),
     flex: '1',
     sortKey: 'riskAdjustment',
@@ -77,7 +89,7 @@ const Amount: React.VFC<AssetByRiskGroup> = ({ amount }) => {
   const { pid } = useParams<{ pid: string }>()
   const pool = usePool(pid)
 
-  return <Text variant="body2">{formatBalance(amount, pool?.currency)}</Text>
+  return <Text variant="body2">{React.isValidElement(amount) ? amount : formatBalance(amount, pool?.currency)}</Text>
 }
 
 export const RiskGroupList: React.FC = () => {
@@ -150,11 +162,11 @@ export const RiskGroupList: React.FC = () => {
       : []
   }, [pool, riskGroups])
 
-  const summaryRow = React.useMemo(() => {
-    const totalSharesSum = [...riskGroups, ...remainingAssets]
-      .reduce((curr, prev) => curr.add(prev.share), Dec(0))
-      .toString()
+  const totalSharesSum = [...riskGroups, ...remainingAssets]
+    .reduce((curr, prev) => curr.add(prev.share as any), Dec(0))
+    .toString()
 
+  const summaryRow = React.useMemo(() => {
     const avgInterestRatePerSec = riskGroups
       .reduce<any>((curr, prev) => curr.add(prev.interestRatePerSec), Dec(0))
       .dividedBy(riskGroups.length)
@@ -166,11 +178,23 @@ export const RiskGroupList: React.FC = () => {
       .toDecimalPlaces(2)
 
     return {
-      share: totalSharesSum.toString(),
-      amount: new Balance(pool?.nav.latest || '0'),
-      name: 'Total',
-      interestRatePerSec: `Avg ${avgInterestRatePerSec.toString()}`,
-      riskAdjustment: `Avg. ${avgRiskAdjustment.toString()}`,
+      share: (
+        <Text variant="body2" fontWeight={600}>
+          {totalSharesSum}
+        </Text>
+      ),
+      amount: (
+        <Text variant="body2" fontWeight={600}>
+          {formatBalance(new Balance(pool?.nav.latest || '0'), pool?.currency)}
+        </Text>
+      ),
+      name: (
+        <Text variant="body2" fontWeight={600}>
+          Total
+        </Text>
+      ),
+      interestRatePerSec: <Text variant="body2" fontWeight={600}>{`Avg ${avgInterestRatePerSec.toString()}`}</Text>,
+      riskAdjustment: <Text variant="body2" fontWeight={600}>{`Avg. ${avgRiskAdjustment.toString()}`}</Text>,
     }
   }, [riskGroups, remainingAssets, pool?.nav.latest])
 
@@ -195,13 +219,13 @@ export const RiskGroupList: React.FC = () => {
 
   return (
     <>
-      {sharesForPie.length > 0 && summaryRow.share !== '0' && (
+      {sharesForPie.length > 0 && totalSharesSum !== '0' && (
         <Shelf justifyContent="center">
           <RiskGroupSharesPieChart data={sharesForPie} />
         </Shelf>
       )}
       {tableDataWithColor.length > 0 ? (
-        <Box mt={sharesForPie.length > 0 && summaryRow.share !== '0' ? '0' : '3'}>
+        <Box mt={sharesForPie.length > 0 && totalSharesSum !== '0' ? '0' : '3'}>
           <DataTable defaultSortKey="share" data={tableDataWithColor} columns={columns} summary={summaryRow} />
         </Box>
       ) : (

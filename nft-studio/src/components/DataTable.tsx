@@ -5,7 +5,7 @@ import styled from 'styled-components'
 
 type GroupedProps = {
   groupIndex?: number
-  lastIndex?: number
+  lastGroupIndex?: number
 }
 
 type Props<T> = {
@@ -44,7 +44,7 @@ export const DataTable = <T extends Record<string, any>>({
   rounded = true,
   summary,
   groupIndex,
-  lastIndex,
+  lastGroupIndex,
 }: Props<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: 'desc' } : {}
@@ -65,7 +65,7 @@ export const DataTable = <T extends Record<string, any>>({
 
   const showHeader = groupIndex === 0 || !groupIndex
   return (
-    <Stack as={rounded && !lastIndex ? Card : Stack}>
+    <Stack as={rounded && !lastGroupIndex ? Card : Stack}>
       <Shelf>
         {showHeader &&
           columns.map((col, i) => (
@@ -103,9 +103,9 @@ export const DataTable = <T extends Record<string, any>>({
         ))}
         {/* summary row is not included in sorting */}
         {summary && (
-          <Row rounded={rounded && groupIndex === lastIndex}>
+          <Row rounded={rounded && groupIndex === lastGroupIndex}>
             {columns.map((col, i) => (
-              <DataCol key={col.sortKey} style={{ flex: col.flex }} align={col?.align}>
+              <DataCol key={`${col.sortKey}-${i}`} style={{ flex: col.flex }} align={col?.align}>
                 {col.cell(summary, i)}
               </DataCol>
             ))}

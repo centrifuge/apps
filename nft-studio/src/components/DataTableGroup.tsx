@@ -8,7 +8,7 @@ export const DataTableGroup: React.FC = ({ children }) => {
         return React.isValidElement(child)
           ? React.cloneElement(child, {
               groupIndex: index,
-              lastIndex: React.Children.count(children) - 1,
+              lastGroupIndex: React.Children.count(children) - 1,
             })
           : null
       })}

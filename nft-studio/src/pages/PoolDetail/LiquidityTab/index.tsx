@@ -10,9 +10,7 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { Tooltips } from '../../../components/Tooltips'
 import { getEpochHoursRemaining } from '../../../utils/date'
 import { formatBalance } from '../../../utils/formatting'
-import { useAddress } from '../../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
-import { usePermissions } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
@@ -30,8 +28,6 @@ export const PoolDetailLiquidityTab: React.FC = () => {
 export const PoolDetailLiquidity: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  const address = useAddress()
-  const permissions = usePermissions(address)
 
   // const dailyPoolStates = useDailyPoolStates(poolId)
 
@@ -49,10 +45,6 @@ export const PoolDetailLiquidity: React.FC = () => {
     // { label: <Tooltips type="upcomingRepayments30d" />, value: formatBalance(0, pool.currency) },
   ]
 
-  const isPoolAdmin = React.useMemo(
-    () => !!(address && permissions?.pools[poolId]?.roles.includes('PoolAdmin')),
-    [poolId, address, permissions]
-  )
   const { execute: closeEpochTx } = useCentrifugeTransaction('Close epoch', (cent) => cent.pools.closeEpoch, {
     onSuccess: () => {
       console.log('Epoch closed successfully')
@@ -77,11 +69,9 @@ export const PoolDetailLiquidity: React.FC = () => {
         headerRight={
           <Shelf gap="1">
             <Tooltips type="epochTimeRemaining" dynamicLabel={`${getEpochHoursRemaining(pool!)} hrs remaining`} />
-            {isPoolAdmin && (
-              <Button small variant="secondary" onClick={closeEpoch} disabled={!pool}>
-                Execute
-              </Button>
-            )}
+            <Button small variant="secondary" onClick={closeEpoch} disabled={!pool}>
+              Execute
+            </Button>
           </Shelf>
         }
       >
