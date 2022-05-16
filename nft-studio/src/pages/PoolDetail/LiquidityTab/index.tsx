@@ -13,12 +13,12 @@ import { formatBalance } from '../../../utils/formatting'
 import { useAddress } from '../../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePermissions } from '../../../utils/usePermissions'
-import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 export const PoolDetailLiquidityTab: React.FC = () => {
   return (
-    <PageWithSideBar sidebar>
+    <PageWithSideBar>
       <PoolDetailHeader />
       <LoadBoundary>
         <PoolDetailLiquidity />
@@ -31,7 +31,6 @@ export const PoolDetailLiquidity: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   if (!pool) return null
-  const { data: metadata } = usePoolMetadata(pool)
   const address = useAddress()
   const permissions = usePermissions(address)
 
@@ -63,22 +62,6 @@ export const PoolDetailLiquidity: React.FC = () => {
     closeEpochTx([pool.id])
   }
 
-  const investments = pool.tranches.map((token) => {
-    const trancheMeta = metadata?.tranches?.[token.seniority]
-    return {
-      order: `${trancheMeta?.symbol} investments`,
-      locked: token.investFulfillment?.toDecimal(),
-    }
-  })
-
-  const redmetions = pool.tranches.map((token) => {
-    const trancheMeta = metadata?.tranches?.[token.seniority]
-    return {
-      order: `${trancheMeta?.symbol} investments`,
-      locked: token.redeemFulfillment?.toDecimal(),
-    }
-  })
-
   return (
     <>
       <PageSummary data={pageSummaryData} />
@@ -99,7 +82,7 @@ export const PoolDetailLiquidity: React.FC = () => {
           </Shelf>
         }
       >
-        <EpochList investments={investments} redmetions={redmetions} />
+        <EpochList pool={pool} />
       </PageSection>
     </>
   )

@@ -3,6 +3,11 @@ import css from '@styled-system/css'
 import * as React from 'react'
 import styled from 'styled-components'
 
+type GroupedProps = {
+  groupIndex?: number
+  lastIndex?: number
+}
+
 type Props<T> = {
   data: Array<T>
   columns: Column[]
@@ -11,7 +16,7 @@ type Props<T> = {
   defaultSortKey?: string
   rounded?: boolean
   summary?: T
-}
+} & GroupedProps
 
 export type OrderBy = 'asc' | 'desc'
 
@@ -38,6 +43,8 @@ export const DataTable = <T extends Record<string, any>>({
   defaultSortKey,
   rounded = true,
   summary,
+  groupIndex,
+  lastIndex,
 }: Props<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: 'desc' } : {}
@@ -56,25 +63,27 @@ export const DataTable = <T extends Record<string, any>>({
     [orderBy, data, currentSortKey]
   )
 
+  const showHeader = groupIndex === 0 || !groupIndex
   return (
-    <Stack as={rounded ? Card : Stack}>
+    <Stack as={rounded && !lastIndex ? Card : Stack}>
       <Shelf>
-        {columns.map((col, i) => (
-          <HeaderCol
-            key={`${col.header}-${i}`}
-            style={{ flex: col.flex }}
-            tabIndex={col?.sortKey ? 0 : undefined}
-            as={col?.sortKey ? 'button' : 'div'}
-            onClick={col?.sortKey ? () => updateSortOrder(col.sortKey) : () => undefined}
-            align={col?.align}
-          >
-            <Text variant="label2">
-              {col?.header && typeof col.header !== 'string' && col?.sortKey && React.isValidElement(col.header())
-                ? React.cloneElement(col.header(), { align: col?.align, orderBy: orderBy[col.sortKey] })
-                : col.header}
-            </Text>
-          </HeaderCol>
-        ))}
+        {showHeader &&
+          columns.map((col, i) => (
+            <HeaderCol
+              key={`${col.header}-${i}`}
+              style={{ flex: col.flex }}
+              tabIndex={col?.sortKey ? 0 : undefined}
+              as={col?.sortKey ? 'button' : 'div'}
+              onClick={col?.sortKey ? () => updateSortOrder(col.sortKey) : () => undefined}
+              align={col?.align}
+            >
+              <Text variant="label2">
+                {col?.header && typeof col.header !== 'string' && col?.sortKey && React.isValidElement(col.header())
+                  ? React.cloneElement(col.header(), { align: col?.align, orderBy: orderBy[col.sortKey] })
+                  : col.header}
+              </Text>
+            </HeaderCol>
+          ))}
       </Shelf>
       <Stack>
         {sortedData?.map((row, i) => (
@@ -94,7 +103,7 @@ export const DataTable = <T extends Record<string, any>>({
         ))}
         {/* summary row is not included in sorting */}
         {summary && (
-          <Row rounded={rounded}>
+          <Row rounded={rounded && groupIndex === lastIndex}>
             {columns.map((col, i) => (
               <DataCol key={col.sortKey} style={{ flex: col.flex }} align={col?.align}>
                 {col.cell(summary, i)}
