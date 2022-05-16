@@ -14,7 +14,6 @@ import { silenceConsoleWhen } from '../../test-utilities/silenceConsoleWhen'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
 import DocumentForm from '../DocumentForm'
 import { EditDocument } from '../EditDocument'
-import { FundingAgreements } from '../FundingAgreements'
 import { Nfts } from '../Nfts'
 
 jest.mock('../../http-client')
@@ -123,7 +122,6 @@ describe('Edit Document', () => {
       expect(documentForm.prop('selectedSchema')).toEqual(defaultSchemas[0])
 
       expect(documentForm.find(Nfts).prop('viewMode')).toBe(false)
-      expect(documentForm.find(FundingAgreements).prop('viewMode')).toBe(false)
     })
   })
 

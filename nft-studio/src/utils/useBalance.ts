@@ -1,21 +1,26 @@
-import { useQuery } from 'react-query'
-import { useWeb3 } from '../components/Web3Provider'
-import { initPolkadotApi } from './web3'
+import { map, switchMap } from 'rxjs/operators'
+import { useAddress } from './useAddress'
+import { useCentrifugeQuery } from './useCentrifugeQuery'
 
 export function useBalance() {
-  const { selectedAccount } = useWeb3()
-  const query = useQuery(
-    ['balance', selectedAccount?.address],
-    async () => {
-      const api = await initPolkadotApi()
-      const balances = await api.query.system.account(selectedAccount!.address)
-      return Number(balances.data.free.toString()) / 10 ** (api.registry.chainDecimals as any)
-    },
+  const address = useAddress()
+  const [result] = useCentrifugeQuery(
+    ['balance', address],
+    (cent) =>
+      cent.getApi().pipe(
+        switchMap(
+          (api) => api.query.system.account(address),
+          (api, balances) => ({ api, balances })
+        ),
+        map(
+          ({ api, balances }) =>
+            Number((balances as any).data.free.toString()) / 10 ** (api.registry.chainDecimals as any)
+        )
+      ),
     {
-      enabled: !!selectedAccount,
-      staleTime: 60 * 1000,
+      enabled: !!address,
     }
   )
 
-  return query
+  return result
 }

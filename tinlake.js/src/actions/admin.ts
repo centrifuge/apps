@@ -75,8 +75,13 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
 
     // ------------ admin functions lender-side -------------
     setMinimumJuniorRatio = async (ratio: string) => {
-      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
       const maxSeniorRatio = new BN(10).pow(new BN(27)).sub(new BN(ratio))
+
+      if (this.contracts['POOL_ADMIN']) {
+        return this.pending(this.contract('POOL_ADMIN').setMaxSeniorRatio(maxSeniorRatio))
+      }
+
+      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
       return this.pending(
         this.contract('ASSESSOR').file(
           web3.fromAscii('maxSeniorRatio').padEnd(66, '0'),
@@ -87,8 +92,13 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
     }
 
     setMaximumJuniorRatio = async (ratio: string) => {
-      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
       const minSeniorRatio = new BN(10).pow(new BN(27)).sub(new BN(ratio))
+
+      if (this.contracts['POOL_ADMIN']) {
+        return this.pending(this.contract('POOL_ADMIN').setMinSeniorRatio(minSeniorRatio))
+      }
+
+      // Source: https://github.com/ethereum/web3.js/issues/2256#issuecomment-462730550
       return this.pending(
         this.contract('ASSESSOR').file(
           web3.fromAscii('minSeniorRatio').padEnd(66, '0'),

@@ -10,7 +10,7 @@ export const checkDueAssets = async (pools: PoolMap) => {
   const fiveDaysFromNow = Math.ceil(Date.now() / 1000 + 5 * 24 * 60 * 60)
   const data = await fetchFromSubgraph(`
       query {
-        loans(where: { maturityDate_not: 0, maturityDate_lte: "${fiveDaysFromNow}", borrowsCount_gt:0, repaysCount:0}) {
+        loans(where: { maturityDate_not: 0, maturityDate_lte: "${fiveDaysFromNow}", borrowsCount_gt:0, repaysCount:0, debt_gt:0}) {
           debt
           index
           maturityDate

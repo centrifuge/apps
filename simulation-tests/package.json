@@ -1,0 +1,20 @@
+{
+  "name": "@centrifuge/simulation-tests",
+  "private": true,
+  "scripts": {
+    "start": "nodemon src/main.ts",
+    "build:deps": "cd ../centrifuge-js && yarn build && cd ../simulation-tests"
+  },
+  "dependencies": {
+    "@centrifuge/centrifuge-js": "workspace:*",
+    "bn.js": "^5.2.0",
+    "node-fetch": "^3.1.0",
+    "rxjs": "^7.4.0"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5",
+    "esbuild-darwin-64": "^0.14.10",
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.4.0"
+  }
+}

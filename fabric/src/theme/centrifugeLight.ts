@@ -3,11 +3,32 @@ import { brandCentrifuge } from './tokens/brandCentrifuge'
 import { modeLight } from './tokens/modeLight'
 import { FabricTheme } from './types'
 
-const centrifugeLight: FabricTheme = {
+const blueScale = {
+  blue30: '#FAFBFF',
+  blue50: '#F0F4FF',
+  blue100: '#DBE5FF',
+  blue200: '#B3C8FF',
+  blue300: '#7A9FFF',
+  blue400: '#4C7EFF',
+  blue500: '#1253FF',
+  blue600: '#003CDB',
+  blue700: '#002B9E',
+  blue800: '#001C66',
+}
+
+export const centrifugeLight: FabricTheme = {
   ...baseTheme,
+  scheme: 'light',
   colors: {
     ...brandCentrifuge,
     ...modeLight.colors,
+    primarySelectedBackground: blueScale.blue500,
+    secondarySelectedBackground: blueScale.blue50,
+    borderFocus: blueScale.blue500,
+    borderSelected: blueScale.blue500,
+    textSelected: blueScale.blue500,
+    textInteractive: blueScale.blue500,
+    textInteractiveHover: blueScale.blue500,
   },
 }
 

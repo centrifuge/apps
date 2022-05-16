@@ -5,13 +5,17 @@
   "scripts": {
     "start:prod": "nodemon",
     "pretest": "yarn workspace @centrifuge/gateway-lib run build",
-    "test": "CI=true yarn workspace @centrifuge/gateway-lib run test && CI=true yarn workspace @centrifuge/gateway-server run test && CI=true yarn workspace @centrifuge/gateway-ui run test",
-    "start": "concurrently \"yarn workspace @centrifuge/gateway-lib run start\" \"yarn workspace @centrifuge/gateway-server run start\" \"yarn workspace @centrifuge/gateway-ui run start\"",
-    "build": "yarn workspace @centrifuge/gateway-lib run build && yarn workspace @centrifuge/gateway-server run build && yarn workspace @centrifuge/gateway-ui run build",
+    "test": "CI=true yarn workspace @centrifuge/gateway-lib run test && CI=true yarn workspace @centrifuge/gateway-server run test && CI=true SKIP_PREFLIGHT_CHECK=true yarn workspace @centrifuge/gateway-ui run test",
+    "start": "concurrently \"yarn workspace @centrifuge/gateway-lib run start\" \"yarn workspace @centrifuge/gateway-server run start\" \"SKIP_PREFLIGHT_CHECK=true yarn workspace @centrifuge/gateway-ui run start\"",
+    "build": "yarn workspace @centrifuge/gateway-lib run build && yarn workspace @centrifuge/gateway-server run build && SKIP_PREFLIGHT_CHECK=true yarn workspace @centrifuge/gateway-ui run build",
     "postbuild": "yarn run move:assets",
     "move:assets": "yarn run move:email-templates && yarn run move:ui",
     "move:ui": "rm -rf ./build && rsync -a packages/ui/build .",
     "move:email-templates": "rm -rf ./email-templates && rsync -a packages/server/email-templates ."
+  },
+  "devDependencies": {
+    "nodemon": "2.0.15",
+    "ts-node": "^7.0.1"
   },
   "eslintConfig": {
     "extends": "react-app"

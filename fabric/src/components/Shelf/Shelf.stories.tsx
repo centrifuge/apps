@@ -17,9 +17,9 @@ export default {
 type ShelfStory = ComponentStory<typeof Shelf>
 const Template: ShelfStory = (args) => (
   <Shelf {...args}>
-    <Box backgroundColor="brand" width={200} minHeight={75} />
-    <Box backgroundColor="brand" width={200} minHeight={50} />
-    <Box backgroundColor="brand" width={200} minHeight={60} />
+    <Box backgroundColor="accentPrimary" width={200} minHeight={75} />
+    <Box backgroundColor="accentPrimary" width={200} minHeight={50} />
+    <Box backgroundColor="accentPrimary" width={200} minHeight={60} />
   </Shelf>
 )
 

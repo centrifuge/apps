@@ -1,6 +1,7 @@
-import { Shelf, Text } from '@centrifuge/fabric'
+import { Shelf } from '@centrifuge/fabric'
+import { ThemeSize } from '@centrifuge/fabric/dist/utils/types'
 import * as React from 'react'
-import styled, { keyframes } from 'styled-components'
+import styled, { keyframes, useTheme } from 'styled-components'
 
 const rotate = keyframes`
 	0% {
@@ -12,10 +13,11 @@ const rotate = keyframes`
 	}
 `
 
-const StyledSpinner = styled.div`
-  width: 48px;
-  height: 48px;
-  border-width: 3px;
+const StyledSpinner = styled.div<{ $size: string }>`
+  font-size: ${(props) => props.$size};
+  width: 1em;
+  height: 1em;
+  border-width: max(0.0625em, 2px);
   border-style: solid;
   border-color: currentcolor;
   border-top-color: transparent;
@@ -23,12 +25,16 @@ const StyledSpinner = styled.div`
   animation: ${rotate} 0.6s linear infinite;
 `
 
-export const Spinner: React.FC = () => {
+export const Spinner: React.FC<{ size?: string | number }> = ({ size = '48px' }) => {
+  const theme = useTheme()
+  const sizePx = toPx(theme.sizes[size as ThemeSize] || size)
   return (
     <Shelf justifyContent="center">
-      <Text>
-        <StyledSpinner />
-      </Text>
+      <StyledSpinner $size={sizePx} />
     </Shelf>
   )
+}
+
+function toPx(n: number | string) {
+  return typeof n === 'number' ? `${n}px` : n
 }

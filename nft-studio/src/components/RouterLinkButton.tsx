@@ -22,6 +22,7 @@ export const RouterLinkButton: React.FC<RouterLinkButtonProps> = ({
   iconRight,
   disabled,
   loading,
+  loadingMessage,
   children,
   showActive = false,
   ...routeProps
@@ -37,6 +38,7 @@ export const RouterLinkButton: React.FC<RouterLinkButtonProps> = ({
         iconRight={iconRight}
         disabled={disabled}
         loading={loading}
+        loadingMessage={loadingMessage}
         active={showActive && isActive}
       >
         {children}

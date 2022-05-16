@@ -293,10 +293,10 @@ const LoanOverview: React.FC<Props> = (props: Props) => {
     </Stack>
   ) : (
     <Shelf gap="medium" alignItems="stretch">
-      <Card p="medium" flex="1 1 420px" maxWidth="420px">
+      <Card p="medium" flex="1 1 420px" maxWidth="50%">
         {reserveElement}
       </Card>
-      <Card p="medium" flex="1 1 480px" maxWidth="480px" height="200px">
+      <Card p="medium" flex="1 1 480px" maxWidth="50%" height="200px">
         {graphElement}
       </Card>
     </Shelf>

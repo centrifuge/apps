@@ -1,5 +1,7 @@
-const centrifugeBlue = '#2762FF'
+const centrifugeBlue = '#2762ff'
+const altairYellow = '#ffc012'
 
 export const brandCentrifuge = {
-  brand: centrifugeBlue,
+  accentPrimary: centrifugeBlue,
+  accentSecondary: altairYellow,
 }

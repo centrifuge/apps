@@ -14,7 +14,8 @@
     "noEmit": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "useUnknownInCatchVariables": false
   },
   "include": ["src/**/*", "src/abi/*.abi.json", "src/abi/test/*.abi.json", ".eslintrc.js"],
   "exclude": ["node_modules", "**/*.spec.ts"]

@@ -1,94 +1,162 @@
-import { Box, Card, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Collection } from '@centrifuge/centrifuge-js'
+import { Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { collectionMetadataSchema, nftMetadataSchema } from '../schemas'
+import styled from 'styled-components'
+import { collectionMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
-import { Collection, useCollectionNFTsPreview } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
+import { useVisibilityChecker } from '../utils/useVisibilityChecker'
 import { Identity } from './Identity'
+import { LogoAltair } from './LogoAltair'
+import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   collection: Collection
 }
 
 export const CollectionCard: React.FC<Props> = ({ collection }) => {
-  const { data: metadata } = useMetadata(collection.metadataUri, collectionMetadataSchema)
-  const { data: previewNFTs } = useCollectionNFTsPreview(collection.id)
-  const { id, admin } = collection
+  const [visible, setVisible] = React.useState(false)
+  const ref = React.useRef<HTMLAnchorElement>(null)
+
+  useVisibilityChecker({ ref, onEnterOnce: () => setVisible(true), marginTop: 200 })
+
+  const { data: metadata, isLoading } = useMetadata(
+    visible ? collection.metadataUri : undefined,
+    collectionMetadataSchema
+  )
+  const { id, admin, instances } = collection
 
   return (
     <CollectionCardInner
       to={`/collection/${id}`}
       title={metadata?.name || 'Unnamed collection'}
       label={
-        <>
-          by <Identity address={admin} />
-        </>
+        <Shelf gap="4px">
+          <span>by</span>
+          <Identity address={admin} />
+        </Shelf>
       }
       description={metadata?.description}
-      previewNFTs={previewNFTs ?? undefined}
+      image={metadata?.image}
+      count={instances}
+      isLoading={isLoading}
+      ref={ref}
     />
   )
 }
 
 type InnerProps = {
+  count?: number
   to: string
   title: string
   label?: React.ReactNode
   description?: string
-  previewNFTs?: { id: string; metadataUri?: string }[]
+  image?: string
+  isLoading?: boolean
 }
 
-export const CollectionCardInner: React.FC<InnerProps> = ({ to, title, label, description, previewNFTs }) => {
-  return (
-    <Card as={Link} display="block" height="100%" to={to} variant="interactive" p={3}>
-      <Shelf gap={3} justifyContent="space-between" alignItems="flex-start">
-        <Stack gap={3}>
-          <div>
-            <Text as="h2" variant="heading2" style={{ wordBreak: 'break-word' }}>
-              {title}
-            </Text>
-            {label && <Text variant="label1">{label}</Text>}
-          </div>
-          <Text
-            style={{
-              overflow: 'hidden',
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              wordBreak: 'break-word',
-            }}
+export const CollectionCardInner = React.forwardRef<HTMLAnchorElement, InnerProps>(
+  ({ isLoading, count, to, title, label, description, image }, ref) => {
+    const [imageShown, setImageShown] = React.useState(false)
+
+    return (
+      <Card as={Link} display="block" height="100%" to={to} variant="interactive" ref={ref}>
+        <Stack>
+          <Box
+            bg="placeholderBackground"
+            style={{ aspectRatio: '16/9' }}
+            borderTopLeftRadius="card"
+            borderTopRightRadius="card"
+            overflow="hidden"
+            position="relative"
           >
-            {description}
-          </Text>
-        </Stack>
-        <Grid columns={2} gap={1}>
-          {Array.from({ length: 4 }, (_, i) => (
-            <PreviewImage uri={previewNFTs?.[i]?.metadataUri} key={previewNFTs?.[i]?.metadataUri || i} />
-          ))}
-        </Grid>
-      </Shelf>
-    </Card>
-  )
-}
+            {image && (
+              <Box
+                as="img"
+                alt=""
+                src={parseMetadataUrl(image)}
+                display="block"
+                width="100%"
+                height="100%"
+                position="relative"
+                zIndex={1}
+                style={{ objectFit: 'cover', transition: 'opacity 200ms', opacity: imageShown ? 1 : 0 }}
+                onLoad={() => setImageShown(true)}
+              />
+            )}
+            <Shelf
+              justifyContent="center"
+              position="absolute"
+              width="100%"
+              height="100%"
+              top={0}
+              left={0}
+              zIndex={0}
+              backgroundColor="black"
+              style={{ transition: 'opacity 200ms', opacity: imageShown ? 0 : 1 }}
+            >
+              <LogoAltair height="50%" />
+            </Shelf>
 
-const PreviewImage: React.FC<{ uri?: string }> = ({ uri }) => {
-  const { data } = useMetadata(uri, nftMetadataSchema)
-  const [shown, setShown] = React.useState(false)
-  return (
-    <Box width="80px" height="80px" borderRadius={4} bg={uri ? 'placeholderBackground' : undefined} overflow="hidden">
-      {data?.image && (
-        <Box
-          as="img"
-          alt=""
-          src={parseMetadataUrl(data.image)}
-          display="block"
-          width="100%"
-          height="100%"
-          style={{ objectFit: 'cover', transition: 'opacity 200ms', opacity: shown ? 1 : 0 }}
-          onLoad={() => setShown(true)}
-        />
-      )}
-    </Box>
-  )
-}
+            {count != null ? (
+              <Count px={1} py="4px" position="absolute" bottom={1} right={1} zIndex={1}>
+                <Text variant="label2" color="textPrimary">
+                  {count} NFTs
+                </Text>
+              </Count>
+            ) : null}
+          </Box>
+          <Stack gap={2} py={[2, 3]} px={[3, 4]} alignItems="center">
+            <Stack alignItems="center">
+              <TextWithPlaceholder
+                isLoading={isLoading}
+                as="h2"
+                variant="heading2"
+                textAlign="center"
+                style={{ wordBreak: 'break-word' }}
+              >
+                {title}
+              </TextWithPlaceholder>
+              {label && (
+                <Text textAlign="center" variant="label1">
+                  {label}
+                </Text>
+              )}
+            </Stack>
+            <TextWithPlaceholder
+              isLoading={isLoading}
+              width={70}
+              variance={20}
+              textAlign="center"
+              style={{
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                wordBreak: 'break-word',
+              }}
+            >
+              {description}
+            </TextWithPlaceholder>
+          </Stack>
+        </Stack>
+      </Card>
+    )
+  }
+)
+
+const Count = styled(Box)`
+  &::before {
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: ${({ theme }) => theme.colors.backgroundSecondary};
+    opacity: 0.8;
+    z-index: -1;
+    border-radius: 2px;
+  }
+`

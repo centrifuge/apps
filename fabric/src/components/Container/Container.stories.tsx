@@ -11,7 +11,7 @@ export default {
 type ContainerStory = ComponentStory<typeof Container>
 const Template: ContainerStory = (args) => (
   <Container {...args}>
-    <Box backgroundColor="brand" width="100%" height={75} />
+    <Box backgroundColor="accentPrimary" width="100%" height={75} />
   </Container>
 )
 

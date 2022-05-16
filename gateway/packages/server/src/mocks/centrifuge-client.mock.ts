@@ -205,7 +205,7 @@ export class MockCentrifugeService {
     }),
   }
   documents = {
-    getDocument: jest.fn((account_id, document_id) => {
+    getCommittedDocument: jest.fn((account_id, document_id) => {
       return {
         header: {
           document_id: document_id,

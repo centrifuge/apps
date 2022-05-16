@@ -17,7 +17,6 @@ import { useMergeState } from '../hooks'
 import { httpClient } from '../http-client'
 import { goToHomePage } from '../utils/goToHomePage'
 import DocumentForm from './DocumentForm'
-import { FundingAgreements } from './FundingAgreements'
 import { Nfts } from './Nfts'
 import documentRoutes from './routes'
 
@@ -154,7 +153,6 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
 
   // Add mint action if schema has any registries defined
   const canMint = selectedSchema!.registries && selectedSchema!.registries.length > 0
-  const canFund = canWriteToDoc(user, document)
   const extendedContacts = extendContactsWithUsers(contacts, [user!])
 
   return (
@@ -195,18 +193,6 @@ export const EditDocument: FunctionComponent<Props> = (props: Props) => {
           template={selectedSchema!.template}
           registries={selectedSchema!.registries}
         />
-
-        {selectedSchema!.formFeatures && selectedSchema!.formFeatures!.fundingAgreement && (
-          <FundingAgreements
-            onAsyncStart={startLoading}
-            onAsyncComplete={loadData}
-            onAsyncError={displayModalError}
-            viewMode={!canFund}
-            document={document!}
-            user={user}
-            contacts={contacts}
-          />
-        )}
       </DocumentForm>
     </>
   )

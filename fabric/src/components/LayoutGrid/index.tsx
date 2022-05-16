@@ -1,23 +1,23 @@
 import * as React from 'react'
 import { ResponsiveValue } from 'styled-system'
 import { mapResponsive } from '../../utils/styled'
-import { Box } from '../Box'
-import { Grid } from '../Grid'
+import { Box, BoxProps } from '../Box'
+import { Grid, GridProps } from '../Grid'
 
-export const LayoutGrid: React.FC = ({ children }) => {
+export const LayoutGrid: React.FC<Omit<GridProps, 'columns' | 'equalColumns' | 'gap'>> = ({ children, ...rest }) => {
   return (
-    <Grid columns={[4, 4, 8, 12]} equalColumns gap={['gutterMobile', 'gutterTablet', 'gutterDesktop']}>
+    <Grid columns={[4, 4, 8, 12]} equalColumns gap={['gutterMobile', 'gutterTablet', 'gutterDesktop']} {...rest}>
       {children}
     </Grid>
   )
 }
 
-type ItemProps = {
+type ItemProps = BoxProps & {
   span?: ResponsiveValue<number>
   push?: ResponsiveValue<number>
 }
 
-export const LayoutGridItem: React.FC<ItemProps> = ({ span, push, children }) => {
+export const LayoutGridItem: React.FC<ItemProps> = ({ span, push, children, ...rest }) => {
   return (
     <>
       {push && (
@@ -26,7 +26,9 @@ export const LayoutGridItem: React.FC<ItemProps> = ({ span, push, children }) =>
           display={mapResponsive(push, (value) => (value === 0 ? 'none' : 'initial'))}
         />
       )}
-      <Box gridColumn={mapResponsive(span, (value) => `auto / span ${value}`)}>{children}</Box>
+      <Box gridColumn={mapResponsive(span, (value) => `auto / span ${value}`)} {...rest}>
+        {children}
+      </Box>
     </>
   )
 }

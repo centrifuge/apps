@@ -1,14 +1,19 @@
 import { Box, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
-import { Footer } from '../components/Footer'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 import { Identity } from '../components/Identity'
+import { LogoAltair } from '../components/LogoAltair'
 import { NFTCard } from '../components/NFTCard'
-import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
+import { PageWithSideBar } from '../components/PageWithSideBar'
+import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
+import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { VisibilityChecker } from '../components/VisibilityChecker'
-import { useWeb3 } from '../components/Web3Provider'
 import { collectionMetadataSchema } from '../schemas'
+import { parseMetadataUrl } from '../utils/parseMetadataUrl'
+import { useAddress } from '../utils/useAddress'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFTs } from '../utils/useNFTs'
@@ -16,9 +21,9 @@ import { isSameAddress } from '../utils/web3'
 
 export const CollectionPage: React.FC = () => {
   return (
-    <PageContainer>
+    <PageWithSideBar>
       <Collection />
-    </PageContainer>
+    </PageWithSideBar>
   )
 }
 
@@ -28,38 +33,113 @@ const Collection: React.FC = () => {
   const {
     params: { cid: collectionId },
   } = useRouteMatch<{ cid: string }>()
-  const { selectedAccount } = useWeb3()
+  const address = useAddress()
   const collection = useCollection(collectionId)
-  const { data: metadata } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
-  const { data: nfts } = useNFTs(collectionId)
+  const nfts = useNFTs(collectionId)
+  const { data: metadata, isLoading } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
+  const centrifuge = useCentrifuge()
+
+  const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
+  const canMint = !isLoanCollection && isSameAddress(address, collection?.owner)
 
   return (
-    <Stack gap={8} flex={1}>
-      <Shelf gap={2} justifyContent="space-between">
-        <Shelf gap={[0, 1]} alignItems="baseline" flexWrap="wrap">
-          <Text variant="headingLarge" as="h1" style={{ wordBreak: 'break-word' }}>
-            {metadata?.name || 'Unnamed collection'}
-          </Text>
-          {collection?.owner && (
-            <Text variant="heading3" color="textSecondary">
+    <Stack flex={1} pb={8}>
+      <PageHeader
+        parent={{ to: '/nfts', label: 'NFTs' }}
+        title={metadata?.name || 'Unnamed collection'}
+        subtitle={
+          collection?.owner && (
+            <>
               by <Identity address={collection.owner} clickToCopy />
-            </Text>
-          )}
-        </Shelf>
-        {isSameAddress(selectedAccount?.address, collection?.owner) && (
-          <Box flex="0 0 auto">
-            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="outlined">
+            </>
+          )
+        }
+        actions={
+          canMint && (
+            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="outlined" small>
               Mint NFT
             </RouterLinkButton>
-          </Box>
+          )
+        }
+      />
+      <Stack alignItems="center" gap={2} mb={5}>
+        {metadata?.image ? (
+          <Box
+            as="img"
+            alt=""
+            src={parseMetadataUrl(metadata.image)}
+            display="block"
+            width="144px"
+            height="144px"
+            borderRadius="50%"
+            style={{ objectFit: 'cover' }}
+          />
+        ) : (
+          <Shelf
+            backgroundColor="black"
+            display="flex"
+            width="144px"
+            height="144px"
+            justifyContent="center"
+            borderRadius="50%"
+            borderWidth={1}
+            borderStyle="solid"
+            borderColor="borderPrimary"
+          >
+            <LogoAltair width="100px" />
+          </Shelf>
         )}
-      </Shelf>
+        <Stack alignItems="center" gap="4px">
+          <TextWithPlaceholder
+            isLoading={isLoading}
+            variant="heading1"
+            fontSize="36px"
+            textAlign="center"
+            style={{ wordBreak: 'break-word' }}
+          >
+            {metadata?.name || 'Unnamed collection'}
+          </TextWithPlaceholder>
+          <Shelf gap={1} alignItems="baseline" flexWrap="wrap">
+            <Box mx="auto">
+              <Text variant="body2">by</Text>
+            </Box>
+            <AnchorPillButton
+              href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/account/${collection?.owner ?? ''}`}
+              target="_blank"
+            >
+              {collection?.owner && <Identity address={collection.owner} clickToCopy />}
+            </AnchorPillButton>
+          </Shelf>
+        </Stack>
+
+        <Box maxWidth="680px">
+          <TextWithPlaceholder
+            isLoading={isLoading}
+            width={100}
+            words={1}
+            variant="body1"
+            textAlign="center"
+            style={{
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 10,
+              WebkitBoxOrient: 'vertical',
+              wordBreak: 'break-word',
+            }}
+          >
+            {metadata?.description || ''}
+          </TextWithPlaceholder>
+        </Box>
+      </Stack>
       {nfts?.length ? (
         <>
-          <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>
-            {nfts.slice(0, shownCount).map((nft, i) => (
-              <NFTCard nft={nft} key={i} />
+          <Box mb={2}>
+            <Text variant="heading3">{collection?.instances ?? 0} NFTs</Text>
+          </Box>
+          <Grid gap={[2, 3]} columns={[2, 2, 3, 4]} equalColumns>
+            {nfts.slice(0, shownCount).map((nft) => (
+              <NFTCard nft={nft} key={nft.id} />
             ))}
           </Grid>
           {nfts.length > shownCount && (
@@ -67,13 +147,11 @@ const Collection: React.FC = () => {
           )}
         </>
       ) : (
-        <Shelf justifyContent="center" mt="15vh" textAlign="center">
-          <Text variant="heading2" color="textSecondary">
-            The collection does not contain any NFTs yet
-          </Text>
-        </Shelf>
+        <Stack alignItems="center" gap={2} mt={8}>
+          <Text variant="label1">This collection does not contain any NFT</Text>
+          {canMint && <RouterLinkButton to={`/collection/${collectionId}/object/mint`}>Mint NFT</RouterLinkButton>}
+        </Stack>
       )}
-      <Footer />
     </Stack>
   )
 }

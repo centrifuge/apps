@@ -9,7 +9,6 @@ import { defaultContacts, defaultSchemas, defaultUser } from '../../test-utiliti
 import { silenceConsoleWhen } from '../../test-utilities/silenceConsoleWhen'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
 import DocumentForm from '../DocumentForm'
-import { FundingAgreements } from '../FundingAgreements'
 import { Nfts } from '../Nfts'
 import { ViewDocument } from '../ViewDocument'
 
@@ -123,7 +122,6 @@ describe('View Document', () => {
       expect(documentForm.prop('selectedSchema')).toEqual(defaultSchemas[0])
 
       expect(documentForm.find(Nfts).prop('viewMode')).toBe(true)
-      expect(documentForm.find(FundingAgreements).prop('viewMode')).toBe(true)
     })
   })
 
@@ -168,7 +166,6 @@ describe('View Document', () => {
       await new Promise((r) => setTimeout(r, 0))
       component.update()
       const documentForm = component.find(DocumentForm)
-      expect(documentForm.find(FundingAgreements).length).toBe(0)
     })
   })
 

@@ -1,17 +1,29 @@
 import { useQuery } from 'react-query'
-import { initPolkadotApi } from './web3'
+import { firstValueFrom, of } from 'rxjs'
+import { map, switchMap } from 'rxjs/operators'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 
 export function useIdentity(address?: string) {
-  const query = useQuery(
+  const centrifuge = useCentrifuge()
+  const { data } = useQuery(
     ['identity', address],
     async () => {
-      const api = await initPolkadotApi('kusama')
-      const result = await api.query.identity.identityOf(address)
-      const obj = result.toHuman() as any
-      if (!obj) return null
-      return {
-        display: obj.info.display.Raw,
-      }
+      return firstValueFrom(
+        centrifuge.getRelayChainApi().pipe(
+          switchMap((api) => {
+            if (!api.query.identity) return of(null)
+            return api.query.identity.identityOf(address)
+          }),
+          map((result) => {
+            if (!result) return null
+            const obj = result.toHuman() as any
+            if (!obj) return null
+            return {
+              display: obj.info.display.Raw,
+            }
+          })
+        )
+      )
     },
     {
       enabled: !!address,
@@ -19,5 +31,5 @@ export function useIdentity(address?: string) {
     }
   )
 
-  return query
+  return data
 }

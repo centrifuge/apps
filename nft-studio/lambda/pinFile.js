@@ -1,13 +1,18 @@
 import path from 'path'
-import { pinFile, pinJson, unpinFile } from './pinata/api'
+import { pinFile } from './pinata/api'
 
 const fs = require('fs')
-const os = require('os')
+
+const MAX_FILE_SIZE_IN_BYTES = 5 * 1024 ** 2 // 5 MB limit
 
 const dataUriToReadStream = ({ tempFilePath, fileDataUri }) => {
   const base64String = fileDataUri.replace(/.+;base64,/, '')
 
-  fs.writeFileSync(tempFilePath, base64String, { encoding: 'base64' })
+  const buffer = Buffer.from(base64String, 'base64')
+
+  if (buffer.byteLength > MAX_FILE_SIZE_IN_BYTES) throw new Error('File too large')
+
+  fs.writeFileSync(tempFilePath, buffer)
 
   console.log(`Temp file '${tempFilePath}' created`)
 
@@ -17,22 +22,16 @@ const dataUriToReadStream = ({ tempFilePath, fileDataUri }) => {
 const ipfsHashToURI = (hash) => `ipfs://ipfs/${hash}`
 
 const handler = async (event) => {
-  let tempDir = ''
   try {
-    const { name, description, fileDataUri, fileName } = JSON.parse(event.body)
+    const { fileDataUri, fileName } = JSON.parse(event.body)
 
     // check incoming data
-    if (!(name && description && fileDataUri && fileName)) {
-      return { statusCode: 400, body: 'Bad request: name, description and fileDataUri are required fields' }
+    if (!(fileDataUri && fileName)) {
+      return { statusCode: 400, body: 'Bad request: fileName and fileDataUri are required fields' }
     }
 
-    // create temp directory
-    tempDir = path.join(fs.realpathSync(os.tmpdir()), fs.mkdtempSync('nft-studio-'))
-    fs.mkdirSync(tempDir)
-    console.log(`Temp dir '${tempDir}' created`)
-
     // create temp file to call the pinFile API
-    const tempFilePath = path.join(tempDir, fileName)
+    const tempFilePath = path.join('/tmp', fileName)
     console.log(`Temp file '${tempFilePath}' created`)
     const fileStream = dataUriToReadStream({ tempFilePath, fileDataUri })
 
@@ -42,35 +41,16 @@ const handler = async (event) => {
     const fileHash = pinFileResponse.data.IpfsHash
     const fileURL = ipfsHashToURI(fileHash)
 
-    let pinMetadataResponse
-    try {
-      pinMetadataResponse = await pinJson({ name, description, image: fileURL })
-    } catch (e) {
-      // if the creation of metadata fails, unpin the image file
-      await unpinFile(fileHash)
-      throw e
-    }
-
-    const metadataHash = pinMetadataResponse.data.IpfsHash
-
     return {
       statusCode: 200,
       body: JSON.stringify({
-        imageIpfsHash: fileHash,
-        metadataIpfsHash: metadataHash,
-        imageURI: fileURL,
-        metadataURI: ipfsHashToURI(metadataHash),
+        fileIpfsHash: fileHash,
+        fileURI: fileURL,
       }),
     }
   } catch (e) {
     console.log(e)
     return { statusCode: 500, body: e.message || 'Server error' }
-  } finally {
-    // clean up the temp file/directory
-    if (tempDir) {
-      fs.rmSync(tempDir, { recursive: true })
-      console.log(`Temp dir '${tempDir}' removed`)
-    }
   }
 }
 

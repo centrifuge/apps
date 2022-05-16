@@ -1,8 +1,8 @@
 import {
   CoreapiAttributeResponse,
-  CoreapiCreateDocumentRequest,
   CoreapiDocumentResponse,
   CoreapiResponseHeader,
+  V2CreateDocumentRequest as CoreapiCreateDocumentRequest,
 } from '@centrifuge/gateway-lib/centrifuge-node-client'
 import { Document, DocumentStatus, NftStatus } from '@centrifuge/gateway-lib/models/document'
 import { User } from '@centrifuge/gateway-lib/models/user'
@@ -57,7 +57,7 @@ export class DocumentsController {
       document.header.document_id
     )
 
-    const updated = await this.centrifugeService.pullForJobComplete(commitResult.header.job_id, user.account)
+    const { jobStatus } = await this.centrifugeService.pullForJobComplete(commitResult.header.job_id, user.account)
 
     const updatedDocs = await this.databaseService.documents.update(
       {
@@ -66,7 +66,7 @@ export class DocumentsController {
       },
       {
         $set: {
-          document_status: updated.status === 'success' ? DocumentStatus.Created : DocumentStatus.CreationFail,
+          document_status: jobStatus ? DocumentStatus.Created : DocumentStatus.CreationFail,
         },
       },
       {
@@ -89,21 +89,21 @@ export class DocumentsController {
       scheme: CoreapiCreateDocumentRequest.SchemeEnum.Generic,
     }
 
-    if (document.header && document.header.read_access) {
+    if (document.header && document.header.readAccess) {
       payload = {
         ...payload,
-        read_access: document.header.read_access,
+        readAccess: document.header.readAccess,
       }
     }
 
-    if (document.header && document.header.write_access) {
+    if (document.header && document.header.writeAccess) {
       payload = {
         ...payload,
-        write_access: document.header.write_access,
+        writeAccess: document.header.writeAccess,
       }
     }
 
-    const createResult: Document = await this.centrifugeService.documents.createDocumentV2(user.account, payload)
+    const createResult: Document = await this.centrifugeService.documents.createDocumentV2(payload, user.account)
 
     const updated = (await this.databaseService.documents.update(
       {
@@ -131,10 +131,10 @@ export class DocumentsController {
 
   async cloneDoc(document: Document, template, user: User) {
     const cloneResult: Document = await this.centrifugeService.documents.cloneDocumentV2(
-      user.account,
       {
         scheme: SchemeEnum.Generic,
       },
+      user.account,
       template
     )
 
@@ -235,7 +235,7 @@ export class DocumentsController {
     const document = await this.getDocFromDB(params.id)
 
     try {
-      const docFromNode = await this.centrifugeService.documents.getDocument(
+      const docFromNode = await this.centrifugeService.documents.getCommittedDocument(
         request.user.account,
         document.header.document_id
       )
@@ -288,13 +288,13 @@ export class DocumentsController {
     const mergedDoc: Document = merge(documentFromDb, updateDocRequest)
     const header: CoreapiResponseHeader = mergedDoc.header
     const updateResult: Document = await this.centrifugeService.documents.updateDocumentV2(
-      request.user.account,
       {
         attributes: mergedDoc.attributes,
-        read_access: header ? header.read_access : [],
-        write_access: header ? header.write_access : [],
+        readAccess: header ? header.readAccess : [],
+        writeAccess: header ? header.writeAccess : [],
         scheme: SchemeEnum.Generic,
       },
+      request.user.account,
       documentFromDb.header.document_id
     )
     const unflattenAttr = unflatten(updateResult.attributes)

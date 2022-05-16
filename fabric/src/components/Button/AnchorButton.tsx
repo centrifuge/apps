@@ -21,12 +21,13 @@ export const AnchorButton: React.FC<AnchorButtonProps> = ({
   iconRight,
   disabled,
   loading,
+  loadingMessage,
   children,
   active,
   ...anchorProps
 }) => {
   return (
-    <StyledAnchor $disabled={loading || disabled} target="_blank" rel="noopener noreferrer" {...anchorProps}>
+    <StyledAnchor $disabled={loading || disabled} rel="noopener noreferrer" {...anchorProps}>
       <VisualButton
         variant={variant}
         small={small}
@@ -34,6 +35,7 @@ export const AnchorButton: React.FC<AnchorButtonProps> = ({
         iconRight={iconRight}
         disabled={disabled}
         loading={loading}
+        loadingMessage={loadingMessage}
         active={active}
       >
         {children}

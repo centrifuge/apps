@@ -1,28 +1,46 @@
 import { Button, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Footer } from '../components/Footer'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 import { NFTCard } from '../components/NFTCard'
-import { PageContainer } from '../components/PageContainer'
+import { PageHeader } from '../components/PageHeader'
+import { PageWithSideBar } from '../components/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
+import { useAddress } from '../utils/useAddress'
+import { useCollections } from '../utils/useCollections'
 import { useAccountNfts } from '../utils/useNFTs'
 
 export const AccountNFTsPage: React.FC = () => {
   return (
-    <PageContainer>
+    <PageWithSideBar>
       <AccountNFTs />
-    </PageContainer>
+    </PageWithSideBar>
   )
 }
 
 const COUNT_PER_PAGE = 16
 
 const AccountNFTs: React.FC = () => {
-  const { selectedAccount, isConnecting, connect } = useWeb3()
-  const { data: nfts } = useAccountNfts(selectedAccount?.address)
+  const { isConnecting, connect } = useWeb3()
+  const address = useAddress()
+  const nfts = useAccountNfts(address)
+  const collections = useCollections()
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
+  const centrifuge = useCentrifuge()
 
-  if (!selectedAccount) {
+  const filteredNfts = React.useMemo(
+    () =>
+      nfts?.filter((nft) => {
+        const collection = collections?.find((c) => c.id === nft.collectionId)
+        if (!collection) return false
+
+        return !centrifuge.utils.isLoanPalletAccount(collection.admin)
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [nfts]
+  )
+
+  if (!address) {
     return (
       <Shelf justifyContent="center">
         <Button onClick={() => connect()} loading={isConnecting}>
@@ -33,22 +51,16 @@ const AccountNFTs: React.FC = () => {
   }
 
   return (
-    <Stack gap={8} flex={1}>
-      <Shelf justifyContent="space-between">
-        <Shelf gap={[0, 1]} alignItems="baseline" flexWrap="wrap">
-          <Text variant="headingLarge" as="h1">
-            My NFTs
-          </Text>
-        </Shelf>
-      </Shelf>
-      {nfts?.length ? (
+    <Stack gap={8} flex={1} pb={8}>
+      <PageHeader parent={{ to: '/nfts', label: 'collections' }} title="My NFTs" />
+      {filteredNfts?.length ? (
         <>
-          <Grid gap={[2, 3]} columns={[2, 3, 4, 5]} equalColumns>
-            {nfts.slice(0, shownCount).map((nft, i) => (
-              <NFTCard nft={nft} key={i} />
+          <Grid gap={[2, 3]} columns={[2, 2, 3, 4]} equalColumns>
+            {filteredNfts.slice(0, shownCount).map((nft) => (
+              <NFTCard nft={nft} key={`${nft.collectionId}-${nft.id}`} />
             ))}
           </Grid>
-          {nfts.length > shownCount && (
+          {filteredNfts.length > shownCount && (
             <VisibilityChecker marginTop={400} onEnter={() => setShownCount((count) => count + COUNT_PER_PAGE)} />
           )}
         </>
@@ -59,7 +71,6 @@ const AccountNFTs: React.FC = () => {
           </Text>
         </Shelf>
       )}
-      <Footer />
     </Stack>
   )
 }

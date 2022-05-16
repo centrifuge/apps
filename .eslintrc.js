@@ -64,6 +64,7 @@ module.exports = {
       },
     ],
     'react/jsx-wrap-multilines': 'off',
+    'react/display-name': 'off',
     semi: 'off',
     'space-before-function-paren': 'off',
     'space-in-parens': ['off', 'never'],

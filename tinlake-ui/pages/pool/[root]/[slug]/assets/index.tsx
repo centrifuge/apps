@@ -64,12 +64,14 @@ const LoanListPage: React.FC<Props> = (props) => {
                   )
                 }
               />
-              <Stack gap="xlarge">
+              <Stack gap="medium">
                 <LoanOverview auth={auth} selectedPool={props.pool} />
                 <Stack gap="small">
-                  <SectionHeading>Asset List</SectionHeading>
-                  <LoanList auth={auth} activePool={props.pool} />
                   <Scorecard activePool={props.pool} />
+                  <Box mt="16px">
+                    <SectionHeading>Asset List</SectionHeading>
+                  </Box>
+                  <LoanList auth={auth} activePool={props.pool} />
                 </Stack>
               </Stack>
             </Auth>

@@ -6,11 +6,13 @@ import { KycEntity, KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
 import { DocusignService } from './docusign.service'
 import { SecuritizeService } from './kyc/securitize.service'
+import MailerService from './mailer.service'
 import { MemberlistService } from './memberlist.service'
 
 @Injectable()
 export class SyncService {
   private readonly logger = new Logger(SyncService.name)
+  mailer = new MailerService()
 
   constructor(
     private readonly kycRepo: KycRepo,
@@ -64,6 +66,11 @@ export class SyncService {
         )
 
         this.memberlistService.update(kyc.userId)
+      }
+
+      //Send KYC status email if status is updated
+      if (investor && investor.verificationStatus !== kyc.status) {
+        await this.mailer.sendKycStatusEmail(investor.fullName, investor.email, investor.verificationStatus)
       }
     })
   }

@@ -9,7 +9,6 @@ import { silenceConsoleWhen } from '../../test-utilities/silenceConsoleWhen'
 import { withAllProvidersAndContexts } from '../../test-utilities/test-providers'
 import CreateDocument from '../CreateDocument'
 import DocumentForm from '../DocumentForm'
-import { FundingAgreements } from '../FundingAgreements'
 import { Nfts } from '../Nfts'
 import routes from '../routes'
 
@@ -53,7 +52,6 @@ describe('Create Document', () => {
       expect(documentForm.prop('contacts')).toEqual(defaultContacts)
 
       expect(documentForm.find(Nfts).length).toBe(0)
-      expect(documentForm.find(FundingAgreements).length).toBe(0)
     })
   })
 

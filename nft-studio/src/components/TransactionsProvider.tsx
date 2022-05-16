@@ -8,6 +8,7 @@ export type Transaction = {
   hash?: string
   result?: any
   failedReason?: string
+  error?: any
   dismissed?: boolean
 }
 
@@ -21,8 +22,6 @@ const TransactionsContext = React.createContext<TransactionsContextType>(null as
 
 export const TransactionProvider: React.FC = ({ children }) => {
   const [transactions, setTransactions] = React.useState<Transaction[]>([])
-
-  console.log('transactions', transactions)
 
   const addTransaction = React.useCallback((tx: Transaction) => {
     setTransactions((prev) => [...prev, tx])

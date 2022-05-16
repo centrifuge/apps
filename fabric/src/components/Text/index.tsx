@@ -19,7 +19,10 @@ function useTextContext(): React.ContextType<typeof TextContext> {
   return React.useContext(TextContext)
 }
 
-type TextProps = PropsOf<typeof StyledText> & { variant?: keyof DefaultTheme['typography'] }
+type TextProps = PropsOf<typeof StyledText> & {
+  variant?: keyof DefaultTheme['typography']
+  underline?: boolean
+}
 
 const Text: React.FC<TextProps> = (props) => {
   const isInText = useTextContext()
@@ -42,6 +45,8 @@ const Text: React.FC<TextProps> = (props) => {
     ...rest
   } = textProps
 
+  const textDecoration = props.underline ? 'underline' : 'initial'
+
   return (
     <TextContext.Provider value>
       <StyledText
@@ -51,6 +56,7 @@ const Text: React.FC<TextProps> = (props) => {
         fontWeight={fontWeight}
         lineHeight={lineHeight}
         fontFamily={fontFamily}
+        style={{ textDecoration }}
         {...rest}
       >
         {children}
@@ -59,4 +65,4 @@ const Text: React.FC<TextProps> = (props) => {
   )
 }
 
-export { Text, TextProps, useTextContext }
+export { Text, TextProps, useTextContext, TextContext }

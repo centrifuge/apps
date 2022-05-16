@@ -238,9 +238,9 @@ export class UsersController {
       if (!user.organizationName) {
         throw new MethodNotAllowedException('Organization name is mandatory!')
       }
-      const generatedAccount = await this.centrifugeService.accounts.generateAccount(config.admin.chain)
+      const generatedAccount = await this.centrifugeService.accounts.generateAccountV2(config.admin.chain)
 
-      const newOrg = new Organization(user.organizationName, generatedAccount.identity_id.toLowerCase())
+      const newOrg = new Organization(user.organizationName, generatedAccount.did.toLowerCase())
       await this.databaseService.organizations.insert(newOrg)
       delete user.organizationName
       user.account = newOrg.account

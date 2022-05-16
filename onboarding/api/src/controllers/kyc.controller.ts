@@ -4,12 +4,14 @@ import { AddressRepo } from '../repos/address.repo'
 import { KycRepo } from '../repos/kyc.repo'
 import { UserRepo } from '../repos/user.repo'
 import { SecuritizeService } from '../services/kyc/securitize.service'
+import MailerService from '../services/mailer.service'
 import { CustomPoolIds, PoolService } from '../services/pool.service'
 import { SessionService } from '../services/session.service'
 
 @Controller()
 export class KycController {
   private readonly logger = new Logger(KycController.name)
+  mailer = new MailerService()
 
   constructor(
     private readonly securitizeService: SecuritizeService,
@@ -74,6 +76,10 @@ export class KycController {
       investor.domainInvestorDetails?.isUsaTaxResident,
       investor.domainInvestorDetails?.isAccredited
     )
+    //Send KYC status email if status is updated
+    if (kyc.status !== investor.verificationStatus) {
+      await this.mailer.sendKycStatusEmail(investor.fullName, investor.email, investor.verificationStatus)
+    }
 
     // Link user to pool/tranche so we know which pools a user has shown interest in
     await this.userRepo.linkToPool(userId, params.poolId, query.tranche || 'senior')
@@ -135,6 +141,11 @@ export class KycController {
       investor.domainInvestorDetails?.isUsaTaxResident,
       investor.domainInvestorDetails?.isAccredited
     )
+
+    //Send KYC status email if status is updated
+    if (kyc.status !== investor.verificationStatus) {
+      await this.mailer.sendKycStatusEmail(investor.fullName, investor.email, investor.verificationStatus)
+    }
 
     // Create session and redirect user
     const session = this.sessionService.create(userId)

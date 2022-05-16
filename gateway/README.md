@@ -30,6 +30,11 @@ Gateway requires a Centrifuge Node to run. Either connect via VPN to a deployed 
 NODE_ENV=development REACT_APP_DISABLE_2FA=true REACT_APP_ADMIN_USER=gateway@centrifuge.io REACT_APP_ADMIN_PASSWORD=admin ETH_NETWORK=kovan ETH_PROVIDER=https://kovan.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5 CENTRIFUGE_URL=http://34.89.251.225:8082 CENTRIFUGE_ADMIN_ACCOUNT=0x0A735602a357802f553113F5831FE2fbf2F0E2e0 yarn start
 ```
 
+#### connect with Amber node 2.0
+```
+NODE_ENV=development REACT_APP_DISABLE_2FA=true REACT_APP_ADMIN_USER=gateway@centrifuge.io REACT_APP_ADMIN_PASSWORD=admin ETH_NETWORK=kovan ETH_PROVIDER=https://kovan.infura.io/v3/55b957b5c6be42c49e6d48cbb102bdd5 CENTRIFUGE_URL=http://34.89.173.240:8082 CENTRIFUGE_ADMIN_ACCOUNT=0x0A735602a357802f553113F5831FE2fbf2F0E2e0 JWT_PRIV_KEY=$(cat jwtRS256.key) JWT_PUB_KEY=$(cat jwtRS256.key.pub) yarn start
+```
+
 #### Connect with local node
 
 ```
