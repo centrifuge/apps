@@ -30,7 +30,6 @@ export const PoolDetailLiquidityTab: React.FC = () => {
 export const PoolDetailLiquidity: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  if (!pool) return null
   const address = useAddress()
   const permissions = usePermissions(address)
 
@@ -40,7 +39,10 @@ export const PoolDetailLiquidity: React.FC = () => {
   // const poolStates30d = dailyPoolStates?.filter((state) => new Date(state.timestamp) > new Date(date30DaysAgo))
 
   const pageSummaryData = [
-    { label: <Tooltips type="poolReserve" />, value: formatBalance(pool.reserve.total.toDecimal(), pool.currency) },
+    {
+      label: <Tooltips type="poolReserve" />,
+      value: formatBalance(pool?.reserve.total.toDecimal() || 0, pool?.currency || ''),
+    },
     // { label: <Tooltips type="invested30d" />, value: formatBalance(0, pool.currency) },
     // { label: <Tooltips type="redeemed30d" />, value: formatBalance(0, pool.currency) },
     // { label: <Tooltips type="repaid30d" />, value: formatBalance(0, pool.currency) },
@@ -62,6 +64,7 @@ export const PoolDetailLiquidity: React.FC = () => {
     closeEpochTx([pool.id])
   }
 
+  if (!pool) return null
   return (
     <>
       <PageSummary data={pageSummaryData} />

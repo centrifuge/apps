@@ -31,9 +31,10 @@ export const ReserveCashDragChart: React.VFC = () => {
   const todayPoolValue = pool?.value.toDecimal().toNumber() || 0
   const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
   const reserve = todayPoolValue - todayAssetValue
+  const cashDrag = todayAssetValue / reserve
   const today: ChartData = {
     day: new Date(),
-    cashDrag: todayAssetValue / reserve,
+    cashDrag: cashDrag || 0,
     reserve,
   }
 
