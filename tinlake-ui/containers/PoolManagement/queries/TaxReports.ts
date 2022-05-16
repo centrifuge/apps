@@ -396,5 +396,5 @@ export function taxReport2020({ poolId, poolData }: { poolId: string; poolData: 
 }
 
 export function taxReport2021({ poolId, poolData }: { poolId: string; poolData: PoolData }) {
-  return taxReportByYear({ poolId, poolData, yearStart: new Date(2021, 0, 1), yearEnd: new Date(2021, 11, 31) })
+  return taxReportByYear({ poolId, poolData, yearStart: new Date(2021, 3, 1), yearEnd: new Date(2022, 2, 31) })
 }
