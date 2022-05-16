@@ -13,11 +13,11 @@ import { Column, DataTable, SortableTableHeader } from './DataTable'
 export type AssetByRiskGroup = {
   color?: string
   labelColor?: string
-  name: string
-  amount: Balance
+  name: string | React.ReactElement
+  amount: Balance | any
   share: string | React.ReactElement
-  interestRatePerSec: string
-  riskAdjustment: string
+  interestRatePerSec: string | React.ReactElement
+  riskAdjustment: string | React.ReactElement
 }
 
 const initialRow: AssetByRiskGroup = {
@@ -146,7 +146,7 @@ export const RiskGroupList: React.FC = () => {
   // temp solution while assets are still manually priced (in the future there will be a select to choose a riskGroup)
   // represents all assets that could not be sorted into a riskGroup
   const remainingAssets: AssetByRiskGroup[] = React.useMemo(() => {
-    const amountsSum = riskGroups.reduce((curr, prev) => new Balance(curr.add(prev.amount)), new Balance('0'))
+    const amountsSum = riskGroups.reduce((curr, prev) => new Balance(curr.add(prev.amount as any)), new Balance('0'))
     const sharesSum = riskGroups.reduce((curr, prev) => curr + Number(prev.share) * 100, 0)
 
     return sharesSum !== 100 && sharesSum !== 0
@@ -180,7 +180,7 @@ export const RiskGroupList: React.FC = () => {
     return {
       share: (
         <Text variant="body2" fontWeight={600}>
-          {totalSharesSum}
+          {totalSharesSum}%
         </Text>
       ),
       amount: (
@@ -193,8 +193,10 @@ export const RiskGroupList: React.FC = () => {
           Total
         </Text>
       ),
-      interestRatePerSec: <Text variant="body2" fontWeight={600}>{`Avg ${avgInterestRatePerSec.toString()}`}</Text>,
-      riskAdjustment: <Text variant="body2" fontWeight={600}>{`Avg. ${avgRiskAdjustment.toString()}`}</Text>,
+      interestRatePerSec: <Text variant="body2" fontWeight={600}>{`Avg ${avgInterestRatePerSec.toString()}%`}</Text>,
+      riskAdjustment: <Text variant="body2" fontWeight={600}>{`Avg. ${avgRiskAdjustment.toString()}%`}</Text>,
+      color: '',
+      labelColor: ' ',
     }
   }, [riskGroups, remainingAssets, pool?.nav.latest])
 
@@ -214,7 +216,7 @@ export const RiskGroupList: React.FC = () => {
     })
 
   const sharesForPie = tableDataWithColor.map(({ name, color, labelColor, share }) => {
-    return { value: Number(share), name, color, labelColor }
+    return { value: Number(share), name: name as string, color, labelColor }
   })
 
   return (
