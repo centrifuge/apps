@@ -198,7 +198,7 @@ export const RiskGroupList: React.FC = () => {
       color: '',
       labelColor: ' ',
     }
-  }, [riskGroups, remainingAssets, pool?.nav.latest])
+  }, [riskGroups, remainingAssets, pool?.nav.latest, pool?.currency, totalSharesSum])
 
   // biggest share of pie gets darkest color
   const tableDataWithColor = [...riskGroups, ...remainingAssets]
