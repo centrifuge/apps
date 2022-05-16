@@ -7,6 +7,7 @@ import { formatBalance } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
 import { DataTableGroup } from './DataTableGroup'
+import { AnchorTextLink } from './TextLink'
 
 type Props = {
   pool: DetailedPool
@@ -66,6 +67,10 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
         <DataTable data={investments} columns={columns} summary={summaryInvestments} />
         <DataTable data={redmetions} columns={columns} summary={summaryRedemtions} />
       </DataTableGroup>
+      <Text variant="body3" color="textSecondary">
+        An epoch is a period of locking investments and redemptions.{' '}
+        <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
+      </Text>
     </Stack>
   )
 }
