@@ -11,6 +11,7 @@ import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { AnchorPillButton } from '../../components/PillButton'
 import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
+import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
 import { formatBalance } from '../../utils/formatting'
 import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
@@ -100,10 +101,16 @@ const Loan: React.FC = () => {
           <>
             <PageSummary
               data={[
-                { label: 'Loan type', value: loan?.loanInfo.type ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '' },
-                { label: 'Collateral value', value: formatBalance(loan.loanInfo.value, pool?.currency) },
                 {
-                  label: 'Risk group',
+                  label: <Tooltips type="loanType" />,
+                  value: loan?.loanInfo.type ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '',
+                },
+                {
+                  label: <Tooltips type="collateralValue" />,
+                  value: formatBalance(loan.loanInfo.value, pool?.currency),
+                },
+                {
+                  label: <Tooltips type="riskGroup" />,
                   value: (
                     <TextWithPlaceholder isLoading={metadataIsLoading}>
                       {riskGroupIndex !== undefined && riskGroupIndex > -1
