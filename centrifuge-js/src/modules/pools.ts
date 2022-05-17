@@ -196,8 +196,6 @@ export type Tranche = {
   outstandingInvestOrders: Balance
   outstandingRedeemOrders: Balance
   lastUpdatedInterest: string
-  investFulfillment?: Balance
-  redeemFulfillment?: Balance
 }
 
 export type TrancheWithTokenPrice = Tranche & {
@@ -303,6 +301,7 @@ export type TrancheInput = {
 export type DailyPoolState = {
   poolState: {
     netAssetValue: Balance
+    totalReserve: Balance
   }
   poolValue: Balance
   currency: string
@@ -960,8 +959,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
                       lastUpdatedInterest: new Date(tranche.lastUpdatedInterest * 1000).toISOString(),
                       totalIssuance: new Balance(tokenIssuanceValues[index].toString()),
                       tokenPrice: new Price(lastEpoch[index]?.tokenPrice.toString() ?? '0'),
-                      investFulfillment: new Balance(hexToBN(lastEpoch[index]?.investFulfillment ?? '0')),
-                      redeemFulfillment: new Balance(hexToBN(lastEpoch[index]?.redeemFulfillment ?? '0')),
                     }
                   }),
                   reserve: {
@@ -1026,6 +1023,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 const poolState = {
                   ...state.poolState,
                   netAssetValue: new Balance(state.poolState.netAssetValue),
+                  totalReserve: new Balance(state.poolState.totalReserve),
                 }
                 const poolValue = new Balance(
                   new Balance(state?.poolState.netAssetValue || '0').add(

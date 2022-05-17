@@ -39,7 +39,7 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
     const trancheMeta = metadata?.tranches?.[token.seniority]
     return {
       order: `${trancheMeta?.symbol} investments`,
-      locked: token.investFulfillment?.toDecimal() || new Decimal(0),
+      locked: token.outstandingInvestOrders?.toDecimal() || new Decimal(0),
     }
   })
 
@@ -47,7 +47,7 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
     const trancheMeta = metadata?.tranches?.[token.seniority]
     return {
       order: `${trancheMeta?.symbol} redemptions`,
-      locked: token.redeemFulfillment?.toDecimal() || new Decimal(0),
+      locked: token.outstandingRedeemOrders?.toDecimal() || new Decimal(0),
     }
   })
 
