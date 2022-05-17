@@ -190,7 +190,7 @@ const CreatePoolForm: React.VFC = () => {
     {
       onSuccess: (args) => {
         const [, poolId] = args
-        history.push(`/pools/${poolId}`)
+        history.push(`/issuer/${poolId}`)
       },
     }
   )

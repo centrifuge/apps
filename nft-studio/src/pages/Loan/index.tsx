@@ -1,4 +1,4 @@
-import { Box, Card, IconChevronLeft, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import { Box, Card, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
 import { CardHeader } from '../../components/CardHeader'
@@ -9,7 +9,6 @@ import { PageSection } from '../../components/PageSection'
 import { PageSummary } from '../../components/PageSummary'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { AnchorPillButton } from '../../components/PillButton'
-import { RouterLinkButton } from '../../components/RouterLinkButton'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { nftMetadataSchema } from '../../schemas'
 import { formatBalance } from '../../utils/formatting'
@@ -82,16 +81,11 @@ const Loan: React.FC = () => {
         icon={<Thumbnail type="asset" label={loan?.id ?? ''} size="large" />}
         title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
         titleAddition={loan && <LoanLabel loan={loan} />}
-        parent={{ to: `/pools/${pid}/assets`, label: 'Assets' }}
+        parent={{ to: `/pools/${pid}/assets`, label: poolMetadata?.pool?.name ?? 'Pool assets' }}
         subtitle={
           <TextWithPlaceholder isLoading={metadataIsLoading}>
             {poolMetadata?.pool?.asset.class} asset
           </TextWithPlaceholder>
-        }
-        actions={
-          <RouterLinkButton icon={IconChevronLeft} to={`/pools/${pid}`} variant="tertiary" small>
-            {poolMetadata?.pool?.name ?? ''}
-          </RouterLinkButton>
         }
       />
       {loan &&
@@ -155,8 +149,8 @@ const Loan: React.FC = () => {
                 )}
               </Box>
               <Stack gap={2}>
-                <Stack gap={1}>
-                  <Text variant="label1">Description</Text>
+                <Stack gap="4px">
+                  <Text variant="label2">Description</Text>
                   <TextWithPlaceholder
                     isLoading={nftMetadataIsLoading}
                     words={2}
@@ -170,8 +164,8 @@ const Loan: React.FC = () => {
                 </Stack>
 
                 {imageUrl && (
-                  <Stack gap={1} alignItems="flex-start">
-                    <Text variant="label1">Image</Text>
+                  <Stack gap="4px" alignItems="flex-start">
+                    <Text variant="label2">Image</Text>
                     <AnchorPillButton
                       href={imageUrl}
                       target="_blank"
@@ -182,8 +176,8 @@ const Loan: React.FC = () => {
                   </Stack>
                 )}
 
-                <Stack gap={1}>
-                  <Text variant="label1">Owner</Text>
+                <Stack gap="4px">
+                  <Text variant="label2">Owner</Text>
                   <Text variant="label2" color="textPrimary">
                     <Identity address={nft.owner} clickToCopy />
                   </Text>

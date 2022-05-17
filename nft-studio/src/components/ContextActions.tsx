@@ -20,7 +20,7 @@ export const ContextActions: React.FC<Props> = ({ actions, parent }) => {
         </Box>
       )}
       {parent && (
-        <RouterLinkButton to={parent.to} small icon={<IconChevronLeft width="16" />} variant="tertiary">
+        <RouterLinkButton to={parent.to} small icon={IconChevronLeft} variant="tertiary">
           {parent.label}
         </RouterLinkButton>
       )}

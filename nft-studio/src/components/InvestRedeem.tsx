@@ -225,8 +225,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
 
   const combinedBalance = balance.add(pendingInvest)
 
-  const loadingMessage =
-    lastCreatedTransaction?.status === 'pending' ? 'Awaiting confirmation...' : 'Signing transaction...'
+  const loadingMessage = lastCreatedTransaction?.status === 'pending' ? 'Pending...' : 'Signing...'
 
   const form = useFormik<{ amount: number | Decimal }>({
     initialValues: {
@@ -390,8 +389,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
   // const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(redeemCapacity)
   const hasPendingOrder = !pendingRedeem.isZero()
 
-  const loadingMessage =
-    lastCreatedTransaction?.status === 'pending' ? 'Awaiting confirmation...' : 'Signing transaction...'
+  const loadingMessage = lastCreatedTransaction?.status === 'pending' ? 'Pending...' : 'Signing...'
 
   /**
    * The form field for amount is in the pool currency, but redeem orders are placed by passing an amount of tranche tokens to redeem.
@@ -518,7 +516,7 @@ const SuccessBanner: React.FC<{ title: string; body?: string }> = ({ title, body
   return (
     <Stack p={2} gap={1} backgroundColor="secondarySelectedBackground" borderRadius="card">
       <Shelf gap={1}>
-        <IconCheckInCircle size="20px" />
+        <IconCheckInCircle size="iconSmall" />
         <Text variant="body2" fontWeight={600}>
           {title}
         </Text>
@@ -569,8 +567,8 @@ const PendingOrder: React.FC<{
           borderTopRightRadius="card"
         >
           <Shelf gap={1}>
-            <IconClock size="20px" />
-            <Text variant="body2" fontWeight={600}>
+            <IconClock size="iconSmall" />
+            <Text variant="body2" fontWeight={500}>
               {formatBalance(amount, pool.currency)} locked
             </Text>
           </Shelf>
