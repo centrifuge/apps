@@ -112,16 +112,16 @@ const tooltipText = {
 type TooltipsProps = {
   type: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
-  dynamicLabel?: string
+  label?: string
 }
 
-export const Tooltips: React.VFC<TooltipsProps> = ({ type, dynamicLabel, variant = 'primary' }) => {
+export const Tooltips: React.VFC<TooltipsProps> = ({ type, label: labelOverride, variant = 'primary' }) => {
   const { label, title, body } = tooltipText[type]
   const isPrimary = variant === 'primary'
   return (
     <FabricTooltip title={title} body={body}>
       <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
-        {dynamicLabel || label}
+        {labelOverride || label}
       </Text>
     </FabricTooltip>
   )
