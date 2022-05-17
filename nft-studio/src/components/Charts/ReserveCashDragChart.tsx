@@ -24,12 +24,13 @@ export const ReserveCashDragChart: React.VFC = () => {
     poolStates?.map((day) => {
       const assetValue = day.poolState.netAssetValue.toDecimal().toNumber()
       const reserve = day.poolState.totalReserve.toDecimal().toNumber()
-      return { day: new Date(day.timestamp), cashDrag: reserve / (reserve + assetValue) || 0, reserve }
+      const cashDrag = (reserve / (reserve + assetValue)) * 100
+      return { day: new Date(day.timestamp), cashDrag: cashDrag || 0, reserve }
     }) || []
 
   const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
   const todayReserve = pool?.reserve.total.toDecimal().toNumber() || 0
-  const cashDrag = todayReserve / (todayAssetValue + todayReserve)
+  const cashDrag = (todayReserve / (todayAssetValue + todayReserve)) * 100
   const today: ChartData = {
     day: new Date(),
     cashDrag: cashDrag || 0,
