@@ -301,6 +301,7 @@ export type TrancheInput = {
 export type DailyPoolState = {
   poolState: {
     netAssetValue: Balance
+    totalReserve: Balance
   }
   poolValue: Balance
   currency: string
@@ -994,7 +995,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     const $query = inst.getOptionalSubqueryObservable<{ dailyPoolStates: { nodes: SubqueryDailyPoolState[] } }>(
       `query($poolId: String!) {
-        dailyPoolStates(filter: {id:{startsWith: $poolId}}) {
+        dailyPoolStates(
+          filter: { 
+            id: { startsWith: $poolId },
+          }) {
           nodes {
             timestamp
             poolState {
@@ -1020,6 +1024,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 const poolState = {
                   ...state.poolState,
                   netAssetValue: new Balance(state.poolState.netAssetValue),
+                  totalReserve: new Balance(state.poolState.totalReserve),
                 }
                 const poolValue = new Balance(
                   new Balance(state?.poolState.netAssetValue || '0').add(
