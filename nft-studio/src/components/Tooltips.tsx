@@ -89,38 +89,83 @@ const tooltipText = {
   },
   poolReserve: {
     label: 'Pool reserve',
-    title: 'placeholder title',
-    body: 'placeholder body',
+    title: '',
+    body: 'The reserve represents the amount of available liquidity in the pool available for loan originations by the issuer and redemptions by investors.',
   },
   invested30d: {
     label: 'Invested (30d)',
-    title: 'placeholder title',
-    body: 'placeholder body',
+    title: '',
+    body: 'The total amount invested by investors into the pool over the past 30 days. ',
   },
   redeemed30d: {
     label: 'Redeemed (30d)',
-    title: 'placeholder title',
-    body: 'placeholder body',
+    title: '',
+    body: 'The total amount redeemed by investors from the pool over the past 30 days. ',
   },
   repaid30d: {
     label: 'Repaid (30d)',
-    title: 'placeholder title',
-    body: 'placeholder body',
+    title: '',
+    body: 'The total amount repaid by the issuer over the past 30 days. ',
   },
   upcomingRepayments30d: {
     label: 'Upcoming repayments (30d)',
-    title: 'placeholder title',
-    body: 'placeholder body',
+    title: '',
+    body: 'Expected repayments by the issuer in the next 30 days. ',
   },
   cashDrag: {
     label: 'Cash drag',
-    title: 'placeholder title',
-    body: 'placeholder body',
+    title: '',
+    body: "Share of the pool's value locked that is currently in the pool’s reserve and not financing assets. Liquidity in the pool’s reserve does not earn yield and thus drags down investor’s returns.",
   },
   epochTimeRemaining: {
-    label: '',
-    title: 'placeholder title',
-    body: 'placeholder body',
+    label: 'override',
+    title: 'e',
+    body: 'Time remaining until the next epoch can be closed and orders executed providing sufficient investment capacity and liquidity.',
+  },
+  issuerName: {
+    label: 'override',
+    title: '',
+    body: 'This is the legal entity, usually a special purpose vehicle, that holds the pools assets.',
+  },
+  tokenSymbol: {
+    label: 'override',
+    title: '',
+    body: 'Add a 6-digit token symbol that reflects the risk and tranche of the token.',
+  },
+  minimumInvestment: {
+    label: 'Minimum investment',
+    title: '',
+    body: 'The minimum amount that can be invested in the token of a pool.',
+  },
+  advanceRate: {
+    label: 'Advance rate',
+    title: '',
+    body: 'The advance rate is the percentage amount of the value of the collateral that an issuer can borrow from the pool against the NFT representing the collateral.',
+  },
+  financingFee: {
+    label: 'Financing fee',
+    title: '',
+    body: 'The financing fee is the rate at which the outstanding amount of an individual financing accrues interest. It is expressed as an "APR" (Annual Percentage Rate) and compounds interest every second.',
+  },
+  probabilityOfDefault: {
+    label: 'Prob of default',
+    title: '',
+    body: 'The probablility of default is the likelyhood of a default occuring for an asset in this risk group.',
+  },
+  lossGivenDefault: {
+    label: 'Loss given default',
+    title: '',
+    body: 'Loss given default (LGD) is the amount expected to be recovered and repaid to the pool in case of a default of a financing.',
+  },
+  riskAdjustment: {
+    label: 'Risk adjustment',
+    title: '',
+    body: 'This is the assumed risk adjustment applied to outstanding financings of the corresponding risk group to calculate the NAV of the asset portfolio. It is calculated as the product of the probability of default and loss given default.',
+  },
+  discountRate: {
+    label: 'Discount rate',
+    title: '',
+    body: 'The discount rate is used to determine the present value of a financing by discounting the risk-adjusted expected interest payments and repayments. It usually reflects the rate of return an investor could earn in the marketplace on an investment of comparable size, maturity and risk.',
   },
 }
 

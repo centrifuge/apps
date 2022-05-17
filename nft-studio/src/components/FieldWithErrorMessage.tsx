@@ -2,7 +2,7 @@ import { Field, FieldAttributes, useField } from 'formik'
 import React from 'react'
 
 type Props = FieldAttributes<any> & {
-  label?: string
+  label?: string | React.ReactElement
 }
 
 export const FieldWithErrorMessage: React.FC<Props> = (props) => {
