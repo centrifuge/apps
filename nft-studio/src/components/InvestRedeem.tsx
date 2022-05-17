@@ -24,6 +24,7 @@ import { formatBalance, getCurrencySymbol } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { getBalanceDec, useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
+import { useFocusInvalidInput } from '../utils/useFocusInvalidInput'
 import { usePermissions } from '../utils/usePermissions'
 import { usePendingCollect, usePool, usePoolMetadata } from '../utils/usePools'
 import { useDebugFlags } from './DebugFlags'
@@ -251,6 +252,9 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
     },
   })
 
+  const formRef = React.useRef<HTMLFormElement>(null)
+  useFocusInvalidInput(form, formRef)
+
   function renderInput(cancelCb?: () => void) {
     return (
       <Stack gap={2}>
@@ -280,9 +284,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
             <Shelf justifyContent="space-between">
               <Text variant="body3">Token amount</Text>
               <TextWithPlaceholder variant="body3" isLoading={isMetadataLoading} width={12} variance={0}>
-                {price.isZero()
-                  ? `~ ∞ ${trancheMeta?.symbol}`
-                  : `~${formatBalance(Dec(form.values.amount).div(price), trancheMeta?.symbol)}`}
+                {!price.isZero() && `~${formatBalance(Dec(form.values.amount).div(price), trancheMeta?.symbol)}`}
               </TextWithPlaceholder>
             </Shelf>
 
@@ -294,7 +296,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
           </Stack>
         ) : null}
         <Stack px={1} gap={1}>
-          <Button type="submit" disabled={!form.isValid} loading={isLoading} loadingMessage={loadingMessage}>
+          <Button type="submit" loading={isLoading} loadingMessage={loadingMessage}>
             Invest
           </Button>
           {cancelCb && (
@@ -309,7 +311,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
 
   return (
     <FormikProvider value={form}>
-      <Form noValidate>
+      <Form noValidate ref={formRef}>
         {changeOrderFormShown ? (
           renderInput(() => setChangeOrderFormShown(false))
         ) : hasPendingOrder ? (
@@ -421,6 +423,9 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
     },
   })
 
+  const formRef = React.useRef<HTMLFormElement>(null)
+  useFocusInvalidInput(form, formRef)
+
   function renderInput(cancelCb?: () => void) {
     return (
       <Stack gap={2}>
@@ -444,18 +449,17 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
             <Shelf justifyContent="space-between">
               <Text variant="body3">Token amount</Text>
               <TextWithPlaceholder variant="body3" isLoading={isMetadataLoading} width={12} variance={0}>
-                {price.isZero()
-                  ? `~ ∞ ${tokenSymbol}`
-                  : `~${formatBalance(
-                      form.values.amount instanceof Decimal ? form.values.amount : Dec(form.values.amount).div(price),
-                      tokenSymbol
-                    )}`}
+                {!price.isZero() &&
+                  `~${formatBalance(
+                    form.values.amount instanceof Decimal ? form.values.amount : Dec(form.values.amount).div(price),
+                    tokenSymbol
+                  )}`}
               </TextWithPlaceholder>
             </Shelf>
           </Stack>
         ) : null}
         <Stack px={1} gap={1}>
-          <Button type="submit" disabled={!form.isValid} loading={isLoading} loadingMessage={loadingMessage}>
+          <Button type="submit" loading={isLoading} loadingMessage={loadingMessage}>
             Redeem
           </Button>
           {cancelCb && (
@@ -470,7 +474,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
 
   return (
     <FormikProvider value={form}>
-      <Form noValidate>
+      <Form noValidate ref={formRef}>
         {changeOrderFormShown ? (
           renderInput(() => setChangeOrderFormShown(false))
         ) : hasPendingOrder ? (
@@ -567,7 +571,7 @@ const PendingOrder: React.FC<{
           <Shelf gap={1}>
             <IconClock size="20px" />
             <Text variant="body2" fontWeight={600}>
-              {formatBalance(amount, pool.currency)} {type === 'invest' ? 'investment' : 'redemption'} locked
+              {formatBalance(amount, pool.currency)} locked
             </Text>
           </Shelf>
           <Text variant="body3">

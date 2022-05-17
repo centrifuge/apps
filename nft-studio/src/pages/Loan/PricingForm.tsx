@@ -139,7 +139,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
         <PageSection
           title="Pricing"
           headerRight={
-            <Button type="submit" disabled={!form.isValid || !riskGroup} loading={isLoading} small>
+            <Button type="submit" disabled={!riskGroup} loading={isLoading} small>
               Price
             </Button>
           }

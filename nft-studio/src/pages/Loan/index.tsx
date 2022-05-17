@@ -148,7 +148,11 @@ const Loan: React.FC = () => {
                 borderRadius="8px"
                 overflow="hidden"
               >
-                {imageUrl ? <Box as="img" maxWidth="100%" src={imageUrl} /> : <IconNft color="white" size="250px" />}
+                {imageUrl ? (
+                  <Box as="img" maxWidth="100%" maxHeight="100%" src={imageUrl} />
+                ) : (
+                  <IconNft color="white" size="250px" />
+                )}
               </Box>
               <Stack gap={2}>
                 <Stack gap={1}>

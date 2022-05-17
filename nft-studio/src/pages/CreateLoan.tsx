@@ -1,4 +1,4 @@
-import { Button, Select, Stack } from '@centrifuge/fabric'
+import { Box, Button, Select, Stack } from '@centrifuge/fabric'
 import { Field, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useQueries } from 'react-query'
@@ -113,18 +113,20 @@ const CreateLoan: React.FC = () => {
             walletShown={false}
           />
           <PageSection>
-            <Field name="poolId">
-              {({ field, form }: any) => (
-                <Select
-                  placeholder="Select a pool"
-                  label="Pool"
-                  options={poolSelectOptions}
-                  value={field.value}
-                  onSelect={(v) => form.setFieldValue('poolId', v)}
-                  disabled={isLoading}
-                />
-              )}
-            </Field>
+            <Box maxWidth={400}>
+              <Field name="poolId">
+                {({ field, form }: any) => (
+                  <Select
+                    placeholder="Select a pool"
+                    label="Pool"
+                    options={poolSelectOptions}
+                    value={field.value}
+                    onSelect={(v) => form.setFieldValue('poolId', v)}
+                    disabled={isLoading}
+                  />
+                )}
+              </Field>
+            </Box>
           </PageSection>
         </Stack>
       </Form>
