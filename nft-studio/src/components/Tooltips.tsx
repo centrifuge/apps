@@ -87,20 +87,56 @@ const tooltipText = {
     title: '',
     body: 'The average outstanding amount of the assets in the pool.',
   },
+  poolReserve: {
+    label: 'Pool reserve',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  invested30d: {
+    label: 'Invested (30d)',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  redeemed30d: {
+    label: 'Redeemed (30d)',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  repaid30d: {
+    label: 'Repaid (30d)',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  upcomingRepayments30d: {
+    label: 'Upcoming repayments (30d)',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  cashDrag: {
+    label: 'Cash drag',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
+  epochTimeRemaining: {
+    label: '',
+    title: 'placeholder title',
+    body: 'placeholder body',
+  },
 }
 
 type TooltipsProps = {
   type: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
+  label?: string
 }
 
-export const Tooltips: React.VFC<TooltipsProps> = ({ type, variant = 'primary' }) => {
+export const Tooltips: React.VFC<TooltipsProps> = ({ type, label: labelOverride, variant = 'primary' }) => {
   const { label, title, body } = tooltipText[type]
   const isPrimary = variant === 'primary'
   return (
     <FabricTooltip title={title} body={body}>
       <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
-        {label}
+        {labelOverride || label}
       </Text>
     </FabricTooltip>
   )
