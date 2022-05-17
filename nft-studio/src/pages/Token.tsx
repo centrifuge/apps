@@ -54,7 +54,7 @@ const TokenDetail: React.FC = () => {
         label: <Tooltips type="protection" />,
         value: (
           <Text variant="heading3">
-            {parseInt(trancheId, 10) > 0 ? (
+            {tranche?.seniority! > 0 ? (
               <Text>
                 {formatPercentage(token?.ratio.toPercent() ?? 0)}{' '}
                 <Text variant="body3">minimum {formatPercentage(token?.minRiskBuffer?.toPercent() ?? 0)}</Text>

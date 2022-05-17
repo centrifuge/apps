@@ -388,7 +388,7 @@ const CreatePoolForm: React.VFC = () => {
               <Field name="currency" validate={validate.currency}>
                 {({ field, form, meta }: FieldProps) => (
                   <Select
-                    label="Currency*"
+                    label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
                     onSelect={(v) => form.setFieldValue('currency', v)}
                     onBlur={field.onBlur}
                     errorMessage={meta.touched && meta.error ? meta.error : undefined}
@@ -467,7 +467,9 @@ const CreatePoolForm: React.VFC = () => {
                 validate={validate.issuerDescription}
                 name="issuerDescription"
                 as={TextAreaInput}
-                label="Description (minimum 100 characters)*"
+                label={
+                  <Tooltips type="poolDescription" variant="secondary" label="Description (minimum 100 characters)*" />
+                }
                 placeholder="Description..."
                 maxLength={1000}
                 disabled={waitingForStoredIssuer}

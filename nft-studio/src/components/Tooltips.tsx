@@ -1,5 +1,8 @@
 import { Text, Tooltip as FabricTooltip } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useParams } from 'react-router'
+import { getCurrencySymbol } from '../utils/formatting'
+import { usePool } from '../utils/usePools'
 
 const tooltipText = {
   loanType: {
@@ -26,9 +29,21 @@ const tooltipText = {
     label: 'Protection',
     body: 'The risk protection is the minimum value of the junior token in relation to the pool value. It denotes how much of the pool is always protected by the junior tranche against asset defaults.',
   },
+  currency: {
+    label: 'override',
+    body: 'Select accepted currency for investments into the pool.',
+  },
+  poolDescription: {
+    label: 'override',
+    body: 'Use this space to share more about your company as an issuer.',
+  },
   valueLocked: {
     label: 'Value locked',
-    body: 'Value locked represents the current total value of pool tokens in `{pool currency}`.',
+    body: () => {
+      const { pid: poolId } = useParams<{ pid: string }>()
+      const pool = usePool(poolId)
+      return <>Value locked represents the current total value of pool tokens in {getCurrencySymbol(pool?.currency)}.</>
+    },
   },
   tvl: {
     label: 'Total value locked (TVL)',
@@ -49,10 +64,6 @@ const tooltipText = {
   poolValue: {
     label: 'Pool value',
     body: 'The pool value is the current value of financed assets ("Asset value") plus the reserve. It is equal to value locked in the tranches of the pool.',
-  },
-  reserve: {
-    label: 'Reserve',
-    body: 'The reserve represents the amount of available liquidity in the pool available for loan originations by the issuer and redemptions by investors.y',
   },
   assetValue: {
     label: 'Asset value',
@@ -76,19 +87,19 @@ const tooltipText = {
   },
   invested30d: {
     label: 'Invested (30d)',
-    body: 'The total amount invested by investors into the pool over the past 30 days. ',
+    body: 'The total amount invested by investors into the pool over the past 30 days.',
   },
   redeemed30d: {
     label: 'Redeemed (30d)',
-    body: 'The total amount redeemed by investors from the pool over the past 30 days. ',
+    body: 'The total amount redeemed by investors from the pool over the past 30 days.',
   },
   repaid30d: {
     label: 'Repaid (30d)',
-    body: 'The total amount repaid by the issuer over the past 30 days. ',
+    body: 'The total amount repaid by the issuer over the past 30 days.',
   },
   upcomingRepayments30d: {
     label: 'Upcoming repayments (30d)',
-    body: 'Expected repayments by the issuer in the next 30 days. ',
+    body: 'Expected repayments by the issuer in the next 30 days.',
   },
   cashDrag: {
     label: 'Cash drag',

@@ -140,7 +140,7 @@ const Legend: React.VFC<{
           <Text variant="body2">{formatBalance(data.assetValue, currency)}</Text>
         </Stack>
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.borderSecondary}>
-          <Tooltips variant="secondary" type="reserve" />
+          <Tooltips variant="secondary" type="poolReserve" />
           <Text variant="body2">{formatBalance(data.reserve[1] - data.reserve[0], currency)}</Text>
         </Stack>
       </Grid>
