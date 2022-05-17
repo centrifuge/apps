@@ -270,10 +270,7 @@ async function taxReportByYear({
   // const yearStart = new Date(taxYear, 0, 1)
   // const yearEnd = new Date(taxYear, 11, 31)
 
-  // const transactions = csvData ? csvData : await getAllTransactions(poolId)
-  console.log('CSV DATA: ', csvData)
-  console.log('TRANSACTION DATA: ', await getAllTransactions(poolId))
-  const transactions = csvData
+  const transactions = csvData ? csvData : await getAllTransactions(poolId)
 
   const symbols = transactions.map((tx) => tx.symbol).filter(onlyUnique)
 
