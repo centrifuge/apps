@@ -3,6 +3,7 @@ import { aggregateByYear, calculateFIFOCapitalGains, Operation } from 'fifo-capi
 import { csvName } from '.'
 import { downloadCSV } from '../../../utils/export'
 import { PoolData } from '../../../utils/usePool'
+import { CsvTransaction } from '../DataExport'
 import {
   calculateCostInUsd,
   date,
@@ -47,6 +48,8 @@ const calculateRealizedCapitalGains = (
   let largeAdjustment = false
   const operations: Operation[] = [
     ...executions.map((execution) => {
+      console.log('currencyAmount', execution.currencyAmount)
+      console.log('tokenPrice', execution.tokenPrice)
       let tokenAmount = new BN(execution.currencyAmount)
         .mul(e27)
         .div(new BN(execution.tokenPrice))
@@ -256,16 +259,22 @@ async function taxReportByYear({
   poolId,
   yearStart,
   yearEnd,
+  csvData,
 }: {
   poolId: string
   poolData: PoolData
   yearStart: Date
   yearEnd: Date
+  csvData?: CsvTransaction[]
 }) {
   // const yearStart = new Date(taxYear, 0, 1)
   // const yearEnd = new Date(taxYear, 11, 31)
 
-  const transactions = await getAllTransactions(poolId)
+  // const transactions = csvData ? csvData : await getAllTransactions(poolId)
+  console.log('CSV DATA: ', csvData)
+  console.log('TRANSACTION DATA: ', await getAllTransactions(poolId))
+  const transactions = csvData
+
   const symbols = transactions.map((tx) => tx.symbol).filter(onlyUnique)
 
   const transfers = await getAllTransfers(poolId)
@@ -395,6 +404,14 @@ export function taxReport2020({ poolId, poolData }: { poolId: string; poolData: 
   return taxReportByYear({ poolId, poolData, yearStart: new Date(2020, 0, 1), yearEnd: new Date(2020, 11, 31) })
 }
 
-export function taxReport2021({ poolId, poolData }: { poolId: string; poolData: PoolData }) {
-  return taxReportByYear({ poolId, poolData, yearStart: new Date(2021, 3, 1), yearEnd: new Date(2022, 2, 31) })
+export function taxReport2021({
+  poolId,
+  poolData,
+  csvData,
+}: {
+  poolId: string
+  poolData: PoolData
+  csvData: CsvTransaction[]
+}) {
+  return taxReportByYear({ poolId, poolData, yearStart: new Date(2021, 3, 1), yearEnd: new Date(2022, 2, 31), csvData })
 }

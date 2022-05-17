@@ -6,7 +6,14 @@ import { investorTransactions } from './InvestorTransactions'
 import { rawPoolData } from './PoolData'
 import { taxReport2020, taxReport2021 } from './TaxReports'
 
-export type PoolQuery = ({ poolId, poolData }: { poolId: string; poolData: PoolData }) => Promise<boolean>
+export type PoolQuery = ({
+  poolId,
+  poolData,
+}: {
+  poolId: string
+  poolData: PoolData
+  csvData?: string[][]
+}) => Promise<boolean>
 
 const queries: { [name: string]: PoolQuery } = {
   'Daily investor balances': dailyInvestorBalances,
