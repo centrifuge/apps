@@ -22,46 +22,42 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
   const basePath = `/pools/${pid}`
 
   return (
-    <>
-      <PageHeader
-        title={
-          <TextWithPlaceholder isLoading={isLoading}>{metadata?.pool?.name ?? 'Unnamed pool'}</TextWithPlaceholder>
-        }
-        subtitle={
-          <TextWithPlaceholder isLoading={isLoading}>by {metadata?.pool?.issuer.name ?? 'Unknown'}</TextWithPlaceholder>
-        }
-        icon={
-          metadata?.pool?.icon ? (
-            <Box as="img" width="iconLarge" height="iconLarge" src={parseMetadataUrl(metadata?.pool?.icon)} />
-          ) : (
-            <Shelf
-              width="iconLarge"
-              height="iconLarge"
-              borderRadius="card"
-              backgroundColor={isLoading ? 'borderSecondary' : 'accentSecondary'}
-              justifyContent="center"
-            >
-              <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>
-            </Shelf>
-          )
-        }
-        border={false}
-        actions={actions}
+    <PageHeader
+      title={<TextWithPlaceholder isLoading={isLoading}>{metadata?.pool?.name ?? 'Unnamed pool'}</TextWithPlaceholder>}
+      subtitle={
+        <TextWithPlaceholder isLoading={isLoading}>by {metadata?.pool?.issuer.name ?? 'Unknown'}</TextWithPlaceholder>
+      }
+      icon={
+        metadata?.pool?.icon ? (
+          <Box as="img" width="iconLarge" height="iconLarge" src={parseMetadataUrl(metadata?.pool?.icon)} />
+        ) : (
+          <Shelf
+            width="iconLarge"
+            height="iconLarge"
+            borderRadius="card"
+            backgroundColor={isLoading ? 'borderSecondary' : 'accentSecondary'}
+            justifyContent="center"
+          >
+            <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>
+          </Shelf>
+        )
+      }
+      border={false}
+      actions={actions}
+    >
+      <Shelf
+        px={PAGE_GUTTER}
+        bg={theme.colors.backgroundPrimary}
+        style={{
+          boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
+        }}
       >
-        <Shelf
-          px={PAGE_GUTTER}
-          bg={theme.colors.backgroundPrimary}
-          style={{
-            boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
-          }}
-        >
-          <NavigationTabs basePath={basePath}>
-            <NavigationTabsItem to={`${basePath}`}>Overview</NavigationTabsItem>
-            <NavigationTabsItem to={`${basePath}/assets`}>Assets</NavigationTabsItem>
-            <NavigationTabsItem to={`${basePath}/liquidity`}>Liquidity</NavigationTabsItem>
-          </NavigationTabs>
-        </Shelf>
-      </PageHeader>
-    </>
+        <NavigationTabs basePath={basePath}>
+          <NavigationTabsItem to={`${basePath}`}>Overview</NavigationTabsItem>
+          <NavigationTabsItem to={`${basePath}/assets`}>Assets</NavigationTabsItem>
+          <NavigationTabsItem to={`${basePath}/liquidity`}>Liquidity</NavigationTabsItem>
+        </NavigationTabs>
+      </Shelf>
+    </PageHeader>
   )
 }

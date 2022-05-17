@@ -7,17 +7,17 @@ import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
 import { useLoans } from '../utils/useLoans'
 import { usePool, usePoolMetadata } from '../utils/usePools'
+import { RiskGroupSharesPieChart } from './Charts/RiskGroupSharesPieChart'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
-import { PieChart } from './PieChart'
 
 export type AssetByRiskGroup = {
   color?: string
   labelColor?: string
-  name: string
-  amount: Balance
-  share: string
-  interestRatePerSec: string
-  riskAdjustment: string
+  name: string | React.ReactElement
+  amount: Balance | any
+  share: string | React.ReactElement
+  interestRatePerSec: string | React.ReactElement
+  riskAdjustment: string | React.ReactElement
 }
 
 const initialRow: AssetByRiskGroup = {
@@ -58,7 +58,13 @@ const columns: Column[] = [
   {
     header: () => <SortableTableHeader label="Financing fee" />,
     cell: ({ interestRatePerSec }: AssetByRiskGroup) => (
-      <Text variant="body2">{interestRatePerSec ? `${interestRatePerSec}%` : ''}</Text>
+      <Text variant="body2">
+        {interestRatePerSec && typeof interestRatePerSec === 'string'
+          ? `${interestRatePerSec}%`
+          : React.isValidElement(interestRatePerSec)
+          ? interestRatePerSec
+          : ''}
+      </Text>
     ),
     flex: '1',
     sortKey: 'interestRatePerSec',
@@ -66,7 +72,13 @@ const columns: Column[] = [
   {
     header: () => <SortableTableHeader label="Risk adjustment" />,
     cell: ({ riskAdjustment }: AssetByRiskGroup) => (
-      <Text variant="body2">{riskAdjustment ? `${riskAdjustment}%` : ''}</Text>
+      <Text variant="body2">
+        {riskAdjustment && typeof riskAdjustment === 'string'
+          ? `${riskAdjustment}%`
+          : React.isValidElement(riskAdjustment)
+          ? riskAdjustment
+          : ''}
+      </Text>
     ),
     flex: '1',
     sortKey: 'riskAdjustment',
@@ -77,7 +89,7 @@ const Amount: React.VFC<AssetByRiskGroup> = ({ amount }) => {
   const { pid } = useParams<{ pid: string }>()
   const pool = usePool(pid)
 
-  return <Text variant="body2">{formatBalance(amount, pool?.currency)}</Text>
+  return <Text variant="body2">{React.isValidElement(amount) ? amount : formatBalance(amount, pool?.currency)}</Text>
 }
 
 export const RiskGroupList: React.FC = () => {
@@ -134,7 +146,7 @@ export const RiskGroupList: React.FC = () => {
   // temp solution while assets are still manually priced (in the future there will be a select to choose a riskGroup)
   // represents all assets that could not be sorted into a riskGroup
   const remainingAssets: AssetByRiskGroup[] = React.useMemo(() => {
-    const amountsSum = riskGroups.reduce((curr, prev) => new Balance(curr.add(prev.amount)), new Balance('0'))
+    const amountsSum = riskGroups.reduce((curr, prev) => new Balance(curr.add(prev.amount as any)), new Balance('0'))
     const sharesSum = riskGroups.reduce((curr, prev) => curr + Number(prev.share) * 100, 0)
 
     return sharesSum !== 100 && sharesSum !== 0
@@ -150,11 +162,11 @@ export const RiskGroupList: React.FC = () => {
       : []
   }, [pool, riskGroups])
 
-  const summaryRow = React.useMemo(() => {
-    const totalSharesSum = [...riskGroups, ...remainingAssets]
-      .reduce((curr, prev) => curr.add(prev.share), Dec(0))
-      .toString()
+  const totalSharesSum = [...riskGroups, ...remainingAssets]
+    .reduce((curr, prev) => curr.add(prev.share as any), Dec(0))
+    .toString()
 
+  const summaryRow = React.useMemo(() => {
     const avgInterestRatePerSec = riskGroups
       .reduce<any>((curr, prev) => curr.add(prev.interestRatePerSec), Dec(0))
       .dividedBy(riskGroups.length)
@@ -166,13 +178,27 @@ export const RiskGroupList: React.FC = () => {
       .toDecimalPlaces(2)
 
     return {
-      share: totalSharesSum.toString(),
-      amount: new Balance(pool?.nav.latest || '0'),
-      name: 'Total',
-      interestRatePerSec: `Avg ${avgInterestRatePerSec.toString()}`,
-      riskAdjustment: `Avg. ${avgRiskAdjustment.toString()}`,
+      share: (
+        <Text variant="body2" fontWeight={600}>
+          {totalSharesSum}%
+        </Text>
+      ),
+      amount: (
+        <Text variant="body2" fontWeight={600}>
+          {formatBalance(new Balance(pool?.nav.latest || '0'), pool?.currency)}
+        </Text>
+      ),
+      name: (
+        <Text variant="body2" fontWeight={600}>
+          Total
+        </Text>
+      ),
+      interestRatePerSec: <Text variant="body2" fontWeight={600}>{`Avg ${avgInterestRatePerSec.toString()}%`}</Text>,
+      riskAdjustment: <Text variant="body2" fontWeight={600}>{`Avg. ${avgRiskAdjustment.toString()}%`}</Text>,
+      color: '',
+      labelColor: ' ',
     }
-  }, [riskGroups, remainingAssets, pool?.nav.latest])
+  }, [riskGroups, pool?.nav.latest, pool?.currency, totalSharesSum])
 
   // biggest share of pie gets darkest color
   const tableDataWithColor = [...riskGroups, ...remainingAssets]
@@ -190,18 +216,18 @@ export const RiskGroupList: React.FC = () => {
     })
 
   const sharesForPie = tableDataWithColor.map(({ name, color, labelColor, share }) => {
-    return { value: Number(share), name, color, labelColor }
+    return { value: Number(share), name: name as string, color, labelColor }
   })
 
   return (
     <>
-      {sharesForPie.length > 0 && summaryRow.share !== '0' && (
+      {sharesForPie.length > 0 && totalSharesSum !== '0' && (
         <Shelf justifyContent="center">
-          <PieChart data={sharesForPie} />
+          <RiskGroupSharesPieChart data={sharesForPie} />
         </Shelf>
       )}
       {tableDataWithColor.length > 0 ? (
-        <Box mt={sharesForPie.length > 0 && summaryRow.share !== '0' ? '0' : '3'}>
+        <Box mt={sharesForPie.length > 0 && totalSharesSum !== '0' ? '0' : '3'}>
           <DataTable defaultSortKey="share" data={tableDataWithColor} columns={columns} summary={summaryRow} />
         </Box>
       ) : (

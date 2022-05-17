@@ -19,6 +19,7 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import styled from 'styled-components'
+import { getEpochHoursRemaining } from '../utils/date'
 import { Dec } from '../utils/Decimal'
 import { formatBalance, getCurrencySymbol } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
@@ -69,13 +70,6 @@ function validateNumberInput(value: number | string | Decimal, min: number | Dec
   if (Dec(value).lessThan(Dec(min))) {
     return 'Value too small'
   }
-}
-
-function getEpochHoursRemaining(pool: DetailedPool) {
-  const last = new Date(pool.epoch.lastClosed).getTime()
-  const min = pool.parameters.minEpochTime * 1000
-  const now = Date.now()
-  return Math.ceil(Math.max(0, last + min - now) / (1000 * 60 * 60))
 }
 
 const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
