@@ -1,14 +1,17 @@
-import { Box, Shelf } from '@centrifuge/fabric'
+import { Box, IconChevronLeft, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
-import { AccountsMenu } from './AccountsMenu'
 import { ButtonGroup } from './ButtonGroup'
+import { RouterLinkButton } from './RouterLinkButton'
 
 type Props = {
   actions?: React.ReactNode
-  walletShown?: boolean
+  parent?: {
+    to: string
+    label: string
+  }
 }
 
-export const ContextActions: React.FC<Props> = ({ actions, walletShown }) => {
+export const ContextActions: React.FC<Props> = ({ actions, parent }) => {
   return (
     <ButtonGroup variant="small">
       {actions && (
@@ -16,7 +19,11 @@ export const ContextActions: React.FC<Props> = ({ actions, walletShown }) => {
           <Shelf gap={1}>{actions}</Shelf>
         </Box>
       )}
-      {walletShown && <AccountsMenu />}
+      {parent && (
+        <RouterLinkButton to={parent.to} small icon={<IconChevronLeft width="16" />} variant="tertiary">
+          {parent.label}
+        </RouterLinkButton>
+      )}
     </ButtonGroup>
   )
 }

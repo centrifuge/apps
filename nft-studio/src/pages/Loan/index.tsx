@@ -135,7 +135,7 @@ const Loan: React.FC = () => {
             icon={<Thumbnail label="nft" type="pool" />}
             title={<TextWithPlaceholder isLoading={nftMetadataIsLoading}>{nftMetadata?.name}</TextWithPlaceholder>}
             variant="button"
-            onClick={() => history.push(`/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`)}
+            onClick={() => history.push(`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`)}
           >
             <Shelf gap={3} alignItems="flex-start">
               <Box

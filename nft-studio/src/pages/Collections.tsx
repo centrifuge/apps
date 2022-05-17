@@ -67,7 +67,7 @@ const Collections: React.FC = () => {
       <PageHeader
         title="NFTs"
         actions={
-          <Button onClick={() => setCreateOpen(true)} variant="tertiary" small icon={IconPlus} disabled={!address}>
+          <Button onClick={() => setCreateOpen(true)} variant="secondary" small icon={IconPlus} disabled={!address}>
             Create Collection
           </Button>
         }
@@ -98,7 +98,7 @@ const Collections: React.FC = () => {
                       </>
                     }
                     description="A dynamic collection of owned NFTs"
-                    to="/account"
+                    to="/nfts/account"
                     image={firstAccountNftMetadata?.image}
                     count={accountNfts.length}
                   />

@@ -53,7 +53,7 @@ const AccountNFTs: React.FC = () => {
 
   return (
     <Stack>
-      <PageHeader parent={{ to: '/nfts', label: 'collections' }} title="My NFTs" />
+      <PageHeader parent={{ to: '/nfts', label: 'Collections' }} title="My NFTs" />
       <PageSection>
         {filteredNfts?.length ? (
           <>

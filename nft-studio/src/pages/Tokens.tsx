@@ -54,7 +54,7 @@ const TokenOverview: React.FC = () => {
 
   return (
     <Stack gap={0} flex={1} mb="6">
-      <PageHeader subtitle="Art NFTs" title="Investment tokens" walletShown={false} />
+      <PageHeader subtitle="Art NFTs" title="Investment tokens" />
       {tokens?.length ? (
         <>
           <PageSummary data={pageSummaryData} />

@@ -110,7 +110,6 @@ const CreateLoan: React.FC = () => {
                 </Button>
               </>
             }
-            walletShown={false}
           />
           <PageSection>
             <Box maxWidth={400}>

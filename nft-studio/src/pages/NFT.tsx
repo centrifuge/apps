@@ -1,6 +1,6 @@
 import { Box, Button, IconArrowRight, IconNft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { NavLink, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { BuyDialog } from '../components/BuyDialog'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { RemoveListingDialog } from '../components/Dialogs/RemoveListingDialog'
@@ -54,7 +54,7 @@ const NFT: React.FC = () => {
     <Stack flex={1}>
       <Box>
         <PageHeader
-          parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
+          parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/nfts/collection/${collectionId}` }}
           title={nftMetadata?.name ?? 'Unnamed NFT'}
           subtitle={
             collection && (
@@ -71,7 +71,7 @@ const NFT: React.FC = () => {
                   <>
                     {canCreateLoan && (
                       <RouterLinkButton
-                        to={`/collection/${collectionId}/object/${nftId}/new-asset`}
+                        to={`/nfts/collection/${collectionId}/object/${nftId}/new-asset`}
                         icon={IconPlus}
                         small
                         variant="secondary"
@@ -184,14 +184,6 @@ const NFT: React.FC = () => {
             )}
             {nft && collection && (
               <>
-                <Stack gap={1}>
-                  <NavLink to={`/collection/${collectionId}`}>
-                    <TextWithPlaceholder isLoading={isCollectionMetadataLoading} variant="heading3" underline>
-                      {collectionMetadata?.name}
-                    </TextWithPlaceholder>
-                  </NavLink>
-                </Stack>
-
                 <Stack gap={1}>
                   <Text variant="label1">Description</Text>
                   <TextWithPlaceholder

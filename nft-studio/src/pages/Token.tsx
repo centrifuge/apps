@@ -75,7 +75,6 @@ const TokenDetail: React.FC = () => {
       <PageHeader
         subtitle="Token"
         title={<TextWithPlaceholder isLoading={isMetadataLoading}> {trancheMeta?.name}</TextWithPlaceholder>}
-        walletShown={false}
         icon={<Thumbnail size="large" label={trancheMeta?.symbol || ''} />}
         actions={
           <Button
