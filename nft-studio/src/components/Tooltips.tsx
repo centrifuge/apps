@@ -151,6 +151,10 @@ const tooltipText = {
     label: 'Average maturity',
     body: 'This indicates the average maturity of the pools ongoing assets, i.e. the time period after which the financing of this assets matures and will be paid back.',
   },
+  id: {
+    label: 'ID',
+    body: 'All NFTs locked in a pool are assigned an ascending NFT ID.',
+  },
 }
 
 type TooltipsProps = {
