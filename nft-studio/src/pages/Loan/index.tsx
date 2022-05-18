@@ -17,10 +17,9 @@ import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
 import { useAddress } from '../../utils/useAddress'
 import { useLoan } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
-import { useLoanNft, useNFT } from '../../utils/useNFTs'
-import { usePermissions } from '../../utils/usePermissions'
+import { useNFT } from '../../utils/useNFTs'
+import { useCanBorrow, usePermissions } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
-import { isSameAddress } from '../../utils/web3'
 import { FinanceForm } from './FinanceForm'
 import { PricingForm } from './PricingForm'
 import { RiskGroupValues } from './RiskGroupValues'
@@ -38,10 +37,8 @@ const LoanSidebar: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
   const address = useAddress()
-  const loanNft = useLoanNft(pid, aid)
   const permissions = usePermissions(address)
-  const isLoanOwner = isSameAddress(loanNft?.owner, address)
-  const canBorrow = permissions?.pools[pid]?.roles.includes('Borrower') && isLoanOwner
+  const canBorrow = useCanBorrow(pid, aid)
 
   if (!loan || loan.status === 'Created' || !permissions) return null
 

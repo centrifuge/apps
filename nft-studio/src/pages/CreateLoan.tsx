@@ -7,8 +7,8 @@ import { useCentrifuge } from '../components/CentrifugeProvider'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
-import { useWeb3 } from '../components/Web3Provider'
 import { PoolMetadata } from '../types'
+import { useAddress } from '../utils/useAddress'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { fetchMetadata } from '../utils/useMetadata'
 import { usePermissions } from '../utils/usePermissions'
@@ -29,8 +29,8 @@ type FormValues = {
 const CreateLoan: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
 
-  const { selectedAccount } = useWeb3()
-  const permissions = usePermissions(selectedAccount?.address)
+  const address = useAddress()
+  const permissions = usePermissions(address)
   const pools = usePools()
   const [redirect, setRedirect] = React.useState<string>()
 

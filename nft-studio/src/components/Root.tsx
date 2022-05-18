@@ -86,8 +86,8 @@ export const Root: React.VFC = () => {
         <GlobalStyle />
         <FabricGlobalStyle />
         <HostPermissionsProvider>
-          <Web3Provider>
-            <CentrifugeProvider>
+          <CentrifugeProvider>
+            <Web3Provider>
               <DebugFlags onChange={(state) => setIsDark(!!state.altairDarkMode)}>
                 <TransactionProvider>
                   <TransactionToasts />
@@ -98,8 +98,8 @@ export const Root: React.VFC = () => {
                   </Router>
                 </TransactionProvider>
               </DebugFlags>
-            </CentrifugeProvider>
-          </Web3Provider>
+            </Web3Provider>
+          </CentrifugeProvider>
         </HostPermissionsProvider>
       </FabricProvider>
     </QueryClientProvider>

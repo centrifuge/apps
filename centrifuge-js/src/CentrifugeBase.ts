@@ -31,6 +31,7 @@ export type Config = {
   signer?: Signer
   signingAddress?: AddressOrPair
   printExtrinsics?: boolean
+  proxy?: string
 }
 
 export type UserProvidedConfig = Partial<Config>
@@ -67,7 +68,11 @@ export class CentrifugeBase {
       this.config.network === 'centrifuge' ? this.config.centrifugeSubqueryUrl : this.config.altairSubqueryUrl
   }
 
-  wrapSignAndSendRx<T extends TransactionOptions>(api: ApiRx, submittable: SubmittableExtrinsic<'rxjs'>, options?: T) {
+  getChainId() {
+    return this.config.network === 'centrifuge' ? 36 : 136
+  }
+
+  wrapSignAndSend<T extends TransactionOptions>(api: ApiRx, submittable: SubmittableExtrinsic<'rxjs'>, options?: T) {
     if (options?.batch) return of(submittable)
 
     if (this.config.printExtrinsics) {
@@ -94,7 +99,11 @@ export class CentrifugeBase {
       return submittable.paymentInfo(options.paymentInfo)
     }
     try {
-      return submittable.signAndSend(signingAddress, { signer }).pipe(
+      let actualSubmittable = submittable
+      if (this.config.proxy) {
+        actualSubmittable = api.tx.proxy.proxy(this.config.proxy, undefined, submittable)
+      }
+      return actualSubmittable.signAndSend(signingAddress, { signer }).pipe(
         tap((result) => {
           options?.onStatusChange?.(result)
         }),
@@ -124,8 +133,8 @@ export class CentrifugeBase {
     return data as T
   }
 
-  getOptionalSubqueryObservable<T = any>(query: string, variables?: any) {
-    return fromFetch<T | null>(this.subqueryUrl, {
+  getSubqueryObservable<T = any>(query: string, variables?: any, optional = true) {
+    const $ = fromFetch<T | null>(this.subqueryUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -134,10 +143,18 @@ export class CentrifugeBase {
       body: JSON.stringify({ query, variables }),
       selector: async (res) => {
         const { data, errors } = await res.json()
-        if (errors?.length) return null
+        if (errors?.length) {
+          if (optional) return null
+          throw errors
+        }
         return data as T
       },
-    }).pipe(catchError(() => of(null)))
+    })
+    if (optional) {
+      return $.pipe(catchError(() => of(null)))
+    }
+
+    return $
   }
 
   _$blockEvents: null | Observable<{ api: ApiRx; events: (IEventRecord<any> & Codec)[] }> = null
@@ -193,5 +210,13 @@ export class CentrifugeBase {
     }
 
     return signingAddress as string
+  }
+
+  setProxy(proxyAccount: string) {
+    this.config.proxy = proxyAccount
+  }
+
+  clearProxy() {
+    this.config.proxy = undefined
   }
 }

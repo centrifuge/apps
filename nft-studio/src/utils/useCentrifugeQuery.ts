@@ -61,6 +61,7 @@ export function useCentrifugeQuery<T = any>(
     {
       suspense,
       staleTime: Infinity,
+      enabled,
     }
   )
 
