@@ -120,7 +120,6 @@ const Row = styled(Shelf)<any>`
   ${({ rounded }) =>
     css({
       width: '100%',
-      height: '48px',
       appearance: 'none',
       border: 'none',
       borderBottom: '1px solid',
@@ -145,9 +144,12 @@ const Row = styled(Shelf)<any>`
 const DataCol = styled.div<{ align: Column['align'] }>`
   background: initial;
   border: none;
-  padding: 16px 0 16px 16px;
+  padding: 8px 0 8px 16px;
   display: flex;
   flex: 1 1 160px;
+  max-width: 100%;
+  overflow: hidden;
+
   button&:hover {
     cursor: pointer;
   }

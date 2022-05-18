@@ -24,6 +24,7 @@ import { Tooltips } from '../../components/Tooltips'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
+import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { pinPoolMetadata } from './pinPoolMetadata'
 import { RiskGroupsInput } from './RiskGroupsInput'
 import { TrancheInput } from './TrancheInput'
@@ -190,7 +191,7 @@ const CreatePoolForm: React.VFC = () => {
     {
       onSuccess: (args) => {
         const [, poolId] = args
-        history.push(`/pools/${poolId}`)
+        history.push(`/issuer/${poolId}`)
       },
     }
   )
@@ -317,9 +318,12 @@ const CreatePoolForm: React.VFC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isStoredIssuerLoading])
 
+  const formRef = React.useRef<HTMLFormElement>(null)
+  useFocusInvalidInput(form, formRef)
+
   return (
     <FormikProvider value={form}>
-      <Form>
+      <Form ref={formRef}>
         <PageHeader
           icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
           title={form.values.poolName || 'New Pool'}

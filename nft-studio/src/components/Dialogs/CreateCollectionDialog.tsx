@@ -51,7 +51,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     isLoading: transactionIsPending,
   } = useCentrifugeTransaction('Create collection', (cent) => cent.nfts.createCollection, {
     onSuccess: ([collectionId]) => {
-      setRedirect(`/collection/${collectionId}`)
+      setRedirect(`/nfts/collection/${collectionId}`)
     },
   })
 

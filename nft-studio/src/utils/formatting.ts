@@ -37,7 +37,11 @@ export function formatBalanceAbbreviated(amount: Balance | Decimal | number, cur
 
 export function formatPercentage(amount: Perquintill | Decimal | number, includeSymbol = true) {
   const formattedAmount = (
-    amount instanceof Perquintill ? amount.toPercent() : amount instanceof Decimal ? amount.toNumber() : amount
+    amount instanceof Perquintill
+      ? amount.toPercent().toNumber()
+      : amount instanceof Decimal
+      ? amount.toNumber()
+      : amount
   ).toLocaleString('en', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

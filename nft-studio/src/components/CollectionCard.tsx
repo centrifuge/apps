@@ -29,7 +29,7 @@ export const CollectionCard: React.FC<Props> = ({ collection }) => {
 
   return (
     <CollectionCardInner
-      to={`/collection/${id}`}
+      to={`/nfts/collection/${id}`}
       title={metadata?.name || 'Unnamed collection'}
       label={
         <Shelf gap="4px">

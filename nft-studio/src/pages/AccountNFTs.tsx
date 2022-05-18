@@ -3,6 +3,7 @@ import * as React from 'react'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'
+import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { useWeb3 } from '../components/Web3Provider'
@@ -51,26 +52,28 @@ const AccountNFTs: React.FC = () => {
   }
 
   return (
-    <Stack gap={8} flex={1} pb={8}>
-      <PageHeader parent={{ to: '/nfts', label: 'collections' }} title="My NFTs" />
-      {filteredNfts?.length ? (
-        <>
-          <Grid gap={[2, 3]} columns={[2, 2, 3, 4]} equalColumns>
-            {filteredNfts.slice(0, shownCount).map((nft) => (
-              <NFTCard nft={nft} key={`${nft.collectionId}-${nft.id}`} />
-            ))}
-          </Grid>
-          {filteredNfts.length > shownCount && (
-            <VisibilityChecker marginTop={400} onEnter={() => setShownCount((count) => count + COUNT_PER_PAGE)} />
-          )}
-        </>
-      ) : (
-        <Shelf justifyContent="center" mt="15vh" textAlign="center">
-          <Text variant="heading2" color="textSecondary">
-            You don&rsquo;t own any NFTs yet
-          </Text>
-        </Shelf>
-      )}
+    <Stack>
+      <PageHeader parent={{ to: '/nfts', label: 'Collections' }} title="My NFTs" />
+      <PageSection>
+        {filteredNfts?.length ? (
+          <>
+            <Grid gap={[2, 3]} columns={[2, 2, 3, 4]} equalColumns>
+              {filteredNfts.slice(0, shownCount).map((nft) => (
+                <NFTCard nft={nft} key={`${nft.collectionId}-${nft.id}`} />
+              ))}
+            </Grid>
+            {filteredNfts.length > shownCount && (
+              <VisibilityChecker marginTop={400} onEnter={() => setShownCount((count) => count + COUNT_PER_PAGE)} />
+            )}
+          </>
+        ) : (
+          <Shelf justifyContent="center" mt="15vh" textAlign="center">
+            <Text variant="heading2" color="textSecondary">
+              You don&rsquo;t own any NFTs yet
+            </Text>
+          </Shelf>
+        )}
+      </PageSection>
     </Stack>
   )
 }
