@@ -80,7 +80,7 @@ const typography: ThemeTypography = {
   label2: {
     fontSize: 12,
     lineHeight: 1.375,
-    fontWeight: 500,
+    fontWeight: 400,
     color: 'textSecondary',
   },
   label3: {

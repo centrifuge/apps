@@ -31,7 +31,7 @@ export const StatusChip: React.FC<Props> = ({ status, children }) => {
   const color = colors[status]
   return (
     <Wrapper $color={color}>
-      <Text variant="label1" lineHeight="20px" color={color}>
+      <Text variant="label2" lineHeight="20px" color={color}>
         {children}
       </Text>
     </Wrapper>

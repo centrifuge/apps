@@ -1,5 +1,5 @@
 import { Balance, Loan as LoanType, LoanInfoInput, Pool, Rate } from '@centrifuge/centrifuge-js'
-import { Button, DateInput, Grid, NumberInput, Select, Stack } from '@centrifuge/fabric'
+import { Button, DateInput, Grid, NumberInput, Select, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
@@ -7,6 +7,7 @@ import { PageSection } from '../../components/PageSection'
 import { PageSummary } from '../../components/PageSummary'
 import { getCurrencySymbol } from '../../utils/formatting'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
+import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePoolMetadata } from '../../utils/usePools'
 import { combine, max, positiveNumber, required } from '../../utils/validation'
 import { RiskGroupValues } from './RiskGroupValues'
@@ -91,6 +92,9 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
     validateOnMount: true,
   })
 
+  const formRef = React.useRef<HTMLFormElement>(null)
+  useFocusInvalidInput(form, formRef)
+
   const shownFields = LOAN_FIELDS[form.values.loanType]
 
   const fields = {
@@ -128,7 +132,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
 
   return (
     <FormikProvider value={form}>
-      <Form noValidate>
+      <Form noValidate ref={formRef}>
         <PageSummary
           data={[
             { label: 'Loan type', value: LOAN_TYPE_LABELS[form.values.loanType] },
@@ -138,8 +142,15 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
         />
         <PageSection
           title="Pricing"
+          subtitle="All fields are required"
           headerRight={
-            <Button type="submit" disabled={!form.isValid || !riskGroup} loading={isLoading} small>
+            <Button
+              type="submit"
+              disabled={!riskGroup}
+              loading={isLoading}
+              loadingMessage={isLoading ? 'Pending...' : undefined}
+              small
+            >
               Price
             </Button>
           }
@@ -165,7 +176,14 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
                 )}
               </Field>
             </Grid>
-            {riskGroup && <RiskGroupValues values={riskGroup} loanType={form.values.loanType} />}
+            {riskGroup && (
+              <Stack gap={2}>
+                <Text variant="heading4">
+                  Risk group • {riskGroup.name ?? `Risk group ${Number(form.values.riskGroup) + 1}`}{' '}
+                </Text>
+                <RiskGroupValues values={riskGroup} loanType={form.values.loanType} />
+              </Stack>
+            )}
           </Stack>
         </PageSection>
       </Form>

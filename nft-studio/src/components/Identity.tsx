@@ -14,7 +14,7 @@ type Props = TextProps & {
   labelForConnectedAddress?: boolean | string
 }
 
-export const Identity: React.FC<Props> = ({ address, clickToCopy, labelForConnectedAddress = 'me', ...textProps }) => {
+export const Identity: React.FC<Props> = ({ address, clickToCopy, labelForConnectedAddress = true, ...textProps }) => {
   const identity = useIdentity(address)
   const myAddress = useAddress()
   const cent = useCentrifuge()
