@@ -29,9 +29,10 @@ type RowProps = {
 const columns: Column[] = [
   {
     align: 'left',
-    header: 'Token',
+    header: () => <SortableTableHeader label="Token" />,
     cell: (token: TokenTableData) => <TokenName token={token} />,
     flex: '9',
+    sortKey: 'token',
   },
   {
     align: 'left',

@@ -31,12 +31,13 @@ const columns: Column[] = [
   },
   {
     align: 'left',
-    header: 'Name',
+    header: () => <SortableTableHeader label="Name" />,
     cell: (token: TokenByPoolTableData) => <TokenName token={token} />,
     flex: '3',
+    sortKey: 'name',
   },
   {
-    header: 'Symbol',
+    header: () => <SortableTableHeader label="Symbol" />,
     cell: (token: TokenByPoolTableData) => <Text variant="body2">{token?.symbol}</Text>,
     flex: '2',
     align: 'left',

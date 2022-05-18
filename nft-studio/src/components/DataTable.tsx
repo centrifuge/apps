@@ -30,9 +30,9 @@ export type Column = {
 const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, sortKey?: string) => {
   if (!sortKey) return data
   if (order === 'asc') {
-    return data.sort((a, b) => a[sortKey] - b[sortKey])
+    return data.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : -1))
   }
-  return data.sort((a, b) => b[sortKey] - a[sortKey])
+  return data.sort((a, b) => (b[sortKey] > a[sortKey] ? 1 : -1))
 }
 
 export const DataTable = <T extends Record<string, any>>({
