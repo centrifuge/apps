@@ -14,8 +14,9 @@ import { encodeAddress } from '@polkadot/keyring'
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import styled from 'styled-components'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
-import { truncateAddress } from '../utils/web3'
+import { truncate } from '../utils/web3'
 import { ConnectButton } from './ConnectButton'
 import { useDebugFlags } from './DebugFlags'
 import { useWeb3 } from './Web3Provider'
@@ -36,6 +37,7 @@ export const AccountsMenu: React.FC = () => {
 const Accounts: React.FC = () => {
   const { selectedAccount, accounts, selectAccount, proxy, selectProxy, proxies } = useWeb3()
   const { showProxies } = useDebugFlags()
+  const cent = useCentrifuge()
 
   const isDesktop = useIsAboveBreakpoint('M')
   if (!selectedAccount || !accounts) return null
@@ -56,7 +58,9 @@ const Accounts: React.FC = () => {
               small
               {...props}
             >
-              {isDesktop ? selectedAccount.meta.name || truncateAddress(selectedAccount.address) : null}
+              {isDesktop
+                ? selectedAccount.meta.name || truncate(cent.utils.formatAddress(selectedAccount.address))
+                : null}
             </Button>
           </div>
         )}
@@ -65,7 +69,7 @@ const Accounts: React.FC = () => {
             <Menu>
               {accounts.map((acc) => (
                 <MenuItem
-                  label={acc.meta.name || truncateAddress(acc.address)}
+                  label={acc.meta.name || truncate(cent.utils.formatAddress(acc.address))}
                   sublabel={acc.meta.name ? encodeAddress(acc.address, 2) : undefined}
                   icon={
                     <IdenticonWrapper>
@@ -93,7 +97,7 @@ const Accounts: React.FC = () => {
                 <option value="">No Proxy</option>
                 {proxies.map((p) => (
                   <option value={p.delegator} key={p.delegator}>
-                    {truncateAddress(p.delegator)} ({p.types.join(', ')})
+                    {truncate(cent.utils.formatAddress(p.delegator))} ({p.types.join(', ')})
                   </option>
                 ))}
               </select>{' '}

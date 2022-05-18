@@ -9,7 +9,7 @@ import { getUtilsModule } from './modules/utils'
 export class Centrifuge extends CentrifugeBase {
   nfts = getNftsModule(this)
   pools = getPoolsModule(this)
-  utils = getUtilsModule()
+  utils = getUtilsModule(this)
   proxies = getProxiesModule(this)
 
   constructor(config: UserProvidedConfig = {}) {
