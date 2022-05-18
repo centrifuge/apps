@@ -67,9 +67,13 @@ const AssetName: React.VFC<{ loan: Loan }> = ({ loan }) => {
   const nft = useNFT(loan.asset.collectionId, loan.asset.nftId)
   const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   return (
-    <Shelf gap="1" overflowX="hidden">
+    <Shelf gap="1" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
       <Thumbnail type="asset" label={loan.id} />
-      <Text variant="body2" fontWeight={600}>
+      <Text
+        variant="body2"
+        fontWeight={600}
+        style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
+      >
         {metadata?.name || 'Unnamed asset'}
       </Text>
     </Shelf>

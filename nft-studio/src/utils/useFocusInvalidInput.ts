@@ -1,6 +1,7 @@
 import { FormikProps, getIn } from 'formik'
 import * as React from 'react'
 
+// Focuses the first invalid input upon form submission
 export function useFocusInvalidInput(form: FormikProps<any>, ref: React.RefObject<HTMLFormElement | null>) {
   React.useEffect(() => {
     if (form.submitCount === 0) return
