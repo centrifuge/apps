@@ -155,6 +155,10 @@ const tooltipText = {
     label: 'ID',
     body: 'All NFTs locked in a pool are assigned an ascending NFT ID.',
   },
+  maxReserve: {
+    label: 'Max. reserve',
+    body: 'Unicorns glow in the dark',
+  },
 }
 
 type TooltipsProps = {

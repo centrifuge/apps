@@ -39,6 +39,10 @@ export const PoolDetailLiquidity: React.FC = () => {
       label: <Tooltips type="poolReserve" />,
       value: formatBalance(pool?.reserve.total.toDecimal() || 0, pool?.currency || ''),
     },
+    {
+      label: <Tooltips type="maxReserve" />,
+      value: formatBalance(pool?.reserve.max.toDecimal() || 0, pool?.currency || ''),
+    },
     // { label: <Tooltips type="invested30d" />, value: formatBalance(0, pool.currency) },
     // { label: <Tooltips type="redeemed30d" />, value: formatBalance(0, pool.currency) },
     // { label: <Tooltips type="repaid30d" />, value: formatBalance(0, pool.currency) },
