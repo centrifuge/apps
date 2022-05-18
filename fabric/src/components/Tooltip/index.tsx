@@ -37,7 +37,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
 
   return (
     <>
-      <StyledTrigger as="button" fontFamiliy="Inter" ref={triggerRef} {...triggerProps} {...textProps}>
+      <StyledTrigger as="button" fontFamily="Inter" ref={triggerRef} {...triggerProps} {...textProps}>
         {children}
       </StyledTrigger>
       {state.isOpen && (
