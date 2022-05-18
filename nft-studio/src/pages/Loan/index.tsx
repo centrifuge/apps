@@ -93,7 +93,7 @@ const Loan: React.FC = () => {
         icon={<Thumbnail type="asset" label={loan?.id ?? ''} size="large" />}
         title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
         titleAddition={loan && <LoanLabel loan={loan} />}
-        parent={{ to: `/pools/${pid}/assets`, label: poolMetadata?.pool?.name ?? 'Pool assets' }}
+        parent={{ to: `/pools/${poolId}/assets`, label: poolMetadata?.pool?.name ?? 'Pool assets' }}
         subtitle={
           <TextWithPlaceholder isLoading={metadataIsLoading}>
             {poolMetadata?.pool?.asset.class} asset
