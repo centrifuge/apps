@@ -8,7 +8,7 @@ import { Text, TextProps } from '../Text'
 
 type TooltipProps = TextProps & {
   title?: string
-  body: string | (() => React.ReactElement)
+  body: string | React.ReactNode
   disabled?: boolean
   delay?: number
 }
@@ -59,7 +59,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
                 {title}
               </Text>
               <Text variant="body3" color="backgroundPrimary">
-                {typeof body !== 'string' ? body() : body}
+                {body}
               </Text>
             </Stack>
           )}

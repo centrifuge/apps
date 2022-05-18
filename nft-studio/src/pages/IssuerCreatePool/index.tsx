@@ -400,8 +400,7 @@ const CreatePoolForm: React.VFC = () => {
               </Field>
             </Box>
             <Box gridColumn="span 2">
-              <Field
-                WithErrorMessage
+              <FieldWithErrorMessage
                 validate={validate.maxReserve}
                 name="maxReserve"
                 as={NumberInput}

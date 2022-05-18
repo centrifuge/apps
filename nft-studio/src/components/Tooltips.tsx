@@ -4,6 +4,12 @@ import { useParams } from 'react-router'
 import { getCurrencySymbol } from '../utils/formatting'
 import { usePool } from '../utils/usePools'
 
+const ValueLockedTooltipBody: React.VFC = () => {
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const pool = usePool(poolId)
+  return <>Value locked represents the current total value of pool tokens in {getCurrencySymbol(pool?.currency)}.</>
+}
+
 const tooltipText = {
   loanType: {
     label: 'Loan value',
@@ -39,11 +45,7 @@ const tooltipText = {
   },
   valueLocked: {
     label: 'Value locked',
-    body: () => {
-      const { pid: poolId } = useParams<{ pid: string }>()
-      const pool = usePool(poolId)
-      return <>Value locked represents the current total value of pool tokens in {getCurrencySymbol(pool?.currency)}.</>
-    },
+    body: <ValueLockedTooltipBody />,
   },
   tvl: {
     label: 'Total value locked (TVL)',
