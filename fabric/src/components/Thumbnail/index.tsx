@@ -72,6 +72,7 @@ const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
           fontSize: '14px',
           height: theme.sizes.iconLarge,
           width: theme.sizes.iconLarge,
+          minWidth: theme.sizes.iconLarge,
         })
       case 'small':
       default:
@@ -80,6 +81,7 @@ const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
           fontSize: '8px',
           height: theme.sizes.iconMedium,
           width: theme.sizes.iconMedium,
+          minWidth: theme.sizes.iconMedium,
         })
     }
   }}

@@ -88,7 +88,13 @@ export const Admins: React.FC = () => {
           subtitle="At least one address is required"
           headerRight={
             isEditing ? (
-              <Button type="submit" small loading={isLoading} key="done">
+              <Button
+                type="submit"
+                small
+                loading={isLoading}
+                loadingMessage={isLoading ? 'Pending...' : undefined}
+                key="done"
+              >
                 Done
               </Button>
             ) : (

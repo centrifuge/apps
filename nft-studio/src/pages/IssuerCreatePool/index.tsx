@@ -23,6 +23,7 @@ import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
+import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { pinPoolMetadata } from './pinPoolMetadata'
 import { RiskGroupsInput } from './RiskGroupsInput'
 import { TrancheInput } from './TrancheInput'
@@ -53,7 +54,7 @@ const DEFAULT_ASSET_CLASS = 'Art NFT'
 
 export const IssuerCreatePoolPage: React.FC = () => {
   return (
-    <PageWithSideBar sidebar={false}>
+    <PageWithSideBar>
       <CreatePoolForm />
     </PageWithSideBar>
   )
@@ -189,7 +190,7 @@ const CreatePoolForm: React.VFC = () => {
     {
       onSuccess: (args) => {
         const [, poolId] = args
-        history.push(`/pools/${poolId}`)
+        history.push(`/issuer/${poolId}`)
       },
     }
   )
@@ -316,9 +317,12 @@ const CreatePoolForm: React.VFC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isStoredIssuerLoading])
 
+  const formRef = React.useRef<HTMLFormElement>(null)
+  useFocusInvalidInput(form, formRef)
+
   return (
     <FormikProvider value={form}>
-      <Form>
+      <Form ref={formRef}>
         <PageHeader
           icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
           title={form.values.poolName || 'New Pool'}
@@ -333,7 +337,7 @@ const CreatePoolForm: React.VFC = () => {
                 Cancel
               </Button>
 
-              <Button loading={form.isSubmitting || transactionIsPending} type="submit" disabled={!form.isValid}>
+              <Button loading={form.isSubmitting || transactionIsPending} type="submit">
                 Create
               </Button>
             </>
