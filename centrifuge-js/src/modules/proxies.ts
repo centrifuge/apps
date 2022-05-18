@@ -12,13 +12,13 @@ export function getProxiesModule(inst: CentrifugeBase) {
     }>(
       `query($address: String!) {
         proxies(filter: { delegatee: { equalTo: $address }}) {
-					nodes {
-						id
-						delegator
-						delegatee
-						proxyType
-					}
-				}
+          nodes {
+            id
+            delegator
+            delegatee
+            proxyType
+          }
+        }
       }`,
       {
         address: encodeAddress(address, inst.getChainId()),

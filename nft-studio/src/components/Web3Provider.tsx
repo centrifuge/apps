@@ -40,10 +40,7 @@ export const Web3Provider: React.FC = ({ children }) => {
   const unsubscribeRef = React.useRef<(() => void) | null>()
   const [proxies] = useCentrifugeQuery(
     ['proxies', selectedAccountAddress],
-    (cent) => (
-      console.log('selectedAccountAddress', selectedAccountAddress),
-      cent.proxies.getUserProxies([selectedAccountAddress!])
-    ),
+    (cent) => cent.proxies.getUserProxies([selectedAccountAddress!]),
     {
       enabled: !!selectedAccountAddress,
     }
