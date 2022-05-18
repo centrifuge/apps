@@ -37,7 +37,7 @@ const NFT: React.FC = () => {
   const nft = useNFT(collectionId, nftId)
   const { data: nftMetadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)
-  const { data: collectionMetadata, isLoading: isCollectionMetadataLoading } = useCollectionMetadata(collection?.id)
+  const { data: collectionMetadata } = useCollectionMetadata(collection?.id)
   const [transferOpen, setTransferOpen] = React.useState(false)
   const [sellOpen, setSellOpen] = React.useState(false)
   const [buyOpen, setBuyOpen] = React.useState(false)
@@ -55,7 +55,7 @@ const NFT: React.FC = () => {
       <Box>
         <PageHeader
           parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/nfts/collection/${collectionId}` }}
-          title={nftMetadata?.name ?? 'Unnamed NFT'}
+          title={<TextWithPlaceholder isLoading={isLoading}>{nftMetadata?.name ?? 'Unnamed NFT'}</TextWithPlaceholder>}
           subtitle={
             collection && (
               <>
