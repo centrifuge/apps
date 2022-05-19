@@ -4,6 +4,7 @@ import React from 'react'
 import { createEmptyRiskGroup, PoolFormValues } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
+import { Tooltips } from '../../components/Tooltips'
 import { validate } from './validate'
 
 const MAX_GROUPS = 100
@@ -31,16 +32,15 @@ export const RiskGroupsInput: React.FC = () => {
             </Button>
           }
         >
-          <Grid gridTemplateColumns="64px 2fr 1fr 1fr 1fr 1fr 1fr 1fr 40px" gap={2} rowGap={3}>
+          <Grid gridTemplateColumns="40px 1fr 1fr 1fr 1fr 1fr 1fr 1fr 40px" gap={2} rowGap={3}>
             {values.riskGroups.map((s, index) => (
               <React.Fragment key={index}>
-                <Stack gap="4px" py={1}>
-                  <Text variant="label2">Group</Text>
+                <Stack gap="4px" py={1} alignItems="center" justifyContent="center">
                   <Text variant="body1">{index + 1}</Text>
                 </Stack>
                 <FieldWithErrorMessage
                   as={TextInput}
-                  label="Name (optional)"
+                  label="Group name"
                   placeholder=""
                   maxLength={30}
                   name={`riskGroups.${index}.groupName`}
@@ -48,7 +48,7 @@ export const RiskGroupsInput: React.FC = () => {
                 />
                 <FieldWithErrorMessage
                   as={NumberInput}
-                  label="Advance rate"
+                  label={<Tooltips type="advanceRate" variant="secondary" label="Advance rate*" />}
                   placeholder="0.00"
                   rightElement="%"
                   name={`riskGroups.${index}.advanceRate`}
@@ -56,7 +56,7 @@ export const RiskGroupsInput: React.FC = () => {
                 />
                 <FieldWithErrorMessage
                   as={NumberInput}
-                  label="Financing fee"
+                  label={<Tooltips type="financingFee" variant="secondary" label="Financing fee*" />}
                   placeholder="0.00"
                   rightElement="%"
                   name={`riskGroups.${index}.fee`}
@@ -64,7 +64,7 @@ export const RiskGroupsInput: React.FC = () => {
                 />
                 <FieldWithErrorMessage
                   as={NumberInput}
-                  label="Prob. of default"
+                  label={<Tooltips type="probabilityOfDefault" variant="secondary" label="Prob. of default*" />}
                   placeholder="0.00"
                   rightElement="%"
                   name={`riskGroups.${index}.probabilityOfDefault`}
@@ -72,14 +72,14 @@ export const RiskGroupsInput: React.FC = () => {
                 />
                 <FieldWithErrorMessage
                   as={NumberInput}
-                  label="Loss given def."
+                  label={<Tooltips type="lossGivenDefault" variant="secondary" label="Loss given def.*" />}
                   placeholder="0.00"
                   rightElement="%"
                   name={`riskGroups.${index}.lossGivenDefault`}
                   validate={validate.lossGivenDefault}
                 />
                 <TextInput
-                  label="Risk adjustment"
+                  label={<Tooltips type="riskAdjustment" variant="secondary" />}
                   disabled
                   value={Math.max(
                     Math.min(
@@ -94,7 +94,7 @@ export const RiskGroupsInput: React.FC = () => {
                 />
                 <FieldWithErrorMessage
                   as={NumberInput}
-                  label="Discount rate"
+                  label={<Tooltips type="discountRate" variant="secondary" label="Discount rate*" />}
                   placeholder="0.00"
                   rightElement="%"
                   name={`riskGroups.${index}.discountRate`}

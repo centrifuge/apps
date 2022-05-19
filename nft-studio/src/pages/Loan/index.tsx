@@ -10,6 +10,7 @@ import { PageSummary } from '../../components/PageSummary'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { AnchorPillButton } from '../../components/PillButton'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
+import { Tooltips } from '../../components/Tooltips'
 import { nftMetadataSchema } from '../../schemas'
 import { formatBalance } from '../../utils/formatting'
 import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
@@ -57,9 +58,9 @@ const LoanSidebar: React.FC = () => {
 }
 
 const Loan: React.FC = () => {
-  const { pid, aid } = useParams<{ pid: string; aid: string }>()
-  const pool = usePool(pid)
-  const loan = useLoan(pid, aid)
+  const { pid: poolId, aid: assetId } = useParams<{ pid: string; aid: string }>()
+  const pool = usePool(poolId)
+  const loan = useLoan(poolId, assetId)
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const nft = useNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
@@ -68,12 +69,23 @@ const Loan: React.FC = () => {
   const history = useHistory()
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
 
-  const canPrice = permissions?.pools[pid]?.roles.includes('PricingAdmin')
+  const canPrice = permissions?.pools[poolId]?.roles.includes('PricingAdmin')
 
   const name = truncate(nftMetadata?.name || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? parseMetadataUrl(nftMetadata.image) : ''
 
   const riskGroupIndex = loan && poolMetadata?.riskGroups && getMatchingRiskGroupIndex(loan, poolMetadata.riskGroups)
+
+  const nftCardSummaryData = [
+    {
+      label: <Tooltips variant="secondary" type="id" />,
+      value: assetId,
+    },
+    {
+      label: 'Owner',
+      value: <Identity address={nft?.owner || ''} />,
+    },
+  ]
 
   return (
     <Stack>
@@ -81,7 +93,7 @@ const Loan: React.FC = () => {
         icon={<Thumbnail type="asset" label={loan?.id ?? ''} size="large" />}
         title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
         titleAddition={loan && <LoanLabel loan={loan} />}
-        parent={{ to: `/pools/${pid}/assets`, label: poolMetadata?.pool?.name ?? 'Pool assets' }}
+        parent={{ to: `/pools/${poolId}/assets`, label: poolMetadata?.pool?.name ?? 'Pool assets' }}
         subtitle={
           <TextWithPlaceholder isLoading={metadataIsLoading}>
             {poolMetadata?.pool?.asset.class} asset
@@ -94,10 +106,16 @@ const Loan: React.FC = () => {
           <>
             <PageSummary
               data={[
-                { label: 'Loan type', value: loan?.loanInfo.type ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '' },
-                { label: 'Collateral value', value: formatBalance(loan.loanInfo.value, pool?.currency) },
                 {
-                  label: 'Risk group',
+                  label: <Tooltips type="loanType" />,
+                  value: loan?.loanInfo.type ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '',
+                },
+                {
+                  label: <Tooltips type="collateralValue" />,
+                  value: formatBalance(loan.loanInfo.value, pool?.currency),
+                },
+                {
+                  label: <Tooltips type="riskGroup" />,
                   value: (
                     <TextWithPlaceholder isLoading={metadataIsLoading}>
                       {riskGroupIndex !== undefined && riskGroupIndex > -1
@@ -130,6 +148,16 @@ const Loan: React.FC = () => {
             title={<TextWithPlaceholder isLoading={nftMetadataIsLoading}>{nftMetadata?.name}</TextWithPlaceholder>}
             variant="button"
             onClick={() => history.push(`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`)}
+            secondaryHeader={
+              <Shelf gap="6" justifyContent="flex-start">
+                {nftCardSummaryData?.map(({ label, value }, index) => (
+                  <Stack gap="2px" key={`${value}-${label}-${index}`}>
+                    <Text variant="label2">{label}</Text>
+                    <Text variant="body2">{value}</Text>
+                  </Stack>
+                ))}
+              </Shelf>
+            }
           >
             <Shelf gap={3} alignItems="flex-start">
               <Box

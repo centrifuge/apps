@@ -48,7 +48,7 @@ const TokenOverview: React.FC = () => {
 
   const pageSummaryData = [
     // TODO: sort out currency for TVL (kUSD vs AIR vs ...), assuming everything uses the same currency
-    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, tokens[0].currency) },
+    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, tokens[0]?.currency) },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
   ]
 
@@ -61,7 +61,7 @@ const TokenOverview: React.FC = () => {
           <TokenList tokens={tokens} />
         </>
       ) : (
-        <Shelf justifyContent="center" textAlign="center">
+        <Shelf p="4" justifyContent="center" textAlign="center">
           <Text variant="heading2" color="textSecondary">
             There are no tokens yet
           </Text>

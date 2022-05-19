@@ -54,7 +54,7 @@ const TokenDetail: React.FC = () => {
         label: <Tooltips type="protection" />,
         value: (
           <Text variant="heading3">
-            {parseInt(trancheId, 10) > 0 ? (
+            {tranche?.seniority! > 0 ? (
               <Text>
                 {formatPercentage(token?.ratio.toPercent() ?? 0)}{' '}
                 <Text variant="body3">minimum {formatPercentage(token?.minRiskBuffer?.toPercent() ?? 0)}</Text>
@@ -67,7 +67,7 @@ const TokenDetail: React.FC = () => {
       },
       { label: <Tooltips type="valueLocked" />, value: `${formatBalance(valueLocked, pool?.currency)}` },
     ],
-    [metadata, token, pool, trancheId, valueLocked]
+    [metadata, token, pool, valueLocked, tranche?.seniority]
   )
 
   return (

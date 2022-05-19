@@ -46,7 +46,7 @@ export const PoolDetailAssets: React.FC = () => {
 
   const pageSummaryData = [
     { label: <Tooltips type="ongoingAssets" />, value: loans?.length || 0 },
-    { label: <Tooltips type="averageAssetMaturity" />, value: avgMaturity },
+    { label: <Tooltips type="averageMaturity" />, value: avgMaturity },
     { label: <Tooltips type="averageFinancingFee" />, value: formatPercentage(avgInterestRatePerSec) },
     { label: <Tooltips type="averageAmount" />, value: formatBalance(avgAmount, pool.currency) },
   ]

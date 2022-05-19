@@ -20,6 +20,7 @@ import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
+import { Tooltips } from '../../components/Tooltips'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
@@ -345,6 +346,16 @@ const CreatePoolForm: React.VFC = () => {
         />
         <PageSection title="Details">
           <Grid columns={[4]} equalColumns gap={2} rowGap={3}>
+            <Box gridColumn="span 2">
+              <FieldWithErrorMessage
+                validate={validate.poolName}
+                name="poolName"
+                as={TextInput}
+                label="Pool name*"
+                placeholder="New pool"
+                maxLength={100}
+              />
+            </Box>
             <Box gridColumn="span 2" width="100%">
               <Field name="poolIcon" validate={validate.poolIcon}>
                 {({ field, meta, form }: FieldProps) => (
@@ -354,7 +365,7 @@ const CreatePoolForm: React.VFC = () => {
                       form.setFieldTouched('poolIcon', true, false)
                       form.setFieldValue('poolIcon', file)
                     }}
-                    label="Pool icon: SVG in square size (required)"
+                    label="Pool icon: SVG in square size*"
                     placeholder="Choose pool icon"
                     errorMessage={meta.touched && meta.error ? meta.error : undefined}
                     accept="image/svg+xml"
@@ -363,20 +374,10 @@ const CreatePoolForm: React.VFC = () => {
               </Field>
             </Box>
             <Box gridColumn="span 2">
-              <FieldWithErrorMessage
-                validate={validate.poolName}
-                name="poolName"
-                as={TextInput}
-                label="Pool name"
-                placeholder="New pool"
-                maxLength={100}
-              />
-            </Box>
-            <Box gridColumn="span 2">
               <Field name="assetClass" validate={validate.assetClass}>
                 {({ field, meta, form }: FieldProps) => (
                   <Select
-                    label="Asset class"
+                    label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
                     onSelect={(v) => form.setFieldValue('assetClass', v)}
                     onBlur={field.onBlur}
                     errorMessage={meta.touched && meta.error ? meta.error : undefined}
@@ -391,7 +392,7 @@ const CreatePoolForm: React.VFC = () => {
               <Field name="currency" validate={validate.currency}>
                 {({ field, form, meta }: FieldProps) => (
                   <Select
-                    label="Currency"
+                    label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
                     onSelect={(v) => form.setFieldValue('currency', v)}
                     onBlur={field.onBlur}
                     errorMessage={meta.touched && meta.error ? meta.error : undefined}
@@ -407,7 +408,7 @@ const CreatePoolForm: React.VFC = () => {
                 validate={validate.maxReserve}
                 name="maxReserve"
                 as={NumberInput}
-                label="Initial maximum reserve"
+                label="Initial maximum reserve*"
                 placeholder="0"
                 rightElement={CURRENCIES.find((c) => c.value === form.values.currency)?.label}
               />
@@ -441,7 +442,7 @@ const CreatePoolForm: React.VFC = () => {
                 validate={validate.issuerName}
                 name="issuerName"
                 as={TextInput}
-                label="Issuer name"
+                label={<Tooltips type="issuerName" label="Legal name of issuer*" variant="secondary" />}
                 placeholder="Name..."
                 maxLength={100}
                 disabled={waitingForStoredIssuer}
@@ -469,7 +470,9 @@ const CreatePoolForm: React.VFC = () => {
                 validate={validate.issuerDescription}
                 name="issuerDescription"
                 as={TextAreaInput}
-                label="Description"
+                label={
+                  <Tooltips type="poolDescription" variant="secondary" label="Description (minimum 100 characters)*" />
+                }
                 placeholder="Description..."
                 maxLength={1000}
                 disabled={waitingForStoredIssuer}
@@ -488,7 +491,7 @@ const CreatePoolForm: React.VFC = () => {
                       form.setFieldValue('executiveSummary', file)
                     }}
                     accept="application/pdf"
-                    label="Executive summary PDF (required)"
+                    label="Executive summary PDF*"
                     placeholder="Choose file"
                     errorMessage={meta.touched && meta.error ? meta.error : undefined}
                   />
