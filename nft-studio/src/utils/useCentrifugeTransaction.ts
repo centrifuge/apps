@@ -15,7 +15,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   options: { onSuccess?: (args: T, result: ISubmittableResult) => void; onError?: (error: any) => void } = {}
 ) {
   const { addTransaction, updateTransaction } = useTransactions()
-  const { selectedAccount, connect } = useWeb3()
+  const { selectedAccount, connect, proxy } = useWeb3()
   const cent = useCentrifuge()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
   const lastCreatedTransaction = useTransaction(lastId)
@@ -25,6 +25,9 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     try {
       const injector = await web3FromAddress(selectedAccount?.address)
       const connectedCent = cent.connect(selectedAccount?.address, injector.signer)
+      if (proxy) {
+        connectedCent.setProxy(proxy.delegator)
+      }
       const api = await cent.getApiPromise()
 
       const transaction = transactionCallback(connectedCent)

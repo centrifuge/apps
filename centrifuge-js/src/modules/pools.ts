@@ -357,7 +357,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
             writeOffGroups.map((g) => api.tx.loans.addWriteOffGroup(poolId, [g.percentage.toString(), g.overdueDays]))
           )
         )
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -372,7 +372,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.pools.update(poolId, minEpochTime, challengeTime, maxNavAge)
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -399,7 +399,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
             api.tx.permissions.remove({ PoolRole: 'PoolAdmin' }, addr, { Pool: poolId }, { PoolRole: role })
           ),
         ])
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -411,7 +411,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.pools.setMaxReserve(poolId, maxReserve.toString())
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -440,7 +440,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         } else {
           submittable = api.tx.pools.updateInvestOrder(poolId, { id: trancheId }, newOrder.toString())
         }
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -468,7 +468,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         } else {
           submittable = api.tx.pools.updateRedeemOrder(poolId, { id: trancheId }, newOrder.toString())
         }
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -480,7 +480,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.utility.batchAll([api.tx.loans.updateNav(poolId), api.tx.pools.closeEpoch(poolId)])
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -492,7 +492,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.pools.submitSolution(poolId, solution)
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -508,7 +508,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         combineLatestWith(getOrder([address, trancheId])),
         switchMap(([[api, pool], order]) => {
           const submittable = api.tx.pools.collect(poolId, { id: trancheId }, pool.epoch.lastExecuted + 1 - order.epoch)
-          return inst.wrapSignAndSendRx(api, submittable, options)
+          return inst.wrapSignAndSend(api, submittable, options)
         })
       )
     }
@@ -537,7 +537,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
             .filter(Boolean)
         )
 
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -671,7 +671,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.create(poolId, [collectionId, nftId])
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -690,7 +690,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         const submittable = api.tx.loans.price(poolId, loanId, ratePerSec, {
           [loanInfoInput.type]: loanInfo,
         })
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -702,7 +702,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.borrow(poolId, loanId, amount.toString())
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -714,7 +714,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.repay(poolId, loanId, amount.toString())
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -737,7 +737,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           api.tx.loans.repay(poolId, loanId, amount),
           api.tx.loans.close(poolId, loanId),
         ])
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -899,7 +899,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const $api = inst.getApi()
 
-    const $query = inst.getOptionalSubqueryObservable<{ pool: { createdAt: string } }>(
+    const $query = inst.getSubqueryObservable<{ pool: { createdAt: string } }>(
       `query($poolId: String!) {
         pool(id: $poolId) {
           createdAt
@@ -993,7 +993,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const $api = inst.getApi()
 
-    const $query = inst.getOptionalSubqueryObservable<{ dailyPoolStates: { nodes: SubqueryDailyPoolState[] } }>(
+    const $query = inst.getSubqueryObservable<{ dailyPoolStates: { nodes: SubqueryDailyPoolState[] } }>(
       `query($poolId: String!) {
         dailyPoolStates(
           filter: { 
@@ -1304,7 +1304,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.addWriteOffGroup(poolId, [percentage.toString(), overdueDays])
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -1319,7 +1319,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.adminWriteOff(poolId, loanId, writeOffGroupId)
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }

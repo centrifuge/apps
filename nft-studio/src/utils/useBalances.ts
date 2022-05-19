@@ -16,6 +16,6 @@ export function getBalanceDec(balances: Balances, currency: string) {
     return Dec(balances.native.balance.toString()).div(Dec(10).pow(balances.native.decimals))
   }
   const entry = balances.currencies.find((c) => c.currency === currency)
-  if (!entry) throw new Error(`invalid currency: ${currency}`)
+  if (!entry) return Dec(0)
   return entry.balance.toDecimal()
 }
