@@ -1,3 +1,4 @@
+import React from 'react'
 import { useWeb3 } from '../components/Web3Provider'
 import { useAddress } from './useAddress'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
@@ -23,4 +24,16 @@ export function useCanBorrow(poolId: string, assetId: string) {
     (!proxy || proxy.types.includes('Borrower') || proxy.types.includes('Any'))
 
   return !!canBorrow
+}
+
+export function useIsPoolAdmin(poolId: string) {
+  const address = useAddress()
+  const permissions = usePermissions(address)
+
+  const isPoolAdmin = React.useMemo(
+    () => !!(address && permissions?.pools[poolId]?.roles.includes('PoolAdmin')),
+    [poolId, address, permissions]
+  )
+
+  return isPoolAdmin
 }
