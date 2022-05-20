@@ -7,7 +7,7 @@ import { Dec } from '../utils/Decimal'
 import { formatBalance, getCurrencySymbol } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
-import { useIsPoolAdmin } from '../utils/usePermissions'
+import { useLiquidityAdmin } from '../utils/usePermissions'
 import { usePool } from '../utils/usePools'
 import { LoadBoundary } from './LoadBoundary'
 
@@ -29,7 +29,7 @@ type MaxReserveValues = {
 
 const MaxReserveInner: React.VFC<Props> = ({ poolId }) => {
   const address = useAddress()
-  const isPoolAdmin = useIsPoolAdmin(poolId)
+  const isLiquidityAdmin = useLiquidityAdmin(poolId)
   const pool = usePool(poolId)
 
   const { execute: setMaxReserveTx, isLoading } = useCentrifugeTransaction(
@@ -55,7 +55,7 @@ const MaxReserveInner: React.VFC<Props> = ({ poolId }) => {
     },
   })
 
-  if (!address || !isPoolAdmin) return null
+  if (!address || !isLiquidityAdmin) return null
 
   return (
     <Stack as={Card} gap={2} p={2} mt={5}>

@@ -12,7 +12,7 @@ import { Tooltips } from '../../../components/Tooltips'
 import { getEpochHoursRemaining } from '../../../utils/date'
 import { formatBalance } from '../../../utils/formatting'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
-import { useIsPoolAdmin } from '../../../utils/usePermissions'
+import { useLiquidityAdmin } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
@@ -34,7 +34,7 @@ export const PoolDetailLiquidity: React.FC<{
 }> = ({ setIsEditingMaxReserve }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  const isPoolAdmin = useIsPoolAdmin(poolId)
+  const isLiquidityAdmin = useLiquidityAdmin(poolId)
 
   // const dailyPoolStates = useDailyPoolStates(poolId)
 
@@ -71,7 +71,7 @@ export const PoolDetailLiquidity: React.FC<{
   return (
     <>
       <PageSummary data={pageSummaryData}>
-        {isPoolAdmin && (
+        {isLiquidityAdmin && (
           <Button variant="secondary" small onClick={() => setIsEditingMaxReserve(true)}>
             Set max
           </Button>

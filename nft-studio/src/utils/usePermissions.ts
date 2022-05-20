@@ -37,3 +37,15 @@ export function useIsPoolAdmin(poolId: string) {
 
   return isPoolAdmin
 }
+
+export function useLiquidityAdmin(poolId: string) {
+  const address = useAddress()
+  const permissions = usePermissions(address)
+
+  const isPoolAdmin = React.useMemo(
+    () => !!(address && permissions?.pools[poolId]?.roles.includes('LiquidityAdmin')),
+    [poolId, address, permissions]
+  )
+
+  return isPoolAdmin
+}
