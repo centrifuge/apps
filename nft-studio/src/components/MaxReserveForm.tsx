@@ -91,7 +91,6 @@ const MaxReserveInner: React.VFC<Props> = ({ poolId }) => {
 }
 
 function validateNumberInput(value: number | string | Decimal) {
-  console.log('🚀 ~ Dec(value).lessThanOrEqualTo(Dec(0))', Dec(value).lessThanOrEqualTo(Dec(0)))
   if (value === '') {
     return 'Not a valid number'
   }
