@@ -55,7 +55,7 @@ const Accounts: React.FC = () => {
               balances
                 ? formatBalanceAbbreviated(
                     Dec(balances?.native.balance.toString()).div(Dec(10).pow(balances?.native.decimals)),
-                    'AIR'
+                    balances?.native.symbol
                   )
                 : undefined
             }

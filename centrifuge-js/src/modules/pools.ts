@@ -1059,6 +1059,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           native: {
             balance: new BN((nativeBalance as any).data.free.toString()),
             decimals: api.registry.chainDecimals[0],
+            symbol: api.registry.chainTokens[0],
           },
         }
 
