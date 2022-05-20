@@ -1,4 +1,4 @@
-import { Button, ButtonProps } from '@centrifuge/fabric'
+import { ButtonProps, WalletButton } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useWeb3 } from './Web3Provider'
 
@@ -10,13 +10,9 @@ export const ConnectButton: React.FC<Props> = ({ label = 'Connect', ...rest }) =
   const { accounts, isConnecting, connect, selectedAccount } = useWeb3()
   return accounts ? (
     selectedAccount ? null : (
-      <Button disabled variant="tertiary">
-        No account connected
-      </Button>
+      <WalletButton connectLabel="No account connected" disabled {...rest} />
     )
   ) : (
-    <Button onClick={() => connect()} loading={isConnecting} {...rest}>
-      {label}
-    </Button>
+    <WalletButton connectLabel={label} onClick={() => connect()} loading={isConnecting} {...rest} />
   )
 }

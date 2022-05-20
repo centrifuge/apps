@@ -27,11 +27,13 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.15.5",
+    "@mdx-js/preact": "^2.1.1",
     "@mdx-js/react": "^1.6.22",
     "@storybook/addon-actions": "^6.4.18",
     "@storybook/addon-docs": "^6.4.18",
     "@storybook/addon-essentials": "^6.4.18",
     "@storybook/addon-links": "^6.4.18",
+    "@storybook/builder-vite": "^0.1.34",
     "@storybook/react": "^6.4.18",
     "@svgr/cli": "^5.5.0",
     "@types/babel__core": "^7",
@@ -62,6 +64,7 @@
     "react-dom": "^17.0.2"
   },
   "dependencies": {
+    "@polkadot/react-identicon": "^2.2.1",
     "@react-aria/button": "^3.3.4",
     "@react-aria/dialog": "^3.1.4",
     "@react-aria/focus": "^3.5.0",
