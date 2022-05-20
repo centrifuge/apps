@@ -28,7 +28,6 @@ export type Key =
   | 'showAdditionalIssuerTabs'
   | 'allowInvestBelowMin'
   | 'altairDarkMode'
-  | 'showProxies'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -59,9 +58,5 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
     default: false,
     alwaysShow: true,
-  },
-  showProxies: {
-    type: 'checkbox',
-    default: false,
   },
 }

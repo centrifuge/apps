@@ -8,14 +8,12 @@ export function getProxiesModule(inst: CentrifugeBase) {
     const [address] = args
 
     const $query = inst.getSubqueryObservable<{
-      proxies: { nodes: { id: string; delegator: string; delegatee: string; proxyType: string }[] }
+      proxies: { nodes: { delegator: string; proxyType: string }[] }
     }>(
       `query($address: String!) {
         proxies(filter: { delegatee: { equalTo: $address }}) {
           nodes {
-            id
             delegator
-            delegatee
             proxyType
           }
         }
@@ -44,7 +42,49 @@ export function getProxiesModule(inst: CentrifugeBase) {
     )
   }
 
+  function getMultiUserProxies(args: [addresses: Account[]]) {
+    const [addresses] = args
+
+    const $query = inst.getSubqueryObservable<{
+      proxies: { nodes: { id: string; delegator: string; delegatee: string; proxyType: string }[] }
+    }>(
+      `query($addresses: [String!]) {
+        proxies(filter: { delegatee: { in: $addresses }}) {
+          nodes {
+            id
+            delegator
+            delegatee
+            proxyType
+          }
+        }
+      }`,
+      {
+        addresses: addresses.map((addr) => encodeAddress(addr, inst.getChainId())),
+      },
+      false
+    )
+
+    return $query.pipe(
+      map((data) => {
+        const proxiesByUser: Record<string, { delegator: string; types: string[] }[]> = {}
+        data?.proxies.nodes.forEach((node) => {
+          const index = proxiesByUser[node.delegatee]?.findIndex((p) => p.delegator === node.delegator)
+          if (index > -1) {
+            proxiesByUser[node.delegatee][index].types.push(node.proxyType)
+          } else {
+            ;(proxiesByUser[node.delegatee] || (proxiesByUser[node.delegatee] = [])).push({
+              delegator: node.delegator,
+              types: [node.proxyType],
+            })
+          }
+        })
+        return proxiesByUser
+      })
+    )
+  }
+
   return {
     getUserProxies,
+    getMultiUserProxies,
   }
 }
