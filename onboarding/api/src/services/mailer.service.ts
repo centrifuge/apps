@@ -129,7 +129,6 @@ export class MailerService {
     } else {
       templateId = config.sendgrid.subscriptionAgreementVoided
     }
-    const issuerName = pool.profile?.issuer?.name.replace(/\s+/g, '-').toLowerCase()
     const message = {
       personalizations: [
         {
@@ -149,8 +148,8 @@ export class MailerService {
         },
       ],
       from: {
-        name: pool.profile?.issuer?.name,
-        email: `issuer+${issuerName}@centrifuge.io`,
+        name: `Centrifuge`,
+        email: `onboarding@centrifuge.io`,
       },
       template_id: config.sendgrid.subscriptionAgreementVoided,
     }
