@@ -9,7 +9,11 @@ export const useAverageMaturity = (poolId: string) => {
   const avgMaturity = React.useMemo(() => {
     const assets = loans?.filter((asset) => asset?.status === 'Active' || asset?.status === 'Created') || []
     const maturityPerAsset = assets.reduce((sum, asset) => {
-      if (asset.loanInfo.type !== 'BulletLoan' || !asset.outstandingDebt.gtn(0)) return sum
+      if (
+        (asset.loanInfo.type !== 'BulletLoan' && asset.loanInfo.type !== 'CreditLineWithMaturity') ||
+        !asset.outstandingDebt.gtn(0)
+      )
+        return sum
       return sum.add(
         Dec(daysBetween(asset.originationDate, asset.loanInfo.maturityDate)).mul(asset.outstandingDebt.toDecimal())
       )
