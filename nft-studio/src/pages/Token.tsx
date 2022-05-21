@@ -56,7 +56,7 @@ const TokenDetail: React.FC = () => {
           <Text variant="heading3">
             {tranche?.seniority! > 0 ? (
               <Text>
-                {formatPercentage(token?.ratio.toPercent() ?? 0)}{' '}
+                {formatPercentage(token?.currentRiskBuffer.toPercent() ?? 0)}{' '}
                 <Text variant="body3">minimum {formatPercentage(token?.minRiskBuffer?.toPercent() ?? 0)}</Text>
               </Text>
             ) : (

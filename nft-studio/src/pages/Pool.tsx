@@ -132,7 +132,7 @@ const Pool: React.FC = () => {
                               <Text color="textSecondary">
                                 Min. {formatPercentage(tranche.minRiskBuffer.toPercent())}
                               </Text>{' '}
-                              {formatPercentage(tranche.ratio.toPercent())}
+                              {formatPercentage(tranche.currentRiskBuffer.toPercent())}
                             </>
                           ),
                         },
