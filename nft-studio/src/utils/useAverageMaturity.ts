@@ -12,8 +12,9 @@ export const useAverageMaturity = (poolId: string) => {
       if (
         (asset.loanInfo.type !== 'BulletLoan' && asset.loanInfo.type !== 'CreditLineWithMaturity') ||
         !asset.outstandingDebt.gtn(0)
-      )
+      ) {
         return sum
+      }
       return sum.add(
         Dec(daysBetween(asset.originationDate, asset.loanInfo.maturityDate)).mul(asset.outstandingDebt.toDecimal())
       )
