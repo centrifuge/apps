@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Box, IconCircle, IconNft, IconPieChart, IconSquare, IconUser, Shelf } from '@centrifuge/fabric'
+import { Box, IconInvestments, IconNft, IconPieChart, IconUser, Shelf } from '@centrifuge/fabric'
 import React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
@@ -42,31 +42,23 @@ export const Menu: React.FC<Props> = () => {
         justifyContent="space-evenly"
         px={[2, 2, 0]}
       >
-        <NavigationItem label="Tokens" href="/tokens" icon={<IconCircle size="16px" />} />
-        <NavigationItem label="Pools" href="/pools" icon={<IconSquare size="16px" />} />
+        <NavigationItem label="Investments" href="/tokens" icon={<IconInvestments size="16px" />} />
         <NavigationItem label="NFTs" href="/nfts" icon={<IconNft size="16px" />} />
-        <NavigationItem
-          label="Investments"
-          href="/investments"
-          icon={<IconPieChart size="16px" />}
-          defaultOpen={!!investmentsMatch}
-        >
-          <NavigationItem label="Tokens" href="/investments/tokens" />
-          <NavigationItem label="Portfolio" href="/investments/portfolio" />
-          <NavigationItem label="Rewards" href="/investments/rewards" />
-        </NavigationItem>
-        <NavigationItem label="Issuer" href="issuer" icon={<IconUser size="16px" />} defaultOpen={!!issuersMatch}>
-          {pools.map((pool) => (
-            <PoolNavigationItem key={pool.id} pool={pool} />
-          ))}
-          {address && (
-            <Shelf justifyContent="center" mt={1}>
-              <RouterLinkButton to="/issuer/create-pool" variant="secondary" small>
-                Create Pool
-              </RouterLinkButton>
-            </Shelf>
-          )}
-        </NavigationItem>
+        <NavigationItem label="Portfolio" href="/investments/portfolio" icon={<IconPieChart size="16px" />} />
+        {pools.length > 0 && (
+          <NavigationItem label="Issuer" href="issuer" icon={<IconUser size="16px" />} defaultOpen>
+            {pools.map((pool) => (
+              <PoolNavigationItem key={pool.id} pool={pool} />
+            ))}
+            {address && (
+              <Shelf justifyContent="center" mt={1}>
+                <RouterLinkButton to="/issuer/create-pool" variant="secondary" small>
+                  Create Pool
+                </RouterLinkButton>
+              </Shelf>
+            )}
+          </NavigationItem>
+        )}
       </Shelf>
     </Box>
   )
