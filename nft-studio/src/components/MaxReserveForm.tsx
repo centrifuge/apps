@@ -1,33 +1,18 @@
 import { Balance } from '@centrifuge/centrifuge-js'
 import { Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
-import Decimal from 'decimal.js-light'
-import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
+import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { Dec } from '../utils/Decimal'
 import { formatBalance, getCurrencySymbol } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLiquidityAdmin } from '../utils/usePermissions'
 import { usePool } from '../utils/usePools'
-import { LoadBoundary } from './LoadBoundary'
 
 type Props = {
   poolId: string
 }
 
-export const MaxReserveForm: React.VFC<Props> = (props) => {
-  return (
-    <LoadBoundary>
-      <MaxReserveInner {...props} />
-    </LoadBoundary>
-  )
-}
-
-type MaxReserveValues = {
-  maxReserve: number | Decimal | ''
-}
-
-const MaxReserveInner: React.VFC<Props> = ({ poolId }) => {
+export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
   const address = useAddress()
   const isLiquidityAdmin = useLiquidityAdmin(poolId)
   const pool = usePool(poolId)
@@ -37,21 +22,14 @@ const MaxReserveInner: React.VFC<Props> = ({ poolId }) => {
     (cent) => cent.pools.setMaxReserve
   )
 
-  const form = useFormik<{ maxReserve: number | Decimal }>({
+  const form = useFormik<{ maxReserve: number }>({
     initialValues: {
       maxReserve: 0,
     },
     onSubmit: (values, actions) => {
       setMaxReserveTx([poolId, Balance.fromFloat(values.maxReserve)])
       actions.setSubmitting(false)
-    },
-    validate: (values) => {
-      const errors: FormikErrors<MaxReserveValues> = {}
-
-      if (validateNumberInput(values.maxReserve)) {
-        errors.maxReserve = validateNumberInput(values.maxReserve)
-      }
-      return errors
+      values.maxReserve = 0
     },
   })
 
@@ -60,17 +38,17 @@ const MaxReserveInner: React.VFC<Props> = ({ poolId }) => {
   return (
     <Stack as={Card} gap={2} p={2} mt={5}>
       <Shelf justifyContent="space-between">
-        <Text variant="heading3">Maximum Reserve</Text>
+        <Text variant="heading3">Maximum reserve</Text>
         <Text variant="heading3">{formatBalance(pool?.reserve.max.toDecimal() || 0, pool?.currency || '')}</Text>
       </Shelf>
       <FormikProvider value={form}>
         <Form>
           <Stack gap="2">
-            <Field name="maxReserve">
+            <Field name="maxReserve" validate={(value: number) => value <= 0 && 'Value too small'}>
               {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
                 <CurrencyInput
                   {...fieldProps}
-                  value={value instanceof Decimal ? value.toNumber() : value}
+                  value={value}
                   errorMessage={meta.touched ? meta.error : undefined}
                   label="Maximum reserve"
                   type="number"
@@ -88,13 +66,4 @@ const MaxReserveInner: React.VFC<Props> = ({ poolId }) => {
       </FormikProvider>
     </Stack>
   )
-}
-
-function validateNumberInput(value: number | string | Decimal) {
-  if (value === '') {
-    return 'Not a valid number'
-  }
-  if (Dec(value).lessThanOrEqualTo(Dec(0))) {
-    return 'Value too small'
-  }
 }

@@ -1,4 +1,3 @@
-import React from 'react'
 import { useWeb3 } from '../components/Web3Provider'
 import { useAddress } from './useAddress'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
@@ -30,22 +29,12 @@ export function useIsPoolAdmin(poolId: string) {
   const address = useAddress()
   const permissions = usePermissions(address)
 
-  const isPoolAdmin = React.useMemo(
-    () => !!(address && permissions?.pools[poolId]?.roles.includes('PoolAdmin')),
-    [poolId, address, permissions]
-  )
-
-  return isPoolAdmin
+  return !!(address && permissions?.pools[poolId]?.roles.includes('PoolAdmin'))
 }
 
 export function useLiquidityAdmin(poolId: string) {
   const address = useAddress()
   const permissions = usePermissions(address)
 
-  const isPoolAdmin = React.useMemo(
-    () => !!(address && permissions?.pools[poolId]?.roles.includes('LiquidityAdmin')),
-    [poolId, address, permissions]
-  )
-
-  return isPoolAdmin
+  return !!(address && permissions?.pools[poolId]?.roles.includes('LiquidityAdmin'))
 }
