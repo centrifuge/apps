@@ -32,7 +32,7 @@ export const formatAge = (ageInDays: number, decimals: number = 1) => {
 export const getAge = (createdAt: string | undefined | null) => {
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
-  return formatAge(daysBetween(createdAt || today, today))
+  return formatAge(daysBetween(createdAt || today, today), 0)
 }
 
 export function getEpochHoursRemaining(pool: DetailedPool) {
