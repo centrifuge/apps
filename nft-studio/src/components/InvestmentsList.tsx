@@ -1,10 +1,11 @@
 import { TrancheBalance } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Text } from '@centrifuge/fabric'
+import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { formatBalance } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
+import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   investments: TrancheBalance[]
@@ -53,13 +54,16 @@ export const InvestmentsList: React.FC<Props> = ({ investments }) => {
 
 const Token: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
-  const { data: metadata } = usePoolMetadata(pool)
+  const { data: metadata, isLoading } = usePoolMetadata(pool)
   const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
   return (
-    <Text variant="body2" fontWeight={600}>
-      {metadata?.pool?.name} {trancheMeta?.name}
-    </Text>
+    <Shelf gap="2">
+      <Thumbnail label={trancheMeta?.symbol || ''} size="small" />
+      <TextWithPlaceholder isLoading={isLoading} variant="body2" color="textPrimary" fontWeight={600}>
+        {metadata?.pool?.name} {trancheMeta?.name}
+      </TextWithPlaceholder>
+    </Shelf>
   )
 }
 

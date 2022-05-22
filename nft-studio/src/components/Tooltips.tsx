@@ -24,7 +24,7 @@ const tooltipText = {
     body: 'Risk group set by the issuer for the asset indicating the likelihood of a default. To learn more read about the issuers risk groupings here...',
   },
   assetClass: {
-    label: 'Asset Class',
+    label: 'Asset class',
     body: 'Assets can be grouped into classes that exhibit similar characteristics in terms of maturity, volume, type of financing, underlying collateral and/or risk return profile.',
   },
   apy: {

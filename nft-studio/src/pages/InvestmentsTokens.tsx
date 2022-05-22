@@ -23,6 +23,7 @@ const Tokens: React.FC = () => {
   const address = useAddress()
   const balances = useBalances(address)
 
+  // TODO: this should multiply each balance by the token price
   const totalValueLocked = React.useMemo(
     () =>
       balances?.tranches.reduce((prev, curr) => {
