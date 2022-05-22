@@ -415,6 +415,18 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
+  function setMetadata(args: [poolId: string, metadata: string], options?: TransactionOptions) {
+    const [poolId, metadata] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.pools.setMetadata(poolId, metadata)
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
   function updateInvestOrder(args: [poolId: string, trancheId: string, newOrder: BN], options?: TransactionOptions) {
     const [poolId, trancheId, newOrder] = args
 
@@ -1408,6 +1420,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     createPool,
     updatePool,
     setMaxReserve,
+    setMetadata,
     updateInvestOrder,
     updateRedeemOrder,
     collect,

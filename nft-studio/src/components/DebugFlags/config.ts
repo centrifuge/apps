@@ -28,6 +28,7 @@ export type Key =
   | 'showAdditionalIssuerTabs'
   | 'allowInvestBelowMin'
   | 'altairDarkMode'
+  | 'editPoolConfig'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -55,6 +56,11 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     default: false,
   },
   altairDarkMode: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
+  },
+  editPoolConfig: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,

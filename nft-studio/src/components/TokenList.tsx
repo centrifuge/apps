@@ -38,18 +38,18 @@ const columns: Column[] = [
     align: 'left',
     header: 'Asset class',
     cell: (token: TokenTableData) => <AssetClass token={token} />,
-    flex: '4',
+    flex: '6',
   },
   {
     header: () => <SortableTableHeader label="Yield" />,
     cell: (token: TokenTableData) => <Yield token={token} />,
-    flex: '4',
+    flex: '3',
     sortKey: 'yield',
   },
   {
     header: () => <SortableTableHeader label="Protection" />,
     cell: (token: TokenTableData) => <Protection token={token} />,
-    flex: '4',
+    flex: '3',
     sortKey: 'protection',
   },
   {
