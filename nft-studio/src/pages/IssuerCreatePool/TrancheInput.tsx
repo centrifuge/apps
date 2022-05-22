@@ -59,8 +59,9 @@ export const TrancheInput: React.FC = () => {
                         onChange={(e) => form.setFieldValue(field.name, e.target.value.toUpperCase())}
                         errorMessage={meta.touched ? meta.error : undefined}
                         label={<Tooltips type="tokenSymbol" label="Token symbol*" variant="secondary" />}
-                        placeholder="6 characters"
-                        maxLength={6}
+                        placeholder="4-12 characters"
+                        minLength={4}
+                        maxLength={12}
                       />
                     )}
                   </Field>

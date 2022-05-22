@@ -196,6 +196,7 @@ const CreatePoolForm: React.VFC = () => {
       let errors: FormikErrors<any> = {}
 
       const tokenNames = new Set<string>()
+      const commonTokenSymbolStart = values.tranches[0].symbolName.slice(0, 3)
       const tokenSymbols = new Set<string>()
       let prevInterest = Infinity
       let prevRiskBuffer = 0
@@ -209,6 +210,10 @@ const CreatePoolForm: React.VFC = () => {
           errors = setIn(errors, `tranches.${i}.symbolName`, 'Token symbols must be unique')
         }
         tokenSymbols.add(t.symbolName)
+
+        if (t.symbolName.slice(0, 3) !== commonTokenSymbolStart) {
+          errors = setIn(errors, `tranches.${i}.symbolName`, 'Token symbols must all start with the same 3 characters')
+        }
 
         if (t.interestRate !== '') {
           if (t.interestRate > prevInterest) {

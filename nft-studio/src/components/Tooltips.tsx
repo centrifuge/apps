@@ -61,7 +61,7 @@ const tooltipText = {
   },
   averageAssetMaturity: {
     label: 'Average asset maturity',
-    body: "This indicates the expected range of maturities of the pool's underlying assets, i.e. the time period after which the financing of this assets matures and will be paid back.",
+    body: "This indicates the range of maturities of the pool's underlying assets, i.e. the time period after which the financing of this assets matures and will be paid back.",
   },
   poolValue: {
     label: 'Pool value',
@@ -117,7 +117,7 @@ const tooltipText = {
   },
   tokenSymbol: {
     label: 'override',
-    body: 'Add a 6-digit token symbol that reflects the risk and tranche of the token.',
+    body: 'Add a 4 to 12 character token symbol that reflects the risk and tranche of the token. Each token symbol of the pool should start with the same 3 characters.',
   },
   minimumInvestment: {
     label: 'Minimum investment',
