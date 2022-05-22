@@ -52,9 +52,14 @@ const TokenOverview: React.FC = () => {
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
   ]
 
+  const network = import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge'
+
   return (
     <Stack gap={0} flex={1} mb="6">
-      <PageHeader subtitle="Art NFTs" title="Investment tokens" />
+      <PageHeader
+        subtitle={network === 'altair' ? 'Art NFTs' : 'Tokens of real-world assets'}
+        title="Investment tokens"
+      />
       {tokens?.length ? (
         <>
           <PageSummary data={pageSummaryData} />

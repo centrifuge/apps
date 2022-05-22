@@ -24,6 +24,7 @@ import { Tooltips } from '../../components/Tooltips'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
+import { useCurrencies } from '../../utils/useCurrencies'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { pinPoolMetadata } from './pinPoolMetadata'
 import { RiskGroupsInput } from './RiskGroupsInput'
@@ -32,26 +33,18 @@ import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
 import { WriteOffInput } from './WriteOffInput'
 
-export const CURRENCIES = [
-  {
-    label: 'AIR',
-    value: 'Native',
-  },
-  {
-    label: 'kUSD',
-    value: 'Usd',
-  },
-  {
-    label: 'pEUR',
-    value: 'PermissionedEur',
-  },
-]
 const DEFAULT_CURRENCY = 'Native'
-const ASSET_CLASSES = ['Art NFT'].map((label) => ({
+
+const network = import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge'
+const ASSET_CLASSES = (
+  network === 'altair'
+    ? ['Art NFTs']
+    : ['Consumer Credit', 'Corporate Credit', 'Commercial Real Estate', 'Residential Real Estate', 'Project Finance']
+).map((label) => ({
   label,
   value: label,
 }))
-const DEFAULT_ASSET_CLASS = 'Art NFT'
+const DEFAULT_ASSET_CLASS = network === 'altair' ? 'Art NFT' : 'Consumer Credit'
 
 export const IssuerCreatePoolPage: React.FC = () => {
   return (
@@ -174,6 +167,7 @@ const PoolIcon: React.FC<{ icon?: File | null }> = ({ children, icon }) => {
 const CreatePoolForm: React.VFC = () => {
   const address = useAddress()
   const centrifuge = useCentrifuge()
+  const currencies = useCurrencies(useAddress())
   const history = useHistory()
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
@@ -397,7 +391,7 @@ const CreatePoolForm: React.VFC = () => {
                     onBlur={field.onBlur}
                     errorMessage={meta.touched && meta.error ? meta.error : undefined}
                     value={field.value}
-                    options={CURRENCIES}
+                    options={currencies}
                     placeholder="Select..."
                   />
                 )}
@@ -410,7 +404,7 @@ const CreatePoolForm: React.VFC = () => {
                 as={NumberInput}
                 label="Initial maximum reserve*"
                 placeholder="0"
-                rightElement={CURRENCIES.find((c) => c.value === form.values.currency)?.label}
+                rightElement={currencies.find((c) => c.value === form.values.currency)?.label}
               />
             </Box>
             {/* <Box gridColumn="span 1">

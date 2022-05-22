@@ -79,16 +79,18 @@ const darkTheme: DefaultTheme = {
 }
 
 export const Root: React.VFC = () => {
-  const [isDark, setIsDark] = React.useState(!!initialFlagsState.altairDarkMode)
+  const [isForcedDark, setIsForcedDark] = React.useState(!!initialFlagsState.altairDarkMode)
+  const network = import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge'
+
   return (
     <QueryClientProvider client={queryClient}>
-      <FabricProvider theme={isDark ? darkTheme : lightTheme}>
+      <FabricProvider theme={isForcedDark || network === 'altair' ? darkTheme : lightTheme}>
         <GlobalStyle />
         <FabricGlobalStyle />
         <HostPermissionsProvider>
           <CentrifugeProvider>
             <Web3Provider>
-              <DebugFlags onChange={(state) => setIsDark(!!state.altairDarkMode)}>
+              <DebugFlags onChange={(state) => setIsForcedDark(!!state.altairDarkMode)}>
                 <TransactionProvider>
                   <TransactionToasts />
                   <Router>
