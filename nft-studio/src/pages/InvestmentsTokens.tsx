@@ -38,17 +38,17 @@ const Tokens: React.FC = () => {
       <PageSummary>
         <LabelValueStack label="Total value" value={totalValueLocked ? formatBalance(totalValueLocked, 'USD') : '0'} />
       </PageSummary>
-      {balances?.tranches.length ? (
-        <PageSection title="Tokens">
+      <PageSection title="Tokens">
+        {balances?.tranches.length ? (
           <InvestmentsList investments={balances.tranches} />
-        </PageSection>
-      ) : (
-        <Shelf justifyContent="center" textAlign="center">
-          <Text variant="heading2" color="textSecondary">
-            You have no investments yet
-          </Text>
-        </Shelf>
-      )}
+        ) : (
+          <Shelf justifyContent="center" textAlign="center">
+            <Text variant="heading2" color="textSecondary">
+              You have no investments yet
+            </Text>
+          </Shelf>
+        )}
+      </PageSection>
     </Stack>
   )
 }
