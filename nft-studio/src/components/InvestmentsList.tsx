@@ -16,15 +16,19 @@ export const InvestmentsList: React.FC<Props> = ({ investments }) => {
   const columns: Column[] = [
     {
       align: 'left',
-      header: 'Pool',
-      cell: (i: TrancheBalance) => <TokenSymbol investment={i} />,
-      flex: '1 1 100px',
+      header: 'Token',
+      cell: (i: TrancheBalance) => <Token investment={i} />,
+      flex: '1 1 300px',
     },
     {
       align: 'left',
       header: 'Asset class',
-      cell: (i: TrancheBalance) => <TrancheName investment={i} />,
+      cell: (i: TrancheBalance) => <AssetClass investment={i} />,
       flex: '2 1 250px',
+    },
+    {
+      header: 'Token balance',
+      cell: (i: TrancheBalance) => <TokenBalance investment={i} />,
     },
     {
       header: 'Value',
@@ -41,30 +45,37 @@ export const InvestmentsList: React.FC<Props> = ({ investments }) => {
       data={investments}
       columns={columns}
       onRowClicked={(i: TrancheBalance) => {
-        history.push(`/investments/tokens/${i.poolId}/${i.trancheId}`)
+        history.push(`/tokens/${i.poolId}/${i.trancheId}`)
       }}
     />
   )
 }
 
-const TokenSymbol: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
+const Token: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
   return (
     <Text variant="body2" fontWeight={600}>
-      {trancheMeta?.symbol}
+      {metadata?.pool?.name} {trancheMeta?.name}
     </Text>
   )
 }
 
-const TrancheName: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
+const AssetClass: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
+  const pool = usePool(investment.poolId)
+  const { data: metadata } = usePoolMetadata(pool)
+  return <Text variant="body2">{metadata?.pool?.asset.class}</Text>
+}
+
+const TokenBalance: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
-  return <Text variant="body2">{trancheMeta?.name}</Text>
+
+  return <Text variant="body2">{formatBalance(investment.balance.toFloat(), trancheMeta?.symbol)}</Text>
 }
 
 const TokenValue: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
