@@ -27,7 +27,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
       subtitle={
         <TextWithPlaceholder isLoading={isLoading}>by {metadata?.pool?.issuer.name ?? 'Unknown'}</TextWithPlaceholder>
       }
-      parent={{ to: '/pools', label: 'Pools' }}
+      parent={{ to: '/tokens', label: 'Investments' }}
       icon={
         metadata?.pool?.icon ? (
           <Box as="img" width="iconLarge" height="iconLarge" src={parseMetadataUrl(metadata?.pool?.icon)} />
