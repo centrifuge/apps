@@ -46,13 +46,13 @@ const TokenOverview: React.FC = () => {
     [tokens]
   )
 
+  const network = import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge'
+
   const pageSummaryData = [
     // TODO: sort out currency for TVL (kUSD vs AIR vs ...), assuming everything uses the same currency
-    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, tokens[0]?.currency) },
+    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, network === 'altair' ? 'AIR' : 'USD') },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
   ]
-
-  const network = import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge'
 
   return (
     <Stack gap={0} flex={1} mb="6">
