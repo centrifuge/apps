@@ -104,7 +104,7 @@ export const RiskGroupList: React.FC = () => {
     return metadata?.riskGroups?.map((group) => {
       const loansByRiskGroup = loans?.filter((loan) => {
         return (
-          loan.loanInfo.type === 'BulletLoan' &&
+          loan.loanInfo.type !== 'CreditLine' &&
           // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
           loan.loanInfo?.lossGivenDefault.toString() === group?.lossGivenDefault &&
           loan.loanInfo?.probabilityOfDefault.toString() === group?.probabilityOfDefault &&
