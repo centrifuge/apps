@@ -23,7 +23,7 @@ export const ExecutiveSummaryDialog: React.FC<{
           </Stack>
           <Box alignSelf="flex-end">
             <UnstyledLink href={href} download onClick={onClose} target="_blank">
-              <Button variant="secondary">View executive summary</Button>
+              <Button variant="primary">View executive summary</Button>
             </UnstyledLink>
           </Box>
         </Stack>
