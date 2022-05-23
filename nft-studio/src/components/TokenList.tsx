@@ -43,13 +43,13 @@ const columns: Column[] = [
   {
     header: () => <SortableTableHeader label="Yield" />,
     cell: (token: TokenTableData) => <Yield token={token} />,
-    flex: '3',
+    flex: '4',
     sortKey: 'yield',
   },
   {
     header: () => <SortableTableHeader label="Protection" />,
     cell: (token: TokenTableData) => <Protection token={token} />,
-    flex: '3',
+    flex: '4',
     sortKey: 'protection',
   },
   {
