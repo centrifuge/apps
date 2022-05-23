@@ -28,7 +28,7 @@ export class Balance extends BNSubType {
     return Balance._fromFloat<Balance>(number)
   }
   div(denominator: Balance) {
-    return new Perquintill(this.mul(new BN(10).pow(new BN(Balance.decimals))).div(other))
+    return new Perquintill(this.mul(new BN(10).pow(new BN(Balance.decimals))).div(denominator))
   }
 }
 
