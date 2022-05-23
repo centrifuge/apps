@@ -50,15 +50,15 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
               {...tooltipElementProps}
               {...positionProps}
               ref={overlayRef}
-              backgroundColor="textPrimary"
+              backgroundColor="backgroundInverted"
               p={1}
               borderRadius="tooltip"
               width={220}
             >
-              <Text variant="label2" color="backgroundPrimary">
+              <Text variant="label2" color="textInverted">
                 {title}
               </Text>
-              <Text variant="body3" color="backgroundPrimary">
+              <Text variant="body3" color="textInverted">
                 {body}
               </Text>
             </Stack>

@@ -24,7 +24,7 @@ const tooltipText = {
     body: 'Risk group set by the issuer for the asset indicating the likelihood of a default. To learn more read about the issuers risk groupings here...',
   },
   assetClass: {
-    label: 'Asset Class',
+    label: 'Asset class',
     body: 'Assets can be grouped into classes that exhibit similar characteristics in terms of maturity, volume, type of financing, underlying collateral and/or risk return profile.',
   },
   apy: {
@@ -61,7 +61,7 @@ const tooltipText = {
   },
   averageAssetMaturity: {
     label: 'Average asset maturity',
-    body: "This indicates the expected range of maturities of the pool's underlying assets, i.e. the time period after which the financing of this assets matures and will be paid back.",
+    body: "This indicates the range of maturities of the pool's underlying assets, i.e. the time period after which the financing of this assets matures and will be paid back.",
   },
   poolValue: {
     label: 'Pool value',
@@ -117,7 +117,7 @@ const tooltipText = {
   },
   tokenSymbol: {
     label: 'override',
-    body: 'Add a 6-digit token symbol that reflects the risk and tranche of the token.',
+    body: 'Add a 4 to 12 character token symbol that reflects the risk and tranche of the token. Each token symbol of the pool should start with the same 3 characters.',
   },
   minimumInvestment: {
     label: 'Minimum investment',
@@ -157,7 +157,7 @@ const tooltipText = {
   },
   maxReserve: {
     label: 'Max. reserve',
-    body: 'Unicorns glow in the dark',
+    body: 'No investments will be accepted if the current reserve is larger than the max reserve amount.',
   },
 }
 

@@ -1,16 +1,19 @@
 import { Box, Button, Grid, IconMinusCircle, NumberInput, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import React from 'react'
-import { createEmptyTranche, CURRENCIES, PoolFormValues } from '.'
+import { createEmptyTranche, PoolFormValues } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
+import { useAddress } from '../../utils/useAddress'
+import { useCurrencies } from '../../utils/useCurrencies'
 import { validate } from './validate'
 
 const MAX_TRANCHES = 5
 
 export const TrancheInput: React.FC = () => {
   const fmk = useFormikContext<PoolFormValues>()
+  const currencies = useCurrencies(useAddress())
   const { values } = fmk
 
   const juniorTrancheIndex = 0 // the first tranche is the most junior in the UI
@@ -56,8 +59,9 @@ export const TrancheInput: React.FC = () => {
                         onChange={(e) => form.setFieldValue(field.name, e.target.value.toUpperCase())}
                         errorMessage={meta.touched ? meta.error : undefined}
                         label={<Tooltips type="tokenSymbol" label="Token symbol*" variant="secondary" />}
-                        placeholder="6 characters"
-                        maxLength={6}
+                        placeholder="4-12 characters"
+                        minLength={4}
+                        maxLength={12}
                       />
                     )}
                   </Field>
@@ -67,7 +71,7 @@ export const TrancheInput: React.FC = () => {
                     placeholder="0.00"
                     name={`tranches.${index}.minInvestment`}
                     validate={validate.minInvestment}
-                    rightElement={CURRENCIES.find((c) => c.value === values.currency)?.label}
+                    rightElement={currencies.find((c) => c.value === values.currency)?.label}
                   />
                   {index === juniorTrancheIndex ? (
                     <>

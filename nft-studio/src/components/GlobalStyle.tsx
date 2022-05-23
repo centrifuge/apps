@@ -1,7 +1,6 @@
 import { createGlobalStyle } from 'styled-components'
 
 export const GlobalStyle = createGlobalStyle`
-
 	html, body, #root, #root>div[data-overlay-container] {
 		height: 100vh;
 	}
@@ -9,8 +8,11 @@ export const GlobalStyle = createGlobalStyle`
 		margin: 0;
 		padding: 0;
 	}
-
+	
 	img {
 		max-width: 100%;
+	}
+	button {
+		text-align: left;
 	}
 `

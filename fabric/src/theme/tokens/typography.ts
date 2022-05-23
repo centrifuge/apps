@@ -47,10 +47,10 @@ const typography: ThemeTypography = {
     color: 'textPrimary',
   },
   interactive2: {
-    fontSize: 14,
+    fontSize: 12,
     lineHeight: 1.375,
     fontWeight: 500,
-    color: 'textSecondary',
+    color: 'textPrimary',
   },
   body1: {
     fontSize: 16,

@@ -22,7 +22,7 @@ type IconProps = {
 }
 
 export type VisualButtonProps = React.PropsWithChildren<{
-  variant?: 'primary' | 'secondary' | 'tertiary'
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'wallet'
   small?: boolean
   icon?: React.ComponentType<IconProps> | React.ReactElement
   iconRight?: React.ComponentType<IconProps> | React.ReactElement
@@ -33,29 +33,46 @@ export type VisualButtonProps = React.PropsWithChildren<{
 }>
 
 type StyledProps = {
-  $variant: 'primary' | 'secondary' | 'tertiary'
+  $variant: 'primary' | 'secondary' | 'tertiary' | 'wallet'
   $iconOnly?: boolean
   $small?: boolean
   $disabled?: boolean
   $active?: boolean
+  $loading?: boolean
 }
+
+const LoadingContent = styled(Shelf)`
+  pointer-events: none;
+`
+const DefaultContent = styled(Shelf)`
+  width: 100%;
+`
 
 export const StyledButton = styled.span<StyledProps>(
   {
-    display: 'flex',
+    position: 'relative',
+    display: 'grid',
     alignItems: 'center',
-    justifyContent: 'center',
+    gridTemplateColumns: '100%',
+    gridTemplateRows: 'auto',
+    gridTemplateAreas: "'unit'",
     cursor: 'pointer',
     borderRadius: 40,
     transitionProperty: 'color, background-color, border-color, box-shadow',
-    transitionDuration: '100ms',
+    transitionDuration: '150ms',
     transitionTimingFunction: 'ease-in-out',
     borderStyle: 'solid',
     userSelect: 'none',
+
+    [`${LoadingContent}, ${DefaultContent}`]: {
+      gridArea: 'unit',
+      justifySelf: 'center',
+    },
   },
-  ({ $variant, $disabled, $small, $active, $iconOnly, theme }) => {
+  ({ $variant, $disabled, $small, $active, $iconOnly, $loading, theme }) => {
     const isTertiaryIcon = $variant === 'tertiary' && $iconOnly
-    const variantToken = $variant[0].toUpperCase().concat($variant.slice(1))
+    const variant = $variant === 'wallet' ? 'secondary' : $variant
+    const variantToken = variant[0].toUpperCase().concat(variant.slice(1))
     const bg = `backgroundButton${variantToken}`
     const bgFocus = `backgroundButton${variantToken}Focus`
     const bgHover = `backgroundButton${variantToken}Hover`
@@ -74,26 +91,27 @@ export const StyledButton = styled.span<StyledProps>(
     const shadow = `shadowButton${variantToken}Pressed`
 
     return css({
-      color: $disabled ? fgDisabled : $active ? fgHover : fg,
-      backgroundColor: $disabled ? bgDisabled : $active && !isTertiaryIcon ? bgHover : bg,
-      borderColor: $disabled ? borderDisabled : $active ? borderHover : border,
+      color: $disabled ? fgDisabled : $active ? fgPressed : fg,
+      backgroundColor: $disabled ? bgDisabled : $active && !isTertiaryIcon ? bgPressed : bg,
+      borderColor: $disabled ? borderDisabled : $active ? borderPressed : border,
       borderWidth: 1,
       pointerEvents: $disabled ? 'none' : 'initial',
       minHeight: $small ? 32 : 40,
       '--fabric-color-focus': theme.colors[shadow],
-      boxShadow: $active && $variant === 'secondary' ? 'buttonActive' : 'none',
+      boxShadow:
+        $active && variant === 'secondary' ? 'buttonActive' : $variant === 'wallet' ? 'cardInteractive' : 'none',
 
       '&:hover': {
         color: fgHover,
         backgroundColor: isTertiaryIcon ? undefined : bgHover,
         borderColor: isTertiaryIcon ? undefined : borderHover,
-        boxShadow: $variant === 'secondary' ? 'buttonActive' : 'none',
+        boxShadow: variant === 'secondary' ? 'buttonActive' : 'none',
       },
       '&:active': {
         color: fgPressed,
         backgroundColor: isTertiaryIcon ? undefined : bgPressed,
         borderColor: isTertiaryIcon ? undefined : borderPressed,
-        boxShadow: $variant !== 'tertiary' ? 'buttonActive' : 'none',
+        boxShadow: variant !== 'tertiary' ? 'buttonActive' : 'none',
       },
 
       'a:focus-visible &, button:focus-visible &': {
@@ -101,43 +119,16 @@ export const StyledButton = styled.span<StyledProps>(
         backgroundColor: isTertiaryIcon ? undefined : bgFocus,
         borderColor: borderFocus,
       },
+
+      '& > :last-child': {
+        opacity: $loading ? 1 : 0,
+      },
+      '& > :first-child': {
+        opacity: $loading ? 0 : 1,
+      },
     })
   }
 )
-
-const LoadingContent = styled(Shelf)`
-  pointer-events: none;
-`
-const DefaultContent = styled(Shelf)``
-
-const LoadingWrapper = styled.span<{ $loading?: boolean }>`
-  position: relative;
-  display: grid;
-  align-items: center;
-  grid-template-columns: 100%;
-  grid-template-rows: auto;
-  grid-template-areas: 'unit';
-
-  ${LoadingContent}, ${DefaultContent} {
-    grid-area: unit;
-    justify-self: center;
-  }
-
-  > :last-child {
-    opacity: 0;
-  }
-
-  ${(props) =>
-    props.$loading &&
-    `
-    > :first-child {
-      opacity: 0;
-    }
-    > :last-child {
-      opacity: 1;
-    }
-  `}
-`
 
 const Spinner = styled(IconSpinner)`
   animation: ${rotate} 600ms linear infinite;
@@ -155,30 +146,52 @@ export const VisualButton: React.FC<VisualButtonProps> = ({
   active,
 }) => {
   const isTertiaryIcon = variant === 'tertiary' && !children
-  const px = isTertiaryIcon ? 1 : variant === 'tertiary' || small ? 2 : 3
+  const isWallet = variant === 'wallet'
+  const px = isWallet ? '12px' : isTertiaryIcon ? 1 : variant === 'tertiary' || small ? 2 : 3
   const iconSize = isTertiaryIcon && !small ? 'iconMedium' : 'iconSmall'
 
   return (
-    <StyledButton $variant={variant} $disabled={disabled} $small={small} $active={active} $iconOnly={!children}>
-      <LoadingWrapper $loading={loading}>
-        <DefaultContent gap={1} px={px} py={small ? '5px' : '8px'} position="relative">
-          {IconComp && <Flex bleedY="5px">{isComponent(IconComp) ? <IconComp size={iconSize} /> : IconComp}</Flex>}
-          {children && (
-            <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
-              {children}
-            </Text>
-          )}
-          {IconRightComp && (isComponent(IconRightComp) ? <IconRightComp size="iconSmall" /> : IconRightComp)}
-        </DefaultContent>
-        <LoadingContent px={px} gap={1} justifyContent="center">
-          <Spinner size={small ? 'iconSmall' : 'iconMedium'} />
-          {loadingMessage && (
-            <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
-              {loadingMessage}
-            </Text>
-          )}
-        </LoadingContent>
-      </LoadingWrapper>
+    <StyledButton
+      $variant={variant}
+      $disabled={disabled}
+      $small={small}
+      $active={active}
+      $iconOnly={!children}
+      $loading={loading}
+    >
+      <DefaultContent
+        gap={1}
+        px={px}
+        py={small ? '5px' : '7px'}
+        position="relative"
+        justifyContent={isWallet ? 'start' : 'center'}
+      >
+        {IconComp && (
+          <Flex bleedY="8px" ml={isWallet ? '-4px' : undefined}>
+            {isComponent(IconComp) ? <IconComp size={iconSize} /> : IconComp}
+          </Flex>
+        )}
+        {isWallet ? (
+          children
+        ) : (
+          <>
+            {children && (
+              <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
+                {children}
+              </Text>
+            )}
+          </>
+        )}
+        {IconRightComp && (isComponent(IconRightComp) ? <IconRightComp size="iconSmall" /> : IconRightComp)}
+      </DefaultContent>
+      <LoadingContent px={px} gap={1} justifyContent="center">
+        <Spinner size={small ? 'iconSmall' : 'iconMedium'} />
+        {loadingMessage && (
+          <Text fontSize={small ? 14 : 16} color="inherit" fontWeight={500}>
+            {loadingMessage}
+          </Text>
+        )}
+      </LoadingContent>
     </StyledButton>
   )
 }

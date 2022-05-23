@@ -21,16 +21,21 @@ export function formatBalance(amount: Balance | Decimal | number, currency?: str
   return currency ? `${formattedAmount} ${getCurrencySymbol(currency)}` : formattedAmount
 }
 
-export function formatBalanceAbbreviated(amount: Balance | Decimal | number, currency?: string, precise = false) {
+export function formatBalanceAbbreviated(
+  amount: Balance | Decimal | number,
+  currency?: string,
+  precise = false,
+  decimals = 1
+) {
   const amountNumber =
     amount instanceof Balance ? amount.toFloat() : amount instanceof Decimal ? amount.toNumber() : amount
   let formattedAmount = ''
   if (amountNumber > 999 && amountNumber < 1e6) {
-    formattedAmount = `${(amountNumber / 1e3).toFixed(1)}K`
+    formattedAmount = `${(amountNumber / 1e3).toFixed(decimals)}K`
   } else if (amountNumber > 1e6) {
-    formattedAmount = `${(amountNumber / 1e6).toFixed(1)}M`
+    formattedAmount = `${(amountNumber / 1e6).toFixed(decimals)}M`
   } else if (amountNumber <= 999) {
-    formattedAmount = String(amountNumber)
+    formattedAmount = `${amountNumber.toFixed(decimals)}`
   }
   return currency ? `${formattedAmount} ${getCurrencySymbol(currency)}` : formattedAmount
 }
