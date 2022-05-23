@@ -180,8 +180,8 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 disabled={isRepayLoading || isRepayAllLoading}
                 secondaryLabel={
                   pool && balance && loan.outstandingDebt.gt(Balance.fromFloat(balance))
-                    ? `${formatBalance(loan.outstandingDebt, pool?.currency)} outstanding`
-                    : `${formatBalance(balance, pool?.currency)} balance`
+                    ? `${formatBalance(balance, pool?.currency)} balance`
+                    : `${formatBalance(loan.outstandingDebt, pool?.currency)} outstanding`
                 }
               />
               <Stack gap={1} px={1}>
