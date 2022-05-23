@@ -188,11 +188,10 @@ export type Tranche = {
   index: number
   id: string
   seniority: number
-  debt: Balance
-  reserve: Balance
+  balance: Balance
   minRiskBuffer: Perquintill | null
+  currentRiskBuffer: Perquintill
   interestRatePerSec: Rate | null
-  ratio: Perquintill
   outstandingInvestOrders: Balance
   outstandingRedeemOrders: Balance
   lastUpdatedInterest: string
@@ -411,6 +410,18 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.pools.setMaxReserve(poolId, maxReserve.toString())
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function setMetadata(args: [poolId: string, metadata: string], options?: TransactionOptions) {
+    const [poolId, metadata] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.pools.setMetadata(poolId, metadata)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -786,15 +797,32 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 minRiskBuffer = new Perquintill(hexToBN(tranche.trancheType.nonResidual.minRiskBuffer))
                 interestRatePerSec = new Rate(hexToBN(tranche.trancheType.nonResidual.interestRatePerSec))
               }
+
+              const subordinateTranchesValue = pool.tranches.tranches
+                .slice()
+                .reverse()
+                .slice(index + 1)
+                .reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                  return new Balance(
+                    prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                  )
+                }, new Balance(0))
+              const poolValue = pool.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                return new Balance(
+                  prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                )
+              }, new Balance(0))
+
               return {
                 index,
                 id: pool.tranches.ids[index],
                 seniority: tranche.seniority,
-                debt: new Balance(hexToBN(tranche.debt)),
-                reserve: new Balance(hexToBN(tranche.reserve)),
+                balance: new Balance(new Balance(hexToBN(tranche.debt)).add(new Balance(hexToBN(tranche.reserve)))),
                 minRiskBuffer,
+                currentRiskBuffer: subordinateTranchesValue.gtn(0)
+                  ? subordinateTranchesValue.div(poolValue)
+                  : new Perquintill(0),
                 interestRatePerSec,
-                ratio: new Perquintill(hexToBN(tranche.ratio)),
                 outstandingInvestOrders: new Balance(hexToBN(tranche.outstandingInvestOrders)),
                 outstandingRedeemOrders: new Balance(hexToBN(tranche.outstandingRedeemOrders)),
                 lastUpdatedInterest: new Date(tranche.lastUpdatedInterest * 1000).toISOString(),
@@ -875,6 +903,19 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 interestRatePerSec = new Rate(hexToBN(tranche.trancheType.nonResidual.interestRatePerSec))
               }
 
+              const subordinateTranchesValue = pool!.data?.tranches.tranches
+                .slice(0, trancheIndex)
+                .reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                  return new Balance(
+                    prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                  )
+                }, new Balance(0))
+              const poolValue = pool!.data?.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                return new Balance(
+                  prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                )
+              }, new Balance(0))
+
               return {
                 id: trancheId,
                 index: trancheIndex,
@@ -886,6 +927,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 poolMetadata: (pool!.metadata ?? undefined) as string | undefined,
                 interestRatePerSec,
                 minRiskBuffer,
+                currentRiskBuffer: subordinateTranchesValue.gtn(0)
+                  ? subordinateTranchesValue.div(poolValue)
+                  : new Perquintill(0),
                 ratio: new Perquintill(hexToBN(tranche.ratio)),
               }
             })
@@ -946,15 +990,32 @@ export function getPoolsModule(inst: CentrifugeBase) {
                       minRiskBuffer = new Perquintill(hexToBN(tranche.trancheType.nonResidual.minRiskBuffer))
                       interestRatePerSec = new Rate(hexToBN(tranche.trancheType.nonResidual.interestRatePerSec))
                     }
+
+                    const subordinateTranchesValue = pool.tranches.tranches
+                      .slice(0, index)
+                      .reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                        return new Balance(
+                          prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                        )
+                      }, new Balance(0))
+                    const poolValue = pool.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                      return new Balance(
+                        prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                      )
+                    }, new Balance(0))
+
                     return {
                       index,
                       id: pool.tranches.ids[index],
                       seniority: tranche.seniority,
-                      debt: new Balance(hexToBN(tranche.debt)),
-                      reserve: new Balance(hexToBN(tranche.reserve)),
+                      balance: new Balance(
+                        new Balance(hexToBN(tranche.debt)).add(new Balance(hexToBN(tranche.reserve)))
+                      ),
                       minRiskBuffer,
+                      currentRiskBuffer: subordinateTranchesValue.gtn(0)
+                        ? subordinateTranchesValue.div(poolValue)
+                        : new Perquintill(0),
                       interestRatePerSec,
-                      ratio: new Perquintill(hexToBN(tranche.ratio)),
                       outstandingInvestOrders: new Balance(hexToBN(tranche.outstandingInvestOrders)),
                       outstandingRedeemOrders: new Balance(hexToBN(tranche.outstandingRedeemOrders)),
                       lastUpdatedInterest: new Date(tranche.lastUpdatedInterest * 1000).toISOString(),
@@ -1359,6 +1420,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     createPool,
     updatePool,
     setMaxReserve,
+    setMetadata,
     updateInvestOrder,
     updateRedeemOrder,
     collect,

@@ -38,7 +38,7 @@ const columns: Column[] = [
     align: 'left',
     header: 'Asset class',
     cell: (token: TokenTableData) => <AssetClass token={token} />,
-    flex: '4',
+    flex: '6',
   },
   {
     header: () => <SortableTableHeader label="Yield" />,

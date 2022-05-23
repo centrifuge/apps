@@ -123,8 +123,11 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 name="amount"
                 validate={combine(
                   positiveNumber(),
-                  max(ceiling.toNumber(), 'amount exceeds available financing'),
-                  max(maxBorrow.toNumber(), `amount exceeds pool reserve (${formatBalance(maxBorrow, pool?.currency)})`)
+                  max(ceiling.toNumber(), 'Amount exceeds available financing'),
+                  max(
+                    maxBorrow.toNumber(),
+                    `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency)})`
+                  )
                 )}
               >
                 {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
@@ -167,15 +170,19 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
               <FieldWithErrorMessage
                 validate={combine(
                   positiveNumber(),
-                  max(balance.toNumber(), 'amount exceeds balance'),
-                  max(debt.toNumber(), 'amount exceeds debt')
+                  max(balance.toNumber(), 'Amount exceeds balance'),
+                  max(debt.toNumber(), 'Amount exceeds outstanding')
                 )}
                 as={CurrencyInput}
                 name="amount"
                 label="Amount"
                 min="0"
                 disabled={isRepayLoading || isRepayAllLoading}
-                secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency)} balance`}
+                secondaryLabel={
+                  pool && balance && loan.outstandingDebt.gt(new Balance(balance.toString()))
+                    ? `${formatBalance(loan.outstandingDebt, pool?.currency)} outstanding`
+                    : `${formatBalance(balance, pool?.currency)} balance`
+                }
               />
               <Stack gap={1} px={1}>
                 <Button type="submit" disabled={isRepayAllLoading} loading={isRepayLoading}>

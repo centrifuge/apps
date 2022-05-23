@@ -80,7 +80,7 @@ const Pool: React.FC = () => {
     <Stack gap={5} flex={1}>
       <PageHeader
         title={metadata?.pool?.name ?? ''}
-        parent={{ to: '/pools', label: 'Pools' }}
+        parent={{ to: '/tokens', label: 'Investments' }}
         subtitle={metadata?.pool?.asset?.class}
         actions={
           <>
@@ -132,7 +132,7 @@ const Pool: React.FC = () => {
                               <Text color="textSecondary">
                                 Min. {formatPercentage(tranche.minRiskBuffer.toPercent())}
                               </Text>{' '}
-                              {formatPercentage(tranche.ratio.toPercent())}
+                              {formatPercentage(tranche.currentRiskBuffer.toPercent())}
                             </>
                           ),
                         },

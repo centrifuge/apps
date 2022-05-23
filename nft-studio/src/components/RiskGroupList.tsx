@@ -180,7 +180,7 @@ export const RiskGroupList: React.FC = () => {
     return {
       share: (
         <Text variant="body2" fontWeight={600}>
-          {totalSharesSum}%
+          {totalSharesSum}
         </Text>
       ),
       amount: (

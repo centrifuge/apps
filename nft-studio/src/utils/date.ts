@@ -18,21 +18,21 @@ export function daysBetween(from: number | string | Date, to: number | string | 
   return Math.floor((toMs - fromMs) / (60 * 60 * 24 * 1000))
 }
 
-export const formatAge = (ageInDays: number) => {
+export const formatAge = (ageInDays: number, decimals: number = 1) => {
   if (ageInDays > 90) {
-    return `${Math.round(((ageInDays || 0) / (365 / 12)) * 10) / 10} months`
+    return `${((ageInDays || 0) / (365 / 12)).toFixed(decimals)} months`
   } else if (ageInDays > 365) {
-    return `${Math.round(((ageInDays || 0) / 365) * 10) / 10} years`
+    return `${((ageInDays || 0) / 365).toFixed(decimals)} years`
   } else if (ageInDays < 0) {
     return '0 days'
   }
-  return `${Math.round((ageInDays || 0) * 10) / 10} days`
+  return `${ageInDays.toFixed(decimals)} days`
 }
 
 export const getAge = (createdAt: string | undefined | null) => {
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
-  return formatAge(daysBetween(createdAt || today, today))
+  return formatAge(daysBetween(createdAt || today, today), 0)
 }
 
 export function getEpochHoursRemaining(pool: DetailedPool) {
