@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Box, IconInvestments, IconNft, IconPieChart, IconUser, Shelf } from '@centrifuge/fabric'
+import { Box, IconInvestments, IconNft, IconPieChart, IconPools, IconUser, Shelf } from '@centrifuge/fabric'
 import React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
@@ -42,7 +42,8 @@ export const Menu: React.FC<Props> = () => {
         justifyContent="space-evenly"
         px={[2, 2, 0]}
       >
-        <NavigationItem label="Investments" href="/tokens" icon={<IconInvestments size="16px" />} />
+        <NavigationItem label="Tokens" href="/tokens" icon={<IconInvestments size="16px" />} />
+        <NavigationItem label="Pools" href="/pools" icon={<IconPools size="16px" />} />
         <NavigationItem label="NFTs" href="/nfts" icon={<IconNft size="16px" />} />
         <NavigationItem label="Portfolio" href="/investments/portfolio" icon={<IconPieChart size="16px" />} />
         {pools.length > 0 && (
