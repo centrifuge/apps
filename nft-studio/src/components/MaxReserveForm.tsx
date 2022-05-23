@@ -19,7 +19,8 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
 
   const { execute: setMaxReserveTx, isLoading } = useCentrifugeTransaction(
     'Set max reserve',
-    (cent) => cent.pools.setMaxReserve
+    (cent) => cent.pools.setMaxReserve,
+    { onSuccess: () => form.resetForm() }
   )
 
   const form = useFormik<{ maxReserve: number }>({
@@ -29,7 +30,6 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
     onSubmit: (values, actions) => {
       setMaxReserveTx([poolId, Balance.fromFloat(values.maxReserve)])
       actions.setSubmitting(false)
-      values.maxReserve = 0
     },
   })
 
