@@ -87,7 +87,7 @@ export const PoolDetailLiquidity: React.FC<{
           <Shelf gap="1">
             <Tooltips type="epochTimeRemaining" label={`${getEpochHoursRemaining(pool!)} hrs remaining`} />
             <Button small variant="secondary" onClick={closeEpoch} disabled={!pool}>
-              Execute
+              Close
             </Button>
           </Shelf>
         }

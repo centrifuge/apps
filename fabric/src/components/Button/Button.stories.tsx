@@ -4,6 +4,7 @@ import { AnchorButton as AnchorButtonComp, Button as ButtonComp } from '.'
 import { IconChevronDown, IconClock } from '../../icon'
 import { Grid } from '../Grid'
 import { Shelf } from '../Shelf'
+import { WalletButton as WalletButtonComp } from './WalletButton'
 
 export default {
   title: 'Components/Button',
@@ -12,6 +13,7 @@ export default {
 
 type ButtonStory = ComponentStory<typeof ButtonComp>
 type AnchorButtonStory = ComponentStory<typeof AnchorButtonComp>
+type WalletButtonStory = ComponentStory<typeof WalletButtonComp>
 
 const Template: ButtonStory = (args): React.ReactElement => (
   <Grid columns={5} gap={3} justifyItems="start" maxWidth={800} equalColumns>
@@ -61,4 +63,22 @@ AnchorButton.args = {
   loading: false,
   active: false,
   href: 'https://centrifuge.io',
+}
+
+export const WalletButton: WalletButtonStory = (args) => (
+  <Grid columns={3} gap={3} justifyItems="stretch" equalColumns>
+    <WalletButtonComp {...args} />
+    <WalletButtonComp {...args} address="kAMx1vYzEvumnpGcd6a5JL6RPE2oerbr6pZszKPFPZby2gLLF" balance="100 kUSD" />
+    <WalletButtonComp
+      {...args}
+      address="kAMx1vYzEvumnpGcd6a5JL6RPE2oerbr6pZszKPFPZby2gLLF"
+      alias="Alice"
+      balance="100 kUSD"
+    />
+  </Grid>
+)
+WalletButton.args = {
+  disabled: false,
+  loading: false,
+  active: false,
 }

@@ -1,4 +1,4 @@
-import { Box, Shelf } from '@centrifuge/fabric'
+import { Box, Stack } from '@centrifuge/fabric'
 import React from 'react'
 import { useTheme } from 'styled-components'
 import { AccountsMenu } from './AccountsMenu'
@@ -45,9 +45,9 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
       {sidebar && (
         <Box gridArea="sidebar" as="aside" zIndex="sticky">
           <Box position="sticky" top={0} p={[0, 0, 3]}>
-            <Shelf justifyContent="center" pb={3}>
+            <Stack pb={3} px={8}>
               <AccountsMenu />
-            </Shelf>
+            </Stack>
             <LoadBoundary>{sidebar}</LoadBoundary>
           </Box>
         </Box>

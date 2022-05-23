@@ -1,7 +1,9 @@
 import { isWeb3Injected, web3AccountsSubscribe, web3Enable, web3EnablePromise } from '@polkadot/extension-dapp'
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types'
 import * as React from 'react'
-import { useCentrifugeQuery } from '../utils/useCentrifugeQuery'
+import { useQuery } from 'react-query'
+import { firstValueFrom } from 'rxjs'
+import { useCentrifuge } from './CentrifugeProvider'
 
 const KUSAMA_GENESIS_HASH = '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe'
 
@@ -19,7 +21,7 @@ type Web3ContextType = {
   selectAccount: (address: string) => void
   selectProxy: (address: string | null) => void
   proxy: Proxy | null
-  proxies: Proxy[] | undefined
+  proxies: Record<string, Proxy[]> | undefined
 }
 
 const Web3Context = React.createContext<Web3ContextType>(null as any)
@@ -38,18 +40,23 @@ export const Web3Provider: React.FC = ({ children }) => {
   const [proxyAddress, setProxyAddress] = React.useState<string | null>(null)
   const [isConnecting, setIsConnecting] = React.useState(false)
   const unsubscribeRef = React.useRef<(() => void) | null>()
-  const [proxies] = useCentrifugeQuery(
-    ['proxies', selectedAccountAddress],
-    (cent) => cent.proxies.getUserProxies([selectedAccountAddress!]),
+  const cent = useCentrifuge()
+  const { data: proxies } = useQuery(
+    ['proxies', accounts?.map((acc) => acc.address)],
+    () => firstValueFrom(cent.proxies.getMultiUserProxies([accounts!.map((acc) => acc.address)])),
     {
-      enabled: !!selectedAccountAddress,
+      enabled: !!accounts?.length,
+      staleTime: Infinity,
     }
   )
 
   function setFilteredAccounts(accounts: Account[]) {
-    const kusamaAccounts = accounts.filter(
-      (account) => !account.meta.genesisHash || account.meta.genesisHash === KUSAMA_GENESIS_HASH
-    )
+    const kusamaAccounts = accounts
+      .filter((account) => !account.meta.genesisHash || account.meta.genesisHash === KUSAMA_GENESIS_HASH)
+      .map((acc) => ({
+        ...acc,
+        address: cent.utils.formatAddress(acc.address),
+      }))
 
     setAccounts(kusamaAccounts)
     const persistedAddress = localStorage.getItem('web3PersistedAddress')
@@ -99,6 +106,7 @@ export const Web3Provider: React.FC = ({ children }) => {
     } finally {
       setIsConnecting(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const selectAccount = React.useCallback((address: string) => {
@@ -132,7 +140,10 @@ export const Web3Provider: React.FC = ({ children }) => {
       disconnect,
       selectAccount,
       selectProxy: setProxyAddress,
-      proxy: proxyAddress ? proxies?.find((p) => p.delegator === proxyAddress) ?? null : null,
+      proxy:
+        selectedAccountAddress && proxyAddress && proxies
+          ? proxies[selectedAccountAddress]?.find((p) => p.delegator === proxyAddress) ?? null
+          : null,
       proxies,
     }),
     [accounts, isConnecting, connect, disconnect, selectAccount, selectedAccountAddress, proxyAddress, proxies]
