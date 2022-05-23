@@ -17,6 +17,7 @@ const darkColors = {
   backgroundPage: 'black',
   backgroundInput: grayScale[950],
   backgroundThumbnail: grayScale[400],
+  backgroundInverted: grayScale[50],
 
   borderPrimary: grayScale[700],
   borderSecondary: grayScale[800],

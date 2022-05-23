@@ -24,3 +24,17 @@ export function useCanBorrow(poolId: string, assetId: string) {
 
   return !!canBorrow
 }
+
+export function useIsPoolAdmin(poolId: string) {
+  const address = useAddress()
+  const permissions = usePermissions(address)
+
+  return !!(address && permissions?.pools[poolId]?.roles.includes('PoolAdmin'))
+}
+
+export function useLiquidityAdmin(poolId: string) {
+  const address = useAddress()
+  const permissions = usePermissions(address)
+
+  return !!(address && permissions?.pools[poolId]?.roles.includes('LiquidityAdmin'))
+}

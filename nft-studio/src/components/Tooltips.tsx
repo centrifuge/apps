@@ -157,7 +157,7 @@ const tooltipText = {
   },
   maxReserve: {
     label: 'Max. reserve',
-    body: 'Unicorns glow in the dark',
+    body: 'No investments will be accepted if the current reserve is larger than the max reserve amount.',
   },
 }
 
