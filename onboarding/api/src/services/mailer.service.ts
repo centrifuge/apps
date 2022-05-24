@@ -32,7 +32,7 @@ export class MailerService {
       ],
       from: {
         name: pool.profile?.issuer?.name,
-        email: `issuer+${issuerName}@centrifuge.io`,
+        email: `issuer+${pool.metadata?.slug}@centrifuge.io`,
       },
       template_id: config.sendgrid.whitelistEmailTemplate,
     }
@@ -121,7 +121,7 @@ export class MailerService {
     }
   }
 
-  async sendAgreementVoidedEmail(user: User, pool: any, data: any, status: string) {
+  async sendAgreementVoidedEmail(user: User, pool: any, tranche: string, status: string) {
     this.logger.log('Sending agreement voided/declined email')
     let templateId
     if (status === 'declined') {
@@ -141,15 +141,18 @@ export class MailerService {
           dynamic_template_data: {
             investorName: user.fullName,
             poolName: pool.metadata?.name,
-            token: `${pool.metadata?.name} ${data.tranche}`,
+            token: `${pool.metadata?.name} ${tranche}`,
             issuerName: pool.profile?.issuer?.name,
             issuerEmail: pool.profile?.issuer?.email,
+            onboardingUrl: `${config.tinlakeUiHost}pool/${pool.id}/${pool.metadata?.slug}/onboarding?tranche=${
+              tranche || 'senior'
+            }`,
           },
         },
       ],
       from: {
-        name: `Centrifuge`,
-        email: `onboarding@centrifuge.io`,
+        name: pool.profile?.issuer?.name,
+        email: `issuer+${pool.metadata?.slug}@centrifuge.io`,
       },
       template_id: config.sendgrid.subscriptionAgreementVoided,
     }
