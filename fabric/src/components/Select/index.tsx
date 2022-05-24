@@ -41,7 +41,7 @@ type SelectProps = {
   onSelect?: OnSelectCallback
   onBlur?: (e: FocusEvent) => void
   value?: string
-  label: string
+  label: string | React.ReactElement
   placeholder: string
   disabled?: boolean
   errorMessage?: string

@@ -17,6 +17,7 @@ const lightColors = {
   backgroundPage: 'white',
   backgroundInput: grayScale[50],
   backgroundThumbnail: grayScale[600],
+  backgroundInverted: grayScale[900],
 
   borderPrimary: grayScale[300],
   borderSecondary: grayScale[200],

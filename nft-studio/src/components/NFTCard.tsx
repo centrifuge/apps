@@ -32,7 +32,13 @@ export const NFTCard: React.FC<Props> = ({ nft }) => {
   const isLoading = !visible || metadataIsLoading
 
   return (
-    <Card as={Link} to={`/collection/${nft.collectionId}/object/${nft.id}`} variant="interactive" pb={[3, 4]} ref={ref}>
+    <Card
+      as={Link}
+      to={`/nfts/collection/${nft.collectionId}/object/${nft.id}`}
+      variant="interactive"
+      pb={[3, 4]}
+      ref={ref}
+    >
       <Stack gap={[2, 3]}>
         <Box
           bg="placeholderBackground"

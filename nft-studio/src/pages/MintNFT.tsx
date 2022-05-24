@@ -64,7 +64,7 @@ const MintNFT: React.FC = () => {
       reset()
 
       if (isPageUnchanged()) {
-        history.push(`/collection/${collectionId}/object/${nftId}`)
+        history.push(`/nfts/collection/${collectionId}/object/${nftId}`)
       }
     },
   })
@@ -119,7 +119,6 @@ const MintNFT: React.FC = () => {
     <form onSubmit={execute} action="">
       <Stack>
         <PageHeader
-          parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/collection/${collectionId}` }}
           title={nftName || DEFAULT_NFT_NAME}
           subtitle={collectionMetadata?.name}
           actions={
@@ -135,7 +134,7 @@ const MintNFT: React.FC = () => {
               <Button disabled={submitDisabled} type="submit" loading={isMinting}>
                 Mint
               </Button>
-              <RouterLinkButton to={`/collection/${collectionId}`} variant="secondary">
+              <RouterLinkButton to={`/nfts/collection/${collectionId}`} variant="secondary">
                 Cancel
               </RouterLinkButton>
             </>

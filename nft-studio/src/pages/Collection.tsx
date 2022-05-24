@@ -58,7 +58,7 @@ const Collection: React.FC = () => {
         }
         actions={
           canMint && (
-            <RouterLinkButton to={`/collection/${collectionId}/object/mint`} variant="secondary" small>
+            <RouterLinkButton to={`/nfts/collection/${collectionId}/object/mint`} variant="secondary" small>
               Mint NFT
             </RouterLinkButton>
           )
@@ -149,7 +149,7 @@ const Collection: React.FC = () => {
       ) : (
         <Stack alignItems="center" gap={2} mt={8}>
           <Text variant="label1">This collection does not contain any NFT</Text>
-          {canMint && <RouterLinkButton to={`/collection/${collectionId}/object/mint`}>Mint NFT</RouterLinkButton>}
+          {canMint && <RouterLinkButton to={`/nfts/collection/${collectionId}/object/mint`}>Mint NFT</RouterLinkButton>}
         </Stack>
       )}
     </Stack>

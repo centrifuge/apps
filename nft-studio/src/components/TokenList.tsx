@@ -29,15 +29,16 @@ type RowProps = {
 const columns: Column[] = [
   {
     align: 'left',
-    header: 'Token',
+    header: () => <SortableTableHeader label="Token" />,
     cell: (token: TokenTableData) => <TokenName token={token} />,
     flex: '9',
+    sortKey: 'token',
   },
   {
     align: 'left',
     header: 'Asset class',
     cell: (token: TokenTableData) => <AssetClass token={token} />,
-    flex: '4',
+    flex: '6',
   },
   {
     header: () => <SortableTableHeader label="Yield" />,

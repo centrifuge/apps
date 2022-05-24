@@ -79,16 +79,18 @@ const darkTheme: DefaultTheme = {
 }
 
 export const Root: React.VFC = () => {
-  const [isDark, setIsDark] = React.useState(!!initialFlagsState.altairDarkMode)
+  const [isForcedDark, setIsForcedDark] = React.useState(!!initialFlagsState.altairDarkMode)
+  const network = import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge'
+
   return (
     <QueryClientProvider client={queryClient}>
-      <FabricProvider theme={isDark ? darkTheme : lightTheme}>
+      <FabricProvider theme={isForcedDark || network === 'altair' ? darkTheme : lightTheme}>
         <GlobalStyle />
         <FabricGlobalStyle />
         <HostPermissionsProvider>
-          <Web3Provider>
-            <CentrifugeProvider>
-              <DebugFlags onChange={(state) => setIsDark(!!state.altairDarkMode)}>
+          <CentrifugeProvider>
+            <Web3Provider>
+              <DebugFlags onChange={(state) => setIsForcedDark(!!state.altairDarkMode)}>
                 <TransactionProvider>
                   <TransactionToasts />
                   <Router>
@@ -98,8 +100,8 @@ export const Root: React.VFC = () => {
                   </Router>
                 </TransactionProvider>
               </DebugFlags>
-            </CentrifugeProvider>
-          </Web3Provider>
+            </Web3Provider>
+          </CentrifugeProvider>
         </HostPermissionsProvider>
       </FabricProvider>
     </QueryClientProvider>
@@ -109,19 +111,19 @@ export const Root: React.VFC = () => {
 const Routes: React.VFC = () => {
   return (
     <Switch>
-      <Route path="/collection/:cid/object/mint">
+      <Route path="/nfts/collection/:cid/object/mint">
         <MintNFTPage />
       </Route>
-      <Route path="/collection/:cid/object/:nftid/new-asset">
+      <Route path="/nfts/collection/:cid/object/:nftid/new-asset">
         <CreateLoanPage />
       </Route>
-      <Route path="/collection/:cid/object/:nftid">
+      <Route path="/nfts/collection/:cid/object/:nftid">
         <NFTPage />
       </Route>
-      <Route path="/collection/:cid">
+      <Route path="/nfts/collection/:cid">
         <CollectionPage />
       </Route>
-      <Route path="/account">
+      <Route path="/nfts/account">
         <AccountNFTsPage />
       </Route>
       <Route path="/nfts">

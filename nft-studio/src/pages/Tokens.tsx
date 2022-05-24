@@ -46,22 +46,27 @@ const TokenOverview: React.FC = () => {
     [tokens]
   )
 
+  const network = import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge'
+
   const pageSummaryData = [
     // TODO: sort out currency for TVL (kUSD vs AIR vs ...), assuming everything uses the same currency
-    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, tokens[0].currency) },
+    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, network === 'altair' ? 'AIR' : 'USD') },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
   ]
 
   return (
     <Stack gap={0} flex={1} mb="6">
-      <PageHeader subtitle="Art NFTs" title="Investment tokens" walletShown={false} />
+      <PageHeader
+        subtitle={network === 'altair' ? 'Art NFTs' : 'Tokens of real-world assets'}
+        title="Investment tokens"
+      />
       {tokens?.length ? (
         <>
           <PageSummary data={pageSummaryData} />
           <TokenList tokens={tokens} />
         </>
       ) : (
-        <Shelf justifyContent="center" textAlign="center">
+        <Shelf p="4" justifyContent="center" textAlign="center">
           <Text variant="heading2" color="textSecondary">
             There are no tokens yet
           </Text>

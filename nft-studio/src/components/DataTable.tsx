@@ -30,9 +30,9 @@ export type Column = {
 const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, sortKey?: string) => {
   if (!sortKey) return data
   if (order === 'asc') {
-    return data.sort((a, b) => a[sortKey] - b[sortKey])
+    return data.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : -1))
   }
-  return data.sort((a, b) => b[sortKey] - a[sortKey])
+  return data.sort((a, b) => (b[sortKey] > a[sortKey] ? 1 : -1))
 }
 
 export const DataTable = <T extends Record<string, any>>({
@@ -120,7 +120,6 @@ const Row = styled(Shelf)<any>`
   ${({ rounded }) =>
     css({
       width: '100%',
-      height: '48px',
       appearance: 'none',
       border: 'none',
       borderBottom: '1px solid',
@@ -145,9 +144,12 @@ const Row = styled(Shelf)<any>`
 const DataCol = styled.div<{ align: Column['align'] }>`
   background: initial;
   border: none;
-  padding: 16px 0 16px 16px;
+  padding: 8px 0 8px 16px;
   display: flex;
   flex: 1 1 160px;
+  max-width: 100%;
+  overflow: hidden;
+
   button&:hover {
     cursor: pointer;
   }

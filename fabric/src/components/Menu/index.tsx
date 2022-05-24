@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { ResponsiveValue } from 'styled-system'
 import { Box } from '../Box'
 import { Card, CardProps } from '../Card'
+import { Divider } from '../Divider'
 import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
@@ -12,17 +13,40 @@ export type MenuProps = Omit<CardProps, 'variant'>
 export const Menu: React.FC<MenuProps> = ({ children, ...cardProps }) => {
   return (
     <Card {...cardProps} variant="overlay">
-      <Stack>{children}</Stack>
+      <ScrollContainer borderRadius="card">{children}</ScrollContainer>
     </Card>
   )
 }
+
+const ScrollContainer = styled(Stack)`
+  overflow-y: auto;
+  max-height: 80vh;
+  @media (pointer: fine) {
+    overscroll-behavior: none;
+  }
+`
+
+export const MenuItemGroup: React.FC = ({ children }) => {
+  return (
+    <>
+      <MenuDivider borderColor="borderSecondary" />
+      {children}
+    </>
+  )
+}
+
+const MenuDivider = styled(Divider)`
+  &:first-child {
+    display: none;
+  }
+`
 
 type IconProps = {
   size?: ResponsiveValue<string | number>
 }
 
 export type MenuItemProps = {
-  label: string
+  label: React.ReactNode
   sublabel?: string
   icon?: React.ComponentType<IconProps> | React.ReactElement
   iconRight?: React.ComponentType<IconProps> | React.ReactElement
@@ -40,10 +64,12 @@ export const MenuItem: React.FC<MenuItemProps> = ({
       <Shelf gap={1} px={2} py={1}>
         {IconComp && isComponent(IconComp) ? <IconComp size="iconMedium" /> : IconComp}
         <Stack alignItems="flex-start">
-          <Text variant="interactive1" color="currentcolor">
+          <Text variant="interactive1" color="inherit">
             {label}
           </Text>
-          <Sublabel variant="label2">{sublabel}</Sublabel>
+          <Sublabel variant="label3" color="inherit">
+            {sublabel}
+          </Sublabel>
         </Stack>
         <Box ml="auto" display="flex">
           {IconRightComp && (isComponent(IconRightComp) ? <IconRightComp size="iconSmall" /> : IconRightComp)}
@@ -62,26 +88,16 @@ const MenuItemButton = styled.button`
   appearance: none;
   background: transparent;
   outline: 0;
+  text-align: left;
   color: ${({ theme }) => theme.colors.textPrimary};
 
   &:hover,
   &:focus-visible {
     background-color: ${({ theme }) => theme.colors.accentPrimary};
-    color: ${({ theme }) => theme.colors.backgroundPrimary};
-
-    ${Sublabel} {
-      color: ${({ theme }) => theme.colors.backgroundPrimary};
+    color: ${({ theme }) => theme.colors.textInverted};
+    * {
+      color: ${({ theme }) => theme.colors.textInverted};
     }
-  }
-
-  &:first-child {
-    border-top-left-radius: ${({ theme }) => theme.radii.card}px;
-    border-top-right-radius: ${({ theme }) => theme.radii.card}px;
-  }
-
-  &:last-child {
-    border-bottom-left-radius: ${({ theme }) => theme.radii.card}px;
-    border-bottom-right-radius: ${({ theme }) => theme.radii.card}px;
   }
 `
 

@@ -19,7 +19,6 @@ type Props = {
   }
   actions?: React.ReactNode
   icon?: React.ReactNode
-  walletShown?: boolean
   border?: boolean
 }
 
@@ -31,8 +30,8 @@ export const PageHeader: React.FC<Props> = ({
   pretitle,
   icon,
   actions,
-  walletShown,
   border = true,
+  parent,
   children,
 }) => {
   const theme = useTheme()
@@ -75,7 +74,7 @@ export const PageHeader: React.FC<Props> = ({
             )}
           </Stack>
         </Shelf>
-        <ContextActions actions={actions} walletShown={walletShown} />
+        <ContextActions actions={actions} parent={parent} />
       </Shelf>
       {children}
     </Box>

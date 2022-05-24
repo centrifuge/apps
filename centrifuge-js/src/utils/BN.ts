@@ -27,6 +27,9 @@ export class Balance extends BNSubType {
   static fromFloat(number: Numeric) {
     return Balance._fromFloat<Balance>(number)
   }
+  div(denominator: Balance) {
+    return new Perquintill(this.mul(new BN(10).pow(new BN(Balance.decimals))).div(denominator))
+  }
 }
 
 export class Price extends BNSubType {

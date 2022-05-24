@@ -1,11 +1,11 @@
 import { isSameAddress } from '@centrifuge/centrifuge-js'
 import { Text, TextProps } from '@centrifuge/fabric'
-import { encodeAddress } from '@polkadot/keyring'
 import React, { useMemo } from 'react'
 import { copyToClipboard } from '../utils/copyToClipboard'
 import { useAddress } from '../utils/useAddress'
 import { useIdentity } from '../utils/useIdentity'
-import { truncateAddress } from '../utils/web3'
+import { truncate } from '../utils/web3'
+import { useCentrifuge } from './CentrifugeProvider'
 import { useWeb3 } from './Web3Provider'
 
 type Props = TextProps & {
@@ -14,14 +14,15 @@ type Props = TextProps & {
   labelForConnectedAddress?: boolean | string
 }
 
-export const Identity: React.FC<Props> = ({ address, clickToCopy, labelForConnectedAddress = 'me', ...textProps }) => {
+export const Identity: React.FC<Props> = ({ address, clickToCopy, labelForConnectedAddress = true, ...textProps }) => {
   const identity = useIdentity(address)
   const myAddress = useAddress()
+  const cent = useCentrifuge()
   const { selectedAccount } = useWeb3()
 
-  const addr = encodeAddress(address, 2)
+  const addr = cent.utils.formatAddress(address)
   const isMe = useMemo(() => isSameAddress(addr, myAddress), [addr, myAddress])
-  const truncated = truncateAddress(address)
+  const truncated = truncate(cent.utils.formatAddress(address))
   const display = identity?.display || truncated
   const meLabel =
     !isMe || !labelForConnectedAddress

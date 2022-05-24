@@ -298,7 +298,7 @@ export function getNftsModule(inst: CentrifugeBase) {
           api.tx.uniques.setClassMetadata(collectionId, metadataUri, true),
         ]),
       })),
-      switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+      switchMap(({ api, submittable }) => inst.wrapSignAndSend(api, submittable, options))
     )
   }
 
@@ -313,7 +313,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         api,
         submittable: api.tx.uniques.transfer(...args),
       })),
-      switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+      switchMap(({ api, submittable }) => inst.wrapSignAndSend(api, submittable, options))
     )
   }
 
@@ -332,7 +332,7 @@ export function getNftsModule(inst: CentrifugeBase) {
           api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
         ]),
       })),
-      switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+      switchMap(({ api, submittable }) => inst.wrapSignAndSend(api, submittable, options))
     )
   }
 
@@ -344,7 +344,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         api,
         submittable: api.tx.nftSales.add(collectionId, nftId, ['Native', price.toString()]),
       })),
-      switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+      switchMap(({ api, submittable }) => inst.wrapSignAndSend(api, submittable, options))
     )
   }
 
@@ -356,7 +356,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         api,
         submittable: api.tx.nftSales.remove(collectionId, nftId),
       })),
-      switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+      switchMap(({ api, submittable }) => inst.wrapSignAndSend(api, submittable, options))
     )
   }
 
@@ -368,7 +368,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         api,
         submittable: api.tx.nftSales.buy(collectionId, nftId, ['Native', price.toString()]),
       })),
-      switchMap(({ api, submittable }) => inst.wrapSignAndSendRx(api, submittable, options))
+      switchMap(({ api, submittable }) => inst.wrapSignAndSend(api, submittable, options))
     )
   }
 

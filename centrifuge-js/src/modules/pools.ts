@@ -188,11 +188,10 @@ export type Tranche = {
   index: number
   id: string
   seniority: number
-  debt: Balance
-  reserve: Balance
+  balance: Balance
   minRiskBuffer: Perquintill | null
+  currentRiskBuffer: Perquintill
   interestRatePerSec: Rate | null
-  ratio: Perquintill
   outstandingInvestOrders: Balance
   outstandingRedeemOrders: Balance
   lastUpdatedInterest: string
@@ -357,7 +356,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
             writeOffGroups.map((g) => api.tx.loans.addWriteOffGroup(poolId, [g.percentage.toString(), g.overdueDays]))
           )
         )
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -372,7 +371,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.pools.update(poolId, minEpochTime, challengeTime, maxNavAge)
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -399,7 +398,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
             api.tx.permissions.remove({ PoolRole: 'PoolAdmin' }, addr, { Pool: poolId }, { PoolRole: role })
           ),
         ])
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -411,7 +410,19 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.pools.setMaxReserve(poolId, maxReserve.toString())
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function setMetadata(args: [poolId: string, metadata: string], options?: TransactionOptions) {
+    const [poolId, metadata] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.pools.setMetadata(poolId, metadata)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -440,7 +451,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         } else {
           submittable = api.tx.pools.updateInvestOrder(poolId, { id: trancheId }, newOrder.toString())
         }
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -468,7 +479,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         } else {
           submittable = api.tx.pools.updateRedeemOrder(poolId, { id: trancheId }, newOrder.toString())
         }
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -480,7 +491,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.utility.batchAll([api.tx.loans.updateNav(poolId), api.tx.pools.closeEpoch(poolId)])
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -492,7 +503,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.pools.submitSolution(poolId, solution)
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -508,7 +519,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         combineLatestWith(getOrder([address, trancheId])),
         switchMap(([[api, pool], order]) => {
           const submittable = api.tx.pools.collect(poolId, { id: trancheId }, pool.epoch.lastExecuted + 1 - order.epoch)
-          return inst.wrapSignAndSendRx(api, submittable, options)
+          return inst.wrapSignAndSend(api, submittable, options)
         })
       )
     }
@@ -537,7 +548,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
             .filter(Boolean)
         )
 
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -671,7 +682,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.create(poolId, [collectionId, nftId])
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -690,7 +701,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         const submittable = api.tx.loans.price(poolId, loanId, ratePerSec, {
           [loanInfoInput.type]: loanInfo,
         })
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -702,7 +713,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.borrow(poolId, loanId, amount.toString())
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -714,7 +725,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.repay(poolId, loanId, amount.toString())
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -737,7 +748,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           api.tx.loans.repay(poolId, loanId, amount),
           api.tx.loans.close(poolId, loanId),
         ])
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -786,15 +797,32 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 minRiskBuffer = new Perquintill(hexToBN(tranche.trancheType.nonResidual.minRiskBuffer))
                 interestRatePerSec = new Rate(hexToBN(tranche.trancheType.nonResidual.interestRatePerSec))
               }
+
+              const subordinateTranchesValue = pool.tranches.tranches
+                .slice()
+                .reverse()
+                .slice(index + 1)
+                .reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                  return new Balance(
+                    prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                  )
+                }, new Balance(0))
+              const poolValue = pool.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                return new Balance(
+                  prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                )
+              }, new Balance(0))
+
               return {
                 index,
                 id: pool.tranches.ids[index],
                 seniority: tranche.seniority,
-                debt: new Balance(hexToBN(tranche.debt)),
-                reserve: new Balance(hexToBN(tranche.reserve)),
+                balance: new Balance(new Balance(hexToBN(tranche.debt)).add(new Balance(hexToBN(tranche.reserve)))),
                 minRiskBuffer,
+                currentRiskBuffer: subordinateTranchesValue.gtn(0)
+                  ? subordinateTranchesValue.div(poolValue)
+                  : new Perquintill(0),
                 interestRatePerSec,
-                ratio: new Perquintill(hexToBN(tranche.ratio)),
                 outstandingInvestOrders: new Balance(hexToBN(tranche.outstandingInvestOrders)),
                 outstandingRedeemOrders: new Balance(hexToBN(tranche.outstandingRedeemOrders)),
                 lastUpdatedInterest: new Date(tranche.lastUpdatedInterest * 1000).toISOString(),
@@ -875,6 +903,19 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 interestRatePerSec = new Rate(hexToBN(tranche.trancheType.nonResidual.interestRatePerSec))
               }
 
+              const subordinateTranchesValue = pool!.data?.tranches.tranches
+                .slice(0, trancheIndex)
+                .reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                  return new Balance(
+                    prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                  )
+                }, new Balance(0))
+              const poolValue = pool!.data?.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                return new Balance(
+                  prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                )
+              }, new Balance(0))
+
               return {
                 id: trancheId,
                 index: trancheIndex,
@@ -886,6 +927,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 poolMetadata: (pool!.metadata ?? undefined) as string | undefined,
                 interestRatePerSec,
                 minRiskBuffer,
+                currentRiskBuffer: subordinateTranchesValue.gtn(0)
+                  ? subordinateTranchesValue.div(poolValue)
+                  : new Perquintill(0),
                 ratio: new Perquintill(hexToBN(tranche.ratio)),
               }
             })
@@ -899,7 +943,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const $api = inst.getApi()
 
-    const $query = inst.getOptionalSubqueryObservable<{ pool: { createdAt: string } }>(
+    const $query = inst.getSubqueryObservable<{ pool: { createdAt: string } }>(
       `query($poolId: String!) {
         pool(id: $poolId) {
           createdAt
@@ -946,15 +990,32 @@ export function getPoolsModule(inst: CentrifugeBase) {
                       minRiskBuffer = new Perquintill(hexToBN(tranche.trancheType.nonResidual.minRiskBuffer))
                       interestRatePerSec = new Rate(hexToBN(tranche.trancheType.nonResidual.interestRatePerSec))
                     }
+
+                    const subordinateTranchesValue = pool.tranches.tranches
+                      .slice(0, index)
+                      .reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                        return new Balance(
+                          prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                        )
+                      }, new Balance(0))
+                    const poolValue = pool.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                      return new Balance(
+                        prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                      )
+                    }, new Balance(0))
+
                     return {
                       index,
                       id: pool.tranches.ids[index],
                       seniority: tranche.seniority,
-                      debt: new Balance(hexToBN(tranche.debt)),
-                      reserve: new Balance(hexToBN(tranche.reserve)),
+                      balance: new Balance(
+                        new Balance(hexToBN(tranche.debt)).add(new Balance(hexToBN(tranche.reserve)))
+                      ),
                       minRiskBuffer,
+                      currentRiskBuffer: subordinateTranchesValue.gtn(0)
+                        ? subordinateTranchesValue.div(poolValue)
+                        : new Perquintill(0),
                       interestRatePerSec,
-                      ratio: new Perquintill(hexToBN(tranche.ratio)),
                       outstandingInvestOrders: new Balance(hexToBN(tranche.outstandingInvestOrders)),
                       outstandingRedeemOrders: new Balance(hexToBN(tranche.outstandingRedeemOrders)),
                       lastUpdatedInterest: new Date(tranche.lastUpdatedInterest * 1000).toISOString(),
@@ -993,7 +1054,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const $api = inst.getApi()
 
-    const $query = inst.getOptionalSubqueryObservable<{ dailyPoolStates: { nodes: SubqueryDailyPoolState[] } }>(
+    const $query = inst.getSubqueryObservable<{ dailyPoolStates: { nodes: SubqueryDailyPoolState[] } }>(
       `query($poolId: String!) {
         dailyPoolStates(
           filter: { 
@@ -1059,6 +1120,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           native: {
             balance: new BN((nativeBalance as any).data.free.toString()),
             decimals: api.registry.chainDecimals[0],
+            symbol: api.registry.chainTokens[0],
           },
         }
 
@@ -1304,7 +1366,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.addWriteOffGroup(poolId, [percentage.toString(), overdueDays])
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -1319,7 +1381,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) => {
         const submittable = api.tx.loans.adminWriteOff(poolId, loanId, writeOffGroupId)
-        return inst.wrapSignAndSendRx(api, submittable, options)
+        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -1358,6 +1420,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     createPool,
     updatePool,
     setMaxReserve,
+    setMetadata,
     updateInvestOrder,
     updateRedeemOrder,
     collect,

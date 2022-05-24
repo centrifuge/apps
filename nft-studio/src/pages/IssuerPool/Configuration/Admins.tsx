@@ -5,13 +5,14 @@ import { encodeAddress } from '@polkadot/util-crypto'
 import { Field, FieldArray, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
+import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { DataTable } from '../../../components/DataTable'
 import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
 import { useWeb3 } from '../../../components/Web3Provider'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePoolPermissions } from '../../../utils/usePools'
-import { truncateAddress } from '../../../utils/web3'
+import { truncate } from '../../../utils/web3'
 
 type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'RiskAdmin'
 
@@ -88,7 +89,13 @@ export const Admins: React.FC = () => {
           subtitle="At least one address is required"
           headerRight={
             isEditing ? (
-              <Button type="submit" small loading={isLoading} key="done">
+              <Button
+                type="submit"
+                small
+                loading={isLoading}
+                loadingMessage={isLoading ? 'Pending...' : undefined}
+                key="done"
+              >
                 Done
               </Button>
             ) : (
@@ -237,9 +244,10 @@ const SearchResult: React.FC<{ address: string; onAdd: () => void; existingAddre
   onAdd,
   existingAddresses,
 }) => {
+  const cent = useCentrifuge()
   let truncated
   try {
-    truncated = truncateAddress(address)
+    truncated = truncate(cent.utils.formatAddress(address))
   } catch (e) {
     //
   }

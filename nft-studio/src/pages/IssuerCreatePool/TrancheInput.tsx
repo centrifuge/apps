@@ -1,15 +1,19 @@
 import { Box, Button, Grid, IconMinusCircle, NumberInput, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import React from 'react'
-import { createEmptyTranche, CURRENCIES, PoolFormValues } from '.'
+import { createEmptyTranche, PoolFormValues } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
+import { Tooltips } from '../../components/Tooltips'
+import { useAddress } from '../../utils/useAddress'
+import { useCurrencies } from '../../utils/useCurrencies'
 import { validate } from './validate'
 
 const MAX_TRANCHES = 5
 
 export const TrancheInput: React.FC = () => {
   const fmk = useFormikContext<PoolFormValues>()
+  const currencies = useCurrencies(useAddress())
   const { values } = fmk
 
   const juniorTrancheIndex = 0 // the first tranche is the most junior in the UI
@@ -33,17 +37,16 @@ export const TrancheInput: React.FC = () => {
             </Button>
           }
         >
-          <Grid gridTemplateColumns="64px 2fr 1fr 1.5fr 1fr 1fr 40px" gap={2} rowGap={3}>
+          <Grid gridTemplateColumns="40px 1fr 1fr 1fr 1fr 1fr 40px" gap={2} rowGap={3}>
             {values.tranches
               .map((s, index) => (
                 <React.Fragment key={index}>
-                  <Stack gap="4px" py={1}>
-                    <Text variant="label2">Seniority</Text>
+                  <Stack gap="4px" py={1} alignItems="center" justifyContent="center">
                     <Text variant="body1">{index + 1}</Text>
                   </Stack>
                   <FieldWithErrorMessage
                     as={TextInput}
-                    label="Name"
+                    label="Token name*"
                     placeholder={index === juniorTrancheIndex ? 'Junior' : ''}
                     maxLength={30}
                     name={`tranches.${index}.tokenName`}
@@ -55,19 +58,20 @@ export const TrancheInput: React.FC = () => {
                         {...field}
                         onChange={(e) => form.setFieldValue(field.name, e.target.value.toUpperCase())}
                         errorMessage={meta.touched ? meta.error : undefined}
-                        label="Token symbol"
-                        placeholder=""
-                        maxLength={6}
+                        label={<Tooltips type="tokenSymbol" label="Token symbol*" variant="secondary" />}
+                        placeholder="4-12 characters"
+                        minLength={4}
+                        maxLength={12}
                       />
                     )}
                   </Field>
                   <FieldWithErrorMessage
                     as={NumberInput}
-                    label="Min. investment amount"
+                    label={<Tooltips type="minimumInvestment" variant="secondary" label="Min. investment*" />}
                     placeholder="0.00"
                     name={`tranches.${index}.minInvestment`}
                     validate={validate.minInvestment}
-                    rightElement={CURRENCIES.find((c) => c.value === values.currency)?.label}
+                    rightElement={currencies.find((c) => c.value === values.currency)?.label}
                   />
                   {index === juniorTrancheIndex ? (
                     <>
@@ -94,7 +98,7 @@ export const TrancheInput: React.FC = () => {
                       />
                     </>
                   )}
-                  <Box p={1}>
+                  <Box pt={1}>
                     {index !== juniorTrancheIndex && (
                       <Button variant="tertiary" icon={IconMinusCircle} onClick={() => fldArr.remove(index)} />
                     )}

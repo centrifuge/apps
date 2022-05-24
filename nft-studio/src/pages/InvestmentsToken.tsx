@@ -59,7 +59,7 @@ const Token: React.FC = () => {
                   {
                     label: 'Value',
                     value: formatBalance(
-                      tranche.debt.toDecimal().mul(tranche.tokenPrice.toDecimal()),
+                      tranche.balance.toDecimal().mul(tranche.tokenPrice.toDecimal()),
                       pool.currency,
                       true
                     ),
@@ -73,13 +73,9 @@ const Token: React.FC = () => {
                     value: (
                       <>
                         <Text color="textSecondary">Min. {formatPercentage(tranche.minRiskBuffer)}</Text>{' '}
-                        {formatPercentage(tranche.ratio)}
+                        {formatPercentage(tranche.currentRiskBuffer)}
                       </>
                     ),
-                  },
-                  {
-                    label: 'Reserve',
-                    value: <Text color="statusOk">{formatBalance(tranche.reserve, pool.currency, true)}</Text>,
                   },
                 ].filter(Boolean) as any
               }
