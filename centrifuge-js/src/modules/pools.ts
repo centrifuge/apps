@@ -365,12 +365,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
     args: [poolId: string, minEpochTime: number, challengeTime: number, maxNavAge: number],
     options?: TransactionOptions
   ) {
-    const [poolId, minEpochTime, challengeTime, maxNavAge] = args
+    const [poolId, minEpochTime] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.pools.update(poolId, minEpochTime, challengeTime, maxNavAge)
+        // const submittable = api.tx.pools.update(poolId, [{ newValue: minEpochTime }, challengeTime, maxNavAge])
+        const submittable = api.tx.pools.update(poolId, { minEpochTime })
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -671,7 +672,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
   async function getNextLoanId() {
     const $api = inst.getApi()
 
-    const id = await firstValueFrom($api.pipe(switchMap((api) => api.query.loans.nextLoanId()))).toString()
+    const id = await firstValueFrom($api.pipe(switchMap((api) => api.query.loans.nextLoanId())))
     return id
   }
 
