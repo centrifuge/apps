@@ -36,7 +36,7 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
   const { data: metadata } = usePoolMetadata(pool)
 
   const investments: TableDataRow[] = pool.tranches.map((token) => {
-    const trancheMeta = metadata?.tranches?.[token.seniority]
+    const trancheMeta = metadata?.tranches?.[token.id]
     return {
       order: `${trancheMeta?.symbol} investments`,
       locked: token.outstandingInvestOrders?.toDecimal() || new Decimal(0),
@@ -44,7 +44,7 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
   })
 
   const redmetions: TableDataRow[] = pool.tranches.map((token) => {
-    const trancheMeta = metadata?.tranches?.[token.seniority]
+    const trancheMeta = metadata?.tranches?.[token.id]
     return {
       order: `${trancheMeta?.symbol} redemptions`,
       locked: token.outstandingRedeemOrders?.toDecimal() || new Decimal(0),

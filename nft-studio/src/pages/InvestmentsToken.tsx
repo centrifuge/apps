@@ -33,7 +33,7 @@ const Token: React.FC = () => {
 
   const token = balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)
   const tranche = pool?.tranches.find((t) => t.id === trancheId)
-  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
 
   if (pool && !tranche) throw new Error('Token not found')
 

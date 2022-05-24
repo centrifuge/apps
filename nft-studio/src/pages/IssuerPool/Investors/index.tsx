@@ -125,7 +125,7 @@ export const Investors: React.FC = () => {
                 header: 'Token',
                 cell: (row: Tranche) => (
                   <TextWithPlaceholder isLoading={metadataIsLoading}>
-                    {metadata?.tranches?.[row.seniority]?.name}
+                    {metadata?.tranches?.[row.id]?.name}
                   </TextWithPlaceholder>
                 ),
                 flex: '1 0 150px',

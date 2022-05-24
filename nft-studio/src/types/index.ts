@@ -21,11 +21,14 @@ export type PoolMetadata = {
     }
     status: PoolStatus
   }
-  tranches: {
-    name: string
-    symbol: string
-    minInitialInvestment: string
-  }[]
+  tranches: Record<
+    string,
+    {
+      name: string
+      symbol: string
+      minInitialInvestment: string
+    }
+  >
   riskGroups: {
     name: string | undefined
     advanceRate: string

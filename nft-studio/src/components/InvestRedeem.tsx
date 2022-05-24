@@ -85,7 +85,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
 
   const allowedToInvest = !!permissions?.pools[poolId]?.tranches[trancheId]
   const tranche = pool?.tranches.find((t) => t.id === trancheId)
-  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
   const trancheBalance =
     balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)?.balance.toDecimal() ?? Dec(0)
 
@@ -178,7 +178,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
   const balance = balances && pool ? getBalanceDec(balances, pool.currency) : Dec(0)
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
-  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
   const isFirstInvestment = order?.epoch === 0 && order.investCurrency.isZero()
   const minInvest = trancheMeta?.minInitialInvestment
     ? new Balance(trancheMeta.minInitialInvestment)
@@ -343,7 +343,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
 
   const tranche = pool?.tranches.find((t) => t.id === trancheId)
-  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
 
   const trancheBalance =
     balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)?.balance.toDecimal() ?? Dec(0)
