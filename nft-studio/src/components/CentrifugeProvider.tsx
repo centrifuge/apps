@@ -1,5 +1,6 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
 import * as React from 'react'
+import { config } from '../config'
 
 const CentrifugeContext = React.createContext<Centrifuge>(null as any)
 
@@ -7,7 +8,7 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
   const ctx = React.useMemo(
     () =>
       new Centrifuge({
-        network: 'altair',
+        network: config.network,
         kusamaWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL as string,
         altairWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL as string,
         printExtrinsics: import.meta.env.NODE_ENV === 'development',

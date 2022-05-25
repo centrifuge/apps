@@ -1,12 +1,12 @@
-import { Button, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { ConnectButton } from '../components/ConnectButton'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { VisibilityChecker } from '../components/VisibilityChecker'
-import { useWeb3 } from '../components/Web3Provider'
 import { useAddress } from '../utils/useAddress'
 import { useCollections } from '../utils/useCollections'
 import { useAccountNfts } from '../utils/useNFTs'
@@ -22,7 +22,6 @@ export const AccountNFTsPage: React.FC = () => {
 const COUNT_PER_PAGE = 16
 
 const AccountNFTs: React.FC = () => {
-  const { isConnecting, connect } = useWeb3()
   const address = useAddress()
   const nfts = useAccountNfts(address)
   const collections = useCollections()
@@ -44,9 +43,7 @@ const AccountNFTs: React.FC = () => {
   if (!address) {
     return (
       <Shelf justifyContent="center">
-        <Button onClick={() => connect()} loading={isConnecting}>
-          Connect
-        </Button>
+        <ConnectButton />
       </Shelf>
     )
   }

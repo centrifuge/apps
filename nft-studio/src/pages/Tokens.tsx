@@ -6,8 +6,9 @@ import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { TokenList, TokenTableData } from '../components/TokenList'
 import { Tooltips } from '../components/Tooltips'
+import { config } from '../config'
 import { Dec } from '../utils/Decimal'
-import { formatBalance } from '../utils/formatting'
+import { formatBalance, getCurrencySymbol } from '../utils/formatting'
 import { useTokens } from '../utils/usePools'
 
 export const TokenOverviewPage: React.FC = () => {
@@ -50,7 +51,7 @@ const TokenOverview: React.FC = () => {
 
   const pageSummaryData = [
     // TODO: sort out currency for TVL (kUSD vs AIR vs ...), assuming everything uses the same currency
-    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, network === 'altair' ? 'AIR' : 'USD') },
+    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, getCurrencySymbol(config.baseCurrency)) },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
   ]
 

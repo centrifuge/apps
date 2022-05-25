@@ -50,7 +50,7 @@ const Accounts: React.FC = () => {
           <WalletButton
             active={state.isOpen}
             address={proxy?.delegator ?? selectedAccount.address}
-            alias={!proxy ? selectedAccount.meta.name : undefined}
+            alias={!proxy ? selectedAccount.name : undefined}
             balance={
               balances
                 ? formatBalanceAbbreviated(
@@ -70,7 +70,7 @@ const Accounts: React.FC = () => {
               <MenuItemGroup key={acc.address}>
                 <MenuItem
                   label={
-                    acc.meta.name ? (
+                    acc.name ? (
                       <Text
                         style={{
                           display: 'block',
@@ -80,7 +80,7 @@ const Accounts: React.FC = () => {
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {acc.meta.name}
+                        {acc.name}
                       </Text>
                     ) : (
                       truncate(acc.address)
@@ -112,7 +112,7 @@ const Accounts: React.FC = () => {
                             whiteSpace: 'nowrap',
                           }}
                         >
-                          {acc.meta.name || truncate(acc.address)}
+                          {acc.name || truncate(acc.address)}
                         </Text>
                         <span>/</span>
                         <span>{truncate(p.delegator)}</span>

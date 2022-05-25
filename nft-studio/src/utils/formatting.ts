@@ -8,7 +8,7 @@ const currencySymbols = {
 }
 
 export function getCurrencySymbol(currency?: string) {
-  return (currency && currencySymbols[currency as keyof typeof currencySymbols]) || currency || ''
+  return (currency && currencySymbols[currency.toLowerCase() as keyof typeof currencySymbols]) || currency || ''
 }
 
 export function formatBalance(amount: Balance | Decimal | number, currency?: string, precise = false) {
