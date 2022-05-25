@@ -1,7 +1,6 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { Box, IconInvestments, IconNft, IconPieChart, IconPools, IconUser, Shelf } from '@centrifuge/fabric'
 import React from 'react'
-import { useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
 import logoCentrifugeFull from '../assets/images/logoCentrifugeFull.svg'
 import { useAddress } from '../utils/useAddress'
@@ -14,9 +13,6 @@ import { TextWithPlaceholder } from './TextWithPlaceholder'
 type Props = {}
 
 export const Menu: React.FC<Props> = () => {
-  const investmentsMatch = useRouteMatch('/investments')
-  const issuersMatch = useRouteMatch('/issuer')
-
   const allPools = usePools()
   const address = useAddress()
   const permissions = usePermissions(address)
