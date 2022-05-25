@@ -56,7 +56,7 @@ const Token: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
-  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
   return (
     <Shelf gap="2">
       <Thumbnail label={trancheMeta?.symbol || ''} size="small" />
@@ -77,7 +77,7 @@ const TokenBalance: React.VFC<{ investment: TrancheBalance }> = ({ investment })
   const pool = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
-  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
 
   return <Text variant="body2">{formatBalance(investment.balance.toFloat(), trancheMeta?.symbol)}</Text>
 }

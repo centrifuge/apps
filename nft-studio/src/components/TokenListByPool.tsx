@@ -75,8 +75,8 @@ export const TokenListByPool: React.FC = () => {
       return {
         apy: tranche?.interestRatePerSec ? feeToApr(tranche?.interestRatePerSec) : '',
         protection: tranche.minRiskBuffer?.toString() || '',
-        name: metadata?.tranches?.find((_, index) => index === tranche.index)?.name || '',
-        symbol: metadata?.tranches?.find((_, index) => index === tranche.index)?.symbol || '',
+        name: metadata?.tranches?.[tranche.id]?.name || '',
+        symbol: metadata?.tranches?.[tranche.id]?.symbol || '',
         poolName: metadata?.pool?.name || '',
         seniority: Number(tranche.seniority),
         poolId: pid,

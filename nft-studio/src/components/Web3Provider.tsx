@@ -60,10 +60,13 @@ export const Web3Provider: React.FC = ({ children }) => {
 
     setAccounts(kusamaAccounts)
     const persistedAddress = localStorage.getItem('web3PersistedAddress')
-    const address =
-      (persistedAddress && kusamaAccounts.find((acc) => acc.address === persistedAddress)?.address) ||
-      kusamaAccounts[0]?.address
+    const persistedProxy = localStorage.getItem('web3PersistedProxy')
+    const matchingAccount = persistedAddress && kusamaAccounts.find((acc) => acc.address === persistedAddress)?.address
+    const address = matchingAccount || kusamaAccounts[0]?.address
     setSelectedAccountAddress(address)
+    if (matchingAccount && persistedProxy) {
+      setProxyAddress(persistedProxy)
+    }
     localStorage.setItem('web3PersistedAddress', address ?? '')
   }
 
@@ -74,6 +77,7 @@ export const Web3Provider: React.FC = ({ children }) => {
     setProxyAddress(null)
     localStorage.setItem('web3Persist', '')
     localStorage.setItem('web3PersistedAddress', '')
+    localStorage.setItem('web3PersistedProxy', '')
     if (unsubscribeRef.current) {
       unsubscribeRef.current()
       unsubscribeRef.current = null
@@ -102,6 +106,7 @@ export const Web3Provider: React.FC = ({ children }) => {
       console.error(e)
       localStorage.setItem('web3Persist', '')
       localStorage.setItem('web3PersistedAddress', '')
+      localStorage.setItem('web3PersistedProxy', '')
       throw e
     } finally {
       setIsConnecting(false)
@@ -113,6 +118,11 @@ export const Web3Provider: React.FC = ({ children }) => {
     setSelectedAccountAddress(address)
     localStorage.setItem('web3PersistedAddress', address)
     setProxyAddress(null)
+  }, [])
+
+  const selectProxy = React.useCallback((address: string | null) => {
+    setProxyAddress(address)
+    localStorage.setItem('web3PersistedProxy', address ?? '')
   }, [])
 
   React.useEffect(() => {
@@ -139,14 +149,24 @@ export const Web3Provider: React.FC = ({ children }) => {
       connect,
       disconnect,
       selectAccount,
-      selectProxy: setProxyAddress,
+      selectProxy,
       proxy:
         selectedAccountAddress && proxyAddress && proxies
           ? proxies[selectedAccountAddress]?.find((p) => p.delegator === proxyAddress) ?? null
           : null,
       proxies,
     }),
-    [accounts, isConnecting, connect, disconnect, selectAccount, selectedAccountAddress, proxyAddress, proxies]
+    [
+      accounts,
+      isConnecting,
+      connect,
+      disconnect,
+      selectAccount,
+      selectProxy,
+      selectedAccountAddress,
+      proxyAddress,
+      proxies,
+    ]
   )
 
   return <Web3Context.Provider value={ctx}>{children}</Web3Context.Provider>

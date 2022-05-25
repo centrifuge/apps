@@ -87,7 +87,7 @@ export const PoolConfig: React.VFC<Props> = (props: { poolId: string }) => {
             <FieldWithErrorMessage
               name="metadata"
               as={TextAreaInput}
-              loading={isLoading}
+              loading={isLoading || form.isSubmitting}
               placeholder="Description..."
               disabled={!isEditing}
               rows={20}

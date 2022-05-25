@@ -83,7 +83,7 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
   const { data: metadata, isLoading } = usePoolMetadata({ metadata: token.poolMetadata })
-  const trancheMeta = metadata?.tranches?.[token.seniority]
+  const trancheMeta = metadata?.tranches?.[token.id]
   const symbol = trancheMeta?.symbol
   return (
     <Shelf gap="2">
