@@ -56,7 +56,7 @@ const StyledClearButtom = styled.button`
   width: 24px;
 `
 
-export const SearchInput: React.FC<Omit<TextInputProps, 'rightElement'> & { clear: () => void }> = ({
+export const SearchInput: React.FC<Omit<TextInputProps, 'rightElement'> & { clear?: () => void }> = ({
   label,
   secondaryLabel,
   disabled,
@@ -74,7 +74,7 @@ export const SearchInput: React.FC<Omit<TextInputProps, 'rightElement'> & { clea
       errorMessage={errorMessage}
       inputElement={<StyledTextInput type="search" disabled={disabled} {...inputProps} />}
       rightElement={
-        inputProps.value ? (
+        inputProps.value && clear ? (
           <StyledClearButtom
             onClick={() => {
               clear()
