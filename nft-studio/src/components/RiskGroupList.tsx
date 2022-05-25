@@ -104,12 +104,17 @@ export const RiskGroupList: React.FC = () => {
     return metadata?.riskGroups?.map((group) => {
       const loansByRiskGroup = loans?.filter((loan) => {
         return (
-          loan.loanInfo.type === 'BulletLoan' &&
-          // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
-          loan.loanInfo?.lossGivenDefault.toString() === group?.lossGivenDefault &&
-          loan.loanInfo?.probabilityOfDefault.toString() === group?.probabilityOfDefault &&
-          loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
-          loan?.interestRatePerSec.toString() === group?.interestRatePerSec
+          (loan.status === 'Active' &&
+            loan.outstandingDebt.toDecimal().greaterThan(0) &&
+            loan.loanInfo.type !== 'CreditLine' &&
+            // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
+            loan.loanInfo?.lossGivenDefault.toString() === group?.lossGivenDefault &&
+            loan.loanInfo?.probabilityOfDefault.toString() === group?.probabilityOfDefault &&
+            loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
+            loan?.interestRatePerSec.toString() === group?.interestRatePerSec) ||
+          (loan.loanInfo.type === 'CreditLine' &&
+            loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
+            loan?.interestRatePerSec.toString() === group?.interestRatePerSec)
         )
       })
 
@@ -127,19 +132,18 @@ export const RiskGroupList: React.FC = () => {
           interestRatePerSec,
         } as AssetByRiskGroup
       }
-      return loansByRiskGroup.reduce<AssetByRiskGroup>((prev, curr) => {
-        const amount = new Balance(prev?.amount.add(curr.outstandingDebt))
-        const share =
-          pool && pool?.nav.latest.toString() !== '0' ? amount.muln(100).div(pool.nav.latest).toString() : '0'
-
-        return {
-          name: group.name,
-          amount,
-          share,
-          interestRatePerSec,
-          riskAdjustment,
-        } as AssetByRiskGroup
-      }, initialRow)
+      const amount = loansByRiskGroup.reduce<Balance>(
+        (prev, curr) => new Balance(prev?.add(curr.outstandingDebt)),
+        new Balance('0')
+      )
+      const share = pool && pool?.nav.latest.toString() !== '0' ? amount.muln(100).div(pool.nav.latest).toString() : '0'
+      return {
+        name: group.name,
+        amount,
+        share,
+        interestRatePerSec,
+        riskAdjustment,
+      } as AssetByRiskGroup
     })
   }, [metadata, loans, pool])
 
@@ -147,14 +151,14 @@ export const RiskGroupList: React.FC = () => {
   // represents all assets that could not be sorted into a riskGroup
   const remainingAssets: AssetByRiskGroup[] = React.useMemo(() => {
     const amountsSum = riskGroups.reduce((curr, prev) => new Balance(curr.add(prev.amount as any)), new Balance('0'))
-    const sharesSum = riskGroups.reduce((curr, prev) => curr + Number(prev.share) * 100, 0)
+    const sharesSum = riskGroups.reduce((curr, prev) => curr + Number(prev.share) * 100, 0) / 100
 
     return sharesSum !== 100 && sharesSum !== 0
       ? [
           {
             name: 'Other',
             amount: new Balance(pool?.nav.latest.sub(amountsSum) || 0),
-            share: `${100 - sharesSum / 100}`,
+            share: `${100 - sharesSum}`,
             interestRatePerSec: '',
             riskAdjustment: '',
           },
@@ -193,7 +197,7 @@ export const RiskGroupList: React.FC = () => {
           Total
         </Text>
       ),
-      interestRatePerSec: <Text variant="body2" fontWeight={600}>{`Avg ${avgInterestRatePerSec.toString()}%`}</Text>,
+      interestRatePerSec: <Text variant="body2" fontWeight={600}>{`Avg. ${avgInterestRatePerSec.toString()}%`}</Text>,
       riskAdjustment: <Text variant="body2" fontWeight={600}>{`Avg. ${avgRiskAdjustment.toString()}%`}</Text>,
       color: '',
       labelColor: ' ',
