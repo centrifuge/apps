@@ -91,9 +91,9 @@ export const StyledButton = styled.span<StyledProps>(
     const shadow = `shadowButton${variantToken}Pressed`
 
     return css({
-      color: $disabled ? fgDisabled : $active ? fgPressed : fg,
-      backgroundColor: $disabled ? bgDisabled : $active && !isTertiaryIcon ? bgPressed : bg,
-      borderColor: $disabled ? borderDisabled : $active ? borderPressed : border,
+      color: $disabled ? fgDisabled : $active ? fgHover : fg,
+      backgroundColor: $disabled ? bgDisabled : $active && !isTertiaryIcon ? bgHover : bg,
+      borderColor: $disabled ? borderDisabled : $active && !isTertiaryIcon ? borderHover : border,
       borderWidth: 1,
       pointerEvents: $disabled ? 'none' : 'initial',
       minHeight: $small ? 32 : 40,

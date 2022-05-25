@@ -12,7 +12,7 @@ export default defineConfig({
   },
   envPrefix: 'REACT_APP_',
   build: {
-    target: 'modules',
+    target: 'esnext',
     outDir: 'build',
     commonjsOptions: {
       // ensure all packages are converted to ES6 for rollup bundle

@@ -266,10 +266,11 @@ const CreatePoolForm: React.VFC = () => {
     onSubmit: async (values, { setSubmitting }) => {
       if (!address) return
       // validation passed, submit
-      const metadataHash = await pinPoolMetadata(values)
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
       const collectionId = await centrifuge.nfts.getAvailableCollectionId()
+
+      const metadataHash = await pinPoolMetadata(values, poolId)
 
       // tranches must be reversed (most junior is the first in the UI but the last in the API)
       const noJuniorTranches = values.tranches.slice(1)
