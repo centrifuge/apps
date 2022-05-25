@@ -3,6 +3,7 @@ import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
 import { CardHeader } from '../../components/CardHeader'
 import { Identity } from '../../components/Identity'
+import { LabelValueStack } from '../../components/LabelValueStack'
 import LoanLabel from '../../components/LoanLabel'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
@@ -15,7 +16,7 @@ import { nftMetadataSchema } from '../../schemas'
 import { formatBalance } from '../../utils/formatting'
 import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
 import { useAddress } from '../../utils/useAddress'
-import { useLoan } from '../../utils/useLoans'
+import { useAvailableFinancing, useLoan } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useNFT } from '../../utils/useNFTs'
 import { useCanBorrow, usePermissions } from '../../utils/usePermissions'
@@ -64,6 +65,7 @@ const Loan: React.FC = () => {
   const address = useAddress()
   const permissions = usePermissions(address)
   const history = useHistory()
+  const { current: availableFinancing } = useAvailableFinancing(poolId, assetId)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
 
   const canPrice = permissions?.pools[poolId]?.roles.includes('PricingAdmin')
@@ -72,17 +74,6 @@ const Loan: React.FC = () => {
   const imageUrl = nftMetadata?.image ? parseMetadataUrl(nftMetadata.image) : ''
 
   const riskGroupIndex = loan && poolMetadata?.riskGroups && getMatchingRiskGroupIndex(loan, poolMetadata.riskGroups)
-
-  const nftCardSummaryData = [
-    {
-      label: <Tooltips variant="secondary" type="id" />,
-      value: assetId,
-    },
-    {
-      label: 'Owner',
-      value: <Identity address={nft?.owner || ''} />,
-    },
-  ]
 
   return (
     <Stack>
@@ -93,7 +84,7 @@ const Loan: React.FC = () => {
         parent={{ to: `/pools/${poolId}/assets`, label: poolMetadata?.pool?.name ?? 'Pool assets' }}
         subtitle={
           <TextWithPlaceholder isLoading={metadataIsLoading}>
-            {poolMetadata?.pool?.asset.class} asset
+            {poolMetadata?.pool?.asset.class} asset by {nft?.owner && <Identity clickToCopy address={nft?.owner} />}
           </TextWithPlaceholder>
         }
       />
@@ -108,10 +99,6 @@ const Loan: React.FC = () => {
                   value: loan?.loanInfo.type ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '',
                 },
                 {
-                  label: <Tooltips type="collateralValue" />,
-                  value: formatBalance(loan.loanInfo.value, pool?.currency),
-                },
-                {
                   label: <Tooltips type="riskGroup" />,
                   value: (
                     <TextWithPlaceholder isLoading={metadataIsLoading}>
@@ -120,6 +107,18 @@ const Loan: React.FC = () => {
                         : 'n/a'}
                     </TextWithPlaceholder>
                   ),
+                },
+                {
+                  label: <Tooltips type="collateralValue" />,
+                  value: formatBalance(loan.loanInfo.value, pool?.currency),
+                },
+                {
+                  label: <Tooltips type="availableForFinancing" />,
+                  value: formatBalance(availableFinancing, pool?.currency),
+                },
+                {
+                  label: <Tooltips type="outstanding" />,
+                  value: formatBalance(loan.outstandingDebt, pool?.currency),
                 },
               ]}
             />
@@ -141,18 +140,17 @@ const Loan: React.FC = () => {
       {loan && nft && (
         <PageSection title="NFT">
           <InteractiveCard
-            icon={<Thumbnail label="nft" type="pool" />}
+            icon={<Thumbnail label="nft" type="nft" />}
             title={<TextWithPlaceholder isLoading={nftMetadataIsLoading}>{nftMetadata?.name}</TextWithPlaceholder>}
             variant="button"
             onClick={() => history.push(`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`)}
             secondaryHeader={
-              <Shelf gap="6" justifyContent="flex-start">
-                {nftCardSummaryData?.map(({ label, value }, index) => (
-                  <Stack gap="2px" key={`${value}-${label}-${index}`}>
-                    <Text variant="label2">{label}</Text>
-                    <Text variant="body2">{value}</Text>
-                  </Stack>
-                ))}
+              <Shelf gap={6}>
+                <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={assetId} />
+                <LabelValueStack
+                  label="Owner"
+                  value={nft?.owner ? <Identity clickToCopy address={nft?.owner} /> : ''}
+                />
               </Shelf>
             }
           >
@@ -174,39 +172,36 @@ const Loan: React.FC = () => {
                 )}
               </Box>
               <Stack gap={2}>
-                <Stack gap="4px">
-                  <Text variant="label2">Description</Text>
-                  <TextWithPlaceholder
-                    isLoading={nftMetadataIsLoading}
-                    words={2}
-                    width={80}
-                    variance={30}
-                    variant="body2"
-                    style={{ wordBreak: 'break-word' }}
-                  >
-                    {nftMetadata?.description || 'No description'}
-                  </TextWithPlaceholder>
-                </Stack>
+                <LabelValueStack
+                  label="Description"
+                  value={
+                    <TextWithPlaceholder
+                      isLoading={nftMetadataIsLoading}
+                      words={2}
+                      width={80}
+                      variance={30}
+                      variant="body2"
+                      style={{ wordBreak: 'break-word' }}
+                    >
+                      {nftMetadata?.description || 'No description'}
+                    </TextWithPlaceholder>
+                  }
+                />
 
                 {imageUrl && (
-                  <Stack gap="4px" alignItems="flex-start">
-                    <Text variant="label2">Image</Text>
-                    <AnchorPillButton
-                      href={imageUrl}
-                      target="_blank"
-                      style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
-                    >
-                      Source file
-                    </AnchorPillButton>
-                  </Stack>
+                  <LabelValueStack
+                    label="Image"
+                    value={
+                      <AnchorPillButton
+                        href={imageUrl}
+                        target="_blank"
+                        style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
+                      >
+                        Source file
+                      </AnchorPillButton>
+                    }
+                  />
                 )}
-
-                <Stack gap="4px">
-                  <Text variant="label2">Owner</Text>
-                  <Text variant="label2" color="textPrimary">
-                    <Identity address={nft.owner} clickToCopy />
-                  </Text>
-                </Stack>
               </Stack>
             </Shelf>
           </InteractiveCard>

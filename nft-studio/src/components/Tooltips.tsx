@@ -159,6 +159,14 @@ const tooltipText = {
     label: 'Max. reserve',
     body: 'No investments will be accepted if the current reserve is larger than the max reserve amount.',
   },
+  availableForFinancing: {
+    label: 'Available for financing',
+    body: '',
+  },
+  outstanding: {
+    label: 'Outstanding',
+    body: '',
+  },
 }
 
 type TooltipsProps = {

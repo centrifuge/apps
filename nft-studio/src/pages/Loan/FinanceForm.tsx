@@ -10,6 +10,7 @@ import { useAddress } from '../../utils/useAddress'
 import { getBalanceDec, useBalances } from '../../utils/useBalances'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
+import { useAvailableFinancing } from '../../utils/useLoans'
 import { usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 
@@ -28,6 +29,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const address = useAddress()
   const balances = useBalances(address)
   const balance = balances && pool ? getBalanceDec(balances, pool.currency) : Dec(0)
+  const { current: availableFinancing, initial: initialCeiling } = useAvailableFinancing(loan.poolId, loan.id)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
     (cent) => cent.pools.financeLoan,
@@ -62,15 +64,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
     loan.principalDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY))
   )
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
-  const initialCeiling = loan.loanInfo.value.toDecimal().mul(loan.loanInfo.advanceRate.toDecimal())
-  let ceiling = initialCeiling
-  if (loan.loanInfo.type === 'BulletLoan') {
-    ceiling = ceiling.minus(loan.totalBorrowed.toDecimal())
-  } else {
-    ceiling = ceiling.minus(debtWithMargin)
-    ceiling = ceiling.isNegative() ? Dec(0) : ceiling
-  }
-  const maxBorrow = poolReserve.lessThan(ceiling) ? poolReserve : ceiling
+  const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
   const canRepayAll = debtWithMargin.lte(balance)
 
   const financeForm = useFormik<FinanceValues>({
@@ -109,7 +103,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
         <Stack>
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Available financing</Text>
-            <Text variant="heading3">{formatBalance(ceiling, pool?.currency)}</Text>
+            <Text variant="heading3">{formatBalance(availableFinancing, pool?.currency)}</Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total financed</Text>
@@ -123,7 +117,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 name="amount"
                 validate={combine(
                   positiveNumber(),
-                  max(ceiling.toNumber(), 'Amount exceeds available financing'),
+                  max(availableFinancing.toNumber(), 'Amount exceeds available financing'),
                   max(
                     maxBorrow.toNumber(),
                     `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency)})`
@@ -136,7 +130,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                     value={value instanceof Decimal ? value.toNumber() : value}
                     label="Amount"
                     min="0"
-                    onSetMax={() => financeForm.setFieldValue('amount', ceiling)}
+                    onSetMax={() => financeForm.setFieldValue('amount', availableFinancing)}
                     errorMessage={meta.touched ? meta.error : undefined}
                     disabled={isFinanceLoading}
                   />
