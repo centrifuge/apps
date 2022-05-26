@@ -2,7 +2,7 @@ import { Balance } from '@centrifuge/centrifuge-js'
 import { Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { formatBalance, getCurrencySymbol } from '../utils/formatting'
+import { getCurrencySymbol } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLiquidityAdmin } from '../utils/usePermissions'
@@ -34,12 +34,10 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
   })
 
   if (!address || !isLiquidityAdmin) return null
-
   return (
     <Stack as={Card} gap={2} p={2} mt={5}>
       <Shelf justifyContent="space-between">
         <Text variant="heading3">Maximum reserve</Text>
-        <Text variant="heading3">{formatBalance(pool?.reserve.max.toDecimal() || 0, pool?.currency || '')}</Text>
       </Shelf>
       <FormikProvider value={form}>
         <Form>
@@ -48,9 +46,8 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
               {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
                 <CurrencyInput
                   {...fieldProps}
-                  value={value}
+                  value={value || pool?.reserve.max.toDecimal().toNumber()}
                   errorMessage={meta.touched ? meta.error : undefined}
-                  label="Maximum reserve"
                   type="number"
                   min="0"
                   disabled={isLoading}
@@ -59,7 +56,7 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
               )}
             </Field>
             <Button type="submit" loading={isLoading} loadingMessage={'Confirming'}>
-              Set
+              Apply
             </Button>
           </Stack>
         </Form>

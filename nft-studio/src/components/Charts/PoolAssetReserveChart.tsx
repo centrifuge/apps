@@ -84,7 +84,7 @@ const CustomLegend: React.VFC<{
   const theme = useTheme()
 
   return (
-    <Shelf bg="white" width="100%" gap="2">
+    <Shelf bg="backgroundPage" width="100%" gap="2">
       <Grid pl="4" pb="4" columns={6} gap="3" width="100%">
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentPrimary}>
           <Tooltips variant="secondary" type="poolValue" />
