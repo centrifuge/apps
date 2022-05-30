@@ -1,6 +1,7 @@
 const altairYellow = '#ffc012'
+const centrifugeBlue = '#2762ff'
 
 export const brandAltair = {
-  accentPrimary: altairYellow,
+  accentPrimary: centrifugeBlue,
   accentSecondary: altairYellow,
 }

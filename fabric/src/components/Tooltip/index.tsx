@@ -23,6 +23,7 @@ const StyledTrigger = styled(Text)`
   cursor: pointer;
   text-align: left;
   font-weight: 400;
+  font-family: ${({ theme }) => theme.fonts.standard};
 `
 
 export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disabled, delay = 1000, ...textProps }) => {
@@ -37,7 +38,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
 
   return (
     <>
-      <StyledTrigger as="button" fontFamily="Inter" ref={triggerRef} {...triggerProps} {...textProps}>
+      <StyledTrigger as="button" ref={triggerRef} {...triggerProps} {...textProps}>
         {children}
       </StyledTrigger>
       {state.isOpen && (

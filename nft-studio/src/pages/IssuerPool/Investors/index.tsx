@@ -89,7 +89,12 @@ export const Investors: React.FC = () => {
     <PageSection title="Investor status" subtitle="Display investor status, and add or remove from Investor whitelist.">
       <Stack gap={2}>
         <Grid columns={2} equalColumns gap={4} alignItems="center">
-          <SearchInput value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Enter address..." />
+          <SearchInput
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Enter address..."
+            clear={() => setAddress('')}
+          />
           {address && !validAddress ? (
             <Text variant="label2" color="statusCritical">
               <Shelf gap={1}>
