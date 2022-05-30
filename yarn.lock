@@ -2576,6 +2576,7 @@ __metadata:
     "@polkadot/react-identicon": ^2.0.1
     "@polkadot/util-crypto": ^9.0.1
     "@react-rxjs/core": ^0.8.4
+    "@stablelib/blake2b": ^1.0.1
     "@styled-system/css": ^5.1.5
     "@styled-system/should-forward-prop": ^5.1.5
     "@types/bn.js": ^5
@@ -9301,6 +9302,47 @@ __metadata:
   dependencies:
     "@sinonjs/commons": ^1.7.0
   checksum: 3390628056e527ec37e0ce4d9f197c2391fef0c8aa208dff832cc8f3e30cfebe1440645fe3bc05ad787efe577323023b6025b60443269d9baf67f4346d73e4f2
+  languageName: node
+  linkType: hard
+
+"@stablelib/binary@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@stablelib/binary@npm:1.0.1"
+  dependencies:
+    "@stablelib/int": ^1.0.1
+  checksum: f6c151eb046250595a4ad2793842b53edda25e0f85845fe43e806f483871582dad31146c25eaf9a84d3dffdf149693576bc33401e44701eb56fc476f6307f7f2
+  languageName: node
+  linkType: hard
+
+"@stablelib/blake2b@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@stablelib/blake2b@npm:1.0.1"
+  dependencies:
+    "@stablelib/binary": ^1.0.1
+    "@stablelib/hash": ^1.0.1
+    "@stablelib/wipe": ^1.0.1
+  checksum: 70dd1fe7046183921c28c99b5cdeb5fb17c52608be9e8ff2b0d7ebadec437154ed0333bdbce619908cdfcb470b561e552fd26d00794b6e6ae953924058c318b3
+  languageName: node
+  linkType: hard
+
+"@stablelib/hash@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@stablelib/hash@npm:1.0.1"
+  checksum: 2187c5f938d6eb8f7971c83587b7e29fdb56e1dd444991f190ba4886dd4626af9c6b6534288c39e11fe11c4fc3f2bf09f1fe4c2cdd28e8e251d7128a5fcf71a3
+  languageName: node
+  linkType: hard
+
+"@stablelib/int@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@stablelib/int@npm:1.0.1"
+  checksum: 37ed6a47f017355d4b174d3ab096e56368572a64f25ede0c6dfad1c5592044cd98acc748fa6afa86f745a3beb8f33074dce4699a16bc583445affd8211fdef80
+  languageName: node
+  linkType: hard
+
+"@stablelib/wipe@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@stablelib/wipe@npm:1.0.1"
+  checksum: 56e3d5bbf6c652fc38eadedf666c170aaedf87e7527466b54086326a7e4a9e97e8304fa651f91e12e6f6f1798cdc7a8aaf624bc0443597ae02bb24066c021b81
   languageName: node
   linkType: hard
 

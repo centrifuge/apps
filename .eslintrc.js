@@ -10,7 +10,6 @@ module.exports = {
 
   plugins: ['@typescript-eslint/eslint-plugin'],
   rules: {
-    'no-plusplus': 'error',
     'prefer-arrow-callback': 'error',
     'no-new-func': 'error',
     'no-else-return': 'error',

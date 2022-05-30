@@ -3,17 +3,19 @@ import { useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { MaxReserveForm } from '../../../components/MaxReserveForm'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
+import { useLiquidityAdmin } from '../../../utils/usePermissions'
 import { PoolDetailLiquidity } from '../../PoolDetail/LiquidityTab'
 import { IssuerPoolHeader } from '../Header'
 
 export const IssuerPoolLiquidityPage: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const [isEditingMaxReserve, setIsEditingMaxReserve] = React.useState(false)
+  const isLiquidityAdmin = useLiquidityAdmin(poolId)
+
   return (
-    <PageWithSideBar sidebar={isEditingMaxReserve ? <MaxReserveForm poolId={poolId} /> : true}>
+    <PageWithSideBar sidebar={isLiquidityAdmin ? <MaxReserveForm poolId={poolId} /> : true}>
       <IssuerPoolHeader />
       <LoadBoundary>
-        <PoolDetailLiquidity setIsEditingMaxReserve={setIsEditingMaxReserve} />
+        <PoolDetailLiquidity />
       </LoadBoundary>
     </PageWithSideBar>
   )

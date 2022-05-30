@@ -27,7 +27,7 @@ const TokenDetail: React.FC = () => {
   const pool = usePool(poolId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const tranche = pool?.tranches.find((t) => t.id === trancheId)
-  const trancheMeta = tranche ? metadata?.tranches?.[tranche.seniority] : null
+  const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
 
   const token = React.useMemo(() => pool?.tranches.find((token) => token.id === trancheId), [pool, trancheId])
 

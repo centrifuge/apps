@@ -1,5 +1,5 @@
 import { DetailedPool } from '@centrifuge/centrifuge-js'
-import { InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import { InteractiveCard, Shelf, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { PoolMetadata } from '../types'
@@ -8,6 +8,7 @@ import { formatBalance } from '../utils/formatting'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useAverageMaturity } from '../utils/useAverageMaturity'
 import { IssuerSection } from './IssuerSection'
+import { LabelValueStack } from './LabelValueStack'
 import { Tooltips } from './Tooltips'
 
 type PoolCardProps = {
@@ -18,21 +19,6 @@ type PoolCardProps = {
 export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
   const avgMaturity = useAverageMaturity(pool.id)
   const history = useHistory()
-
-  const poolCardSummaryData = [
-    {
-      label: <Tooltips type="valueLocked" variant="secondary" />,
-      value: formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency),
-    },
-    {
-      label: <Tooltips type="age" variant="secondary" />,
-      value: getAge(pool?.createdAt),
-    },
-    {
-      label: <Tooltips type="averageAssetMaturity" variant="secondary" />,
-      value: avgMaturity,
-    },
-  ]
 
   return (
     <InteractiveCard
@@ -48,12 +34,12 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
       onClick={() => history.push(`/pools/${pool.id}`)}
       secondaryHeader={
         <Shelf gap="6" justifyContent="flex-start">
-          {poolCardSummaryData?.map(({ label, value }, index) => (
-            <Stack gap="2px" key={`${value}-${label}-${index}`}>
-              <Text variant="label2">{label}</Text>
-              <Text variant="body2">{value}</Text>
-            </Stack>
-          ))}
+          <LabelValueStack
+            label={<Tooltips type="valueLocked" variant="secondary" />}
+            value={formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency)}
+          />
+          <LabelValueStack label={<Tooltips type="age" variant="secondary" />} value={getAge(pool?.createdAt)} />
+          <LabelValueStack label={<Tooltips type="averageAssetMaturity" variant="secondary" />} value={avgMaturity} />
         </Shelf>
       }
     >

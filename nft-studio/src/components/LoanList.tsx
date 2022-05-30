@@ -27,7 +27,10 @@ export const LoanList: React.FC<Props> = ({ loans, onLoanClicked }) => {
       header: 'Maturity',
       cell: (l: Loan) => (
         <Text variant="body2">
-          {'maturityDate' in l.loanInfo && !l.interestRatePerSec.isZero() && !l.totalBorrowed.isZero()
+          {l.status === 'Active' &&
+          'maturityDate' in l.loanInfo &&
+          !l.interestRatePerSec.isZero() &&
+          !l.totalBorrowed.isZero()
             ? formatAge(daysBetween(l.originationDate, l.loanInfo?.maturityDate))
             : ''}
         </Text>
@@ -35,9 +38,11 @@ export const LoanList: React.FC<Props> = ({ loans, onLoanClicked }) => {
       flex: '2',
     },
     {
-      header: 'Maturity Date',
+      header: 'Maturity date',
       cell: (l: Loan) => (
-        <Text variant="body2">{'maturityDate' in l.loanInfo ? formatDate(l.loanInfo.maturityDate) : ''}</Text>
+        <Text variant="body2">
+          {l.status !== 'Created' && 'maturityDate' in l.loanInfo ? formatDate(l.loanInfo.maturityDate) : ''}
+        </Text>
       ),
       flex: '2',
     },
@@ -82,5 +87,9 @@ const AssetName: React.VFC<{ loan: Loan }> = ({ loan }) => {
 
 const AssetAmount: React.VFC<{ loan: Loan }> = ({ loan }) => {
   const pool = usePool(loan.poolId)
-  return <Text variant="body2">{formatBalance(loan.loanInfo.value, pool?.currency)}</Text>
+  return (
+    <Text variant="body2">
+      {loan.loanInfo.value.toDecimal().toString() !== '0' ? formatBalance(loan.loanInfo.value, pool?.currency) : ''}
+    </Text>
+  )
 }

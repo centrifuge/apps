@@ -28,7 +28,10 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
 
   const riskGroupOptions =
-    metadata?.riskGroups?.map((r, i) => ({ value: i.toString(), label: r.name ?? `Risk group ${i + 1}` })) ?? []
+    metadata?.riskGroups?.map((r, i) => ({
+      value: i.toString(),
+      label: r.name ? `${i + 1} – ${r.name}` : `Risk group ${i + 1}`,
+    })) ?? []
 
   React.useEffect(() => {
     if (riskGroupOptions.length) {
@@ -76,6 +79,8 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
     },
     validate: (values) => {
       const errors: FormikErrors<PricingFormValues> = {}
+      const today = new Date()
+      const dateIn5Years = new Date(today.getFullYear() + 5, today.getMonth(), today.getDate())
 
       if (shownFields.includes('maturityDate')) {
         if (!values.maturityDate) {
@@ -83,8 +88,10 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
         } else if (!/\d{4}-\d{2}-\d{2}/.test(values.maturityDate)) {
           // Date input not natively supported, let user enter manually in required format
           errors.maturityDate = 'Maturity date must be in format yyyy-mm-dd'
-        } else if (new Date(values.maturityDate) < new Date()) {
+        } else if (new Date(values.maturityDate) < today) {
           errors.maturityDate = 'Maturity date must be in the future'
+        } else if (new Date(values.maturityDate) > dateIn5Years) {
+          errors.maturityDate = `Maturity date must be before ${dateIn5Years.toLocaleDateString()}`
         }
       }
       return errors
@@ -102,7 +109,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
       <FieldWithErrorMessage
         key="value"
         as={NumberInput}
-        label="Value"
+        label="Collateral value*"
         min="0"
         placeholder="0.00"
         name="value"
@@ -114,9 +121,10 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
       <FieldWithErrorMessage
         key="maturityDate"
         as={DateInput}
-        label="Maturity date"
+        label="Maturity date*"
         type="date"
         min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
+        max={new Date(365 * Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
         name="maturityDate"
       />
     ),
@@ -136,13 +144,12 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
         <PageSummary
           data={[
             { label: 'Loan type', value: LOAN_TYPE_LABELS[form.values.loanType] },
-            { label: 'Collateral value', value: 'n/a' },
             { label: 'Risk group', value: 'n/a' },
+            { label: 'Collateral value', value: 'n/a' },
           ]}
         />
         <PageSection
           title="Pricing"
-          subtitle="All fields are required"
           headerRight={
             <Button
               type="submit"
@@ -179,7 +186,10 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
             {riskGroup && (
               <Stack gap={2}>
                 <Text variant="heading4">
-                  Risk group • {riskGroup.name ?? `Risk group ${Number(form.values.riskGroup) + 1}`}{' '}
+                  Risk group{' '}
+                  {riskGroup.name
+                    ? `${Number(form.values.riskGroup) + 1} – ${riskGroup.name}`
+                    : `Risk group ${Number(form.values.riskGroup) + 1}`}{' '}
                 </Text>
                 <RiskGroupValues values={riskGroup} loanType={form.values.loanType} />
               </Stack>

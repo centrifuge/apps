@@ -28,57 +28,50 @@ const InputWrapper = styled(Stack)<{ $active?: boolean; $disabled?: boolean }>`
   }
 `
 
-export const InputBox: React.FC<StackProps & InputBoxProps> = ({
-  label,
-  secondaryLabel,
-  errorMessage,
-  inputElement,
-  rightElement,
-  disabled,
-  active,
-  ...boxProps
-}) => {
-  const theme = useTheme()
-  return (
-    <Stack gap={1} width="100%">
-      <InputWrapper gap="4px" px={2} py={1} as="label" $active={active} $disabled={disabled} {...boxProps}>
-        {label && (
-          <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'}>
-            {label}
-          </Text>
-        )}
-        <Stack>
-          <Shelf>
-            <Box flex="1 1 auto">
-              <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'}>
-                {inputElement}
-              </Text>
-            </Box>
-            {rightElement && (
-              <Box
-                as={Text}
-                flex="0 0 auto"
-                display="flex"
-                style={{ color: theme.colors[disabled ? 'textDisabled' : 'textPrimary'] }}
-              >
-                {rightElement}
-              </Box>
-            )}
-          </Shelf>
-          {secondaryLabel && (
-            <Text variant="body3" color={disabled ? 'textDisabled' : 'textSecondary'}>
-              {secondaryLabel}
+export const InputBox: React.FC<StackProps & InputBoxProps> = React.forwardRef(
+  ({ label, secondaryLabel, errorMessage, inputElement, rightElement, disabled, active, ...boxProps }, ref) => {
+    const theme = useTheme()
+    return (
+      <Stack gap={1} width="100%">
+        <InputWrapper gap="4px" px={2} py={1} as="label" $active={active} $disabled={disabled} {...boxProps} ref={ref}>
+          {label && (
+            <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'}>
+              {label}
             </Text>
           )}
-        </Stack>
-      </InputWrapper>
-      {errorMessage && (
-        <Box px={2}>
-          <Text variant="label2" color="statusCritical">
-            {errorMessage}
-          </Text>
-        </Box>
-      )}
-    </Stack>
-  )
-}
+          <Stack>
+            <Shelf>
+              <Box flex="1 1 auto">
+                <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'}>
+                  {inputElement}
+                </Text>
+              </Box>
+              {rightElement && (
+                <Box
+                  as={Text}
+                  flex="0 0 auto"
+                  display="flex"
+                  style={{ color: theme.colors[disabled ? 'textDisabled' : 'textPrimary'] }}
+                >
+                  {rightElement}
+                </Box>
+              )}
+            </Shelf>
+            {secondaryLabel && (
+              <Text variant="body3" color={disabled ? 'textDisabled' : 'textSecondary'}>
+                {secondaryLabel}
+              </Text>
+            )}
+          </Stack>
+        </InputWrapper>
+        {errorMessage && (
+          <Box px={2}>
+            <Text variant="label2" color="statusCritical">
+              {errorMessage}
+            </Text>
+          </Box>
+        )}
+      </Stack>
+    )
+  }
+)

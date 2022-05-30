@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { IconSearch } from '../..'
+import { IconInfoFailed, IconSearch } from '../..'
 import { Box } from '../Box'
 import { InputBox, InputBoxProps } from '../InputBox'
 import { Stack } from '../Stack'
@@ -48,21 +48,45 @@ export const TextInput: React.FC<TextInputProps> = ({
   )
 }
 
-export const SearchInput: React.FC<Omit<TextInputProps, 'rightElement'>> = ({
+const StyledClearButtom = styled.button`
+  background: none;
+  padding: 0;
+  border: none;
+  height: 24px;
+  width: 24px;
+`
+
+export const SearchInput: React.FC<Omit<TextInputProps, 'rightElement'> & { clear?: () => void }> = ({
   label,
   secondaryLabel,
   disabled,
   errorMessage,
+  clear,
   ...inputProps
 }) => {
+  const ref = useRef<HTMLInputElement>(null)
   return (
     <InputBox
+      ref={ref}
       label={label}
       secondaryLabel={secondaryLabel}
       disabled={disabled}
       errorMessage={errorMessage}
       inputElement={<StyledTextInput type="search" disabled={disabled} {...inputProps} />}
-      rightElement={<IconSearch size="iconMedium" color="textPrimary" />}
+      rightElement={
+        inputProps.value && clear ? (
+          <StyledClearButtom
+            onClick={() => {
+              clear()
+              ref.current?.focus()
+            }}
+          >
+            <IconInfoFailed color="textPrimary" />
+          </StyledClearButtom>
+        ) : (
+          <IconSearch size="iconMedium" color="textPrimary" />
+        )
+      }
     />
   )
 }

@@ -1,7 +1,8 @@
 import { Rate } from '@centrifuge/centrifuge-js'
-import { Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Shelf } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
+import { LabelValueStack } from '../../components/LabelValueStack'
 import { formatDate } from '../../utils/date'
 import { formatPercentage } from '../../utils/formatting'
 import { LOAN_FIELDS } from './utils'
@@ -29,47 +30,34 @@ export const RiskGroupValues: React.FC<{
   return (
     <Shelf gap={3} flexWrap="wrap">
       {showMaturityDate && values.maturityDate && (
-        <Stack gap="4px">
-          <Text variant="label2">Maturity date</Text>
-          <Text variant="body2">{formatDate(values.maturityDate)}</Text>
-        </Stack>
+        <LabelValueStack label="Maturity date" value={formatDate(values.maturityDate)} />
       )}
-      <Stack gap="4px">
-        <Text variant="label2">Advance rate</Text>
-        <Text variant="body2">{advanceRate && formatPercentage(advanceRate.toPercent())}</Text>
-      </Stack>
-
-      <Stack gap="4px">
-        <Text variant="label2">Financing fee</Text>
-        <Text variant="body2">{fee && formatPercentage(fee.toAprPercent())}</Text>
-      </Stack>
+      <LabelValueStack label="Advance rate" value={advanceRate && formatPercentage(advanceRate.toPercent())} />
+      <LabelValueStack label="Financing fee" value={fee && formatPercentage(fee.toAprPercent())} />
 
       {shownFields.includes('probabilityOfDefault') && (
         <>
-          <Stack gap="4px">
-            <Text variant="label2">Probability of default</Text>
-            <Text variant="body2">{probabilityOfDefault && formatPercentage(probabilityOfDefault.toPercent())}</Text>
-          </Stack>
-
-          <Stack gap="4px">
-            <Text variant="label2">Loss given default</Text>
-            <Text variant="body2">{lossGivenDefault && formatPercentage(lossGivenDefault.toPercent())}</Text>
-          </Stack>
-          <Stack gap="4px">
-            <Text variant="label2">Expected loss</Text>
-            <Text variant="body2">
-              {lossGivenDefault &&
-                probabilityOfDefault &&
-                formatPercentage(lossGivenDefault.toFloat() * probabilityOfDefault.toFloat() * 100)}
-            </Text>
-          </Stack>
+          <LabelValueStack
+            label="Probability of default"
+            value={probabilityOfDefault && formatPercentage(probabilityOfDefault.toPercent())}
+          />
+          <LabelValueStack
+            label="Loss given default"
+            value={lossGivenDefault && formatPercentage(lossGivenDefault.toPercent())}
+          />
+          <LabelValueStack
+            label="Expected loss"
+            value={
+              lossGivenDefault &&
+              probabilityOfDefault &&
+              formatPercentage(lossGivenDefault.toFloat() * probabilityOfDefault.toFloat() * 100)
+            }
+          />
+          =
         </>
       )}
       {shownFields.includes('discountRate') && (
-        <Stack>
-          <Text variant="label2">Discount rate</Text>
-          <Text variant="body2">{discountRate && formatPercentage(discountRate.toAprPercent())}</Text>
-        </Stack>
+        <LabelValueStack label="Discount rate" value={discountRate && formatPercentage(discountRate.toAprPercent())} />
       )}
     </Shelf>
   )
