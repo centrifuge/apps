@@ -37,7 +37,7 @@ const columns: Column[] = [
   },
   {
     header: () => <SortableTableHeader label="Amount" />,
-    cell: (props: AssetByRiskGroup) => <Amount {...props} />,
+    cell: ({ amount }: AssetByRiskGroup) => <Text variant="body2">{amount}</Text>,
     flex: '1',
     sortKey: 'amount',
   },
@@ -77,13 +77,6 @@ const columns: Column[] = [
   },
 ]
 
-const Amount: React.VFC<AssetByRiskGroup> = ({ amount }) => {
-  const { pid } = useParams<{ pid: string }>()
-  const pool = usePool(pid)
-
-  return <Text variant="body2">{amount}</Text>
-}
-
 export const RiskGroupList: React.FC = () => {
   const { pid } = useParams<{ pid: string }>()
   const loans = useLoans(pid)
@@ -91,57 +84,61 @@ export const RiskGroupList: React.FC = () => {
   const theme = useTheme()
   const { data: metadata } = usePoolMetadata(pool)
 
-  if (!metadata?.riskGroups?.length) return null
-  const totalAmountsSum =
-    loans?.reduce<Balance>((prev, curr) => new Balance(prev.add(curr.outstandingDebt)), new Balance(0)) ||
-    new Balance(0)
+  const totalAmountsSum = React.useMemo(
+    () =>
+      loans?.reduce<Balance>((prev, curr) => new Balance(prev.add(curr.outstandingDebt)), new Balance(0)) ||
+      new Balance(0),
+    [loans]
+  )
 
   const riskGroups = React.useMemo(() => {
-    return metadata.riskGroups!.map((group) => {
-      const loansByRiskGroup = loans?.filter((loan) => {
-        return (
-          (loan.status === 'Active' &&
-            loan.outstandingDebt.toDecimal().greaterThan(0) &&
-            loan.loanInfo.type !== 'CreditLine' &&
-            // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
-            loan.loanInfo?.lossGivenDefault.toString() === group?.lossGivenDefault &&
-            loan.loanInfo?.probabilityOfDefault.toString() === group?.probabilityOfDefault &&
-            loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
-            loan?.interestRatePerSec.toString() === group?.interestRatePerSec) ||
-          (loan.loanInfo.type === 'CreditLine' &&
-            loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
-            loan?.interestRatePerSec.toString() === group?.interestRatePerSec)
+    return (
+      metadata?.riskGroups!.map((group) => {
+        const loansByRiskGroup = loans?.filter((loan) => {
+          return (
+            (loan.status === 'Active' &&
+              loan.outstandingDebt.toDecimal().greaterThan(0) &&
+              loan.loanInfo.type !== 'CreditLine' &&
+              // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
+              loan.loanInfo?.lossGivenDefault.toString() === group?.lossGivenDefault &&
+              loan.loanInfo?.probabilityOfDefault.toString() === group?.probabilityOfDefault &&
+              loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
+              loan?.interestRatePerSec.toString() === group?.interestRatePerSec) ||
+            (loan.loanInfo.type === 'CreditLine' &&
+              loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
+              loan?.interestRatePerSec.toString() === group?.interestRatePerSec)
+          )
+        })
+
+        const lgd = new Rate(group?.lossGivenDefault).toPercent()
+        const pod = new Rate(group.probabilityOfDefault).toPercent()
+        const riskAdjustment = lgd.mul(pod).div(100).toDecimalPlaces(2).toString()
+        const interestRatePerSec = new Rate(group.interestRatePerSec).toAprPercent().toDecimalPlaces(2).toString()
+
+        const amount = loansByRiskGroup?.reduce<Balance>(
+          (prev, curr) => new Balance(prev?.add(curr.outstandingDebt)),
+          new Balance('0')
         )
-      })
+        if (!amount || !totalAmountsSum) {
+          return {
+            name: group.name,
+            amount: '',
+            share: '',
+            interestRatePerSec,
+            riskAdjustment,
+          } as AssetByRiskGroup
+        }
 
-      const lgd = new Rate(group?.lossGivenDefault).toPercent()
-      const pod = new Rate(group.probabilityOfDefault).toPercent()
-      const riskAdjustment = lgd.mul(pod).div(100).toDecimalPlaces(2).toString()
-      const interestRatePerSec = new Rate(group.interestRatePerSec).toAprPercent().toDecimalPlaces(2).toString()
-
-      const amount = loansByRiskGroup?.reduce<Balance>(
-        (prev, curr) => new Balance(prev?.add(curr.outstandingDebt)),
-        new Balance('0')
-      )
-      if (!amount || !totalAmountsSum) {
         return {
           name: group.name,
-          amount: '',
-          share: '',
+          amount: formatBalance(amount, pool?.currency),
+          share: Dec(amount?.toDecimal()).div(totalAmountsSum.toDecimal()).mul(100).toDecimalPlaces(0).toString(),
           interestRatePerSec,
           riskAdjustment,
         } as AssetByRiskGroup
-      }
-
-      return {
-        name: group.name,
-        amount: formatBalance(amount, pool?.currency),
-        share: Dec(amount?.toDecimal()).div(totalAmountsSum.toDecimal()).mul(100).toDecimalPlaces(0).toString(),
-        interestRatePerSec,
-        riskAdjustment,
-      } as AssetByRiskGroup
-    })
-  }, [metadata, loans, pool])
+      }) || []
+    )
+  }, [metadata, loans, pool, totalAmountsSum])
 
   const totalSharesSum = riskGroups
     .reduce((prev, curr) => (typeof curr.share === 'string' ? prev.add(curr.share) : prev), Dec(0))
@@ -181,7 +178,7 @@ export const RiskGroupList: React.FC = () => {
       color: '',
       labelColor: ' ',
     }
-  }, [riskGroups, pool?.nav.latest, pool?.currency, totalSharesSum])
+  }, [riskGroups, pool?.currency, totalSharesSum, totalAmountsSum])
 
   // biggest share of pie gets darkest color
   const tableDataWithColor = riskGroups
