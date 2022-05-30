@@ -136,7 +136,10 @@ export const RiskGroupList: React.FC = () => {
         (prev, curr) => new Balance(prev?.add(curr.outstandingDebt)),
         new Balance('0')
       )
-      const share = pool && pool?.nav.latest.toString() !== '0' ? amount.muln(100).div(pool.nav.latest).toString() : '0'
+      const share =
+        pool && pool?.nav.latest.toString() !== '0'
+          ? Dec(amount.toDecimal()).div(pool!.nav.latest.toDecimal()).mul(100).toDecimalPlaces(0).toNumber()
+          : '0'
       return {
         name: group.name,
         amount,
