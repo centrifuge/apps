@@ -361,17 +361,23 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  function updatePool(
-    args: [poolId: string, minEpochTime: number, challengeTime: number, maxNavAge: number],
-    options?: TransactionOptions
-  ) {
-    const [poolId, minEpochTime] = args
+  type UpdatePoolInput = {
+    poolId: string
+    minEpochTime?: { newValue: number }
+    tranches?: { newValue: any }
+    maxNavAge?: { newValue: number }
+  }
+
+  function updatePool(args: UpdatePoolInput, options?: TransactionOptions) {
+    const { poolId } = args
+    const minEpochTime = args?.minEpochTime
+    const tranches = args?.tranches
+    const maxNavAge = args?.maxNavAge
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        // const submittable = api.tx.pools.update(poolId, [{ newValue: minEpochTime }, challengeTime, maxNavAge])
-        const submittable = api.tx.pools.update(poolId, { minEpochTime })
+        const submittable = api.tx.pools.update(poolId, { ...minEpochTime, ...tranches, ...maxNavAge })
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )

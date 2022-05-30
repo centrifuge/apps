@@ -1,23 +1,66 @@
 import Centrifuge, { Balance, LoanInfoInput, Perquintill, Pool, Rate } from '@centrifuge/centrifuge-js'
 import { Keyring } from '@polkadot/api'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
-import BN from 'bn.js'
 import { firstValueFrom, lastValueFrom } from 'rxjs'
 
 const SEC_PER_YEAR = 365 * 24 * 60 * 60
-
-const Currency = new BN(10).pow(new BN(18))
 
 const Alice = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY'
 
 const consoleFreightMetadataHash = 'QmYDnfRRty1wRFi88sPft56Sv1aJatYCTiTR4wyNLd2pne'
 const forestCollectionMetadata = 'QmRL22TRYgK71zmH4fcw7YcCTRogLdGTgu4dqEtPYaSyCo'
 const baobabTreeNftMetadata = 'Qmd2G2Xjo5dNfQvGxmH9Psuq23b4C8j3pJ1sP8f5BXxED7'
+const firTreeNftMetadata = 'QmTNTWJuRNd3bJgGCXoLEaC4TqhbGixq7Y4gGpbzPxAGdS'
+const chestnutTreeNftMetadata = 'QmPEQNz2VSoukiiNoyVLeTmhMbTyVmy8kjkNYVFKHH8Ro2'
 
-const curCollectionId = '593814048587'
-const curPoolId = '950381600487'
-const curLoanCollectionId = '123123123137'
-const curAssetNftId = '124124124141'
+const makeId = (): string => {
+  const min = 1
+  const max = 10 ** 12
+  return Math.round(Math.random() * (max - min) + min).toString()
+}
+
+const poolId = makeId()
+const loanCollectionId = makeId()
+const assetCollectionId = makeId()
+const assetNftId1 = makeId()
+const assetNftId2 = makeId()
+const assetNftId3 = makeId()
+
+const loanInputs: Record<string, LoanInfoInput & { metadata: string; interestRatePerSec: Rate }> = {
+  [assetNftId1]: {
+    type: 'CreditLineWithMaturity',
+    value: Balance.fromFloat(7500),
+    advanceRate: Rate.fromPercent(90),
+    probabilityOfDefault: Rate.fromPercent(4.5),
+    lossGivenDefault: Rate.fromPercent(4.5),
+    discountRate: Rate.fromAprPercent(4.5),
+    maturityDate: '2025-10-10T00:00:00.000Z',
+    metadata: baobabTreeNftMetadata,
+    interestRatePerSec: Rate.fromAprPercent(4.5),
+  },
+  [assetNftId2]: {
+    type: 'CreditLineWithMaturity',
+    value: Balance.fromFloat(5000),
+    advanceRate: Rate.fromPercent(95),
+    probabilityOfDefault: Rate.fromPercent(6.5),
+    lossGivenDefault: Rate.fromPercent(6.5),
+    discountRate: Rate.fromAprPercent(6.5),
+    maturityDate: '2023-02-01T00:00:00.000Z',
+    metadata: firTreeNftMetadata,
+    interestRatePerSec: Rate.fromAprPercent(6.5),
+  },
+  [assetNftId3]: {
+    type: 'CreditLineWithMaturity',
+    value: Balance.fromFloat(1000),
+    advanceRate: Rate.fromPercent(99),
+    probabilityOfDefault: Rate.fromPercent(8.5),
+    lossGivenDefault: Rate.fromPercent(8.5),
+    discountRate: Rate.fromAprPercent(8.5),
+    maturityDate: '2023-05-30T00:00:00.000Z',
+    metadata: chestnutTreeNftMetadata,
+    interestRatePerSec: Rate.fromAprPercent(8.5),
+  },
+}
 
 const createPool = async (centrifuge: Centrifuge, poolId: string, loanCollectionId: string) => {
   const trancheInput = [
@@ -39,14 +82,13 @@ const createPool = async (centrifuge: Centrifuge, poolId: string, loanCollection
       loanCollectionId,
       trancheInput,
       'Usd',
-      new BN(1000000).mul(Currency),
+      Balance.fromFloat(1000),
       consoleFreightMetadataHash,
       [{ overdueDays: 1, percentage: Rate.fromPercent(13) }],
     ])
   )
 }
 
-// give pool creator full admin rights
 const addRolesToPool = async (centrifuge: Centrifuge, poolId: string, pool: Pool) => {
   // give pool creator full admin rights
   await lastValueFrom(
@@ -65,26 +107,21 @@ const addRolesToPool = async (centrifuge: Centrifuge, poolId: string, pool: Pool
   )
 }
 
-const createCollection = async (centrifuge: Centrifuge, assetCollectionId: string) => {
+const createAndFinanceAssets = async (centrifuge: Centrifuge) => {
   await lastValueFrom(centrifuge.nfts.createCollection([assetCollectionId, Alice, forestCollectionMetadata]))
-}
+  for (const assetId in loanInputs) {
+    const { metadata, interestRatePerSec, ...assetInput } = loanInputs[assetId]
+    await lastValueFrom(centrifuge.nfts.mintNft([assetCollectionId, assetId, Alice, metadata]))
+    await lastValueFrom(centrifuge.pools.createLoan([poolId, assetCollectionId, assetId]))
 
-const mintNftIntoCollection = async (centrifuge: Centrifuge, assetCollectionId: string, assetNftId: string) => {
-  await lastValueFrom(centrifuge.nfts.mintNft([assetCollectionId, assetNftId, Alice, baobabTreeNftMetadata]))
-}
+    const nextLoanId = (await centrifuge.pools.getNextLoanId()).toString()
+    const currentLoanId = `${Number(nextLoanId) - 1}`
+    await lastValueFrom(centrifuge.pools.priceLoan([poolId, currentLoanId, interestRatePerSec.toString(), assetInput]))
 
-const priceLoan = async (centrifuge: Centrifuge, poolId: string, loanId: string) => {
-  const loanInfoInput: LoanInfoInput = {
-    type: 'CreditLineWithMaturity',
-    value: Balance.fromFloat(100000),
-    advanceRate: Rate.fromPercent(90),
-    probabilityOfDefault: Rate.fromPercent(4.5),
-    lossGivenDefault: Rate.fromPercent(4.5),
-    discountRate: Rate.fromAprPercent(4.5),
-    maturityDate: '2023-05-24T00:00:00.000Z',
+    // check this transaction in UI, make sure numbers are fine
+    await lastValueFrom(centrifuge.pools.financeLoan([poolId, currentLoanId, Balance.fromFloat(300)]))
+    console.log(`Created and financed loan with id: ${currentLoanId}`)
   }
-
-  await lastValueFrom(centrifuge.pools.priceLoan([poolId, loanId, Rate.fromAprPercent(4.5).toString(), loanInfoInput]))
 }
 
 const run = async () => {
@@ -99,55 +136,45 @@ const run = async () => {
     printExtrinsics: true,
   })
 
-  // TODO create and finance a loan in each riskgroup
-
-  const poolId = curPoolId
-  const loanCollectionId = curLoanCollectionId
-  const assetCollectionId = curCollectionId
-  const assetNftId = curAssetNftId
-
   console.log(
-    `poolId: ${poolId}, loanCollectionId: ${loanCollectionId}, assetCollectionId: ${assetCollectionId}, assetNftId: ${assetNftId}`
+    `poolId: ${poolId}, loanCollectionId: ${loanCollectionId}, assetCollectionId: ${assetCollectionId}, assetNftIds: ${assetNftId1}, ${assetNftId2}, ${assetNftId3}`
   )
 
-  // create pool based on already existing metadata (cool pool in this case)
   await createPool(centrifuge, poolId, loanCollectionId)
 
   const pool = await firstValueFrom(centrifuge.pools.getPool([poolId]))
   await addRolesToPool(centrifuge, poolId, pool)
 
-  await createCollection(centrifuge, assetCollectionId)
-
-  await mintNftIntoCollection(centrifuge, assetCollectionId, assetNftId)
-
-  await lastValueFrom(centrifuge.pools.createLoan([poolId, assetCollectionId, assetNftId]))
-
-  const nextLoanId = (await centrifuge.pools.getNextLoanId()).toString()
-  const currentLoanId = `${Number(nextLoanId) - 1}`
-  await priceLoan(centrifuge, poolId, currentLoanId)
-
-  await lastValueFrom(centrifuge.pools.updatePool([poolId, 1, 1, 1]))
+  await lastValueFrom(centrifuge.pools.updatePool({ poolId, minEpochTime: { newValue: 1 } }))
 
   const JUN = pool.tranches[0].id
   const MEZ = pool.tranches[1].id
   const SEN = pool.tranches[2].id
 
-  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, SEN, new BN(2000).mul(Currency)]))
-  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, MEZ, new BN(1000).mul(Currency)]))
-  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, JUN, new BN(500).mul(Currency)]))
+  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, SEN, Balance.fromFloat(2000)]))
+  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, MEZ, Balance.fromFloat(1000)]))
+  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, JUN, Balance.fromFloat(500)]))
 
   await lastValueFrom(centrifuge.pools.closeEpoch([poolId]))
+  console.log('EPOCH 1 CLOSED')
 
   await lastValueFrom(centrifuge.pools.collect([poolId]))
   console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
 
-  await lastValueFrom(centrifuge.pools.financeLoan([poolId, currentLoanId, new BN(50).mul(Currency)]))
-  console.log(JSON.stringify(await centrifuge.pools.getLoan([poolId, currentLoanId]), null, 4))
+  await createAndFinanceAssets(centrifuge)
 
-  await lastValueFrom(centrifuge.pools.updateRedeemOrder([poolId, SEN, new BN(200).mul(Currency)]))
+  const nextLoanId = (await centrifuge.pools.getNextLoanId()).toString()
+  const currentLoanId = `${Number(nextLoanId) - 1}`
+
+  // check this in UI as well
+  await lastValueFrom(centrifuge.pools.updateRedeemOrder([poolId, SEN, Balance.fromFloat(400)]))
   console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
 
   await lastValueFrom(centrifuge.pools.closeEpoch([poolId]))
+  await lastValueFrom(centrifuge.pools.collect([poolId]))
+  console.log('EPOCH 2 CLOSED')
+
+  // this one doesn't work
   await lastValueFrom(centrifuge.pools.collect([poolId, JUN]))
   await lastValueFrom(
     centrifuge.pools.submitSolution([
@@ -159,7 +186,6 @@ const run = async () => {
     ])
   )
   await lastValueFrom(centrifuge.pools.collect([poolId]))
-  console.log(JSON.stringify(await firstValueFrom(centrifuge.pools.getPool([poolId])), null, 4))
 
   console.log(JSON.stringify(await firstValueFrom(centrifuge.pools.getLoans([poolId])), null, 4))
   await lastValueFrom(centrifuge.pools.repayAndCloseLoan([poolId, currentLoanId]))
@@ -172,17 +198,12 @@ const run = async () => {
 
   console.log(JSON.stringify(await firstValueFrom(centrifuge.pools.getPool([poolId])), null, 4))
 
-  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, SEN, new BN(10).mul(Currency)]))
+  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, SEN, Balance.fromFloat(10)]))
   await lastValueFrom(centrifuge.pools.closeEpoch([poolId]))
+  console.log('EPOCH 3 CLOSED')
   await lastValueFrom(centrifuge.pools.collect([poolId]))
 }
 
 cryptoWaitReady().then(() => {
   run()
 })
-
-const makeId = (): string => {
-  const min = 1
-  const max = 10 ** 12
-  return Math.round(Math.random() * (max - min) + min).toString()
-}

@@ -54,7 +54,7 @@ export const ReserveCashDragChart: React.VFC = () => {
                 yAxisId="left"
                 tickLine={false}
                 style={{ fontSize: '10px', fontFamily: "'Inter'" }}
-                tickFormatter={(tick: number) => formatBalanceAbbreviated(tick)}
+                tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
               />
               <YAxis
                 yAxisId="right"

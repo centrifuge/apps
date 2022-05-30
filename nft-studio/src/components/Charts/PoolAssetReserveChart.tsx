@@ -43,7 +43,7 @@ export const PoolAssetReserveChart: React.VFC = () => {
       <Shelf gap="4" width="100%" color="textSecondary">
         {[...data, today]?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart data={[...data, today]} margin={{ left: -30 }} reverseStackOrder>
+            <ComposedChart data={[...data, today]} margin={{ left: -20 }} reverseStackOrder>
               <XAxis
                 dataKey="day"
                 tick={<CustomizedXAxisTick variant={[...data, today].length > 30 ? 'months' : 'days'} />}
@@ -53,7 +53,7 @@ export const PoolAssetReserveChart: React.VFC = () => {
               <YAxis
                 tickLine={false}
                 style={{ fontSize: '10px', fontFamily: "'Inter'" }}
-                tickFormatter={(tick: number) => formatBalanceAbbreviated(tick)}
+                tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
               />
               <CartesianGrid stroke={theme.colors.borderSecondary} />
               <Tooltip content={<CustomizedTooltip currency={pool?.currency || ''} />} />

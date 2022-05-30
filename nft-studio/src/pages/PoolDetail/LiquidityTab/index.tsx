@@ -9,7 +9,7 @@ import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { Tooltips } from '../../../components/Tooltips'
-import { getEpochHoursRemaining } from '../../../utils/date'
+import { getEpochTimeRemaining } from '../../../utils/date'
 import { formatBalance } from '../../../utils/formatting'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { useLiquidityAdmin } from '../../../utils/usePermissions'
@@ -35,6 +35,7 @@ export const PoolDetailLiquidity: React.FC<{
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const isLiquidityAdmin = useLiquidityAdmin(poolId)
+  const { hours, minutes } = getEpochTimeRemaining(pool!)
 
   // const dailyPoolStates = useDailyPoolStates(poolId)
 
@@ -85,7 +86,7 @@ export const PoolDetailLiquidity: React.FC<{
         titleAddition={`Ongoing`}
         headerRight={
           <Shelf gap="1">
-            <Tooltips type="epochTimeRemaining" label={`${getEpochHoursRemaining(pool!)} hrs remaining`} />
+            <Tooltips type="epochTimeRemaining" label={`${hours} hrs and ${minutes} min remaining`} />
             <Button small variant="secondary" onClick={closeEpoch} disabled={!pool}>
               Close
             </Button>
