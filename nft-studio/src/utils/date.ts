@@ -39,9 +39,9 @@ export function getEpochTimeRemaining(pool: DetailedPool) {
   const last = new Date(pool.epoch.lastClosed).getTime()
   const min = pool.parameters.minEpochTime * 1000
   const now = Date.now()
-  let seconds = Math.floor((last + min - now) / 1000)
-  let minutes = Math.max(0, Math.floor(seconds / 60))
-  let hours = Math.max(Math.floor(minutes / 60))
 
+  const seconds = Math.floor((last + min - now) / 1000)
+  const minutes = Math.max(0, Math.floor(seconds / 60))
+  const hours = Math.max(Math.floor(minutes / 60))
   return { hours, minutes }
 }
