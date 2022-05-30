@@ -1,22 +1,29 @@
 import * as React from 'react'
 import styled, { css } from 'styled-components'
+import IconNftThumbnail from '../../icon/IconNftThumbnail'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
 type ThumbnailProps = {
   label: string
-  type?: 'token' | 'pool' | 'asset'
+  type?: 'token' | 'pool' | 'asset' | 'nft'
   size?: 'small' | 'large'
 }
 
 export const Thumbnail: React.VFC<ThumbnailProps> = ({ label, ...props }) => {
   return (
-    <StyledThumbnail fontWeight={500} {...props}>
-      <Stack position="relative" zIndex="1">
-        <span>{label.slice(0, 3)}</span>
-        <span>{label.slice(3, 6)}</span>
-      </Stack>
-    </StyledThumbnail>
+    <>
+      {props.type === 'nft' ? (
+        <IconNftThumbnail color="backgroundThumbnail" />
+      ) : (
+        <StyledThumbnail fontWeight={500} {...props}>
+          <Stack position="relative" zIndex="1">
+            <span>{label.slice(0, 3)}</span>
+            <span>{label.slice(3, 6)}</span>
+          </Stack>
+        </StyledThumbnail>
+      )}
+    </>
   )
 }
 
