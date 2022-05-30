@@ -10,7 +10,9 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
       new Centrifuge({
         network: config.network,
         kusamaWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL as string,
+        polkadotWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL as string,
         altairWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL as string,
+        centrifugeWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL as string,
         printExtrinsics: import.meta.env.NODE_ENV === 'development',
         centrifugeSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,
         altairSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,

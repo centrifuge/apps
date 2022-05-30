@@ -39,7 +39,7 @@ const PROXY_TYPE_LABELS = {
 }
 
 const Accounts: React.FC = () => {
-  const { selectedAccount, accounts, selectAccount, proxy, selectProxy, proxies } = useWeb3()
+  const { selectedAccount, accounts, selectAccount, proxy, selectProxy, proxies, disconnect } = useWeb3()
   const balances = useBalances(useAddress())
 
   if (!selectedAccount || !accounts) return null
@@ -144,6 +144,16 @@ const Accounts: React.FC = () => {
                 ))}
               </MenuItemGroup>
             ))}
+            <MenuItemGroup>
+              <MenuItem
+                label="Disconnect"
+                icon={<Box minWidth="iconMedium" />}
+                onClick={() => {
+                  state.close()
+                  disconnect()
+                }}
+              />
+            </MenuItemGroup>
           </Menu>
         </div>
       )}

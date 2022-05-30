@@ -3,7 +3,7 @@ import { Box, IconInvestments, IconNft, IconPieChart, IconPools, IconUser, Shelf
 import React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
-import logoCentrifugeFull from '../assets/images/logoCentrifugeFull.svg'
+import { config } from '../config'
 import { useAddress } from '../utils/useAddress'
 import { usePermissions } from '../utils/usePermissions'
 import { usePoolMetadata, usePools } from '../utils/usePools'
@@ -14,8 +14,7 @@ import { TextWithPlaceholder } from './TextWithPlaceholder'
 type Props = {}
 
 export const Menu: React.FC<Props> = () => {
-  const investmentsMatch = useRouteMatch('/investments')
-  const issuersMatch = useRouteMatch('/issuer')
+  const homeMatch = useRouteMatch({ path: '/', exact: true })
 
   const allPools = usePools()
   const address = useAddress()
@@ -28,11 +27,13 @@ export const Menu: React.FC<Props> = () => {
     return allPools.filter(({ id }) => permissions.pools[id]?.roles.includes('PoolAdmin'))
   }, [allPools, permissions])
 
+  const Logo = config.logo
+
   return (
     <Box position="sticky" top={0} px={[0, 0, 2]}>
       <Link to="/">
-        <Box py={[0, 0, 3]} px={1} mb={[2, 2, 10]}>
-          <img src={logoCentrifugeFull} alt="" />
+        <Box py={[0, 0, 3]} px={1} mb={2} color="textPrimary">
+          <Logo style={{ maxHeight: '56px', maxWidth: '50%' }} />
         </Box>
       </Link>
       <Shelf
@@ -42,7 +43,7 @@ export const Menu: React.FC<Props> = () => {
         justifyContent="space-evenly"
         px={[2, 2, 0]}
       >
-        <NavigationItem label="Tokens" href="/tokens" icon={<IconInvestments size="16px" />} />
+        <NavigationItem label="Tokens" href="/tokens" icon={<IconInvestments size="16px" />} active={!!homeMatch} />
         <NavigationItem label="Pools" href="/pools" icon={<IconPools size="16px" />} />
         <NavigationItem label="NFTs" href="/nfts" icon={<IconNft size="16px" />} />
         <NavigationItem label="Portfolio" href="/investments/portfolio" icon={<IconPieChart size="16px" />} />

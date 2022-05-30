@@ -38,17 +38,25 @@ const queryClient = new QueryClient({
 })
 
 export const Root: React.VFC = () => {
-  const [isForcedDark, setIsForcedDark] = React.useState(!!initialFlagsState.altairDarkMode)
+  const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
 
   return (
     <QueryClientProvider client={queryClient}>
-      <FabricProvider theme={isForcedDark || config.defaultTheme === 'dark' ? config.themes.dark : config.themes.light}>
+      <FabricProvider
+        theme={
+          !isThemeToggled
+            ? config.themes[config.defaultTheme]
+            : config.defaultTheme === 'dark'
+            ? config.themes.light
+            : config.themes.dark
+        }
+      >
         <GlobalStyle />
         <FabricGlobalStyle />
         <HostPermissionsProvider>
           <CentrifugeProvider>
             <Web3Provider>
-              <DebugFlags onChange={(state) => setIsForcedDark(!!state.altairDarkMode)}>
+              <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
                 <TransactionProvider>
                   <TransactionToasts />
                   <Router>

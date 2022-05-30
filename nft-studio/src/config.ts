@@ -1,5 +1,8 @@
 import { altairDark, centrifugeLight } from '@centrifuge/fabric'
+import React from 'react'
 import { DefaultTheme } from 'styled-components'
+import { LogoAltairText } from './components/LogoAltair'
+import { LogoCentrifuge } from './components/LogoCentrifuge'
 
 export const FEATURED_COLLECTIONS = [
   '3410462771',
@@ -54,6 +57,7 @@ const darkTheme: DefaultTheme = {
 
 type EnvironmentConfig = {
   name: string
+  logo: React.ComponentType<any>
   network: 'altair' | 'centrifuge'
   themes: {
     light: DefaultTheme
@@ -67,6 +71,7 @@ type EnvironmentConfig = {
 
 const ALTAIR: EnvironmentConfig = {
   name: 'Pools on Altair',
+  logo: LogoAltairText,
   network: 'altair',
   themes: {
     light: lightTheme,
@@ -80,6 +85,7 @@ const ALTAIR: EnvironmentConfig = {
 
 const CENTRIFUGE: EnvironmentConfig = {
   name: 'Centrifuge App',
+  logo: LogoCentrifuge,
   network: 'centrifuge',
   themes: {
     light: lightTheme,

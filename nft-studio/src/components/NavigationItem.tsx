@@ -9,6 +9,7 @@ type Props = {
   icon?: React.ReactElement
   href?: string
   defaultOpen?: boolean
+  active?: boolean
 }
 
 const NavigationClickable = styled(Shelf)<{ $active?: boolean }>`
@@ -27,10 +28,10 @@ const IconWrapper = styled(Shelf)`
     vertical-align: baseline;
   }
 `
-export const NavigationItem: React.FC<Props> = ({ label, icon, href, children, defaultOpen = false }) => {
+export const NavigationItem: React.FC<Props> = ({ label, icon, href, children, active, defaultOpen = false }) => {
   const [open, setOpen] = useState(defaultOpen)
   const history = useHistory()
-  const match = useRouteMatch(href || '/ignore')
+  const match = useRouteMatch(href || '/ignore') || active
   const isDesktop = useIsAboveBreakpoint('M')
 
   return (

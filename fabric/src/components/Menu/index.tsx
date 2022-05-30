@@ -62,7 +62,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
 }) => {
   return (
     <MenuItemButton {...buttonProps}>
-      <Shelf gap={1} px={2} py={1}>
+      <Shelf gap={1} px={2} py={1} minHeight="48px">
         {IconComp && isComponent(IconComp) ? <IconComp size="iconMedium" /> : IconComp}
         <Stack alignItems="flex-start">
           <Text variant="interactive1" color="inherit">
