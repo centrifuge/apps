@@ -26,7 +26,7 @@ export const formatAge = (ageInDays: number, decimals: number = 1) => {
   } else if (ageInDays < 0) {
     return '0 days'
   }
-  return `${ageInDays.toFixed(decimals)} days`
+  return `${Math.floor(ageInDays)} days`
 }
 
 export const getAge = (createdAt: string | undefined | null) => {

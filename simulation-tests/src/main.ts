@@ -90,7 +90,6 @@ const createPool = async (centrifuge: Centrifuge, poolId: string, loanCollection
 }
 
 const addRolesToPool = async (centrifuge: Centrifuge, poolId: string, pool: Pool) => {
-  // give pool creator full admin rights
   await lastValueFrom(
     centrifuge.pools.updatePoolRoles([
       poolId,
@@ -118,8 +117,7 @@ const createAndFinanceAssets = async (centrifuge: Centrifuge) => {
     const currentLoanId = `${Number(nextLoanId) - 1}`
     await lastValueFrom(centrifuge.pools.priceLoan([poolId, currentLoanId, interestRatePerSec.toString(), assetInput]))
 
-    // check this transaction in UI, make sure numbers are fine
-    await lastValueFrom(centrifuge.pools.financeLoan([poolId, currentLoanId, Balance.fromFloat(300)]))
+    await lastValueFrom(centrifuge.pools.financeLoan([poolId, currentLoanId, Balance.fromFloat(200)]))
     console.log(`Created and financed loan with id: ${currentLoanId}`)
   }
 }
@@ -151,14 +149,13 @@ const run = async () => {
   const MEZ = pool.tranches[1].id
   const SEN = pool.tranches[2].id
 
-  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, SEN, Balance.fromFloat(2000)]))
-  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, MEZ, Balance.fromFloat(1000)]))
+  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, SEN, Balance.fromFloat(300)]))
+  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, MEZ, Balance.fromFloat(100)]))
   await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, JUN, Balance.fromFloat(500)]))
 
   await lastValueFrom(centrifuge.pools.closeEpoch([poolId]))
   console.log('EPOCH 1 CLOSED')
 
-  await lastValueFrom(centrifuge.pools.collect([poolId]))
   console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
 
   await createAndFinanceAssets(centrifuge)
@@ -166,16 +163,12 @@ const run = async () => {
   const nextLoanId = (await centrifuge.pools.getNextLoanId()).toString()
   const currentLoanId = `${Number(nextLoanId) - 1}`
 
-  // check this in UI as well
-  await lastValueFrom(centrifuge.pools.updateRedeemOrder([poolId, SEN, Balance.fromFloat(400)]))
-  console.log(JSON.stringify(await centrifuge.pools.getPool([poolId]), null, 4))
+  await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, MEZ, Balance.fromFloat(600)]))
+  await lastValueFrom(centrifuge.pools.updateRedeemOrder([poolId, SEN, Balance.fromFloat(200)]))
 
   await lastValueFrom(centrifuge.pools.closeEpoch([poolId]))
-  await lastValueFrom(centrifuge.pools.collect([poolId]))
   console.log('EPOCH 2 CLOSED')
 
-  // this one doesn't work
-  await lastValueFrom(centrifuge.pools.collect([poolId, JUN]))
   await lastValueFrom(
     centrifuge.pools.submitSolution([
       poolId,
@@ -185,23 +178,16 @@ const run = async () => {
       ],
     ])
   )
-  await lastValueFrom(centrifuge.pools.collect([poolId]))
 
-  console.log(JSON.stringify(await firstValueFrom(centrifuge.pools.getLoans([poolId])), null, 4))
   await lastValueFrom(centrifuge.pools.repayAndCloseLoan([poolId, currentLoanId]))
-  console.log(JSON.stringify(await firstValueFrom(centrifuge.pools.getLoans([poolId])), null, 4))
-
-  console.log(JSON.stringify(await firstValueFrom(centrifuge.pools.getPool([poolId])), null, 4))
 
   const writeOffGroupId = 0
   await lastValueFrom(centrifuge.pools.adminWriteOff([poolId, currentLoanId, writeOffGroupId]))
 
-  console.log(JSON.stringify(await firstValueFrom(centrifuge.pools.getPool([poolId])), null, 4))
-
   await lastValueFrom(centrifuge.pools.updateInvestOrder([poolId, SEN, Balance.fromFloat(10)]))
   await lastValueFrom(centrifuge.pools.closeEpoch([poolId]))
   console.log('EPOCH 3 CLOSED')
-  await lastValueFrom(centrifuge.pools.collect([poolId]))
+  console.log(JSON.stringify(await firstValueFrom(centrifuge.pools.getPool([poolId])), null, 4))
 }
 
 cryptoWaitReady().then(() => {

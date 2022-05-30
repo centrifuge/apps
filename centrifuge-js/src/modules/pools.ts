@@ -377,7 +377,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.pools.update(poolId, { ...minEpochTime, ...tranches, ...maxNavAge })
+        const submittable = api.tx.pools.update(poolId, { minEpochTime, tranches, maxNavAge })
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
