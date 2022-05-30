@@ -14,18 +14,10 @@ export type AssetByRiskGroup = {
   color?: string
   labelColor?: string
   name: string | React.ReactElement
-  amount: Balance | any
+  amount: string | React.ReactElement
   share: string | React.ReactElement
   interestRatePerSec: string | React.ReactElement
   riskAdjustment: string | React.ReactElement
-}
-
-const initialRow: AssetByRiskGroup = {
-  name: '',
-  amount: new Balance(0),
-  share: '0',
-  interestRatePerSec: '0',
-  riskAdjustment: '0',
 }
 
 const columns: Column[] = [
@@ -89,7 +81,7 @@ const Amount: React.VFC<AssetByRiskGroup> = ({ amount }) => {
   const { pid } = useParams<{ pid: string }>()
   const pool = usePool(pid)
 
-  return <Text variant="body2">{React.isValidElement(amount) ? amount : formatBalance(amount, pool?.currency)}</Text>
+  return <Text variant="body2">{amount}</Text>
 }
 
 export const RiskGroupList: React.FC = () => {
@@ -99,9 +91,13 @@ export const RiskGroupList: React.FC = () => {
   const theme = useTheme()
   const { data: metadata } = usePoolMetadata(pool)
 
+  if (!metadata?.riskGroups?.length) return null
+  const totalAmountsSum =
+    loans?.reduce<Balance>((prev, curr) => new Balance(prev.add(curr.outstandingDebt)), new Balance(0)) ||
+    new Balance(0)
+
   const riskGroups = React.useMemo(() => {
-    if (!metadata?.riskGroups) return []
-    return metadata?.riskGroups?.map((group) => {
+    return metadata.riskGroups!.map((group) => {
       const loansByRiskGroup = loans?.filter((loan) => {
         return (
           (loan.status === 'Active' &&
@@ -123,64 +119,44 @@ export const RiskGroupList: React.FC = () => {
       const riskAdjustment = lgd.mul(pod).div(100).toDecimalPlaces(2).toString()
       const interestRatePerSec = new Rate(group.interestRatePerSec).toAprPercent().toDecimalPlaces(2).toString()
 
-      // temp solution while assets are still manually priced (in the future there will be a select to choose a riskGroup)
-      if (!loansByRiskGroup || loansByRiskGroup?.length === 0) {
-        return {
-          ...initialRow,
-          name: group.name,
-          riskAdjustment,
-          interestRatePerSec,
-        } as AssetByRiskGroup
-      }
-      const amount = loansByRiskGroup.reduce<Balance>(
+      const amount = loansByRiskGroup?.reduce<Balance>(
         (prev, curr) => new Balance(prev?.add(curr.outstandingDebt)),
         new Balance('0')
       )
-      const share =
-        pool && pool?.nav.latest.toString() !== '0'
-          ? Dec(amount.toDecimal()).div(pool!.nav.latest.toDecimal()).mul(100).toDecimalPlaces(0).toNumber()
-          : '0'
+      if (!amount || !totalAmountsSum) {
+        return {
+          name: group.name,
+          amount: '',
+          share: '',
+          interestRatePerSec,
+          riskAdjustment,
+        } as AssetByRiskGroup
+      }
+
       return {
         name: group.name,
-        amount,
-        share,
+        amount: formatBalance(amount, pool?.currency),
+        share: Dec(amount?.toDecimal()).div(totalAmountsSum.toDecimal()).mul(100).toDecimalPlaces(0).toString(),
         interestRatePerSec,
         riskAdjustment,
       } as AssetByRiskGroup
     })
   }, [metadata, loans, pool])
 
-  // temp solution while assets are still manually priced (in the future there will be a select to choose a riskGroup)
-  // represents all assets that could not be sorted into a riskGroup
-  const remainingAssets: AssetByRiskGroup[] = React.useMemo(() => {
-    const amountsSum = riskGroups.reduce((curr, prev) => new Balance(curr.add(prev.amount as any)), new Balance('0'))
-    const sharesSum = riskGroups.reduce((curr, prev) => curr + Number(prev.share) * 100, 0) / 100
-
-    return sharesSum !== 100 && sharesSum !== 0
-      ? [
-          {
-            name: 'Other',
-            amount: new Balance(pool?.nav.latest.sub(amountsSum) || 0),
-            share: `${100 - sharesSum}`,
-            interestRatePerSec: '',
-            riskAdjustment: '',
-          },
-        ]
-      : []
-  }, [pool, riskGroups])
-
-  const totalSharesSum = [...riskGroups, ...remainingAssets]
-    .reduce((curr, prev) => curr.add(prev.share as any), Dec(0))
+  const totalSharesSum = riskGroups
+    .reduce((prev, curr) => (typeof curr.share === 'string' ? prev.add(curr.share) : prev), Dec(0))
     .toString()
-
   const summaryRow = React.useMemo(() => {
     const avgInterestRatePerSec = riskGroups
-      .reduce<any>((curr, prev) => curr.add(prev.interestRatePerSec), Dec(0))
+      .reduce(
+        (prev, curr) => (typeof curr.interestRatePerSec === 'string' ? prev.add(curr.interestRatePerSec) : prev),
+        Dec(0)
+      )
       .dividedBy(riskGroups.length)
       .toDecimalPlaces(2)
 
     const avgRiskAdjustment = riskGroups
-      .reduce<any>((curr, prev) => curr.add(prev.riskAdjustment), Dec(0))
+      .reduce((prev, curr) => (typeof curr.riskAdjustment === 'string' ? prev.add(curr.riskAdjustment) : prev), Dec(0))
       .dividedBy(riskGroups.length)
       .toDecimalPlaces(2)
 
@@ -192,7 +168,7 @@ export const RiskGroupList: React.FC = () => {
       ),
       amount: (
         <Text variant="body2" fontWeight={600}>
-          {formatBalance(new Balance(pool?.nav.latest || '0'), pool?.currency)}
+          {formatBalance(totalAmountsSum || 0, pool?.currency)}
         </Text>
       ),
       name: (
@@ -208,7 +184,7 @@ export const RiskGroupList: React.FC = () => {
   }, [riskGroups, pool?.nav.latest, pool?.currency, totalSharesSum])
 
   // biggest share of pie gets darkest color
-  const tableDataWithColor = [...riskGroups, ...remainingAssets]
+  const tableDataWithColor = riskGroups
     .sort((a, b) => Number(a.amount) - Number(b.amount))
     .map((item, index) => {
       if (metadata?.riskGroups!.length) {
