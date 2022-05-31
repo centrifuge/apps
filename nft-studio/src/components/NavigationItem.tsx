@@ -16,7 +16,7 @@ const NavigationClickable = styled(Shelf)<{ $active?: boolean }>`
   background: ${({ $active, theme }) => $active && theme.colors.secondarySelectedBackground};
   color: ${({ $active, theme }) => ($active ? theme.colors.textSelected : theme.colors.textPrimary)};
   :hover {
-    color: ${({ theme }) => theme.colors.accentPrimary};
+    color: ${({ theme }) => theme.colors.textSelected};
   }
 `
 
