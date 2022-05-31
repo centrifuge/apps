@@ -19,7 +19,7 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import styled from 'styled-components'
-import { getEpochHoursRemaining } from '../utils/date'
+import { getEpochTimeRemaining } from '../utils/date'
 import { Dec } from '../utils/Decimal'
 import { formatBalance, getCurrencySymbol } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
@@ -550,6 +550,7 @@ const PendingOrder: React.FC<{
   isCancelling: boolean
   onChangeOrder: () => void
 }> = ({ type, amount, pool, onCancelOrder, isCancelling, onChangeOrder }) => {
+  const { hours: hoursRemaining, minutes: minutesRemaining } = getEpochTimeRemaining(pool!)
   return (
     <Stack gap={2}>
       <Stack gap="1px">
@@ -568,7 +569,7 @@ const PendingOrder: React.FC<{
           </Shelf>
           <Text variant="body3">
             Locked {type === 'invest' ? 'investments' : 'redemptions'} are executed at the end of the epoch (
-            {getEpochHoursRemaining(pool!)} hrs remaining).{' '}
+            {hoursRemaining} hrs and ${minutesRemaining} min remaining).{' '}
             <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
           </Text>
         </Stack>

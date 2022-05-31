@@ -21,12 +21,7 @@ export function formatBalance(amount: Balance | Decimal | number, currency?: str
   return currency ? `${formattedAmount} ${getCurrencySymbol(currency)}` : formattedAmount
 }
 
-export function formatBalanceAbbreviated(
-  amount: Balance | Decimal | number,
-  currency?: string,
-  precise = false,
-  decimals = 1
-) {
+export function formatBalanceAbbreviated(amount: Balance | Decimal | number, currency?: string, decimals = 1) {
   const amountNumber =
     amount instanceof Balance ? amount.toFloat() : amount instanceof Decimal ? amount.toNumber() : amount
   let formattedAmount = ''

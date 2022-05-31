@@ -32,6 +32,7 @@ export type Config = {
   signingAddress?: AddressOrPair
   printExtrinsics?: boolean
   proxy?: string
+  debug?: boolean
 }
 
 export type UserProvidedConfig = Partial<Config>
@@ -109,6 +110,9 @@ export class CentrifugeBase {
         }),
         takeWhile((result) => {
           const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
+          if (errors.length && this.config.debug) {
+            console.log('🚨 error', JSON.stringify(errors))
+          }
           const hasError = !!(result.dispatchError || errors.length)
 
           return !result.status.isInBlock && !hasError
