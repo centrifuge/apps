@@ -1,6 +1,4 @@
-import { feeToApr, formatPercentage } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Text } from '@centrifuge/fabric'
-import { BN } from '@polkadot/util'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
 import { usePool, usePoolMetadata } from '../utils/usePools'
@@ -73,8 +71,10 @@ export const TokenListByPool: React.FC = () => {
   const tokens: TokenByPoolTableData[] = pool?.tranches
     .map((tranche) => {
       return {
-        apy: tranche?.interestRatePerSec ? feeToApr(tranche?.interestRatePerSec) : '',
-        protection: tranche.minRiskBuffer?.toString() || '',
+        apy: tranche?.interestRatePerSec
+          ? tranche?.interestRatePerSec.toAprPercent().toDecimalPlaces(2).toString()
+          : '',
+        protection: tranche.minRiskBuffer?.toDecimal().mul(100).toString() || '',
         name: metadata?.tranches?.[tranche.id]?.name || '',
         symbol: metadata?.tranches?.[tranche.id]?.symbol || '',
         poolName: metadata?.pool?.name || '',
@@ -106,10 +106,9 @@ const TokenName: React.VFC<RowProps> = ({ token }) => {
 }
 
 const APY: React.VFC<RowProps> = ({ token }) => {
-  const apr = parseInt(token?.apy || '0', 10)
-  return <Text variant="body2">{apr > 0 ? `${apr.toPrecision(3)}%` : ''}</Text>
+  return <Text variant="body2">{Number(token.apy) > 0 ? `${token.apy}%` : ''}</Text>
 }
 
 const Protection: React.VFC<RowProps> = ({ token }) => {
-  return <Text variant="body2">{formatPercentage(token.protection, new BN(10).pow(new BN(18)).toString())}</Text>
+  return <Text variant="body2">{Number(token.protection) > 0 ? `${token.protection}%` : ''}</Text>
 }

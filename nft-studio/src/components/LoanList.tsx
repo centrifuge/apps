@@ -10,65 +10,73 @@ import { usePool } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import LoanLabel from './LoanLabel'
 
+type Row = Loan & { amount?: number }
+
 type Props = {
   loans: Loan[]
   onLoanClicked: (loan: Loan) => void
 }
 
-export const LoanList: React.FC<Props> = ({ loans, onLoanClicked }) => {
-  const columns: Column[] = [
-    {
-      align: 'left',
-      header: 'Asset',
-      cell: (l: Loan) => <AssetName loan={l} />,
-      flex: '3',
-    },
-    {
-      header: 'Maturity',
-      cell: (l: Loan) => (
-        <Text variant="body2">
-          {l.status === 'Active' &&
-          'maturityDate' in l.loanInfo &&
-          !l.interestRatePerSec.isZero() &&
-          !l.totalBorrowed.isZero()
-            ? formatAge(daysBetween(l.originationDate, l.loanInfo?.maturityDate))
-            : ''}
-        </Text>
-      ),
-      flex: '2',
-    },
-    {
-      header: 'Maturity date',
-      cell: (l: Loan) => (
-        <Text variant="body2">
-          {l.status !== 'Created' && 'maturityDate' in l.loanInfo ? formatDate(l.loanInfo.maturityDate) : ''}
-        </Text>
-      ),
-      flex: '2',
-    },
-    {
-      header: () => <SortableTableHeader label="Amount" />,
-      cell: (l: Loan) => <AssetAmount loan={l} />,
-      flex: '2',
-      sortKey: 'principleDebt',
-    },
-    {
-      header: 'Status',
-      cell: (l: Loan) => <LoanLabel loan={l} />,
-      flex: '2',
-      align: 'center',
-    },
-    {
-      header: '',
-      cell: () => <IconChevronRight size={24} color="textPrimary" />,
-      flex: '0 0 52px',
-    },
-  ]
+const columns: Column[] = [
+  {
+    align: 'left',
+    header: 'Asset',
+    cell: (l: Row) => <AssetName loan={l} />,
+    flex: '3',
+  },
+  {
+    header: 'Maturity',
+    cell: (l: Row) => (
+      <Text variant="body2">
+        {l.status === 'Active' &&
+        'maturityDate' in l.loanInfo &&
+        !l.interestRatePerSec.isZero() &&
+        !l.totalBorrowed.isZero()
+          ? formatAge(daysBetween(l.originationDate, l.loanInfo?.maturityDate))
+          : ''}
+      </Text>
+    ),
+    flex: '2',
+  },
+  {
+    header: 'Maturity date',
+    cell: (l: Row) => (
+      <Text variant="body2">
+        {l.status !== 'Created' && 'maturityDate' in l.loanInfo ? formatDate(l.loanInfo.maturityDate) : ''}
+      </Text>
+    ),
+    flex: '2',
+  },
+  {
+    header: () => <SortableTableHeader label="Amount" />,
+    cell: (l: Row) => <AssetAmount loan={l} />,
+    flex: '2',
+    sortKey: 'amount',
+  },
+  {
+    header: 'Status',
+    cell: (l: Row) => <LoanLabel loan={l} />,
+    flex: '2',
+    align: 'center',
+  },
+  {
+    header: '',
+    cell: () => <IconChevronRight size={24} color="textPrimary" />,
+    flex: '0 0 52px',
+  },
+]
 
-  return <DataTable data={loans} columns={columns} onRowClicked={onLoanClicked} />
+export const LoanList: React.FC<Props> = ({ loans, onLoanClicked }) => {
+  const Row = loans.map((loan) => {
+    return {
+      amount: loan.loanInfo.value.toDecimal().toNumber(),
+      ...loan,
+    }
+  })
+  return <DataTable data={Row} columns={columns} onRowClicked={onLoanClicked} />
 }
 
-const AssetName: React.VFC<{ loan: Loan }> = ({ loan }) => {
+const AssetName: React.VFC<{ loan: Row }> = ({ loan }) => {
   const nft = useNFT(loan.asset.collectionId, loan.asset.nftId)
   const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   return (
@@ -85,11 +93,7 @@ const AssetName: React.VFC<{ loan: Loan }> = ({ loan }) => {
   )
 }
 
-const AssetAmount: React.VFC<{ loan: Loan }> = ({ loan }) => {
+const AssetAmount: React.VFC<{ loan: Row }> = ({ loan }) => {
   const pool = usePool(loan.poolId)
-  return (
-    <Text variant="body2">
-      {loan.loanInfo.value.toDecimal().toString() !== '0' ? formatBalance(loan.loanInfo.value, pool?.currency) : ''}
-    </Text>
-  )
+  return <Text variant="body2">{loan?.amount ? formatBalance(loan.amount, pool?.currency) : ''}</Text>
 }
