@@ -11,6 +11,7 @@ import {
   Observable,
   of,
   share,
+  startWith,
   switchMap,
   takeWhile,
   tap,
@@ -155,7 +156,10 @@ export class CentrifugeBase {
       },
     })
     if (optional) {
-      return $.pipe(catchError(() => of(null)))
+      return $.pipe(
+        startWith(null),
+        catchError(() => of(null))
+      )
     }
 
     return $

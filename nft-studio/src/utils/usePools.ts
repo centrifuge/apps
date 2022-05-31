@@ -11,19 +11,13 @@ export function usePools() {
 }
 
 export function usePool(id: string) {
-  const [result] = useCentrifugeQuery(['pool', id], (cent) => cent.pools.getPool([id]), {
-    suspense: true,
-  })
-
-  return result
+  const pools = usePools()
+  return pools?.find((p) => p.id === id)
 }
 
 export function useTokens() {
-  const [result] = useCentrifugeQuery(['tokens'], (cent) => cent.pools.getTokens(), {
-    suspense: true,
-  })
-
-  return result
+  const pools = usePools()
+  return pools?.flatMap((p) => p.tranches)
 }
 
 export function useDailyPoolStates(poolId: string) {

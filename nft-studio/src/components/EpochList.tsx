@@ -1,4 +1,4 @@
-import { DetailedPool } from '@centrifuge/centrifuge-js'
+import { Pool } from '@centrifuge/centrifuge-js'
 import { Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
@@ -10,7 +10,7 @@ import { DataTableGroup } from './DataTableGroup'
 import { AnchorTextLink } from './TextLink'
 
 type Props = {
-  pool: DetailedPool
+  pool: Pool
 }
 
 type TableDataRow = {
