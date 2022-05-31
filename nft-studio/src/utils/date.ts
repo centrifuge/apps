@@ -26,7 +26,7 @@ export const formatAge = (ageInDays: number, decimals: number = 1) => {
   } else if (ageInDays < 0) {
     return '0 days'
   }
-  return `${ageInDays.toFixed(decimals)} days`
+  return `${Math.floor(ageInDays)} days`
 }
 
 export const getAge = (createdAt: string | undefined | null) => {
@@ -35,9 +35,13 @@ export const getAge = (createdAt: string | undefined | null) => {
   return formatAge(daysBetween(createdAt || today, today), 0)
 }
 
-export function getEpochHoursRemaining(pool: DetailedPool) {
+export function getEpochTimeRemaining(pool: DetailedPool) {
   const last = new Date(pool.epoch.lastClosed).getTime()
   const min = pool.parameters.minEpochTime * 1000
   const now = Date.now()
-  return Math.ceil(Math.max(0, last + min - now) / (1000 * 60 * 60))
+
+  const seconds = Math.floor((last + min - now) / 1000)
+  const minutes = Math.max(0, Math.floor(seconds / 60))
+  const hours = Math.max(Math.floor(minutes / 60))
+  return { hours, minutes: minutes % 60 }
 }
