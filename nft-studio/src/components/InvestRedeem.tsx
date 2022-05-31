@@ -550,7 +550,7 @@ const PendingOrder: React.FC<{
   isCancelling: boolean
   onChangeOrder: () => void
 }> = ({ type, amount, pool, onCancelOrder, isCancelling, onChangeOrder }) => {
-  const { hours: hoursRemaining } = getEpochTimeRemaining(pool!)
+  const { hours: hoursRemaining, minutes: minutesRemaining } = getEpochTimeRemaining(pool!)
   return (
     <Stack gap={2}>
       <Stack gap="1px">
@@ -569,7 +569,7 @@ const PendingOrder: React.FC<{
           </Shelf>
           <Text variant="body3">
             Locked {type === 'invest' ? 'investments' : 'redemptions'} are executed at the end of the epoch (
-            {hoursRemaining} hrs remaining).{' '}
+            {hoursRemaining} hrs and ${minutesRemaining} min remaining).{' '}
             <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
           </Text>
         </Stack>
