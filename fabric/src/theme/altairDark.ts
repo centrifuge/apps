@@ -10,13 +10,13 @@ export const altairDark: FabricTheme = {
   colors: {
     ...brandAltair,
     ...modeDark.colors,
-    primarySelectedBackground: blueScale[500],
+    primarySelectedBackground: yellowScale[500],
     secondarySelectedBackground: yellowScale[700],
-    borderFocus: blueScale[500],
+    borderFocus: yellowScale[500],
     borderSelected: yellowScale[500],
     textSelected: yellowScale[500],
-    textInteractive: blueScale[500],
-    textInteractiveHover: blueScale[500],
+    textInteractive: yellowScale[500],
+    textInteractiveHover: yellowScale[500],
     accentScale: blueScale,
   },
   shadows: {

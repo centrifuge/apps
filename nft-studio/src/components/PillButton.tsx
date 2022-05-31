@@ -15,7 +15,7 @@ const Pill = styled.button<{ variant?: 'small' | 'regular' }>(
       color: 'textPrimary',
     },
     '&:hover': {
-      color: 'accentPrimary',
+      color: 'textSelected',
     },
   }),
   {
