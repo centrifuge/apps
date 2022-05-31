@@ -2575,7 +2575,7 @@ __metadata:
     "@polkadot/extension-dapp": ^0.43.1
     "@polkadot/react-identicon": ^2.0.1
     "@polkadot/util-crypto": ^9.0.1
-    "@react-rxjs/core": ^0.8.4
+    "@react-rxjs/core": ~0.9.6
     "@stablelib/blake2b": ^1.0.1
     "@styled-system/css": ^5.1.5
     "@styled-system/should-forward-prop": ^5.1.5
@@ -8776,15 +8776,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-rxjs/core@npm:^0.8.4":
-  version: 0.8.7
-  resolution: "@react-rxjs/core@npm:0.8.7"
+"@react-rxjs/core@npm:~0.9.6":
+  version: 0.9.6
+  resolution: "@react-rxjs/core@npm:0.9.6"
   dependencies:
-    use-sync-external-store: ^1.0.0-rc.0
+    "@rxstate/core": ^0.0.1
+    use-sync-external-store: ^1.0.0
   peerDependencies:
     react: ">=16.8.0"
-    rxjs: ">=6"
-  checksum: 213e4ed65aeb217dcdc89c7effb334cc9dae599fe7a08df17122d82dd0464e34c2526835c9bad00eb3a8c3d4ae2cf46811e0015c205e081feb874b455a3539f1
+    rxjs: ">=7"
+  checksum: 69634bcc0265da5fa7cc5ad3553b798f5aef11728f48625deb5eb447a8c51001db178e6ee46101750764425062279ceb31ffe2aeb7c9d2a289dce076ab0aeae6
   languageName: node
   linkType: hard
 
@@ -9194,6 +9195,15 @@ __metadata:
     estree-walker: ^2.0.1
     picomatch: ^2.2.2
   checksum: ce208476ef530bfd86ccd76a4a41f573658a0e99766112996d5bb9246be35ecc0086fab6747350ee717ea94d9dd6e18b40b8c2bbcc12dbcc80c1fa324e10e1e0
+  languageName: node
+  linkType: hard
+
+"@rxstate/core@npm:^0.0.1":
+  version: 0.0.1
+  resolution: "@rxstate/core@npm:0.0.1"
+  peerDependencies:
+    rxjs: ">=6"
+  checksum: 0d2d2cdc1eb8912546802253c7dec7919a65a40f94adc4b1e3d32aeba6b12b415470c1b8677e5f00ede3383c7679779d39740f1421ff9bd77f69ce30474914bc
   languageName: node
   linkType: hard
 
@@ -46736,12 +46746,12 @@ resolve@1.18.1:
   languageName: node
   linkType: hard
 
-"use-sync-external-store@npm:^1.0.0-rc.0":
-  version: 1.0.0
-  resolution: "use-sync-external-store@npm:1.0.0"
+"use-sync-external-store@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "use-sync-external-store@npm:1.1.0"
   peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0-rc
-  checksum: 8664c2e1ea6c25ecc5b9917062a0edec5c5cf05091930a035981dd670e837be51553cda13c4dc61876b749934564c954671a923e8c909469e246bf9b737ced99
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: f1078f7601315eeebb16e2672cf359071160ddfebd33281893ba913cf63b3c9b2a30559aa9fdddfbe8ec0dd8754a62edca533b3e860c53882e90fa0e16bdb38f
   languageName: node
   linkType: hard
 
