@@ -40,7 +40,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
               width="iconLarge"
               height="iconLarge"
               borderRadius="card"
-              backgroundColor={isLoading ? 'borderSecondary' : 'accentSecondary'}
+              backgroundColor={isLoading ? 'borderSecondary' : 'backgroundThumbnail'}
               justifyContent="center"
             >
               <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>

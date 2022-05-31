@@ -1,7 +1,6 @@
-const altairYellow = '#ffc012'
-const centrifugeBlue = '#2762ff'
+import { blueScale, yellowScale } from './colors'
 
 export const brandAltair = {
-  accentPrimary: centrifugeBlue,
-  accentSecondary: altairYellow,
+  accentPrimary: yellowScale[500],
+  accentSecondary: blueScale[500],
 }

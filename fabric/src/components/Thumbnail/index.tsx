@@ -67,7 +67,7 @@ const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
       default:
         return css({
           borderRadius: '100%',
-          background: theme.colors.accentSecondary,
+          background: theme.colors.backgroundThumbnail,
         })
     }
   }};

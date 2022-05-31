@@ -21,7 +21,7 @@ const InputWrapper = styled(Stack)<{ $active?: boolean; $disabled?: boolean }>`
   border-radius: ${({ theme }) => theme.radii.input}px;
   background: ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundPage : theme.colors.backgroundInput)};
   border-color: ${({ theme, $disabled, $active }) =>
-    $disabled ? theme.colors.backgroundSecondary : $active ? theme.colors.accentPrimary : 'transparent'};
+    $disabled ? theme.colors.backgroundSecondary : $active ? theme.colors.textSelected : 'transparent'};
   &:focus,
   &:focus-within {
     border-color: var(--fabric-color-focus);

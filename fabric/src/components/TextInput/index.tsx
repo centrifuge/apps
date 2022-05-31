@@ -24,7 +24,7 @@ const StyledTextInput = styled.input`
   }
 
   &:focus {
-    color: ${({ theme }) => theme.colors.accentPrimary};
+    color: ${({ theme }) => theme.colors.textSelected};
   }
 `
 
@@ -166,7 +166,7 @@ const StyledTextArea = styled(Box)`
   }
 
   &:focus {
-    color: ${({ theme }) => theme.colors.accentPrimary};
+    color: ${({ theme }) => theme.colors.textSelected};
   }
 `
 

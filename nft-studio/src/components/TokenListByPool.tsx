@@ -99,7 +99,7 @@ export const TokenListByPool: React.FC = () => {
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
   return (
-    <Text variant="body2" color="textPrimary" fontWeight={600}>
+    <Text variant="body2" color="textInteractive" fontWeight={600}>
       {token?.poolName} {token?.name}
     </Text>
   )
