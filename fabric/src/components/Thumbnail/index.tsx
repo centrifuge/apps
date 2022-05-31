@@ -68,6 +68,7 @@ const StyledThumbnail = styled(Text)<Partial<ThumbnailProps>>`
         return css({
           borderRadius: '100%',
           background: theme.colors.backgroundThumbnail,
+          color: theme.colors.textInverted,
         })
     }
   }};
