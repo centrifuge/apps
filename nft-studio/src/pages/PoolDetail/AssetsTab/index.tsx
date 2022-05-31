@@ -44,8 +44,10 @@ export const PoolDetailAssets: React.FC = () => {
     .dividedBy(loans?.length)
     .toDecimalPlaces(2)
 
+  const ongoingAssets = loans?.filter((loan) => loan.status !== 'Closed')
+
   const pageSummaryData = [
-    { label: <Tooltips type="ongoingAssets" />, value: loans?.length || 0 },
+    { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets?.length || 0 },
     { label: <Tooltips type="averageMaturity" />, value: avgMaturity },
     { label: <Tooltips type="averageFinancingFee" />, value: formatPercentage(avgInterestRatePerSec) },
     { label: <Tooltips type="averageAmount" />, value: formatBalance(avgAmount, pool.currency) },

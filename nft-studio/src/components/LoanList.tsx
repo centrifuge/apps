@@ -8,9 +8,13 @@ import { useMetadata } from '../utils/useMetadata'
 import { useNFT } from '../utils/useNFTs'
 import { usePool } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
-import LoanLabel from './LoanLabel'
+import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
 
-type Row = Loan & { amount?: number }
+type Row = Loan & {
+  amount?: number
+  maturityDate: string | null
+  statusLabel: string
+}
 
 type Props = {
   loans: Loan[]
@@ -39,13 +43,10 @@ const columns: Column[] = [
     flex: '2',
   },
   {
-    header: 'Maturity date',
-    cell: (l: Row) => (
-      <Text variant="body2">
-        {l.status !== 'Created' && 'maturityDate' in l.loanInfo ? formatDate(l.loanInfo.maturityDate) : ''}
-      </Text>
-    ),
+    header: () => <SortableTableHeader label="Maturity date" />,
+    cell: (l: Row) => <Text variant="body2">{l.maturityDate ? formatDate(l.maturityDate) : ''}</Text>,
     flex: '2',
+    sortKey: 'maturityDate',
   },
   {
     header: () => <SortableTableHeader label="Amount" />,
@@ -54,10 +55,11 @@ const columns: Column[] = [
     sortKey: 'amount',
   },
   {
-    header: 'Status',
+    header: () => <SortableTableHeader label="Status" />,
     cell: (l: Row) => <LoanLabel loan={l} />,
     flex: '2',
     align: 'center',
+    sortKey: 'statusLabel',
   },
   {
     header: '',
@@ -67,9 +69,11 @@ const columns: Column[] = [
 ]
 
 export const LoanList: React.FC<Props> = ({ loans, onLoanClicked }) => {
-  const Row = loans.map((loan) => {
+  const Row: Row[] = loans.map((loan) => {
     return {
       amount: loan.loanInfo.value.toDecimal().toNumber(),
+      statusLabel: getLoanLabelStatus(loan)[0],
+      maturityDate: loan.status !== 'Created' && 'maturityDate' in loan.loanInfo ? loan.loanInfo.maturityDate : null,
       ...loan,
     }
   })
