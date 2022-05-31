@@ -32,9 +32,9 @@ const TokenOverview: React.FC = () => {
             // feeToApr is a temporary solution for calculating yield
             // bc we don't have a way to query for historical token prices yet
             // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
-            yield: tranche.interestRatePerSec ? tranche.interestRatePerSec.toAprPercent() : null,
-            protection: tranche.minRiskBuffer?.toPercent() || new Perquintill(0).toPercent(),
-            valueLocked: tranche.tokenIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()),
+            yield: tranche.interestRatePerSec ? tranche.interestRatePerSec.toAprPercent().toNumber() : null,
+            protection: tranche.minRiskBuffer?.toPercent().toNumber() || new Perquintill(0).toPercent().toNumber(),
+            valueLocked: tranche.tokenIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()).toNumber(),
           }
         })
         .flat() || [],
@@ -50,7 +50,10 @@ const TokenOverview: React.FC = () => {
 
   const pageSummaryData = [
     // TODO: sort out currency for TVL (kUSD vs AIR vs ...), assuming everything uses the same currency
-    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, network === 'altair' ? 'AIR' : 'USD') },
+    {
+      label: <Tooltips type="tvl" />,
+      value: formatBalance(Dec(totalValueLocked || 0), network === 'altair' ? 'AIR' : 'USD'),
+    },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
   ]
 
