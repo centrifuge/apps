@@ -21,10 +21,20 @@ export const defaultFlags: Flags = Object.entries(flagsConfig).reduce((obj, [k, 
   return obj
 }, {} as any)
 
-export const initialFlagsState: FlagsState = Object.entries(flagsConfig).reduce((obj, [k, v]) => {
-  obj[k] = v.default
-  return obj
-}, {} as any)
+let persistedState: FlagsState | null = null
+try {
+  const stored = localStorage.getItem('debugFlags') ?? ''
+  persistedState = JSON.parse(stored[0] === '{' ? stored : '') as FlagsState
+} catch (e) {
+  //
+}
+
+export const initialFlagsState: FlagsState =
+  persistedState ||
+  Object.entries(flagsConfig).reduce((obj, [k, v]) => {
+    obj[k] = v.default
+    return obj
+  }, {} as any)
 
 export const DebugFlagsContext = React.createContext<Context>({ flags: defaultFlags, register() {}, unregister() {} })
 

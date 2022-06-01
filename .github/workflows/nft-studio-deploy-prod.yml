@@ -14,6 +14,7 @@ jobs:
       relay-wss-url: wss://kusama-rpc.polkadot.io
       subscan-url: https://altair.subscan.io
       whitelisted-accounts: ''
+      network: altair
       subquery-url: https://api.subquery.network/sq/centrifuge/pools
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

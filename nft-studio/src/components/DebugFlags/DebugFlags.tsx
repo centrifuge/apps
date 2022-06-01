@@ -1,9 +1,8 @@
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
-import { initialFlagsState, useDebugFlags } from '.'
 import { flagsConfig, Key } from './config'
-import { DebugFlagsContext, FlagsState } from './context'
+import { DebugFlagsContext, FlagsState, initialFlagsState, useDebugFlags } from './context'
 
 const DebugFlagsImpl: React.FC<{ onChange?: (state: FlagsState) => void }> = ({ children, onChange }) => {
   const [state, setState] = React.useState(initialFlagsState)
@@ -30,6 +29,12 @@ const DebugFlagsImpl: React.FC<{ onChange?: (state: FlagsState) => void }> = ({ 
 
   React.useEffect(() => {
     onChange?.(state)
+    if (state.persistDebugFlags) {
+      localStorage.setItem('debugFlags', JSON.stringify(state))
+    }
+    if (!state.persistDebugFlags && localStorage.getItem('debugFlags')) {
+      localStorage.removeItem('debugFlags')
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state])
 
@@ -51,16 +56,7 @@ const Panel: React.FC<{
   onChange: (key: Key, val: any) => void
 }> = ({ state, usedKeys, onChange }) => {
   const [open, setOpen] = React.useState(false)
-  const { showUnusedFlags, alwaysShowPanel } = useDebugFlags()
-
-  React.useEffect(() => {
-    if (alwaysShowPanel && !localStorage.getItem('debug')) {
-      localStorage.setItem('debug', '1')
-    }
-    if (!alwaysShowPanel && localStorage.getItem('debug')) {
-      localStorage.removeItem('debug')
-    }
-  }, [alwaysShowPanel])
+  const { showUnusedFlags } = useDebugFlags()
 
   return (
     <StyledPanel position="fixed" bottom={0} right={0} zIndex="overlay">

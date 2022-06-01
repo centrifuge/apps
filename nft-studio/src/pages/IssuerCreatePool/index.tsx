@@ -21,6 +21,7 @@ import { PageSection } from '../../components/PageSection'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
+import { config } from '../../config'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
@@ -35,16 +36,11 @@ import { WriteOffInput } from './WriteOffInput'
 
 const DEFAULT_CURRENCY = 'Native'
 
-const network = import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge'
-const ASSET_CLASSES = (
-  network === 'altair'
-    ? ['Art NFTs']
-    : ['Consumer Credit', 'Corporate Credit', 'Commercial Real Estate', 'Residential Real Estate', 'Project Finance']
-).map((label) => ({
+const ASSET_CLASSES = config.assetClasses.map((label) => ({
   label,
   value: label,
 }))
-const DEFAULT_ASSET_CLASS = network === 'altair' ? 'Art NFT' : 'Consumer Credit'
+const DEFAULT_ASSET_CLASS = config.defaultAssetClass
 
 export const IssuerCreatePoolPage: React.FC = () => {
   return (
