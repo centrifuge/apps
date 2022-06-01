@@ -195,6 +195,7 @@ export type Tranche = {
   outstandingInvestOrders: Balance
   outstandingRedeemOrders: Balance
   lastUpdatedInterest: string
+  ratio: Perquintill
 }
 
 export type TrancheWithTokenPrice = Tranche & {
@@ -202,12 +203,19 @@ export type TrancheWithTokenPrice = Tranche & {
   tokenPrice: Price
 }
 
+export type Token = TrancheWithTokenPrice & {
+  poolId: string
+  poolMetadata: string | undefined
+  currency: string
+}
+
 export type Pool = {
   id: string
   currency: Currency
   metadata?: string
   value: Balance
-  tranches: Tranche[]
+  createdAt: string | null
+  tranches: Token[]
   reserve: {
     max: Balance
     available: Balance
@@ -228,11 +236,6 @@ export type Pool = {
     challengeTime: number
     maxNavAge: number
   }
-}
-
-export type DetailedPool = Omit<Pool, 'tranches'> & {
-  createdAt: string | null
-  tranches: TrancheWithTokenPrice[]
 }
 
 export enum LoanStatus {
@@ -775,9 +778,25 @@ export function getPoolsModule(inst: CentrifugeBase) {
       })
     )
 
+    const $query = inst.getSubqueryObservable<{ pools: { nodes: { id: string; createdAt: string }[] } }>(
+      `query {
+        pools {
+          nodes {
+            id
+            createdAt
+          }
+        }
+      }`,
+      {},
+      true
+    )
+
     return $api.pipe(
-      switchMap((api) => combineLatest([api.query.pools.pool.entries(), api.query.loans.poolNAV.entries()])),
-      map(([rawPools, rawNavs]) => {
+      switchMap(
+        (api) => combineLatest([api.query.pools.pool.entries(), api.query.loans.poolNAV.entries()]),
+        (api, [rawPools, rawNavs]) => ({ api, rawPools, rawNavs })
+      ),
+      switchMap(({ api, rawPools, rawNavs }) => {
         const navMap = rawNavs.reduce((acc, [key, navValue]) => {
           const poolId = formatPoolKey(key as StorageKey<[u32]>)
           const nav = navValue.toJSON() as unknown as NAVDetailsData
@@ -788,90 +807,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
           return acc
         }, {} as Record<string, { latest: string; lastUpdated: number }>)
 
-        const pools = rawPools.map(([key, value]) => {
-          const pool = value.toJSON() as unknown as PoolDetailsData
-          const metadata = (value.toHuman() as any).metadata
-          const poolId = formatPoolKey(key as StorageKey<[u32]>)
-          const navData = navMap[poolId]
-          const mapped: Pool = {
-            id: poolId,
-            metadata,
-            currency: getCurrency(pool.currency),
-            tranches: pool.tranches.tranches.map((tranche, index) => {
-              let minRiskBuffer: Perquintill | null = null
-              let interestRatePerSec: Rate | null = null
-              if ('nonResidual' in tranche.trancheType) {
-                minRiskBuffer = new Perquintill(hexToBN(tranche.trancheType.nonResidual.minRiskBuffer))
-                interestRatePerSec = new Rate(hexToBN(tranche.trancheType.nonResidual.interestRatePerSec))
-              }
-
-              const subordinateTranchesValue = pool.tranches.tranches
-                .slice()
-                .reverse()
-                .slice(index + 1)
-                .reduce((prev: Balance, tranche: TrancheDetailsData) => {
-                  return new Balance(
-                    prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
-                  )
-                }, new Balance(0))
-              const poolValue = pool.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
-                return new Balance(
-                  prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
-                )
-              }, new Balance(0))
-
-              return {
-                index,
-                id: pool.tranches.ids[index],
-                seniority: tranche.seniority,
-                balance: new Balance(new Balance(hexToBN(tranche.debt)).add(new Balance(hexToBN(tranche.reserve)))),
-                minRiskBuffer,
-                currentRiskBuffer: subordinateTranchesValue.gtn(0)
-                  ? subordinateTranchesValue.div(poolValue)
-                  : new Perquintill(0),
-                interestRatePerSec,
-                outstandingInvestOrders: new Balance(hexToBN(tranche.outstandingInvestOrders)),
-                outstandingRedeemOrders: new Balance(hexToBN(tranche.outstandingRedeemOrders)),
-                lastUpdatedInterest: new Date(tranche.lastUpdatedInterest * 1000).toISOString(),
-              }
-            }),
-            reserve: {
-              max: new Balance(hexToBN(pool.reserve.max)),
-              available: new Balance(hexToBN(pool.reserve.available)),
-              total: new Balance(hexToBN(pool.reserve.total)),
-            },
-            epoch: {
-              ...pool.epoch,
-              lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
-            },
-            parameters: {
-              ...pool.parameters,
-            },
-            nav: {
-              latest: navData?.latest ? new Balance(hexToBN(navData.latest)) : new Balance(0),
-              lastUpdated: new Date((navData?.lastUpdated ?? 0) * 1000).toISOString(),
-            },
-            value: new Balance(hexToBN(pool.reserve.total).add(new BN(navData?.latest ? hexToBN(navData.latest) : 0))),
-          }
-
-          return mapped
-        })
-
-        return pools
-      }),
-      repeatWhen(() => $events)
-    )
-  }
-
-  function getTokens() {
-    const $api = inst.getApi()
-
-    return $api.pipe(
-      switchMap(
-        (api) => api.query.pools.pool.entries(),
-        (api, pools) => ({ api, pools })
-      ),
-      switchMap(({ api, pools: rawPools }) => {
         // read pools, poolIds and metadata from observable
         const pools = rawPools.map(([poolKeys, poolValue]) => ({
           id: formatPoolKey(poolKeys as any), // poolId
@@ -884,6 +819,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
             return data.tranches.ids.map((tid) => [id, tid, data.epoch.lastExecuted] as const)
           })
           .flat()
+        const tranceIdToEpochIndex: Record<string, number> = {}
+        keys.forEach(([, tid], i) => {
+          tranceIdToEpochIndex[tid] = i
+        })
+
         // array of args for $epoch query (by trancheId and epoch)
         const epochKeys = keys.map((k) => k.slice(1))
         // modify keys for $issuance query [Tranche: [poolId, trancheId]]
@@ -891,169 +831,118 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
         const $epochs = api.query.pools.epoch.multi(epochKeys)
         const $issuance = api.query.ormlTokens.totalIssuance.multi(issuanceKeys)
-
-        // emit changes from $epochs and $issuance to construct final array of tokens
         return combineLatest([$epochs, $issuance]).pipe(
           map(([rawEpochs, rawIssuances]) => {
             const epochs = rawEpochs.map((value) => (!value.isEmpty ? (value as any).toJSON() : null))
 
-            return epochs.map((epoch, epochIndex) => {
-              const [poolId, trancheId] = keys[epochIndex]
-              const pool = pools?.find(({ id }) => id === poolId)
-              const trancheIndex = pool!.data?.tranches.ids.findIndex((id) => id === trancheId)
-              const tranche = pool!.data?.tranches.tranches.find((_, tIndex) => trancheIndex === tIndex)!
+            const mappedPools = pools.map((poolObj) => {
+              const { data: pool, id: poolId, metadata } = poolObj
+              const navData = navMap[poolId]
+              const currency = getCurrency(pool.currency)
+              const mappedPool: Pool = {
+                id: poolId,
+                createdAt: null,
+                metadata,
+                currency,
+                tranches: pool.tranches.tranches.map((tranche, index) => {
+                  const trancheId = pool.tranches.ids[index]
+                  const epochIndex = tranceIdToEpochIndex[trancheId]
+                  const epoch = epochs[epochIndex]
 
-              let minRiskBuffer: Perquintill | null = null
-              let interestRatePerSec: Rate | null = null
-              if ('nonResidual' in tranche.trancheType) {
-                minRiskBuffer = new Perquintill(hexToBN(tranche.trancheType.nonResidual.minRiskBuffer))
-                interestRatePerSec = new Rate(hexToBN(tranche.trancheType.nonResidual.interestRatePerSec))
+                  let minRiskBuffer: Perquintill | null = null
+                  let interestRatePerSec: Rate | null = null
+                  if ('nonResidual' in tranche.trancheType) {
+                    minRiskBuffer = new Perquintill(hexToBN(tranche.trancheType.nonResidual.minRiskBuffer))
+                    interestRatePerSec = new Rate(hexToBN(tranche.trancheType.nonResidual.interestRatePerSec))
+                  }
+
+                  const subordinateTranchesValue = pool.tranches.tranches
+                    .slice()
+                    .reverse()
+                    .slice(index + 1)
+                    .reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                      return new Balance(
+                        prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                      )
+                    }, new Balance(0))
+                  const poolValue = pool.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                    return new Balance(
+                      prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                    )
+                  }, new Balance(0))
+
+                  return {
+                    id: trancheId,
+                    index,
+                    seniority: tranche.seniority,
+                    tokenPrice: epoch ? new Price(hexToBN(epoch.tokenPrice)) : Price.fromFloat(1),
+                    currency,
+                    totalIssuance: new Balance(rawIssuances[epochIndex].toString()),
+                    poolId,
+                    poolMetadata: (metadata ?? undefined) as string | undefined,
+                    interestRatePerSec,
+                    minRiskBuffer,
+                    currentRiskBuffer: subordinateTranchesValue.gtn(0)
+                      ? subordinateTranchesValue.div(poolValue)
+                      : new Perquintill(0),
+                    ratio: new Perquintill(hexToBN(tranche.ratio)),
+                    outstandingInvestOrders: new Balance(hexToBN(tranche.outstandingInvestOrders)),
+                    outstandingRedeemOrders: new Balance(hexToBN(tranche.outstandingRedeemOrders)),
+                    lastUpdatedInterest: new Date(tranche.lastUpdatedInterest * 1000).toISOString(),
+                    balance: new Balance(new Balance(hexToBN(tranche.debt)).add(new Balance(hexToBN(tranche.reserve)))),
+                  }
+                }),
+                reserve: {
+                  max: new Balance(hexToBN(pool.reserve.max)),
+                  available: new Balance(hexToBN(pool.reserve.available)),
+                  total: new Balance(hexToBN(pool.reserve.total)),
+                },
+                epoch: {
+                  ...pool.epoch,
+                  lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
+                },
+                parameters: {
+                  ...pool.parameters,
+                },
+                nav: {
+                  latest: navData?.latest ? new Balance(hexToBN(navData.latest)) : new Balance(0),
+                  lastUpdated: new Date((navData?.lastUpdated ?? 0) * 1000).toISOString(),
+                },
+                value: new Balance(
+                  hexToBN(pool.reserve.total).add(new BN(navData?.latest ? hexToBN(navData.latest) : 0))
+                ),
               }
 
-              const subordinateTranchesValue = pool!.data?.tranches.tranches
-                .slice(0, trancheIndex)
-                .reduce((prev: Balance, tranche: TrancheDetailsData) => {
-                  return new Balance(
-                    prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
-                  )
-                }, new Balance(0))
-              const poolValue = pool!.data?.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
-                return new Balance(
-                  prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
-                )
-              }, new Balance(0))
-
-              return {
-                id: trancheId,
-                index: trancheIndex,
-                seniority: tranche.seniority,
-                tokenPrice: epoch ? new Price(hexToBN(epoch.tokenPrice)) : Price.fromFloat(1),
-                currency: getCurrency(pool!.data.currency),
-                tokenIssuance: new Balance(rawIssuances[epochIndex].toString()),
-                poolId,
-                poolMetadata: (pool!.metadata ?? undefined) as string | undefined,
-                interestRatePerSec,
-                minRiskBuffer,
-                currentRiskBuffer: subordinateTranchesValue.gtn(0)
-                  ? subordinateTranchesValue.div(poolValue)
-                  : new Perquintill(0),
-                ratio: new Perquintill(hexToBN(tranche.ratio)),
-              }
+              return mappedPool
             })
+
+            return mappedPools
           })
         )
-      })
+      }),
+      combineLatestWith($query),
+      map(([pools, gqlResult]) => {
+        return pools.map((pool) => {
+          const gqlPool = gqlResult?.pools.nodes.find((r) => r.id === pool.id)
+          const poolWithGqlData: Pool = {
+            ...pool,
+            createdAt: gqlPool?.createdAt ?? null,
+          }
+          return poolWithGqlData
+        })
+      }),
+      repeatWhen(() => $events)
     )
   }
 
   function getPool(args: [poolId: string]) {
     const [poolId] = args
-    const $api = inst.getApi()
-
-    const $query = inst.getSubqueryObservable<{ pool: { createdAt: string } }>(
-      `query($poolId: String!) {
-        pool(id: $poolId) {
-          createdAt
-        }
-      }`,
-      {
-        poolId,
-      }
-    )
-
-    return $api.pipe(
-      switchMap((api) =>
-        combineLatest([api.query.pools.pool(poolId), api.query.loans.poolNAV(poolId), $query]).pipe(
-          switchMap(([poolValue, navValue, queryData]) => {
-            const pool = poolValue.toJSON() as unknown as PoolDetailsData
-            const nav = navValue.toJSON() as unknown as NAVDetailsData
-            const createdAt = queryData?.pool?.createdAt ?? null
-            const metadata = (poolValue.toHuman() as any).metadata
-
-            const { ids } = pool.tranches
-
-            // @ts-expect-error
-            const $multi = api.queryMulti([
-              ...ids.map((id) => [api.query.ormlTokens.totalIssuance, { tranche: [poolId, id] }]),
-              ...ids.map((id) => [api.query.pools.epoch, [id, pool.epoch.lastExecuted]]),
-            ])
-
-            return $multi.pipe(
-              map((multi) => {
-                const numTranches = multi.length / 2
-                const tokenIssuanceValues = multi.slice(0, numTranches)
-                const epochValues = multi.slice(numTranches)
-                const lastEpoch = epochValues.map((val) => (!val.isEmpty ? (val as any).unwrap() : null))
-
-                const detailedPool: DetailedPool = {
-                  id: poolId,
-                  createdAt,
-                  metadata,
-                  currency: getCurrency(pool.currency),
-                  tranches: pool.tranches.tranches.map((tranche, index) => {
-                    let minRiskBuffer: Perquintill | null = null
-                    let interestRatePerSec: Rate | null = null
-                    if ('nonResidual' in tranche.trancheType) {
-                      minRiskBuffer = new Perquintill(hexToBN(tranche.trancheType.nonResidual.minRiskBuffer))
-                      interestRatePerSec = new Rate(hexToBN(tranche.trancheType.nonResidual.interestRatePerSec))
-                    }
-
-                    const subordinateTranchesValue = pool.tranches.tranches
-                      .slice(0, index)
-                      .reduce((prev: Balance, tranche: TrancheDetailsData) => {
-                        return new Balance(
-                          prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
-                        )
-                      }, new Balance(0))
-                    const poolValue = pool.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
-                      return new Balance(
-                        prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
-                      )
-                    }, new Balance(0))
-
-                    return {
-                      index,
-                      id: pool.tranches.ids[index],
-                      seniority: tranche.seniority,
-                      balance: new Balance(
-                        new Balance(hexToBN(tranche.debt)).add(new Balance(hexToBN(tranche.reserve)))
-                      ),
-                      minRiskBuffer,
-                      currentRiskBuffer: subordinateTranchesValue.gtn(0)
-                        ? subordinateTranchesValue.div(poolValue)
-                        : new Perquintill(0),
-                      interestRatePerSec,
-                      outstandingInvestOrders: new Balance(hexToBN(tranche.outstandingInvestOrders)),
-                      outstandingRedeemOrders: new Balance(hexToBN(tranche.outstandingRedeemOrders)),
-                      lastUpdatedInterest: new Date(tranche.lastUpdatedInterest * 1000).toISOString(),
-                      totalIssuance: new Balance(tokenIssuanceValues[index].toString()),
-                      tokenPrice: new Price(lastEpoch[index]?.tokenPrice.toString() ?? '0'),
-                    }
-                  }),
-                  reserve: {
-                    max: new Balance(hexToBN(pool.reserve.max)),
-                    available: new Balance(hexToBN(pool.reserve.available)),
-                    total: new Balance(hexToBN(pool.reserve.total)),
-                  },
-                  epoch: {
-                    ...pool.epoch,
-                    lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
-                  },
-                  parameters: {
-                    ...pool.parameters,
-                  },
-                  nav: {
-                    latest: nav?.latest ? new Balance(hexToBN(nav.latest)) : new Balance(0),
-                    lastUpdated: new Date((nav?.lastUpdated ?? 0) * 1000).toISOString(),
-                  },
-                  value: new Balance(hexToBN(pool.reserve.total).add(new BN(nav?.latest ? hexToBN(nav.latest) : 0))),
-                }
-                return detailedPool
-              })
-            )
-          })
-        )
-      )
+    return getPools().pipe(
+      map((pools) => {
+        const pool = pools.find(({ id }) => id === poolId)
+        if (!pool) throw new Error(`Pool not found with poolId: ${poolId}`)
+        return pool
+      })
     )
   }
 
@@ -1452,7 +1341,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
     addWriteOffGroup,
     adminWriteOff,
     getLoanCollectionIdForPool,
-    getTokens,
     getAvailablePoolId,
     getDailyPoolStates,
   }

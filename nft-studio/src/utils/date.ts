@@ -1,4 +1,4 @@
-import { DetailedPool } from '@centrifuge/centrifuge-js'
+import { Pool } from '@centrifuge/centrifuge-js'
 
 export function formatDate(timestamp: number | string) {
   return new Date(timestamp).toLocaleDateString('en-US', {
@@ -35,7 +35,7 @@ export const getAge = (createdAt: string | undefined | null) => {
   return formatAge(daysBetween(createdAt || today, today), 0)
 }
 
-export function getEpochTimeRemaining(pool: DetailedPool) {
+export function getEpochTimeRemaining(pool: Pick<Pool, 'epoch' | 'parameters'>) {
   const last = new Date(pool.epoch.lastClosed).getTime()
   const min = pool.parameters.minEpochTime * 1000
   const now = Date.now()

@@ -1,8 +1,8 @@
-import { altairDark, centrifugeLight, FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
+import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-import { DefaultTheme } from 'styled-components'
+import { config } from '../config'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
@@ -37,60 +37,26 @@ const queryClient = new QueryClient({
   },
 })
 
-const lightTheme: DefaultTheme = {
-  ...centrifugeLight,
-  sizes: {
-    ...centrifugeLight.sizes,
-    container: '100%',
-  },
-  colors: {
-    ...centrifugeLight.colors,
-    placeholderBackground: centrifugeLight.colors.backgroundSecondary,
-  },
-  typography: {
-    ...centrifugeLight.typography,
-    headingLarge: {
-      fontSize: [24, 24, 36],
-      lineHeight: 1.25,
-      fontWeight: 600,
-      color: 'textPrimary',
-    },
-  },
-}
-const darkTheme: DefaultTheme = {
-  ...altairDark,
-  sizes: {
-    ...altairDark.sizes,
-    container: '100%',
-  },
-  colors: {
-    ...altairDark.colors,
-    placeholderBackground: altairDark.colors.backgroundSecondary,
-  },
-  typography: {
-    ...altairDark.typography,
-    headingLarge: {
-      fontSize: [24, 24, 36],
-      lineHeight: 1.25,
-      fontWeight: 600,
-      color: 'textPrimary',
-    },
-  },
-}
-
 export const Root: React.VFC = () => {
-  const [isForcedDark, setIsForcedDark] = React.useState(!!initialFlagsState.altairDarkMode)
-  const network = import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge'
+  const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
 
   return (
     <QueryClientProvider client={queryClient}>
-      <FabricProvider theme={isForcedDark || network === 'altair' ? darkTheme : lightTheme}>
+      <FabricProvider
+        theme={
+          !isThemeToggled
+            ? config.themes[config.defaultTheme]
+            : config.defaultTheme === 'dark'
+            ? config.themes.light
+            : config.themes.dark
+        }
+      >
         <GlobalStyle />
         <FabricGlobalStyle />
         <HostPermissionsProvider>
           <CentrifugeProvider>
             <Web3Provider>
-              <DebugFlags onChange={(state) => setIsForcedDark(!!state.altairDarkMode)}>
+              <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
                 <TransactionProvider>
                   <TransactionToasts />
                   <Router>

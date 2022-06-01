@@ -123,12 +123,9 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
 
   return (
     <>
-      <Dialog isOpen={open && !confirmOpen} onClose={close}>
+      <Dialog isOpen={open && !confirmOpen} onClose={close} title="Create new collection">
         <form onSubmit={() => setConfirmOpen(true)}>
           <Stack gap={3}>
-            <Text variant="heading2" as="h2">
-              Create new collection
-            </Text>
             <TextInput
               label="Name"
               value={name}

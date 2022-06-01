@@ -2,18 +2,29 @@ import { useDialog } from '@react-aria/dialog'
 import { FocusScope } from '@react-aria/focus'
 import { OverlayContainer, useModal, useOverlay, usePreventScroll } from '@react-aria/overlays'
 import * as React from 'react'
+import { ResponsiveValue } from 'styled-system'
 import { IconX } from '../../icon'
+import { Size } from '../../utils/types'
 import { Box } from '../Box'
 import { Button } from '../Button'
 import { Card } from '../Card'
+import { Shelf } from '../Shelf'
+import { Stack } from '../Stack'
+import { Text } from '../Text'
+
+type IconProps = {
+  size?: ResponsiveValue<Size>
+}
 
 type Props = {
   isOpen: boolean
   onClose: () => void
   width?: string | number
+  title?: string
+  icon?: React.ComponentType<IconProps> | React.ReactElement
 }
 
-const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dialog' }) => {
+const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dialog', icon: IconComp, title }) => {
   const ref = React.useRef<HTMLDivElement>(null)
   const { overlayProps, underlayProps } = useOverlay({ isOpen, onClose, isDismissable: true }, ref)
 
@@ -39,7 +50,9 @@ const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dial
       <FocusScope contain restoreFocus autoFocus>
         <Card
           position="relative"
-          p={4}
+          px={3}
+          pt={3}
+          pb={4}
           width={width}
           maxWidth="100%"
           {...overlayProps}
@@ -47,10 +60,15 @@ const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dial
           {...modalProps}
           ref={ref}
         >
-          {children}
-          <Box position="absolute" top={1} right={2}>
-            <Button variant="tertiary" icon={IconX} onClick={() => onClose()} />
-          </Box>
+          <Stack gap={3}>
+            <Shelf gap={2}>
+              {IconComp && (isComponent(IconComp) ? <IconComp size="iconMedium" /> : IconComp)}
+              <Text variant="heading2">{title}</Text>
+
+              <Button variant="tertiary" icon={IconX} onClick={() => onClose()} style={{ marginLeft: 'auto' }} />
+            </Shelf>
+            {children}
+          </Stack>
         </Card>
       </FocusScope>
     </Box>
@@ -63,4 +81,8 @@ export const Dialog: React.FC<Props> = (props) => {
       <DialogInner {...props} />
     </OverlayContainer>
   ) : null
+}
+
+function isComponent(object: any): object is React.ComponentType {
+  return typeof object === 'function'
 }

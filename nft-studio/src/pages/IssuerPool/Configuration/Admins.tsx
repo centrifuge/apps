@@ -117,7 +117,7 @@ export const Admins: React.FC = () => {
                       cell: (row: Admin) => (
                         <Text>
                           <Identity address={row.address} clickToCopy labelForConnectedAddress={false} />{' '}
-                          {row.address === me && `(${selectedAccount?.meta.name || 'you'})`}
+                          {row.address === me && `(${selectedAccount?.name || 'you'})`}
                         </Text>
                       ),
                       flex: '1 0 150px',

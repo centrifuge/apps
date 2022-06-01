@@ -2,11 +2,9 @@ import Centrifuge from '@centrifuge/centrifuge-js'
 import { bind } from '@react-rxjs/core'
 import * as React from 'react'
 import { useQuery, useQueryClient } from 'react-query'
-import { Observable, of, timer } from 'rxjs'
-import { delayWhen, mapTo, retryWhen, scan, tap } from 'rxjs/operators'
+import { catchError, Observable, of, retry, timer } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 
-const [useEmptySuspenseSub] = bind(of(null))
 const [useEmptySub] = bind(of(null), null)
 
 const RETRIES_BEFORE_THROWING = 3
@@ -38,19 +36,16 @@ export function useCentrifugeQuery<T = any>(
       const $obs = queryCallback(cent).pipe(
         // When an error is thrown, retry after a delay of RETRY_MIN_DELAY, doubling every attempt to a max of RETRY_MAX_DELAY.
         // When using Suspense, an error will be thrown after RETRIES_BEFORE_THROWING retries.
-        retryWhen((errors) =>
-          errors.pipe(
-            tap((error) => {
-              console.error(error)
-            }),
-            mapTo(1),
-            scan((acc, cur) => acc + cur),
-            tap((errorCount) => {
-              if (errorCount > RETRIES_BEFORE_THROWING && throwErrors) throw new Error('Failed to query data')
-            }),
-            delayWhen((errorCount) => timer(Math.min(RETRY_MIN_DELAY * 2 ** (errorCount - 1), RETRY_MAX_DELAY)))
-          )
-        )
+        retry({
+          count: RETRIES_BEFORE_THROWING,
+          delay: (err, errorCount) => timer(Math.min(RETRY_MIN_DELAY * 2 ** (errorCount - 1), RETRY_MAX_DELAY)),
+          resetOnSuccess: true,
+        }),
+        catchError((e) => {
+          console.error('useCentrifugeQuery: query threw an error: ', e)
+          if (throwErrors) throw e
+          return of(null)
+        })
       )
 
       if (!suspense) {
@@ -65,13 +60,8 @@ export function useCentrifugeQuery<T = any>(
     }
   )
 
-  // Passing no default value to `bind` causes the returned hook to use Suspense until a value is available
-  // The returned hook from `bind` renders a different number of hooks on when this is the case.
-  // `useCentrifugeQuery` can conditionally be enabled or not.
-  // When it is disabled, we need to ensure that the number of hooks rendered is the same as when the query is enabled.
-  // That's why the hooks that return null are different depending on whether we're using Suspense or not.
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const data = enabled && bindResult ? bindResult[0]() : suspense ? useEmptySuspenseSub() : useEmptySub()
+  const data = enabled && bindResult ? bindResult[0]() : useEmptySub()
 
   React.useEffect(() => {
     if (data && cachedData !== data) {

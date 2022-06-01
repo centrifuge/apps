@@ -1,4 +1,4 @@
-import { Balance, DetailedPool } from '@centrifuge/centrifuge-js'
+import { Balance, Pool } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -545,7 +545,7 @@ const LightButton = styled.button<{ $left?: boolean }>(
 const PendingOrder: React.FC<{
   type: 'invest' | 'redeem'
   amount: Decimal
-  pool: DetailedPool
+  pool: Pool
   onCancelOrder: () => void
   isCancelling: boolean
   onChangeOrder: () => void

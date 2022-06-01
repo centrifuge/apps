@@ -1,13 +1,12 @@
-import { isWeb3Injected, web3AccountsSubscribe, web3Enable, web3EnablePromise } from '@polkadot/extension-dapp'
-import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types'
+import { isWeb3Injected } from '@polkadot/extension-dapp'
+import { getWalletBySource, getWallets, Wallet, WalletAccount } from '@talisman-connect/wallets'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { firstValueFrom } from 'rxjs'
+import { config } from '../config'
 import { useCentrifuge } from './CentrifugeProvider'
 
-const KUSAMA_GENESIS_HASH = '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe'
-
-type Account = InjectedAccountWithMeta
+type Account = WalletAccount
 
 type Proxy = { delegator: string; types: string[] }
 
@@ -16,15 +15,18 @@ type Web3ContextType = {
   selectedAccount: Account | null
   isConnecting: boolean
   isWeb3Injected: boolean
-  connect: () => Promise<void>
+  connect: (source?: string) => Promise<void>
   disconnect: () => void
   selectAccount: (address: string) => void
+  selectedWallet: Wallet | null
   selectProxy: (address: string | null) => void
   proxy: Proxy | null
   proxies: Record<string, Proxy[]> | undefined
 }
 
 const Web3Context = React.createContext<Web3ContextType>(null as any)
+
+export const wallets = getWallets()
 
 export function useWeb3() {
   const ctx = React.useContext(Web3Context)
@@ -39,6 +41,7 @@ export const Web3Provider: React.FC = ({ children }) => {
   const [selectedAccountAddress, setSelectedAccountAddress] = React.useState<string | null>(null)
   const [proxyAddress, setProxyAddress] = React.useState<string | null>(null)
   const [isConnecting, setIsConnecting] = React.useState(false)
+  const [selectedWallet, setSelectedWallet] = React.useState<Wallet | null>(null)
   const unsubscribeRef = React.useRef<(() => void) | null>()
   const cent = useCentrifuge()
   const { data: proxies } = useQuery(
@@ -51,18 +54,16 @@ export const Web3Provider: React.FC = ({ children }) => {
   )
 
   function setFilteredAccounts(accounts: Account[]) {
-    const kusamaAccounts = accounts
-      .filter((account) => !account.meta.genesisHash || account.meta.genesisHash === KUSAMA_GENESIS_HASH)
-      .map((acc) => ({
-        ...acc,
-        address: cent.utils.formatAddress(acc.address),
-      }))
+    const mappedAccounts = accounts.map((acc) => ({
+      ...acc,
+      address: cent.utils.formatAddress(acc.address),
+    }))
 
-    setAccounts(kusamaAccounts)
+    setAccounts(mappedAccounts)
     const persistedAddress = localStorage.getItem('web3PersistedAddress')
     const persistedProxy = localStorage.getItem('web3PersistedProxy')
-    const matchingAccount = persistedAddress && kusamaAccounts.find((acc) => acc.address === persistedAddress)?.address
-    const address = matchingAccount || kusamaAccounts[0]?.address
+    const matchingAccount = persistedAddress && mappedAccounts.find((acc) => acc.address === persistedAddress)?.address
+    const address = matchingAccount || mappedAccounts[0]?.address
     setSelectedAccountAddress(address)
     if (matchingAccount && persistedProxy) {
       setProxyAddress(persistedProxy)
@@ -75,7 +76,9 @@ export const Web3Provider: React.FC = ({ children }) => {
     setSelectedAccountAddress(null)
     setIsConnecting(false)
     setProxyAddress(null)
+    setSelectedWallet(null)
     localStorage.setItem('web3Persist', '')
+    localStorage.setItem('web3PersistedWallet', '')
     localStorage.setItem('web3PersistedAddress', '')
     localStorage.setItem('web3PersistedProxy', '')
     if (unsubscribeRef.current) {
@@ -84,27 +87,30 @@ export const Web3Provider: React.FC = ({ children }) => {
     }
   }, [])
 
-  const connect = React.useCallback(async () => {
+  const connect = React.useCallback(async (source?: string) => {
     unsubscribeRef.current?.()
     setIsConnecting(true)
 
     try {
-      const injected = await (web3EnablePromise || web3Enable('NFT Studio'))
-      if (injected.length === 0) {
-        // no extension installed, or the user did not accept the authorization
-        // in this case we should inform the use and give a link to the extension
-        throw new Error('No extension or not authorized')
-      }
+      const wallet = source ? getWalletBySource(source) : wallets.find((w) => w.installed)
+      if (!wallet?.installed) throw new Error('Wallet not available')
+      setSelectedWallet(wallet)
 
-      const unsub = await web3AccountsSubscribe((allAccounts) => {
+      // const injected = await (web3EnablePromise || web3Enable('NFT Studio'))
+      await wallet.enable(config.name)
+
+      const unsub = await wallet.subscribeAccounts((allAccounts) => {
+        if (!allAccounts) throw new Error('No accounts')
         setFilteredAccounts(allAccounts)
       })
-      unsubscribeRef.current = unsub
+      unsubscribeRef.current = unsub as any
 
       localStorage.setItem('web3Persist', '1')
+      localStorage.setItem('web3PersistedWallet', wallet.extensionName)
     } catch (e) {
       console.error(e)
       localStorage.setItem('web3Persist', '')
+      localStorage.setItem('web3PersistedWallet', '')
       localStorage.setItem('web3PersistedAddress', '')
       localStorage.setItem('web3PersistedProxy', '')
       throw e
@@ -127,7 +133,7 @@ export const Web3Provider: React.FC = ({ children }) => {
 
   React.useEffect(() => {
     if (!triedEager && localStorage.getItem('web3Persist')) {
-      connect()
+      connect(localStorage.getItem('web3PersistedWallet')!)
     }
     triedEager = true
 
@@ -148,6 +154,7 @@ export const Web3Provider: React.FC = ({ children }) => {
       isWeb3Injected,
       connect,
       disconnect,
+      selectedWallet,
       selectAccount,
       selectProxy,
       proxy:
@@ -161,6 +168,7 @@ export const Web3Provider: React.FC = ({ children }) => {
       isConnecting,
       connect,
       disconnect,
+      selectedWallet,
       selectAccount,
       selectProxy,
       selectedAccountAddress,

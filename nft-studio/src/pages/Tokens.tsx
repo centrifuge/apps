@@ -6,8 +6,9 @@ import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { TokenList, TokenTableData } from '../components/TokenList'
 import { Tooltips } from '../components/Tooltips'
+import { config } from '../config'
 import { Dec } from '../utils/Decimal'
-import { formatBalance } from '../utils/formatting'
+import { formatBalance, getCurrencySymbol } from '../utils/formatting'
 import { useTokens } from '../utils/usePools'
 
 export const TokenOverviewPage: React.FC = () => {
@@ -34,7 +35,7 @@ const TokenOverview: React.FC = () => {
             // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
             yield: tranche.interestRatePerSec ? tranche.interestRatePerSec.toAprPercent() : null,
             protection: tranche.minRiskBuffer?.toPercent() || new Perquintill(0).toPercent(),
-            valueLocked: tranche.tokenIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()),
+            valueLocked: tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()),
           }
         })
         .flat() || [],
@@ -42,7 +43,7 @@ const TokenOverview: React.FC = () => {
   )
 
   const totalValueLocked = React.useMemo(
-    () => tokens?.reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)),
+    () => tokens?.reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)) ?? Dec(0),
     [tokens]
   )
 
@@ -50,7 +51,7 @@ const TokenOverview: React.FC = () => {
 
   const pageSummaryData = [
     // TODO: sort out currency for TVL (kUSD vs AIR vs ...), assuming everything uses the same currency
-    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, network === 'altair' ? 'AIR' : 'USD') },
+    { label: <Tooltips type="tvl" />, value: formatBalance(totalValueLocked, getCurrencySymbol(config.baseCurrency)) },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
   ]
 

@@ -1,6 +1,6 @@
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug =
-  import.meta.env.MODE === 'development' || params.get('debug') != null || !!localStorage.getItem('debug')
+  import.meta.env.MODE === 'development' || params.get('debug') != null || !!localStorage.getItem('debugFlags')
 
 export type DebugFlagConfig =
   | {
@@ -23,11 +23,11 @@ export type DebugFlagConfig =
 export type Key =
   | 'address'
   | 'batchMintNFTs'
-  | 'alwaysShowPanel'
+  | 'persistDebugFlags'
   | 'showUnusedFlags'
   | 'showAdditionalIssuerTabs'
   | 'allowInvestBelowMin'
-  | 'altairDarkMode'
+  | 'alternativeTheme'
   | 'editPoolConfig'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
@@ -39,14 +39,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
     default: false,
   },
-  alwaysShowPanel: {
-    type: 'checkbox',
-    default: !!localStorage.getItem('debug'),
-  },
-  showUnusedFlags: {
-    type: 'checkbox',
-    default: false,
-  },
   showAdditionalIssuerTabs: {
     type: 'checkbox',
     default: true,
@@ -55,7 +47,7 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
     default: false,
   },
-  altairDarkMode: {
+  alternativeTheme: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,
@@ -64,5 +56,14 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     type: 'checkbox',
     default: false,
     alwaysShow: true,
+  },
+  persistDebugFlags: {
+    type: 'checkbox',
+    default: !!localStorage.getItem('debugFlags'),
+    alwaysShow: true,
+  },
+  showUnusedFlags: {
+    type: 'checkbox',
+    default: false,
   },
 }

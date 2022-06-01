@@ -28,7 +28,7 @@ export const Identity: React.FC<Props> = ({ address, clickToCopy, labelForConnec
     !isMe || !labelForConnectedAddress
       ? display
       : labelForConnectedAddress === true && isSameAddress(selectedAccount?.address, address)
-      ? selectedAccount?.meta.name || display
+      ? selectedAccount?.name || display
       : labelForConnectedAddress
 
   return (

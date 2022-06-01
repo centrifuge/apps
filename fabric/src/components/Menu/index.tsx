@@ -1,6 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { ResponsiveValue } from 'styled-system'
+import { PropsOf } from '../../utils/types'
 import { Box } from '../Box'
 import { Card, CardProps } from '../Card'
 import { Divider } from '../Divider'
@@ -50,7 +51,7 @@ export type MenuItemProps = {
   sublabel?: string
   icon?: React.ComponentType<IconProps> | React.ReactElement
   iconRight?: React.ComponentType<IconProps> | React.ReactElement
-} & React.ComponentPropsWithoutRef<'button'>
+} & PropsOf<typeof MenuItemButton>
 
 export const MenuItem: React.FC<MenuItemProps> = ({
   label,
@@ -61,7 +62,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
 }) => {
   return (
     <MenuItemButton {...buttonProps}>
-      <Shelf gap={1} px={2} py={1}>
+      <Shelf gap={1} px={2} py={1} minHeight="48px">
         {IconComp && isComponent(IconComp) ? <IconComp size="iconMedium" /> : IconComp}
         <Stack alignItems="flex-start">
           <Text variant="interactive1" color="inherit">

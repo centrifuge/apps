@@ -49,6 +49,7 @@ export const DataTable = <T extends Record<string, any>>({
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: 'desc' } : {}
   )
+
   const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
 
   const updateSortOrder = (sortKey: Column['sortKey']) => {
@@ -117,18 +118,23 @@ export const DataTable = <T extends Record<string, any>>({
 }
 
 const Row = styled(Shelf)<any>`
-  ${({ rounded }) =>
+  ${({ rounded, as: comp }) =>
     css({
       width: '100%',
       appearance: 'none',
       border: 'none',
-      borderBottom: '1px solid',
+      borderBottomStyle: 'solid',
+      borderBottomWidth: '1px',
       borderBottomColor: 'borderPrimary',
       backgroundColor: 'transparent',
-      'button&:hover': {
-        backgroundColor: 'backgroundSecondary',
-        cursor: 'pointer',
-      },
+      // using button&:hover caused the background sometimes not to update when switching themes
+      '&:hover':
+        comp === 'button'
+          ? {
+              backgroundColor: 'backgroundSecondary',
+              cursor: 'pointer',
+            }
+          : undefined,
       '&:focus-visible': {
         boxShadow: 'inset 0 0 0 3px var(--fabric-color-focus)',
       },
