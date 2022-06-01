@@ -8,7 +8,7 @@ on:
       - 'fabric/**' # dependency
       - 'centrifuge-js/**' # dependency
       - '.github/workflows/nft-studio-build-and-deploy.yml' # dependency
-      - '.github/workflows/altair-app-deploy-dev.yml'
+      - '.github/workflows/altair-app-deploy-demo.yml'
 
 jobs:
   dev:
