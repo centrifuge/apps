@@ -2,7 +2,7 @@ name: 'altair-app Demo'
 on:
   push:
     branches:
-      - split-altair-and-cent-deployments
+      - main
     paths:
       - 'nft-studio/**'
       - 'fabric/**' # dependency

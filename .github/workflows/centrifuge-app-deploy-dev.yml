@@ -2,7 +2,7 @@ name: 'centrifuge-app Dev'
 on:
   push:
     branches:
-      - split-altair-and-cent-deployments
+      - main
     paths:
       - 'nft-studio/**'
       - 'fabric/**' # dependency
