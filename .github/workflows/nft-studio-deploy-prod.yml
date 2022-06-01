@@ -1,4 +1,4 @@
-name: 'nft-studio PROD'
+name: 'nft-studio/ PROD'
 on:
   push:
     tags:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   dev:
-    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
+    uses: centrifuge/apps/.github/workflows/centrifuge-app-build-and-deploy.yml@main
     with:
       netlify-alias: ''
       ipfs-gateway: https://altair.mypinata.cloud/
