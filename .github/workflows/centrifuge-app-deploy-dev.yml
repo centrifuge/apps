@@ -21,7 +21,7 @@ jobs:
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
       network: centrifuge
-      subquery-url: https://api.subquery.network/sq/centrifuge/pools-demo
+      subquery-url: https://api.subquery.network/sq/centrifuge/pools
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
