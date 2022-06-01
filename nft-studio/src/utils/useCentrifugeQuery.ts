@@ -42,7 +42,7 @@ export function useCentrifugeQuery<T = any>(
           resetOnSuccess: true,
         }),
         catchError((e) => {
-          console.log('caught', e)
+          console.error('useCentrifugeQuery: query threw an error: ', e)
           if (throwErrors) throw e
           return of(null)
         })

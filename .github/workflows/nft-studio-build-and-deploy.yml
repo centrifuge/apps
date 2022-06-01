@@ -17,6 +17,9 @@ on:
       subscan-url:
         required: true
         type: string
+      network:
+        required: true
+        type: string
       subquery-url:
         required: true
         type: string
