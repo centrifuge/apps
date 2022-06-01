@@ -1,30 +1,30 @@
-name: 'nft-studio/ Dev'
+name: 'altair-app Demo'
 on:
   push:
     branches:
       - main
     paths:
-      - 'centrifuge-app/**'
+      - 'nft-studio/**'
       - 'fabric/**' # dependency
       - 'centrifuge-js/**' # dependency
-      - '.github/workflows/centrifuge-app-build-and-deploy.yml' # dependency
-      - '.github/workflows/centrifuge-app-deploy-to-dev.yml'
+      - '.github/workflows/nft-studio-build-and-deploy.yml' # dependency
+      - '.github/workflows/altair-app-deploy-demo.yml'
 
 jobs:
   dev:
-    uses: centrifuge/apps/.github/workflows/centrifuge-app-build-and-deploy.yml@main
+    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
     with:
       netlify-alias: ''
       ipfs-gateway: https://altair.mypinata.cloud/
-      collator-wss-url: wss://fullnode-collator-2.development.cntrfg.com
-      relay-wss-url: wss://fullnode-relay-2.development.cntrfg.com
+      collator-wss-url: wss://fullnode.demo.cntrfg.com
+      relay-wss-url: wss://fullnode-relay.demo.cntrfg.com
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
       network: altair
-      subquery-url: https://api.subquery.network/sq/centrifuge/pools
+      subquery-url: https://api.subquery.network/sq/centrifuge/pools-demo
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      netlify-site-id: ${{ secrets.NFT_STUDIO_DEV_NETLIFY_SITE_ID }}
+      netlify-site-id: ${{ secrets.ALTAIR_APP_DEMO_NETLIFY_SITE_ID }}
       pinata-api-key: ${{ secrets.PINATA_API_KEY }}
       pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}
