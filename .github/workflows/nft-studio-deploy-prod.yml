@@ -1,4 +1,4 @@
-name: 'nft-studio/ PROD'
+name: 'nft-studio PROD'
 on:
   push:
     tags:
