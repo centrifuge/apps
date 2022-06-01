@@ -10,7 +10,7 @@ on:
 
 jobs:
   pull-request:
-    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
+    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@wallet-dialog
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
       ipfs-gateway: https://altair.mypinata.cloud/
