@@ -1,4 +1,4 @@
-import { altairYellow, blueScale, grayScale } from './colors'
+import { altairYellow, grayScale, yellowScale } from './colors'
 
 const statusDefault = grayScale[600]
 const statusInfo = '#006ef5'
@@ -64,18 +64,18 @@ const darkColors = {
 
   backgroundButtonTertiary: 'transparent',
   backgroundButtonTertiaryFocus: 'transparent',
-  backgroundButtonTertiaryHover: blueScale[800],
-  backgroundButtonTertiaryPressed: blueScale[800],
+  backgroundButtonTertiaryHover: yellowScale[700],
+  backgroundButtonTertiaryPressed: yellowScale[700],
   backgroundButtonTertiaryDisabled: 'transparent',
   textButtonTertiary: 'white',
-  textButtonTertiaryFocus: blueScale[400],
-  textButtonTertiaryHover: blueScale[400],
-  textButtonTertiaryPressed: blueScale[400],
+  textButtonTertiaryFocus: yellowScale[500],
+  textButtonTertiaryHover: yellowScale[500],
+  textButtonTertiaryPressed: yellowScale[500],
   textButtonTertiaryDisabled: grayScale[600],
   borderButtonTertiary: 'transparent',
   borderButtonTertiaryFocus: 'transparent',
   borderButtonTertiaryHover: 'transparent',
-  borderButtonTertiaryPressed: blueScale[400],
+  borderButtonTertiaryPressed: yellowScale[500],
   borderButtonTertiaryDisabled: 'transparent',
 }
 

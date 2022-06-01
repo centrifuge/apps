@@ -36,7 +36,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
             width="iconLarge"
             height="iconLarge"
             borderRadius="card"
-            backgroundColor={isLoading ? 'borderSecondary' : 'accentSecondary'}
+            backgroundColor={isLoading ? 'borderSecondary' : 'backgroundThumbnail'}
             justifyContent="center"
           >
             <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>
@@ -48,10 +48,11 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
     >
       <Shelf
         px={PAGE_GUTTER}
-        bg={theme.colors.backgroundPrimary}
+        bg="backgroundPage"
         style={{
           boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
         }}
+        color="textSelected"
       >
         <NavigationTabs basePath={basePath}>
           <NavigationTabsItem to={`${basePath}`}>Overview</NavigationTabsItem>

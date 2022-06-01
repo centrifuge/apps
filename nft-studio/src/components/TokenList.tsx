@@ -1,5 +1,4 @@
 import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
-import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { formatBalance, formatPercentage } from '../utils/formatting'
@@ -9,9 +8,9 @@ import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 export type TokenTableData = {
   poolMetadata?: string
-  yield: Decimal | null
-  protection: Decimal
-  valueLocked: Decimal
+  yield: number | null
+  protection: number
+  valueLocked: number
   currency: string
   id: string
   seniority: number
@@ -29,10 +28,9 @@ type RowProps = {
 const columns: Column[] = [
   {
     align: 'left',
-    header: () => <SortableTableHeader label="Token" />,
+    header: 'Token',
     cell: (token: TokenTableData) => <TokenName token={token} />,
     flex: '9',
-    sortKey: 'token',
   },
   {
     align: 'left',
@@ -42,19 +40,23 @@ const columns: Column[] = [
   },
   {
     header: () => <SortableTableHeader label="Yield" />,
-    cell: (token: TokenTableData) => <Yield token={token} />,
+    cell: (token: TokenTableData) => (
+      <Text variant="body2">{token.yield ? `Target: ${formatPercentage(token.yield)}` : ''}</Text>
+    ),
     flex: '4',
     sortKey: 'yield',
   },
   {
     header: () => <SortableTableHeader label="Protection" />,
-    cell: (token: TokenTableData) => <Protection token={token} />,
+    cell: (token: TokenTableData) => (
+      <Text variant="body2">{token.protection ? formatPercentage(token.protection) : ''}</Text>
+    ),
     flex: '4',
     sortKey: 'protection',
   },
   {
     header: () => <SortableTableHeader label="Value locked" />,
-    cell: (token: TokenTableData) => <ValueLocked token={token} />,
+    cell: (token: TokenTableData) => <Text variant="body2">{formatBalance(token?.valueLocked, token.currency)}</Text>,
     flex: '4',
     sortKey: 'valueLocked',
   },
@@ -102,20 +104,4 @@ const AssetClass: React.VFC<RowProps> = ({ token }) => {
       {metadata?.pool?.asset.class}
     </TextWithPlaceholder>
   )
-}
-
-const Yield: React.VFC<RowProps> = ({ token }) => {
-  return (
-    <Text variant="body2">
-      {token.yield && !token.yield?.isZero() ? `Target: ${formatPercentage(token.yield)}` : ''}
-    </Text>
-  )
-}
-
-const Protection: React.VFC<RowProps> = ({ token }) => {
-  return <Text variant="body2">{!token.protection.isZero() && formatPercentage(token.protection)}</Text>
-}
-
-const ValueLocked: React.VFC<RowProps> = ({ token }) => {
-  return <Text variant="body2">{formatBalance(token?.valueLocked, token.currency)}</Text>
 }

@@ -21,12 +21,15 @@ export const PoolAssetReserveChart: React.VFC = () => {
   const poolStates = useDailyPoolStates(poolId)
   const pool = usePool(poolId)
 
-  const data: ChartData[] =
-    poolStates?.map((day) => {
-      const assetValue = day.poolState.netAssetValue.toDecimal().toNumber()
-      const poolValue = day.poolValue.toDecimal().toNumber()
-      return { day: new Date(day.timestamp), poolValue, assetValue, reserve: [assetValue, poolValue] }
-    }) || []
+  const data: ChartData[] = React.useMemo(() => {
+    return (
+      poolStates?.map((day) => {
+        const assetValue = day.poolState.netAssetValue.toDecimal().toNumber()
+        const poolValue = day.poolValue.toDecimal().toNumber()
+        return { day: new Date(day.timestamp), poolValue, assetValue, reserve: [assetValue, poolValue] }
+      }) || []
+    )
+  }, [poolStates])
 
   const todayPoolValue = pool?.value.toDecimal().toNumber() || 0
   const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
@@ -37,18 +40,20 @@ export const PoolAssetReserveChart: React.VFC = () => {
     reserve: [todayAssetValue, todayPoolValue],
   }
 
+  const chartData = [...data, today]
+
   return (
     <Stack>
       <CustomLegend data={today} currency={pool?.currency || ''} />
       <Shelf gap="4" width="100%" color="textSecondary">
-        {[...data, today]?.length ? (
+        {chartData?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart data={[...data, today]} margin={{ left: -20 }} reverseStackOrder>
+            <ComposedChart data={chartData} margin={{ left: -20, right: 10 }} reverseStackOrder>
               <XAxis
                 dataKey="day"
-                tick={<CustomizedXAxisTick variant={[...data, today].length > 30 ? 'months' : 'days'} />}
+                tick={<CustomizedXAxisTick variant={chartData.length > 30 ? 'months' : 'days'} />}
                 tickLine={false}
-                interval={0}
+                interval={chartData.length < 18 || chartData.length > 30 ? 0 : 1}
               />
               <YAxis
                 tickLine={false}

@@ -201,7 +201,7 @@ export const SortableTableHeader: React.VFC<{ label: string; orderBy?: OrderBy; 
 }) => {
   return (
     <StyledHeader>
-      {!align && (
+      {(!align || align === 'right') && (
         <IconArrowDown
           color={orderBy ? 'currentColor' : 'transparent'}
           size={16}
@@ -209,7 +209,7 @@ export const SortableTableHeader: React.VFC<{ label: string; orderBy?: OrderBy; 
         />
       )}
       {label}
-      {align && align === 'left' && (
+      {align && (align === 'left' || align === 'center') && (
         <IconArrowDown
           color={orderBy ? 'currentColor' : 'transparent'}
           size={16}

@@ -154,7 +154,7 @@ const PoolIcon: React.FC<{ icon?: File | null }> = ({ children, icon }) => {
   return dataUri ? (
     <img src={dataUri} width={40} height={40} alt="" />
   ) : (
-    <Shelf width={40} height={40} borderRadius="card" backgroundColor="accentSecondary" justifyContent="center">
+    <Shelf width={40} height={40} borderRadius="card" backgroundColor="backgroundThumbnail" justifyContent="center">
       <Text variant="body1">{children}</Text>
     </Shelf>
   )
@@ -261,7 +261,6 @@ const CreatePoolForm: React.VFC = () => {
     validateOnMount: true,
     onSubmit: async (values, { setSubmitting }) => {
       if (!address) return
-      // validation passed, submit
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
       const collectionId = await centrifuge.nfts.getAvailableCollectionId()
