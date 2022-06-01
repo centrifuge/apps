@@ -16,7 +16,7 @@ type Props = {}
 export const Menu: React.FC<Props> = () => {
   const homeMatch = useRouteMatch({ path: '/', exact: true })
 
-  const allPools = usePools()
+  const allPools = usePools(false)
   const address = useAddress()
   const permissions = usePermissions(address)
 
