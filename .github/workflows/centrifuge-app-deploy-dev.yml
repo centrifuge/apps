@@ -1,4 +1,4 @@
-name: 'centrifuge-app Demo'
+name: 'centrifuge-app Dev'
 on:
   push:
     branches:
@@ -16,8 +16,8 @@ jobs:
     with:
       netlify-alias: ''
       ipfs-gateway: https://altair.mypinata.cloud/
-      collator-wss-url: wss://fullnode-collator-2.development.cntrfg.com
-      relay-wss-url: wss://fullnode-relay-2.development.cntrfg.com
+      collator-wss-url: wss://fullnode.development.cntrfg.com
+      relay-wss-url: wss://fullnode-relay.development.cntrfg.com
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
       network: centrifuge
@@ -25,6 +25,6 @@ jobs:
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      netlify-site-id: ${{ secrets.CENTRIFUGE_APP_DEMO_NETLIFY_SITE_ID }}
+      netlify-site-id: ${{ secrets.CENTRIFUGE_APP_DEV_NETLIFY_SITE_ID }}
       pinata-api-key: ${{ secrets.PINATA_API_KEY }}
       pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}

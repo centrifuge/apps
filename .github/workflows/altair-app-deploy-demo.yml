@@ -1,4 +1,4 @@
-name: 'centrifuge-app Demo'
+name: 'altair-app Demo'
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ on:
       - 'fabric/**' # dependency
       - 'centrifuge-js/**' # dependency
       - '.github/workflows/nft-studio-build-and-deploy.yml' # dependency
-      - '.github/workflows/centrifuge-app-deploy-dev.yml'
+      - '.github/workflows/altair-app-deploy-dev.yml'
 
 jobs:
   dev:
@@ -25,6 +25,6 @@ jobs:
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      netlify-site-id: ${{ secrets.CENTRIFUGE_APP_DEMO_NETLIFY_SITE_ID }}
+      netlify-site-id: ${{ secrets.ALTAIR_APP_DEMO_NETLIFY_SITE_ID }}
       pinata-api-key: ${{ secrets.PINATA_API_KEY }}
       pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}
