@@ -2,7 +2,7 @@ name: 'centrifuge-app Dev'
 on:
   push:
     branches:
-      - altair-dev-deployments
+      - main
     paths:
       - 'centrifuge-app/**'
       - 'fabric/**' # dependency
