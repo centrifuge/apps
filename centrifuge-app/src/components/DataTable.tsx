@@ -120,6 +120,7 @@ export const DataTable = <T extends Record<string, any>>({
 const Row = styled(Shelf)<any>`
   ${({ rounded, as: comp }) =>
     css({
+      height: '48px',
       width: '100%',
       appearance: 'none',
       border: 'none',
@@ -155,6 +156,9 @@ const DataCol = styled.div<{ align: Column['align'] }>`
   flex: 1 1 160px;
   max-width: 100%;
   overflow: hidden;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   button&:hover {
     cursor: pointer;
@@ -192,7 +196,10 @@ const DataCol = styled.div<{ align: Column['align'] }>`
   }}
 `
 
-const HeaderCol = styled(DataCol)``
+const HeaderCol = styled(DataCol)`
+  height: 48px;
+  align-items: center;
+`
 
 export const SortableTableHeader: React.VFC<{ label: string; orderBy?: OrderBy; align?: Column['align'] }> = ({
   label,

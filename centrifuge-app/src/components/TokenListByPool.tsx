@@ -71,10 +71,8 @@ export const TokenListByPool: React.FC = () => {
   const tokens: TokenByPoolTableData[] = pool?.tranches
     .map((tranche) => {
       return {
-        apy: tranche?.interestRatePerSec
-          ? tranche?.interestRatePerSec.toAprPercent().toDecimalPlaces(2).toString()
-          : '',
-        protection: tranche.minRiskBuffer?.toDecimal().mul(100).toString() || '',
+        apy: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent().toFixed(2).toString() : '0.00',
+        protection: tranche.minRiskBuffer?.toDecimal().mul(100).toFixed(2).toString() || '',
         name: metadata?.tranches?.[tranche.id]?.name || '',
         symbol: metadata?.tranches?.[tranche.id]?.symbol || '',
         poolName: metadata?.pool?.name || '',
@@ -106,7 +104,7 @@ const TokenName: React.VFC<RowProps> = ({ token }) => {
 }
 
 const APY: React.VFC<RowProps> = ({ token }) => {
-  return <Text variant="body2">{Number(token.apy) > 0 ? `${token.apy}%` : ''}</Text>
+  return <Text variant="body2">{`${token.apy}%`}</Text>
 }
 
 const Protection: React.VFC<RowProps> = ({ token }) => {
