@@ -19,11 +19,23 @@ const StyledTrigger = styled(Text)`
   appearance: none;
   background: transparent;
   position: relative;
-  text-decoration: underline dotted;
   cursor: pointer;
   text-align: left;
   font-weight: 400;
   font-family: ${({ theme }) => theme.fonts.standard};
+  position: relative;
+  width: fit-content;
+
+  ::after {
+    position: absolute;
+    content: '';
+    height: 1px;
+    bottom: 0px;
+    left: 0;
+    width: 100%;
+    background: transparent;
+    border-bottom: 1px dotted ${({ theme }) => theme.colors.textSecondary};
+  }
 `
 
 export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disabled, delay = 1000, ...textProps }) => {
