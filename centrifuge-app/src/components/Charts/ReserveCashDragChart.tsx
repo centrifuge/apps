@@ -14,7 +14,7 @@ type ChartData = {
   reserve: number
 }
 
-export const ReserveCashDragChart: React.VFC = () => {
+const ReserveCashDragChart: React.VFC = () => {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
   const poolStates = useDailyPoolStates(poolId)
@@ -106,3 +106,5 @@ const CustomLegend: React.VFC<{
     </Shelf>
   )
 }
+
+export { ReserveCashDragChart as default }
