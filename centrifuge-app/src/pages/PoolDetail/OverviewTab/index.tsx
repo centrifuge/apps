@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { useParams } from 'react-router'
-// import { PoolAssetReserveChart } from '../../../components/Charts/PoolAssetReserveChart'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
