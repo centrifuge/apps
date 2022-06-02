@@ -77,7 +77,7 @@ export class CentChain {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       const api = await this.api()
-      const extrinsic = api.tx.radClaims.claim(claimerAccountID, amount, proof)
+      const extrinsic = api.tx.claims.claim(claimerAccountID, amount, proof)
       await extrinsic
         .signAndSend(address, { signer: injector.signer }, ({ status, dispatchError }) => {
           // status would still be set, but in the case of error we can shortcut
