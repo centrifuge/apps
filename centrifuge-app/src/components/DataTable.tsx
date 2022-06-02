@@ -132,7 +132,7 @@ const Row = styled(Shelf)<any>`
       '&:hover':
         comp === 'button'
           ? {
-              backgroundColor: 'backgroundSecondary',
+              backgroundColor: 'secondarySelectedBackground',
               cursor: 'pointer',
             }
           : undefined,
