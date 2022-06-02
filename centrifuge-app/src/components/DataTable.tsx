@@ -157,8 +157,6 @@ const DataCol = styled.div<{ align: Column['align'] }>`
   max-width: 100%;
   overflow: hidden;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 
   button&:hover {
     cursor: pointer;

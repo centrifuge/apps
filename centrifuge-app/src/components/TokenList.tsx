@@ -88,9 +88,15 @@ const TokenName: React.VFC<RowProps> = ({ token }) => {
   const trancheMeta = metadata?.tranches?.[token.id]
   const symbol = trancheMeta?.symbol
   return (
-    <Shelf gap="2">
+    <Shelf gap="2" overflow="hidden">
       <Thumbnail label={symbol || ''} size="small" />
-      <TextWithPlaceholder isLoading={isLoading} variant="body2" color="textPrimary" fontWeight={600}>
+      <TextWithPlaceholder
+        isLoading={isLoading}
+        variant="body2"
+        color="textPrimary"
+        fontWeight={600}
+        textOverflow="ellipsis"
+      >
         {metadata?.pool?.name} {trancheMeta?.name}
       </TextWithPlaceholder>
     </Shelf>

@@ -51,7 +51,7 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
 const PoolName: React.VFC<{ pool: Pool }> = ({ pool }) => {
   const { data, isLoading } = usePoolMetadata(pool)
   return (
-    <TextWithPlaceholder isLoading={isLoading} variant="body2" fontWeight={600}>
+    <TextWithPlaceholder isLoading={isLoading} variant="body2" fontWeight={600} textOverflow="ellipsis">
       {data?.pool?.name ?? 'Unnamed Pool'}
     </TextWithPlaceholder>
   )
