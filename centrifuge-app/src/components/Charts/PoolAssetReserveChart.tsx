@@ -67,7 +67,7 @@ export const PoolAssetReserveChart: React.VFC = () => {
                 dataKey="reserve"
                 stroke="transparent"
                 strokeOpacity={0}
-                fillOpacity={1}
+                fillOpacity={0.8}
                 name="Reserve"
               />
               <Line dot={false} dataKey="assetValue" stroke={theme.colors.accentSecondary} name="Asset value" />
