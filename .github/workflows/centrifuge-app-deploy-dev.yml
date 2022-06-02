@@ -4,7 +4,7 @@ on:
     branches:
       - main
     paths:
-      - 'nft-studio/**'
+      - 'centrifuge-app/**'
       - 'fabric/**' # dependency
       - 'centrifuge-js/**' # dependency
       - '.github/workflows/nft-studio-build-and-deploy.yml' # dependency

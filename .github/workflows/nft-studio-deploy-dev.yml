@@ -1,18 +1,20 @@
-name: 'nft-studio Pull request'
+name: 'nft-studio Dev'
 on:
-  pull_request:
+  push:
+    branches:
+      - main
     paths:
-      - 'nft-studio/**'
+      - 'centrifuge-app/**'
       - 'fabric/**' # dependency
       - 'centrifuge-js/**' # dependency
-      - '.github/workflows/nft-studio-build-and-deploy.yml' # dependency
-      - '.github/workflows/nft-studio-pull-request.yml'
+      - '.github/workflows/centrifuge-app-build-and-deploy.yml' # dependency
+      - '.github/workflows/nft-studio-deploy-dev.yml'
 
 jobs:
-  pull-request:
-    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
+  dev:
+    uses: centrifuge/apps/.github/workflows/centrifuge-app-build-and-deploy.yml@main
     with:
-      netlify-alias: pr-${{ github.event.pull_request.number }}
+      netlify-alias: ''
       ipfs-gateway: https://altair.mypinata.cloud/
       collator-wss-url: wss://fullnode-collator-2.development.cntrfg.com
       relay-wss-url: wss://fullnode-relay-2.development.cntrfg.com
@@ -20,7 +22,6 @@ jobs:
       whitelisted-accounts: ''
       network: altair
       subquery-url: https://api.subquery.network/sq/centrifuge/pools
-
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

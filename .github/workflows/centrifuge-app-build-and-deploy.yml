@@ -1,4 +1,4 @@
-name: 'nft-studio Build and deploy'
+name: 'centrifuge-app Build and deploy'
 on:
   workflow_call:
     inputs:
@@ -45,7 +45,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: nft-studio
+        working-directory: centrifuge-app
 
     steps:
       - name: Checkout
@@ -63,7 +63,7 @@ jobs:
       - name: Lint
         run: yarn lint
 
-      - name: Build nft-studio + dependencies
+      - name: Build centrifuge-app + dependencies
         run: yarn build
         env:
           SKIP_PREFLIGHT_CHECK: 'true'
@@ -85,9 +85,9 @@ jobs:
           deploy-message: ${{ github.event.head_commit.message }}
           enable-commit-comment: false
           github-token: ${{ secrets.github-token }}
-          netlify-config-path: ./nft-studio/netlify.toml
-          publish-dir: ./nft-studio/build
-          functions-dir: ./nft-studio/functions
+          netlify-config-path: ./centrifuge-app/netlify.toml
+          publish-dir: ./centrifuge-app/build
+          functions-dir: ./centrifuge-app/functions
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.netlify-auth-token  }}
           NETLIFY_SITE_ID: ${{ secrets.netlify-site-id }}
