@@ -57,7 +57,7 @@ const PoolAssetReserveChart: React.VFC = () => {
               />
               <YAxis
                 tickLine={false}
-                style={{ fontSize: '10px', fontFamily: "'Inter'" }}
+                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
               />
               <CartesianGrid stroke={theme.colors.borderSecondary} />

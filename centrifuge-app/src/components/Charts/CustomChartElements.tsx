@@ -25,15 +25,7 @@ export const CustomizedXAxisTick: React.VFC<CustomizedXAxisTickProps> = ({ paylo
 
   return (
     <g transform={`translate(${x},${y})`}>
-      <text
-        x={0}
-        y={0}
-        dy={16}
-        fontSize="10px"
-        fill={theme.colors.textSecondary}
-        fontFamily="Inter"
-        textAnchor="center"
-      >
+      <text x={0} y={0} dy={16} fontSize="10px" fill={theme.colors.textSecondary} textAnchor="center">
         {tick}
       </text>
     </g>
