@@ -31,7 +31,7 @@ const columns: Column[] = [
     align: 'left',
     header: () => <SortableTableHeader label="Name" />,
     cell: (token: TokenByPoolTableData) => <TokenName token={token} />,
-    flex: '3',
+    flex: '4',
     sortKey: 'name',
   },
   {
@@ -44,13 +44,13 @@ const columns: Column[] = [
   {
     header: () => <SortableTableHeader label="Min. Protection" />,
     cell: (token: TokenByPoolTableData) => <Protection token={token} />,
-    flex: '2',
+    flex: '3',
     sortKey: 'protection',
   },
   {
     header: () => <SortableTableHeader label="APY" />,
     cell: (token: TokenByPoolTableData) => <APY token={token} />,
-    flex: '2',
+    flex: '3',
     sortKey: 'apy',
   },
   {
