@@ -25,6 +25,6 @@ jobs:
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      netlify-site-id: ${{ secrets.NFT_STUDIO_DEV_NETLIFY_SITE_ID }}
+      netlify-site-id: ${{ secrets.CENTRIFUGE_APP_DEV_NETLIFY_SITE_ID }}
       pinata-api-key: ${{ secrets.PINATA_API_KEY }}
       pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}
