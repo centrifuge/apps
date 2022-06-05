@@ -1,5 +1,5 @@
 import BN from 'bn.js'
-import { aggregateByYear, calculateFIFOCapitalGains, Operation } from 'fifo-capital-gains-js'
+import { aggregateByYear, calculateFIFOCapitalGains, CapitalGains, Operation } from 'fifo-capital-gains-js'
 import { csvName } from '.'
 import { downloadCSV } from '../../../utils/export'
 import { PoolData } from '../../../utils/usePool'
@@ -35,12 +35,18 @@ const getBalanceOnFirstDay = (executionsBeforeYearStart: any[]) => {
   }, 0)
 }
 
+const aggregateByTimePeriod = (capitalGains: CapitalGains[], startDate: Date, endDate: Date) =>
+  capitalGains
+    .filter((cg) => cg.sale.date >= startDate && cg.sale.date <= endDate)
+    .reduce((acc, cg) => cg.capitalGains + acc, 0)
+
 const calculateRealizedCapitalGains = (
   executions: any[],
   transfersFrom: any[],
   transfersTo: any[],
   investor: string,
-  yearStart: Date
+  yearStart: Date,
+  yearEnd: Date
 ) => {
   if (executions.length === 0) return 0
 
@@ -48,8 +54,6 @@ const calculateRealizedCapitalGains = (
   let largeAdjustment = false
   const operations: Operation[] = [
     ...executions.map((execution) => {
-      console.log('currencyAmount', execution.currencyAmount)
-      console.log('tokenPrice', execution.tokenPrice)
       let tokenAmount = new BN(execution.currencyAmount)
         .mul(e27)
         .div(new BN(execution.tokenPrice))
@@ -116,17 +120,17 @@ const calculateRealizedCapitalGains = (
   }
 
   try {
-    // if (investor === '0x00397d81c4b005e86df0492fd468891ad2153377') {
-    //   console.log(executions)
-    //   console.log(transfersFrom)
-    //   console.log(transfersTo)
-    //   console.log(operations)
-    // }
-    return aggregateByYear(calculateFIFOCapitalGains(operations))
+    if (investor === '0x124b0a3c466dfe822d50632a4f9965d35e040eaa') {
+      console.log('------------------------------------------')
+      console.log('operations', operations)
+      console.log('Capital Gains: ', calculateFIFOCapitalGains(operations))
+      console.log('Capital Gains(aggregatedByYear): ', aggregateByYear(calculateFIFOCapitalGains(operations)))
+      console.log('customAggregate', aggregateByTimePeriod(calculateFIFOCapitalGains(operations), yearStart, yearEnd))
+    }
+    return aggregateByTimePeriod(calculateFIFOCapitalGains(operations), yearStart, yearEnd)
   } catch (e) {
     console.error(e)
-    const year = yearStart.getFullYear()
-    return { [year]: 0 }
+    return 0
   }
 }
 
@@ -139,11 +143,10 @@ const calculateInterestAccrued = (
   yearEnd: Date
 ) => {
   if (executions.length === 0) {
-    const year = yearStart.getFullYear()
     return {
       balanceOnFirstDay: 0,
       balanceOnLastDay: 0,
-      interestAccrued: { [year]: 0 },
+      interestAccrued: 0,
     }
   }
   const executionsBeforeYearStart = executions.filter((result) => date(result.timestamp) < yearStart)
@@ -206,7 +209,16 @@ const calculateInterestAccrued = (
           } as Operation,
           ...operations.filter((op) => op.date >= yearStart),
         ]
-      : operations
+      : [
+          {
+            symbol,
+            amount: 0,
+            date: yearStart,
+            price: tokenPriceFirstDay,
+            type: 'BUY',
+          } as Operation,
+          ...operations.filter((op) => op.date >= yearStart),
+        ]
 
   // Add a sell order at the end of the year, to assume everything was sold
   const operationsWithAssumedYearEndSale =
@@ -222,7 +234,24 @@ const calculateInterestAccrued = (
             type: 'SELL',
           } as Operation,
         ]
+  console.log(executions[0].owner.id)
+  operationsWithAssumedYearEndSale[operationsWithAssumedYearEndSale.length - 1].amount -= 0.0000001
   try {
+    if (executions[0].owner.id === '0x124b0a3c466dfe822d50632a4f9965d35e040eaa') {
+      console.log('!!!!!!!!!!!!!!!!')
+      console.log('operations with final sell', operationsWithAssumedYearEndSale)
+      console.log('operations with final sell', operationsWithAssumedYearEndSale)
+
+      console.log('interestAccrued', calculateFIFOCapitalGains(operationsWithAssumedYearEndSale))
+      console.log(
+        'interestAccrued(aggregatedByYear)',
+        aggregateByYear(calculateFIFOCapitalGains(operationsAggregratedYearStart))
+      )
+      console.log(
+        'customAggregate',
+        aggregateByTimePeriod(calculateFIFOCapitalGains(operationsAggregratedYearStart), yearStart, yearEnd)
+      )
+    }
     // console.log(executions)
     // console.log(operations)
     return {
@@ -230,18 +259,21 @@ const calculateInterestAccrued = (
       tokensOnFirstDay,
       balanceOnLastDay,
       tokensOnLastDay,
-      interestAccrued: aggregateByYear(calculateFIFOCapitalGains(operationsWithAssumedYearEndSale)),
+      interestAccrued: aggregateByTimePeriod(
+        calculateFIFOCapitalGains(operationsWithAssumedYearEndSale),
+        yearStart,
+        yearEnd
+      ),
     }
   } catch (e) {
     console.error(e)
-    const year = yearStart.getFullYear()
     return {
       balanceOnFirstDay,
       tokensOnFirstDay,
       balanceOnLastDay,
       tokensOnLastDay,
       tokenPriceLastDay,
-      interestAccrued: { [year]: 0 },
+      interestAccrued: 0,
     }
   }
 }
@@ -353,7 +385,8 @@ async function taxReportByYear({
         transfersFrom,
         transfersTo,
         investor,
-        yearStart
+        yearStart,
+        yearEnd
       )
       const { interestAccrued, balanceOnFirstDay, tokensOnFirstDay, balanceOnLastDay, tokensOnLastDay } =
         calculateInterestAccrued(
@@ -374,11 +407,17 @@ async function taxReportByYear({
         transfersTo.filter((result) => date(result.timestamp) >= yearStart && date(result.timestamp) <= yearEnd)
       )
 
+      if (investor === '0x124b0a3c466dfe822d50632a4f9965d35e040eaa') {
+        console.log('vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv')
+        console.log('realizedCapitalGains', realizedCapitalGains)
+        console.log('interestAccrued', interestAccrued)
+      }
+
       rows.push([
         investor,
         symbol,
-        realizedCapitalGains['2021'] || 0,
-        interestAccrued['2021'] || 0,
+        realizedCapitalGains,
+        interestAccrued,
         transactionFees,
         balanceOnFirstDay,
         tokensOnFirstDay,

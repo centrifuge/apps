@@ -135,6 +135,7 @@ async function getCentChainData(subgraphData: UserRewardsData, claimsData: Rewar
 
 async function getClaimsData() {
   const r = await fetch(config.rewardsTreeUrl)
+  console.log(config.rewardsTreeUrl)
   if (!r.ok) {
     throw new Error(`could not load rewards claims from ${config.rewardsTreeUrl}`)
   }
