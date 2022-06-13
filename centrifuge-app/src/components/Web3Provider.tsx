@@ -1,4 +1,4 @@
-import { isWeb3Injected, web3Enable, web3EnablePromise } from '@polkadot/extension-dapp'
+import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWalletBySource, getWallets, Wallet, WalletAccount } from '@talisman-connect/wallets'
 import * as React from 'react'
 import { useQuery } from 'react-query'
@@ -96,7 +96,6 @@ export const Web3Provider: React.FC = ({ children }) => {
       if (!wallet?.installed) throw new Error('Wallet not available')
       setSelectedWallet(wallet)
 
-      await (web3EnablePromise || web3Enable('Centrifuge App'))
       await wallet.enable(config.name)
 
       const unsub = await wallet.subscribeAccounts((allAccounts) => {
