@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { IconChevronRight } from '@centrifuge/fabric'
+import { IconChevronRight, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { formatBalance } from '../utils/formatting'
@@ -28,7 +28,7 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
     },
     {
       header: 'Value',
-      cell: (p: Pool) => formatBalance(p.value, p.currency),
+      cell: (p: Pool) => <Text variant="body2">{formatBalance(p.value, p.currency)}</Text>,
     },
     {
       header: '',
