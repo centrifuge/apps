@@ -9,7 +9,7 @@
     "tinlake-ui",
     "tinlake.js",
     "centrifuge-js",
-    "nft-studio",
+    "centrifuge-app",
     "gateway",
     "gateway/packages/lib",
     "gateway/packages/ui",

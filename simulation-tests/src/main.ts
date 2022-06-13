@@ -123,7 +123,7 @@ const createAndFinanceAssets = async (centrifuge: Centrifuge) => {
     await lastValueFrom(centrifuge.nfts.mintNft([assetCollectionId, assetId, Alice, metadata]))
     await lastValueFrom(centrifuge.pools.createLoan([poolId, assetCollectionId, assetId]))
 
-    const nextLoanId = (await centrifuge.pools.getNextLoanId()).toString()
+    const nextLoanId = (await centrifuge.pools.getNextLoanId([poolId])).toString()
     const currentLoanId = `${Number(nextLoanId) - 1}`
     await lastValueFrom(centrifuge.pools.priceLoan([poolId, currentLoanId, interestRatePerSec.toString(), assetInput]))
 
@@ -140,8 +140,8 @@ const run = async () => {
     network: 'centrifuge',
     // polkadotWsUrl: 'ws://localhost:9944',
     // centrifugeWsUrl: 'ws://localhost:9946',
-    polkadotWsUrl: 'wss://fullnode-relay-2.development.cntrfg.com',
-    centrifugeWsUrl: 'wss://fullnode-collator-2.development.cntrfg.com',
+    polkadotWsUrl: 'wss://fullnode-relay.development.cntrfg.com',
+    centrifugeWsUrl: 'wss://fullnode.development.cntrfg.com',
     signingAddress: AliceKeyRing,
     printExtrinsics: true,
     debug: true,
@@ -181,7 +181,7 @@ const run = async () => {
   await lastValueFrom(centrifuge.pools.closeEpoch([poolId]))
   console.log('EPOCH 2 CLOSED')
 
-  const nextLoanId = (await centrifuge.pools.getNextLoanId()).toString()
+  const nextLoanId = (await centrifuge.pools.getNextLoanId([poolId])).toString()
   const currentLoanId = `${Number(nextLoanId) - 1}`
   await lastValueFrom(centrifuge.pools.repayAndCloseLoan([poolId, currentLoanId]))
 

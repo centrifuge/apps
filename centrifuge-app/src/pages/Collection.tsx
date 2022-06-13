@@ -64,7 +64,7 @@ const Collection: React.FC = () => {
           )
         }
       />
-      <Stack alignItems="center" gap={2} mb={5}>
+      <Stack alignItems="center" gap={2} my={5}>
         {metadata?.image ? (
           <Box
             as="img"

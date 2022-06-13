@@ -1,5 +1,5 @@
 [build]
-  base = "nft-studio"
+  base = "centrifuge-app"
   command = "yarn build:all"
   publish = "build"
   environment = { NETLIFY_USE_YARN = "true" }

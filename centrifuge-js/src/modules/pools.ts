@@ -678,10 +678,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  async function getNextLoanId() {
+  async function getNextLoanId(args: [poolId: string]) {
+    const [poolId] = args
     const $api = inst.getApi()
 
-    const id = await firstValueFrom($api.pipe(switchMap((api) => api.query.loans.nextLoanId())))
+    const id = await firstValueFrom($api.pipe(switchMap((api) => api.query.loans.nextLoanId(poolId))))
     return id
   }
 

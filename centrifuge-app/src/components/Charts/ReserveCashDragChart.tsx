@@ -1,43 +1,40 @@
 import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { useParams } from 'react-router'
-import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'
-import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
+import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../utils/formatting'
 import { useDailyPoolStates, usePool } from '../../utils/usePools'
 import { Tooltips } from '../Tooltips'
 import { CustomizedTooltip, CustomizedXAxisTick } from './CustomChartElements'
 
 type ChartData = {
   day: Date
-  poolValue: number
-  assetValue: number
-  reserve: [number, number]
+  cashDrag: number
+  reserve: number
 }
 
-export const PoolAssetReserveChart: React.VFC = () => {
+const ReserveCashDragChart: React.VFC = () => {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
   const poolStates = useDailyPoolStates(poolId)
   const pool = usePool(poolId)
 
-  const data: ChartData[] = React.useMemo(() => {
-    return (
-      poolStates?.map((day) => {
-        const assetValue = day.poolState.netAssetValue.toDecimal().toNumber()
-        const poolValue = day.poolValue.toDecimal().toNumber()
-        return { day: new Date(day.timestamp), poolValue, assetValue, reserve: [assetValue, poolValue] }
-      }) || []
-    )
-  }, [poolStates])
+  const data: ChartData[] =
+    poolStates?.map((day) => {
+      const assetValue = day.poolState.netAssetValue.toDecimal().toNumber()
+      const reserve = day.poolState.totalReserve.toDecimal().toNumber()
+      const cashDrag = (reserve / (reserve + assetValue)) * 100
+      return { day: new Date(day.timestamp), cashDrag: cashDrag || 0, reserve }
+    }) || []
 
-  const todayPoolValue = pool?.value.toDecimal().toNumber() || 0
   const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
+  const todayReserve = pool?.reserve.total.toDecimal().toNumber() || 0
+  const cashDrag = (todayReserve / (todayAssetValue + todayReserve)) * 100
   const today: ChartData = {
     day: new Date(),
-    poolValue: todayPoolValue,
-    assetValue: todayAssetValue,
-    reserve: [todayAssetValue, todayPoolValue],
+    cashDrag: cashDrag || 0,
+    reserve: todayReserve,
   }
 
   const chartData = [...data, today]
@@ -48,7 +45,7 @@ export const PoolAssetReserveChart: React.VFC = () => {
       <Shelf gap="4" width="100%" color="textSecondary">
         {chartData?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart data={chartData} margin={{ left: -20, right: 10 }} reverseStackOrder>
+            <ComposedChart data={chartData} margin={{ left: -30 }}>
               <XAxis
                 dataKey="day"
                 tick={<CustomizedXAxisTick variant={chartData.length > 30 ? 'months' : 'days'} />}
@@ -56,22 +53,30 @@ export const PoolAssetReserveChart: React.VFC = () => {
                 interval={chartData.length < 18 || chartData.length > 30 ? 0 : 1}
               />
               <YAxis
+                yAxisId="left"
                 tickLine={false}
-                style={{ fontSize: '10px', fontFamily: "'Inter'" }}
+                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
+              />
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
+                tickMargin={5}
+                tickLine={false}
+                tickFormatter={(tick: number) => `${tick}%`}
               />
               <CartesianGrid stroke={theme.colors.borderSecondary} />
               <Tooltip content={<CustomizedTooltip currency={pool?.currency || ''} />} />
-              <Area
-                fill={theme.colors.backgroundSecondary}
-                dataKey="reserve"
-                stroke="transparent"
-                strokeOpacity={0}
-                fillOpacity={1}
-                name="Reserve"
+              <Line dot={false} dataKey="reserve" yAxisId="left" stroke={theme.colors.accentPrimary} name="Reserve" />
+              <Line
+                dot={false}
+                dataKey="cashDrag"
+                yAxisId="right"
+                stroke={theme.colors.accentSecondary}
+                unit="percent"
+                name="Cash drag"
               />
-              <Line dot={false} dataKey="assetValue" stroke={theme.colors.accentSecondary} name="Asset value" />
-              <Line dot={false} dataKey="poolValue" stroke={theme.colors.accentPrimary} name="Pool value" />
             </ComposedChart>
           </ResponsiveContainer>
         ) : (
@@ -92,18 +97,16 @@ const CustomLegend: React.VFC<{
     <Shelf bg="backgroundPage" width="100%" gap="2">
       <Grid pl="4" pb="4" columns={6} gap="3" width="100%">
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentPrimary}>
-          <Tooltips variant="secondary" type="poolValue" />
-          <Text variant="body2">{formatBalance(data.poolValue, currency)}</Text>
+          <Tooltips variant="secondary" type="poolReserve" />
+          <Text variant="body2">{formatBalance(data.reserve, currency)}</Text>
         </Stack>
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentSecondary}>
-          <Tooltips variant="secondary" type="assetValue" />
-          <Text variant="body2">{formatBalance(data.assetValue, currency)}</Text>
-        </Stack>
-        <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.borderSecondary}>
-          <Tooltips variant="secondary" type="poolReserve" />
-          <Text variant="body2">{formatBalance(data.reserve[1] - data.reserve[0], currency)}</Text>
+          <Tooltips variant="secondary" type="cashDrag" />
+          <Text variant="body2">{formatPercentage(data.cashDrag)}</Text>
         </Stack>
       </Grid>
     </Shelf>
   )
 }
+
+export { ReserveCashDragChart as default }

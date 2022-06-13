@@ -48,7 +48,7 @@ export const RiskGroupSharesPieChart: React.VFC<PieChartProps> = ({ data }) => {
   }
 
   return (
-    <RechartsPieChart width={300} height={250} style={{ fontFamily: 'Inter' }}>
+    <RechartsPieChart width={300} height={250}>
       <Pie
         data={data}
         cx="50%"
