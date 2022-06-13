@@ -1,8 +1,8 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
+import { combineLatest, EMPTY, expand, firstValueFrom, mergeWith, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
-import { CentrifugeBase } from '../CentrifugeBase'
+import { $txCompleted, CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
 import { SubqueryDailyPoolState } from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
@@ -1001,7 +1001,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [address] = args
     const $api = inst.getApi()
 
-    const $events = inst.getBlockEvents()
+    const $events = inst.getBlockEvents().pipe(mergeWith($txCompleted))
 
     return $api.pipe(
       switchMap(

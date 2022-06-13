@@ -46,6 +46,9 @@ export function useCentrifugeQuery<T = any>(
           if (throwErrors) throw e
           return of(null)
         }),
+        // Share the observable between subscriber and provide new subscriber the latest cached value.
+        // When there are no subscribers anymore, unsubscribe from the shared observable with a delay
+        // The delay is to avoid unsubscribing and resubscribing on page navigations.
         shareReplayWithDelayedReset({ bufferSize: 1, resetDelay: 60000 })
       )
       return source
@@ -57,17 +60,19 @@ export function useCentrifugeQuery<T = any>(
     }
   )
 
-  console.log('$source1', !!$source, key)
   const { data: queryData } = useQuery(
-    ['queryData', ...key],
+    ['queryData', ...key, !!$source],
     () => {
-      console.log('$source', $source, key)
-      return firstValueFrom($source!)
+      console.log('$source', !!$source, key)
+      return $source ? firstValueFrom($source) : null
     },
     {
       suspense,
+      // Infinite staleTime as useQuery here is only used to populate the cache initially and
+      // to handle suspending the component when the suspense option is enabled.
+      // Further data is subscribed to, and added to the cache, after the component has mounted.
       staleTime: Infinity,
-      enabled: !!$source && enabled,
+      enabled: $source && enabled,
       retry: false,
     }
   )
@@ -77,9 +82,9 @@ export function useCentrifugeQuery<T = any>(
     const sub = $source.subscribe({
       next: (data) => {
         if (data) {
-          const cached = queryClient.getQueryData<T>(['queryData', ...key])
+          const cached = queryClient.getQueryData<T>(['queryData', ...key, true])
           if (cached !== data) {
-            queryClient.setQueryData<T>(['queryData', ...key], data)
+            queryClient.setQueryData<T>(['queryData', ...key, true], data)
           }
         }
       },

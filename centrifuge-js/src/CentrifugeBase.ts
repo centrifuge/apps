@@ -12,6 +12,7 @@ import {
   of,
   share,
   startWith,
+  Subject,
   switchMap,
   takeWhile,
   tap,
@@ -55,6 +56,8 @@ const parachainTypes = {
   ClassId: 'u64',
   InstanceId: 'u128',
 }
+
+export const $txCompleted = new Subject<void>()
 
 export class CentrifugeBase {
   config: Config
@@ -108,6 +111,7 @@ export class CentrifugeBase {
       return actualSubmittable.signAndSend(signingAddress, { signer }).pipe(
         tap((result) => {
           options?.onStatusChange?.(result)
+          if (result.status.isInBlock) $txCompleted.next()
         }),
         takeWhile((result) => {
           const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
