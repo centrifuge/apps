@@ -1,8 +1,8 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, mergeWith, of } from 'rxjs'
+import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
-import { $txCompleted, CentrifugeBase } from '../CentrifugeBase'
+import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
 import { SubqueryDailyPoolState } from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
@@ -567,7 +567,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [address] = args
     const $api = inst.getApi()
 
-    const $events = inst.getBlockEvents().pipe(
+    const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) => api.events.permissions.Added.is(event) || api.events.permissions.Removed.is(event)
@@ -626,7 +626,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     const $api = inst.getApi()
 
-    const $events = inst.getBlockEvents().pipe(
+    const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) => api.events.permissions.Added.is(event) || api.events.permissions.Removed.is(event)
@@ -1002,7 +1002,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [address] = args
     const $api = inst.getApi()
 
-    const $events = inst.getBlockEvents().pipe(mergeWith($txCompleted))
+    const $events = inst.getEvents()
 
     return $api.pipe(
       switchMap(
@@ -1086,7 +1086,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const $api = inst.getApi()
 
-    const $events = inst.getBlockEvents().pipe(
+    const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
