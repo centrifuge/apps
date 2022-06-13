@@ -1,12 +1,11 @@
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { PoolAssetReserveChart } from '../../../components/Charts/PoolAssetReserveChart'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { RiskGroupList } from '../../../components/RiskGroupList'
+import { Spinner } from '../../../components/Spinner'
 import { TokenListByPool } from '../../../components/TokenListByPool'
 import { Tooltips } from '../../../components/Tooltips'
 import { formatDate, getAge } from '../../../utils/date'
@@ -14,6 +13,9 @@ import { formatBalance } from '../../../utils/formatting'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
+
+const RiskGroupList = React.lazy(() => import('../../../components/RiskGroupList'))
+const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
 
 export const PoolDetailOverviewTab: React.FC = () => {
   return (
@@ -43,7 +45,9 @@ export const PoolDetailOverview: React.FC = () => {
     <>
       <PageSummary data={pageSummaryData} />
       <PageSection title="Pool value, asset value & reserve" titleAddition={formatDate(new Date().toString())}>
-        <PoolAssetReserveChart />
+        <React.Suspense fallback={<Spinner />}>
+          <PoolAssetReserveChart />
+        </React.Suspense>
       </PageSection>
       <PageSection title="Investment Tokens">
         <TokenListByPool />
@@ -52,7 +56,9 @@ export const PoolDetailOverview: React.FC = () => {
         <IssuerSection metadata={metadata} />
       </PageSection>
       <PageSection title=" Asset portfolio" titleAddition="By risk groups">
-        <RiskGroupList />
+        <React.Suspense fallback={<Spinner />}>
+          <RiskGroupList />
+        </React.Suspense>
       </PageSection>
     </>
   )

@@ -31,7 +31,7 @@ const columns: Column[] = [
     align: 'left',
     header: () => <SortableTableHeader label="Name" />,
     cell: (token: TokenByPoolTableData) => <TokenName token={token} />,
-    flex: '3',
+    flex: '4',
     sortKey: 'name',
   },
   {
@@ -44,13 +44,13 @@ const columns: Column[] = [
   {
     header: () => <SortableTableHeader label="Min. Protection" />,
     cell: (token: TokenByPoolTableData) => <Protection token={token} />,
-    flex: '2',
+    flex: '3',
     sortKey: 'protection',
   },
   {
     header: () => <SortableTableHeader label="APY" />,
     cell: (token: TokenByPoolTableData) => <APY token={token} />,
-    flex: '2',
+    flex: '3',
     sortKey: 'apy',
   },
   {
@@ -71,10 +71,8 @@ export const TokenListByPool: React.FC = () => {
   const tokens: TokenByPoolTableData[] = pool?.tranches
     .map((tranche) => {
       return {
-        apy: tranche?.interestRatePerSec
-          ? tranche?.interestRatePerSec.toAprPercent().toDecimalPlaces(2).toString()
-          : '',
-        protection: tranche.minRiskBuffer?.toDecimal().mul(100).toString() || '',
+        apy: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent().toFixed(2).toString() : '0.00',
+        protection: tranche.minRiskBuffer?.toDecimal().mul(100).toFixed(2).toString() || '',
         name: metadata?.tranches?.[tranche.id]?.name || '',
         symbol: metadata?.tranches?.[tranche.id]?.symbol || '',
         poolName: metadata?.pool?.name || '',
@@ -99,14 +97,14 @@ export const TokenListByPool: React.FC = () => {
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
   return (
-    <Text variant="body2" color="textInteractive" fontWeight={600}>
+    <Text variant="body2" color="textInteractive" fontWeight={600} textOverflow="ellipsis">
       {token?.poolName} {token?.name}
     </Text>
   )
 }
 
 const APY: React.VFC<RowProps> = ({ token }) => {
-  return <Text variant="body2">{Number(token.apy) > 0 ? `${token.apy}%` : ''}</Text>
+  return <Text variant="body2">{`${token.apy}%`}</Text>
 }
 
 const Protection: React.VFC<RowProps> = ({ token }) => {

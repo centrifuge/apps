@@ -1,7 +1,6 @@
 import Centrifuge, { TransactionOptions } from '@centrifuge/centrifuge-js'
-import { web3FromAddress } from '@polkadot/extension-dapp'
-import { InjectedAccount } from '@polkadot/extension-inject/types'
 import { ISubmittableResult } from '@polkadot/types/types'
+import { WalletAccount } from '@talisman-connect/wallets'
 import * as React from 'react'
 import { lastValueFrom, Observable } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
@@ -21,10 +20,9 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   const lastCreatedTransaction = useTransaction(lastId)
   const pendingTransaction = React.useRef<{ id: string; args: T }>()
 
-  async function doTransaction(selectedAccount: InjectedAccount, id: string, args: T) {
+  async function doTransaction(selectedAccount: WalletAccount, id: string, args: T) {
     try {
-      const injector = await web3FromAddress(selectedAccount?.address)
-      const connectedCent = cent.connect(selectedAccount?.address, injector.signer)
+      const connectedCent = cent.connect(selectedAccount?.address, selectedAccount?.signer as any)
       if (proxy) {
         connectedCent.setProxy(proxy.delegator)
       }

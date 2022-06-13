@@ -96,7 +96,6 @@ export const Web3Provider: React.FC = ({ children }) => {
       if (!wallet?.installed) throw new Error('Wallet not available')
       setSelectedWallet(wallet)
 
-      // const injected = await (web3EnablePromise || web3Enable('NFT Studio'))
       await wallet.enable(config.name)
 
       const unsub = await wallet.subscribeAccounts((allAccounts) => {

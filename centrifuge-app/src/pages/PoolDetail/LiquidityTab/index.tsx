@@ -1,13 +1,13 @@
 import { Button, Shelf } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { ReserveCashDragChart } from '../../../components/Charts/ReserveCashDragChart'
 import { EpochList } from '../../../components/EpochList'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { MaxReserveForm } from '../../../components/MaxReserveForm'
 import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
+import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
 import { getEpochTimeRemaining } from '../../../utils/date'
 import { formatBalance } from '../../../utils/formatting'
@@ -15,6 +15,8 @@ import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransactio
 import { useLiquidityAdmin } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
+
+const ReserveCashDragChart = React.lazy(() => import('../../../components/Charts/ReserveCashDragChart'))
 
 export const PoolDetailLiquidityTab: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
@@ -61,7 +63,9 @@ export const PoolDetailLiquidity: React.FC = () => {
     <>
       <PageSummary data={pageSummaryData}></PageSummary>
       <PageSection title="Reserve vs. cash drag">
-        <ReserveCashDragChart />
+        <React.Suspense fallback={<Spinner />}>
+          <ReserveCashDragChart />
+        </React.Suspense>
       </PageSection>
       <PageSection
         title={`Epoch ${pool.epoch.current}`}

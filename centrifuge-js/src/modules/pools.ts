@@ -4,7 +4,7 @@ import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
-import { SubqueryDailyPoolState } from '../types/subquery'
+import { SubqueryPoolSnapshot } from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
 import { Balance, Perquintill, Price, Rate } from '../utils/BN'
 
@@ -678,10 +678,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  async function getNextLoanId() {
+  async function getNextLoanId(args: [poolId: string]) {
+    const [poolId] = args
     const $api = inst.getApi()
 
-    const id = await firstValueFrom($api.pipe(switchMap((api) => api.query.loans.nextLoanId())))
+    const id = await firstValueFrom($api.pipe(switchMap((api) => api.query.loans.nextLoanId(poolId))))
     return id
   }
 
@@ -950,19 +951,18 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const [poolId] = args
     const $api = inst.getApi()
 
-    const $query = inst.getSubqueryObservable<{ dailyPoolStates: { nodes: SubqueryDailyPoolState[] } }>(
+    const $query = inst.getSubqueryObservable<{ poolSnapshots: { nodes: SubqueryPoolSnapshot[] } }>(
       `query($poolId: String!) {
-        dailyPoolStates(
+        poolSnapshots(
+          orderBy: BLOCK_NUMBER_ASC,
           filter: { 
             id: { startsWith: $poolId },
           }) {
           nodes {
+            id
             timestamp
-            poolState {
-              id
-              totalReserve
-              netAssetValue
-            }
+            totalReserve
+            netAssetValue
           }
         }
       }
@@ -977,16 +977,14 @@ export function getPoolsModule(inst: CentrifugeBase) {
         combineLatest([$query]).pipe(
           switchMap(([queryData]) => {
             return [
-              queryData?.dailyPoolStates.nodes.map((state) => {
+              queryData?.poolSnapshots.nodes.map((state) => {
                 const poolState = {
-                  ...state.poolState,
-                  netAssetValue: new Balance(state.poolState.netAssetValue),
-                  totalReserve: new Balance(state.poolState.totalReserve),
+                  id: state.id,
+                  netAssetValue: new Balance(state.netAssetValue),
+                  totalReserve: new Balance(state.totalReserve),
                 }
                 const poolValue = new Balance(
-                  new Balance(state?.poolState.netAssetValue || '0').add(
-                    new Balance(state?.poolState.totalReserve || '0')
-                  )
+                  new Balance(state?.netAssetValue || '0').add(new Balance(state?.totalReserve || '0'))
                 )
                 return { ...state, poolState, poolValue }
               }) as unknown as DailyPoolState[],

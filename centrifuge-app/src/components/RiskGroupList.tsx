@@ -77,7 +77,7 @@ const columns: Column[] = [
   },
 ]
 
-export const RiskGroupList: React.FC = () => {
+const RiskGroupList: React.FC = () => {
   const { pid } = useParams<{ pid: string }>()
   const loans = useLoans(pid)
   const pool = usePool(pid)
@@ -216,3 +216,5 @@ export const RiskGroupList: React.FC = () => {
     </>
   )
 }
+
+export { RiskGroupList as default }
