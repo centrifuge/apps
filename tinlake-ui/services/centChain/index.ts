@@ -1,6 +1,7 @@
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types'
 import config from '../../config'
+import { accountIdToCentChainAddr } from './accountIdToCentChainAddr'
 import { centChainAddrToAccountId } from './centChainAddrToAccountId'
 import { types } from './types'
 
@@ -66,13 +67,19 @@ export class CentChain {
    * @param proof proof for the given claimer and amount
    * @returns txHash string
    */
-  public claimCFGRewards(claimerAccountID: string, amount: string, proof: Uint8Array[]): Promise<string> {
+  public async claimCFGRewards(claimerAccountID: string, amount: string, proof: Uint8Array[]): Promise<string> {
+    const { web3FromAddress } = await import('@polkadot/extension-dapp')
+
+    const address = accountIdToCentChainAddr(claimerAccountID)
+
+    const injector = await web3FromAddress(address)
+
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       const api = await this.api()
-      const extrinsic = api.tx.radClaims.claim(claimerAccountID, amount, proof)
+      const extrinsic = api.tx.claims.claim(claimerAccountID, amount, proof)
       await extrinsic
-        .send(({ status, dispatchError }) => {
+        .signAndSend(address, { signer: injector.signer }, ({ status, dispatchError }) => {
           // status would still be set, but in the case of error we can shortcut
           // to just check it (so an error would indicate InBlock or Finalized)
           if (dispatchError) {
