@@ -1,7 +1,7 @@
 import { Perquintill } from '@centrifuge/centrifuge-js'
-import { Shelf, Stack, Text, Toggle } from '@centrifuge/fabric'
+import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { NavLink } from 'react-router-dom'
+import { MenuSwitch } from '../components/MenuSwitch'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
@@ -59,16 +59,7 @@ const Pools: React.FC = () => {
 
   return (
     <Stack gap={0} flex={1}>
-      <PageHeader
-        title="Investments"
-        subtitle="Pools and tokens of real-world assets"
-        actions={
-          <Toggle active="pools">
-            <NavLink to="/pools">Pools</NavLink>
-            <NavLink to="/tokens">Tokens</NavLink>
-          </Toggle>
-        }
-      />
+      <PageHeader title="Investments" subtitle="Pools and tokens of real-world assets" actions={<MenuSwitch />} />
       {pools?.length ? (
         <>
           <PageSummary data={pageSummaryData} />

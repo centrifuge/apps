@@ -1,7 +1,7 @@
 import { Perquintill } from '@centrifuge/centrifuge-js'
-import { Shelf, Stack, Text, Toggle } from '@centrifuge/fabric'
+import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { NavLink } from 'react-router-dom'
+import { MenuSwitch } from '../components/MenuSwitch'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
@@ -63,12 +63,7 @@ const TokenOverview: React.FC = () => {
       <PageHeader
         subtitle={network === 'altair' ? 'Art NFTs' : 'Pools and tokens of real-world assets'}
         title="Investments"
-        actions={
-          <Toggle active="tokens">
-            <NavLink to="/pools">Pools</NavLink>
-            <NavLink to="/tokens">Tokens</NavLink>
-          </Toggle>
-        }
+        actions={<MenuSwitch />}
       />
       {tokens?.length ? (
         <>
