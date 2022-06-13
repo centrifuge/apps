@@ -20,7 +20,7 @@ export function useCanBorrow(poolId: string, assetId: string) {
   const canBorrow =
     permissions?.pools[poolId]?.roles.includes('Borrower') &&
     isLoanOwner &&
-    (!proxy || proxy.types.includes('Borrower') || proxy.types.includes('Any'))
+    (!proxy || proxy.types.includes('Borrow') || proxy.types.includes('Any'))
 
   return !!canBorrow
 }
