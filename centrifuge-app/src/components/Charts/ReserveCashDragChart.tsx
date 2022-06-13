@@ -14,7 +14,7 @@ type ChartData = {
   reserve: number
 }
 
-export const ReserveCashDragChart: React.VFC = () => {
+const ReserveCashDragChart: React.VFC = () => {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
   const poolStates = useDailyPoolStates(poolId)
@@ -37,29 +37,31 @@ export const ReserveCashDragChart: React.VFC = () => {
     reserve: todayReserve,
   }
 
+  const chartData = [...data, today]
+
   return (
     <Stack>
       <CustomLegend data={today} currency={pool?.currency || ''} />
       <Shelf gap="4" width="100%" color="textSecondary">
-        {[...data, today]?.length ? (
+        {chartData?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart data={[...data, today]} margin={{ left: -30 }}>
+            <ComposedChart data={chartData} margin={{ left: -30 }}>
               <XAxis
                 dataKey="day"
-                tick={<CustomizedXAxisTick variant={[...data, today].length > 30 ? 'months' : 'days'} />}
+                tick={<CustomizedXAxisTick variant={chartData.length > 30 ? 'months' : 'days'} />}
                 tickLine={false}
-                interval={0}
+                interval={chartData.length < 18 || chartData.length > 30 ? 0 : 1}
               />
               <YAxis
                 yAxisId="left"
                 tickLine={false}
-                style={{ fontSize: '10px', fontFamily: "'Inter'" }}
+                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
               />
               <YAxis
                 yAxisId="right"
                 orientation="right"
-                style={{ fontSize: '10px', fontFamily: "'Inter'" }}
+                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickMargin={5}
                 tickLine={false}
                 tickFormatter={(tick: number) => `${tick}%`}
@@ -106,3 +108,5 @@ const CustomLegend: React.VFC<{
     </Shelf>
   )
 }
+
+export { ReserveCashDragChart as default }

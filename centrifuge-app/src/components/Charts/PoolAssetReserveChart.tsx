@@ -15,7 +15,7 @@ type ChartData = {
   reserve: [number, number]
 }
 
-export const PoolAssetReserveChart: React.VFC = () => {
+const PoolAssetReserveChart: React.VFC = () => {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
   const poolStates = useDailyPoolStates(poolId)
@@ -57,7 +57,7 @@ export const PoolAssetReserveChart: React.VFC = () => {
               />
               <YAxis
                 tickLine={false}
-                style={{ fontSize: '10px', fontFamily: "'Inter'" }}
+                style={{ fontSize: '10px', fill: theme.colors.textSecondary }}
                 tickFormatter={(tick: number) => formatBalanceAbbreviated(tick, '', 0)}
               />
               <CartesianGrid stroke={theme.colors.borderSecondary} />
@@ -67,7 +67,7 @@ export const PoolAssetReserveChart: React.VFC = () => {
                 dataKey="reserve"
                 stroke="transparent"
                 strokeOpacity={0}
-                fillOpacity={1}
+                fillOpacity={0.8}
                 name="Reserve"
               />
               <Line dot={false} dataKey="assetValue" stroke={theme.colors.accentSecondary} name="Asset value" />
@@ -107,3 +107,5 @@ const CustomLegend: React.VFC<{
     </Shelf>
   )
 }
+
+export { PoolAssetReserveChart as default }

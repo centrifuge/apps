@@ -22,6 +22,7 @@ function useTextContext(): React.ContextType<typeof TextContext> {
 type TextProps = PropsOf<typeof StyledText> & {
   variant?: keyof DefaultTheme['typography']
   underline?: boolean
+  textOverflow?: 'ellipsis'
 }
 
 const Text: React.FC<TextProps> = (props) => {
@@ -46,6 +47,7 @@ const Text: React.FC<TextProps> = (props) => {
   } = textProps
 
   const textDecoration = props.underline ? 'underline' : 'initial'
+  const overflow = props.textOverflow ? { overflow: 'hidden', textOverflow: props.textOverflow } : {}
 
   return (
     <TextContext.Provider value>
@@ -56,7 +58,7 @@ const Text: React.FC<TextProps> = (props) => {
         fontWeight={fontWeight}
         lineHeight={lineHeight}
         fontFamily={fontFamily}
-        style={{ textDecoration }}
+        style={{ textDecoration, ...overflow }}
         {...rest}
       >
         {children}

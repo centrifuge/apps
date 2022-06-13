@@ -1,6 +1,6 @@
 import { altairYellow, grayScale, yellowScale } from './colors'
 
-const statusDefault = grayScale[600]
+const statusDefault = grayScale[500]
 const statusInfo = '#006ef5'
 const statusOk = '#598232'
 const statusWarning = '#a86500'

@@ -11,7 +11,7 @@ export type CardProps = Props &
 
 export const Card = styled(Box)<Props>(({ variant = 'default' }) =>
   css({
-    bg: 'backgroundPrimary',
+    bg: 'backgroundPage',
     borderRadius: 'card',
     borderWidth: variant === 'default' ? 1 : 0,
     borderStyle: 'solid',
