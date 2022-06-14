@@ -28,7 +28,7 @@ export const MenuSwitch: React.VFC = () => {
   return (
     <Shelf as="nav" bg="backgroundSecondary" borderRadius="20px" p="5px">
       {links.map((link) => (
-        <Box borderRadius="20px" padding={pathname === link.to ? '0px' : '0px 16px'}>
+        <Box borderRadius="20px" padding={pathname === link.to ? '0px' : '0px 16px'} key={`${link.to}-${link.label}`}>
           <NavLink to={link.to} activeStyle={pathname === link.to ? activeStyle : inactiveStyle}>
             <Text
               variant="interactive2"
