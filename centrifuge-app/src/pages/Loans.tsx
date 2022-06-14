@@ -29,7 +29,7 @@ const Loans: React.FC = () => {
         <LoanList
           loans={loans}
           onLoanClicked={(loan) => {
-            history.push(`/${basePath}/${loan.poolId}/assets/${loan.id}`)
+            history.push(`${basePath}/${loan.poolId}/assets/${loan.id}`)
           }}
         />
       )}

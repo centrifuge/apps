@@ -62,7 +62,7 @@ export const PoolDetailAssets: React.FC = () => {
           <LoanList
             loans={loans}
             onLoanClicked={(loan) => {
-              history.push(`/${basePath}/${pool.id}/assets/${loan.id}`)
+              history.push(`${basePath}/${pool.id}/assets/${loan.id}`)
             }}
           />
         </Box>
