@@ -1,7 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { InteractiveCard, Shelf, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory } from 'react-router'
+import { useHistory, useRouteMatch } from 'react-router'
 import { PoolMetadata } from '../types'
 import { getAge } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
@@ -19,6 +19,7 @@ type PoolCardProps = {
 export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
   const avgMaturity = useAverageMaturity(pool.id)
   const history = useHistory()
+  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
   return (
     <InteractiveCard
@@ -31,7 +32,7 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
       }
       variant="button"
       title={metadata?.pool?.name}
-      onClick={() => history.push(`/pools/${pool.id}`)}
+      onClick={() => history.push(`${basePath}/${pool.id}`)}
       secondaryHeader={
         <Shelf gap="6" justifyContent="flex-start">
           <LabelValueStack
