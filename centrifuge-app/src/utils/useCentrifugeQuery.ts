@@ -62,10 +62,7 @@ export function useCentrifugeQuery<T = any>(
 
   const { data: queryData } = useQuery(
     ['queryData', ...key, !!$source],
-    () => {
-      console.log('$source', !!$source, key)
-      return $source ? firstValueFrom($source) : null
-    },
+    () => ($source ? firstValueFrom($source) : null),
     {
       suspense,
       // Infinite staleTime as useQuery here is only used to populate the cache initially and
