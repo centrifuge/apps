@@ -1,6 +1,6 @@
 import { Box, Card, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useHistory, useLocation, useParams } from 'react-router'
 import { CardHeader } from '../../components/CardHeader'
 import { Identity } from '../../components/Identity'
 import { LabelValueStack } from '../../components/LabelValueStack'
@@ -66,6 +66,8 @@ const Loan: React.FC = () => {
   const permissions = usePermissions(address)
   const history = useHistory()
   const { current: availableFinancing } = useAvailableFinancing(poolId, assetId)
+  const { pathname } = useLocation()
+  const basePath = `/${pathname.split('/').filter(Boolean)[0]}`
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
 
   const canPrice = permissions?.pools[poolId]?.roles.includes('PricingAdmin')
@@ -81,7 +83,7 @@ const Loan: React.FC = () => {
         icon={<Thumbnail type="asset" label={loan?.id ?? ''} size="large" />}
         title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
         titleAddition={loan && <LoanLabel loan={loan} />}
-        parent={{ to: `/pools/${poolId}/assets`, label: poolMetadata?.pool?.name ?? 'Pool assets' }}
+        parent={{ to: `${basePath}/${poolId}/assets`, label: poolMetadata?.pool?.name ?? 'Pool assets' }}
         subtitle={
           <TextWithPlaceholder isLoading={metadataIsLoading}>
             {poolMetadata?.pool?.asset.class} asset by {nft?.owner && <Identity clickToCopy address={nft?.owner} />}
