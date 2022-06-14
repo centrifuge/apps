@@ -1,6 +1,6 @@
 import { Button, IconChevronLeft, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useHistory, useLocation, useParams } from 'react-router'
 import { InvestRedeem } from '../components/InvestRedeem'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
@@ -23,6 +23,8 @@ export const TokenDetailPage: React.FC = () => {
 
 const TokenDetail: React.FC = () => {
   const history = useHistory()
+  const { pathname } = useLocation()
+  const basePath = `/${pathname.split('/').filter(Boolean)[0]}`
   const { pid: poolId, tid: trancheId } = useParams<{ pid: string; tid: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
@@ -82,7 +84,7 @@ const TokenDetail: React.FC = () => {
         icon={<Thumbnail size="large" label={trancheMeta?.symbol || ''} />}
         actions={
           <Button
-            onClick={() => history.push(`/pools/${poolId}`)}
+            onClick={() => history.push(`${basePath}/${poolId}`)}
             small
             icon={<IconChevronLeft width="16" />}
             variant="tertiary"
