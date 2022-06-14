@@ -1,6 +1,6 @@
 import { Stack } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory } from 'react-router'
+import { useHistory, useLocation } from 'react-router'
 import { LoanList } from '../components/LoanList'
 import { PageHeader } from '../components/PageHeader'
 import { PageWithSideBar } from '../components/PageWithSideBar'
@@ -20,6 +20,8 @@ const Loans: React.FC = () => {
   const managedPoolIds = pools?.filter((p) => true)?.map((p) => p.id)
   const loans = useLoansAcrossPools(managedPoolIds)
   const history = useHistory()
+  const { pathname } = useLocation()
+  const basePath = pathname.split('/').filter(Boolean)[0]
 
   return (
     <Stack gap={5} flex={1}>
@@ -28,7 +30,7 @@ const Loans: React.FC = () => {
         <LoanList
           loans={loans}
           onLoanClicked={(loan) => {
-            history.push(`/pools/${loan.poolId}/assets/${loan.id}`)
+            history.push(`/${basePath}/${loan.poolId}/assets/${loan.id}`)
           }}
         />
       )}

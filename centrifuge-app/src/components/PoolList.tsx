@@ -1,7 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory } from 'react-router'
+import { useHistory, useLocation } from 'react-router'
 import { formatBalance } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
@@ -13,6 +13,8 @@ type Props = {
 
 export const PoolList: React.FC<Props> = ({ pools }) => {
   const history = useHistory()
+  const { pathname } = useLocation()
+  const basePath = `/${pathname.split('/').filter(Boolean)[0]}`
 
   const columns: Column[] = [
     {
@@ -42,7 +44,7 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
       data={pools}
       columns={columns}
       onRowClicked={(p: Pool) => {
-        history.push(`/pools/${p.id}`)
+        history.push(`${basePath}/${p.id}`)
       }}
     />
   )

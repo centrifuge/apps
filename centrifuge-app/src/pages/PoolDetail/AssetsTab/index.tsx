@@ -1,6 +1,6 @@
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useHistory, useLocation, useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
@@ -26,6 +26,8 @@ export const PoolDetailAssetsTab: React.FC = () => {
 
 export const PoolDetailAssets: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
+  const { pathname } = useLocation()
+  const basePath = pathname.split('/').filter(Boolean)[0]
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
   const history = useHistory()
@@ -61,7 +63,7 @@ export const PoolDetailAssets: React.FC = () => {
           <LoanList
             loans={loans}
             onLoanClicked={(loan) => {
-              history.push(`/pools/${pool.id}/assets/${loan.id}`)
+              history.push(`/${basePath}/${pool.id}/assets/${loan.id}`)
             }}
           />
         </Box>

@@ -1,6 +1,6 @@
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
@@ -15,11 +15,11 @@ type Props = {
 
 export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
   const { pid } = useParams<{ pid: string }>()
+  const { pathname } = useLocation()
+  const basePath = `/${pathname.split('/').filter(Boolean)[0]}/${pid}`
   const pool = usePool(pid)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const theme = useTheme()
-
-  const basePath = `/pools/${pid}`
 
   return (
     <PageHeader
@@ -27,7 +27,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
       subtitle={
         <TextWithPlaceholder isLoading={isLoading}>by {metadata?.pool?.issuer.name ?? 'Unknown'}</TextWithPlaceholder>
       }
-      parent={{ to: '/tokens', label: 'Investments' }}
+      parent={{ to: '/investments', label: 'Investments' }}
       icon={
         metadata?.pool?.icon ? (
           <Box as="img" width="iconLarge" height="iconLarge" src={parseMetadataUrl(metadata?.pool?.icon)} />

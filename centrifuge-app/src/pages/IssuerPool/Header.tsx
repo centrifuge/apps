@@ -1,6 +1,6 @@
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { useDebugFlags } from '../../components/DebugFlags'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
@@ -20,8 +20,8 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const theme = useTheme()
   const { showAdditionalIssuerTabs } = useDebugFlags()
-
-  const basePath = `/issuer/${pid}`
+  const { pathname } = useLocation()
+  const basePath = `/${pathname.split('/').filter(Boolean)[0]}/${pid}`
 
   return (
     <>
@@ -58,7 +58,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
           }}
         >
           <NavigationTabs basePath={basePath}>
-            <NavigationTabsItem to={`${basePath}/overview`}>Overview</NavigationTabsItem>
+            <NavigationTabsItem to={`${basePath}`}>Overview</NavigationTabsItem>
             <NavigationTabsItem to={`${basePath}/assets`}>Assets</NavigationTabsItem>
             <NavigationTabsItem to={`${basePath}/liquidity`}>Liquidity</NavigationTabsItem>
             {showAdditionalIssuerTabs && (

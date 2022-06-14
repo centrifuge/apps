@@ -1,7 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Box, IconInvestments, IconNft, IconPieChart, IconPools, IconUser, Shelf } from '@centrifuge/fabric'
+import { Box, IconInvestments, IconNft, IconUser, Shelf } from '@centrifuge/fabric'
 import React from 'react'
-import { useRouteMatch } from 'react-router'
+import { useLocation } from 'react-router'
 import { Link } from 'react-router-dom'
 import { config } from '../config'
 import { useAddress } from '../utils/useAddress'
@@ -14,7 +14,7 @@ import { TextWithPlaceholder } from './TextWithPlaceholder'
 type Props = {}
 
 export const Menu: React.FC<Props> = () => {
-  const homeMatch = useRouteMatch({ path: '/', exact: true })
+  const { pathname } = useLocation()
 
   const allPools = usePools()
   const address = useAddress()
@@ -43,10 +43,13 @@ export const Menu: React.FC<Props> = () => {
         justifyContent="space-evenly"
         px={[2, 2, 0]}
       >
-        <NavigationItem label="Tokens" href="/tokens" icon={<IconInvestments size="16px" />} active={!!homeMatch} />
-        <NavigationItem label="Pools" href="/pools" icon={<IconPools size="16px" />} />
+        <NavigationItem
+          label="Investments"
+          href="/investments"
+          icon={<IconInvestments size="16px" />}
+          active={pathname.includes('investments')}
+        />
         <NavigationItem label="NFTs" href="/nfts" icon={<IconNft size="16px" />} />
-        <NavigationItem label="Portfolio" href="/investments/portfolio" icon={<IconPieChart size="16px" />} />
         {pools.length > 0 && (
           <NavigationItem label="Issuer" href="issuer" icon={<IconUser size="16px" />} defaultOpen>
             {pools.map((pool) => (
