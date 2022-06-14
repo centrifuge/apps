@@ -48,8 +48,6 @@ const TokenOverview: React.FC = () => {
     [tokens]
   )
 
-  const network = import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge'
-
   const pageSummaryData = [
     {
       label: <Tooltips type="tvl" />,
@@ -60,11 +58,7 @@ const TokenOverview: React.FC = () => {
 
   return (
     <Stack gap={0} flex={1} mb="6">
-      <PageHeader
-        subtitle={network === 'altair' ? 'Art NFTs' : 'Pools and tokens of real-world assets'}
-        title="Investments"
-        actions={<MenuSwitch />}
-      />
+      <PageHeader subtitle={config.tokensPageSubtitle} title="Investments" actions={<MenuSwitch />} />
       {tokens?.length ? (
         <>
           <PageSummary data={pageSummaryData} />
