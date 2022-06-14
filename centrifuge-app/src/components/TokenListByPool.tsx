@@ -1,6 +1,6 @@
 import { IconChevronRight, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useLocation, useParams } from 'react-router'
+import { useHistory, useParams, useRouteMatch } from 'react-router'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 
@@ -65,8 +65,7 @@ export const TokenListByPool: React.FC = () => {
   const { pid } = useParams<{ pid: string }>()
   const pool = usePool(pid)
   const { data: metadata } = usePoolMetadata(pool)
-  const { pathname } = useLocation()
-  const basePath = `/${pathname.split('/').filter(Boolean)[0]}`
+  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
   if (!pool || !pool.tranches) return null
 

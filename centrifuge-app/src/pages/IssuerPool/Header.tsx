@@ -1,6 +1,6 @@
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useLocation, useParams } from 'react-router'
+import { useParams, useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
 import { useDebugFlags } from '../../components/DebugFlags'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
@@ -20,8 +20,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const theme = useTheme()
   const { showAdditionalIssuerTabs } = useDebugFlags()
-  const { pathname } = useLocation()
-  const basePath = `/${pathname.split('/').filter(Boolean)[0]}/${pid}`
+  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
   return (
     <>
@@ -57,15 +56,15 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
             boxShadow: `0 1px 0 ${theme.colors.borderSecondary}`,
           }}
         >
-          <NavigationTabs basePath={basePath}>
-            <NavigationTabsItem to={`${basePath}`}>Overview</NavigationTabsItem>
-            <NavigationTabsItem to={`${basePath}/assets`}>Assets</NavigationTabsItem>
-            <NavigationTabsItem to={`${basePath}/liquidity`}>Liquidity</NavigationTabsItem>
+          <NavigationTabs basePath={`${basePath}/${pid}`}>
+            <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
+            <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
+            <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
             {showAdditionalIssuerTabs && (
-              <NavigationTabsItem to={`${basePath}/investors`}>Investors</NavigationTabsItem>
+              <NavigationTabsItem to={`${basePath}/${pid}/investors`}>Investors</NavigationTabsItem>
             )}
             {showAdditionalIssuerTabs && (
-              <NavigationTabsItem to={`${basePath}/configuration`}>Configuration</NavigationTabsItem>
+              <NavigationTabsItem to={`${basePath}/${pid}/configuration`}>Configuration</NavigationTabsItem>
             )}
           </NavigationTabs>
         </Shelf>

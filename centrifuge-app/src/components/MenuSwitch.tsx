@@ -1,16 +1,16 @@
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import React from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useRouteMatch } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 export const MenuSwitch: React.VFC = () => {
   const theme = useTheme()
   const { pathname } = useLocation()
-  const basePath = `${pathname.split('/').filter(Boolean)[0]}`
+  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
   const links = [
-    { to: `/${basePath}`, label: 'Pools' },
-    { to: `/${basePath}/tokens`, label: 'Tokens' },
+    { to: `${basePath}`, label: 'Pools' },
+    { to: `${basePath}/tokens`, label: 'Tokens' },
   ]
 
   const inactiveStyle = {

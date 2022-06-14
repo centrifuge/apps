@@ -1,7 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { InteractiveCard, Shelf, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useLocation } from 'react-router'
+import { useHistory, useRouteMatch } from 'react-router'
 import { PoolMetadata } from '../types'
 import { getAge } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
@@ -19,8 +19,7 @@ type PoolCardProps = {
 export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
   const avgMaturity = useAverageMaturity(pool.id)
   const history = useHistory()
-  const { pathname } = useLocation()
-  const basePath = `/${pathname.split('/').filter(Boolean)[0]}`
+  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
   return (
     <InteractiveCard

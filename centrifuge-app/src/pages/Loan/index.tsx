@@ -1,6 +1,6 @@
 import { Box, Card, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useLocation, useParams } from 'react-router'
+import { useHistory, useParams, useRouteMatch } from 'react-router'
 import { CardHeader } from '../../components/CardHeader'
 import { Identity } from '../../components/Identity'
 import { LabelValueStack } from '../../components/LabelValueStack'
@@ -57,6 +57,7 @@ const LoanSidebar: React.FC = () => {
 
 const Loan: React.FC = () => {
   const { pid: poolId, aid: assetId } = useParams<{ pid: string; aid: string }>()
+  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
   const pool = usePool(poolId)
   const loan = useLoan(poolId, assetId)
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
@@ -66,8 +67,6 @@ const Loan: React.FC = () => {
   const permissions = usePermissions(address)
   const history = useHistory()
   const { current: availableFinancing } = useAvailableFinancing(poolId, assetId)
-  const { pathname } = useLocation()
-  const basePath = `/${pathname.split('/').filter(Boolean)[0]}`
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
 
   const canPrice = permissions?.pools[poolId]?.roles.includes('PricingAdmin')
