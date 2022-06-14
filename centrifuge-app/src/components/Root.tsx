@@ -1,7 +1,7 @@
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import { config } from '../config'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
@@ -121,7 +121,7 @@ const Routes: React.VFC = () => {
         <PoolsPage />
       </Route>
       <Route exact path="/">
-        <PoolsPage />
+        <Redirect to="/investments" />
       </Route>
       <Route>
         <NotFoundPage />
