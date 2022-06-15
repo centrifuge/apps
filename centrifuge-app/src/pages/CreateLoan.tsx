@@ -84,7 +84,7 @@ const CreateLoan: React.FC = () => {
 
           // Doing the redirect via state, so it only happens if the user is still on this
           // page when the transaction completes
-          setRedirect(`/issuers/${poolId}/assets/${loanId}`)
+          setRedirect(`/issuer/${poolId}/assets/${loanId}`)
         }
       },
     }
