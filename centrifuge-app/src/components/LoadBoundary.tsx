@@ -6,7 +6,7 @@ import { Spinner } from './Spinner'
 
 type ErrorCb = (args: { error: any; retry: () => void }) => React.ReactElement | null
 
-export const LoadBoundary: React.FC<{ fallback?: React.ReactNode; renderError?: ErrorCb; root?: boolean }> = ({
+export const LoadBoundary: React.FC<{ fallback?: React.ReactNode; renderError?: ErrorCb }> = ({
   children,
   fallback,
   renderError,
