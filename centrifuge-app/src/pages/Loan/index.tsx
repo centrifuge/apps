@@ -1,7 +1,6 @@
-import { Box, Card, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import { Box, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
-import { CardHeader } from '../../components/CardHeader'
 import { Identity } from '../../components/Identity'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import LoanLabel from '../../components/LoanLabel'
@@ -41,18 +40,9 @@ const LoanSidebar: React.FC = () => {
   const permissions = usePermissions(address)
   const canBorrow = useCanBorrow(pid, aid)
 
-  if (!loan || loan.status === 'Created' || !permissions) return null
+  if (!loan || loan.status === 'Created' || !permissions || !canBorrow) return null
 
-  return canBorrow ? (
-    <FinanceForm loan={loan} />
-  ) : (
-    <Card p={2}>
-      <Stack gap={2}>
-        <CardHeader title="Finance &amp; Repay" />
-        <Text variant="body2">You don&rsquo;t have permission to finance this asset</Text>
-      </Stack>
-    </Card>
-  )
+  return <FinanceForm loan={loan} />
 }
 
 const Loan: React.FC = () => {

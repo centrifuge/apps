@@ -1,11 +1,11 @@
 import { Balance, Loan as LoanType } from '@centrifuge/centrifuge-js'
-import { Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Card, CurrencyInput, IconInfo, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { Dec } from '../../utils/Decimal'
-import { formatBalance } from '../../utils/formatting'
+import { formatBalance, getCurrencySymbol } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { getBalanceDec, useBalances } from '../../utils/useBalances'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
@@ -65,6 +65,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   )
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
+  const maxRepay = Math.min(balance.toNumber(), loan.outstandingDebt.toDecimal().toNumber())
   const canRepayAll = debtWithMargin.lte(balance)
 
   const financeForm = useFormik<FinanceValues>({
@@ -127,15 +128,26 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
                   <CurrencyInput
                     {...fieldProps}
-                    value={value instanceof Decimal ? value.toNumber() : value}
+                    value={value instanceof Decimal ? Math.floor(value.toNumber() * 100) / 100 : value}
                     label="Amount"
                     min="0"
-                    onSetMax={() => financeForm.setFieldValue('amount', availableFinancing)}
+                    onSetMax={() => financeForm.setFieldValue('amount', maxBorrow)}
                     errorMessage={meta.touched ? meta.error : undefined}
+                    secondaryLabel={`${formatBalance(maxBorrow, pool?.currency)} available`}
                     disabled={isFinanceLoading}
+                    currency={getCurrencySymbol(pool?.currency)}
                   />
                 )}
               </Field>
+              {poolReserve.lessThan(availableFinancing) && (
+                <Shelf alignItems="flex-start" gap="4px">
+                  <IconInfo height="16" />
+                  <Text variant="body3">
+                    The pool's available reserve ({formatBalance(poolReserve, pool?.currency)}) is smaller than the
+                    available financing
+                  </Text>
+                </Shelf>
+              )}
               <Stack px={1}>
                 <Button type="submit" loading={isFinanceLoading}>
                   Finance asset
@@ -172,12 +184,18 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 label="Amount"
                 min="0"
                 disabled={isRepayLoading || isRepayAllLoading}
-                secondaryLabel={
-                  pool && balance && loan.outstandingDebt.gt(Balance.fromFloat(balance))
-                    ? `${formatBalance(balance, pool?.currency)} balance`
-                    : `${formatBalance(loan.outstandingDebt, pool?.currency)} outstanding`
-                }
+                secondaryLabel={`${formatBalance(maxRepay, pool?.currency)} available`}
+                onSetMax={() => repayForm.setFieldValue('amount', Math.floor((maxRepay * 100) / 100))}
               />
+              {balance.lessThan(loan.outstandingDebt.toDecimal()) && (
+                <Shelf alignItems="flex-start" gap="4px">
+                  <IconInfo height="16" />
+                  <Text variant="body3">
+                    Your wallet balance ({formatBalance(balance, pool?.currency)}) is smaller than the outstanding
+                    balance.
+                  </Text>
+                </Shelf>
+              )}
               <Stack gap={1} px={1}>
                 <Button type="submit" disabled={isRepayAllLoading} loading={isRepayLoading}>
                   Repay asset
