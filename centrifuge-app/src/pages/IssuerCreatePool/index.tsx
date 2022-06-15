@@ -163,7 +163,7 @@ const PoolIcon: React.FC<{ icon?: File | null }> = ({ children, icon }) => {
 const CreatePoolForm: React.VFC = () => {
   const address = useAddress()
   const centrifuge = useCentrifuge()
-  const currencies = useCurrencies(useAddress())
+  const currencies = useCurrencies()
   const history = useHistory()
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)

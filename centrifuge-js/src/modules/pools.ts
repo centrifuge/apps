@@ -995,6 +995,15 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
+  function getNativeCurrency() {
+    return inst.getApi().pipe(
+      map((api) => ({
+        decimals: api.registry.chainDecimals[0],
+        symbol: api.registry.chainTokens[0],
+      }))
+    )
+  }
+
   function getBalances(args: [address: Account]) {
     const [address] = args
     const $api = inst.getApi()
@@ -1341,6 +1350,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     getLoanCollectionIdForPool,
     getAvailablePoolId,
     getDailyPoolStates,
+    getNativeCurrency,
   }
 }
 
