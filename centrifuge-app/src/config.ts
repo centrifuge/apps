@@ -67,6 +67,7 @@ type EnvironmentConfig = {
   baseCurrency: 'Native' | 'Usd' | 'PermissionedEur'
   assetClasses: string[]
   defaultAssetClass: string
+  tokensPageSubtitle: string
 }
 
 const ALTAIR: EnvironmentConfig = {
@@ -81,6 +82,7 @@ const ALTAIR: EnvironmentConfig = {
   baseCurrency: 'Native',
   assetClasses: ['Art NFTs'],
   defaultAssetClass: 'Art NFTs',
+  tokensPageSubtitle: 'Art NFTs',
 }
 
 const CENTRIFUGE: EnvironmentConfig = {
@@ -101,6 +103,7 @@ const CENTRIFUGE: EnvironmentConfig = {
     'Project Finance',
   ],
   defaultAssetClass: 'Consumer Credit',
+  tokensPageSubtitle: 'Tokens of real-world assets',
 }
 
 export const config = (import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge') === 'altair' ? ALTAIR : CENTRIFUGE

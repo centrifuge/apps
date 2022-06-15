@@ -1,6 +1,6 @@
 import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory } from 'react-router'
+import { useHistory, useRouteMatch } from 'react-router'
 import { formatBalance, formatPercentage } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
@@ -69,6 +69,7 @@ const columns: Column[] = [
 
 export const TokenList: React.FC<Props> = ({ tokens }) => {
   const history = useHistory()
+  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
   return (
     <DataTable
@@ -77,7 +78,7 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
       defaultSortKey="valueLocked"
       rounded={false}
       onRowClicked={(token: TokenTableData) => {
-        history.push(`/tokens/${token.poolId}/${token.id}`)
+        history.push(`${basePath}/${token.poolId}/tokens/${token.id}`)
       }}
     />
   )

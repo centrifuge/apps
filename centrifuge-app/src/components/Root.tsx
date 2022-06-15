@@ -1,18 +1,15 @@
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import { config } from '../config'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
 import { CreateLoanPage } from '../pages/CreateLoan'
-import { InvestmentsTokenPage } from '../pages/InvestmentsToken'
-import { InvestmentsTokensPage } from '../pages/InvestmentsTokens'
 import { IssuerCreatePoolPage } from '../pages/IssuerCreatePool'
 import { IssuerPoolPage } from '../pages/IssuerPool'
 import { LoanPage } from '../pages/Loan'
-import { ManagedPoolsPage } from '../pages/ManagedPools'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
 import { NotFoundPage } from '../pages/NotFound'
@@ -95,41 +92,36 @@ const Routes: React.VFC = () => {
       <Route path="/nfts">
         <CollectionsPage />
       </Route>
-      <Route path="/pools/:pid/assets/:aid">
-        <LoanPage />
-      </Route>
-      <Route path="/pools/:pid">
-        <PoolDetailPage />
-      </Route>
-      <Route path="/pools">
-        <PoolsPage />
-      </Route>
+
       <Route path="/issuer/create-pool">
         <IssuerCreatePoolPage />
+      </Route>
+      <Route exact path="/issuer/:pid/assets/:aid">
+        <LoanPage />
+      </Route>
+      <Route path="/issuer/:pid/tokens/:tid">
+        <TokenDetailPage />
       </Route>
       <Route path="/issuer/:pid">
         <IssuerPoolPage />
       </Route>
-      <Route path="/investments/tokens/:pid/:tid">
-        <InvestmentsTokenPage />
-      </Route>
-      <Route path="/investments/tokens">
-        <InvestmentsTokensPage />
-      </Route>
-      <Route path="/investments">
-        <InvestmentsTokensPage />
-      </Route>
-      <Route path="/issuers/managed-pools">
-        <ManagedPoolsPage />
-      </Route>
-      <Route path="/tokens/:pid/:tid">
+      <Route path="/investments/:pid/tokens/:tid">
         <TokenDetailPage />
       </Route>
-      <Route path="/tokens">
+      <Route path="/investments/:pid/assets/:aid">
+        <LoanPage />
+      </Route>
+      <Route path="/investments/tokens">
         <TokenOverviewPage />
       </Route>
+      <Route path="/investments/:pid">
+        <PoolDetailPage />
+      </Route>
+      <Route path="/investments">
+        <PoolsPage />
+      </Route>
       <Route exact path="/">
-        <TokenOverviewPage />
+        <Redirect to="/investments" />
       </Route>
       <Route>
         <NotFoundPage />

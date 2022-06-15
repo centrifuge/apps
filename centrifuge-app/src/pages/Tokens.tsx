@@ -1,6 +1,7 @@
 import { Perquintill } from '@centrifuge/centrifuge-js'
 import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { MenuSwitch } from '../components/MenuSwitch'
 import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
@@ -9,7 +10,7 @@ import { Tooltips } from '../components/Tooltips'
 import { config } from '../config'
 import { Dec } from '../utils/Decimal'
 import { formatBalance, getCurrencySymbol } from '../utils/formatting'
-import { useTokens } from '../utils/usePools'
+import { usePools, useTokens } from '../utils/usePools'
 
 export const TokenOverviewPage: React.FC = () => {
   return (
@@ -21,6 +22,7 @@ export const TokenOverviewPage: React.FC = () => {
 
 const TokenOverview: React.FC = () => {
   const dataTokens = useTokens()
+  const pools = usePools()
 
   const tokens: TokenTableData[] | undefined = React.useMemo(
     () =>
@@ -42,27 +44,42 @@ const TokenOverview: React.FC = () => {
     [dataTokens]
   )
 
-  const totalValueLocked = React.useMemo(
-    () => tokens?.reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)) ?? Dec(0),
-    [tokens]
-  )
+  const totalValueLocked = React.useMemo(() => {
+    return (
+      dataTokens
+        ?.map((tranche) => ({
+          valueLocked: tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()).toNumber(),
+        }))
+        .reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)) ?? Dec(0)
+    )
+  }, [dataTokens])
 
-  const network = import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge'
+  const totalInvestmentCapacity = React.useMemo(() => {
+    return (
+      pools
+        ?.map((pool) => ({
+          capacity: pool.reserve.available.toDecimal().toNumber(),
+        }))
+        .reduce((prev, curr) => prev.add(curr.capacity), Dec(0)) ?? Dec(0)
+    )
+  }, [pools])
 
   const pageSummaryData = [
     {
       label: <Tooltips type="tvl" />,
       value: formatBalance(Dec(totalValueLocked || 0), getCurrencySymbol(config.baseCurrency)),
     },
+    { label: 'Pools', value: pools?.length || 0 },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
+    {
+      label: 'Total investment capacity',
+      value: formatBalance(Dec(totalInvestmentCapacity || 0), getCurrencySymbol(config.baseCurrency)),
+    },
   ]
 
   return (
     <Stack gap={0} flex={1} mb="6">
-      <PageHeader
-        subtitle={network === 'altair' ? 'Art NFTs' : 'Tokens of real-world assets'}
-        title="Investment tokens"
-      />
+      <PageHeader subtitle={config.tokensPageSubtitle} title="Investments" actions={<MenuSwitch />} />
       {tokens?.length ? (
         <>
           <PageSummary data={pageSummaryData} />

@@ -146,14 +146,17 @@ const RiskGroupList: React.FC = () => {
   const summaryRow = React.useMemo(() => {
     const avgInterestRatePerSec = riskGroups
       .reduce(
-        (prev, curr) => (typeof curr.interestRatePerSec === 'string' ? prev.add(curr.interestRatePerSec) : prev),
+        (prev, curr) => (typeof curr.interestRatePerSec === 'string' ? prev.add(Dec(curr.interestRatePerSec)) : prev),
         Dec(0)
       )
       .dividedBy(riskGroups.length)
       .toDecimalPlaces(2)
 
     const avgRiskAdjustment = riskGroups
-      .reduce((prev, curr) => (typeof curr.riskAdjustment === 'string' ? prev.add(curr.riskAdjustment) : prev), Dec(0))
+      .reduce(
+        (prev, curr) => (typeof curr.riskAdjustment === 'string' ? prev.add(Dec(curr.riskAdjustment)) : prev),
+        Dec(0)
+      )
       .dividedBy(riskGroups.length)
       .toDecimalPlaces(2)
 
