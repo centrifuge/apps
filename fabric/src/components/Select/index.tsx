@@ -225,7 +225,7 @@ const StyledListBox = styled.ul`
 const StyledOption = styled.li<{ isSelected: boolean; isFocused: boolean; isDisabled: boolean }>`
   box-sizing: border-box;
   background: ${({ theme, isFocused, isDisabled }) => {
-    if (isFocused) return '#EDF2FF'
+    if (isFocused) return theme.colors.primarySelectedBackground
     if (isDisabled) return theme.colors.backgroundSecondary
     return theme.colors.backgroundInput
   }};
@@ -235,7 +235,8 @@ const StyledOption = styled.li<{ isSelected: boolean; isFocused: boolean; isDisa
 `
 
 const StyledOptionText = styled(Text)<{ isSelected: boolean; isFocused: boolean; isDisabled: boolean }>`
-  color: ${({ theme, isDisabled }) => {
+  color: ${({ theme, isDisabled, isFocused }) => {
+    if (isFocused) return theme.colors.textInverted
     if (isDisabled) return theme.colors.textDisabled
     return theme.colors.textPrimary
   }} !important;
