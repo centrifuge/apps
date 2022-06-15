@@ -6,10 +6,10 @@ import {
   Grid,
   NumberInput,
   Select,
-  Shelf,
   Text,
   TextAreaInput,
   TextInput,
+  Thumbnail,
 } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
@@ -140,7 +140,7 @@ const initialValues: PoolFormValues = {
   writeOffGroups: [createEmptyWriteOffGroup()],
 }
 
-const PoolIcon: React.FC<{ icon?: File | null }> = ({ children, icon }) => {
+const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
   const [dataUri, setDataUri] = React.useState('')
 
   React.useEffect(() => {
@@ -154,9 +154,7 @@ const PoolIcon: React.FC<{ icon?: File | null }> = ({ children, icon }) => {
   return dataUri ? (
     <img src={dataUri} width={40} height={40} alt="" />
   ) : (
-    <Shelf width={40} height={40} borderRadius="card" backgroundColor="backgroundThumbnail" justifyContent="center">
-      <Text variant="body1">{children}</Text>
-    </Shelf>
+    <Thumbnail label={children} type="pool" size="large" />
   )
 }
 
