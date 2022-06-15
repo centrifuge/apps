@@ -81,7 +81,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
   const order = usePendingCollect(poolId, trancheId, address)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
 
-  const isDataLoading = balances === undefined || order === undefined || permissions === undefined
+  const isDataLoading = balances == null || order == null || permissions == null
 
   const allowedToInvest = !!permissions?.pools[poolId]?.tranches[trancheId]
   const tranche = pool?.tranches.find((t) => t.id === trancheId)
@@ -122,7 +122,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
       {isDataLoading ? (
         <Spinner />
       ) : allowedToInvest ? (
-        balances !== undefined &&
+        balances != null &&
         (order.payoutTokenAmount.isZero() && combinedBalance.isZero() && pendingRedeem.isZero() ? (
           <InvestForm poolId={poolId} trancheId={trancheId} />
         ) : actualView === 'start' ? (
@@ -569,7 +569,7 @@ const PendingOrder: React.FC<{
           </Shelf>
           <Text variant="body3">
             Locked {type === 'invest' ? 'investments' : 'redemptions'} are executed at the end of the epoch (
-            {hoursRemaining} hrs and ${minutesRemaining} min remaining).{' '}
+            {hoursRemaining} hrs and {minutesRemaining} min remaining).{' '}
             <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
           </Text>
         </Stack>

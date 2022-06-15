@@ -9,7 +9,7 @@ export function useBalances(address?: string) {
   return result
 }
 
-type Balances = Exclude<ReturnType<typeof useBalances>, undefined>
+type Balances = Exclude<ReturnType<typeof useBalances>, undefined | null>
 
 export function getBalanceDec(balances: Balances, currency: string) {
   if (currency === 'native') {

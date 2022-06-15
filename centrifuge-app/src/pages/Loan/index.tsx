@@ -103,7 +103,7 @@ const Loan: React.FC = () => {
                   label: <Tooltips type="riskGroup" />,
                   value: (
                     <TextWithPlaceholder isLoading={metadataIsLoading}>
-                      {riskGroupIndex !== undefined && riskGroupIndex > -1
+                      {riskGroupIndex != null && riskGroupIndex > -1
                         ? poolMetadata?.riskGroups?.[riskGroupIndex]?.name || `Risk group ${riskGroupIndex + 1}`
                         : 'n/a'}
                     </TextWithPlaceholder>

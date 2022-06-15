@@ -2,9 +2,9 @@ import { PoolMetadata } from '../types'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 
-export function usePools() {
+export function usePools(suspense = true) {
   const [result] = useCentrifugeQuery(['pools'], (cent) => cent.pools.getPools(), {
-    suspense: true,
+    suspense,
   })
 
   return result

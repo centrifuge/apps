@@ -1,7 +1,7 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, firstValueFrom } from 'rxjs'
-import { delayWhen, expand, filter, map, repeatWhen, skip, switchMap, take } from 'rxjs/operators'
+import { expand, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
 import { getRandomUint, isSameAddress } from '../utils'
@@ -47,18 +47,11 @@ export function getNftsModule(inst: CentrifugeBase) {
   function getCollections() {
     const $api = inst.getApi()
 
-    const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
-    const $events = $api.pipe(
-      switchMap(
-        (api) => api.query.system.events(),
-        (api, events) => ({ api, events })
-      ),
+    const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
-        // @ts-expect-error
         const event = events.find(({ event }) => api.events.uniques.Created.is(event))
         return !!event
-      }),
-      delayWhen(() => $blocks.pipe(skip(1)))
+      })
     )
 
     return $api.pipe(
@@ -121,24 +114,16 @@ export function getNftsModule(inst: CentrifugeBase) {
     const [collectionId] = args
     const $api = inst.getApi()
 
-    const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
-    const $events = $api.pipe(
-      switchMap(
-        (api) => api.query.system.events(),
-        (api, events) => ({ api, events })
-      ),
+    const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
-        // @ts-expect-error
         const event = events.find(
-          // @ts-expect-error
           ({ event }) => api.events.uniques.Transferred.is(event) || api.events.uniques.Issued.is(event)
         )
         if (!event) return false
 
         const [cid] = (event.toHuman() as any).event.data
         return cid.replace(/\D/g, '') === collectionId
-      }),
-      delayWhen(() => $blocks.pipe(skip(1)))
+      })
     )
 
     return $api.pipe(
@@ -213,25 +198,16 @@ export function getNftsModule(inst: CentrifugeBase) {
 
     const $api = inst.getApi()
 
-    const $blocks = $api.pipe(switchMap((api) => api.query.system.number()))
-    const $events = $api.pipe(
-      switchMap(
-        (api) => api.query.system.events(),
-        (api, events) => ({ api, events })
-      ),
-
+    const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
-        // @ts-expect-error
         const event = events.find(
-          // @ts-expect-error
           ({ event }) => api.events.uniques.Transferred.is(event) || api.events.uniques.Issued.is(event)
         )
         if (!event) return false
 
         const [, , from, to] = (event.toJSON() as any).event.data
         return isSameAddress(address, from) || (to && isSameAddress(address, to))
-      }),
-      delayWhen(() => $blocks.pipe(skip(1)))
+      })
     )
 
     return $api.pipe(

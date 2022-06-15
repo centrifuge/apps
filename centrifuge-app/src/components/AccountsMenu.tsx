@@ -34,8 +34,9 @@ export const AccountsMenu: React.FC = () => {
 
 const PROXY_TYPE_LABELS = {
   Any: 'Any rights',
-  Borrower: 'Borrower',
-  Investor: 'Investor',
+  Borrow: 'Borrower',
+  Invest: 'Investor',
+  Price: 'Pricing',
 }
 
 const Accounts: React.FC = () => {

@@ -1,17 +1,20 @@
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
-import { Codec, IEventRecord, Signer } from '@polkadot/types/types'
+import { ISubmittableResult, Signer } from '@polkadot/types/types'
 import 'isomorphic-fetch'
 import {
   bufferCount,
   catchError,
+  combineLatestWith,
   filter,
   firstValueFrom,
   map,
+  mergeWith,
   Observable,
   of,
   share,
   startWith,
+  Subject,
   switchMap,
   takeWhile,
   tap,
@@ -55,6 +58,11 @@ const parachainTypes = {
   ClassId: 'u64',
   InstanceId: 'u128',
 }
+
+type Events = ISubmittableResult['events']
+
+const txCompletedEvents: Record<string, Subject<Events>> = {}
+const blockEvents: Record<string, Observable<Events>> = {}
 
 export class CentrifugeBase {
   config: Config
@@ -108,6 +116,7 @@ export class CentrifugeBase {
       return actualSubmittable.signAndSend(signingAddress, { signer }).pipe(
         tap((result) => {
           options?.onStatusChange?.(result)
+          if (result.status.isInBlock) this.getTxCompletedEvents().next(result.events)
         }),
         takeWhile((result) => {
           const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
@@ -165,22 +174,32 @@ export class CentrifugeBase {
     return $
   }
 
-  _$blockEvents: null | Observable<{ api: ApiRx; events: (IEventRecord<any> & Codec)[] }> = null
-
   getBlockEvents() {
-    if (this._$blockEvents) return this._$blockEvents
+    if (blockEvents[this.parachainUrl]) return blockEvents[this.parachainUrl]
     const $api = this.getApi()
 
-    return (this._$blockEvents = $api.pipe(
+    return (blockEvents[this.parachainUrl] = $api.pipe(
       switchMap((api) =>
         api.queryMulti([api.query.system.events, api.query.system.number]).pipe(
           bufferCount(2, 1), // Delay the events by one block, to make sure storage has been updated
           filter(([[events]]) => !!(events as any)?.length),
-          map(([[events]]) => ({ api, events: events as any }))
+          map(([[events]]) => events as any)
         )
       ),
       share()
     ))
+  }
+
+  getTxCompletedEvents() {
+    return txCompletedEvents[this.parachainUrl] || (txCompletedEvents[this.parachainUrl] = new Subject())
+  }
+
+  getEvents() {
+    return this.getBlockEvents().pipe(
+      mergeWith(this.getTxCompletedEvents()),
+      combineLatestWith(this.getApi()),
+      map(([events, api]) => ({ events, api }))
+    )
   }
 
   getApi() {

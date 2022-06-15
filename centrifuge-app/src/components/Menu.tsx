@@ -16,7 +16,7 @@ type Props = {}
 export const Menu: React.FC<Props> = () => {
   const { pathname } = useLocation()
 
-  const allPools = usePools()
+  const allPools = usePools(false)
   const address = useAddress()
   const permissions = usePermissions(address)
 
