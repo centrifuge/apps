@@ -123,7 +123,7 @@ const initialValues: PoolFormValues = {
   poolName: '',
   assetClass: DEFAULT_ASSET_CLASS,
   currency: DEFAULT_CURRENCY,
-  maxReserve: 0,
+  maxReserve: '',
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
 

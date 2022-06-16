@@ -135,7 +135,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                     value={
                       value instanceof Decimal
                         ? formatThousandSeparator(Math.floor(value.toNumber() * 100) / 100)
-                        : formatThousandSeparator(value || '')
+                        : value
                     }
                     label="Amount"
                     min="0"
@@ -196,11 +196,10 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                       value={
                         value instanceof Decimal
                           ? formatThousandSeparator(Math.floor(value.toNumber() * 100) / 100)
-                          : formatThousandSeparator(value || '')
+                          : value
                       }
                       label="Amount"
-                      // min="0"
-                      onSetMax={() => repayForm.setFieldValue('amount', maxRepay)}
+                      onSetMax={() => repayForm.setFieldValue('amount', Dec(maxRepay))}
                       errorMessage={meta.touched ? meta.error : undefined}
                       secondaryLabel={`${formatBalance(maxRepay, pool?.currency)} available`}
                       disabled={isRepayLoading || isRepayAllLoading}
