@@ -54,9 +54,6 @@ export const InvestRedeem: React.VFC<Props> = (props) => {
 //   return nums.reduce((a, b) => (a.greaterThan(b) ? b : a))
 // }
 
-function inputToNumber(num: number | Decimal | '') {
-  return num instanceof Decimal ? num.toNumber() : num || 0
-}
 function inputToDecimal(num: number | Decimal | string) {
   return Dec(num || 0)
 }
