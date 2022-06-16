@@ -71,10 +71,6 @@ const TokenOverview: React.FC = () => {
     },
     { label: 'Pools', value: pools?.length || 0 },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
-    {
-      label: 'Total investment capacity',
-      value: formatBalance(Dec(totalInvestmentCapacity || 0), getCurrencySymbol(config.baseCurrency)),
-    },
   ]
 
   return (
