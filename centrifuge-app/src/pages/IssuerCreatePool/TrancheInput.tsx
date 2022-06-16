@@ -5,7 +5,6 @@ import { createEmptyTranche, PoolFormValues } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
-import { useAddress } from '../../utils/useAddress'
 import { useCurrencies } from '../../utils/useCurrencies'
 import { validate } from './validate'
 
@@ -13,7 +12,7 @@ const MAX_TRANCHES = 5
 
 export const TrancheInput: React.FC = () => {
   const fmk = useFormikContext<PoolFormValues>()
-  const currencies = useCurrencies(useAddress())
+  const currencies = useCurrencies()
   const { values } = fmk
 
   const juniorTrancheIndex = 0 // the first tranche is the most junior in the UI

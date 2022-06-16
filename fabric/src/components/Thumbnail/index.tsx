@@ -1,5 +1,5 @@
 import * as React from 'react'
-import styled, { css } from 'styled-components'
+import styled, { css, useTheme } from 'styled-components'
 import IconNftThumbnail from '../../icon/IconNftThumbnail'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
@@ -11,10 +11,16 @@ type ThumbnailProps = {
 }
 
 export const Thumbnail: React.VFC<ThumbnailProps> = ({ label, ...props }) => {
+  const theme = useTheme()
   return (
     <>
       {props.type === 'nft' ? (
-        <IconNftThumbnail color="backgroundThumbnail" />
+        <IconNftThumbnail
+          color="backgroundThumbnail"
+          size={props.size === 'large' ? 'iconLarge' : 'iconMedium'}
+          // @ts-expect-error
+          style={{ '--secondary': theme.colors.textInverted }}
+        />
       ) : (
         <StyledThumbnail fontWeight={500} {...props}>
           <Stack position="relative" zIndex="1">

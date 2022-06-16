@@ -12,8 +12,8 @@ const darkColors = {
   textDisabled: grayScale[600],
   textInverted: 'black',
 
-  backgroundPrimary: grayScale[900],
-  backgroundSecondary: grayScale[800],
+  backgroundPrimary: 'black',
+  backgroundSecondary: grayScale[900],
   backgroundPage: 'black',
   backgroundInput: grayScale[950],
   backgroundThumbnail: grayScale[400],

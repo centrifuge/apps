@@ -14,6 +14,7 @@ const Template: ThumbnailStory = (args) => (
     <Thumbnail {...args} type="token" />
     <Thumbnail {...args} type="pool" />
     <Thumbnail {...args} type="asset" />
+    <Thumbnail {...args} type="nft" />
   </Shelf>
 )
 
