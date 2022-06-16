@@ -45,7 +45,7 @@ jobs:
       - name: Build
         run: yarn export
         env:
-          NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL: 'wss://fullnode.amber.centrifuge.io'
+          NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL: 'wss://fullnode.catalyst.cntrfg.com'
           NEXT_PUBLIC_CLAIM_CFG_CONTRACT_ADDRESS: '0x297237e17F327f8e5C8dEd78b15761A7D513353b'
           NEXT_PUBLIC_ENV: 'demo'
           NEXT_PUBLIC_ETHERSCAN_URL: 'https://kovan.etherscan.io'
@@ -118,7 +118,7 @@ jobs:
       - name: Build
         run: yarn export
         env:
-          NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL: 'wss://fullnode.centrifuge.io'
+          NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL: 'wss://fullnode.parachain.centrifuge.io'
           NEXT_PUBLIC_CLAIM_CFG_CONTRACT_ADDRESS: '0x1cA3B2E7FfCAF83d9228a64e4726402B1d5CC054'
           NEXT_PUBLIC_ENV: 'PROD'
           NEXT_PUBLIC_ETHERSCAN_URL: 'https://etherscan.io'
