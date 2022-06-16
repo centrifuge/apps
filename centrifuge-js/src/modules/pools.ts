@@ -1,6 +1,7 @@
 import { StorageKey, u32 } from '@polkadot/types'
+import { Codec } from '@polkadot/types-codec/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
+import { combineLatest, EMPTY, expand, firstValueFrom, Observable, of, startWith } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
@@ -200,7 +201,7 @@ export type Tranche = {
 
 export type TrancheWithTokenPrice = Tranche & {
   totalIssuance: Balance
-  tokenPrice: Price
+  tokenPrice: null | Price
 }
 
 export type Token = TrancheWithTokenPrice & {
@@ -767,13 +768,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
   function getPools() {
     const $api = inst.getApi()
 
-    const $events = $api.pipe(
-      switchMap(
-        (api) => combineLatest([api.query.system.events(), api.query.system.number()]),
-        (api, [events]) => ({ api, events })
-      ),
+    const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
-        // @ts-expect-error
         const event = events.find(({ event }) => api.events.pools.Created.is(event))
         return !!event
       })
@@ -820,23 +816,24 @@ export function getPoolsModule(inst: CentrifugeBase) {
             return data.tranches.ids.map((tid) => [id, tid, data.epoch.lastExecuted] as const)
           })
           .flat()
-        const tranceIdToEpochIndex: Record<string, number> = {}
+        const tranceIdToIssuanceIndex: Record<string, number> = {}
         keys.forEach(([, tid], i) => {
-          tranceIdToEpochIndex[tid] = i
+          tranceIdToIssuanceIndex[tid] = i
         })
 
-        // array of args for $epoch query (by trancheId and epoch)
-        const epochKeys = keys.map((k) => k.slice(1))
         // modify keys for $issuance query [Tranche: [poolId, trancheId]]
         const issuanceKeys = keys.map(([poolId, trancheId]) => ({ Tranche: [poolId, trancheId] }))
 
-        const $epochs = api.query.pools.epoch.multi(epochKeys)
-        const $issuance = api.query.ormlTokens.totalIssuance.multi(issuanceKeys)
-        return combineLatest([$epochs, $issuance]).pipe(
-          map(([rawEpochs, rawIssuances]) => {
-            const epochs = rawEpochs.map((value) => (!value.isEmpty ? (value as any).toJSON() : null))
+        // Get the token prices via RPC
+        const $prices = combineLatest(
+          // @ts-expect-error
+          pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
+        )
 
-            const mappedPools = pools.map((poolObj) => {
+        const $issuance = api.query.ormlTokens.totalIssuance.multi(issuanceKeys)
+        return combineLatest([$issuance, $prices]).pipe(
+          map(([rawIssuances, rawPrices]) => {
+            const mappedPools = pools.map((poolObj, poolIndex) => {
               const { data: pool, id: poolId, metadata } = poolObj
               const navData = navMap[poolId]
               const currency = getCurrency(pool.currency)
@@ -847,8 +844,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 currency,
                 tranches: pool.tranches.tranches.map((tranche, index) => {
                   const trancheId = pool.tranches.ids[index]
-                  const epochIndex = tranceIdToEpochIndex[trancheId]
-                  const epoch = epochs[epochIndex]
+                  const issuanceIndex = tranceIdToIssuanceIndex[trancheId]
 
                   let minRiskBuffer: Perquintill | null = null
                   let interestRatePerSec: Rate | null = null
@@ -872,13 +868,15 @@ export function getPoolsModule(inst: CentrifugeBase) {
                     )
                   }, new Balance(0))
 
+                  const tokenPrice = rawPrices[poolIndex]?.[index].toJSON() as string
+
                   return {
                     id: trancheId,
                     index,
                     seniority: tranche.seniority,
-                    tokenPrice: epoch ? new Price(hexToBN(epoch.tokenPrice)) : Price.fromFloat(1),
+                    tokenPrice: tokenPrice ? new Price(hexToBN(tokenPrice)) : null,
                     currency,
-                    totalIssuance: new Balance(rawIssuances[epochIndex].toString()),
+                    totalIssuance: new Balance(rawIssuances[issuanceIndex].toString()),
                     poolId,
                     poolMetadata: (metadata ?? undefined) as string | undefined,
                     interestRatePerSec,

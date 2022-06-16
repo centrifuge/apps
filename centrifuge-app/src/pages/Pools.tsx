@@ -27,7 +27,10 @@ const Pools: React.FC = () => {
     return (
       tokens
         ?.map((tranche) => ({
-          valueLocked: tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()).toNumber(),
+          valueLocked: tranche.totalIssuance
+            .toDecimal()
+            .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
+            .toNumber(),
         }))
         .reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)) ?? Dec(0)
     )

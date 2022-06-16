@@ -88,7 +88,7 @@ const TokenValue: React.VFC<{ investment: TrancheBalance }> = ({ investment }) =
 
   return (
     <Text variant="body2">
-      {formatBalance(investment.balance.toFloat() * (tranche?.tokenPrice.toFloat() ?? 1), pool?.currency)}
+      {formatBalance(investment.balance.toFloat() * (tranche?.tokenPrice?.toFloat() ?? 1), pool?.currency)}
     </Text>
   )
 }
