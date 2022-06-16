@@ -56,7 +56,7 @@ export class CentChain {
   }
 
   public async claimedCFGRewards(addr: string) {
-    const claimed = await (await this.api()).query.claims.accountBalances(centChainAddrToAccountId(addr))
+    const claimed = await (await this.api()).query.claims.claimedAmounts(centChainAddrToAccountId(addr))
     return claimed
   }
 
