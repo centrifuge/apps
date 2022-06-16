@@ -68,9 +68,16 @@ export class CentChain {
    * @returns txHash string
    */
   public async claimCFGRewards(claimerAccountID: string, amount: string, proof: Uint8Array[]): Promise<string> {
-    const { web3FromAddress } = await import('@polkadot/extension-dapp')
+    const { web3FromAddress, web3Enable } = await import('@polkadot/extension-dapp')
 
     const address = accountIdToCentChainAddr(claimerAccountID)
+
+    const extensions = await web3Enable('Tinlake')
+    if (extensions.length === 0) {
+      // no extension installed, or the user did not accept the authorization
+      // in this case we should inform the use and give a link to the extension
+      throw new Error('No extension or not authorized')
+    }
 
     const injector = await web3FromAddress(address)
 
