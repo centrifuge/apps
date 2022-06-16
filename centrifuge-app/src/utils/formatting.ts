@@ -48,3 +48,25 @@ export function formatPercentage(amount: Perquintill | Decimal | number, include
   })
   return includeSymbol ? `${formattedAmount}%` : formattedAmount
 }
+
+export function formatThousandSeparator(input: Balance | number | Decimal): string {
+  const balance = input instanceof Balance ? input.toDecimal().toString() : input.toString()
+  const removeNonNumeric = balance.replace(/[^0-9.]/g, '') // remove non-numeric chars except .
+  if (removeNonNumeric.includes('.')) {
+    const decimalIndex = removeNonNumeric.indexOf('.')
+    // add thousand separator only pre-decimal
+    return `${removeNonNumeric.slice(0, decimalIndex).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}${removeNonNumeric.slice(
+      decimalIndex
+    )}`
+  }
+  return removeNonNumeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+export function removeThousandSeparator(value?: string | Decimal): number {
+  const formattedNumber =
+    value instanceof Decimal
+      ? parseFloat(value.toString()?.replaceAll(',', '') || '')
+      : parseFloat(value?.replaceAll(',', '') || '')
+
+  return formattedNumber
+}

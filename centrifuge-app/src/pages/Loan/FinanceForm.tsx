@@ -3,9 +3,13 @@ import { Button, Card, CurrencyInput, IconInfo, Shelf, Stack, Text } from '@cent
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { Dec } from '../../utils/Decimal'
-import { formatBalance, getCurrencySymbol } from '../../utils/formatting'
+import {
+  formatBalance,
+  formatThousandSeparator,
+  getCurrencySymbol,
+  removeThousandSeparator,
+} from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { getBalanceDec, useBalances } from '../../utils/useBalances'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
@@ -15,11 +19,11 @@ import { usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 
 type FinanceValues = {
-  amount: number | Decimal | ''
+  amount: string | Decimal
 }
 
 type RepayValues = {
-  amount: number | Decimal | ''
+  amount: string | Decimal
 }
 
 const SEC_PER_DAY = 24 * 60 * 60
@@ -73,7 +77,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = Balance.fromFloat(values.amount)
+      const amount = Balance.fromFloat(removeThousandSeparator(values.amount))
       doFinanceTransaction([loan.poolId, loan.id, amount])
       actions.setSubmitting(false)
     },
@@ -85,7 +89,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = Balance.fromFloat(values.amount)
+      const amount = Balance.fromFloat(removeThousandSeparator(values.amount))
       doRepayTransaction([loan.poolId, loan.id, amount])
       actions.setSubmitting(false)
     },
@@ -128,7 +132,11 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
                   <CurrencyInput
                     {...fieldProps}
-                    value={value instanceof Decimal ? Math.floor(value.toNumber() * 100) / 100 : value}
+                    value={
+                      value instanceof Decimal
+                        ? formatThousandSeparator(Math.floor(value.toNumber() * 100) / 100)
+                        : formatThousandSeparator(value || '')
+                    }
                     label="Amount"
                     min="0"
                     onSetMax={() => financeForm.setFieldValue('amount', maxBorrow)}
@@ -143,7 +151,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 <Shelf alignItems="flex-start" gap="4px">
                   <IconInfo height="16" />
                   <Text variant="body3">
-                    The pool's available reserve ({formatBalance(poolReserve, pool?.currency)}) is smaller than the
+                    The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency)}) is smaller than the
                     available financing
                   </Text>
                 </Shelf>
@@ -173,20 +181,34 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
         {loan.status === 'Active' && !loan.outstandingDebt.isZero() && (
           <FormikProvider value={repayForm}>
             <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
-              <FieldWithErrorMessage
+              <Field
                 validate={combine(
                   positiveNumber(),
                   max(balance.toNumber(), 'Amount exceeds balance'),
                   max(debt.toNumber(), 'Amount exceeds outstanding')
                 )}
-                as={CurrencyInput}
                 name="amount"
-                label="Amount"
-                min="0"
-                disabled={isRepayLoading || isRepayAllLoading}
-                secondaryLabel={`${formatBalance(maxRepay, pool?.currency)} available`}
-                onSetMax={() => repayForm.setFieldValue('amount', Math.floor((maxRepay * 100) / 100))}
-              />
+              >
+                {({ field: { value, ...fieldProps }, meta }: FieldProps) => {
+                  return (
+                    <CurrencyInput
+                      {...fieldProps}
+                      value={
+                        value instanceof Decimal
+                          ? formatThousandSeparator(Math.floor(value.toNumber() * 100) / 100)
+                          : formatThousandSeparator(value || '')
+                      }
+                      label="Amount"
+                      // min="0"
+                      onSetMax={() => repayForm.setFieldValue('amount', maxRepay)}
+                      errorMessage={meta.touched ? meta.error : undefined}
+                      secondaryLabel={`${formatBalance(maxRepay, pool?.currency)} available`}
+                      disabled={isRepayLoading || isRepayAllLoading}
+                      currency={getCurrencySymbol(pool?.currency)}
+                    />
+                  )
+                }}
+              </Field>
               {balance.lessThan(loan.outstandingDebt.toDecimal()) && (
                 <Shelf alignItems="flex-start" gap="4px">
                   <IconInfo height="16" />

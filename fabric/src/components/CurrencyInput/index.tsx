@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { Box } from '../Box'
 import { InputBox, InputBoxProps } from '../InputBox'
 import { Shelf } from '../Shelf'
@@ -9,9 +9,10 @@ export type CurrencyInputProps = React.InputHTMLAttributes<HTMLInputElement> &
   Omit<InputBoxProps, 'inputElement' | 'rightElement'> & {
     currency?: string
     onSetMax?: () => void
+    variant?: 'small' | 'large'
   }
 
-const StyledTextInput = styled.input`
+const StyledTextInput = styled.input<{ $variant: 'small' | 'large' }>`
   width: 100%;
   border: 0;
   background: transparent;
@@ -36,6 +37,13 @@ const StyledTextInput = styled.input`
     -webkit-appearance: none;
     margin: 0;
   }
+
+  ${({ $variant }) =>
+    $variant === 'small' &&
+    css({
+      fontSize: '16px',
+      height: '20px',
+    })}
 `
 
 const StyledMaxButton = styled(Box)`
@@ -68,6 +76,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   currency,
   onSetMax,
   placeholder = '0.0',
+  variant = 'large',
   ...inputProps
 }) => {
   return (
@@ -87,9 +96,15 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
       }
       disabled={disabled}
       errorMessage={errorMessage}
-      inputElement={<StyledTextInput disabled={disabled} placeholder={placeholder} type="number" {...inputProps} />}
+      inputElement={
+        <StyledTextInput disabled={disabled} placeholder={placeholder} type="text" {...inputProps} $variant={variant} />
+      }
       rightElement={
-        <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'}>
+        <Text
+          variant="body1"
+          color={disabled ? 'textDisabled' : 'textPrimary'}
+          fontSize={variant === 'small' ? '16px' : '24px'}
+        >
           {currency}
         </Text>
       }

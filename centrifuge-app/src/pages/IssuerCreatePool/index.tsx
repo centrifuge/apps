@@ -2,9 +2,9 @@ import { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import {
   Box,
   Button,
+  CurrencyInput,
   FileUpload,
   Grid,
-  NumberInput,
   Select,
   Shelf,
   Text,
@@ -22,6 +22,7 @@ import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
+import { formatThousandSeparator, removeThousandSeparator } from '../../utils/formatting'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
@@ -75,7 +76,7 @@ export interface PoolFormValues {
   poolName: string
   assetClass: string
   currency: string
-  maxReserve: number | ''
+  maxReserve: string | ''
   epochHours: number | ''
   epochMinutes: number | ''
 
@@ -292,7 +293,7 @@ const CreatePoolForm: React.VFC = () => {
         collectionId,
         tranches,
         currency,
-        Balance.fromFloat(values.maxReserve),
+        Balance.fromFloat(removeThousandSeparator(values.maxReserve)),
         metadataHash,
         writeOffGroups,
       ])
@@ -399,14 +400,19 @@ const CreatePoolForm: React.VFC = () => {
               </Field>
             </Box>
             <Box gridColumn="span 2">
-              <FieldWithErrorMessage
-                validate={validate.maxReserve}
-                name="maxReserve"
-                as={NumberInput}
-                label="Initial maximum reserve*"
-                placeholder="0"
-                rightElement={currencies.find((c) => c.value === form.values.currency)?.label}
-              />
+              <Field name="maxReserve" validate={validate.maxReserve}>
+                {({ field: { value, ...fieldProps }, form, meta }: FieldProps) => (
+                  <CurrencyInput
+                    {...fieldProps}
+                    name="maxReserve"
+                    label="Initial maximum reserve*"
+                    placeholder="0"
+                    currency={currencies.find((c) => c.value === form.values.currency)?.label}
+                    variant="small"
+                    value={formatThousandSeparator(value)}
+                  />
+                )}
+              </Field>
             </Box>
             {/* <Box gridColumn="span 1">
               <FieldWithErrorMessage

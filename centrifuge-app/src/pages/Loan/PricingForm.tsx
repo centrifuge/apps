@@ -1,11 +1,12 @@
 import { Balance, Loan as LoanType, LoanInfoInput, Pool, Rate } from '@centrifuge/centrifuge-js'
-import { Button, DateInput, Grid, NumberInput, Select, Stack, Text } from '@centrifuge/fabric'
+import { Button, CurrencyInput, DateInput, Grid, Select, Stack, Text } from '@centrifuge/fabric'
+import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { PageSummary } from '../../components/PageSummary'
-import { getCurrencySymbol } from '../../utils/formatting'
+import { formatThousandSeparator, getCurrencySymbol, removeThousandSeparator } from '../../utils/formatting'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePoolMetadata } from '../../utils/usePools'
@@ -15,7 +16,7 @@ import { LOAN_FIELDS, LOAN_TYPE_LABELS } from './utils'
 
 type PricingFormValues = {
   loanType: 'BulletLoan' | 'CreditLine' | 'CreditLineWithMaturity'
-  value: number | string
+  value: string | Decimal
   maturityDate: string
   riskGroup: string
 }
@@ -49,7 +50,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
     },
     onSubmit: (values, { setSubmitting }) => {
       if (!riskGroup) return
-      const value = Balance.fromFloat(values.value)
+      const value = Balance.fromFloat(removeThousandSeparator(values.value))
       const maturityDate = new Date(form.values.maturityDate).toISOString()
       const ratePerSec = fee!
 
@@ -106,16 +107,27 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
 
   const fields = {
     value: (
-      <FieldWithErrorMessage
-        key="value"
-        as={NumberInput}
-        label="Collateral value*"
-        min="0"
-        placeholder="0.00"
-        name="value"
-        rightElement={getCurrencySymbol(pool.currency)}
-        validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}
-      />
+      <Field name="value" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
+        {({ field: { value, ...fieldProps }, meta }: FieldProps) => {
+          return (
+            <CurrencyInput
+              {...fieldProps}
+              variant="small"
+              value={
+                value instanceof Decimal
+                  ? formatThousandSeparator(Math.floor(value.toNumber() * 100) / 100)
+                  : formatThousandSeparator(value || '')
+              }
+              label="Collateral value*"
+              errorMessage={meta.touched ? meta.error : undefined}
+              currency={getCurrencySymbol(pool?.currency)}
+              key="value"
+              placeholder="0.00"
+              name="value"
+            />
+          )
+        }}
+      </Field>
     ),
     maturityDate: (
       <FieldWithErrorMessage

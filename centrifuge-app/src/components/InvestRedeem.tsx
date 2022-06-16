@@ -21,13 +21,14 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { getEpochTimeRemaining } from '../utils/date'
 import { Dec } from '../utils/Decimal'
-import { formatBalance, getCurrencySymbol } from '../utils/formatting'
+import { formatBalance, formatThousandSeparator, getCurrencySymbol, removeThousandSeparator } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { getBalanceDec, useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../utils/useFocusInvalidInput'
 import { usePermissions } from '../utils/usePermissions'
 import { usePendingCollect, usePool, usePoolMetadata } from '../utils/usePools'
+import { positiveNumber } from '../utils/validation'
 import { useDebugFlags } from './DebugFlags'
 import { LoadBoundary } from './LoadBoundary'
 import { Spinner } from './Spinner'
@@ -159,7 +160,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
 }
 
 type InvestValues = {
-  amount: number | Decimal | ''
+  amount: string | Decimal | ''
 }
 
 type InvestFormProps = {
@@ -221,21 +222,19 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
 
   const loadingMessage = lastCreatedTransaction?.status === 'pending' ? 'Pending...' : 'Signing...'
 
-  const form = useFormik<{ amount: number | Decimal }>({
+  const form = useFormik<{ amount: string | Decimal }>({
     initialValues: {
-      amount: 0,
+      amount: '0',
     },
     onSubmit: (values, actions) => {
-      const amount = Balance.fromFloat(values.amount)
+      const amount = Balance.fromFloat(removeThousandSeparator(values.amount))
       doInvestTransaction([poolId, trancheId, amount])
       actions.setSubmitting(false)
     },
     validate: (values) => {
       const errors: FormikErrors<InvestValues> = {}
 
-      if (validateNumberInput(values.amount, 0, combinedBalance)) {
-        errors.amount = validateNumberInput(values.amount, 0, combinedBalance)
-      } else if (hasPendingOrder && inputToDecimal(values.amount).eq(pendingInvest)) {
+      if (hasPendingOrder && inputToDecimal(values.amount).eq(pendingInvest)) {
         errors.amount = 'Equals current order'
       } else if (!allowInvestBelowMin && isFirstInvestment && Dec(form.values.amount).lt(minInvest.toDecimal())) {
         errors.amount = 'Investment amount too low'
@@ -251,28 +250,33 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
   function renderInput(cancelCb?: () => void) {
     return (
       <Stack gap={2}>
-        <Field name="amount">
-          {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
-            <CurrencyInput
-              {...fieldProps}
-              value={value instanceof Decimal ? value.toNumber() : value}
-              errorMessage={meta.touched ? meta.error : undefined}
-              label={`Amount ${isFirstInvestment ? `(min: ${formatBalance(minInvest, pool?.currency)})` : ''}`}
-              type="number"
-              min="0"
-              disabled={isLoading || isLoadingCancel}
-              onSetMax={() => form.setFieldValue('amount', balance)}
-              currency={getCurrencySymbol(pool?.currency)}
-              secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency)} balance`}
-            />
-          )}
+        <Field name="amount" validate={positiveNumber()}>
+          {({ field: { value, ...fieldProps }, meta }: FieldProps) => {
+            return (
+              <CurrencyInput
+                {...fieldProps}
+                value={
+                  value && value instanceof Decimal
+                    ? formatThousandSeparator(Math.floor(value.toNumber() * 100) / 100)
+                    : formatThousandSeparator(value)
+                }
+                errorMessage={meta.touched ? meta.error : undefined}
+                label={`Amount ${isFirstInvestment ? `(min: ${formatBalance(minInvest, pool?.currency)})` : ''}`}
+                min="0"
+                disabled={isLoading || isLoadingCancel}
+                onSetMax={() => form.setFieldValue('amount', balance)}
+                currency={getCurrencySymbol(pool?.currency)}
+                secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency)} balance`}
+              />
+            )
+          }}
         </Field>
         {/* {inputToNumber(form.values.amount) > 0 && inputAmountCoveredByCapacity && (
           <Text variant="label2" color="statusOk">
             Full amount covered by investment capacity ✓
           </Text>
         )} */}
-        {inputToNumber(form.values.amount) > 0 ? (
+        {removeThousandSeparator(form.values.amount) > 0 ? (
           <Stack px={2} gap="4px">
             <Shelf justifyContent="space-between">
               <Text variant="body3">Token amount</Text>
@@ -391,9 +395,9 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
    * When clicking on the "max" button in the input box, we set the amount to a Decimal representing the number of tranche tokens the user has.
    * This to avoid possibly losing precision if we were to convert it to the pool currency and then back again when submitting the form.
    */
-  const form = useFormik<{ amount: number | Decimal }>({
+  const form = useFormik<{ amount: string | Decimal }>({
     initialValues: {
-      amount: 0,
+      amount: '',
     },
     onSubmit: (values, actions) => {
       const amount = (values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price))
@@ -404,10 +408,10 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
     },
     validate: (values) => {
       const errors: FormikErrors<InvestValues> = {}
-
-      if (!(values.amount instanceof Decimal) && validateNumberInput(values.amount, 0, maxRedeem)) {
-        errors.amount = validateNumberInput(values.amount, 0, maxRedeem)
-      } else if (hasPendingOrder && inputToDecimal(values.amount).eq(pendingRedeem)) {
+      const amount = removeThousandSeparator(
+        values.amount instanceof Decimal ? values.amount.toString() : values.amount
+      )
+      if (hasPendingOrder && Dec(amount).eq(pendingRedeem)) {
         errors.amount = 'Equals current order'
       }
 
@@ -421,22 +425,24 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
   function renderInput(cancelCb?: () => void) {
     return (
       <Stack gap={2}>
-        <Field name="amount">
+        <Field name="amount" validate={positiveNumber()}>
           {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
             <CurrencyInput
               {...fieldProps}
-              value={value instanceof Decimal ? value.mul(price).toNumber() : value}
+              value={
+                value instanceof Decimal
+                  ? formatThousandSeparator(value.mul(price).toNumber())
+                  : formatThousandSeparator(value)
+              }
               errorMessage={meta.touched ? meta.error : undefined}
               label="Amount"
-              type="number"
-              min="0"
               disabled={isLoading || isLoadingCancel}
               onSetMax={() => form.setFieldValue('amount', combinedBalance)}
               currency={getCurrencySymbol(pool?.currency)}
             />
           )}
         </Field>
-        {inputToNumber(form.values.amount) > 0 ? (
+        {removeThousandSeparator(form.values.amount) > 0 ? (
           <Stack px={2} gap="4px">
             <Shelf justifyContent="space-between">
               <Text variant="body3">Token amount</Text>
