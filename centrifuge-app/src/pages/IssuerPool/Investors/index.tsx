@@ -46,7 +46,7 @@ const IssuerPoolInvestors: React.FC = () => {
   return <>{canEditInvestors && <Investors />}</>
 }
 
-const SevenDaysMs = (7 * 24 + 1) * 60 * 60 * 1000 // 1 week margin
+const SevenDaysMs = (7 * 24 + 1) * 60 * 60 * 1000 // 1 hour margin
 
 export const Investors: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
