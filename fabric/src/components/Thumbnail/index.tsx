@@ -18,6 +18,7 @@ export const Thumbnail: React.VFC<ThumbnailProps> = ({ label, ...props }) => {
         <IconNftThumbnail
           color="backgroundThumbnail"
           size={props.size === 'large' ? 'iconLarge' : 'iconMedium'}
+          // @ts-expect-error
           style={{ '--secondary': theme.colors.textInverted }}
         />
       ) : (
