@@ -134,7 +134,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                     currency={getCurrencySymbol(pool?.currency)}
                     handleChange={(value: number) => form.setFieldValue('amount', value)}
                     onSetMax={(setDisplayValue) => {
-                      setDisplayValue(Math.floor(maxBorrow.toNumber() * 100) / 100)
+                      setDisplayValue(String(Math.floor(maxBorrow.toNumber() * 100) / 100))
                       form.setFieldValue('amount', Math.floor(maxRepay * 100) / 100)
                     }}
                   />
@@ -193,7 +193,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                       currency={getCurrencySymbol(pool?.currency)}
                       handleChange={(value) => form.setFieldValue('amount', value)}
                       onSetMax={(setDisplayValue) => {
-                        setDisplayValue(Math.floor(maxRepay * 100) / 100)
+                        setDisplayValue(String(Math.floor(maxRepay * 100) / 100))
                         form.setFieldValue('amount', Math.floor(maxRepay * 100) / 100)
                       }}
                     />

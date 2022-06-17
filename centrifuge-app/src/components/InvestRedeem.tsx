@@ -260,7 +260,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
                 currency={getCurrencySymbol(pool?.currency)}
                 secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency)} balance`}
                 onSetMax={(setDisplayValue) => {
-                  setDisplayValue(Math.floor(balance.toNumber() * 100) / 100)
+                  setDisplayValue(String(Math.floor(balance.toNumber() * 100) / 100))
                   form.setFieldValue('amount', Math.floor(balance.toNumber() * 100) / 100)
                 }}
               />
@@ -426,7 +426,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
               label="Amount"
               disabled={isLoading || isLoadingCancel}
               onSetMax={(setDisplayValue) => {
-                setDisplayValue(Math.floor(combinedBalance.toNumber() * 100) / 100)
+                setDisplayValue(String(Math.floor(combinedBalance.toNumber() * 100) / 100))
                 form.setFieldValue('amount', Math.floor(combinedBalance.toNumber() * 100) / 100)
               }}
               handleChange={(value: number) => {
