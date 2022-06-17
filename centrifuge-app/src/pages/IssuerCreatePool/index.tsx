@@ -22,7 +22,6 @@ import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
-import { formatThousandSeparator, removeThousandSeparator } from '../../utils/formatting'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
@@ -76,7 +75,7 @@ export interface PoolFormValues {
   poolName: string
   assetClass: string
   currency: string
-  maxReserve: string | ''
+  maxReserve: number | ''
   epochHours: number | ''
   epochMinutes: number | ''
 
@@ -293,7 +292,7 @@ const CreatePoolForm: React.VFC = () => {
         collectionId,
         tranches,
         currency,
-        Balance.fromFloat(removeThousandSeparator(values.maxReserve)),
+        Balance.fromFloat(values.maxReserve),
         metadataHash,
         writeOffGroups,
       ])
@@ -409,7 +408,7 @@ const CreatePoolForm: React.VFC = () => {
                     placeholder="0"
                     currency={currencies.find((c) => c.value === form.values.currency)?.label}
                     variant="small"
-                    value={formatThousandSeparator(value)}
+                    handleChange={(value) => form.setFieldValue('maxReserve', value)}
                   />
                 )}
               </Field>

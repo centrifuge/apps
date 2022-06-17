@@ -4,12 +4,7 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
-import {
-  formatBalance,
-  formatThousandSeparator,
-  getCurrencySymbol,
-  removeThousandSeparator,
-} from '../../utils/formatting'
+import { formatBalance, getCurrencySymbol } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { getBalanceDec, useBalances } from '../../utils/useBalances'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
@@ -77,7 +72,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = Balance.fromFloat(removeThousandSeparator(values.amount))
+      const amount = Balance.fromFloat(values.amount)
       doFinanceTransaction([loan.poolId, loan.id, amount])
       actions.setSubmitting(false)
     },
@@ -89,7 +84,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = Balance.fromFloat(removeThousandSeparator(values.amount))
+      const amount = Balance.fromFloat(values.amount)
       doRepayTransaction([loan.poolId, loan.id, amount])
       actions.setSubmitting(false)
     },
@@ -129,21 +124,19 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                   )
                 )}
               >
-                {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
+                {({ field: { value, ...fieldProps }, meta, form }: FieldProps) => (
                   <CurrencyInput
                     {...fieldProps}
-                    value={
-                      value instanceof Decimal
-                        ? formatThousandSeparator(Math.floor(value.toNumber() * 100) / 100)
-                        : value
-                    }
                     label="Amount"
-                    min="0"
-                    onSetMax={() => financeForm.setFieldValue('amount', maxBorrow)}
                     errorMessage={meta.touched ? meta.error : undefined}
                     secondaryLabel={`${formatBalance(maxBorrow, pool?.currency)} available`}
                     disabled={isFinanceLoading}
                     currency={getCurrencySymbol(pool?.currency)}
+                    handleChange={(value: number) => form.setFieldValue('amount', value)}
+                    onSetMax={(setDisplayValue) => {
+                      setDisplayValue(Math.floor(maxBorrow.toNumber() * 100) / 100)
+                      form.setFieldValue('amount', Math.floor(maxRepay * 100) / 100)
+                    }}
                   />
                 )}
               </Field>
@@ -189,21 +182,20 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 )}
                 name="amount"
               >
-                {({ field: { value, ...fieldProps }, meta }: FieldProps) => {
+                {({ field: { value, ...fieldProps }, meta, form }: FieldProps) => {
                   return (
                     <CurrencyInput
                       {...fieldProps}
-                      value={
-                        value instanceof Decimal
-                          ? formatThousandSeparator(Math.floor(value.toNumber() * 100) / 100)
-                          : value
-                      }
                       label="Amount"
-                      onSetMax={() => repayForm.setFieldValue('amount', Dec(maxRepay))}
                       errorMessage={meta.touched ? meta.error : undefined}
                       secondaryLabel={`${formatBalance(maxRepay, pool?.currency)} available`}
                       disabled={isRepayLoading || isRepayAllLoading}
                       currency={getCurrencySymbol(pool?.currency)}
+                      handleChange={(value) => form.setFieldValue('amount', value)}
+                      onSetMax={(setDisplayValue) => {
+                        setDisplayValue(Math.floor(maxRepay * 100) / 100)
+                        form.setFieldValue('amount', Math.floor(maxRepay * 100) / 100)
+                      }}
                     />
                   )
                 }}

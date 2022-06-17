@@ -8,8 +8,10 @@ import { Text } from '../Text'
 export type CurrencyInputProps = React.InputHTMLAttributes<HTMLInputElement> &
   Omit<InputBoxProps, 'inputElement' | 'rightElement'> & {
     currency?: string
-    onSetMax?: () => void
+    onSetMax?: (setDisplayValue: (value: number | string) => void) => void
     variant?: 'small' | 'large'
+    handleChange?: (value: number) => void
+    initialValue?: number
   }
 
 const StyledTextInput = styled.input<{ $variant: 'small' | 'large' }>`
@@ -68,6 +70,18 @@ StyledMaxButton.defaultProps = {
   type: 'button',
 }
 
+function formatThousandSeparator(input: number | string): string {
+  const removeNonNumeric = (typeof input === 'string' ? input : input.toString()).replace(/[^0-9.]/g, '') // remove non-numeric chars except .
+  if (removeNonNumeric.includes('.')) {
+    const decimalIndex = removeNonNumeric.indexOf('.')
+    // add thousand separator only pre-decimal
+    return `${removeNonNumeric.slice(0, decimalIndex).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}${removeNonNumeric.slice(
+      decimalIndex
+    )}`
+  }
+  return removeNonNumeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
 export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   label,
   secondaryLabel,
@@ -77,8 +91,19 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   onSetMax,
   placeholder = '0.0',
   variant = 'large',
+  initialValue,
   ...inputProps
 }) => {
+  const [value, setValue] = React.useState(initialValue ? formatThousandSeparator(initialValue) : '')
+
+  const onChange = (value: string) => {
+    const inputFormatted = formatThousandSeparator(value)
+    const inputAsNumber = parseFloat(value.replaceAll(',', ''))
+    if (inputProps?.handleChange) {
+      inputProps?.handleChange(inputAsNumber)
+      setValue(inputFormatted)
+    }
+  }
   return (
     <InputBox
       label={label}
@@ -86,7 +111,9 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
         <Shelf justifyContent="space-between">
           <span>{secondaryLabel}</span>
           {onSetMax && (
-            <StyledMaxButton onClick={onSetMax} disabled={disabled}>
+            // the value we display to users is a parse string but the value stored in the form handler is a numeric value
+            // after setting the max make sure you manually overwrite the display value using the onChange handler
+            <StyledMaxButton onClick={() => onSetMax(onChange)} disabled={disabled}>
               <Text variant="label3" lineHeight={1.5} color="inherit">
                 MAX
               </Text>
@@ -97,7 +124,15 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
       disabled={disabled}
       errorMessage={errorMessage}
       inputElement={
-        <StyledTextInput disabled={disabled} placeholder={placeholder} type="text" {...inputProps} $variant={variant} />
+        <StyledTextInput
+          {...inputProps}
+          disabled={disabled}
+          placeholder={placeholder}
+          type="text"
+          onChange={(e) => onChange(e.target.value)}
+          value={value}
+          $variant={variant}
+        />
       }
       rightElement={
         <Text

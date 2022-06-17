@@ -1,5 +1,4 @@
 import Decimal from 'decimal.js-light'
-import { removeThousandSeparator } from '../formatting'
 import { getImageDimensions } from '../getImageDimensions'
 
 const isImageFile = (file: any): boolean => file instanceof File && !!file.type.match(/^image\//)
@@ -24,7 +23,7 @@ export const nonNegativeNumber = (err?: CustomError) => (val?: any) => {
 }
 
 export const positiveNumber = (err?: CustomError) => (val?: any) => {
-  const num = val instanceof Decimal ? val.toNumber() : typeof val === 'string' ? removeThousandSeparator(val) : val
+  const num = val instanceof Decimal ? val.toNumber() : val
   return Number.isFinite(num) && num > 0 ? '' : getError(`Value must be positive`, err, num)
 }
 
@@ -32,7 +31,7 @@ export const integer = (err?: CustomError) => (val?: any) =>
   Number.isFinite(val) && Math.floor(val) === val ? '' : getError(`Value must whole number`, err, val)
 
 export const max = (maxValue: number, err?: CustomError) => (val?: any) => {
-  const num = val instanceof Decimal ? val.toNumber() : typeof val === 'string' ? removeThousandSeparator(val) : val
+  const num = val instanceof Decimal ? val.toNumber() : val
   return num <= maxValue ? '' : getError(`Value too large`, err, num)
 }
 
