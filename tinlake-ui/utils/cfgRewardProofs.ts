@@ -20,7 +20,15 @@ export function newClaim({ accountID, balance }: { accountID: string; balance: s
 }
 
 export function createTree(claims: Claim[]): MerkleTree {
-  const leaves = claims.map((x) => hashLeaf(x.accountID, x.balance))
+  const uniqueClaims = claims.reduce((acc: Claim[], currentClaim) => {
+    const claim = acc.find((item) => item.accountID === currentClaim.accountID)
+    if (!claim) {
+      return acc.concat([currentClaim])
+    }
+    return acc
+  }, [])
+
+  const leaves = uniqueClaims.map((claim) => hashLeaf(claim.accountID, claim.balance))
   return new MerkleTree(leaves, hashBlake2b, { sortPairs: true })
 }
 
