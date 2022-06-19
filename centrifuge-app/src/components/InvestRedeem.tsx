@@ -21,7 +21,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { getEpochTimeRemaining } from '../utils/date'
 import { Dec } from '../utils/Decimal'
-import { formatBalance, getCurrencySymbol } from '../utils/formatting'
+import { formatBalance, getCurrencySymbol, roundDown } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { getBalanceDec, useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
@@ -62,6 +62,7 @@ function validateNumberInput(value: number | string | Decimal, min: number | Dec
   if (value === '') {
     return 'Not a valid number'
   }
+  console.log('🚀 ~ Dec(value)', Dec(value).toString(), Dec(max).toString())
   if (max && Dec(value).greaterThan(Dec(max))) {
     return 'Value too large'
   }
@@ -249,20 +250,17 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
     return (
       <Stack gap={2}>
         <Field name="amount" validate={positiveNumber()}>
-          {({ field: { value, ...fieldProps }, meta }: FieldProps) => {
+          {({ field, meta }: FieldProps) => {
             return (
               <CurrencyInput
-                {...fieldProps}
-                handleChange={(value: number) => form.setFieldValue('amount', value)}
+                {...field}
+                handleChange={(value) => form.setFieldValue('amount', value)}
                 errorMessage={meta.touched ? meta.error : undefined}
                 label={`Amount ${isFirstInvestment ? `(min: ${formatBalance(minInvest, pool?.currency)})` : ''}`}
                 disabled={isLoading || isLoadingCancel}
                 currency={getCurrencySymbol(pool?.currency)}
-                secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency)} balance`}
-                onSetMax={(setDisplayValue) => {
-                  setDisplayValue(String(Math.floor(balance.toNumber() * 100) / 100))
-                  form.setFieldValue('amount', Math.floor(balance.toNumber() * 100) / 100)
-                }}
+                secondaryLabel={pool && balance && `${formatBalance(roundDown(balance), pool?.currency, 2)} balance`}
+                onSetMax={() => form.setFieldValue('amount', roundDown(balance))}
               />
             )
           }}
@@ -396,7 +394,8 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amountWithPrice = Dec(values.amount).div(price).mul('1e18').toFixed(0)
+      const value = values.amount === roundDown(maxRedeem.toNumber()) ? combinedBalance.toNumber() : values.amount
+      const amountWithPrice = Dec(value).div(price).mul('1e18').toFixed(0)
       doRedeemTransaction([poolId, trancheId, new BN(amountWithPrice)])
       actions.setSubmitting(false)
     },
@@ -419,20 +418,16 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
     return (
       <Stack gap={2}>
         <Field name="amount" validate={positiveNumber()}>
-          {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
+          {({ field, meta }: FieldProps) => (
             <CurrencyInput
-              {...fieldProps}
+              {...field}
               errorMessage={meta.touched ? meta.error : undefined}
               label="Amount"
               disabled={isLoading || isLoadingCancel}
-              onSetMax={(setDisplayValue) => {
-                setDisplayValue(String(Math.floor(combinedBalance.toNumber() * 100) / 100))
-                form.setFieldValue('amount', Math.floor(combinedBalance.toNumber() * 100) / 100)
-              }}
-              handleChange={(value: number) => {
-                form.setFieldValue('amount', value)
-              }}
+              onSetMax={() => form.setFieldValue('amount', roundDown(maxRedeem))}
+              handleChange={(value) => form.setFieldValue('amount', value)}
               currency={getCurrencySymbol(pool?.currency)}
+              secondaryLabel={`${formatBalance(roundDown(maxRedeem), pool?.currency, 2)} available`}
             />
           )}
         </Field>

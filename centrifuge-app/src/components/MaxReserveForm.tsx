@@ -48,17 +48,15 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
         <Form noValidate>
           <Stack gap="2">
             <Field name="maxReserve">
-              {({ field: { value, ...fieldProps }, meta, form }: FieldProps) => {
+              {({ field, meta, form }: FieldProps) => {
                 return (
                   <CurrencyInput
-                    {...fieldProps}
+                    {...field}
                     initialValue={pool?.reserve.max.toDecimal().toNumber()}
                     errorMessage={meta.touched ? meta.error : undefined}
                     disabled={isLoading}
                     currency={getCurrencySymbol(pool?.currency)}
-                    handleChange={(value) => {
-                      form.setFieldValue('maxReserve', value)
-                    }}
+                    handleChange={(value) => form.setFieldValue('maxReserve', value)}
                   />
                 )
               }}

@@ -8,7 +8,7 @@ import { Text } from '../Text'
 export type CurrencyInputProps = React.InputHTMLAttributes<HTMLInputElement> &
   Omit<InputBoxProps, 'inputElement' | 'rightElement'> & {
     currency?: string
-    onSetMax?: (setDisplayValue: (value: number | string) => void) => void
+    onSetMax?: () => void
     variant?: 'small' | 'large'
     handleChange?: (value: number) => void
     initialValue?: number
@@ -70,6 +70,7 @@ StyledMaxButton.defaultProps = {
   type: 'button',
 }
 
+// regex from https://stackoverflow.com/questions/63091317/thousand-separator-input-with-react-hooks
 function formatThousandSeparator(input: number | string): string {
   const removeNonNumeric = (typeof input === 'string' ? input : input.toString()).replace(/[^0-9.]/g, '') // remove non-numeric chars except .
   if (removeNonNumeric.includes('.')) {
@@ -104,6 +105,12 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
       setValue(inputFormatted)
     }
   }
+
+  React.useEffect(() => {
+    const inputFormatted = formatThousandSeparator(inputProps.value as number)
+    onChange(inputFormatted)
+  }, [inputProps.value])
+
   return (
     <InputBox
       label={label}
@@ -111,9 +118,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
         <Shelf justifyContent="space-between">
           <span>{secondaryLabel}</span>
           {onSetMax && (
-            // the value we display to users is a parse string but the value stored in the form handler is a numeric value
-            // after setting the max make sure you manually overwrite the display value using the onChange handler
-            <StyledMaxButton onClick={() => onSetMax(onChange)} disabled={disabled}>
+            <StyledMaxButton onClick={onSetMax} disabled={disabled}>
               <Text variant="label3" lineHeight={1.5} color="inherit">
                 MAX
               </Text>

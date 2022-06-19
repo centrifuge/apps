@@ -4,7 +4,7 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
-import { formatBalance, getCurrencySymbol } from '../../utils/formatting'
+import { formatBalance, getCurrencySymbol, roundDown } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { getBalanceDec, useBalances } from '../../utils/useBalances'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
@@ -103,11 +103,11 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
         <Stack>
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Available financing</Text>
-            <Text variant="heading3">{formatBalance(availableFinancing, pool?.currency)}</Text>
+            <Text variant="heading3">{formatBalance(roundDown(availableFinancing), pool?.currency, 2)}</Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total financed</Text>
-            <Text variant="label1">{formatBalance(loan.totalBorrowed, pool?.currency)}</Text>
+            <Text variant="label1">{formatBalance(roundDown(loan.totalBorrowed.toDecimal()), pool?.currency, 2)}</Text>
           </Shelf>
         </Stack>
         {loan.status === 'Active' && loan.totalBorrowed.toDecimal().lt(initialCeiling) && (
@@ -120,23 +120,20 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                   max(availableFinancing.toNumber(), 'Amount exceeds available financing'),
                   max(
                     maxBorrow.toNumber(),
-                    `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency)})`
+                    `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency, 2)})`
                   )
                 )}
               >
-                {({ field: { value, ...fieldProps }, meta, form }: FieldProps) => (
+                {({ field, meta, form }: FieldProps) => (
                   <CurrencyInput
-                    {...fieldProps}
+                    {...field}
                     label="Amount"
                     errorMessage={meta.touched ? meta.error : undefined}
-                    secondaryLabel={`${formatBalance(maxBorrow, pool?.currency)} available`}
+                    secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency, 2)} available`}
                     disabled={isFinanceLoading}
                     currency={getCurrencySymbol(pool?.currency)}
                     handleChange={(value: number) => form.setFieldValue('amount', value)}
-                    onSetMax={(setDisplayValue) => {
-                      setDisplayValue(String(Math.floor(maxBorrow.toNumber() * 100) / 100))
-                      form.setFieldValue('amount', Math.floor(maxRepay * 100) / 100)
-                    }}
+                    onSetMax={() => form.setFieldValue('amount', roundDown(maxBorrow))}
                   />
                 )}
               </Field>
@@ -163,11 +160,11 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
         <Stack>
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Outstanding</Text>
-            <Text variant="heading3">{formatBalance(loan.outstandingDebt, pool?.currency)}</Text>
+            <Text variant="heading3">{formatBalance(loan.outstandingDebt.toDecimal(), pool?.currency, 2)}</Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total repaid</Text>
-            <Text variant="label1">{formatBalance(loan.totalRepaid, pool?.currency)}</Text>
+            <Text variant="label1">{formatBalance(loan.totalRepaid, pool?.currency, 2)}</Text>
           </Shelf>
         </Stack>
 
@@ -182,20 +179,17 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 )}
                 name="amount"
               >
-                {({ field: { value, ...fieldProps }, meta, form }: FieldProps) => {
+                {({ field, meta, form }: FieldProps) => {
                   return (
                     <CurrencyInput
-                      {...fieldProps}
+                      {...field}
                       label="Amount"
                       errorMessage={meta.touched ? meta.error : undefined}
-                      secondaryLabel={`${formatBalance(maxRepay, pool?.currency)} available`}
+                      secondaryLabel={`${formatBalance(roundDown(maxRepay), pool?.currency, 2)} available`}
                       disabled={isRepayLoading || isRepayAllLoading}
                       currency={getCurrencySymbol(pool?.currency)}
                       handleChange={(value) => form.setFieldValue('amount', value)}
-                      onSetMax={(setDisplayValue) => {
-                        setDisplayValue(String(Math.floor(maxRepay * 100) / 100))
-                        form.setFieldValue('amount', Math.floor(maxRepay * 100) / 100)
-                      }}
+                      onSetMax={() => form.setFieldValue('amount', roundDown(maxRepay))}
                     />
                   )
                 }}
@@ -204,8 +198,8 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 <Shelf alignItems="flex-start" gap="4px">
                   <IconInfo height="16" />
                   <Text variant="body3">
-                    Your wallet balance ({formatBalance(balance, pool?.currency)}) is smaller than the outstanding
-                    balance.
+                    Your wallet balance ({formatBalance(roundDown(balance), pool?.currency, 2)}) is smaller than the
+                    outstanding balance.
                   </Text>
                 </Shelf>
               )}

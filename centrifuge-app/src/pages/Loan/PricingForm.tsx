@@ -107,10 +107,10 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
   const fields = {
     value: (
       <Field key="value" name="value" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
-        {({ field: { value, ...fieldProps }, meta }: FieldProps) => {
+        {({ field, meta }: FieldProps) => {
           return (
             <CurrencyInput
-              {...fieldProps}
+              {...field}
               variant="small"
               label="Collateral value*"
               errorMessage={meta.touched ? meta.error : undefined}

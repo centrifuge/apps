@@ -400,9 +400,9 @@ const CreatePoolForm: React.VFC = () => {
             </Box>
             <Box gridColumn="span 2">
               <Field name="maxReserve" validate={validate.maxReserve}>
-                {({ field: { value, ...fieldProps }, form, meta }: FieldProps) => (
+                {({ field, form }: FieldProps) => (
                   <CurrencyInput
-                    {...fieldProps}
+                    {...field}
                     name="maxReserve"
                     label="Initial maximum reserve*"
                     placeholder="0"
