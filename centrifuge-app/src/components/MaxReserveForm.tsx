@@ -23,9 +23,9 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
     { onSuccess: () => form.resetForm() }
   )
 
-  const form = useFormik<{ maxReserve: string | undefined }>({
+  const form = useFormik<{ maxReserve: number | '' }>({
     initialValues: {
-      maxReserve: undefined,
+      maxReserve: '',
     },
     onSubmit: (values, actions) => {
       if (values.maxReserve) {
@@ -45,21 +45,19 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
         <Text variant="heading3">Maximum reserve</Text>
       </Shelf>
       <FormikProvider value={form}>
-        <Form noValidate>
+        <Form>
           <Stack gap="2">
             <Field name="maxReserve">
-              {({ field, meta, form }: FieldProps) => {
-                return (
-                  <CurrencyInput
-                    {...field}
-                    initialValue={pool?.reserve.max.toDecimal().toNumber()}
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    disabled={isLoading}
-                    currency={getCurrencySymbol(pool?.currency)}
-                    handleChange={(value) => form.setFieldValue('maxReserve', value)}
-                  />
-                )
-              }}
+              {({ field, meta, form }: FieldProps) => (
+                <CurrencyInput
+                  {...field}
+                  initialValue={pool?.reserve.max.toDecimal().toNumber()}
+                  errorMessage={meta.touched ? meta.error : undefined}
+                  disabled={isLoading}
+                  currency={getCurrencySymbol(pool?.currency)}
+                  handleChange={(value) => form.setFieldValue('maxReserve', value)}
+                />
+              )}
             </Field>
             <Button type="submit" loading={isLoading} loadingMessage={'Confirming'}>
               Apply

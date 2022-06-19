@@ -14,11 +14,11 @@ import { usePool } from '../../utils/usePools'
 import { combine, max, positiveNumber } from '../../utils/validation'
 
 type FinanceValues = {
-  amount: string | Decimal
+  amount: number | '' | Decimal
 }
 
 type RepayValues = {
-  amount: string | Decimal
+  amount: number | '' | Decimal
 }
 
 const SEC_PER_DAY = 24 * 60 * 60
