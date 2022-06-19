@@ -62,7 +62,6 @@ function validateNumberInput(value: number | string | Decimal, min: number | Dec
   if (value === '') {
     return 'Not a valid number'
   }
-  console.log('🚀 ~ Dec(value)', Dec(value).toString(), Dec(max).toString())
   if (max && Dec(value).greaterThan(Dec(max))) {
     return 'Value too large'
   }
