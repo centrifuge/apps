@@ -313,7 +313,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
             isCancelling={isLoadingCancel}
             onChangeOrder={() => {
               form.resetForm()
-              form.setFieldValue('amount', pendingInvest.toString(), false)
+              form.setFieldValue('amount', pendingInvest, false)
               setChangeOrderFormShown(true)
             }}
           />
