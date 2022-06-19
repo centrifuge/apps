@@ -64,7 +64,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   )
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
-  const maxRepay = Math.min(balance.toNumber(), loan.outstandingDebt.toDecimal().toNumber())
+  const maxRepay = balance.lessThan(loan.outstandingDebt.toDecimal()) ? balance : loan.outstandingDebt.toDecimal()
   const canRepayAll = debtWithMargin.lte(balance)
 
   const financeForm = useFormik<FinanceValues>({
@@ -103,11 +103,12 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
         <Stack>
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Available financing</Text>
+            {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
             <Text variant="heading3">{formatBalance(roundDown(availableFinancing), pool?.currency, 2)}</Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total financed</Text>
-            <Text variant="label1">{formatBalance(roundDown(loan.totalBorrowed.toDecimal()), pool?.currency, 2)}</Text>
+            <Text variant="label1">{formatBalance(loan.totalBorrowed.toDecimal(), pool?.currency, 2)}</Text>
           </Shelf>
         </Stack>
         {loan.status === 'Active' && loan.totalBorrowed.toDecimal().lt(initialCeiling) && (
@@ -133,7 +134,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                     disabled={isFinanceLoading}
                     currency={getCurrencySymbol(pool?.currency)}
                     handleChange={(value: number) => form.setFieldValue('amount', value)}
-                    onSetMax={() => form.setFieldValue('amount', roundDown(maxBorrow))}
+                    onSetMax={() => form.setFieldValue('amount', maxBorrow)}
                   />
                 )}
               </Field>
@@ -160,7 +161,10 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
         <Stack>
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Outstanding</Text>
-            <Text variant="heading3">{formatBalance(loan.outstandingDebt.toDecimal(), pool?.currency, 2)}</Text>
+            {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
+            <Text variant="heading3">
+              {formatBalance(roundDown(loan.outstandingDebt.toDecimal()), pool?.currency, 2)}
+            </Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total repaid</Text>
@@ -189,7 +193,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                       disabled={isRepayLoading || isRepayAllLoading}
                       currency={getCurrencySymbol(pool?.currency)}
                       handleChange={(value) => form.setFieldValue('amount', value)}
-                      onSetMax={() => form.setFieldValue('amount', roundDown(maxRepay))}
+                      onSetMax={() => form.setFieldValue('amount', maxRepay)}
                     />
                   )
                 }}

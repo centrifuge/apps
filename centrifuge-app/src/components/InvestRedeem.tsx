@@ -54,6 +54,9 @@ export const InvestRedeem: React.VFC<Props> = (props) => {
 //   return nums.reduce((a, b) => (a.greaterThan(b) ? b : a))
 // }
 
+function inputToNumber(num: number | Decimal | '') {
+  return num instanceof Decimal ? num.toNumber() : num || 0
+}
 function inputToDecimal(num: number | Decimal | string) {
   return Dec(num || 0)
 }
@@ -219,7 +222,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
 
   const loadingMessage = lastCreatedTransaction?.status === 'pending' ? 'Pending...' : 'Signing...'
 
-  const form = useFormik<{ amount: number }>({
+  const form = useFormik<{ amount: number | Decimal }>({
     initialValues: {
       amount: 0,
     },
@@ -258,8 +261,8 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
                 label={`Amount ${isFirstInvestment ? `(min: ${formatBalance(minInvest, pool?.currency)})` : ''}`}
                 disabled={isLoading || isLoadingCancel}
                 currency={getCurrencySymbol(pool?.currency)}
-                secondaryLabel={pool && balance && `${formatBalance(roundDown(balance), pool?.currency, 2)} balance`}
-                onSetMax={() => form.setFieldValue('amount', roundDown(balance))}
+                secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency, 2)} balance`}
+                onSetMax={() => form.setFieldValue('amount', balance)}
               />
             )
           }}
@@ -269,7 +272,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
             Full amount covered by investment capacity ✓
           </Text>
         )} */}
-        {form.values.amount > 0 ? (
+        {inputToNumber(form.values.amount) > 0 ? (
           <Stack px={2} gap="4px">
             <Shelf justifyContent="space-between">
               <Text variant="body3">Token amount</Text>
@@ -388,13 +391,15 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
    * When clicking on the "max" button in the input box, we set the amount to a Decimal representing the number of tranche tokens the user has.
    * This to avoid possibly losing precision if we were to convert it to the pool currency and then back again when submitting the form.
    */
-  const form = useFormik<{ amount: number | '' }>({
+  const form = useFormik<{ amount: number | '' | Decimal }>({
     initialValues: {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const value = values.amount === roundDown(maxRedeem.toNumber()) ? combinedBalance.toNumber() : values.amount
-      const amountWithPrice = Dec(value).div(price).mul('1e18').toFixed(0)
+      const amount = (values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price))
+        .mul('1e18')
+        .toFixed(0)
+      const amountWithPrice = Dec(amount).div(price).mul('1e18').toFixed(0)
       doRedeemTransaction([poolId, trancheId, new BN(amountWithPrice)])
       actions.setSubmitting(false)
     },
@@ -423,14 +428,14 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
               errorMessage={meta.touched ? meta.error : undefined}
               label="Amount"
               disabled={isLoading || isLoadingCancel}
-              onSetMax={() => form.setFieldValue('amount', roundDown(maxRedeem))}
+              onSetMax={() => form.setFieldValue('amount', maxRedeem)}
               handleChange={(value) => form.setFieldValue('amount', value)}
               currency={getCurrencySymbol(pool?.currency)}
               secondaryLabel={`${formatBalance(roundDown(maxRedeem), pool?.currency, 2)} available`}
             />
           )}
         </Field>
-        {form.values.amount > 0 ? (
+        {inputToNumber(form.values.amount) > 0 ? (
           <Stack px={2} gap="4px">
             <Shelf justifyContent="space-between">
               <Text variant="body3">Token amount</Text>
