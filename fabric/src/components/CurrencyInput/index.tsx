@@ -83,6 +83,10 @@ function formatThousandSeparator(input: number | string): string {
   return removeNonNumeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
+/**
+ *
+ * CurrencyInput formats
+ */
 export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   label,
   secondaryLabel,
@@ -107,8 +111,8 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   }
 
   React.useEffect(() => {
-    const inputFormatted = formatThousandSeparator(inputProps.value as number)
-    onChange(inputFormatted)
+    const inputFormatted = formatThousandSeparator(Math.floor((inputProps.value as number) * 100) / 100)
+    setValue(inputFormatted)
   }, [inputProps.value])
 
   return (
