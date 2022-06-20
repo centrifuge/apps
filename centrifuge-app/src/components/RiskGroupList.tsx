@@ -179,7 +179,7 @@ const RiskGroupList: React.FC = () => {
       interestRatePerSec: <Text variant="body2" fontWeight={600}>{`Avg. ${avgInterestRatePerSec.toString()}%`}</Text>,
       riskAdjustment: <Text variant="body2" fontWeight={600}>{`Avg. ${avgRiskAdjustment.toString()}%`}</Text>,
       color: '',
-      labelColor: ' ',
+      labelColor: '',
     }
   }, [riskGroups, pool?.currency, totalSharesSum, totalAmountsSum])
 
@@ -188,9 +188,14 @@ const RiskGroupList: React.FC = () => {
     .sort((a, b) => Number(a.amount) - Number(b.amount))
     .map((item, index) => {
       if (metadata?.riskGroups!.length) {
+        const name = item.name ? `${index + 1} – ${item.name}` : `${index + 1}`
+        if (Dec(totalSharesSum).lessThanOrEqualTo(0)) {
+          return { ...item, name }
+        }
         const nextShade = ((index + 2) % 8) * 100
         return {
           ...item,
+          name,
           color: theme.colors.accentScale[nextShade],
           labelColor: nextShade >= 500 ? 'white' : 'black',
         }
@@ -211,7 +216,13 @@ const RiskGroupList: React.FC = () => {
       )}
       {tableDataWithColor.length > 0 ? (
         <Box mt={sharesForPie.length > 0 && totalSharesSum !== '0' ? '0' : '3'}>
-          <DataTable defaultSortKey="share" data={tableDataWithColor} columns={columns} summary={summaryRow} />
+          <DataTable
+            defaultSortKey="name"
+            defaultSortOrder="asc"
+            data={tableDataWithColor}
+            columns={columns}
+            summary={summaryRow}
+          />
         </Box>
       ) : (
         <Text variant="label1">No data</Text>
