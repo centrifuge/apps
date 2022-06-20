@@ -256,7 +256,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
             return (
               <CurrencyInput
                 {...field}
-                handleChange={(value) => form.setFieldValue('amount', value)}
+                onChange={(value) => form.setFieldValue('amount', value)}
                 errorMessage={meta.touched ? meta.error : undefined}
                 label={`Amount ${isFirstInvestment ? `(min: ${formatBalance(minInvest, pool?.currency)})` : ''}`}
                 disabled={isLoading || isLoadingCancel}
@@ -429,7 +429,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
               label="Amount"
               disabled={isLoading || isLoadingCancel}
               onSetMax={() => form.setFieldValue('amount', maxRedeem)}
-              handleChange={(value) => form.setFieldValue('amount', value)}
+              onChange={(value) => form.setFieldValue('amount', value)}
               currency={getCurrencySymbol(pool?.currency)}
               secondaryLabel={`${formatBalance(roundDown(maxRedeem), pool?.currency, 2)} available`}
             />

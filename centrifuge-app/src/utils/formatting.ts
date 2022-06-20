@@ -49,6 +49,6 @@ export function formatPercentage(amount: Perquintill | Decimal | number, include
   return includeSymbol ? `${formattedAmount}%` : formattedAmount
 }
 
-export function roundDown(float: Decimal | number) {
-  return Math.floor((float instanceof Decimal ? float.toNumber() : float) * 100) / 100
+export function roundDown(float: Decimal | number, precision: number = 2) {
+  return Math.floor((float instanceof Decimal ? float.toNumber() : float) * 10 ** precision) / 10 ** precision
 }

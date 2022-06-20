@@ -133,7 +133,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                     secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency, 2)} available`}
                     disabled={isFinanceLoading}
                     currency={getCurrencySymbol(pool?.currency)}
-                    handleChange={(value: number) => form.setFieldValue('amount', value)}
+                    onChange={(value: number) => form.setFieldValue('amount', value)}
                     onSetMax={() => form.setFieldValue('amount', maxBorrow)}
                   />
                 )}
@@ -192,7 +192,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                       secondaryLabel={`${formatBalance(roundDown(maxRepay), pool?.currency, 2)} available`}
                       disabled={isRepayLoading || isRepayAllLoading}
                       currency={getCurrencySymbol(pool?.currency)}
-                      handleChange={(value) => form.setFieldValue('amount', value)}
+                      onChange={(value) => form.setFieldValue('amount', value)}
                       onSetMax={() => form.setFieldValue('amount', maxRepay)}
                     />
                   )

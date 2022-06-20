@@ -117,7 +117,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
               currency={getCurrencySymbol(pool?.currency)}
               placeholder="0.00"
               name="value"
-              handleChange={(value) => form.setFieldValue('value', value)}
+              onChange={(value) => form.setFieldValue('value', value)}
             />
           )
         }}

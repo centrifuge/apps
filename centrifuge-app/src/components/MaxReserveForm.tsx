@@ -55,7 +55,7 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
                   currency={getCurrencySymbol(pool?.currency)}
-                  handleChange={(value) => form.setFieldValue('maxReserve', value)}
+                  onChange={(value) => form.setFieldValue('maxReserve', value)}
                 />
               )}
             </Field>

@@ -408,7 +408,7 @@ const CreatePoolForm: React.VFC = () => {
                     placeholder="0"
                     currency={currencies.find((c) => c.value === form.values.currency)?.label}
                     variant="small"
-                    handleChange={(value) => form.setFieldValue('maxReserve', value)}
+                    onChange={(value) => form.setFieldValue('maxReserve', value)}
                   />
                 )}
               </Field>

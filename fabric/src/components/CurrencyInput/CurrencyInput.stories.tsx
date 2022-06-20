@@ -19,6 +19,6 @@ Default.args = {
   disabled: false,
   currency: 'kUSD',
   value: 123456.0,
-  handleChange: () => {},
+  onChange: () => {},
   onSetMax: () => {},
 }

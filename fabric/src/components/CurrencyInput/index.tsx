@@ -5,13 +5,14 @@ import { InputBox, InputBoxProps } from '../InputBox'
 import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 
-export type CurrencyInputProps = React.InputHTMLAttributes<HTMLInputElement> &
+export type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> &
   Omit<InputBoxProps, 'inputElement' | 'rightElement'> & {
     currency?: string
     onSetMax?: () => void
     variant?: 'small' | 'large'
-    handleChange?: (value: number) => void
+    onChange?: (value: number) => void
     initialValue?: number
+    precision?: number
   }
 
 const StyledTextInput = styled.input<{ $variant: 'small' | 'large' }>`
@@ -93,6 +94,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   placeholder = '0.0',
   variant = 'large',
   initialValue,
+  precision = 2,
   ...inputProps
 }) => {
   const [value, setValue] = React.useState(initialValue ? formatThousandSeparator(initialValue) : '')
@@ -100,14 +102,16 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   const onChange = (value: string) => {
     const inputFormatted = formatThousandSeparator(value)
     const inputAsNumber = parseFloat(value.replaceAll(',', ''))
-    if (inputProps?.handleChange) {
-      inputProps?.handleChange(inputAsNumber)
+    if (inputProps?.onChange) {
+      inputProps?.onChange(inputAsNumber)
       setValue(inputFormatted)
     }
   }
 
   React.useEffect(() => {
-    const inputFormatted = formatThousandSeparator(Math.floor((inputProps.value as number) * 100) / 100)
+    const inputFormatted = formatThousandSeparator(
+      Math.floor((inputProps.value as number) * 10 ** precision) / 10 ** precision
+    )
     setValue(inputFormatted)
   }, [inputProps.value])
 

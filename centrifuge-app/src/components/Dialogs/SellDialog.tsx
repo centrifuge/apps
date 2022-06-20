@@ -82,7 +82,7 @@ export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId
           <CurrencyInput
             label="Price"
             value={price}
-            handleChange={(value) => setPrice(value)}
+            onChange={(value) => setPrice(value)}
             errorMessage={(touched && error) || undefined}
             onBlur={() => setTouched(true)}
             currency="AIR"
