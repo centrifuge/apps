@@ -59,6 +59,21 @@ const parachainTypes = {
   InstanceId: 'u128',
 }
 
+const parachainRpcMethods = {
+  pools: {
+    trancheTokenPrices: {
+      description: 'Retrieve prices for all tranches',
+      params: [
+        {
+          name: 'pool_id',
+          type: 'u64',
+        },
+      ],
+      type: 'Vec<u128>',
+    },
+  },
+}
+
 type Events = ISubmittableResult['events']
 
 const txCompletedEvents: Record<string, Subject<Events>> = {}
@@ -203,11 +218,11 @@ export class CentrifugeBase {
   }
 
   getApi() {
-    return getPolkadotApi(this.parachainUrl, parachainTypes)
+    return getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods)
   }
 
   getApiPromise() {
-    return firstValueFrom(getPolkadotApi(this.parachainUrl, parachainTypes))
+    return firstValueFrom(getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods))
   }
 
   getRelayChainApi() {

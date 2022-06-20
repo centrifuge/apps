@@ -89,7 +89,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
   const trancheBalance =
     balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)?.balance.toDecimal() ?? Dec(0)
 
-  const price = tranche?.tokenPrice.toDecimal() ?? Dec(0)
+  const price = tranche?.tokenPrice?.toDecimal() ?? Dec(0)
   const investToCollect = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
   const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
   const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
@@ -187,7 +187,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')
 
-  const price = tranche?.tokenPrice.toDecimal() ?? Dec(0)
+  const price = tranche?.tokenPrice?.toDecimal() ?? Dec(0)
 
   const {
     execute: doInvestTransaction,
@@ -352,7 +352,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
   const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
 
   const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
-  const price = tranche?.tokenPrice.toDecimal() ?? Dec(0)
+  const price = tranche?.tokenPrice?.toDecimal() ?? Dec(0)
   const maxRedeem = combinedBalance.mul(price)
   const tokenSymbol = trancheMeta?.symbol ?? ''
 

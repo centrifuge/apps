@@ -37,7 +37,10 @@ const TokenOverview: React.FC = () => {
             // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
             yield: tranche.interestRatePerSec ? tranche.interestRatePerSec.toAprPercent().toNumber() : null,
             protection: tranche.minRiskBuffer?.toPercent().toNumber() || new Perquintill(0).toPercent().toNumber(),
-            valueLocked: tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()).toNumber(),
+            valueLocked: tranche.totalIssuance
+              .toDecimal()
+              .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
+              .toNumber(),
           }
         })
         .flat() || [],
@@ -48,7 +51,10 @@ const TokenOverview: React.FC = () => {
     return (
       dataTokens
         ?.map((tranche) => ({
-          valueLocked: tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()).toNumber(),
+          valueLocked: tranche.totalIssuance
+            .toDecimal()
+            .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
+            .toNumber(),
         }))
         .reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)) ?? Dec(0)
     )
