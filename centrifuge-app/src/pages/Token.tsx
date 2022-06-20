@@ -1,4 +1,4 @@
-import { Button, IconChevronLeft, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import { Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
 import { InvestRedeem } from '../components/InvestRedeem'
@@ -81,16 +81,7 @@ const TokenDetail: React.FC = () => {
           </TextWithPlaceholder>
         }
         icon={<Thumbnail size="large" label={trancheMeta?.symbol || ''} />}
-        actions={
-          <Button
-            onClick={() => history.push(`${basePath}/${poolId}`)}
-            small
-            icon={<IconChevronLeft width="16" />}
-            variant="tertiary"
-          >
-            {metadata?.pool?.name}
-          </Button>
-        }
+        parent={{ to: `${basePath}/tokens`, label: 'Tokens' }}
       />
       {pool ? (
         <>
