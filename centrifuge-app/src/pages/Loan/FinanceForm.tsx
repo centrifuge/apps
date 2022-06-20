@@ -1,8 +1,10 @@
 import { Balance, Loan as LoanType } from '@centrifuge/centrifuge-js'
+import { LoanInfo } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Button, Card, CurrencyInput, IconInfo, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
+import { daysBetween } from '../../utils/date'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, getCurrencySymbol, roundDown } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
@@ -67,6 +69,16 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const maxRepay = balance.lessThan(loan.outstandingDebt.toDecimal()) ? balance : loan.outstandingDebt.toDecimal()
   const canRepayAll = debtWithMargin.lte(balance)
 
+  const allowedToBorrow: Record<LoanInfo['type'], boolean> = {
+    CreditLineWithMaturity:
+      loan.status === 'Active' &&
+      'maturityDate' in loan.loanInfo &&
+      !!daysBetween(loan.originationDate, loan.loanInfo.maturityDate) &&
+      loan.outstandingDebt.toDecimal().lt(initialCeiling) &&
+      maxBorrow.greaterThan(0),
+    BulletLoan: false,
+    CreditLine: false,
+  }
   const financeForm = useFormik<FinanceValues>({
     initialValues: {
       amount: '',
@@ -111,7 +123,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
             <Text variant="label1">{formatBalance(loan.totalBorrowed.toDecimal(), pool?.currency, 2)}</Text>
           </Shelf>
         </Stack>
-        {loan.status === 'Active' && loan.totalBorrowed.toDecimal().lt(initialCeiling) && (
+        {allowedToBorrow[loan.loanInfo.type] && (
           <FormikProvider value={financeForm}>
             <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
               <Field
