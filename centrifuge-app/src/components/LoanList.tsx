@@ -2,7 +2,7 @@ import { Loan } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { nftMetadataSchema } from '../schemas'
-import { daysBetween, formatAge, formatDate } from '../utils/date'
+import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFT } from '../utils/useNFTs'
@@ -11,7 +11,6 @@ import { Column, DataTable, SortableTableHeader } from './DataTable'
 import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
 
 type Row = Loan & {
-  amount?: number
   maturityDate: string | null
   statusLabel: string
 }
@@ -29,14 +28,11 @@ const columns: Column[] = [
     flex: '3',
   },
   {
-    header: 'Maturity',
+    header: 'Financing date',
     cell: (l: Row) => (
       <Text variant="body2">
-        {l.status === 'Active' &&
-        'maturityDate' in l.loanInfo &&
-        !l.interestRatePerSec.isZero() &&
-        !l.totalBorrowed.isZero()
-          ? formatAge(daysBetween(l.originationDate, l.loanInfo?.maturityDate))
+        {l.status === 'Active' && 'originationDate' in l && !l.interestRatePerSec.isZero() && !l.totalBorrowed.isZero()
+          ? formatDate(l.originationDate)
           : ''}
       </Text>
     ),
@@ -49,10 +45,10 @@ const columns: Column[] = [
     sortKey: 'maturityDate',
   },
   {
-    header: () => <SortableTableHeader label="Amount" />,
+    header: () => <SortableTableHeader label="Outstanding" />,
     cell: (l: Row) => <AssetAmount loan={l} />,
     flex: '2',
-    sortKey: 'amount',
+    sortKey: 'outstanding',
   },
   {
     header: () => <SortableTableHeader label="Status" />,
@@ -71,7 +67,6 @@ const columns: Column[] = [
 export const LoanList: React.FC<Props> = ({ loans, onLoanClicked }) => {
   const Row: Row[] = loans.map((loan) => {
     return {
-      amount: loan.loanInfo.value.toDecimal().toNumber(),
       statusLabel: getLoanLabelStatus(loan)[0],
       maturityDate: loan.status !== 'Created' && 'maturityDate' in loan.loanInfo ? loan.loanInfo.maturityDate : null,
       ...loan,
@@ -99,5 +94,7 @@ const AssetName: React.VFC<{ loan: Row }> = ({ loan }) => {
 
 const AssetAmount: React.VFC<{ loan: Row }> = ({ loan }) => {
   const pool = usePool(loan.poolId)
-  return <Text variant="body2">{loan?.amount ? formatBalance(loan.amount, pool?.currency) : ''}</Text>
+  return (
+    <Text variant="body2">{loan?.status !== 'Created' ? formatBalance(loan.outstandingDebt, pool?.currency) : ''}</Text>
+  )
 }
