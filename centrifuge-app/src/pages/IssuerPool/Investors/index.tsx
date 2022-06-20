@@ -41,15 +41,12 @@ const IssuerPoolInvestors: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const address = useAddress()
   const permissions = usePermissions(address)
-  const canEditInvestors =
-    address &&
-    (permissions?.pools[poolId]?.roles.includes('PoolAdmin') ||
-      permissions?.pools[poolId]?.roles.includes('MemberListAdmin'))
+  const canEditInvestors = address && permissions?.pools[poolId]?.roles.includes('MemberListAdmin')
 
   return <>{canEditInvestors && <Investors />}</>
 }
 
-const SevenDaysMs = 7 * 25 * 60 * 60 * 1000 // 1 hour margin
+const SevenDaysMs = (7 * 24 + 1) * 60 * 60 * 1000 // 1 hour margin
 
 export const Investors: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()

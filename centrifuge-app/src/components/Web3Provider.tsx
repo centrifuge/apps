@@ -130,9 +130,28 @@ export const Web3Provider: React.FC = ({ children }) => {
     localStorage.setItem('web3PersistedProxy', address ?? '')
   }, [])
 
+  async function tryReconnect() {
+    const source = localStorage.getItem('web3PersistedWallet')!
+    // This script might have loaded quicker than the wallet extension,
+    // so we'll wait up to 2 seconds for it to load
+    let i = 8
+    let hasWallet = false
+    while (i--) {
+      const wallet = getWalletBySource(source)
+      if (wallet?.installed) {
+        hasWallet = true
+        break
+      }
+      await new Promise((res) => setTimeout(res, 250))
+    }
+    if (hasWallet) {
+      connect(source)
+    }
+  }
+
   React.useEffect(() => {
     if (!triedEager && localStorage.getItem('web3Persist')) {
-      connect(localStorage.getItem('web3PersistedWallet')!)
+      tryReconnect()
     }
     triedEager = true
 
