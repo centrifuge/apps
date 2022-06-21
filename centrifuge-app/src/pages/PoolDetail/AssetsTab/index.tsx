@@ -43,7 +43,7 @@ export const PoolDetailAssets: React.FC = () => {
     .dividedBy(loans?.length)
     .toDecimalPlaces(2)
 
-  const ongoingAssets = loans?.filter((loan) => loan.status !== 'Closed')
+  const ongoingAssets = loans?.filter((loan) => loan.status === 'Active')
 
   const pageSummaryData = [
     { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets?.length || 0 },
