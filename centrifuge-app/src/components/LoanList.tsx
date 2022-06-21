@@ -67,7 +67,6 @@ export const LoanList: React.FC<Props> = ({ loans }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
   const Row: Row[] = loans.map((loan) => {
-    console.log('🚀 ~ loan', loan)
     return {
       statusLabel: getLoanLabelStatus(loan)[1],
       maturityDate: loan.status !== 'Created' && 'maturityDate' in loan.loanInfo ? loan.loanInfo.maturityDate : '',
