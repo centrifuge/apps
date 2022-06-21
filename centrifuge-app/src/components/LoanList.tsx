@@ -71,7 +71,7 @@ export const LoanList: React.FC<Props> = ({ loans }) => {
     return {
       statusLabel: getLoanLabelStatus(loan)[1],
       maturityDate: loan.status !== 'Created' && 'maturityDate' in loan.loanInfo ? loan.loanInfo.maturityDate : '',
-      idSortKey: parseInt(loan.id),
+      idSortKey: parseInt(loan.id, 10),
       outstandingDebtSortKey: loan.outstandingDebt.toDecimal().toNumber(),
       originationDateSortKey:
         loan.status === 'Active' &&
