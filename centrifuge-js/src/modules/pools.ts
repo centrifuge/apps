@@ -854,9 +854,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
                   }
 
                   const subordinateTranchesValue = pool.tranches.tranches
-                    .slice()
-                    .reverse()
-                    .slice(index + 1)
+                    .slice(0, index)
                     .reduce((prev: Balance, tranche: TrancheDetailsData) => {
                       return new Balance(
                         prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
@@ -882,7 +880,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
                     interestRatePerSec,
                     minRiskBuffer,
                     currentRiskBuffer: subordinateTranchesValue.gtn(0)
-                      ? subordinateTranchesValue.div(poolValue)
+                      ? new Perquintill(subordinateTranchesValue.div(poolValue))
                       : new Perquintill(0),
                     ratio: new Perquintill(hexToBN(tranche.ratio)),
                     outstandingInvestOrders: new Balance(hexToBN(tranche.outstandingInvestOrders)),
