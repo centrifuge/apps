@@ -1,6 +1,7 @@
 import { Card, IconArrowDown, Shelf, Stack, Text } from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import * as React from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 type GroupedProps = {
@@ -12,7 +13,7 @@ type Props<T> = {
   data: Array<T>
   columns: Column[]
   keyField?: string
-  onRowClicked?: (row: T) => void
+  onRowClicked?: (row: T) => string
   defaultSortKey?: string
   defaultSortOrder?: OrderBy
   rounded?: boolean
@@ -92,9 +93,9 @@ export const DataTable = <T extends Record<string, any>>({
         {sortedData?.map((row, i) => (
           <Row
             rounded={rounded}
-            as={onRowClicked ? 'button' : 'div'}
+            as={onRowClicked ? Link : 'div'}
+            to={onRowClicked && (() => onRowClicked(row))}
             key={keyField ? row[keyField] : i}
-            onClick={onRowClicked && (() => onRowClicked(row))}
             tabIndex={onRowClicked ? 0 : undefined}
           >
             {columns.map((col) => (

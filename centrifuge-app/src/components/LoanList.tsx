@@ -1,6 +1,7 @@
 import { Loan } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useParams, useRouteMatch } from 'react-router'
 import { nftMetadataSchema } from '../schemas'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
@@ -18,7 +19,6 @@ type Row = Loan & {
 
 type Props = {
   loans: Loan[]
-  onLoanClicked: (loan: Loan) => void
 }
 
 const columns: Column[] = [
@@ -65,7 +65,9 @@ const columns: Column[] = [
   },
 ]
 
-export const LoanList: React.FC<Props> = ({ loans, onLoanClicked }) => {
+export const LoanList: React.FC<Props> = ({ loans }) => {
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
   const Row: Row[] = loans.map((loan) => {
     return {
       statusLabel: getLoanLabelStatus(loan)[0],
@@ -73,7 +75,7 @@ export const LoanList: React.FC<Props> = ({ loans, onLoanClicked }) => {
       ...loan,
     }
   })
-  return <DataTable data={Row} columns={columns} onRowClicked={onLoanClicked} />
+  return <DataTable data={Row} columns={columns} onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`} />
 }
 
 const AssetName: React.VFC<{ loan: Row }> = ({ loan }) => {

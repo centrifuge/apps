@@ -1,7 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useRouteMatch } from 'react-router'
+import { useRouteMatch } from 'react-router'
 import styled from 'styled-components'
 import { formatBalance } from '../utils/formatting'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
@@ -14,7 +14,6 @@ type Props = {
 }
 
 export const PoolList: React.FC<Props> = ({ pools }) => {
-  const history = useHistory()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
   const columns: Column[] = [
@@ -39,16 +38,7 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
       flex: '0 0 72px',
     },
   ]
-  return (
-    <DataTable
-      rounded={false}
-      data={pools}
-      columns={columns}
-      onRowClicked={(p: Pool) => {
-        history.push(`${basePath}/${p.id}`)
-      }}
-    />
-  )
+  return <DataTable rounded={false} data={pools} columns={columns} onRowClicked={(p: Pool) => `${basePath}/${p.id}`} />
 }
 
 const PoolName: React.VFC<{ pool: Pool }> = ({ pool }) => {
