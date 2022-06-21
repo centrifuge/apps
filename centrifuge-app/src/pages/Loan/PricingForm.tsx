@@ -1,5 +1,5 @@
 import { Balance, Loan as LoanType, LoanInfoInput, Pool, Rate } from '@centrifuge/centrifuge-js'
-import { Button, DateInput, Grid, NumberInput, Select, Stack, Text } from '@centrifuge/fabric'
+import { Button, CurrencyInput, DateInput, Grid, Select, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
@@ -15,7 +15,7 @@ import { LOAN_FIELDS, LOAN_TYPE_LABELS } from './utils'
 
 type PricingFormValues = {
   loanType: 'BulletLoan' | 'CreditLine' | 'CreditLineWithMaturity'
-  value: number | string
+  value: number | ''
   maturityDate: string
   riskGroup: string
 }
@@ -106,16 +106,22 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
 
   const fields = {
     value: (
-      <FieldWithErrorMessage
-        key="value"
-        as={NumberInput}
-        label="Collateral value*"
-        min="0"
-        placeholder="0.00"
-        name="value"
-        rightElement={getCurrencySymbol(pool.currency)}
-        validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}
-      />
+      <Field key="value" name="value" validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
+        {({ field, meta }: FieldProps) => {
+          return (
+            <CurrencyInput
+              {...field}
+              variant="small"
+              label="Collateral value*"
+              errorMessage={meta.touched ? meta.error : undefined}
+              currency={getCurrencySymbol(pool?.currency)}
+              placeholder="0.00"
+              name="value"
+              onChange={(value) => form.setFieldValue('value', value)}
+            />
+          )
+        }}
+      </Field>
     ),
     maturityDate: (
       <FieldWithErrorMessage

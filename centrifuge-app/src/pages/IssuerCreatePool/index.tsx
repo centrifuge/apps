@@ -2,9 +2,9 @@ import { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import {
   Box,
   Button,
+  CurrencyInput,
   FileUpload,
   Grid,
-  NumberInput,
   Select,
   Text,
   TextAreaInput,
@@ -122,7 +122,7 @@ const initialValues: PoolFormValues = {
   poolName: '',
   assetClass: DEFAULT_ASSET_CLASS,
   currency: DEFAULT_CURRENCY,
-  maxReserve: 0,
+  maxReserve: '',
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
 
@@ -397,14 +397,19 @@ const CreatePoolForm: React.VFC = () => {
               </Field>
             </Box>
             <Box gridColumn="span 2">
-              <FieldWithErrorMessage
-                validate={validate.maxReserve}
-                name="maxReserve"
-                as={NumberInput}
-                label="Initial maximum reserve*"
-                placeholder="0"
-                rightElement={currencies.find((c) => c.value === form.values.currency)?.label}
-              />
+              <Field name="maxReserve" validate={validate.maxReserve}>
+                {({ field, form }: FieldProps) => (
+                  <CurrencyInput
+                    {...field}
+                    name="maxReserve"
+                    label="Initial maximum reserve*"
+                    placeholder="0"
+                    currency={currencies.find((c) => c.value === form.values.currency)?.label}
+                    variant="small"
+                    onChange={(value) => form.setFieldValue('maxReserve', value)}
+                  />
+                )}
+              </Field>
             </Box>
             {/* <Box gridColumn="span 1">
               <FieldWithErrorMessage

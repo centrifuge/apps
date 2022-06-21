@@ -141,7 +141,7 @@ const RiskGroupList: React.FC = () => {
   }, [metadata, loans, pool, totalAmountsSum])
 
   const totalSharesSum = riskGroups
-    .reduce((prev, curr) => (typeof curr.share === 'string' ? prev.add(curr.share) : prev), Dec(0))
+    .reduce((prev, curr) => (typeof curr.share === 'string' ? prev.add(curr.share || 0) : prev), Dec(0))
     .toString()
   const summaryRow = React.useMemo(() => {
     const avgInterestRatePerSec = riskGroups

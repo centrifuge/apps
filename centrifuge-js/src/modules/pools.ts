@@ -137,7 +137,7 @@ type CreditLineWithMaturity = {
   lossGivenDefault: Rate
 }
 
-type LoanInfo = BulletLoan | CreditLine | CreditLineWithMaturity
+export type LoanInfo = BulletLoan | CreditLine | CreditLineWithMaturity
 
 type TrancheDetailsData = {
   trancheType:

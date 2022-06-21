@@ -1,17 +1,21 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { Box } from '../Box'
 import { InputBox, InputBoxProps } from '../InputBox'
 import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 
-export type CurrencyInputProps = React.InputHTMLAttributes<HTMLInputElement> &
+export type CurrencyInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> &
   Omit<InputBoxProps, 'inputElement' | 'rightElement'> & {
     currency?: string
     onSetMax?: () => void
+    variant?: 'small' | 'large'
+    onChange?: (value: number) => void
+    initialValue?: number
+    precision?: number
   }
 
-const StyledTextInput = styled.input`
+const StyledTextInput = styled.input<{ $variant: 'small' | 'large' }>`
   width: 100%;
   border: 0;
   background: transparent;
@@ -36,6 +40,13 @@ const StyledTextInput = styled.input`
     -webkit-appearance: none;
     margin: 0;
   }
+
+  ${({ $variant }) =>
+    $variant === 'small' &&
+    css({
+      fontSize: '16px',
+      height: '20px',
+    })}
 `
 
 const StyledMaxButton = styled(Box)`
@@ -60,6 +71,19 @@ StyledMaxButton.defaultProps = {
   type: 'button',
 }
 
+// regex from https://stackoverflow.com/questions/63091317/thousand-separator-input-with-react-hooks
+function formatThousandSeparator(input: number | string): string {
+  const removeNonNumeric = (typeof input === 'string' ? input : input.toString()).replace(/[^0-9.]/g, '') // remove non-numeric chars except .
+  if (removeNonNumeric.includes('.')) {
+    const decimalIndex = removeNonNumeric.indexOf('.')
+    // add thousand separator only pre-decimal
+    return `${removeNonNumeric.slice(0, decimalIndex).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}${removeNonNumeric.slice(
+      decimalIndex
+    )}`
+  }
+  return removeNonNumeric.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
 export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   label,
   secondaryLabel,
@@ -68,8 +92,29 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   currency,
   onSetMax,
   placeholder = '0.0',
+  variant = 'large',
+  initialValue,
+  precision = 2,
   ...inputProps
 }) => {
+  const [value, setValue] = React.useState(initialValue ? formatThousandSeparator(initialValue) : '')
+
+  const onChange = (value: string) => {
+    const inputFormatted = formatThousandSeparator(value)
+    const inputAsNumber = parseFloat(value.replaceAll(',', ''))
+    if (inputProps?.onChange) {
+      inputProps?.onChange(inputAsNumber)
+      setValue(inputFormatted)
+    }
+  }
+
+  React.useEffect(() => {
+    const inputFormatted = formatThousandSeparator(
+      Math.floor((inputProps.value as number) * 10 ** precision) / 10 ** precision
+    )
+    setValue(inputFormatted)
+  }, [inputProps.value])
+
   return (
     <InputBox
       label={label}
@@ -87,9 +132,23 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
       }
       disabled={disabled}
       errorMessage={errorMessage}
-      inputElement={<StyledTextInput disabled={disabled} placeholder={placeholder} type="number" {...inputProps} />}
+      inputElement={
+        <StyledTextInput
+          {...inputProps}
+          disabled={disabled}
+          placeholder={placeholder}
+          type="text"
+          onChange={(e) => onChange(e.target.value)}
+          value={value}
+          $variant={variant}
+        />
+      }
       rightElement={
-        <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'}>
+        <Text
+          variant="body1"
+          color={disabled ? 'textDisabled' : 'textPrimary'}
+          fontSize={variant === 'small' ? '16px' : '24px'}
+        >
           {currency}
         </Text>
       }

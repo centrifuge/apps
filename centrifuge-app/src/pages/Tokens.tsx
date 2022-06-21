@@ -60,16 +60,6 @@ const TokenOverview: React.FC = () => {
     )
   }, [dataTokens])
 
-  const totalInvestmentCapacity = React.useMemo(() => {
-    return (
-      pools
-        ?.map((pool) => ({
-          capacity: pool.reserve.available.toDecimal().toNumber(),
-        }))
-        .reduce((prev, curr) => prev.add(curr.capacity), Dec(0)) ?? Dec(0)
-    )
-  }, [pools])
-
   const pageSummaryData = [
     {
       label: <Tooltips type="tvl" />,
@@ -77,10 +67,6 @@ const TokenOverview: React.FC = () => {
     },
     { label: 'Pools', value: pools?.length || 0 },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
-    {
-      label: 'Total investment capacity',
-      value: formatBalance(Dec(totalInvestmentCapacity || 0), getCurrencySymbol(config.baseCurrency)),
-    },
   ]
 
   return (

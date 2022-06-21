@@ -23,17 +23,22 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
     { onSuccess: () => form.resetForm() }
   )
 
-  const form = useFormik<{ maxReserve: number }>({
+  const form = useFormik<{ maxReserve: number | '' }>({
     initialValues: {
-      maxReserve: 0,
+      maxReserve: '',
     },
     onSubmit: (values, actions) => {
-      setMaxReserveTx([poolId, Balance.fromFloat(values.maxReserve)])
+      if (values.maxReserve) {
+        setMaxReserveTx([poolId, Balance.fromFloat(values.maxReserve)])
+      } else {
+        actions.setErrors({ maxReserve: 'Invalid number' })
+      }
       actions.setSubmitting(false)
     },
   })
 
   if (!address || !isLiquidityAdmin) return null
+
   return (
     <Stack as={Card} gap={2} p={2} mt={5}>
       <Shelf justifyContent="space-between">
@@ -42,16 +47,15 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
       <FormikProvider value={form}>
         <Form>
           <Stack gap="2">
-            <Field name="maxReserve" validate={(value: number) => value <= 0 && 'Value too small'}>
-              {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
+            <Field name="maxReserve">
+              {({ field, meta, form }: FieldProps) => (
                 <CurrencyInput
-                  {...fieldProps}
-                  value={value || pool?.reserve.max.toDecimal().toNumber()}
+                  {...field}
+                  initialValue={pool?.reserve.max.toDecimal().toNumber()}
                   errorMessage={meta.touched ? meta.error : undefined}
-                  type="number"
-                  min="0"
                   disabled={isLoading}
                   currency={getCurrencySymbol(pool?.currency)}
+                  onChange={(value) => form.setFieldValue('maxReserve', value)}
                 />
               )}
             </Field>
