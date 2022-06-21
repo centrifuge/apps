@@ -14,6 +14,7 @@ type Props<T> = {
   keyField?: string
   onRowClicked?: (row: T) => void
   defaultSortKey?: string
+  defaultSortOrder?: OrderBy
   rounded?: boolean
   summary?: T
 } & GroupedProps
@@ -45,9 +46,10 @@ export const DataTable = <T extends Record<string, any>>({
   summary,
   groupIndex,
   lastGroupIndex,
+  defaultSortOrder = 'desc',
 }: Props<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
-    defaultSortKey ? { [defaultSortKey]: 'desc' } : {}
+    defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
   )
 
   const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
