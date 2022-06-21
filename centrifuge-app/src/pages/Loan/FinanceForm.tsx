@@ -71,14 +71,16 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
 
   const allowedToBorrow: Record<LoanInfo['type'], boolean> = {
     CreditLineWithMaturity:
-      loan.status === 'Active' &&
       'maturityDate' in loan.loanInfo &&
-      !!daysBetween(loan.originationDate, loan.loanInfo.maturityDate) &&
-      loan.outstandingDebt.toDecimal().lt(initialCeiling) &&
-      maxBorrow.greaterThan(0),
-    BulletLoan: false,
-    CreditLine: false,
+      Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
+      loan.outstandingDebt.toDecimal().lt(availableFinancing),
+    BulletLoan:
+      'maturityDate' in loan.loanInfo &&
+      Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
+      loan.totalRepaid.toDecimal().lt(initialCeiling),
+    CreditLine: loan.outstandingDebt.toDecimal().lt(initialCeiling),
   }
+
   const financeForm = useFormik<FinanceValues>({
     initialValues: {
       amount: '',
@@ -116,14 +118,16 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Available financing</Text>
             {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">{formatBalance(roundDown(availableFinancing), pool?.currency, 2)}</Text>
+            <Text variant="heading3">
+              {formatBalance(roundDown(loan.status === 'Closed' ? 0 : availableFinancing), pool?.currency, 2)}
+            </Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total financed</Text>
             <Text variant="label1">{formatBalance(loan.totalBorrowed.toDecimal(), pool?.currency, 2)}</Text>
           </Shelf>
         </Stack>
-        {allowedToBorrow[loan.loanInfo.type] && (
+        {loan.status === 'Active' && allowedToBorrow[loan.loanInfo.type] && (
           <FormikProvider value={financeForm}>
             <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
               <Field
