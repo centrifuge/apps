@@ -77,7 +77,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
     BulletLoan:
       'maturityDate' in loan.loanInfo &&
       Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
-      loan.totalRepaid.toDecimal().lt(initialCeiling),
+      loan.totalBorrowed.toDecimal().lt(initialCeiling),
     CreditLine: loan.outstandingDebt.toDecimal().lt(initialCeiling),
   }
 
