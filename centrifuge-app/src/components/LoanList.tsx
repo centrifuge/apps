@@ -13,8 +13,10 @@ import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
 import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Row = Loan & {
+  idSortKey: number
   maturityDate: string | null
   statusLabel: string
+  originationDateSortKey: string
 }
 
 type Props = {
@@ -24,20 +26,16 @@ type Props = {
 const columns: Column[] = [
   {
     align: 'left',
-    header: 'Asset',
+    header: () => <SortableTableHeader label="Asset" />,
     cell: (l: Row) => <AssetName loan={l} />,
     flex: '3',
+    sortKey: 'idSortKey',
   },
   {
-    header: 'Financing date',
-    cell: (l: Row) => (
-      <Text variant="body2">
-        {l.status === 'Active' && 'originationDate' in l && !l.interestRatePerSec.isZero() && !l.totalBorrowed.isZero()
-          ? formatDate(l.originationDate)
-          : ''}
-      </Text>
-    ),
+    header: () => <SortableTableHeader label="Financing date" />,
+    cell: (l: Row) => <Text variant="body2">{l.originationDateSortKey ? formatDate(l.originationDate) : ''}</Text>,
     flex: '2',
+    sortKey: 'originationDateSortKey',
   },
   {
     header: () => <SortableTableHeader label="Maturity date" />,
@@ -49,7 +47,7 @@ const columns: Column[] = [
     header: () => <SortableTableHeader label="Outstanding" />,
     cell: (l: Row) => <OutstandingDebt loan={l} />,
     flex: '2',
-    sortKey: 'outstanding',
+    sortKey: 'outstandingDebtSortKey',
   },
   {
     header: () => <SortableTableHeader label="Status" />,
@@ -69,13 +67,31 @@ export const LoanList: React.FC<Props> = ({ loans }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
   const Row: Row[] = loans.map((loan) => {
+    console.log('🚀 ~ loan', loan)
     return {
-      statusLabel: getLoanLabelStatus(loan)[0],
-      maturityDate: loan.status !== 'Created' && 'maturityDate' in loan.loanInfo ? loan.loanInfo.maturityDate : null,
+      statusLabel: getLoanLabelStatus(loan)[1],
+      maturityDate: loan.status !== 'Created' && 'maturityDate' in loan.loanInfo ? loan.loanInfo.maturityDate : '',
+      idSortKey: parseInt(loan.id),
+      outstandingDebtSortKey: loan.outstandingDebt.toDecimal().toNumber(),
+      originationDateSortKey:
+        loan.status === 'Active' &&
+        'originationDate' in loan &&
+        !loan.interestRatePerSec.isZero() &&
+        !loan.totalBorrowed.isZero()
+          ? loan.originationDate
+          : '',
       ...loan,
     }
   })
-  return <DataTable data={Row} columns={columns} onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`} />
+  return (
+    <DataTable
+      data={Row}
+      columns={columns}
+      defaultSortKey="idSortKey"
+      defaultSortOrder="asc"
+      onRowClicked={(row) => `${basePath}/${poolId}/assets/${row.id}`}
+    />
+  )
 }
 
 const AssetName: React.VFC<{ loan: Row }> = ({ loan }) => {
