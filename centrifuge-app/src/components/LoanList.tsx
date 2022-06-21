@@ -9,6 +9,7 @@ import { useNFT } from '../utils/useNFTs'
 import { usePool } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
+import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Row = Loan & {
   maturityDate: string | null
@@ -46,7 +47,7 @@ const columns: Column[] = [
   },
   {
     header: () => <SortableTableHeader label="Outstanding" />,
-    cell: (l: Row) => <AssetAmount loan={l} />,
+    cell: (l: Row) => <OutstandingDebt loan={l} />,
     flex: '2',
     sortKey: 'outstanding',
   },
@@ -77,24 +78,29 @@ export const LoanList: React.FC<Props> = ({ loans, onLoanClicked }) => {
 
 const AssetName: React.VFC<{ loan: Row }> = ({ loan }) => {
   const nft = useNFT(loan.asset.collectionId, loan.asset.nftId)
-  const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
+  const { data: metadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   return (
     <Shelf gap="1" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
       <Thumbnail type="asset" label={loan.id} />
-      <Text
+      <TextWithPlaceholder
+        isLoading={isLoading}
+        width={12}
         variant="body2"
         fontWeight={600}
         style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
       >
-        {metadata?.name || 'Unnamed asset'}
-      </Text>
+        {metadata?.name}
+      </TextWithPlaceholder>
     </Shelf>
   )
 }
 
-const AssetAmount: React.VFC<{ loan: Row }> = ({ loan }) => {
+const OutstandingDebt: React.VFC<{ loan: Row }> = ({ loan }) => {
   const pool = usePool(loan.poolId)
+
   return (
-    <Text variant="body2">{loan?.status !== 'Created' ? formatBalance(loan.outstandingDebt, pool?.currency) : ''}</Text>
+    <Text variant="body2">
+      {!['Ready', 'Created'].includes(loan.statusLabel) ? formatBalance(loan.outstandingDebt, pool?.currency) : ''}
+    </Text>
   )
 }
