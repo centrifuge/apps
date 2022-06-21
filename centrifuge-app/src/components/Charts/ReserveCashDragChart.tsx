@@ -109,4 +109,4 @@ const CustomLegend: React.VFC<{
   )
 }
 
-export { ReserveCashDragChart as default }
+export default ReserveCashDragChart
