@@ -1,6 +1,6 @@
 import { IconChevronRight, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useParams, useRouteMatch } from 'react-router'
+import { useParams, useRouteMatch } from 'react-router'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 
@@ -61,7 +61,6 @@ const columns: Column[] = [
 ]
 
 export const TokenListByPool: React.FC = () => {
-  const history = useHistory()
   const { pid } = useParams<{ pid: string }>()
   const pool = usePool(pid)
   const { data: metadata } = usePoolMetadata(pool)
@@ -89,9 +88,7 @@ export const TokenListByPool: React.FC = () => {
       data={tokens}
       columns={columns}
       defaultSortKey="seniority"
-      onRowClicked={(token: TokenByPoolTableData) => {
-        history.push(`${basePath}/${token.poolId}/tokens/${token.id}`)
-      }}
+      onRowClicked={(token: TokenByPoolTableData) => `${basePath}/${token.poolId}/tokens/${token.id}`}
     />
   )
 }

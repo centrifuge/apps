@@ -1,4 +1,3 @@
-import { Perquintill } from '@centrifuge/centrifuge-js'
 import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { MenuSwitch } from '../components/MenuSwitch'
@@ -36,7 +35,7 @@ const TokenOverview: React.FC = () => {
             // bc we don't have a way to query for historical token prices yet
             // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
             yield: tranche.interestRatePerSec ? tranche.interestRatePerSec.toAprPercent().toNumber() : null,
-            protection: tranche.minRiskBuffer?.toPercent().toNumber() || new Perquintill(0).toPercent().toNumber(),
+            protection: tranche.currentRiskBuffer?.toPercent().toNumber() || 0,
             valueLocked: tranche.totalIssuance
               .toDecimal()
               .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))

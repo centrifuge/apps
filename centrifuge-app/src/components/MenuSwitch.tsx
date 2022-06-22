@@ -13,14 +13,7 @@ export const MenuSwitch: React.VFC = () => {
     { to: `${basePath}/tokens`, label: 'Tokens' },
   ]
 
-  const inactiveStyle = {
-    borderRadius: '20px',
-    display: 'block',
-  }
-
   const activeStyle = {
-    ...inactiveStyle,
-    padding: '8px 16px',
     boxShadow: theme.shadows.cardInteractive,
     background: theme.colors.backgroundPage,
   }
@@ -28,8 +21,12 @@ export const MenuSwitch: React.VFC = () => {
   return (
     <Shelf as="nav" bg="backgroundSecondary" borderRadius="20px" p="5px">
       {links.map((link) => (
-        <Box borderRadius="20px" padding={pathname === link.to ? '0px' : '0px 16px'} key={`${link.to}-${link.label}`}>
-          <NavLink to={link.to} activeStyle={pathname === link.to ? activeStyle : inactiveStyle}>
+        <Box borderRadius="20px" key={`${link.to}-${link.label}`}>
+          <NavLink
+            to={link.to}
+            style={{ padding: '8px 16px', borderRadius: '20px', display: 'block' }}
+            activeStyle={pathname === link.to ? activeStyle : {}}
+          >
             <Text
               variant="interactive2"
               color={pathname === link.to ? theme.colors.textInteractive : theme.colors.textPrimary}

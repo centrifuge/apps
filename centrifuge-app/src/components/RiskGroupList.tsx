@@ -231,4 +231,4 @@ const RiskGroupList: React.FC = () => {
   )
 }
 
-export { RiskGroupList as default }
+export default RiskGroupList

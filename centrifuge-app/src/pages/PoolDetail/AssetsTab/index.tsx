@@ -1,6 +1,6 @@
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useParams, useRouteMatch } from 'react-router'
+import { useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
@@ -26,10 +26,8 @@ export const PoolDetailAssetsTab: React.FC = () => {
 
 export const PoolDetailAssets: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
-  const history = useHistory()
   const avgMaturity = useAverageMaturity(poolId)
 
   if (!pool || !loans) return null
@@ -45,7 +43,7 @@ export const PoolDetailAssets: React.FC = () => {
     .dividedBy(loans?.length)
     .toDecimalPlaces(2)
 
-  const ongoingAssets = loans?.filter((loan) => loan.status !== 'Closed')
+  const ongoingAssets = loans?.filter((loan) => loan.status === 'Active')
 
   const pageSummaryData = [
     { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets?.length || 0 },
@@ -59,12 +57,7 @@ export const PoolDetailAssets: React.FC = () => {
       <PageSummary data={pageSummaryData} />
       {loans.length ? (
         <Box px="5" py="2">
-          <LoanList
-            loans={loans}
-            onLoanClicked={(loan) => {
-              history.push(`${basePath}/${pool.id}/assets/${loan.id}`)
-            }}
-          />
+          <LoanList loans={loans} />
         </Box>
       ) : (
         <Shelf p="4">

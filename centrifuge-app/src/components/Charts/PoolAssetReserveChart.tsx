@@ -108,4 +108,4 @@ const CustomLegend: React.VFC<{
   )
 }
 
-export { PoolAssetReserveChart as default }
+export default PoolAssetReserveChart
