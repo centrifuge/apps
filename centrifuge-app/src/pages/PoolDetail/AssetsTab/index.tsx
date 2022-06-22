@@ -40,9 +40,10 @@ export const PoolDetailAssets: React.FC = () => {
 
   const ongoingAssets = loans?.filter((loan) => loan.status === 'Active')
 
-  const avgAmount = ongoingAssets
-    ?.reduce<any>((curr, prev) => curr.add(prev.outstandingDebt.toDecimal()), Dec(0))
-    .dividedBy(loans?.length)
+  const ongoingAssetWithDebt = ongoingAssets.filter((asset) => !asset.outstandingDebt.isZero())
+  const avgAmount = ongoingAssetWithDebt
+    .reduce<any>((curr, prev) => curr.add(prev.outstandingDebt.toDecimal()), Dec(0))
+    .dividedBy(ongoingAssetWithDebt?.length)
     .toDecimalPlaces(2)
 
   const pageSummaryData = [
