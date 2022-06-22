@@ -109,10 +109,12 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   }
 
   React.useEffect(() => {
-    const inputFormatted = formatThousandSeparator(
-      Math.floor((inputProps.value as number) * 10 ** precision) / 10 ** precision
-    )
-    setValue(inputFormatted)
+    if (inputProps.value) {
+      const inputFormatted = formatThousandSeparator(
+        Math.floor((inputProps.value as number) * 10 ** precision) / 10 ** precision
+      )
+      setValue(inputFormatted)
+    }
   }, [inputProps.value])
 
   return (
