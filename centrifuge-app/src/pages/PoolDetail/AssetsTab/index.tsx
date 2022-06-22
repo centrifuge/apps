@@ -38,12 +38,12 @@ export const PoolDetailAssets: React.FC = () => {
     .toFixed(2)
     .toString()
 
-  const avgAmount = loans
-    ?.reduce<any>((curr, prev) => curr.add(prev.loanInfo.value.toDecimal()), Dec(0))
+  const ongoingAssets = loans?.filter((loan) => loan.status === 'Active')
+
+  const avgAmount = ongoingAssets
+    ?.reduce<any>((curr, prev) => curr.add(prev.outstandingDebt.toDecimal()), Dec(0))
     .dividedBy(loans?.length)
     .toDecimalPlaces(2)
-
-  const ongoingAssets = loans?.filter((loan) => loan.status === 'Active')
 
   const pageSummaryData = [
     { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets?.length || 0 },
