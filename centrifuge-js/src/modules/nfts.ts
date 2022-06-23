@@ -49,8 +49,8 @@ export function getNftsModule(inst: CentrifugeBase) {
       switchMap(
         (api) =>
           combineLatest([
-            api.query.uniques[deprecationKeys(api.version, 'collectionMetadataOf')].entries(),
-            api.query.uniques[deprecationKeys(api.version, 'collection')].entries(),
+            api.query.uniques[deprecationKeys(api.specVersion, 'collectionMetadataOf')].entries(),
+            api.query.uniques[deprecationKeys(api.specVersion, 'collection')].entries(),
           ]),
         (api, [metas, collections]) => ({ api, metas, collections })
       ),
@@ -70,7 +70,7 @@ export function getNftsModule(inst: CentrifugeBase) {
             admin: collectionValue.admin,
             owner: collectionValue.owner,
             issuer: collectionValue.issuer,
-            items: collectionValue[deprecationKeys(api.version, 'items') as 'items'],
+            items: collectionValue[deprecationKeys(api.specVersion, 'items') as 'items'],
             metadataUri: metasObj[id]?.data,
           }
           return collection
@@ -90,8 +90,8 @@ export function getNftsModule(inst: CentrifugeBase) {
       switchMap(
         (api) =>
           combineLatest([
-            api.query.uniques[deprecationKeys(api.version, 'collectionMetadataOf')](collectionId),
-            api.query.uniques[deprecationKeys(api.version, 'collection')](collectionId),
+            api.query.uniques[deprecationKeys(api.specVersion, 'collectionMetadataOf')](collectionId),
+            api.query.uniques[deprecationKeys(api.specVersion, 'collection')](collectionId),
           ]),
         (api, [meta, collectionData]) => ({ api, meta, collectionData })
       ),
@@ -103,7 +103,7 @@ export function getNftsModule(inst: CentrifugeBase) {
           admin: collectionValue.admin,
           owner: collectionValue.owner,
           issuer: collectionValue.issuer,
-          items: collectionValue[deprecationKeys(api.version, 'items') as 'items'],
+          items: collectionValue[deprecationKeys(api.specVersion, 'items') as 'items'],
           metadataUri: (meta.toHuman() as any)?.data,
         }
         return collection
@@ -130,7 +130,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) =>
         combineLatest([
-          api.query.uniques[deprecationKeys(api.version, 'itemMetadataOf')].entries(collectionId),
+          api.query.uniques[deprecationKeys(api.specVersion, 'itemMetadataOf')].entries(collectionId),
           api.query.uniques.asset.entries(collectionId),
           api.query.nftSales.sales.entries(collectionId),
         ])
@@ -173,7 +173,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) =>
         combineLatest([
-          api.query.uniques[deprecationKeys(api.version, 'itemMetadataOf')](collectionId, nftId),
+          api.query.uniques[deprecationKeys(api.specVersion, 'itemMetadataOf')](collectionId, nftId),
           api.query.uniques.asset(collectionId, nftId),
           api.query.nftSales.sales(collectionId, nftId),
         ])
@@ -272,7 +272,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         api,
         submittable: api.tx.utility.batchAll([
           api.tx.uniques.create(collectionId, owner),
-          api.tx.uniques[deprecationKeys(api.version, 'collectionMetadataOf')](collectionId, metadataUri, true),
+          api.tx.uniques[deprecationKeys(api.specVersion, 'collectionMetadataOf')](collectionId, metadataUri, true),
         ]),
       })),
       switchMap(({ api, submittable }) => inst.wrapSignAndSend(api, submittable, options))
@@ -364,7 +364,7 @@ export function getNftsModule(inst: CentrifugeBase) {
             const id = String(getRandomUint())
             if (triesLeft <= 0) return EMPTY
 
-            return api.query.uniques[deprecationKeys(api.version, 'collection')](id).pipe(
+            return api.query.uniques[deprecationKeys(api.specVersion, 'collection')](id).pipe(
               map((res) => ({ api, id: res.toJSON() === null ? id : null, triesLeft: triesLeft - 1 })),
               take(1)
             )

@@ -77,6 +77,11 @@ const parachainRpcMethods = {
 
 type Events = ISubmittableResult['events']
 
+type Specs = {
+  specVersion: number
+  specName: string
+}
+
 const txCompletedEvents: Record<string, Subject<Events>> = {}
 const blockEvents: Record<string, Observable<Events>> = {}
 
@@ -94,10 +99,9 @@ export class CentrifugeBase {
       this.config.network === 'centrifuge' ? this.config.centrifugeSubqueryUrl : this.config.altairSubqueryUrl
   }
 
-  // getSpecVersion($api: any) {
-  //   console.log("🚀 ~ api", $api)
-  //   return $api.query.system.lastRuntimeUpgrade()
-  // }
+  getSpecVersion($api: ApiRx) {
+    return $api.query.system.lastRuntimeUpgrade()
+  }
 
   getChainId() {
     return this.config.network === 'centrifuge' ? 36 : 136
@@ -226,19 +230,14 @@ export class CentrifugeBase {
   getApi() {
     return getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods).pipe(
       switchMap(
-        (api) => {
-          console.log('🚀 ~switchMap api', api)
-          return combineLatest(api.query.system.lastRuntimeUpgrade())
-        },
+        (api) => combineLatest(this.getSpecVersion(api)),
         (api, [specs]) => {
-          // @ts-expect-errors
-          const version = specs.toJSON()?.specVersion
-          // @ts-expect-error
-          api.version = version
+          const specsJson = specs.toJSON() as Specs
+          ;(api as ApiRx & Omit<Specs, 'specName'>).specVersion = specsJson.specVersion
           return api
         }
       )
-    ) as Observable<ApiRx & { version: number }>
+    ) as Observable<ApiRx & Omit<Specs, 'specName'>>
   }
 
   getApiPromise() {

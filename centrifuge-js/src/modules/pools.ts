@@ -1250,7 +1250,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const $api = inst.getApi()
 
     return $api.pipe(
-      switchMap((api) => api.query.loans[deprecationKeys(api.version, 'poolToLoanNftCollection')](poolId)),
+      switchMap((api) => api.query.loans[deprecationKeys(api.specVersion, 'poolToLoanNftCollection')](poolId)),
       map((result) => {
         const collectionId = (result.toHuman() as string).replace(/\D/g, '')
 
