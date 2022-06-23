@@ -8,6 +8,7 @@ import { Account, TransactionOptions } from '../types'
 import { SubqueryPoolSnapshot } from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
 import { Balance, Perquintill, Price, Rate } from '../utils/BN'
+import { deprecationKeys } from './deprecated'
 
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
@@ -1249,7 +1250,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const $api = inst.getApi()
 
     return $api.pipe(
-      switchMap((api) => api.query.loans.poolToLoanNftClass(poolId)),
+      switchMap((api) => api.query.loans[deprecationKeys(api.version, 'poolToLoanNftCollection')](poolId)),
       map((result) => {
         const collectionId = (result.toHuman() as string).replace(/\D/g, '')
 

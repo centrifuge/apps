@@ -56,8 +56,8 @@ const relayChainTypes = {}
 
 const parachainTypes = {
   // NFTs
-  ClassId: 'u64',
-  InstanceId: 'u128',
+  CollectionId: 'u64',
+  ItemId: 'u128',
 }
 
 const parachainRpcMethods = {

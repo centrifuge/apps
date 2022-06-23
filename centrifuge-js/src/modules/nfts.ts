@@ -5,12 +5,10 @@ import { expand, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators
 import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
 import { getRandomUint, isSameAddress } from '../utils'
+import { deprecationKeys } from './deprecated'
 
 type Item = {
   owner: string
-  // approved: Option<AccountId32>;
-  // isFrozen: bool;
-  // deposit: u128;
 }
 
 export type NFT = Item & {
@@ -20,42 +18,22 @@ export type NFT = Item & {
   sellPrice: string | null
 }
 
-type Class = {
-  owner: string
-  issuer: string
-  admin: string
-  // freezer: string
-  // totalDeposit: u128
-  // freeHolding: boolean
-  instances: number
-  // instanceMetadatas: u32
-  // attributes: u32
-  // isFrozen: boolean
-}
-
-export type Collection = Class & {
+type CollectionMetadata = {
   id: string
   metadataUri?: string
 }
 
-const MAP = {
-  collectionMetadataOf: 'classMetadataOf',
-  collection: 'class',
-  itemMetadataOf: 'instanceMetadataOf',
-  item: 'instance',
-}
-
-const upgradeKeys = (version: number, key: keyof typeof MAP) => {
-  if (version < 1007) {
-    return MAP[key]
-  }
-  return key
+export type Collection = CollectionMetadata & {
+  owner: string
+  issuer: string
+  admin: string
+  items: number
 }
 
 const MAX_ATTEMPTS = 10
 
-const formatClassKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
-const formatInstanceKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
+const formatCollectionKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
+const formatItemKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
 export function getNftsModule(inst: CentrifugeBase) {
   function getCollections() {
@@ -68,32 +46,31 @@ export function getNftsModule(inst: CentrifugeBase) {
     )
 
     return $api.pipe(
-      // figure out how to use filter here or somewhere
-      // map((api) => ({ api, spec: inst.getSpecVersion($api) })),
-      switchMap((api) => {
-        return combineLatest([
-          api.query.uniques[upgradeKeys(api.version, 'collectionMetadataOf')].entries(),
-          api.query.uniques[upgradeKeys(api.version, 'collection')].entries(),
-        ])
-      }),
-      map(([metas, collections]) => {
-        // console.log("🚀 ~ specVersion", specVersion.toHuman())
+      switchMap(
+        (api) =>
+          combineLatest([
+            api.query.uniques[deprecationKeys(api.version, 'collectionMetadataOf')].entries(),
+            api.query.uniques[deprecationKeys(api.version, 'collection')].entries(),
+          ]),
+        (api, [metas, collections]) => ({ api, metas, collections })
+      ),
+      map(({ api, metas, collections }) => {
         const metasObj = metas.reduce((acc, [keys, value]) => {
           // @ts-expect-error
-          acc[formatClassKey(keys)] = value.toHuman()
+          acc[formatCollectionKey(keys)] = value.toHuman()
           return acc
         }, {} as any)
 
         const mapped = collections.map(([keys, value]) => {
           // @ts-expect-error
-          const id = formatClassKey(keys)
-          const collectionValue = value.toJSON() as Class
+          const id = formatCollectionKey(keys)
+          const collectionValue = value.toJSON() as Omit<Collection, keyof CollectionMetadata>
           const collection: Collection = {
             id,
             admin: collectionValue.admin,
             owner: collectionValue.owner,
             issuer: collectionValue.issuer,
-            instances: collectionValue.instances,
+            items: collectionValue[deprecationKeys(api.version, 'items') as 'items'],
             metadataUri: metasObj[id]?.data,
           }
           return collection
@@ -110,21 +87,23 @@ export function getNftsModule(inst: CentrifugeBase) {
     const $api = inst.getApi()
 
     return $api.pipe(
-      switchMap((api) =>
-        combineLatest([
-          api.query.uniques[upgradeKeys(api.version, 'collectionMetadataOf')](collectionId),
-          api.query.uniques[upgradeKeys(api.version, 'collection')](collectionId),
-        ])
+      switchMap(
+        (api) =>
+          combineLatest([
+            api.query.uniques[deprecationKeys(api.version, 'collectionMetadataOf')](collectionId),
+            api.query.uniques[deprecationKeys(api.version, 'collection')](collectionId),
+          ]),
+        (api, [meta, collectionData]) => ({ api, meta, collectionData })
       ),
-      map(([meta, collectionData]) => {
-        const collectionValue = collectionData.toJSON() as Class
+      map(({ api, meta, collectionData }) => {
+        const collectionValue = collectionData.toJSON() as Omit<Collection, keyof CollectionMetadata>
         if (!collectionValue) throw new Error('Collection not found')
         const collection: Collection = {
           id: collectionId,
           admin: collectionValue.admin,
           owner: collectionValue.owner,
           issuer: collectionValue.issuer,
-          instances: collectionValue.instances,
+          items: collectionValue[deprecationKeys(api.version, 'items') as 'items'],
           metadataUri: (meta.toHuman() as any)?.data,
         }
         return collection
@@ -151,7 +130,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) =>
         combineLatest([
-          api.query.uniques[upgradeKeys(api.version, 'itemMetadataOf')].entries(collectionId),
+          api.query.uniques[deprecationKeys(api.version, 'itemMetadataOf')].entries(collectionId),
           api.query.uniques.asset.entries(collectionId),
           api.query.nftSales.sales.entries(collectionId),
         ])
@@ -159,18 +138,18 @@ export function getNftsModule(inst: CentrifugeBase) {
       map(([metas, nfts, sales]) => {
         const metasObj = metas.reduce((acc, [keys, value]) => {
           // @ts-expect-error
-          acc[formatInstanceKey(keys)] = value.toHuman()
+          acc[formatItemKey(keys)] = value.toHuman()
           return acc
         }, {} as any)
 
         const salesObj = sales.reduce((acc, [keys, value]) => {
-          acc[formatInstanceKey(keys as StorageKey<[u32, u32]>)] = value.toJSON()
+          acc[formatItemKey(keys as StorageKey<[u32, u32]>)] = value.toJSON()
           return acc
         }, {} as any)
 
         const mapped = nfts.map(([keys, value]) => {
           // @ts-expect-error
-          const id = formatInstanceKey(keys)
+          const id = formatItemKey(keys)
           const nftValue = value.toJSON() as Item
           const nft: NFT = {
             id,
@@ -194,7 +173,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) =>
         combineLatest([
-          api.query.uniques[upgradeKeys(api.version, 'itemMetadataOf')](collectionId, nftId),
+          api.query.uniques[deprecationKeys(api.version, 'itemMetadataOf')](collectionId, nftId),
           api.query.uniques.asset(collectionId, nftId),
           api.query.nftSales.sales(collectionId, nftId),
         ])
@@ -260,12 +239,12 @@ export function getNftsModule(inst: CentrifugeBase) {
           map(([metas, nfts, sales]) => {
             const mapped = nfts.map((value, i) => {
               const [collectionId, id] = keysArr[i]
-              const instance = value.toJSON() as Item
+              const item = value.toJSON() as Item
               const sale = sales[i]?.toJSON() as any
               const nft: NFT = {
                 id,
                 collectionId,
-                owner: sale?.seller || instance.owner,
+                owner: sale?.seller || item.owner,
                 metadataUri: (metas[i]?.toHuman() as any)?.data,
                 sellPrice: sale ? parseHex(sale.price.amount) : null,
               }
@@ -293,7 +272,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         api,
         submittable: api.tx.utility.batchAll([
           api.tx.uniques.create(collectionId, owner),
-          api.tx.uniques.setClassMetadata(collectionId, metadataUri, true),
+          api.tx.uniques[deprecationKeys(api.version, 'collectionMetadataOf')](collectionId, metadataUri, true),
         ]),
       })),
       switchMap(({ api, submittable }) => inst.wrapSignAndSend(api, submittable, options))
@@ -385,7 +364,7 @@ export function getNftsModule(inst: CentrifugeBase) {
             const id = String(getRandomUint())
             if (triesLeft <= 0) return EMPTY
 
-            return api.query.uniques.class(id).pipe(
+            return api.query.uniques[deprecationKeys(api.version, 'collection')](id).pipe(
               map((res) => ({ api, id: res.toJSON() === null ? id : null, triesLeft: triesLeft - 1 })),
               take(1)
             )
