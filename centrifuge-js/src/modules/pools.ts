@@ -771,7 +771,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
-        // this may be causing problems
         const event = events.find(({ event }) => api.events.pools.Created.is(event))
         return !!event
       })

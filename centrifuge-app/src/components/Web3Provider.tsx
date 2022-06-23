@@ -37,7 +37,6 @@ export function useWeb3() {
 let triedEager = false
 
 export const Web3Provider: React.FC = ({ children }) => {
-  console.log('here', children)
   const [accounts, setAccounts] = React.useState<Account[] | null>(null)
   const [selectedAccountAddress, setSelectedAccountAddress] = React.useState<string | null>(null)
   const [proxyAddress, setProxyAddress] = React.useState<string | null>(null)
@@ -45,7 +44,6 @@ export const Web3Provider: React.FC = ({ children }) => {
   const [selectedWallet, setSelectedWallet] = React.useState<Wallet | null>(null)
   const unsubscribeRef = React.useRef<(() => void) | null>()
   const cent = useCentrifuge()
-  console.log('🚀 ~ cent', cent)
   const { data: proxies } = useQuery(
     ['proxies', accounts?.map((acc) => acc.address)],
     () => firstValueFrom(cent.proxies.getMultiUserProxies([accounts!.map((acc) => acc.address)])),
