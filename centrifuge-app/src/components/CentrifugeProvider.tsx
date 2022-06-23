@@ -25,6 +25,9 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
 
 export function useCentrifuge() {
   const ctx = React.useContext(CentrifugeContext)
-  if (!ctx) throw new Error('useCentrifuge must be used within CentrifugeProvider')
+  if (!ctx) {
+    console.log('🚀 ~ Error no ctx', ctx)
+    throw new Error('useCentrifuge must be used within CentrifugeProvider')
+  }
   return ctx
 }

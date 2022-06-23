@@ -6,14 +6,14 @@ import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
 import { getRandomUint, isSameAddress } from '../utils'
 
-type Item = {
+type Instance = {
   owner: string
   // approved: Option<AccountId32>;
   // isFrozen: bool;
   // deposit: u128;
 }
 
-export type NFT = Item & {
+export type NFT = Instance & {
   id: string
   collectionId: string
   metadataUri?: string
@@ -38,28 +38,16 @@ export type Collection = Class & {
   metadataUri?: string
 }
 
-const MAP = {
-  collectionMetadataOf: 'classMetadataOf',
-  collection: 'class',
-  itemMetadataOf: 'instanceMetadataOf',
-  item: 'instance',
-}
-
-const upgradeKeys = (version: number, key: keyof typeof MAP) => {
-  if (version < 1007) {
-    return MAP[key]
-  }
-  return key
-}
-
 const MAX_ATTEMPTS = 10
 
 const formatClassKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatInstanceKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
-export function getNftsModule(inst: CentrifugeBase) {
+export function getNftsModule__DEPRECATED(inst: CentrifugeBase) {
+  console.log('🚀 ~ getNftsModule__DEPRECATED')
   function getCollections() {
     const $api = inst.getApi()
+
     const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
         const event = events.find(({ event }) => api.events.uniques.Created.is(event))
@@ -68,16 +56,10 @@ export function getNftsModule(inst: CentrifugeBase) {
     )
 
     return $api.pipe(
-      // figure out how to use filter here or somewhere
-      // map((api) => ({ api, spec: inst.getSpecVersion($api) })),
-      switchMap((api) => {
-        return combineLatest([
-          api.query.uniques[upgradeKeys(api.version, 'collectionMetadataOf')].entries(),
-          api.query.uniques[upgradeKeys(api.version, 'collection')].entries(),
-        ])
-      }),
+      switchMap((api) =>
+        combineLatest([api.query.uniques.classMetadataOf.entries(), api.query.uniques.class.entries()])
+      ),
       map(([metas, collections]) => {
-        // console.log("🚀 ~ specVersion", specVersion.toHuman())
         const metasObj = metas.reduce((acc, [keys, value]) => {
           // @ts-expect-error
           acc[formatClassKey(keys)] = value.toHuman()
@@ -111,10 +93,7 @@ export function getNftsModule(inst: CentrifugeBase) {
 
     return $api.pipe(
       switchMap((api) =>
-        combineLatest([
-          api.query.uniques[upgradeKeys(api.version, 'collectionMetadataOf')](collectionId),
-          api.query.uniques[upgradeKeys(api.version, 'collection')](collectionId),
-        ])
+        combineLatest([api.query.uniques.classMetadataOf(collectionId), api.query.uniques.class(collectionId)])
       ),
       map(([meta, collectionData]) => {
         const collectionValue = collectionData.toJSON() as Class
@@ -151,7 +130,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) =>
         combineLatest([
-          api.query.uniques[upgradeKeys(api.version, 'itemMetadataOf')].entries(collectionId),
+          api.query.uniques.instanceMetadataOf.entries(collectionId),
           api.query.uniques.asset.entries(collectionId),
           api.query.nftSales.sales.entries(collectionId),
         ])
@@ -171,7 +150,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         const mapped = nfts.map(([keys, value]) => {
           // @ts-expect-error
           const id = formatInstanceKey(keys)
-          const nftValue = value.toJSON() as Item
+          const nftValue = value.toJSON() as Instance
           const nft: NFT = {
             id,
             collectionId,
@@ -194,13 +173,13 @@ export function getNftsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap((api) =>
         combineLatest([
-          api.query.uniques[upgradeKeys(api.version, 'itemMetadataOf')](collectionId, nftId),
+          api.query.uniques.instanceMetadataOf(collectionId, nftId),
           api.query.uniques.asset(collectionId, nftId),
           api.query.nftSales.sales(collectionId, nftId),
         ])
       ),
       map(([meta, nftData, sale]) => {
-        const nftValue = nftData.toJSON() as Item
+        const nftValue = nftData.toJSON() as Instance
         const saleValue = sale.toJSON() as any
         if (!nftValue) throw new Error(`NFT not found: collectionId: ${collectionId}, nftId: ${nftId}`)
         const nft: NFT = {
@@ -260,7 +239,7 @@ export function getNftsModule(inst: CentrifugeBase) {
           map(([metas, nfts, sales]) => {
             const mapped = nfts.map((value, i) => {
               const [collectionId, id] = keysArr[i]
-              const instance = value.toJSON() as Item
+              const instance = value.toJSON() as Instance
               const sale = sales[i]?.toJSON() as any
               const nft: NFT = {
                 id,

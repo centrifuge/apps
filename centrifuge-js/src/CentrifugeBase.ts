@@ -5,6 +5,7 @@ import 'isomorphic-fetch'
 import {
   bufferCount,
   catchError,
+  combineLatest,
   combineLatestWith,
   filter,
   firstValueFrom,
@@ -92,6 +93,11 @@ export class CentrifugeBase {
     this.subqueryUrl =
       this.config.network === 'centrifuge' ? this.config.centrifugeSubqueryUrl : this.config.altairSubqueryUrl
   }
+
+  // getSpecVersion($api: any) {
+  //   console.log("🚀 ~ api", $api)
+  //   return $api.query.system.lastRuntimeUpgrade()
+  // }
 
   getChainId() {
     return this.config.network === 'centrifuge' ? 36 : 136
@@ -218,7 +224,21 @@ export class CentrifugeBase {
   }
 
   getApi() {
-    return getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods)
+    return getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods).pipe(
+      switchMap(
+        (api) => {
+          console.log('🚀 ~switchMap api', api)
+          return combineLatest(api.query.system.lastRuntimeUpgrade())
+        },
+        (api, [specs]) => {
+          // @ts-expect-errors
+          const version = specs.toJSON()?.specVersion
+          // @ts-expect-error
+          api.version = version
+          return api
+        }
+      )
+    ) as Observable<ApiRx & { version: number }>
   }
 
   getApiPromise() {
