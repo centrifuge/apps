@@ -105,14 +105,14 @@ export const Investors: React.FC = () => {
               <Text variant="label2" color="statusOk">
                 <Shelf gap={1}>
                   <IconCheckCircle size="20px" />
-                  <span>Address In member list</span>
+                  <span>Address whitelisted</span>
                 </Shelf>
               </Text>
             ) : permissions && !allowedTranches.length ? (
               <Text variant="label2" color="statusWarning">
                 <Shelf gap={1}>
                   <IconAlertCircle size="20px" />
-                  <span>Address not in member list</span>
+                  <span>Address not whitelisted</span>
                 </Shelf>
               </Text>
             ) : null)
@@ -126,17 +126,17 @@ export const Investors: React.FC = () => {
                 align: 'left',
                 header: 'Token',
                 cell: (row: Tranche) => (
-                  <TextWithPlaceholder isLoading={metadataIsLoading}>
+                  <TextWithPlaceholder isLoading={metadataIsLoading} textOverflow="ellipsis">
                     {metadata?.tranches?.[row.id]?.name}
                   </TextWithPlaceholder>
                 ),
-                flex: '1 0 150px',
+                flex: '1',
               },
               {
                 align: 'left',
                 header: 'Investment',
                 cell: (row: Tranche) => <InvestedCell address={validAddress} trancheId={row.id} />,
-                flex: '1 0 150px',
+                flex: '1',
               },
               {
                 header: '',
@@ -152,11 +152,11 @@ export const Investors: React.FC = () => {
                       loading={isTransactionPending && pendingTrancheId === row.id}
                       small={!isAllowed}
                     >
-                      {!isAllowed && 'Add token'}
+                      {isAllowed ? 'Remove from whitelist' : 'Add to whitelist'}
                     </Button>
                   )
                 },
-                flex: '0 0 180px',
+                flex: '1',
               },
             ]}
           />
