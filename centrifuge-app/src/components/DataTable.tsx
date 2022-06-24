@@ -131,9 +131,9 @@ const Row = styled(Shelf)<any>`
       borderBottomWidth: '1px',
       borderBottomColor: 'borderPrimary',
       backgroundColor: 'transparent',
-      // using button&:hover caused the background sometimes not to update when switching themes
+      // using a&:hover caused the background sometimes not to update when switching themes
       '&:hover':
-        comp === 'button'
+        comp === Link
           ? {
               backgroundColor: 'secondarySelectedBackground',
               cursor: 'pointer',
@@ -161,9 +161,6 @@ const DataCol = styled.div<{ align: Column['align'] }>`
   overflow: hidden;
   white-space: nowrap;
 
-  button&:hover {
-    cursor: pointer;
-  }
   &:first-child {
     padding-right: '16px';
   }
