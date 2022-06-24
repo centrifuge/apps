@@ -16,8 +16,8 @@ export const WriteOffInput: React.FC = () => {
     <FieldArray name="writeOffGroups">
       {(fldArr) => (
         <PageSection
-          title="Write-off groups"
-          subtitle="At least one write-off group is required"
+          title="Write-off schedule"
+          subtitle="At least one write-off activity is required"
           headerRight={
             <Button
               variant="secondary"

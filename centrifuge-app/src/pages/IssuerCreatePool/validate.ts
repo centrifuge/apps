@@ -15,7 +15,7 @@ import {
   required,
 } from '../../utils/validation'
 
-const MB = 1024 ** 2
+export const MB = 1024 ** 2
 
 export const validate = {
   poolName: combine(required(), maxLength(100)),

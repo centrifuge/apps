@@ -1,4 +1,5 @@
 import Decimal from 'decimal.js-light'
+import { MB } from '../../pages/IssuerCreatePool/validate'
 import { getImageDimensions } from '../getImageDimensions'
 
 const isImageFile = (file: any): boolean => file instanceof File && !!file.type.match(/^image\//)
@@ -36,7 +37,9 @@ export const max = (maxValue: number, err?: CustomError) => (val?: any) => {
 }
 
 export const maxFileSize = (maxBytes: number, err?: CustomError) => (val?: any) => {
-  return val instanceof File && val.size > maxBytes ? getError(`File too large`, err, val) : ''
+  return val instanceof File && val.size > maxBytes
+    ? getError(`File too large. The maximum file size is ${maxBytes / MB} MB.`, err, val)
+    : ''
 }
 
 export const mimeType = (type: RegExp | string, err?: CustomError) => (val?: any) => {
