@@ -1,6 +1,5 @@
 const versionMap = {
-  collectionMetadataOf: 'classMetadataOf',
-  collection: 'class',
+  class: 'class',
   itemMetadataOf: 'instanceMetadataOf',
   item: 'instance',
   items: 'instances',

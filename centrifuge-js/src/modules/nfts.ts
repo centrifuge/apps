@@ -47,11 +47,7 @@ export function getNftsModule(inst: CentrifugeBase) {
 
     return $api.pipe(
       switchMap(
-        (api) =>
-          combineLatest([
-            api.query.uniques[deprecationKeys(api.specVersion, 'collectionMetadataOf')].entries(),
-            api.query.uniques[deprecationKeys(api.specVersion, 'collection')].entries(),
-          ]),
+        (api) => combineLatest([api.query.uniques.classMetadataOf.entries(), api.query.uniques.class.entries()]),
         (api, [metas, collections]) => ({ api, metas, collections })
       ),
       map(({ api, metas, collections }) => {
@@ -89,10 +85,7 @@ export function getNftsModule(inst: CentrifugeBase) {
     return $api.pipe(
       switchMap(
         (api) =>
-          combineLatest([
-            api.query.uniques[deprecationKeys(api.specVersion, 'collectionMetadataOf')](collectionId),
-            api.query.uniques[deprecationKeys(api.specVersion, 'collection')](collectionId),
-          ]),
+          combineLatest([api.query.uniques.classMetadataOf(collectionId), api.query.uniques.class(collectionId)]),
         (api, [meta, collectionData]) => ({ api, meta, collectionData })
       ),
       map(({ api, meta, collectionData }) => {
@@ -272,7 +265,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         api,
         submittable: api.tx.utility.batchAll([
           api.tx.uniques.create(collectionId, owner),
-          api.tx.uniques[deprecationKeys(api.specVersion, 'collectionMetadataOf')](collectionId, metadataUri, true),
+          api.tx.uniques.classMetadataOf(collectionId, metadataUri, true),
         ]),
       })),
       switchMap(({ api, submittable }) => inst.wrapSignAndSend(api, submittable, options))
@@ -364,7 +357,7 @@ export function getNftsModule(inst: CentrifugeBase) {
             const id = String(getRandomUint())
             if (triesLeft <= 0) return EMPTY
 
-            return api.query.uniques[deprecationKeys(api.specVersion, 'collection')](id).pipe(
+            return api.query.uniques.class(id).pipe(
               map((res) => ({ api, id: res.toJSON() === null ? id : null, triesLeft: triesLeft - 1 })),
               take(1)
             )
