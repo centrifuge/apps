@@ -5,7 +5,7 @@ import {
   IconAlertCircle,
   IconCheckCircle,
   IconInfoFailed,
-  IconMinusCircle,
+  IconMinus,
   IconPlus,
   SearchInput,
   Shelf,
@@ -126,7 +126,7 @@ export const Investors: React.FC = () => {
                 align: 'left',
                 header: 'Token',
                 cell: (row: Tranche) => (
-                  <TextWithPlaceholder isLoading={metadataIsLoading} textOverflow="ellipsis">
+                  <TextWithPlaceholder isLoading={metadataIsLoading} textOverflow="ellipsis" variant="body2">
                     {metadata?.tranches?.[row.id]?.name}
                   </TextWithPlaceholder>
                 ),
@@ -147,10 +147,10 @@ export const Investors: React.FC = () => {
                   return (
                     <Button
                       variant="tertiary"
-                      icon={isAllowed ? IconMinusCircle : IconPlus}
+                      icon={isAllowed ? IconMinus : IconPlus}
                       onClick={() => toggleAllowed(row.id)}
                       loading={isTransactionPending && pendingTrancheId === row.id}
-                      small={!isAllowed}
+                      small
                     >
                       {isAllowed ? 'Remove from whitelist' : 'Add to whitelist'}
                     </Button>
@@ -170,5 +170,5 @@ const InvestedCell: React.FC<{ address: string; trancheId: string }> = ({ tranch
   const order = useOrder(trancheId, address)
   const hasInvested = order && (order?.epoch > 0 || !order.invest.isZero())
 
-  return <TextWithPlaceholder>{hasInvested && 'Invested'}</TextWithPlaceholder>
+  return <TextWithPlaceholder variant="body2">{hasInvested && 'Invested'}</TextWithPlaceholder>
 }
