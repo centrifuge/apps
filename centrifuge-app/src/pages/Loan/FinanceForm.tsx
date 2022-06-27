@@ -73,7 +73,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
     CreditLineWithMaturity:
       'maturityDate' in loan.loanInfo &&
       Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
-      loan.outstandingDebt.toDecimal().lt(availableFinancing),
+      availableFinancing.greaterThan(0),
     BulletLoan:
       'maturityDate' in loan.loanInfo &&
       Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
@@ -155,8 +155,8 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 )}
               </Field>
               {poolReserve.lessThan(availableFinancing) && (
-                <Shelf alignItems="flex-start" gap="4px">
-                  <IconInfo height="16" />
+                <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
+                  <IconInfo size="iconMedium" />
                   <Text variant="body3">
                     The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency)}) is smaller than the
                     available financing
@@ -215,8 +215,8 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 }}
               </Field>
               {balance.lessThan(loan.outstandingDebt.toDecimal()) && (
-                <Shelf alignItems="flex-start" gap="4px">
-                  <IconInfo height="16" />
+                <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
+                  <IconInfo size="iconMedium" />
                   <Text variant="body3">
                     Your wallet balance ({formatBalance(roundDown(balance), pool?.currency, 2)}) is smaller than the
                     outstanding balance.
