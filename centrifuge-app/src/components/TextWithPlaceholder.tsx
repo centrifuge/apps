@@ -66,7 +66,7 @@ export const TextWithPlaceholder: React.FC<Props> = ({
 }) => {
   const [rand] = React.useState(() => Math.random())
   return (
-    <Text {...textProps} underline={isLoading ? undefined : textProps.underline}>
+    <Text {...textProps} textOverflow="ellipsis" underline={isLoading ? undefined : textProps.underline}>
       {isLoading ? (
         <LoadingWrapper $lines={maxLines} $isLoading={isLoading}>
           {Array.from({ length: words }, (_, i) => (

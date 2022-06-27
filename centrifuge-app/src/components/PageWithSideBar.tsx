@@ -45,7 +45,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
       {sidebar && (
         <Box gridArea="sidebar" as="aside" zIndex="sticky">
           <Box position="sticky" top={0} p={[0, 0, 3]}>
-            <Stack pb={3} px={8}>
+            <Stack mb={9} px={8}>
               <AccountsMenu />
             </Stack>
             <LoadBoundary>{sidebar}</LoadBoundary>

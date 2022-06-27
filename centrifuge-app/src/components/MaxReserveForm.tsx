@@ -40,7 +40,7 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
   if (!address || !isLiquidityAdmin) return null
 
   return (
-    <Stack as={Card} gap={2} p={2} mt={5}>
+    <Stack as={Card} gap={2} p={2}>
       <Shelf justifyContent="space-between">
         <Text variant="heading3">Maximum reserve</Text>
       </Shelf>
