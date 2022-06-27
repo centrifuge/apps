@@ -1,3 +1,4 @@
+import { ApiPromise } from '@polkadot/api'
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
 // import { AnyNumber } from '@polkadot/types/types'
@@ -41,13 +42,18 @@ const formatCollectionKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as stri
 const formatItemKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
 export function getNftsModule(inst: CentrifugeBase) {
+  function getVersionSpec(api: ApiPromise) {
+    return api.query.system.lastRuntimeUpgrade()
+  }
+
   async function getCollections() {
     const api = await inst.getApi()
 
-    const [metas, collections, specVersion] = await Promise.all([
+    const specVersion = await getVersionSpec(api)
+
+    const [metas, collections] = await Promise.all([
       api.query.uniques.classMetadataOf.entries(),
       api.query.uniques.class.entries(),
-      api.query.system.lastRuntimeUpgrade(),
     ])
 
     const metasObj = metas.reduce((acc, [keys, value]) => {
@@ -63,7 +69,7 @@ export function getNftsModule(inst: CentrifugeBase) {
         admin: collectionValue.admin,
         owner: collectionValue.owner,
         issuer: collectionValue.issuer,
-        items: (specVersion.toJSON() as Specs).specVersion > 1007 ? collectionValue.items : collectionValue.instances,
+        items: (specVersion?.toJSON() as Specs).specVersion > 1007 ? collectionValue.items : collectionValue.instances,
         metadataUri: metasObj[id]?.data,
       }
       return collection
@@ -151,10 +157,17 @@ export function getNftsModule(inst: CentrifugeBase) {
   ) {
     const [collectionId, owner, metadataUri] = args
     const api = await inst.getApi()
+    const specs = (await (await getVersionSpec(api)).toJSON()) as Specs
+
     const submittable = api.tx.utility.batchAll([
       api.tx.uniques.create(collectionId, owner),
-      api.tx.uniques.setClassMetadata(collectionId, metadataUri, true),
+      api.tx.uniques[specs.specVersion > 1007 ? 'setCollectionMetadata' : 'setClassMetadata'](
+        collectionId,
+        metadataUri,
+        true
+      ),
     ])
+
     return inst.wrapSignAndSend(api, submittable, options)
   }
 

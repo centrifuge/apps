@@ -99,6 +99,10 @@ export class CentrifugeBase {
     })
   }
 
+  getVersionSpec(api: ApiPromise) {
+    return api.query.system.lastRuntimeUpgrade()
+  }
+
   getApi() {
     return getPolkadotApi(this.parachainUrl, parachainTypes)
   }
