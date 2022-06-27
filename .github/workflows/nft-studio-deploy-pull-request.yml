@@ -14,7 +14,7 @@ jobs:
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
       ipfs-gateway: https://altair.mypinata.cloud/
-      collator-wss-url: wss://fullnode-collator-2.development.cntrfg.com
+      collator-wss-url: wss://fullnode.altair-dev.cntrfg.com
       relay-wss-url: wss://fullnode-relay-2.development.cntrfg.com
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
