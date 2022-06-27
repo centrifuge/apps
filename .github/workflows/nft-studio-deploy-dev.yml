@@ -3,12 +3,6 @@ on:
   push:
     branches:
       - rc/nft-studio/release-*
-    paths:
-      - 'nft-studio/**'
-      - 'fabric/**' # dependency
-      - 'centrifuge-js/**' # dependency
-      - '.github/workflows/nft-studio-build-and-deploy.yml' # dependency
-      - '.github/workflows/nft-studio-deploy-to-dev.yml'
 
 jobs:
   dev:
