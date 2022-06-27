@@ -142,7 +142,7 @@ const Collection: React.FC = () => {
       {nfts?.length ? (
         <>
           <Box mb={2}>
-            <Text variant="heading3">{collection?.instances ?? 0} NFTs</Text>
+            <Text variant="heading3">{collection?.items ?? 0} NFTs</Text>
           </Box>
           <Grid gap={[2, 3]} columns={[2, 2, 3, 4]} equalColumns>
             {nfts.slice(0, shownCount).map((nft) => (
