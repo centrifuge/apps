@@ -2,7 +2,7 @@ name: 'nft-studio Dev'
 on:
   push:
     branches:
-      - main
+      - rc/nft-studio/release-2
     paths:
       - 'nft-studio/**'
       - 'fabric/**' # dependency
