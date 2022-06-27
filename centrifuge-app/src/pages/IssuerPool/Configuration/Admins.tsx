@@ -9,6 +9,7 @@ import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { DataTable } from '../../../components/DataTable'
 import { Identity } from '../../../components/Identity'
 import { PageSection } from '../../../components/PageSection'
+import { Tooltips } from '../../../components/Tooltips'
 import { useWeb3 } from '../../../components/Web3Provider'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePoolPermissions } from '../../../utils/usePools'
@@ -124,7 +125,7 @@ export const Admins: React.FC = () => {
                     },
                     {
                       align: 'center',
-                      header: 'Pool',
+                      header: <Tooltips type="pool" variant="secondary" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.PoolAdmin`}
@@ -137,7 +138,7 @@ export const Admins: React.FC = () => {
                     },
                     {
                       align: 'center',
-                      header: 'Borrower',
+                      header: <Tooltips type="borrower" variant="secondary" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.Borrower`}
@@ -150,7 +151,7 @@ export const Admins: React.FC = () => {
                     },
                     {
                       align: 'center',
-                      header: 'Pricing',
+                      header: <Tooltips type="pricing" variant="secondary" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.PricingAdmin`}
@@ -163,7 +164,7 @@ export const Admins: React.FC = () => {
                     },
                     {
                       align: 'center',
-                      header: 'Memberlist',
+                      header: <Tooltips type="whitelist" variant="secondary" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.MemberListAdmin`}
@@ -176,7 +177,7 @@ export const Admins: React.FC = () => {
                     },
                     {
                       align: 'center',
-                      header: 'Risk',
+                      header: <Tooltips type="risk" variant="secondary" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.RiskAdmin`}
@@ -189,7 +190,7 @@ export const Admins: React.FC = () => {
                     },
                     {
                       align: 'center',
-                      header: 'Liquidity',
+                      header: <Tooltips type="liquidity" variant="secondary" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.LiquidityAdmin`}
@@ -217,7 +218,7 @@ export const Admins: React.FC = () => {
                 />
                 {isEditing && (
                   <Grid columns={2} equalColumns gap={4} alignItems="center">
-                    <Field as={SearchInput} name="search" placeholder="Enter address..." disabled={isLoading} />
+                    <Field as={SearchInput} name="search" placeholder="Search to add address..." disabled={isLoading} />
                     {form.values.search && !isLoading && (
                       <SearchResult
                         address={form.values.search}

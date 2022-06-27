@@ -104,7 +104,7 @@ const Loan: React.FC = () => {
                   value: formatBalance(loan.loanInfo.value, pool?.currency),
                 },
                 {
-                  label: <Tooltips type="availableForFinancing" />,
+                  label: <Tooltips type="availableFinancing" />,
                   value: formatBalance(availableFinancing, pool?.currency),
                 },
                 {
