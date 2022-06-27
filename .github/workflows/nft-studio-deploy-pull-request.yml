@@ -10,12 +10,12 @@ on:
 
 jobs:
   pull-request:
-    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
+    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@rc/nft-studio/release-2
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
       ipfs-gateway: https://altair.mypinata.cloud/
-      collator-wss-url: wss://fullnode-collator-2.development.cntrfg.com
-      relay-wss-url: wss://fullnode-relay-2.development.cntrfg.com
+      collator-wss-url: wss://fullnode.altair-dev.cntrfg.com
+      relay-wss-url: wss://rococo-rpc.polkadot.io
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
 

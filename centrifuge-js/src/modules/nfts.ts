@@ -1,3 +1,4 @@
+import { ApiPromise } from '@polkadot/api'
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
 // import { AnyNumber } from '@polkadot/types/types'
@@ -5,14 +6,11 @@ import { CentrifugeBase } from '../CentrifugeBase'
 import { TransactionOptions } from '../types'
 import { getRandomUint } from '../utils'
 
-type Instance = {
+type Item = {
   owner: string
-  // approved: Option<AccountId32>;
-  // isFrozen: bool;
-  // deposit: u128;
 }
 
-export type NFT = Instance & {
+export type NFT = Item & {
   id: string
   collectionId: string
   metadataUri?: string
@@ -23,13 +21,14 @@ type Class = {
   owner: string
   issuer: string
   admin: string
-  // freezer: string
-  // totalDeposit: u128
-  // freeHolding: boolean
-  instances: number
-  // instanceMetadatas: u32
-  // attributes: u32
-  // isFrozen: boolean
+  items?: number
+  /** @deprecated */
+  instances?: number
+}
+
+type Specs = {
+  specVersion: number
+  specName: string
 }
 
 export type Collection = Class & {
@@ -39,12 +38,18 @@ export type Collection = Class & {
 
 const MAX_ATTEMPTS = 10
 
-const formatClassKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
-const formatInstanceKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
+const formatCollectionKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
+const formatItemKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
 export function getNftsModule(inst: CentrifugeBase) {
+  function getVersionSpec(api: ApiPromise) {
+    return api.query.system.lastRuntimeUpgrade()
+  }
+
   async function getCollections() {
     const api = await inst.getApi()
+
+    const specVersion = await getVersionSpec(api)
 
     const [metas, collections] = await Promise.all([
       api.query.uniques.classMetadataOf.entries(),
@@ -52,19 +57,19 @@ export function getNftsModule(inst: CentrifugeBase) {
     ])
 
     const metasObj = metas.reduce((acc, [keys, value]) => {
-      acc[formatClassKey(keys)] = value.toHuman()
+      acc[formatCollectionKey(keys)] = value.toHuman()
       return acc
     }, {} as any)
 
     const mapped = collections.map(([keys, value]) => {
-      const id = formatClassKey(keys)
+      const id = formatCollectionKey(keys)
       const collectionValue = value.toJSON() as Class
       const collection: Collection = {
         id,
         admin: collectionValue.admin,
         owner: collectionValue.owner,
         issuer: collectionValue.issuer,
-        instances: collectionValue.instances,
+        items: (specVersion?.toJSON() as Specs).specVersion > 1007 ? collectionValue.items : collectionValue.instances,
         metadataUri: metasObj[id]?.data,
       }
       return collection
@@ -83,18 +88,18 @@ export function getNftsModule(inst: CentrifugeBase) {
     ])
 
     const metasObj = metas.reduce((acc, [keys, value]) => {
-      acc[formatInstanceKey(keys)] = value.toHuman()
+      acc[formatItemKey(keys)] = value.toHuman()
       return acc
     }, {} as any)
 
     const salesObj = sales.reduce((acc, [keys, value]) => {
-      acc[formatInstanceKey(keys as StorageKey<[u32, u32]>)] = value.toJSON()
+      acc[formatItemKey(keys as StorageKey<[u32, u32]>)] = value.toJSON()
       return acc
     }, {} as any)
 
     const mapped = nfts.map(([keys, value]) => {
-      const id = formatInstanceKey(keys)
-      const nftValue = value.toJSON() as Instance
+      const id = formatItemKey(keys)
+      const nftValue = value.toJSON() as Item
       const nft: NFT = {
         id,
         collectionId,
@@ -132,12 +137,12 @@ export function getNftsModule(inst: CentrifugeBase) {
 
     const mapped = nfts.map((value, i) => {
       const [collectionId, id] = keysArr[i]
-      const instance = value.toJSON() as Instance
+      const item = value.toJSON() as Item
       const sale = sales[i]?.toJSON() as any
       const nft: NFT = {
         id,
         collectionId,
-        owner: instance.owner,
+        owner: item.owner,
         metadataUri: (metas[i]?.toHuman() as any)?.data,
         sellPrice: sale ? parseHex(sale.price.amount) : null,
       }
@@ -152,10 +157,17 @@ export function getNftsModule(inst: CentrifugeBase) {
   ) {
     const [collectionId, owner, metadataUri] = args
     const api = await inst.getApi()
+    const specs = (await (await getVersionSpec(api)).toJSON()) as Specs
+
     const submittable = api.tx.utility.batchAll([
       api.tx.uniques.create(collectionId, owner),
-      api.tx.uniques.setClassMetadata(collectionId, metadataUri, true),
+      api.tx.uniques[specs.specVersion > 1007 ? 'setCollectionMetadata' : 'setClassMetadata'](
+        collectionId,
+        metadataUri,
+        true
+      ),
     ])
+
     return inst.wrapSignAndSend(api, submittable, options)
   }
 

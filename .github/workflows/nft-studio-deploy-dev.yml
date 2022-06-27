@@ -12,12 +12,12 @@ on:
 
 jobs:
   dev:
-    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@main
+    uses: centrifuge/apps/.github/workflows/nft-studio-build-and-deploy.yml@rc/nft-studio/release-2
     with:
       netlify-alias: ''
       ipfs-gateway: https://altair.mypinata.cloud/
-      collator-wss-url: wss://fullnode-collator.charcoal.centrifuge.io
-      relay-wss-url: wss://westend-rpc.polkadot.io
+      collator-wss-url: wss://fullnode.altair-dev.cntrfg.com
+      relay-wss-url: wss://rococo-rpc.polkadot.io
       subscan-url: https://westend.subscan.io
       whitelisted-accounts: ''
     secrets:
