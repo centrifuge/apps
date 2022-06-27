@@ -121,7 +121,7 @@ export const Admins: React.FC = () => {
                           {row.address === me && `(${selectedAccount?.name || 'you'})`}
                         </Text>
                       ),
-                      flex: '1 0 150px',
+                      flex: '3',
                     },
                     {
                       align: 'center',
@@ -134,7 +134,7 @@ export const Admins: React.FC = () => {
                           disabled={!isEditing || isLoading || (poolAdminCount === 1 && row.roles.PoolAdmin)}
                         />
                       ),
-                      flex: '0 0 100px',
+                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -147,7 +147,7 @@ export const Admins: React.FC = () => {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '0 0 100px',
+                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -160,7 +160,7 @@ export const Admins: React.FC = () => {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '0 0 100px',
+                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -173,7 +173,7 @@ export const Admins: React.FC = () => {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '0 0 100px',
+                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -186,7 +186,7 @@ export const Admins: React.FC = () => {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '0 0 100px',
+                      flex: '2',
                     },
                     {
                       align: 'center',
@@ -199,7 +199,7 @@ export const Admins: React.FC = () => {
                           disabled={!isEditing || isLoading}
                         />
                       ),
-                      flex: '0 0 100px',
+                      flex: '2',
                     },
                     {
                       header: '',
