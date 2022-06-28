@@ -173,7 +173,7 @@ const tooltipText = {
   },
   risk: {
     label: 'Risk',
-    body: 'Allows to set risk groups.',
+    body: 'Allows to write-off assets.',
   },
   whitelist: {
     label: 'Whitelist',
