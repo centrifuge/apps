@@ -1,6 +1,6 @@
 import { Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams, useRouteMatch } from 'react-router'
+import { useParams } from 'react-router'
 import { InvestRedeem } from '../components/InvestRedeem'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
@@ -22,7 +22,6 @@ export const TokenDetailPage: React.FC = () => {
 }
 
 const TokenDetail: React.FC = () => {
-  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
   const { pid: poolId, tid: trancheId } = useParams<{ pid: string; tid: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
