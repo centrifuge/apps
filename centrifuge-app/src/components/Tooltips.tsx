@@ -189,7 +189,7 @@ const tooltipText = {
   },
   pool: {
     label: 'Pool',
-    body: 'Allows to manage pool configuration.',
+    body: 'Allows to manage pool configuration and manage other admins.',
   },
 }
 
