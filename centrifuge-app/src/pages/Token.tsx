@@ -80,7 +80,7 @@ const TokenDetail: React.FC = () => {
           </TextWithPlaceholder>
         }
         icon={<Thumbnail size="large" label={trancheMeta?.symbol || ''} />}
-        parent={{ to: `${basePath}/tokens`, label: 'Tokens' }}
+        parent={{ to: `/investments/tokens`, label: 'Tokens' }}
       />
       {pool ? (
         <>
