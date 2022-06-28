@@ -83,7 +83,10 @@ export const DataTable = <T extends Record<string, any>>({
             >
               <Text variant="label2">
                 {col?.header && typeof col.header !== 'string' && col?.sortKey && React.isValidElement(col.header)
-                  ? React.cloneElement(col.header, { align: col?.align, orderBy: orderBy[col.sortKey] })
+                  ? React.cloneElement(col.header as React.ReactElement<any>, {
+                      align: col?.align,
+                      orderBy: orderBy[col.sortKey],
+                    })
                   : col.header}
               </Text>
             </HeaderCol>
