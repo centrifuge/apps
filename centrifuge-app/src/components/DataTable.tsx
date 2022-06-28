@@ -23,7 +23,7 @@ type Props<T> = {
 export type OrderBy = 'asc' | 'desc'
 
 export type Column = {
-  header: string | React.ReactElement | (() => React.ReactElement)
+  header: string | React.ReactElement
   cell: (row: any, index: number) => React.ReactNode
   align?: string
   flex?: string

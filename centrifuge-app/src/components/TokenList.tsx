@@ -39,7 +39,7 @@ const columns: Column[] = [
     flex: '6',
   },
   {
-    header: () => <SortableTableHeader label="Yield" />,
+    header: <SortableTableHeader label="Yield" />,
     cell: (token: TokenTableData) => (
       <Text variant="body2">{token.yield ? `Target: ${formatPercentage(token.yield)}` : ''}</Text>
     ),
@@ -47,7 +47,7 @@ const columns: Column[] = [
     sortKey: 'yield',
   },
   {
-    header: () => <SortableTableHeader label="Protection" />,
+    header: <SortableTableHeader label="Protection" />,
     cell: (token: TokenTableData) => (
       <Text variant="body2">{token.protection ? formatPercentage(token.protection) : ''}</Text>
     ),
@@ -55,7 +55,7 @@ const columns: Column[] = [
     sortKey: 'protection',
   },
   {
-    header: () => <SortableTableHeader label="Value locked" />,
+    header: <SortableTableHeader label="Value locked" />,
     cell: (token: TokenTableData) => <Text variant="body2">{formatBalance(token?.valueLocked, token.currency)}</Text>,
     flex: '4',
     sortKey: 'valueLocked',
