@@ -22,33 +22,33 @@ type RowProps = {
 const columns: Column[] = [
   {
     align: 'left',
-    header: () => <SortableTableHeader label="Seniority" />,
+    header: <SortableTableHeader label="Seniority" />,
     cell: (token: TokenByPoolTableData) => <Text variant="body2"> {token.seniority + 1}</Text>,
     flex: '2',
     sortKey: 'seniority',
   },
   {
     align: 'left',
-    header: () => <SortableTableHeader label="Name" />,
+    header: <SortableTableHeader label="Name" />,
     cell: (token: TokenByPoolTableData) => <TokenName token={token} />,
     flex: '4',
     sortKey: 'name',
   },
   {
-    header: () => <SortableTableHeader label="Symbol" />,
+    header: <SortableTableHeader label="Symbol" />,
     cell: (token: TokenByPoolTableData) => <Text variant="body2">{token?.symbol}</Text>,
     flex: '2',
     align: 'left',
     sortKey: 'symbol',
   },
   {
-    header: () => <SortableTableHeader label="Min. Protection" />,
+    header: <SortableTableHeader label="Min. Protection" />,
     cell: (token: TokenByPoolTableData) => <Protection token={token} />,
     flex: '3',
     sortKey: 'protection',
   },
   {
-    header: () => <SortableTableHeader label="APY" />,
+    header: <SortableTableHeader label="APY" />,
     cell: (token: TokenByPoolTableData) => <APY token={token} />,
     flex: '3',
     sortKey: 'apy',
