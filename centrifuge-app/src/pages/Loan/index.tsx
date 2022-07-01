@@ -108,7 +108,7 @@ const Loan: React.FC = () => {
                   value: loan.loanInfo ? formatBalance(loan.loanInfo.value, pool?.currency) : 'n/a',
                 },
                 {
-                  label: <Tooltips type="availableForFinancing" />,
+                  label: <Tooltips type="availableFinancing" />,
                   value: !availableFinancing.isZero() ? formatBalance(availableFinancing, pool?.currency) : 'n/a',
                 },
                 {

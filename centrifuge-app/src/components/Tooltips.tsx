@@ -159,13 +159,37 @@ const tooltipText = {
     label: 'Max. reserve',
     body: 'No investments will be accepted if the current reserve is larger than the max reserve amount.',
   },
-  availableForFinancing: {
-    label: 'Available for financing',
-    body: '',
+  availableFinancing: {
+    label: 'Available financing',
+    body: 'The amount available for financing the asset based on the asset value and the advance rate.',
   },
   outstanding: {
     label: 'Outstanding',
-    body: '',
+    body: "The pool's outstanding financing debt.",
+  },
+  liquidity: {
+    label: 'Liquidity',
+    body: 'Allows to set the maximum reserve.',
+  },
+  risk: {
+    label: 'Risk',
+    body: 'Allows to write-off assets.',
+  },
+  whitelist: {
+    label: 'Whitelist',
+    body: 'Allows to whitelist investor addresses.',
+  },
+  pricing: {
+    label: 'Pricing',
+    body: 'Allows to price assets.',
+  },
+  borrower: {
+    label: 'Borrower',
+    body: 'Allows to borrow from the pool against assets.',
+  },
+  pool: {
+    label: 'Pool',
+    body: 'Allows to manage pool configuration and manage other admins.',
   },
 }
 

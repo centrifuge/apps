@@ -23,7 +23,7 @@ export type AssetByRiskGroup = {
 const columns: Column[] = [
   {
     align: 'left',
-    header: () => <SortableTableHeader label="Risk group" />,
+    header: <SortableTableHeader label="Risk group" />,
     cell: (riskGroup: AssetByRiskGroup) => (
       <Shelf gap="1">
         {riskGroup?.color && <Box width="10px" height="10px" backgroundColor={riskGroup.color} />}
@@ -36,19 +36,19 @@ const columns: Column[] = [
     sortKey: 'name',
   },
   {
-    header: () => <SortableTableHeader label="Amount" />,
+    header: <SortableTableHeader label="Amount" />,
     cell: ({ amount }: AssetByRiskGroup) => <Text variant="body2">{amount}</Text>,
     flex: '1',
     sortKey: 'amount',
   },
   {
-    header: () => <SortableTableHeader label="Share" />,
+    header: <SortableTableHeader label="Share" />,
     cell: ({ share }: AssetByRiskGroup) => <Text variant="body2">{share}%</Text>,
     flex: '1',
     sortKey: 'share',
   },
   {
-    header: () => <SortableTableHeader label="Financing fee" />,
+    header: <SortableTableHeader label="Financing fee" />,
     cell: ({ interestRatePerSec }: AssetByRiskGroup) => (
       <Text variant="body2">
         {interestRatePerSec && typeof interestRatePerSec === 'string'
@@ -62,7 +62,7 @@ const columns: Column[] = [
     sortKey: 'interestRatePerSec',
   },
   {
-    header: () => <SortableTableHeader label="Risk adjustment" />,
+    header: <SortableTableHeader label="Risk adjustment" />,
     cell: ({ riskAdjustment }: AssetByRiskGroup) => (
       <Text variant="body2">
         {riskAdjustment && typeof riskAdjustment === 'string'

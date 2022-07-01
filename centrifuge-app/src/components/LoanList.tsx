@@ -26,13 +26,13 @@ type Props = {
 const columns: Column[] = [
   {
     align: 'left',
-    header: () => <SortableTableHeader label="Asset" />,
+    header: <SortableTableHeader label="Asset" />,
     cell: (l: Row) => <AssetName loan={l} />,
     flex: '3',
     sortKey: 'idSortKey',
   },
   {
-    header: () => <SortableTableHeader label="Financing date" />,
+    header: <SortableTableHeader label="Financing date" />,
     cell: (l: Row) => (
       <Text variant="body2">{l.originationDateSortKey && l.originationDate ? formatDate(l.originationDate) : ''}</Text>
     ),
@@ -40,19 +40,19 @@ const columns: Column[] = [
     sortKey: 'originationDateSortKey',
   },
   {
-    header: () => <SortableTableHeader label="Maturity date" />,
+    header: <SortableTableHeader label="Maturity date" />,
     cell: (l: Row) => <Text variant="body2">{l.maturityDate ? formatDate(l.maturityDate) : ''}</Text>,
     flex: '2',
     sortKey: 'maturityDate',
   },
   {
-    header: () => <SortableTableHeader label="Outstanding" />,
+    header: <SortableTableHeader label="Outstanding" />,
     cell: (l: Row) => <OutstandingDebt loan={l} />,
     flex: '2',
     sortKey: 'outstandingDebtSortKey',
   },
   {
-    header: () => <SortableTableHeader label="Status" />,
+    header: <SortableTableHeader label="Status" />,
     cell: (l: Row) => <LoanLabel loan={l} />,
     flex: '2',
     align: 'center',
