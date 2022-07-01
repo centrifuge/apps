@@ -14,9 +14,9 @@ export function getLoanLabelStatus(l: Loan): [LabelStatus, string] {
   today.setUTCHours(0, 0, 0, 0)
   if (l.adminWrittenOff) return ['critical', 'Write-off']
   if (l.status === 'Closed') return ['ok', 'Repaid']
-  if (l.status === 'Created') return ['default', 'Created']
+  if (l.status === 'Created' || !l.loanInfo) return ['default', 'Created']
   if (!l.interestRatePerSec.isZero() && l.totalBorrowed.isZero()) return ['default', 'Ready']
-  if (!('maturityDate' in l.loanInfo)) return ['info', 'Ongoing']
+  if (!('maturityDate' in l?.loanInfo)) return ['info', 'Ongoing']
 
   const days = daysBetween(today, l.loanInfo.maturityDate)
 

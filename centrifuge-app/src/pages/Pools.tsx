@@ -54,7 +54,7 @@ const Pools: React.FC = () => {
           <PoolList pools={pools} />
         </>
       ) : (
-        <Shelf justifyContent="center" textAlign="center">
+        <Shelf justifyContent="center" textAlign="center" pt={4}>
           <Text variant="heading2" color="textSecondary">
             There are no pools yet
           </Text>

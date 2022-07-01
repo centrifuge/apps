@@ -11,8 +11,8 @@ const ValueLockedTooltipBody: React.VFC = () => {
 }
 
 const tooltipText = {
-  loanType: {
-    label: 'Loan value',
+  assetType: {
+    label: 'Asset type',
     body: 'This refers to the loan type used to finance the asset. This can e.g. be bullet loans or interest bearing loans. The loan type determines in particular the cash flow profile of the financing.',
   },
   collateralValue: {

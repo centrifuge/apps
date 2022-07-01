@@ -1,3 +1,4 @@
+import { LoanInfo } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { altairDark, centrifugeLight } from '@centrifuge/fabric'
 import React from 'react'
 import { DefaultTheme } from 'styled-components'
@@ -64,10 +65,11 @@ type EnvironmentConfig = {
     dark: DefaultTheme
   }
   defaultTheme: 'light' | 'dark'
-  baseCurrency: 'Native' | 'Usd' | 'PermissionedEur'
+  baseCurrency: 'Native' | 'kUsd' | 'PermissionedEur'
   assetClasses: string[]
   defaultAssetClass: string
   tokensPageSubtitle: string
+  defaultLoanType: LoanInfo['type']
 }
 
 const ALTAIR: EnvironmentConfig = {
@@ -83,6 +85,7 @@ const ALTAIR: EnvironmentConfig = {
   assetClasses: ['Art NFTs'],
   defaultAssetClass: 'Art NFTs',
   tokensPageSubtitle: 'Art NFTs',
+  defaultLoanType: 'CreditLineWithMaturity',
 }
 
 const CENTRIFUGE: EnvironmentConfig = {
@@ -94,7 +97,7 @@ const CENTRIFUGE: EnvironmentConfig = {
     dark: darkTheme,
   },
   defaultTheme: 'light',
-  baseCurrency: 'Usd',
+  baseCurrency: 'kUsd',
   assetClasses: [
     'Consumer Credit',
     'Corporate Credit',
@@ -104,6 +107,7 @@ const CENTRIFUGE: EnvironmentConfig = {
   ],
   defaultAssetClass: 'Consumer Credit',
   tokensPageSubtitle: 'Tokens of real-world assets',
+  defaultLoanType: 'CreditLineWithMaturity',
 }
 
 export const config = (import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge') === 'altair' ? ALTAIR : CENTRIFUGE

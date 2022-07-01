@@ -4,6 +4,7 @@ import { Button, Card, CurrencyInput, IconInfo, Shelf, Stack, Text } from '@cent
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
+import { config } from '../../config'
 import { daysBetween } from '../../utils/date'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, getCurrencySymbol, roundDown } from '../../utils/formatting'
@@ -62,7 +63,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
 
   const debt = loan.outstandingDebt.toDecimal()
   const debtWithMargin = debt.add(
-    loan.principalDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY))
+    loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY))
   )
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
@@ -70,11 +71,15 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const canRepayAll = debtWithMargin.lte(balance)
 
   const allowedToBorrow: Record<LoanInfo['type'], boolean> = {
-    CreditLineWithMaturity:
-      'maturityDate' in loan.loanInfo &&
-      Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
-      loan.outstandingDebt.toDecimal().lt(availableFinancing),
+    CreditLineWithMaturity: true,
+    // !!loan?.loanInfo &&
+    // !!loan?.originationDate &&
+    // 'maturityDate' in loan.loanInfo &&
+    // Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
+    // loan.outstandingDebt.toDecimal().lt(availableFinancing),
     BulletLoan:
+      !!loan?.loanInfo &&
+      !!loan?.originationDate &&
       'maturityDate' in loan.loanInfo &&
       Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
       loan.totalBorrowed.toDecimal().lt(initialCeiling),
@@ -127,7 +132,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
             <Text variant="label1">{formatBalance(loan.totalBorrowed.toDecimal(), pool?.currency, 2)}</Text>
           </Shelf>
         </Stack>
-        {loan.status === 'Active' && allowedToBorrow[loan.loanInfo.type] && (
+        {loan.status === 'Active' && allowedToBorrow[loan?.loanInfo ? loan.loanInfo.type : config.defaultLoanType] && (
           <FormikProvider value={financeForm}>
             <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
               <Field

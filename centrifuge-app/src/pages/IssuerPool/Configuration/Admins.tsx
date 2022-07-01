@@ -14,7 +14,7 @@ import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransactio
 import { usePoolPermissions } from '../../../utils/usePools'
 import { truncate } from '../../../utils/web3'
 
-type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'RiskAdmin'
+type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'LoanAdmin'
 
 type Admin = {
   address: string
@@ -179,7 +179,7 @@ export const Admins: React.FC = () => {
                       header: 'Risk',
                       cell: (row: Row) => (
                         <Field
-                          name={`admins.${row.index}.roles.RiskAdmin`}
+                          name={`admins.${row.index}.roles.LoanAdmin`}
                           as={Checkbox}
                           type="checkbox"
                           disabled={!isEditing || isLoading}
@@ -282,7 +282,7 @@ const SearchResult: React.FC<{ address: string; onAdd: () => void; existingAddre
   )
 }
 
-const roles = ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'RiskAdmin']
+const roles = ['PoolAdmin', 'Borrower', 'PricingAdmin', 'LiquidityAdmin', 'MemberListAdmin', 'LoanAdmin']
 
 function diffPermissions(storedValues: Admin[], formValues: Admin[]) {
   const storedObj = Object.fromEntries(storedValues.map((admin) => [admin.address, admin.roles]))

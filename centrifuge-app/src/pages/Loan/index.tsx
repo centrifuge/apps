@@ -11,6 +11,7 @@ import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { AnchorPillButton } from '../../components/PillButton'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
+import { config } from '../../config'
 import { nftMetadataSchema } from '../../schemas'
 import { formatBalance } from '../../utils/formatting'
 import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
@@ -86,8 +87,11 @@ const Loan: React.FC = () => {
             <PageSummary
               data={[
                 {
-                  label: <Tooltips type="loanType" />,
-                  value: loan?.loanInfo.type ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '',
+                  label: <Tooltips type="assetType" />,
+                  value:
+                    loan?.loanInfo && loan?.loanInfo.type
+                      ? LOAN_TYPE_LABELS[loan.loanInfo.type]
+                      : LOAN_TYPE_LABELS[config.defaultLoanType],
                 },
                 {
                   label: <Tooltips type="riskGroup" />,
@@ -101,25 +105,27 @@ const Loan: React.FC = () => {
                 },
                 {
                   label: <Tooltips type="collateralValue" />,
-                  value: formatBalance(loan.loanInfo.value, pool?.currency),
+                  value: loan.loanInfo ? formatBalance(loan.loanInfo.value, pool?.currency) : 'n/a',
                 },
                 {
                   label: <Tooltips type="availableForFinancing" />,
-                  value: formatBalance(availableFinancing, pool?.currency),
+                  value: !availableFinancing.isZero() ? formatBalance(availableFinancing, pool?.currency) : 'n/a',
                 },
                 {
                   label: <Tooltips type="outstanding" />,
-                  value: formatBalance(loan.outstandingDebt, pool?.currency),
+                  value: loan?.outstandingDebt.gtn(0) ? formatBalance(loan.outstandingDebt, pool?.currency) : 'n/a',
                 },
               ]}
             />
-            <PageSection title="Pricing">
-              <RiskGroupValues
-                values={{ ...loan.loanInfo, interestRatePerSec: loan.interestRatePerSec }}
-                loanType={loan.loanInfo.type}
-                showMaturityDate
-              />
-            </PageSection>
+            {loan?.loanInfo && (
+              <PageSection title="Pricing">
+                <RiskGroupValues
+                  values={{ ...loan.loanInfo, interestRatePerSec: loan.interestRatePerSec }}
+                  loanType={loan?.loanInfo ? loan.loanInfo.type : config.defaultLoanType}
+                  showMaturityDate
+                />
+              </PageSection>
+            )}
           </>
         ) : canPrice ? (
           <PricingForm loan={loan} pool={pool} />

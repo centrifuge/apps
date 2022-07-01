@@ -69,12 +69,15 @@ export const LoanList: React.FC<Props> = ({ loans }) => {
   const Row: Row[] = loans.map((loan) => {
     return {
       statusLabel: getLoanLabelStatus(loan)[1],
-      maturityDate: loan.status !== 'Created' && 'maturityDate' in loan.loanInfo ? loan.loanInfo.maturityDate : '',
+      maturityDate:
+        loan?.loanInfo && loan.status !== 'Created' && 'maturityDate' in loan.loanInfo
+          ? loan.loanInfo.maturityDate
+          : '',
       idSortKey: parseInt(loan.id, 10),
       outstandingDebtSortKey: loan.outstandingDebt.toDecimal().toNumber(),
       originationDateSortKey:
         loan.status === 'Active' &&
-        'originationDate' in loan &&
+        loan?.originationDate &&
         !loan.interestRatePerSec.isZero() &&
         !loan.totalBorrowed.isZero()
           ? loan.originationDate

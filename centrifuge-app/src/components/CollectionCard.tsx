@@ -25,7 +25,7 @@ export const CollectionCard: React.FC<Props> = ({ collection }) => {
     visible ? collection.metadataUri : undefined,
     collectionMetadataSchema
   )
-  const { id, admin, instances } = collection
+  const { id, admin, items } = collection
 
   return (
     <CollectionCardInner
@@ -39,7 +39,7 @@ export const CollectionCard: React.FC<Props> = ({ collection }) => {
       }
       description={metadata?.description}
       image={metadata?.image}
-      count={instances}
+      count={items}
       isLoading={isLoading}
       ref={ref}
     />

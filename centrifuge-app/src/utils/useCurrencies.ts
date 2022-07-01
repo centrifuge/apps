@@ -15,7 +15,7 @@ export function useCurrencies() {
     },
     {
       label: 'kUSD',
-      value: 'Usd',
+      value: 'kusd',
     },
     {
       label: 'pEUR',

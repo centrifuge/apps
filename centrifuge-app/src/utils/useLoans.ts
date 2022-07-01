@@ -38,10 +38,14 @@ export function useAvailableFinancing(poolId: string, assetId: string) {
   const loan = useLoan(poolId, assetId)
   if (!loan) return { current: Dec(0), initial: Dec(0) }
 
-  const debt = loan.outstandingDebt.toDecimal()
+  const debt = loan.outstandingDebt?.toDecimal() ?? 0
   const debtWithMargin = debt.add(
-    loan.principalDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY))
+    loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY))
   )
+
+  if (!loan?.loanInfo) {
+    return { current: Dec(0), initial: Dec(0) }
+  }
 
   const initialCeiling = loan.loanInfo.value.toDecimal().mul(loan.loanInfo.advanceRate.toDecimal())
   let ceiling = initialCeiling
