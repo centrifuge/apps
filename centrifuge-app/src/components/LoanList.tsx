@@ -33,7 +33,9 @@ const columns: Column[] = [
   },
   {
     header: () => <SortableTableHeader label="Financing date" />,
-    cell: (l: Row) => <Text variant="body2">{l.originationDateSortKey ? formatDate(l.originationDate) : ''}</Text>,
+    cell: (l: Row) => (
+      <Text variant="body2">{l.originationDateSortKey && l.originationDate ? formatDate(l.originationDate) : ''}</Text>
+    ),
     flex: '2',
     sortKey: 'originationDateSortKey',
   },

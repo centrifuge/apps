@@ -1131,6 +1131,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         ])
       ),
       map(([loanValues, activeLoansValues, closedLoansValues]) => {
+        console.log('🚀 ~ closedLoansValues', closedLoansValues)
         console.log('🚀 ~ activeLoansValues', activeLoansValues)
         // get api down here to make request
         // const $interestAccrual =  $api.query.interestAccrual.rate(poolId),
@@ -1150,8 +1151,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
             originationDate: '',
             status: loan.status,
             loanInfo: null,
-            adminWrittenOff: loan.adminWrittenOff,
-            writeOffStatus: loan.writeOffStatus,
+            adminWrittenOff: null,
+            writeOffStatus: null,
             asset: {
               collectionId: collectionId.toString(),
               nftId: nftId.toString(),
@@ -1280,8 +1281,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api, [loanData, activeLoanData, closedLoanData]) => ({ api, loanData, activeLoanData, closedLoanData })
       ),
       map(({ api, loanData, activeLoanData, closedLoanData }) => {
-        const $interestAccrual = api.query.interestAccrual.rate(poolId)
-        const closedLoanValule = closedLoanData.toJSON() as unknown
+        // const $interestAccrual = api.query.interestAccrual.rate(poolId)
+        // const closedLoanValule = closedLoanData.toJSON() as unknown
+        console.log('🚀 ~ api', api, closedLoanData)
         const interestAccrual = { accumulatedRate: new Rate(0), lastUpdated: '122324323' } as unknown as InterestAccrual
         const loanValue = loanData.toJSON() as unknown as LoanDetailsData
         const activeLoanValues = activeLoanData.toJSON() as unknown as ActiveLoanDetilsData[]

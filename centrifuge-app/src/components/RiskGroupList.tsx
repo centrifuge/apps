@@ -96,15 +96,17 @@ const RiskGroupList: React.FC = () => {
       metadata?.riskGroups!.map((group) => {
         const loansByRiskGroup = loans?.filter((loan) => {
           return (
-            (loan.status === 'Active' &&
+            // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
+            (loan?.loanInfo &&
+              loan.status === 'Active' &&
               loan.outstandingDebt.toDecimal().greaterThan(0) &&
               loan.loanInfo.type !== 'CreditLine' &&
-              // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
               loan.loanInfo?.lossGivenDefault.toString() === group?.lossGivenDefault &&
               loan.loanInfo?.probabilityOfDefault.toString() === group?.probabilityOfDefault &&
               loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
               loan?.interestRatePerSec.toString() === group?.interestRatePerSec) ||
-            (loan.loanInfo.type === 'CreditLine' &&
+            (loan?.loanInfo &&
+              loan.loanInfo.type === 'CreditLine' &&
               loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
               loan?.interestRatePerSec.toString() === group?.interestRatePerSec)
           )

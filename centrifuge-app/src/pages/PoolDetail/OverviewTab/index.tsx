@@ -56,8 +56,9 @@ export const PoolDetailOverview: React.FC = () => {
         <IssuerSection metadata={metadata} />
       </PageSection>
       <PageSection title=" Asset portfolio" titleAddition="By risk groups">
-        {/* figure out how to to map assets to risk group if they have no loan info */}
-        <React.Suspense fallback={<Spinner />}>{/* <RiskGroupList /> */}</React.Suspense>
+        <React.Suspense fallback={<Spinner />}>
+          <RiskGroupList />
+        </React.Suspense>
       </PageSection>
     </>
   )
