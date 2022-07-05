@@ -788,10 +788,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
       switchMap(([api, loan]) => {
         // Calculate the debt an hour from now to have some margin
         const secondsPerHour = 60 * 60
-        const debtWithMargin = loan.outstandingDebt
+        const debtWithMargin = loan?.outstandingDebt
           .toDecimal()
           .add(loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(secondsPerHour)))
-        const amount = Balance.fromFloat(debtWithMargin).toString()
+        const amount = Balance.fromFloat(debtWithMargin || 0).toString()
         const submittable = api.tx.utility.batchAll([
           api.tx.loans.repay(poolId, loanId, amount),
           api.tx.loans.close(poolId, loanId),
@@ -1322,56 +1322,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function getLoan(args: [poolId: string, loanId: string]) {
     const [poolId, loanId] = args
-    const $api = inst.getApi()
-
-    return $api.pipe(
-      switchMap(
-        (api) =>
-          combineLatest([
-            api.query.loans.loan(poolId, loanId),
-            api.query.loans.activeLoans(poolId),
-            api.query.loans.closedLoans(poolId, loanId),
-          ]),
-        (api, [loanData, activeLoanData, closedLoanData]) => ({ api, loanData, activeLoanData, closedLoanData })
-      ),
-      map(({ api, loanData, activeLoanData, closedLoanData }) => {
-        // interestAccrual takes interestRatePerSecond as parameter
-        // const closedLoanValule = closedLoanData.toJSON() as unknown
-        console.log('🚀 ~ api', api, closedLoanData)
-        const interestAccrual = { accumulatedRate: new Rate(0), lastUpdated: '122324323' } as unknown as InterestAccrual
-        const loanValue = loanData.toJSON() as unknown as LoanDetailsData
-        const activeLoanValues = activeLoanData.toJSON() as unknown as ActiveLoanDetilsData[]
-        const activeLoan = activeLoanValues.find((loan) => loan.loanId.toString() === loanId)
-        // const $interestAccrual = api.query.interestAccrual.rate(activeLoan?.interestRatePerSec)
-        // console.log('🚀 ~ $interestAccrual', $interestAccrual)
-        const [collectionId, nftId] = loanValue.collateral
-
-        const loan: Loan = {
-          id: loanId,
-          poolId,
-          interestRatePerSec: activeLoan?.interestRatePerSec
-            ? new Rate(hexToBN(activeLoan.interestRatePerSec))
-            : new Rate(0),
-          outstandingDebt: activeLoan?.normalizedDebt
-            ? getOutstandingDebt(activeLoan, interestAccrual)
-            : new Balance(0),
-          normalizedDebt: activeLoan?.normalizedDebt ? new Balance(hexToBN(activeLoan.normalizedDebt)) : new Balance(0),
-          totalBorrowed: activeLoan?.totalBorrowed ? new Balance(hexToBN(activeLoan.totalBorrowed)) : new Balance(0),
-          totalRepaid: activeLoan?.totalRepaid ? new Balance(hexToBN(activeLoan.totalRepaid)) : new Balance(0),
-          lastUpdated: interestAccrual?.lastUpdated ? new Date(interestAccrual.lastUpdated * 1000).toISOString() : null,
-          originationDate: activeLoan?.originationDate
-            ? new Date(activeLoan.originationDate * 1000).toISOString()
-            : null,
-          status: getLoanStatus(loanValue),
-          loanInfo: activeLoan?.loanType ? getLoanInfo(activeLoan.loanType) : null,
-          adminWrittenOff: activeLoan?.adminWrittenOff || null,
-          writeOffStatus: activeLoan?.writeOffStatus || null,
-          asset: {
-            collectionId: collectionId.toString(),
-            nftId: nftId.toString(),
-          },
-        }
-        return loan
+    return getLoans([poolId]).pipe(
+      map((loans) => {
+        const loanByLoanId = loans.find((loan) => loan.id === loanId)
+        return loanByLoanId
       })
     )
   }
