@@ -76,12 +76,12 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const canRepayAll = debtWithMargin.lte(balance)
 
   const allowedToBorrow: Record<LoanInfo['type'], boolean> = {
-    CreditLineWithMaturity: true,
-    // !!loan?.loanInfo &&
-    // !!loan?.originationDate &&
-    // 'maturityDate' in loan.loanInfo &&
-    // Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
-    // availableFinancing.greaterThan(0),
+    CreditLineWithMaturity:
+      !!loan?.loanInfo &&
+      !!loan?.originationDate &&
+      'maturityDate' in loan.loanInfo &&
+      Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
+      availableFinancing.greaterThan(0),
     BulletLoan:
       !!loan?.loanInfo &&
       !!loan?.originationDate &&
