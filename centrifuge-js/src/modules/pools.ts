@@ -802,6 +802,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api, [rawPools, rawNavs]) => ({ api, rawPools, rawNavs })
       ),
       switchMap(({ api, rawPools, rawNavs }) => {
+        if (!rawPools.length) return of([])
+
         const navMap = rawNavs.reduce((acc, [key, navValue]) => {
           const poolId = formatPoolKey(key as StorageKey<[u32]>)
           const nav = navValue.toJSON() as unknown as NAVDetailsData
