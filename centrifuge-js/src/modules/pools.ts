@@ -801,6 +801,18 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
+  function closeLoan(args: [poolId: string, loanId: string], options?: TransactionOptions) {
+    const [poolId, loanId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.loans.close(poolId, loanId)
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
   function getPools() {
     const $api = inst.getApi()
     const $events = inst.getEvents().pipe(
@@ -837,6 +849,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api, [rawPools, rawNavs]) => ({ api, rawPools, rawNavs })
       ),
       switchMap(({ api, rawPools, rawNavs }) => {
+        if (!rawPools.length) return of([])
+
         const navMap = rawNavs.reduce((acc, [key, navValue]) => {
           const poolId = formatPoolKey(key as StorageKey<[u32]>)
           const nav = navValue.toJSON() as unknown as NAVDetailsData
@@ -1421,6 +1435,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     financeLoan,
     repayLoanPartially,
     repayAndCloseLoan,
+    closeLoan,
     getPools,
     getPool,
     getBalances,
