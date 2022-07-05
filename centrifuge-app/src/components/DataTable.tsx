@@ -49,7 +49,10 @@ export const DataTable = <T extends Record<string, any>>({
   lastGroupIndex,
   defaultSortOrder = 'desc',
 }: Props<T>) => {
-  const colWithUniqueKey = React.useMemo(() => columns?.map((col, index) => ({ ...col, id: index++ + '' })), [columns])
+  const colWithUniqueKey = React.useMemo(
+    () => columns?.map((col) => ({ ...col, id: Math.random().toString(36).substr(2, 9) })),
+    [columns]
+  )
 
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
