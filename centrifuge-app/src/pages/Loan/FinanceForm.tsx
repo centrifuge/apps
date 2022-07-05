@@ -56,6 +56,11 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
     (cent) => cent.pools.repayAndCloseLoan
   )
 
+  const { execute: doCloseTransaction, isLoading: isCloseLoading } = useCentrifugeTransaction(
+    'Close asset',
+    (cent) => cent.pools.closeLoan
+  )
+
   function repayAll() {
     doRepayAllTransaction([loan.poolId, loan.id])
   }
@@ -111,6 +116,8 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
+  const maturityDatePassed = 'maturityDate' in loan.loanInfo && new Date() > new Date(loan.loanInfo.maturityDate)
+
   return (
     <Stack gap={3}>
       <Stack as={Card} gap={2} p={2}>
@@ -127,7 +134,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
             <Text variant="label1">{formatBalance(loan.totalBorrowed.toDecimal(), pool?.currency, 2)}</Text>
           </Shelf>
         </Stack>
-        {loan.status === 'Active' && allowedToBorrow[loan.loanInfo.type] && (
+        {loan.status === 'Active' && allowedToBorrow[loan.loanInfo.type] && !maturityDatePassed && (
           <FormikProvider value={financeForm}>
             <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
               <Field
@@ -188,54 +195,65 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
           </Shelf>
         </Stack>
 
-        {loan.status === 'Active' && !loan.outstandingDebt.isZero() && (
-          <FormikProvider value={repayForm}>
-            <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
-              <Field
-                validate={combine(
-                  positiveNumber(),
-                  max(balance.toNumber(), 'Amount exceeds balance'),
-                  max(debt.toNumber(), 'Amount exceeds outstanding')
-                )}
-                name="amount"
-              >
-                {({ field, meta, form }: FieldProps) => {
-                  return (
-                    <CurrencyInput
-                      {...field}
-                      label="Amount"
-                      errorMessage={meta.touched ? meta.error : undefined}
-                      secondaryLabel={`${formatBalance(roundDown(maxRepay), pool?.currency, 2)} available`}
-                      disabled={isRepayLoading || isRepayAllLoading}
-                      currency={getCurrencySymbol(pool?.currency)}
-                      onChange={(value) => form.setFieldValue('amount', value)}
-                      onSetMax={() => form.setFieldValue('amount', maxRepay)}
-                    />
-                  )
-                }}
-              </Field>
-              {balance.lessThan(loan.outstandingDebt.toDecimal()) && (
-                <InlineFeedback>
-                  Your wallet balance ({formatBalance(roundDown(balance), pool?.currency, 2)}) is smaller than the
-                  outstanding balance.
-                </InlineFeedback>
-              )}
-              <Stack gap={1} px={1}>
-                <Button type="submit" disabled={isRepayAllLoading} loading={isRepayLoading}>
-                  Repay asset
-                </Button>
-                <Button
-                  variant="secondary"
-                  loading={isRepayAllLoading}
-                  disabled={!canRepayAll || isRepayLoading}
-                  onClick={() => repayAll()}
+        {loan.status === 'Active' &&
+          (!loan.outstandingDebt.isZero() ? (
+            <FormikProvider value={repayForm}>
+              <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
+                <Field
+                  validate={combine(
+                    positiveNumber(),
+                    max(balance.toNumber(), 'Amount exceeds balance'),
+                    max(debt.toNumber(), 'Amount exceeds outstanding')
+                  )}
+                  name="amount"
                 >
-                  Repay all and close
-                </Button>
+                  {({ field, meta, form }: FieldProps) => {
+                    return (
+                      <CurrencyInput
+                        {...field}
+                        label="Amount"
+                        errorMessage={meta.touched ? meta.error : undefined}
+                        secondaryLabel={`${formatBalance(roundDown(maxRepay), pool?.currency, 2)} available`}
+                        disabled={isRepayLoading || isRepayAllLoading}
+                        currency={getCurrencySymbol(pool?.currency)}
+                        onChange={(value) => form.setFieldValue('amount', value)}
+                        onSetMax={() => form.setFieldValue('amount', maxRepay)}
+                      />
+                    )
+                  }}
+                </Field>
+                {balance.lessThan(loan.outstandingDebt.toDecimal()) && (
+                  <InlineFeedback>
+                    Your wallet balance ({formatBalance(roundDown(balance), pool?.currency, 2)}) is smaller than the
+                    outstanding balance.
+                  </InlineFeedback>
+                )}
+                <Stack gap={1} px={1}>
+                  <Button type="submit" disabled={isRepayAllLoading} loading={isRepayLoading}>
+                    Repay asset
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    loading={isRepayAllLoading}
+                    disabled={!canRepayAll || isRepayLoading}
+                    onClick={() => repayAll()}
+                  >
+                    Repay all and close
+                  </Button>
+                </Stack>
               </Stack>
-            </Stack>
-          </FormikProvider>
-        )}
+            </FormikProvider>
+          ) : (
+            maturityDatePassed && (
+              <Button
+                variant="primary"
+                loading={isCloseLoading}
+                onClick={() => doCloseTransaction([loan.poolId, loan.id])}
+              >
+                Close
+              </Button>
+            )
+          ))}
       </Stack>
     </Stack>
   )
