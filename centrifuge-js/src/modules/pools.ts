@@ -791,7 +791,15 @@ export function getPoolsModule(inst: CentrifugeBase) {
     const $api = inst.getApi()
     const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
-        const event = events.find(({ event }) => api.events.pools.Created.is(event))
+        const event = events.find(
+          ({ event }) =>
+            api.events.pools.Created.is(event) ||
+            api.events.pools.Updated.is(event) ||
+            api.events.pools.MaxReserveSet.is(event) ||
+            api.events.pools.MetadataSet.is(event) ||
+            api.events.pools.EpochClosed.is(event) ||
+            api.events.pools.EpochExecuted.is(event)
+        )
         return !!event
       })
     )
@@ -851,7 +859,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
         )
 
-        const $issuance = api.query.ormlTokens.totalIssuance.multi(issuanceKeys)
+        const $issuance = api.query.ormlTokens.totalIssuance.multi(issuanceKeys).pipe(take(1))
         return combineLatest([$issuance, $prices]).pipe(
           map(([rawIssuances, rawPrices]) => {
             const mappedPools = pools.map((poolObj, poolIndex) => {
