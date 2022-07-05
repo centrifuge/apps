@@ -824,7 +824,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
             api.events.pools.MaxReserveSet.is(event) ||
             api.events.pools.MetadataSet.is(event) ||
             api.events.pools.EpochClosed.is(event) ||
-            api.events.pools.EpochExecuted.is(event)
+            api.events.pools.EpochExecuted.is(event) ||
+            api.events.pools.InvestOrderUpdated.is(event) ||
+            api.events.pools.RedeemOrderUpdated.is(event)
         )
         return !!event
       })
@@ -1152,7 +1154,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
             api.events.loans.Created.is(event) ||
             api.events.loans.Closed.is(event) ||
             api.events.loans.Priced.is(event) ||
-            api.events.loans.Borrowed.is(event)
+            api.events.loans.Borrowed.is(event) ||
+            api.events.loans.Repaid.is(event) ||
+            api.events.loans.NAVUpdated.is(event)
         )
         return !!event
       })
