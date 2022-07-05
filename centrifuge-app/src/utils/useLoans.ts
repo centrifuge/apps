@@ -27,11 +27,9 @@ export function useLoansAcrossPools(poolIds?: string[]) {
 }
 
 export function useLoan(poolId: string, assetId: string) {
-  const [result] = useCentrifugeQuery(['loan', poolId, assetId], (cent) => cent.pools.getLoan([poolId, assetId]), {
-    suspense: true,
-  })
-
-  return result
+  const loans = useLoans(poolId)
+  const loan = loans?.find((loan) => loan.id === assetId)
+  return loan
 }
 
 export function useAvailableFinancing(poolId: string, assetId: string) {
