@@ -1,7 +1,7 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
-import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
+import { combineLatestWith, filter, map, repeatWhen, startWith, switchMap, take } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
 import { SubqueryPoolSnapshot } from '../types/subquery'
@@ -846,15 +846,15 @@ export function getPoolsModule(inst: CentrifugeBase) {
         const issuanceKeys = keys.map(([poolId, trancheId]) => ({ Tranche: [poolId, trancheId] }))
 
         // Get the token prices via RPC
-        // const $prices = combineLatest(
-        //   // @ts-expect-error
-        //   pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
-        // )
+        const $prices = combineLatest(
+          // @ts-expect-error
+          pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
+        )
 
         const $issuance = api.query.ormlTokens.totalIssuance.multi(issuanceKeys)
-        return combineLatest([$issuance]).pipe(
-          map(([rawIssuances]) => {
-            const mappedPools = pools.map((poolObj) => {
+        return combineLatest([$issuance, $prices]).pipe(
+          map(([rawIssuances, rawPrices]) => {
+            const mappedPools = pools.map((poolObj, poolIndex) => {
               const { data: pool, id: poolId, metadata } = poolObj
               const navData = navMap[poolId]
               const currency = getCurrency(pool.currency)
@@ -887,13 +887,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
                     )
                   }, new Balance(0))
 
-                  // const tokenPrice = rawPrices[poolIndex]?.[index].toJSON() as string
+                  const tokenPrice = rawPrices[poolIndex]?.[index].toJSON() as string
 
                   return {
                     id: trancheId,
                     index,
                     seniority: tranche.seniority,
-                    tokenPrice: new Price(0),
+                    tokenPrice: tokenPrice ? new Price(hexToBN(tokenPrice)) : null,
                     currency,
                     totalIssuance: new Balance(rawIssuances[issuanceIndex].toString()),
                     poolId,
@@ -1281,7 +1281,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         (api, [loanData, activeLoanData, closedLoanData]) => ({ api, loanData, activeLoanData, closedLoanData })
       ),
       map(({ api, loanData, activeLoanData, closedLoanData }) => {
-        // const $interestAccrual = api.query.interestAccrual.rate(poolId)
+        // interestAccrual takes interestRatePerSecond as parameter
         // const closedLoanValule = closedLoanData.toJSON() as unknown
         console.log('🚀 ~ api', api, closedLoanData)
         const interestAccrual = { accumulatedRate: new Rate(0), lastUpdated: '122324323' } as unknown as InterestAccrual
@@ -1289,6 +1289,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         const activeLoanValues = activeLoanData.toJSON() as unknown as ActiveLoanDetilsData[]
         // @ts-expect-error
         const activeLoan = activeLoanValues.find((loan) => loan.loanId.toString() === loanId)
+        const $interestAccrual = api.query.interestAccrual.rate(activeLoan?.interestRatePerSec)
         const [collectionId, nftId] = loanValue.collateral
 
         const loan: Loan = {
