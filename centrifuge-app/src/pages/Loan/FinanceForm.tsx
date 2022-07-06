@@ -5,7 +5,6 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { config } from '../../config'
-import { daysBetween } from '../../utils/date'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, getCurrencySymbol, roundDown } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
@@ -66,29 +65,33 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
     doRepayAllTransaction([loan.poolId, loan.id])
   }
 
-  const debt = loan.outstandingDebt.toDecimal()
-  const debtWithMargin = debt.add(
-    loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY))
-  )
+  const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
+  const debtWithMargin =
+    debt &&
+    loan?.normalizedDebt &&
+    loan?.interestRatePerSec &&
+    debt.add(loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
-  const maxRepay = balance.lessThan(loan.outstandingDebt.toDecimal()) ? balance : loan.outstandingDebt.toDecimal()
-  const canRepayAll = debtWithMargin.lte(balance)
+  const maxRepay = loan?.outstandingDebt
+    ? balance.lessThan(loan.outstandingDebt.toDecimal())
+      ? balance
+      : loan.outstandingDebt.toDecimal()
+    : Dec(0)
+  const canRepayAll = debtWithMargin?.lte(balance)
 
   const allowedToBorrow: Record<LoanInfo['type'], boolean> = {
     CreditLineWithMaturity:
       !!loan?.loanInfo &&
       !!loan?.originationDate &&
       'maturityDate' in loan.loanInfo &&
-      Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
       availableFinancing.greaterThan(0),
     BulletLoan:
       !!loan?.loanInfo &&
       !!loan?.originationDate &&
       'maturityDate' in loan.loanInfo &&
-      Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
-      loan.totalBorrowed.toDecimal().lt(initialCeiling),
-    CreditLine: loan.outstandingDebt.toDecimal().lt(initialCeiling),
+      !!loan.totalBorrowed?.toDecimal().lt(initialCeiling),
+    CreditLine: !!loan.outstandingDebt?.toDecimal().lt(initialCeiling),
   }
 
   const financeForm = useFormik<FinanceValues>({
@@ -137,7 +140,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total financed</Text>
-            <Text variant="label1">{formatBalance(loan.totalBorrowed.toDecimal(), pool?.currency, 2)}</Text>
+            <Text variant="label1">{formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency, 2)}</Text>
           </Shelf>
         </Stack>
         {loan.status === 'Active' &&
@@ -193,18 +196,16 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Outstanding</Text>
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">
-              {formatBalance(roundDown(loan.outstandingDebt.toDecimal()), pool?.currency, 2)}
-            </Text>
+            <Text variant="heading3">{formatBalance(roundDown(debt), pool?.currency, 2)}</Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total repaid</Text>
-            <Text variant="label1">{formatBalance(loan.totalRepaid, pool?.currency, 2)}</Text>
+            <Text variant="label1">{formatBalance(loan?.totalRepaid || 0, pool?.currency, 2)}</Text>
           </Shelf>
         </Stack>
 
         {loan.status === 'Active' &&
-          (!loan.outstandingDebt.isZero() ? (
+          (debt.gt(0) ? (
             <FormikProvider value={repayForm}>
               <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
                 <Field
@@ -230,7 +231,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                     )
                   }}
                 </Field>
-                {balance.lessThan(loan.outstandingDebt.toDecimal()) && (
+                {balance.lessThan(debt) && (
                   <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
                     <IconInfo size="iconMedium" />
                     <Text variant="body3">

@@ -11,7 +11,7 @@ export const useAverageMaturity = (poolId: string) => {
     const maturityPerAsset = assets.reduce((sum, asset) => {
       if (
         (asset?.loanInfo && asset.loanInfo.type !== 'BulletLoan' && asset.loanInfo.type !== 'CreditLineWithMaturity') ||
-        !asset.outstandingDebt.gtn(0)
+        !asset.outstandingDebt?.gtn(0)
       ) {
         return sum
       }
@@ -21,7 +21,10 @@ export const useAverageMaturity = (poolId: string) => {
       )
     }, Dec(0))
 
-    const totalOutstandingDebt = assets.reduce((sum, asset) => sum.add(asset.outstandingDebt.toDecimal()), Dec(0))
+    const totalOutstandingDebt = assets.reduce(
+      (sum, asset) => sum.add(asset.outstandingDebt?.toDecimal() || Dec(0)),
+      Dec(0)
+    )
 
     return maturityPerAsset.div(totalOutstandingDebt).toNumber()
   }, [loans])

@@ -76,12 +76,12 @@ export const LoanList: React.FC<Props> = ({ loans }) => {
           ? loan.loanInfo.maturityDate
           : '',
       idSortKey: parseInt(loan.id, 10),
-      outstandingDebtSortKey: loan.outstandingDebt.toDecimal().toNumber(),
+      outstandingDebtSortKey: loan?.outstandingDebt?.toDecimal().toNumber(),
       originationDateSortKey:
         loan.status === 'Active' &&
         loan?.originationDate &&
-        !loan.interestRatePerSec.isZero() &&
-        !loan.totalBorrowed.isZero()
+        !loan?.interestRatePerSec?.isZero() &&
+        !loan?.totalBorrowed?.isZero()
           ? loan.originationDate
           : '',
       ...loan,
@@ -122,7 +122,9 @@ const OutstandingDebt: React.VFC<{ loan: Row }> = ({ loan }) => {
 
   return (
     <Text variant="body2">
-      {!['Ready', 'Created'].includes(loan.statusLabel) ? formatBalance(loan.outstandingDebt, pool?.currency) : ''}
+      {loan?.outstandingDebt && !['Ready', 'Created'].includes(loan.statusLabel)
+        ? formatBalance(loan.outstandingDebt, pool?.currency)
+        : ''}
     </Text>
   )
 }

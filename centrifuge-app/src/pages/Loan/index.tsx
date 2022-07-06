@@ -113,11 +113,11 @@ const Loan: React.FC = () => {
                 },
                 {
                   label: <Tooltips type="outstanding" />,
-                  value: loan?.outstandingDebt.gtn(0) ? formatBalance(loan.outstandingDebt, pool?.currency) : 'n/a',
+                  value: loan?.outstandingDebt?.gtn(0) ? formatBalance(loan.outstandingDebt, pool?.currency) : 'n/a',
                 },
               ]}
             />
-            {loan?.loanInfo && (
+            {loan?.loanInfo && loan?.interestRatePerSec && (
               <PageSection title="Pricing">
                 <RiskGroupValues
                   values={{ ...loan.loanInfo, interestRatePerSec: loan.interestRatePerSec }}

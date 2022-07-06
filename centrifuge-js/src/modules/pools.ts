@@ -7,6 +7,7 @@ import { Account, TransactionOptions } from '../types'
 import { SubqueryPoolSnapshot } from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
 import { Balance, Perquintill, Price, Rate } from '../utils/BN'
+import { Dec } from '../utils/Decimal'
 
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
@@ -297,16 +298,16 @@ type ClosedLoanDetilsData = LoanDetailsData & {
 export type Loan = {
   id: string
   poolId: string
-  interestRatePerSec: Rate
-  outstandingDebt: Balance
-  normalizedDebt: Balance
-  totalBorrowed: Balance
-  totalRepaid: Balance
-  lastUpdated: string | null
-  originationDate: string | null
+  interestRatePerSec?: Rate
+  outstandingDebt?: Balance
+  normalizedDebt?: Balance
+  totalBorrowed?: Balance
+  totalRepaid?: Balance
+  lastUpdated?: string
+  originationDate?: string
   status: LoanStatus
-  loanInfo: LoanInfo | null
-  adminWrittenOff: boolean | null
+  loanInfo?: LoanInfo
+  adminWrittenOff?: boolean
   writeOffStatus: WriteOffStatus
   asset: {
     collectionId: string
@@ -788,9 +789,14 @@ export function getPoolsModule(inst: CentrifugeBase) {
       switchMap(([api, loan]) => {
         // Calculate the debt an hour from now to have some margin
         const secondsPerHour = 60 * 60
-        const debtWithMargin = loan?.outstandingDebt
-          .toDecimal()
-          .add(loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(secondsPerHour)))
+        const debtWithMargin =
+          loan?.normalizedDebt && loan?.interestRatePerSec
+            ? loan?.outstandingDebt
+                ?.toDecimal()
+                .add(
+                  loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(secondsPerHour))
+                )
+            : Dec(0)
         const amount = Balance.fromFloat(debtWithMargin || 0).toString()
         const submittable = api.tx.utility.batchAll([
           api.tx.loans.repay(poolId, loanId, amount),
@@ -1173,7 +1179,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         const $interestAccrual = api.query.interestAccrual.rate.multi(interestAccrualKeys).pipe(take(1))
         return combineLatest([
           api.query.loans.loan.entries(poolId),
-          api.query.loans.activeLoans(poolId),
+          of(activeLoanValues),
           api.query.loans.closedLoans.entries(poolId),
           $interestAccrual,
         ])
@@ -1182,52 +1188,47 @@ export function getPoolsModule(inst: CentrifugeBase) {
         const loans = (loanValues as any[]).map(([key, value]) => {
           const loan = value.toJSON() as unknown as LoanDetailsData
           const [collectionId, nftId] = loan.collateral
-          const mapped: Loan = {
+          return {
             id: formatLoanKey(key as StorageKey<[u32, u32]>),
             poolId,
-            interestRatePerSec: new Rate(0),
-            outstandingDebt: new Balance(0),
-            normalizedDebt: new Balance(0),
-            totalBorrowed: new Balance(0),
-            totalRepaid: new Balance(0),
-            lastUpdated: '',
-            originationDate: '',
             status: getLoanStatus(loan),
-            loanInfo: null,
-            adminWrittenOff: null,
-            writeOffStatus: null,
             asset: {
               collectionId: collectionId.toString(),
               nftId: nftId.toString(),
             },
-          }
-          return mapped
+          } as Loan
         })
 
         const activeLoanData = activeLoanValues.toJSON() as ActiveLoanDetilsData[]
-        const activeLoans = activeLoanData.map((activeLoan, index) => {
-          const interestData = interestAccrual[index].toJSON() as InterestAccrual
-          const mapped: Omit<Loan, 'asset' | 'status'> = {
-            id: String(activeLoan.loanId),
-            poolId,
-            interestRatePerSec: new Rate(hexToBN(activeLoan.interestRatePerSec)),
-            outstandingDebt: getOutstandingDebt(activeLoan, interestData),
-            normalizedDebt: new Balance(hexToBN(activeLoan.normalizedDebt)),
-            totalBorrowed: new Balance(hexToBN(activeLoan.totalBorrowed)),
-            totalRepaid: new Balance(hexToBN(activeLoan.totalRepaid)),
-            lastUpdated: new Date(activeLoan.lastUpdated * 1000).toISOString(),
-            originationDate: new Date(activeLoan.originationDate * 1000).toISOString(),
-            loanInfo: getLoanInfo(activeLoan.loanType),
-            adminWrittenOff: activeLoan.adminWrittenOff,
-            writeOffStatus: activeLoan.writeOffStatus,
-          }
-          return mapped
-        })
+        const activeLoans = activeLoanData.reduce<Record<string, Omit<Loan, 'asset' | 'status'>>>(
+          (prev, activeLoan, index) => {
+            const interestData = interestAccrual[index].toJSON() as InterestAccrual
+            const mapped = {
+              id: String(activeLoan.loanId),
+              poolId,
+              interestRatePerSec: new Rate(hexToBN(activeLoan.interestRatePerSec)),
+              outstandingDebt: getOutstandingDebt(activeLoan, interestData),
+              normalizedDebt: new Balance(hexToBN(activeLoan.normalizedDebt)),
+              totalBorrowed: new Balance(hexToBN(activeLoan.totalBorrowed)),
+              totalRepaid: new Balance(hexToBN(activeLoan.totalRepaid)),
+              lastUpdated: new Date(activeLoan.lastUpdated * 1000).toISOString(),
+              originationDate: new Date(activeLoan.originationDate * 1000).toISOString(),
+              loanInfo: getLoanInfo(activeLoan.loanType),
+              adminWrittenOff: activeLoan.adminWrittenOff,
+              writeOffStatus: activeLoan.writeOffStatus,
+            }
+            return { ...prev, [String(activeLoan.loanId)]: mapped }
+          },
+          {}
+        )
 
-        const closedLoans = (closedLoansValues as any[]).map(([key, value]) => {
+        const closedLoans = (closedLoansValues as any[]).reduce<
+          Record<string, Omit<Loan, 'asset' | 'status' | 'adminWrittenOff'>>
+        >((prev, [key, value]) => {
           const closedLoan = value.toJSON() as ClosedLoanDetilsData
-          const mapped: Omit<Loan, 'asset' | 'status' | 'adminWrittenOff'> = {
-            id: formatLoanKey(key as StorageKey<[u32, u32]>),
+          const loanId = formatLoanKey(key as StorageKey<[u32, u32]>)
+          const loan = {
+            id: loanId,
             poolId,
             interestRatePerSec: new Rate(hexToBN(closedLoan.interestRatePerSec)),
             outstandingDebt: new Balance(0),
@@ -1239,24 +1240,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
             loanInfo: getLoanInfo(closedLoan.loanType),
             writeOffStatus: closedLoan.writeOffStatus,
           }
-          return mapped
-        })
+          return { ...prev, [loanId]: loan }
+        }, {})
 
-        // combine loan status and collateral from loans.loan() with active/closedLoan data
-        const mergedLoans = [...loans, ...activeLoans, ...closedLoans].reduce<any[]>((prev, curr) => {
-          const loanExists = prev.some((loan) => loan.id === curr.id)
-          if (loanExists) {
-            return prev.map((loan) => {
-              if (String(loan.id) === String(curr.id)) {
-                return { ...loan, ...curr }
-              }
-              return loan
-            })
-          }
-
-          return [...prev, curr]
-        }, []) as Loan[]
-        return mergedLoans
+        return loans.map((loan) => ({ ...loan, ...activeLoans[loan.id], ...closedLoans[loan.id] }), []) as Loan[]
       }),
       repeatWhen(() => $events)
     )
@@ -1441,11 +1428,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
     repayAndCloseLoan,
     closeLoan,
     getPools,
-    getPool,
     getBalances,
     getOrder,
     getLoans,
-    getLoan,
     getPendingCollect,
     addWriteOffGroup,
     adminWriteOff,

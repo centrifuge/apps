@@ -36,10 +36,12 @@ export function useAvailableFinancing(poolId: string, assetId: string) {
   const loan = useLoan(poolId, assetId)
   if (!loan) return { current: Dec(0), initial: Dec(0) }
 
-  const debt = loan.outstandingDebt?.toDecimal() ?? 0
-  const debtWithMargin = debt.add(
-    loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY))
-  )
+  const debtWithMargin =
+    loan?.normalizedDebt && loan.interestRatePerSec
+      ? loan.normalizedDebt
+          .toDecimal()
+          .add(loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
+      : Dec(0)
 
   if (!loan?.loanInfo) {
     return { current: Dec(0), initial: Dec(0) }
@@ -48,7 +50,7 @@ export function useAvailableFinancing(poolId: string, assetId: string) {
   const initialCeiling = loan.loanInfo.value.toDecimal().mul(loan.loanInfo.advanceRate.toDecimal())
   let ceiling = initialCeiling
   if (loan.loanInfo.type === 'BulletLoan') {
-    ceiling = ceiling.minus(loan.totalBorrowed.toDecimal())
+    ceiling = ceiling.minus(loan.totalBorrowed?.toDecimal() || 0)
   } else {
     ceiling = ceiling.minus(debtWithMargin)
     ceiling = ceiling.isNegative() ? Dec(0) : ceiling

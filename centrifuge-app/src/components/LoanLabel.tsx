@@ -15,8 +15,8 @@ export function getLoanLabelStatus(l: Loan): [LabelStatus, string] {
   if (l.adminWrittenOff) return ['critical', 'Write-off']
   if (l.status === 'Closed') return ['ok', 'Repaid']
   if (l.status === 'Created' || !l.loanInfo) return ['default', 'Created']
-  if (!l.interestRatePerSec.isZero() && l.totalBorrowed.isZero()) return ['default', 'Ready']
-  if (!('maturityDate' in l?.loanInfo)) return ['info', 'Ongoing']
+  if (l.interestRatePerSec?.gtn(0) && l.totalBorrowed?.isZero()) return ['default', 'Ready']
+  if (!('maturityDate' in l.loanInfo)) return ['info', 'Ongoing']
 
   const days = daysBetween(today, l.loanInfo.maturityDate)
 
@@ -28,6 +28,7 @@ export function getLoanLabelStatus(l: Loan): [LabelStatus, string] {
 }
 
 const LoanLabel: React.FC<Props> = ({ loan }) => {
+  console.log('🚀 ~ LoanLabel', loan)
   const [status, text] = getLoanLabelStatus(loan)
   return <StatusChip status={status}>{text}</StatusChip>
 }

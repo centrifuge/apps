@@ -24,7 +24,7 @@ export function getMatchingRiskGroupIndex(loan: LoanType, riskGroups: PoolMetada
   if (!loan.loanInfo) {
     return -1
   }
-  const loanInterestRatePerSec = loan.interestRatePerSec.toApr().toFixed(4)
+  const loanInterestRatePerSec = loan.interestRatePerSec?.toApr().toFixed(4)
   const loanAdvanceRate = loan.loanInfo.advanceRate.toFloat().toFixed(4)
   const loanLossGivenDefault =
     'lossGivenDefault' in loan.loanInfo ? loan.loanInfo.lossGivenDefault.toFloat().toFixed(4) : null
