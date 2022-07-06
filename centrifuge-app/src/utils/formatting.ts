@@ -3,7 +3,7 @@ import Decimal from 'decimal.js-light'
 
 const currencySymbols = {
   native: 'AIR',
-  usd: 'kUSD',
+  kusd: 'kUSD',
   permissionedeur: 'pEUR',
 }
 

@@ -4,7 +4,7 @@ import { Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Te
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { daysBetween } from '../../utils/date'
+import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, getCurrencySymbol, roundDown } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
@@ -65,25 +65,33 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
     doRepayAllTransaction([loan.poolId, loan.id])
   }
 
-  const debt = loan.outstandingDebt.toDecimal()
-  const debtWithMargin = debt.add(
-    loan.principalDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY))
-  )
+  const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
+  const debtWithMargin =
+    debt &&
+    loan?.normalizedDebt &&
+    loan?.interestRatePerSec &&
+    debt.add(loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
-  const maxRepay = balance.lessThan(loan.outstandingDebt.toDecimal()) ? balance : loan.outstandingDebt.toDecimal()
-  const canRepayAll = debtWithMargin.lte(balance)
+  const maxRepay = loan?.outstandingDebt
+    ? balance.lessThan(loan.outstandingDebt.toDecimal())
+      ? balance
+      : loan.outstandingDebt.toDecimal()
+    : Dec(0)
+  const canRepayAll = debtWithMargin?.lte(balance)
 
   const allowedToBorrow: Record<LoanInfo['type'], boolean> = {
     CreditLineWithMaturity:
+      !!loan?.loanInfo &&
+      !!loan?.originationDate &&
       'maturityDate' in loan.loanInfo &&
-      Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
       availableFinancing.greaterThan(0),
     BulletLoan:
+      !!loan?.loanInfo &&
+      !!loan?.originationDate &&
       'maturityDate' in loan.loanInfo &&
-      Dec(daysBetween(loan.originationDate, loan.loanInfo.maturityDate)).gt(0) &&
-      loan.totalBorrowed.toDecimal().lt(initialCeiling),
-    CreditLine: loan.outstandingDebt.toDecimal().lt(initialCeiling),
+      !!loan.totalBorrowed?.toDecimal().lt(initialCeiling),
+    CreditLine: !!loan.outstandingDebt?.toDecimal().lt(initialCeiling),
   }
 
   const financeForm = useFormik<FinanceValues>({
@@ -116,7 +124,8 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  const maturityDatePassed = 'maturityDate' in loan.loanInfo && new Date() > new Date(loan.loanInfo.maturityDate)
+  const maturityDatePassed =
+    loan?.loanInfo && 'maturityDate' in loan.loanInfo && new Date() > new Date(loan.loanInfo.maturityDate)
 
   return (
     <Stack gap={3}>
@@ -131,53 +140,55 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total financed</Text>
-            <Text variant="label1">{formatBalance(loan.totalBorrowed.toDecimal(), pool?.currency, 2)}</Text>
+            <Text variant="label1">{formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency, 2)}</Text>
           </Shelf>
         </Stack>
-        {loan.status === 'Active' && allowedToBorrow[loan.loanInfo.type] && !maturityDatePassed && (
-          <FormikProvider value={financeForm}>
-            <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
-              <Field
-                name="amount"
-                validate={combine(
-                  positiveNumber(),
-                  max(availableFinancing.toNumber(), 'Amount exceeds available financing'),
-                  max(
-                    maxBorrow.toNumber(),
-                    `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency, 2)})`
-                  )
+        {loan.status === 'Active' &&
+          allowedToBorrow[loan?.loanInfo ? loan.loanInfo.type : config.defaultLoanType] &&
+          !maturityDatePassed && (
+            <FormikProvider value={financeForm}>
+              <Stack as={Form} gap={2} noValidate ref={financeFormRef}>
+                <Field
+                  name="amount"
+                  validate={combine(
+                    positiveNumber(),
+                    max(availableFinancing.toNumber(), 'Amount exceeds available financing'),
+                    max(
+                      maxBorrow.toNumber(),
+                      `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency, 2)})`
+                    )
+                  )}
+                >
+                  {({ field, meta, form }: FieldProps) => (
+                    <CurrencyInput
+                      {...field}
+                      label="Amount"
+                      errorMessage={meta.touched ? meta.error : undefined}
+                      secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency, 2)} available`}
+                      disabled={isFinanceLoading}
+                      currency={getCurrencySymbol(pool?.currency)}
+                      onChange={(value: number) => form.setFieldValue('amount', value)}
+                      onSetMax={() => form.setFieldValue('amount', maxBorrow)}
+                    />
+                  )}
+                </Field>
+                {poolReserve.lessThan(availableFinancing) && (
+                  <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
+                    <IconInfo size="iconMedium" />
+                    <Text variant="body3">
+                      The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency)}) is smaller than
+                      the available financing
+                    </Text>
+                  </Shelf>
                 )}
-              >
-                {({ field, meta, form }: FieldProps) => (
-                  <CurrencyInput
-                    {...field}
-                    label="Amount"
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency, 2)} available`}
-                    disabled={isFinanceLoading}
-                    currency={getCurrencySymbol(pool?.currency)}
-                    onChange={(value: number) => form.setFieldValue('amount', value)}
-                    onSetMax={() => form.setFieldValue('amount', maxBorrow)}
-                  />
-                )}
-              </Field>
-              {poolReserve.lessThan(availableFinancing) && (
-                <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
-                  <IconInfo size="iconMedium" />
-                  <Text variant="body3">
-                    The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency)}) is smaller than the
-                    available financing
-                  </Text>
-                </Shelf>
-              )}
-              <Stack px={1}>
-                <Button type="submit" loading={isFinanceLoading}>
-                  Finance asset
-                </Button>
+                <Stack px={1}>
+                  <Button type="submit" loading={isFinanceLoading}>
+                    Finance asset
+                  </Button>
+                </Stack>
               </Stack>
-            </Stack>
-          </FormikProvider>
-        )}
+            </FormikProvider>
+          )}
       </Stack>
 
       <Stack as={Card} gap={2} p={2}>
@@ -185,18 +196,16 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Outstanding</Text>
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">
-              {formatBalance(roundDown(loan.outstandingDebt.toDecimal()), pool?.currency, 2)}
-            </Text>
+            <Text variant="heading3">{formatBalance(roundDown(debt), pool?.currency, 2)}</Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total repaid</Text>
-            <Text variant="label1">{formatBalance(loan.totalRepaid, pool?.currency, 2)}</Text>
+            <Text variant="label1">{formatBalance(loan?.totalRepaid || 0, pool?.currency, 2)}</Text>
           </Shelf>
         </Stack>
 
         {loan.status === 'Active' &&
-          (!loan.outstandingDebt.isZero() ? (
+          (debt.gt(0) ? (
             <FormikProvider value={repayForm}>
               <Stack as={Form} gap={2} noValidate ref={repayFormRef}>
                 <Field
@@ -222,7 +231,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                     )
                   }}
                 </Field>
-                {balance.lessThan(loan.outstandingDebt.toDecimal()) && (
+                {balance.lessThan(debt) && (
                   <InlineFeedback>
                     Your wallet balance ({formatBalance(roundDown(balance), pool?.currency, 2)}) is smaller than the
                     outstanding balance.

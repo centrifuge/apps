@@ -33,15 +33,15 @@ export const PoolDetailAssets: React.FC = () => {
   if (!pool || !loans) return null
 
   const avgInterestRatePerSec = loans
-    ?.reduce<any>((curr, prev) => curr.add(prev.interestRatePerSec.toAprPercent()), Dec(0))
+    ?.reduce<any>((curr, prev) => curr.add(prev.interestRatePerSec?.toAprPercent() || Dec(0)), Dec(0))
     .dividedBy(loans?.length)
     .toFixed(2)
     .toString()
 
-  const ongoingAssets = loans?.filter((loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero())
+  const ongoingAssets = loans?.filter((loan) => loan.status === 'Active' && !loan.outstandingDebt?.isZero())
 
   const avgAmount = ongoingAssets
-    .reduce<any>((curr, prev) => curr.add(prev.outstandingDebt.toDecimal()), Dec(0))
+    .reduce<any>((curr, prev) => curr.add(prev.outstandingDebt?.toDecimal() || Dec(0)), Dec(0))
     .dividedBy(ongoingAssets?.length)
     .toDecimalPlaces(2)
 

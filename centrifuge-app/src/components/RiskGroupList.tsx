@@ -86,8 +86,10 @@ const RiskGroupList: React.FC = () => {
 
   const totalAmountsSum = React.useMemo(
     () =>
-      loans?.reduce<Balance>((prev, curr) => new Balance(prev.add(curr.outstandingDebt)), new Balance(0)) ||
-      new Balance(0),
+      loans?.reduce<Balance>(
+        (prev, curr) => new Balance(prev.add(curr?.outstandingDebt || new Balance(0))),
+        new Balance(0)
+      ) || new Balance(0),
     [loans]
   )
 
@@ -96,17 +98,19 @@ const RiskGroupList: React.FC = () => {
       metadata?.riskGroups!.map((group) => {
         const loansByRiskGroup = loans?.filter((loan) => {
           return (
-            (loan.status === 'Active' &&
-              loan.outstandingDebt.toDecimal().greaterThan(0) &&
+            // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
+            (loan?.loanInfo &&
+              loan.status === 'Active' &&
+              loan.outstandingDebt?.toDecimal().greaterThan(0) &&
               loan.loanInfo.type !== 'CreditLine' &&
-              // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
               loan.loanInfo?.lossGivenDefault.toString() === group?.lossGivenDefault &&
               loan.loanInfo?.probabilityOfDefault.toString() === group?.probabilityOfDefault &&
               loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
-              loan?.interestRatePerSec.toString() === group?.interestRatePerSec) ||
-            (loan.loanInfo.type === 'CreditLine' &&
+              loan?.interestRatePerSec?.toString() === group?.interestRatePerSec) ||
+            (loan?.loanInfo &&
+              loan.loanInfo.type === 'CreditLine' &&
               loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
-              loan?.interestRatePerSec.toString() === group?.interestRatePerSec)
+              loan?.interestRatePerSec?.toString() === group?.interestRatePerSec)
           )
         })
 
@@ -116,7 +120,7 @@ const RiskGroupList: React.FC = () => {
         const interestRatePerSec = new Rate(group.interestRatePerSec).toAprPercent().toDecimalPlaces(2).toString()
 
         const amount = loansByRiskGroup?.reduce<Balance>(
-          (prev, curr) => new Balance(prev?.add(curr.outstandingDebt)),
+          (prev, curr) => new Balance(prev?.add(curr?.outstandingDebt || new Balance(0))),
           new Balance('0')
         )
         if (!amount || !totalAmountsSum) {

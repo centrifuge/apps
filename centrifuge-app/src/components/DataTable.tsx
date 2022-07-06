@@ -74,7 +74,7 @@ export const DataTable = <T extends Record<string, any>>({
         {showHeader &&
           columns.map((col, i) => (
             <HeaderCol
-              key={`${col.header}-${i}`}
+              key={i}
               style={{ flex: col.flex }}
               tabIndex={col?.sortKey ? 0 : undefined}
               as={col?.sortKey ? 'button' : 'div'}
@@ -101,8 +101,8 @@ export const DataTable = <T extends Record<string, any>>({
             key={keyField ? row[keyField] : i}
             tabIndex={onRowClicked ? 0 : undefined}
           >
-            {columns.map((col) => (
-              <DataCol style={{ flex: col.flex }} align={col?.align} key={`${col.header}-${i}`}>
+            {columns.map((col, index) => (
+              <DataCol style={{ flex: col.flex }} align={col?.align} key={index}>
                 {col.cell(row, i)}
               </DataCol>
             ))}
