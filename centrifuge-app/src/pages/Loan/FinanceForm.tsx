@@ -1,6 +1,6 @@
 import { Balance, Loan as LoanType } from '@centrifuge/centrifuge-js'
 import { LoanInfo } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { Button, Card, CurrencyInput, IconInfo, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -223,13 +223,10 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                   }}
                 </Field>
                 {balance.lessThan(loan.outstandingDebt.toDecimal()) && (
-                  <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
-                    <IconInfo size="iconMedium" />
-                    <Text variant="body3">
-                      Your wallet balance ({formatBalance(roundDown(balance), pool?.currency, 2)}) is smaller than the
-                      outstanding balance.
-                    </Text>
-                  </Shelf>
+                  <InlineFeedback>
+                    Your wallet balance ({formatBalance(roundDown(balance), pool?.currency, 2)}) is smaller than the
+                    outstanding balance.
+                  </InlineFeedback>
                 )}
                 <Stack gap={1} px={1}>
                   <Button type="submit" disabled={isRepayAllLoading} loading={isRepayLoading}>
