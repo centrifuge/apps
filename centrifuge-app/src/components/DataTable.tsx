@@ -49,11 +49,6 @@ export const DataTable = <T extends Record<string, any>>({
   lastGroupIndex,
   defaultSortOrder = 'desc',
 }: Props<T>) => {
-  const colWithUniqueKey = React.useMemo(
-    () => columns?.map((col) => ({ ...col, id: Math.random().toString(36).substr(2, 9) })),
-    [columns]
-  )
-
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
   )
@@ -77,7 +72,7 @@ export const DataTable = <T extends Record<string, any>>({
     <Stack as={rounded && !lastGroupIndex ? Card : Stack}>
       <Shelf>
         {showHeader &&
-          colWithUniqueKey.map((col, i) => (
+          columns.map((col, i) => (
             <HeaderCol
               key={i}
               style={{ flex: col.flex }}
@@ -106,8 +101,8 @@ export const DataTable = <T extends Record<string, any>>({
             key={keyField ? row[keyField] : i}
             tabIndex={onRowClicked ? 0 : undefined}
           >
-            {colWithUniqueKey.map((col) => (
-              <DataCol style={{ flex: col.flex }} align={col?.align} key={`${col.id}-column`}>
+            {columns.map((col, index) => (
+              <DataCol style={{ flex: col.flex }} align={col?.align} key={index}>
                 {col.cell(row, i)}
               </DataCol>
             ))}
