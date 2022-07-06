@@ -28,7 +28,6 @@ export function getLoanLabelStatus(l: Loan): [LabelStatus, string] {
 }
 
 const LoanLabel: React.FC<Props> = ({ loan }) => {
-  console.log('🚀 ~ LoanLabel', loan)
   const [status, text] = getLoanLabelStatus(loan)
   return <StatusChip status={status}>{text}</StatusChip>
 }

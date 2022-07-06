@@ -79,7 +79,7 @@ export const DataTable = <T extends Record<string, any>>({
         {showHeader &&
           colWithUniqueKey.map((col, i) => (
             <HeaderCol
-              key={col.id}
+              key={i}
               style={{ flex: col.flex }}
               tabIndex={col?.sortKey ? 0 : undefined}
               as={col?.sortKey ? 'button' : 'div'}
