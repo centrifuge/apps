@@ -253,15 +253,13 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
               </Stack>
             </FormikProvider>
           ) : (
-            maturityDatePassed && (
-              <Button
-                variant="primary"
-                loading={isCloseLoading}
-                onClick={() => doCloseTransaction([loan.poolId, loan.id])}
-              >
-                Close
-              </Button>
-            )
+            <Button
+              variant="primary"
+              loading={isCloseLoading}
+              onClick={() => doCloseTransaction([loan.poolId, loan.id])}
+            >
+              Close
+            </Button>
           ))}
       </Stack>
     </Stack>
