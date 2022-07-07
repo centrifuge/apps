@@ -15,6 +15,7 @@ jobs:
       subscan-url: https://altair.subscan.io
       whitelisted-accounts: ''
       network: altair
+      requires-pop: 'true'
       subquery-url: https://api.subquery.network/sq/centrifuge/pools
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

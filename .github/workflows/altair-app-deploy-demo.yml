@@ -21,6 +21,7 @@ jobs:
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
       network: altair
+      requires-pop: 'false'
       subquery-url: https://api.subquery.network/sq/centrifuge/pools-demo
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

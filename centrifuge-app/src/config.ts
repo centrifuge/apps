@@ -70,7 +70,10 @@ type EnvironmentConfig = {
   defaultAssetClass: string
   tokensPageSubtitle: string
   defaultLoanType: LoanInfo['type']
+  requiresPop: boolean
 }
+
+const requiresPop = import.meta.env.REACT_APP_REQUIRES_POP !== 'false'
 
 const ALTAIR: EnvironmentConfig = {
   name: 'Pools on Altair',
@@ -86,6 +89,7 @@ const ALTAIR: EnvironmentConfig = {
   defaultAssetClass: 'Art NFTs',
   tokensPageSubtitle: 'Art NFTs',
   defaultLoanType: 'CreditLineWithMaturity',
+  requiresPop,
 }
 
 const CENTRIFUGE: EnvironmentConfig = {
@@ -108,6 +112,7 @@ const CENTRIFUGE: EnvironmentConfig = {
   defaultAssetClass: 'Consumer Credit',
   tokensPageSubtitle: 'Tokens of real-world assets',
   defaultLoanType: 'CreditLineWithMaturity',
+  requiresPop,
 }
 
 export const config = (import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge') === 'altair' ? ALTAIR : CENTRIFUGE

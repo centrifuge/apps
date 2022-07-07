@@ -1,4 +1,4 @@
-import { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
+import Centrifuge, { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import {
   Box,
   Button,
@@ -11,9 +11,11 @@ import {
   TextInput,
   Thumbnail,
 } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
+import { combineLatest, map, of, Subject, switchMap } from 'rxjs'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
@@ -21,12 +23,16 @@ import { PageSection } from '../../components/PageSection'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
+import { useWeb3 } from '../../components/Web3Provider'
 import { config } from '../../config'
+import { formatBalance } from '../../utils/formatting'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
+import { useBalances } from '../../utils/useBalances'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { useCurrencies } from '../../utils/useCurrencies'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
+import { truncate } from '../../utils/web3'
 import { pinPoolMetadata } from './pinPoolMetadata'
 import { RiskGroupsInput } from './RiskGroupsInput'
 import { TrancheInput } from './TrancheInput'
@@ -158,28 +164,68 @@ const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children
   )
 }
 
+type CreatePoolArgs = Parameters<Centrifuge['pools']['createPool']>[0]
+
 const CreatePoolForm: React.VFC = () => {
   const address = useAddress()
   const centrifuge = useCentrifuge()
   const currencies = useCurrencies()
   const history = useHistory()
+  const balances = useBalances(address)
+  const { selectedAccount } = useWeb3()
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
+  const [proposeFee, setProposeFee] = React.useState<Balance | null>(null)
+
+  // Retrieve the submittable with data currently in the form to see how much the transaction would cost
+  // Only for when the pool creation goes via democracy
+  const [$proposeFee, feeSubject] = React.useMemo(() => {
+    const subject = new Subject<CreatePoolArgs>()
+    const $fee = subject.pipe(
+      switchMap((args) => {
+        if (!selectedAccount) return of(null)
+        const connectedCent = centrifuge.connect(selectedAccount?.address, selectedAccount?.signer as any)
+        return combineLatest([centrifuge.getApi(), connectedCent.pools.createPool(args, { batch: true })]).pipe(
+          map(([api, submittable]) => {
+            const { minimumDeposit, preimageByteDeposit } = api.consts.democracy
+            const feeBN = hexToBN(minimumDeposit.toHex()).add(
+              hexToBN(preimageByteDeposit.toHex()).mul(new BN((submittable as any).encodedLength))
+            )
+            return new Balance(feeBN)
+          })
+        )
+      })
+    )
+    return [$fee, subject] as const
+  }, [centrifuge, selectedAccount])
 
   React.useEffect(() => {
-    // If the hash can't be find on Pinata the request can take a long time to time out
+    const sub = $proposeFee.subscribe({
+      next: (val) => {
+        setProposeFee(val)
+      },
+    })
+    return () => {
+      sub.unsubscribe()
+    }
+  }, [$proposeFee])
+
+  React.useEffect(() => {
+    // If the hash can't be found on Pinata the request can take a long time to time out
     // During which the name/description can't be edited
     // Set a deadline for how long we're willing to wait on a stored issuer
     setTimeout(() => setWaitingForStoredIssuer(false), 10000)
   }, [])
 
   const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
-    'Create pool',
+    config.requiresPop ? 'Submit pool proposal' : 'Create pool',
     (cent) => cent.pools.createPool,
     {
       onSuccess: (args) => {
         const [, poolId] = args
-        history.push(`/issuer/${poolId}`)
+        if (!config.requiresPop) {
+          history.push(`/issuer/${poolId}`)
+        }
       },
     }
   )
@@ -284,16 +330,19 @@ const CreatePoolForm: React.VFC = () => {
 
       const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
 
-      createPoolTx([
-        address,
-        poolId,
-        collectionId,
-        tranches,
-        currency,
-        Balance.fromFloat(values.maxReserve),
-        metadataHash,
-        writeOffGroups,
-      ])
+      createPoolTx(
+        [
+          address,
+          poolId,
+          collectionId,
+          tranches,
+          currency,
+          Balance.fromFloat(values.maxReserve),
+          metadataHash,
+          writeOffGroups,
+        ],
+        { propose: config.requiresPop }
+      )
 
       setSubmitting(false)
     },
@@ -311,6 +360,48 @@ const CreatePoolForm: React.VFC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isStoredIssuerLoading])
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const getProposeFee = React.useCallback(
+    debounce((values: PoolFormValues) => {
+      if (!address) return
+
+      const noJuniorTranches = values.tranches.slice(1)
+      const tranches = [
+        {},
+        ...noJuniorTranches.map((tranche) => ({
+          interestRatePerSec: Rate.fromAprPercent(tranche.interestRate || 0),
+          minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer || 0),
+        })),
+      ]
+
+      const writeOffGroups = values.writeOffGroups.map((g) => ({
+        overdueDays: g.days as number,
+        percentage: Rate.fromPercent(g.writeOff || 0),
+      }))
+
+      const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
+
+      // Complete the data in the form with some dummy data for things like poolId and metadata hash
+      feeSubject.next([
+        address,
+        '1234567890',
+        '1234567890',
+        tranches,
+        currency,
+        Balance.fromFloat(values.maxReserve || 0),
+        'x'.repeat(46),
+        writeOffGroups,
+      ])
+    }, 1000),
+    []
+  )
+
+  React.useEffect(() => {
+    if (config.requiresPop) {
+      getProposeFee(form.values)
+    }
+  }, [form.values, getProposeFee])
+
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
 
@@ -322,11 +413,14 @@ const CreatePoolForm: React.VFC = () => {
           title={form.values.poolName || 'New Pool'}
           subtitle={
             <TextWithPlaceholder isLoading={waitingForStoredIssuer} width={15}>
-              by {form.values.issuerName || address}
+              by {form.values.issuerName || (address && truncate(address))}
             </TextWithPlaceholder>
           }
           actions={
             <>
+              {proposeFee && (
+                <Text variant="body3">Deposit required: {formatBalance(proposeFee, balances?.native.symbol)}</Text>
+              )}
               <Button variant="secondary" onClick={() => history.goBack()}>
                 Cancel
               </Button>
@@ -534,4 +628,18 @@ const CreatePoolForm: React.VFC = () => {
       </Form>
     </FormikProvider>
   )
+}
+
+function hexToBN(value: string | number) {
+  if (typeof value === 'number') return new BN(value)
+  return new BN(value.toString().substring(2), 'hex')
+}
+
+function debounce<T extends Function>(cb: T, wait = 20) {
+  let h: any
+  function callable(...args: any) {
+    clearTimeout(h)
+    h = setTimeout(() => cb(...args), wait)
+  }
+  return callable as any as T
 }
