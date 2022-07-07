@@ -218,12 +218,14 @@ const CreatePoolForm: React.VFC = () => {
   }, [])
 
   const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
-    'Create pool',
+    config.requiresPop ? 'Submit pool proposal' : 'Create pool',
     (cent) => cent.pools.createPool,
     {
       onSuccess: (args) => {
         const [, poolId] = args
-        history.push(`/issuer/${poolId}`)
+        if (!config.requiresPop) {
+          history.push(`/issuer/${poolId}`)
+        }
       },
     }
   )
