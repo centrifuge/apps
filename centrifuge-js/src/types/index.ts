@@ -6,6 +6,7 @@ export type TransactionOptions = {
   batch?: boolean
   paymentInfo?: AddressOrPair
   onStatusChange?: (result: ISubmittableResult) => void
+  propose?: boolean
 }
 
 export type Account = HexString | string | Uint8Array

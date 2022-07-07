@@ -1,6 +1,7 @@
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
+import { ReactQueryDevtools } from 'react-query/devtools'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import { config } from '../config'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
@@ -67,6 +68,7 @@ export const Root: React.VFC = () => {
           </CentrifugeProvider>
         </HostPermissionsProvider>
       </FabricProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
 }
