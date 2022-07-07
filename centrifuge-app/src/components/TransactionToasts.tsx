@@ -26,7 +26,7 @@ export const TransactionToasts: React.FC = () => {
   const dismiss = (txId: string) => () => updateTransaction(txId, { dismissed: true })
 
   return (
-    <Stack width={330} gap={2} position="fixed" top={80} right={1} zIndex="overlay">
+    <Stack width={330} gap={2} position="fixed" top={64} right={1} zIndex="overlay">
       {transactions
         .filter((tx) => !tx.dismissed && !['creating', 'unconfirmed'].includes(tx.status))
         .map((tx) => (
