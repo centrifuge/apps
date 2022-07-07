@@ -177,7 +177,7 @@ export const Admins: React.FC = () => {
                     },
                     {
                       align: 'center',
-                      header: <Tooltips type="risk" variant="secondary" />,
+                      header: <Tooltips type="asset" variant="secondary" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.LoanAdmin`}
