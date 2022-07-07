@@ -1170,7 +1170,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return $api.pipe(
       switchMap(
-        (api) => combineLatest([api.query.loans.activeLoans(poolId)]),
+        (api) => combineLatest([api.query.loans.activeLoans(poolId)]).pipe(take(1)),
         (api, [activeLoanValues]) => ({ api, activeLoanValues })
       ),
       switchMap(({ api, activeLoanValues }) => {
@@ -1243,7 +1243,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           return { ...prev, [loanId]: loan }
         }, {})
 
-        return loans.map((loan) => ({ ...loan, ...activeLoans[loan.id], ...closedLoans[loan.id] }), []) as Loan[]
+        return loans.map((loan) => ({ ...loan, ...activeLoans[loan.id], ...closedLoans[loan.id] })) as Loan[]
       }),
       repeatWhen(() => $events)
     )

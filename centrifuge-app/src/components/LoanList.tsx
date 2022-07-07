@@ -68,7 +68,7 @@ const columns: Column[] = [
 export const LoanList: React.FC<Props> = ({ loans }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
-  const Row: Row[] = loans.map((loan) => {
+  const rows: Row[] = loans.map((loan) => {
     return {
       statusLabel: getLoanLabelStatus(loan)[1],
       maturityDate:
@@ -89,7 +89,7 @@ export const LoanList: React.FC<Props> = ({ loans }) => {
   })
   return (
     <DataTable
-      data={Row}
+      data={rows}
       columns={columns}
       defaultSortKey="idSortKey"
       defaultSortOrder="asc"
