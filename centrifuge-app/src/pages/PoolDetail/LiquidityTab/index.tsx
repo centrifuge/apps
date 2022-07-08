@@ -69,11 +69,20 @@ export const PoolDetailLiquidity: React.FC = () => {
       </PageSection>
       <PageSection
         title={`Epoch ${pool.epoch.current}`}
-        titleAddition={`Ongoing`}
+        titleAddition={pool.epoch.isInSubmissionPeriod ? 'Calculating orders...' : 'Ongoing'}
         headerRight={
           <Shelf gap="1">
-            <Tooltips type="epochTimeRemaining" label={`${hours} hrs and ${minutes} min remaining`} />
-            <Button small variant="secondary" onClick={closeEpoch} disabled={!pool}>
+            {!pool.epoch.isInSubmissionPeriod && (
+              <Tooltips type="epochTimeRemaining" label={`${hours} hrs and ${minutes} min remaining`} />
+            )}
+            <Button
+              small
+              variant="secondary"
+              onClick={closeEpoch}
+              disabled={!pool}
+              loading={pool.epoch.isInSubmissionPeriod}
+              loadingMessage="Calculating..."
+            >
               Close
             </Button>
           </Shelf>

@@ -9,6 +9,7 @@ import {
   IconArrowUpRight,
   IconCheckInCircle,
   IconClock,
+  InlineFeedback,
   Shelf,
   Stack,
   Text,
@@ -72,6 +73,14 @@ function validateNumberInput(value: number | string | Decimal, min: number | Dec
     return 'Value too small'
   }
 }
+
+const epochBusyElement = (
+  <InlineFeedback>
+    The pool is busy calculating epoch orders.
+    <br />
+    Try again later.
+  </InlineFeedback>
+)
 
 const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
   const [view, setView] = React.useState<'start' | 'invest' | 'redeem'>('start')
@@ -137,11 +146,12 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
               ) : !order.payoutCurrencyAmount.isZero() ? (
                 <SuccessBanner title="Redemption successful" />
               ) : null)}
+            {pool?.epoch.isInSubmissionPeriod && epochBusyElement}
             <Stack p={1} gap={1}>
-              <Button variant="secondary" onClick={() => setView('invest')}>
+              <Button variant="secondary" onClick={() => setView('invest')} disabled={pool?.epoch.isInSubmissionPeriod}>
                 Invest more
               </Button>
-              <Button variant="secondary" onClick={() => setView('redeem')}>
+              <Button variant="secondary" onClick={() => setView('redeem')} disabled={pool?.epoch.isInSubmissionPeriod}>
                 Redeem
               </Button>
               <TransactionsLink />
@@ -251,6 +261,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
   function renderInput(cancelCb?: () => void) {
     return (
       <Stack gap={2}>
+        {pool?.epoch.isInSubmissionPeriod && epochBusyElement}
         <Field name="amount" validate={positiveNumber()}>
           {({ field, meta }: FieldProps) => {
             return (
@@ -289,7 +300,12 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
           </Stack>
         ) : null}
         <Stack px={1} gap={1}>
-          <Button type="submit" loading={isLoading} loadingMessage={loadingMessage}>
+          <Button
+            type="submit"
+            loading={isLoading}
+            loadingMessage={loadingMessage}
+            disabled={pool?.epoch.isInSubmissionPeriod}
+          >
             Invest
           </Button>
           {cancelCb && (
@@ -421,6 +437,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
   function renderInput(cancelCb?: () => void) {
     return (
       <Stack gap={2}>
+        {pool?.epoch.isInSubmissionPeriod && epochBusyElement}
         <Field name="amount" validate={positiveNumber()}>
           {({ field, meta }: FieldProps) => (
             <CurrencyInput
@@ -446,7 +463,12 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
           </Stack>
         ) : null}
         <Stack px={1} gap={1}>
-          <Button type="submit" loading={isLoading} loadingMessage={loadingMessage}>
+          <Button
+            type="submit"
+            loading={isLoading}
+            loadingMessage={loadingMessage}
+            disabled={pool?.epoch.isInSubmissionPeriod}
+          >
             Redeem
           </Button>
           {cancelCb && (
@@ -548,6 +570,7 @@ const PendingOrder: React.FC<{
   const { hours: hoursRemaining, minutes: minutesRemaining } = getEpochTimeRemaining(pool!)
   return (
     <Stack gap={2}>
+      {pool.epoch.isInSubmissionPeriod && epochBusyElement}
       <Stack gap="1px">
         <Stack
           p={2}
@@ -569,7 +592,12 @@ const PendingOrder: React.FC<{
           </Text>
         </Stack>
         <Grid gap="1px" columns={2} equalColumns>
-          <LightButton type="button" $left onClick={onCancelOrder} disabled={isCancelling}>
+          <LightButton
+            type="button"
+            $left
+            onClick={onCancelOrder}
+            disabled={isCancelling || pool.epoch.isInSubmissionPeriod}
+          >
             {isCancelling ? (
               <Spinner size="iconSmall" />
             ) : (
@@ -578,7 +606,7 @@ const PendingOrder: React.FC<{
               </Text>
             )}
           </LightButton>
-          <LightButton type="button" onClick={onChangeOrder} disabled={isCancelling}>
+          <LightButton type="button" onClick={onChangeOrder} disabled={isCancelling || pool.epoch.isInSubmissionPeriod}>
             <Text variant="body2" color="inherit">
               Change order
             </Text>
