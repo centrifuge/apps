@@ -149,7 +149,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
       <Form noValidate ref={formRef}>
         <PageSummary
           data={[
-            { label: 'Loan type', value: LOAN_TYPE_LABELS[form.values.loanType] },
+            { label: 'Asset type', value: LOAN_TYPE_LABELS[form.values.loanType] },
             { label: 'Risk group', value: 'n/a' },
             { label: 'Collateral value', value: 'n/a' },
           ]}
