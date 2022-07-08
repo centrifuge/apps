@@ -142,7 +142,7 @@ const RiskGroupList: React.FC = () => {
         } as AssetByRiskGroup
       }) || []
     )
-  }, [metadata, loans, pool, totalAmountsSum])
+  }, [metadata, activeLoans, pool, totalAmountsSum])
 
   const totalSharesSum = riskGroups
     .reduce((prev, curr) => (typeof curr.share === 'string' ? prev.add(curr.share || 0) : prev), Dec(0))
