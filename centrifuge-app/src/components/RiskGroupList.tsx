@@ -1,4 +1,5 @@
 import { Balance, Rate } from '@centrifuge/centrifuge-js'
+import { ActiveLoan } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -84,35 +85,34 @@ const RiskGroupList: React.FC = () => {
   const theme = useTheme()
   const { data: metadata } = usePoolMetadata(pool)
 
+  const activeLoans = loans?.filter((loan) => loan.type === 'ActiveLoan') as ActiveLoan[]
+
   const totalAmountsSum = React.useMemo(
     () =>
-      loans?.reduce<Balance>(
+      activeLoans?.reduce<Balance>(
         (prev, curr) => new Balance(prev.add(curr?.outstandingDebt || new Balance(0))),
         new Balance(0)
       ) || new Balance(0),
-    [loans]
+    [activeLoans]
   )
 
   const riskGroups = React.useMemo(() => {
     return (
       metadata?.riskGroups!.map((group) => {
-        const loansByRiskGroup = loans?.filter((loan) => {
+        const loansByRiskGroup = activeLoans?.filter((loan) => {
           return (
             // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
-            (loan?.loanInfo &&
-              loan.status === 'Active' &&
-              loan.outstandingDebt?.toDecimal().greaterThan(0) &&
-              loan.loanInfo.type !== 'CreditLine' &&
-              loan.loanInfo?.lossGivenDefault.toString() === group?.lossGivenDefault &&
-              loan.loanInfo?.probabilityOfDefault.toString() === group?.probabilityOfDefault &&
-              loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
-              loan?.interestRatePerSec?.toString() === group?.interestRatePerSec) ||
-            (loan?.loanInfo &&
-              loan.loanInfo.type === 'CreditLine' &&
-              loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
-              loan?.interestRatePerSec?.toString() === group?.interestRatePerSec)
+            (loan.loanInfo.type !== 'CreditLine' &&
+              loan.outstandingDebt.toDecimal().greaterThan(0) &&
+              loan.loanInfo.lossGivenDefault.toString() === group?.lossGivenDefault &&
+              loan.loanInfo.probabilityOfDefault.toString() === group?.probabilityOfDefault &&
+              loan.loanInfo.advanceRate.toString() === group?.advanceRate &&
+              loan.interestRatePerSec.toString() === group?.interestRatePerSec) ||
+            (loan.loanInfo.type === 'CreditLine' &&
+              loan.loanInfo.advanceRate.toString() === group?.advanceRate &&
+              loan.interestRatePerSec.toString() === group?.interestRatePerSec)
           )
-        })
+        }) as ActiveLoan[]
 
         const lgd = new Rate(group?.lossGivenDefault).toPercent()
         const pod = new Rate(group.probabilityOfDefault).toPercent()

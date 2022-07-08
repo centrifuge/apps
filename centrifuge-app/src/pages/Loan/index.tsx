@@ -89,7 +89,7 @@ const Loan: React.FC = () => {
                 {
                   label: <Tooltips type="assetType" />,
                   value:
-                    loan?.loanInfo && loan?.loanInfo.type
+                    loan.type !== 'DefaultLoan'
                       ? LOAN_TYPE_LABELS[loan.loanInfo.type]
                       : LOAN_TYPE_LABELS[config.defaultLoanType],
                 },
@@ -105,7 +105,7 @@ const Loan: React.FC = () => {
                 },
                 {
                   label: <Tooltips type="collateralValue" />,
-                  value: loan.loanInfo ? formatBalance(loan.loanInfo.value, pool?.currency) : 'n/a',
+                  value: loan.type !== 'DefaultLoan' ? formatBalance(loan.loanInfo.value, pool?.currency) : 'n/a',
                 },
                 {
                   label: <Tooltips type="availableFinancing" />,
@@ -113,11 +113,14 @@ const Loan: React.FC = () => {
                 },
                 {
                   label: <Tooltips type="outstanding" />,
-                  value: loan?.outstandingDebt?.gtn(0) ? formatBalance(loan.outstandingDebt, pool?.currency) : 'n/a',
+                  value:
+                    loan.type !== 'DefaultLoan' && loan?.outstandingDebt?.gtn(0)
+                      ? formatBalance(loan.outstandingDebt, pool?.currency)
+                      : 'n/a',
                 },
               ]}
             />
-            {loan?.loanInfo && loan?.interestRatePerSec && (
+            {loan.type !== 'DefaultLoan' && (
               <PageSection title="Pricing">
                 <RiskGroupValues
                   values={{ ...loan.loanInfo, interestRatePerSec: loan.interestRatePerSec }}

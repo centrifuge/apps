@@ -34,7 +34,9 @@ const columns: Column[] = [
   {
     header: <SortableTableHeader label="Financing date" />,
     cell: (l: Row) => (
-      <Text variant="body2">{l.originationDateSortKey && l.originationDate ? formatDate(l.originationDate) : ''}</Text>
+      <Text variant="body2">
+        {l.originationDateSortKey && l.type === 'ActiveLoan' && l?.originationDate ? formatDate(l.originationDate) : ''}
+      </Text>
     ),
     flex: '2',
     sortKey: 'originationDateSortKey',
@@ -72,13 +74,11 @@ export const LoanList: React.FC<Props> = ({ loans }) => {
     return {
       statusLabel: getLoanLabelStatus(loan)[1],
       maturityDate:
-        loan?.loanInfo && loan.status !== 'Created' && 'maturityDate' in loan.loanInfo
-          ? loan.loanInfo.maturityDate
-          : '',
+        loan.type !== 'DefaultLoan' && loan.loanInfo?.type !== 'CreditLine' ? loan.loanInfo.maturityDate : '',
       idSortKey: parseInt(loan.id, 10),
-      outstandingDebtSortKey: loan?.outstandingDebt?.toDecimal().toNumber(),
+      outstandingDebtSortKey: loan.type !== 'DefaultLoan' && loan?.outstandingDebt?.toDecimal().toNumber(),
       originationDateSortKey:
-        loan.status === 'Active' &&
+        loan.type !== 'DefaultLoan' &&
         loan?.originationDate &&
         !loan?.interestRatePerSec?.isZero() &&
         !loan?.totalBorrowed?.isZero()
@@ -122,9 +122,7 @@ const OutstandingDebt: React.VFC<{ loan: Row }> = ({ loan }) => {
 
   return (
     <Text variant="body2">
-      {loan?.outstandingDebt && !['Ready', 'Created'].includes(loan.statusLabel)
-        ? formatBalance(loan.outstandingDebt, pool?.currency)
-        : ''}
+      {loan.type !== 'DefaultLoan' ? formatBalance(loan.outstandingDebt, pool?.currency) : ''}
     </Text>
   )
 }

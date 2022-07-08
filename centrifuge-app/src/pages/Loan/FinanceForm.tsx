@@ -65,35 +65,6 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
     doRepayAllTransaction([loan.poolId, loan.id])
   }
 
-  const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
-  const debtWithMargin =
-    debt &&
-    loan?.normalizedDebt &&
-    loan?.interestRatePerSec &&
-    debt.add(loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
-  const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
-  const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
-  const maxRepay = loan?.outstandingDebt
-    ? balance.lessThan(loan.outstandingDebt.toDecimal())
-      ? balance
-      : loan.outstandingDebt.toDecimal()
-    : Dec(0)
-  const canRepayAll = debtWithMargin?.lte(balance)
-
-  const allowedToBorrow: Record<LoanInfo['type'], boolean> = {
-    CreditLineWithMaturity:
-      !!loan?.loanInfo &&
-      !!loan?.originationDate &&
-      'maturityDate' in loan.loanInfo &&
-      availableFinancing.greaterThan(0),
-    BulletLoan:
-      !!loan?.loanInfo &&
-      !!loan?.originationDate &&
-      'maturityDate' in loan.loanInfo &&
-      !!loan.totalBorrowed?.toDecimal().lt(initialCeiling),
-    CreditLine: !!loan.outstandingDebt?.toDecimal().lt(initialCeiling),
-  }
-
   const financeForm = useFormik<FinanceValues>({
     initialValues: {
       amount: '',
@@ -123,6 +94,27 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
 
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
+
+  if (loan.type !== 'ActiveLoan') {
+    return null
+  }
+  const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
+  const debtWithMargin =
+    debt && debt.add(loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
+  const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
+  const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
+  const maxRepay = loan?.outstandingDebt
+    ? balance.lessThan(loan.outstandingDebt.toDecimal())
+      ? balance
+      : loan.outstandingDebt.toDecimal()
+    : Dec(0)
+  const canRepayAll = debtWithMargin?.lte(balance)
+
+  const allowedToBorrow: Record<LoanInfo['type'], boolean> = {
+    CreditLineWithMaturity: availableFinancing.greaterThan(0),
+    BulletLoan: !!loan.totalBorrowed?.toDecimal().lt(initialCeiling),
+    CreditLine: !!loan.outstandingDebt?.toDecimal().lt(initialCeiling),
+  }
 
   const maturityDatePassed =
     loan?.loanInfo && 'maturityDate' in loan.loanInfo && new Date() > new Date(loan.loanInfo.maturityDate)
