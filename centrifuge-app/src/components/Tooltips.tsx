@@ -13,7 +13,7 @@ const ValueLockedTooltipBody: React.VFC = () => {
 const tooltipText = {
   assetType: {
     label: 'Asset type',
-    body: 'This refers to the loan type used to finance the asset. This can e.g. be bullet loans or interest bearing loans. The loan type determines in particular the cash flow profile of the financing.',
+    body: 'This refers to the asset type used to finance the asset. This can e.g. be bullet loans or interest bearing loans. The asset type determines in particular the cash flow profile of the financing.',
   },
   collateralValue: {
     label: 'Collateral value',
@@ -171,8 +171,8 @@ const tooltipText = {
     label: 'Liquidity',
     body: 'Allows to set the maximum reserve.',
   },
-  risk: {
-    label: 'Risk',
+  asset: {
+    label: 'Asset',
     body: 'Allows to write-off assets.',
   },
   whitelist: {

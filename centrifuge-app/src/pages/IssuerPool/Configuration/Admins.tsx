@@ -116,7 +116,7 @@ export const Admins: React.FC = () => {
                       align: 'left',
                       header: 'Address',
                       cell: (row: Admin) => (
-                        <Text>
+                        <Text variant="body2">
                           <Identity address={row.address} clickToCopy labelForConnectedAddress={false} />{' '}
                           {row.address === me && `(${selectedAccount?.name || 'you'})`}
                         </Text>
@@ -177,7 +177,7 @@ export const Admins: React.FC = () => {
                     },
                     {
                       align: 'center',
-                      header: <Tooltips type="risk" variant="secondary" />,
+                      header: <Tooltips type="asset" variant="secondary" />,
                       cell: (row: Row) => (
                         <Field
                           name={`admins.${row.index}.roles.LoanAdmin`}
