@@ -85,7 +85,7 @@ const RiskGroupList: React.FC = () => {
   const theme = useTheme()
   const { data: metadata } = usePoolMetadata(pool)
 
-  const activeLoans = loans?.filter((loan) => loan.type === 'ActiveLoan') as ActiveLoan[]
+  const activeLoans = loans?.filter((loan) => loan.status === 'Active') as ActiveLoan[]
 
   const totalAmountsSum = React.useMemo(
     () =>

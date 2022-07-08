@@ -34,7 +34,7 @@ export const PoolDetailAssets: React.FC = () => {
   if (!pool || !loans) return null
 
   const ongoingAssets = loans?.filter(
-    (loan) => loan.type === 'ActiveLoan' && !loan.outstandingDebt.isZero()
+    (loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero()
   ) as ActiveLoan[]
 
   const avgInterestRatePerSec = ongoingAssets

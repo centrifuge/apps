@@ -249,6 +249,8 @@ export enum LoanStatus {
   Closed = 'Closed',
 }
 
+// type LoanStatus = 'Created' | 'Active' | 'Closed'
+
 type WrittenOfByAdmin = {
   percentage: Rate
   penaltyInterestRateRerSec: Rate
@@ -300,10 +302,9 @@ type ClosedLoanData = LoanData & {
 
 // transformed type for UI
 export type DefaultLoan = {
-  type: 'DefaultLoan'
+  status: 'Created'
   id: string
   poolId: string
-  status: LoanStatus
   asset: {
     collectionId: string
     nftId: string
@@ -312,7 +313,7 @@ export type DefaultLoan = {
 
 // transformed type for UI
 export type ActiveLoan = {
-  type: 'ActiveLoan'
+  status: 'Active'
   id: string
   poolId: string
   interestRatePerSec: Rate
@@ -322,7 +323,6 @@ export type ActiveLoan = {
   totalRepaid: Balance
   lastUpdated: string
   originationDate: string
-  status: LoanStatus
   loanInfo: LoanInfo
   adminWrittenOff?: boolean
   writeOffStatus: WriteOffStatus
@@ -334,7 +334,7 @@ export type ActiveLoan = {
 
 // transformed type for UI
 export type ClosedLoan = {
-  type: 'ClosedLoan'
+  status: 'Closed'
   id: string
   poolId: string
   interestRatePerSec: Rate
@@ -344,7 +344,6 @@ export type ClosedLoan = {
   totalRepaid: Balance
   lastUpdated: string
   originationDate?: string | null
-  status: LoanStatus
   loanInfo: LoanInfo
   writeOffStatus: WriteOffStatus
   asset: {
@@ -837,7 +836,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         // Calculate the debt an hour from now to have some margin
         const secondsPerHour = 60 * 60
         const debtWithMargin =
-          loan?.type === 'ActiveLoan'
+          loan?.status === 'Active'
             ? loan.outstandingDebt
                 .toDecimal()
                 .add(
@@ -1236,7 +1235,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
           const loan = value.toJSON() as unknown as LoanData
           const [collectionId, nftId] = loan.collateral
           return {
-            type: 'DefaultLoan',
             id: formatLoanKey(key as StorageKey<[u32, u32]>),
             poolId,
             status: getLoanStatus(loan),
@@ -1252,7 +1250,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
           (prev, activeLoan, index) => {
             const interestData = interestAccrual[index].toJSON() as InterestAccrual
             const mapped = {
-              type: 'ActiveLoan' as const,
               id: String(activeLoan.loanId),
               poolId,
               interestRatePerSec: new Rate(hexToBN(activeLoan.interestRatePerSec)),
@@ -1279,7 +1276,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
           const closedLoan = value.toJSON() as ClosedLoanData
           const loanId = formatLoanKey(key as StorageKey<[u32, u32]>)
           const loan = {
-            type: 'ClosedLoan' as const,
             id: loanId,
             poolId,
             interestRatePerSec: new Rate(hexToBN(closedLoan.interestRatePerSec)),

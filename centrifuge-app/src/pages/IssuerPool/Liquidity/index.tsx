@@ -4,7 +4,7 @@ import { LoadBoundary } from '../../../components/LoadBoundary'
 import { MaxReserveForm } from '../../../components/MaxReserveForm'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { useLiquidityAdmin } from '../../../utils/usePermissions'
-import { PoolDetailLiquidity } from '../../PoolDetail/LiquidityTab'
+import { PoolDetailLiquidity } from '../../Pool/Liquidity'
 import { IssuerPoolHeader } from '../Header'
 
 export const IssuerPoolLiquidityPage: React.FC = () => {

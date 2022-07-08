@@ -95,7 +95,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  if (loan.type !== 'ActiveLoan') {
+  if (loan.status !== 'Created') {
     return null
   }
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)

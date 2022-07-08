@@ -8,7 +8,7 @@ export const useAverageMaturity = (poolId: string) => {
   const loans = useLoans(poolId)
 
   const avgMaturity = React.useMemo(() => {
-    const assets = loans?.filter((asset) => asset.type === 'ActiveLoan') as ActiveLoan[]
+    const assets = loans?.filter((asset) => asset.status === 'Active') as ActiveLoan[]
     const maturityPerAsset = assets.reduce((sum, asset) => {
       if (asset?.loanInfo && asset.loanInfo.type !== 'CreditLine' && asset.outstandingDebt.gtn(0)) {
         return sum.add(

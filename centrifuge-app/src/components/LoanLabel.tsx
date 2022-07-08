@@ -12,12 +12,12 @@ interface Props {
 export function getLoanLabelStatus(l: Loan): [LabelStatus, string] {
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
-  if (l.type === 'ActiveLoan' && l.adminWrittenOff) return ['critical', 'Write-off']
-  if (l.type === 'ClosedLoan') return ['ok', 'Repaid']
-  if (l.type === 'ActiveLoan' && l.interestRatePerSec?.gtn(0) && l.totalBorrowed?.isZero()) return ['default', 'Ready']
-  if (l.type === 'DefaultLoan') return ['default', 'Created']
+  if (l.status === 'Active' && l.adminWrittenOff) return ['critical', 'Write-off']
+  if (l.status === 'Closed') return ['ok', 'Repaid']
+  if (l.status === 'Active' && l.interestRatePerSec?.gtn(0) && l.totalBorrowed?.isZero()) return ['default', 'Ready']
+  if (l.status === 'Created') return ['default', 'Created']
 
-  if (l.type === 'ActiveLoan' && l.loanInfo.type !== 'CreditLine') {
+  if (l.status === 'Active' && l.loanInfo.type !== 'CreditLine') {
     const days = daysBetween(today, l.loanInfo.maturityDate)
     if (days === 0) return ['warning', 'due today']
     if (days === 1) return ['warning', 'due tomorrow']
