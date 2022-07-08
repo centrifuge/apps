@@ -95,7 +95,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const repayFormRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(repayForm, repayFormRef)
 
-  if (loan.status !== 'Created') {
+  if (loan.status !== 'Active') {
     return null
   }
   const debt = loan.outstandingDebt?.toDecimal() || Dec(0)
@@ -103,11 +103,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
     debt && debt.add(loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
   const poolReserve = pool?.reserve.available.toDecimal() ?? Dec(0)
   const maxBorrow = poolReserve.lessThan(availableFinancing) ? poolReserve : availableFinancing
-  const maxRepay = loan?.outstandingDebt
-    ? balance.lessThan(loan.outstandingDebt.toDecimal())
-      ? balance
-      : loan.outstandingDebt.toDecimal()
-    : Dec(0)
+  const maxRepay = balance.lessThan(loan.outstandingDebt.toDecimal()) ? balance : loan.outstandingDebt.toDecimal()
   const canRepayAll = debtWithMargin?.lte(balance)
 
   const allowedToBorrow: Record<LoanInfo['type'], boolean> = {
@@ -126,9 +122,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Available financing</Text>
             {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">
-              {formatBalance(roundDown(loan.status === 'Closed' ? 0 : availableFinancing), pool?.currency, 2)}
-            </Text>
+            <Text variant="heading3">{formatBalance(roundDown(availableFinancing), pool?.currency, 2)}</Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total financed</Text>
