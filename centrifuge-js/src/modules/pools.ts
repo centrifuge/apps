@@ -1495,6 +1495,7 @@ function getLoanInfo(loanType: LoanInfoData): LoanInfo {
 }
 
 function getOutstandingDebt(loan: ActiveLoanDetilsData, interestAccrual: InterestAccrual) {
+  if (!interestAccrual) return new Balance(0)
   const accRate = new Rate(hexToBN(interestAccrual.accumulatedRate)).toDecimal()
   const rate = new Rate(hexToBN(loan.interestRatePerSec)).toDecimal()
   const normalizedDebt = new Balance(hexToBN(loan.normalizedDebt)).toDecimal()
