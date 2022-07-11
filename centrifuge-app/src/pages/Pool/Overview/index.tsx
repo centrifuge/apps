@@ -5,6 +5,7 @@ import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
+import RiskGroupList from '../../../components/RiskGroupList'
 import { Spinner } from '../../../components/Spinner'
 import { TokenListByPool } from '../../../components/TokenListByPool'
 import { Tooltips } from '../../../components/Tooltips'
@@ -14,7 +15,6 @@ import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
-const RiskGroupList = React.lazy(() => import('../../../components/RiskGroupList'))
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
 
 export const PoolDetailOverviewTab: React.FC = () => {
@@ -56,9 +56,7 @@ export const PoolDetailOverview: React.FC = () => {
         <IssuerSection metadata={metadata} />
       </PageSection>
       <PageSection title=" Asset portfolio" titleAddition="By risk groups">
-        <React.Suspense fallback={<Spinner />}>
-          <RiskGroupList />
-        </React.Suspense>
+        <RiskGroupList />
       </PageSection>
     </>
   )
