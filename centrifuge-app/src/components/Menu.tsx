@@ -32,8 +32,8 @@ export const Menu: React.FC<Props> = () => {
   return (
     <Box position="sticky" top={0} px={[0, 0, 2]}>
       <Link to="/">
-        <Box pt={[0, 0, 3]} pb={0} px={1} mb={[1, 2, 7]} color="textPrimary">
-          <Logo style={{ maxHeight: '56px', maxWidth: '50%' }} />
+        <Box pt={[0, 0, 0]} pb={0} px={1} mb={[1, 2, 6]} color="textPrimary">
+          <Logo />
         </Box>
       </Link>
       <Shelf
