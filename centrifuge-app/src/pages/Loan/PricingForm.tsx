@@ -91,7 +91,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
         } else if (new Date(values.maturityDate) < today) {
           errors.maturityDate = 'Maturity date must be in the future'
         } else if (new Date(values.maturityDate) > dateIn5Years) {
-          errors.maturityDate = `Maturity date must be before ${dateIn5Years.toLocaleDateString()}`
+          errors.maturityDate = `Maturity date must not exceed 5 years (${dateIn5Years.toLocaleDateString()})`
         }
       }
       return errors

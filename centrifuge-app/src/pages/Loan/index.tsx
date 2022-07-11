@@ -88,10 +88,7 @@ const Loan: React.FC = () => {
               data={[
                 {
                   label: <Tooltips type="assetType" />,
-                  value:
-                    loan?.loanInfo && loan?.loanInfo.type
-                      ? LOAN_TYPE_LABELS[loan.loanInfo.type]
-                      : LOAN_TYPE_LABELS[config.defaultLoanType],
+                  value: LOAN_TYPE_LABELS[loan.loanInfo.type],
                 },
                 {
                   label: <Tooltips type="riskGroup" />,
@@ -105,7 +102,7 @@ const Loan: React.FC = () => {
                 },
                 {
                   label: <Tooltips type="collateralValue" />,
-                  value: loan.loanInfo ? formatBalance(loan.loanInfo.value, pool?.currency) : 'n/a',
+                  value: formatBalance(loan.loanInfo.value, pool?.currency),
                 },
                 {
                   label: <Tooltips type="availableFinancing" />,
@@ -117,7 +114,7 @@ const Loan: React.FC = () => {
                 },
               ]}
             />
-            {loan?.loanInfo && loan?.interestRatePerSec && (
+            {
               <PageSection title="Pricing">
                 <RiskGroupValues
                   values={{ ...loan.loanInfo, interestRatePerSec: loan.interestRatePerSec }}
@@ -125,7 +122,7 @@ const Loan: React.FC = () => {
                   showMaturityDate
                 />
               </PageSection>
-            )}
+            }
           </>
         ) : canPrice ? (
           <PricingForm loan={loan} pool={pool} />

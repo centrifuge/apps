@@ -21,7 +21,7 @@ export const LOAN_TYPE_LABELS = {
 }
 
 export function getMatchingRiskGroupIndex(loan: LoanType, riskGroups: PoolMetadata['riskGroups']) {
-  if (!loan.loanInfo) {
+  if (loan.status === 'Created') {
     return -1
   }
   const loanInterestRatePerSec = loan.interestRatePerSec?.toApr().toFixed(4)

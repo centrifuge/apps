@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router'
-import { PoolDetailAssetsTab } from './AssetsTab'
-import { PoolDetailLiquidityTab } from './LiquidityTab'
-import { PoolDetailOverviewTab } from './OverviewTab'
+import { PoolDetailAssetsTab } from './Assets'
+import { PoolDetailLiquidityTab } from './Liquidity'
+import { PoolDetailOverviewTab } from './Overview'
 
 export const PoolDetailPage: React.FC = () => {
   const { path } = useRouteMatch()
