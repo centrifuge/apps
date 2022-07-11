@@ -11,7 +11,7 @@ jobs:
       netlify-alias: ''
       ipfs-gateway: https://altair.mypinata.cloud/
       collator-wss-url: wss://fullnode.catalyst.cntrfg.com
-      relay-wss-url: wss://fullnode.catalyst.cntrfg.com
+      relay-wss-url: wss://rococo-rpc.polkadot.io
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
       network: centrifuge

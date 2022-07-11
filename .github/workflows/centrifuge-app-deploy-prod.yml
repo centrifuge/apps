@@ -15,6 +15,7 @@ jobs:
       subscan-url: https://centrifuge.subscan.io
       whitelisted-accounts: ''
       network: centrifuge
+      subquery-url: ''
       requires-pop: 'true'
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
