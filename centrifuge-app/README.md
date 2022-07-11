@@ -31,16 +31,16 @@ To reference env variables in code please use the vite standard `import.meta.env
 
 ### Altair app
 
-| Env          | Action                                       | Deployed URLs                                                          |
-| ------------ | -------------------------------------------- | ---------------------------------------------------------------------- |
-| dev and demo | push to `main` branch                        | https://dev.app.altair.cntrfg.com & https://demo.app.altair.cntrfg.com |
-| staging      | push to `rc/centrifuge-app/altair/release-*` | https://staging.app.altair.cntrfg.com/                                 |
-| production   | tag `centrifuge-app/altair/release-*`        | https://app.altair.network/                                            |
+| Env          | Action                                              | Deployed URLs                                                          |
+| ------------ | --------------------------------------------------- | ---------------------------------------------------------------------- |
+| dev and demo | push to `main` branch                               | https://dev.app.altair.cntrfg.com & https://demo.app.altair.cntrfg.com |
+| staging      | push to `rc/centrifuge-app/altair/release-*` branch | https://staging.app.altair.cntrfg.com/                                 |
+| production   | tag `centrifuge-app/altair/release-*`               | https://app.altair.network/                                            |
 
 ### Centrifuge app
 
-| Env          | Action                                | Deployed URLs                                            |
-| ------------ | ------------------------------------- | -------------------------------------------------------- |
-| dev and demo | push to `main` branch                 | https://dev.app.cntrfg.com & https://demo.app.cntrfg.com |
-| staging      | push to `rc/centrifuge-app/release-*` |                                                          |
-| production   | tag `centrifuge-app/release-*`        |                                                          |
+| Env          | Action                                       | Deployed URLs                                            |
+| ------------ | -------------------------------------------- | -------------------------------------------------------- |
+| dev and demo | push to `main` branch                        | https://dev.app.cntrfg.com & https://demo.app.cntrfg.com |
+| staging      | push to `rc/centrifuge-app/release-*` branch |                                                          |
+| production   | tag `centrifuge-app/release-*`               |                                                          |
