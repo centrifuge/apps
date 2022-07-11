@@ -10,7 +10,7 @@ jobs:
     with:
       netlify-alias: ''
       ipfs-gateway: https://altair.mypinata.cloud/
-      collator-wss-url: fullnode.parachain.centrifuge.io
+      collator-wss-url: wss://fullnode.parachain.centrifuge.io
       relay-wss-url: wss://rpc.polkadot.io
       subscan-url: https://centrifuge.subscan.io
       whitelisted-accounts: ''
