@@ -26,3 +26,21 @@ This app uses [`vite`](https://vitejs.dev/guide/) but serve, build and bundle.
 To reference env variables in code please use the vite standard `import.meta.env.ENV_VARIABLE`.
 
 > in Netlify functions you still need to reference env variables with `process.env`
+
+## Deployments
+
+### Altair app
+
+| Env          | Action                                              | Deployed URLs                                                          |
+| ------------ | --------------------------------------------------- | ---------------------------------------------------------------------- |
+| dev and demo | push to `main` branch                               | https://dev.app.altair.cntrfg.com & https://demo.app.altair.cntrfg.com |
+| staging      | push to `rc/centrifuge-app/altair/release-*` branch | https://staging.app.altair.cntrfg.com/                                 |
+| production   | tag `centrifuge-app/altair/release-*`               | https://app.altair.network/                                            |
+
+### Centrifuge app
+
+| Env          | Action                                       | Deployed URLs                                            |
+| ------------ | -------------------------------------------- | -------------------------------------------------------- |
+| dev and demo | push to `main` branch                        | https://dev.app.cntrfg.com & https://demo.app.cntrfg.com |
+| staging      | push to `rc/centrifuge-app/release-*` branch |                                                          |
+| production   | tag `centrifuge-app/release-*`               |                                                          |
