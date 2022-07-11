@@ -1,6 +1,7 @@
 import { StorageKey, u32 } from '@polkadot/types'
+import { Codec } from '@polkadot/types/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
+import { combineLatest, EMPTY, expand, firstValueFrom, Observable, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, startWith, switchMap, take } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
@@ -185,6 +186,14 @@ type NAVDetailsData = {
   lastUpdated: number
 }
 
+type EpochExecutionData = {
+  epoch: number
+  nav: string
+  reserve: string
+  maxReserve: string
+  // incomplete
+}
+
 export type Tranche = {
   index: number
   id: string
@@ -226,7 +235,7 @@ export type Pool = {
     current: number
     lastClosed: string
     lastExecuted: number
-    // inSubmissionPeriod: number | null
+    isInSubmissionPeriod: boolean
   }
   nav: {
     latest: Balance
@@ -860,10 +869,15 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return $api.pipe(
       switchMap(
-        (api) => combineLatest([api.query.pools.pool.entries(), api.query.loans.poolNAV.entries()]),
-        (api, [rawPools, rawNavs]) => ({ api, rawPools, rawNavs })
+        (api) =>
+          combineLatest([
+            api.query.pools.pool.entries(),
+            api.query.loans.poolNAV.entries(),
+            api.query.pools.epochExecution.entries(),
+          ]),
+        (api, [rawPools, rawNavs, rawEpochs]) => ({ api, rawPools, rawNavs, rawEpochs })
       ),
-      switchMap(({ api, rawPools, rawNavs }) => {
+      switchMap(({ api, rawPools, rawNavs, rawEpochs }) => {
         if (!rawPools.length) return of([])
 
         const navMap = rawNavs.reduce((acc, [key, navValue]) => {
@@ -875,6 +889,15 @@ export function getPoolsModule(inst: CentrifugeBase) {
           }
           return acc
         }, {} as Record<string, { latest: string; lastUpdated: number }>)
+
+        const epochMap = rawEpochs.reduce((acc, [key, navValue]) => {
+          const poolId = formatPoolKey(key as StorageKey<[u32]>)
+          const epoch = navValue.toJSON() as unknown as EpochExecutionData
+          acc[poolId] = {
+            epoch: epoch.epoch,
+          }
+          return acc
+        }, {} as Record<string, unknown>)
 
         // read pools, poolIds and metadata from observable
         const pools = rawPools.map(([poolKeys, poolValue]) => ({
@@ -908,6 +931,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
             const mappedPools = pools.map((poolObj, poolIndex) => {
               const { data: pool, id: poolId, metadata } = poolObj
               const navData = navMap[poolId]
+              const epochExecution = epochMap[poolId]
               const currency = getCurrency(pool.currency)
               const mappedPool: Pool = {
                 id: poolId,
@@ -969,6 +993,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 epoch: {
                   ...pool.epoch,
                   lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
+                  isInSubmissionPeriod: !!epochExecution,
                 },
                 parameters: {
                   ...pool.parameters,

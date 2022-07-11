@@ -50,7 +50,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
 
   return (
     <>
-      <StyledTrigger as="button" ref={triggerRef} {...triggerProps} {...textProps}>
+      <StyledTrigger as="button" type="button" ref={triggerRef} {...triggerProps} {...textProps}>
         {children}
       </StyledTrigger>
       {state.isOpen && (
