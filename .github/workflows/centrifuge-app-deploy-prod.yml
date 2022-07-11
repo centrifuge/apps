@@ -1,0 +1,24 @@
+name: 'Centrifuge app PROD'
+on:
+  push:
+    tags:
+      - centrifuge-app/release-*
+
+jobs:
+  dev:
+    uses: centrifuge/apps/.github/workflows/centrifuge-app-build-and-deploy.yml@main
+    with:
+      netlify-alias: ''
+      ipfs-gateway: https://altair.mypinata.cloud/
+      collator-wss-url: fullnode.parachain.centrifuge.io
+      relay-wss-url: wss://rpc.polkadot.io
+      subscan-url: https://centrifuge.subscan.io
+      whitelisted-accounts: ''
+      network: centrifuge
+      requires-pop: 'true'
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      netlify-site-id: ${{ secrets.NFT_STUDIO_PROD_NETLIFY_SITE_ID }}
+      pinata-api-key: ${{ secrets.PINATA_API_KEY }}
+      pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}

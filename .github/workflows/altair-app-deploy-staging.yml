@@ -1,8 +1,8 @@
-name: 'nft-studio PROD'
+name: 'Altair-app Staging'
 on:
   push:
-    tags:
-      - nft-studio/release-*
+    branches:
+      - rc/centrifuge-app/altair/release-*
 
 jobs:
   dev:
@@ -10,16 +10,16 @@ jobs:
     with:
       netlify-alias: ''
       ipfs-gateway: https://altair.mypinata.cloud/
-      collator-wss-url: wss://fullnode.altair.centrifuge.io
-      relay-wss-url: wss://kusama-rpc.polkadot.io
-      subscan-url: https://altair.subscan.io
+      collator-wss-url: wss://fullnode-collator.charcoal.centrifuge.io
+      relay-wss-url: wss://westend-rpc.polkadot.io
+      subscan-url: https://westend.subscan.io
       whitelisted-accounts: ''
       network: altair
       requires-pop: 'true'
-      subquery-url: https://api.subquery.network/sq/centrifuge/pools
+      subquery-url: https://api.subquery.network/sq/centrifuge/pools-demo
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      netlify-site-id: ${{ secrets.NFT_STUDIO_PROD_NETLIFY_SITE_ID }}
+      netlify-site-id: ${{ secrets.NFT_STUDIO_STAGING_NETLIFY_SITE_ID }}
       pinata-api-key: ${{ secrets.PINATA_API_KEY }}
       pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}
