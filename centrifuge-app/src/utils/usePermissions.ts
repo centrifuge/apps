@@ -13,13 +13,13 @@ export function usePermissions(address?: string) {
 
 export function useCanBorrow(poolId: string, assetId?: string) {
   const address = useAddress()
+  const loanNft = useLoanNft(poolId, assetId)
   const permissions = usePermissions(address)
   const { proxy } = useWeb3()
   const hasPermission =
     permissions?.pools[poolId]?.roles.includes('Borrower') &&
     (!proxy || proxy.types.includes('Borrow') || proxy.types.includes('Any'))
   if (assetId) {
-    const loanNft = useLoanNft(poolId, assetId)
     const isLoanOwner = isSameAddress(loanNft?.owner, address)
     return !!hasPermission && isLoanOwner
   }
