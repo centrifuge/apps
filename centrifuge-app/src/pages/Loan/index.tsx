@@ -39,7 +39,7 @@ const LoanSidebar: React.FC = () => {
   const loan = useLoan(pid, aid)
   const address = useAddress()
   const permissions = usePermissions(address)
-  const canBorrow = useCanBorrow(pid, aid)
+  const canBorrow = useCanBorrow(pid)
 
   if (!loan || loan.status === 'Created' || !permissions || !canBorrow) return null
 

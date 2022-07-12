@@ -24,7 +24,10 @@ export const Menu: React.FC<Props> = () => {
     if (!allPools || !permissions) {
       return []
     }
-    return allPools.filter(({ id }) => permissions.pools[id]?.roles.includes('PoolAdmin'))
+    return allPools.filter(
+      ({ id }) =>
+        permissions.pools[id]?.roles.includes('PoolAdmin') || permissions.pools[id]?.roles.includes('MemberListAdmin')
+    )
   }, [allPools, permissions])
 
   const Logo = config.logo
@@ -32,7 +35,7 @@ export const Menu: React.FC<Props> = () => {
   return (
     <Box position="sticky" top={0} px={[0, 0, 2]}>
       <Link to="/">
-        <Box pt={[0, 0, 0]} pb={0} px={1} mb={[1, 2, 6]} color="textPrimary">
+        <Box pt={0} pb={0} px={1} mb={[1, 2, 6]} color="textPrimary">
           <Logo />
         </Box>
       </Link>
