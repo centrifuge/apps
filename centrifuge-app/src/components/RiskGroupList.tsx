@@ -8,8 +8,10 @@ import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
 import { useLoans } from '../utils/useLoans'
 import { usePool, usePoolMetadata } from '../utils/usePools'
-import { RiskGroupSharesPieChart } from './Charts/RiskGroupSharesPieChart'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
+import { Spinner } from './Spinner'
+
+const RiskGroupSharesPieChart = React.lazy(() => import('./Charts/RiskGroupSharesPieChart'))
 
 export type AssetByRiskGroup = {
   color?: string
@@ -215,7 +217,9 @@ const RiskGroupList: React.FC = () => {
     <>
       {sharesForPie.length > 0 && totalSharesSum !== '0' && (
         <Shelf justifyContent="center">
-          <RiskGroupSharesPieChart data={sharesForPie} />
+          <React.Suspense fallback={<Spinner />}>
+            <RiskGroupSharesPieChart data={sharesForPie} />
+          </React.Suspense>
         </Shelf>
       )}
       {tableDataWithColor.length > 0 ? (
