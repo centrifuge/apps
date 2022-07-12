@@ -53,7 +53,7 @@ export const Menu: React.FC<Props> = () => {
           active={pathname.includes('investments')}
         />
         <NavigationItem label="NFTs" href="/nfts" icon={<IconNft size="16px" />} />
-        {(pools.length > 0 || !config.requiresPop) && (
+        {pools.length > 0 && !config.requiresPop && (
           <NavigationItem label="Issuer" href="issuer" icon={<IconUser size="16px" />} defaultOpen>
             {pools.map((pool) => (
               <PoolNavigationItem key={pool.id} pool={pool} />
