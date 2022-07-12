@@ -447,8 +447,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
         )
         if (options?.propose) {
           const proposalSubmittable = api.tx.utility.batchAll([
-            api.tx.democracy.notePreimage(submittable.toHex()),
-            api.tx.democracy.propose(submittable.hash, api.consts.democracy.minimumDeposit),
+            api.tx.democracy.notePreimage(submittable.method.toHex()),
+            api.tx.democracy.propose(submittable.method.hash, api.consts.democracy.minimumDeposit),
           ])
           return inst.wrapSignAndSend(api, proposalSubmittable, options)
         }
