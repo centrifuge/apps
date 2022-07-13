@@ -2,7 +2,6 @@ import { CronJob } from 'cron'
 import { ethers } from 'ethers'
 import config from './config'
 import { checkDueAssets } from './tasks/checkDueAssets'
-import { closePools } from './tasks/closePools'
 import { executePools } from './tasks/executePools'
 import { sendSupplyRedeemSummary } from './tasks/sendSupplyRedeemSummary'
 import { submitSolutions } from './tasks/submitSolutions'
@@ -38,12 +37,6 @@ const run = async () => {
     pools = await loadFromIPFS(provider, config.excludedPools)
   })
   cronJobs.set('retrievePools', retrievePoolsTask)
-
-  let closePoolsTask = new CronJob('0 9 * * *', async () => {
-    // Close pool epochs every day at 10am CET (9am UTC)
-    await closePools(pools, provider, signer)
-  })
-  cronJobs.set('closePools', closePoolsTask)
 
   let submitSolutionsTask = new CronJob(CronExpression.EVERY_30_MINUTES, async () => {
     // Submit solutions every x minutes
