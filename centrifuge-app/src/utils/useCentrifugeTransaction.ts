@@ -86,11 +86,8 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       }
     } catch (e) {
       console.error(e)
-      const failedReason = (e as Error).message.includes('[cent-js]')
-        ? (e as Error).message.replaceAll('[cent-js] ', '')
-        : 'Failed to submit transaction'
 
-      updateTransaction(id, { status: 'failed', failedReason })
+      updateTransaction(id, { status: 'failed', failedReason: (e as Error).message })
       options.onError?.(e)
     }
   }

@@ -143,7 +143,7 @@ export class CentrifugeBase {
             const txFee = Number(paymentInfo.partialFee.toString()) / 10 ** (api.registry.chainDecimals as any)
             const balance = new Balance(hexToBn(nativeBalance.data.free))
             if (balance.lten(txFee)) {
-              throw new Error(`[cent-js] ${api.registry.chainTokens[0]} balance too low`)
+              throw new Error(`${api.registry.chainTokens[0]} balance too low`)
             }
             return true
           })
