@@ -2,12 +2,13 @@ import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
-import { useDebugFlags } from '../../components/DebugFlags'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
+import { useAddress } from '../../utils/useAddress'
+import { usePermissions } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
@@ -19,8 +20,16 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   const pool = usePool(pid)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const theme = useTheme()
-  const { showAdditionalIssuerTabs } = useDebugFlags()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
+
+  const address = useAddress()
+  const permissions = usePermissions(address)
+  if (!pool || !permissions) return null
+
+  const configurePermission = permissions.pools[pid]?.roles.includes('PoolAdmin')
+
+  const investPermission =
+    permissions.pools[pid]?.roles.includes('PoolAdmin') || permissions.pools[pid]?.roles.includes('MemberListAdmin')
 
   return (
     <>
@@ -60,10 +69,8 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
             <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
             <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
             <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
-            {showAdditionalIssuerTabs && (
-              <NavigationTabsItem to={`${basePath}/${pid}/investors`}>Investors</NavigationTabsItem>
-            )}
-            {showAdditionalIssuerTabs && (
+            {investPermission && <NavigationTabsItem to={`${basePath}/${pid}/investors`}>Investors</NavigationTabsItem>}
+            {configurePermission && (
               <NavigationTabsItem to={`${basePath}/${pid}/configuration`}>Configuration</NavigationTabsItem>
             )}
           </NavigationTabs>
