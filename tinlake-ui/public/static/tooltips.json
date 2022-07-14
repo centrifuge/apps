@@ -81,8 +81,8 @@
     "description": "Underlying every Tinlake pool is a \"risk scorecard\" with different risk groups. Each NFT is assigned to one of these risk groups to determine financing fee and assumed risk adjustment for valuation.",
     "link": "https://docs.centrifuge.io/learn/pool-valuation/"
   },
-  "assumedRiskAdjustment": {
-    "title": "Assumed risk adjustment",
+  "appliedRiskAdjustment": {
+    "title": "Applied risk adjustment",
     "description": "This is the assumed risk adjustment applied to outstanding financings of the corresponding risk group to calculate the NAV of the asset portfolio.",
     "link": "https://docs.centrifuge.io/learn/pool-valuation/"
   },
