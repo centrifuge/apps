@@ -48,7 +48,7 @@ const defaultConfig: Config = {
   polkadotWsUrl: 'wss://rpc.polkadot.io',
   kusamaWsUrl: 'wss://kusama-rpc.polkadot.io',
   centrifugeSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools',
-  altairSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools__Y2Vud',
+  altairSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools-altair',
 }
 
 const relayChainTypes = {}
