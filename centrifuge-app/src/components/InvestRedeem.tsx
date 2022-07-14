@@ -218,12 +218,9 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
     (cent) => cent.pools.updateInvestOrder
   )
   React.useEffect(() => {
-    // submit dummy tx with paymentInfo option to get tx fee estimate
-    getTxInvestFee([poolId, trancheId, Balance.fromFloat(100)], {
-      paymentInfo: address,
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [poolId, trancheId, address])
+    // submit dummy tx to get tx fee estimate
+    getTxInvestFee([poolId, trancheId, Balance.fromFloat(100)])
+  }, [poolId, trancheId, getTxInvestFee])
 
   const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
     'Cancel order',

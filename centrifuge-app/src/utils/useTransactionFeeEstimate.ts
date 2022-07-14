@@ -25,6 +25,7 @@ export function useTransactionFeeEstimate<T extends Array<any>>(
 
       const lastResult = await lastValueFrom(
         transaction(args, {
+          paymentInfo: selectedAccount.address,
           ...txOptions,
         })
       )
