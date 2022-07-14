@@ -30,6 +30,7 @@ import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../utils/useFocusInvalidInput'
 import { usePermissions } from '../utils/usePermissions'
 import { usePendingCollect, usePool, usePoolMetadata } from '../utils/usePools'
+import { useTransactionFeeEstimate } from '../utils/useTransactionFeeEstimate'
 import { positiveNumber } from '../utils/validation'
 import { useDebugFlags } from './DebugFlags'
 import { LoadBoundary } from './LoadBoundary'
@@ -213,12 +214,11 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
     },
   })
 
-  // submit dummy tx with paymentInfo option to check how much the tx would cost
-  const { execute: getTxInvestFee, txFee: investTxFee } = useCentrifugeTransaction(
-    'Get tx fee',
+  const { execute: getTxInvestFee, txFee: investTxFee } = useTransactionFeeEstimate(
     (cent) => cent.pools.updateInvestOrder
   )
   React.useEffect(() => {
+    // submit dummy tx with paymentInfo option to get tx fee estimate
     getTxInvestFee([poolId, trancheId, Balance.fromFloat(100)], {
       paymentInfo: address,
     })
