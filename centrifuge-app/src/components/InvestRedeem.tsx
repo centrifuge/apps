@@ -278,8 +278,11 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
         {pool?.epoch.isInSubmissionPeriod && epochBusyElement}
         {nativeBalanceTooLow && (
           <InlineFeedback>
-            You need at least {investTxFee?.toFixed(4)} {balances?.native.symbol || config.baseCurrency} to make this
-            transaction.
+            {investTxFee
+              ? `This transaction will cost ${investTxFee.toFixed(4)} ${
+                  balances?.native.symbol || config.baseCurrency
+                }. Please check your balance.`
+              : `${balances?.native.symbol || config.baseCurrency} balance is too low.`}
           </InlineFeedback>
         )}
         <Field name="amount" validate={positiveNumber()}>

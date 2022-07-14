@@ -40,9 +40,8 @@ export function useTransactionFeeEstimate<T extends Array<any>>(
   async function execute(args: T, options?: TxOptions) {
     if (!selectedAccount) {
       return
-    } else {
-      await doTransaction(selectedAccount, args, options)
     }
+    await doTransaction(selectedAccount, args, options)
   }
 
   return {
