@@ -31,6 +31,8 @@ const PoolAssetReserveChart: React.VFC = () => {
     )
   }, [poolStates])
 
+  if (poolStates && poolStates?.length < 1) return <Text variant="body2">No data available</Text>
+
   const todayPoolValue = pool?.value.toDecimal().toNumber() || 0
   const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
   const today: ChartData = {

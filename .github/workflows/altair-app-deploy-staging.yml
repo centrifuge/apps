@@ -16,7 +16,7 @@ jobs:
       whitelisted-accounts: ''
       network: altair
       requires-pop: 'true'
-      subquery-url: https://api.subquery.network/sq/centrifuge/pools-altair
+      subquery-url: https://api.subquery.network/sq/centrifuge/pools-charcoal
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

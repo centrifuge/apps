@@ -37,9 +37,12 @@ export const PoolDetailOverview: React.FC = () => {
   const pageSummaryData = [
     { label: <Tooltips type="assetClass" />, value: metadata?.pool?.asset.class },
     { label: <Tooltips type="valueLocked" />, value: formatBalance(pool?.value || 0, pool?.currency) },
-    { label: <Tooltips type="age" />, value: getAge(pool?.createdAt) },
     { label: <Tooltips type="averageAssetMaturity" />, value: avgMaturity },
   ]
+
+  if (pool?.createdAt) {
+    pageSummaryData.splice(2, 0, { label: <Tooltips type="age" />, value: getAge(pool.createdAt) })
+  }
 
   return (
     <>
