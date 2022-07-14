@@ -20,6 +20,7 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import styled from 'styled-components'
+import { config } from '../config'
 import { getEpochTimeRemaining } from '../utils/date'
 import { Dec } from '../utils/Decimal'
 import { formatBalance, getCurrencySymbol, roundDown } from '../utils/formatting'
@@ -187,6 +188,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
   const pool = usePool(poolId)
   const tranche = pool?.tranches.find((t) => t.id === trancheId)
   const balance = balances && pool ? getBalanceDec(balances, pool.currency) : Dec(0)
+  const nativeBalance = balances && pool ? getBalanceDec(balances, 'native') : Dec(0)
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
@@ -210,6 +212,18 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
       setChangeOrderFormShown(false)
     },
   })
+
+  // submit dummy tx with paymentInfo option to check how much the tx would cost
+  const { execute: getTxInvestFee, txFee: investTxFee } = useCentrifugeTransaction(
+    'Get tx fee',
+    (cent) => cent.pools.updateInvestOrder
+  )
+  React.useEffect(() => {
+    getTxInvestFee([poolId, trancheId, Balance.fromFloat(100)], {
+      paymentInfo: address,
+    })
+  }, [])
+
   const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
     'Cancel order',
     (cent) => cent.pools.updateInvestOrder,
@@ -258,10 +272,18 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
 
+  const nativeBalanceTooLow = nativeBalance.lte(investTxFee || 1)
+
   function renderInput(cancelCb?: () => void) {
     return (
       <Stack gap={2}>
         {pool?.epoch.isInSubmissionPeriod && epochBusyElement}
+        {nativeBalanceTooLow && (
+          <InlineFeedback>
+            You need at least {investTxFee?.toFixed(4)} {balances?.native.symbol || config.baseCurrency} to make this
+            transaction.
+          </InlineFeedback>
+        )}
         <Field name="amount" validate={positiveNumber()}>
           {({ field, meta }: FieldProps) => {
             return (
@@ -304,7 +326,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
             type="submit"
             loading={isLoading}
             loadingMessage={loadingMessage}
-            disabled={pool?.epoch.isInSubmissionPeriod}
+            disabled={pool?.epoch.isInSubmissionPeriod || nativeBalanceTooLow}
           >
             Invest
           </Button>

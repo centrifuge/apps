@@ -8,7 +8,7 @@ import { Transaction, useTransaction, useTransactions } from '../components/Tran
 import { useWeb3 } from '../components/Web3Provider'
 import { PalletError } from './errors'
 
-type TxOptions = Pick<TransactionOptions, 'propose'>
+type TxOptions = Pick<TransactionOptions, 'propose' | 'paymentInfo'>
 
 export function useCentrifugeTransaction<T extends Array<any>>(
   title: string,
@@ -19,6 +19,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   const { selectedAccount, connect, proxy } = useWeb3()
   const cent = useCentrifuge()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
+  const [txFee, setTxFee] = React.useState<number | undefined>(undefined)
   const lastCreatedTransaction = useTransaction(lastId)
   const pendingTransaction = React.useRef<{ id: string; args: T; options?: TxOptions }>()
 
@@ -79,6 +80,12 @@ export function useCentrifugeTransaction<T extends Array<any>>(
         })
       )
 
+      if (txOptions?.paymentInfo) {
+        const txFee = Number(lastResult.partialFee.toString()) / 10 ** (api.registry.chainDecimals as any)
+        setTxFee(txFee)
+        return
+      }
+
       if (txError) {
         options.onError?.(txError)
       } else {
@@ -92,7 +99,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     }
   }
 
-  function execute(args: T, options?: TxOptions) {
+  async function execute(args: T, options?: TxOptions) {
     const id = Math.random().toString(36).substr(2)
     const tx: Transaction = {
       id,
@@ -109,6 +116,10 @@ export function useCentrifugeTransaction<T extends Array<any>>(
         updateTransaction(id, { status: 'failed', failedReason: e.message })
       })
     } else {
+      if (options?.paymentInfo) {
+        const paymentInfo = await doTransaction(selectedAccount, id, args, options)
+        return paymentInfo
+      }
       doTransaction(selectedAccount, id, args, options)
     }
     return id
@@ -131,6 +142,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   return {
     execute,
     lastCreatedTransaction,
+    txFee,
     reset: () => setLastId(undefined),
     isLoading: lastCreatedTransaction
       ? ['creating', 'unconfirmed', 'pending'].includes(lastCreatedTransaction.status)
