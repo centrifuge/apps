@@ -48,7 +48,7 @@ export type UserProvidedConfig = Partial<Config>
 
 export type PaymentInfo = {
   class: string
-  partialFee: number
+  partialFee: number | Balance
   weight: number
 }
 
