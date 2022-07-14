@@ -1,7 +1,6 @@
-import { Box, Card, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import { Box, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
-import { CardHeader } from '../../components/CardHeader'
 import { Identity } from '../../components/Identity'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import LoanLabel from '../../components/LoanLabel'
@@ -12,6 +11,7 @@ import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { AnchorPillButton } from '../../components/PillButton'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
+import { config } from '../../config'
 import { nftMetadataSchema } from '../../schemas'
 import { formatBalance } from '../../utils/formatting'
 import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
@@ -41,18 +41,9 @@ const LoanSidebar: React.FC = () => {
   const permissions = usePermissions(address)
   const canBorrow = useCanBorrow(pid, aid)
 
-  if (!loan || loan.status === 'Created' || !permissions) return null
+  if (!loan || loan.status === 'Created' || !permissions || !canBorrow) return null
 
-  return canBorrow ? (
-    <FinanceForm loan={loan} />
-  ) : (
-    <Card p={2}>
-      <Stack gap={2}>
-        <CardHeader title="Finance &amp; Repay" />
-        <Text variant="body2">You don&rsquo;t have permission to finance this asset</Text>
-      </Stack>
-    </Card>
-  )
+  return <FinanceForm loan={loan} />
 }
 
 const Loan: React.FC = () => {
@@ -96,8 +87,8 @@ const Loan: React.FC = () => {
             <PageSummary
               data={[
                 {
-                  label: <Tooltips type="loanType" />,
-                  value: loan?.loanInfo.type ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '',
+                  label: <Tooltips type="assetType" />,
+                  value: LOAN_TYPE_LABELS[loan.loanInfo.type],
                 },
                 {
                   label: <Tooltips type="riskGroup" />,
@@ -114,22 +105,24 @@ const Loan: React.FC = () => {
                   value: formatBalance(loan.loanInfo.value, pool?.currency),
                 },
                 {
-                  label: <Tooltips type="availableForFinancing" />,
-                  value: formatBalance(availableFinancing, pool?.currency),
+                  label: <Tooltips type="availableFinancing" />,
+                  value: !availableFinancing.isZero() ? formatBalance(availableFinancing, pool?.currency) : 'n/a',
                 },
                 {
                   label: <Tooltips type="outstanding" />,
-                  value: formatBalance(loan.outstandingDebt, pool?.currency),
+                  value: loan?.outstandingDebt?.gtn(0) ? formatBalance(loan.outstandingDebt, pool?.currency) : 'n/a',
                 },
               ]}
             />
-            <PageSection title="Pricing">
-              <RiskGroupValues
-                values={{ ...loan.loanInfo, interestRatePerSec: loan.interestRatePerSec }}
-                loanType={loan.loanInfo.type}
-                showMaturityDate
-              />
-            </PageSection>
+            {
+              <PageSection title="Pricing">
+                <RiskGroupValues
+                  values={{ ...loan.loanInfo, interestRatePerSec: loan.interestRatePerSec }}
+                  loanType={loan?.loanInfo ? loan.loanInfo.type : config.defaultLoanType}
+                  showMaturityDate
+                />
+              </PageSection>
+            }
           </>
         ) : canPrice ? (
           <PricingForm loan={loan} pool={pool} />

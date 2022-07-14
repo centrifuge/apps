@@ -20,6 +20,8 @@ const ReserveCashDragChart: React.VFC = () => {
   const poolStates = useDailyPoolStates(poolId)
   const pool = usePool(poolId)
 
+  if (!poolStates || poolStates?.length < 1) return <Text variant="body2">No data available</Text>
+
   const data: ChartData[] =
     poolStates?.map((day) => {
       const assetValue = day.poolState.netAssetValue.toDecimal().toNumber()
@@ -109,4 +111,4 @@ const CustomLegend: React.VFC<{
   )
 }
 
-export { ReserveCashDragChart as default }
+export default ReserveCashDragChart

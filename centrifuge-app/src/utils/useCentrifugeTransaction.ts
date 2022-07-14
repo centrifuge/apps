@@ -8,6 +8,8 @@ import { Transaction, useTransaction, useTransactions } from '../components/Tran
 import { useWeb3 } from '../components/Web3Provider'
 import { PalletError } from './errors'
 
+type TxOptions = Pick<TransactionOptions, 'propose'>
+
 export function useCentrifugeTransaction<T extends Array<any>>(
   title: string,
   transactionCallback: (centrifuge: Centrifuge) => (args: T, options?: TransactionOptions) => Observable<any>,
@@ -18,9 +20,9 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   const cent = useCentrifuge()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
   const lastCreatedTransaction = useTransaction(lastId)
-  const pendingTransaction = React.useRef<{ id: string; args: T }>()
+  const pendingTransaction = React.useRef<{ id: string; args: T; options?: TxOptions }>()
 
-  async function doTransaction(selectedAccount: WalletAccount, id: string, args: T) {
+  async function doTransaction(selectedAccount: WalletAccount, id: string, args: T, txOptions?: TxOptions) {
     try {
       const connectedCent = cent.connect(selectedAccount?.address, selectedAccount?.signer as any)
       if (proxy) {
@@ -35,6 +37,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       let txError: any = null
       const lastResult = await lastValueFrom(
         transaction(args, {
+          ...txOptions,
           onStatusChange: (result) => {
             const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
             let errorObject: any
@@ -88,7 +91,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     }
   }
 
-  function execute(args: T) {
+  function execute(args: T, options?: TxOptions) {
     const id = Math.random().toString(36).substr(2)
     const tx: Transaction = {
       id,
@@ -100,23 +103,23 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     setLastId(id)
 
     if (!selectedAccount) {
-      pendingTransaction.current = { id, args }
+      pendingTransaction.current = { id, args, options }
       connect().catch((e) => {
         updateTransaction(id, { status: 'failed', failedReason: e.message })
       })
     } else {
-      doTransaction(selectedAccount, id, args)
+      doTransaction(selectedAccount, id, args, options)
     }
     return id
   }
 
   React.useEffect(() => {
     if (pendingTransaction.current) {
-      const { id, args } = pendingTransaction.current
+      const { id, args, options } = pendingTransaction.current
       pendingTransaction.current = undefined
 
       if (selectedAccount) {
-        doTransaction(selectedAccount, id, args)
+        doTransaction(selectedAccount, id, args, options)
       } else {
         updateTransaction(id, { status: 'failed', failedReason: 'No accounts available' })
       }

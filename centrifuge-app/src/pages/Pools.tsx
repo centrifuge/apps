@@ -27,21 +27,14 @@ const Pools: React.FC = () => {
     return (
       tokens
         ?.map((tranche) => ({
-          valueLocked: tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()).toNumber(),
+          valueLocked: tranche.totalIssuance
+            .toDecimal()
+            .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
+            .toNumber(),
         }))
         .reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)) ?? Dec(0)
     )
   }, [tokens])
-
-  const totalInvestmentCapacity = React.useMemo(() => {
-    return (
-      pools
-        ?.map((pool) => ({
-          capacity: pool.reserve.available.toDecimal().toNumber(),
-        }))
-        .reduce((prev, curr) => prev.add(curr.capacity), Dec(0)) ?? Dec(0)
-    )
-  }, [pools])
 
   const pageSummaryData = [
     {
@@ -50,10 +43,6 @@ const Pools: React.FC = () => {
     },
     { label: 'Pools', value: pools?.length || 0 },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
-    {
-      label: 'Total investment capacity',
-      value: formatBalance(Dec(totalInvestmentCapacity || 0), getCurrencySymbol(config.baseCurrency)),
-    },
   ]
 
   return (
@@ -65,7 +54,7 @@ const Pools: React.FC = () => {
           <PoolList pools={pools} />
         </>
       ) : (
-        <Shelf justifyContent="center" textAlign="center">
+        <Shelf p={4} justifyContent="center" textAlign="center">
           <Text variant="heading2" color="textSecondary">
             There are no pools yet
           </Text>

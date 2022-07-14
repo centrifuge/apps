@@ -1,7 +1,6 @@
 import { TrancheBalance } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory } from 'react-router'
 import { formatBalance } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
@@ -11,43 +10,40 @@ type Props = {
   investments: TrancheBalance[]
 }
 
-export const InvestmentsList: React.FC<Props> = ({ investments }) => {
-  const history = useHistory()
+const columns: Column[] = [
+  {
+    align: 'left',
+    header: 'Token',
+    cell: (i: TrancheBalance) => <Token investment={i} />,
+    flex: '1 1 300px',
+  },
+  {
+    align: 'left',
+    header: 'Asset class',
+    cell: (i: TrancheBalance) => <AssetClass investment={i} />,
+    flex: '2 1 250px',
+  },
+  {
+    header: 'Token balance',
+    cell: (i: TrancheBalance) => <TokenBalance investment={i} />,
+  },
+  {
+    header: 'Value',
+    cell: (i: TrancheBalance) => <TokenValue investment={i} />,
+  },
+  {
+    header: '',
+    cell: () => <IconChevronRight size={24} color="textPrimary" />,
+    flex: '0 0 72px',
+  },
+]
 
-  const columns: Column[] = [
-    {
-      align: 'left',
-      header: 'Token',
-      cell: (i: TrancheBalance) => <Token investment={i} />,
-      flex: '1 1 300px',
-    },
-    {
-      align: 'left',
-      header: 'Asset class',
-      cell: (i: TrancheBalance) => <AssetClass investment={i} />,
-      flex: '2 1 250px',
-    },
-    {
-      header: 'Token balance',
-      cell: (i: TrancheBalance) => <TokenBalance investment={i} />,
-    },
-    {
-      header: 'Value',
-      cell: (i: TrancheBalance) => <TokenValue investment={i} />,
-    },
-    {
-      header: '',
-      cell: () => <IconChevronRight size={24} color="textPrimary" />,
-      flex: '0 0 72px',
-    },
-  ]
+export const InvestmentsList: React.FC<Props> = ({ investments }) => {
   return (
     <DataTable
       data={investments}
       columns={columns}
-      onRowClicked={(i: TrancheBalance) => {
-        history.push(`/tokens/${i.poolId}/${i.trancheId}`)
-      }}
+      onRowClicked={(i: TrancheBalance) => `/tokens/${i.poolId}/${i.trancheId}`}
     />
   )
 }
@@ -88,7 +84,7 @@ const TokenValue: React.VFC<{ investment: TrancheBalance }> = ({ investment }) =
 
   return (
     <Text variant="body2">
-      {formatBalance(investment.balance.toFloat() * (tranche?.tokenPrice.toFloat() ?? 1), pool?.currency)}
+      {formatBalance(investment.balance.toFloat() * (tranche?.tokenPrice?.toFloat() ?? 1), pool?.currency)}
     </Text>
   )
 }

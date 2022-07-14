@@ -9,6 +9,7 @@ import {
   IconArrowUpRight,
   IconCheckInCircle,
   IconClock,
+  InlineFeedback,
   Shelf,
   Stack,
   Text,
@@ -21,13 +22,14 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { getEpochTimeRemaining } from '../utils/date'
 import { Dec } from '../utils/Decimal'
-import { formatBalance, getCurrencySymbol } from '../utils/formatting'
+import { formatBalance, getCurrencySymbol, roundDown } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { getBalanceDec, useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../utils/useFocusInvalidInput'
 import { usePermissions } from '../utils/usePermissions'
 import { usePendingCollect, usePool, usePoolMetadata } from '../utils/usePools'
+import { positiveNumber } from '../utils/validation'
 import { useDebugFlags } from './DebugFlags'
 import { LoadBoundary } from './LoadBoundary'
 import { Spinner } from './Spinner'
@@ -72,6 +74,14 @@ function validateNumberInput(value: number | string | Decimal, min: number | Dec
   }
 }
 
+const epochBusyElement = (
+  <InlineFeedback>
+    The pool is busy calculating epoch orders.
+    <br />
+    Try again later.
+  </InlineFeedback>
+)
+
 const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
   const [view, setView] = React.useState<'start' | 'invest' | 'redeem'>('start')
   const address = useAddress()
@@ -89,7 +99,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
   const trancheBalance =
     balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === trancheId)?.balance.toDecimal() ?? Dec(0)
 
-  const price = tranche?.tokenPrice.toDecimal() ?? Dec(0)
+  const price = tranche?.tokenPrice?.toDecimal() ?? Dec(0)
   const investToCollect = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
   const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
   const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
@@ -136,11 +146,12 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
               ) : !order.payoutCurrencyAmount.isZero() ? (
                 <SuccessBanner title="Redemption successful" />
               ) : null)}
+            {pool?.epoch.isInSubmissionPeriod && epochBusyElement}
             <Stack p={1} gap={1}>
-              <Button variant="secondary" onClick={() => setView('invest')}>
+              <Button variant="secondary" onClick={() => setView('invest')} disabled={pool?.epoch.isInSubmissionPeriod}>
                 Invest more
               </Button>
-              <Button variant="secondary" onClick={() => setView('redeem')}>
+              <Button variant="secondary" onClick={() => setView('redeem')} disabled={pool?.epoch.isInSubmissionPeriod}>
                 Redeem
               </Button>
               <TransactionsLink />
@@ -159,7 +170,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
 }
 
 type InvestValues = {
-  amount: number | Decimal | ''
+  amount: number | ''
 }
 
 type InvestFormProps = {
@@ -187,7 +198,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')
 
-  const price = tranche?.tokenPrice.toDecimal() ?? Dec(0)
+  const price = tranche?.tokenPrice?.toDecimal() ?? Dec(0)
 
   const {
     execute: doInvestTransaction,
@@ -232,12 +243,11 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
     },
     validate: (values) => {
       const errors: FormikErrors<InvestValues> = {}
-
       if (validateNumberInput(values.amount, 0, combinedBalance)) {
         errors.amount = validateNumberInput(values.amount, 0, combinedBalance)
-      } else if (hasPendingOrder && inputToDecimal(values.amount).eq(pendingInvest)) {
+      } else if (hasPendingOrder && Dec(values.amount).eq(pendingInvest)) {
         errors.amount = 'Equals current order'
-      } else if (!allowInvestBelowMin && isFirstInvestment && Dec(form.values.amount).lt(minInvest.toDecimal())) {
+      } else if (!allowInvestBelowMin && isFirstInvestment && Dec(values.amount).lt(minInvest.toDecimal())) {
         errors.amount = 'Investment amount too low'
       }
 
@@ -251,21 +261,22 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
   function renderInput(cancelCb?: () => void) {
     return (
       <Stack gap={2}>
-        <Field name="amount">
-          {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
-            <CurrencyInput
-              {...fieldProps}
-              value={value instanceof Decimal ? value.toNumber() : value}
-              errorMessage={meta.touched ? meta.error : undefined}
-              label={`Amount ${isFirstInvestment ? `(min: ${formatBalance(minInvest, pool?.currency)})` : ''}`}
-              type="number"
-              min="0"
-              disabled={isLoading || isLoadingCancel}
-              onSetMax={() => form.setFieldValue('amount', balance)}
-              currency={getCurrencySymbol(pool?.currency)}
-              secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency)} balance`}
-            />
-          )}
+        {pool?.epoch.isInSubmissionPeriod && epochBusyElement}
+        <Field name="amount" validate={positiveNumber()}>
+          {({ field, meta }: FieldProps) => {
+            return (
+              <CurrencyInput
+                {...field}
+                onChange={(value) => form.setFieldValue('amount', value)}
+                errorMessage={meta.touched ? meta.error : undefined}
+                label={`Amount ${isFirstInvestment ? `(min: ${formatBalance(minInvest, pool?.currency)})` : ''}`}
+                disabled={isLoading || isLoadingCancel}
+                currency={getCurrencySymbol(pool?.currency)}
+                secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency, 2)} balance`}
+                onSetMax={() => form.setFieldValue('amount', balance)}
+              />
+            )
+          }}
         </Field>
         {/* {inputToNumber(form.values.amount) > 0 && inputAmountCoveredByCapacity && (
           <Text variant="label2" color="statusOk">
@@ -289,7 +300,12 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
           </Stack>
         ) : null}
         <Stack px={1} gap={1}>
-          <Button type="submit" loading={isLoading} loadingMessage={loadingMessage}>
+          <Button
+            type="submit"
+            loading={isLoading}
+            loadingMessage={loadingMessage}
+            disabled={pool?.epoch.isInSubmissionPeriod}
+          >
             Invest
           </Button>
           {cancelCb && (
@@ -352,7 +368,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
   const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
 
   const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
-  const price = tranche?.tokenPrice.toDecimal() ?? Dec(0)
+  const price = tranche?.tokenPrice?.toDecimal() ?? Dec(0)
   const maxRedeem = combinedBalance.mul(price)
   const tokenSymbol = trancheMeta?.symbol ?? ''
 
@@ -391,21 +407,21 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
    * When clicking on the "max" button in the input box, we set the amount to a Decimal representing the number of tranche tokens the user has.
    * This to avoid possibly losing precision if we were to convert it to the pool currency and then back again when submitting the form.
    */
-  const form = useFormik<{ amount: number | Decimal }>({
+  const form = useFormik<{ amount: number | '' | Decimal }>({
     initialValues: {
-      amount: 0,
+      amount: '',
     },
     onSubmit: (values, actions) => {
       const amount = (values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price))
         .mul('1e18')
         .toFixed(0)
-      doRedeemTransaction([poolId, trancheId, new BN(amount)])
+      const amountWithPrice = Dec(amount).div(price).mul('1e18').toFixed(0)
+      doRedeemTransaction([poolId, trancheId, new BN(amountWithPrice)])
       actions.setSubmitting(false)
     },
     validate: (values) => {
       const errors: FormikErrors<InvestValues> = {}
-
-      if (!(values.amount instanceof Decimal) && validateNumberInput(values.amount, 0, maxRedeem)) {
+      if (validateNumberInput(values.amount, 0, maxRedeem)) {
         errors.amount = validateNumberInput(values.amount, 0, maxRedeem)
       } else if (hasPendingOrder && inputToDecimal(values.amount).eq(pendingRedeem)) {
         errors.amount = 'Equals current order'
@@ -421,18 +437,18 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
   function renderInput(cancelCb?: () => void) {
     return (
       <Stack gap={2}>
-        <Field name="amount">
-          {({ field: { value, ...fieldProps }, meta }: FieldProps) => (
+        {pool?.epoch.isInSubmissionPeriod && epochBusyElement}
+        <Field name="amount" validate={positiveNumber()}>
+          {({ field, meta }: FieldProps) => (
             <CurrencyInput
-              {...fieldProps}
-              value={value instanceof Decimal ? value.mul(price).toNumber() : value}
+              {...field}
               errorMessage={meta.touched ? meta.error : undefined}
               label="Amount"
-              type="number"
-              min="0"
               disabled={isLoading || isLoadingCancel}
-              onSetMax={() => form.setFieldValue('amount', combinedBalance)}
+              onSetMax={() => form.setFieldValue('amount', maxRedeem)}
+              onChange={(value) => form.setFieldValue('amount', value)}
               currency={getCurrencySymbol(pool?.currency)}
+              secondaryLabel={`${formatBalance(roundDown(maxRedeem), pool?.currency, 2)} available`}
             />
           )}
         </Field>
@@ -441,17 +457,18 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
             <Shelf justifyContent="space-between">
               <Text variant="body3">Token amount</Text>
               <TextWithPlaceholder variant="body3" isLoading={isMetadataLoading} width={12} variance={0}>
-                {!price.isZero() &&
-                  `~${formatBalance(
-                    form.values.amount instanceof Decimal ? form.values.amount : Dec(form.values.amount).div(price),
-                    tokenSymbol
-                  )}`}
+                {!price.isZero() && `~${formatBalance(Dec(form.values.amount).div(price), tokenSymbol)}`}
               </TextWithPlaceholder>
             </Shelf>
           </Stack>
         ) : null}
         <Stack px={1} gap={1}>
-          <Button type="submit" loading={isLoading} loadingMessage={loadingMessage}>
+          <Button
+            type="submit"
+            loading={isLoading}
+            loadingMessage={loadingMessage}
+            disabled={pool?.epoch.isInSubmissionPeriod}
+          >
             Redeem
           </Button>
           {cancelCb && (
@@ -553,6 +570,7 @@ const PendingOrder: React.FC<{
   const { hours: hoursRemaining, minutes: minutesRemaining } = getEpochTimeRemaining(pool!)
   return (
     <Stack gap={2}>
+      {pool.epoch.isInSubmissionPeriod && epochBusyElement}
       <Stack gap="1px">
         <Stack
           p={2}
@@ -574,7 +592,12 @@ const PendingOrder: React.FC<{
           </Text>
         </Stack>
         <Grid gap="1px" columns={2} equalColumns>
-          <LightButton type="button" $left onClick={onCancelOrder} disabled={isCancelling}>
+          <LightButton
+            type="button"
+            $left
+            onClick={onCancelOrder}
+            disabled={isCancelling || pool.epoch.isInSubmissionPeriod}
+          >
             {isCancelling ? (
               <Spinner size="iconSmall" />
             ) : (
@@ -583,7 +606,7 @@ const PendingOrder: React.FC<{
               </Text>
             )}
           </LightButton>
-          <LightButton type="button" onClick={onChangeOrder} disabled={isCancelling}>
+          <LightButton type="button" onClick={onChangeOrder} disabled={isCancelling || pool.epoch.isInSubmissionPeriod}>
             <Text variant="body2" color="inherit">
               Change order
             </Text>

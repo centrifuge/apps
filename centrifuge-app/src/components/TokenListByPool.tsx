@@ -1,6 +1,6 @@
 import { IconChevronRight, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useParams, useRouteMatch } from 'react-router'
+import { useParams, useRouteMatch } from 'react-router'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 
@@ -22,33 +22,33 @@ type RowProps = {
 const columns: Column[] = [
   {
     align: 'left',
-    header: () => <SortableTableHeader label="Seniority" />,
+    header: <SortableTableHeader label="Seniority" />,
     cell: (token: TokenByPoolTableData) => <Text variant="body2"> {token.seniority + 1}</Text>,
     flex: '2',
     sortKey: 'seniority',
   },
   {
     align: 'left',
-    header: () => <SortableTableHeader label="Name" />,
+    header: <SortableTableHeader label="Name" />,
     cell: (token: TokenByPoolTableData) => <TokenName token={token} />,
     flex: '4',
     sortKey: 'name',
   },
   {
-    header: () => <SortableTableHeader label="Symbol" />,
+    header: <SortableTableHeader label="Symbol" />,
     cell: (token: TokenByPoolTableData) => <Text variant="body2">{token?.symbol}</Text>,
     flex: '2',
     align: 'left',
     sortKey: 'symbol',
   },
   {
-    header: () => <SortableTableHeader label="Min. Protection" />,
+    header: <SortableTableHeader label="Min. Protection" />,
     cell: (token: TokenByPoolTableData) => <Protection token={token} />,
     flex: '3',
     sortKey: 'protection',
   },
   {
-    header: () => <SortableTableHeader label="APY" />,
+    header: <SortableTableHeader label="APY" />,
     cell: (token: TokenByPoolTableData) => <APY token={token} />,
     flex: '3',
     sortKey: 'apy',
@@ -61,7 +61,6 @@ const columns: Column[] = [
 ]
 
 export const TokenListByPool: React.FC = () => {
-  const history = useHistory()
   const { pid } = useParams<{ pid: string }>()
   const pool = usePool(pid)
   const { data: metadata } = usePoolMetadata(pool)
@@ -89,9 +88,7 @@ export const TokenListByPool: React.FC = () => {
       data={tokens}
       columns={columns}
       defaultSortKey="seniority"
-      onRowClicked={(token: TokenByPoolTableData) => {
-        history.push(`${basePath}/${token.poolId}/tokens/${token.id}`)
-      }}
+      onRowClicked={(token: TokenByPoolTableData) => `${basePath}/${token.poolId}/tokens/${token.id}`}
     />
   )
 }

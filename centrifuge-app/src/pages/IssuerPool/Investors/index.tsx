@@ -5,7 +5,7 @@ import {
   IconAlertCircle,
   IconCheckCircle,
   IconInfoFailed,
-  IconMinusCircle,
+  IconMinus,
   IconPlus,
   SearchInput,
   Shelf,
@@ -41,15 +41,12 @@ const IssuerPoolInvestors: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const address = useAddress()
   const permissions = usePermissions(address)
-  const canEditInvestors =
-    address &&
-    (permissions?.pools[poolId]?.roles.includes('PoolAdmin') ||
-      permissions?.pools[poolId]?.roles.includes('MemberListAdmin'))
+  const canEditInvestors = address && permissions?.pools[poolId]?.roles.includes('MemberListAdmin')
 
   return <>{canEditInvestors && <Investors />}</>
 }
 
-const SevenDaysMs = 7 * 25 * 60 * 60 * 1000 // 1 hour margin
+const SevenDaysMs = (7 * 24 + 1) * 60 * 60 * 1000 // 1 hour margin
 
 export const Investors: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
@@ -108,14 +105,14 @@ export const Investors: React.FC = () => {
               <Text variant="label2" color="statusOk">
                 <Shelf gap={1}>
                   <IconCheckCircle size="20px" />
-                  <span>Address In member list</span>
+                  <span>Address whitelisted</span>
                 </Shelf>
               </Text>
             ) : permissions && !allowedTranches.length ? (
               <Text variant="label2" color="statusWarning">
                 <Shelf gap={1}>
                   <IconAlertCircle size="20px" />
-                  <span>Address not in member list</span>
+                  <span>Address not whitelisted</span>
                 </Shelf>
               </Text>
             ) : null)
@@ -129,17 +126,17 @@ export const Investors: React.FC = () => {
                 align: 'left',
                 header: 'Token',
                 cell: (row: Tranche) => (
-                  <TextWithPlaceholder isLoading={metadataIsLoading}>
+                  <TextWithPlaceholder isLoading={metadataIsLoading} textOverflow="ellipsis" variant="body2">
                     {metadata?.tranches?.[row.id]?.name}
                   </TextWithPlaceholder>
                 ),
-                flex: '1 0 150px',
+                flex: '1',
               },
               {
                 align: 'left',
                 header: 'Investment',
                 cell: (row: Tranche) => <InvestedCell address={validAddress} trancheId={row.id} />,
-                flex: '1 0 150px',
+                flex: '1',
               },
               {
                 header: '',
@@ -150,16 +147,16 @@ export const Investors: React.FC = () => {
                   return (
                     <Button
                       variant="tertiary"
-                      icon={isAllowed ? IconMinusCircle : IconPlus}
+                      icon={isAllowed ? IconMinus : IconPlus}
                       onClick={() => toggleAllowed(row.id)}
                       loading={isTransactionPending && pendingTrancheId === row.id}
-                      small={!isAllowed}
+                      small
                     >
-                      {!isAllowed && 'Add token'}
+                      {isAllowed ? 'Remove from whitelist' : 'Add to whitelist'}
                     </Button>
                   )
                 },
-                flex: '0 0 180px',
+                flex: '1',
               },
             ]}
           />
@@ -173,5 +170,5 @@ const InvestedCell: React.FC<{ address: string; trancheId: string }> = ({ tranch
   const order = useOrder(trancheId, address)
   const hasInvested = order && (order?.epoch > 0 || !order.invest.isZero())
 
-  return <TextWithPlaceholder>{hasInvested && 'Invested'}</TextWithPlaceholder>
+  return <TextWithPlaceholder variant="body2">{hasInvested && 'Invested'}</TextWithPlaceholder>
 }

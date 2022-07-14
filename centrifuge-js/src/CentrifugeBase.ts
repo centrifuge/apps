@@ -48,7 +48,7 @@ const defaultConfig: Config = {
   polkadotWsUrl: 'wss://rpc.polkadot.io',
   kusamaWsUrl: 'wss://kusama-rpc.polkadot.io',
   centrifugeSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools',
-  altairSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools__Y2Vud',
+  altairSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools-altair',
 }
 
 const relayChainTypes = {}
@@ -57,6 +57,21 @@ const parachainTypes = {
   // NFTs
   ClassId: 'u64',
   InstanceId: 'u128',
+}
+
+const parachainRpcMethods = {
+  pools: {
+    trancheTokenPrices: {
+      description: 'Retrieve prices for all tranches',
+      params: [
+        {
+          name: 'pool_id',
+          type: 'u64',
+        },
+      ],
+      type: 'Vec<u128>',
+    },
+  },
 }
 
 type Events = ISubmittableResult['events']
@@ -203,11 +218,11 @@ export class CentrifugeBase {
   }
 
   getApi() {
-    return getPolkadotApi(this.parachainUrl, parachainTypes)
+    return getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods)
   }
 
   getApiPromise() {
-    return firstValueFrom(getPolkadotApi(this.parachainUrl, parachainTypes))
+    return firstValueFrom(getPolkadotApi(this.parachainUrl, parachainTypes, parachainRpcMethods))
   }
 
   getRelayChainApi() {

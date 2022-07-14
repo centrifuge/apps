@@ -1,4 +1,5 @@
 import { Balance, Rate } from '@centrifuge/centrifuge-js'
+import { ActiveLoan } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -7,8 +8,10 @@ import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
 import { useLoans } from '../utils/useLoans'
 import { usePool, usePoolMetadata } from '../utils/usePools'
-import { RiskGroupSharesPieChart } from './Charts/RiskGroupSharesPieChart'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
+import { Spinner } from './Spinner'
+
+const RiskGroupSharesPieChart = React.lazy(() => import('./Charts/RiskGroupSharesPieChart'))
 
 export type AssetByRiskGroup = {
   color?: string
@@ -23,7 +26,7 @@ export type AssetByRiskGroup = {
 const columns: Column[] = [
   {
     align: 'left',
-    header: () => <SortableTableHeader label="Risk group" />,
+    header: <SortableTableHeader label="Risk group" />,
     cell: (riskGroup: AssetByRiskGroup) => (
       <Shelf gap="1">
         {riskGroup?.color && <Box width="10px" height="10px" backgroundColor={riskGroup.color} />}
@@ -36,19 +39,19 @@ const columns: Column[] = [
     sortKey: 'name',
   },
   {
-    header: () => <SortableTableHeader label="Amount" />,
+    header: <SortableTableHeader label="Amount" />,
     cell: ({ amount }: AssetByRiskGroup) => <Text variant="body2">{amount}</Text>,
     flex: '1',
     sortKey: 'amount',
   },
   {
-    header: () => <SortableTableHeader label="Share" />,
+    header: <SortableTableHeader label="Share" />,
     cell: ({ share }: AssetByRiskGroup) => <Text variant="body2">{share}%</Text>,
     flex: '1',
     sortKey: 'share',
   },
   {
-    header: () => <SortableTableHeader label="Financing fee" />,
+    header: <SortableTableHeader label="Financing fee" />,
     cell: ({ interestRatePerSec }: AssetByRiskGroup) => (
       <Text variant="body2">
         {interestRatePerSec && typeof interestRatePerSec === 'string'
@@ -62,7 +65,7 @@ const columns: Column[] = [
     sortKey: 'interestRatePerSec',
   },
   {
-    header: () => <SortableTableHeader label="Risk adjustment" />,
+    header: <SortableTableHeader label="Risk adjustment" />,
     cell: ({ riskAdjustment }: AssetByRiskGroup) => (
       <Text variant="body2">
         {riskAdjustment && typeof riskAdjustment === 'string'
@@ -84,31 +87,34 @@ const RiskGroupList: React.FC = () => {
   const theme = useTheme()
   const { data: metadata } = usePoolMetadata(pool)
 
+  const activeLoans = loans?.filter((loan) => loan.status === 'Active') as ActiveLoan[]
+
   const totalAmountsSum = React.useMemo(
     () =>
-      loans?.reduce<Balance>((prev, curr) => new Balance(prev.add(curr.outstandingDebt)), new Balance(0)) ||
-      new Balance(0),
-    [loans]
+      activeLoans?.reduce<Balance>(
+        (prev, curr) => new Balance(prev.add(curr?.outstandingDebt || new Balance(0))),
+        new Balance(0)
+      ) || new Balance(0),
+    [activeLoans]
   )
 
   const riskGroups = React.useMemo(() => {
     return (
       metadata?.riskGroups!.map((group) => {
-        const loansByRiskGroup = loans?.filter((loan) => {
+        const loansByRiskGroup = activeLoans?.filter((loan) => {
           return (
-            (loan.status === 'Active' &&
+            // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
+            (loan.loanInfo.type !== 'CreditLine' &&
               loan.outstandingDebt.toDecimal().greaterThan(0) &&
-              loan.loanInfo.type !== 'CreditLine' &&
-              // find loans that have matching number to risk group to determine which riskGroup they belong to (we don't store associations on chain)
-              loan.loanInfo?.lossGivenDefault.toString() === group?.lossGivenDefault &&
-              loan.loanInfo?.probabilityOfDefault.toString() === group?.probabilityOfDefault &&
-              loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
-              loan?.interestRatePerSec.toString() === group?.interestRatePerSec) ||
+              loan.loanInfo.lossGivenDefault.toString() === group?.lossGivenDefault &&
+              loan.loanInfo.probabilityOfDefault.toString() === group?.probabilityOfDefault &&
+              loan.loanInfo.advanceRate.toString() === group?.advanceRate &&
+              loan.interestRatePerSec.toString() === group?.interestRatePerSec) ||
             (loan.loanInfo.type === 'CreditLine' &&
-              loan.loanInfo?.advanceRate.toString() === group?.advanceRate &&
-              loan?.interestRatePerSec.toString() === group?.interestRatePerSec)
+              loan.loanInfo.advanceRate.toString() === group?.advanceRate &&
+              loan.interestRatePerSec.toString() === group?.interestRatePerSec)
           )
-        })
+        }) as ActiveLoan[]
 
         const lgd = new Rate(group?.lossGivenDefault).toPercent()
         const pod = new Rate(group.probabilityOfDefault).toPercent()
@@ -116,7 +122,7 @@ const RiskGroupList: React.FC = () => {
         const interestRatePerSec = new Rate(group.interestRatePerSec).toAprPercent().toDecimalPlaces(2).toString()
 
         const amount = loansByRiskGroup?.reduce<Balance>(
-          (prev, curr) => new Balance(prev?.add(curr.outstandingDebt)),
+          (prev, curr) => new Balance(prev?.add(curr?.outstandingDebt || new Balance(0))),
           new Balance('0')
         )
         if (!amount || !totalAmountsSum) {
@@ -138,10 +144,10 @@ const RiskGroupList: React.FC = () => {
         } as AssetByRiskGroup
       }) || []
     )
-  }, [metadata, loans, pool, totalAmountsSum])
+  }, [metadata, activeLoans, pool, totalAmountsSum])
 
   const totalSharesSum = riskGroups
-    .reduce((prev, curr) => (typeof curr.share === 'string' ? prev.add(curr.share) : prev), Dec(0))
+    .reduce((prev, curr) => (typeof curr.share === 'string' ? prev.add(curr.share || 0) : prev), Dec(0))
     .toString()
   const summaryRow = React.useMemo(() => {
     const avgInterestRatePerSec = riskGroups
@@ -179,7 +185,7 @@ const RiskGroupList: React.FC = () => {
       interestRatePerSec: <Text variant="body2" fontWeight={600}>{`Avg. ${avgInterestRatePerSec.toString()}%`}</Text>,
       riskAdjustment: <Text variant="body2" fontWeight={600}>{`Avg. ${avgRiskAdjustment.toString()}%`}</Text>,
       color: '',
-      labelColor: ' ',
+      labelColor: '',
     }
   }, [riskGroups, pool?.currency, totalSharesSum, totalAmountsSum])
 
@@ -188,9 +194,14 @@ const RiskGroupList: React.FC = () => {
     .sort((a, b) => Number(a.amount) - Number(b.amount))
     .map((item, index) => {
       if (metadata?.riskGroups!.length) {
+        const name = item.name ? `${index + 1} – ${item.name}` : `${index + 1}`
+        if (Dec(totalSharesSum).lessThanOrEqualTo(0)) {
+          return { ...item, name }
+        }
         const nextShade = ((index + 2) % 8) * 100
         return {
           ...item,
+          name,
           color: theme.colors.accentScale[nextShade],
           labelColor: nextShade >= 500 ? 'white' : 'black',
         }
@@ -206,12 +217,20 @@ const RiskGroupList: React.FC = () => {
     <>
       {sharesForPie.length > 0 && totalSharesSum !== '0' && (
         <Shelf justifyContent="center">
-          <RiskGroupSharesPieChart data={sharesForPie} />
+          <React.Suspense fallback={<Spinner />}>
+            <RiskGroupSharesPieChart data={sharesForPie} />
+          </React.Suspense>
         </Shelf>
       )}
       {tableDataWithColor.length > 0 ? (
         <Box mt={sharesForPie.length > 0 && totalSharesSum !== '0' ? '0' : '3'}>
-          <DataTable defaultSortKey="share" data={tableDataWithColor} columns={columns} summary={summaryRow} />
+          <DataTable
+            defaultSortKey="name"
+            defaultSortOrder="asc"
+            data={tableDataWithColor}
+            columns={columns}
+            summary={summaryRow}
+          />
         </Box>
       ) : (
         <Text variant="label1">No data</Text>
@@ -220,4 +239,4 @@ const RiskGroupList: React.FC = () => {
   )
 }
 
-export { RiskGroupList as default }
+export default RiskGroupList

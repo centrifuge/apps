@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, splitVendorChunkPlugin } from 'vite'
 
 // https://vitejs.dev/config/
 // when making changes to this file start vite with --force flag
@@ -38,5 +38,6 @@ export default defineConfig({
         plugins: ['babel-plugin-styled-components'],
       },
     }),
+    splitVendorChunkPlugin(),
   ],
 })

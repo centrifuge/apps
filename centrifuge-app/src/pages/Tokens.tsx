@@ -1,4 +1,3 @@
-import { Perquintill } from '@centrifuge/centrifuge-js'
 import { Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { MenuSwitch } from '../components/MenuSwitch'
@@ -36,8 +35,11 @@ const TokenOverview: React.FC = () => {
             // bc we don't have a way to query for historical token prices yet
             // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
             yield: tranche.interestRatePerSec ? tranche.interestRatePerSec.toAprPercent().toNumber() : null,
-            protection: tranche.minRiskBuffer?.toPercent().toNumber() || new Perquintill(0).toPercent().toNumber(),
-            valueLocked: tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()).toNumber(),
+            protection: tranche.currentRiskBuffer?.toPercent().toNumber() || 0,
+            valueLocked: tranche.totalIssuance
+              .toDecimal()
+              .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
+              .toNumber(),
           }
         })
         .flat() || [],
@@ -48,21 +50,14 @@ const TokenOverview: React.FC = () => {
     return (
       dataTokens
         ?.map((tranche) => ({
-          valueLocked: tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal()).toNumber(),
+          valueLocked: tranche.totalIssuance
+            .toDecimal()
+            .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
+            .toNumber(),
         }))
         .reduce((prev, curr) => prev.add(curr.valueLocked), Dec(0)) ?? Dec(0)
     )
   }, [dataTokens])
-
-  const totalInvestmentCapacity = React.useMemo(() => {
-    return (
-      pools
-        ?.map((pool) => ({
-          capacity: pool.reserve.available.toDecimal().toNumber(),
-        }))
-        .reduce((prev, curr) => prev.add(curr.capacity), Dec(0)) ?? Dec(0)
-    )
-  }, [pools])
 
   const pageSummaryData = [
     {
@@ -71,10 +66,6 @@ const TokenOverview: React.FC = () => {
     },
     { label: 'Pools', value: pools?.length || 0 },
     { label: <Tooltips type="tokens" />, value: tokens?.length || 0 },
-    {
-      label: 'Total investment capacity',
-      value: formatBalance(Dec(totalInvestmentCapacity || 0), getCurrencySymbol(config.baseCurrency)),
-    },
   ]
 
   return (
@@ -86,7 +77,7 @@ const TokenOverview: React.FC = () => {
           <TokenList tokens={tokens} />
         </>
       ) : (
-        <Shelf p="4" justifyContent="center" textAlign="center">
+        <Shelf p={4} justifyContent="center" textAlign="center">
           <Text variant="heading2" color="textSecondary">
             There are no tokens yet
           </Text>

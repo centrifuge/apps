@@ -56,7 +56,7 @@ export class CentChain {
   }
 
   public async claimedCFGRewards(addr: string) {
-    const claimed = await (await this.api()).query.radClaims.accountBalances(centChainAddrToAccountId(addr))
+    const claimed = await (await this.api()).query.claims.claimedAmounts(centChainAddrToAccountId(addr))
     return claimed
   }
 
@@ -68,7 +68,8 @@ export class CentChain {
    * @returns txHash string
    */
   public async claimCFGRewards(claimerAccountID: string, amount: string, proof: Uint8Array[]): Promise<string> {
-    const { web3FromAddress } = await import('@polkadot/extension-dapp')
+    const { web3FromAddress, web3Enable } = await import('@polkadot/extension-dapp')
+    await web3Enable('tinlake')
 
     const address = accountIdToCentChainAddr(claimerAccountID)
 

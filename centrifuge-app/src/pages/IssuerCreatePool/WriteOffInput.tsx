@@ -16,8 +16,8 @@ export const WriteOffInput: React.FC = () => {
     <FieldArray name="writeOffGroups">
       {(fldArr) => (
         <PageSection
-          title="Write-off groups"
-          subtitle="At least one write-off group is required"
+          title="Write-off schedule"
+          subtitle="At least one write-off activity is required"
           headerRight={
             <Button
               variant="secondary"
@@ -35,7 +35,7 @@ export const WriteOffInput: React.FC = () => {
             {values.writeOffGroups.map((s, index) => (
               <React.Fragment key={index}>
                 <Stack gap="4px" py={1}>
-                  <Text variant="label2">Group</Text>
+                  <Text variant="label2">Activity</Text>
                   <Text variant="body1">{index + 1}</Text>
                 </Stack>
                 <FieldWithErrorMessage

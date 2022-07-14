@@ -24,7 +24,10 @@ export const Menu: React.FC<Props> = () => {
     if (!allPools || !permissions) {
       return []
     }
-    return allPools.filter(({ id }) => permissions.pools[id]?.roles.includes('PoolAdmin'))
+    return allPools.filter(
+      ({ id }) =>
+        permissions.pools[id]?.roles.includes('PoolAdmin') || permissions.pools[id]?.roles.includes('MemberListAdmin')
+    )
   }, [allPools, permissions])
 
   const Logo = config.logo
@@ -32,8 +35,8 @@ export const Menu: React.FC<Props> = () => {
   return (
     <Box position="sticky" top={0} px={[0, 0, 2]}>
       <Link to="/">
-        <Box py={[0, 0, 3]} px={1} mb={2} color="textPrimary">
-          <Logo style={{ maxHeight: '56px', maxWidth: '50%' }} />
+        <Box pt={0} pb={0} px={1} mb={[1, 2, 6]} color="textPrimary">
+          <Logo />
         </Box>
       </Link>
       <Shelf
@@ -50,12 +53,12 @@ export const Menu: React.FC<Props> = () => {
           active={pathname.includes('investments')}
         />
         <NavigationItem label="NFTs" href="/nfts" icon={<IconNft size="16px" />} />
-        {pools.length > 0 && (
+        {(pools.length > 0 || !config.requiresPop) && (
           <NavigationItem label="Issuer" href="issuer" icon={<IconUser size="16px" />} defaultOpen>
             {pools.map((pool) => (
               <PoolNavigationItem key={pool.id} pool={pool} />
             ))}
-            {address && (
+            {address && !config.requiresPop && (
               <Shelf justifyContent="center" mt={1}>
                 <RouterLinkButton to="/issuer/create-pool" variant="secondary" small>
                   Create Pool

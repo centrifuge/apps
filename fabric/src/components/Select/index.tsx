@@ -211,6 +211,7 @@ const StyledPopover = styled.div`
   border-radius: ${({ theme }) => theme.radii.input}px;
   overflow: hidden;
   z-index: 20;
+  box-shadow: ${({ theme }) => theme.shadows.cardOverlay};
 `
 
 // TODO Configure maxHeight and overflow via props

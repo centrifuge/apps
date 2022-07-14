@@ -53,7 +53,6 @@ export const RiskGroupValues: React.FC<{
               formatPercentage(lossGivenDefault.toFloat() * probabilityOfDefault.toFloat() * 100)
             }
           />
-          =
         </>
       )}
       {shownFields.includes('discountRate') && (

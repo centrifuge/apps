@@ -1,6 +1,7 @@
+import { ActiveLoan } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useParams, useRouteMatch } from 'react-router'
+import { useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
@@ -26,26 +27,26 @@ export const PoolDetailAssetsTab: React.FC = () => {
 
 export const PoolDetailAssets: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
-  const history = useHistory()
   const avgMaturity = useAverageMaturity(poolId)
 
   if (!pool || !loans) return null
 
-  const avgInterestRatePerSec = loans
-    ?.reduce<any>((curr, prev) => curr.add(prev.interestRatePerSec.toAprPercent()), Dec(0))
+  const ongoingAssets = loans?.filter(
+    (loan) => loan.status === 'Active' && !loan.outstandingDebt.isZero()
+  ) as ActiveLoan[]
+
+  const avgInterestRatePerSec = ongoingAssets
+    ?.reduce<any>((curr, prev) => curr.add(prev.interestRatePerSec.toAprPercent() || Dec(0)), Dec(0))
     .dividedBy(loans?.length)
     .toFixed(2)
     .toString()
 
-  const avgAmount = loans
-    ?.reduce<any>((curr, prev) => curr.add(prev.loanInfo.value.toDecimal()), Dec(0))
-    .dividedBy(loans?.length)
+  const avgAmount = ongoingAssets
+    .reduce<any>((curr, prev) => curr.add(prev.outstandingDebt.toDecimal() || Dec(0)), Dec(0))
+    .dividedBy(ongoingAssets?.length)
     .toDecimalPlaces(2)
-
-  const ongoingAssets = loans?.filter((loan) => loan.status !== 'Closed')
 
   const pageSummaryData = [
     { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets?.length || 0 },
@@ -59,12 +60,7 @@ export const PoolDetailAssets: React.FC = () => {
       <PageSummary data={pageSummaryData} />
       {loans.length ? (
         <Box px="5" py="2">
-          <LoanList
-            loans={loans}
-            onLoanClicked={(loan) => {
-              history.push(`${basePath}/${pool.id}/assets/${loan.id}`)
-            }}
-          />
+          <LoanList loans={loans} />
         </Box>
       ) : (
         <Shelf p="4">

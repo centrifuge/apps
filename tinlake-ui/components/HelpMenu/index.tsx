@@ -66,11 +66,7 @@ const HelpMenu: React.FC<{}> = () => {
             <MenuItem href="mailto:support@centrifuge.io" target="_blank" icon="email">
               <Name>Email</Name>
             </MenuItem>
-            <MenuItem
-              href="https://docs.centrifuge.io/tinlake/overview/introduction/"
-              target="_blank"
-              icon="documentation"
-            >
+            <MenuItem href="https://docs.centrifuge.io/" target="_blank" icon="documentation">
               <Name>Documentation</Name>
             </MenuItem>
           </Card>

@@ -1,6 +1,7 @@
 import { Card, IconArrowDown, Shelf, Stack, Text } from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import * as React from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 type GroupedProps = {
@@ -12,8 +13,9 @@ type Props<T> = {
   data: Array<T>
   columns: Column[]
   keyField?: string
-  onRowClicked?: (row: T) => void
+  onRowClicked?: (row: T) => string
   defaultSortKey?: string
+  defaultSortOrder?: OrderBy
   rounded?: boolean
   summary?: T
 } & GroupedProps
@@ -21,7 +23,7 @@ type Props<T> = {
 export type OrderBy = 'asc' | 'desc'
 
 export type Column = {
-  header: string | (() => React.ReactElement)
+  header: string | React.ReactElement
   cell: (row: any, index: number) => React.ReactNode
   align?: string
   flex?: string
@@ -45,9 +47,10 @@ export const DataTable = <T extends Record<string, any>>({
   summary,
   groupIndex,
   lastGroupIndex,
+  defaultSortOrder = 'desc',
 }: Props<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
-    defaultSortKey ? { [defaultSortKey]: 'desc' } : {}
+    defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
   )
 
   const [currentSortKey, setCurrentSortKey] = React.useState(defaultSortKey || '')
@@ -71,7 +74,7 @@ export const DataTable = <T extends Record<string, any>>({
         {showHeader &&
           columns.map((col, i) => (
             <HeaderCol
-              key={`${col.header}-${i}`}
+              key={i}
               style={{ flex: col.flex }}
               tabIndex={col?.sortKey ? 0 : undefined}
               as={col?.sortKey ? 'button' : 'div'}
@@ -79,8 +82,11 @@ export const DataTable = <T extends Record<string, any>>({
               align={col?.align}
             >
               <Text variant="label2">
-                {col?.header && typeof col.header !== 'string' && col?.sortKey && React.isValidElement(col.header())
-                  ? React.cloneElement(col.header(), { align: col?.align, orderBy: orderBy[col.sortKey] })
+                {col?.header && typeof col.header !== 'string' && col?.sortKey && React.isValidElement(col.header)
+                  ? React.cloneElement(col.header as React.ReactElement<any>, {
+                      align: col?.align,
+                      orderBy: orderBy[col.sortKey],
+                    })
                   : col.header}
               </Text>
             </HeaderCol>
@@ -90,13 +96,13 @@ export const DataTable = <T extends Record<string, any>>({
         {sortedData?.map((row, i) => (
           <Row
             rounded={rounded}
-            as={onRowClicked ? 'button' : 'div'}
+            as={onRowClicked ? Link : 'div'}
+            to={onRowClicked && (() => onRowClicked(row))}
             key={keyField ? row[keyField] : i}
-            onClick={onRowClicked && (() => onRowClicked(row))}
             tabIndex={onRowClicked ? 0 : undefined}
           >
-            {columns.map((col) => (
-              <DataCol style={{ flex: col.flex }} align={col?.align} key={`${col.header}-${i}`}>
+            {columns.map((col, index) => (
+              <DataCol style={{ flex: col.flex }} align={col?.align} key={index}>
                 {col.cell(row, i)}
               </DataCol>
             ))}
@@ -128,9 +134,9 @@ const Row = styled(Shelf)<any>`
       borderBottomWidth: '1px',
       borderBottomColor: 'borderPrimary',
       backgroundColor: 'transparent',
-      // using button&:hover caused the background sometimes not to update when switching themes
+      // using a&:hover caused the background sometimes not to update when switching themes
       '&:hover':
-        comp === 'button'
+        comp === Link
           ? {
               backgroundColor: 'secondarySelectedBackground',
               cursor: 'pointer',
@@ -158,9 +164,6 @@ const DataCol = styled.div<{ align: Column['align'] }>`
   overflow: hidden;
   white-space: nowrap;
 
-  button&:hover {
-    cursor: pointer;
-  }
   &:first-child {
     padding-right: '16px';
   }

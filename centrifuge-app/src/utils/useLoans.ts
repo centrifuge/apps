@@ -27,26 +27,28 @@ export function useLoansAcrossPools(poolIds?: string[]) {
 }
 
 export function useLoan(poolId: string, assetId: string) {
-  const [result] = useCentrifugeQuery(['loan', poolId, assetId], (cent) => cent.pools.getLoan([poolId, assetId]), {
-    suspense: true,
-  })
-
-  return result
+  const loans = useLoans(poolId)
+  const loan = loans?.find((loan) => loan.id === assetId)
+  return loan
 }
 
 export function useAvailableFinancing(poolId: string, assetId: string) {
   const loan = useLoan(poolId, assetId)
   if (!loan) return { current: Dec(0), initial: Dec(0) }
+  if (loan.status !== 'Active') return { current: Dec(0), initial: Dec(0) }
 
-  const debt = loan.outstandingDebt.toDecimal()
-  const debtWithMargin = debt.add(
-    loan.principalDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY))
-  )
+  const debtWithMargin = loan.normalizedDebt
+    .toDecimal()
+    .add(loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
+
+  if (!loan?.loanInfo) {
+    return { current: Dec(0), initial: Dec(0) }
+  }
 
   const initialCeiling = loan.loanInfo.value.toDecimal().mul(loan.loanInfo.advanceRate.toDecimal())
   let ceiling = initialCeiling
   if (loan.loanInfo.type === 'BulletLoan') {
-    ceiling = ceiling.minus(loan.totalBorrowed.toDecimal())
+    ceiling = ceiling.minus(loan.totalBorrowed?.toDecimal() || 0)
   } else {
     ceiling = ceiling.minus(debtWithMargin)
     ceiling = ceiling.isNegative() ? Dec(0) : ceiling

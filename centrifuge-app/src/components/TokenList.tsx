@@ -1,6 +1,6 @@
 import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useHistory, useRouteMatch } from 'react-router'
+import { useRouteMatch } from 'react-router'
 import { formatBalance, formatPercentage } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
@@ -39,7 +39,7 @@ const columns: Column[] = [
     flex: '6',
   },
   {
-    header: () => <SortableTableHeader label="Yield" />,
+    header: <SortableTableHeader label="Yield" />,
     cell: (token: TokenTableData) => (
       <Text variant="body2">{token.yield ? `Target: ${formatPercentage(token.yield)}` : ''}</Text>
     ),
@@ -47,7 +47,7 @@ const columns: Column[] = [
     sortKey: 'yield',
   },
   {
-    header: () => <SortableTableHeader label="Protection" />,
+    header: <SortableTableHeader label="Protection" />,
     cell: (token: TokenTableData) => (
       <Text variant="body2">{token.protection ? formatPercentage(token.protection) : ''}</Text>
     ),
@@ -55,7 +55,7 @@ const columns: Column[] = [
     sortKey: 'protection',
   },
   {
-    header: () => <SortableTableHeader label="Value locked" />,
+    header: <SortableTableHeader label="Value locked" />,
     cell: (token: TokenTableData) => <Text variant="body2">{formatBalance(token?.valueLocked, token.currency)}</Text>,
     flex: '4',
     sortKey: 'valueLocked',
@@ -68,7 +68,6 @@ const columns: Column[] = [
 ]
 
 export const TokenList: React.FC<Props> = ({ tokens }) => {
-  const history = useHistory()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
   return (
@@ -77,9 +76,7 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
       columns={columns}
       defaultSortKey="valueLocked"
       rounded={false}
-      onRowClicked={(token: TokenTableData) => {
-        history.push(`${basePath}/${token.poolId}/tokens/${token.id}`)
-      }}
+      onRowClicked={(token: TokenTableData) => `${basePath}/${token.poolId}/tokens/${token.id}`}
     />
   )
 }

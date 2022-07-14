@@ -18,7 +18,7 @@ type Props = {
 const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
-  const [price, setPrice] = React.useState<string | number>('')
+  const [price, setPrice] = React.useState<number | ''>()
   const [touched, setTouched] = React.useState(false)
   const { selectedAccount } = useWeb3()
   const balance = useBalance()
@@ -42,7 +42,7 @@ export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId
   function submit(e: React.FormEvent) {
     e.preventDefault()
     if (!isConnected || !!error) return
-
+    if (!price) return
     const amountBN = new BN(price).mul(e18)
     doTransaction([collectionId, nftId, amountBN])
   }
@@ -82,8 +82,7 @@ export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId
           <CurrencyInput
             label="Price"
             value={price}
-            min="0"
-            onChange={(e) => setPrice(e.target.value)}
+            onChange={(value) => setPrice(value)}
             errorMessage={(touched && error) || undefined}
             onBlur={() => setTouched(true)}
             currency="AIR"

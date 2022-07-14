@@ -25,7 +25,6 @@ export type Key =
   | 'batchMintNFTs'
   | 'persistDebugFlags'
   | 'showUnusedFlags'
-  | 'showAdditionalIssuerTabs'
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
   | 'editPoolConfig'
@@ -38,10 +37,6 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   batchMintNFTs: {
     type: 'checkbox',
     default: false,
-  },
-  showAdditionalIssuerTabs: {
-    type: 'checkbox',
-    default: true,
   },
   allowInvestBelowMin: {
     type: 'checkbox',

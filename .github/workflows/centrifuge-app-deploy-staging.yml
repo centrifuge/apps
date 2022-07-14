@@ -1,8 +1,8 @@
-name: 'nft-studio PROD'
+name: 'Centrifuge app Staging'
 on:
   push:
-    tags:
-      - nft-studio/release-*
+    branches:
+      - rc/centrifuge-app/release-*
 
 jobs:
   dev:
@@ -10,15 +10,16 @@ jobs:
     with:
       netlify-alias: ''
       ipfs-gateway: https://altair.mypinata.cloud/
-      collator-wss-url: wss://fullnode.altair.centrifuge.io
-      relay-wss-url: wss://kusama-rpc.polkadot.io
-      subscan-url: https://altair.subscan.io
+      collator-wss-url: wss://fullnode.catalyst.cntrfg.com
+      relay-wss-url: wss://rococo-rpc.polkadot.io
+      subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
-      network: altair
-      subquery-url: https://api.subquery.network/sq/centrifuge/pools
+      network: centrifuge
+      requires-pop: 'true'
+      subquery-url: ''
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      netlify-site-id: ${{ secrets.NFT_STUDIO_PROD_NETLIFY_SITE_ID }}
+      netlify-site-id: ''
       pinata-api-key: ${{ secrets.PINATA_API_KEY }}
       pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}

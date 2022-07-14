@@ -49,7 +49,7 @@
     "@centrifuge/tinlake-pools-kovan": "0.0.1-develop.6",
     "@centrifuge/tinlake-pools-mainnet": "0.0.1-develop.20",
     "@makerdao/multicall": "^0.12.0",
-    "@polkadot/api": "^6.3.1",
+    "@polkadot/api": "^7.6.1",
     "@polkadot/extension-dapp": "^0.40.3",
     "@sendgrid/mail": "7.1.1",
     "@sentry/react": "^5.26.0",

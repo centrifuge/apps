@@ -31,6 +31,8 @@ const PoolAssetReserveChart: React.VFC = () => {
     )
   }, [poolStates])
 
+  if (poolStates && poolStates?.length < 1) return <Text variant="body2">No data available</Text>
+
   const todayPoolValue = pool?.value.toDecimal().toNumber() || 0
   const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
   const today: ChartData = {
@@ -48,7 +50,7 @@ const PoolAssetReserveChart: React.VFC = () => {
       <Shelf gap="4" width="100%" color="textSecondary">
         {chartData?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart data={chartData} margin={{ left: -20, right: 10 }} reverseStackOrder>
+            <ComposedChart data={chartData} margin={{ left: -30 }} reverseStackOrder>
               <XAxis
                 dataKey="day"
                 tick={<CustomizedXAxisTick variant={chartData.length > 30 ? 'months' : 'days'} />}
@@ -108,4 +110,4 @@ const CustomLegend: React.VFC<{
   )
 }
 
-export { PoolAssetReserveChart as default }
+export default PoolAssetReserveChart

@@ -3,7 +3,7 @@ import Decimal from 'decimal.js-light'
 
 const currencySymbols = {
   native: 'AIR',
-  usd: 'kUSD',
+  kusd: 'kUSD',
   permissionedeur: 'pEUR',
 }
 
@@ -11,12 +11,12 @@ export function getCurrencySymbol(currency?: string) {
   return (currency && currencySymbols[currency.toLowerCase() as keyof typeof currencySymbols]) || currency || ''
 }
 
-export function formatBalance(amount: Balance | Decimal | number, currency?: string, precise = false) {
+export function formatBalance(amount: Balance | Decimal | number, currency?: string, precision = 0) {
   const formattedAmount = (
     amount instanceof Balance ? amount.toFloat() : amount instanceof Decimal ? amount.toNumber() : amount
   ).toLocaleString('en', {
-    minimumFractionDigits: precise ? 4 : 0,
-    maximumFractionDigits: precise ? 4 : 0,
+    minimumFractionDigits: precision,
+    maximumFractionDigits: precision,
   })
   return currency ? `${formattedAmount} ${getCurrencySymbol(currency)}` : formattedAmount
 }
@@ -47,4 +47,8 @@ export function formatPercentage(amount: Perquintill | Decimal | number, include
     maximumFractionDigits: 2,
   })
   return includeSymbol ? `${formattedAmount}%` : formattedAmount
+}
+
+export function roundDown(float: Decimal | number, precision: number = 2) {
+  return Math.floor((float instanceof Decimal ? float.toNumber() : float) * 10 ** precision) / 10 ** precision
 }

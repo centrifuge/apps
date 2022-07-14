@@ -1,0 +1,25 @@
+name: 'Altair-app Staging'
+on:
+  push:
+    branches:
+      - rc/centrifuge-app/altair/release-*
+
+jobs:
+  dev:
+    uses: centrifuge/apps/.github/workflows/centrifuge-app-build-and-deploy.yml@main
+    with:
+      netlify-alias: ''
+      ipfs-gateway: https://altair.mypinata.cloud/
+      collator-wss-url: wss://fullnode-collator.charcoal.centrifuge.io
+      relay-wss-url: wss://westend-rpc.polkadot.io
+      subscan-url: https://westend.subscan.io
+      whitelisted-accounts: ''
+      network: altair
+      requires-pop: 'true'
+      subquery-url: https://api.subquery.network/sq/centrifuge/pools-charcoal
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      netlify-site-id: ${{ secrets.NFT_STUDIO_STAGING_NETLIFY_SITE_ID }}
+      pinata-api-key: ${{ secrets.PINATA_API_KEY }}
+      pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}
