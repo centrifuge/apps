@@ -26,8 +26,7 @@ export function useTransactionFeeEstimate<T extends Array<any>>(
           ...txOptions,
         })
       )
-
-      const txFee = Number(lastResult.partialFee.toString()) / 10 ** (api.registry.chainDecimals as any)
+      const txFee = lastResult.partialFee.toDecimal()
       setTxFee(txFee)
     } catch (e) {
       console.error(e)

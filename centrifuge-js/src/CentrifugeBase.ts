@@ -46,6 +46,12 @@ export type Config = {
 
 export type UserProvidedConfig = Partial<Config>
 
+export type PaymentInfo = {
+  class: string
+  partialFee: number
+  weight: number
+}
+
 const defaultConfig: Config = {
   network: 'centrifuge',
   centrifugeWsUrl: 'wss://fullnode.centrifuge.io',
@@ -138,8 +144,12 @@ export class CentrifugeBase {
       if (options?.paymentInfo) {
         return lastValueFrom(
           $paymentInfo.pipe(
-            map((paymentInfo) => {
-              return paymentInfo.toJSON()
+            map((paymentInfoRaw) => {
+              const paymentInfo = paymentInfoRaw.toJSON() as PaymentInfo
+              return {
+                ...paymentInfo,
+                partialFee: new Balance(paymentInfo.partialFee),
+              }
             })
           )
         )
