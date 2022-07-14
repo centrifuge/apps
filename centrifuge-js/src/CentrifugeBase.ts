@@ -10,6 +10,7 @@ import {
   combineLatestWith,
   filter,
   firstValueFrom,
+  lastValueFrom,
   map,
   mergeWith,
   Observable,
@@ -134,12 +135,22 @@ export class CentrifugeBase {
       const $paymentInfo = submittable.paymentInfo(signingAddress)
       const $balances = api.query.system.account(signingAddress)
 
+      if (options?.paymentInfo) {
+        return lastValueFrom(
+          $paymentInfo.pipe(
+            map((paymentInfo) => {
+              return paymentInfo.toJSON()
+            })
+          )
+        )
+      }
+
       return combineLatest([$balances, $paymentInfo])
         .pipe(
           take(1),
           takeWhile(([balancesRaw, paymentInfoRaw]) => {
-            const paymentInfo = paymentInfoRaw.toJSON() as any
-            const nativeBalance = balancesRaw.toJSON() as any
+            const paymentInfo = paymentInfoRaw.toJSON() as { partialFee: number }
+            const nativeBalance = balancesRaw.toJSON() as { data: { free: string } }
             const txFee = Number(paymentInfo.partialFee.toString()) / 10 ** (api.registry.chainDecimals as any)
             const balance = new Balance(hexToBn(nativeBalance.data.free))
             if (balance.lten(txFee)) {
