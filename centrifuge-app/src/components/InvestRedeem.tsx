@@ -222,7 +222,8 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
     getTxInvestFee([poolId, trancheId, Balance.fromFloat(100)], {
       paymentInfo: address,
     })
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [poolId, trancheId, address])
 
   const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
     'Cancel order',
