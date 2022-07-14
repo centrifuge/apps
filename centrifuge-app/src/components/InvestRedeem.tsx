@@ -20,6 +20,7 @@ import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import styled from 'styled-components'
+import { config } from '../config'
 import { getEpochTimeRemaining } from '../utils/date'
 import { Dec } from '../utils/Decimal'
 import { formatBalance, getCurrencySymbol, roundDown } from '../utils/formatting'
@@ -29,6 +30,7 @@ import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../utils/useFocusInvalidInput'
 import { usePermissions } from '../utils/usePermissions'
 import { usePendingCollect, usePool, usePoolMetadata } from '../utils/usePools'
+import { useTransactionFeeEstimate } from '../utils/useTransactionFeeEstimate'
 import { positiveNumber } from '../utils/validation'
 import { useDebugFlags } from './DebugFlags'
 import { LoadBoundary } from './LoadBoundary'
@@ -187,6 +189,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
   const pool = usePool(poolId)
   const tranche = pool?.tranches.find((t) => t.id === trancheId)
   const balance = balances && pool ? getBalanceDec(balances, pool.currency) : Dec(0)
+  const nativeBalance = balances && pool ? getBalanceDec(balances, 'native') : Dec(0)
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
@@ -210,6 +213,15 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
       setChangeOrderFormShown(false)
     },
   })
+
+  const { execute: getTxInvestFee, txFee: investTxFee } = useTransactionFeeEstimate(
+    (cent) => cent.pools.updateInvestOrder
+  )
+  React.useEffect(() => {
+    // submit dummy tx to get tx fee estimate
+    getTxInvestFee([poolId, trancheId, Balance.fromFloat(100)])
+  }, [poolId, trancheId, getTxInvestFee])
+
   const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
     'Cancel order',
     (cent) => cent.pools.updateInvestOrder,
@@ -258,10 +270,21 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
 
+  const nativeBalanceTooLow = nativeBalance.lte(investTxFee || 1)
+
   function renderInput(cancelCb?: () => void) {
     return (
       <Stack gap={2}>
         {pool?.epoch.isInSubmissionPeriod && epochBusyElement}
+        {nativeBalanceTooLow && (
+          <InlineFeedback>
+            {investTxFee
+              ? `This transaction will cost ${investTxFee.toFixed(4)} ${
+                  balances?.native.symbol || config.baseCurrency
+                }. Please check your balance.`
+              : `${balances?.native.symbol || config.baseCurrency} balance is too low.`}
+          </InlineFeedback>
+        )}
         <Field name="amount" validate={positiveNumber()}>
           {({ field, meta }: FieldProps) => {
             return (
@@ -304,7 +327,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
             type="submit"
             loading={isLoading}
             loadingMessage={loadingMessage}
-            disabled={pool?.epoch.isInSubmissionPeriod}
+            disabled={pool?.epoch.isInSubmissionPeriod || nativeBalanceTooLow}
           >
             Invest
           </Button>

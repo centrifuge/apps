@@ -1,13 +1,16 @@
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult, Signer } from '@polkadot/types/types'
+import { hexToBn } from '@polkadot/util'
 import 'isomorphic-fetch'
 import {
   bufferCount,
   catchError,
+  combineLatest,
   combineLatestWith,
   filter,
   firstValueFrom,
+  lastValueFrom,
   map,
   mergeWith,
   Observable,
@@ -16,11 +19,13 @@ import {
   startWith,
   Subject,
   switchMap,
+  take,
   takeWhile,
   tap,
   throwError,
 } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
+import { Balance } from '.'
 import { TransactionOptions } from './types'
 import { getPolkadotApi } from './utils/web3'
 
@@ -40,6 +45,12 @@ export type Config = {
 }
 
 export type UserProvidedConfig = Partial<Config>
+
+export type PaymentInfo = {
+  class: string
+  partialFee: number | Balance
+  weight: number
+}
 
 const defaultConfig: Config = {
   network: 'centrifuge',
@@ -120,29 +131,63 @@ export class CentrifugeBase {
     }
 
     const { signer, signingAddress } = this.getSigner()
-    if (options?.paymentInfo) {
-      return submittable.paymentInfo(options.paymentInfo)
-    }
+
     try {
       let actualSubmittable = submittable
       if (this.config.proxy) {
         actualSubmittable = api.tx.proxy.proxy(this.config.proxy, undefined, submittable)
       }
-      return actualSubmittable.signAndSend(signingAddress, { signer }).pipe(
-        tap((result) => {
-          options?.onStatusChange?.(result)
-          if (result.status.isInBlock) this.getTxCompletedEvents().next(result.events)
-        }),
-        takeWhile((result) => {
-          const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
-          if (errors.length && this.config.debug) {
-            console.log('🚨 error', JSON.stringify(errors))
-          }
-          const hasError = !!(result.dispatchError || errors.length)
 
-          return !result.status.isInBlock && !hasError
-        }, true)
-      )
+      const $paymentInfo = submittable.paymentInfo(signingAddress)
+      const $balances = api.query.system.account(signingAddress)
+
+      if (options?.paymentInfo) {
+        return lastValueFrom(
+          $paymentInfo.pipe(
+            map((paymentInfoRaw) => {
+              const paymentInfo = paymentInfoRaw.toJSON() as PaymentInfo
+              return {
+                ...paymentInfo,
+                partialFee: new Balance(paymentInfo.partialFee),
+              }
+            })
+          )
+        )
+      }
+
+      return combineLatest([$balances, $paymentInfo])
+        .pipe(
+          take(1),
+          takeWhile(([balancesRaw, paymentInfoRaw]) => {
+            const paymentInfo = paymentInfoRaw.toJSON() as { partialFee: number }
+            const nativeBalance = balancesRaw.toJSON() as { data: { free: string } }
+            const txFee = Number(paymentInfo.partialFee.toString()) / 10 ** (api.registry.chainDecimals as any)
+            const balance = new Balance(hexToBn(nativeBalance.data.free))
+            if (balance.lten(txFee)) {
+              throw new Error(`${api.registry.chainTokens[0]} balance too low`)
+            }
+            return true
+          })
+        )
+        .pipe(
+          switchMap(() =>
+            actualSubmittable.signAndSend(signingAddress, { signer }).pipe(
+              tap((result) => {
+                options?.onStatusChange?.(result)
+                if (result.status.isInBlock) this.getTxCompletedEvents().next(result.events)
+              }),
+              takeWhile((result) => {
+                const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
+                if (errors.length && this.config.debug) {
+                  console.log('🚨 error', JSON.stringify(errors))
+                }
+                const hasError = !!(result.dispatchError || errors.length)
+
+                return !result.status.isInBlock && !hasError
+              }, true)
+            )
+          )
+        )
     } catch (e) {
       return throwError(() => e)
     }

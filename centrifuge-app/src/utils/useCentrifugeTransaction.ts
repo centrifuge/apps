@@ -86,7 +86,8 @@ export function useCentrifugeTransaction<T extends Array<any>>(
       }
     } catch (e) {
       console.error(e)
-      updateTransaction(id, { status: 'failed', failedReason: 'Failed to submit transaction' })
+
+      updateTransaction(id, { status: 'failed', failedReason: (e as Error).message })
       options.onError?.(e)
     }
   }
