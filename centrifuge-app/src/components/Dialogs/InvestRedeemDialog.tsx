@@ -7,16 +7,15 @@ export const InvestRedeemDialog: React.FC<{
   trancheId: string
   open: boolean
   onClose: () => void
-  action?: 'invest' | 'redeem'
-  showTabs?: boolean
-}> = ({ poolId, trancheId, open, onClose, action, showTabs }) => {
+  view?: 'invest' | 'redeem'
+}> = ({ poolId, trancheId, open, onClose, view }) => {
   return (
     <Dialog isOpen={open} onClose={onClose}>
       <Stack gap={3}>
         <Text variant="heading2" as="h2">
-          {action === 'invest' ? 'Invest' : 'Redeem'}
+          {view === 'invest' ? 'Invest' : 'Redeem'}
         </Text>
-        <InvestRedeem poolId={poolId} trancheId={trancheId} action={action} showTabs={showTabs} />
+        <InvestRedeem poolId={poolId} trancheId={trancheId} view={view} />
       </Stack>
     </Dialog>
   )

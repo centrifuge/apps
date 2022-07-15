@@ -1,37 +1,147 @@
+import { Button, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useParams } from 'react-router'
+import { useLocation, useParams } from 'react-router'
+import { InvestRedeem } from '../../../components/InvestRedeem'
 import { IssuerSection } from '../../../components/IssuerSection'
+import { LabelValueStack } from '../../../components/LabelValueStack'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import RiskGroupList from '../../../components/RiskGroupList'
 import { Spinner } from '../../../components/Spinner'
-import { TokenListByPool } from '../../../components/TokenListByPool'
+import { TextWithPlaceholder } from '../../../components/TextWithPlaceholder'
 import { Tooltips } from '../../../components/Tooltips'
 import { formatDate, getAge } from '../../../utils/date'
-import { formatBalance } from '../../../utils/formatting'
+import { Dec } from '../../../utils/Decimal'
+import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
+import { useAddress } from '../../../utils/useAddress'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
-import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { useBalances } from '../../../utils/useBalances'
+import { usePermissions } from '../../../utils/usePermissions'
+import { usePendingCollectMulti, usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
 
 export const PoolDetailOverviewTab: React.FC = () => {
+  const { state } = useLocation<{ token: string }>()
+  const [selectedToken, setSelectedToken] = React.useState(state?.token || null)
+  console.log('selectedToken', selectedToken)
   return (
-    <PageWithSideBar>
+    <PageWithSideBar
+      sidebar={
+        <PoolDetailSideBar selectedToken={selectedToken} setSelectedToken={setSelectedToken} key={selectedToken} />
+      }
+    >
       <PoolDetailHeader />
       <LoadBoundary>
-        <PoolDetailOverview />
+        <PoolDetailOverview selectedToken={selectedToken} setSelectedToken={setSelectedToken} />
       </LoadBoundary>
     </PageWithSideBar>
   )
 }
 
-export const PoolDetailOverview: React.FC = () => {
+export const PoolDetailSideBar: React.FC<{
+  selectedToken: string | null
+  setSelectedToken: (token: string | null) => void
+}> = ({ selectedToken, setSelectedToken }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  const { data: metadata } = usePoolMetadata(pool)
+  const address = useAddress()
+  const permissions = usePermissions(address)
+  const balances = useBalances(address)
+  const allowedTranches = Object.keys(pool ? permissions?.pools[poolId]?.tranches ?? {} : {}).sort((a, b) => {
+    const tA = pool?.tranches.find((t) => t.id === a)
+    const tB = pool?.tranches.find((t) => t.id === b)
+    return tB!.seniority - tA!.seniority
+  })
+  const orders = usePendingCollectMulti(poolId, allowedTranches, address)
+  const hasInvestments = allowedTranches.map((tid, i) => {
+    const trancheBalance =
+      balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === tid)?.balance.toDecimal() ?? Dec(0)
+    const order = orders?.[tid]
+    const investToCollect = order?.payoutTokenAmount.toDecimal() ?? Dec(0)
+    const pendingRedeem = order?.remainingRedeemToken.toDecimal() ?? Dec(0)
+    const combinedBalance = trancheBalance.add(investToCollect).add(pendingRedeem)
+    return !combinedBalance.isZero()
+  })
+  const hasAnyInvestment = hasInvestments.some((inv) => inv)
+
+  if (pool && permissions && selectedToken && !allowedTranches.includes(selectedToken)) {
+    // Redirect to onboarding
+    return null
+  }
+
+  if (pool && permissions && !allowedTranches.length) {
+    // Show onboarding card
+    return null
+  }
+
+  if (allowedTranches.length && orders && !hasAnyInvestment) {
+    return (
+      <InvestRedeem
+        poolId={poolId}
+        defaultTrancheId={selectedToken ?? undefined}
+        autoFocus={!!selectedToken}
+        key={`1-${selectedToken}`}
+      />
+    )
+  }
+
+  if (allowedTranches.length && orders && hasAnyInvestment) {
+    return (
+      <Stack gap={2}>
+        {allowedTranches.map((tid, i) => {
+          if (hasInvestments[i] || tid === selectedToken) {
+            return (
+              <InvestRedeemBox
+                poolId={poolId}
+                tokenId={tid}
+                selectedToken={selectedToken}
+                setSelectedToken={setSelectedToken}
+                key={`2-${tid}-${selectedToken}`}
+              />
+            )
+          }
+          return null
+        })}
+      </Stack>
+    )
+  }
+
+  return null
+}
+
+const InvestRedeemBox: React.FC<{
+  selectedToken: string | null
+  setSelectedToken: (token: string | null) => void
+  poolId: string
+  tokenId: string
+}> = ({ selectedToken, setSelectedToken, tokenId }) => {
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const [view, setViewState] = React.useState<'start' | 'invest' | 'redeem'>(
+    selectedToken === tokenId ? 'invest' : 'start'
+  )
+  function setView(value: React.SetStateAction<'start' | 'invest' | 'redeem'>) {
+    const newView = typeof value === 'function' ? value(view) : value
+    setViewState(newView)
+    if (newView === 'start') {
+      setSelectedToken(null)
+    } else if (newView === 'invest') {
+      setSelectedToken(tokenId)
+    }
+  }
+  return <InvestRedeem poolId={poolId} trancheId={tokenId} view={view} onSetView={setView} autoFocus />
+}
+
+export const PoolDetailOverview: React.FC<{
+  selectedToken?: string | null
+  setSelectedToken?: (token: string | null) => void
+}> = ({ setSelectedToken }) => {
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const pool = usePool(poolId)
+  const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
   const avgMaturity = useAverageMaturity(poolId)
 
   const pageSummaryData = [
@@ -44,6 +154,28 @@ export const PoolDetailOverview: React.FC = () => {
     pageSummaryData.splice(2, 0, { label: <Tooltips type="age" />, value: getAge(pool.createdAt) })
   }
 
+  const tokens = pool?.tranches
+    .map((tranche) => {
+      const protection = tranche.minRiskBuffer ?? Dec(0)
+      const totalReserve = pool?.reserve.total.toDecimal() ?? Dec(0)
+      const maxReserve = pool?.reserve.max.toDecimal() ?? Dec(0)
+      const capacity = maxReserve.minus(totalReserve) // TODO: check protection and pending orders
+      return {
+        apy: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
+        protection,
+        name: metadata?.tranches?.[tranche.id]?.name || '',
+        symbol: metadata?.tranches?.[tranche.id]?.symbol || '',
+        poolName: metadata?.pool?.name || '',
+        seniority: Number(tranche.seniority),
+        valueLocked: tranche?.tokenPrice
+          ? tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal())
+          : Dec(0),
+        capacity,
+        id: tranche.id,
+      }
+    })
+    .sort((a, b) => b.seniority - a.seniority)
+
   return (
     <>
       <PageSummary data={pageSummaryData} />
@@ -52,8 +184,53 @@ export const PoolDetailOverview: React.FC = () => {
           <PoolAssetReserveChart />
         </React.Suspense>
       </PageSection>
-      <PageSection title="Investment Tokens">
-        <TokenListByPool />
+      <PageSection title="Pool tokens">
+        <Stack gap={2}>
+          {tokens?.map((token, i) => (
+            <InteractiveCard
+              icon={<Thumbnail label="SEN" type="token" />}
+              title={
+                <TextWithPlaceholder isLoading={metadataIsLoading}>
+                  {metadata?.pool?.name} {metadata?.tranches?.[token.id]?.name}
+                </TextWithPlaceholder>
+              }
+              secondaryHeader={
+                <Shelf gap={6}>
+                  <LabelValueStack
+                    label={<Tooltips variant="secondary" type="protection" />}
+                    value={formatPercentage(token.protection)}
+                  />
+                  <LabelValueStack
+                    label={<Tooltips variant="secondary" type="valueLocked" />}
+                    value={formatBalance(token.valueLocked, pool?.currency)}
+                  />
+                  <LabelValueStack
+                    label={<Tooltips variant="secondary" type="apy" />}
+                    value={formatPercentage(token.apy)}
+                  />
+                  <LabelValueStack
+                    label="Capacity"
+                    value={
+                      <Text variant="body2" fontWeight={600} color="statusOk">
+                        {formatBalanceAbbreviated(token.capacity, pool?.currency)}
+                      </Text>
+                    }
+                  />
+                  {setSelectedToken && (
+                    <Button
+                      variant={i === 0 ? 'primary' : 'secondary'}
+                      onClick={() => setSelectedToken(token.id)}
+                      style={{ marginLeft: 'auto' }}
+                    >
+                      Invest
+                    </Button>
+                  )}
+                </Shelf>
+              }
+              key={token.id}
+            />
+          ))}
+        </Stack>
       </PageSection>
       <PageSection title="Issuer">
         <IssuerSection metadata={metadata} />

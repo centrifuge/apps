@@ -10,9 +10,11 @@ import {
   IconCheckInCircle,
   IconClock,
   InlineFeedback,
+  Select,
   Shelf,
   Stack,
   Text,
+  useControlledState,
 } from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import BN from 'bn.js'
@@ -40,9 +42,13 @@ import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   poolId: string
-  trancheId: string
-  action?: 'invest' | 'redeem'
-  showTabs?: boolean
+  trancheId?: string
+  defaultTrancheId?: string
+  defaultView?: 'invest' | 'redeem'
+  view?: 'invest' | 'redeem' | 'start'
+  onSetView?: React.Dispatch<React.SetStateAction<'invest' | 'redeem' | 'start'>>
+  autoFocus?: boolean
+  onCancel?: () => void
 }
 
 export const InvestRedeem: React.VFC<Props> = (props) => {
@@ -84,12 +90,22 @@ const epochBusyElement = (
   </InlineFeedback>
 )
 
-const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
-  const [view, setView] = React.useState<'start' | 'invest' | 'redeem'>('start')
+const InvestRedeemInner: React.VFC<Props> = ({
+  poolId,
+  trancheId: trancheIdProp,
+  defaultTrancheId,
+  autoFocus,
+  view: viewProp,
+  defaultView,
+  onSetView,
+}) => {
+  const [view, setView] = useControlledState<'start' | 'invest' | 'redeem'>(defaultView ?? 'start', viewProp, onSetView)
   const address = useAddress()
   const permissions = usePermissions(address)
   const balances = useBalances(address)
   const pool = usePool(poolId)
+  const allowedTranches = Object.keys(permissions?.pools[poolId]?.tranches ?? {})
+  const [trancheId, setTrancheId] = React.useState(trancheIdProp ?? defaultTrancheId ?? allowedTranches[0])
   const order = usePendingCollect(poolId, trancheId, address)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
 
@@ -134,36 +150,71 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
       {isDataLoading ? (
         <Spinner />
       ) : allowedToInvest ? (
-        balances != null &&
-        (order.payoutTokenAmount.isZero() && combinedBalance.isZero() && pendingRedeem.isZero() ? (
-          <InvestForm poolId={poolId} trancheId={trancheId} />
-        ) : actualView === 'start' ? (
+        balances != null && (
           <>
-            {order &&
-              (!order.payoutTokenAmount.isZero() ? (
-                <SuccessBanner
-                  title="Investment successful"
-                  body={`${formatBalance(order.investCurrency, pool?.currency)} was successfully invested`}
-                />
-              ) : !order.payoutCurrencyAmount.isZero() ? (
-                <SuccessBanner title="Redemption successful" />
-              ) : null)}
-            {pool?.epoch.isInSubmissionPeriod && epochBusyElement}
-            <Stack p={1} gap={1}>
-              <Button variant="secondary" onClick={() => setView('invest')} disabled={pool?.epoch.isInSubmissionPeriod}>
-                Invest more
-              </Button>
-              <Button variant="secondary" onClick={() => setView('redeem')} disabled={pool?.epoch.isInSubmissionPeriod}>
-                Redeem
-              </Button>
-              <TransactionsLink />
-            </Stack>
+            {!trancheIdProp && allowedTranches.length > 1 && (
+              <Select
+                placeholder="Select a token"
+                options={allowedTranches.map((id) => ({ label: metadata?.tranches?.[id]?.symbol ?? id, value: id }))}
+                value={trancheId}
+                onSelect={(v) => setTrancheId(v as any)}
+              />
+            )}
+            {order.payoutTokenAmount.isZero() && combinedBalance.isZero() && pendingRedeem.isZero() ? (
+              <InvestForm
+                poolId={poolId}
+                trancheId={trancheId}
+                autoFocus={autoFocus}
+                investLabel={trancheMeta ? `Invest in ${trancheMeta.symbol}` : 'Invest'}
+                onCancel={trancheIdProp ? () => setView('start') : undefined}
+              />
+            ) : actualView === 'start' ? (
+              <>
+                {order &&
+                  (!order.payoutTokenAmount.isZero() ? (
+                    <SuccessBanner
+                      title="Investment successful"
+                      body={`${formatBalance(order.investCurrency, pool?.currency)} was successfully invested`}
+                    />
+                  ) : !order.payoutCurrencyAmount.isZero() ? (
+                    <SuccessBanner title="Redemption successful" />
+                  ) : null)}
+                {pool?.epoch.isInSubmissionPeriod && epochBusyElement}
+                <Stack p={1} gap={1}>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setView('invest')}
+                    disabled={pool?.epoch.isInSubmissionPeriod}
+                  >
+                    Invest more
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setView('redeem')}
+                    disabled={pool?.epoch.isInSubmissionPeriod}
+                  >
+                    Redeem
+                  </Button>
+                  <TransactionsLink />
+                </Stack>
+              </>
+            ) : actualView === 'invest' ? (
+              <InvestForm
+                poolId={poolId}
+                trancheId={trancheId}
+                onCancel={() => setView('start')}
+                autoFocus={autoFocus}
+              />
+            ) : (
+              <RedeemForm
+                poolId={poolId}
+                trancheId={trancheId}
+                onCancel={() => setView('start')}
+                autoFocus={autoFocus}
+              />
+            )}
           </>
-        ) : actualView === 'invest' ? (
-          <InvestForm poolId={poolId} trancheId={trancheId} onCancel={() => setView('start')} />
-        ) : (
-          <RedeemForm poolId={poolId} trancheId={trancheId} onCancel={() => setView('start')} />
-        ))
+        )
       ) : (
         <Text>Not allowed to invest</Text>
       )}
@@ -180,9 +231,18 @@ type InvestFormProps = {
   trancheId: string
   onCancel?: () => void
   hasInvestment?: boolean
+  autoFocus?: boolean
+  investLabel?: string
 }
 
-const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, hasInvestment }) => {
+const InvestForm: React.VFC<InvestFormProps> = ({
+  poolId,
+  trancheId,
+  onCancel,
+  hasInvestment,
+  autoFocus,
+  investLabel = 'Invest',
+}) => {
   const address = useAddress()
   const balances = useBalances(address)
   const order = usePendingCollect(poolId, trancheId, address)
@@ -297,6 +357,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
                 currency={getCurrencySymbol(pool?.currency)}
                 secondaryLabel={pool && balance && `${formatBalance(balance, pool?.currency, 2)} balance`}
                 onSetMax={() => form.setFieldValue('amount', balance)}
+                autoFocus={autoFocus}
               />
             )
           }}
@@ -329,7 +390,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
             loadingMessage={loadingMessage}
             disabled={pool?.epoch.isInSubmissionPeriod || nativeBalanceTooLow}
           >
-            Invest
+            {investLabel}
           </Button>
           {cancelCb && (
             <Button variant="secondary" onClick={cancelCb}>
@@ -371,9 +432,10 @@ type RedeemFormProps = {
   poolId: string
   trancheId: string
   onCancel: () => void
+  autoFocus?: boolean
 }
 
-const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel }) => {
+const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel, autoFocus }) => {
   const address = useAddress()
   const balances = useBalances(address)
   const order = usePendingCollect(poolId, trancheId, address)
@@ -472,6 +534,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
               onChange={(value) => form.setFieldValue('amount', value)}
               currency={getCurrencySymbol(pool?.currency)}
               secondaryLabel={`${formatBalance(roundDown(maxRedeem), pool?.currency, 2)} available`}
+              autoFocus={autoFocus}
             />
           )}
         </Field>

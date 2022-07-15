@@ -76,7 +76,10 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
       columns={columns}
       defaultSortKey="valueLocked"
       rounded={false}
-      onRowClicked={(token: TokenTableData) => `${basePath}/${token.poolId}/tokens/${token.id}`}
+      onRowClicked={(token: TokenTableData) => ({
+        pathname: `${basePath}/${token.poolId}`,
+        state: { token: token.id },
+      })}
     />
   )
 }
