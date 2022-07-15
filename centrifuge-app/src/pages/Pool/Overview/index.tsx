@@ -156,13 +156,21 @@ export const PoolDetailOverview: React.FC<{
 
   const tokens = pool?.tranches
     .map((tranche) => {
-      const protection = tranche.minRiskBuffer ?? Dec(0)
-      const totalReserve = pool?.reserve.total.toDecimal() ?? Dec(0)
-      const maxReserve = pool?.reserve.max.toDecimal() ?? Dec(0)
-      const capacity = maxReserve.minus(totalReserve) // TODO: check protection and pending orders
+      const protection = tranche.minRiskBuffer?.toDecimal() ?? Dec(0)
+      const tvl = pool.value.toDecimal()
+      const totalReserve = pool.reserve.total.toDecimal() ?? Dec(0)
+      const maxReserve = pool.reserve.max.toDecimal() ?? Dec(0)
+      const capacityGivenMaxReserve = maxReserve.minus(totalReserve)
+      const capacityGivenProtection = protection.isZero()
+        ? capacityGivenMaxReserve
+        : tranche.currentRiskBuffer.toDecimal().div(protection).mul(tvl).minus(tvl)
+      const capacity = capacityGivenMaxReserve.gt(capacityGivenProtection)
+        ? capacityGivenProtection
+        : capacityGivenMaxReserve
       return {
         apy: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
-        protection,
+        protection: protection.mul(100),
+        ratio: tranche.ratio.toFloat(),
         name: metadata?.tranches?.[tranche.id]?.name || '',
         symbol: metadata?.tranches?.[tranche.id]?.symbol || '',
         poolName: metadata?.pool?.name || '',
@@ -170,11 +178,11 @@ export const PoolDetailOverview: React.FC<{
         valueLocked: tranche?.tokenPrice
           ? tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal())
           : Dec(0),
-        capacity,
         id: tranche.id,
+        capacity,
       }
     })
-    .sort((a, b) => b.seniority - a.seniority)
+    .reverse()
 
   return (
     <>
