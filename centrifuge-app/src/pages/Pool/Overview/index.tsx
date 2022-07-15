@@ -27,7 +27,7 @@ const PoolAssetReserveChart = React.lazy(() => import('../../../components/Chart
 export const PoolDetailOverviewTab: React.FC = () => {
   const { state } = useLocation<{ token: string }>()
   const [selectedToken, setSelectedToken] = React.useState(state?.token || null)
-  console.log('selectedToken', selectedToken)
+
   return (
     <PageWithSideBar
       sidebar={
@@ -140,6 +140,7 @@ export const PoolDetailOverview: React.FC<{
   setSelectedToken?: (token: string | null) => void
 }> = ({ setSelectedToken }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
+  const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
   const avgMaturity = useAverageMaturity(poolId)
@@ -184,6 +185,13 @@ export const PoolDetailOverview: React.FC<{
     })
     .reverse()
 
+  const hasScrolledToToken = React.useRef(false)
+  function handleTokenMount(node: HTMLDivElement, id: string) {
+    if (hasScrolledToToken.current === true || id !== state?.token) return
+    node.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    hasScrolledToToken.current = true
+  }
+
   return (
     <>
       <PageSummary data={pageSummaryData} />
@@ -195,48 +203,49 @@ export const PoolDetailOverview: React.FC<{
       <PageSection title="Pool tokens">
         <Stack gap={2}>
           {tokens?.map((token, i) => (
-            <InteractiveCard
-              icon={<Thumbnail label="SEN" type="token" />}
-              title={
-                <TextWithPlaceholder isLoading={metadataIsLoading}>
-                  {metadata?.pool?.name} {metadata?.tranches?.[token.id]?.name}
-                </TextWithPlaceholder>
-              }
-              secondaryHeader={
-                <Shelf gap={6}>
-                  <LabelValueStack
-                    label={<Tooltips variant="secondary" type="protection" />}
-                    value={formatPercentage(token.protection)}
-                  />
-                  <LabelValueStack
-                    label={<Tooltips variant="secondary" type="valueLocked" />}
-                    value={formatBalance(token.valueLocked, pool?.currency)}
-                  />
-                  <LabelValueStack
-                    label={<Tooltips variant="secondary" type="apy" />}
-                    value={formatPercentage(token.apy)}
-                  />
-                  <LabelValueStack
-                    label="Capacity"
-                    value={
-                      <Text variant="body2" fontWeight={600} color="statusOk">
-                        {formatBalanceAbbreviated(token.capacity, pool?.currency)}
-                      </Text>
-                    }
-                  />
-                  {setSelectedToken && (
-                    <Button
-                      variant={i === 0 ? 'primary' : 'secondary'}
-                      onClick={() => setSelectedToken(token.id)}
-                      style={{ marginLeft: 'auto' }}
-                    >
-                      Invest
-                    </Button>
-                  )}
-                </Shelf>
-              }
-              key={token.id}
-            />
+            <div key={token.id} ref={(node) => node && handleTokenMount(node, token.id)}>
+              <InteractiveCard
+                icon={<Thumbnail label="SEN" type="token" />}
+                title={
+                  <TextWithPlaceholder isLoading={metadataIsLoading}>
+                    {metadata?.pool?.name} {metadata?.tranches?.[token.id]?.name}
+                  </TextWithPlaceholder>
+                }
+                secondaryHeader={
+                  <Shelf gap={6}>
+                    <LabelValueStack
+                      label={<Tooltips variant="secondary" type="protection" />}
+                      value={formatPercentage(token.protection)}
+                    />
+                    <LabelValueStack
+                      label={<Tooltips variant="secondary" type="valueLocked" />}
+                      value={formatBalance(token.valueLocked, pool?.currency)}
+                    />
+                    <LabelValueStack
+                      label={<Tooltips variant="secondary" type="apy" />}
+                      value={formatPercentage(token.apy)}
+                    />
+                    <LabelValueStack
+                      label="Capacity"
+                      value={
+                        <Text variant="body2" fontWeight={600} color="statusOk">
+                          {formatBalanceAbbreviated(token.capacity, pool?.currency)}
+                        </Text>
+                      }
+                    />
+                    {setSelectedToken && (
+                      <Button
+                        variant={i === 0 ? 'primary' : 'secondary'}
+                        onClick={() => setSelectedToken(token.id)}
+                        style={{ marginLeft: 'auto' }}
+                      >
+                        Invest
+                      </Button>
+                    )}
+                  </Shelf>
+                }
+              />
+            </div>
           ))}
         </Stack>
       </PageSection>

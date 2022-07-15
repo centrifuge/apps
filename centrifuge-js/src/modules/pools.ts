@@ -972,6 +972,13 @@ export function getPoolsModule(inst: CentrifugeBase) {
               const navData = navMap[poolId]
               const epochExecution = epochMap[poolId]
               const currency = getCurrency(pool.currency)
+
+              const poolValue = pool.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                return new Balance(
+                  prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                )
+              }, new Balance(0))
+
               const mappedPool: Pool = {
                 id: poolId,
                 createdAt: null,
@@ -995,11 +1002,6 @@ export function getPoolsModule(inst: CentrifugeBase) {
                         prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
                       )
                     }, new Balance(0))
-                  const poolValue = pool.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
-                    return new Balance(
-                      prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
-                    )
-                  }, new Balance(0))
 
                   const tokenPrice = rawPrices[poolIndex]?.[index].toJSON() as string
 
