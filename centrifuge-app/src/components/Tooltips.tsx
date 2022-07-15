@@ -165,7 +165,7 @@ const tooltipText = {
   },
   outstanding: {
     label: 'Outstanding',
-    body: "The pool's outstanding financing debt.",
+    body: "The asset's outstanding financing debt.",
   },
   liquidity: {
     label: 'Liquidity',
