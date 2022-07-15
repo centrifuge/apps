@@ -1,8 +1,7 @@
 import { StorageKey, u32 } from '@polkadot/types'
-import { Codec } from '@polkadot/types/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, Observable, of } from 'rxjs'
-import { combineLatestWith, filter, map, repeatWhen, startWith, switchMap, take } from 'rxjs/operators'
+import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
+import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
 import { SubqueryPoolSnapshot } from '../types/subquery'
@@ -914,9 +913,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
             api.query.loans.poolNAV.entries(),
             api.query.pools.epochExecution.entries(),
           ]),
-        (api, [rawPools, rawNavs, rawEpochs]) => ({ api, rawPools, rawNavs, rawEpochs })
+        (api, [rawPools, rawNavs, rawEpochExecutions]) => ({ api, rawPools, rawNavs, rawEpochExecutions })
       ),
-      switchMap(({ api, rawPools, rawNavs, rawEpochs }) => {
+      switchMap(({ api, rawPools, rawNavs, rawEpochExecutions }) => {
         if (!rawPools.length) return of([])
 
         const navMap = rawNavs.reduce((acc, [key, navValue]) => {
@@ -929,7 +928,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           return acc
         }, {} as Record<string, { latest: string; lastUpdated: number }>)
 
-        const epochMap = rawEpochs.reduce((acc, [key, navValue]) => {
+        const epochExecutionMap = rawEpochExecutions.reduce((acc, [key, navValue]) => {
           const poolId = formatPoolKey(key as StorageKey<[u32]>)
           const epoch = navValue.toJSON() as unknown as EpochExecutionData
           acc[poolId] = {
@@ -950,27 +949,32 @@ export function getPoolsModule(inst: CentrifugeBase) {
             return data.tranches.ids.map((tid) => [id, tid, data.epoch.lastExecuted] as const)
           })
           .flat()
-        const tranceIdToIssuanceIndex: Record<string, number> = {}
+
+        const trancheIdToIndex: Record<string, number> = {}
         keys.forEach(([, tid], i) => {
-          tranceIdToIssuanceIndex[tid] = i
+          trancheIdToIndex[tid] = i
         })
 
         // modify keys for $issuance query [Tranche: [poolId, trancheId]]
         const issuanceKeys = keys.map(([poolId, trancheId]) => ({ Tranche: [poolId, trancheId] }))
-
-        // Get the token prices via RPC
-        const $prices = combineLatest(
-          // @ts-expect-error
-          pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
-        )
-
         const $issuance = api.query.ormlTokens.totalIssuance.multi(issuanceKeys).pipe(take(1))
-        return combineLatest([$issuance, $prices]).pipe(
-          map(([rawIssuances, rawPrices]) => {
-            const mappedPools = pools.map((poolObj, poolIndex) => {
+
+        const epochKeys = keys.map((k) => k.slice(1))
+        const $epochs = api.query.pools.epoch.multi(epochKeys)
+
+        // TODO: Get the token prices via RPC again, currently not always accurate data
+        // const $prices = combineLatest(
+        //   // @ts-expect-error
+        //   pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
+        // )
+
+        return combineLatest([$issuance, $epochs]).pipe(
+          map(([rawIssuances, rawEpochs]) => {
+            const epochs = rawEpochs.map((value) => (!value.isEmpty ? (value as any).toJSON() : null))
+            const mappedPools = pools.map((poolObj) => {
               const { data: pool, id: poolId, metadata } = poolObj
               const navData = navMap[poolId]
-              const epochExecution = epochMap[poolId]
+              const epochExecution = epochExecutionMap[poolId]
               const currency = getCurrency(pool.currency)
               const mappedPool: Pool = {
                 id: poolId,
@@ -979,7 +983,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 currency,
                 tranches: pool.tranches.tranches.map((tranche, index) => {
                   const trancheId = pool.tranches.ids[index]
-                  const issuanceIndex = tranceIdToIssuanceIndex[trancheId]
+                  const trancheIndex = trancheIdToIndex[trancheId]
+                  const epoch = epochs[trancheIndex]
 
                   let minRiskBuffer: Perquintill | null = null
                   let interestRatePerSec: Rate | null = null
@@ -1001,15 +1006,15 @@ export function getPoolsModule(inst: CentrifugeBase) {
                     )
                   }, new Balance(0))
 
-                  const tokenPrice = rawPrices[poolIndex]?.[index].toJSON() as string
+                  const tokenPrice = epoch ? new Price(hexToBN(epoch.tokenPrice)) : Price.fromFloat(1)
 
                   return {
                     id: trancheId,
                     index,
                     seniority: tranche.seniority,
-                    tokenPrice: tokenPrice ? new Price(hexToBN(tokenPrice)) : null,
+                    tokenPrice,
                     currency,
-                    totalIssuance: new Balance(rawIssuances[issuanceIndex].toString()),
+                    totalIssuance: new Balance(rawIssuances[trancheIndex].toString()),
                     poolId,
                     poolMetadata: (metadata ?? undefined) as string | undefined,
                     interestRatePerSec,
