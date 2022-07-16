@@ -10,7 +10,7 @@ export type ScoreCard = {
 }
 
 export type Loan = {
-  loanId: number | string
+  loanId: string
   registry: string
   tokenId: BN
   ownerOf: string
