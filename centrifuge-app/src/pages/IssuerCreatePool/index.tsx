@@ -15,8 +15,9 @@ import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
-import { combineLatest, map, of, Subject, switchMap } from 'rxjs'
+import { combineLatest, filter, map, of, Subject, switchMap } from 'rxjs'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
+import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
@@ -175,6 +176,8 @@ const CreatePoolForm: React.VFC = () => {
   const { selectedAccount } = useWeb3()
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false)
+  const [preimageHash, setPreimageHash] = React.useState('')
   const [proposeFee, setProposeFee] = React.useState<Balance | null>(null)
 
   // Retrieve the submittable with data currently in the form to see how much the transaction would cost
@@ -217,10 +220,12 @@ const CreatePoolForm: React.VFC = () => {
     setTimeout(() => setWaitingForStoredIssuer(false), 10000)
   }, [])
 
+  const cent = useCentrifuge()
+
   const txMessage = {
     immediate: 'Create pool',
     propose: 'Submit pool proposal',
-    notePreimage: 'Noting preimage (fast track)',
+    notePreimage: 'Note preimage',
   }
   const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
     txMessage[config.poolCreationType || 'immediate'],
@@ -228,7 +233,7 @@ const CreatePoolForm: React.VFC = () => {
     {
       onSuccess: (args) => {
         const [, poolId] = args
-        if (config.poolCreationType !== 'propose' && config.poolCreationType !== 'notePreimage') {
+        if (config.poolCreationType === 'immediate') {
           history.push(`/issuer/${poolId}`)
         }
       },
@@ -402,115 +407,140 @@ const CreatePoolForm: React.VFC = () => {
   )
 
   React.useEffect(() => {
-    if (config.poolCreationType === 'propose') {
+    if (config.poolCreationType !== 'immediate') {
       getProposeFee(form.values)
     }
   }, [form.values, getProposeFee])
+
+  React.useEffect(() => {
+    if (config.poolCreationType === 'notePreimage') {
+      const $events = cent
+        .getEvents()
+        .pipe(
+          filter(({ api, events }) => {
+            const event = events.find(({ event }) => api.events.democracy.PreimageNoted.is(event))
+            const parsedEvent = event?.toJSON() as any
+            // the events api returns a few events for the event PreimageNoted where the data looks different everytime
+            // when data is a tuple and the length is 3, it may be safe to extract the first value as the preimage hash
+            if (parsedEvent?.event?.data?.length === 3) {
+              console.info('Preimage hash: ', parsedEvent.event.data[0])
+              setPreimageHash(parsedEvent.event.data[0])
+              setIsDialogOpen(true)
+            }
+            return !!event
+          })
+        )
+        .subscribe()
+      return () => $events.unsubscribe()
+    }
+  }, [cent])
 
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
 
   return (
-    <FormikProvider value={form}>
-      <Form ref={formRef}>
-        <PageHeader
-          icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
-          title={form.values.poolName || 'New Pool'}
-          subtitle={
-            <TextWithPlaceholder isLoading={waitingForStoredIssuer} width={15}>
-              by {form.values.issuerName || (address && truncate(address))}
-            </TextWithPlaceholder>
-          }
-          actions={
-            <>
-              {proposeFee && (
-                <Text variant="body3">Deposit required: {formatBalance(proposeFee, balances?.native.symbol)}</Text>
-              )}
-              <Button variant="secondary" onClick={() => history.goBack()}>
-                Cancel
-              </Button>
+    <>
+      <PreimageHashDialog hash={preimageHash} open={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
+      <FormikProvider value={form}>
+        <Form ref={formRef}>
+          <PageHeader
+            icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
+            title={form.values.poolName || 'New Pool'}
+            subtitle={
+              <TextWithPlaceholder isLoading={waitingForStoredIssuer} width={15}>
+                by {form.values.issuerName || (address && truncate(address))}
+              </TextWithPlaceholder>
+            }
+            actions={
+              <>
+                {proposeFee && (
+                  <Text variant="body3">Deposit required: {formatBalance(proposeFee, balances?.native.symbol)}</Text>
+                )}
+                <Button variant="secondary" onClick={() => history.goBack()}>
+                  Cancel
+                </Button>
 
-              <Button loading={form.isSubmitting || transactionIsPending} type="submit">
-                Create
-              </Button>
-            </>
-          }
-        />
-        <PageSection title="Details">
-          <Grid columns={[4]} equalColumns gap={2} rowGap={3}>
-            <Box gridColumn="span 2">
-              <FieldWithErrorMessage
-                validate={validate.poolName}
-                name="poolName"
-                as={TextInput}
-                label="Pool name*"
-                placeholder="New pool"
-                maxLength={100}
-              />
-            </Box>
-            <Box gridColumn="span 2" width="100%">
-              <Field name="poolIcon" validate={validate.poolIcon}>
-                {({ field, meta, form }: FieldProps) => (
-                  <FileUpload
-                    file={field.value}
-                    onFileChange={(file) => {
-                      form.setFieldTouched('poolIcon', true, false)
-                      form.setFieldValue('poolIcon', file)
-                    }}
-                    label="Pool icon: SVG in square size*"
-                    placeholder="Choose pool icon"
-                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                    accept="image/svg+xml"
-                  />
-                )}
-              </Field>
-            </Box>
-            <Box gridColumn="span 2">
-              <Field name="assetClass" validate={validate.assetClass}>
-                {({ field, meta, form }: FieldProps) => (
-                  <Select
-                    label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
-                    onSelect={(v) => form.setFieldValue('assetClass', v)}
-                    onBlur={field.onBlur}
-                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                    value={field.value}
-                    options={ASSET_CLASSES}
-                    placeholder="Select..."
-                  />
-                )}
-              </Field>
-            </Box>
-            <Box gridColumn="span 2">
-              <Field name="currency" validate={validate.currency}>
-                {({ field, form, meta }: FieldProps) => (
-                  <Select
-                    label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
-                    onSelect={(v) => form.setFieldValue('currency', v)}
-                    onBlur={field.onBlur}
-                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                    value={field.value}
-                    options={currencies}
-                    placeholder="Select..."
-                  />
-                )}
-              </Field>
-            </Box>
-            <Box gridColumn="span 2">
-              <Field name="maxReserve" validate={validate.maxReserve}>
-                {({ field, form }: FieldProps) => (
-                  <CurrencyInput
-                    {...field}
-                    name="maxReserve"
-                    label="Initial maximum reserve*"
-                    placeholder="0"
-                    currency={currencies.find((c) => c.value === form.values.currency)?.label}
-                    variant="small"
-                    onChange={(value) => form.setFieldValue('maxReserve', value)}
-                  />
-                )}
-              </Field>
-            </Box>
-            {/* <Box gridColumn="span 1">
+                <Button loading={form.isSubmitting || transactionIsPending} type="submit">
+                  Create
+                </Button>
+              </>
+            }
+          />
+          <PageSection title="Details">
+            <Grid columns={[4]} equalColumns gap={2} rowGap={3}>
+              <Box gridColumn="span 2">
+                <FieldWithErrorMessage
+                  validate={validate.poolName}
+                  name="poolName"
+                  as={TextInput}
+                  label="Pool name*"
+                  placeholder="New pool"
+                  maxLength={100}
+                />
+              </Box>
+              <Box gridColumn="span 2" width="100%">
+                <Field name="poolIcon" validate={validate.poolIcon}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <FileUpload
+                      file={field.value}
+                      onFileChange={(file) => {
+                        form.setFieldTouched('poolIcon', true, false)
+                        form.setFieldValue('poolIcon', file)
+                      }}
+                      label="Pool icon: SVG in square size*"
+                      placeholder="Choose pool icon"
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      accept="image/svg+xml"
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 2">
+                <Field name="assetClass" validate={validate.assetClass}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <Select
+                      label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
+                      onSelect={(v) => form.setFieldValue('assetClass', v)}
+                      onBlur={field.onBlur}
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      value={field.value}
+                      options={ASSET_CLASSES}
+                      placeholder="Select..."
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 2">
+                <Field name="currency" validate={validate.currency}>
+                  {({ field, form, meta }: FieldProps) => (
+                    <Select
+                      label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
+                      onSelect={(v) => form.setFieldValue('currency', v)}
+                      onBlur={field.onBlur}
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      value={field.value}
+                      options={currencies}
+                      placeholder="Select..."
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 2">
+                <Field name="maxReserve" validate={validate.maxReserve}>
+                  {({ field, form }: FieldProps) => (
+                    <CurrencyInput
+                      {...field}
+                      name="maxReserve"
+                      label="Initial maximum reserve*"
+                      placeholder="0"
+                      currency={currencies.find((c) => c.value === form.values.currency)?.label}
+                      variant="small"
+                      onChange={(value) => form.setFieldValue('maxReserve', value)}
+                    />
+                  )}
+                </Field>
+              </Box>
+              {/* <Box gridColumn="span 1">
               <FieldWithErrorMessage
                 validate={validate.epochHours}
                 name="epochHours"
@@ -530,108 +560,113 @@ const CreatePoolForm: React.VFC = () => {
                 rightElement="min"
               />
             </Box> */}
-          </Grid>
-        </PageSection>
-        <PageSection title="Issuer">
-          <Grid columns={[6]} equalColumns gap={2} rowGap={3}>
-            <Box gridColumn="span 3">
-              <FieldWithErrorMessage
-                validate={validate.issuerName}
-                name="issuerName"
-                as={TextInput}
-                label={<Tooltips type="issuerName" label="Legal name of issuer*" variant="secondary" />}
-                placeholder="Name..."
-                maxLength={100}
-                disabled={waitingForStoredIssuer}
-              />
-            </Box>
-            <Box gridColumn="span 3" width="100%">
-              <Field name="issuerLogo" validate={validate.issuerLogo}>
-                {({ field, meta, form }: FieldProps) => (
-                  <FileUpload
-                    file={field.value}
-                    onFileChange={(file) => {
-                      form.setFieldTouched('issuerLogo', true, false)
-                      form.setFieldValue('issuerLogo', file)
-                    }}
-                    label="Issuer logo (JPG/PNG/SVG, 480x480 px)"
-                    placeholder="Choose issuer logo"
-                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                    accept="image/*"
-                  />
-                )}
-              </Field>
-            </Box>
-            <Box gridColumn="span 6">
-              <FieldWithErrorMessage
-                validate={validate.issuerDescription}
-                name="issuerDescription"
-                as={TextAreaInput}
-                label={
-                  <Tooltips type="poolDescription" variant="secondary" label="Description (minimum 100 characters)*" />
-                }
-                placeholder="Description..."
-                maxLength={1000}
-                disabled={waitingForStoredIssuer}
-              />
-            </Box>
-            <Box gridColumn="span 6">
-              <Text>Links</Text>
-            </Box>
-            <Box gridColumn="span 3">
-              <Field name="executiveSummary" validate={validate.executiveSummary}>
-                {({ field, meta, form }: FieldProps) => (
-                  <FileUpload
-                    file={field.value}
-                    onFileChange={(file) => {
-                      form.setFieldTouched('executiveSummary', true, false)
-                      form.setFieldValue('executiveSummary', file)
-                    }}
-                    accept="application/pdf"
-                    label="Executive summary PDF*"
-                    placeholder="Choose file"
-                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                  />
-                )}
-              </Field>
-            </Box>
-            <Box gridColumn="span 3">
-              <FieldWithErrorMessage
-                name="website"
-                as={TextInput}
-                label="Website"
-                placeholder="https://..."
-                validate={validate.website}
-              />
-            </Box>
-            <Box gridColumn="span 3">
-              <FieldWithErrorMessage
-                name="forum"
-                as={TextInput}
-                label="Governance forum"
-                placeholder="https://..."
-                validate={validate.forum}
-              />
-            </Box>
-            <Box gridColumn="span 3">
-              <FieldWithErrorMessage
-                name="email"
-                as={TextInput}
-                label="Email"
-                placeholder=""
-                validate={validate.email}
-              />
-            </Box>
-          </Grid>
-        </PageSection>
+            </Grid>
+          </PageSection>
+          <PageSection title="Issuer">
+            <Grid columns={[6]} equalColumns gap={2} rowGap={3}>
+              <Box gridColumn="span 3">
+                <FieldWithErrorMessage
+                  validate={validate.issuerName}
+                  name="issuerName"
+                  as={TextInput}
+                  label={<Tooltips type="issuerName" label="Legal name of issuer*" variant="secondary" />}
+                  placeholder="Name..."
+                  maxLength={100}
+                  disabled={waitingForStoredIssuer}
+                />
+              </Box>
+              <Box gridColumn="span 3" width="100%">
+                <Field name="issuerLogo" validate={validate.issuerLogo}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <FileUpload
+                      file={field.value}
+                      onFileChange={(file) => {
+                        form.setFieldTouched('issuerLogo', true, false)
+                        form.setFieldValue('issuerLogo', file)
+                      }}
+                      label="Issuer logo (JPG/PNG/SVG, 480x480 px)"
+                      placeholder="Choose issuer logo"
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                      accept="image/*"
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 6">
+                <FieldWithErrorMessage
+                  validate={validate.issuerDescription}
+                  name="issuerDescription"
+                  as={TextAreaInput}
+                  label={
+                    <Tooltips
+                      type="poolDescription"
+                      variant="secondary"
+                      label="Description (minimum 100 characters)*"
+                    />
+                  }
+                  placeholder="Description..."
+                  maxLength={1000}
+                  disabled={waitingForStoredIssuer}
+                />
+              </Box>
+              <Box gridColumn="span 6">
+                <Text>Links</Text>
+              </Box>
+              <Box gridColumn="span 3">
+                <Field name="executiveSummary" validate={validate.executiveSummary}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <FileUpload
+                      file={field.value}
+                      onFileChange={(file) => {
+                        form.setFieldTouched('executiveSummary', true, false)
+                        form.setFieldValue('executiveSummary', file)
+                      }}
+                      accept="application/pdf"
+                      label="Executive summary PDF*"
+                      placeholder="Choose file"
+                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                    />
+                  )}
+                </Field>
+              </Box>
+              <Box gridColumn="span 3">
+                <FieldWithErrorMessage
+                  name="website"
+                  as={TextInput}
+                  label="Website"
+                  placeholder="https://..."
+                  validate={validate.website}
+                />
+              </Box>
+              <Box gridColumn="span 3">
+                <FieldWithErrorMessage
+                  name="forum"
+                  as={TextInput}
+                  label="Governance forum"
+                  placeholder="https://..."
+                  validate={validate.forum}
+                />
+              </Box>
+              <Box gridColumn="span 3">
+                <FieldWithErrorMessage
+                  name="email"
+                  as={TextInput}
+                  label="Email"
+                  placeholder=""
+                  validate={validate.email}
+                />
+              </Box>
+            </Grid>
+          </PageSection>
 
-        <TrancheInput />
+          <TrancheInput />
 
-        <RiskGroupsInput />
+          <RiskGroupsInput />
 
-        <WriteOffInput />
-      </Form>
-    </FormikProvider>
+          <WriteOffInput />
+        </Form>
+      </FormikProvider>
+    </>
   )
 }
 
