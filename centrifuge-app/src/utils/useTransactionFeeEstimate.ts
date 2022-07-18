@@ -17,7 +17,6 @@ export function useTransactionFeeEstimate<T extends Array<any>>(
   async function doTransaction(selectedAccount: WalletAccount, args: T, txOptions?: TxOptions) {
     try {
       const connectedCent = cent.connect(selectedAccount?.address, selectedAccount?.signer as any)
-      const api = await cent.getApiPromise()
       const transaction = transactionCallback(connectedCent)
 
       const lastResult = await lastValueFrom(
