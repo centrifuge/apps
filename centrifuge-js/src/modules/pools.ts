@@ -984,7 +984,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 tranches: pool.tranches.tranches.map((tranche, index) => {
                   const trancheId = pool.tranches.ids[index]
                   const trancheIndex = trancheIdToIndex[trancheId]
-                  const epoch = epochs[trancheIndex]
+                  const lastClosedEpoch = epochs[trancheIndex]
 
                   let minRiskBuffer: Perquintill | null = null
                   let interestRatePerSec: Rate | null = null
@@ -1006,7 +1006,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
                     )
                   }, new Balance(0))
 
-                  const tokenPrice = epoch ? new Price(hexToBN(epoch.tokenPrice)) : Price.fromFloat(1)
+                  const tokenPrice = lastClosedEpoch
+                    ? new Price(hexToBN(lastClosedEpoch.tokenPrice))
+                    : Price.fromFloat(1)
 
                   return {
                     id: trancheId,
