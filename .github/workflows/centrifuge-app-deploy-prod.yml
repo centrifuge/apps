@@ -16,7 +16,7 @@ jobs:
       whitelisted-accounts: ''
       network: centrifuge
       subquery-url: ''
-      requires-pop: 'true'
+      pool-creation-type: propose
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

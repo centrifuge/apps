@@ -217,13 +217,18 @@ const CreatePoolForm: React.VFC = () => {
     setTimeout(() => setWaitingForStoredIssuer(false), 10000)
   }, [])
 
+  const txMessage = {
+    immediate: 'Create pool',
+    propose: 'Submit pool proposal',
+    notePreimage: 'Noting preimage (fast track)',
+  }
   const { execute: createPoolTx, isLoading: transactionIsPending } = useCentrifugeTransaction(
-    config.requiresPop ? 'Submit pool proposal' : 'Create pool',
+    txMessage[config.poolCreationType || 'immediate'],
     (cent) => cent.pools.createPool,
     {
       onSuccess: (args) => {
         const [, poolId] = args
-        if (!config.requiresPop) {
+        if (config.poolCreationType !== 'propose' && config.poolCreationType !== 'notePreimage') {
           history.push(`/issuer/${poolId}`)
         }
       },
@@ -341,7 +346,7 @@ const CreatePoolForm: React.VFC = () => {
           metadataHash,
           writeOffGroups,
         ],
-        { propose: config.requiresPop }
+        { createType: config.poolCreationType }
       )
 
       setSubmitting(false)
@@ -397,7 +402,7 @@ const CreatePoolForm: React.VFC = () => {
   )
 
   React.useEffect(() => {
-    if (config.requiresPop) {
+    if (config.poolCreationType === 'propose') {
       getProposeFee(form.values)
     }
   }, [form.values, getProposeFee])

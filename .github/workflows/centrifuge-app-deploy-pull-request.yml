@@ -18,9 +18,9 @@ jobs:
       relay-wss-url: wss://fullnode-relay.demo.cntrfg.com
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
-      network: altair
+      network: centrifuge
       subquery-url: https://api.subquery.network/sq/centrifuge/pools-demo
-      requires-pop: 'false'
+      pool-creation-type: immediate
 
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,3 +1,4 @@
+import { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { LoanInfo } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { altairDark, centrifugeLight } from '@centrifuge/fabric'
 import React from 'react'
@@ -70,10 +71,10 @@ type EnvironmentConfig = {
   defaultAssetClass: string
   tokensPageSubtitle: string
   defaultLoanType: LoanInfo['type']
-  requiresPop: boolean
+  poolCreationType: TransactionOptions['createType']
 }
 
-const requiresPop = import.meta.env.REACT_APP_REQUIRES_POP !== 'false'
+const poolCreationType: TransactionOptions['createType'] = import.meta.env.REACT_APP_POOL_CREATION_TYPE || 'immediate'
 
 const ALTAIR: EnvironmentConfig = {
   name: 'Pools on Altair',
@@ -89,7 +90,7 @@ const ALTAIR: EnvironmentConfig = {
   defaultAssetClass: 'Art NFTs',
   tokensPageSubtitle: 'Art NFTs',
   defaultLoanType: 'CreditLineWithMaturity',
-  requiresPop,
+  poolCreationType,
 }
 
 const CENTRIFUGE: EnvironmentConfig = {
@@ -112,7 +113,7 @@ const CENTRIFUGE: EnvironmentConfig = {
   defaultAssetClass: 'Consumer Credit',
   tokensPageSubtitle: 'Tokens of real-world assets',
   defaultLoanType: 'CreditLineWithMaturity',
-  requiresPop,
+  poolCreationType,
 }
 
 export const config = (import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge') === 'altair' ? ALTAIR : CENTRIFUGE
