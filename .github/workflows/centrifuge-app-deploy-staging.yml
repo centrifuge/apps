@@ -15,7 +15,7 @@ jobs:
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
       network: centrifuge
-      rpool-creation-type: notePreimage
+      pool-creation-type: notePreimage
       subquery-url: ''
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
