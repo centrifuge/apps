@@ -20,7 +20,7 @@ jobs:
       whitelisted-accounts: ''
       network: centrifuge
       subquery-url: https://api.subquery.network/sq/centrifuge/pools-demo
-      pool-creation-type: immediate
+      pool-creation-type: notePreimage
 
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
