@@ -453,9 +453,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           return inst.wrapSignAndSend(api, proposalSubmittable, options)
         }
         if (options?.createType === 'notePreimage') {
-          const preimageSubmittable = api.tx.utility.batchAll([
-            api.tx.democracy.notePreimage(submittable.method.toHex()),
-          ])
+          const preimageSubmittable = api.tx.democracy.notePreimage(submittable.method.toHex())
           return inst.wrapSignAndSend(api, preimageSubmittable, options)
         }
         return inst.wrapSignAndSend(api, submittable, options)
