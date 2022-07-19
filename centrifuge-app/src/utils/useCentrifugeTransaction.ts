@@ -8,7 +8,7 @@ import { Transaction, useTransaction, useTransactions } from '../components/Tran
 import { useWeb3 } from '../components/Web3Provider'
 import { PalletError } from './errors'
 
-type TxOptions = Pick<TransactionOptions, 'propose'>
+type TxOptions = Pick<TransactionOptions, 'createType'>
 
 export function useCentrifugeTransaction<T extends Array<any>>(
   title: string,
