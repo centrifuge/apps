@@ -233,6 +233,7 @@ const StyledHeader = styled(Shelf)`
 
   &:hover,
   &:hover > svg {
+    cursor: pointer;
     color: ${({ theme }) => theme.colors.textInteractiveHover};
   }
 `
