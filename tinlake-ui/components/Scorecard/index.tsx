@@ -145,8 +145,8 @@ const Scorecard: React.FC<Props> = (props: Props) => {
                   </TableCell>
                   <TableCell size="22%">Financing fee (APR)</TableCell>
                   <TableCell size="22%">
-                    <Tooltip id="assumedRiskAdjustment" underline>
-                      Assumed risk adjustment
+                    <Tooltip id="appliedRiskAdjustment" underline>
+                      Applied risk adjustment
                     </Tooltip>
                   </TableCell>
                   <TableCell size="22%">Portfolio share</TableCell>

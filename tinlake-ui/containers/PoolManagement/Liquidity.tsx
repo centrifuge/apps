@@ -6,7 +6,6 @@ import { Box, Button, Heading, Table, TableBody, TableCell, TableRow } from 'gro
 import * as React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
-import Alert from '../../components/Alert'
 import { Card } from '../../components/Card'
 import { LoadingValue } from '../../components/LoadingValue'
 import { useTinlake } from '../../components/TinlakeProvider'
@@ -16,7 +15,6 @@ import { addThousandsSeparators } from '../../utils/addThousandsSeparators'
 import { Fixed27Base } from '../../utils/ratios'
 import { toPrecision } from '../../utils/toPrecision'
 import { usePool } from '../../utils/usePool'
-import { usePools } from '../../utils/usePools'
 
 interface Props extends TransactionProps {
   activePool: Pool
@@ -25,9 +23,6 @@ interface Props extends TransactionProps {
 const Liquidity: React.FC<Props> = (props: Props) => {
   const tinlake = useTinlake()
   const { data: poolData, refetch: refetchPoolData } = usePool(tinlake.contractAddresses.ROOT_CONTRACT)
-
-  const pools = usePools()
-  const poolListData = pools.data?.pools.find((p) => p.id === props.activePool.addresses.ROOT_CONTRACT)
 
   const isMakerIntegrated =
     props.activePool.addresses.CLERK !== undefined && props.activePool.metadata.maker?.ilk !== ''
@@ -327,20 +322,6 @@ const Liquidity: React.FC<Props> = (props: Props) => {
           }
           onChange={onChangeExternalCapacity}
         />
-
-        {poolListData?.capacity?.lt(
-          new BN(
-            externalCapacity === undefined
-              ? (poolData?.maxReserve || new BN(0)).sub(poolData?.maker?.remainingCredit || new BN(0)).toString() || '0'
-              : externalCapacity
-          )
-        ) && (
-          <Alert margin={{ top: 'medium' }} type="info">
-            The actual investor capacity is currently{' '}
-            {addThousandsSeparators(toPrecision(baseToDisplay(poolListData?.capacity || new BN(0), 18), 0))} DAI because
-            it's constrained by the TIN Risk Buffer.
-          </Alert>
-        )}
 
         <Box gap="small" justify="end" direction="row" margin={{ top: 'small' }}>
           <Button
