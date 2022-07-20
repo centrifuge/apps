@@ -292,13 +292,8 @@ const InvestForm: React.VFC<InvestFormProps> = ({
     }
   )
 
-  // const totalReserve = Dec(pool?.reserve.total ?? '0').div('1e18')
-  // const maxReserve = Dec(pool?.reserve.max ?? '0').div('1e18')
   const pendingInvest = order?.remainingInvestCurrency.toDecimal() ?? Dec(0)
-  // const investmentCapacity = min(maxReserve.minus(totalReserve)) // TODO: check risk buffer and outstanding invest orders
-  // const needsToCollect = order?.payoutCurrencyAmount !== '0' || order?.payoutTokenAmount !== '0'
   const hasPendingOrder = !pendingInvest.isZero()
-  // const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(investmentCapacity)
 
   const combinedBalance = balance.add(pendingInvest)
 
@@ -332,6 +327,10 @@ const InvestForm: React.VFC<InvestFormProps> = ({
 
   const nativeBalanceTooLow = nativeBalance.lte(investTxFee || 1)
 
+  const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(
+    tranche?.capacity.toDecimal() ?? 0
+  )
+
   function renderInput(cancelCb?: () => void) {
     return (
       <Stack gap={2}>
@@ -362,11 +361,11 @@ const InvestForm: React.VFC<InvestFormProps> = ({
             )
           }}
         </Field>
-        {/* {inputToNumber(form.values.amount) > 0 && inputAmountCoveredByCapacity && (
+        {inputToNumber(form.values.amount) > 0 && inputAmountCoveredByCapacity && (
           <Text variant="label2" color="statusOk">
             Full amount covered by investment capacity ✓
           </Text>
-        )} */}
+        )}
         {inputToNumber(form.values.amount) > 0 ? (
           <Stack px={2} gap="4px">
             <Shelf justifyContent="space-between">
@@ -390,7 +389,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({
             loadingMessage={loadingMessage}
             disabled={pool?.epoch.isInSubmissionPeriod || nativeBalanceTooLow}
           >
-            {investLabel}
+            {changeOrderFormShown ? 'Change order' : investLabel}
           </Button>
           {cancelCb && (
             <Button variant="secondary" onClick={cancelCb}>
