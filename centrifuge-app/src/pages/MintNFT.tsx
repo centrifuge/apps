@@ -1,6 +1,5 @@
 import { Box, Button, Flex, NumberInput, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import React, { useReducer, useState } from 'react'
-import { useQueryClient } from 'react-query'
 import { useHistory, useParams } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useDebugFlags } from '../components/DebugFlags'
@@ -18,7 +17,6 @@ import { useBalance } from '../utils/useBalance'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useIsPageUnchanged } from '../utils/useIsPageUnchanged'
-import { fetchMetadata } from '../utils/useMetadata'
 import { isSameAddress } from '../utils/web3'
 
 const DEFAULT_NFT_NAME = 'Untitled NFT'
@@ -36,7 +34,6 @@ export const MintNFTPage: React.FC = () => {
 
 const MintNFT: React.FC = () => {
   const { cid: collectionId } = useParams<{ cid: string }>()
-  const queryClient = useQueryClient()
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collectionId)
   const balance = useBalance()
@@ -90,8 +87,6 @@ const MintNFT: React.FC = () => {
       fileDataUri,
       fileName,
     })
-
-    queryClient.prefetchQuery(['metadata', res.metadataURI], () => fetchMetadata(res.metadataURI))
 
     doTransaction([collectionId, nftId, address!, res.metadataURI, nftAmount])
   })
