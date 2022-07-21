@@ -1,6 +1,6 @@
-import { useHostPermission } from '../components/HostPermissions'
-import { parseMetadataUrl } from './parseMetadataUrl'
-import { useCentrifugeQuery } from './useCentrifugeQuery'
+import { lastValueFrom } from '@polkadot/api-base/node_modules/rxjs'
+import { useQuery, UseQueryResult } from 'react-query'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 
 type Schema = {
   [key: string]: {
@@ -10,41 +10,48 @@ type Schema = {
   }
 }
 
-export function useMetadata<T extends Record<any, any>>(
-  uri: string | string[] | undefined,
-  schema?: Schema
-): { data: T } {
-  const { allowed } = useHostPermission(uri)
-  let url: string | string[] = ''
-  if (!uri) {
-    url = ''
-  } else if (typeof uri === 'string') {
-    url = parseMetadataUrl(uri) as string
-  } else {
-    url = uri.map((u) => parseMetadataUrl(u))
-  }
-  const [result] = useCentrifugeQuery(['metadata', url], (cent) => cent.metadata.getMetadata(url), {
-    suspense: true,
-    enabled: !!url || url.length > 0 || !allowed,
-  })
+type Optional<T, S extends boolean | undefined> = S extends true ? T | undefined : T
 
-  if (!schema) {
-    return { data: result }
-  }
+type Result<T extends Schema> = {
+  [P in keyof T]: Optional<T[P]['type'] extends 'string' ? string : number, T[P]['optional']>
+}
 
-  const resultSchema: any = {}
-  if (schema && result) {
-    for (const key in schema) {
-      const { maxLength, optional, type } = schema[key]
-      let value = result[key]
-      if (!value) {
-        if (optional) continue
-        continue
+export function useMetadata<T = any>(uri: string | undefined): UseQueryResult<Partial<T>, unknown>
+export function useMetadata<T extends Schema>(uri: string | undefined, schema: T): UseQueryResult<Result<T>, unknown>
+export function useMetadata<T extends Schema>(uri: string | undefined, schema?: T) {
+  const cent = useCentrifuge()
+  const { data, isLoading } = useQuery(
+    ['metadata', uri],
+    async () => {
+      try {
+        const res = await lastValueFrom(cent.metadata.getMetadata(uri!))
+
+        if (!schema) return res
+
+        const result: any = {}
+
+        for (const key in schema) {
+          const { maxLength, optional, type } = schema[key]
+          let value = res[key]
+          if (!value) {
+            if (optional) continue
+            return null
+          }
+          if (typeof value !== type) return null
+          if (maxLength) value = value.slice(0, maxLength)
+          result[key] = value
+        }
+
+        return result as Result<T>
+      } catch (error) {
+        console.warn('Query error', error)
       }
-      if (typeof value !== type) continue
-      if (maxLength) value = value.slice(0, maxLength)
-      resultSchema[key] = value
+    },
+    {
+      enabled: !!uri,
+      staleTime: Infinity,
     }
-  }
-  return { data: resultSchema || result }
+  )
+
+  return { data, isLoading }
 }

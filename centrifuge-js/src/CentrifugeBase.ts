@@ -10,6 +10,7 @@ import {
   combineLatestWith,
   filter,
   firstValueFrom,
+  from,
   lastValueFrom,
   map,
   mergeWith,
@@ -37,6 +38,7 @@ export type Config = {
   kusamaWsUrl: string
   centrifugeSubqueryUrl: string
   altairSubqueryUrl: string
+  metadataHost: string
   signer?: Signer
   signingAddress?: AddressOrPair
   printExtrinsics?: boolean
@@ -60,6 +62,7 @@ const defaultConfig: Config = {
   kusamaWsUrl: 'wss://kusama-rpc.polkadot.io',
   centrifugeSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools',
   altairSubqueryUrl: 'https://api.subquery.network/sq/centrifuge/pools-altair',
+  metadataHost: 'https://altair.mypinata.cloud',
 }
 
 const relayChainTypes = {}
@@ -164,6 +167,7 @@ export class CentrifugeBase {
             const txFee = Number(paymentInfo.partialFee.toString()) / 10 ** (api.registry.chainDecimals as any)
             const balance = new Balance(hexToBn(nativeBalance.data.free))
             if (balance.lten(txFee)) {
+              console.log('za error ehere', api.registry)
               throw new Error(`${api.registry.chainTokens[0]} balance too low`)
             }
             return true
@@ -232,6 +236,29 @@ export class CentrifugeBase {
     }
 
     return $
+  }
+
+  getMetadataObservable<T = any>(url: string, optional = true) {
+    if (new URL(url)?.hostname !== new URL(this.config.metadataHost).hostname) {
+      console.warn('Invalid url')
+      return from([])
+    }
+    const $ = fromFetch(url)
+    if (optional) {
+      return $.pipe(
+        startWith(null),
+        catchError(() => of(null)),
+        switchMap((res) => {
+          return from(res?.json() || []) as Observable<T>
+        })
+      )
+    }
+
+    return $.pipe(
+      switchMap((res) => {
+        return from(res.json()) as Observable<T>
+      })
+    )
   }
 
   getBlockEvents() {

@@ -1,46 +1,37 @@
-import { combineLatest, filter, forkJoin, map, Observable } from 'rxjs'
-import { fromFetch } from 'rxjs/fetch'
-import { switchMap } from 'rxjs/operators'
+import { from, Observable } from 'rxjs'
+import Centrifuge from '..'
 
-export function getMetadataModule() {
-  function getFetchObervable(url: string | string[]) {
-    if (typeof url === 'string') {
-      const $ = fromFetch(url).pipe(
-        switchMap((res) => {
-          if (res.ok) {
-            return new Promise((resolve) => resolve(res.json()))
-          }
-          throw new Error(JSON.stringify(res))
-        })
-      )
-      return $
+export function getMetadataModule(inst: Centrifuge) {
+  function getMetadata<T = any>(uri: string): Observable<T | T[] | null> {
+    const url = parseMetadataUrl(uri, inst.config.metadataHost)
+    if (!url) {
+      return from([])
     }
-
-    const $sources = url.map((u) => fromFetch(u))
-    const $multi = forkJoin($sources).pipe(
-      filter((url) => url.length > 0),
-      switchMap((res) => {
-        return Promise.all(
-          res.map((r) => {
-            if (r.ok) {
-              return r.json()
-            }
-            throw new Error(JSON.stringify(r))
-          })
-        )
-      })
-    )
-    return $multi
-  }
-
-  function getMetadata<T = any>(url: string | string[]): Observable<T | T[] | null> {
-    const $query = getFetchObervable(url)
-    return combineLatest([$query]).pipe(
-      map(([res]) => {
-        return res as T
-      })
-    )
+    return inst.getMetadataObservable<T>(url)
   }
 
   return { getMetadata }
+}
+
+export function parseMetadataUrl(url: string, hostname: string) {
+  try {
+    let newUrl
+
+    if (!url.includes(':')) {
+      // string without protocol is assumed to be an IPFS hash
+      newUrl = new URL(`ipfs/${url}`, hostname)
+    } else if (url.startsWith('ipfs://')) {
+      newUrl = new URL(url.substr(7), hostname)
+    } else {
+      newUrl = new URL(url)
+    }
+
+    if (newUrl.protocol === 'http:' || newUrl.protocol === 'https:') {
+      return newUrl.href
+    }
+
+    return ''
+  } catch (e) {
+    return ''
+  }
 }

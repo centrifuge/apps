@@ -12,7 +12,7 @@ export class Centrifuge extends CentrifugeBase {
   pools = getPoolsModule(this)
   utils = getUtilsModule(this)
   proxies = getProxiesModule(this)
-  metadata = getMetadataModule()
+  metadata = getMetadataModule(this)
 
   constructor(config: UserProvidedConfig = {}) {
     super(config)
