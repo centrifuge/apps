@@ -39,9 +39,16 @@ export const HostPermissionsProvider: React.FC = ({ children }) => {
   )
 }
 
-export function useHostPermission(url?: string) {
+export function useHostPermission(uri?: string | string[]) {
   const ctx = React.useContext(HostPermissionsContext)
   if (!ctx) throw new Error('useHostPermission must be used within HostPermissionsProvider')
+
+  let url = ''
+  if (Array.isArray(uri) && uri.length > 0) {
+    url = uri[0]
+  } else if (typeof uri === 'string') {
+    url = uri
+  }
 
   if (url && isUrl(url)) {
     const u = new URL(url)

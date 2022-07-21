@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { useHostPermission } from '../components/HostPermissions'
 import { parseMetadataUrl } from './parseMetadataUrl'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 
@@ -15,8 +16,7 @@ export function useMetadata<T extends Record<any, any>>(
   schema?: Schema
 ): { data: T } {
   const dataRef = useRef<T | Record<any, any>>({})
-  // this doesn't work yet
-  // const { allowed } = useHostPermission(uri)
+  const { allowed } = useHostPermission(uri)
   let url: string | string[] = ''
   if (!uri) {
     url = ''
@@ -27,7 +27,7 @@ export function useMetadata<T extends Record<any, any>>(
   }
   const [result] = useCentrifugeQuery(['metadata', url], (cent) => cent.metadata.getMetadata(url), {
     suspense: true,
-    enabled: !!url || url.length > 0,
+    enabled: !!url || url.length > 0 || !allowed,
   })
 
   if (!schema) {
