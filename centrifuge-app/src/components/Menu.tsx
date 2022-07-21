@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Box, IconInvestments, IconNft, IconUser, Shelf } from '@centrifuge/fabric'
+import { Box, IconInvestments, IconNft, IconUser, Shelf, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { useLocation } from 'react-router'
 import { Link } from 'react-router-dom'
@@ -9,7 +9,6 @@ import { usePermissions } from '../utils/usePermissions'
 import { usePoolMetadata, usePools } from '../utils/usePools'
 import { NavigationItem } from './NavigationItem'
 import { RouterLinkButton } from './RouterLinkButton'
-import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {}
 
@@ -73,12 +72,7 @@ export const Menu: React.FC<Props> = () => {
 }
 
 const PoolNavigationItem: React.FC<{ pool: Pool }> = ({ pool }) => {
-  const { data: metadata, isLoading } = usePoolMetadata(pool)
+  const { data: metadata } = usePoolMetadata(pool)
 
-  return (
-    <NavigationItem
-      label={<TextWithPlaceholder isLoading={isLoading}>{metadata?.pool?.name ?? pool.id}</TextWithPlaceholder>}
-      href={`/issuer/${pool.id}`}
-    />
-  )
+  return <NavigationItem label={<Text>{metadata?.pool?.name ?? pool.id}</Text>} href={`/issuer/${pool.id}`} />
 }

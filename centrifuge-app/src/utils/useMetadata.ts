@@ -1,4 +1,4 @@
-import React from 'react'
+import { useRef } from 'react'
 import { parseMetadataUrl } from './parseMetadataUrl'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 
@@ -10,56 +10,43 @@ type Schema = {
   }
 }
 
-type Optional<T, S extends boolean | undefined> = S extends true ? T | undefined : T
-
-type Result<T extends Schema> = {
-  [P in keyof T]: Optional<T[P]['type'] extends 'string' ? string : number, T[P]['optional']>
-}
-
-export function useMetadata<T extends Schema>(
+export function useMetadata<T extends Record<any, any>>(
   uri: string | string[] | undefined,
-  schema?: T
-): { data: Partial<Result<T>>; isLoading: boolean } {
-  const [isLoading, setIsLoading] = React.useState(false)
+  schema?: Schema
+): { data: T } {
+  const dataRef = useRef<T | Record<any, any>>({})
   // this doesn't work yet
   // const { allowed } = useHostPermission(uri)
   let url: string | string[] = ''
   if (!uri) {
-    uri = ''
+    url = ''
   } else if (typeof uri === 'string') {
     url = parseMetadataUrl(uri) as string
   } else {
     url = uri.map((u) => parseMetadataUrl(u))
   }
-  const [query] = useCentrifugeQuery(['metadata', url], (cent) => cent.metadata.getMetadata(url), {
+  const [result] = useCentrifugeQuery(['metadata', url], (cent) => cent.metadata.getMetadata(url), {
     suspense: true,
     enabled: !!url || url.length > 0,
   })
 
-  React.useEffect(() => {
-    if (query) {
-      setIsLoading(false)
-    } else {
-      setIsLoading(true)
+  if (!schema) {
+    return { data: result }
+  }
+
+  const resultSchema: any = {}
+  if (schema && result && dataRef) {
+    for (const key in schema) {
+      const { maxLength, optional, type } = schema[key]
+      let value = result[key]
+      if (!value) {
+        if (optional) continue
+        continue
+      }
+      if (typeof value !== type) continue
+      if (maxLength) value = value.slice(0, maxLength)
+      resultSchema[key] = value
     }
-  }, [query])
-
-  // if (!schema) return { data: query }
-
-  // const result: any = {}
-
-  // for (const key in schema) {
-  //   const { maxLength, optional, type } = schema[key]
-  //   // @ts-expect-error
-  //   let value = query[key]
-  //   if (!value) {
-  //     if (optional) continue
-
-  //   }
-  //   if (typeof value !== type) return null
-  //   if (maxLength) value = value.slice(0, maxLength)
-  //   result[key] = value
-  // }
-
-  return { data: query, isLoading }
+  }
+  return { data: resultSchema || result }
 }

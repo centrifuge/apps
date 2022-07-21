@@ -19,7 +19,6 @@ import { DataTable } from '../../../components/DataTable'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { TextWithPlaceholder } from '../../../components/TextWithPlaceholder'
 import { useAddress } from '../../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePermissions } from '../../../utils/usePermissions'
@@ -66,7 +65,7 @@ export const Investors: React.FC = () => {
     .map(([tid]) => tid)
 
   const pool = usePool(poolId)
-  const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
+  const { data: metadata } = usePoolMetadata(pool)
 
   function toggleAllowed(trancheId: string) {
     if (!validAddress) return
@@ -126,9 +125,9 @@ export const Investors: React.FC = () => {
                 align: 'left',
                 header: 'Token',
                 cell: (row: Tranche) => (
-                  <TextWithPlaceholder isLoading={metadataIsLoading} textOverflow="ellipsis" variant="body2">
+                  <Text textOverflow="ellipsis" variant="body2">
                     {metadata?.tranches?.[row.id]?.name}
-                  </TextWithPlaceholder>
+                  </Text>
                 ),
                 flex: '1',
               },
@@ -170,5 +169,5 @@ const InvestedCell: React.FC<{ address: string; trancheId: string }> = ({ tranch
   const order = useOrder(trancheId, address)
   const hasInvested = order && (order?.epoch > 0 || !order.invest.isZero())
 
-  return <TextWithPlaceholder variant="body2">{hasInvested && 'Invested'}</TextWithPlaceholder>
+  return <Text variant="body2">{hasInvested && 'Invested'}</Text>
 }

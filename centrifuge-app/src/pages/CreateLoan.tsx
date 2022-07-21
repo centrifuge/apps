@@ -46,7 +46,6 @@ const CreateLoan: React.FC = () => {
   const { data } = useMetadata(urls)
 
   const poolSelectOptions = allowedPools.map((pool, i) => ({
-    // @ts-expect-error
     label: truncate(data?.[i]?.pool?.name || pool.id, 30),
     value: pool.id,
   }))

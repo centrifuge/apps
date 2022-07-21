@@ -25,7 +25,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
     'Price asset',
     (cent) => cent.pools.priceLoan as any
   )
-  const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
+  const { data: metadata } = usePoolMetadata(pool)
 
   const riskGroupOptions =
     metadata?.riskGroups?.map((r, i) => ({
@@ -184,7 +184,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
                     value={field.value}
                     options={riskGroupOptions}
                     placeholder=""
-                    disabled={metadataIsLoading}
+                    disabled={!!metadata}
                   />
                 )}
               </Field>

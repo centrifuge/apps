@@ -10,7 +10,6 @@ import { useNFT } from '../utils/useNFTs'
 import { usePool } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import LoanLabel, { getLoanLabelStatus } from './LoanLabel'
-import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Row = Loan & {
   idSortKey: number
@@ -99,19 +98,19 @@ export const LoanList: React.FC<Props> = ({ loans }) => {
 
 const AssetName: React.VFC<{ loan: Row }> = ({ loan }) => {
   const nft = useNFT(loan.asset.collectionId, loan.asset.nftId)
-  const { data: metadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
+  const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
+  console.log('🚀 ~ metadata', metadata)
   return (
     <Shelf gap="1" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
       <Thumbnail type="asset" label={loan.id} />
-      <TextWithPlaceholder
-        isLoading={isLoading}
+      <Text
         width={12}
         variant="body2"
         fontWeight={600}
         style={{ overflow: 'hidden', maxWidth: '300px', textOverflow: 'ellipsis' }}
       >
         {metadata?.name}
-      </TextWithPlaceholder>
+      </Text>
     </Shelf>
   )
 }

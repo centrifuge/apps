@@ -19,10 +19,10 @@ export function useStoredIssuer() {
     return allPools.filter(({ id, metadata }) => permissions?.pools[id]?.roles.includes('PoolAdmin') && metadata)
   }, [allPools, permissions])
 
-  const { data, isLoading } = usePoolMetadata(pools[0])
+  const { data } = usePoolMetadata(pools[0])
 
   return {
     data: data?.pool?.issuer,
-    isLoading: isLoading || !permissions,
+    isLoading: !permissions,
   }
 }

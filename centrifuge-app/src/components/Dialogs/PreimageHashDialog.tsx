@@ -1,6 +1,5 @@
 import { Box, Dialog, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import styled from 'styled-components'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 
 export const PreimageHashDialog: React.FC<{
@@ -30,8 +29,3 @@ export const PreimageHashDialog: React.FC<{
     </Dialog>
   )
 }
-
-const UnstyledLink = styled.a`
-  color: inherit;
-  underline: none;
-`

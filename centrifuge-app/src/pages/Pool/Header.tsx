@@ -5,7 +5,6 @@ import { useTheme } from 'styled-components'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
-import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
@@ -17,15 +16,13 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
   const { pid } = useParams<{ pid: string }>()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
   const pool = usePool(pid)
-  const { data: metadata, isLoading } = usePoolMetadata(pool)
+  const { data: metadata } = usePoolMetadata(pool)
   const theme = useTheme()
 
   return (
     <PageHeader
-      title={<TextWithPlaceholder isLoading={isLoading}>{metadata?.pool?.name ?? 'Unnamed pool'}</TextWithPlaceholder>}
-      subtitle={
-        <TextWithPlaceholder isLoading={isLoading}>by {metadata?.pool?.issuer.name ?? 'Unknown'}</TextWithPlaceholder>
-      }
+      title={<Text>{metadata?.pool?.name ?? 'Unnamed pool'}</Text>}
+      subtitle={<Text>by {metadata?.pool?.issuer.name ?? 'Unknown'}</Text>}
       parent={{ to: '/investments', label: 'Pools' }}
       icon={
         metadata?.pool?.icon ? (
@@ -35,10 +32,10 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
             width="iconLarge"
             height="iconLarge"
             borderRadius="card"
-            backgroundColor={isLoading ? 'borderSecondary' : 'backgroundThumbnail'}
+            backgroundColor="backgroundThumbnail"
             justifyContent="center"
           >
-            <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>
+            <Text variant="body1">{(metadata?.pool?.name ?? 'U')[0]}</Text>
           </Shelf>
         )
       }

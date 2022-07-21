@@ -21,10 +21,7 @@ export const CollectionCard: React.FC<Props> = ({ collection }) => {
 
   useVisibilityChecker({ ref, onEnterOnce: () => setVisible(true), marginTop: 200 })
 
-  const { data: metadata, isLoading } = useMetadata(
-    visible ? collection.metadataUri : undefined,
-    collectionMetadataSchema
-  )
+  const { data: metadata } = useMetadata(visible ? collection.metadataUri : undefined, collectionMetadataSchema)
   const { id, admin, items } = collection
 
   return (
@@ -40,7 +37,6 @@ export const CollectionCard: React.FC<Props> = ({ collection }) => {
       description={metadata?.description}
       image={metadata?.image}
       count={items}
-      isLoading={isLoading}
       ref={ref}
     />
   )

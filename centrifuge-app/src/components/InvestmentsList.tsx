@@ -50,13 +50,13 @@ export const InvestmentsList: React.FC<Props> = ({ investments }) => {
 
 const Token: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
-  const { data: metadata, isLoading } = usePoolMetadata(pool)
+  const { data: metadata } = usePoolMetadata(pool)
   const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
   return (
     <Shelf gap="2">
       <Thumbnail label={trancheMeta?.symbol || ''} size="small" />
-      <TextWithPlaceholder isLoading={isLoading} variant="body2" color="textPrimary" fontWeight={600}>
+      <TextWithPlaceholder variant="body2" color="textPrimary" fontWeight={600}>
         {metadata?.pool?.name} {trancheMeta?.name}
       </TextWithPlaceholder>
     </Shelf>

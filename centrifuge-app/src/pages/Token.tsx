@@ -7,7 +7,6 @@ import { PageSection } from '../components/PageSection'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolCard } from '../components/PoolCard'
-import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { Tooltips } from '../components/Tooltips'
 import { formatBalance, formatPercentage } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
@@ -24,7 +23,7 @@ export const TokenDetailPage: React.FC = () => {
 const TokenDetail: React.FC = () => {
   const { pid: poolId, tid: trancheId } = useParams<{ pid: string; tid: string }>()
   const pool = usePool(poolId)
-  const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
+  const { data: metadata } = usePoolMetadata(pool)
   const tranche = pool?.tranches.find((t) => t.id === trancheId)
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
 
@@ -74,9 +73,9 @@ const TokenDetail: React.FC = () => {
       <PageHeader
         subtitle="Token"
         title={
-          <TextWithPlaceholder isLoading={isMetadataLoading}>
+          <Text>
             {metadata?.pool?.name} {trancheMeta?.name}
-          </TextWithPlaceholder>
+          </Text>
         }
         icon={<Thumbnail size="large" label={trancheMeta?.symbol || ''} />}
         parent={{ to: `/investments/tokens`, label: 'Tokens' }}
