@@ -3,7 +3,7 @@ import { fromFetch } from 'rxjs/fetch'
 import { switchMap } from 'rxjs/operators'
 
 export function getMetadataModule() {
-  function getMetadataObervable(url: string | string[]) {
+  function getFetchObervable(url: string | string[]) {
     if (typeof url === 'string') {
       const $ = fromFetch(url).pipe(
         switchMap((res) => {
@@ -34,10 +34,10 @@ export function getMetadataModule() {
   }
 
   function getMetadata<T = any>(url: string | string[]): Observable<T | T[] | null> {
-    const $query = getMetadataObervable(url)
+    const $query = getFetchObervable(url)
     return combineLatest([$query]).pipe(
       map(([res]) => {
-        return res as any
+        return res as T
       })
     )
   }

@@ -133,7 +133,7 @@ const Loan: React.FC = () => {
         <PageSection title="NFT">
           <InteractiveCard
             icon={<Thumbnail label="nft" type="nft" />}
-            title={<textarea>{nftMetadata?.name}</textarea>}
+            title={<Text>{nftMetadata?.name}</Text>}
             variant="button"
             onClick={() => history.push(`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`)}
             secondaryHeader={
@@ -167,7 +167,7 @@ const Loan: React.FC = () => {
                 <LabelValueStack
                   label="Description"
                   value={
-                    <Text words={2} width={80} variance={30} variant="body2" style={{ wordBreak: 'break-word' }}>
+                    <Text variant="body2" style={{ wordBreak: 'break-word' }}>
                       {nftMetadata?.description || 'No description'}
                     </Text>
                   }

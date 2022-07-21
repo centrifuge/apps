@@ -185,7 +185,7 @@ const NFT: React.FC = () => {
               <>
                 <Stack gap={1}>
                   <Text variant="label1">Description</Text>
-                  <Text words={2} width={80} variance={30} variant="body2" style={{ wordBreak: 'break-word' }}>
+                  <Text variant="body2" style={{ wordBreak: 'break-word' }}>
                     {nftMetadata?.description || 'No description'}
                   </Text>
                 </Stack>

@@ -99,7 +99,6 @@ export const LoanList: React.FC<Props> = ({ loans }) => {
 const AssetName: React.VFC<{ loan: Row }> = ({ loan }) => {
   const nft = useNFT(loan.asset.collectionId, loan.asset.nftId)
   const { data: metadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
-  console.log('🚀 ~ metadata', metadata)
   return (
     <Shelf gap="1" style={{ whiteSpace: 'nowrap', maxWidth: '100%' }}>
       <Thumbnail type="asset" label={loan.id} />
