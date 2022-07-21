@@ -6,9 +6,10 @@ import { useCentrifuge } from '../components/CentrifugeProvider'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
+import { PoolMetadata } from '../types'
 import { useAddress } from '../utils/useAddress'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
-import { useMetadata } from '../utils/useMetadata'
+import { useMetadataMulti } from '../utils/useMetadata'
 import { usePermissions } from '../utils/usePermissions'
 import { usePools } from '../utils/usePools'
 
@@ -42,11 +43,10 @@ const CreateLoan: React.FC = () => {
 
   const allowedPools = pools ? pools.filter((p) => poolIds.includes(p.id)) : []
 
-  const urls = allowedPools.map((p) => p.metadata || '').filter(Boolean)
-  const { data } = useMetadata(urls)
+  const poolMetadata = useMetadataMulti(allowedPools.map((pool) => pool.metadata))
 
   const poolSelectOptions = allowedPools.map((pool, i) => ({
-    label: truncate(data?.[i]?.pool?.name || pool.id, 30),
+    label: truncate((poolMetadata[i].data as PoolMetadata)?.pool?.name || pool.id, 30),
     value: pool.id,
   }))
 
