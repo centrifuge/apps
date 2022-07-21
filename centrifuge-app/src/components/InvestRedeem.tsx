@@ -435,7 +435,9 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = Dec(values.amount).div(price).mul('1e18').toFixed(0)
+      const amount = (values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price))
+        .mul('1e18')
+        .toFixed(0)
       doRedeemTransaction([poolId, trancheId, new BN(amount)])
       actions.setSubmitting(false)
     },
@@ -462,10 +464,11 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
           {({ field, meta }: FieldProps) => (
             <CurrencyInput
               {...field}
+              value={field.value instanceof Decimal ? field.value.mul(price).toNumber() : field.value}
               errorMessage={meta.touched ? meta.error : undefined}
               label="Amount"
               disabled={isLoading || isLoadingCancel}
-              onSetMax={() => form.setFieldValue('amount', maxRedeem)}
+              onSetMax={() => form.setFieldValue('amount', combinedBalance)}
               onChange={(value) => form.setFieldValue('amount', value)}
               currency={getCurrencySymbol(pool?.currency)}
               secondaryLabel={`${formatBalance(roundDown(maxRedeem), pool?.currency, 2)} available`}
