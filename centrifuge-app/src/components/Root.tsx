@@ -20,7 +20,6 @@ import { TokenOverviewPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { GlobalStyle } from './GlobalStyle'
-import { HostPermissionsProvider } from './HostPermissions'
 import { LoadBoundary } from './LoadBoundary'
 import { TransactionProvider } from './TransactionsProvider'
 import { TransactionToasts } from './TransactionToasts'
@@ -50,22 +49,20 @@ export const Root: React.VFC = () => {
       >
         <GlobalStyle />
         <FabricGlobalStyle />
-        <HostPermissionsProvider>
-          <CentrifugeProvider>
-            <Web3Provider>
-              <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
-                <TransactionProvider>
-                  <TransactionToasts />
-                  <Router>
-                    <LoadBoundary>
-                      <Routes />
-                    </LoadBoundary>
-                  </Router>
-                </TransactionProvider>
-              </DebugFlags>
-            </Web3Provider>
-          </CentrifugeProvider>
-        </HostPermissionsProvider>
+        <CentrifugeProvider>
+          <Web3Provider>
+            <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
+              <TransactionProvider>
+                <TransactionToasts />
+                <Router>
+                  <LoadBoundary>
+                    <Routes />
+                  </LoadBoundary>
+                </Router>
+              </TransactionProvider>
+            </DebugFlags>
+          </Web3Provider>
+        </CentrifugeProvider>
       </FabricProvider>
     </QueryClientProvider>
   )
