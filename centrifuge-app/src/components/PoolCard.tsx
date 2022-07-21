@@ -5,8 +5,8 @@ import { useHistory, useRouteMatch } from 'react-router'
 import { PoolMetadata } from '../types'
 import { getAge } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
-import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useAverageMaturity } from '../utils/useAverageMaturity'
+import { useCentrifuge } from './CentrifugeProvider'
 import { IssuerSection } from './IssuerSection'
 import { LabelValueStack } from './LabelValueStack'
 import { Tooltips } from './Tooltips'
@@ -18,6 +18,7 @@ type PoolCardProps = {
 
 export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
   const avgMaturity = useAverageMaturity(pool.id)
+  const cent = useCentrifuge()
   const history = useHistory()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
@@ -25,7 +26,7 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
     <InteractiveCard
       icon={
         metadata?.pool?.icon ? (
-          <img src={parseMetadataUrl(metadata?.pool?.icon || '')} alt="" height="24" width="24" />
+          <img src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon || '')} alt="" height="24" width="24" />
         ) : (
           <Thumbnail type="pool" label="LP" size="small" />
         )
