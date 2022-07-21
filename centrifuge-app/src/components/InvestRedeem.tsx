@@ -435,10 +435,9 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = (values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price))
-        .mul('1e18')
-        .toFixed(0)
-      doRedeemTransaction([poolId, trancheId, new BN(amount)])
+      const amount =
+        values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price).mul(1e18).toFixed(0)
+      doRedeemTransaction([poolId, trancheId, Balance.fromFloat(amount)])
       actions.setSubmitting(false)
     },
     validate: (values) => {
@@ -513,7 +512,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
           <PendingOrder
             type="redeem"
             pool={pool!}
-            amount={pendingRedeem}
+            amount={pendingRedeem.mul(price)}
             onCancelOrder={() => doCancel([poolId, trancheId, new BN(0)])}
             isCancelling={isLoadingCancel}
             onChangeOrder={() => {
