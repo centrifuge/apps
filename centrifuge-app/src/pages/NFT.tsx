@@ -12,6 +12,7 @@ import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
+import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { nftMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useAddress } from '../utils/useAddress'
@@ -34,7 +35,7 @@ const NFT: React.FC = () => {
   const address = useAddress()
   const permissions = usePermissions(address)
   const nft = useNFT(collectionId, nftId)
-  const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
+  const { data: nftMetadata, isLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collection?.id)
   const [transferOpen, setTransferOpen] = React.useState(false)
@@ -54,7 +55,7 @@ const NFT: React.FC = () => {
       <Box>
         <PageHeader
           parent={{ label: collectionMetadata?.name ?? 'Collection', to: `/nfts/collection/${collectionId}` }}
-          title={<Text>{nftMetadata?.name ?? 'Unnamed NFT'}</Text>}
+          title={<TextWithPlaceholder isLoading={isLoading}>{nftMetadata?.name ?? 'Unnamed NFT'}</TextWithPlaceholder>}
           subtitle={
             collection && (
               <>
@@ -185,9 +186,16 @@ const NFT: React.FC = () => {
               <>
                 <Stack gap={1}>
                   <Text variant="label1">Description</Text>
-                  <Text variant="body2" style={{ wordBreak: 'break-word' }}>
+                  <TextWithPlaceholder
+                    isLoading={isLoading}
+                    words={2}
+                    width={80}
+                    variance={30}
+                    variant="body2"
+                    style={{ wordBreak: 'break-word' }}
+                  >
                     {nftMetadata?.description || 'No description'}
-                  </Text>
+                  </TextWithPlaceholder>
                 </Stack>
 
                 {imageUrl && (

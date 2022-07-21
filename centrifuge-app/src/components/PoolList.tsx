@@ -7,6 +7,7 @@ import { formatBalance } from '../utils/formatting'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
+import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   pools: Pool[]
@@ -41,7 +42,7 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
 }
 
 const PoolName: React.VFC<{ pool: Pool }> = ({ pool }) => {
-  const { data } = usePoolMetadata(pool)
+  const { data, isLoading } = usePoolMetadata(pool)
   return (
     <Shelf alignItems="center" gap={1}>
       {data?.pool?.icon ? (
@@ -59,9 +60,9 @@ const PoolName: React.VFC<{ pool: Pool }> = ({ pool }) => {
           size="small"
         />
       )}
-      <Text variant="body2" fontWeight={600} textOverflow="ellipsis">
+      <TextWithPlaceholder isLoading={isLoading} variant="body2" fontWeight={600} textOverflow="ellipsis">
         {data?.pool?.name ?? 'Unnamed Pool'}
-      </Text>
+      </TextWithPlaceholder>
     </Shelf>
   )
 }
@@ -71,6 +72,10 @@ const StyledLogo = styled.img`
 `
 
 const AssetClass: React.VFC<{ pool: Pool }> = ({ pool }) => {
-  const { data } = usePoolMetadata(pool)
-  return <Text variant="body2">{data?.pool?.asset?.class ?? 'n/a'}</Text>
+  const { data, isLoading } = usePoolMetadata(pool)
+  return (
+    <TextWithPlaceholder isLoading={isLoading} variant="body2">
+      {data?.pool?.asset?.class ?? 'n/a'}
+    </TextWithPlaceholder>
+  )
 }

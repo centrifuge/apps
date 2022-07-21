@@ -10,6 +10,7 @@ import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
+import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { collectionMetadataSchema } from '../schemas'
 import { parseMetadataUrl } from '../utils/parseMetadataUrl'
@@ -36,7 +37,7 @@ const Collection: React.FC = () => {
   const address = useAddress()
   const collection = useCollection(collectionId)
   const nfts = useNFTs(collectionId)
-  const { data: metadata } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
+  const { data: metadata, isLoading } = useMetadata(collection?.metadataUri, collectionMetadataSchema)
   const [shownCount, setShownCount] = React.useState(COUNT_PER_PAGE)
   const centrifuge = useCentrifuge()
 
@@ -91,9 +92,15 @@ const Collection: React.FC = () => {
           </Shelf>
         )}
         <Stack alignItems="center" gap="4px">
-          <Text variant="heading1" fontSize="36px" textAlign="center" style={{ wordBreak: 'break-word' }}>
+          <TextWithPlaceholder
+            isLoading={isLoading}
+            variant="heading1"
+            fontSize="36px"
+            textAlign="center"
+            style={{ wordBreak: 'break-word' }}
+          >
             {metadata?.name || 'Unnamed collection'}
-          </Text>
+          </TextWithPlaceholder>
           <Shelf gap={1} alignItems="baseline" flexWrap="wrap">
             <Box mx="auto">
               <Text variant="body2">by</Text>
@@ -108,7 +115,8 @@ const Collection: React.FC = () => {
         </Stack>
 
         <Box maxWidth="680px">
-          <Text
+          <TextWithPlaceholder
+            isLoading={isLoading}
             width={100}
             words={1}
             variant="body1"
@@ -122,7 +130,7 @@ const Collection: React.FC = () => {
             }}
           >
             {metadata?.description || ''}
-          </Text>
+          </TextWithPlaceholder>
         </Box>
       </Stack>
       {nfts?.length ? (

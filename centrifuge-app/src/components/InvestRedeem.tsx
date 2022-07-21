@@ -91,7 +91,7 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
   const balances = useBalances(address)
   const pool = usePool(poolId)
   const order = usePendingCollect(poolId, trancheId, address)
-  const { data: metadata } = usePoolMetadata(pool)
+  const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
 
   const isDataLoading = balances == null || order == null || permissions == null
 
@@ -126,9 +126,9 @@ const InvestRedeemInner: React.VFC<Props> = ({ poolId, trancheId }) => {
         </Shelf>
         <Shelf justifyContent="space-between">
           <Text variant="label1">Token balance</Text>
-          <Text variant="label1" width={12}>
+          <TextWithPlaceholder variant="label1" isLoading={isDataLoading || isMetadataLoading} width={12} variance={0}>
             {formatBalance(combinedBalance, trancheMeta?.symbol)}
-          </Text>
+          </TextWithPlaceholder>
         </Shelf>
       </Stack>
       {isDataLoading ? (
@@ -191,7 +191,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
   const balance = balances && pool ? getBalanceDec(balances, pool.currency) : Dec(0)
   const nativeBalance = balances && pool ? getBalanceDec(balances, 'native') : Dec(0)
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
-  const { data: metadata } = usePoolMetadata(pool)
+  const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
   const isFirstInvestment = order?.epoch === 0 && order.investCurrency.isZero()
   const minInvest = trancheMeta?.minInitialInvestment
@@ -310,9 +310,9 @@ const InvestForm: React.VFC<InvestFormProps> = ({ poolId, trancheId, onCancel, h
           <Stack px={2} gap="4px">
             <Shelf justifyContent="space-between">
               <Text variant="body3">Token amount</Text>
-              <Text variant="body3" width={12}>
+              <TextWithPlaceholder variant="body3" isLoading={isMetadataLoading} width={12} variance={0}>
                 {!price.isZero() && `~${formatBalance(Dec(form.values.amount).div(price), trancheMeta?.symbol)}`}
-              </Text>
+              </TextWithPlaceholder>
             </Shelf>
 
             {!hasInvestment && (
@@ -378,7 +378,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
   const balances = useBalances(address)
   const order = usePendingCollect(poolId, trancheId, address)
   const pool = usePool(poolId)
-  const { data: metadata } = usePoolMetadata(pool)
+  const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
 
   const tranche = pool?.tranches.find((t) => t.id === trancheId)
@@ -479,9 +479,9 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
           <Stack px={2} gap="4px">
             <Shelf justifyContent="space-between">
               <Text variant="body3">Token amount</Text>
-              <Text variant="body3" width={12}>
+              <TextWithPlaceholder variant="body3" isLoading={isMetadataLoading} width={12} variance={0}>
                 {!price.isZero() && `~${formatBalance(Dec(form.values.amount).div(price), tokenSymbol)}`}
-              </Text>
+              </TextWithPlaceholder>
             </Shelf>
           </Stack>
         ) : null}

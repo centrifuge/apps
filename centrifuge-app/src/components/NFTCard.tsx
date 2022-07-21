@@ -21,12 +21,15 @@ export const NFTCard: React.FC<Props> = ({ nft }) => {
 
   useVisibilityChecker({ ref, onEnterOnce: () => setVisible(true), marginTop: 200 })
 
-  const { data: metadata } = useMetadata(visible ? nft.metadataUri : undefined, nftMetadataSchema)
+  const { data: metadata, isLoading: metadataIsLoading } = useMetadata(
+    visible ? nft.metadataUri : undefined,
+    nftMetadataSchema
+  )
   const collection = useCollection(nft.collectionId)
   const centrifuge = useCentrifuge()
   const [imageShown, setImageShown] = React.useState(false)
 
-  const isLoading = !visible
+  const isLoading = !visible || metadataIsLoading
 
   return (
     <Card

@@ -9,6 +9,7 @@ import { PageSection } from '../../components/PageSection'
 import { PageSummary } from '../../components/PageSummary'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { AnchorPillButton } from '../../components/PillButton'
+import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
 import { nftMetadataSchema } from '../../schemas'
@@ -50,13 +51,14 @@ const Loan: React.FC = () => {
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
   const pool = usePool(poolId)
   const loan = useLoan(poolId, assetId)
-  const { data: poolMetadata } = usePoolMetadata(pool)
+  const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const nft = useNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
-  const { data: nftMetadata } = useMetadata(nft?.metadataUri, nftMetadataSchema)
+  const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
   const address = useAddress()
   const permissions = usePermissions(address)
   const history = useHistory()
   const { current: availableFinancing } = useAvailableFinancing(poolId, assetId)
+  const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
 
   const canPrice = permissions?.pools[poolId]?.roles.includes('PricingAdmin')
 
@@ -69,13 +71,13 @@ const Loan: React.FC = () => {
     <Stack>
       <PageHeader
         icon={<Thumbnail type="asset" label={loan?.id ?? ''} size="large" />}
-        title={<Text>{name}</Text>}
+        title={<TextWithPlaceholder isLoading={metadataIsLoading}>{name}</TextWithPlaceholder>}
         titleAddition={loan && <LoanLabel loan={loan} />}
         parent={{ to: `${basePath}/${poolId}/assets`, label: poolMetadata?.pool?.name ?? 'Pool assets' }}
         subtitle={
-          <Text>
+          <TextWithPlaceholder isLoading={metadataIsLoading}>
             {poolMetadata?.pool?.asset.class} asset by {nft?.owner && <Identity clickToCopy address={nft?.owner} />}
-          </Text>
+          </TextWithPlaceholder>
         }
       />
       {loan &&
@@ -91,11 +93,11 @@ const Loan: React.FC = () => {
                 {
                   label: <Tooltips type="riskGroup" />,
                   value: (
-                    <Text>
+                    <TextWithPlaceholder isLoading={metadataIsLoading}>
                       {riskGroupIndex != null && riskGroupIndex > -1
                         ? poolMetadata?.riskGroups?.[riskGroupIndex]?.name || `Risk group ${riskGroupIndex + 1}`
                         : 'n/a'}
-                    </Text>
+                    </TextWithPlaceholder>
                   ),
                 },
                 {
@@ -133,7 +135,7 @@ const Loan: React.FC = () => {
         <PageSection title="NFT">
           <InteractiveCard
             icon={<Thumbnail label="nft" type="nft" />}
-            title={<Text>{nftMetadata?.name}</Text>}
+            title={<TextWithPlaceholder isLoading={nftMetadataIsLoading}>{nftMetadata?.name}</TextWithPlaceholder>}
             variant="button"
             onClick={() => history.push(`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`)}
             secondaryHeader={
@@ -167,9 +169,16 @@ const Loan: React.FC = () => {
                 <LabelValueStack
                   label="Description"
                   value={
-                    <Text variant="body2" style={{ wordBreak: 'break-word' }}>
+                    <TextWithPlaceholder
+                      isLoading={nftMetadataIsLoading}
+                      words={2}
+                      width={80}
+                      variance={30}
+                      variant="body2"
+                      style={{ wordBreak: 'break-word' }}
+                    >
                       {nftMetadata?.description || 'No description'}
-                    </Text>
+                    </TextWithPlaceholder>
                   }
                 />
 

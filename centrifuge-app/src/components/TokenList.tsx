@@ -4,6 +4,7 @@ import { useRouteMatch } from 'react-router'
 import { formatBalance, formatPercentage } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
+import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 export type TokenTableData = {
   poolMetadata?: string
@@ -81,20 +82,30 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
 }
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
-  const { data: metadata } = usePoolMetadata({ metadata: token.poolMetadata })
+  const { data: metadata, isLoading } = usePoolMetadata({ metadata: token.poolMetadata })
   const trancheMeta = metadata?.tranches?.[token.id]
   const symbol = trancheMeta?.symbol
   return (
     <Shelf gap="2" overflow="hidden">
       <Thumbnail label={symbol || ''} size="small" />
-      <Text variant="body2" color="textPrimary" fontWeight={600} textOverflow="ellipsis">
+      <TextWithPlaceholder
+        isLoading={isLoading}
+        variant="body2"
+        color="textPrimary"
+        fontWeight={600}
+        textOverflow="ellipsis"
+      >
         {metadata?.pool?.name} {trancheMeta?.name}
-      </Text>
+      </TextWithPlaceholder>
     </Shelf>
   )
 }
 
 const AssetClass: React.VFC<RowProps> = ({ token }) => {
-  const { data: metadata } = usePoolMetadata({ metadata: token.poolMetadata })
-  return <Text variant="body2">{metadata?.pool?.asset.class}</Text>
+  const { data: metadata, isLoading } = usePoolMetadata({ metadata: token.poolMetadata })
+  return (
+    <TextWithPlaceholder isLoading={isLoading} variant="body2">
+      {metadata?.pool?.asset.class}
+    </TextWithPlaceholder>
+  )
 }

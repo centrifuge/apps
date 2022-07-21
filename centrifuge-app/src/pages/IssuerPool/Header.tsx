@@ -5,6 +5,7 @@ import { useTheme } from 'styled-components'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
+import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
 import { useAddress } from '../../utils/useAddress'
 import { usePermissions } from '../../utils/usePermissions'
@@ -17,7 +18,7 @@ type Props = {
 export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   const { pid } = useParams<{ pid: string }>()
   const pool = usePool(pid)
-  const { data: metadata } = usePoolMetadata(pool)
+  const { data: metadata, isLoading } = usePoolMetadata(pool)
   const theme = useTheme()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
@@ -33,8 +34,12 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   return (
     <>
       <PageHeader
-        title={<Text>{metadata?.pool?.name ?? 'Unnamed pool'}</Text>}
-        subtitle={<Text>by {metadata?.pool?.issuer.name ?? 'Unknown'}</Text>}
+        title={
+          <TextWithPlaceholder isLoading={isLoading}>{metadata?.pool?.name ?? 'Unnamed pool'}</TextWithPlaceholder>
+        }
+        subtitle={
+          <TextWithPlaceholder isLoading={isLoading}>by {metadata?.pool?.issuer.name ?? 'Unknown'}</TextWithPlaceholder>
+        }
         icon={
           metadata?.pool?.icon ? (
             <Box as="img" width="iconLarge" height="iconLarge" src={parseMetadataUrl(metadata?.pool?.icon)} />
@@ -43,10 +48,10 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
               width="iconLarge"
               height="iconLarge"
               borderRadius="card"
-              backgroundColor={'backgroundThumbnail'}
+              backgroundColor={isLoading ? 'borderSecondary' : 'backgroundThumbnail'}
               justifyContent="center"
             >
-              <Text variant="body1">{(metadata?.pool?.name ?? 'U')[0]}</Text>
+              <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>
             </Shelf>
           )
         }
