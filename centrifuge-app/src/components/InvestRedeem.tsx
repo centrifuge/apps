@@ -441,9 +441,10 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
     },
     validate: (values) => {
       const errors: FormikErrors<InvestValues> = {}
-      if (validateNumberInput(values.amount, 0, maxRedeem)) {
-        errors.amount = validateNumberInput(values.amount, 0, maxRedeem)
-      } else if (hasPendingOrder && inputToDecimal(values.amount).div(price).eq(pendingRedeem)) {
+      const amount = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price)
+      if (validateNumberInput(amount, 0, maxRedeem)) {
+        errors.amount = validateNumberInput(amount, 0, maxRedeem)
+      } else if (hasPendingOrder && amount.eq(pendingRedeem)) {
         errors.amount = 'Equals current order'
       }
 
@@ -462,6 +463,8 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
           {({ field, meta }: FieldProps) => (
             <CurrencyInput
               {...field}
+              // when the value is a decimal we assume the user clicked the max button
+              // it tracks the value in tokens and needs to be multiplied by price to get the value in pool currency
               value={field.value instanceof Decimal ? field.value.mul(price).toNumber() : field.value}
               errorMessage={meta.touched ? meta.error : undefined}
               label="Amount"
