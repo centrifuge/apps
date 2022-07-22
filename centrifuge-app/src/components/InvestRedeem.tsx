@@ -435,8 +435,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount =
-        values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price).mul(1e18).toFixed(0)
+      const amount = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price)
       doRedeemTransaction([poolId, trancheId, Balance.fromFloat(amount)])
       actions.setSubmitting(false)
     },
@@ -444,7 +443,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel })
       const errors: FormikErrors<InvestValues> = {}
       if (validateNumberInput(values.amount, 0, maxRedeem)) {
         errors.amount = validateNumberInput(values.amount, 0, maxRedeem)
-      } else if (hasPendingOrder && inputToDecimal(values.amount).eq(pendingRedeem)) {
+      } else if (hasPendingOrder && inputToDecimal(values.amount).div(price).eq(pendingRedeem)) {
         errors.amount = 'Equals current order'
       }
 
