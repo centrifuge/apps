@@ -240,7 +240,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
             </FormikProvider>
           ) : (
             <Button
-              variant="primary"
+              variant="secondary"
               loading={isCloseLoading}
               onClick={() => doCloseTransaction([loan.poolId, loan.id])}
             >

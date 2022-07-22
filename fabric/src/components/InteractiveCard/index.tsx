@@ -84,7 +84,7 @@ export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'v
           {secondaryHeader}
         </Box>
       )}
-      {(variant !== 'collabsible' || open) && (
+      {(variant !== 'collabsible' || open) && children && (
         <Box
           p={2}
           backgroundColor={variant === 'collabsible' ? 'backgroundSecondary' : undefined}
