@@ -40,7 +40,7 @@ export const Root: React.VFC = () => {
   return (
     <>
       <Helmet>
-        <title>{config.network === 'centrifuge' ? 'Centrifuge App' : 'Altair app'}</title>
+        <title>{config.network === 'centrifuge' ? 'Centrifuge App' : 'Altair App'}</title>
       </Helmet>
       <QueryClientProvider client={queryClient}>
         <FabricProvider
