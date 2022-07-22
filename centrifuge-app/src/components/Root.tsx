@@ -1,5 +1,6 @@
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
+import { Helmet } from 'react-helmet'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import { config } from '../config'
@@ -37,34 +38,39 @@ export const Root: React.VFC = () => {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <FabricProvider
-        theme={
-          !isThemeToggled
-            ? config.themes[config.defaultTheme]
-            : config.defaultTheme === 'dark'
-            ? config.themes.light
-            : config.themes.dark
-        }
-      >
-        <GlobalStyle />
-        <FabricGlobalStyle />
-        <CentrifugeProvider>
-          <Web3Provider>
-            <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
-              <TransactionProvider>
-                <TransactionToasts />
-                <Router>
-                  <LoadBoundary>
-                    <Routes />
-                  </LoadBoundary>
-                </Router>
-              </TransactionProvider>
-            </DebugFlags>
-          </Web3Provider>
-        </CentrifugeProvider>
-      </FabricProvider>
-    </QueryClientProvider>
+    <>
+      <Helmet>
+        <title>{config.network === 'centrifuge' ? 'Centrifuge App' : 'Altair App'}</title>
+      </Helmet>
+      <QueryClientProvider client={queryClient}>
+        <FabricProvider
+          theme={
+            !isThemeToggled
+              ? config.themes[config.defaultTheme]
+              : config.defaultTheme === 'dark'
+              ? config.themes.light
+              : config.themes.dark
+          }
+        >
+          <GlobalStyle />
+          <FabricGlobalStyle />
+          <CentrifugeProvider>
+            <Web3Provider>
+              <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
+                <TransactionProvider>
+                  <TransactionToasts />
+                  <Router>
+                    <LoadBoundary>
+                      <Routes />
+                    </LoadBoundary>
+                  </Router>
+                </TransactionProvider>
+              </DebugFlags>
+            </Web3Provider>
+          </CentrifugeProvider>
+        </FabricProvider>
+      </QueryClientProvider>
+    </>
   )
 }
 
