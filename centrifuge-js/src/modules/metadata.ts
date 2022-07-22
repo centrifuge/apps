@@ -10,6 +10,20 @@ export function getMetadataModule(inst: Centrifuge) {
     return inst.getMetadataObservable<T>(url)
   }
 
+  function pinMetadata(metadata: any): Observable<string> {
+    if (!inst.config.pinMetadata) {
+      console.error('pinMetadata must be set in config to use this feature')
+      return from([])
+    }
+    return from(
+      inst.config.pinMetadata({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(metadata),
+      })
+    )
+  }
+
   function parseMetadataUrl(url: string) {
     try {
       let newUrl
@@ -33,5 +47,5 @@ export function getMetadataModule(inst: Centrifuge) {
     }
   }
 
-  return { getMetadata, parseMetadataUrl }
+  return { getMetadata, parseMetadataUrl, pinMetadata }
 }

@@ -1,3 +1,4 @@
+import { CollectionMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
 import {
   Box,
   Button,
@@ -13,7 +14,6 @@ import {
 import React, { useEffect, useState } from 'react'
 import { Redirect } from 'react-router'
 import { collectionMetadataSchema } from '../../schemas'
-import { createCollectionMetadata } from '../../utils/createCollectionMetadata'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAsyncCallback } from '../../utils/useAsyncCallback'
 import { useBalance } from '../../utils/useBalance'
@@ -72,14 +72,14 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
       fileDataUri = await getFileDataURI(logo)
     }
 
-    const res = await createCollectionMetadata({
+    const metadataValues: CollectionMetadataInput = {
       name: nameValue,
       description: descriptionValue,
       fileName,
       fileDataUri,
-    })
+    }
 
-    doTransaction([collectionId, selectedAccount!.address, res.metadataURI])
+    doTransaction([collectionId, selectedAccount!.address, metadataValues])
   })
 
   // Only close if the modal is still showing the last created collection

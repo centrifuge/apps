@@ -1,3 +1,4 @@
+import { NFTMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
 import { Box, Button, Flex, NumberInput, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
 import React, { useReducer, useState } from 'react'
 import { useHistory, useParams } from 'react-router'
@@ -9,7 +10,6 @@ import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { nftMetadataSchema } from '../schemas'
-import { createNFTMetadata } from '../utils/createNFTMetadata'
 import { getFileDataURI } from '../utils/getFileDataURI'
 import { useAddress } from '../utils/useAddress'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
@@ -81,14 +81,15 @@ const MintNFT: React.FC = () => {
       return
     }
     const nftId = await cent.nfts.getAvailableNftId(collectionId)
-    const res = await createNFTMetadata({
+
+    const metadataValues: NFTMetadataInput = {
       name: nameValue,
       description: descriptionValue,
       fileDataUri,
       fileName,
-    })
+    }
 
-    doTransaction([collectionId, nftId, address!, res.metadataURI, nftAmount])
+    doTransaction([collectionId, nftId, address!, metadataValues, nftAmount])
   })
 
   function reset() {

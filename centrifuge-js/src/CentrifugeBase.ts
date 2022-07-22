@@ -39,6 +39,7 @@ export type Config = {
   centrifugeSubqueryUrl: string
   altairSubqueryUrl: string
   metadataHost: string
+  pinMetadata?: (values: any) => Promise<string> // returns either hash or uri
   signer?: Signer
   signingAddress?: AddressOrPair
   printExtrinsics?: boolean
