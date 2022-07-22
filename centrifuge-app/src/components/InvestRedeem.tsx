@@ -496,18 +496,16 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel, a
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = (values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price))
-        .mul('1e18')
-        .toFixed(0)
-      const amountWithPrice = Dec(amount).div(price).mul('1e18').toFixed(0)
-      doRedeemTransaction([poolId, trancheId, new BN(amountWithPrice)])
+      const amount = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price)
+      doRedeemTransaction([poolId, trancheId, Balance.fromFloat(amount)])
       actions.setSubmitting(false)
     },
     validate: (values) => {
       const errors: FormikErrors<InvestValues> = {}
-      if (validateNumberInput(values.amount, 0, maxRedeem)) {
-        errors.amount = validateNumberInput(values.amount, 0, maxRedeem)
-      } else if (hasPendingOrder && inputToDecimal(values.amount).eq(pendingRedeem)) {
+      const amount = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price)
+      if (validateNumberInput(amount, 0, maxRedeem)) {
+        errors.amount = validateNumberInput(amount, 0, maxRedeem)
+      } else if (hasPendingOrder && amount.eq(pendingRedeem)) {
         errors.amount = 'Equals current order'
       }
 
@@ -526,10 +524,13 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel, a
           {({ field, meta }: FieldProps) => (
             <CurrencyInput
               {...field}
+              // when the value is a decimal we assume the user clicked the max button
+              // it tracks the value in tokens and needs to be multiplied by price to get the value in pool currency
+              value={field.value instanceof Decimal ? field.value.mul(price).toNumber() : field.value}
               errorMessage={meta.touched ? meta.error : undefined}
               label="Amount"
               disabled={isLoading || isLoadingCancel}
-              onSetMax={() => form.setFieldValue('amount', maxRedeem)}
+              onSetMax={() => form.setFieldValue('amount', combinedBalance)}
               onChange={(value) => form.setFieldValue('amount', value)}
               currency={getCurrencySymbol(pool?.currency)}
               secondaryLabel={`${formatBalance(roundDown(maxRedeem), pool?.currency, 2)} available`}
@@ -575,7 +576,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel, a
           <PendingOrder
             type="redeem"
             pool={pool!}
-            amount={pendingRedeem}
+            amount={pendingRedeem.mul(price)}
             onCancelOrder={() => doCancel([poolId, trancheId, new BN(0)])}
             isCancelling={isLoadingCancel}
             onChangeOrder={() => {
