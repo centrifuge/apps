@@ -70,7 +70,7 @@ export const PoolDetailSideBar: React.FC<{
 
   if (pool && permissions && selectedToken && !allowedTranches.includes(selectedToken)) {
     // Redirect to onboarding
-    return null
+    return <InvestRedeem poolId={poolId} trancheId={selectedToken} key="notallowed" />
   }
 
   if (pool && permissions && !allowedTranches.length) {
