@@ -41,7 +41,7 @@ type SelectProps = {
   onSelect?: OnSelectCallback
   onBlur?: (e: FocusEvent) => void
   value?: string
-  label: string | React.ReactElement
+  label?: string | React.ReactElement
   placeholder: string
   disabled?: boolean
   errorMessage?: string
@@ -84,7 +84,11 @@ export const Select: React.FC<SelectProps> = ({
 const SelectInputInt: React.FC<SelectIntProps> = (props) => {
   const state = useSelectState<SelectOptionItem>(props)
   const ref = React.useRef<HTMLButtonElement>(null)
-  const { triggerProps, valueProps, menuProps } = useSelect(props, state, ref)
+  const { triggerProps, valueProps, menuProps } = useSelect(
+    { ...props, 'aria-label': !props.label ? props.placeholder : undefined },
+    state,
+    ref
+  )
   const { buttonProps } = useButton(triggerProps, ref)
   const IconComp = state.isOpen ? IconChevronUp : IconChevronDown
 
@@ -116,7 +120,13 @@ const SelectInputInt: React.FC<SelectIntProps> = (props) => {
             }
           />
         </StyledTrigger>
-        <HiddenSelect state={state} triggerRef={ref} label={props.label} name={props.name} />
+        <HiddenSelect
+          state={state}
+          triggerRef={ref}
+          label={props.label}
+          name={props.name}
+          aria-label={props.label ?? props.placeholder}
+        />
 
         {state.isOpen && (
           <Popover isOpen={state.isOpen} onClose={state.close}>

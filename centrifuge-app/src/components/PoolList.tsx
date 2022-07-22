@@ -4,8 +4,8 @@ import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import styled from 'styled-components'
 import { formatBalance } from '../utils/formatting'
-import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { usePoolMetadata } from '../utils/usePools'
+import { useCentrifuge } from './CentrifugeProvider'
 import { Column, DataTable } from './DataTable'
 import { TextWithPlaceholder } from './TextWithPlaceholder'
 
@@ -43,10 +43,11 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
 
 const PoolName: React.VFC<{ pool: Pool }> = ({ pool }) => {
   const { data, isLoading } = usePoolMetadata(pool)
+  const cent = useCentrifuge()
   return (
     <Shelf alignItems="center" gap={1}>
       {data?.pool?.icon ? (
-        <StyledLogo src={parseMetadataUrl(data.pool.icon)} alt="pool logo" height="24" width="24" />
+        <StyledLogo src={cent.metadata.parseMetadataUrl(data.pool.icon)} alt="pool logo" height="24" width="24" />
       ) : (
         <Thumbnail
           type="pool"

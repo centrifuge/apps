@@ -28,13 +28,18 @@ try {
 } catch (e) {
   //
 }
-
-export const initialFlagsState: FlagsState =
-  persistedState ||
-  Object.entries(flagsConfig).reduce((obj, [k, v]) => {
-    obj[k] = v.default
-    return obj
-  }, {} as any)
+const flagKeys = Object.keys(flagsConfig)
+export const initialFlagsState: FlagsState = persistedState
+  ? Object.entries(persistedState)
+      .filter(([k]) => flagKeys.includes(k))
+      .reduce((obj, [k, v]) => {
+        obj[k] = v
+        return obj
+      }, {} as any)
+  : Object.entries(flagsConfig).reduce((obj, [k, v]) => {
+      obj[k] = v.default
+      return obj
+    }, {} as any)
 
 export const DebugFlagsContext = React.createContext<Context>({ flags: defaultFlags, register() {}, unregister() {} })
 

@@ -1,3 +1,5 @@
+import Centrifuge from '@centrifuge/centrifuge-js'
+import { combineLatest, map, Observable } from 'rxjs'
 import { PoolMetadata } from '../types'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
@@ -40,13 +42,40 @@ export function useOrder(trancheId: string, address?: string) {
   return result
 }
 
-export function usePendingCollect(poolId: string, trancheId: string, address?: string) {
+export function usePendingCollect(poolId: string, trancheId?: string, address?: string) {
   const pool = usePool(poolId)
   const [result] = useCentrifugeQuery(
     ['pendingCollect', poolId, trancheId, address],
-    (cent) => cent.pools.getPendingCollect([address!, poolId, trancheId, pool!.epoch.lastExecuted]),
+    (cent) => cent.pools.getPendingCollect([address!, poolId, trancheId!, pool!.epoch.lastExecuted]),
     {
-      enabled: !!address && !!pool,
+      enabled: !!address && !!pool && !!trancheId,
+    }
+  )
+
+  return result
+}
+
+export function usePendingCollectMulti(poolId: string, trancheIds?: string[], address?: string) {
+  const pool = usePool(poolId)
+  const [result] = useCentrifugeQuery(
+    ['pendingCollectPool', poolId, trancheIds, address],
+    (cent) =>
+      combineLatest(
+        trancheIds!.map((tid) => cent.pools.getPendingCollect([address!, poolId, tid, pool!.epoch.lastExecuted]))
+      ).pipe(
+        map((orders) => {
+          const obj: Record<
+            string,
+            ReturnType<Centrifuge['pools']['getPendingCollect']> extends Observable<infer T> ? T : never
+          > = {}
+          trancheIds!.forEach((tid, i) => {
+            obj[tid] = orders[i]
+          })
+          return obj
+        })
+      ),
+    {
+      enabled: !!address && !!pool && !!trancheIds?.length,
     }
   )
 

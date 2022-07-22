@@ -2,11 +2,11 @@ import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
+import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
-import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
 import { useAddress } from '../../utils/useAddress'
 import { usePermissions } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
@@ -20,6 +20,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   const pool = usePool(pid)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const theme = useTheme()
+  const cent = useCentrifuge()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
   const address = useAddress()
@@ -42,7 +43,12 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
         }
         icon={
           metadata?.pool?.icon ? (
-            <Box as="img" width="iconLarge" height="iconLarge" src={parseMetadataUrl(metadata?.pool?.icon)} />
+            <Box
+              as="img"
+              width="iconLarge"
+              height="iconLarge"
+              src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon)}
+            />
           ) : (
             <Shelf
               width="iconLarge"

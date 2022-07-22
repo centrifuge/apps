@@ -1,6 +1,7 @@
 import { Box, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
+import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { Identity } from '../../components/Identity'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import LoanLabel from '../../components/LoanLabel'
@@ -14,7 +15,6 @@ import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
 import { nftMetadataSchema } from '../../schemas'
 import { formatBalance } from '../../utils/formatting'
-import { parseMetadataUrl } from '../../utils/parseMetadataUrl'
 import { useAddress } from '../../utils/useAddress'
 import { useAvailableFinancing, useLoan } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
@@ -57,13 +57,14 @@ const Loan: React.FC = () => {
   const address = useAddress()
   const permissions = usePermissions(address)
   const history = useHistory()
+  const cent = useCentrifuge()
   const { current: availableFinancing } = useAvailableFinancing(poolId, assetId)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
 
   const canPrice = permissions?.pools[poolId]?.roles.includes('PricingAdmin')
 
   const name = truncate(nftMetadata?.name || 'Unnamed asset', 30)
-  const imageUrl = nftMetadata?.image ? parseMetadataUrl(nftMetadata.image) : ''
+  const imageUrl = nftMetadata?.image ? cent.metadata.parseMetadataUrl(nftMetadata.image) : ''
 
   const riskGroupIndex = loan && poolMetadata?.riskGroups && getMatchingRiskGroupIndex(loan, poolMetadata.riskGroups)
 

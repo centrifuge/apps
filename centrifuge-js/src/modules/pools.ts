@@ -210,6 +210,7 @@ export type Tranche = {
 export type TrancheWithTokenPrice = Tranche & {
   totalIssuance: Balance
   tokenPrice: null | Price
+  capacity: Balance
 }
 
 export type Token = TrancheWithTokenPrice & {
@@ -980,6 +981,17 @@ export function getPoolsModule(inst: CentrifugeBase) {
               const navData = navMap[poolId]
               const epochExecution = epochExecutionMap[poolId]
               const currency = getCurrency(pool.currency)
+
+              const poolValue = pool.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
+                return new Balance(
+                  prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
+                )
+              }, new Balance(0))
+
+              const maxReserve = new Balance(hexToBN(pool.reserve.max))
+              const availableReserve = new Balance(hexToBN(pool.reserve.available))
+              const totalReserve = new Balance(hexToBN(pool.reserve.total))
+
               const mappedPool: Pool = {
                 id: poolId,
                 createdAt: null,
@@ -1004,15 +1016,32 @@ export function getPoolsModule(inst: CentrifugeBase) {
                         prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
                       )
                     }, new Balance(0))
-                  const poolValue = pool.tranches.tranches.reduce((prev: Balance, tranche: TrancheDetailsData) => {
-                    return new Balance(
-                      prev.add(new Balance(hexToBN(tranche.debt))).add(new Balance(hexToBN(tranche.reserve)))
-                    )
-                  }, new Balance(0))
 
                   const tokenPrice = lastClosedEpoch
                     ? new Price(hexToBN(lastClosedEpoch.tokenPrice))
                     : Price.fromFloat(1)
+
+                  const currentRiskBuffer = subordinateTranchesValue.gtn(0)
+                    ? new Perquintill(subordinateTranchesValue.div(poolValue))
+                    : new Perquintill(0)
+
+                  const outstandingInvestOrders = new Balance(hexToBN(tranche.outstandingInvestOrders))
+                  const outstandingRedeemOrders = new Balance(hexToBN(tranche.outstandingRedeemOrders))
+
+                  const protection = minRiskBuffer?.toDecimal() ?? Dec(0)
+                  const tvl = poolValue.toDecimal()
+                  let capacityGivenMaxReserve = maxReserve
+                    .toDecimal()
+                    .minus(totalReserve.toDecimal())
+                    .minus(outstandingInvestOrders.toDecimal())
+                    .add(outstandingRedeemOrders.toDecimal())
+                  capacityGivenMaxReserve = capacityGivenMaxReserve.lt(0) ? Dec(0) : capacityGivenMaxReserve
+                  const capacityGivenProtection = protection.isZero()
+                    ? capacityGivenMaxReserve
+                    : currentRiskBuffer.toDecimal().div(protection).mul(tvl).minus(tvl)
+                  const capacity = capacityGivenMaxReserve.gt(capacityGivenProtection)
+                    ? capacityGivenProtection
+                    : capacityGivenMaxReserve
 
                   return {
                     id: trancheId,
@@ -1025,20 +1054,19 @@ export function getPoolsModule(inst: CentrifugeBase) {
                     poolMetadata: (metadata ?? undefined) as string | undefined,
                     interestRatePerSec,
                     minRiskBuffer,
-                    currentRiskBuffer: subordinateTranchesValue.gtn(0)
-                      ? new Perquintill(subordinateTranchesValue.div(poolValue))
-                      : new Perquintill(0),
+                    currentRiskBuffer,
+                    capacity: Balance.fromFloat(capacity),
                     ratio: new Perquintill(hexToBN(tranche.ratio)),
-                    outstandingInvestOrders: new Balance(hexToBN(tranche.outstandingInvestOrders)),
-                    outstandingRedeemOrders: new Balance(hexToBN(tranche.outstandingRedeemOrders)),
+                    outstandingInvestOrders,
+                    outstandingRedeemOrders,
                     lastUpdatedInterest: new Date(tranche.lastUpdatedInterest * 1000).toISOString(),
                     balance: new Balance(new Balance(hexToBN(tranche.debt)).add(new Balance(hexToBN(tranche.reserve)))),
                   }
                 }),
                 reserve: {
-                  max: new Balance(hexToBN(pool.reserve.max)),
-                  available: new Balance(hexToBN(pool.reserve.available)),
-                  total: new Balance(hexToBN(pool.reserve.total)),
+                  max: maxReserve,
+                  available: availableReserve,
+                  total: totalReserve,
                 },
                 epoch: {
                   ...pool.epoch,
