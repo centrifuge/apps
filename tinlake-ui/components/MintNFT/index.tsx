@@ -93,15 +93,15 @@ const MintNFT: React.FC<Props> = (props: Props) => {
           {status !== 'succeeded' && (
             <Alert pad={{ horizontal: 'medium' }} type="info">
               <p>
-                Tinlake requires you to have a non-fungible token ("NFT") to deposit as collateral. An NFT is an
-                on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or
+                Tinlake requires you to have a non-fungible token (&quot;NFT&quot;) to deposit as collateral. An NFT is
+                an on-chain, digital representation of an underlying real-world asset, such as an invoice, a mortgage or
                 music royalties.
               </p>
               <p>
                 In this demo, you can mint a test NFT reflecting an sample invoice worth USD 1.000 into your wallet.
-                Please fill in a "NFT Reference" as a unique identifier for your invoice NFT below. Then proceed with
-                Mint NFT. The NFT will be minted into your wallet and on the next screen you will be provided with the
-                Token ID of this NFT.
+                Please fill in a &quot;NFT Reference&quot; as a unique identifier for your invoice NFT below. Then
+                proceed with Mint NFT. The NFT will be minted into your wallet and on the next screen you will be
+                provided with the Token ID of this NFT.
               </p>
               <p>
                 <b>Please store or copy this Token ID, as it will be used again to finance an asset on Tinlake.</b>

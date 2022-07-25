@@ -73,8 +73,12 @@ const Archived: React.FC<Props> = (props: Props) => {
             <Heading level="5" margin={{ top: 'small' }}>
               Asset Originator Details
             </Heading>
-            <a href={props.selectedPool.metadata.website} target="_blank">
-              <img src={props.selectedPool.metadata.media?.logo} style={{ maxHeight: '80px', maxWidth: '50%' }} />
+            <a href={props.selectedPool.metadata.website} target="_blank" rel="noreferrer">
+              <img
+                alt="pool-logo"
+                src={props.selectedPool.metadata.media?.logo}
+                style={{ maxHeight: '80px', maxWidth: '50%' }}
+              />
             </a>
 
             <p>{props.selectedPool.metadata.description}</p>

@@ -117,7 +117,7 @@ const ValueNFT: React.FC<Props> = (props: Props) => {
   return (
     <Box>
       <Alert pad={{ horizontal: 'medium' }} type="info">
-        <p>Tinlake requires you to have your non-fungible token ("NFT") valued and a maturity date set.</p>
+        <p>Tinlake requires you to have your non-fungible token (&quot;NFT&quot;) valued and a maturity date set.</p>
         <p>In this demo, you can assign a value and a risk score to the NFT as well as set the maturity date.</p>
         <p>
           Note that this functionality is only available on Kovan Testnet. On Mainnet, NFTs are valued by underwriters

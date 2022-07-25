@@ -191,8 +191,8 @@ const ManageMemberlist: React.FC<Props> = (props: Props) => {
                       <TableCell>{onboardingData.kyc.accredited ? 'yes' : 'no'}</TableCell>
                     </TableRow>
                   )}
-                  {onboardingData.agreements.map((agreement: AgreementsStatus) => (
-                    <TableRow>
+                  {onboardingData.agreements.map((agreement: AgreementsStatus, index: number) => (
+                    <TableRow key={index}>
                       <TableCell>{agreement.name}</TableCell>
                       <TableCell>
                         {agreement.counterSigned
