@@ -26,6 +26,7 @@ const FileUploadContainer = styled(Stack)<{ $disabled?: boolean }>`
   position: relative;
   justify-content: center;
   width: 100%;
+  height: 100%;
   background: ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundPage : theme.colors.backgroundInput)};
   /* outline: 1px dashed
     ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundSecondary : theme.colors.borderPrimary)};
@@ -211,7 +212,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           tabIndex={-1}
           ref={inputRef}
         />
-        <Stack gap="4px">
+        <Stack gap="4px" height="100%">
           {label && (
             <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'}>
               {label}
@@ -219,7 +220,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           )}
           {curFile ? (
             <>
-              <Shelf gap={1}>
+              <Shelf gap={1} m="auto">
                 <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver} />
                 <Flex minWidth="iconMedium">
                   {loading ? (
@@ -249,7 +250,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           ) : (
             <>
               <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver}></UploadButton>
-              <AddButton gap={1} justifyContent="center">
+              <AddButton gap={1} justifyContent="center" m="auto">
                 <IconUpload />
                 <Text variant="body1" color="currentcolor">
                   {placeholder}

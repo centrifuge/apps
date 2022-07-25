@@ -13,10 +13,10 @@ import { useMetadataMulti } from '../utils/useMetadata'
 import { usePermissions } from '../utils/usePermissions'
 import { usePools } from '../utils/usePools'
 
-export const CreateLoanPage: React.FC = () => {
+export const CreateLoanFromNFTPage: React.FC = () => {
   return (
     <PageWithSideBar>
-      <CreateLoan />
+      <CreateLoanFromNFT />
     </PageWithSideBar>
   )
 }
@@ -25,7 +25,7 @@ type FormValues = {
   poolId: string
 }
 
-const CreateLoan: React.FC = () => {
+const CreateLoanFromNFT: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
 
   const address = useAddress()

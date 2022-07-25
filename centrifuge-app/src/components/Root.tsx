@@ -6,9 +6,10 @@ import { config } from '../config'
 import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
-import { CreateLoanPage } from '../pages/CreateLoan'
+import { CreateLoanFromNFTPage } from '../pages/CreateLoanFromNFT'
 import { IssuerCreatePoolPage } from '../pages/IssuerCreatePool'
 import { IssuerPoolPage } from '../pages/IssuerPool'
+import { IssuerCreateLoanPage } from '../pages/IssuerPool/Assets/CreateLoan'
 import { LoanPage } from '../pages/Loan'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
@@ -75,7 +76,7 @@ const Routes: React.VFC = () => {
         <MintNFTPage />
       </Route>
       <Route path="/nfts/collection/:cid/object/:nftid/new-asset">
-        <CreateLoanPage />
+        <CreateLoanFromNFTPage />
       </Route>
       <Route path="/nfts/collection/:cid/object/:nftid">
         <NFTPage />
@@ -92,6 +93,9 @@ const Routes: React.VFC = () => {
 
       <Route path="/issuer/create-pool">
         <IssuerCreatePoolPage />
+      </Route>
+      <Route path="/issuer/create-asset">
+        <IssuerCreateLoanPage />
       </Route>
       <Route exact path="/issuer/:pid/assets/:aid">
         <LoanPage />
