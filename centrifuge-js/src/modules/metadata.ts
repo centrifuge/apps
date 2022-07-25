@@ -10,13 +10,27 @@ export function getMetadataModule(inst: Centrifuge) {
     return inst.getMetadataObservable<T>(url)
   }
 
-  function pinMetadata(metadata: any): Observable<string> {
-    if (!inst.config.pinMetadata) {
-      console.error('pinMetadata must be set in config to use this feature')
+  function pinNFTMetadata(metadata: any): Observable<string> {
+    if (!inst.config.pinNFTMetadata) {
+      console.error('pinNFTMetadata must be set in config to use this feature')
       return from([])
     }
     return from(
-      inst.config.pinMetadata({
+      inst.config.pinNFTMetadata({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(metadata),
+      })
+    )
+  }
+
+  function pinPoolMetadata(metadata: any): Observable<string> {
+    if (!inst.config.pinPoolMetadata) {
+      console.error('pinPoolMetadata must be set in config to use this feature')
+      return from([])
+    }
+    return from(
+      inst.config.pinPoolMetadata({
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(metadata),
@@ -47,5 +61,5 @@ export function getMetadataModule(inst: Centrifuge) {
     }
   }
 
-  return { getMetadata, parseMetadataUrl, pinMetadata }
+  return { getMetadata, parseMetadataUrl, pinNFTMetadata, pinPoolMetadata }
 }

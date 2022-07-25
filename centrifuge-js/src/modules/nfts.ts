@@ -268,7 +268,7 @@ export function getNftsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [collectionId, owner, metadata] = args
-    const $metadata = inst.metadata.pinMetadata(metadata).pipe(take(1))
+    const $metadata = inst.metadata.pinNFTMetadata(metadata).pipe(take(1))
     const $api = inst.getApi()
 
     return combineLatest([$api, $metadata]).pipe(
@@ -306,7 +306,7 @@ export function getNftsModule(inst: Centrifuge) {
   ) {
     const [collectionId, nftId, owner, metadata] = args
 
-    const $metadata = inst.metadata.pinMetadata(metadata).pipe(take(1))
+    const $metadata = inst.metadata.pinNFTMetadata(metadata).pipe(take(1))
     const $api = inst.getApi()
     return combineLatest([$api, $metadata]).pipe(
       map(([api, metadataURI]) => {
