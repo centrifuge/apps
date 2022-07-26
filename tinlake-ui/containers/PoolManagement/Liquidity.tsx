@@ -43,6 +43,10 @@ const Liquidity: React.FC<Props> = (props: Props) => {
   const mat = poolData?.maker?.mat
 
   const debtCeiling = (poolData?.maker?.line || new BN('0')).div(new BN(10).pow(new BN(45 - 18)))
+
+  // debt ceiling minus 100,000
+  const debtCeilingMax = debtCeiling.sub(new BN(100000).mul(new BN(10).pow(new BN(18))))
+
   const maxRaise = mat
     ? (poolData?.netAssetValue || new BN(0))
         .add(poolData?.reserveAndRemainingCredit || new BN(0))
@@ -308,7 +312,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
               token={props.activePool?.metadata.currencySymbol || 'DAI'}
               value={makerCapacity === undefined ? poolData?.maker?.creditline?.toString() || '0' : makerCapacity}
               onChange={onChangeMakerCapacity}
-              maxValue={(maxCreditline.lt(debtCeiling) ? maxCreditline : debtCeiling).toString()}
+              maxValue={(maxCreditline.lt(debtCeilingMax) ? maxCreditline : debtCeilingMax).toString()}
             />
           </Box>
         )}
@@ -335,7 +339,7 @@ const Liquidity: React.FC<Props> = (props: Props) => {
               (changedMakerCapacity &&
                 (creditlineStatus === 'pending' ||
                   creditlineStatus === 'unconfirmed' ||
-                  (makerCapacity ? new BN(makerCapacity).gt(debtCeiling) : true)))
+                  (makerCapacity ? new BN(makerCapacity).gt(debtCeilingMax) : true)))
             }
           />
         </Box>
