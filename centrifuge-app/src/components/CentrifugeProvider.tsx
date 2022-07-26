@@ -18,8 +18,8 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
         centrifugeSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,
         altairSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,
         metadataHost: import.meta.env.REACT_APP_IPFS_GATEWAY as string,
-        pinNFTMetadata: (values) => fetchLambdaNew('pinNFTMetadata', values),
-        pinPoolMetadata: (values) => fetchLambdaNew('pinPoolMetadata', values),
+        pinFile: (values) => fetchLambdaNew('pinFile', values),
+        pinJson: (values) => fetchLambdaNew('pinJson', values),
       }),
     []
   )

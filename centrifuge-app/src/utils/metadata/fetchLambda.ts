@@ -8,5 +8,5 @@ export const fetchLambdaNew = async (url: string, reqInit?: RequestInit) => {
     throw new Error(`Error pinning pool metadata: ${resText}`)
   }
   const json = await res.json()
-  return json.metadataURI as string
+  return json
 }

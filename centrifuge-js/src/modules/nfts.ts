@@ -268,16 +268,31 @@ export function getNftsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [collectionId, owner, metadata] = args
-    const $metadata = inst.metadata.pinNFTMetadata(metadata).pipe(take(1))
+    const { fileDataUri, fileName } = metadata
+
     const $api = inst.getApi()
 
-    return combineLatest([$api, $metadata]).pipe(
-      map(([api, metadataURI]) => {
+    // upload image to ipfs
+    const $image = inst.metadata.pinFile({ fileDataUri, fileName }).pipe(take(1))
+    // get image uri to pin json metadata
+    const metadataURI = $image
+      .pipe(
+        switchMap((metadataURI) =>
+          inst.metadata.pinJson({
+            image: metadataURI.uri,
+            name: metadata.name,
+            description: metadata.description,
+          })
+        )
+      )
+      .pipe(take(1))
+    return combineLatest([$api, metadataURI]).pipe(
+      map(([api, metadata]) => {
         return {
           api,
           submittable: api.tx.utility.batchAll([
             api.tx.uniques.create(collectionId, owner),
-            api.tx.uniques.setCollectionMetadata(collectionId, metadataURI, true),
+            api.tx.uniques.setCollectionMetadata(collectionId, metadata.uri, true),
           ]),
         }
       }),
@@ -304,17 +319,31 @@ export function getNftsModule(inst: Centrifuge) {
     args: [collectionId: string, nftId: string, owner: string, metadata: NFTMetadataInput, amount?: number],
     options?: TransactionOptions
   ) {
-    const [collectionId, nftId, owner, metadata] = args
-
-    const $metadata = inst.metadata.pinNFTMetadata(metadata).pipe(take(1))
     const $api = inst.getApi()
-    return combineLatest([$api, $metadata]).pipe(
-      map(([api, metadataURI]) => {
+    const [collectionId, nftId, owner, metadata] = args
+    const { fileDataUri, fileName } = metadata
+
+    // upload image to ipfs
+    const $image = inst.metadata.pinFile({ fileDataUri, fileName }).pipe(take(1))
+    // get image uri to pin json metadata
+    const metadataURI = $image
+      .pipe(
+        switchMap((metadataURI) =>
+          inst.metadata.pinJson({
+            image: metadataURI.uri,
+            name: metadata.name,
+            description: metadata.description,
+          })
+        )
+      )
+      .pipe(take(1))
+    return combineLatest([$api, metadataURI]).pipe(
+      map(([api, metadata]) => {
         return {
           api,
           submittable: api.tx.utility.batchAll([
             api.tx.uniques.mint(collectionId, nftId, owner),
-            api.tx.uniques.setMetadata(collectionId, nftId, metadataURI, true),
+            api.tx.uniques.setMetadata(collectionId, nftId, metadata?.uri, true),
           ]),
         }
       }),

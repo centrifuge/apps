@@ -19,12 +19,21 @@ const dataUriToReadStream = ({ tempFilePath, fileDataUri }) => {
   return fs.createReadStream(tempFilePath)
 }
 
+function jsonToFile(jsonInput) {
+  const json = JSON.stringify(jsonInput)
+  let n = json.length
+  const bytes = new Uint8Array(n)
+  while (n--) {
+    bytes[n] = json.charCodeAt(n)
+  }
+  return new File([bytes], 'file.json', { type: 'application/json' })
+}
+
 const ipfsHashToURI = (hash) => `ipfs://ipfs/${hash}`
 
 const handler = async (event) => {
   try {
     const { fileDataUri, fileName } = JSON.parse(event.body)
-
     // check incoming data
     if (!(fileDataUri && fileName)) {
       return { statusCode: 400, body: 'Bad request: fileName and fileDataUri are required fields' }
@@ -37,16 +46,12 @@ const handler = async (event) => {
 
     // pin the image file
     const pinFileResponse = await pinFile(fileStream)
-
     const fileHash = pinFileResponse.data.IpfsHash
     const fileURL = ipfsHashToURI(fileHash)
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        fileIpfsHash: fileHash,
-        fileURI: fileURL,
-      }),
+      body: JSON.stringify({ uri: fileURL }),
     }
   } catch (e) {
     console.log(e)
