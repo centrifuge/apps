@@ -105,7 +105,9 @@ const InvestRedeemInner: React.VFC<Props> = ({
   const balances = useBalances(address)
   const pool = usePool(poolId)
   const allowedTranches = Object.keys(permissions?.pools[poolId]?.tranches ?? {})
-  const [trancheId, setTrancheId] = React.useState(trancheIdProp ?? defaultTrancheId ?? allowedTranches[0])
+  const [trancheId, setTrancheId] = React.useState(
+    trancheIdProp ?? defaultTrancheId ?? allowedTranches[0] ?? pool?.tranches[0].id
+  )
   const order = usePendingCollect(poolId, trancheId, address)
   const { data: metadata, isLoading: isMetadataLoading } = usePoolMetadata(pool)
 

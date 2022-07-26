@@ -14,7 +14,7 @@ export function useTransactionFeeEstimate<T extends Array<any>>(
   const cent = useCentrifuge()
   const [txFee, setTxFee] = React.useState<number | undefined>(undefined)
 
-  async function doTransaction(selectedAccount: WalletAccount, args: T, txOptions?: TxOptions) {
+  const doTransaction = React.useCallback(async (selectedAccount: WalletAccount, args: T, txOptions?: TxOptions) => {
     try {
       const connectedCent = cent.connect(selectedAccount?.address, selectedAccount?.signer as any)
       const transaction = transactionCallback(connectedCent)
@@ -30,14 +30,18 @@ export function useTransactionFeeEstimate<T extends Array<any>>(
     } catch (e) {
       console.error(e)
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  async function execute(args: T, options?: TxOptions) {
-    if (!selectedAccount) {
-      return
-    }
-    await doTransaction(selectedAccount, args, options)
-  }
+  const execute = React.useCallback(
+    async (args: T, options?: TxOptions) => {
+      if (!selectedAccount) {
+        return
+      }
+      await doTransaction(selectedAccount, args, options)
+    },
+    [doTransaction, selectedAccount]
+  )
 
   return {
     execute,
