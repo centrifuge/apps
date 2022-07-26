@@ -63,7 +63,7 @@ const AdminLog: React.FC<Props> = (props: Props) => {
             </TableHeader>
             <TableBody>
               {logs.slice(start, start + logsPerPage).map((log: ethers.utils.LogDescription, id: number) => (
-                <TableRow>
+                <TableRow key={id}>
                   <TableCell>{dateToYMD(blocks[start + id]?.timestamp || 0)}&nbsp;</TableCell>
                   <TableCell>
                     <DisplayFieldWrapper>
@@ -79,7 +79,7 @@ const AdminLog: React.FC<Props> = (props: Props) => {
                   </TableCell>
                   <TableCell>{truncateString(generateLogName(log), 80)}</TableCell>
                   <TableCell style={{ textAlign: 'right' }}>
-                    <a href={getTransactionLink(events[start + id].transactionHash)} target="_blank">
+                    <a href={getTransactionLink(events[start + id].transactionHash)} target="_blank" rel="noreferrer">
                       <img src="/static/wallet/external-link.svg" alt="View on Etherscan" />
                     </a>
                   </TableCell>

@@ -196,6 +196,7 @@ const OverviewHeader: React.FC<Props> = (props: Props) => {
                 {!isMobile && (
                   <Shelf justifyContent="space-between" alignSelf="baseline" alignItems="baseline" flexGrow={1}>
                     {makerStats.map((item) => (
+                      // eslint-disable-next-line react/jsx-key
                       <LabeledValue value={item.value} unit={item.valueUnit} label={item.term} variant="primaryList" />
                     ))}
                   </Shelf>

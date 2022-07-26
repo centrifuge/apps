@@ -154,7 +154,7 @@ const Scorecard: React.FC<Props> = (props: Props) => {
               </TableHeader>
               <TableBody>
                 {existingRiskGroups.slice(start, start + riskGroupsPerPage).map((riskGroup: RiskGroupWithId) => (
-                  <TableRow>
+                  <TableRow key={riskGroup.id}>
                     <TableCell>{riskGroup.id}</TableCell>
                     <TableCell>
                       {isValidRatePerSecond(riskGroup.rate.ratePerSecond)

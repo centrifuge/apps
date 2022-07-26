@@ -69,6 +69,7 @@ const InfoBox: React.FC<Props> = (props: Props) => {
           {countries
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((country: { code: string; name: string }) => (
+              // eslint-disable-next-line react/jsx-key
               <li>{country.name}</li>
             ))}
         </ul>
