@@ -43,60 +43,6 @@ type FormValues = {
   attributes: Record<string, string | number>
 }
 
-const mockSchemas = [
-  {
-    name: 'Sample schema 1',
-    options: {
-      assetClasses: ['AC 1', 'AC 2', 'AC3 3'],
-      loanTypes: ['BulletLoan'],
-      description: true,
-      image: true,
-    },
-    sections: [
-      {
-        name: 'A public data section',
-        public: true,
-        attributes: [
-          {
-            label: 'Borrower Interest Rate',
-            type: 'percentage',
-          },
-          {
-            label: 'State',
-            type: 'string',
-            displayType: 'single-select',
-            options: ['A', 'B'],
-          },
-          {
-            label: 'Purchase loan amount',
-            type: 'currency',
-            currencySymbol: 'USD',
-            currencyDecimals: 18,
-          },
-          {
-            label: 'Last sold',
-            type: 'timestamp',
-          },
-          {
-            label: 'Your favourite number',
-            type: 'decimal',
-          },
-        ],
-      },
-      {
-        name: 'A private data section',
-        public: false,
-        attributes: [
-          {
-            label: 'Street',
-            type: 'string',
-          },
-        ],
-      },
-    ],
-  },
-]
-
 const IssuerCreateLoan: React.FC = () => {
   const { state } = useLocation<{ pid: string }>()
   const address = useAddress()
@@ -137,8 +83,8 @@ const IssuerCreateLoan: React.FC = () => {
   const selectedPoolMetadata = poolMetadata[allowedPools?.findIndex((p) => p.id === form.values.poolId)]
     .data as PoolMetadata
 
-  const schemaIds = ['abc123'] // selectedPoolMetadata?.schemas?.map((s) => s.id) ?? []
-  const schemaMetadata = mockSchemas.map((data) => ({ data })) // useMetadataMulti(selectedPoolMetadata?.schemas?.map((s) => s.id) ?? [])
+  const schemaIds = selectedPoolMetadata?.schemas?.map((s) => s.id) ?? []
+  const schemaMetadata = useMetadataMulti(selectedPoolMetadata?.schemas?.map((s) => s.id) ?? [])
 
   const schemaSelectOptions = schemaIds.map((id, i) => ({
     label: truncate((schemaMetadata[i].data as Schema)?.name ?? `Schema ${i + 1}`, 30),
@@ -175,7 +121,11 @@ const IssuerCreateLoan: React.FC = () => {
     switch (attr.type) {
       case 'currency': {
         return (
-          <Field key="value" name={name} validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}>
+          <Field
+            name={name}
+            validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}
+            key={attr.label}
+          >
             {({ field, meta }: FieldProps) => {
               return (
                 <CurrencyInput
@@ -194,12 +144,20 @@ const IssuerCreateLoan: React.FC = () => {
         )
       }
       case 'decimal': {
-        return <FieldWithErrorMessage name={name} as={NumberInput} label={`${attr.label}*`} validate={required()} />
+        return (
+          <FieldWithErrorMessage
+            name={name}
+            as={NumberInput}
+            label={`${attr.label}*`}
+            validate={required()}
+            key={attr.label}
+          />
+        )
       }
       case 'string': {
         if ('options' in attr) {
           return (
-            <Field name={name} validate={required()}>
+            <Field name={name} validate={required()} key={attr.label}>
               {({ field, form }: any) => (
                 <Select
                   placeholder="Select one"
@@ -216,10 +174,26 @@ const IssuerCreateLoan: React.FC = () => {
           )
         }
 
-        return <FieldWithErrorMessage name={name} as={TextInput} label={`${attr.label}*`} validate={required()} />
+        return (
+          <FieldWithErrorMessage
+            name={name}
+            as={TextInput}
+            label={`${attr.label}*`}
+            validate={required()}
+            key={attr.label}
+          />
+        )
       }
       case 'timestamp': {
-        return <FieldWithErrorMessage name={name} as={DateInput} label={`${attr.label}*`} validate={required()} />
+        return (
+          <FieldWithErrorMessage
+            name={name}
+            as={DateInput}
+            label={`${attr.label}*`}
+            validate={required()}
+            key={attr.label}
+          />
+        )
       }
       case 'percentage': {
         return (
@@ -230,6 +204,7 @@ const IssuerCreateLoan: React.FC = () => {
             validate={required()}
             placeholder="0.00"
             rightElement="%"
+            key={attr.label}
           />
         )
       }
