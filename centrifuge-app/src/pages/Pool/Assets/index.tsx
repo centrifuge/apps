@@ -13,10 +13,11 @@ import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useLoans } from '../../../utils/useLoans'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
+import { PoolDetailSideBar } from '../Overview'
 
 export const PoolDetailAssetsTab: React.FC = () => {
   return (
-    <PageWithSideBar>
+    <PageWithSideBar sidebar={<PoolDetailSideBar selectedToken={null} setSelectedToken={() => {}} />}>
       <PoolDetailHeader />
       <LoadBoundary>
         <PoolDetailAssets />

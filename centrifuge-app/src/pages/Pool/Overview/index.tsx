@@ -69,13 +69,13 @@ export const PoolDetailSideBar: React.FC<{
   const hasAnyInvestment = hasInvestments.some((inv) => inv)
 
   if (pool && permissions && selectedToken && !allowedTranches.includes(selectedToken)) {
-    // Redirect to onboarding
+    // TODO: Redirect to onboarding
     return <InvestRedeem poolId={poolId} trancheId={selectedToken} key="notallowed" />
   }
 
   if (pool && permissions && !allowedTranches.length) {
-    // Show onboarding card
-    return null
+    // TODO: Show onboarding card
+    return <InvestRedeem poolId={poolId} key="notallowed" />
   }
 
   if (allowedTranches.length && orders && !hasAnyInvestment) {
@@ -144,6 +144,8 @@ export const PoolDetailOverview: React.FC<{
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
   const avgMaturity = useAverageMaturity(poolId)
+  const address = useAddress()
+  const permissions = usePermissions(address)
 
   const pageSummaryData = [
     { label: <Tooltips type="assetClass" />, value: metadata?.pool?.asset.class },
@@ -195,7 +197,7 @@ export const PoolDetailOverview: React.FC<{
           {tokens?.map((token, i) => (
             <div key={token.id} ref={(node) => node && handleTokenMount(node, token.id)}>
               <InteractiveCard
-                icon={<Thumbnail label="SEN" type="token" />}
+                icon={<Thumbnail label={metadata?.tranches?.[token.id]?.symbol ?? ''} type="token" />}
                 title={
                   <TextWithPlaceholder isLoading={metadataIsLoading}>
                     {metadata?.pool?.name} {metadata?.tranches?.[token.id]?.name}
@@ -218,7 +220,11 @@ export const PoolDetailOverview: React.FC<{
                     <LabelValueStack
                       label="Capacity"
                       value={
-                        <Text variant="body2" fontWeight={600} color="statusOk">
+                        <Text
+                          variant="body2"
+                          fontWeight={600}
+                          color={token.capacity.isZero() ? 'statusWarning' : 'statusOk'}
+                        >
                           {formatBalanceAbbreviated(token.capacity, pool?.currency)}
                         </Text>
                       }
@@ -228,6 +234,7 @@ export const PoolDetailOverview: React.FC<{
                         variant={i === 0 ? 'primary' : 'secondary'}
                         onClick={() => setSelectedToken(token.id)}
                         style={{ marginLeft: 'auto' }}
+                        disabled={!permissions?.pools[poolId]?.tranches[token.id]}
                       >
                         Invest
                       </Button>
