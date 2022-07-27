@@ -131,6 +131,7 @@ interface Config {
   infuraKey: string
   gasLimit: number
   onboardAPIHost: string
+  onboardUIHost: string
   featureFlagNewOnboardingPools: string[]
   featureFlagMaintenanceMode: string[]
   enableErrorLogging: boolean
@@ -364,6 +365,10 @@ const config: Config = {
     .string()
     .required('NEXT_PUBLIC_ONBOARD_API_HOST is required')
     .validateSync(process.env.NEXT_PUBLIC_ONBOARD_API_HOST),
+  onboardUIHost: yup
+    .string()
+    .required('NEXT_PUBLIC_ONBOARD_UI_HOST is required')
+    .validateSync(process.env.NEXT_PUBLIC_ONBOARD_UI_HOST),
   centrifugeChainUrl: yup
     .string()
     .required('NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL is required')
