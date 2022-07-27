@@ -1,5 +1,5 @@
 import { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
-import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/metadata'
+import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import {
   Box,
   Button,
@@ -349,7 +349,7 @@ const CreatePoolForm: React.VFC = () => {
       <FormikProvider value={form}>
         <Form ref={formRef}>
           <PageHeader
-            icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
+            icon={<PoolIcon icon={form.values.poolIcon as File}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
             title={form.values.poolName || 'New Pool'}
             subtitle={
               <TextWithPlaceholder isLoading={waitingForStoredIssuer} width={15}>

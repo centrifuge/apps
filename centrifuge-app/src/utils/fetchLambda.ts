@@ -1,7 +1,4 @@
-export const fetchLambda = (url: string, reqInit?: RequestInit) =>
-  fetch(`${window.location.origin}/.netlify/functions/${url}`, reqInit)
-
-export const fetchLambdaNew = async (url: string, reqInit?: RequestInit) => {
+export const fetchLambda = async (url: string, reqInit?: RequestInit) => {
   const res = await fetch(`${window.location.origin}/.netlify/functions/${url}`, reqInit)
   if (!res.ok) {
     const resText = await res.text()

@@ -272,9 +272,7 @@ export function getNftsModule(inst: Centrifuge) {
 
     const $api = inst.getApi()
 
-    // upload image to ipfs
-    const $image = inst.metadata.pinFile({ fileDataUri, fileName }).pipe(take(1))
-    // get image uri to pin json metadata
+    const $image = inst.metadata.pinFile({ fileDataUri, fileName })
     const metadataURI = $image
       .pipe(
         switchMap((metadataURI) =>
@@ -323,9 +321,7 @@ export function getNftsModule(inst: Centrifuge) {
     const [collectionId, nftId, owner, metadata] = args
     const { fileDataUri, fileName } = metadata
 
-    // upload image to ipfs
-    const $image = inst.metadata.pinFile({ fileDataUri, fileName }).pipe(take(1))
-    // get image uri to pin json metadata
+    const $image = inst.metadata.pinFile({ fileDataUri, fileName })
     const metadataURI = $image
       .pipe(
         switchMap((metadataURI) =>

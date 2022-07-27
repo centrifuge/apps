@@ -1,5 +1,5 @@
 import Centrifuge, { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
-import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/metadata'
+import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import BN from 'bn.js'
 import * as React from 'react'
 import { combineLatest, map, of, Subject, switchMap } from 'rxjs'

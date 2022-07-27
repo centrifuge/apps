@@ -9,7 +9,6 @@ import { SubqueryPoolSnapshot } from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
 import { Balance, Perquintill, Price, Rate } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
-import { PoolMetadata, PoolMetadataInput } from './metadata'
 
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
@@ -390,6 +389,114 @@ export type DailyPoolState = {
   poolValue: Balance
   currency: string
   timestamp: string
+}
+
+interface TrancheFormValues {
+  tokenName: string
+  symbolName: string
+  interestRate: number | ''
+  minRiskBuffer: number | ''
+  minInvestment: number | ''
+}
+interface RiskGroupFormValues {
+  groupName: string
+  advanceRate: number | ''
+  fee: number | ''
+  probabilityOfDefault: number | ''
+  lossGivenDefault: number | ''
+  discountRate: number | ''
+}
+interface WriteOffGroupFormValues {
+  days: number | ''
+  writeOff: number | ''
+}
+
+export interface PoolMetadataInput {
+  // details
+  poolIcon: string | File | null
+  poolName: string
+  assetClass: string
+  currency: string
+  maxReserve: number | ''
+  epochHours: number | ''
+  epochMinutes: number | ''
+
+  // issuer
+  issuerName: string
+  issuerLogo: string | File | null
+  issuerDescription: string
+
+  executiveSummary: string | File | null
+  website: string
+  forum: string
+  email: string
+
+  // tranche
+  tranches: TrancheFormValues[]
+  riskGroups: RiskGroupFormValues[]
+  writeOffGroups: WriteOffGroupFormValues[]
+}
+
+export type PoolStatus = 'open' | 'upcoming' | 'hidden'
+export type PoolCountry = 'us' | 'non-us'
+export type NonSolicitationNotice = 'all' | 'non-us' | 'none'
+export type PoolMetadata = {
+  pool: {
+    name: string
+    icon: string
+    asset: {
+      class: string
+    }
+    issuer: {
+      name: string
+      description: string
+      email: string
+      logo: string
+    }
+    links: {
+      executiveSummary: string
+      forum: string
+      website: string
+    }
+    status: PoolStatus
+  }
+  tranches: Record<
+    string,
+    {
+      name: string
+      symbol: string
+      minInitialInvestment: string
+    }
+  >
+  riskGroups: {
+    name: string | undefined
+    advanceRate: string
+    interestRatePerSec: string
+    probabilityOfDefault: string
+    lossGivenDefault: string
+    discountRate: string
+  }[]
+  // Not yet implemented
+  // onboarding: {
+  //   live: boolean
+  //   agreements: {
+  //     name: string
+  //     provider: 'docusign'
+  //     providerTemplateId: string
+  //     tranche: string
+  //     country: 'us | non-us'
+  //   }[]
+  //   issuer: {
+  //     name: string
+  //     email: string
+  //     restrictedCountryCodes: string[]
+  //     minInvestmentCurrency: number
+  //     nonSolicitationNotice: 'all' | 'non-us' | 'none'
+  //   }
+  // }
+  // bot: {
+  //   channelId: string
+  // }
 }
 
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
