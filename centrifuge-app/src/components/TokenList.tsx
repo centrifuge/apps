@@ -63,14 +63,13 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Capacity" />,
-    cell: (token: TokenTableData) =>
-      token.capacity > 0 && (
-        <Text variant="body2" color="statusOk">
-          {formatBalanceAbbreviated(token.capacity, token.currency)}
-        </Text>
-      ),
+    cell: (token: TokenTableData) => (
+      <Text variant="body2" color={token.capacity > 0 ? 'statusOk' : 'statusWarning'}>
+        {formatBalanceAbbreviated(token.capacity, token.currency)}
+      </Text>
+    ),
     flex: '4',
-    sortKey: 'valueLocked',
+    sortKey: 'capacity',
   },
 
   {
