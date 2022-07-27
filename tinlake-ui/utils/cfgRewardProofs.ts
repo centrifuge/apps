@@ -57,6 +57,6 @@ function hashBlake2b(bytes: string | Uint8Array) {
 }
 
 export function hashLeaf(accountID: string, balance: BN): Buffer {
-  // @ts-ignore
+  // @ts-expect-error
   return hashBlake2b(u8aConcat(hexToU8a(accountID), bnToU8a(balance, 128, true)))
 }
