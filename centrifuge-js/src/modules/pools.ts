@@ -545,10 +545,11 @@ export function getPoolsModule(inst: Centrifuge) {
   function setMetadata(args: [poolId: string, metadata: string], options?: TransactionOptions) {
     const [poolId, metadata] = args
     const $api = inst.getApi()
+    const $metadataURI = inst.metadata.pinJson(JSON.parse(metadata))
 
-    return $api.pipe(
-      switchMap((api) => {
-        const submittable = api.tx.pools.setMetadata(poolId, metadata)
+    return combineLatest([$api, $metadataURI]).pipe(
+      switchMap(([api, metadataURI]) => {
+        const submittable = api.tx.pools.setMetadata(poolId, metadataURI.ipfsHash)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
