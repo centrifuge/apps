@@ -1,4 +1,5 @@
 import Tinlake from '@centrifuge/tinlake-js'
+import BN from 'bn.js'
 import { ethers } from 'ethers'
 import { Box, Button, Select } from 'grommet'
 import { CircleAlert } from 'grommet-icons'
@@ -9,6 +10,7 @@ import { Tooltip } from '../../components/Tooltip'
 import config from '../../config'
 import { CentChainWalletState, InjectedAccount } from '../../ducks/centChainWallet'
 import { createTransaction, TransactionProps, useTransactionState } from '../../ducks/transactions'
+import { centChainService } from '../../services/centChain'
 import { accountIdToCentChainAddr } from '../../services/centChain/accountIdToCentChainAddr'
 import { centChainAddrToAccountId } from '../../services/centChain/centChainAddrToAccountId'
 import { isCentChainAddr } from '../../services/centChain/isCentChainAddr'
@@ -32,6 +34,7 @@ const HelpText = styled.span`
 
 const LinkingWarning = styled(Warning)`
   margin: 16px;
+  width: 100%;
 `
 
 const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: TransactionProps) => {
@@ -41,9 +44,27 @@ const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: Trans
   const { data: ethLink, refetch: refetchEthLink } = useEthLink()
   const [selectedCentAcc, selectCentAcc] = React.useState<InjectedAccount>()
 
+  const [isCFGBalanceZero, setCFGBalanceIsZero] = React.useState<boolean | undefined>()
+
   React.useEffect(() => {
     selectCentAcc(cWallet.accounts[0])
   }, [cWallet.accounts[0]?.addrCentChain])
+
+  React.useEffect(() => {
+    ;(async () => {
+      if (selectedCentAcc) {
+        const account = await centChainService().account(selectedCentAcc.addrCentChain)
+
+        // @ts-expect-error
+        if (account?.data?.free) {
+          // @ts-expect-error
+          const freeBalance = new BN(account.data.free.toString())
+
+          setCFGBalanceIsZero(freeBalance.isNeg() || freeBalance.isZero())
+        }
+      }
+    })()
+  }, [selectedCentAcc])
 
   const [status, , setTxId] = useTransactionState()
 
@@ -108,6 +129,15 @@ const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: Trans
         <LinkingAlert />
         <HelpText>Make sure to select the correct account – linking the account cannot be undone</HelpText>
       </LinkingWarning>
+      {isCFGBalanceZero && (
+        <LinkingWarning>
+          <LinkingAlert />
+          <HelpText>
+            This account does not hold any CFG to cover transaction costs for the linking transaction. CFG is available
+            on many exchanges.
+          </HelpText>
+        </LinkingWarning>
+      )}
       <div>
         <Select
           options={cWallet.accounts}
