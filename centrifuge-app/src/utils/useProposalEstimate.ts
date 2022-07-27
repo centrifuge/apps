@@ -24,7 +24,7 @@ export function useProposalEstimate(formValues: PoolMetadataInput) {
         const connectedCent = centrifuge.connect(selectedAccount?.address, selectedAccount?.signer as any)
         return combineLatest([
           centrifuge.getApi(),
-          connectedCent.pools.createPool(args, { batch: true, skipMetadataPin: true })
+          connectedCent.pools.createPool(args, { batch: true, paymentInfo: selectedAccount.address }),
         ]).pipe(
           map(([api, submittable]) => {
             const { minimumDeposit, preimageByteDeposit } = api.consts.democracy
@@ -93,7 +93,7 @@ export function useProposalEstimate(formValues: PoolMetadataInput) {
   }, [formValues, getProposeFee])
 
   return {
-    proposeFee
+    proposeFee,
   }
 }
 

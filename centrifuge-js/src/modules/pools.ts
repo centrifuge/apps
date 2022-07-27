@@ -1,6 +1,7 @@
 import { StorageKey, u32 } from '@polkadot/types'
+import { hash } from '@stablelib/blake2b'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, from, of } from 'rxjs'
+import { combineLatest, EMPTY, expand, firstValueFrom, Observable, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
@@ -9,7 +10,6 @@ import { getRandomUint, isSameAddress } from '../utils'
 import { Balance, Perquintill, Price, Rate } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
 import { PoolMetadata, PoolMetadataInput } from './metadata'
-import { hash } from '@stablelib/blake2b'
 
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
@@ -45,28 +45,28 @@ export type PoolRoles = {
 
 export type LoanInfoInput =
   | {
-    type: 'BulletLoan'
-    advanceRate: BN
-    probabilityOfDefault: BN
-    lossGivenDefault: BN
-    value: BN
-    discountRate: BN
-    maturityDate: string
-  }
+      type: 'BulletLoan'
+      advanceRate: BN
+      probabilityOfDefault: BN
+      lossGivenDefault: BN
+      value: BN
+      discountRate: BN
+      maturityDate: string
+    }
   | {
-    type: 'CreditLine'
-    advanceRate: BN
-    value: BN
-  }
+      type: 'CreditLine'
+      advanceRate: BN
+      value: BN
+    }
   | {
-    type: 'CreditLineWithMaturity'
-    advanceRate: BN
-    probabilityOfDefault: BN
-    value: BN
-    discountRate: BN
-    maturityDate: string
-    lossGivenDefault: BN
-  }
+      type: 'CreditLineWithMaturity'
+      advanceRate: BN
+      probabilityOfDefault: BN
+      value: BN
+      discountRate: BN
+      maturityDate: string
+      lossGivenDefault: BN
+    }
 
 const LOAN_INPUT_TRANSFORM = {
   value: (v: BN) => v.toString(),
@@ -143,13 +143,13 @@ export type LoanInfo = BulletLoan | CreditLine | CreditLineWithMaturity
 
 type TrancheDetailsData = {
   trancheType:
-  | { residual: null }
-  | {
-    nonResidual: {
-      interestRatePerSec: string
-      minRiskBuffer: string
-    }
-  }
+    | { residual: null }
+    | {
+        nonResidual: {
+          interestRatePerSec: string
+          minRiskBuffer: string
+        }
+      }
   seniority: number
   outstandingInvestOrders: number
   outstandingRedeemOrders: number
@@ -396,7 +396,6 @@ const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
 const MAX_ATTEMPTS = 10
-const MOCK_METADATA_HASH = 'xxx'
 
 export function getPoolsModule(inst: Centrifuge) {
   function createPool(
@@ -414,11 +413,18 @@ export function getPoolsModule(inst: Centrifuge) {
   ) {
     const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, writeOffGroups] = args
 
-    const $poolIcon = inst.metadata.pinFile({ fileDataUri: metadata.poolIcon, fileName: 'poolIcon' })
-    const $issuerLogo = metadata?.issuerLogo ? inst.metadata.pinFile({ fileDataUri: metadata.issuerLogo, fileName: 'issuerLogo' }) : from([])
-    const $executiveSummary = inst.metadata.pinFile({ fileDataUri: metadata.executiveSummary, fileName: 'execSummary' })
-    const $uris = combineLatest({ poolIcon: $poolIcon, issuerLogo: $issuerLogo, executiveSummary: $executiveSummary })
-
+    let $uris: Observable<any> = of(null)
+    if (!options?.paymentInfo) {
+      const $poolIcon = inst.metadata.pinFile({ fileDataUri: metadata.poolIcon, fileName: 'poolIcon' })
+      const $issuerLogo = metadata?.issuerLogo
+        ? inst.metadata.pinFile({ fileDataUri: metadata.issuerLogo, fileName: 'issuerLogo' })
+        : of(null)
+      const $executiveSummary = inst.metadata.pinFile({
+        fileDataUri: metadata.executiveSummary,
+        fileName: 'execSummary',
+      })
+      $uris = combineLatest({ poolIcon: $poolIcon, issuerLogo: $issuerLogo, executiveSummary: $executiveSummary })
+    }
 
     const trancheInput = tranches.map((t) => [
       t.interestRatePerSec
@@ -429,8 +435,8 @@ export function getPoolsModule(inst: Centrifuge) {
     const $api = inst.getApi()
     return combineLatest([$api, $uris]).pipe(
       switchMap(([api, fileURIs]) => {
-        const formattedMetadata = formatPoolMetadata(metadata, poolId, fileURIs)
-        const $metadataURI = inst.metadata.pinJson(formattedMetadata)
+        const formattedMetadata = !options?.paymentInfo ? formatPoolMetadata(metadata, poolId, fileURIs) : {}
+        const $metadataURI = !options?.paymentInfo ? inst.metadata.pinJson(formattedMetadata) : of('')
         return combineLatest([$metadataURI]).pipe(
           switchMap(([metadataURI]) => {
             const submittable = api.tx.utility.batchAll(
@@ -865,10 +871,10 @@ export function getPoolsModule(inst: Centrifuge) {
         const debtWithMargin =
           loan?.status === 'Active'
             ? loan.outstandingDebt
-              .toDecimal()
-              .add(
-                loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(secondsPerHour))
-              )
+                .toDecimal()
+                .add(
+                  loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(secondsPerHour))
+                )
             : Dec(0)
         const amount = Balance.fromFloat(debtWithMargin || 0).toString()
         const submittable = api.tx.utility.batchAll([
