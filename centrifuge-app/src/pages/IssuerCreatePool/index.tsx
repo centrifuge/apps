@@ -178,6 +178,7 @@ const CreatePoolForm: React.VFC = () => {
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [preimageHash, setPreimageHash] = React.useState('')
+  const [metadataHash, setMetadataHash] = React.useState('')
   const [proposeFee, setProposeFee] = React.useState<Balance | null>(null)
 
   // Retrieve the submittable with data currently in the form to see how much the transaction would cost
@@ -321,6 +322,9 @@ const CreatePoolForm: React.VFC = () => {
 
       const metadataHash = await pinPoolMetadata(values, poolId)
 
+      console.log('Pool metadata hash', metadataHash)
+      setMetadataHash(metadataHash)
+
       // tranches must be reversed (most junior is the first in the UI but the last in the API)
       const noJuniorTranches = values.tranches.slice(1)
       const tranches = [
@@ -440,7 +444,12 @@ const CreatePoolForm: React.VFC = () => {
 
   return (
     <>
-      <PreimageHashDialog hash={preimageHash} open={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
+      <PreimageHashDialog
+        preimageHash={preimageHash}
+        metadataHash={metadataHash}
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+      />
       <FormikProvider value={form}>
         <Form ref={formRef}>
           <PageHeader

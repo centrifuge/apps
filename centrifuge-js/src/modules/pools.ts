@@ -409,7 +409,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, writeOffGroups] = args
+    const [admin, poolId, , tranches, currency, maxReserve, , writeOffGroups] = args
 
     const $api = inst.getApi()
 
@@ -421,29 +421,37 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.utility.batchAll(
-          [
-            api.tx.uniques.create(collectionId, LoanPalletAccountId),
-            api.tx.pools.create(admin, poolId, trancheInput, currency, maxReserve.toString()),
-            api.tx.pools.setMetadata(poolId, metadata),
-            api.tx.permissions.add(
-              { PoolRole: 'PoolAdmin' },
-              inst.getSignerAddress(),
-              { Pool: poolId },
-              {
-                PoolRole: 'LoanAdmin',
-              }
-            ),
-            api.tx.loans.initialisePool(poolId, collectionId),
-          ].concat(
-            writeOffGroups.map((g) =>
-              api.tx.loans.addWriteOffGroup(poolId, {
-                percentage: g.percentage.toString(),
-                overdueDays: g.overdueDays,
-                penaltyInterestRatePerSec: null,
-              })
-            )
-          )
+        const submittable = api.tx.pools.create(admin, poolId, trancheInput, currency, maxReserve.toString())
+        // api.tx.utility.batchAll(
+        //   [
+        //     api.tx.uniques.create(collectionId, LoanPalletAccountId),
+        //     api.tx.pools.create(inst.getSignerAddress(), poolId, trancheInput, currency, maxReserve.toString()),
+        //     api.tx.pools.setMetadata(poolId, metadata),
+        //     api.tx.permissions.add(
+        //       { PoolRole: 'PoolAdmin' },
+        //       admin,
+        //       { Pool: poolId },
+        //       {
+        //         PoolRole: 'LoanAdmin',
+        //       }
+        //     ),
+        //     api.tx.loans.initialisePool(poolId, collectionId),
+        //   ].concat(
+        //     writeOffGroups.map((g) =>
+        //       api.tx.loans.addWriteOffGroup(poolId, {
+        //         percentage: g.percentage.toString(),
+        //         overdueDays: g.overdueDays,
+        //         penaltyInterestRatePerSec: null,
+        //       })
+        //     )
+        //   )
+        // )
+        console.log(
+          'writeOffGroups',
+          writeOffGroups.map((g) => ({
+            percentage: g.percentage.toString(),
+            overdueDays: g.overdueDays,
+          }))
         )
         if (options?.createType === 'propose') {
           const proposalSubmittable = api.tx.utility.batchAll([

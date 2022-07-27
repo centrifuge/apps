@@ -3,27 +3,45 @@ import * as React from 'react'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 
 export const PreimageHashDialog: React.FC<{
-  hash: string
+  preimageHash: string
+  metadataHash: string
   open: boolean
   onClose: () => void
-}> = ({ hash, open, onClose }) => {
+}> = ({ preimageHash, metadataHash, open, onClose }) => {
   return (
     <Dialog isOpen={open} onClose={onClose} width="684px">
       <Box display="flex">
-        <Stack gap="3">
-          <Text variant="heading2">Preimage hash</Text>
-          <Box alignSelf="flex-end">
-            <Text
-              style={{
-                cursor: 'copy',
-                wordBreak: 'break-word',
-                whiteSpace: 'normal',
-              }}
-              onClick={() => copyToClipboard(hash)}
-            >
-              {hash}
-            </Text>
-          </Box>
+        <Stack gap={3}>
+          <Stack>
+            <Text variant="heading2">Preimage hash</Text>
+            <Box alignSelf="flex-end">
+              <Text
+                style={{
+                  cursor: 'copy',
+                  wordBreak: 'break-word',
+                  whiteSpace: 'normal',
+                }}
+                onClick={() => copyToClipboard(preimageHash)}
+              >
+                {preimageHash}
+              </Text>
+            </Box>
+          </Stack>
+          <Stack>
+            <Text variant="heading2">Metadata hash</Text>
+            <Box alignSelf="flex-end">
+              <Text
+                style={{
+                  cursor: 'copy',
+                  wordBreak: 'break-word',
+                  whiteSpace: 'normal',
+                }}
+                onClick={() => copyToClipboard(metadataHash)}
+              >
+                {metadataHash}
+              </Text>
+            </Box>
+          </Stack>
         </Stack>
       </Box>
     </Dialog>
