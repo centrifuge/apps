@@ -11,7 +11,7 @@ const handler = async (event) => {
 
     const fileHash = pinJsonResponse.data.IpfsHash
     const fileURL = ipfsHashToURI(fileHash)
-    return { statusCode: 201, body: JSON.stringify({ uri: fileURL }) }
+    return { statusCode: 201, body: JSON.stringify({ uri: fileURL, ipfsHash: fileHash }) }
   } catch (e) {
     console.log(e)
     return { statusCode: 500, body: e.message || 'Server error' }

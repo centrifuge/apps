@@ -1,4 +1,5 @@
-import Centrifuge, { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
+import { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
+import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/metadata'
 import {
   Box,
   Button,
@@ -11,11 +12,10 @@ import {
   TextInput,
   Thumbnail,
 } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
-import { combineLatest, filter, map, of, Subject, switchMap } from 'rxjs'
+import { filter } from 'rxjs'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
@@ -24,7 +24,6 @@ import { PageSection } from '../../components/PageSection'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
-import { useWeb3 } from '../../components/Web3Provider'
 import { config } from '../../config'
 import { formatBalance } from '../../utils/formatting'
 import { getFileDataURI } from '../../utils/getFileDataURI'
@@ -33,8 +32,8 @@ import { useBalances } from '../../utils/useBalances'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { useCurrencies } from '../../utils/useCurrencies'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
+import { useProposalEstimate } from '../../utils/useProposalEstimate'
 import { truncate } from '../../utils/web3'
-import { pinPoolMetadata } from './pinPoolMetadata'
 import { RiskGroupsInput } from './RiskGroupsInput'
 import { TrancheInput } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
@@ -76,31 +75,6 @@ export interface WriteOffGroup {
   days: number | ''
   writeOff: number | ''
 }
-export interface PoolFormValues {
-  // details
-  poolIcon: File | null
-  poolName: string
-  assetClass: string
-  currency: string
-  maxReserve: number | ''
-  epochHours: number | ''
-  epochMinutes: number | ''
-
-  // issuer
-  issuerName: string
-  issuerLogo: File | null
-  issuerDescription: string
-
-  executiveSummary: File | null
-  website: string
-  forum: string
-  email: string
-
-  // tranche
-  tranches: Tranche[]
-  riskGroups: RiskGroup[]
-  writeOffGroups: WriteOffGroup[]
-}
 
 export const createEmptyTranche = (junior?: boolean): Tranche => ({
   tokenName: '',
@@ -124,7 +98,7 @@ export const createEmptyWriteOffGroup = (): WriteOffGroup => ({
   writeOff: '',
 })
 
-const initialValues: PoolFormValues = {
+const initialValues: PoolMetadataInput = {
   poolIcon: null,
   poolName: '',
   assetClass: DEFAULT_ASSET_CLASS,
@@ -165,53 +139,16 @@ const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children
   )
 }
 
-type CreatePoolArgs = Parameters<Centrifuge['pools']['createPool']>[0]
-
 const CreatePoolForm: React.VFC = () => {
   const address = useAddress()
   const centrifuge = useCentrifuge()
   const currencies = useCurrencies()
   const history = useHistory()
   const balances = useBalances(address)
-  const { selectedAccount } = useWeb3()
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [preimageHash, setPreimageHash] = React.useState('')
-  const [proposeFee, setProposeFee] = React.useState<Balance | null>(null)
-
-  // Retrieve the submittable with data currently in the form to see how much the transaction would cost
-  // Only for when the pool creation goes via democracy
-  const [$proposeFee, feeSubject] = React.useMemo(() => {
-    const subject = new Subject<CreatePoolArgs>()
-    const $fee = subject.pipe(
-      switchMap((args) => {
-        if (!selectedAccount) return of(null)
-        const connectedCent = centrifuge.connect(selectedAccount?.address, selectedAccount?.signer as any)
-        return combineLatest([centrifuge.getApi(), connectedCent.pools.createPool(args, { batch: true })]).pipe(
-          map(([api, submittable]) => {
-            const { minimumDeposit, preimageByteDeposit } = api.consts.democracy
-            const feeBN = hexToBN(minimumDeposit.toHex()).add(
-              hexToBN(preimageByteDeposit.toHex()).mul(new BN((submittable as any).encodedLength))
-            )
-            return new Balance(feeBN)
-          })
-        )
-      })
-    )
-    return [$fee, subject] as const
-  }, [centrifuge, selectedAccount])
-
-  React.useEffect(() => {
-    const sub = $proposeFee.subscribe({
-      next: (val) => {
-        setProposeFee(val)
-      },
-    })
-    return () => {
-      sub.unsubscribe()
-    }
-  }, [$proposeFee])
 
   React.useEffect(() => {
     // If the hash can't be found on Pinata the request can take a long time to time out
@@ -219,8 +156,6 @@ const CreatePoolForm: React.VFC = () => {
     // Set a deadline for how long we're willing to wait on a stored issuer
     setTimeout(() => setWaitingForStoredIssuer(false), 10000)
   }, [])
-
-  const cent = useCentrifuge()
 
   const txMessage = {
     immediate: 'Create pool',
@@ -314,15 +249,24 @@ const CreatePoolForm: React.VFC = () => {
     },
     validateOnMount: true,
     onSubmit: async (values, { setSubmitting }) => {
+      const metadataValues = { ...values }
       if (!address) return
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
       const collectionId = await centrifuge.nfts.getAvailableCollectionId()
 
-      const metadataHash = await pinPoolMetadata(values, poolId)
+      const [poolIconUri, issuerLogoUri, executiveSummaryUri] = await Promise.all([
+        metadataValues?.poolIcon ? getFileDataURI(metadataValues.poolIcon as any) : null,
+        metadataValues?.issuerLogo ? getFileDataURI(metadataValues.issuerLogo as any) : null,
+        metadataValues?.executiveSummary ? getFileDataURI(metadataValues.executiveSummary as any) : null,
+      ])
+
+      metadataValues.issuerLogo = issuerLogoUri
+      metadataValues.executiveSummary = executiveSummaryUri
+      metadataValues.poolIcon = poolIconUri
 
       // tranches must be reversed (most junior is the first in the UI but the last in the API)
-      const noJuniorTranches = values.tranches.slice(1)
+      const noJuniorTranches = metadataValues.tranches.slice(1)
       const tranches = [
         {}, // most junior tranche
         ...noJuniorTranches.map((tranche) => ({
@@ -331,14 +275,15 @@ const CreatePoolForm: React.VFC = () => {
         })),
       ]
 
-      const writeOffGroups = values.writeOffGroups.map((g) => ({
+      const writeOffGroups = metadataValues.writeOffGroups.map((g) => ({
         overdueDays: g.days as number,
         percentage: Rate.fromPercent(g.writeOff),
       }))
 
       // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
-      const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
+      const currency =
+        metadataValues.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : metadataValues.currency
 
       createPoolTx(
         [
@@ -347,8 +292,8 @@ const CreatePoolForm: React.VFC = () => {
           collectionId,
           tranches,
           currency,
-          Balance.fromFloat(values.maxReserve),
-          metadataHash,
+          Balance.fromFloat(metadataValues.maxReserve),
+          metadataValues,
           writeOffGroups,
         ],
         { createType: config.poolCreationType }
@@ -370,51 +315,9 @@ const CreatePoolForm: React.VFC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isStoredIssuerLoading])
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const getProposeFee = React.useCallback(
-    debounce((values: PoolFormValues) => {
-      if (!address) return
-
-      const noJuniorTranches = values.tranches.slice(1)
-      const tranches = [
-        {},
-        ...noJuniorTranches.map((tranche) => ({
-          interestRatePerSec: Rate.fromAprPercent(tranche.interestRate || 0),
-          minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer || 0),
-        })),
-      ]
-
-      const writeOffGroups = values.writeOffGroups.map((g) => ({
-        overdueDays: g.days as number,
-        percentage: Rate.fromPercent(g.writeOff || 0),
-      }))
-
-      const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
-
-      // Complete the data in the form with some dummy data for things like poolId and metadata hash
-      feeSubject.next([
-        address,
-        '1234567890',
-        '1234567890',
-        tranches,
-        currency,
-        Balance.fromFloat(values.maxReserve || 0),
-        'x'.repeat(46),
-        writeOffGroups,
-      ])
-    }, 1000),
-    []
-  )
-
-  React.useEffect(() => {
-    if (config.poolCreationType !== 'immediate') {
-      getProposeFee(form.values)
-    }
-  }, [form.values, getProposeFee])
-
   React.useEffect(() => {
     if (config.poolCreationType === 'notePreimage') {
-      const $events = cent
+      const $events = centrifuge
         .getEvents()
         .pipe(
           filter(({ api, events }) => {
@@ -433,10 +336,12 @@ const CreatePoolForm: React.VFC = () => {
         .subscribe()
       return () => $events.unsubscribe()
     }
-  }, [cent])
+  }, [centrifuge])
 
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
+
+  const { proposeFee } = useProposalEstimate(form?.values)
 
   return (
     <>
@@ -668,18 +573,4 @@ const CreatePoolForm: React.VFC = () => {
       </FormikProvider>
     </>
   )
-}
-
-function hexToBN(value: string | number) {
-  if (typeof value === 'number') return new BN(value)
-  return new BN(value.toString().substring(2), 'hex')
-}
-
-function debounce<T extends Function>(cb: T, wait = 20) {
-  let h: any
-  function callable(...args: any) {
-    clearTimeout(h)
-    h = setTimeout(() => cb(...args), wait)
-  }
-  return callable as any as T
 }

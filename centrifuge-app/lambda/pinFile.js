@@ -51,7 +51,7 @@ const handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ uri: fileURL }),
+      body: JSON.stringify({ uri: fileURL, ipfsHash: fileHash }),
     }
   } catch (e) {
     console.log(e)

@@ -1,13 +1,15 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
+import { combineLatest, EMPTY, expand, firstValueFrom, from, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
-import { CentrifugeBase } from '../CentrifugeBase'
+import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import { SubqueryPoolSnapshot } from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
 import { Balance, Perquintill, Price, Rate } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
+import { PoolMetadata, PoolMetadataInput } from './metadata'
+import { hash } from '@stablelib/blake2b'
 
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
@@ -43,28 +45,28 @@ export type PoolRoles = {
 
 export type LoanInfoInput =
   | {
-      type: 'BulletLoan'
-      advanceRate: BN
-      probabilityOfDefault: BN
-      lossGivenDefault: BN
-      value: BN
-      discountRate: BN
-      maturityDate: string
-    }
+    type: 'BulletLoan'
+    advanceRate: BN
+    probabilityOfDefault: BN
+    lossGivenDefault: BN
+    value: BN
+    discountRate: BN
+    maturityDate: string
+  }
   | {
-      type: 'CreditLine'
-      advanceRate: BN
-      value: BN
-    }
+    type: 'CreditLine'
+    advanceRate: BN
+    value: BN
+  }
   | {
-      type: 'CreditLineWithMaturity'
-      advanceRate: BN
-      probabilityOfDefault: BN
-      value: BN
-      discountRate: BN
-      maturityDate: string
-      lossGivenDefault: BN
-    }
+    type: 'CreditLineWithMaturity'
+    advanceRate: BN
+    probabilityOfDefault: BN
+    value: BN
+    discountRate: BN
+    maturityDate: string
+    lossGivenDefault: BN
+  }
 
 const LOAN_INPUT_TRANSFORM = {
   value: (v: BN) => v.toString(),
@@ -141,13 +143,13 @@ export type LoanInfo = BulletLoan | CreditLine | CreditLineWithMaturity
 
 type TrancheDetailsData = {
   trancheType:
-    | { residual: null }
-    | {
-        nonResidual: {
-          interestRatePerSec: string
-          minRiskBuffer: string
-        }
-      }
+  | { residual: null }
+  | {
+    nonResidual: {
+      interestRatePerSec: string
+      minRiskBuffer: string
+    }
+  }
   seniority: number
   outstandingInvestOrders: number
   outstandingRedeemOrders: number
@@ -394,8 +396,9 @@ const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
 const MAX_ATTEMPTS = 10
+const MOCK_METADATA_HASH = 'xxx'
 
-export function getPoolsModule(inst: CentrifugeBase) {
+export function getPoolsModule(inst: Centrifuge) {
   function createPool(
     args: [
       admin: string,
@@ -404,14 +407,18 @@ export function getPoolsModule(inst: CentrifugeBase) {
       tranches: TrancheInput[],
       currency: string | { permissioned: string },
       maxReserve: BN,
-      metadata: string,
+      metadata: PoolMetadataInput,
       writeOffGroups: { overdueDays: number; percentage: BN }[]
     ],
     options?: TransactionOptions
   ) {
     const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, writeOffGroups] = args
 
-    const $api = inst.getApi()
+    const $poolIcon = inst.metadata.pinFile({ fileDataUri: metadata.poolIcon, fileName: 'poolIcon' })
+    const $issuerLogo = metadata?.issuerLogo ? inst.metadata.pinFile({ fileDataUri: metadata.issuerLogo, fileName: 'issuerLogo' }) : from([])
+    const $executiveSummary = inst.metadata.pinFile({ fileDataUri: metadata.executiveSummary, fileName: 'execSummary' })
+    const $uris = combineLatest({ poolIcon: $poolIcon, issuerLogo: $issuerLogo, executiveSummary: $executiveSummary })
+
 
     const trancheInput = tranches.map((t) => [
       t.interestRatePerSec
@@ -419,44 +426,51 @@ export function getPoolsModule(inst: CentrifugeBase) {
         : 'Residual',
     ])
 
-    return $api.pipe(
-      switchMap((api) => {
-        const submittable = api.tx.utility.batchAll(
-          [
-            api.tx.uniques.create(collectionId, LoanPalletAccountId),
-            api.tx.pools.create(admin, poolId, trancheInput, currency, maxReserve.toString()),
-            api.tx.pools.setMetadata(poolId, metadata),
-            api.tx.permissions.add(
-              { PoolRole: 'PoolAdmin' },
-              inst.getSignerAddress(),
-              { Pool: poolId },
-              {
-                PoolRole: 'LoanAdmin',
-              }
-            ),
-            api.tx.loans.initialisePool(poolId, collectionId),
-          ].concat(
-            writeOffGroups.map((g) =>
-              api.tx.loans.addWriteOffGroup(poolId, {
-                percentage: g.percentage.toString(),
-                overdueDays: g.overdueDays,
-                penaltyInterestRatePerSec: null,
-              })
+    const $api = inst.getApi()
+    return combineLatest([$api, $uris]).pipe(
+      switchMap(([api, fileURIs]) => {
+        const formattedMetadata = formatPoolMetadata(metadata, poolId, fileURIs)
+        const $metadataURI = inst.metadata.pinJson(formattedMetadata)
+        return combineLatest([$metadataURI]).pipe(
+          switchMap(([metadataURI]) => {
+            const submittable = api.tx.utility.batchAll(
+              [
+                api.tx.uniques.create(collectionId, LoanPalletAccountId),
+                api.tx.pools.create(admin, poolId, trancheInput, currency, maxReserve.toString()),
+                api.tx.pools.setMetadata(poolId, metadataURI),
+                api.tx.permissions.add(
+                  { PoolRole: 'PoolAdmin' },
+                  inst.getSignerAddress(),
+                  { Pool: poolId },
+                  {
+                    PoolRole: 'LoanAdmin',
+                  }
+                ),
+                api.tx.loans.initialisePool(poolId, collectionId),
+              ].concat(
+                writeOffGroups.map((g) =>
+                  api.tx.loans.addWriteOffGroup(poolId, {
+                    percentage: g.percentage.toString(),
+                    overdueDays: g.overdueDays,
+                    penaltyInterestRatePerSec: null,
+                  })
+                )
+              )
             )
-          )
+            if (options?.createType === 'propose') {
+              const proposalSubmittable = api.tx.utility.batchAll([
+                api.tx.democracy.notePreimage(submittable.method.toHex()),
+                api.tx.democracy.propose(submittable.method.hash, api.consts.democracy.minimumDeposit),
+              ])
+              return inst.wrapSignAndSend(api, proposalSubmittable, options)
+            }
+            if (options?.createType === 'notePreimage') {
+              const preimageSubmittable = api.tx.democracy.notePreimage(submittable.method.toHex())
+              return inst.wrapSignAndSend(api, preimageSubmittable, options)
+            }
+            return inst.wrapSignAndSend(api, submittable, options)
+          })
         )
-        if (options?.createType === 'propose') {
-          const proposalSubmittable = api.tx.utility.batchAll([
-            api.tx.democracy.notePreimage(submittable.method.toHex()),
-            api.tx.democracy.propose(submittable.method.hash, api.consts.democracy.minimumDeposit),
-          ])
-          return inst.wrapSignAndSend(api, proposalSubmittable, options)
-        }
-        if (options?.createType === 'notePreimage') {
-          const preimageSubmittable = api.tx.democracy.notePreimage(submittable.method.toHex())
-          return inst.wrapSignAndSend(api, preimageSubmittable, options)
-        }
-        return inst.wrapSignAndSend(api, submittable, options)
       })
     )
   }
@@ -851,10 +865,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
         const debtWithMargin =
           loan?.status === 'Active'
             ? loan.outstandingDebt
-                .toDecimal()
-                .add(
-                  loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(secondsPerHour))
-                )
+              .toDecimal()
+              .add(
+                loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(secondsPerHour))
+              )
             : Dec(0)
         const amount = Balance.fromFloat(debtWithMargin || 0).toString()
         const submittable = api.tx.utility.batchAll([
@@ -1616,4 +1630,69 @@ function getOutstandingDebt(loan: ActiveLoanData, interestAccrual?: InterestAccr
 const getLoanStatus = (loanValue: LoanData) => {
   const status = Object.keys(loanValue.status)[0]
   return `${status.charAt(0).toUpperCase()}${status.slice(1)}` as LoanStatus
+}
+
+const computeTrancheId = (trancheIndex: number, poolId: string) => {
+  const a = new BN(trancheIndex).toArray('le', 8)
+  const b = new BN(poolId).toArray('le', 8)
+  const data = Uint8Array.from(a.concat(b))
+
+  return toHex(hash(data, 16))
+}
+
+function toHex(data: Uint8Array) {
+  const hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
+  const out = []
+
+  for (let i = 0; i < data.length; i++) {
+    out.push(hex[(data[i] >> 4) & 0xf])
+    out.push(hex[data[i] & 0xf])
+  }
+  return `0x${out.join('')}`
+}
+
+type FileURIs = {
+  poolIcon: { uri: string }
+  issuerLogo: { uri: string }
+  executiveSummary: { uri: string }
+}
+
+function formatPoolMetadata(metadata: PoolMetadataInput, poolId: string, fileURIs: FileURIs): PoolMetadata {
+  const tranchesById: PoolMetadata['tranches'] = {}
+  metadata.tranches.forEach((tranche, index) => {
+    tranchesById[computeTrancheId(index, poolId)] = {
+      name: tranche.tokenName,
+      symbol: tranche.symbolName,
+      minInitialInvestment: Balance.fromFloat(tranche.minInvestment).toString(),
+    }
+  })
+
+  return {
+    pool: {
+      name: metadata.poolName,
+      icon: fileURIs.poolIcon?.uri || '',
+      asset: { class: metadata.assetClass },
+      issuer: {
+        name: metadata.issuerName,
+        description: metadata.issuerDescription,
+        email: metadata.email,
+        logo: fileURIs.issuerLogo?.uri || '',
+      },
+      links: {
+        executiveSummary: fileURIs.executiveSummary?.uri || '',
+        forum: metadata.forum,
+        website: metadata.website,
+      },
+      status: 'open',
+    },
+    tranches: tranchesById,
+    riskGroups: metadata.riskGroups.map((group) => ({
+      name: group.groupName,
+      advanceRate: Rate.fromPercent(group.advanceRate).toString(),
+      interestRatePerSec: Rate.fromAprPercent(group.fee).toString(),
+      probabilityOfDefault: Rate.fromPercent(group.probabilityOfDefault).toString(),
+      lossGivenDefault: Rate.fromPercent(group.lossGivenDefault).toString(),
+      discountRate: Rate.fromAprPercent(group.discountRate).toString(),
+    })),
+  }
 }
