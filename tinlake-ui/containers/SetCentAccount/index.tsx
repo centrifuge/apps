@@ -4,6 +4,7 @@ import { ethers } from 'ethers'
 import { Box, Button, Select } from 'grommet'
 import { CircleAlert } from 'grommet-icons'
 import * as React from 'react'
+import { useQuery } from 'react-query'
 import { connect, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { Tooltip } from '../../components/Tooltip'
@@ -44,15 +45,14 @@ const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: Trans
   const { data: ethLink, refetch: refetchEthLink } = useEthLink()
   const [selectedCentAcc, selectCentAcc] = React.useState<InjectedAccount>()
 
-  const [isCFGBalanceZero, setCFGBalanceIsZero] = React.useState<boolean | undefined>()
-
   React.useEffect(() => {
     selectCentAcc(cWallet.accounts[0])
   }, [cWallet.accounts[0]?.addrCentChain])
 
-  React.useEffect(() => {
-    ;(async () => {
-      if (selectedCentAcc) {
+  const { data: isCFGBalanceZero } = useQuery(
+    ['balance', selectedCentAcc?.addrCentChain],
+    async () => {
+      if (selectedCentAcc?.addrCentChain) {
         const account = await centChainService().account(selectedCentAcc.addrCentChain)
 
         // @ts-expect-error
@@ -60,11 +60,12 @@ const SetCentAccount: React.FC<TransactionProps> = ({ createTransaction }: Trans
           // @ts-expect-error
           const freeBalance = new BN(account.data.free.toString())
 
-          setCFGBalanceIsZero(freeBalance.isNeg() || freeBalance.isZero())
+          return freeBalance.isNeg() || freeBalance.isZero()
         }
       }
-    })()
-  }, [selectedCentAcc])
+    },
+    { enabled: selectedCentAcc !== undefined }
+  )
 
   const [status, , setTxId] = useTransactionState()
 
