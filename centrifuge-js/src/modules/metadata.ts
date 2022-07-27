@@ -10,11 +10,19 @@ export function getMetadataModule(inst: Centrifuge) {
     return inst.getMetadataObservable<T>(url)
   }
 
-  function pinFile(metadata: Record<any, any>): Observable<{ uri: string; ipfsHash: string }> {
+  function pinFile(metadata: {
+    fileDataUri?: string
+    fileName?: string
+  }): Observable<{ uri: string; ipfsHash: string }> {
     if (!inst.config?.pinFile) {
       console.error('pinFile must be set in config to use this feature')
       return from([])
     }
+    if (!metadata.fileDataUri || !metadata.fileName) {
+      console.error('fileDataUri or fileName not provided')
+      return from([])
+    }
+
     return from(
       inst.config.pinFile({
         method: 'POST',
@@ -25,15 +33,18 @@ export function getMetadataModule(inst: Centrifuge) {
   }
 
   function pinJson(metadata: Record<any, any>): Observable<{ uri: string; ipfsHash: string }> {
-    if (!inst.config.pinJson) {
-      console.error('pinJson must be set in config to use this feature')
+    if (!inst.config.pinFile) {
+      console.error('pinFile must be set in config to use this feature')
       return from([])
     }
+
+    const file = jsonToBase64(metadata)
+
     return from(
-      inst.config.pinJson({
+      inst.config.pinFile({
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(metadata),
+        body: JSON.stringify({ fileDataUri: file, fileName: `pin-file-${Math.random().toString().slice(8)}` }),
       })
     ).pipe(first())
   }
@@ -62,4 +73,13 @@ export function getMetadataModule(inst: Centrifuge) {
   }
 
   return { getMetadata, parseMetadataUrl, pinFile, pinJson }
+}
+
+function jsonToBase64(jsonInput: Record<any, any>) {
+  try {
+    const json = JSON.stringify(jsonInput)
+    return btoa(json)
+  } catch (error) {
+    throw new Error('Invalid JSON')
+  }
 }

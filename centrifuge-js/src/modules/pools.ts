@@ -522,12 +522,12 @@ export function getPoolsModule(inst: Centrifuge) {
 
     let $uris: Observable<any> = of(null)
     if (!options?.paymentInfo) {
-      const $poolIcon = inst.metadata.pinFile({ fileDataUri: metadata.poolIcon, fileName: 'poolIcon' })
+      const $poolIcon = inst.metadata.pinFile({ fileDataUri: metadata.poolIcon as string, fileName: 'poolIcon' })
       const $issuerLogo = metadata?.issuerLogo
-        ? inst.metadata.pinFile({ fileDataUri: metadata.issuerLogo, fileName: 'issuerLogo' })
+        ? inst.metadata.pinFile({ fileDataUri: metadata.issuerLogo as string, fileName: 'issuerLogo' })
         : of(null)
       const $executiveSummary = inst.metadata.pinFile({
-        fileDataUri: metadata.executiveSummary,
+        fileDataUri: metadata.executiveSummary as string,
         fileName: 'execSummary',
       })
       $uris = combineLatest({ poolIcon: $poolIcon, issuerLogo: $issuerLogo, executiveSummary: $executiveSummary })

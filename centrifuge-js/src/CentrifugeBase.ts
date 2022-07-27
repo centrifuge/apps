@@ -40,7 +40,6 @@ export type Config = {
   altairSubqueryUrl: string
   metadataHost: string
   pinFile?: (values: any) => Promise<{ uri: string; ipfsHash: string }>
-  pinJson?: (values: any) => Promise<{ uri: string; ipfsHash: string }>
   signer?: Signer
   signingAddress?: AddressOrPair
   printExtrinsics?: boolean

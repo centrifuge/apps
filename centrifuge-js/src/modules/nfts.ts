@@ -275,13 +275,13 @@ export function getNftsModule(inst: Centrifuge) {
     const $image = inst.metadata.pinFile({ fileDataUri, fileName })
     const metadataURI = $image
       .pipe(
-        switchMap((metadataURI) =>
-          inst.metadata.pinJson({
+        switchMap((metadataURI) => {
+          return inst.metadata.pinJson({
             image: metadataURI.uri,
             name: metadata.name,
             description: metadata.description,
           })
-        )
+        })
       )
       .pipe(take(1))
     return combineLatest([$api, metadataURI]).pipe(
@@ -324,13 +324,13 @@ export function getNftsModule(inst: Centrifuge) {
     const $image = inst.metadata.pinFile({ fileDataUri, fileName })
     const metadataURI = $image
       .pipe(
-        switchMap((metadataURI) =>
-          inst.metadata.pinJson({
+        switchMap((metadataURI) => {
+          return inst.metadata.pinJson({
             image: metadataURI.uri,
             name: metadata.name,
             description: metadata.description,
           })
-        )
+        })
       )
       .pipe(take(1))
     return combineLatest([$api, metadataURI]).pipe(

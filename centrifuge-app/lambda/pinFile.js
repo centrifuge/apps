@@ -19,16 +19,6 @@ const dataUriToReadStream = ({ tempFilePath, fileDataUri }) => {
   return fs.createReadStream(tempFilePath)
 }
 
-function jsonToFile(jsonInput) {
-  const json = JSON.stringify(jsonInput)
-  let n = json.length
-  const bytes = new Uint8Array(n)
-  while (n--) {
-    bytes[n] = json.charCodeAt(n)
-  }
-  return new File([bytes], 'file.json', { type: 'application/json' })
-}
-
 const ipfsHashToURI = (hash) => `ipfs://ipfs/${hash}`
 
 const handler = async (event) => {
