@@ -257,6 +257,11 @@ const CreatePoolForm: React.VFC = () => {
         }
         tokenNames.add(t.tokenName)
 
+        // matches any character thats not alphanumeric or -
+        if (/[^a-z^A-Z^0-9^-]+/.test(t.symbolName)) {
+          errors = setIn(errors, `tranches.${i}.symbolName`, 'Invalid character detected')
+        }
+
         if (tokenSymbols.has(t.symbolName)) {
           errors = setIn(errors, `tranches.${i}.symbolName`, 'Token symbols must be unique')
         }
