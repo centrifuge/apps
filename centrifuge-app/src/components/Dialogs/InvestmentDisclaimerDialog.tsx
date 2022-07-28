@@ -25,7 +25,7 @@ export const InvestmentDisclaimerDialog: React.FC<{
             affiliates are not liable nor responsible for the information provided hereby.
             <br />
             <br />
-            Before investing in any of the pools, please check the issuer's offering materials and subscription
+            Before investing in any of the pools, please check the issuer&apos;s offering materials and subscription
             documents including the Executive Summary to understand the terms, conditions, and investment risks of each
             pool. The issuer provides investment risk factors which are important to understand when you consider
             whether to invest in a pool. You alone assume the sole responsibility of evaluating the merits and risks
