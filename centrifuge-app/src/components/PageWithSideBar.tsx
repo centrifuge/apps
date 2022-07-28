@@ -1,7 +1,9 @@
 import { Box, Stack } from '@centrifuge/fabric'
 import React from 'react'
 import { useTheme } from 'styled-components'
+import { config } from '../config'
 import { AccountsMenu } from './AccountsMenu'
+import { Footer } from './Footer'
 import { LoadBoundary } from './LoadBoundary'
 import { Menu } from './Menu'
 
@@ -21,17 +23,24 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
       gridAutoRows={['1fr auto auto', '1fr auto auto', 'auto']}
       minHeight="100vh"
     >
-      <Box
-        gridArea="menu"
-        position="sticky"
-        bottom={0}
-        zIndex={theme.zIndices.sticky + 1}
-        background="backgroundPrimary"
-        style={{
-          boxShadow: `0 -1px 0 ${theme.colors.borderSecondary}, 1px 0 0 ${theme.colors.borderSecondary}`,
-        }}
-      >
-        <Menu />
+      <Box>
+        <Box
+          gridArea="menu"
+          position="sticky"
+          bottom={0}
+          top={0}
+          height="100%"
+          zIndex={theme.zIndices.sticky + 1}
+          background={theme.colors.backgroundPrimary}
+          style={{
+            boxShadow: `0 -1px 0 ${theme.colors.borderSecondary}, 1px 0 0 ${theme.colors.borderSecondary}`,
+          }}
+        >
+          <Stack height="100%" position="sticky" top={0} justifyContent="space-between">
+            <Menu />
+            {config.network === 'centrifuge' && <Footer />}
+          </Stack>
+        </Box>
       </Box>
       <Box
         gridArea={sidebar ? 'main' : '1 / 2 / 1 / 4'}
