@@ -10,7 +10,7 @@ import {
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
-import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
+import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useLocation } from 'react-router'
 import { useCentrifuge } from '../../../components/CentrifugeProvider'
@@ -19,6 +19,7 @@ import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { PoolMetadata, Schema } from '../../../types'
+import { truncateText } from '../../../utils/formatting'
 import { useAddress } from '../../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
@@ -43,6 +44,83 @@ type FormValues = {
   attributes: Record<string, string | number>
 }
 
+type Attribute = Schema['sections'][0]['attributes'][0]
+type SchemaFieldProps<T extends string> = Attribute & { type: T; name: string }
+
+const CurrencyField: React.VFC<SchemaFieldProps<'currency'>> = ({ name, label, currencySymbol }) => {
+  const form = useFormikContext()
+  return (
+    <Field name={name} validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))} key={label}>
+      {({ field, meta }: FieldProps) => {
+        return (
+          <CurrencyInput
+            {...field}
+            variant="small"
+            label={`${label}*`}
+            errorMessage={meta.touched ? meta.error : undefined}
+            currency={currencySymbol}
+            placeholder="0.00"
+            name={name}
+            onChange={(value) => form.setFieldValue(name, value)}
+          />
+        )
+      }}
+    </Field>
+  )
+}
+
+const DecimalField: React.VFC<SchemaFieldProps<'decimal'>> = ({ name, label }) => {
+  return <FieldWithErrorMessage name={name} as={NumberInput} label={`${label}*`} validate={required()} key={label} />
+}
+
+const StringField: React.VFC<SchemaFieldProps<'string'>> = ({ name, label, ...attr }) => {
+  if ('options' in attr) {
+    return (
+      <Field name={name} validate={required()} key={label}>
+        {({ field, form }: any) => (
+          <Select
+            placeholder="Select one"
+            label={`${label}*`}
+            options={attr.options.map((o) => ({ label: o, value: o }))}
+            value={field.value}
+            onSelect={(v) => {
+              form.setFieldValue(name, v)
+            }}
+          />
+        )}
+      </Field>
+    )
+  }
+
+  return <FieldWithErrorMessage name={name} as={TextInput} label={`${label}*`} validate={required()} key={label} />
+}
+
+const TimestampField: React.VFC<SchemaFieldProps<'timestamp'>> = ({ name, label }) => {
+  return <FieldWithErrorMessage name={name} as={DateInput} label={`${label}*`} validate={required()} key={label} />
+}
+
+const PercentageField: React.VFC<SchemaFieldProps<'timestamp'>> = ({ name, label }) => {
+  return (
+    <FieldWithErrorMessage
+      name={name}
+      as={NumberInput}
+      label={`${label}*`}
+      validate={required()}
+      placeholder="0.00"
+      rightElement="%"
+      key={label}
+    />
+  )
+}
+
+const schemaFields = {
+  currency: CurrencyField,
+  decimal: DecimalField,
+  string: StringField,
+  timestamp: TimestampField,
+  percentage: PercentageField,
+}
+
 const IssuerCreateLoan: React.FC = () => {
   const { state } = useLocation<{ pid: string }>()
   const address = useAddress()
@@ -63,7 +141,7 @@ const IssuerCreateLoan: React.FC = () => {
   const poolMetadata = useMetadataMulti(allowedPools.map((pool) => pool.metadata))
 
   const poolSelectOptions = allowedPools.map((pool, i) => ({
-    label: truncate((poolMetadata[i].data as PoolMetadata)?.pool?.name || pool.id, 30),
+    label: truncateText((poolMetadata[i].data as PoolMetadata)?.pool?.name || pool.id, 30),
     value: pool.id,
   }))
 
@@ -87,7 +165,7 @@ const IssuerCreateLoan: React.FC = () => {
   const schemaMetadata = useMetadataMulti(selectedPoolMetadata?.schemas?.map((s) => s.id) ?? [])
 
   const schemaSelectOptions = schemaIds.map((id, i) => ({
-    label: truncate((schemaMetadata[i].data as Schema)?.name ?? `Schema ${i + 1}`, 30),
+    label: truncateText((schemaMetadata[i].data as Schema)?.name ?? `Schema ${i + 1}`, 30),
     value: id,
   }))
 
@@ -114,101 +192,6 @@ const IssuerCreateLoan: React.FC = () => {
 
   if (redirect) {
     return <Redirect to={redirect} />
-  }
-
-  function getInput(attr: Schema['sections'][0]['attributes'][0]) {
-    const name = `attributes.${labelToKey(attr.label)}`
-    switch (attr.type) {
-      case 'currency': {
-        return (
-          <Field
-            name={name}
-            validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))}
-            key={attr.label}
-          >
-            {({ field, meta }: FieldProps) => {
-              return (
-                <CurrencyInput
-                  {...field}
-                  variant="small"
-                  label={`${attr.label}*`}
-                  errorMessage={meta.touched ? meta.error : undefined}
-                  currency={attr.currencySymbol}
-                  placeholder="0.00"
-                  name={name}
-                  onChange={(value) => form.setFieldValue(name, value)}
-                />
-              )
-            }}
-          </Field>
-        )
-      }
-      case 'decimal': {
-        return (
-          <FieldWithErrorMessage
-            name={name}
-            as={NumberInput}
-            label={`${attr.label}*`}
-            validate={required()}
-            key={attr.label}
-          />
-        )
-      }
-      case 'string': {
-        if ('options' in attr) {
-          return (
-            <Field name={name} validate={required()} key={attr.label}>
-              {({ field, form }: any) => (
-                <Select
-                  placeholder="Select one"
-                  label={`${attr.label}*`}
-                  options={attr.options.map((o) => ({ label: o, value: o }))}
-                  value={field.value}
-                  onSelect={(v) => {
-                    form.setFieldValue(name, v)
-                  }}
-                  disabled={isLoading}
-                />
-              )}
-            </Field>
-          )
-        }
-
-        return (
-          <FieldWithErrorMessage
-            name={name}
-            as={TextInput}
-            label={`${attr.label}*`}
-            validate={required()}
-            key={attr.label}
-          />
-        )
-      }
-      case 'timestamp': {
-        return (
-          <FieldWithErrorMessage
-            name={name}
-            as={DateInput}
-            label={`${attr.label}*`}
-            validate={required()}
-            key={attr.label}
-          />
-        )
-      }
-      case 'percentage': {
-        return (
-          <FieldWithErrorMessage
-            name={name}
-            as={NumberInput}
-            label={`${attr.label}*`}
-            validate={required()}
-            placeholder="0.00"
-            rightElement="%"
-            key={attr.label}
-          />
-        )
-      }
-    }
   }
 
   return (
@@ -275,7 +258,11 @@ const IssuerCreateLoan: React.FC = () => {
           {selectedSchemaMetadata?.sections.map((section) => (
             <PageSection title={section.name} titleAddition={section.public ? 'Public' : 'Private'} key={section.name}>
               <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
-                {section.attributes?.map((attr) => getInput(attr))}
+                {section.attributes?.map((attr) => {
+                  const Comp = schemaFields[attr.type] as React.VFC<any>
+                  const name = `attributes.${labelToKey(attr.label)}`
+                  return <Comp {...attr} name={name} key={attr.label} />
+                })}
               </Grid>
             </PageSection>
           ))}
@@ -310,13 +297,6 @@ const IssuerCreateLoan: React.FC = () => {
       </Form>
     </FormikProvider>
   )
-}
-
-function truncate(txt: string, num: number) {
-  if (txt.length > num) {
-    return `${txt.slice(0, num)}...`
-  }
-  return txt
 }
 
 function labelToKey(label: string) {

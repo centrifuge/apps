@@ -52,3 +52,10 @@ export function formatPercentage(amount: Perquintill | Decimal | number, include
 export function roundDown(float: Decimal | number, precision: number = 2) {
   return Math.floor((float instanceof Decimal ? float.toNumber() : float) * 10 ** precision) / 10 ** precision
 }
+
+export function truncateText(txt: string, len: number) {
+  if (txt.length > len) {
+    return `${txt.slice(0, len)}...`
+  }
+  return txt
+}

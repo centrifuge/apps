@@ -7,6 +7,7 @@ import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolMetadata } from '../types'
+import { truncateText } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useMetadataMulti } from '../utils/useMetadata'
@@ -46,7 +47,7 @@ const CreateLoanFromNFT: React.FC = () => {
   const poolMetadata = useMetadataMulti(allowedPools.map((pool) => pool.metadata))
 
   const poolSelectOptions = allowedPools.map((pool, i) => ({
-    label: truncate((poolMetadata[i].data as PoolMetadata)?.pool?.name || pool.id, 30),
+    label: truncateText((poolMetadata[i].data as PoolMetadata)?.pool?.name || pool.id, 30),
     value: pool.id,
   }))
 
@@ -122,11 +123,4 @@ const CreateLoanFromNFT: React.FC = () => {
       </Form>
     </FormikProvider>
   )
-}
-
-function truncate(txt: string, num: number) {
-  if (txt.length > num) {
-    return `${txt.slice(0, num)}...`
-  }
-  return txt
 }
