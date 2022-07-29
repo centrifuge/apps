@@ -5,8 +5,10 @@ const fs = require('fs')
 
 const MAX_FILE_SIZE_IN_BYTES = 5 * 1024 ** 2 // 5 MB limit
 
-const dataUriToReadStream = ({ tempFilePath, fileDataUri }) => {
-  const base64String = fileDataUri.replace(/.+;base64,/, '')
+const dataUriToReadStream = (uri) => {
+  // create temp file to call the pinFile API
+  const tempFilePath = path.join('/tmp', Math.floor(Math.random() * Date.now()).toString())
+  const base64String = uri.replace(/.+;base64,/, '')
 
   const buffer = Buffer.from(base64String, 'base64')
 
@@ -23,16 +25,13 @@ const ipfsHashToURI = (hash) => `ipfs://ipfs/${hash}`
 
 const handler = async (event) => {
   try {
-    const { fileDataUri, fileName } = JSON.parse(event.body)
+    const { uri } = JSON.parse(event.body)
     // check incoming data
-    if (!(fileDataUri && fileName)) {
-      return { statusCode: 400, body: 'Bad request: fileName and fileDataUri are required fields' }
+    if (!uri) {
+      return { statusCode: 400, body: 'Bad request: uri is required' }
     }
 
-    // create temp file to call the pinFile API
-    const tempFilePath = path.join('/tmp', fileName)
-    console.log(`Temp file '${tempFilePath}' created`)
-    const fileStream = dataUriToReadStream({ tempFilePath, fileDataUri })
+    const fileStream = dataUriToReadStream(uri)
 
     // pin the image file
     const pinFileResponse = await pinFile(fileStream)
@@ -41,7 +40,7 @@ const handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ uri: fileURL, ipfsHash: fileHash }),
+      body: JSON.stringify({ uri: fileURL }),
     }
   } catch (e) {
     console.log(e)

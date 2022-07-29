@@ -1,4 +1,4 @@
-import { first, from, Observable } from 'rxjs'
+import { first, from, map, Observable } from 'rxjs'
 import Centrifuge from '..'
 
 export function getMetadataModule(inst: Centrifuge) {
@@ -10,43 +10,23 @@ export function getMetadataModule(inst: Centrifuge) {
     return inst.getMetadataObservable<T>(url)
   }
 
-  function pinFile(metadata: {
-    fileDataUri?: string
-    fileName?: string
-  }): Observable<{ uri: string; ipfsHash: string }> {
+  function pinFile(b64URI?: string): Observable<{ uri: string; ipfsHash: string }> {
     if (!inst.config?.pinFile) {
       console.error('pinFile must be set in config to use this feature')
       return from([])
     }
-    if (!metadata.fileDataUri || !metadata.fileName) {
-      console.error('fileDataUri or fileName not provided')
+    if (!b64URI) {
       return from([])
     }
 
-    return from(
-      inst.config.pinFile({
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(metadata),
-      })
-    ).pipe(first())
+    return from(inst.config.pinFile(b64URI))
+      .pipe(first())
+      .pipe(map(({ uri }) => parseIPFSHash(uri)))
   }
 
   function pinJson(metadata: Record<any, any>): Observable<{ uri: string; ipfsHash: string }> {
-    if (!inst.config.pinFile) {
-      console.error('pinFile must be set in config to use this feature')
-      return from([])
-    }
-
     const file = jsonToBase64(metadata)
-
-    return from(
-      inst.config.pinFile({
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ fileDataUri: file, fileName: `pin-file-${Math.random().toString().slice(8)}` }),
-      })
-    ).pipe(first())
+    return pinFile(file)
   }
 
   function parseMetadataUrl(url: string) {
@@ -69,6 +49,21 @@ export function getMetadataModule(inst: Centrifuge) {
       return ''
     } catch (e) {
       return ''
+    }
+  }
+
+  const IPFS_HASH_LENGTH = 46
+  function parseIPFSHash(uri: string) {
+    if (uri.includes('ipfs://')) {
+      const hash = uri
+        .split(/ipfs:\/\/ipfs\//)
+        .filter(Boolean)
+        .join()
+      return { uri, ipfsHash: hash }
+    } else if (!uri.includes('/') && uri.length === IPFS_HASH_LENGTH) {
+      return { uri: `ipfs://ipfs/${uri}`, ipfsHash: uri }
+    } else {
+      return { uri, ipfsHash: '' }
     }
   }
 
