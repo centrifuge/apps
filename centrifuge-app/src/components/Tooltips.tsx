@@ -117,7 +117,7 @@ const tooltipText = {
   },
   tokenSymbol: {
     label: 'override',
-    body: 'Add a 4 to 12 character token symbol that reflects the risk and tranche of the token. Each token symbol of the pool should start with the same 3 characters.',
+    body: 'Add a 4-to-12 character token symbol that reflects the risk and tranche of the token. Each token symbol of the pool should start with the same 3 characters.',
   },
   minimumInvestment: {
     label: 'Minimum investment',
@@ -165,7 +165,7 @@ const tooltipText = {
   },
   outstanding: {
     label: 'Outstanding',
-    body: "The pool's outstanding financing debt.",
+    body: "The asset's outstanding financing debt.",
   },
   liquidity: {
     label: 'Liquidity',

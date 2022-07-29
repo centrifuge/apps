@@ -14,7 +14,6 @@ import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { nftMetadataSchema } from '../schemas'
-import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useAddress } from '../utils/useAddress'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
@@ -44,7 +43,7 @@ const NFT: React.FC = () => {
   const [unlistOpen, setUnlistOpen] = React.useState(false)
   const centrifuge = useCentrifuge()
 
-  const imageUrl = nftMetadata?.image ? parseMetadataUrl(nftMetadata.image) : ''
+  const imageUrl = nftMetadata?.image ? centrifuge.metadata.parseMetadataUrl(nftMetadata.image) : ''
 
   const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
   const canCreateLoan =

@@ -21,7 +21,7 @@ jobs:
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
       network: centrifuge
-      requires-pop: 'false'
+      pool-creation-type: immediate
       subquery-url: https://api.subquery.network/sq/centrifuge/pools-development
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

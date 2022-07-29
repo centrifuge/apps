@@ -1,7 +1,6 @@
 import { Box, Button, Select, Stack } from '@centrifuge/fabric'
 import { Field, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { useQueries } from 'react-query'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { PageHeader } from '../components/PageHeader'
@@ -10,7 +9,7 @@ import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolMetadata } from '../types'
 import { useAddress } from '../utils/useAddress'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
-import { fetchMetadata } from '../utils/useMetadata'
+import { useMetadataMulti } from '../utils/useMetadata'
 import { usePermissions } from '../utils/usePermissions'
 import { usePools } from '../utils/usePools'
 
@@ -44,18 +43,10 @@ const CreateLoan: React.FC = () => {
 
   const allowedPools = pools ? pools.filter((p) => poolIds.includes(p.id)) : []
 
-  const poolMetadataQueries = useQueries(
-    allowedPools.map((pool) => {
-      return {
-        queryKey: ['metadata', pool.metadata],
-        queryFn: () => fetchMetadata(pool.metadata!),
-        enabled: !!pool.metadata,
-      }
-    })
-  )
+  const poolMetadata = useMetadataMulti(allowedPools.map((pool) => pool.metadata))
 
   const poolSelectOptions = allowedPools.map((pool, i) => ({
-    label: truncate((poolMetadataQueries[i].data as PoolMetadata)?.pool?.name || pool.id, 30),
+    label: truncate((poolMetadata[i].data as PoolMetadata)?.pool?.name || pool.id, 30),
     value: pool.id,
   }))
 

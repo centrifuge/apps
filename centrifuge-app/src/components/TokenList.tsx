@@ -1,7 +1,7 @@
 import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
-import { formatBalance, formatPercentage } from '../utils/formatting'
+import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 import { TextWithPlaceholder } from './TextWithPlaceholder'
@@ -10,6 +10,7 @@ export type TokenTableData = {
   poolMetadata?: string
   yield: number | null
   protection: number
+  capacity: number
   valueLocked: number
   currency: string
   id: string
@@ -61,6 +62,17 @@ const columns: Column[] = [
     sortKey: 'valueLocked',
   },
   {
+    header: <SortableTableHeader label="Capacity" />,
+    cell: (token: TokenTableData) => (
+      <Text variant="body2" color={token.capacity > 0 ? 'statusOk' : 'statusWarning'}>
+        {formatBalanceAbbreviated(token.capacity, token.currency)}
+      </Text>
+    ),
+    flex: '4',
+    sortKey: 'capacity',
+  },
+
+  {
     header: '',
     cell: () => <IconChevronRight size={24} color="textPrimary" />,
     flex: '0 1 52px',
@@ -76,7 +88,10 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
       columns={columns}
       defaultSortKey="valueLocked"
       rounded={false}
-      onRowClicked={(token: TokenTableData) => `${basePath}/${token.poolId}/tokens/${token.id}`}
+      onRowClicked={(token: TokenTableData) => ({
+        pathname: `${basePath}/${token.poolId}`,
+        state: { token: token.id },
+      })}
     />
   )
 }

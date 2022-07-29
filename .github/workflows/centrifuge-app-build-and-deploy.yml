@@ -20,7 +20,7 @@ on:
       network:
         required: true
         type: string
-      requires-pop:
+      pool-creation-type:
         required: false
         type: string
       subquery-url:
@@ -77,7 +77,7 @@ jobs:
           REACT_APP_WHITELISTED_ACCOUNTS: ${{ inputs.whitelisted-accounts }}
           REACT_APP_SUBQUERY_URL: ${{ inputs.subquery-url }}
           REACT_APP_NETWORK: ${{ inputs.network }}
-          REACT_APP_REQUIRES_POP: ${{ inputs.requires-pop }}
+          REACT_APP_POOL_CREATION_TYPE: ${{ inputs.pool-creation-type }}
           PINATA_API_KEY: ${{ secrets.pinata-api-key }}
           PINATA_SECRET_API_KEY: ${{ secrets.pinata-secret-api-key }}
 

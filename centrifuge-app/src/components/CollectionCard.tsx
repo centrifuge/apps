@@ -4,9 +4,9 @@ import * as React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { collectionMetadataSchema } from '../schemas'
-import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useMetadata } from '../utils/useMetadata'
 import { useVisibilityChecker } from '../utils/useVisibilityChecker'
+import { useCentrifuge } from './CentrifugeProvider'
 import { Identity } from './Identity'
 import { LogoAltair } from './LogoAltair'
 import { TextWithPlaceholder } from './TextWithPlaceholder'
@@ -59,6 +59,7 @@ type InnerProps = {
 export const CollectionCardInner = React.forwardRef<HTMLAnchorElement, InnerProps>(
   ({ isLoading, count, to, title, label, description, image }, ref) => {
     const [imageShown, setImageShown] = React.useState(false)
+    const cent = useCentrifuge()
 
     return (
       <Card as={Link} display="block" height="100%" to={to} variant="interactive" ref={ref}>
@@ -75,7 +76,7 @@ export const CollectionCardInner = React.forwardRef<HTMLAnchorElement, InnerProp
               <Box
                 as="img"
                 alt=""
-                src={parseMetadataUrl(image)}
+                src={cent.metadata.parseMetadataUrl(image)}
                 display="block"
                 width="100%"
                 height="100%"

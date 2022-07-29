@@ -137,15 +137,15 @@ const Risk: React.FC<Props> = (props: Props) => {
               <TableCell size="22%">Max advance rate</TableCell>
               <TableCell size="22%">Financing fee (APR)</TableCell>
               <TableCell size="22%">
-                <Tooltip id="assumedRiskAdjustment" underline>
-                  Assumed risk adjustment
+                <Tooltip id="appliedRiskAdjustment" underline>
+                  Applied risk adjustment
                 </Tooltip>
               </TableCell>
             </TableRow>
           </TableHeader>
           <TableBody>
             {existingRiskGroups.slice(start, start + riskGroupsPerPage).map((riskGroup: RiskGroupWithId) => (
-              <TableRow>
+              <TableRow key={riskGroup.id}>
                 <TableCell>{riskGroup.id}</TableCell>
                 <TableCell>{parseFloat(riskGroup.ceilingRatio.div(new BN(10).pow(new BN(25))).toString())}%</TableCell>
                 <TableCell>
@@ -170,7 +170,7 @@ const Risk: React.FC<Props> = (props: Props) => {
             {poolData?.adminLevel && poolData.adminLevel >= 2 && (
               <>
                 {riskGroups.map((riskGroup: IRiskGroup, id: number) => (
-                  <TableRow>
+                  <TableRow key={riskGroup.id}>
                     <TableCell>{riskGroup.id}</TableCell>
                     <TableCell>
                       <FormField margin={{ right: 'small' }}>
@@ -275,7 +275,7 @@ const Risk: React.FC<Props> = (props: Props) => {
             </TableHeader>
             <TableBody>
               {existingWriteOffGroups.map((writeOffGroup: WriteOffGroup, index: number) => (
-                <TableRow>
+                <TableRow key={index}>
                   <TableCell>{index}</TableCell>
                   <TableCell>
                     {parseFloat(
@@ -296,7 +296,7 @@ const Risk: React.FC<Props> = (props: Props) => {
               {poolData?.adminLevel && poolData.adminLevel >= 2 && (
                 <>
                   {writeOffGroups.map((writeOffGroup: IWriteOffGroup, id: number) => (
-                    <TableRow>
+                    <TableRow key={id}>
                       <TableCell>{existingWriteOffGroups.length + id}</TableCell>
                       <TableCell>
                         <FormField margin={{ right: 'small' }}>

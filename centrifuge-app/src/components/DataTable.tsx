@@ -1,7 +1,7 @@
 import { Card, IconArrowDown, Shelf, Stack, Text } from '@centrifuge/fabric'
 import css from '@styled-system/css'
 import * as React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, LinkProps } from 'react-router-dom'
 import styled from 'styled-components'
 
 type GroupedProps = {
@@ -13,7 +13,7 @@ type Props<T> = {
   data: Array<T>
   columns: Column[]
   keyField?: string
-  onRowClicked?: (row: T) => string
+  onRowClicked?: (row: T) => string | LinkProps['to']
   defaultSortKey?: string
   defaultSortOrder?: OrderBy
   rounded?: boolean
@@ -233,6 +233,7 @@ const StyledHeader = styled(Shelf)`
 
   &:hover,
   &:hover > svg {
+    cursor: pointer;
     color: ${({ theme }) => theme.colors.textInteractiveHover};
   }
 `

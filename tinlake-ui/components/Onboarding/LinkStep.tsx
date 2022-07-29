@@ -39,8 +39,8 @@ const LinkStep: React.FC<Props> = ({ state, onboardingData }) => {
               label={
                 <>
                   I consent to share personal information with Securitize, which Securitize may transfer to Centrifuge
-                  and issuers I (the investor) have identified and I consent to Centrifuge's Privacy Policy and Terms
-                  and Conditions.{' '}
+                  and issuers I (the investor) have identified and I consent to Centrifuge&apos;s Privacy Policy and
+                  Terms and Conditions.{' '}
                   <Anchor
                     onClick={(event) => {
                       openModal()
@@ -84,9 +84,9 @@ const LinkStep: React.FC<Props> = ({ state, onboardingData }) => {
             to direct Securitize to disclose your personal data to issuers you are choosing. Investors located in the
             European Economic Area (“EEA”) or the United Kingdom should be aware that these disclosures may involve
             transfers to countries that do not provide the same level of protection for personal data as their home
-            countries. Please note that this Data Transfer Consent Form should be read in conjunction with Securitize's
-            GLBA Privacy Notice and (for EEA and UK residents) our GDPR Privacy Notice. Any defined terms not defined
-            herein take their meaning from those notices or the Securitize Platform Terms of Service.
+            countries. Please note that this Data Transfer Consent Form should be read in conjunction with
+            Securitize&apos;s GLBA Privacy Notice and (for EEA and UK residents) our GDPR Privacy Notice. Any defined
+            terms not defined herein take their meaning from those notices or the Securitize Platform Terms of Service.
           </Paragraph>
           <Paragraph margin={{ top: 'medium' }}>
             Securitize will access and transfer your personal data to the issuer you identify. That issuer may be
@@ -225,8 +225,8 @@ const LinkStep: React.FC<Props> = ({ state, onboardingData }) => {
             <li>
               If you are located in, or are a resident of, a country in which the cross-border marketing of securities
               is restricted, you are confirming that you are requesting this information without having been being
-              solicited or approached, directly or indirectly, by the issuer or any issuer's affiliate or issuer's
-              partner or other person acting as agent or otherwise on behalf of the issuer.
+              solicited or approached, directly or indirectly, by the issuer or any issuer&apos;s affiliate or
+              issuer&apos;s partner or other person acting as agent or otherwise on behalf of the issuer.
             </li>
           </ul>
         </LegalCopy>

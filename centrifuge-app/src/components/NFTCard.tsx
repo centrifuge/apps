@@ -3,7 +3,6 @@ import { Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { nftMetadataSchema } from '../schemas'
-import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
 import { useVisibilityChecker } from '../utils/useVisibilityChecker'
@@ -51,7 +50,7 @@ export const NFTCard: React.FC<Props> = ({ nft }) => {
             <Box
               as="img"
               alt={metadata?.description ?? ''}
-              src={parseMetadataUrl(metadata?.image)}
+              src={centrifuge.metadata.parseMetadataUrl(metadata?.image)}
               display="block"
               width="100%"
               height="100%"

@@ -1,5 +1,6 @@
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
+import { Helmet } from 'react-helmet'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import { config } from '../config'
@@ -20,7 +21,6 @@ import { TokenOverviewPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { GlobalStyle } from './GlobalStyle'
-import { HostPermissionsProvider } from './HostPermissions'
 import { LoadBoundary } from './LoadBoundary'
 import { TransactionProvider } from './TransactionsProvider'
 import { TransactionToasts } from './TransactionToasts'
@@ -38,19 +38,22 @@ export const Root: React.VFC = () => {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <FabricProvider
-        theme={
-          !isThemeToggled
-            ? config.themes[config.defaultTheme]
-            : config.defaultTheme === 'dark'
-            ? config.themes.light
-            : config.themes.dark
-        }
-      >
-        <GlobalStyle />
-        <FabricGlobalStyle />
-        <HostPermissionsProvider>
+    <>
+      <Helmet>
+        <title>{config.network === 'centrifuge' ? 'Centrifuge App' : 'Altair App'}</title>
+      </Helmet>
+      <QueryClientProvider client={queryClient}>
+        <FabricProvider
+          theme={
+            !isThemeToggled
+              ? config.themes[config.defaultTheme]
+              : config.defaultTheme === 'dark'
+              ? config.themes.light
+              : config.themes.dark
+          }
+        >
+          <GlobalStyle />
+          <FabricGlobalStyle />
           <CentrifugeProvider>
             <Web3Provider>
               <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
@@ -65,9 +68,9 @@ export const Root: React.VFC = () => {
               </DebugFlags>
             </Web3Provider>
           </CentrifugeProvider>
-        </HostPermissionsProvider>
-      </FabricProvider>
-    </QueryClientProvider>
+        </FabricProvider>
+      </QueryClientProvider>
+    </>
   )
 }
 

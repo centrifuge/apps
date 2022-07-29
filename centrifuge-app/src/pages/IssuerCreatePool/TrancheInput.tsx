@@ -55,7 +55,7 @@ export const TrancheInput: React.FC = () => {
                     {({ field, form, meta }: FieldProps) => (
                       <TextInput
                         {...field}
-                        onChange={(e) => form.setFieldValue(field.name, e.target.value.toUpperCase())}
+                        onChange={(e) => form.setFieldValue(field.name, e.target.value)}
                         errorMessage={meta.touched ? meta.error : undefined}
                         label={<Tooltips type="tokenSymbol" label="Token symbol*" variant="secondary" />}
                         placeholder="4-12 characters"

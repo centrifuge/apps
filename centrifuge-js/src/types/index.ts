@@ -6,7 +6,7 @@ export type TransactionOptions = {
   batch?: boolean
   paymentInfo?: AddressOrPair
   onStatusChange?: (result: ISubmittableResult) => void
-  propose?: boolean
+  createType?: 'immediate' | 'propose' | 'notePreimage'
 }
 
 export type Account = HexString | string | Uint8Array

@@ -55,7 +55,11 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
         <Card p="medium">
           <Stack gap="medium">
             <div>
-              <img src={selectedPool.metadata.media?.logo} style={{ maxHeight: '60px', maxWidth: '30%' }} />
+              <img
+                alt="pool-logo"
+                src={selectedPool.metadata.media?.logo}
+                style={{ maxHeight: '60px', maxWidth: '30%' }}
+              />
             </div>
             <p style={{ margin: '0' }}>{selectedPool.metadata.description}</p>
 
@@ -80,7 +84,7 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
                                 onClick={() => openModal(value)}
                               />
                             ) : (
-                              <a href={value} target="_blank">
+                              <a href={value} target="_blank" rel="noreferrer">
                                 <ButtonWithIcon
                                   label={label}
                                   icon={label.includes('Discussion') ? <Chat /> : <Globe />}
@@ -126,7 +130,7 @@ const Overview: React.FC<Props> = ({ selectedPool }) => {
           {selectedPool.metadata.shortName || selectedPool.metadata.name} or any affiliate.&nbsp;
         </Paragraph>
         <ButtonGroup>
-          <a href={modalLink} target="_blank">
+          <a href={modalLink} target="_blank" rel="noreferrer">
             <Button primary onClick={closeModal} label="View the Executive Summary" fill={true} />
           </a>
         </ButtonGroup>

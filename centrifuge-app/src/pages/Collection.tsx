@@ -13,7 +13,6 @@ import { RouterLinkButton } from '../components/RouterLinkButton'
 import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { VisibilityChecker } from '../components/VisibilityChecker'
 import { collectionMetadataSchema } from '../schemas'
-import { parseMetadataUrl } from '../utils/parseMetadataUrl'
 import { useAddress } from '../utils/useAddress'
 import { useCollection } from '../utils/useCollections'
 import { useMetadata } from '../utils/useMetadata'
@@ -69,7 +68,7 @@ const Collection: React.FC = () => {
           <Box
             as="img"
             alt=""
-            src={parseMetadataUrl(metadata.image)}
+            src={centrifuge.metadata.parseMetadataUrl(metadata.image)}
             display="block"
             width="144px"
             height="144px"
