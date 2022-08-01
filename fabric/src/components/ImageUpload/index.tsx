@@ -1,7 +1,9 @@
 import * as React from 'react'
 import styled, { css } from 'styled-components'
+import { ResponsiveValue } from 'styled-system'
 import IconUpload from '../../icon/IconUpload'
 import IconX from '../../icon/IconX'
+import { Size } from '../../utils/types'
 import useControlledState from '../../utils/useControlledState'
 import { Box } from '../Box'
 import { Button } from '../Button'
@@ -12,14 +14,17 @@ import { Text } from '../Text'
 
 const AddButton = styled(Shelf)`
   color: ${({ theme }) => theme.colors.textDisabled};
+  transition: 100ms ease-in-out;
 `
 
 const PreviewPlaceholder = styled(Flex)<{ $active?: boolean; $disabled?: boolean; $visible?: boolean }>`
   color: ${({ $active, $disabled, theme }) =>
-    $disabled ? theme.colors.backgroundSecondary : $active ? theme.colors.accentPrimary : theme.colors.borderPrimary}
-  background-color: ${({ $disabled, theme }) => ($disabled ? 'transparent' : theme.colors.backgroundSecondary)}
-  transition: color 100ms ease-in-out;
-  opacity: ${({ $visible }) => ($visible ? 1 : 0)}
+    $disabled ? theme.colors.textDisabled : $active ? theme.colors.accentPrimary : theme.colors.textPrimary};
+  background-color: ${({ $disabled, theme }) => ($disabled ? 'transparent' : theme.colors.backgroundSecondary)};
+  transition: border-color 100ms ease-in-out, color 100ms ease-in-out;
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  border: 1px dashed
+    ${({ theme, $disabled }) => ($disabled ? theme.colors.borderSecondary : theme.colors.borderPrimary)};
 `
 
 const ImageUploadContainer = styled(Stack)<{ $disabled?: boolean }>`
@@ -27,7 +32,8 @@ const ImageUploadContainer = styled(Stack)<{ $disabled?: boolean }>`
   justify-content: center;
   width: 100%;
   height: 100%;
-  background: ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundPage : theme.colors.backgroundInput)};
+  background: ${({ theme, $disabled }) => ($disabled ? 'transparent' : theme.colors.backgroundInput)};
+  box-shadow: ${({ theme, $disabled }) => ($disabled ? `inset 0 0 0 1px ${theme.colors.borderSecondary}` : 'none')};
   border-radius: ${({ theme }) => theme.radii.card}px;
   cursor: pointer;
   pointer-events: ${({ $disabled }) => ($disabled ? 'none' : 'initial')};
@@ -47,13 +53,13 @@ const UploadButton = styled.button<{ $active?: boolean }>`
   border: none;
   background: transparent;
   appearance: none;
-  transition: border-color 100ms ease-in-out, color 100ms ease-in-out;
   cursor: pointer;
 
   &:focus-visible,
   &:hover {
     & + * ${PreviewPlaceholder} {
       color: ${({ theme }) => theme.colors.accentPrimary};
+      border-color: currentcolor;
     }
     & ~ * ${AddButton} {
       color: ${({ theme }) => theme.colors.accentPrimary};
@@ -65,6 +71,7 @@ const UploadButton = styled.button<{ $active?: boolean }>`
     css`
       & + * ${PreviewPlaceholder} {
         color: ${theme.colors.accentPrimary};
+        border-color: currentcolor;
       }
       & ~ * ${AddButton} {
         color: ${({ theme }) => theme.colors.accentPrimary};
@@ -97,8 +104,9 @@ type ImageUploadProps = {
   placeholder: string
   loading?: boolean
   label?: React.ReactNode
-  aspectRatio?: string
+  aspectRatio?: ResponsiveValue<string>
   requirements?: string
+  height?: ResponsiveValue<Size>
 }
 
 export const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -106,11 +114,12 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   onFileChange,
   validate,
   errorMessage: errorMessageProp,
-  accept,
+  accept = 'image/*',
   disabled,
   label,
   aspectRatio = '1 / 1',
   requirements,
+  height,
 }) => {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [curFile, setCurFile] = useControlledState<File | null>(null, fileProp, onFileChange)
@@ -216,10 +225,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   }
 
   return (
-    <Stack gap={1} width="100%">
+    <Stack gap={1} width="100%" height={height} minHeight="60px">
       <ImageUploadContainer
         $disabled={disabled}
-        p={2}
+        px={2}
+        py={1}
         onDragOver={handleDrag}
         onDragEnter={handleDrag}
         onDragEnd={handleDragEnd}
@@ -244,9 +254,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             gridTemplateRows="auto"
             gridTemplateAreas="'unit'"
             flex="0 0 auto"
-            style={{ aspectRatio }}
+            aspectRatio={aspectRatio}
             alignSelf="stretch"
             ref={handlePreviewMount}
+            minWidth={34}
+            my="4px"
           >
             <PreviewPlaceholder
               $active={dragOver}
@@ -256,11 +268,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               justifySelf="stretch"
               alignItems="center"
               justifyContent="center"
-              backgroundColor="backgroundSecondary"
               borderRadius="input"
-              borderStyle="dashed"
-              borderWidth="1px"
-              borderColor="currentColor"
               position="relative"
             >
               <IconUpload size="iconSmall" style={{ opacity: visible ? 0 : 1 }} />
@@ -298,7 +306,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               />
             )}
           </Box>
-          <Stack gap="4px" flex="1 1 auto">
+          <Stack gap="4px" flex="1 1 auto" minWidth={0}>
             {label && (
               <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'}>
                 {label}
@@ -314,19 +322,12 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
+                      direction: 'rtl',
                     }}
                   >
                     {typeof curFile === 'string' ? curFile : curFile.name}
                   </Text>
-                  <Box
-                    display="flex"
-                    position="relative"
-                    zIndex="1"
-                    ml="auto"
-                    my="-10px"
-                    mr="-10px"
-                    minWidth="iconMedium"
-                  >
+                  <Box display="flex" position="relative" zIndex="1" ml="auto" my="-10px" mr="-10px" minWidth="40px">
                     {!disabled && <Button variant="tertiary" onClick={handleClear} icon={IconX} disabled={disabled} />}
                   </Box>
                 </Shelf>

@@ -14,9 +14,10 @@ export const Default = Template.bind({})
 Default.args = {
   placeholder: 'Not set',
   label: 'Upload Image',
-  requirements: 'JPG/PNG/SVG, 320x240px, up to 1MB',
+  requirements: 'JPG/PNG/SVG, max 1MB',
   errorMessage: '',
   disabled: false,
   loading: false,
   aspectRatio: '1 / 1',
+  height: '',
 }
