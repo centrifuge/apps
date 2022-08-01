@@ -220,7 +220,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           )}
           {curFile ? (
             <>
-              <Shelf gap={1} m="auto">
+              <Shelf gap={1} my="auto">
                 <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver} />
                 <Flex minWidth="iconMedium">
                   {loading ? (
@@ -242,7 +242,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 >
                   {typeof curFile === 'string' ? curFile : curFile.name}
                 </Text>
-                <Box display="flex" position="relative" zIndex="1" ml="auto" my="-10px" minWidth="iconMedium">
+                <Box
+                  display="flex"
+                  position="relative"
+                  zIndex="1"
+                  ml="auto"
+                  my="-10px"
+                  mr="-10px"
+                  minWidth="iconMedium"
+                >
                   {!disabled && <Button variant="tertiary" onClick={handleClear} icon={IconX} disabled={disabled} />}
                 </Box>
               </Shelf>
