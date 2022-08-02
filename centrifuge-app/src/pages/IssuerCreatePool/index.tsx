@@ -195,7 +195,7 @@ const CreatePoolForm: React.VFC = () => {
             const feeBN = hexToBN(minimumDeposit.toHex()).add(
               hexToBN(preimageByteDeposit.toHex()).mul(new BN((submittable as any).encodedLength))
             )
-            return new CurrencyBalance(feeBN, api.registry.chainDecimals as any)
+            return new CurrencyBalance(feeBN, api.registry.chainDecimals[0])
           })
         )
       })
