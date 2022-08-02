@@ -518,10 +518,20 @@ export function getPoolsModule(inst: CentrifugeBase) {
       switchMap((api) => {
         const submittable = api.tx.utility.batchAll([
           ...add.map(([addr, role]) =>
-            api.tx.permissions.add({ PoolRole: 'PoolAdmin' }, addr, { Pool: poolId }, { PoolRole: role })
+            api.tx.permissions.add(
+              { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'MemberListAdmin' },
+              addr,
+              { Pool: poolId },
+              { PoolRole: role }
+            )
           ),
           ...sortedRemove.map(([addr, role]) =>
-            api.tx.permissions.remove({ PoolRole: 'PoolAdmin' }, addr, { Pool: poolId }, { PoolRole: role })
+            api.tx.permissions.remove(
+              { PoolRole: typeof role === 'string' ? 'PoolAdmin' : 'MemberListAdmin' },
+              addr,
+              { Pool: poolId },
+              { PoolRole: role }
+            )
           ),
         ])
         return inst.wrapSignAndSend(api, submittable, options)
