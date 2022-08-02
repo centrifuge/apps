@@ -15,8 +15,8 @@ export function useCurrencies() {
       decimals: 18,
     },
     {
-      label: 'kUSD',
-      value: 'kusd',
+      label: 'aUSD',
+      value: 'ausd',
       decimals: 12,
     },
     {
