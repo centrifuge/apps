@@ -1,4 +1,4 @@
-import { Balance, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
 import { hash } from '@stablelib/blake2b'
 import BN from 'bn.js'
 import { PoolFormValues } from '.'
@@ -45,7 +45,11 @@ const getFileIpfsUri = async (file?: File | null): Promise<string | null> => {
   return null
 }
 
-export const pinPoolMetadata = async (poolFormData: PoolFormValues, poolId: string): Promise<string> => {
+export const pinPoolMetadata = async (
+  poolFormData: PoolFormValues,
+  poolId: string,
+  currencyDecimals: number
+): Promise<string> => {
   // pin image files files. If not present, hash will be null
   const fileUriMap = await promiseAllObject<string | null>({
     poolIcon: getFileIpfsUri(poolFormData.poolIcon),
@@ -61,7 +65,7 @@ export const pinPoolMetadata = async (poolFormData: PoolFormValues, poolId: stri
     tranchesById[computeTrancheId(index, poolId)] = {
       name: tranche.tokenName,
       symbol: tranche.symbolName,
-      minInitialInvestment: Balance.fromFloat(tranche.minInvestment).toString(),
+      minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
     }
   })
 

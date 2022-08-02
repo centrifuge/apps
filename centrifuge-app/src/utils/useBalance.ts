@@ -12,10 +12,7 @@ export function useBalance() {
           (api) => api.query.system.account(address),
           (api, balances) => ({ api, balances })
         ),
-        map(
-          ({ api, balances }) =>
-            Number((balances as any).data.free.toString()) / 10 ** (api.registry.chainDecimals as any)
-        )
+        map(({ api, balances }) => Number((balances as any).data.free.toString()) / 10 ** api.registry.chainDecimals[0])
       ),
     {
       enabled: !!address,
