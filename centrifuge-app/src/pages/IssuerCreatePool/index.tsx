@@ -195,7 +195,7 @@ const CreatePoolForm: React.VFC = () => {
             const feeBN = hexToBN(minimumDeposit.toHex()).add(
               hexToBN(preimageByteDeposit.toHex()).mul(new BN((submittable as any).encodedLength))
             )
-            return new CurrencyBalance(feeBN, api.registry.chainDecimals as any)
+            return new CurrencyBalance(feeBN, api.registry.chainDecimals[0])
           })
         )
       })
@@ -318,7 +318,7 @@ const CreatePoolForm: React.VFC = () => {
       if (!address) return
 
       const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
-      const currencyDecimals = currencies.find(values.currency as any)!.decimals
+      const currencyDecimals = currencies.find((c) => c.value === values.currency)!.decimals
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
       const collectionId = await centrifuge.nfts.getAvailableCollectionId()
