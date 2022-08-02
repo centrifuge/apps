@@ -1,4 +1,4 @@
-import { Balance, Loan as LoanType } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
 import { LoanInfo } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
@@ -70,7 +70,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = Balance.fromFloat(values.amount)
+      const amount = CurrencyBalance.fromFloat(values.amount, pool!.currencyDecimals)
       doFinanceTransaction([loan.poolId, loan.id, amount])
       actions.setSubmitting(false)
     },
@@ -82,7 +82,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = Balance.fromFloat(values.amount)
+      const amount = CurrencyBalance.fromFloat(values.amount, pool!.currencyDecimals)
       doRepayTransaction([loan.poolId, loan.id, amount])
       actions.setSubmitting(false)
     },

@@ -135,7 +135,7 @@ export const Investors: React.FC = () => {
               {
                 align: 'left',
                 header: 'Investment',
-                cell: (row: Tranche) => <InvestedCell address={validAddress} trancheId={row.id} />,
+                cell: (row: Tranche) => <InvestedCell address={validAddress} poolId={poolId} trancheId={row.id} />,
                 flex: '1',
               },
               {
@@ -166,8 +166,12 @@ export const Investors: React.FC = () => {
   )
 }
 
-const InvestedCell: React.FC<{ address: string; trancheId: string }> = ({ trancheId, address }) => {
-  const order = useOrder(trancheId, address)
+const InvestedCell: React.FC<{ address: string; poolId: string; trancheId: string }> = ({
+  poolId,
+  trancheId,
+  address,
+}) => {
+  const order = useOrder(poolId, trancheId, address)
   const hasInvested = order && (order?.epoch > 0 || !order.invest.isZero())
 
   return <TextWithPlaceholder variant="body2">{hasInvested && 'Invested'}</TextWithPlaceholder>

@@ -1,4 +1,4 @@
-import { TrancheBalance } from '@centrifuge/centrifuge-js'
+import { AccountTokenBalance } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatBalance } from '../utils/formatting'
@@ -7,29 +7,29 @@ import { Column, DataTable } from './DataTable'
 import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
-  investments: TrancheBalance[]
+  investments: AccountTokenBalance[]
 }
 
 const columns: Column[] = [
   {
     align: 'left',
     header: 'Token',
-    cell: (i: TrancheBalance) => <Token investment={i} />,
+    cell: (i: AccountTokenBalance) => <Token investment={i} />,
     flex: '1 1 300px',
   },
   {
     align: 'left',
     header: 'Asset class',
-    cell: (i: TrancheBalance) => <AssetClass investment={i} />,
+    cell: (i: AccountTokenBalance) => <AssetClass investment={i} />,
     flex: '2 1 250px',
   },
   {
     header: 'Token balance',
-    cell: (i: TrancheBalance) => <TokenBalance investment={i} />,
+    cell: (i: AccountTokenBalance) => <TokenBalance investment={i} />,
   },
   {
     header: 'Value',
-    cell: (i: TrancheBalance) => <TokenValue investment={i} />,
+    cell: (i: AccountTokenBalance) => <TokenValue investment={i} />,
   },
   {
     header: '',
@@ -43,12 +43,12 @@ export const InvestmentsList: React.FC<Props> = ({ investments }) => {
     <DataTable
       data={investments}
       columns={columns}
-      onRowClicked={(i: TrancheBalance) => `/tokens/${i.poolId}/${i.trancheId}`}
+      onRowClicked={(i: AccountTokenBalance) => `/tokens/${i.poolId}/${i.trancheId}`}
     />
   )
 }
 
-const Token: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
+const Token: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
@@ -63,13 +63,13 @@ const Token: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
   )
 }
 
-const AssetClass: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
+const AssetClass: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
   return <Text variant="body2">{metadata?.pool?.asset.class}</Text>
 }
 
-const TokenBalance: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
+const TokenBalance: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
@@ -78,7 +78,7 @@ const TokenBalance: React.VFC<{ investment: TrancheBalance }> = ({ investment })
   return <Text variant="body2">{formatBalance(investment.balance.toFloat(), trancheMeta?.symbol)}</Text>
 }
 
-const TokenValue: React.VFC<{ investment: TrancheBalance }> = ({ investment }) => {
+const TokenValue: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
   const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
 

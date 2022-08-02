@@ -1,4 +1,4 @@
-import { Balance, Loan as LoanType, LoanInfoInput, Pool, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Loan as LoanType, LoanInfoInput, Pool, Rate } from '@centrifuge/centrifuge-js'
 import { Button, CurrencyInput, DateInput, Grid, Select, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -49,7 +49,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
     },
     onSubmit: (values, { setSubmitting }) => {
       if (!riskGroup) return
-      const value = Balance.fromFloat(values.value)
+      const value = CurrencyBalance.fromFloat(values.value, pool.currencyDecimals)
       const maturityDate = new Date(form.values.maturityDate).toISOString()
       const ratePerSec = fee!
 

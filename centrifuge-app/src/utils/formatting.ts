@@ -1,4 +1,4 @@
-import { Balance, Perquintill } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Perquintill, TokenBalance } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
 
 const currencySymbols = {
@@ -11,9 +11,17 @@ export function getCurrencySymbol(currency?: string) {
   return (currency && currencySymbols[currency.toLowerCase() as keyof typeof currencySymbols]) || currency || ''
 }
 
-export function formatBalance(amount: Balance | Decimal | number, currency?: string, precision = 0) {
+export function formatBalance(
+  amount: CurrencyBalance | TokenBalance | Decimal | number,
+  currency?: string,
+  precision = 0
+) {
   const formattedAmount = (
-    amount instanceof Balance ? amount.toFloat() : amount instanceof Decimal ? amount.toNumber() : amount
+    amount instanceof TokenBalance || amount instanceof CurrencyBalance
+      ? amount.toFloat()
+      : amount instanceof Decimal
+      ? amount.toNumber()
+      : amount
   ).toLocaleString('en', {
     minimumFractionDigits: precision,
     maximumFractionDigits: precision,
@@ -21,9 +29,17 @@ export function formatBalance(amount: Balance | Decimal | number, currency?: str
   return currency ? `${formattedAmount} ${getCurrencySymbol(currency)}` : formattedAmount
 }
 
-export function formatBalanceAbbreviated(amount: Balance | Decimal | number, currency?: string, decimals = 1) {
+export function formatBalanceAbbreviated(
+  amount: CurrencyBalance | TokenBalance | Decimal | number,
+  currency?: string,
+  decimals = 1
+) {
   const amountNumber =
-    amount instanceof Balance ? amount.toFloat() : amount instanceof Decimal ? amount.toNumber() : amount
+    amount instanceof TokenBalance || amount instanceof CurrencyBalance
+      ? amount.toFloat()
+      : amount instanceof Decimal
+      ? amount.toNumber()
+      : amount
   let formattedAmount = ''
   if (amountNumber >= 1e6) {
     formattedAmount = `${(amountNumber / 1e6).toFixed(decimals)}M`
