@@ -1051,7 +1051,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
                     hexToBN(tranche.outstandingInvestOrders),
                     currencyDecimals
                   )
-                  const outstandingRedeemOrders = new TokenBalance(hexToBN(tranche.outstandingRedeemOrders))
+                  const outstandingRedeemOrders = new TokenBalance(
+                    hexToBN(tranche.outstandingRedeemOrders),
+                    currencyDecimals
+                  )
 
                   const protection = minRiskBuffer?.toDecimal() ?? Dec(0)
                   const tvl = poolValue.toDecimal()
@@ -1075,7 +1078,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
                     tokenPrice,
                     currency,
                     currencyDecimals: 12,
-                    totalIssuance: new TokenBalance(rawIssuances[trancheIndex].toString()),
+                    totalIssuance: new TokenBalance(rawIssuances[trancheIndex].toString(), currencyDecimals),
                     poolId,
                     poolMetadata: (metadata ?? undefined) as string | undefined,
                     interestRatePerSec,
@@ -1086,7 +1089,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
                     outstandingInvestOrders,
                     outstandingRedeemOrders,
                     lastUpdatedInterest: new Date(tranche.lastUpdatedInterest * 1000).toISOString(),
-                    balance: new TokenBalance(hexToBN(tranche.debt).add(hexToBN(tranche.reserve))),
+                    balance: new TokenBalance(hexToBN(tranche.debt).add(hexToBN(tranche.reserve)), currencyDecimals),
                   }
                 }),
                 reserve: {
@@ -1215,11 +1218,16 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return $api.pipe(
       switchMap(
-        (api) => combineLatest([api.query.ormlTokens.accounts.entries(address), api.query.system.account(address)]),
-        (api, [rawBalances, nativeBalance]) => ({ api, rawBalances, nativeBalance })
+        (api) =>
+          combineLatest([
+            api.query.ormlTokens.accounts.entries(address),
+            api.query.system.account(address),
+            api.query.pools.pool.entries(),
+          ]),
+        (api, [rawBalances, nativeBalance, poolValues]) => ({ api, rawBalances, nativeBalance, poolValues })
       ),
       take(1),
-      map(({ api, rawBalances, nativeBalance }) => {
+      map(({ api, rawBalances, nativeBalance, poolValues }) => {
         const balances = {
           tranches: [] as AccountTokenBalance[],
           currencies: [] as AccountCurrencyBalance[],
@@ -1229,6 +1237,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
             symbol: api.registry.chainTokens[0],
           },
         }
+
+        const decimalsByPool = Object.fromEntries(
+          poolValues.map(([k, v]) => [formatPoolKey(k as any), getCurrencyDecimals((v.toJSON() as any).currency)])
+        )
 
         rawBalances.forEach(([rawKey, rawValue]) => {
           const key = (rawKey.toHuman() as any)[1] as string | { Tranche: [string, string] } | { Permissioned: string }
@@ -1247,7 +1259,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
               balances.tranches.push({
                 poolId: poolId.replace(/\D/g, ''),
                 trancheId,
-                balance: new TokenBalance(hexToBN(value.free)),
+                balance: new TokenBalance(hexToBN(value.free), decimalsByPool[poolId]),
               })
             }
           } else {
@@ -1286,7 +1298,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           return {
             currency,
             invest: new CurrencyBalance(0, currencyDecimals),
-            redeem: new TokenBalance(0),
+            redeem: new TokenBalance(0, currencyDecimals),
             epoch: 0,
           }
         }
@@ -1294,7 +1306,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         return {
           currency,
           invest: new CurrencyBalance(hexToBN(order.invest), currencyDecimals),
-          redeem: new TokenBalance(hexToBN(order.redeem)),
+          redeem: new TokenBalance(hexToBN(order.redeem), currencyDecimals),
           epoch: order.epoch as number,
         }
       })
@@ -1460,24 +1472,24 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
               return {
                 investCurrency: new CurrencyBalance(order.invest, currencyDecimals),
-                redeemToken: new TokenBalance(order.redeem),
+                redeemToken: new TokenBalance(order.redeem, currencyDecimals),
                 epoch: order.epoch,
                 payoutCurrencyAmount: new CurrencyBalance(payoutCurrencyAmount, currencyDecimals),
-                payoutTokenAmount: new TokenBalance(payoutTokenAmount),
+                payoutTokenAmount: new TokenBalance(payoutTokenAmount, currencyDecimals),
                 remainingInvestCurrency: new CurrencyBalance(remainingInvestCurrency, currencyDecimals),
-                remainingRedeemToken: new TokenBalance(remainingRedeemToken),
+                remainingRedeemToken: new TokenBalance(remainingRedeemToken, currencyDecimals),
               }
             })
           )
         }
         return of({
           investCurrency: new CurrencyBalance(order.invest, currencyDecimals),
-          redeemToken: new TokenBalance(order.redeem),
+          redeemToken: new TokenBalance(order.redeem, currencyDecimals),
           epoch: order.epoch,
           payoutCurrencyAmount: new CurrencyBalance(0, currencyDecimals),
-          payoutTokenAmount: new TokenBalance(0),
+          payoutTokenAmount: new TokenBalance(0, currencyDecimals),
           remainingInvestCurrency: new CurrencyBalance(order.invest, currencyDecimals),
-          remainingRedeemToken: new TokenBalance(order.redeem),
+          remainingRedeemToken: new TokenBalance(order.redeem, currencyDecimals),
         })
       })
     )
