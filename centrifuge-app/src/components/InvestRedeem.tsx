@@ -499,7 +499,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel, a
     },
     onSubmit: (values, actions) => {
       const amount = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price)
-      doRedeemTransaction([poolId, trancheId, TokenBalance.fromFloat(amount)])
+      doRedeemTransaction([poolId, trancheId, TokenBalance.fromFloat(amount, pool!.currencyDecimals)])
       actions.setSubmitting(false)
     },
     validate: (values) => {

@@ -40,10 +40,10 @@ export class CurrencyBalance extends BN {
   }
 }
 
-export class TokenBalance extends BNSubType {
-  static decimals = 18
-  static fromFloat(number: Numeric) {
-    return TokenBalance._fromFloat<TokenBalance>(number)
+export class TokenBalance extends CurrencyBalance {
+  static fromFloat(number: Numeric, decimals: number) {
+    const n = Dec(number).mul(Dec(10).pow(decimals)).toDecimalPlaces(0).toString()
+    return new TokenBalance(n, decimals)
   }
 }
 
