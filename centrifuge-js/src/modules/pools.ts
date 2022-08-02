@@ -12,7 +12,7 @@ import { Dec } from '../utils/Decimal'
 const PerquintillBN = new BN(10).pow(new BN(18))
 const PriceBN = new BN(10).pow(new BN(27))
 
-// const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
+const LoanPalletAccountId = '0x6d6f646c70616c2f6c6f616e0000000000000000000000000000000000000000'
 
 type AdminRole = 'PoolAdmin' | 'Borrower' | 'PricingAdmin' | 'LiquidityAdmin' | 'MemberListAdmin' | 'LoanAdmin'
 
@@ -410,7 +410,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, , tranches, currency, maxReserve, , writeOffGroups] = args
+    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, writeOffGroups] = args
 
     const $api = inst.getApi()
 
@@ -422,31 +422,41 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.pools.create(admin, poolId, trancheInput, currency, maxReserve.toString())
-        // api.tx.utility.batchAll(
-        //   [
-        //     api.tx.uniques.create(collectionId, LoanPalletAccountId),
-        //     api.tx.pools.create(inst.getSignerAddress(), poolId, trancheInput, currency, maxReserve.toString()),
-        //     api.tx.pools.setMetadata(poolId, metadata),
-        //     api.tx.permissions.add(
-        //       { PoolRole: 'PoolAdmin' },
-        //       admin,
-        //       { Pool: poolId },
-        //       {
-        //         PoolRole: 'LoanAdmin',
-        //       }
-        //     ),
-        //     api.tx.loans.initialisePool(poolId, collectionId),
-        //   ].concat(
-        //     writeOffGroups.map((g) =>
-        //       api.tx.loans.addWriteOffGroup(poolId, {
-        //         percentage: g.percentage.toString(),
-        //         overdueDays: g.overdueDays,
-        //         penaltyInterestRatePerSec: null,
-        //       })
-        //     )
-        //   )
-        // )
+        let submittable
+        if (['propose', 'notePreimage'].includes(options?.createType ?? '')) {
+          submittable = api.tx.pools.create(admin, poolId, trancheInput, currency, maxReserve.toString(), metadata)
+        } else {
+          submittable = api.tx.utility.batchAll(
+            [
+              api.tx.uniques.create(collectionId, LoanPalletAccountId),
+              api.tx.pools.create(
+                inst.getSignerAddress(),
+                poolId,
+                trancheInput,
+                currency,
+                maxReserve.toString(),
+                metadata
+              ),
+              api.tx.permissions.add(
+                { PoolRole: 'PoolAdmin' },
+                admin,
+                { Pool: poolId },
+                {
+                  PoolRole: 'LoanAdmin',
+                }
+              ),
+              api.tx.loans.initialisePool(poolId, collectionId),
+            ].concat(
+              writeOffGroups.map((g) =>
+                api.tx.loans.addWriteOffGroup(poolId, {
+                  percentage: g.percentage.toString(),
+                  overdueDays: g.overdueDays,
+                  penaltyInterestRatePerSec: null,
+                })
+              )
+            )
+          )
+        }
         console.log(
           'writeOffGroups',
           writeOffGroups.map((g) => ({
