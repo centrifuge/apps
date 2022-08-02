@@ -1,6 +1,7 @@
-import { Balance, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Rate } from '@centrifuge/centrifuge-js'
 import { ActiveLoan } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Shelf, Text } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
@@ -91,11 +92,11 @@ const RiskGroupList: React.FC = () => {
 
   const totalAmountsSum = React.useMemo(
     () =>
-      activeLoans?.reduce<Balance>(
-        (prev, curr) => new Balance(prev.add(curr?.outstandingDebt || new Balance(0))),
-        new Balance(0)
-      ) || new Balance(0),
-    [activeLoans]
+      new CurrencyBalance(
+        activeLoans?.reduce((prev, curr) => prev.add(curr?.outstandingDebt || new BN(0)), new BN(0)) || new BN(0),
+        pool?.currencyDecimals ?? 18
+      ),
+    [activeLoans, pool]
   )
 
   const riskGroups = React.useMemo(() => {
@@ -121,9 +122,9 @@ const RiskGroupList: React.FC = () => {
         const riskAdjustment = lgd.mul(pod).div(100).toDecimalPlaces(2).toString()
         const interestRatePerSec = new Rate(group.interestRatePerSec).toAprPercent().toDecimalPlaces(2).toString()
 
-        const amount = loansByRiskGroup?.reduce<Balance>(
-          (prev, curr) => new Balance(prev?.add(curr?.outstandingDebt || new Balance(0))),
-          new Balance('0')
+        const amount = new CurrencyBalance(
+          loansByRiskGroup?.reduce((prev, curr) => prev?.add(curr?.outstandingDebt || new BN(0)), new BN(0)),
+          pool?.currencyDecimals ?? 18
         )
         if (!amount || !totalAmountsSum) {
           return {

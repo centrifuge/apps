@@ -12,14 +12,21 @@ export function useCurrencies() {
     {
       label: native?.symbol || 'AIR',
       value: 'Native',
+      decimals: 18,
     },
     {
       label: 'kUSD',
       value: 'kusd',
+      decimals: 12,
     },
     {
       label: 'pEUR',
       value: 'PermissionedEur',
+      decimals: 18,
     },
   ]
+}
+
+export function getCurrencyDecimals(currency: string) {
+  return currency.endsWith('usd') ? 12 : 18
 }
