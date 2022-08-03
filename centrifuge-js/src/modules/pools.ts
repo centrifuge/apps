@@ -611,7 +611,19 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  function submitSolution(args: [poolId: string, solution: string[][]], options?: TransactionOptions) {
+  function executeEpoch(args: [poolId: string], options?: TransactionOptions) {
+    const [poolId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => {
+        const submittable = api.tx.pools.executedEpoch(poolId)
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function submitSolution(args: [poolId: string, solution: BN[][]], options?: TransactionOptions) {
     const [poolId, solution] = args
     const $api = inst.getApi()
 
@@ -973,7 +985,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         const $issuance = api.query.ormlTokens.totalIssuance.multi(issuanceKeys).pipe(take(1))
 
         const epochKeys = keys.map((k) => k.slice(1))
-        const $epochs = api.query.pools.epoch.multi(epochKeys)
+        const $epochs = api.query.pools.epoch.multi(epochKeys).pipe(take(1))
 
         // TODO: Get the token prices via RPC again, currently not always accurate data
         // const $prices = combineLatest(
@@ -1536,6 +1548,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     updateRedeemOrder,
     collect,
     closeEpoch,
+    executeEpoch,
     submitSolution,
     getUserPermissions,
     getPoolPermissions,
