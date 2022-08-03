@@ -9,16 +9,8 @@ import { Schema } from '../../../types'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { isValidJsonString } from '../../../utils/validation'
 import { pinPoolMetadata } from './pinPoolMetadata'
-
-const isValidJsonString = (str: string) => {
-  try {
-    JSON.parse(str)
-  } catch (e) {
-    return false
-  }
-  return true
-}
 
 const initialSchemaJSON = `{
   "name":"Example schema",

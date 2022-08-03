@@ -38,6 +38,8 @@ export const IssuerCreateLoanPage: React.FC = () => {
 }
 
 type FormValues = {
+  image: File | null
+  description: string
   assetName: string
   poolId: string
   schemaId: string
@@ -99,7 +101,7 @@ const TimestampField: React.VFC<SchemaFieldProps<'timestamp'>> = ({ name, label 
   return <FieldWithErrorMessage name={name} as={DateInput} label={`${label}*`} validate={required()} key={label} />
 }
 
-const PercentageField: React.VFC<SchemaFieldProps<'timestamp'>> = ({ name, label }) => {
+const PercentageField: React.VFC<SchemaFieldProps<'percentage'>> = ({ name, label }) => {
   return (
     <FieldWithErrorMessage
       name={name}
@@ -147,6 +149,8 @@ const IssuerCreateLoan: React.FC = () => {
 
   const form = useFormik<FormValues>({
     initialValues: {
+      image: null,
+      description: '',
       assetName: '',
       poolId: state?.pid ?? '',
       schemaId: '',
@@ -162,7 +166,7 @@ const IssuerCreateLoan: React.FC = () => {
     ?.data as PoolMetadata
 
   const schemaIds = selectedPoolMetadata?.schemas?.map((s) => s.id) ?? []
-  const schemaMetadata = useMetadataMulti(selectedPoolMetadata?.schemas?.map((s) => s.id) ?? [])
+  const schemaMetadata = useMetadataMulti(schemaIds)
 
   const schemaSelectOptions = schemaIds.map((id, i) => ({
     label: truncateText((schemaMetadata[i].data as Schema)?.name ?? `Schema ${i + 1}`, 30),
@@ -280,6 +284,7 @@ const IssuerCreateLoan: React.FC = () => {
                     requirements="JPG/PNG, 500x500px, up to 1MB"
                     label="Asset image"
                     errorMessage={meta.touched ? meta.error : undefined}
+                    accept="image/jpeg,image/png"
                   />
                 )}
               </Field>
