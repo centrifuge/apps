@@ -5,21 +5,19 @@ import BN from 'bn.js'
 import { DataTable, Text } from 'grommet'
 import { useRouter } from 'next/router'
 import * as React from 'react'
-import { useQuery } from 'react-query'
 import styled from 'styled-components'
 import NumberDisplay from '../../../components/NumberDisplay'
 import { Pool } from '../../../config'
 import { dateToYMD } from '../../../utils/date'
 import { hexToInt } from '../../../utils/etherscanLinkGenerator'
 import { saveAsCSV } from '../../../utils/export'
+import { useAssetListWriteOffStatus } from '../../../utils/useAssetListWriteOffStatus'
 import { useMedia } from '../../../utils/useMedia'
-import { calculateWriteOffPercentage } from '../../../utils/useWriteOffPercentage'
 import { ButtonGroup } from '../../ButtonGroup'
 import { Card } from '../../Card'
 import ChevronRight from '../../ChevronRight'
 import { useDebugFlags } from '../../DebugFlags'
 import { Box } from '../../Layout'
-import { useTinlake } from '../../TinlakeProvider'
 import LoanLabel from '../Label'
 
 interface Props {
@@ -31,24 +29,8 @@ interface Props {
 const LoanList: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const { showExport } = useDebugFlags()
-  const tinlake = useTinlake()
-
-  const { isFetching: isFetchingLoansWithWriteOffStatus, data: loansWithWriteOffStatusData } = useQuery(
-    ['loansWithWriteOffStatus', props.loans],
-    async () => {
-      const loans: Loan[] = []
-      for (const loan of props.loans) {
-        const writeOffPercentage = await calculateWriteOffPercentage(tinlake, Number(loan.loanId))
-
-        loans.push({
-          ...loan,
-          status: writeOffPercentage === '100' ? 'repaid' : loan.status,
-        })
-      }
-
-      return loans
-    }
-  )
+  const { isFetching: isFetchingLoansWithWriteOffStatus, data: loansWithWriteOffStatusData } =
+    useAssetListWriteOffStatus(props.loans, props.activePool?.addresses as Pool['addresses'])
 
   const clickRow = React.useCallback(
     ({ datum }: { datum?: Loan; index?: number }) => {
