@@ -227,6 +227,31 @@ export function AdminActions<ActionsBase extends Constructor<TinlakeParams>>(Bas
       return groups
     }
 
+    getWriteOffPercentage = async (rateGroup: BN): Promise<BN> => {
+      const navFeed = this.contract('FEED')
+
+      if (navFeed.writeOffs) {
+        const writeOffGroup = rateGroup.sub(new BN(1000))
+        const { percentage } = await navFeed.writeOffs(writeOffGroup.toString())
+
+        return new BN(10).pow(new BN(27)).sub(new BN(percentage.toString()))
+      } else if (navFeed.writeOffGroups) {
+        const writeOffGroups = await this.getWriteOffGroups()
+
+        const writeOffGroup = writeOffGroups.find((group) => rateGroup.eq(group.rate))
+
+        if (writeOffGroup) {
+          const writeOffPercentage = new BN(10).pow(new BN(27)).sub(writeOffGroup.writeOffPercentage) || new BN(0)
+
+          return writeOffPercentage
+        }
+
+        return new BN(0)
+      }
+
+      return new BN(0)
+    }
+
     getRateGroup = async (loanId: number) => {
       return await this.toBN(this.contract('PILE').loanRates(loanId))
     }
@@ -321,6 +346,7 @@ export type IAdminActions = {
   addWriteOffGroups(writeOffGroups: IWriteOffGroup[]): Promise<PendingTransaction>
   getAuditLog(ignoredEvents: string[]): Promise<IAuditLog>
   getWriteOffGroups(): Promise<IWriteOffGroup[]>
+  getWriteOffPercentage(rateGroup: BN): Promise<BN>
   writeOff(loanId: number): Promise<PendingTransaction>
   getRateGroup(loanId: number): Promise<BN>
   closePool(): Promise<PendingTransaction>

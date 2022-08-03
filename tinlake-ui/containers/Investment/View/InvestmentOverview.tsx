@@ -263,7 +263,6 @@ const InvestmentOverview: React.FC<Props> = (props: Props) => {
             </Shelf>
             <Stack gap="small">
               <TrancheNote>TIN token &mdash; Higher risk, variable return</TrancheNote>
-              {poolData && console.log(poolData.juniorInvestors)}
               <ValuePairList
                 variant="tertiary"
                 items={[

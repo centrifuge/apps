@@ -1,9 +1,8 @@
-import { baseToDisplay, feeToInterestRate } from '@centrifuge/tinlake-js'
+import { baseToDisplay, feeToInterestRate, Loan } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { dateToYMDTechnical } from './date'
-import { SortableLoan } from './useAssets'
 
-export const saveAsCSV = (loans: SortableLoan[]) => {
+export const saveAsCSV = (loans: Loan[]) => {
   const rows = [
     [
       'Asset ID',
@@ -16,7 +15,7 @@ export const saveAsCSV = (loans: SortableLoan[]) => {
       'Financing Fee',
       'Status',
     ],
-    ...loans.map((loan: SortableLoan) => {
+    ...loans.map((loan: Loan) => {
       return [
         loan.loanId,
         loan.tokenId,
