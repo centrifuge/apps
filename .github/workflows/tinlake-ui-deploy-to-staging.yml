@@ -21,16 +21,19 @@ jobs:
         with:
           node-version: '12'
 
-      - name: Restore Yarn Workspaces
-        id: yarn-cache
+      - name: Get Yarn Cache Directory Path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
+      - name: Cache Yarn Dependencies
         uses: actions/cache@v2
         with:
-          path: |
-            **/node_modules
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
       - name: Install Dependencies
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
       - name: Cache Next.js Bundle
@@ -94,16 +97,19 @@ jobs:
         with:
           node-version: '12'
 
-      - name: Restore Yarn Workspaces
-        id: yarn-cache
+      - name: Get Yarn Cache Directory Path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
+      - name: Cache Yarn Dependencies
         uses: actions/cache@v2
         with:
-          path: |
-            **/node_modules
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
       - name: Install Dependencies
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
       - name: Cache Next.js Bundle
