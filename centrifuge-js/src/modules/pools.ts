@@ -1254,10 +1254,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
               balance: new CurrencyBalance(hexToBN(value.free), currencyDecimals),
             })
           } else if ('Tranche' in key) {
-            const [poolId, trancheId] = key.Tranche
+            const [pid, trancheId] = key.Tranche
+            const poolId = pid.replace(/\D/g, '')
             if (value.free !== 0) {
               balances.tranches.push({
-                poolId: poolId.replace(/\D/g, ''),
+                poolId,
                 trancheId,
                 balance: new TokenBalance(hexToBN(value.free), decimalsByPool[poolId]),
               })
