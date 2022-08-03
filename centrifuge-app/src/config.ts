@@ -72,6 +72,7 @@ type EnvironmentConfig = {
   tokensPageSubtitle: string
   defaultLoanType: LoanInfo['type']
   poolCreationType: TransactionOptions['createType']
+  useDocumentNfts: boolean
 }
 
 const poolCreationType: TransactionOptions['createType'] = import.meta.env.REACT_APP_POOL_CREATION_TYPE || 'immediate'
@@ -91,6 +92,7 @@ const ALTAIR: EnvironmentConfig = {
   tokensPageSubtitle: 'Art NFTs',
   defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
+  useDocumentNfts: false,
 }
 
 const CENTRIFUGE: EnvironmentConfig = {
@@ -114,6 +116,7 @@ const CENTRIFUGE: EnvironmentConfig = {
   tokensPageSubtitle: 'Tokens of real-world assets',
   defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
+  useDocumentNfts: true,
 }
 
 export const config = (import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge') === 'altair' ? ALTAIR : CENTRIFUGE

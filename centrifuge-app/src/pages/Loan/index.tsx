@@ -14,7 +14,7 @@ import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
 import { nftMetadataSchema } from '../../schemas'
-import { formatBalance } from '../../utils/formatting'
+import { formatBalance, truncateText } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useAvailableFinancing, useLoan } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
@@ -63,7 +63,7 @@ const Loan: React.FC = () => {
 
   const canPrice = permissions?.pools[poolId]?.roles.includes('PricingAdmin')
 
-  const name = truncate(nftMetadata?.name || 'Unnamed asset', 30)
+  const name = truncateText(nftMetadata?.name || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? cent.metadata.parseMetadataUrl(nftMetadata.image) : ''
 
   const riskGroupIndex = loan && poolMetadata?.riskGroups && getMatchingRiskGroupIndex(loan, poolMetadata.riskGroups)
@@ -204,11 +204,4 @@ const Loan: React.FC = () => {
       )}
     </Stack>
   )
-}
-
-function truncate(txt: string, num: number) {
-  if (txt.length > num) {
-    return `${txt.slice(0, num)}...`
-  }
-  return txt
 }
