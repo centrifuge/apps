@@ -1,6 +1,7 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
 import { lastValueFrom } from '@polkadot/api-base/node_modules/rxjs'
-import { useQueries, useQuery, UseQueryResult } from 'react-query'
+import { useCallback } from 'react'
+import { useQueries, useQuery, useQueryClient, UseQueryResult } from 'react-query'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 
 type Schema = {
@@ -53,6 +54,16 @@ export function useMetadata<T extends Schema>(uri: string | undefined, schema?: 
   })
 
   return { data, isLoading }
+}
+
+export function usePrefetchMetadata() {
+  const cent = useCentrifuge()
+  const queryClient = useQueryClient()
+
+  return useCallback((uri: string) => {
+    queryClient.prefetchQuery(['metadata', uri], () => metadataQueryFn(uri, cent))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 }
 
 export function useMetadataMulti<T = any>(uris: (string | undefined)[]): UseQueryResult<Partial<T>, unknown>[]

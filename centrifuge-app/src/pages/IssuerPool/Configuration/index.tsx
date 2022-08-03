@@ -8,6 +8,7 @@ import { useIsPoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
 import { Admins } from './Admins'
 import { PoolConfig } from './PoolConfig'
+import { Schemas } from './Schemas'
 
 export const IssuerPoolConfigurationPage: React.FC = () => {
   return (
@@ -30,6 +31,7 @@ const IssuerPoolConfiguration: React.FC = () => {
       {isPoolAdmin && (
         <>
           <Admins />
+          <Schemas />
           {editPoolConfig && <PoolConfig poolId={poolId} />}
         </>
       )}

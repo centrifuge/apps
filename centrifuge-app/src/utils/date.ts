@@ -1,6 +1,6 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 
-export function formatDate(timestamp: number | string) {
+export function formatDate(timestamp: number | string | Date) {
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',

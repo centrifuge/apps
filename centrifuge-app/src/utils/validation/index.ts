@@ -105,3 +105,12 @@ export const combineAsync =
   }
 
 type CustomError = string | ((val?: any) => string)
+
+export const isValidJsonString = (str: string) => {
+  try {
+    JSON.parse(str)
+  } catch (e) {
+    return false
+  }
+  return true
+}

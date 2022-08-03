@@ -1,4 +1,4 @@
-import { Balance, Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Pool, TokenBalance } from '@centrifuge/centrifuge-js'
 import {
   AnchorButton,
   Box,
@@ -257,8 +257,8 @@ const InvestForm: React.VFC<InvestFormProps> = ({
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
   const isFirstInvestment = order?.epoch === 0 && order.investCurrency.isZero()
   const minInvest = trancheMeta?.minInitialInvestment
-    ? new Balance(trancheMeta.minInitialInvestment)
-    : Balance.fromFloat(0)
+    ? new CurrencyBalance(trancheMeta.minInitialInvestment, pool?.currencyDecimals ?? 18)
+    : CurrencyBalance.fromFloat(0, 0)
   const { allowInvestBelowMin } = useDebugFlags()
 
   if (pool && !tranche) throw new Error('Nonexistent tranche')
@@ -281,7 +281,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({
   )
   React.useEffect(() => {
     // submit dummy tx to get tx fee estimate
-    getTxInvestFee([poolId, trancheId, Balance.fromFloat(100)])
+    getTxInvestFee([poolId, trancheId, CurrencyBalance.fromFloat(100, 18)])
   }, [poolId, trancheId, getTxInvestFee])
 
   const { execute: doCancel, isLoading: isLoadingCancel } = useCentrifugeTransaction(
@@ -306,7 +306,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({
       amount: 0,
     },
     onSubmit: (values, actions) => {
-      const amount = Balance.fromFloat(values.amount)
+      const amount = CurrencyBalance.fromFloat(values.amount, pool!.currencyDecimals)
       doInvestTransaction([poolId, trancheId, amount])
       actions.setSubmitting(false)
     },
@@ -499,7 +499,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel, a
     },
     onSubmit: (values, actions) => {
       const amount = values.amount instanceof Decimal ? values.amount : Dec(values.amount).div(price)
-      doRedeemTransaction([poolId, trancheId, Balance.fromFloat(amount)])
+      doRedeemTransaction([poolId, trancheId, TokenBalance.fromFloat(amount, pool!.currencyDecimals)])
       actions.setSubmitting(false)
     },
     validate: (values) => {

@@ -26,6 +26,7 @@ const FileUploadContainer = styled(Stack)<{ $disabled?: boolean }>`
   position: relative;
   justify-content: center;
   width: 100%;
+  height: 100%;
   background: ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundPage : theme.colors.backgroundInput)};
   /* outline: 1px dashed
     ${({ theme, $disabled }) => ($disabled ? theme.colors.backgroundSecondary : theme.colors.borderPrimary)};
@@ -50,8 +51,8 @@ const UploadButton = styled.button<{ $active?: boolean }>`
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px dashed
-    ${({ theme, disabled }) => (disabled ? theme.colors.backgroundSecondary : theme.colors.borderPrimary)};
+  border: ${({ theme, disabled }) =>
+    disabled ? `1px solid ${theme.colors.borderSecondary}` : `1px dashed ${theme.colors.borderPrimary}`};
   border-radius: ${({ theme }) => theme.radii.card}px;
   background: transparent;
   appearance: none;
@@ -211,7 +212,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           tabIndex={-1}
           ref={inputRef}
         />
-        <Stack gap="4px">
+        <Stack gap="4px" height="100%">
           {label && (
             <Text variant="label2" color={disabled ? 'textDisabled' : 'textSecondary'}>
               {label}
@@ -219,7 +220,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           )}
           {curFile ? (
             <>
-              <Shelf gap={1}>
+              <Shelf gap={1} my="auto">
                 <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver} />
                 <Flex minWidth="iconMedium">
                   {loading ? (
@@ -241,7 +242,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 >
                   {typeof curFile === 'string' ? curFile : curFile.name}
                 </Text>
-                <Box display="flex" position="relative" zIndex="1" ml="auto" my="-10px" minWidth="iconMedium">
+                <Box
+                  display="flex"
+                  position="relative"
+                  zIndex="1"
+                  ml="auto"
+                  my="-10px"
+                  mr="-10px"
+                  minWidth="iconMedium"
+                >
                   {!disabled && <Button variant="tertiary" onClick={handleClear} icon={IconX} disabled={disabled} />}
                 </Box>
               </Shelf>
@@ -249,7 +258,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           ) : (
             <>
               <UploadButton onClick={handleUploadBtnClick} disabled={disabled} $active={dragOver}></UploadButton>
-              <AddButton gap={1} justifyContent="center">
+              <AddButton gap={1} justifyContent="center" m="auto">
                 <IconUpload />
                 <Text variant="body1" color="currentcolor">
                   {placeholder}

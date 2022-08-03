@@ -5,19 +5,11 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { PageSection } from '../../../components/PageSection'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { isValidJsonString } from '../../../utils/validation'
 import { pinPoolMetadata } from './pinPoolMetadata'
 
 type Props = {
   poolId: string
-}
-
-const isValidJsonString = (str: string) => {
-  try {
-    JSON.parse(str)
-  } catch (e) {
-    return false
-  }
-  return true
 }
 
 export const PoolConfig: React.VFC<Props> = (props: { poolId: string }) => {

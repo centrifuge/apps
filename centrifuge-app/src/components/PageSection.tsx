@@ -21,14 +21,18 @@ export const PageSection: React.FC<Props> = ({ title, titleAddition, subtitle, h
       borderTopStyle="solid"
       borderTopColor="borderSecondary"
     >
-      {title && (
+      {(title || titleAddition) && (
         <Shelf justifyContent="space-between" as="header">
           <Stack>
-            <Shelf gap={1} alignItems="baseline">
-              <Text variant="heading2" as="h1">
-                {title}
+            <Shelf pl={!title ? [0, 0, 4] : undefined} gap={1} alignItems="baseline">
+              {title && (
+                <Text variant="heading2" as="h1">
+                  {title}
+                </Text>
+              )}
+              <Text variant="body2" color="textSecondary">
+                {titleAddition}
               </Text>
-              <Text variant="body1">{titleAddition}</Text>
             </Shelf>
 
             {subtitle && (

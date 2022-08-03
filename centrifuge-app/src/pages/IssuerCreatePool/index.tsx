@@ -1,4 +1,4 @@
-import Centrifuge, { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
+import Centrifuge, { CurrencyBalance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import {
   Box,
   Button,
@@ -179,7 +179,7 @@ const CreatePoolForm: React.VFC = () => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [preimageHash, setPreimageHash] = React.useState('')
   const [metadataHash, setMetadataHash] = React.useState('')
-  const [proposeFee, setProposeFee] = React.useState<Balance | null>(null)
+  const [proposeFee, setProposeFee] = React.useState<CurrencyBalance | null>(null)
 
   // Retrieve the submittable with data currently in the form to see how much the transaction would cost
   // Only for when the pool creation goes via democracy
@@ -195,7 +195,7 @@ const CreatePoolForm: React.VFC = () => {
             const feeBN = hexToBN(minimumDeposit.toHex()).add(
               hexToBN(preimageByteDeposit.toHex()).mul(new BN((submittable as any).encodedLength))
             )
-            return new Balance(feeBN)
+            return new CurrencyBalance(feeBN, api.registry.chainDecimals[0])
           })
         )
       })
@@ -322,10 +322,13 @@ const CreatePoolForm: React.VFC = () => {
     onSubmit: async (values, { setSubmitting }) => {
       if (!address) return
 
+      const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
+      const currencyDecimals = currencies.find((c) => c.value === values.currency)!.decimals
+
       const poolId = await centrifuge.pools.getAvailablePoolId()
       const collectionId = await centrifuge.nfts.getAvailableCollectionId()
 
-      const metadataHash = await pinPoolMetadata(values, poolId)
+      const metadataHash = await pinPoolMetadata(values, poolId, currencyDecimals)
 
       console.log('Pool metadata hash', metadataHash)
       setMetadataHash(metadataHash)
@@ -347,8 +350,6 @@ const CreatePoolForm: React.VFC = () => {
 
       // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
-      const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
-
       createPoolTx(
         [
           address,
@@ -356,7 +357,7 @@ const CreatePoolForm: React.VFC = () => {
           collectionId,
           tranches,
           currency,
-          Balance.fromFloat(values.maxReserve),
+          CurrencyBalance.fromFloat(values.maxReserve, currencyDecimals),
           metadataHash,
           writeOffGroups,
         ],
@@ -407,7 +408,7 @@ const CreatePoolForm: React.VFC = () => {
         '1234567890',
         tranches,
         currency,
-        Balance.fromFloat(values.maxReserve || 0),
+        CurrencyBalance.fromFloat(values.maxReserve || 0, 18),
         'x'.repeat(46),
         writeOffGroups,
       ])
