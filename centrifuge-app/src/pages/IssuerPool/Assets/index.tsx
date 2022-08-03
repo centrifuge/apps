@@ -31,7 +31,7 @@ const PoolDetailAssetsSideBar: React.FC = () => {
     <Stack px={8}>
       {borrowerPermission && config.useDocumentNfts && (
         <RouterLinkButton to={{ pathname: `/issuer/create-asset`, state: { pid } }} variant="secondary" small>
-          Create Asset
+          Create asset
         </RouterLinkButton>
       )}
     </Stack>

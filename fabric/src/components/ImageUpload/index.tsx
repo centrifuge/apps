@@ -46,7 +46,7 @@ const UploadButton = styled.button<{ $active?: boolean }>`
   position: absolute;
   left: 0;
   top: 0;
-  z-index: 0;
+  z-index: 2;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -101,7 +101,7 @@ type ImageUploadProps = {
   errorMessage?: string
   accept?: string
   disabled?: boolean
-  placeholder: string
+  placeholder?: string
   loading?: boolean
   label?: React.ReactNode
   aspectRatio?: ResponsiveValue<string>
@@ -120,6 +120,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   aspectRatio = '1 / 1',
   requirements,
   height,
+  placeholder = 'Not set',
 }) => {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [curFile, setCurFile] = useControlledState<File | null>(null, fileProp, onFileChange)
@@ -259,6 +260,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             ref={handlePreviewMount}
             minWidth={34}
             my="4px"
+            // style={{ aspectRatio }}
           >
             <PreviewPlaceholder
               $active={dragOver}
@@ -327,7 +329,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                   >
                     {typeof curFile === 'string' ? curFile : curFile.name}
                   </Text>
-                  <Box display="flex" position="relative" zIndex="1" ml="auto" my="-10px" mr="-10px" minWidth="40px">
+                  <Box display="flex" position="relative" zIndex="3" ml="auto" my="-10px" mr="-10px" minWidth="40px">
                     {!disabled && <Button variant="tertiary" onClick={handleClear} icon={IconX} disabled={disabled} />}
                   </Box>
                 </Shelf>
@@ -336,7 +338,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               <>
                 <AddButton gap={1}>
                   <Text variant="body1" color="inherit">
-                    Not set
+                    {placeholder}
                   </Text>
                 </AddButton>
               </>

@@ -61,7 +61,7 @@ export const Menu: React.FC<Props> = () => {
             {address && config.poolCreationType === 'immediate' && (
               <Shelf justifyContent="center" mt={1}>
                 <RouterLinkButton to="/issuer/create-pool" variant="secondary" small>
-                  Create Pool
+                  Create pool
                 </RouterLinkButton>
               </Shelf>
             )}

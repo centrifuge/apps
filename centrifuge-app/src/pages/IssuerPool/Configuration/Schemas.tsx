@@ -36,8 +36,7 @@ export const Schemas: React.FC = () => {
 
   return (
     <PageSection
-      title="Schemas"
-      subtitle="Asset templates"
+      title="Asset templates"
       headerRight={
         <RouterLinkButton to={`/issuer/${poolId}/configuration/create-schema`} variant="secondary" small>
           {tableData.length ? 'Add another' : 'Add schema'}

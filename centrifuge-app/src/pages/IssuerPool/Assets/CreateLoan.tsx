@@ -2,8 +2,8 @@ import {
   Button,
   CurrencyInput,
   DateInput,
-  FileUpload,
   Grid,
+  ImageUpload,
   NumberInput,
   Select,
   Stack,
@@ -159,7 +159,7 @@ const IssuerCreateLoan: React.FC = () => {
   })
 
   const selectedPoolMetadata = poolMetadata[allowedPools?.findIndex((p) => p.id === form.values.poolId)]
-    .data as PoolMetadata
+    ?.data as PoolMetadata
 
   const schemaIds = selectedPoolMetadata?.schemas?.map((s) => s.id) ?? []
   const schemaMetadata = useMetadataMulti(selectedPoolMetadata?.schemas?.map((s) => s.id) ?? [])
@@ -268,19 +268,18 @@ const IssuerCreateLoan: React.FC = () => {
           ))}
 
           <PageSection title="Description" titleAddition="Optional">
-            <Grid columns={[1, 1, 2]} gap={2} rowGap={3}>
+            <Stack gap={3}>
               <Field name="image" validate={validate.issuerLogo}>
                 {({ field, meta, form }: FieldProps) => (
-                  <FileUpload
+                  <ImageUpload
                     file={field.value}
                     onFileChange={(file) => {
                       form.setFieldTouched('image', true, false)
                       form.setFieldValue('image', file)
                     }}
-                    label="Image (JPG/PNG, 500x500px)"
-                    placeholder="Choose file"
+                    requirements="JPG/PNG, 500x500px, up to 1MB"
+                    label="Asset image"
                     errorMessage={meta.touched ? meta.error : undefined}
-                    accept="image/*"
                   />
                 )}
               </Field>
@@ -291,7 +290,7 @@ const IssuerCreateLoan: React.FC = () => {
                 placeholder="Add asset description paragraph..."
                 maxLength={100}
               />
-            </Grid>
+            </Stack>
           </PageSection>
         </Stack>
       </Form>
