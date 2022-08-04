@@ -41,13 +41,6 @@ export type PoolRoles = {
   tranches: { [key: string]: string } // trancheId -> permissionedTill
 }
 
-export type Block = {
-  block: {
-    extrinsincs: string[]
-    header: {}
-  }
-}
-
 export type LoanInfoInput =
   | {
       type: 'BulletLoan'
