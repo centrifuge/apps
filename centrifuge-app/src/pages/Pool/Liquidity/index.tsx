@@ -1,4 +1,6 @@
-import { Button, Shelf, Stack } from '@centrifuge/fabric'
+import { calculateOptimalSolution } from '@centrifuge/centrifuge-js'
+import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { BN } from 'bn.js'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { EpochList } from '../../../components/EpochList'
@@ -55,18 +57,91 @@ export const PoolDetailLiquidity: React.FC = () => {
     },
   ]
 
-  const { execute: closeEpochTx } = useCentrifugeTransaction('Close epoch', (cent) => cent.pools.closeEpoch, {
-    onSuccess: () => {
-      console.log('Epoch closed successfully')
-    },
-  })
+  const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
+    'Close epoch',
+    (cent) => cent.pools.closeEpoch,
+    {
+      onSuccess: () => {
+        console.log('Epoch closed successfully')
+      },
+    }
+  )
+
+  const { execute: submitSolutionTx, isLoading: loadingSolution } = useCentrifugeTransaction(
+    'Submit solution',
+    (cent) => cent.pools.submitSolution,
+    {
+      onSuccess: () => {
+        console.log('Solution successfully submitted')
+      },
+      onError: (error) => {
+        console.log('Solution unsuccesful', error)
+      },
+    }
+  )
+
+  const { execute: executeEpochTx, isLoading: loadingExecution } = useCentrifugeTransaction(
+    'Execute epoch',
+    (cent) => cent.pools.executeEpoch,
+    {
+      onSuccess: () => {
+        console.log('Solution successfully submitted')
+      },
+      onError: (error) => {
+        console.log('Solution unsuccesful', error)
+      },
+    }
+  )
 
   const closeEpoch = async () => {
     if (!pool) return
     closeEpochTx([pool.id])
   }
 
+  const executeEpoch = () => {
+    if (!pool) return
+    executeEpochTx([pool.id])
+  }
+
+  const submitSolution = async () => {
+    if (!pool) return
+    const solutionTranches =
+      pool.tranches.map((tranche) => {
+        return {
+          ratio: tranche.ratio,
+          minRiskBuffer: tranche.minRiskBuffer,
+        }
+      }) || []
+    const poolState = {
+      netAssetValue: pool.nav.latest,
+      reserve: pool.reserve.total,
+      tranches: solutionTranches,
+      maxReserve: pool.reserve.max,
+      currencyDecimals: pool.currencyDecimals,
+    }
+    const orders = pool.tranches.map((tranche) => {
+      return {
+        invest: tranche.outstandingInvestOrders,
+        redeem: tranche.outstandingRedeemOrders,
+      }
+    })
+
+    const redeemStartWeight = new BN(10).pow(new BN(solutionTranches.length))
+    const weights = solutionTranches.map((_t: any, index: number) => {
+      return {
+        invest: new BN(10).pow(new BN(solutionTranches.length - index)),
+        redeem: redeemStartWeight.mul(new BN(10).pow(new BN(index).addn(1))),
+      }
+    })
+
+    const solution = await calculateOptimalSolution(poolState, orders, weights)
+    if (solution.isFeasible) {
+      submitSolutionTx([pool.id, solution.tranches])
+    }
+  }
+
   if (!pool) return null
+  const { isInChallengePeriod, isInExecutionPeriod, isInSubmissionPeriod, challengePeriodEnd } = pool.epoch
   return (
     <>
       <PageSummary data={pageSummaryData}></PageSummary>
@@ -77,22 +152,44 @@ export const PoolDetailLiquidity: React.FC = () => {
       </PageSection>
       <PageSection
         title={`Epoch ${pool.epoch.current}`}
-        titleAddition={pool.epoch.isInSubmissionPeriod ? 'Calculating orders...' : 'Ongoing'}
+        titleAddition={
+          isInSubmissionPeriod || isInExecutionPeriod || isInChallengePeriod ? 'Calculating orders...' : 'Ongoing'
+        }
         headerRight={
           <Shelf gap="1">
-            {!pool.epoch.isInSubmissionPeriod && (
+            {!isInSubmissionPeriod && !isInChallengePeriod && !isInExecutionPeriod && (
               <Tooltips type="epochTimeRemaining" label={`${hours} hrs and ${minutes} min remaining`} />
             )}
-            <Button
-              small
-              variant="secondary"
-              onClick={closeEpoch}
-              disabled={!pool}
-              loading={pool.epoch.isInSubmissionPeriod}
-              loadingMessage="Calculating..."
-            >
-              Close
-            </Button>
+            {isInChallengePeriod && (
+              <Text variant="label2">
+                Epoch is in challenge period until block {challengePeriodEnd.toString()} is finalized
+              </Text>
+            )}
+            {(isInExecutionPeriod || isInChallengePeriod) && !isInSubmissionPeriod ? (
+              <Button
+                small
+                variant="secondary"
+                onClick={executeEpoch}
+                disabled={!pool || isInChallengePeriod}
+                loading={isInChallengePeriod || loadingExecution}
+              >
+                Execute epoch
+              </Button>
+            ) : isInSubmissionPeriod ? (
+              <Button
+                small
+                variant="secondary"
+                onClick={submitSolution}
+                disabled={!pool || loadingSolution}
+                loading={false}
+              >
+                Submit solution
+              </Button>
+            ) : (
+              <Button small variant="secondary" onClick={closeEpoch} disabled={!pool || loadingClose}>
+                Close
+              </Button>
+            )}
           </Shelf>
         }
       >

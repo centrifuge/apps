@@ -15,5 +15,6 @@ export {
 export * from './types'
 export * from './utils'
 export * from './utils/BN'
+export * from './utils/solver'
 
 export default Centrifuge

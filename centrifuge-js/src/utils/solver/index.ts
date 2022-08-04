@@ -1,5 +1,6 @@
 import BN from 'bn.js'
 import { CLP } from 'clp-wasm'
+import { CurrencyBalance, Perquintill } from '../BN'
 
 export const calculateOptimalSolution = async (
   state: State,
@@ -7,57 +8,59 @@ export const calculateOptimalSolution = async (
   weights: TrancheWeights[],
   calcInvestmentCapacityForTranche?: number
 ): Promise<SolverResult> => {
-  return require('clp-wasm/clp-wasm.all').then((clp: CLP) => {
-    if (state.tranches.length !== orders.length || orders.length !== weights.length) {
-      throw new Error('Mismatched input length')
-    }
+  // @ts-expect-error
+  const res = await import('clp-wasm/clp-wasm.all')
+  const clp: CLP = await res.default
+  if (state.tranches.length !== orders.length || orders.length !== weights.length) {
+    throw new Error('Mismatched input length')
+  }
 
-    if (state.tranches.length === 0 || state.tranches[0].minRiskBuffer !== undefined) {
-      throw new Error('Missing junior tranche')
-    }
+  if (state.tranches.length === 0 || state.tranches[0].minRiskBuffer !== null) {
+    throw new Error('Missing junior tranche')
+  }
 
-    if (!state.tranches.slice(1).every((tranche) => !!tranche.minRiskBuffer)) {
-      throw new Error('Missing min risk buffer for non junior tranche')
-    }
+  if (!state.tranches.slice(1).every((tranche) => !!tranche.minRiskBuffer)) {
+    throw new Error('Missing min risk buffer for non junior tranche')
+  }
 
-    if (!state.tranches.every((tranche) => !!tranche.ratio)) {
-      throw new Error('Missing ratio for tranche')
-    }
+  if (!state.tranches.every((tranche) => !!tranche.ratio)) {
+    throw new Error('Missing ratio for tranche')
+  }
 
-    if (calcInvestmentCapacityForTranche !== undefined && state.tranches.length < calcInvestmentCapacityForTranche) {
-      throw new Error('Trying to calculate investment capacity for an invalid tranche')
-    }
+  if (calcInvestmentCapacityForTranche !== undefined && state.tranches.length < calcInvestmentCapacityForTranche) {
+    throw new Error('Trying to calculate investment capacity for an invalid tranche')
+  }
 
-    // const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
+  // const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
 
-    const varWeights = weights
-      .map((tranche) => [parseFloat(tranche.invest.toString()), parseFloat(tranche.redeem.toString())])
-      .flat()
+  const varWeights = weights
+    .map((tranche) => [parseFloat(tranche.invest.toString()), parseFloat(tranche.redeem.toString())])
+    .flat()
 
-    const varNames = weights.map((_t, index) => [`tranche-${index}-invest`, `tranche-${index}-redeem`]).flat()
+  const varNames = weights.map((_t, index) => [`tranche-${index}-invest`, `tranche-${index}-redeem`]).flat()
 
-    // const minRiskBufferConstraints = state.tranches
-    //   .slice(1) // skip junior tranche
-    //   .map(
-    //     (tranche, index) => `
-    //       tranche-${index}-minRiskBuffer: ${linearExpression(varNames, [1, -1, 1, -1])} <= ${tranche.minRiskBuffer}
-    //     `
-    //   )
-    //   .join()
+  // const minRiskBufferConstraints = state.tranches
+  //   .slice(1) // skip junior tranche
+  //   .map(
+  //     (tranche, index) => `
+  //       tranche-${index}-minRiskBuffer: ${linearExpression(varNames, [1, -1, 1, -1])} <= ${tranche.minRiskBuffer}
+  //     `
+  //   )
+  //   .join()
 
-    const bounds = orders
-      .map(
-        (order, index) => `
+  const bounds = orders
+    .map(
+      (order, index) => `
           0 <= tranche-${index}-invest  <= ${order.invest}
           0 <= tranche-${index}-redeem  <= ${order.redeem}
         `
-      )
-      .join()
+    )
+    .join()
 
-    const coefs = Array(state.tranches.length).fill([1, -1]).flat()
+  const coefs = Array(state.tranches.length).fill([1, -1]).flat()
 
-    // TODO: add ${minRiskBufferConstraints}
-    const lp = `
+  // TODO: add ${minRiskBufferConstraints}
+  const lp = `
       Maximize
         ${linearExpression(varNames, varWeights)}
       Subject To
@@ -68,29 +71,36 @@ export const calculateOptimalSolution = async (
       End
     `
 
-    // console.log(lp)
+  // console.log(lp)
 
-    const output = (clp as any).solve(lp, 0)
+  const output = clp.solve(lp, 0)
 
-    const solutionVector = output.solution.map((x: string) => new BN(clp.bnRound(x)))
-    const isFeasible = output.infeasibilityRay.length === 0 && output.integerSolution
+  const solutionVector = output.solution.map((x: string) => new BN(clp.bnRound(x)))
+  const isFeasible = output.infeasibilityRay.length === 0 && output.integerSolution
 
-    if (!isFeasible) {
-      return {
-        isFeasible: false,
-        tranches: state.tranches.map(() => {
-          return { invest: new BN(0), redeem: new BN(0) }
-        }),
-      }
-    }
-
+  if (!isFeasible) {
     return {
-      isFeasible,
-      tranches: state.tranches.map((_t, index: number) => {
-        return { invest: solutionVector[index * 2], redeem: solutionVector[index * 2 + 1] }
+      isFeasible: false,
+      tranches: state.tranches.map(() => {
+        return [Perquintill.fromFloat(0), Perquintill.fromFloat(0)]
       }),
     }
-  })
+  }
+
+  return {
+    isFeasible,
+    tranches: state.tranches.map((_t, index: number) => {
+      const investSolution = new CurrencyBalance(solutionVector[index * 2].toString(), state.currencyDecimals)
+      const redeemSolution = new CurrencyBalance(solutionVector[index * 2 + 1].toString(), state.currencyDecimals)
+      const investPerquintill = Perquintill.fromFloat(
+        investSolution.gtn(0) ? investSolution.toDecimal().div(orders[index].invest.toDecimal()).toString() : 0
+      )
+      const redeemPerquintill = Perquintill.fromFloat(
+        redeemSolution.gtn(0) ? redeemSolution.toDecimal().div(orders[index].redeem.toDecimal()).toString() : 0
+      )
+      return [investPerquintill, redeemPerquintill]
+    }),
+  }
 }
 
 const nameValToStr = (name: string, coef: BN | number, first: boolean) => {
@@ -126,20 +136,21 @@ const linearExpression = (varNames: string[], coefs: (BN | number)[]) => {
 }
 
 interface TrancheState {
-  ratio: BN
-  minRiskBuffer?: BN
+  ratio: Perquintill
+  minRiskBuffer: Perquintill | null
 }
 
 export interface State {
-  netAssetValue: BN
-  reserve: BN
+  netAssetValue: CurrencyBalance
+  reserve: CurrencyBalance // total?
   tranches: TrancheState[]
-  maxReserve: BN
+  maxReserve: CurrencyBalance
+  currencyDecimals: number
 }
 
 interface TrancheOrders {
-  invest: BN
-  redeem: BN
+  invest: CurrencyBalance
+  redeem: CurrencyBalance
 }
 
 interface TrancheWeights {
@@ -154,10 +165,7 @@ export interface SolverSolution {
   dropInvest: BN
 }
 
-interface TrancheResult {
-  invest: BN
-  redeem: BN
-}
+type TrancheResult = [Perquintill, Perquintill]
 
 export interface SolverResult {
   isFeasible: boolean

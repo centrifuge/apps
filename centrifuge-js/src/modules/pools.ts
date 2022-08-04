@@ -41,6 +41,13 @@ export type PoolRoles = {
   tranches: { [key: string]: string } // trancheId -> permissionedTill
 }
 
+export type Block = {
+  block: {
+    extrinsincs: string[]
+    header: {}
+  }
+}
+
 export type LoanInfoInput =
   | {
       type: 'BulletLoan'
@@ -190,6 +197,7 @@ type EpochExecutionData = {
   nav: string
   reserve: string
   maxReserve: string
+  challengePeriodEnd: number
   // incomplete
 }
 
@@ -237,6 +245,9 @@ export type Pool = {
     lastClosed: string
     lastExecuted: number
     isInSubmissionPeriod: boolean
+    isInChallengePeriod: boolean
+    isInExecutionPeriod: boolean
+    challengePeriodEnd: number
   }
   nav: {
     latest: CurrencyBalance
@@ -638,7 +649,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.pools.executedEpoch(poolId)
+        const submittable = api.tx.pools.executeEpoch(poolId)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -980,9 +991,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
           const epoch = navValue.toJSON() as unknown as EpochExecutionData
           acc[poolId] = {
             epoch: epoch.epoch,
+            challengePeriodEnd: epoch.challengePeriodEnd,
           }
           return acc
-        }, {} as Record<string, unknown>)
+        }, {} as Record<string, Pick<EpochExecutionData, 'challengePeriodEnd' | 'epoch'>>)
 
         // read pools, poolIds and metadata from observable
         const pools = rawPools.map(([poolKeys, poolValue]) => ({
@@ -1015,8 +1027,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
         //   pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
         // )
 
-        return combineLatest([$issuance, $epochs]).pipe(
-          map(([rawIssuances, rawEpochs]) => {
+        const $block = api.rpc.chain.getBlock()
+
+        return combineLatest([$issuance, $epochs, $block]).pipe(
+          map(([rawIssuances, rawEpochs, { block }]) => {
+            const blockNumber = block?.header?.number.toNumber()
             const epochs = rawEpochs.map((value) => (!value.isEmpty ? (value as any).toJSON() : null))
             const mappedPools = pools.map((poolObj) => {
               const { data: pool, id: poolId, metadata } = poolObj
@@ -1122,7 +1137,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 epoch: {
                   ...pool.epoch,
                   lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
-                  isInSubmissionPeriod: !!epochExecution,
+                  isInSubmissionPeriod: !!epochExecution && !epochExecution?.challengePeriodEnd,
+                  isInChallengePeriod: epochExecution?.challengePeriodEnd >= blockNumber,
+                  isInExecutionPeriod: epochExecution?.challengePeriodEnd < blockNumber,
+                  challengePeriodEnd: epochExecution?.challengePeriodEnd,
                 },
                 parameters: {
                   ...pool.parameters,
@@ -1281,7 +1299,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
               balances.tranches.push({
                 poolId: poolId.replace(/\D/g, ''),
                 trancheId,
-                balance: new TokenBalance(hexToBN(value.free), decimalsByPool[poolId]),
+                balance: new TokenBalance(hexToBN(value.free), decimalsByPool[poolId.replace(/\D/g, '')]),
               })
             }
           } else {
