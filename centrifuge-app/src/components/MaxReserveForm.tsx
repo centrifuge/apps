@@ -1,4 +1,4 @@
-import { Balance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -29,7 +29,7 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
     },
     onSubmit: (values, actions) => {
       if (values.maxReserve) {
-        setMaxReserveTx([poolId, Balance.fromFloat(values.maxReserve)])
+        setMaxReserveTx([poolId, CurrencyBalance.fromFloat(values.maxReserve, pool!.currencyDecimals)])
       } else {
         actions.setErrors({ maxReserve: 'Invalid number' })
       }

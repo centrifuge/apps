@@ -172,6 +172,7 @@ const PoolList: React.FC<Props> = ({ poolsData }) => {
           {dataColumns.map((col) => {
             const Col = isAlignedLeft(col) ? HeaderColLeft : HeaderCol
             return (
+              // eslint-disable-next-line react/jsx-key
               <Col>
                 <HeaderTitle>{col.header}</HeaderTitle>
                 {col.subHeader && <HeaderSub>{col.subHeader}</HeaderSub>}
@@ -246,6 +247,7 @@ export const Row: React.FC<DetailsProps & PropsOf<typeof PoolRow>> = ({
           {poolTitle}
           {columns.map((col) => {
             const Col = isAlignedLeft(col) ? DataColLeft : DataCol
+            // eslint-disable-next-line react/jsx-key
             return <Col>{col.cell(row)}</Col>
           })}
         </Shelf>
@@ -357,6 +359,7 @@ export const RwaMarketRow: React.FC<RwaMarketRowProps & PropsOf<typeof PoolRow>>
           {poolTitle}
           {columns.map((col) => {
             const Col = isAlignedLeft(col) ? DataColLeft : DataCol
+            // eslint-disable-next-line react/jsx-key
             return <Col>{col.cell()}</Col>
           })}
         </Shelf>

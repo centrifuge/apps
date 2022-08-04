@@ -1,4 +1,4 @@
-import { Button, Shelf } from '@centrifuge/fabric'
+import { Button, Shelf, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { EpochList } from '../../../components/EpochList'
@@ -15,6 +15,7 @@ import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransactio
 import { useLiquidityAdmin } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
+import { PoolDetailSideBar } from '../Overview'
 
 const ReserveCashDragChart = React.lazy(() => import('../../../components/Charts/ReserveCashDragChart'))
 
@@ -22,7 +23,14 @@ export const PoolDetailLiquidityTab: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const isLiquidityAdmin = useLiquidityAdmin(poolId)
   return (
-    <PageWithSideBar sidebar={isLiquidityAdmin ? <MaxReserveForm poolId={poolId} /> : true}>
+    <PageWithSideBar
+      sidebar={
+        <Stack gap={2}>
+          {isLiquidityAdmin ? <MaxReserveForm poolId={poolId} /> : true}
+          <PoolDetailSideBar selectedToken={null} setSelectedToken={() => {}} />
+        </Stack>
+      }
+    >
       <PoolDetailHeader />
       <LoadBoundary>
         <PoolDetailLiquidity />

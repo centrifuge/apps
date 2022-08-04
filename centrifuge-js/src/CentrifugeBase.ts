@@ -26,8 +26,8 @@ import {
   throwError,
 } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
-import { Balance } from '.'
 import { TransactionOptions } from './types'
+import { CurrencyBalance } from './utils/BN'
 import { getPolkadotApi } from './utils/web3'
 
 export type Config = {
@@ -51,7 +51,7 @@ export type UserProvidedConfig = Partial<Config>
 
 export type PaymentInfo = {
   class: string
-  partialFee: number | Balance
+  partialFee: number | CurrencyBalance
   weight: number
 }
 
@@ -152,7 +152,7 @@ export class CentrifugeBase {
               const paymentInfo = paymentInfoRaw.toJSON() as PaymentInfo
               return {
                 ...paymentInfo,
-                partialFee: new Balance(paymentInfo.partialFee),
+                partialFee: new CurrencyBalance(paymentInfo.partialFee, api.registry.chainDecimals[0]),
               }
             })
           )
@@ -165,8 +165,8 @@ export class CentrifugeBase {
           takeWhile(([balancesRaw, paymentInfoRaw]) => {
             const paymentInfo = paymentInfoRaw.toJSON() as { partialFee: number }
             const nativeBalance = balancesRaw.toJSON() as { data: { free: string } }
-            const txFee = Number(paymentInfo.partialFee.toString()) / 10 ** (api.registry.chainDecimals as any)
-            const balance = new Balance(hexToBn(nativeBalance.data.free))
+            const txFee = Number(paymentInfo.partialFee.toString()) / 10 ** api.registry.chainDecimals[0]
+            const balance = new CurrencyBalance(hexToBn(nativeBalance.data.free), api.registry.chainDecimals[0])
             if (balance.lten(txFee)) {
               throw new Error(`${api.registry.chainTokens[0]} balance too low`)
             }

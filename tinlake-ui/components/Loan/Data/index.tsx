@@ -15,6 +15,7 @@ import { toPrecision } from '../../../utils/toPrecision'
 import { Asset } from '../../../utils/useAsset'
 import { useLoan } from '../../../utils/useLoan'
 import { RiskGroup, usePool } from '../../../utils/usePool'
+import { useWriteOffPercentage } from '../../../utils/useWriteOffPercentage'
 import { Button } from '../../Button'
 import { ButtonGroup } from '../../ButtonGroup'
 import { Card } from '../../Card'
@@ -61,6 +62,11 @@ const LoanData: React.FC<Props> = (props: Props) => {
 
   const { data: loanData } = useLoan(props.poolConfig.addresses.ROOT_CONTRACT, Number(props.loan?.loanId))
 
+  const { data: writeOffPercentageData } = useWriteOffPercentage(
+    props.poolConfig.addresses.ROOT_CONTRACT,
+    Number(props.loan?.loanId)
+  )
+
   const appliedRiskAdjustment = React.useMemo(() => {
     if (riskGroup?.recoveryRatePD) {
       return toPrecision(
@@ -92,8 +98,12 @@ const LoanData: React.FC<Props> = (props: Props) => {
         <Stack gap="medium">
           <Shelf justifyContent={['space-between', 'flex-start']} gap="small">
             <SectionHeading>Status</SectionHeading>
-            <LoadingValue done={!!props.loan} height={28} alignRight={false}>
-              {props.loan && <LoanLabel loan={props.loan} />}
+            <LoadingValue done={!!props.loan && writeOffPercentageData !== undefined} height={28} alignRight={false}>
+              {props.loan && (
+                <LoanLabel
+                  loan={{ ...props.loan, status: writeOffPercentageData === '100' ? 'repaid' : props.loan.status }}
+                />
+              )}
             </LoadingValue>
           </Shelf>
           <Flex flexDirection={['column', 'column', 'row']} justifyContent="space-between">
@@ -112,17 +122,19 @@ const LoanData: React.FC<Props> = (props: Props) => {
                   <TableRow>
                     <TableCell scope="row">Outstanding</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
-                      <LoadingValue done={props.loan?.debt !== undefined}>
-                        {addThousandsSeparators(toPrecision(baseToDisplay(props.loan?.debt || new BN(0), 18), 2))}{' '}
+                      <LoadingValue done={props.loan?.debt !== undefined && writeOffPercentageData !== undefined}>
+                        {writeOffPercentageData === '100'
+                          ? '0'
+                          : addThousandsSeparators(
+                              toPrecision(baseToDisplay(props.loan?.debt || new BN(0), 18), 2)
+                            )}{' '}
                         {props.poolConfig.metadata.currencySymbol || 'DAI'}
                       </LoadingValue>
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell scope="row" border={{ color: 'transparent' }}>
-                      Maturity date
-                    </TableCell>
-                    <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+                    <TableCell scope="row">Maturity date</TableCell>
+                    <TableCell style={{ textAlign: 'end' }}>
                       <LoadingValue done={props.loan?.nft?.maturityDate !== undefined}>
                         {dateToYMD(props.loan?.nft?.maturityDate || 0)}
                       </LoadingValue>
@@ -198,6 +210,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
           )}
         </Stack>
       </Card>
+
       <Card p="medium" maxWidth={{ medium: 900 }}>
         <Stack>
           <Shelf justifyContent={['space-between', 'flex-start']} gap="small">
@@ -211,6 +224,16 @@ const LoanData: React.FC<Props> = (props: Props) => {
                     <TableCell scope="row">Risk group</TableCell>
                     <TableCell style={{ textAlign: 'end' }}>
                       <LoadingValue done={props.loan?.riskGroup !== undefined}>{props.loan?.riskGroup}</LoadingValue>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell scope="row" border={{ color: 'transparent' }}>
+                      Applied write-off
+                    </TableCell>
+                    <TableCell style={{ textAlign: 'end' }} border={{ color: 'transparent' }}>
+                      <LoadingValue done={writeOffPercentageData !== undefined}>
+                        {writeOffPercentageData} %
+                      </LoadingValue>
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -230,7 +253,7 @@ const LoanData: React.FC<Props> = (props: Props) => {
                       <LoadingValue
                         done={props.loan?.riskGroup !== undefined && riskGroup?.recoveryRatePD !== undefined}
                       >
-                        {appliedRiskAdjustment}%
+                        {appliedRiskAdjustment} %
                       </LoadingValue>
                     </TableCell>
                   </TableRow>

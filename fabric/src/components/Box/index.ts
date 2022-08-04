@@ -46,6 +46,16 @@ const bleed = system({
   },
 })
 
+interface AspectProps {
+  aspectRatio?: ResponsiveValue<CSS.Property.AspectRatio>
+}
+
+const aspect = system({
+  aspectRatio: {
+    property: 'aspectRatio',
+  },
+})
+
 interface SystemProps
   extends SpaceProps,
     LayoutProps,
@@ -56,14 +66,15 @@ interface SystemProps
     BorderProps,
     TextAlignProps,
     PositionProps,
-    BleedProps {}
+    BleedProps,
+    AspectProps {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StyledBoxProps extends SystemProps {}
 
 export const Box = styled('div').withConfig({
   shouldForwardProp: (prop) => shouldForwardProp(prop),
-})<StyledBoxProps>(compose(space, layout, background, color, flexbox, grid, border, textAlign, position, bleed))
+})<StyledBoxProps>(compose(space, layout, background, color, flexbox, grid, border, textAlign, position, bleed, aspect))
 
 export type BoxProps = PropsOf<typeof Box>
 

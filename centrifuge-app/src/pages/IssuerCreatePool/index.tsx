@@ -1,4 +1,4 @@
-import { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import {
   Box,
@@ -191,6 +191,11 @@ const CreatePoolForm: React.VFC = () => {
         }
         tokenNames.add(t.tokenName)
 
+        // matches any character thats not alphanumeric or -
+        if (/[^a-z^A-Z^0-9^-]+/.test(t.symbolName)) {
+          errors = setIn(errors, `tranches.${i}.symbolName`, 'Invalid character detected')
+        }
+
         if (tokenSymbols.has(t.symbolName)) {
           errors = setIn(errors, `tranches.${i}.symbolName`, 'Token symbols must be unique')
         }
@@ -252,6 +257,9 @@ const CreatePoolForm: React.VFC = () => {
       const metadataValues = { ...values }
       if (!address) return
 
+      const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
+      const currencyDecimals = currencies.find((c) => c.value === values.currency)!.decimals
+
       const poolId = await centrifuge.pools.getAvailablePoolId()
       const collectionId = await centrifuge.nfts.getAvailableCollectionId()
 
@@ -282,9 +290,6 @@ const CreatePoolForm: React.VFC = () => {
 
       // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
-      const currency =
-        metadataValues.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : metadataValues.currency
-
       createPoolTx(
         [
           address,
@@ -292,7 +297,7 @@ const CreatePoolForm: React.VFC = () => {
           collectionId,
           tranches,
           currency,
-          Balance.fromFloat(metadataValues.maxReserve),
+          CurrencyBalance.fromFloat(values.maxReserve, currencyDecimals),
           metadataValues,
           writeOffGroups,
         ],
@@ -323,6 +328,7 @@ const CreatePoolForm: React.VFC = () => {
           filter(({ api, events }) => {
             const event = events.find(({ event }) => api.events.democracy.PreimageNoted.is(event))
             const parsedEvent = event?.toJSON() as any
+            console.log('🚀 ~ parsedEvent', parsedEvent)
             // the events api returns a few events for the event PreimageNoted where the data looks different everytime
             // when data is a tuple and the length is 3, it may be safe to extract the first value as the preimage hash
             if (parsedEvent?.event?.data?.length === 3) {
@@ -345,7 +351,12 @@ const CreatePoolForm: React.VFC = () => {
 
   return (
     <>
-      <PreimageHashDialog hash={preimageHash} open={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
+      <PreimageHashDialog
+        preimageHash={preimageHash}
+        metadataHash="Please check the brwoser console"
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+      />
       <FormikProvider value={form}>
         <Form ref={formRef}>
           <PageHeader

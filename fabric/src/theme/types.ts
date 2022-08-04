@@ -86,6 +86,7 @@ export type TextVariantName =
   | 'body1'
   | 'body2'
   | 'body3'
+  | 'body4'
   | 'label1'
   | 'label2'
   | 'label3'

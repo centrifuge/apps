@@ -1,5 +1,6 @@
 import { DisplayField } from '@centrifuge/axis-display-field'
-import { baseToDisplay, bnToHex, feeToInterestRate } from '@centrifuge/tinlake-js'
+import { Spinner } from '@centrifuge/axis-spinner'
+import { baseToDisplay, bnToHex, feeToInterestRate, Loan } from '@centrifuge/tinlake-js'
 import BN from 'bn.js'
 import { DataTable, Text } from 'grommet'
 import { useRouter } from 'next/router'
@@ -10,7 +11,7 @@ import { Pool } from '../../../config'
 import { dateToYMD } from '../../../utils/date'
 import { hexToInt } from '../../../utils/etherscanLinkGenerator'
 import { saveAsCSV } from '../../../utils/export'
-import { SortableLoan } from '../../../utils/useAssets'
+import { useAssetListWriteOffStatus } from '../../../utils/useAssetListWriteOffStatus'
 import { useMedia } from '../../../utils/useMedia'
 import { ButtonGroup } from '../../ButtonGroup'
 import { Card } from '../../Card'
@@ -20,7 +21,7 @@ import { Box } from '../../Layout'
 import LoanLabel from '../Label'
 
 interface Props {
-  loans: SortableLoan[]
+  loans: Loan[]
   userAddress: string
   activePool?: Pool
 }
@@ -28,9 +29,11 @@ interface Props {
 const LoanList: React.FC<Props> = (props: Props) => {
   const router = useRouter()
   const { showExport } = useDebugFlags()
+  const { isFetching: isFetchingLoansWithWriteOffStatus, data: loansWithWriteOffStatusData } =
+    useAssetListWriteOffStatus(props.loans, props.activePool?.addresses as Pool['addresses'])
 
   const clickRow = React.useCallback(
-    ({ datum }: { datum?: SortableLoan; index?: number }) => {
+    ({ datum }: { datum?: Loan; index?: number }) => {
       const { root, slug } = router.query
 
       router.push(
@@ -59,7 +62,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
               property: 'amountNum',
               align: 'end',
               sortable: false,
-              render: (l: SortableLoan) => (
+              render: (l: Loan) => (
                 <NumberDisplay
                   suffix=""
                   precision={0}
@@ -79,7 +82,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
               property: 'interestRateNum',
               align: 'end',
               sortable: false,
-              render: (l: SortableLoan) =>
+              render: (l: Loan) =>
                 l.status === 'Repaid' ? (
                   '-'
                 ) : (
@@ -91,7 +94,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
               property: 'status',
               align: 'center',
               sortable: false,
-              render: (l: SortableLoan) => <LoanLabel loan={l} dot />,
+              render: (l: Loan) => <LoanLabel loan={l} dot />,
             },
             {
               header: '',
@@ -117,7 +120,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
               property: 'tokenId',
               align: 'start',
               size: '260px',
-              render: (l: SortableLoan) => (
+              render: (l: Loan) => (
                 <Box style={{ maxWidth: '200px' }}>
                   <DisplayField as={'span'} value={hexToInt(bnToHex(l.tokenId).toString())} />
                 </Box>
@@ -127,19 +130,19 @@ const LoanList: React.FC<Props> = (props: Props) => {
               header: 'Financing Date',
               property: 'financingDate',
               align: 'end',
-              render: (l: SortableLoan) => (l.financingDate && l.financingDate > 0 ? dateToYMD(l.financingDate) : '-'),
+              render: (l: Loan) => (l.financingDate && l.financingDate > 0 ? dateToYMD(l.financingDate) : '-'),
             },
             {
               header: 'Maturity Date',
               property: 'maturityDate',
               align: 'end',
-              render: (l: SortableLoan) => (l.maturityDate && l.maturityDate > 0 ? dateToYMD(l.maturityDate) : '-'),
+              render: (l: Loan) => (l.maturityDate && l.maturityDate > 0 ? dateToYMD(l.maturityDate) : '-'),
             },
             {
               header: `Amount (${props.activePool?.metadata.currencySymbol || 'DAI'})`,
               property: 'amountNum',
               align: 'end',
-              render: (l: SortableLoan) => (
+              render: (l: Loan) => (
                 <NumberDisplay
                   suffix=""
                   precision={0}
@@ -158,7 +161,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
               header: 'Financing Fee',
               property: 'interestRateNum',
               align: 'end',
-              render: (l: SortableLoan) =>
+              render: (l: Loan) =>
                 l.status === 'Repaid' ? (
                   '-'
                 ) : (
@@ -170,7 +173,7 @@ const LoanList: React.FC<Props> = (props: Props) => {
               property: 'status',
               align: 'start',
               size: '130px',
-              render: (l: SortableLoan) => <LoanLabel loan={l} />,
+              render: (l: Loan) => <LoanLabel loan={l} />,
             },
             {
               header: '',
@@ -189,10 +192,12 @@ const LoanList: React.FC<Props> = (props: Props) => {
   return (
     <>
       <StyledCard bleedX={['12px', 0]} width="auto" pt="xsmall" mb="medium" borderRadius={[0, '8px']}>
-        {props.loans.length > 0 ? (
+        {isFetchingLoansWithWriteOffStatus ? (
+          <Spinner height={'400px'} message={'Loading...'} />
+        ) : loansWithWriteOffStatusData ? (
           <DataTable
             style={{ tableLayout: 'auto' }}
-            data={props.loans}
+            data={loansWithWriteOffStatusData}
             sort={{ direction: 'desc', property: 'loanId' }}
             pad="xsmall"
             sortable
@@ -207,7 +212,9 @@ const LoanList: React.FC<Props> = (props: Props) => {
       </StyledCard>
       {showExport && (
         <ButtonGroup>
-          <ExportLink onClick={() => saveAsCSV(props.loans)}>Export Asset List as CSV</ExportLink>
+          <ExportLink onClick={() => saveAsCSV(loansWithWriteOffStatusData as Loan[])}>
+            Export Asset List as CSV
+          </ExportLink>
         </ButtonGroup>
       )}
     </>

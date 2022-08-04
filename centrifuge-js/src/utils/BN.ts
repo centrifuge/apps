@@ -22,13 +22,28 @@ class BNSubType extends BN {
   }
 }
 
-export class Balance extends BNSubType {
-  static decimals = 18
-  static fromFloat(number: Numeric) {
-    return Balance._fromFloat<Balance>(number)
+export class CurrencyBalance extends BN {
+  decimals: number
+  constructor(number: number | string | number[] | Uint8Array | Buffer | BN, decimals: number) {
+    super(BN.isBN(number) ? number.toString() : number)
+    this.decimals = decimals
   }
-  div(denominator: Balance) {
-    return new Perquintill(this.mul(new BN(10).pow(new BN(Balance.decimals))).div(denominator))
+  static fromFloat(number: Numeric, decimals: number) {
+    const n = Dec(number).mul(Dec(10).pow(decimals)).toDecimalPlaces(0).toString()
+    return new CurrencyBalance(n, decimals)
+  }
+  toDecimal() {
+    return Dec(this.toString()).div(Dec(10).pow(this.decimals))
+  }
+  toFloat() {
+    return this.toDecimal().toNumber()
+  }
+}
+
+export class TokenBalance extends CurrencyBalance {
+  static fromFloat(number: Numeric, decimals: number) {
+    const n = Dec(number).mul(Dec(10).pow(decimals)).toDecimalPlaces(0).toString()
+    return new TokenBalance(n, decimals)
   }
 }
 
