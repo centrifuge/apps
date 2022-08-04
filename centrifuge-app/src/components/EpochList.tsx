@@ -3,6 +3,7 @@ import { Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
+import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
@@ -35,19 +36,21 @@ const columns: Column[] = [
 export const EpochList: React.FC<Props> = ({ pool }) => {
   const { data: metadata } = usePoolMetadata(pool)
 
-  const investments: TableDataRow[] = pool.tranches.map((token) => {
+  const investments: TableDataRow[] = pool.tranches.map((token, index) => {
     const trancheMeta = metadata?.tranches?.[token.id]
+    const price = token.tokenPrice?.toDecimal() || Dec(0)
     return {
       order: `${trancheMeta?.symbol} investments`,
-      locked: token.outstandingInvestOrders?.toDecimal() || new Decimal(0),
+      locked: token.outstandingInvestOrders?.toDecimal().mul(price) || new Decimal(0),
     }
   })
 
   const redmetions: TableDataRow[] = pool.tranches.map((token) => {
     const trancheMeta = metadata?.tranches?.[token.id]
+    const price = token.tokenPrice?.toDecimal() || Dec(0)
     return {
       order: `${trancheMeta?.symbol} redemptions`,
-      locked: token.outstandingRedeemOrders?.toDecimal() || new Decimal(0),
+      locked: token.outstandingRedeemOrders?.toDecimal().mul(price) || new Decimal(0),
     }
   })
 
