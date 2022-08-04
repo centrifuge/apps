@@ -537,7 +537,9 @@ export function getPoolsModule(inst: Centrifuge) {
     const $api = inst.getApi()
     return $uris.pipe(
       switchMap((fileURIs) => {
-        const formattedMetadata = !options?.paymentInfo ? formatPoolMetadata(metadata, poolId, fileURIs) : {}
+        const formattedMetadata = !options?.paymentInfo
+          ? formatPoolMetadata(metadata, poolId, fileURIs, getCurrencyDecimals(currency))
+          : {}
         const $metadataURI = !options?.paymentInfo ? inst.metadata.pinJson(formattedMetadata) : of('')
         return combineLatest([$api, $metadataURI]).pipe(
           switchMap(([api]) => {
@@ -1839,13 +1841,18 @@ type FileURIs = {
   executiveSummary: { uri: string }
 }
 
-function formatPoolMetadata(metadata: PoolMetadataInput, poolId: string, fileURIs: FileURIs): PoolMetadata {
+function formatPoolMetadata(
+  metadata: PoolMetadataInput,
+  poolId: string,
+  fileURIs: FileURIs,
+  currencyDecimals: number
+): PoolMetadata {
   const tranchesById: PoolMetadata['tranches'] = {}
   metadata.tranches.forEach((tranche, index) => {
     tranchesById[computeTrancheId(index, poolId)] = {
       name: tranche.tokenName,
       symbol: tranche.symbolName,
-      minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, pool.c).toString(),
+      minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
     }
   })
 
