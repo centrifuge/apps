@@ -27,6 +27,6 @@ export function useWriteOffPercentage(poolId: string, loanId: number) {
   const tinlake = useTinlake()
 
   return useQuery(['writeOff', poolId, loanId], async () => calculateWriteOffPercentage(tinlake, loanId), {
-    enabled: !!poolId,
+    enabled: !!poolId && !!loanId,
   })
 }
