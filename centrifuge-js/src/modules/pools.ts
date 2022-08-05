@@ -674,10 +674,10 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function setMetadata(args: [poolId: string, metadata: string], options?: TransactionOptions) {
+  function setMetadata(args: [poolId: string, metadata: Record<string, unknown>], options?: TransactionOptions) {
     const [poolId, metadata] = args
     const $api = inst.getApi()
-    const $metadataURI = inst.metadata.pinJson(JSON.parse(metadata))
+    const $metadataURI = inst.metadata.pinJson(metadata)
 
     return combineLatest([$api, $metadataURI]).pipe(
       switchMap(([api, metadataURI]) => {

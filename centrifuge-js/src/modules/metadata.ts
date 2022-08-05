@@ -62,9 +62,8 @@ export function getMetadataModule(inst: Centrifuge) {
       return { uri, ipfsHash: hash }
     } else if (!uri.includes('/') && uri.length === IPFS_HASH_LENGTH) {
       return { uri: `ipfs://ipfs/${uri}`, ipfsHash: uri }
-    } else {
-      return { uri, ipfsHash: '' }
     }
+    return { uri, ipfsHash: '' }
   }
 
   return { getMetadata, parseMetadataUrl, pinFile, pinJson }

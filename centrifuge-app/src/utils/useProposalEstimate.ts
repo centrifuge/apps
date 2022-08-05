@@ -1,4 +1,4 @@
-import Centrifuge, { Balance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
+import Centrifuge, { CurrencyBalance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -10,7 +10,8 @@ import { config } from '../config'
 type CreatePoolArgs = Parameters<Centrifuge['pools']['createPool']>[0]
 
 export function useProposalEstimate(formValues: PoolMetadataInput) {
-  const [proposeFee, setProposeFee] = React.useState<Balance | null>(null)
+  const [proposeFee, setProposeFee] = React.useState<CurrencyBalance | null>(null)
+  const [chainDecimals, setChainDecimals] = React.useState(18)
   const { selectedAccount } = useWeb3()
   const centrifuge = useCentrifuge()
 
@@ -28,16 +29,17 @@ export function useProposalEstimate(formValues: PoolMetadataInput) {
         ]).pipe(
           map(([api, submittable]) => {
             const { minimumDeposit, preimageByteDeposit } = api.consts.democracy
+            setChainDecimals(api.registry.chainDecimals[0])
             const feeBN = hexToBN(minimumDeposit.toHex()).add(
               hexToBN(preimageByteDeposit.toHex()).mul(new BN((submittable as any).encodedLength))
             )
-            return new Balance(feeBN)
+            return new CurrencyBalance(feeBN, chainDecimals)
           })
         )
       })
     )
     return [$fee, subject] as const
-  }, [centrifuge, selectedAccount])
+  }, [centrifuge, selectedAccount, chainDecimals])
 
   React.useEffect(() => {
     const sub = $proposeFee.subscribe({
@@ -78,7 +80,7 @@ export function useProposalEstimate(formValues: PoolMetadataInput) {
         '1234567890',
         tranches,
         currency,
-        Balance.fromFloat(values.maxReserve || 0),
+        CurrencyBalance.fromFloat(values.maxReserve || 0, chainDecimals),
         {} as any,
         writeOffGroups,
       ] as CreatePoolArgs)
