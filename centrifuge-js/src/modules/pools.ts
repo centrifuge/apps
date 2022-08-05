@@ -937,7 +937,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
             api.events.pools.EpochClosed.is(event) ||
             api.events.pools.EpochExecuted.is(event) ||
             api.events.pools.InvestOrderUpdated.is(event) ||
-            api.events.pools.RedeemOrderUpdated.is(event)
+            api.events.pools.RedeemOrderUpdated.is(event) ||
+            api.events.pools.SolutionSubmitted.is(event)
         )
         return !!event
       })
