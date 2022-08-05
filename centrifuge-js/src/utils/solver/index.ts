@@ -135,7 +135,7 @@ const linearExpression = (varNames: string[], coefs: (BN | number)[]) => {
   return str
 }
 
-interface TrancheState {
+export interface TrancheState {
   ratio: Perquintill
   minRiskBuffer: Perquintill | null
 }

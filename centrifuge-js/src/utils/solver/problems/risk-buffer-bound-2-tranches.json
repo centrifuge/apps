@@ -4,6 +4,7 @@
       "base": 18,
       "value": 0
     },
+    "currencyDecimals": 18,
     "reserve": {
       "base": 18,
       "value": 10
@@ -12,17 +13,17 @@
       {
         "ratio": {
           "base": 27,
-          "value": 0.20
+          "value": 0.2
         }
       },
       {
         "ratio": {
           "base": 27,
-          "value": 0.80
+          "value": 0.8
         },
         "minRiskBuffer": {
           "base": 27,
-          "value": 0.20
+          "value": 0.2
         }
       }
     ],

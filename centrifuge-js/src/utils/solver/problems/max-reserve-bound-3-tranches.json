@@ -4,6 +4,7 @@
       "base": 18,
       "value": 990
     },
+    "currencyDecimals": 18,
     "reserve": {
       "base": 18,
       "value": 10
@@ -12,13 +13,13 @@
       {
         "ratio": {
           "base": 27,
-          "value": 0.20
+          "value": 0.2
         }
       },
       {
         "ratio": {
           "base": 27,
-          "value": 0.80
+          "value": 0.8
         },
         "minRiskBuffer": {
           "base": 27,
@@ -28,7 +29,7 @@
       {
         "ratio": {
           "base": 27,
-          "value": 0.80
+          "value": 0.8
         },
         "minRiskBuffer": {
           "base": 27,
@@ -77,7 +78,7 @@
     {
       "invest": {
         "base": 18,
-        "value": 6
+        "value": 1
       },
       "redeem": {
         "base": 18,
@@ -85,10 +86,7 @@
       }
     },
     {
-      "invest": {
-        "base": 18,
-        "value": 4
-      },
+      "invest": "666666666666666667",
       "redeem": {
         "base": 18,
         "value": 0

@@ -2,14 +2,16 @@ import assert from 'assert'
 import BN from 'bn.js'
 import fs from 'fs'
 import glob from 'glob'
-import { calculateOptimalSolution } from './index'
+import { CurrencyBalance } from '../BN'
+import { calculateOptimalSolution, State, TrancheState } from './index'
 
 const DebugMode: boolean = false
 
 const objToNum = (jsonNumber: { base: number; value: number; add?: number } | string) => {
-  if (typeof jsonNumber == 'string') return new BN(jsonNumber)
+  if (typeof jsonNumber == 'string') return new CurrencyBalance(jsonNumber, 18)
   const add = jsonNumber.add ? jsonNumber.add : 0
-  return new BN(jsonNumber.value * 100000).mul(new BN(10).pow(new BN(jsonNumber.base - 5))).add(new BN(add))
+
+  return new CurrencyBalance(CurrencyBalance.fromFloat(jsonNumber.value, jsonNumber.base).addn(add), jsonNumber.base)
 }
 
 const problems = glob.sync('src/utils/solver/problems/*.json')
@@ -19,16 +21,17 @@ describe('pocc-solver tests', () => {
     const name = problemPath.split('/').slice(-1)[0].split('.').slice(0, -1).join('.')
 
     it(`Should solve the ${name} test case`, async () => {
-      const state = {
+      const state: State = {
         netAssetValue: objToNum(problem.state.netAssetValue),
         reserve: objToNum(problem.state.reserve),
         maxReserve: objToNum(problem.state.maxReserve),
+        currencyDecimals: problem.state.currencyDecimals,
         tranches: problem.state.tranches.map((tranche: any) => {
           return {
             ratio: objToNum(tranche.ratio),
-            minRiskBuffer: tranche.minRiskBuffer ? objToNum(tranche.minRiskBuffer) : undefined,
+            minRiskBuffer: tranche.minRiskBuffer ? objToNum(tranche.minRiskBuffer) : null,
           }
-        }),
+        }) as TrancheState[],
       }
 
       const orders = problem.orders.map((tranche: any) => {
@@ -64,10 +67,10 @@ describe('pocc-solver tests', () => {
       if (
         DebugMode ||
         result.isFeasible !== expected.isFeasible ||
-        result.tranches.every(
-          (result, index) =>
-            result.invest !== expected.tranches[index].invest || result.redeem !== expected.tranches[index].redeem
-        )
+        result.tranches.every((result, index) => {
+          const [investResult, redeemResult] = result
+          return investResult !== expected.tranches[index].invest || redeemResult !== expected.tranches[index].redeem
+        })
       ) {
         if (problem.explanation) console.log(`${problem.explanation}\n`)
         console.log(`\n\t- State`)
@@ -91,13 +94,14 @@ describe('pocc-solver tests', () => {
 
       assert.strictEqual(result.isFeasible, expected.isFeasible, 'isFeasible does not match')
       result.tranches.forEach((result, index) => {
+        const [investResult, redeemResult] = result
         assert.strictEqual(
-          result.invest.toString(),
+          investResult.toString(),
           expected.tranches[index].invest.toString(),
           `tranche-${index}-invest is not correct`
         )
         assert.strictEqual(
-          result.redeem.toString(),
+          redeemResult.toString(),
           expected.tranches[index].redeem.toString(),
           `tranche-${index}-redeem is not correct`
         )
