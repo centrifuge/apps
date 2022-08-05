@@ -82,17 +82,14 @@ function validateNumberInput(value: number | string | Decimal, min: number | Dec
   }
 }
 
-const EpochBusy: React.VFC<{ busy?: boolean }> = ({ busy }) => {
-  if (busy)
-    return (
-      <InlineFeedback>
-        The pool is busy calculating epoch orders.
-        <br />
-        Try again later.
-      </InlineFeedback>
-    )
-  return null
-}
+const EpochBusy: React.VFC<{ busy?: boolean }> = ({ busy }) =>
+  busy ? (
+    <InlineFeedback>
+      The pool is busy calculating epoch orders.
+      <br />
+      Try again later.
+    </InlineFeedback>
+  ) : null
 
 const InvestRedeemInner: React.VFC<Props> = ({
   poolId,
