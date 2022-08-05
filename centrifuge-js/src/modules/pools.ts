@@ -540,12 +540,21 @@ export function getPoolsModule(inst: Centrifuge) {
         const formattedMetadata = !options?.paymentInfo
           ? formatPoolMetadata(metadata, poolId, fileURIs, getCurrencyDecimals(currency))
           : {}
-        const $metadataURI = !options?.paymentInfo ? inst.metadata.pinJson(formattedMetadata) : of('')
-        return combineLatest([$api, $metadataURI]).pipe(
-          switchMap(([api]) => {
+        const $pinnedMetadata = !options?.paymentInfo
+          ? inst.metadata.pinJson(formattedMetadata)
+          : of({ uri: '', ipfsHash: '' })
+        return combineLatest([$api, $pinnedMetadata]).pipe(
+          switchMap(([api, pinnedMetadata]) => {
             let submittable
             if (['propose', 'notePreimage'].includes(options?.createType ?? '')) {
-              submittable = api.tx.pools.create(admin, poolId, trancheInput, currency, maxReserve.toString(), metadata)
+              submittable = api.tx.pools.create(
+                admin,
+                poolId,
+                trancheInput,
+                currency,
+                maxReserve.toString(),
+                pinnedMetadata.uri
+              )
             } else {
               submittable = api.tx.utility.batchAll(
                 [
@@ -556,7 +565,7 @@ export function getPoolsModule(inst: Centrifuge) {
                     trancheInput,
                     currency,
                     maxReserve.toString(),
-                    metadata
+                    pinnedMetadata.uri
                   ),
                   api.tx.permissions.add(
                     { PoolRole: 'PoolAdmin' },

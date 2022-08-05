@@ -351,12 +351,7 @@ const CreatePoolForm: React.VFC = () => {
 
   return (
     <>
-      <PreimageHashDialog
-        preimageHash={preimageHash}
-        metadataHash="Please check the brwoser console"
-        open={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-      />
+      <PreimageHashDialog preimageHash={preimageHash} open={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
       <FormikProvider value={form}>
         <Form ref={formRef}>
           <PageHeader

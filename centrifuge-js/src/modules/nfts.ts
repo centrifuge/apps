@@ -272,7 +272,7 @@ export function getNftsModule(inst: Centrifuge) {
     const $api = inst.getApi()
 
     const $image = inst.metadata.pinFile(metadata.fileDataUri)
-    const metadataURI = $image
+    const $pinnedMetadata = $image
       .pipe(
         switchMap((metadataURI) => {
           return inst.metadata.pinJson({
@@ -283,13 +283,13 @@ export function getNftsModule(inst: Centrifuge) {
         })
       )
       .pipe(take(1))
-    return combineLatest([$api, metadataURI]).pipe(
-      map(([api, metadata]) => {
+    return combineLatest([$api, $pinnedMetadata]).pipe(
+      map(([api, pinnedMetadata]) => {
         return {
           api,
           submittable: api.tx.utility.batchAll([
             api.tx.uniques.create(collectionId, owner),
-            api.tx.uniques.setCollectionMetadata(collectionId, metadata.uri, true),
+            api.tx.uniques.setCollectionMetadata(collectionId, pinnedMetadata.uri, true),
           ]),
         }
       }),
@@ -320,7 +320,7 @@ export function getNftsModule(inst: Centrifuge) {
     const [collectionId, nftId, owner, metadata] = args
 
     const $image = inst.metadata.pinFile(metadata.fileDataUri)
-    const metadataURI = $image
+    const $pinnedMetadata = $image
       .pipe(
         switchMap((metadataURI) => {
           return inst.metadata.pinJson({
@@ -331,13 +331,13 @@ export function getNftsModule(inst: Centrifuge) {
         })
       )
       .pipe(take(1))
-    return combineLatest([$api, metadataURI]).pipe(
-      map(([api, metadata]) => {
+    return combineLatest([$api, $pinnedMetadata]).pipe(
+      map(([api, pinnedMetadata]) => {
         return {
           api,
           submittable: api.tx.utility.batchAll([
             api.tx.uniques.mint(collectionId, nftId, owner),
-            api.tx.uniques.setMetadata(collectionId, nftId, metadata?.uri, true),
+            api.tx.uniques.setMetadata(collectionId, nftId, pinnedMetadata.uri, true),
           ]),
         }
       }),
