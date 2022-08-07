@@ -1,4 +1,4 @@
-import { CurrencyBalance, Perquintill, TokenBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Perquintill, Price, TokenBalance } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
 
 const currencySymbols = {
@@ -24,6 +24,14 @@ export function formatBalance(
       ? amount.toNumber()
       : amount
   ).toLocaleString('en', {
+    minimumFractionDigits: precision,
+    maximumFractionDigits: precision,
+  })
+  return currency ? `${formattedAmount} ${getCurrencySymbol(currency)}` : formattedAmount
+}
+
+export function formatPrice(price: Price, currency?: string, precision = 4) {
+  const formattedAmount = price.toFloat().toLocaleString('en', {
     minimumFractionDigits: precision,
     maximumFractionDigits: precision,
   })

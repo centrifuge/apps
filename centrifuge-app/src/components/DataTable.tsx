@@ -29,6 +29,7 @@ export type Column = {
   align?: string
   flex?: string
   sortKey?: string
+  width?: string
 }
 const sorter = <T extends Record<string, any>>(data: Array<T>, order: OrderBy, sortKey?: string) => {
   if (!sortKey) return data
@@ -105,7 +106,11 @@ export const DataTable = <T extends Record<string, any>>({
             tabIndex={onRowClicked ? 0 : undefined}
           >
             {columns.map((col, index) => (
-              <DataCol style={{ flex: col.flex }} align={col?.align} key={index}>
+              <DataCol
+                style={{ flex: col.width !== undefined ? 'auto' : col.flex, width: col.width }}
+                align={col?.align}
+                key={index}
+              >
                 {col.cell(row, i)}
               </DataCol>
             ))}

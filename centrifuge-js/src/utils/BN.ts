@@ -52,6 +52,12 @@ export class Price extends BNSubType {
   static fromFloat(number: Numeric) {
     return Price._fromFloat<Price>(number)
   }
+  toDecimal() {
+    return Dec(this.toString()).div(Dec(10).pow(Price.decimals))
+  }
+  toFloat() {
+    return this.toDecimal().toNumber()
+  }
 }
 
 export class Perquintill extends BNSubType {
