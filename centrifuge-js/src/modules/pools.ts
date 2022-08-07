@@ -908,7 +908,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  function getPools() {
+  function getPools(args: [blockNumber?: number]) {
+    // const [blockNumber] = args
+
     const $api = inst.getApi()
     const $events = inst.getEvents().pipe(
       filter(({ api, events }) => {
@@ -1149,9 +1151,9 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  function getPool(args: [poolId: string]) {
-    const [poolId] = args
-    return getPools().pipe(
+  function getPool(args: [poolId: string, blockNumber?: number]) {
+    const [poolId, blockNumber] = args
+    return getPools(blockNumber).pipe(
       map((pools) => {
         const pool = pools.find(({ id }) => id === poolId)
         if (!pool) throw new Error(`Pool not found with poolId: ${poolId}`)

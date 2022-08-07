@@ -17,6 +17,7 @@ type Props<T> = {
   defaultSortKey?: string
   defaultSortOrder?: OrderBy
   rounded?: boolean
+  hoverable?: boolean
   summary?: T
 } & GroupedProps
 
@@ -44,6 +45,7 @@ export const DataTable = <T extends Record<string, any>>({
   onRowClicked,
   defaultSortKey,
   rounded = true,
+  hoverable = false,
   summary,
   groupIndex,
   lastGroupIndex,
@@ -96,6 +98,7 @@ export const DataTable = <T extends Record<string, any>>({
         {sortedData?.map((row, i) => (
           <Row
             rounded={rounded}
+            hoverable={hoverable}
             as={onRowClicked ? Link : 'div'}
             to={onRowClicked && (() => onRowClicked(row))}
             key={keyField ? row[keyField] : i}
@@ -124,7 +127,7 @@ export const DataTable = <T extends Record<string, any>>({
 }
 
 const Row = styled(Shelf)<any>`
-  ${({ rounded, as: comp }) =>
+  ${({ rounded, hoverable, as: comp }) =>
     css({
       height: '48px',
       width: '100%',
@@ -140,6 +143,10 @@ const Row = styled(Shelf)<any>`
           ? {
               backgroundColor: 'secondarySelectedBackground',
               cursor: 'pointer',
+            }
+          : hoverable
+          ? {
+              backgroundColor: 'secondarySelectedBackground',
             }
           : undefined,
       '&:focus-visible': {
