@@ -65,17 +65,14 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
 
     const collectionId = await cent.nfts.getAvailableCollectionId()
 
-    let fileName
     let fileDataUri
     if (logo) {
-      fileName = logo.name
       fileDataUri = await getFileDataURI(logo)
     }
 
     const metadataValues: CollectionMetadataInput = {
       name: nameValue,
       description: descriptionValue,
-      fileName,
       fileDataUri,
     }
 

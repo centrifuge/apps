@@ -32,14 +32,12 @@ export type Collection = Class & {
 export type CollectionMetadataInput = {
   name: string
   description: string
-  fileName?: string
   fileDataUri?: string
 }
 
 export type NFTMetadataInput = {
   name: string
   description: string
-  fileName: string
   fileDataUri: string
 }
 

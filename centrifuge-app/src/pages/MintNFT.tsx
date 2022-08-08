@@ -46,7 +46,6 @@ const MintNFT: React.FC = () => {
   const [nftAmount, setNftAmount] = useState(1)
   const [nftDescription, setNftDescription] = useState('')
   const [fileDataUri, setFileDataUri] = useState('')
-  const [fileName, setFileName] = useState('')
 
   const isPageUnchanged = useIsPageUnchanged()
 
@@ -86,7 +85,6 @@ const MintNFT: React.FC = () => {
       name: nameValue,
       description: descriptionValue,
       fileDataUri,
-      fileName,
     }
 
     doTransaction([collectionId, nftId, address!, metadataValues, nftAmount])
@@ -96,7 +94,6 @@ const MintNFT: React.FC = () => {
     setNftName('')
     setNftDescription('')
     setFileDataUri('')
-    setFileName('')
     resetLastTransaction()
     resetUpload()
     setNextVersion()
@@ -143,13 +140,11 @@ const MintNFT: React.FC = () => {
                 key={version}
                 onFileUpdate={async (file) => {
                   if (file) {
-                    setFileName(file.name)
                     setFileDataUri(await getFileDataURI(file))
                     if (!nftName) {
                       setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
                     }
                   } else {
-                    setFileName('')
                     setFileDataUri('')
                   }
                 }}
