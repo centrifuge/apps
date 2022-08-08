@@ -56,24 +56,26 @@ export const Report: React.FC<Props> = ({ pool, poolStates, exportRef, groupBy }
     : []
 
   const exportToCsv = () => {
-    let rows = [columns.map((col) => col.header.toString())]
+    const rows = [columns.map((col) => col.header.toString())]
+
+    const mapText = (text: string) => text.replaceAll('\u00A0 \u00A0', '-')
 
     overviewRecords.forEach((rec, index) => {
-      rows.push(columns.map((col) => (col.cell(rec, index) ? textContent(col.cell(rec, index)) : '')))
+      rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
     })
     rows.push([''])
 
     priceRecords.forEach((rec, index) => {
-      rows.push(columns.map((col) => (col.cell(rec, index) ? textContent(col.cell(rec, index)) : '')))
+      rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
     })
     rows.push([''])
 
     inOutFlowRecords.forEach((rec, index) => {
-      rows.push(columns.map((col) => (col.cell(rec, index) ? textContent(col.cell(rec, index)) : '')))
+      rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
     })
     rows.push([''])
 
-    downloadCSV(rows, 'report.csv')
+    downloadCSV(rows, `pool-balance_${new Date().toISOString().slice(0, 10)}.csv`)
   }
   exportRef.current = exportToCsv
 
@@ -121,7 +123,7 @@ export const Report: React.FC<Props> = ({ pool, poolStates, exportRef, groupBy }
           name: `\u00A0 \u00A0 ${trancheMeta?.name} tranche`,
           value:
             poolStates?.map((state) => {
-              return state.tranches[token.id].price ? formatPrice(state.tranches[token.id].price) : '1.000'
+              return state.tranches[token.id].price ? formatPrice(state.tranches[token.id].price!) : '1.000'
             }) || [],
           heading: false,
         }

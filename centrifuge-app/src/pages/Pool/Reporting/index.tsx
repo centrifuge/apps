@@ -23,16 +23,11 @@ export const PoolDetailReportingTab: React.FC = () => {
 
   const [groupBy, setGroupBy] = React.useState('day' as GroupBy)
 
-  const poolStates = groupBy === 'day' ? useDailyPoolStates(poolId) : useMonthlyPoolStates(poolId)
+  const dailyPoolStates = useDailyPoolStates(poolId, startDate, endDate)
+  const monthlyPoolStates = useMonthlyPoolStates(poolId, startDate, endDate)
+  const poolStates = groupBy === 'day' ? dailyPoolStates : monthlyPoolStates
 
   const exportRef = React.useRef<() => void>(() => {})
-
-  React.useEffect(() => {
-    if (poolStates && poolStates.length > 0) {
-      setStartDate(new Date(poolStates[0].timestamp + 1))
-      setEndDate(new Date(poolStates[poolStates.length - 1].timestamp + 1))
-    }
-  }, [poolStates])
 
   return (
     <PageWithSideBar

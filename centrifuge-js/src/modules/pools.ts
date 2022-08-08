@@ -1170,19 +1170,20 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  function getDailyPoolStates(args: [poolId: string]) {
-    const [poolId] = args
+  function getDailyPoolStates(args: [poolId: string, from?: Date, to?: Date]) {
+    const [poolId, from, to] = args
     const $api = inst.getApi()
 
     const $query = inst.getSubqueryObservable<{
       poolSnapshots: { nodes: SubqueryPoolSnapshot[] }
       trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] }
     }>(
-      `query($poolId: String!) {
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
         poolSnapshots(
           orderBy: BLOCK_NUMBER_ASC,
           filter: { 
             id: { startsWith: $poolId },
+            timestamp: { greaterThan: $from, lessThan: $to }
           }) {
           nodes {
             id
@@ -1195,6 +1196,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
           orderBy: BLOCK_NUMBER_ASC,
           filter: { 
             id: { startsWith: $poolId },
+            timestamp: { greaterThan: $from, lessThan: $to }
           }) {
           nodes {
             id
@@ -1212,6 +1214,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
       `,
       {
         poolId,
+        from: from ? from.toISOString() : new Date(new Date().setFullYear(new Date().getFullYear() - 10)).toISOString(),
+        to: to ? to.toISOString() : new Date(new Date().setFullYear(new Date().getFullYear() + 10)).toISOString(),
       }
     )
 
@@ -1258,7 +1262,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  function getMonthlyPoolStates(args: [poolId: string]) {
+  function getMonthlyPoolStates(args: [poolId: string, from?: Date, to?: Date]) {
     return getDailyPoolStates(args).pipe(
       map((poolStates) => {
         if (!poolStates) return []
