@@ -1,5 +1,5 @@
 import path from 'path'
-import { pinFile } from './pinata/api'
+import { pinFile, unpinFile } from './pinata/api'
 
 const fs = require('fs')
 
@@ -26,6 +26,13 @@ const ipfsHashToURI = (hash) => `ipfs://ipfs/${hash}`
 const handler = async (event) => {
   try {
     const { uri } = JSON.parse(event.body)
+    if (event.httpMethod === 'DELETE') {
+      await unpinFile(fileStream)
+      return {
+        statusCode: 204,
+      }
+    }
+
     // check incoming data
     if (!uri) {
       return { statusCode: 400, body: 'Bad request: uri is required' }

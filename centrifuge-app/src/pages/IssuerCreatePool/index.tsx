@@ -328,7 +328,6 @@ const CreatePoolForm: React.VFC = () => {
           filter(({ api, events }) => {
             const event = events.find(({ event }) => api.events.democracy.PreimageNoted.is(event))
             const parsedEvent = event?.toJSON() as any
-            console.log('🚀 ~ parsedEvent', parsedEvent)
             // the events api returns a few events for the event PreimageNoted where the data looks different everytime
             // when data is a tuple and the length is 3, it may be safe to extract the first value as the preimage hash
             if (parsedEvent?.event?.data?.length === 3) {

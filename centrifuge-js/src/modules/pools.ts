@@ -1,7 +1,7 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import { hash } from '@stablelib/blake2b'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, Observable, of } from 'rxjs'
+import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
@@ -521,93 +521,140 @@ export function getPoolsModule(inst: Centrifuge) {
   ) {
     const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, writeOffGroups] = args
 
-    let $uris: Observable<any> = of(null)
-    if (!options?.paymentInfo) {
-      const $poolIcon = inst.metadata.pinFile(metadata.poolIcon as string)
-      const $issuerLogo = metadata?.issuerLogo ? inst.metadata.pinFile(metadata.issuerLogo as string) : of(null)
-      const $executiveSummary = inst.metadata.pinFile(metadata.executiveSummary as string)
-      $uris = combineLatest({ poolIcon: $poolIcon, issuerLogo: $issuerLogo, executiveSummary: $executiveSummary })
-    }
-
     const trancheInput = tranches.map((t) => [
       t.interestRatePerSec
         ? { NonResidual: [t.interestRatePerSec.toString(), t.minRiskBuffer?.toString()] }
         : 'Residual',
     ])
+    const $pinMetadata = pinPoolMetadata(metadata, poolId, currency, options)
     const $api = inst.getApi()
-    return $uris.pipe(
-      switchMap((fileURIs) => {
-        const formattedMetadata = !options?.paymentInfo
-          ? formatPoolMetadata(metadata, poolId, fileURIs, getCurrencyDecimals(currency))
-          : {}
-        const $pinnedMetadata = !options?.paymentInfo
-          ? inst.metadata.pinJson(formattedMetadata)
-          : of({ uri: '', ipfsHash: '' })
-        return combineLatest([$api, $pinnedMetadata]).pipe(
-          switchMap(([api, pinnedMetadata]) => {
-            let submittable
-            if (['propose', 'notePreimage'].includes(options?.createType ?? '')) {
-              submittable = api.tx.pools.create(
-                admin,
+
+    return combineLatest([$api, $pinMetadata]).pipe(
+      switchMap(([api, pinnedMetadata]) => {
+        let submittable
+        if (['propose', 'notePreimage'].includes(options?.createType ?? '')) {
+          submittable = api.tx.pools.create(
+            admin,
+            poolId,
+            trancheInput,
+            currency,
+            maxReserve.toString(),
+            pinnedMetadata.ipfsHash
+          )
+        } else {
+          submittable = api.tx.utility.batchAll(
+            [
+              api.tx.uniques.create(collectionId, LoanPalletAccountId),
+              api.tx.pools.create(
+                inst.getSignerAddress(),
                 poolId,
                 trancheInput,
                 currency,
                 maxReserve.toString(),
-                pinnedMetadata.uri
+                pinnedMetadata.ipfsHash
+              ),
+              api.tx.permissions.add(
+                { PoolRole: 'PoolAdmin' },
+                admin,
+                { Pool: poolId },
+                {
+                  PoolRole: 'LoanAdmin',
+                }
+              ),
+              api.tx.loans.initialisePool(poolId, collectionId),
+            ].concat(
+              writeOffGroups.map((g) =>
+                api.tx.loans.addWriteOffGroup(poolId, {
+                  percentage: g.percentage.toString(),
+                  overdueDays: g.overdueDays,
+                  penaltyInterestRatePerSec: null,
+                })
               )
-            } else {
-              submittable = api.tx.utility.batchAll(
-                [
-                  api.tx.uniques.create(collectionId, LoanPalletAccountId),
-                  api.tx.pools.create(
-                    inst.getSignerAddress(),
-                    poolId,
-                    trancheInput,
-                    currency,
-                    maxReserve.toString(),
-                    pinnedMetadata.uri
-                  ),
-                  api.tx.permissions.add(
-                    { PoolRole: 'PoolAdmin' },
-                    admin,
-                    { Pool: poolId },
-                    {
-                      PoolRole: 'LoanAdmin',
-                    }
-                  ),
-                  api.tx.loans.initialisePool(poolId, collectionId),
-                ].concat(
-                  writeOffGroups.map((g) =>
-                    api.tx.loans.addWriteOffGroup(poolId, {
-                      percentage: g.percentage.toString(),
-                      overdueDays: g.overdueDays,
-                      penaltyInterestRatePerSec: null,
-                    })
-                  )
-                )
-              )
-            }
-            console.log(
-              'writeOffGroups',
-              writeOffGroups.map((g) => ({
-                percentage: g.percentage.toString(),
-                overdueDays: g.overdueDays,
-              }))
             )
-            if (options?.createType === 'propose') {
-              const proposalSubmittable = api.tx.utility.batchAll([
-                api.tx.democracy.notePreimage(submittable.method.toHex()),
-                api.tx.democracy.propose(submittable.method.hash, api.consts.democracy.minimumDeposit),
-              ])
-              return inst.wrapSignAndSend(api, proposalSubmittable, options)
-            }
-            if (options?.createType === 'notePreimage') {
-              const preimageSubmittable = api.tx.democracy.notePreimage(submittable.method.toHex())
-              return inst.wrapSignAndSend(api, preimageSubmittable, options)
-            }
-            return inst.wrapSignAndSend(api, submittable, options)
-          })
+          )
+        }
+        console.log(
+          'writeOffGroups',
+          writeOffGroups.map((g) => ({
+            percentage: g.percentage.toString(),
+            overdueDays: g.overdueDays,
+          }))
         )
+        if (options?.createType === 'propose') {
+          const proposalSubmittable = api.tx.utility.batchAll([
+            api.tx.democracy.notePreimage(submittable.method.toHex()),
+            api.tx.democracy.propose(submittable.method.hash, api.consts.democracy.minimumDeposit),
+          ])
+          return inst.wrapSignAndSend(api, proposalSubmittable, options)
+        }
+        if (options?.createType === 'notePreimage') {
+          const preimageSubmittable = api.tx.democracy.notePreimage(submittable.method.toHex())
+          return inst.wrapSignAndSend(api, preimageSubmittable, options)
+        }
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function pinPoolMetadata(
+    metadata: PoolMetadataInput,
+    poolId: string,
+    currency: string | { permissioned: string },
+    options?: TransactionOptions
+  ) {
+    if (options?.paymentInfo) {
+      return of({ uri: '', ipfsHash: '' })
+    }
+
+    const $poolIcon = inst.metadata.pinFile(metadata.poolIcon as string)
+    const $issuerLogo = metadata?.issuerLogo ? inst.metadata.pinFile(metadata.issuerLogo as string) : of(null)
+    const $executiveSummary = inst.metadata.pinFile(metadata.executiveSummary as string)
+    const $uris = combineLatest({ poolIcon: $poolIcon, issuerLogo: $issuerLogo, executiveSummary: $executiveSummary })
+
+    return $uris.pipe(
+      switchMap((fileURIs) => {
+        const tranchesById: PoolMetadata['tranches'] = {}
+        metadata.tranches.forEach((tranche, index) => {
+          tranchesById[computeTrancheId(index, poolId)] = {
+            name: tranche.tokenName,
+            symbol: tranche.symbolName,
+            minInitialInvestment: CurrencyBalance.fromFloat(
+              tranche.minInvestment,
+              getCurrencyDecimals(currency)
+            ).toString(),
+          }
+        })
+
+        const formattedMetadata = {
+          pool: {
+            name: metadata.poolName,
+            icon: fileURIs.poolIcon?.uri || '',
+            asset: { class: metadata.assetClass },
+            issuer: {
+              name: metadata.issuerName,
+              description: metadata.issuerDescription,
+              email: metadata.email,
+              logo: fileURIs.issuerLogo?.uri || '',
+            },
+            links: {
+              executiveSummary: fileURIs.executiveSummary?.uri || '',
+              forum: metadata.forum,
+              website: metadata.website,
+            },
+            status: 'open',
+          },
+          tranches: tranchesById,
+          riskGroups: metadata.riskGroups.map((group) => ({
+            name: group.groupName,
+            advanceRate: Rate.fromPercent(group.advanceRate).toString(),
+            interestRatePerSec: Rate.fromAprPercent(group.fee).toString(),
+            probabilityOfDefault: Rate.fromPercent(group.probabilityOfDefault).toString(),
+            lossGivenDefault: Rate.fromPercent(group.lossGivenDefault).toString(),
+            discountRate: Rate.fromAprPercent(group.discountRate).toString(),
+          })),
+        }
+
+        return inst.metadata.pinJson(formattedMetadata)
       })
     )
   }
@@ -686,11 +733,11 @@ export function getPoolsModule(inst: Centrifuge) {
   function setMetadata(args: [poolId: string, metadata: Record<string, unknown>], options?: TransactionOptions) {
     const [poolId, metadata] = args
     const $api = inst.getApi()
-    const $metadataURI = inst.metadata.pinJson(metadata)
+    const $pinnedMetadata = inst.metadata.pinJson(metadata)
 
-    return combineLatest([$api, $metadataURI]).pipe(
-      switchMap(([api, metadataURI]) => {
-        const submittable = api.tx.pools.setMetadata(poolId, metadataURI.ipfsHash)
+    return combineLatest([$api, $pinnedMetadata]).pipe(
+      switchMap(([api, pinnedMetadata]) => {
+        const submittable = api.tx.pools.setMetadata(poolId, pinnedMetadata.ipfsHash)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -1054,7 +1101,8 @@ export function getPoolsModule(inst: Centrifuge) {
             api.events.pools.EpochClosed.is(event) ||
             api.events.pools.EpochExecuted.is(event) ||
             api.events.pools.InvestOrderUpdated.is(event) ||
-            api.events.pools.RedeemOrderUpdated.is(event)
+            api.events.pools.RedeemOrderUpdated.is(event) ||
+            api.events.pools.SolutionSubmitted.is(event)
         )
         return !!event
       })
@@ -1842,55 +1890,4 @@ function toHex(data: Uint8Array) {
     out.push(hex[data[i] & 0xf])
   }
   return `0x${out.join('')}`
-}
-
-type FileURIs = {
-  poolIcon: { uri: string }
-  issuerLogo: { uri: string }
-  executiveSummary: { uri: string }
-}
-
-function formatPoolMetadata(
-  metadata: PoolMetadataInput,
-  poolId: string,
-  fileURIs: FileURIs,
-  currencyDecimals: number
-): PoolMetadata {
-  const tranchesById: PoolMetadata['tranches'] = {}
-  metadata.tranches.forEach((tranche, index) => {
-    tranchesById[computeTrancheId(index, poolId)] = {
-      name: tranche.tokenName,
-      symbol: tranche.symbolName,
-      minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
-    }
-  })
-
-  return {
-    pool: {
-      name: metadata.poolName,
-      icon: fileURIs.poolIcon?.uri || '',
-      asset: { class: metadata.assetClass },
-      issuer: {
-        name: metadata.issuerName,
-        description: metadata.issuerDescription,
-        email: metadata.email,
-        logo: fileURIs.issuerLogo?.uri || '',
-      },
-      links: {
-        executiveSummary: fileURIs.executiveSummary?.uri || '',
-        forum: metadata.forum,
-        website: metadata.website,
-      },
-      status: 'open',
-    },
-    tranches: tranchesById,
-    riskGroups: metadata.riskGroups.map((group) => ({
-      name: group.groupName,
-      advanceRate: Rate.fromPercent(group.advanceRate).toString(),
-      interestRatePerSec: Rate.fromAprPercent(group.fee).toString(),
-      probabilityOfDefault: Rate.fromPercent(group.probabilityOfDefault).toString(),
-      lossGivenDefault: Rate.fromPercent(group.lossGivenDefault).toString(),
-      discountRate: Rate.fromAprPercent(group.discountRate).toString(),
-    })),
-  }
 }

@@ -10,7 +10,7 @@ export function getMetadataModule(inst: Centrifuge) {
     return inst.getMetadataObservable<T>(url)
   }
 
-  function pinFile(b64URI?: string): Observable<{ uri: string; ipfsHash: string }> {
+  function pinFile(b64URI?: string, request?: RequestInit): Observable<{ uri: string; ipfsHash: string }> {
     if (!inst.config?.pinFile) {
       console.error('pinFile must be set in config to use this feature')
       return from([])
@@ -19,14 +19,14 @@ export function getMetadataModule(inst: Centrifuge) {
       return from([])
     }
 
-    return from(inst.config.pinFile(b64URI))
+    return from(inst.config.pinFile(b64URI, request ?? {}))
       .pipe(first())
       .pipe(map(({ uri }) => parseIPFSHash(uri)))
   }
 
-  function pinJson(metadata: Record<any, any>): Observable<{ uri: string; ipfsHash: string }> {
+  function pinJson(metadata: Record<any, any>, request?: RequestInit): Observable<{ uri: string; ipfsHash: string }> {
     const file = jsonToBase64(metadata)
-    return pinFile(file)
+    return pinFile(file, request)
   }
 
   function parseMetadataUrl(url: string) {

@@ -271,19 +271,8 @@ export function getNftsModule(inst: Centrifuge) {
 
     const $api = inst.getApi()
 
-    const $image = inst.metadata.pinFile(metadata.fileDataUri)
-    const $pinnedMetadata = $image
-      .pipe(
-        switchMap((metadataURI) => {
-          return inst.metadata.pinJson({
-            image: metadataURI.uri,
-            name: metadata.name,
-            description: metadata.description,
-          })
-        })
-      )
-      .pipe(take(1))
-    return combineLatest([$api, $pinnedMetadata]).pipe(
+    const $pinMetadata = pinNFTMetadata(metadata)
+    return combineLatest([$api, $pinMetadata]).pipe(
       map(([api, pinnedMetadata]) => {
         return {
           api,
@@ -312,15 +301,9 @@ export function getNftsModule(inst: Centrifuge) {
     )
   }
 
-  function mintNft(
-    args: [collectionId: string, nftId: string, owner: string, metadata: NFTMetadataInput, amount?: number],
-    options?: TransactionOptions
-  ) {
-    const $api = inst.getApi()
-    const [collectionId, nftId, owner, metadata] = args
-
+  function pinNFTMetadata(metadata: NFTMetadataInput | CollectionMetadataInput) {
     const $image = inst.metadata.pinFile(metadata.fileDataUri)
-    const $pinnedMetadata = $image
+    return $image
       .pipe(
         switchMap((metadataURI) => {
           return inst.metadata.pinJson({
@@ -331,6 +314,16 @@ export function getNftsModule(inst: Centrifuge) {
         })
       )
       .pipe(take(1))
+  }
+
+  function mintNft(
+    args: [collectionId: string, nftId: string, owner: string, metadata: NFTMetadataInput, amount?: number],
+    options?: TransactionOptions
+  ) {
+    const $api = inst.getApi()
+    const [collectionId, nftId, owner, metadata] = args
+
+    const $pinnedMetadata = pinNFTMetadata(metadata)
     return combineLatest([$api, $pinnedMetadata]).pipe(
       map(([api, pinnedMetadata]) => {
         return {

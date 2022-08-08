@@ -39,7 +39,7 @@ export type Config = {
   centrifugeSubqueryUrl: string
   altairSubqueryUrl: string
   metadataHost: string
-  pinFile?: (b64URI: string) => Promise<{ uri: string }>
+  pinFile?: (b64URI: string, request: RequestInit) => Promise<{ uri: string }>
   signer?: Signer
   signingAddress?: AddressOrPair
   printExtrinsics?: boolean
