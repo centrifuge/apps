@@ -1,5 +1,5 @@
+import { ContractAddresses, ContractVersions, ITinlake } from '@centrifuge/tinlake-js'
 import React, { createContext, useContext, useMemo } from 'react'
-import { ContractAddresses, ContractVersions, ITinlake } from '../../../tinlake.js/dist'
 import { initTinlake } from '../../services/tinlake'
 
 interface TinlakeProviderProps {

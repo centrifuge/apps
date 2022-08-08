@@ -43,7 +43,7 @@ export const ToastWrapper: React.FC<Props> = (props: Props) => {
         </Content>
         {props.externalLink && (
           <Action>
-            <a href={props.externalLink} target="_blank">
+            <a href={props.externalLink} target="_blank" rel="noreferrer">
               <img src="/static/wallet/external-link.svg" alt="Open link" />
             </a>
           </Action>

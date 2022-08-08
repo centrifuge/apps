@@ -59,7 +59,7 @@ const App: React.FC<Props> = (props: Props) => {
 export async function getStaticProps() {
   return {
     props: {
-      onboardingApiHost: process.env.ONBOARDING_API_HOST,
+      onboardingApiHost: process.env.NEXT_PUBLIC_ONBOARD_API_HOST,
     }, // will be passed to the page component as props
   }
 }

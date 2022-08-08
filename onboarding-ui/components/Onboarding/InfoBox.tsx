@@ -68,8 +68,8 @@ const InfoBox: React.FC<Props> = (props: Props) => {
         <ul>
           {countries
             .sort((a, b) => a.name.localeCompare(b.name))
-            .map((country: { code: string; name: string }) => (
-              <li>{country.name}</li>
+            .map((country: { code: string; name: string }, index) => (
+              <li key={index}>{country.name}</li>
             ))}
         </ul>
 
