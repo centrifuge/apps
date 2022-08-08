@@ -9,20 +9,23 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { Report } from '../../../components/Report'
 import { Spinner } from '../../../components/Spinner'
 import { formatDate } from '../../../utils/date'
-import { useDailyPoolStates, usePool } from '../../../utils/usePools'
+import { useDailyPoolStates, useMonthlyPoolStates, usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
-export const PoolDetailReportingTab: React.FC = () => {
-  const [startDate, setStartDate] = React.useState(new Date())
-  const [endDate, setEndDate] = React.useState(new Date())
+export type GroupBy = 'day' | 'month'
 
+export const PoolDetailReportingTab: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  const poolStates = useDailyPoolStates(poolId)
 
-  const exportRef = React.useRef(() => {
-    return '0'
-  })
+  const [startDate, setStartDate] = React.useState(pool?.createdAt ? new Date(pool?.createdAt) : new Date())
+  const [endDate, setEndDate] = React.useState(new Date())
+
+  const [groupBy, setGroupBy] = React.useState('day' as GroupBy)
+
+  const poolStates = groupBy === 'day' ? useDailyPoolStates(poolId) : useMonthlyPoolStates(poolId)
+
+  const exportRef = React.useRef<() => void>(() => {})
 
   React.useEffect(() => {
     if (poolStates && poolStates.length > 0) {
@@ -67,9 +70,14 @@ export const PoolDetailReportingTab: React.FC = () => {
             <Shelf gap={2}>
               <Text>Group by</Text>
               <InputGroup>
-                <RadioButton name="month" label="Month" disabled />
+                <RadioButton
+                  name="month"
+                  label="Month"
+                  onClick={() => setGroupBy('month')}
+                  checked={groupBy === 'month'}
+                />
                 <RadioButton name="week" label="Week" disabled />
-                <RadioButton name="day" label="Day" />
+                <RadioButton name="day" label="Day" onClick={() => setGroupBy('day')} checked={groupBy === 'day'} />
               </InputGroup>
             </Shelf>
           </Stack>
@@ -95,6 +103,7 @@ export const PoolDetailReportingTab: React.FC = () => {
           pool={pool}
           poolStates={poolStates || []}
           exportRef={exportRef}
+          groupBy={groupBy}
         />
         {/* ?.filter(
               (state) => Number(state.timestamp) >= startDate.getTime() && Number(state.timestamp) <= endDate.getTime()
@@ -109,9 +118,10 @@ export const PoolDetailReporting: React.FC<{
   end: Date | undefined
   pool: Pool | undefined
   poolStates: DailyPoolState[]
-  exportRef: React.MutableRefObject<Function>
-}> = ({ start, end, pool, poolStates, exportRef }) => {
-  if (!pool) return null
+  exportRef: React.MutableRefObject<() => void>
+  groupBy: GroupBy
+}> = ({ start, end, pool, poolStates, exportRef, groupBy }) => {
+  if (!pool) return <Spinner />
   return (
     <>
       <PageSection
@@ -119,7 +129,10 @@ export const PoolDetailReporting: React.FC<{
         titleAddition={start && end ? `${formatDate(start.toString())} to ${formatDate(end.toString())}` : ''}
       >
         <React.Suspense fallback={<Spinner />}>
-          <Report pool={pool} poolStates={poolStates} exportRef={exportRef} />
+          {!poolStates || (poolStates.length === 0 && <Spinner />)}
+          {poolStates && poolStates.length > 0 && (
+            <Report pool={pool} poolStates={poolStates} exportRef={exportRef} groupBy={groupBy} />
+          )}
         </React.Suspense>
       </PageSection>
     </>

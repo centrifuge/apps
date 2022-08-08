@@ -30,6 +30,18 @@ export function useDailyPoolStates(poolId: string) {
   return result
 }
 
+export function useMonthlyPoolStates(poolId: string) {
+  const [result] = useCentrifugeQuery(
+    ['monthlyPoolStates', poolId],
+    (cent) => cent.pools.getMonthlyPoolStates([poolId]),
+    {
+      suspense: true,
+    }
+  )
+
+  return result
+}
+
 export function useOrder(poolId: string, trancheId: string, address?: string) {
   const [result] = useCentrifugeQuery(
     ['order', trancheId, address],

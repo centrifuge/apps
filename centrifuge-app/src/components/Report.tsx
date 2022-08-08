@@ -2,6 +2,7 @@ import { DailyPoolState, Pool } from '@centrifuge/centrifuge-js/dist/modules/poo
 import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
+import { GroupBy } from '../pages/Pool/Reporting'
 import { formatBalance, formatPrice, getCurrencySymbol } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
@@ -15,7 +16,8 @@ export type ReportingMoment = {
 type Props = {
   pool: Pool
   poolStates: DailyPoolState[]
-  exportRef: () => void
+  exportRef: React.MutableRefObject<Function>
+  groupBy: GroupBy
 }
 
 type TableDataRow = {
@@ -24,7 +26,7 @@ type TableDataRow = {
   heading?: boolean
 }
 
-export const Report: React.FC<Props> = ({ pool, poolStates, exportRef }) => {
+export const Report: React.FC<Props> = ({ pool, poolStates, exportRef, groupBy }) => {
   const { data: metadata } = usePoolMetadata(pool)
 
   const columns: Column[] = poolStates
@@ -33,7 +35,7 @@ export const Report: React.FC<Props> = ({ pool, poolStates, exportRef }) => {
           align: 'left',
           header: '',
           cell: (row: TableDataRow) => <Text variant={row.heading ? 'heading4' : 'body2'}>{row.name}</Text>,
-          flex: '0 0 200px',
+          flex: '1 0 200px',
         },
       ].concat(
         poolStates.map((state, index) => {
@@ -41,15 +43,19 @@ export const Report: React.FC<Props> = ({ pool, poolStates, exportRef }) => {
             align: 'right',
             header: `${new Date(state.timestamp).toLocaleDateString('en-US', {
               month: 'short',
-            })} ${new Date(state.timestamp).toLocaleDateString('en-US', { day: 'numeric' })}`,
+            })} ${
+              groupBy === 'day'
+                ? new Date(state.timestamp).toLocaleDateString('en-US', { day: 'numeric' })
+                : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric' })
+            }`,
             cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-            flex: '0 0 80px',
+            flex: '0 0 100px',
           }
         })
       )
     : []
 
-  exportRef = () => {
+  const exportToCsv = () => {
     let rows = [columns.map((col) => col.header.toString())]
 
     overviewRecords.forEach((rec, index) => {
@@ -69,6 +75,7 @@ export const Report: React.FC<Props> = ({ pool, poolStates, exportRef }) => {
 
     downloadCSV(rows, 'report.csv')
   }
+  exportRef.current = exportToCsv
 
   const overviewRecords: TableDataRow[] = [
     {
@@ -185,12 +192,12 @@ export const Report: React.FC<Props> = ({ pool, poolStates, exportRef }) => {
 }
 
 const GradientOverlay = styled.div`
-  // max-width: 400px;
-  // overflow: auto;
-  // background: linear-gradient(to right, #fff 20%, rgba(0, 0, 0, 0)),
-  //   linear-gradient(to right, rgba(0, 0, 0, 0), #fff 80%) 0 100%, linear-gradient(to right, #000, rgba(0, 0, 0, 0) 20%),
-  //   linear-gradient(to left, #000, rgba(0, 0, 0, 0) 20%);
-  // background-attachment: local, local, scroll, scroll;
+  max-width: 960px;
+  overflow: auto;
+  background: linear-gradient(to right, #fff 20%, rgba(0, 0, 0, 0)),
+    linear-gradient(to right, rgba(0, 0, 0, 0), #fff 80%) 0 100%, linear-gradient(to right, #000, rgba(0, 0, 0, 0) 20%),
+    linear-gradient(to left, #000, rgba(0, 0, 0, 0) 20%);
+  background-attachment: local, local, scroll, scroll;
 `
 
 function textContent(elem: any): string {

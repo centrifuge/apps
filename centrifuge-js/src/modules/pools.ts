@@ -1258,6 +1258,33 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
+  function getMonthlyPoolStates(args: [poolId: string]) {
+    return getDailyPoolStates(args).pipe(
+      map((poolStates) => {
+        if (!poolStates) return []
+        // group by month
+        // todo: find last of each month
+        let poolStatesByMonth: { [monthYear: string]: DailyPoolState[] } = {}
+        poolStates.forEach((poolState) => {
+          const monthYear = new Date(poolState.timestamp).getMonth() + '-' + new Date(poolState.timestamp).getFullYear()
+          console.log(new Date(poolState.timestamp).toISOString())
+          if (monthYear in poolStatesByMonth) {
+            poolStatesByMonth[monthYear] = [...poolStatesByMonth[monthYear], poolState]
+          } else {
+            poolStatesByMonth[monthYear] = [poolState]
+          }
+        })
+
+        return Object.values(poolStatesByMonth).map((statesOneMonth) => {
+          let base = statesOneMonth[statesOneMonth.length - 1]
+          // todo: sum aggregated values (e.g. tranches.fulfilledInvestOrders)
+
+          return base
+        })
+      })
+    )
+  }
+
   function getNativeCurrency() {
     return inst.getApi().pipe(
       map((api) => ({
@@ -1665,6 +1692,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     getLoanCollectionIdForPool,
     getAvailablePoolId,
     getDailyPoolStates,
+    getMonthlyPoolStates,
     getNativeCurrency,
   }
 }
