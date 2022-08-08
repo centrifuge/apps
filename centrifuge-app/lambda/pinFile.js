@@ -26,12 +26,6 @@ const ipfsHashToURI = (hash) => `ipfs://ipfs/${hash}`
 const handler = async (event) => {
   try {
     const { uri } = JSON.parse(event.body)
-    if (event.httpMethod === 'DELETE') {
-      await unpinFile(fileStream)
-      return {
-        statusCode: 204,
-      }
-    }
 
     // check incoming data
     if (!uri) {
@@ -39,6 +33,13 @@ const handler = async (event) => {
     }
 
     const fileStream = dataUriToReadStream(uri)
+
+    if (event.httpMethod === 'DELETE') {
+      await unpinFile(fileStream)
+      return {
+        statusCode: 204,
+      }
+    }
 
     // pin the image file
     const pinFileResponse = await pinFile(fileStream)
