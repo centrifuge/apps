@@ -18,12 +18,17 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
         centrifugeSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,
         altairSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,
         metadataHost: import.meta.env.REACT_APP_IPFS_GATEWAY as string,
-        pinFile: (b64URI, request) =>
+        pinFile: (b64URI) =>
           fetchLambda('pinFile', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ uri: b64URI }),
-            ...request,
+          }),
+        unpinFile: (hash) =>
+          fetchLambda('unpinFile', {
+            method: 'DELETE',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ hash }),
           }),
       }),
     []

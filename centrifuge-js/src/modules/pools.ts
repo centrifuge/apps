@@ -414,7 +414,7 @@ interface WriteOffGroupFormValues {
 
 export interface PoolMetadataInput {
   // details
-  poolIcon: string
+  poolIcon: string | File | null
   poolName: string
   assetClass: string
   currency: string
@@ -424,10 +424,10 @@ export interface PoolMetadataInput {
 
   // issuer
   issuerName: string
-  issuerLogo: string | null
+  issuerLogo: string | File | null
   issuerDescription: string
 
-  executiveSummary: string
+  executiveSummary: string | File | null
   website: string
   forum: string
   email: string
