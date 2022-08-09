@@ -13,6 +13,7 @@ import {
 } from '@centrifuge/fabric'
 import React, { useEffect, useState } from 'react'
 import { Redirect } from 'react-router'
+import { lastValueFrom } from 'rxjs'
 import { collectionMetadataSchema } from '../../schemas'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAsyncCallback } from '../../utils/useAsyncCallback'
@@ -70,10 +71,11 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
       fileDataUri = await getFileDataURI(logo)
     }
 
+    const imageMetadataHash = await lastValueFrom(cent.metadata.pinFile(fileDataUri))
     const metadataValues: CollectionMetadataInput = {
       name: nameValue,
       description: descriptionValue,
-      fileDataUri,
+      image: imageMetadataHash.ipfsHash,
     }
 
     doTransaction([collectionId, selectedAccount!.address, metadataValues])

@@ -414,7 +414,7 @@ interface WriteOffGroupFormValues {
 
 export interface PoolMetadataInput {
   // details
-  poolIcon: string | File | null
+  poolIcon: string
   poolName: string
   assetClass: string
   currency: string
@@ -424,10 +424,10 @@ export interface PoolMetadataInput {
 
   // issuer
   issuerName: string
-  issuerLogo: string | File | null
+  issuerLogo: string | null
   issuerDescription: string
 
-  executiveSummary: string | File | null
+  executiveSummary: string
   website: string
   forum: string
   email: string
@@ -606,57 +606,48 @@ export function getPoolsModule(inst: Centrifuge) {
       return of({ uri: '', ipfsHash: '' })
     }
 
-    const $poolIcon = inst.metadata.pinFile(metadata.poolIcon as string)
-    const $issuerLogo = metadata?.issuerLogo ? inst.metadata.pinFile(metadata.issuerLogo as string) : of(null)
-    const $executiveSummary = inst.metadata.pinFile(metadata.executiveSummary as string)
-    const $uris = combineLatest({ poolIcon: $poolIcon, issuerLogo: $issuerLogo, executiveSummary: $executiveSummary })
+    const tranchesById: PoolMetadata['tranches'] = {}
+    metadata.tranches.forEach((tranche, index) => {
+      tranchesById[computeTrancheId(index, poolId)] = {
+        name: tranche.tokenName,
+        symbol: tranche.symbolName,
+        minInitialInvestment: CurrencyBalance.fromFloat(
+          tranche.minInvestment,
+          getCurrencyDecimals(currency)
+        ).toString(),
+      }
+    })
 
-    return $uris.pipe(
-      switchMap((fileURIs) => {
-        const tranchesById: PoolMetadata['tranches'] = {}
-        metadata.tranches.forEach((tranche, index) => {
-          tranchesById[computeTrancheId(index, poolId)] = {
-            name: tranche.tokenName,
-            symbol: tranche.symbolName,
-            minInitialInvestment: CurrencyBalance.fromFloat(
-              tranche.minInvestment,
-              getCurrencyDecimals(currency)
-            ).toString(),
-          }
-        })
+    const formattedMetadata = {
+      pool: {
+        name: metadata.poolName,
+        icon: metadata.poolIcon,
+        asset: { class: metadata.assetClass },
+        issuer: {
+          name: metadata.issuerName,
+          description: metadata.issuerDescription,
+          email: metadata.email,
+          logo: metadata.issuerLogo,
+        },
+        links: {
+          executiveSummary: metadata.executiveSummary,
+          forum: metadata.forum,
+          website: metadata.website,
+        },
+        status: 'open',
+      },
+      tranches: tranchesById,
+      riskGroups: metadata.riskGroups.map((group) => ({
+        name: group.groupName,
+        advanceRate: Rate.fromPercent(group.advanceRate).toString(),
+        interestRatePerSec: Rate.fromAprPercent(group.fee).toString(),
+        probabilityOfDefault: Rate.fromPercent(group.probabilityOfDefault).toString(),
+        lossGivenDefault: Rate.fromPercent(group.lossGivenDefault).toString(),
+        discountRate: Rate.fromAprPercent(group.discountRate).toString(),
+      })),
+    }
 
-        const formattedMetadata = {
-          pool: {
-            name: metadata.poolName,
-            icon: fileURIs.poolIcon?.uri || '',
-            asset: { class: metadata.assetClass },
-            issuer: {
-              name: metadata.issuerName,
-              description: metadata.issuerDescription,
-              email: metadata.email,
-              logo: fileURIs.issuerLogo?.uri || '',
-            },
-            links: {
-              executiveSummary: fileURIs.executiveSummary?.uri || '',
-              forum: metadata.forum,
-              website: metadata.website,
-            },
-            status: 'open',
-          },
-          tranches: tranchesById,
-          riskGroups: metadata.riskGroups.map((group) => ({
-            name: group.groupName,
-            advanceRate: Rate.fromPercent(group.advanceRate).toString(),
-            interestRatePerSec: Rate.fromAprPercent(group.fee).toString(),
-            probabilityOfDefault: Rate.fromPercent(group.probabilityOfDefault).toString(),
-            lossGivenDefault: Rate.fromPercent(group.lossGivenDefault).toString(),
-            discountRate: Rate.fromAprPercent(group.discountRate).toString(),
-          })),
-        }
-
-        return inst.metadata.pinJson(formattedMetadata)
-      })
-    )
+    return inst.metadata.pinJson(formattedMetadata)
   }
 
   type UpdatePoolInput = {

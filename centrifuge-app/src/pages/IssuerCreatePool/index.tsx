@@ -15,7 +15,7 @@ import {
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
-import { filter } from 'rxjs'
+import { filter, lastValueFrom } from 'rxjs'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
@@ -264,14 +264,20 @@ const CreatePoolForm: React.VFC = () => {
       const collectionId = await centrifuge.nfts.getAvailableCollectionId()
 
       const [poolIconUri, issuerLogoUri, executiveSummaryUri] = await Promise.all([
-        metadataValues?.poolIcon ? getFileDataURI(metadataValues.poolIcon as any) : null,
+        getFileDataURI(metadataValues.poolIcon as any),
         metadataValues?.issuerLogo ? getFileDataURI(metadataValues.issuerLogo as any) : null,
-        metadataValues?.executiveSummary ? getFileDataURI(metadataValues.executiveSummary as any) : null,
+        getFileDataURI(metadataValues.executiveSummary as any),
       ])
 
-      metadataValues.issuerLogo = issuerLogoUri
-      metadataValues.executiveSummary = executiveSummaryUri
-      metadataValues.poolIcon = poolIconUri
+      const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all([
+        lastValueFrom(centrifuge.metadata.pinFile(poolIconUri)),
+        issuerLogoUri ? lastValueFrom(centrifuge.metadata.pinFile(issuerLogoUri)) : null,
+        lastValueFrom(centrifuge.metadata.pinFile(executiveSummaryUri)),
+      ])
+
+      metadataValues.issuerLogo = pinnedPoolIcon.uri
+      metadataValues.executiveSummary = pinnedIssuerLogo?.uri || ''
+      metadataValues.poolIcon = pinnedExecSummary.uri
 
       // tranches must be reversed (most junior is the first in the UI but the last in the API)
       const noJuniorTranches = metadataValues.tranches.slice(1)

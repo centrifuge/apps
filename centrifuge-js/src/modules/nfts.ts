@@ -32,13 +32,13 @@ export type Collection = Class & {
 export type CollectionMetadataInput = {
   name: string
   description: string
-  fileDataUri?: string
+  image?: string
 }
 
 export type NFTMetadataInput = {
   name: string
   description: string
-  fileDataUri: string
+  image: string
 }
 
 const MAX_ATTEMPTS = 10
@@ -268,9 +268,12 @@ export function getNftsModule(inst: Centrifuge) {
     const [collectionId, owner, metadata] = args
 
     const $api = inst.getApi()
-
-    const $pinMetadata = pinNFTMetadata(metadata)
-    return combineLatest([$api, $pinMetadata]).pipe(
+    const $pinnedMetadata = inst.metadata.pinJson({
+      image: metadata.image,
+      name: metadata.name,
+      description: metadata.description,
+    })
+    return combineLatest([$api, $pinnedMetadata]).pipe(
       map(([api, pinnedMetadata]) => {
         return {
           api,
@@ -299,21 +302,6 @@ export function getNftsModule(inst: Centrifuge) {
     )
   }
 
-  function pinNFTMetadata(metadata: NFTMetadataInput | CollectionMetadataInput) {
-    const $image = inst.metadata.pinFile(metadata.fileDataUri)
-    return $image
-      .pipe(
-        switchMap((metadataURI) => {
-          return inst.metadata.pinJson({
-            image: metadataURI.uri,
-            name: metadata.name,
-            description: metadata.description,
-          })
-        })
-      )
-      .pipe(take(1))
-  }
-
   function mintNft(
     args: [collectionId: string, nftId: string, owner: string, metadata: NFTMetadataInput, amount?: number],
     options?: TransactionOptions
@@ -321,7 +309,11 @@ export function getNftsModule(inst: Centrifuge) {
     const $api = inst.getApi()
     const [collectionId, nftId, owner, metadata] = args
 
-    const $pinnedMetadata = pinNFTMetadata(metadata)
+    const $pinnedMetadata = inst.metadata.pinJson({
+      image: metadata.image,
+      name: metadata.name,
+      description: metadata.description,
+    })
     return combineLatest([$api, $pinnedMetadata]).pipe(
       map(([api, pinnedMetadata]) => {
         return {

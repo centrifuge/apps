@@ -1,5 +1,6 @@
 import { NFTMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
 import { Box, Button, Flex, NumberInput, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
+import { lastValueFrom } from '@polkadot/api-base/node_modules/rxjs'
 import React, { useReducer, useState } from 'react'
 import { useHistory, useParams } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
@@ -80,13 +81,12 @@ const MintNFT: React.FC = () => {
       return
     }
     const nftId = await cent.nfts.getAvailableNftId(collectionId)
-
+    const imageMetadataHash = await lastValueFrom(cent.metadata.pinFile(fileDataUri))
     const metadataValues: NFTMetadataInput = {
       name: nameValue,
       description: descriptionValue,
-      fileDataUri,
+      image: imageMetadataHash.uri,
     }
-
     doTransaction([collectionId, nftId, address!, metadataValues, nftAmount])
   })
 
