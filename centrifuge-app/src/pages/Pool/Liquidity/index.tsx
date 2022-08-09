@@ -1,4 +1,4 @@
-import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Shelf, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { EpochList } from '../../../components/EpochList'
@@ -119,17 +119,19 @@ export const PoolDetailLiquidity: React.FC = () => {
       <PageSection
         title={`Epoch ${pool.epoch.current}`}
         titleAddition={
-          isInSubmissionPeriod || isInExecutionPeriod || isInChallengePeriod ? 'Calculating orders...' : 'Ongoing'
+          // isInSubmissionPeriod || isInExecutionPeriod || isInChallengePeriod ? 'Calculating orders...' : 'Ongoing'
+          isInSubmissionPeriod
+            ? 'In submission period'
+            : isInExecutionPeriod
+            ? 'Awaiting execution'
+            : isInChallengePeriod
+            ? `In challenge period (until block #${challengePeriodEnd})`
+            : 'Ongoing'
         }
         headerRight={
           <Shelf gap="1">
             {!isInSubmissionPeriod && !isInChallengePeriod && !isInExecutionPeriod && (
               <Tooltips type="epochTimeRemaining" label={`${hours} hrs and ${minutes} min remaining`} />
-            )}
-            {isInChallengePeriod && (
-              <Text variant="label2">
-                Epoch is in challenge period until block {challengePeriodEnd.toString()} is finalized
-              </Text>
             )}
             {(isInExecutionPeriod || isInChallengePeriod) && !isInSubmissionPeriod ? (
               <Button

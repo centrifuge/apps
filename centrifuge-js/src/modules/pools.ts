@@ -651,9 +651,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
 
   function submitSolution(args: [poolId: string], options?: TransactionOptions) {
     const [poolId] = args
+    const $pool = getPool([poolId]).pipe(take(1))
     const $api = inst.getApi()
-    return getPool([poolId]).pipe(
-      switchMap((pool) => {
+    return combineLatest([$pool]).pipe(
+      switchMap(([pool]) => {
         const solutionTranches = pool.tranches.map((tranche) => ({
           ratio: tranche.ratio,
           minRiskBuffer: tranche.minRiskBuffer,
@@ -677,7 +678,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
         }))
 
         const $solution = from(calculateOptimalSolution(poolState, orders, weights))
-        return combineLatest([$api, $solution]).pipe(take(1))
+        return combineLatest([$api, $solution])
       }),
       switchMap(([api, optimalSolution]) => {
         if (!optimalSolution.isFeasible) {
