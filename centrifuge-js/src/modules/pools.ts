@@ -1,7 +1,8 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
+import { combineLatest, EMPTY, expand, firstValueFrom, from, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
+import { calculateOptimalSolution } from '..'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
 import { SubqueryPoolSnapshot } from '../types/subquery'
@@ -648,13 +649,42 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  function submitSolution(args: [poolId: string, solution: BN[][]], options?: TransactionOptions) {
-    const [poolId, solution] = args
+  function submitSolution(args: [poolId: string], options?: TransactionOptions) {
+    const [poolId] = args
     const $api = inst.getApi()
+    return getPool([poolId]).pipe(
+      switchMap((pool) => {
+        const solutionTranches = pool.tranches.map((tranche) => ({
+          ratio: tranche.ratio,
+          minRiskBuffer: tranche.minRiskBuffer,
+        }))
+        const poolState = {
+          netAssetValue: pool.nav.latest,
+          reserve: pool.reserve.total,
+          tranches: solutionTranches,
+          maxReserve: pool.reserve.max,
+          currencyDecimals: pool.currencyDecimals,
+        }
+        const orders = pool.tranches.map((tranche) => ({
+          invest: tranche.outstandingInvestOrders,
+          redeem: tranche.outstandingRedeemOrders,
+        }))
 
-    return $api.pipe(
-      switchMap((api) => {
-        const submittable = api.tx.pools.submitSolution(poolId, solution)
+        const redeemStartWeight = new BN(10).pow(new BN(solutionTranches.length))
+        const weights = solutionTranches.map((_t: any, index: number) => ({
+          invest: new BN(10).pow(new BN(solutionTranches.length - index)),
+          redeem: redeemStartWeight.mul(new BN(10).pow(new BN(index).addn(1))),
+        }))
+
+        const $solution = from(calculateOptimalSolution(poolState, orders, weights))
+        return combineLatest([$api, $solution]).pipe(take(1))
+      }),
+      switchMap(([api, optimalSolution]) => {
+        if (!optimalSolution.isFeasible) {
+          console.warn('Calculated solution is not feasible')
+          return of(null)
+        }
+        const submittable = api.tx.pools.submitSolution(poolId, optimalSolution.tranches)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )

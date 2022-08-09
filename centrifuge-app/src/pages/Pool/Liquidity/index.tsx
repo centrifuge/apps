@@ -1,6 +1,4 @@
-import { calculateOptimalSolution } from '@centrifuge/centrifuge-js'
 import { Button, Shelf, Stack, Text } from '@centrifuge/fabric'
-import { BN } from 'bn.js'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { EpochList } from '../../../components/EpochList'
@@ -105,39 +103,7 @@ export const PoolDetailLiquidity: React.FC = () => {
 
   const submitSolution = async () => {
     if (!pool) return
-    const solutionTranches =
-      pool.tranches.map((tranche) => {
-        return {
-          ratio: tranche.ratio,
-          minRiskBuffer: tranche.minRiskBuffer,
-        }
-      }) || []
-    const poolState = {
-      netAssetValue: pool.nav.latest,
-      reserve: pool.reserve.total,
-      tranches: solutionTranches,
-      maxReserve: pool.reserve.max,
-      currencyDecimals: pool.currencyDecimals,
-    }
-    const orders = pool.tranches.map((tranche) => {
-      return {
-        invest: tranche.outstandingInvestOrders,
-        redeem: tranche.outstandingRedeemOrders,
-      }
-    })
-
-    const redeemStartWeight = new BN(10).pow(new BN(solutionTranches.length))
-    const weights = solutionTranches.map((_t: any, index: number) => {
-      return {
-        invest: new BN(10).pow(new BN(solutionTranches.length - index)),
-        redeem: redeemStartWeight.mul(new BN(10).pow(new BN(index).addn(1))),
-      }
-    })
-
-    const solution = await calculateOptimalSolution(poolState, orders, weights)
-    if (solution.isFeasible) {
-      submitSolutionTx([pool.id, solution.tranches])
-    }
+    submitSolutionTx([pool.id])
   }
 
   if (!pool) return null
@@ -181,7 +147,7 @@ export const PoolDetailLiquidity: React.FC = () => {
                 variant="secondary"
                 onClick={submitSolution}
                 disabled={!pool || loadingSolution}
-                loading={false}
+                loading={loadingSolution}
               >
                 Submit solution
               </Button>
