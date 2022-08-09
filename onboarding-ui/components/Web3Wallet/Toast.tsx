@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import * as React from 'react'
 import { WalletTransaction } from '../../ducks/transactions'
 import { Spinner } from './Spinner'
@@ -35,7 +36,7 @@ export const ToastWrapper: React.FC<Props> = (props: Props) => {
       <MainToastCard>
         <Icon color={config.color}>
           {config.icon === 'spinner' && <Spinner color={config.color} />}
-          {config.icon !== 'spinner' && <img src={config.icon} alt={config.title} />}
+          {config.icon !== 'spinner' && <Image src={config.icon} alt={config.title} width={24} height={24} />}
         </Icon>
         <Content>
           <Title color={config.color}>{config.title}</Title>
@@ -44,7 +45,7 @@ export const ToastWrapper: React.FC<Props> = (props: Props) => {
         {props.externalLink && (
           <Action>
             <a href={props.externalLink} target="_blank" rel="noreferrer">
-              <img src="/static/wallet/external-link.svg" alt="Open link" />
+              <Image src="/static/wallet/external-link.svg" alt="Open link" width={24} height={24} />
             </a>
           </Action>
         )}

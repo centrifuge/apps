@@ -1,4 +1,3 @@
-// @ts-ignore
 import { AxisTheme } from '@centrifuge/axis-theme'
 import * as Sentry from '@sentry/react'
 import { Integrations } from '@sentry/tracing'

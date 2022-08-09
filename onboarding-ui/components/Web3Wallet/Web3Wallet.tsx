@@ -1,5 +1,6 @@
 import { copyToClipboard } from '@centrifuge/axis-utils'
 import { Button, Drop } from 'grommet'
+import Image from 'next/image'
 import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { WalletTransaction } from '../../ducks/transactions'
@@ -49,16 +50,21 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
         <InnerWallet>
           <IdenticonSmall>
             {ensAvatar ? (
-              <img src={ensAvatar} width={24} height={24} />
+              <Image src={ensAvatar} width={24} height={24} />
             ) : (
-              <img src={toDataUrl(address)} width={24} height={24} />
+              <Image src={toDataUrl(address)} width={24} height={24} />
             )}
           </IdenticonSmall>
           <StatusAddrSmall>
             <Addr>{ensName || shorten(address, 4)}</Addr>
           </StatusAddrSmall>
           <Caret>
-            <img src="/static/chevron-down.svg" style={{ transform: open ? 'rotate(-180deg)' : '' }} />
+            <Image
+              src="/static/chevron-down.svg"
+              style={{ transform: open ? 'rotate(-180deg)' : '' }}
+              width={16}
+              height={16}
+            />
           </Caret>
         </InnerWallet>
 
@@ -84,9 +90,9 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
             <Card>
               <Identicon>
                 {ensAvatar ? (
-                  <img src={ensAvatar} width={64} height={64} />
+                  <Image src={ensAvatar} width={64} height={64} />
                 ) : (
-                  <img src={toDataUrl(address)} width={64} height={64} />
+                  <Image src={toDataUrl(address)} width={64} height={64} />
                 )}
               </Identicon>
               <StatusAddrCopyLink>
@@ -107,10 +113,14 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
                       .catch(() => console.log('copy api not supported'))
                   }
                 >
-                  {copied ? <img src="/static/wallet/check.svg" /> : <img src="/static/wallet/copy.svg" />}
+                  {copied ? (
+                    <Image src="/static/wallet/check.svg" width={24} height={24} />
+                  ) : (
+                    <Image src="/static/wallet/copy.svg" width={24} height={24} />
+                  )}
                 </Copy>
                 <Link plain href={getAddressLink(address)} target="_blank">
-                  <img src="/static/wallet/external-link.svg" />
+                  <Image src="/static/wallet/external-link.svg" width={24} height={24} />
                 </Link>
               </StatusAddrCopyLink>
 
@@ -176,8 +186,6 @@ const Addr = styled.div`
 const Caret = styled.div`
   height: 16px;
   img {
-    width: 16px;
-    height: 16px;
     transition: transform 200ms;
   }
   @media (max-width: 899px) {
