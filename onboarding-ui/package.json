@@ -16,7 +16,6 @@
     "@centrifuge/axis-theme": "0.4.2-develop.c4f03d8.139+c4f03d8",
     "@centrifuge/axis-utils": "0.4.2-develop.109",
     "@centrifuge/tinlake-js": "workspace:*",
-    "@netlify/plugin-nextjs": "^4.14.1",
     "grommet": "2.17.3",
     "grommet-icons": "^4.5.0",
     "next": "12.2.0",
