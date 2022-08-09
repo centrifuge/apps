@@ -119,7 +119,6 @@ export const PoolDetailLiquidity: React.FC = () => {
       <PageSection
         title={`Epoch ${pool.epoch.current}`}
         titleAddition={
-          // isInSubmissionPeriod || isInExecutionPeriod || isInChallengePeriod ? 'Calculating orders...' : 'Ongoing'
           isInSubmissionPeriod
             ? 'In submission period'
             : isInExecutionPeriod
