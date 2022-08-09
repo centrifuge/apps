@@ -35,7 +35,7 @@ const columns: Column[] = [
 export const EpochList: React.FC<Props> = ({ pool }) => {
   const { data: metadata } = usePoolMetadata(pool)
 
-  const investments: TableDataRow[] = pool.tranches.map((token, index) => {
+  const investments: TableDataRow[] = pool.tranches.map((token) => {
     const trancheMeta = metadata?.tranches?.[token.id]
     return {
       order: `${trancheMeta?.symbol} investments`,
