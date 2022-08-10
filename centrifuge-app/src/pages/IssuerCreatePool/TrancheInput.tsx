@@ -1,7 +1,8 @@
+import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Button, Grid, IconMinusCircle, NumberInput, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
 import React from 'react'
-import { createEmptyTranche, PoolFormValues } from '.'
+import { createEmptyTranche } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
@@ -11,7 +12,7 @@ import { validate } from './validate'
 const MAX_TRANCHES = 5
 
 export const TrancheInput: React.FC = () => {
-  const fmk = useFormikContext<PoolFormValues>()
+  const fmk = useFormikContext<PoolMetadataInput>()
   const currencies = useCurrencies()
   const { values } = fmk
 

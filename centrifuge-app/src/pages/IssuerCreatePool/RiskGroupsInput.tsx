@@ -1,7 +1,8 @@
+import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Button, Grid, IconMinusCircle, NumberInput, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { FieldArray, useFormikContext } from 'formik'
 import React from 'react'
-import { createEmptyRiskGroup, PoolFormValues } from '.'
+import { createEmptyRiskGroup } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
@@ -10,7 +11,7 @@ import { validate } from './validate'
 const MAX_GROUPS = 100
 
 export const RiskGroupsInput: React.FC = () => {
-  const fmk = useFormikContext<PoolFormValues>()
+  const fmk = useFormikContext<PoolMetadataInput>()
   const { values } = fmk
 
   return (

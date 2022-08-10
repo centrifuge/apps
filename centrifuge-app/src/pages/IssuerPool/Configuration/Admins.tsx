@@ -21,7 +21,7 @@ type Admin = {
   address: string
   roles: { [key in AdminRole]?: boolean }
 }
-type PoolFormValues = {
+type PoolMetadataInput = {
   search: string
   admins: Admin[]
 }
@@ -34,7 +34,7 @@ export const Admins: React.FC = () => {
   const { selectedAccount } = useWeb3()
   const me = selectedAccount?.address && encodeAddress(selectedAccount?.address)
 
-  const initialValues: PoolFormValues = React.useMemo(
+  const initialValues: PoolMetadataInput = React.useMemo(
     () => ({
       search: '',
       admins: poolPermissions

@@ -2,7 +2,7 @@ import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, firstValueFrom } from 'rxjs'
 import { expand, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
-import { CentrifugeBase } from '../CentrifugeBase'
+import { Centrifuge } from '../Centrifuge'
 import { TransactionOptions } from '../types'
 import { getRandomUint, isSameAddress } from '../utils'
 
@@ -29,12 +29,24 @@ export type Collection = Class & {
   metadataUri?: string
 }
 
+export type CollectionMetadataInput = {
+  name: string
+  description: string
+  image?: string
+}
+
+export type NFTMetadataInput = {
+  name: string
+  description: string
+  image: string
+}
+
 const MAX_ATTEMPTS = 10
 
 const formatCollectionKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatItemKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
-export function getNftsModule(inst: CentrifugeBase) {
+export function getNftsModule(inst: Centrifuge) {
   function getCollections() {
     const $api = inst.getApi()
 
@@ -250,21 +262,27 @@ export function getNftsModule(inst: CentrifugeBase) {
   }
 
   function createCollection(
-    args: [collectionId: string, owner: string, metadataUri: string],
+    args: [collectionId: string, owner: string, metadata: CollectionMetadataInput],
     options?: TransactionOptions
   ) {
-    const [collectionId, owner, metadataUri] = args
+    const [collectionId, owner, metadata] = args
 
     const $api = inst.getApi()
-
-    return $api.pipe(
-      map((api) => ({
-        api,
-        submittable: api.tx.utility.batchAll([
-          api.tx.uniques.create(collectionId, owner),
-          api.tx.uniques.setCollectionMetadata(collectionId, metadataUri, true),
-        ]),
-      })),
+    const $pinnedMetadata = inst.metadata.pinJson({
+      image: metadata.image,
+      name: metadata.name,
+      description: metadata.description,
+    })
+    return combineLatest([$api, $pinnedMetadata]).pipe(
+      map(([api, pinnedMetadata]) => {
+        return {
+          api,
+          submittable: api.tx.utility.batchAll([
+            api.tx.uniques.create(collectionId, owner),
+            api.tx.uniques.setCollectionMetadata(collectionId, pinnedMetadata.uri, true),
+          ]),
+        }
+      }),
       switchMap(({ api, submittable }) => inst.wrapSignAndSend(api, submittable, options))
     )
   }
@@ -285,20 +303,27 @@ export function getNftsModule(inst: CentrifugeBase) {
   }
 
   function mintNft(
-    args: [collectionId: string, nftId: string, owner: string, metadataUri: string, amount?: number],
+    args: [collectionId: string, nftId: string, owner: string, metadata: NFTMetadataInput, amount?: number],
     options?: TransactionOptions
   ) {
-    const [collectionId, nftId, owner, metadataUri] = args
     const $api = inst.getApi()
+    const [collectionId, nftId, owner, metadata] = args
 
-    return $api.pipe(
-      map((api) => ({
-        api,
-        submittable: api.tx.utility.batchAll([
-          api.tx.uniques.mint(collectionId, nftId, owner),
-          api.tx.uniques.setMetadata(collectionId, nftId, metadataUri, true),
-        ]),
-      })),
+    const $pinnedMetadata = inst.metadata.pinJson({
+      image: metadata.image,
+      name: metadata.name,
+      description: metadata.description,
+    })
+    return combineLatest([$api, $pinnedMetadata]).pipe(
+      map(([api, pinnedMetadata]) => {
+        return {
+          api,
+          submittable: api.tx.utility.batchAll([
+            api.tx.uniques.mint(collectionId, nftId, owner),
+            api.tx.uniques.setMetadata(collectionId, nftId, pinnedMetadata.uri, true),
+          ]),
+        }
+      }),
       switchMap(({ api, submittable }) => inst.wrapSignAndSend(api, submittable, options))
     )
   }

@@ -1,9 +1,10 @@
 import { StorageKey, u32 } from '@polkadot/types'
+import { hash } from '@stablelib/blake2b'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, expand, firstValueFrom, from, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
 import { calculateOptimalSolution } from '..'
-import { CentrifugeBase } from '../CentrifugeBase'
+import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import { SubqueryPoolSnapshot } from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
@@ -396,12 +397,120 @@ export type DailyPoolState = {
   timestamp: string
 }
 
+interface TrancheFormValues {
+  tokenName: string
+  symbolName: string
+  interestRate: number | ''
+  minRiskBuffer: number | ''
+  minInvestment: number | ''
+}
+interface RiskGroupFormValues {
+  groupName: string
+  advanceRate: number | ''
+  fee: number | ''
+  probabilityOfDefault: number | ''
+  lossGivenDefault: number | ''
+  discountRate: number | ''
+}
+interface WriteOffGroupFormValues {
+  days: number | ''
+  writeOff: number | ''
+}
+
+export interface PoolMetadataInput {
+  // details
+  poolIcon: string | File | null
+  poolName: string
+  assetClass: string
+  currency: string
+  maxReserve: number | ''
+  epochHours: number | ''
+  epochMinutes: number | ''
+
+  // issuer
+  issuerName: string
+  issuerLogo: string | File | null
+  issuerDescription: string
+
+  executiveSummary: string | File | null
+  website: string
+  forum: string
+  email: string
+
+  // tranche
+  tranches: TrancheFormValues[]
+  riskGroups: RiskGroupFormValues[]
+  writeOffGroups: WriteOffGroupFormValues[]
+}
+
+export type PoolStatus = 'open' | 'upcoming' | 'hidden'
+export type PoolCountry = 'us' | 'non-us'
+export type NonSolicitationNotice = 'all' | 'non-us' | 'none'
+export type PoolMetadata = {
+  pool: {
+    name: string
+    icon: string
+    asset: {
+      class: string
+    }
+    issuer: {
+      name: string
+      description: string
+      email: string
+      logo: string
+    }
+    links: {
+      executiveSummary: string
+      forum: string
+      website: string
+    }
+    status: PoolStatus
+  }
+  tranches: Record<
+    string,
+    {
+      name: string
+      symbol: string
+      minInitialInvestment: string
+    }
+  >
+  riskGroups: {
+    name: string | undefined
+    advanceRate: string
+    interestRatePerSec: string
+    probabilityOfDefault: string
+    lossGivenDefault: string
+    discountRate: string
+  }[]
+  // Not yet implemented
+  // onboarding: {
+  //   live: boolean
+  //   agreements: {
+  //     name: string
+  //     provider: 'docusign'
+  //     providerTemplateId: string
+  //     tranche: string
+  //     country: 'us | non-us'
+  //   }[]
+  //   issuer: {
+  //     name: string
+  //     email: string
+  //     restrictedCountryCodes: string[]
+  //     minInvestmentCurrency: number
+  //     nonSolicitationNotice: 'all' | 'non-us' | 'none'
+  //   }
+  // }
+  // bot: {
+  //   channelId: string
+  // }
+}
+
 const formatPoolKey = (keys: StorageKey<[u32]>) => (keys.toHuman() as string[])[0].replace(/\D/g, '')
 const formatLoanKey = (keys: StorageKey<[u32, u32]>) => (keys.toHuman() as string[])[1].replace(/\D/g, '')
 
 const MAX_ATTEMPTS = 10
 
-export function getPoolsModule(inst: CentrifugeBase) {
+export function getPoolsModule(inst: Centrifuge) {
   function createPool(
     args: [
       admin: string,
@@ -410,26 +519,33 @@ export function getPoolsModule(inst: CentrifugeBase) {
       tranches: TrancheInput[],
       currency: string | { permissioned: string },
       maxReserve: BN,
-      metadata: string,
+      metadata: PoolMetadataInput,
       writeOffGroups: { overdueDays: number; percentage: BN }[]
     ],
     options?: TransactionOptions
   ) {
     const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, writeOffGroups] = args
 
-    const $api = inst.getApi()
-
     const trancheInput = tranches.map((t) => [
       t.interestRatePerSec
         ? { NonResidual: [t.interestRatePerSec.toString(), t.minRiskBuffer?.toString()] }
         : 'Residual',
     ])
+    const $pinMetadata = pinPoolMetadata(metadata, poolId, currency, options)
+    const $api = inst.getApi()
 
-    return $api.pipe(
-      switchMap((api) => {
+    return combineLatest([$api, $pinMetadata]).pipe(
+      switchMap(([api, pinnedMetadata]) => {
         let submittable
         if (['propose', 'notePreimage'].includes(options?.createType ?? '')) {
-          submittable = api.tx.pools.create(admin, poolId, trancheInput, currency, maxReserve.toString(), metadata)
+          submittable = api.tx.pools.create(
+            admin,
+            poolId,
+            trancheInput,
+            currency,
+            maxReserve.toString(),
+            pinnedMetadata.ipfsHash
+          )
         } else {
           submittable = api.tx.utility.batchAll(
             [
@@ -440,7 +556,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 trancheInput,
                 currency,
                 maxReserve.toString(),
-                metadata
+                pinnedMetadata.ipfsHash
               ),
               api.tx.permissions.add(
                 { PoolRole: 'PoolAdmin' },
@@ -483,6 +599,60 @@ export function getPoolsModule(inst: CentrifugeBase) {
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
+  }
+
+  function pinPoolMetadata(
+    metadata: PoolMetadataInput,
+    poolId: string,
+    currency: string | { permissioned: string },
+    options?: TransactionOptions
+  ) {
+    if (options?.paymentInfo) {
+      return of({ uri: '', ipfsHash: '' })
+    }
+
+    const tranchesById: PoolMetadata['tranches'] = {}
+    metadata.tranches.forEach((tranche, index) => {
+      tranchesById[computeTrancheId(index, poolId)] = {
+        name: tranche.tokenName,
+        symbol: tranche.symbolName,
+        minInitialInvestment: CurrencyBalance.fromFloat(
+          tranche.minInvestment,
+          getCurrencyDecimals(currency)
+        ).toString(),
+      }
+    })
+
+    const formattedMetadata = {
+      pool: {
+        name: metadata.poolName,
+        icon: metadata.poolIcon,
+        asset: { class: metadata.assetClass },
+        issuer: {
+          name: metadata.issuerName,
+          description: metadata.issuerDescription,
+          email: metadata.email,
+          logo: metadata.issuerLogo,
+        },
+        links: {
+          executiveSummary: metadata.executiveSummary,
+          forum: metadata.forum,
+          website: metadata.website,
+        },
+        status: 'open',
+      },
+      tranches: tranchesById,
+      riskGroups: metadata.riskGroups.map((group) => ({
+        name: group.groupName,
+        advanceRate: Rate.fromPercent(group.advanceRate).toString(),
+        interestRatePerSec: Rate.fromAprPercent(group.fee).toString(),
+        probabilityOfDefault: Rate.fromPercent(group.probabilityOfDefault).toString(),
+        lossGivenDefault: Rate.fromPercent(group.lossGivenDefault).toString(),
+        discountRate: Rate.fromAprPercent(group.discountRate).toString(),
+      })),
+    }
+
+    return inst.metadata.pinJson(formattedMetadata)
   }
 
   type UpdatePoolInput = {
@@ -556,13 +726,14 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  function setMetadata(args: [poolId: string, metadata: string], options?: TransactionOptions) {
+  function setMetadata(args: [poolId: string, metadata: Record<string, unknown>], options?: TransactionOptions) {
     const [poolId, metadata] = args
     const $api = inst.getApi()
+    const $pinnedMetadata = inst.metadata.pinJson(metadata)
 
-    return $api.pipe(
-      switchMap((api) => {
-        const submittable = api.tx.pools.setMetadata(poolId, metadata)
+    return combineLatest([$api, $pinnedMetadata]).pipe(
+      switchMap(([api, pinnedMetadata]) => {
+        const submittable = api.tx.pools.setMetadata(poolId, pinnedMetadata.ipfsHash)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -1746,4 +1917,23 @@ function getOutstandingDebt(loan: ActiveLoanData, currencyDecimals: number, inte
 const getLoanStatus = (loanValue: LoanData) => {
   const status = Object.keys(loanValue.status)[0]
   return `${status.charAt(0).toUpperCase()}${status.slice(1)}` as LoanStatus
+}
+
+const computeTrancheId = (trancheIndex: number, poolId: string) => {
+  const a = new BN(trancheIndex).toArray('le', 8)
+  const b = new BN(poolId).toArray('le', 8)
+  const data = Uint8Array.from(a.concat(b))
+
+  return toHex(hash(data, 16))
+}
+
+function toHex(data: Uint8Array) {
+  const hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
+  const out = []
+
+  for (let i = 0; i < data.length; i++) {
+    out.push(hex[(data[i] >> 4) & 0xf])
+    out.push(hex[data[i] & 0xf])
+  }
+  return `0x${out.join('')}`
 }
