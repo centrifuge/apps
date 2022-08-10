@@ -276,8 +276,8 @@ const CreatePoolForm: React.VFC = () => {
       ])
 
       metadataValues.issuerLogo = pinnedPoolIcon.uri
-      metadataValues.executiveSummary = pinnedIssuerLogo?.uri || ''
-      metadataValues.poolIcon = pinnedExecSummary.uri
+      metadataValues.executiveSummary = pinnedExecSummary.uri
+      metadataValues.poolIcon = pinnedIssuerLogo?.uri || ''
 
       // tranches must be reversed (most junior is the first in the UI but the last in the API)
       const noJuniorTranches = metadataValues.tranches.slice(1)
