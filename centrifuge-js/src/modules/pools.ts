@@ -1,7 +1,8 @@
 import { StorageKey, u32 } from '@polkadot/types'
 import BN from 'bn.js'
-import { combineLatest, EMPTY, expand, firstValueFrom, of } from 'rxjs'
+import { combineLatest, EMPTY, expand, firstValueFrom, from, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
+import { calculateOptimalSolution } from '..'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account, TransactionOptions } from '../types'
 import { SubqueryPoolSnapshot } from '../types/subquery'
@@ -190,6 +191,7 @@ type EpochExecutionData = {
   nav: string
   reserve: string
   maxReserve: string
+  challengePeriodEnd: number
   // incomplete
 }
 
@@ -237,6 +239,9 @@ export type Pool = {
     lastClosed: string
     lastExecuted: number
     isInSubmissionPeriod: boolean
+    isInChallengePeriod: boolean
+    isInExecutionPeriod: boolean
+    challengePeriodEnd: number
   }
   nav: {
     latest: CurrencyBalance
@@ -632,13 +637,55 @@ export function getPoolsModule(inst: CentrifugeBase) {
     )
   }
 
-  function submitSolution(args: [poolId: string, solution: string[][]], options?: TransactionOptions) {
-    const [poolId, solution] = args
+  function executeEpoch(args: [poolId: string], options?: TransactionOptions) {
+    const [poolId] = args
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.pools.submitSolution(poolId, solution)
+        const submittable = api.tx.pools.executeEpoch(poolId)
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
+  function submitSolution(args: [poolId: string], options?: TransactionOptions) {
+    const [poolId] = args
+    const $pool = getPool([poolId]).pipe(take(1))
+    const $api = inst.getApi()
+    return combineLatest([$pool]).pipe(
+      switchMap(([pool]) => {
+        const solutionTranches = pool.tranches.map((tranche) => ({
+          ratio: tranche.ratio,
+          minRiskBuffer: tranche.minRiskBuffer,
+        }))
+        const poolState = {
+          netAssetValue: pool.nav.latest,
+          reserve: pool.reserve.total,
+          tranches: solutionTranches,
+          maxReserve: pool.reserve.max,
+          currencyDecimals: pool.currencyDecimals,
+        }
+        const orders = pool.tranches.map((tranche) => ({
+          invest: tranche.outstandingInvestOrders,
+          redeem: tranche.outstandingRedeemOrders,
+        }))
+
+        const redeemStartWeight = new BN(10).pow(new BN(solutionTranches.length))
+        const weights = solutionTranches.map((_t: any, index: number) => ({
+          invest: new BN(10).pow(new BN(solutionTranches.length - index)),
+          redeem: redeemStartWeight.mul(new BN(10).pow(new BN(index).addn(1))),
+        }))
+
+        const $solution = from(calculateOptimalSolution(poolState, orders, weights))
+        return combineLatest([$api, $solution])
+      }),
+      switchMap(([api, optimalSolution]) => {
+        if (!optimalSolution.isFeasible) {
+          console.warn('Calculated solution is not feasible')
+          return of(null)
+        }
+        const submittable = api.tx.pools.submitSolution(poolId, optimalSolution.tranches)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -921,7 +968,8 @@ export function getPoolsModule(inst: CentrifugeBase) {
             api.events.pools.EpochClosed.is(event) ||
             api.events.pools.EpochExecuted.is(event) ||
             api.events.pools.InvestOrderUpdated.is(event) ||
-            api.events.pools.RedeemOrderUpdated.is(event)
+            api.events.pools.RedeemOrderUpdated.is(event) ||
+            api.events.pools.SolutionSubmitted.is(event)
         )
         return !!event
       })
@@ -968,9 +1016,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
           const epoch = navValue.toJSON() as unknown as EpochExecutionData
           acc[poolId] = {
             epoch: epoch.epoch,
+            challengePeriodEnd: epoch.challengePeriodEnd,
           }
           return acc
-        }, {} as Record<string, unknown>)
+        }, {} as Record<string, Pick<EpochExecutionData, 'challengePeriodEnd' | 'epoch'>>)
 
         // read pools, poolIds and metadata from observable
         const pools = rawPools.map(([poolKeys, poolValue]) => ({
@@ -1003,8 +1052,11 @@ export function getPoolsModule(inst: CentrifugeBase) {
         //   pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
         // )
 
-        return combineLatest([$issuance, $epochs]).pipe(
-          map(([rawIssuances, rawEpochs]) => {
+        const $block = api.rpc.chain.getBlock()
+
+        return combineLatest([$issuance, $epochs, $block]).pipe(
+          map(([rawIssuances, rawEpochs, { block }]) => {
+            const blockNumber = block?.header?.number.toNumber()
             const epochs = rawEpochs.map((value) => (!value.isEmpty ? (value as any).toJSON() : null))
             const mappedPools = pools.map((poolObj) => {
               const { data: pool, id: poolId, metadata } = poolObj
@@ -1110,7 +1162,10 @@ export function getPoolsModule(inst: CentrifugeBase) {
                 epoch: {
                   ...pool.epoch,
                   lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
-                  isInSubmissionPeriod: !!epochExecution,
+                  isInSubmissionPeriod: !!epochExecution && !epochExecution?.challengePeriodEnd,
+                  isInChallengePeriod: epochExecution?.challengePeriodEnd >= blockNumber,
+                  isInExecutionPeriod: epochExecution?.challengePeriodEnd < blockNumber,
+                  challengePeriodEnd: epochExecution?.challengePeriodEnd,
                 },
                 parameters: {
                   ...pool.parameters,
@@ -1270,7 +1325,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
               balances.tranches.push({
                 poolId,
                 trancheId,
-                balance: new TokenBalance(hexToBN(value.free), decimalsByPool[poolId]),
+                balance: new TokenBalance(hexToBN(value.free), decimalsByPool[poolId.replace(/\D/g, '')]),
               })
             }
           } else {
@@ -1597,6 +1652,7 @@ export function getPoolsModule(inst: CentrifugeBase) {
     updateRedeemOrder,
     collect,
     closeEpoch,
+    executeEpoch,
     submitSolution,
     getUserPermissions,
     getPoolPermissions,
