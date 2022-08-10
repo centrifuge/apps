@@ -132,7 +132,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
     ),
   }
 
-  const riskGroup = metadata?.riskGroups?.[Number(form.values.riskGroup)]
+  const riskGroup = metadata?.riskGroups?.[form.values.riskGroup !== '' ? Number(form.values.riskGroup) : -1]
 
   const advanceRate = riskGroup?.advanceRate ? new Rate(riskGroup.advanceRate) : undefined
   const fee = riskGroup?.interestRatePerSec ? new Rate(riskGroup.interestRatePerSec) : undefined
