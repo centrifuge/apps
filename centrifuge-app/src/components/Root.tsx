@@ -23,6 +23,7 @@ import { CentrifugeProvider } from './CentrifugeProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { GlobalStyle } from './GlobalStyle'
 import { LoadBoundary } from './LoadBoundary'
+import { NodeAuthProvider } from './NodeAuthProvider'
 import { TransactionProvider } from './TransactionsProvider'
 import { TransactionToasts } from './TransactionToasts'
 import { Web3Provider } from './Web3Provider'
@@ -57,16 +58,18 @@ export const Root: React.VFC = () => {
           <FabricGlobalStyle />
           <CentrifugeProvider>
             <Web3Provider>
-              <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
-                <TransactionProvider>
-                  <TransactionToasts />
-                  <Router>
-                    <LoadBoundary>
-                      <Routes />
-                    </LoadBoundary>
-                  </Router>
-                </TransactionProvider>
-              </DebugFlags>
+              <NodeAuthProvider>
+                <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
+                  <TransactionProvider>
+                    <TransactionToasts />
+                    <Router>
+                      <LoadBoundary>
+                        <Routes />
+                      </LoadBoundary>
+                    </Router>
+                  </TransactionProvider>
+                </DebugFlags>
+              </NodeAuthProvider>
             </Web3Provider>
           </CentrifugeProvider>
         </FabricProvider>

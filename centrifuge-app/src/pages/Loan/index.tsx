@@ -1,10 +1,21 @@
-import { Box, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  IconAlertCircle,
+  IconNft,
+  InteractiveCard,
+  Shelf,
+  Stack,
+  Text,
+  Thumbnail,
+} from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { Identity } from '../../components/Identity'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import LoanLabel from '../../components/LoanLabel'
+import { useNodeAuth, useNodeDocument } from '../../components/NodeAuthProvider'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { PageSummary } from '../../components/PageSummary'
@@ -14,7 +25,9 @@ import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
 import { nftMetadataSchema } from '../../schemas'
-import { formatBalance, truncateText } from '../../utils/formatting'
+import { Schema, SchemaAttribute } from '../../types'
+import { formatDate } from '../../utils/date'
+import { formatBalance, formatPercentage, truncateText } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
 import { useAvailableFinancing, useLoan } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
@@ -37,14 +50,22 @@ export const LoanPage: React.FC = () => {
 const LoanSidebar: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
+  const pool = usePool(pid)
   const address = useAddress()
   const permissions = usePermissions(address)
   const canBorrow = useCanBorrow(pid, aid)
+  const canPrice = permissions?.pools[pid]?.roles.includes('PricingAdmin')
+
+  if (loan && pool && loan?.status === 'Created' && canPrice) {
+    return <PricingForm loan={loan} pool={pool} />
+  }
 
   if (!loan || loan.status === 'Created' || !permissions || !canBorrow) return null
 
   return <FinanceForm loan={loan} />
 }
+
+const MOCK_NODE_URL = '0.0.0.0'
 
 const Loan: React.FC = () => {
   const { pid: poolId, aid: assetId } = useParams<{ pid: string; aid: string }>()
@@ -54,17 +75,27 @@ const Loan: React.FC = () => {
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const nft = useNFT(loan?.asset.collectionId, loan?.asset.nftId, false)
   const { data: nftMetadata, isLoading: nftMetadataIsLoading } = useMetadata(nft?.metadataUri, nftMetadataSchema)
-  const address = useAddress()
-  const permissions = usePermissions(address)
   const history = useHistory()
   const cent = useCentrifuge()
   const { current: availableFinancing } = useAvailableFinancing(poolId, assetId)
   const metadataIsLoading = poolMetadataIsLoading || nftMetadataIsLoading
 
-  const canPrice = permissions?.pools[poolId]?.roles.includes('PricingAdmin')
-
   const name = truncateText(nftMetadata?.name || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? cent.metadata.parseMetadataUrl(nftMetadata.image) : ''
+
+  const { data: schemaData } = useMetadata<Schema>(
+    nftMetadata?.properties?.schema && `ipfs://ipfs/${nftMetadata?.properties?.schema}`
+  )
+
+  const { isLoggedIn, login, hasAccount } = useNodeAuth(MOCK_NODE_URL)
+  const { data: document } = useNodeDocument(MOCK_NODE_URL, 'testDocId')
+
+  const publicData = nftMetadata?.properties
+    ? Object.fromEntries(Object.entries(nftMetadata?.properties).map(([key, obj]: any) => [key, obj.value]))
+    : {}
+  const privateData = document?.attributes
+    ? Object.fromEntries(Object.entries(document.attributes).map(([key, obj]: any) => [key, obj.value]))
+    : {}
 
   const riskGroupIndex = loan && poolMetadata?.riskGroups && getMatchingRiskGroupIndex(loan, poolMetadata.riskGroups)
 
@@ -115,93 +146,149 @@ const Loan: React.FC = () => {
                 },
               ]}
             />
-            {
-              <PageSection title="Pricing">
+
+            <PageSection title="Pricing">
+              <Shelf gap={3} flexWrap="wrap">
                 <RiskGroupValues
                   values={{ ...loan.loanInfo, interestRatePerSec: loan.interestRatePerSec }}
                   loanType={loan?.loanInfo ? loan.loanInfo.type : config.defaultLoanType}
                   showMaturityDate
                 />
-              </PageSection>
-            }
+              </Shelf>
+            </PageSection>
           </>
-        ) : canPrice ? (
-          <PricingForm loan={loan} pool={pool} />
         ) : (
-          <PageSection title="Price">
-            <Text variant="body2">You don&rsquo;t have permission to price assets for this pool</Text>
-          </PageSection>
+          <>
+            <PageSummary
+              data={[
+                { label: 'Asset type', value: '-' },
+                { label: 'Risk group', value: '-' },
+                { label: 'Collateral value', value: '-' },
+              ]}
+            />
+            <PageSection title="Price">
+              <Shelf gap={1} justifyContent="center">
+                <IconAlertCircle size="iconSmall" /> <Text variant="body3">The asset has not been priced yet</Text>
+              </Shelf>
+            </PageSection>
+          </>
         ))}
       {loan && nft && (
-        <PageSection title="NFT">
-          <InteractiveCard
-            icon={<Thumbnail label="nft" type="nft" />}
-            title={<TextWithPlaceholder isLoading={nftMetadataIsLoading}>{nftMetadata?.name}</TextWithPlaceholder>}
-            variant="button"
-            onClick={() => history.push(`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`)}
-            secondaryHeader={
-              <Shelf gap={6}>
-                <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={assetId} />
-                <LabelValueStack
-                  label="Owner"
-                  value={nft?.owner ? <Identity clickToCopy address={nft?.owner} /> : ''}
-                />
-              </Shelf>
-            }
-          >
-            <Shelf gap={3} alignItems="flex-start">
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                flex="0 1 50%"
-                style={{ aspectRatio: '1 / 1' }}
-                backgroundColor="backgroundSecondary"
-                borderRadius="8px"
-                overflow="hidden"
-              >
-                {imageUrl ? (
-                  <Box as="img" maxWidth="100%" maxHeight="100%" src={imageUrl} />
-                ) : (
-                  <IconNft color="white" size="250px" />
-                )}
-              </Box>
-              <Stack gap={2}>
-                <LabelValueStack
-                  label="Description"
-                  value={
-                    <TextWithPlaceholder
-                      isLoading={nftMetadataIsLoading}
-                      words={2}
-                      width={80}
-                      variance={30}
-                      variant="body2"
-                      style={{ wordBreak: 'break-word' }}
-                    >
-                      {nftMetadata?.description || 'No description'}
-                    </TextWithPlaceholder>
-                  }
-                />
-
-                {imageUrl && (
+        <>
+          {schemaData?.sections?.map((section, i) => (
+            <PageSection title={section.name} titleAddition={section.public ? undefined : 'Private'} key={i}>
+              {section.public || document ? (
+                <Shelf gap={6} flexWrap="wrap">
+                  {section.attributes.map((attr) => {
+                    const key = labelToKey(attr.label)
+                    const value = section.public ? publicData[key] : privateData[key]
+                    const formatted = formatValue(value, attr)
+                    return <LabelValueStack label={attr.label} value={formatted} key={key} />
+                  })}
+                </Shelf>
+              ) : !section.public && !isLoggedIn && hasAccount ? (
+                <Shelf gap={2} justifyContent="center">
+                  <Shelf gap={1}>
+                    <IconAlertCircle size="iconSmall" /> <Text variant="body3">This information is private</Text>
+                  </Shelf>
+                  <Button onClick={login} small>
+                    Authenticate to view
+                  </Button>
+                </Shelf>
+              ) : null}
+            </PageSection>
+          ))}
+          <PageSection title="NFT">
+            <InteractiveCard
+              icon={<Thumbnail label="nft" type="nft" />}
+              title={<TextWithPlaceholder isLoading={nftMetadataIsLoading}>{nftMetadata?.name}</TextWithPlaceholder>}
+              variant="button"
+              onClick={() => history.push(`/nfts/collection/${loan?.asset.collectionId}/object/${loan?.asset.nftId}`)}
+              secondaryHeader={
+                <Shelf gap={6}>
+                  <LabelValueStack label={<Tooltips variant="secondary" type="id" />} value={assetId} />
                   <LabelValueStack
-                    label="Image"
+                    label="Owner"
+                    value={nft?.owner ? <Identity clickToCopy address={nft?.owner} /> : ''}
+                  />
+                </Shelf>
+              }
+            >
+              <Shelf gap={3} alignItems="flex-start">
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  flex="0 1 50%"
+                  style={{ aspectRatio: '1 / 1' }}
+                  backgroundColor="backgroundSecondary"
+                  borderRadius="8px"
+                  overflow="hidden"
+                >
+                  {imageUrl ? (
+                    <Box as="img" maxWidth="100%" maxHeight="100%" src={imageUrl} />
+                  ) : (
+                    <IconNft color="white" size="250px" />
+                  )}
+                </Box>
+                <Stack gap={2}>
+                  <LabelValueStack
+                    label="Description"
                     value={
-                      <AnchorPillButton
-                        href={imageUrl}
-                        target="_blank"
-                        style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
+                      <TextWithPlaceholder
+                        isLoading={nftMetadataIsLoading}
+                        words={2}
+                        width={80}
+                        variance={30}
+                        variant="body2"
+                        style={{ wordBreak: 'break-word' }}
                       >
-                        Source file
-                      </AnchorPillButton>
+                        {nftMetadata?.description || 'No description'}
+                      </TextWithPlaceholder>
                     }
                   />
-                )}
-              </Stack>
-            </Shelf>
-          </InteractiveCard>
-        </PageSection>
+
+                  {imageUrl && (
+                    <LabelValueStack
+                      label="Image"
+                      value={
+                        <AnchorPillButton
+                          href={imageUrl}
+                          target="_blank"
+                          style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
+                        >
+                          Source file
+                        </AnchorPillButton>
+                      }
+                    />
+                  )}
+                </Stack>
+              </Shelf>
+            </InteractiveCard>
+          </PageSection>
+        </>
       )}
     </Stack>
   )
+}
+
+function labelToKey(label: string) {
+  return label.toLowerCase().replaceAll(/\s/g, '_')
+}
+
+function formatValue(value: any, attr: SchemaAttribute) {
+  switch (attr.type) {
+    case 'string':
+      return value
+    case 'percentage':
+      return formatPercentage(value, true)
+    case 'decimal':
+      return value.toLocaleString('en')
+    case 'currency':
+      return formatBalance(value, attr.currencySymbol)
+    case 'timestamp':
+      return formatDate(value)
+    default:
+      return ''
+  }
 }

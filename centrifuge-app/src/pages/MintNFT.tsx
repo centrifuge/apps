@@ -1,9 +1,19 @@
-import { Box, Button, Flex, NumberInput, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  Flex,
+  ImageUpload,
+  NumberInput,
+  Shelf,
+  Stack,
+  Text,
+  TextAreaInput,
+  TextInput,
+} from '@centrifuge/fabric'
 import React, { useReducer, useState } from 'react'
 import { useHistory, useParams } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useDebugFlags } from '../components/DebugFlags'
-import { FileImageUpload } from '../components/FileImageUpload'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
@@ -23,6 +33,18 @@ const DEFAULT_NFT_NAME = 'Untitled NFT'
 
 // TODO: replace with better fee estimate
 const MINT_FEE_ESTIMATE = 2
+const DEFAULT_MAX_FILE_SIZE_IN_BYTES = 1e6 // 1 MB
+const ALLOWED_TYPES = [
+  'image/png',
+  'image/avif',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+  'image/svg+xml',
+  'image/bmp',
+  'image/vnd.microsoft.icon',
+]
+const ACCEPT_STRING = ALLOWED_TYPES.join(',')
 
 export const MintNFTPage: React.FC = () => {
   return (
@@ -46,7 +68,7 @@ const MintNFT: React.FC = () => {
   const [nftAmount, setNftAmount] = useState(1)
   const [nftDescription, setNftDescription] = useState('')
   const [fileDataUri, setFileDataUri] = useState('')
-  const [fileName, setFileName] = useState('')
+  const [file, setFile] = useState<File | null>(null)
 
   const isPageUnchanged = useIsPageUnchanged()
 
@@ -77,7 +99,7 @@ const MintNFT: React.FC = () => {
     const nameValue = nftName.trim()
     const descriptionValue = nftDescription.trim()
 
-    if (!(nameValue && descriptionValue && fileDataUri)) {
+    if (!(nameValue && descriptionValue && file && fileDataUri)) {
       return
     }
     const nftId = await cent.nfts.getAvailableNftId(collectionId)
@@ -85,7 +107,7 @@ const MintNFT: React.FC = () => {
       name: nameValue,
       description: descriptionValue,
       fileDataUri,
-      fileName,
+      fileName: file.name,
     })
 
     doTransaction([collectionId, nftId, address!, res.metadataURI, nftAmount])
@@ -95,7 +117,7 @@ const MintNFT: React.FC = () => {
     setNftName('')
     setNftDescription('')
     setFileDataUri('')
-    setFileName('')
+    setFile(null)
     resetLastTransaction()
     resetUpload()
     setNextVersion()
@@ -137,21 +159,24 @@ const MintNFT: React.FC = () => {
         />
         <PageSection>
           <Shelf alignItems="stretch" flexWrap="wrap" gap={4}>
-            <Flex alignItems="stretch" justifyContent="center" height="100%" flex="1 1 60%">
-              <FileImageUpload
+            <Flex alignItems="stretch" justifyContent="center" flex="1 1 60%" aspectRatio="3 / 2">
+              <ImageUpload
                 key={version}
-                onFileUpdate={async (file) => {
+                file={file}
+                validate={(file) => (file.size > DEFAULT_MAX_FILE_SIZE_IN_BYTES ? 'File size too large' : undefined)}
+                onFileChange={async (file) => {
                   if (file) {
-                    setFileName(file.name)
+                    setFile(file)
                     setFileDataUri(await getFileDataURI(file))
                     if (!nftName) {
                       setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
                     }
                   } else {
-                    setFileName('')
+                    setFile(null)
                     setFileDataUri('')
                   }
                 }}
+                accept={ACCEPT_STRING}
               />
             </Flex>
             <Box flex="1 1 30%" minWidth={250}>
