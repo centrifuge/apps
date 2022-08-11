@@ -1,4 +1,6 @@
+import { NFTMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
 import { Box, Button, Flex, NumberInput, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
+import { lastValueFrom } from '@polkadot/api-base/node_modules/rxjs'
 import React, { useReducer, useState } from 'react'
 import { useHistory, useParams } from 'react-router'
 import { useCentrifuge } from '../components/CentrifugeProvider'
@@ -9,7 +11,6 @@ import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { RouterLinkButton } from '../components/RouterLinkButton'
 import { nftMetadataSchema } from '../schemas'
-import { createNFTMetadata } from '../utils/createNFTMetadata'
 import { getFileDataURI } from '../utils/getFileDataURI'
 import { useAddress } from '../utils/useAddress'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
@@ -46,7 +47,6 @@ const MintNFT: React.FC = () => {
   const [nftAmount, setNftAmount] = useState(1)
   const [nftDescription, setNftDescription] = useState('')
   const [fileDataUri, setFileDataUri] = useState('')
-  const [fileName, setFileName] = useState('')
 
   const isPageUnchanged = useIsPageUnchanged()
 
@@ -81,21 +81,19 @@ const MintNFT: React.FC = () => {
       return
     }
     const nftId = await cent.nfts.getAvailableNftId(collectionId)
-    const res = await createNFTMetadata({
+    const imageMetadataHash = await lastValueFrom(cent.metadata.pinFile(fileDataUri))
+    const metadataValues: NFTMetadataInput = {
       name: nameValue,
       description: descriptionValue,
-      fileDataUri,
-      fileName,
-    })
-
-    doTransaction([collectionId, nftId, address!, res.metadataURI, nftAmount])
+      image: imageMetadataHash.uri,
+    }
+    doTransaction([collectionId, nftId, address!, metadataValues, nftAmount])
   })
 
   function reset() {
     setNftName('')
     setNftDescription('')
     setFileDataUri('')
-    setFileName('')
     resetLastTransaction()
     resetUpload()
     setNextVersion()
@@ -142,13 +140,11 @@ const MintNFT: React.FC = () => {
                 key={version}
                 onFileUpdate={async (file) => {
                   if (file) {
-                    setFileName(file.name)
                     setFileDataUri(await getFileDataURI(file))
                     if (!nftName) {
                       setNftName(file.name.replace(/\.[a-zA-Z0-9]{2,4}$/, ''))
                     }
                   } else {
-                    setFileName('')
                     setFileDataUri('')
                   }
                 }}

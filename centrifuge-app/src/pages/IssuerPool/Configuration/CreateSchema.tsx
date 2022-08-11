@@ -1,7 +1,9 @@
 import { Box, Button, TextAreaInput } from '@centrifuge/fabric'
+import { lastValueFrom } from '@polkadot/rpc-core/node_modules/rxjs'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
+import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
@@ -10,7 +12,6 @@ import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransactio
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { isValidJsonString } from '../../../utils/validation'
-import { pinPoolMetadata } from './pinPoolMetadata'
 
 const initialSchemaJSON = `{
   "name":"Example schema",
@@ -79,6 +80,7 @@ export const CreateSchema: React.FC = () => {
   const history = useHistory()
   const prefetchMetadata = usePrefetchMetadata()
   const [redirect, setRedirect] = React.useState('')
+  const cent = useCentrifuge()
 
   const { execute: updateConfigTx, isLoading } = useCentrifugeTransaction(
     'Create schema',
@@ -108,24 +110,21 @@ export const CreateSchema: React.FC = () => {
       return errors
     },
     onSubmit: async (values, { setSubmitting }) => {
-      const schemaMetadataHash = await pinPoolMetadata(values.metadata)
+      const schemaMetadataHash = await lastValueFrom(cent.metadata.pinJson(JSON.parse(values.metadata)))
       const newPoolMetadata = {
         ...poolMetadata,
         schemas: [
           ...(poolMetadata?.schemas ?? []),
           {
-            id: schemaMetadataHash,
+            id: schemaMetadataHash.ipfsHash,
             createdAt: new Date().toISOString(),
           },
         ],
       }
 
-      const metadataHash = await pinPoolMetadata(JSON.stringify(newPoolMetadata))
+      prefetchMetadata(schemaMetadataHash.ipfsHash)
 
-      prefetchMetadata(metadataHash)
-      prefetchMetadata(schemaMetadataHash)
-
-      updateConfigTx([poolId, metadataHash])
+      updateConfigTx([poolId, newPoolMetadata])
       setSubmitting(false)
     },
   })
