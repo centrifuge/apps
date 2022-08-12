@@ -1,6 +1,5 @@
 import { GetStaticProps } from 'next'
 import Head from 'next/head'
-import { useRouter } from 'next/router'
 import * as React from 'react'
 import Auth from '../components/Auth'
 import { FunnelHeader } from '../components/FunnelHeader'
@@ -15,10 +14,9 @@ interface Props {
   ipfsPools: IpfsPools
 }
 
-const InvestorOnboardingPage: React.FC<Props> = ({ ipfsPools }) => {
-  const router = useRouter()
-  const { from } = router.query
+const { NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL } = process.env
 
+const InvestorOnboardingPage: React.FC<Props> = ({ ipfsPools }) => {
   return (
     <IpfsPoolsProvider value={ipfsPools}>
       <TinlakeProvider>
@@ -26,7 +24,7 @@ const InvestorOnboardingPage: React.FC<Props> = ({ ipfsPools }) => {
           <Head>
             <title>Investor Onboarding | Tinlake | Centrifuge</title>
           </Head>
-          <FunnelHeader returnPath={(from as string) || 'https://tinlake.centrifuge.io'} />
+          <FunnelHeader returnPath={NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL as string} />
           <Auth>
             <PageContainer width="funnel" noMargin>
               <InvestorOnboarding />

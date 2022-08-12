@@ -17,9 +17,12 @@ interface Props {
   ipfsPools: IpfsPools
 }
 
+const { NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL } = process.env
+
 const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
   const router = useRouter()
-  const { root, slug, from } = router.query
+  const { root, slug } = router.query
+
   return (
     <IpfsPoolsProvider value={ipfsPools}>
       <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig} contractVersions={pool.versions}>
@@ -27,9 +30,7 @@ const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
           <Head>
             <title>Investor Onboarding: {pool.metadata.name} | Tinlake | Centrifuge</title>
           </Head>
-          <FunnelHeader
-            returnPath={(from as string) || `https://tinlake.centrifuge.io/pool/${root}/${slug}/investments`}
-          />
+          <FunnelHeader returnPath={`${NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL}/pool/${root}/${slug}/investments`} />
           <Auth>
             <PageContainer width="funnel" noMargin>
               <PoolOnboarding activePool={pool} />
