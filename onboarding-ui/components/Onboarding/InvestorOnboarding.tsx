@@ -24,6 +24,8 @@ interface Props {
   hidePageTitle?: boolean
 }
 
+const { NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL } = process.env
+
 const deleteMyAccount = async (address: string, session: string) => {
   await fetch(`${config.onboardAPIHost}addresses/${address}?session=${session}`, { method: 'DELETE' })
   window.location.reload()
@@ -101,7 +103,7 @@ export const InvestorOnboarding: React.FC<Props> = () => {
                         <br />
                         Select a pool to start investing.
                       </StepParagraph>
-                      <Link href="/">
+                      <Link href={NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL as string}>
                         <Button primary label="Browse pools" largeOnMobile={false} />
                       </Link>
                     </>

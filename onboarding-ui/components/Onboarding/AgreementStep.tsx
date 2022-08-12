@@ -20,6 +20,8 @@ interface Props {
   whitelistStatus: boolean
 }
 
+const { NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL } = process.env
+
 const AgreementStep: React.FC<Props> = ({
   state,
   activePool,
@@ -106,7 +108,7 @@ const AgreementStep: React.FC<Props> = ({
                   />
                   .
                 </StepParagraph>
-                <Link href="/">
+                <Link href={NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL as string}>
                   <Button label="Explore other pools" primary />
                 </Link>
               </>
