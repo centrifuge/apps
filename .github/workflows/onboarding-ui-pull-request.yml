@@ -55,6 +55,7 @@ jobs:
           NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
           NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.centrifuge.io/'
           NEXT_PUBLIC_RWA_MARKET_ONBOARD_RETURN_URL: 'https://rwamarket.io'
+          NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL: 'https://dev.tinlake.cntrfg.com'
           NEXT_PUBLIC_POOL_REGISTRY: '0xddf1c516cf87126c6c610b52fd8d609e67fb6033'
           NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmZmXGymPherntXSkZDxS3t38f8KzRtAEhqQGjc3oFpugs'
           NEXT_PUBLIC_PORTIS_KEY: 'bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f'
