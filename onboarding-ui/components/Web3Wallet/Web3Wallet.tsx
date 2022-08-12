@@ -50,9 +50,9 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
         <InnerWallet>
           <IdenticonSmall>
             {ensAvatar ? (
-              <Image src={ensAvatar} width={24} height={24} />
+              <Image src={ensAvatar} width={24} height={24} loader={({ src }) => src} />
             ) : (
-              <Image src={toDataUrl(address)} width={24} height={24} />
+              <Image src={toDataUrl(address)} width={24} height={24} loader={({ src }) => src} />
             )}
           </IdenticonSmall>
           <StatusAddrSmall>
@@ -64,6 +64,7 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
               style={{ transform: open ? 'rotate(-180deg)' : '' }}
               width={16}
               height={16}
+              loader={({ src }) => src}
             />
           </Caret>
         </InnerWallet>
@@ -90,9 +91,9 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
             <Card>
               <Identicon>
                 {ensAvatar ? (
-                  <Image src={ensAvatar} width={64} height={64} />
+                  <Image src={ensAvatar} width={64} height={64} loader={({ src }) => src} />
                 ) : (
-                  <Image src={toDataUrl(address)} width={64} height={64} />
+                  <Image src={toDataUrl(address)} width={64} height={64} loader={({ src }) => src} />
                 )}
               </Identicon>
               <StatusAddrCopyLink>
@@ -114,13 +115,13 @@ export const Web3Wallet: React.FunctionComponent<Props> = ({
                   }
                 >
                   {copied ? (
-                    <Image src="/static/wallet/check.svg" width={24} height={24} />
+                    <Image src="/static/wallet/check.svg" width={24} height={24} loader={({ src }) => src} />
                   ) : (
-                    <Image src="/static/wallet/copy.svg" width={24} height={24} />
+                    <Image src="/static/wallet/copy.svg" width={24} height={24} loader={({ src }) => src} />
                   )}
                 </Copy>
                 <Link plain href={getAddressLink(address)} target="_blank">
-                  <Image src="/static/wallet/external-link.svg" width={24} height={24} />
+                  <Image src="/static/wallet/external-link.svg" width={24} height={24} loader={({ src }) => src} />
                 </Link>
               </StatusAddrCopyLink>
 
