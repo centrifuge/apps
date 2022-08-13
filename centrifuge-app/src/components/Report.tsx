@@ -3,6 +3,7 @@ import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
 import { GroupBy, Report } from '../pages/Pool/Reporting'
+import { formatDate } from '../utils/date'
 import { formatBalance, formatPrice, getCurrencySymbol } from '../utils/formatting'
 import { useDailyPoolStates, useInvestorTransactions, useMonthlyPoolStates, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
@@ -192,13 +193,16 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, grou
 
   const investorTxRecords: TableDataRow[] =
     investorTransactions?.map((tx) => {
+      const tokenId = tx.trancheId.split('-')[1]
+      const trancheMeta = metadata?.tranches?.[tokenId]
+
       return {
         name: ``,
         value: [
           tx.accountId,
-          tx.trancheId,
-          tx.epochNumber,
-          tx.timestamp.toISOString(),
+          trancheMeta?.name || '',
+          `Epoch ${tx.epochNumber}`,
+          formatDate(tx.timestamp.toString()),
           tx.type,
           formatBalance(tx.currencyAmount.toDecimal()),
           formatBalance(tx.tokenAmount.toDecimal()),
