@@ -1,10 +1,10 @@
-import { DailyPoolState, Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
-import { GroupBy } from '../pages/Pool/Reporting'
+import { GroupBy, Report } from '../pages/Pool/Reporting'
 import { formatBalance, formatPrice, getCurrencySymbol } from '../utils/formatting'
-import { usePoolMetadata } from '../utils/usePools'
+import { useDailyPoolStates, useInvestorTransactions, useMonthlyPoolStates, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
 import { DataTableGroup } from './DataTableGroup'
 
@@ -15,7 +15,7 @@ export type ReportingMoment = {
 
 type Props = {
   pool: Pool
-  poolStates: DailyPoolState[]
+  report: Report
   exportRef: React.MutableRefObject<Function>
   groupBy: GroupBy
 }
@@ -26,34 +26,49 @@ type TableDataRow = {
   heading?: boolean
 }
 
-export const Report: React.FC<Props> = ({ pool, poolStates, exportRef, groupBy }) => {
+export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, groupBy }) => {
   const { data: metadata } = usePoolMetadata(pool)
 
-  const columns: Column[] = poolStates
-    ? [
-        {
-          align: 'left',
-          header: '',
-          cell: (row: TableDataRow) => <Text variant={row.heading ? 'heading4' : 'body2'}>{row.name}</Text>,
-          flex: '1 0 200px',
-        },
-      ].concat(
-        poolStates.map((state, index) => {
+  const dailyPoolStates = useDailyPoolStates(pool.id) // , startDate, endDate
+  const monthlyPoolStates = useMonthlyPoolStates(pool.id) // , startDate, endDate
+  const poolStates = report === 'pool-balance' ? (groupBy === 'day' ? dailyPoolStates : monthlyPoolStates) : []
+  const investorTransactions = useInvestorTransactions(pool.id)
+
+  const columns: Column[] =
+    report === 'pool-balance'
+      ? poolStates
+        ? [
+            {
+              align: 'left',
+              header: '',
+              cell: (row: TableDataRow) => <Text variant={row.heading ? 'heading4' : 'body2'}>{row.name}</Text>,
+              flex: '1 0 200px',
+            },
+          ].concat(
+            poolStates.map((state, index) => {
+              return {
+                align: 'right',
+                header: `${new Date(state.timestamp).toLocaleDateString('en-US', {
+                  month: 'short',
+                })} ${
+                  groupBy === 'day'
+                    ? new Date(state.timestamp).toLocaleDateString('en-US', { day: 'numeric' })
+                    : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric' })
+                }`,
+                cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
+                flex: '0 0 100px',
+              }
+            })
+          )
+        : []
+      : ['Account', 'Tranche', 'Epoch', 'Timestamp', 'Type', 'Amount (aUSD)', 'Amount (tokens)'].map((col, index) => {
           return {
-            align: 'right',
-            header: `${new Date(state.timestamp).toLocaleDateString('en-US', {
-              month: 'short',
-            })} ${
-              groupBy === 'day'
-                ? new Date(state.timestamp).toLocaleDateString('en-US', { day: 'numeric' })
-                : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric' })
-            }`,
+            align: 'left',
+            header: col,
             cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-            flex: '0 0 100px',
+            flex: '0 0 200px',
           }
         })
-      )
-    : []
 
   const exportToCsv = () => {
     const rows = [columns.map((col) => col.header.toString())]
@@ -175,14 +190,37 @@ export const Report: React.FC<Props> = ({ pool, poolStates, exportRef, groupBy }
     )
   )
 
+  const investorTxRecords: TableDataRow[] =
+    investorTransactions?.map((tx) => {
+      return {
+        name: ``,
+        value: [
+          tx.accountId,
+          tx.trancheId,
+          tx.epochNumber,
+          tx.timestamp.toISOString(),
+          tx.type,
+          formatBalance(tx.currencyAmount.toDecimal()),
+          formatBalance(tx.tokenAmount.toDecimal()),
+        ],
+        heading: false,
+      }
+    }) || []
+
   return (
     <Stack gap="2">
       <Stack gap="3">
         <GradientOverlay>
           <DataTableGroup>
-            <DataTable data={overviewRecords} columns={columns} hoverable />
-            <DataTable data={priceRecords} columns={columns} hoverable />
-            <DataTable data={inOutFlowRecords} columns={columns} hoverable />
+            {report === 'pool-balance' && (
+              <>
+                <DataTable data={overviewRecords} columns={columns} hoverable />
+                <DataTable data={priceRecords} columns={columns} hoverable />
+                <DataTable data={inOutFlowRecords} columns={columns} hoverable />
+              </>
+            )}
+            {console.log(investorTransactions)}
+            {report === 'investor-tx' && <DataTable data={investorTxRecords} columns={columns} hoverable />}
           </DataTableGroup>
         </GradientOverlay>
       </Stack>
@@ -209,20 +247,6 @@ function textContent(elem: any): string {
   if (typeof elem === 'string') {
     return elem
   }
-  // Debugging for basic content shows that props.children, if any, is either a
-  // ReactElement, or a string, or an Array with any combination. Like for
-  // `<p>Hello <em>world</em>!</p>`:
-  //
-  //   $$typeof: Symbol(react.element)
-  //   type: "p"
-  //   props:
-  //     children:
-  //       - "Hello "
-  //       - $$typeof: Symbol(react.element)
-  //         type: "em"
-  //         props:
-  //           children: "world"
-  //       - "!"
   const children = elem.props && elem.props.children
   if (children instanceof Array) {
     return children.map(textContent).join('')

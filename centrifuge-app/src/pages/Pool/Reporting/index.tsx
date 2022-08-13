@@ -1,18 +1,25 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { DailyPoolState } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Button, Card, DateInput, InputGroup, RadioButton, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { Report } from '../../../components/Report'
+import { ReportComponent } from '../../../components/Report'
 import { Spinner } from '../../../components/Spinner'
 import { formatDate } from '../../../utils/date'
-import { useDailyPoolStates, useMonthlyPoolStates, usePool } from '../../../utils/usePools'
+import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 export type GroupBy = 'day' | 'month'
+
+export type Report = 'pool-balance' | 'asset-list' | 'investor-tx'
+
+const titleByReport: { [key: string]: string } = {
+  'pool-balance': 'Pool balance',
+  'asset-list': 'Asset list',
+  'investor-tx': 'Investor transactions',
+}
 
 export const PoolDetailReportingTab: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
@@ -21,13 +28,16 @@ export const PoolDetailReportingTab: React.FC = () => {
   const [startDate, setStartDate] = React.useState(pool?.createdAt ? new Date(pool?.createdAt) : new Date())
   const [endDate, setEndDate] = React.useState(new Date())
 
+  const [report, setReport] = React.useState('investor-tx' as Report)
   const [groupBy, setGroupBy] = React.useState('day' as GroupBy)
 
-  const dailyPoolStates = useDailyPoolStates(poolId, startDate, endDate)
-  const monthlyPoolStates = useMonthlyPoolStates(poolId, startDate, endDate)
-  const poolStates = groupBy === 'day' ? dailyPoolStates : monthlyPoolStates
-
   const exportRef = React.useRef<() => void>(() => {})
+
+  const reportOptions: { label: string; value: Report }[] = [
+    { label: 'Pool balance', value: 'pool-balance' },
+    { label: 'Asset list', value: 'asset-list' },
+    { label: 'Investor transactions', value: 'investor-tx' },
+  ]
 
   return (
     <PageWithSideBar
@@ -38,12 +48,13 @@ export const PoolDetailReportingTab: React.FC = () => {
 
             <Select
               placeholder="Select a report"
-              options={[
-                { label: 'Pool balance', value: 'pool-balance' },
-                { label: 'Token performance', value: 'token-performance' },
-                { label: 'Asset performance', value: 'asset-performance' },
-              ]}
-              value={'pool-balance'}
+              options={reportOptions}
+              value={report}
+              onSelect={(newReport) => {
+                if (newReport) {
+                  setReport(newReport as Report)
+                }
+              }}
             />
           </Stack>
           <Stack as={Card} gap={2} p={2}>
@@ -68,11 +79,10 @@ export const PoolDetailReportingTab: React.FC = () => {
                 <RadioButton
                   name="month"
                   label="Month"
-                  onClick={() => setGroupBy('month')}
+                  onChange={() => setGroupBy('month')}
                   checked={groupBy === 'month'}
                 />
-                <RadioButton name="week" label="Week" disabled />
-                <RadioButton name="day" label="Day" onClick={() => setGroupBy('day')} checked={groupBy === 'day'} />
+                <RadioButton name="day" label="Day" onChange={() => setGroupBy('day')} checked={groupBy === 'day'} />
               </InputGroup>
             </Shelf>
           </Stack>
@@ -96,7 +106,7 @@ export const PoolDetailReportingTab: React.FC = () => {
           start={startDate}
           end={endDate}
           pool={pool}
-          poolStates={poolStates || []}
+          report={report}
           exportRef={exportRef}
           groupBy={groupBy}
         />
@@ -112,22 +122,19 @@ export const PoolDetailReporting: React.FC<{
   start: Date | undefined
   end: Date | undefined
   pool: Pool | undefined
-  poolStates: DailyPoolState[]
+  report: Report
   exportRef: React.MutableRefObject<() => void>
   groupBy: GroupBy
-}> = ({ start, end, pool, poolStates, exportRef, groupBy }) => {
+}> = ({ start, end, pool, report, exportRef, groupBy }) => {
   if (!pool) return <Spinner />
   return (
     <>
       <PageSection
-        title="Pool balance"
+        title={titleByReport[report]}
         titleAddition={start && end ? `${formatDate(start.toString())} to ${formatDate(end.toString())}` : ''}
       >
         <React.Suspense fallback={<Spinner />}>
-          {!poolStates || (poolStates.length === 0 && <Spinner />)}
-          {poolStates && poolStates.length > 0 && (
-            <Report pool={pool} poolStates={poolStates} exportRef={exportRef} groupBy={groupBy} />
-          )}
+          <ReportComponent pool={pool} report={report} exportRef={exportRef} groupBy={groupBy} />
         </React.Suspense>
       </PageSection>
     </>

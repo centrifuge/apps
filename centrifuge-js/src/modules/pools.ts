@@ -6,7 +6,12 @@ import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxj
 import { calculateOptimalSolution } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
-import { SubqueryPoolSnapshot, SubqueryTrancheSnapshot } from '../types/subquery'
+import {
+  InvestorTransactionType,
+  SubqueryInvestorTransaction,
+  SubqueryPoolSnapshot,
+  SubqueryTrancheSnapshot,
+} from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
@@ -1497,7 +1502,6 @@ export function getPoolsModule(inst: Centrifuge) {
         let poolStatesByMonth: { [monthYear: string]: DailyPoolState[] } = {}
         poolStates.forEach((poolState) => {
           const monthYear = new Date(poolState.timestamp).getMonth() + '-' + new Date(poolState.timestamp).getFullYear()
-          console.log(new Date(poolState.timestamp).toISOString())
           if (monthYear in poolStatesByMonth) {
             poolStatesByMonth[monthYear] = [...poolStatesByMonth[monthYear], poolState]
           } else {
@@ -1512,6 +1516,73 @@ export function getPoolsModule(inst: Centrifuge) {
           return base
         })
       })
+    )
+  }
+
+  function getInvestorTransactions(args: [poolId: string, from?: Date, to?: Date]) {
+    const [poolId, from, to] = args
+    const $api = inst.getApi()
+
+    const $query = inst.getSubqueryObservable<{
+      investorTransactions: { nodes: SubqueryInvestorTransaction[] }
+    }>(
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+        investorTransactions(
+          orderBy: TIMESTAMP_ASC,
+          filter: { 
+            poolId: { equalTo: $poolId },
+            timestamp: { greaterThan: $from, lessThan: $to }
+          }) {
+          nodes {
+            id
+            timestamp
+            accountId
+            poolId
+            trancheId
+            epochNumber
+            type
+            tokenAmount
+            currencyAmount
+            tokenPrice
+            transactionFee
+          }
+        }
+      }
+      `,
+      {
+        poolId,
+        from: from ? from.toISOString() : new Date(new Date().setFullYear(new Date().getFullYear() - 10)).toISOString(),
+        to: to ? to.toISOString() : new Date(new Date().setFullYear(new Date().getFullYear() + 10)).toISOString(),
+      }
+    )
+
+    return $api.pipe(
+      switchMap((api) =>
+        combineLatest([$query, api.query.pools.pool(poolId).pipe(take(1))]).pipe(
+          switchMap(([queryData, poolValue]) => {
+            const pool = poolValue.toJSON() as unknown as PoolDetailsData
+            const currencyDecimals = getCurrencyDecimals(pool.currency)
+            return [
+              queryData?.investorTransactions.nodes.map((tx) => {
+                return {
+                  id: tx.id,
+                  timestamp: new Date(tx.timestamp),
+                  accountId: tx.accountId,
+                  trancheId: tx.trancheId,
+                  epochNumber: tx.epochNumber,
+                  type: tx.type as InvestorTransactionType,
+                  currencyAmount: tx.currencyAmount
+                    ? new CurrencyBalance(tx.currencyAmount, currencyDecimals)
+                    : undefined,
+                  tokenAmount: tx.tokenAmount ? new CurrencyBalance(tx.tokenAmount, currencyDecimals) : undefined,
+                  tokenPrice: tx.tokenPrice ? new Price(tx.tokenPrice) : undefined,
+                  transactionFee: tx.transactionFee ? new CurrencyBalance(tx.transactionFee, 18) : undefined, // native tokenks are always denominated in 18
+                }
+              }) as unknown as any[], // TODO: add typing
+            ]
+          })
+        )
+      )
     )
   }
 
@@ -1924,6 +1995,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getAvailablePoolId,
     getDailyPoolStates,
     getMonthlyPoolStates,
+    getInvestorTransactions,
     getNativeCurrency,
   }
 }
