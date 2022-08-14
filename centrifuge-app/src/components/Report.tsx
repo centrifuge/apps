@@ -14,11 +14,16 @@ export type ReportingMoment = {
   timestamp: Date
 }
 
+export type CustomFilters = {
+  groupBy: GroupBy
+  activeTranche?: string
+}
+
 type Props = {
   pool: Pool
   report: Report
   exportRef: React.MutableRefObject<Function>
-  groupBy: GroupBy
+  customFilters: CustomFilters
 }
 
 type TableDataRow = {
@@ -27,13 +32,14 @@ type TableDataRow = {
   heading?: boolean
 }
 
-export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, groupBy }) => {
+export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, customFilters }) => {
   const { data: metadata } = usePoolMetadata(pool)
 
   const dailyPoolStates = useDailyPoolStates(pool.id) // , startDate, endDate
   const monthlyPoolStates = useMonthlyPoolStates(pool.id) // , startDate, endDate
-  const poolStates = report === 'pool-balance' ? (groupBy === 'day' ? dailyPoolStates : monthlyPoolStates) : []
-  const investorTransactions = useInvestorTransactions(pool.id)
+  const poolStates =
+    report === 'pool-balance' ? (customFilters.groupBy === 'day' ? dailyPoolStates : monthlyPoolStates) : []
+  const investorTransactions = useInvestorTransactions(pool.id, customFilters.activeTranche)
 
   const columns: Column[] =
     report === 'pool-balance'
@@ -52,7 +58,7 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, grou
                 header: `${new Date(state.timestamp).toLocaleDateString('en-US', {
                   month: 'short',
                 })} ${
-                  groupBy === 'day'
+                  customFilters.groupBy === 'day'
                     ? new Date(state.timestamp).toLocaleDateString('en-US', { day: 'numeric' })
                     : new Date(state.timestamp).toLocaleDateString('en-US', { year: 'numeric' })
                 }`,
@@ -62,12 +68,21 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, grou
             })
           )
         : []
-      : ['Account', 'Tranche', 'Epoch', 'Timestamp', 'Type', 'Amount (aUSD)', 'Amount (tokens)'].map((col, index) => {
+      : [
+          'Token',
+          'Account',
+          'Epoch',
+          'Date',
+          'Type',
+          `${pool && getCurrencySymbol(pool.currency)} amount`,
+          'Token amount',
+          'Price',
+        ].map((col, index) => {
           return {
             align: 'left',
             header: col,
             cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-            flex: '0 0 200px',
+            flex: index === 0 ? '0 0 150px' : index === 4 ? '0 0 200px' : '1',
           }
         })
 
@@ -76,22 +91,29 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, grou
 
     const mapText = (text: string) => text.replaceAll('\u00A0 \u00A0', '-')
 
-    overviewRecords.forEach((rec, index) => {
-      rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
-    })
-    rows.push([''])
+    if (report === 'pool-balance') {
+      overviewRecords.forEach((rec, index) => {
+        rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
+      })
+      rows.push([''])
 
-    priceRecords.forEach((rec, index) => {
-      rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
-    })
-    rows.push([''])
+      priceRecords.forEach((rec, index) => {
+        rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
+      })
+      rows.push([''])
 
-    inOutFlowRecords.forEach((rec, index) => {
-      rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
-    })
-    rows.push([''])
+      inOutFlowRecords.forEach((rec, index) => {
+        rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
+      })
+      rows.push([''])
+    } else {
+      investorTxRecords.forEach((rec, index) => {
+        rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
+      })
+      rows.push([''])
+    }
 
-    downloadCSV(rows, `pool-balance_${new Date().toISOString().slice(0, 10)}.csv`)
+    downloadCSV(rows, `${report}_${new Date().toISOString().slice(0, 10)}.csv`)
   }
   exportRef.current = exportToCsv
 
@@ -199,13 +221,14 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, grou
       return {
         name: ``,
         value: [
+          `${metadata?.pool?.name} ${trancheMeta?.name}`,
           tx.accountId,
-          trancheMeta?.name || '',
-          `Epoch ${tx.epochNumber}`,
+          tx.epochNumber,
           formatDate(tx.timestamp.toString()),
           tx.type,
           formatBalance(tx.currencyAmount.toDecimal()),
           formatBalance(tx.tokenAmount.toDecimal()),
+          tx.tokenPrice ? formatPrice(tx.tokenPrice) : '',
         ],
         heading: false,
       }
@@ -215,17 +238,14 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, grou
     <Stack gap="2">
       <Stack gap="3">
         <GradientOverlay>
-          <DataTableGroup>
-            {report === 'pool-balance' && (
-              <>
-                <DataTable data={overviewRecords} columns={columns} hoverable />
-                <DataTable data={priceRecords} columns={columns} hoverable />
-                <DataTable data={inOutFlowRecords} columns={columns} hoverable />
-              </>
-            )}
-            {console.log(investorTransactions)}
-            {report === 'investor-tx' && <DataTable data={investorTxRecords} columns={columns} hoverable />}
-          </DataTableGroup>
+          {report === 'pool-balance' && (
+            <DataTableGroup>
+              <DataTable data={overviewRecords} columns={columns} hoverable />
+              <DataTable data={priceRecords} columns={columns} hoverable />
+              <DataTable data={inOutFlowRecords} columns={columns} hoverable />
+            </DataTableGroup>
+          )}
+          {report === 'investor-tx' && <DataTable data={investorTxRecords} columns={columns} hoverable />}
         </GradientOverlay>
       </Stack>
       <Text variant="body3" color="textSecondary">

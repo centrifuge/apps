@@ -46,10 +46,10 @@ export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
   return result
 }
 
-export function useInvestorTransactions(poolId: string, from?: Date, to?: Date) {
+export function useInvestorTransactions(poolId: string, trancheId?: string, from?: Date, to?: Date) {
   const [result] = useCentrifugeQuery(
-    ['investorTransactions', poolId, from, to],
-    (cent) => cent.pools.getInvestorTransactions([poolId, from, to]),
+    ['investorTransactions', poolId, trancheId, from, to],
+    (cent) => cent.pools.getInvestorTransactions([poolId, trancheId, from, to]),
     {
       suspense: true,
     }

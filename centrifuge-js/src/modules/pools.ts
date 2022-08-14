@@ -1519,8 +1519,8 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getInvestorTransactions(args: [poolId: string, from?: Date, to?: Date]) {
-    const [poolId, from, to] = args
+  function getInvestorTransactions(args: [poolId: string, trancheId?: string, from?: Date, to?: Date]) {
+    const [poolId, trancheId, from, to] = args
     const $api = inst.getApi()
 
     const $query = inst.getSubqueryObservable<{
@@ -1562,23 +1562,27 @@ export function getPoolsModule(inst: Centrifuge) {
           switchMap(([queryData, poolValue]) => {
             const pool = poolValue.toJSON() as unknown as PoolDetailsData
             const currencyDecimals = getCurrencyDecimals(pool.currency)
+
+            // TODO: trancheId filter should be passed to subquery call instead
             return [
-              queryData?.investorTransactions.nodes.map((tx) => {
-                return {
-                  id: tx.id,
-                  timestamp: new Date(tx.timestamp),
-                  accountId: tx.accountId,
-                  trancheId: tx.trancheId,
-                  epochNumber: tx.epochNumber,
-                  type: tx.type as InvestorTransactionType,
-                  currencyAmount: tx.currencyAmount
-                    ? new CurrencyBalance(tx.currencyAmount, currencyDecimals)
-                    : undefined,
-                  tokenAmount: tx.tokenAmount ? new CurrencyBalance(tx.tokenAmount, currencyDecimals) : undefined,
-                  tokenPrice: tx.tokenPrice ? new Price(tx.tokenPrice) : undefined,
-                  transactionFee: tx.transactionFee ? new CurrencyBalance(tx.transactionFee, 18) : undefined, // native tokenks are always denominated in 18
-                }
-              }) as unknown as any[], // TODO: add typing
+              queryData?.investorTransactions.nodes
+                .filter((tx) => !trancheId || tx.trancheId.endsWith(trancheId))
+                .map((tx) => {
+                  return {
+                    id: tx.id,
+                    timestamp: new Date(tx.timestamp),
+                    accountId: tx.accountId,
+                    trancheId: tx.trancheId,
+                    epochNumber: tx.epochNumber,
+                    type: tx.type as InvestorTransactionType,
+                    currencyAmount: tx.currencyAmount
+                      ? new CurrencyBalance(tx.currencyAmount, currencyDecimals)
+                      : undefined,
+                    tokenAmount: tx.tokenAmount ? new CurrencyBalance(tx.tokenAmount, currencyDecimals) : undefined,
+                    tokenPrice: tx.tokenPrice ? new Price(tx.tokenPrice) : undefined,
+                    transactionFee: tx.transactionFee ? new CurrencyBalance(tx.transactionFee, 18) : undefined, // native tokenks are always denominated in 18
+                  }
+                }) as unknown as any[], // TODO: add typing
             ]
           })
         )
