@@ -1,9 +1,11 @@
-name: 'onboarding-ui Pull Request'
+name: 'onboarding-ui Deploy to Dev'
 on:
-  pull_request:
+  push:
+    branches:
+      - main
     paths:
       - 'onboarding-ui/**'
-      - '.github/workflows/onboarding-ui-pull-request.yml'
+      - '.github/workflows/onboarding-ui-deploy-to-dev.yml'
 
 jobs:
   build-and-deploy:
@@ -67,11 +69,11 @@ jobs:
       - name: Deploy To Netlify
         uses: nwtgck/actions-netlify@v1.2.0
         with:
-          alias: pr-${{ github.event.pull_request.number }}
-          deploy-message: ${{ github.event.commit.message }}
-          enable-pull-request-comment: true
+          deploy-message: ${{ github.event.head_commit.message }}
+          enable-commit-comment: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
           netlify-config-path: ./onboarding-ui/netlify.toml
+          production-deploy: true
           publish-dir: ./onboarding-ui/out
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
