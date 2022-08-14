@@ -1,10 +1,12 @@
-import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { ActiveLoan, Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
+import { LOAN_TYPE_LABELS } from '../pages/Loan/utils'
 import { GroupBy, Report } from '../pages/Pool/Reporting'
 import { formatDate } from '../utils/date'
-import { formatBalance, formatPrice, getCurrencySymbol } from '../utils/formatting'
+import { formatBalance, formatPercentage, formatPrice, getCurrencySymbol } from '../utils/formatting'
+import { useLoans } from '../utils/useLoans'
 import { useDailyPoolStates, useInvestorTransactions, useMonthlyPoolStates, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
 import { DataTableGroup } from './DataTableGroup'
@@ -40,6 +42,7 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
   const poolStates =
     report === 'pool-balance' ? (customFilters.groupBy === 'day' ? dailyPoolStates : monthlyPoolStates) : []
   const investorTransactions = useInvestorTransactions(pool.id, customFilters.activeTranche)
+  const loans = useLoans(pool.id)
 
   const columns: Column[] =
     report === 'pool-balance'
@@ -68,6 +71,29 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
             })
           )
         : []
+      : report === 'asset-list'
+      ? [
+          'ID',
+          'Asset type',
+          'Collateral value',
+          'Outstanding',
+          'Total financed',
+          'Total repaid',
+          'Financing date',
+          'Maturity date',
+          'Financing fee',
+          'Advance rate',
+          'PD',
+          'LGD',
+          'Discount rate',
+        ].map((col, index) => {
+          return {
+            align: 'left',
+            header: col,
+            cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
+            flex: index === 0 ? '0 0 50px' : index === 1 ? '0 0 200px' : '0 0 100px',
+          }
+        })
       : [
           'Token',
           'Account',
@@ -106,6 +132,10 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
         rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
       })
       rows.push([''])
+    } else if (report === 'asset-list') {
+      loanListRecords.forEach((rec, index) => {
+        rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
+      })
     } else {
       investorTxRecords.forEach((rec, index) => {
         rows.push(columns.map((col) => (col.cell(rec, index) ? mapText(textContent(col.cell(rec, index))) : '')))
@@ -213,6 +243,38 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
     )
   )
 
+  const loanListRecords: TableDataRow[] =
+    loans?.map((loan) => {
+      return {
+        name: ``,
+        value: [
+          loan.id,
+          loan.status === 'Active' ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '-',
+          loan.status === 'Active' ? formatBalance(loan.loanInfo.value.toDecimal()) : '-',
+          loan.status === 'Active' ? formatBalance((loan as ActiveLoan).outstandingDebt.toDecimal()) : '-',
+          loan.status === 'Active' ? formatBalance((loan as ActiveLoan).totalBorrowed.toDecimal()) : '-',
+          loan.status === 'Active' ? formatBalance((loan as ActiveLoan).totalRepaid.toDecimal()) : '-',
+          loan.status === 'Active' ? formatDate(loan.originationDate.toString()) : '-',
+          loan.status === 'Active' && 'maturityDate' in loan.loanInfo
+            ? formatDate(loan.loanInfo.maturityDate.toString())
+            : '-',
+          loan.status === 'Active' ? formatPercentage(loan.interestRatePerSec.toAprPercent()) : '-',
+          loan.status === 'Active' ? formatPercentage(loan.loanInfo.advanceRate.toPercent()) : '-',
+          loan.status === 'Active' && 'probabilityOfDefault' in loan.loanInfo
+            ? formatPercentage(loan.loanInfo.probabilityOfDefault.toPercent())
+            : '-',
+          loan.status === 'Active' && 'lossGivenDefault' in loan.loanInfo
+            ? formatPercentage(loan.loanInfo.lossGivenDefault.toPercent())
+            : '-',
+          loan.status === 'Active' && 'discountRate' in loan.loanInfo
+            ? formatPercentage(loan.loanInfo.discountRate.toPercent())
+            : '-',
+          // loan.status === 'Active' ? formatDate(loan.maturityDate.toString()) : '-',
+        ],
+        heading: false,
+      }
+    }) || []
+
   const investorTxRecords: TableDataRow[] =
     investorTransactions?.map((tx) => {
       const tokenId = tx.trancheId.split('-')[1]
@@ -245,12 +307,15 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
               <DataTable data={inOutFlowRecords} columns={columns} hoverable />
             </DataTableGroup>
           )}
+          {report === 'asset-list' && <DataTable data={loanListRecords} columns={columns} hoverable />}
           {report === 'investor-tx' && <DataTable data={investorTxRecords} columns={columns} hoverable />}
         </GradientOverlay>
       </Stack>
-      <Text variant="body3" color="textSecondary">
-        All amounts are in {pool && getCurrencySymbol(pool.currency)}.
-      </Text>
+      {(report === 'pool-balance' || report === 'asset-list') && (
+        <Text variant="body3" color="textSecondary">
+          All amounts are in {pool && getCurrencySymbol(pool.currency)}.
+        </Text>
+      )}
     </Stack>
   )
 }

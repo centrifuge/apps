@@ -29,7 +29,7 @@ export const PoolDetailReportingTab: React.FC = () => {
   // Global filters
   const [startDate, setStartDate] = React.useState(pool?.createdAt ? new Date(pool?.createdAt) : new Date())
   const [endDate, setEndDate] = React.useState(new Date())
-  const [report, setReport] = React.useState('investor-tx' as Report)
+  const [report, setReport] = React.useState('asset-list' as Report)
 
   // Custom filters for specific reports
   const [groupBy, setGroupBy] = React.useState('day' as GroupBy)
