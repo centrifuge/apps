@@ -3,6 +3,7 @@ import { Button, Card, CurrencyInput, DateInput, Grid, Select, Stack, Text } fro
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
+import { config } from '../../config'
 import { getCurrencySymbol } from '../../utils/formatting'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
@@ -38,7 +39,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
 
   const form = useFormik<PricingFormValues>({
     initialValues: {
-      loanType: 'CreditLineWithMaturity',
+      loanType: 'BulletLoan',
       riskGroup: '',
       value: '',
       maturityDate: '',
@@ -145,19 +146,21 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
       <Form noValidate ref={formRef}>
         <Stack as={Card} gap={2} p={2}>
           <Text variant="heading3">Pricing</Text>
-          <Field name="loanType">
-            {({ field, meta, form }: FieldProps) => (
-              <Select
-                label="Loan type"
-                onSelect={(v) => form.setFieldValue('loanType', v, false)}
-                onBlur={field.onBlur}
-                errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                value={field.value}
-                options={loanTypeOptions}
-                placeholder=""
-              />
-            )}
-          </Field>
+          {config.network === 'centrifuge' && (
+            <Field name="loanType">
+              {({ field, meta, form }: FieldProps) => (
+                <Select
+                  label="Loan type"
+                  onSelect={(v) => form.setFieldValue('loanType', v, false)}
+                  onBlur={field.onBlur}
+                  errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                  value={field.value}
+                  options={loanTypeOptions}
+                  placeholder=""
+                />
+              )}
+            </Field>
+          )}
           {Object.entries(fields)
             .filter(([key]) => shownFields.includes(key))
             .map(([, el]) => el)}
