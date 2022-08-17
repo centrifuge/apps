@@ -11,6 +11,7 @@ export interface Config {
   sentryDsn: string | undefined
   ipfsGateway: string
   tinlakeUiHost: string
+  onboardingUiHost: string
   onboardApiHost: string
   rpcUrl: string
   poolRegistry: string
@@ -65,6 +66,7 @@ const config: Config = {
   sentryDsn: process.env.SENTRY_DSN,
   ipfsGateway: process.env.IPFS_GATEWAY,
   tinlakeUiHost: process.env.TINLAKE_UI_HOST,
+  onboardingUiHost: process.env.ONBOARDING_UI_HOST,
   onboardApiHost: process.env.ONBOARD_API_HOST,
   rpcUrl: process.env.RPC_URL,
   poolRegistry: process.env.POOL_REGISTRY,

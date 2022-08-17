@@ -1,4 +1,4 @@
-import { from, Observable } from 'rxjs'
+import { first, from, map, Observable } from 'rxjs'
 import Centrifuge from '..'
 
 export function getMetadataModule(inst: Centrifuge) {
@@ -8,6 +8,33 @@ export function getMetadataModule(inst: Centrifuge) {
       return from([])
     }
     return inst.getMetadataObservable<T>(url)
+  }
+
+  function pinFile(b64URI?: string): Observable<{ uri: string; ipfsHash: string }> {
+    if (!inst.config?.pinFile) {
+      console.error('pinFile must be set in config to use this feature')
+      return from([])
+    }
+    if (!b64URI) {
+      return from([])
+    }
+
+    return from(inst.config.pinFile(b64URI))
+      .pipe(first())
+      .pipe(map(({ uri }) => parseIPFSHash(uri)))
+  }
+
+  function pinJson(metadata: Record<any, any>): Observable<{ uri: string; ipfsHash: string }> {
+    const file = jsonToBase64(metadata)
+    return pinFile(file)
+  }
+
+  function unpinFile(uri: string) {
+    if (!inst.config.unpinFile) {
+      return from([])
+    }
+    const hash = parseIPFSHash(uri).ipfsHash
+    return inst.config.unpinFile(hash)
   }
 
   function parseMetadataUrl(url: string) {
@@ -33,5 +60,28 @@ export function getMetadataModule(inst: Centrifuge) {
     }
   }
 
-  return { getMetadata, parseMetadataUrl }
+  const IPFS_HASH_LENGTH = 46
+  function parseIPFSHash(uri: string) {
+    if (uri.includes('ipfs://')) {
+      const hash = uri
+        .split(/ipfs:\/\/ipfs\//)
+        .filter(Boolean)
+        .join()
+      return { uri, ipfsHash: hash }
+    } else if (!uri.includes('/') && uri.length === IPFS_HASH_LENGTH) {
+      return { uri: `ipfs://ipfs/${uri}`, ipfsHash: uri }
+    }
+    return { uri, ipfsHash: '' }
+  }
+
+  return { getMetadata, parseMetadataUrl, pinFile, pinJson, unpinFile }
+}
+
+function jsonToBase64(jsonInput: Record<any, any>) {
+  try {
+    const json = JSON.stringify(jsonInput)
+    return btoa(json)
+  } catch (error) {
+    throw new Error('Invalid JSON')
+  }
 }

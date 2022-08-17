@@ -9,7 +9,7 @@ import PoolList from '../../components/PoolList'
 import PoolsMetrics from '../../components/PoolsMetrics'
 import { Text } from '../../components/Text'
 import TinlakeExplainer from '../../components/TinlakeExplainer'
-import { IpfsPools } from '../../config'
+import config, { IpfsPools } from '../../config'
 import { useAddress } from '../../utils/useAddress'
 import { useInvestorOnboardingState } from '../../utils/useOnboardingState'
 import { usePools } from '../../utils/usePools'
@@ -41,7 +41,7 @@ const Dashboard: React.FC<Props> = () => {
               />
             </Text>
             <ButtonGroup bleedY={[0, '10px']}>
-              <Link href="/onboarding">
+              <Link href={config.onboardUIHost}>
                 <Button primary label="Onboard as investor" />
               </Link>
             </ButtonGroup>

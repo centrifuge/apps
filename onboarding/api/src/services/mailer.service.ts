@@ -144,7 +144,7 @@ export class MailerService {
             token: `${pool.metadata?.name} ${tranche}`,
             issuerName: pool.profile?.issuer?.name,
             issuerEmail: pool.profile?.issuer?.email,
-            onboardingUrl: `${config.tinlakeUiHost}pool/${pool.id}/${pool.metadata?.slug}/onboarding?tranche=${
+            onboardingUrl: `${config.onboardingUiHost}pool/${pool.id}/${pool.metadata?.slug}?tranche=${
               tranche || 'senior'
             }`,
           },

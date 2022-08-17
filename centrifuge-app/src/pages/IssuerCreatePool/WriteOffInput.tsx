@@ -1,7 +1,8 @@
+import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Button, Grid, IconMinusCircle, NumberInput, Stack, Text } from '@centrifuge/fabric'
 import { FieldArray, useFormikContext } from 'formik'
 import React from 'react'
-import { createEmptyWriteOffGroup, PoolFormValues } from '.'
+import { createEmptyWriteOffGroup } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { validate } from './validate'
@@ -9,7 +10,7 @@ import { validate } from './validate'
 const MAX_GROUPS = 100
 
 export const WriteOffInput: React.FC = () => {
-  const fmk = useFormikContext<PoolFormValues>()
+  const fmk = useFormikContext<PoolMetadataInput>()
   const { values } = fmk
 
   return (
