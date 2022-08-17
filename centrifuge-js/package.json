@@ -2,15 +2,18 @@
   "name": "@centrifuge/centrifuge-js",
   "version": "0.1.0",
   "description": "",
+  "homepage": "https://github.com/centrifuge/apps/tree/main/centrifuge-js#readme",
   "author": "",
   "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/centrifuge-js.esm.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
+  "engines": {
+    "node": ">=14"
+  },
   "scripts": {
     "start": "run-p -l start:esbuild start:types",
     "start:esbuild": "node ./esbuild watch",

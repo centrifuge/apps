@@ -1,10 +1,9 @@
 import { CurrencyBalance, Loan as LoanType, LoanInfoInput, Pool, Rate } from '@centrifuge/centrifuge-js'
-import { Button, CurrencyInput, DateInput, Grid, Select, Stack, Text } from '@centrifuge/fabric'
+import { Button, Card, CurrencyInput, DateInput, Grid, Select, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
-import { PageSection } from '../../components/PageSection'
-import { PageSummary } from '../../components/PageSummary'
+import { config } from '../../config'
 import { getCurrencySymbol } from '../../utils/formatting'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
@@ -20,6 +19,11 @@ type PricingFormValues = {
   riskGroup: string
 }
 
+const loanTypeOptions = Object.entries(LOAN_TYPE_LABELS).map(([value, label]) => ({
+  label,
+  value,
+}))
+
 export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, pool }) => {
   const { execute: doTransaction, isLoading } = useCentrifugeTransaction(
     'Price asset',
@@ -32,13 +36,6 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
       value: i.toString(),
       label: r.name ? `${i + 1} – ${r.name}` : `Risk group ${i + 1}`,
     })) ?? []
-
-  React.useEffect(() => {
-    if (riskGroupOptions.length) {
-      form.setFieldValue('riskGroup', '0', false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metadata])
 
   const form = useFormik<PricingFormValues>({
     initialValues: {
@@ -136,7 +133,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
     ),
   }
 
-  const riskGroup = metadata?.riskGroups?.[Number(form.values.riskGroup)]
+  const riskGroup = metadata?.riskGroups?.[form.values.riskGroup !== '' ? Number(form.values.riskGroup) : -1]
 
   const advanceRate = riskGroup?.advanceRate ? new Rate(riskGroup.advanceRate) : undefined
   const fee = riskGroup?.interestRatePerSec ? new Rate(riskGroup.interestRatePerSec) : undefined
@@ -147,61 +144,61 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
   return (
     <FormikProvider value={form}>
       <Form noValidate ref={formRef}>
-        <PageSummary
-          data={[
-            { label: 'Asset type', value: LOAN_TYPE_LABELS[form.values.loanType] },
-            { label: 'Risk group', value: 'n/a' },
-            { label: 'Collateral value', value: 'n/a' },
-          ]}
-        />
-        <PageSection
-          title="Pricing"
-          headerRight={
-            <Button
-              type="submit"
-              disabled={!riskGroup}
-              loading={isLoading}
-              loadingMessage={isLoading ? 'Pending...' : undefined}
-              small
-            >
+        <Stack as={Card} gap={2} p={2}>
+          <Text variant="heading3">Pricing</Text>
+          {config.network === 'centrifuge' && (
+            <Field name="loanType">
+              {({ field, meta, form }: FieldProps) => (
+                <Select
+                  label="Loan type"
+                  onSelect={(v) => form.setFieldValue('loanType', v, false)}
+                  onBlur={field.onBlur}
+                  errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                  value={field.value}
+                  options={loanTypeOptions}
+                  placeholder=""
+                />
+              )}
+            </Field>
+          )}
+          {Object.entries(fields)
+            .filter(([key]) => shownFields.includes(key))
+            .map(([, el]) => el)}
+
+          <Field name="riskGroup" validate={required()}>
+            {({ field, meta, form }: FieldProps) => (
+              <Select
+                label="Risk group"
+                onSelect={(v) => form.setFieldValue('riskGroup', v, false)}
+                onBlur={field.onBlur}
+                errorMessage={meta.touched && meta.error ? meta.error : undefined}
+                value={field.value}
+                options={riskGroupOptions}
+                placeholder="Select..."
+                disabled={metadataIsLoading}
+              />
+            )}
+          </Field>
+          {riskGroup && (
+            <Stack gap={2} px={2}>
+              <Text variant="heading4">
+                Risk group{' '}
+                {riskGroup.name
+                  ? `${Number(form.values.riskGroup) + 1} – ${riskGroup.name}`
+                  : `Risk group ${Number(form.values.riskGroup) + 1}`}{' '}
+              </Text>
+              <Grid columns={2} equalColumns gap={2}>
+                <RiskGroupValues values={riskGroup} loanType={form.values.loanType} />
+              </Grid>
+            </Stack>
+          )}
+
+          <Stack px={2} py={1}>
+            <Button type="submit" loading={isLoading} loadingMessage={isLoading ? 'Pending...' : undefined}>
               Price
             </Button>
-          }
-        >
-          <Stack gap={3}>
-            <Grid columns={[1, 3]} equalColumns gap={3}>
-              {Object.entries(fields)
-                .filter(([key]) => shownFields.includes(key))
-                .map(([, el]) => el)}
-
-              <Field name="riskGroup">
-                {({ field, meta, form }: FieldProps) => (
-                  <Select
-                    label="Risk group"
-                    onSelect={(v) => form.setFieldValue('riskGroup', v, false)}
-                    onBlur={field.onBlur}
-                    errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                    value={field.value}
-                    options={riskGroupOptions}
-                    placeholder=""
-                    disabled={metadataIsLoading}
-                  />
-                )}
-              </Field>
-            </Grid>
-            {riskGroup && (
-              <Stack gap={2}>
-                <Text variant="heading4">
-                  Risk group{' '}
-                  {riskGroup.name
-                    ? `${Number(form.values.riskGroup) + 1} – ${riskGroup.name}`
-                    : `Risk group ${Number(form.values.riskGroup) + 1}`}{' '}
-                </Text>
-                <RiskGroupValues values={riskGroup} loanType={form.values.loanType} />
-              </Stack>
-            )}
           </Stack>
-        </PageSection>
+        </Stack>
       </Form>
     </FormikProvider>
   )

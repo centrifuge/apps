@@ -2,7 +2,7 @@ export type PoolStatus = 'open' | 'upcoming' | 'hidden'
 export type PoolCountry = 'us' | 'non-us'
 export type NonSolicitationNotice = 'all' | 'non-us' | 'none'
 
-type Attribute =
+export type SchemaAttribute =
   | {
       label: string
       type: 'decimal'
@@ -36,7 +36,7 @@ type Attribute =
 type Section = {
   name: string
   public: boolean
-  attributes: Attribute[]
+  attributes: SchemaAttribute[]
 }
 
 export type Schema = {

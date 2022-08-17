@@ -6,7 +6,7 @@ import { useCentrifuge } from '../components/CentrifugeProvider'
 
 type Schema = {
   [key: string]: {
-    type: 'string' | 'number'
+    type: 'string' | 'number' | 'any'
     maxLength?: number
     optional?: boolean
   }
@@ -15,7 +15,10 @@ type Schema = {
 type Optional<T, S extends boolean | undefined> = S extends true ? T | undefined : T
 
 type Result<T extends Schema> = {
-  [P in keyof T]: Optional<T[P]['type'] extends 'string' ? string : number, T[P]['optional']>
+  [P in keyof T]: Optional<
+    T[P]['type'] extends 'string' ? string : T[P]['type'] extends 'any' ? any : number,
+    T[P]['optional']
+  >
 }
 
 async function metadataQueryFn<T extends Schema>(uri: string, cent: Centrifuge, schema?: T) {
@@ -30,10 +33,9 @@ async function metadataQueryFn<T extends Schema>(uri: string, cent: Centrifuge, 
       const { maxLength, optional, type } = schema[key]
       let value = res[key]
       if (!value) {
-        if (optional) continue
-        return null
+        if (!optional) return null
       }
-      if (typeof value !== type) return null
+      if (typeof value !== type && type !== 'any') return null
       if (maxLength) value = value.slice(0, maxLength)
       result[key] = value
     }
