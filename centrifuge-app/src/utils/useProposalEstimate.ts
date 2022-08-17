@@ -66,11 +66,6 @@ export function useProposalEstimate(formValues: PoolMetadataInput) {
         })),
       ]
 
-      const writeOffGroups = values.writeOffGroups.map((g) => ({
-        overdueDays: g.days as number,
-        percentage: Rate.fromPercent(g.writeOff || 0),
-      }))
-
       const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
 
       // Complete the data in the form with some dummy data for things like poolId and metadata hash
@@ -82,7 +77,6 @@ export function useProposalEstimate(formValues: PoolMetadataInput) {
         currency,
         CurrencyBalance.fromFloat(values.maxReserve || 0, chainDecimals),
         {} as any,
-        writeOffGroups,
       ] as CreatePoolArgs)
     }, 1000),
     []

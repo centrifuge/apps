@@ -1,17 +1,6 @@
 import { CurrencyBalance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import {
-  Box,
-  Button,
-  CurrencyInput,
-  FileUpload,
-  Grid,
-  Select,
-  Text,
-  TextAreaInput,
-  TextInput,
-  Thumbnail,
-} from '@centrifuge/fabric'
+import { Box, Button, CurrencyInput, FileUpload, Grid, Select, Text, TextInput, Thumbnail } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
@@ -34,11 +23,11 @@ import { useCurrencies } from '../../utils/useCurrencies'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useProposalEstimate } from '../../utils/useProposalEstimate'
 import { truncate } from '../../utils/web3'
+import { IssuerInput } from './IssuerInput'
 import { RiskGroupsInput } from './RiskGroupsInput'
-import { TrancheInput } from './TrancheInput'
+import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
-import { WriteOffInput } from './WriteOffInput'
 
 const DEFAULT_CURRENCY = 'Native'
 
@@ -63,7 +52,7 @@ export interface Tranche {
   minRiskBuffer: number | ''
   minInvestment: number | ''
 }
-export interface RiskGroup {
+export interface RiskGroupInput {
   groupName: string
   advanceRate: number | ''
   fee: number | ''
@@ -71,9 +60,10 @@ export interface RiskGroup {
   lossGivenDefault: number | ''
   discountRate: number | ''
 }
-export interface WriteOffGroup {
+export interface WriteOffGroupInput {
   days: number | ''
   writeOff: number | ''
+  penaltyInterest: number | ''
 }
 
 export const createEmptyTranche = (junior?: boolean): Tranche => ({
@@ -84,18 +74,13 @@ export const createEmptyTranche = (junior?: boolean): Tranche => ({
   minInvestment: 0,
 })
 
-export const createEmptyRiskGroup = (): RiskGroup => ({
+export const createEmptyRiskGroup = (): RiskGroupInput => ({
   groupName: '',
   advanceRate: '',
   fee: '',
   probabilityOfDefault: '',
   lossGivenDefault: '',
   discountRate: '',
-})
-
-export const createEmptyWriteOffGroup = (): WriteOffGroup => ({
-  days: '',
-  writeOff: '',
 })
 
 const initialValues: PoolMetadataInput = {
@@ -106,6 +91,7 @@ const initialValues: PoolMetadataInput = {
   maxReserve: '',
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
+  nodeEndpoint: '',
 
   issuerName: '',
   issuerLogo: null,
@@ -118,7 +104,6 @@ const initialValues: PoolMetadataInput = {
 
   tranches: [createEmptyTranche(true)],
   riskGroups: [createEmptyRiskGroup()],
-  writeOffGroups: [createEmptyWriteOffGroup()],
 }
 
 const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
@@ -220,36 +205,6 @@ const CreatePoolForm: React.VFC = () => {
         }
       })
 
-      const writeOffGroups = values.writeOffGroups
-        .filter((g) => typeof g.days === 'number')
-        .sort((a, b) => (a.days as number) - (b.days as number))
-      let highestWriteOff = 0
-      let previousDays = -1
-      writeOffGroups.forEach((g) => {
-        if (g.writeOff <= highestWriteOff) {
-          const index = values.writeOffGroups.findIndex((gr) => gr.days === g.days && gr.writeOff === g.writeOff)
-          errors = setIn(
-            errors,
-            `writeOffGroups.${index}.writeOff`,
-            'Write-off percentage must increase as days increase'
-          )
-        } else {
-          highestWriteOff = g.writeOff as number
-        }
-        if (g.days === previousDays) {
-          const index = values.writeOffGroups.findIndex((gr) => gr.days === g.days && gr.writeOff === g.writeOff)
-          errors = setIn(errors, `writeOffGroups.${index}.days`, 'Days must be unique')
-        }
-        previousDays = g.days as number
-      })
-      if (highestWriteOff !== 100) {
-        errors = setIn(
-          errors,
-          `writeOffGroups.${values.writeOffGroups.length - 1}.writeOff`,
-          'Must have one group with 100% write-off'
-        )
-      }
-
       return errors
     },
     validateOnMount: true,
@@ -275,9 +230,9 @@ const CreatePoolForm: React.VFC = () => {
         lastValueFrom(centrifuge.metadata.pinFile(executiveSummaryUri)),
       ])
 
-      metadataValues.issuerLogo = pinnedPoolIcon.uri
+      metadataValues.issuerLogo = pinnedIssuerLogo?.uri || null
       metadataValues.executiveSummary = pinnedExecSummary.uri
-      metadataValues.poolIcon = pinnedIssuerLogo?.uri || ''
+      metadataValues.poolIcon = pinnedPoolIcon.uri
 
       // tranches must be reversed (most junior is the first in the UI but the last in the API)
       const noJuniorTranches = metadataValues.tranches.slice(1)
@@ -288,11 +243,6 @@ const CreatePoolForm: React.VFC = () => {
           minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
         })),
       ]
-
-      const writeOffGroups = metadataValues.writeOffGroups.map((g) => ({
-        overdueDays: g.days as number,
-        percentage: Rate.fromPercent(g.writeOff),
-      }))
 
       // const epochSeconds = ((values.epochHours as number) * 60 + (values.epochMinutes as number)) * 60
 
@@ -305,7 +255,6 @@ const CreatePoolForm: React.VFC = () => {
           currency,
           CurrencyBalance.fromFloat(values.maxReserve, currencyDecimals),
           metadataValues,
-          writeOffGroups,
         ],
         { createType: config.poolCreationType }
       )
@@ -479,107 +428,12 @@ const CreatePoolForm: React.VFC = () => {
             </Grid>
           </PageSection>
           <PageSection title="Issuer">
-            <Grid columns={[6]} equalColumns gap={2} rowGap={3}>
-              <Box gridColumn="span 3">
-                <FieldWithErrorMessage
-                  validate={validate.issuerName}
-                  name="issuerName"
-                  as={TextInput}
-                  label={<Tooltips type="issuerName" label="Legal name of issuer*" variant="secondary" />}
-                  placeholder="Name..."
-                  maxLength={100}
-                  disabled={waitingForStoredIssuer}
-                />
-              </Box>
-              <Box gridColumn="span 3" width="100%">
-                <Field name="issuerLogo" validate={validate.issuerLogo}>
-                  {({ field, meta, form }: FieldProps) => (
-                    <FileUpload
-                      file={field.value}
-                      onFileChange={(file) => {
-                        form.setFieldTouched('issuerLogo', true, false)
-                        form.setFieldValue('issuerLogo', file)
-                      }}
-                      label="Issuer logo (JPG/PNG/SVG, 480x480 px)"
-                      placeholder="Choose issuer logo"
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                      accept="image/*"
-                    />
-                  )}
-                </Field>
-              </Box>
-              <Box gridColumn="span 6">
-                <FieldWithErrorMessage
-                  validate={validate.issuerDescription}
-                  name="issuerDescription"
-                  as={TextAreaInput}
-                  label={
-                    <Tooltips
-                      type="poolDescription"
-                      variant="secondary"
-                      label="Description (minimum 100 characters)*"
-                    />
-                  }
-                  placeholder="Description..."
-                  maxLength={1000}
-                  disabled={waitingForStoredIssuer}
-                />
-              </Box>
-              <Box gridColumn="span 6">
-                <Text>Links</Text>
-              </Box>
-              <Box gridColumn="span 3">
-                <Field name="executiveSummary" validate={validate.executiveSummary}>
-                  {({ field, meta, form }: FieldProps) => (
-                    <FileUpload
-                      file={field.value}
-                      onFileChange={(file) => {
-                        form.setFieldTouched('executiveSummary', true, false)
-                        form.setFieldValue('executiveSummary', file)
-                      }}
-                      accept="application/pdf"
-                      label="Executive summary PDF*"
-                      placeholder="Choose file"
-                      errorMessage={meta.touched && meta.error ? meta.error : undefined}
-                    />
-                  )}
-                </Field>
-              </Box>
-              <Box gridColumn="span 3">
-                <FieldWithErrorMessage
-                  name="website"
-                  as={TextInput}
-                  label="Website"
-                  placeholder="https://..."
-                  validate={validate.website}
-                />
-              </Box>
-              <Box gridColumn="span 3">
-                <FieldWithErrorMessage
-                  name="forum"
-                  as={TextInput}
-                  label="Governance forum"
-                  placeholder="https://..."
-                  validate={validate.forum}
-                />
-              </Box>
-              <Box gridColumn="span 3">
-                <FieldWithErrorMessage
-                  name="email"
-                  as={TextInput}
-                  label="Email"
-                  placeholder=""
-                  validate={validate.email}
-                />
-              </Box>
-            </Grid>
+            <IssuerInput waitingForStoredIssuer={waitingForStoredIssuer} />
           </PageSection>
 
-          <TrancheInput />
+          <TrancheSection />
 
           <RiskGroupsInput />
-
-          <WriteOffInput />
         </Form>
       </FormikProvider>
     </>

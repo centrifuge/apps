@@ -1,6 +1,7 @@
-import Centrifuge from '@centrifuge/centrifuge-js'
+import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
+import { useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
-import { PoolMetadata } from '../types'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 
@@ -92,4 +93,31 @@ export function usePoolPermissions(poolId?: string) {
 
 export function usePoolMetadata(pool?: { metadata?: string }) {
   return useMetadata<PoolMetadata>(pool?.metadata)
+}
+
+export function useConstants() {
+  const centrifuge = useCentrifuge()
+  const { data } = useQuery(
+    ['constants'],
+    async () => {
+      const api = await centrifuge.getApiPromise()
+      return {
+        minUpdateDelay: Number(api.consts.pools.minUpdateDelay.toHuman()),
+        maxTranches: Number(api.consts.pools.maxTranches.toHuman()),
+        challengeTime: Number(api.consts.pools.challengeTime.toHuman()),
+        maxWriteOffGroups: Number(api.consts.loans.maxWriteOffGroups.toHuman()),
+      }
+    },
+    {
+      staleTime: Infinity,
+    }
+  )
+
+  return data
+}
+
+export function useWriteOffGroups(poolId: string) {
+  const [result] = useCentrifugeQuery(['writeOffGroups', poolId], (cent) => cent.pools.getWriteOffGroups([poolId]))
+
+  return result
 }

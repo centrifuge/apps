@@ -44,6 +44,7 @@ export const PoolConfig: React.VFC<Props> = (props: { poolId: string }) => {
       return errors
     },
     onSubmit: async (values, { setSubmitting }) => {
+      console.log('dateta', values.metadata)
       updateConfigTx([props.poolId, JSON.parse(values.metadata)])
       setSubmitting(false)
     },

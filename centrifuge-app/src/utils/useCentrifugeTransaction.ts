@@ -1,6 +1,6 @@
 import Centrifuge, { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { ISubmittableResult } from '@polkadot/types/types'
-import { WalletAccount } from '@talisman-connect/wallets'
+import { WalletAccount } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import { lastValueFrom, Observable } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
