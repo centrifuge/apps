@@ -47,7 +47,12 @@ const PoolName: React.VFC<{ pool: Pool }> = ({ pool }) => {
   return (
     <Shelf alignItems="center" gap={1}>
       {data?.pool?.icon ? (
-        <StyledLogo src={cent.metadata.parseMetadataUrl(data.pool.icon)} alt="pool logo" height="24" width="24" />
+        <StyledLogo
+          src={cent.metadata.parseMetadataUrl(data.pool.icon?.uri ?? data.pool.icon)}
+          alt="pool logo"
+          height="24"
+          width="24"
+        />
       ) : (
         <Thumbnail
           type="pool"

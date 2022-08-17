@@ -1,8 +1,8 @@
 import { Pool } from '@centrifuge/centrifuge-js'
+import { PoolMetadata } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { InteractiveCard, Shelf, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
-import { PoolMetadata } from '../types'
 import { getAge } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
 import { useAverageMaturity } from '../utils/useAverageMaturity'
@@ -26,7 +26,12 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
     <InteractiveCard
       icon={
         metadata?.pool?.icon ? (
-          <img src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon || '')} alt="" height="24" width="24" />
+          <img
+            src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon.uri ?? metadata?.pool?.icon)}
+            alt=""
+            height="24"
+            width="24"
+          />
         ) : (
           <Thumbnail type="pool" label="LP" size="small" />
         )
