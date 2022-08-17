@@ -42,8 +42,8 @@ export class AgreementController {
     const verifiedSession = this.sessionService.verify(query.session)
     if (!verifiedSession) {
       const returnUrl = CustomPoolIds.includes(params.poolId.trim())
-        ? `${config.tinlakeUiHost}onboarding/${params.poolId.trim()}`
-        : `${config.tinlakeUiHost}pool/${params.poolId.trim()}/${pool.metadata.slug}/onboarding`
+        ? `${config.onboardingUiHost}${params.poolId.trim()}`
+        : `${config.onboardingUiHost}pool/${params.poolId.trim()}/${pool.metadata.slug}`
       console.error(`Invalid session`)
       return res.redirect(returnUrl)
     }
@@ -90,8 +90,8 @@ export class AgreementController {
     }
 
     const returnUrl = CustomPoolIds.includes(params.poolId)
-      ? `${config.tinlakeUiHost}onboarding/${params.poolId}`
-      : `${config.tinlakeUiHost}pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${agreement.tranche}`
+      ? `${config.onboardingUiHost}${params.poolId}`
+      : `${config.onboardingUiHost}pool/${params.poolId}/${pool.metadata.slug}?tranche=${agreement.tranche}`
     return res.redirect(returnUrl)
   }
 

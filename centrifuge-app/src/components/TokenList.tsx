@@ -48,7 +48,7 @@ const columns: Column[] = [
     sortKey: 'yield',
   },
   {
-    header: <SortableTableHeader label="Protection" />,
+    header: <SortableTableHeader label="Max. protection" />,
     cell: (token: TokenTableData) => (
       <Text variant="body2">{token.protection ? formatPercentage(token.protection) : ''}</Text>
     ),

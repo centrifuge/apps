@@ -5,7 +5,6 @@
     "tinlake-bot",
     "e2e-tests",
     "onboarding/api",
-    "onboarding/ui",
     "tinlake-ui",
     "tinlake.js",
     "centrifuge-js",
@@ -14,7 +13,8 @@
     "gateway/packages/lib",
     "gateway/packages/ui",
     "gateway/packages/server",
-    "simulation-tests"
+    "simulation-tests",
+    "onboarding-ui"
   ],
   "devDependencies": {
     "@types/concurrently": "^5",

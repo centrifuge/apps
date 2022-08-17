@@ -10,6 +10,10 @@ export const nftMetadataSchema = {
   image: {
     type: 'string',
   },
+  properties: {
+    type: 'any',
+    optional: true,
+  },
 } as const
 
 export const collectionMetadataSchema = {
