@@ -38,7 +38,7 @@ export const CollectionCard: React.FC<Props> = ({ collection }) => {
         </Shelf>
       }
       description={metadata?.description}
-      image={metadata?.image}
+      image={metadata?.image?.uri ?? metadata?.image}
       count={items}
       isLoading={isLoading}
       ref={ref}

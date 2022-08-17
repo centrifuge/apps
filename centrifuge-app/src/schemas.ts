@@ -8,7 +8,7 @@ export const nftMetadataSchema = {
     maxLength: 400,
   },
   image: {
-    type: 'string',
+    type: 'any',
   },
   properties: {
     type: 'any',
@@ -26,7 +26,7 @@ export const collectionMetadataSchema = {
     maxLength: 400,
   },
   image: {
-    type: 'string',
+    type: 'any',
     optional: true,
   },
 } as const
