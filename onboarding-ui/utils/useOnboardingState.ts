@@ -29,7 +29,10 @@ export function useOnboardingState(pool?: Pool | UpcomingPool, tranche?: Tranche
 }
 
 // TODO: Call onboard API URL that isn't pool dependant
-const placeholderPoolId = '0x560Ac248ce28972083B718778EEb0dbC2DE55740'
+const placeholderPoolId =
+  process.env.NEXT_PUBLIC_ENV === 'PROD'
+    ? '0x560Ac248ce28972083B718778EEb0dbC2DE55740'
+    : '0x792164b3e10a3CE1efafF7728961aD506c433c18'
 
 type AdditionalData = {
   kycStatus: AddressStatus['kyc']['status'] | 'requires-signin'
