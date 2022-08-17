@@ -1,5 +1,5 @@
 import { PoolMetadata, PoolMetadataInput } from '@centrifuge/centrifuge-js'
-import { Box, Button, Grid, ImageUpload, Select, Shelf, TextInput } from '@centrifuge/fabric'
+import { Box, Button, Checkbox, Grid, ImageUpload, Select, Shelf, Stack, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
@@ -98,6 +98,8 @@ export const Details: React.FC = () => {
 
   const icon = cent.metadata.parseMetadataUrl(metadata?.pool?.icon ?? '')
 
+  const currency = getCurrencySymbol(pool?.currency)
+
   return (
     <FormikProvider value={form}>
       <Form>
@@ -132,7 +134,7 @@ export const Details: React.FC = () => {
                       form.setFieldValue('poolIcon', file)
                     }}
                     requirements=""
-                    label="Pool icon: SVG in square size"
+                    label="Pool icon: SVG in square size*"
                     errorMessage={meta.touched ? meta.error : undefined}
                     accept="image/svg+xml"
                   />
@@ -159,6 +161,14 @@ export const Details: React.FC = () => {
                   />
                 )}
               </Field>
+              <Select
+                label="Currency"
+                onSelect={() => {}}
+                value={currency}
+                options={[{ label: currency, value: currency }]}
+                placeholder=""
+                disabled
+              />
               <FieldWithErrorMessage
                 validate={validate.nodeEndpoint}
                 name="nodeEndpoint"
@@ -166,6 +176,14 @@ export const Details: React.FC = () => {
                 label="Node enpoint*"
                 placeholder="https://..."
               />
+
+              <Field name="listed" validate={validate.assetClass}>
+                {({ field, meta, form }: FieldProps) => (
+                  <Stack px={2}>
+                    <LabelValueStack label="Menu listing" value={<Checkbox {...field} label="published" />} />
+                  </Stack>
+                )}
+              </Field>
             </Grid>
           ) : (
             <Shelf gap={3} flexWrap="wrap">

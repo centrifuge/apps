@@ -405,6 +405,15 @@ const CreatePoolForm: React.VFC = () => {
                   )}
                 </Field>
               </Box>
+              <Box gridColumn="span 2">
+                <FieldWithErrorMessage
+                  validate={validate.nodeEndpoint}
+                  name="nodeEndpoint"
+                  as={TextInput}
+                  label="Node endpoint*"
+                  placeholder="https://"
+                />
+              </Box>
               {/* <Box gridColumn="span 1">
               <FieldWithErrorMessage
                 validate={validate.epochHours}
