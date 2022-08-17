@@ -84,8 +84,8 @@ export const Issuer: React.FC = () => {
           },
           links: {
             executiveSummary: execSummaryUri ?? oldMetadata.pool.links.executiveSummary,
-            forum: values.issuerName,
-            website: values.issuerName,
+            forum: values.forum,
+            website: values.website,
           },
         },
       }

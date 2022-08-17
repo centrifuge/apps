@@ -52,6 +52,7 @@ export const WriteOffGroups: React.FC = () => {
   const consts = useConstants()
 
   const savedGroups = useWriteOffGroups(poolId)
+  const sortedSavedGroups = [...(savedGroups ?? [])].sort((a, b) => a.overdueDays - b.overdueDays)
 
   const { execute, isLoading } = useCentrifugeTransaction(
     'Update configuration',
@@ -67,17 +68,20 @@ export const WriteOffGroups: React.FC = () => {
         ...(savedGroups ?? []).map((g) => ({
           days: g.overdueDays,
           writeOff: g.percentage.toPercent().toNumber(),
-          penaltyInterest: g.penaltyInterestRate.toPercent().toNumber(),
+          penaltyInterest: g.penaltyInterestRate.toAprPercent().toNumber(),
+          saved: true,
         })),
         ...values.writeOffGroups,
       ]
         .filter((g) => typeof g.days === 'number')
         .sort((a, b) => (a.days as number) - (b.days as number))
       let highestWriteOff = 0
+      let highestPenalty = 0
       let previousDays = -1
       writeOffGroups.forEach((g) => {
         if (g.writeOff <= highestWriteOff) {
-          const index = values.writeOffGroups.findIndex((gr) => gr.days === g.days && gr.writeOff === g.writeOff)
+          let index = values.writeOffGroups.findIndex((gr) => gr.days === g.days && gr.writeOff === g.writeOff)
+          index = index === -1 ? 0 : index
           errors = setIn(
             errors,
             `writeOffGroups.${index}.writeOff`,
@@ -86,6 +90,19 @@ export const WriteOffGroups: React.FC = () => {
         } else {
           highestWriteOff = g.writeOff as number
         }
+
+        if (g.penaltyInterest < highestPenalty) {
+          let index = values.writeOffGroups.findIndex((gr) => gr.days === g.days && gr.writeOff === g.writeOff)
+          index = index === -1 ? 0 : index
+          errors = setIn(
+            errors,
+            `writeOffGroups.${index}.penaltyInterest`,
+            'Penalty interest rate must stay equal or increase as days increase'
+          )
+        } else {
+          highestPenalty = g.penaltyInterest as number
+        }
+
         if (g.days === previousDays) {
           const index = values.writeOffGroups.findIndex((gr) => gr.days === g.days && gr.writeOff === g.writeOff)
           errors = setIn(errors, `writeOffGroups.${index}.days`, 'Days must be unique')
@@ -99,6 +116,7 @@ export const WriteOffGroups: React.FC = () => {
           'Must have one group with 100% write-off'
         )
       }
+
       return errors
     },
     onSubmit: async (values, actions) => {
@@ -130,7 +148,7 @@ export const WriteOffGroups: React.FC = () => {
           key="edit"
           disabled={(savedGroups?.length ?? 0) + form.values.writeOffGroups.length >= (consts?.maxWriteOffGroups ?? 5)}
         >
-          {savedGroups?.length ? 'Add another' : 'Add'}
+          {(savedGroups?.length ?? 0) + form.values.writeOffGroups.length > 0 ? 'Add another' : 'Add'}
         </Button>
       )}
     </FieldArray>
@@ -160,7 +178,7 @@ export const WriteOffGroups: React.FC = () => {
           }
         >
           <Stack gap={3}>
-            <DataTable data={savedGroups ?? []} columns={columns} />
+            <DataTable data={sortedSavedGroups} columns={columns} />
             <WriteOffInput />
             <Box>{form.values.writeOffGroups.length > 0 && addButton}</Box>
           </Stack>

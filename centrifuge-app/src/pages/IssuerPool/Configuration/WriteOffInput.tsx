@@ -12,7 +12,7 @@ export const WriteOffInput: React.FC = () => {
   return (
     <FieldArray name="writeOffGroups">
       {(fldArr) => (
-        <Grid gridTemplateColumns="1fr 1fr 1fr 40px" gap={2} rowGap={3}>
+        <Grid gridTemplateColumns="1fr 1fr 1fr 40px" gap={2} rowGap={2}>
           {values.writeOffGroups.map((s, index) => (
             <React.Fragment key={index}>
               <FieldWithErrorMessage
