@@ -122,9 +122,6 @@ export const PoolDetailReportingTab: React.FC = () => {
               <Button type="button" variant="primary" onClick={() => exportRef.current()}>
                 Export to CSV
               </Button>
-              <Button type="button" variant="secondary" disabled>
-                Export to PDF
-              </Button>
             </Shelf>
           </Stack>
         </Stack>
