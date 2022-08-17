@@ -39,7 +39,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
 
   const form = useFormik<PricingFormValues>({
     initialValues: {
-      loanType: 'BulletLoan',
+      loanType: 'CreditLineWithMaturity',
       riskGroup: '',
       value: '',
       maturityDate: '',
