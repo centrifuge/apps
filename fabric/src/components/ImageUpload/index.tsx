@@ -125,7 +125,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [curFile, setCurFile] = useControlledState<File | null>(null, fileProp, onFileChange)
   const [error, setError] = React.useState<string | null>(null)
-  const [fileDataUri, setFileDataUri] = React.useState('')
+  const [fileUrl, setFileUrl] = React.useState('')
   const [dragOver, setDragOver] = React.useState(false)
   const [visible, setVisible] = React.useState(true)
   const observeRef = React.useRef<ResizeObserver | null>(null)
@@ -139,7 +139,10 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   function handleClear() {
     setError(null)
     setCurFile(null)
-    setFileDataUri('')
+    if (fileUrl) {
+      URL.revokeObjectURL(fileUrl)
+      setFileUrl('')
+    }
   }
 
   async function handleNewFile(newFile: File) {
@@ -190,9 +193,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
   React.useEffect(() => {
     if (!curFile) return
-    getFileDataURI(curFile).then((dataUri) => {
-      setFileDataUri(dataUri)
-    })
+    const url = URL.createObjectURL(curFile)
+    setFileUrl(url)
   }, [curFile])
 
   function handlePreviewMount(node: HTMLDivElement | null) {
@@ -265,7 +267,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             <PreviewPlaceholder
               $active={dragOver}
               $disabled={disabled}
-              $visible={!fileDataUri}
+              $visible={!fileUrl}
               gridArea="unit"
               justifySelf="stretch"
               alignItems="center"
@@ -295,12 +297,12 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                 {requirements && <Text variant="label2">{requirements}</Text>}
               </Stack>
             </PreviewPlaceholder>
-            {fileDataUri && (
+            {fileUrl && (
               <Box
                 gridArea="unit"
                 justifySelf="stretch"
                 borderRadius="input"
-                backgroundImage={`url(${fileDataUri})`}
+                backgroundImage={`url(${fileUrl})`}
                 backgroundRepeat="no-repeat"
                 backgroundPosition="center"
                 backgroundSize="contain"
@@ -356,35 +358,4 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       )}
     </Stack>
   )
-}
-
-const cached = new WeakMap<File, string>()
-
-function getFileDataURI(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    if (cached.has(file)) resolve(cached.get(file)!)
-    const reader = new FileReader()
-
-    reader.addEventListener(
-      'load',
-      () => {
-        if (!reader.result) {
-          reject(`Error reading file '${file.name}'`)
-        } else {
-          const res = reader.result.toString()
-          cached.set(file, res)
-          resolve(res)
-        }
-      },
-      false
-    )
-    reader.addEventListener(
-      'error',
-      () => {
-        reject(`Error reading file '${file.name}'`)
-      },
-      false
-    )
-    reader.readAsDataURL(file)
-  })
 }
