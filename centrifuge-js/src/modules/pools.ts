@@ -45,28 +45,28 @@ export type PoolRoles = {
 
 export type LoanInfoInput =
   | {
-    type: 'BulletLoan'
-    advanceRate: BN
-    probabilityOfDefault: BN
-    lossGivenDefault: BN
-    value: BN
-    discountRate: BN
-    maturityDate: string
-  }
+      type: 'BulletLoan'
+      advanceRate: BN
+      probabilityOfDefault: BN
+      lossGivenDefault: BN
+      value: BN
+      discountRate: BN
+      maturityDate: string
+    }
   | {
-    type: 'CreditLine'
-    advanceRate: BN
-    value: BN
-  }
+      type: 'CreditLine'
+      advanceRate: BN
+      value: BN
+    }
   | {
-    type: 'CreditLineWithMaturity'
-    advanceRate: BN
-    probabilityOfDefault: BN
-    value: BN
-    discountRate: BN
-    maturityDate: string
-    lossGivenDefault: BN
-  }
+      type: 'CreditLineWithMaturity'
+      advanceRate: BN
+      probabilityOfDefault: BN
+      value: BN
+      discountRate: BN
+      maturityDate: string
+      lossGivenDefault: BN
+    }
 
 const LOAN_INPUT_TRANSFORM = {
   value: (v: BN) => v.toString(),
@@ -143,13 +143,13 @@ export type LoanInfo = BulletLoan | CreditLine | CreditLineWithMaturity
 
 type TrancheDetailsData = {
   trancheType:
-  | { residual: null }
-  | {
-    nonResidual: {
-      interestRatePerSec: string
-      minRiskBuffer: string
-    }
-  }
+    | { residual: null }
+    | {
+        nonResidual: {
+          interestRatePerSec: string
+          minRiskBuffer: string
+        }
+      }
   seniority: number
   outstandingInvestOrders: number
   outstandingRedeemOrders: number
@@ -418,7 +418,7 @@ interface WriteOffGroupFormValues {
 }
 export interface PoolMetadataInput {
   // details
-  poolIcon: { uri: string; mime: string }
+  poolIcon: { uri: string; mime: string } | null
   poolName: string
   assetClass: string
   currency: string
@@ -428,10 +428,10 @@ export interface PoolMetadataInput {
 
   // issuer
   issuerName: string
-  issuerLogo?: { uri: string; mime: string }
+  issuerLogo?: { uri: string; mime: string } | null
   issuerDescription: string
 
-  executiveSummary: { uri: string; mime: string }
+  executiveSummary: { uri: string; mime: string } | null
   website: string
   forum: string
   email: string
@@ -448,7 +448,7 @@ export type NonSolicitationNotice = 'all' | 'non-us' | 'none'
 export type PoolMetadata = {
   pool: {
     name: string
-    icon: { uri: string; mime: string }
+    icon: { uri: string; mime: string } | null
     asset: {
       class: string
     }
@@ -456,10 +456,10 @@ export type PoolMetadata = {
       name: string
       description: string
       email: string
-      logo?: { uri: string; mime: string }
+      logo?: { uri: string; mime: string } | null
     }
     links: {
-      executiveSummary: { uri: string; mime: string }
+      executiveSummary: { uri: string; mime: string } | null
       forum: string
       website: string
     }
@@ -1102,10 +1102,10 @@ export function getPoolsModule(inst: Centrifuge) {
         const debtWithMargin =
           loan?.status === 'Active'
             ? loan.outstandingDebt
-              .toDecimal()
-              .add(
-                loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(secondsPerHour))
-              )
+                .toDecimal()
+                .add(
+                  loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(secondsPerHour))
+                )
             : Dec(0)
         const amount = CurrencyBalance.fromFloat(debtWithMargin || 0, pool.currencyDecimals).toString()
         const submittable = api.tx.utility.batchAll([
