@@ -18,9 +18,7 @@ export const IssuerSection: React.VFC<IssuerSectionProps> = ({ metadata, ...prop
     <Stack {...props}>
       <Box>
         {metadata?.pool?.issuer.logo && (
-          <StyledImage
-            src={cent.metadata.parseMetadataUrl(metadata?.pool?.issuer.logo?.uri ?? metadata?.pool?.issuer.logo)}
-          />
+          <StyledImage src={cent.metadata.parseMetadataUrl(metadata?.pool?.issuer.logo?.uri)} />
         )}
       </Box>
       <Shelf alignItems="flex-start" gap="3">
@@ -37,9 +35,7 @@ export const IssuerSection: React.VFC<IssuerSectionProps> = ({ metadata, ...prop
                   Executive summary
                 </AnchorPillButton>
                 <ExecutiveSummaryDialog
-                  href={cent.metadata.parseMetadataUrl(
-                    metadata?.pool?.links.executiveSummary.uri ?? metadata?.pool?.links.executiveSummary
-                  )}
+                  href={cent.metadata.parseMetadataUrl(metadata?.pool?.links.executiveSummary?.uri)}
                   open={isDialogOpen}
                   onClose={() => setIsDialogOpen(false)}
                 />

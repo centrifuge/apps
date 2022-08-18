@@ -25,13 +25,8 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
   return (
     <InteractiveCard
       icon={
-        metadata?.pool?.icon ? (
-          <img
-            src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon.uri ?? metadata?.pool?.icon)}
-            alt=""
-            height="24"
-            width="24"
-          />
+        metadata?.pool?.icon?.uri ? (
+          <img src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)} alt="" height="24" width="24" />
         ) : (
           <Thumbnail type="pool" label="LP" size="small" />
         )
