@@ -68,7 +68,7 @@ const Collection: React.FC = () => {
           <Box
             as="img"
             alt=""
-            src={centrifuge.metadata.parseMetadataUrl(metadata.image?.uri ?? metadata.image)}
+            src={centrifuge.metadata.parseMetadataUrl(metadata.image)}
             display="block"
             width="144px"
             height="144px"

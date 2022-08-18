@@ -75,7 +75,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
     const metadataValues: CollectionMetadataInput = {
       name: nameValue,
       description: descriptionValue,
-      image: { uri: imageMetadataHash.ipfsHash, mime: logo?.type || '' },
+      image: imageMetadataHash.ipfsHash,
     }
 
     doTransaction([collectionId, selectedAccount!.address, metadataValues])

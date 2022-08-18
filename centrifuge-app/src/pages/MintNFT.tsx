@@ -108,7 +108,7 @@ const MintNFT: React.FC = () => {
     const metadataValues: NFTMetadataInput = {
       name: nameValue,
       description: descriptionValue,
-      image: { uri: imageMetadataHash.uri, mime: file.type },
+      image: imageMetadataHash.uri,
     }
     doTransaction([collectionId, nftId, address!, metadataValues, nftAmount])
   })

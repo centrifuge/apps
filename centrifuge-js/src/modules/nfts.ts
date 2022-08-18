@@ -32,13 +32,13 @@ export type Collection = Class & {
 export type CollectionMetadataInput = {
   name: string
   description: string
-  image?: { uri: string; mime: string }
+  image?: string
 }
 
 export type NFTMetadataInput = {
   name: string
   description: string
-  image: { uri: string; mime: string }
+  image: string
 }
 
 const MAX_ATTEMPTS = 10

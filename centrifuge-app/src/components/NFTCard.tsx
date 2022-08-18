@@ -50,7 +50,7 @@ export const NFTCard: React.FC<Props> = ({ nft }) => {
             <Box
               as="img"
               alt={metadata?.description ?? ''}
-              src={centrifuge.metadata.parseMetadataUrl(metadata?.image?.uri ?? metadata?.image)}
+              src={centrifuge.metadata.parseMetadataUrl(metadata?.image)}
               display="block"
               width="100%"
               height="100%"

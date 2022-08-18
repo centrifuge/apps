@@ -43,9 +43,7 @@ const NFT: React.FC = () => {
   const [unlistOpen, setUnlistOpen] = React.useState(false)
   const centrifuge = useCentrifuge()
 
-  const imageUrl = nftMetadata?.image
-    ? centrifuge.metadata.parseMetadataUrl(nftMetadata.image?.uri || nftMetadata.image)
-    : ''
+  const imageUrl = nftMetadata?.image ? centrifuge.metadata.parseMetadataUrl(nftMetadata.image) : ''
 
   const isLoanCollection = collection?.admin ? centrifuge.utils.isLoanPalletAccount(collection.admin) : true
   const canCreateLoan =
