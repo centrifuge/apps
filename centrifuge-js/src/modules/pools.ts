@@ -446,6 +446,7 @@ export type PoolStatus = 'open' | 'upcoming' | 'hidden'
 export type PoolCountry = 'us' | 'non-us'
 export type NonSolicitationNotice = 'all' | 'non-us' | 'none'
 export type PoolMetadata = {
+  version?: number
   pool: {
     name: string
     icon: { uri: string; mime: string } | null
@@ -627,6 +628,7 @@ export function getPoolsModule(inst: Centrifuge) {
     })
 
     const formattedMetadata = {
+      version: 1,
       pool: {
         name: metadata.poolName,
         icon: metadata.poolIcon,
@@ -732,8 +734,14 @@ export function getPoolsModule(inst: Centrifuge) {
   function setMetadata(args: [poolId: string, metadata: Record<string, unknown>], options?: TransactionOptions) {
     const [poolId, metadata] = args
     const $api = inst.getApi()
-    const $pinnedMetadata = inst.metadata.pinJson(metadata)
 
+    if (metadata?.version) {
+      metadata.version = (metadata.version as number) + 1
+    } else {
+      metadata.version = 1
+    }
+
+    const $pinnedMetadata = inst.metadata.pinJson(metadata)
     return combineLatest([$api, $pinnedMetadata]).pipe(
       switchMap(([api, pinnedMetadata]) => {
         const submittable = api.tx.pools.setMetadata(poolId, pinnedMetadata.ipfsHash)
