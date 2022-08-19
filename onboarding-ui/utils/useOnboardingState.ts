@@ -32,7 +32,7 @@ export function useOnboardingState(pool?: Pool | UpcomingPool, tranche?: Tranche
 const placeholderPoolId =
   process.env.NEXT_PUBLIC_ENV === 'PROD'
     ? '0x560Ac248ce28972083B718778EEb0dbC2DE55740'
-    : '0x792164b3e10a3CE1efafF7728961aD506c433c18'
+    : '0x1f4155D64D75555B9B36E4514C0FCC11313d5A54'
 
 type AdditionalData = {
   kycStatus: AddressStatus['kyc']['status'] | 'requires-signin'
