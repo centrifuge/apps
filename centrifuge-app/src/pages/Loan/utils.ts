@@ -1,5 +1,5 @@
 import { Loan as LoanType, Rate } from '@centrifuge/centrifuge-js'
-import { PoolMetadata } from '../../types'
+import { PoolMetadata } from '@centrifuge/centrifuge-js/dist/modules/pools'
 
 export const LOAN_FIELDS = {
   BulletLoan: ['advanceRate', 'probabilityOfDefault', 'lossGivenDefault', 'value', 'discountRate', 'maturityDate'],

@@ -416,10 +416,9 @@ interface WriteOffGroupFormValues {
   days: number | ''
   writeOff: number | ''
 }
-
 export interface PoolMetadataInput {
   // details
-  poolIcon: string | File | null
+  poolIcon: { uri: string; mime: string } | null
   poolName: string
   assetClass: string
   currency: string
@@ -429,10 +428,10 @@ export interface PoolMetadataInput {
 
   // issuer
   issuerName: string
-  issuerLogo: string | File | null
+  issuerLogo?: { uri: string; mime: string } | null
   issuerDescription: string
 
-  executiveSummary: string | File | null
+  executiveSummary: { uri: string; mime: string } | null
   website: string
   forum: string
   email: string
@@ -447,9 +446,10 @@ export type PoolStatus = 'open' | 'upcoming' | 'hidden'
 export type PoolCountry = 'us' | 'non-us'
 export type NonSolicitationNotice = 'all' | 'non-us' | 'none'
 export type PoolMetadata = {
+  version?: number
   pool: {
     name: string
-    icon: string
+    icon: { uri: string; mime: string } | null
     asset: {
       class: string
     }
@@ -457,10 +457,10 @@ export type PoolMetadata = {
       name: string
       description: string
       email: string
-      logo: string
+      logo?: { uri: string; mime: string } | null
     }
     links: {
-      executiveSummary: string
+      executiveSummary: { uri: string; mime: string } | null
       forum: string
       website: string
     }
@@ -481,6 +481,10 @@ export type PoolMetadata = {
     probabilityOfDefault: string
     lossGivenDefault: string
     discountRate: string
+  }[]
+  schemas?: {
+    id: string
+    createdAt: string
   }[]
   // Not yet implemented
   // onboarding: {
@@ -624,6 +628,7 @@ export function getPoolsModule(inst: Centrifuge) {
     })
 
     const formattedMetadata = {
+      version: 1,
       pool: {
         name: metadata.poolName,
         icon: metadata.poolIcon,
@@ -729,8 +734,14 @@ export function getPoolsModule(inst: Centrifuge) {
   function setMetadata(args: [poolId: string, metadata: Record<string, unknown>], options?: TransactionOptions) {
     const [poolId, metadata] = args
     const $api = inst.getApi()
-    const $pinnedMetadata = inst.metadata.pinJson(metadata)
 
+    if (metadata?.version) {
+      metadata.version = (metadata.version as number) + 1
+    } else {
+      metadata.version = 1
+    }
+
+    const $pinnedMetadata = inst.metadata.pinJson(metadata)
     return combineLatest([$api, $pinnedMetadata]).pipe(
       switchMap(([api, pinnedMetadata]) => {
         const submittable = api.tx.pools.setMetadata(poolId, pinnedMetadata.ipfsHash)
