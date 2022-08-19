@@ -3,8 +3,7 @@ on:
   push:
     tags:
       - centrifuge-js/v*
-    branches:
-      - cent-js/fix-deployment
+
 defaults:
   run:
     working-directory: centrifuge-js
@@ -21,7 +20,8 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
+          registry-url: 'https://registry.npmjs.org'
 
       # Cache
       - name: Get yarn cache directory path
