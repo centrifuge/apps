@@ -3,7 +3,8 @@ on:
   push:
     tags:
       - centrifuge-js/v*
-
+    branches:
+      - cent-js/fix-deployment
 defaults:
   run:
     working-directory: centrifuge-js
@@ -20,7 +21,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: '14'
 
       # Cache
       - name: Get yarn cache directory path
@@ -50,6 +51,6 @@ jobs:
         run: yarn build
 
       - name: Publish to npm
-        run: npm publish
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
