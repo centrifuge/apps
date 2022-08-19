@@ -243,6 +243,7 @@ export type Pool = {
     isInChallengePeriod: boolean
     isInExecutionPeriod: boolean
     challengePeriodEnd: number
+    status: 'submissionPeriod' | 'challengePeriod' | 'executionPeriod' | 'ongoing'
   }
   nav: {
     latest: CurrencyBalance
@@ -1333,6 +1334,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 epoch: {
                   ...pool.epoch,
                   lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
+                  status: getEpochStatus(epochExecution, blockNumber),
                   isInSubmissionPeriod: !!epochExecution && !epochExecution?.challengePeriodEnd,
                   isInChallengePeriod: epochExecution?.challengePeriodEnd >= blockNumber,
                   isInExecutionPeriod: epochExecution?.challengePeriodEnd < blockNumber,
@@ -1936,4 +1938,19 @@ function toHex(data: Uint8Array) {
     out.push(hex[data[i] & 0xf])
   }
   return `0x${out.join('')}`
+}
+
+const getEpochStatus = (
+  epochExecution: Pick<EpochExecutionData, 'challengePeriodEnd' | 'epoch'>,
+  blockNumber: number
+) => {
+  if (!!epochExecution && !epochExecution?.challengePeriodEnd) {
+    return 'submissionPeriod'
+  } else if (epochExecution?.challengePeriodEnd >= blockNumber) {
+    return 'challengePeriod'
+  } else if (epochExecution?.challengePeriodEnd < blockNumber) {
+    return 'executionPeriod'
+  } else {
+    return 'ongoing'
+  }
 }
