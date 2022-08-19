@@ -23,12 +23,12 @@ import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from
 import * as React from 'react'
 import styled from 'styled-components'
 import { config } from '../config'
-import { getEpochTimeRemaining } from '../utils/date'
 import { Dec } from '../utils/Decimal'
 import { formatBalance, getCurrencySymbol, roundDown } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { getBalanceDec, useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
+import { useEpochTimeRemaining } from '../utils/useEpochTimeRemaining'
 import { useFocusInvalidInput } from '../utils/useFocusInvalidInput'
 import { usePermissions } from '../utils/usePermissions'
 import { usePendingCollect, usePool, usePoolMetadata } from '../utils/usePools'
@@ -654,7 +654,7 @@ const PendingOrder: React.FC<{
   isCancelling: boolean
   onChangeOrder: () => void
 }> = ({ type, amount, pool, onCancelOrder, isCancelling, onChangeOrder }) => {
-  const { hours: hoursRemaining, minutes: minutesRemaining } = getEpochTimeRemaining(pool!)
+  const { message: epochTimeRemaining } = useEpochTimeRemaining(pool.id!)
   const calculatingOrders =
     pool?.epoch.isInSubmissionPeriod || pool?.epoch.isInChallengePeriod || pool?.epoch.isInExecutionPeriod
   return (
@@ -676,7 +676,7 @@ const PendingOrder: React.FC<{
           </Shelf>
           <Text variant="body3">
             Locked {type === 'invest' ? 'investments' : 'redemptions'} are executed at the end of the epoch (
-            {hoursRemaining} hrs and {minutesRemaining} min remaining).{' '}
+            {epochTimeRemaining || `0 min remaining`}).{' '}
             <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
           </Text>
         </Stack>

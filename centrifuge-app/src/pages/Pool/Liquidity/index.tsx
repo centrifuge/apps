@@ -9,9 +9,9 @@ import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
-import { getEpochTimeRemaining } from '../../../utils/date'
 import { formatBalance } from '../../../utils/formatting'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
+import { useEpochTimeRemaining } from '../../../utils/useEpochTimeRemaining'
 import { useLiquidityAdmin } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
@@ -42,7 +42,7 @@ export const PoolDetailLiquidityTab: React.FC = () => {
 export const PoolDetailLiquidity: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  const { hours, minutes } = getEpochTimeRemaining(pool!)
+  const { message: epochTimeRemaining } = useEpochTimeRemaining(poolId)
 
   const pageSummaryData = [
     {
@@ -73,7 +73,7 @@ export const PoolDetailLiquidity: React.FC = () => {
         console.log('Solution successfully submitted')
       },
       onError: (error) => {
-        console.log('Solution unsuccesful', error)
+        console.log('Solution unsuccesful', error?.toJSON())
       },
     }
   )
@@ -86,7 +86,7 @@ export const PoolDetailLiquidity: React.FC = () => {
         console.log('Solution successfully submitted')
       },
       onError: (error) => {
-        console.log('Solution unsuccesful', error)
+        console.log('Execution unsuccesful', error?.toJSON())
       },
     }
   )
@@ -129,8 +129,8 @@ export const PoolDetailLiquidity: React.FC = () => {
         }
         headerRight={
           <Shelf gap="1">
-            {!isInSubmissionPeriod && !isInChallengePeriod && !isInExecutionPeriod && (
-              <Tooltips type="epochTimeRemaining" label={`${hours} hrs and ${minutes} min remaining`} />
+            {epochTimeRemaining && !isInSubmissionPeriod && !isInChallengePeriod && !isInExecutionPeriod && (
+              <Tooltips type="epochTimeRemaining" label={epochTimeRemaining} />
             )}
             {(isInExecutionPeriod || isInChallengePeriod) && !isInSubmissionPeriod ? (
               <Button
@@ -153,7 +153,12 @@ export const PoolDetailLiquidity: React.FC = () => {
                 Submit solution
               </Button>
             ) : (
-              <Button small variant="secondary" onClick={closeEpoch} disabled={!pool || loadingClose}>
+              <Button
+                small
+                variant="secondary"
+                onClick={closeEpoch}
+                disabled={!pool || loadingClose || !!epochTimeRemaining}
+              >
                 Close
               </Button>
             )}
