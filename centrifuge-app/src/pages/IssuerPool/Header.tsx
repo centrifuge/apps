@@ -47,7 +47,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
               as="img"
               width="iconLarge"
               height="iconLarge"
-              src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon)}
+              src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)}
             />
           ) : (
             <Shelf

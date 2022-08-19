@@ -1,8 +1,8 @@
+import { PoolMetadata } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
 import styled from 'styled-components'
 import { PaddingProps } from 'styled-system'
-import { PoolMetadata } from '../types'
 import { useCentrifuge } from './CentrifugeProvider'
 import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'
 import { AnchorPillButton } from './PillButton'
@@ -14,12 +14,11 @@ type IssuerSectionProps = {
 export const IssuerSection: React.VFC<IssuerSectionProps> = ({ metadata, ...props }) => {
   const cent = useCentrifuge()
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
-
   return (
     <Stack {...props}>
       <Box>
         {metadata?.pool?.issuer.logo && (
-          <StyledImage src={cent.metadata.parseMetadataUrl(metadata?.pool?.issuer.logo)} />
+          <StyledImage src={cent.metadata.parseMetadataUrl(metadata?.pool?.issuer.logo?.uri)} />
         )}
       </Box>
       <Shelf alignItems="flex-start" gap="3">
@@ -36,7 +35,7 @@ export const IssuerSection: React.VFC<IssuerSectionProps> = ({ metadata, ...prop
                   Executive summary
                 </AnchorPillButton>
                 <ExecutiveSummaryDialog
-                  href={cent.metadata.parseMetadataUrl(metadata?.pool?.links.executiveSummary)}
+                  href={cent.metadata.parseMetadataUrl(metadata?.pool?.links.executiveSummary?.uri)}
                   open={isDialogOpen}
                   onClose={() => setIsDialogOpen(false)}
                 />

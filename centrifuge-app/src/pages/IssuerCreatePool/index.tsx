@@ -121,19 +121,9 @@ const initialValues: PoolMetadataInput = {
   writeOffGroups: [createEmptyWriteOffGroup()],
 }
 
-const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
-  const [dataUri, setDataUri] = React.useState('')
-
-  React.useEffect(() => {
-    if (icon && icon.type === 'image/svg+xml') {
-      getFileDataURI(icon).then((d) => setDataUri(d))
-    } else {
-      setDataUri('')
-    }
-  }, [icon])
-
-  return dataUri ? (
-    <img src={dataUri} width={40} height={40} alt="" />
+const PoolIcon: React.FC<{ iconURI?: string; children: string }> = ({ children, iconURI }) => {
+  return iconURI ? (
+    <img src={iconURI} width={40} height={40} alt="" />
   ) : (
     <Thumbnail label={children} type="pool" size="large" />
   )
@@ -262,22 +252,22 @@ const CreatePoolForm: React.VFC = () => {
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
       const collectionId = await centrifuge.nfts.getAvailableCollectionId()
-
-      const [poolIconUri, issuerLogoUri, executiveSummaryUri] = await Promise.all([
-        getFileDataURI(metadataValues.poolIcon as any),
-        metadataValues?.issuerLogo ? getFileDataURI(metadataValues.issuerLogo as any) : null,
-        getFileDataURI(metadataValues.executiveSummary as any),
-      ])
-
+      if (!metadataValues.poolIcon || !metadataValues.executiveSummary) {
+        return
+      }
       const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all([
-        lastValueFrom(centrifuge.metadata.pinFile(poolIconUri)),
-        issuerLogoUri ? lastValueFrom(centrifuge.metadata.pinFile(issuerLogoUri)) : null,
-        lastValueFrom(centrifuge.metadata.pinFile(executiveSummaryUri)),
+        lastValueFrom(centrifuge.metadata.pinFile(metadataValues.poolIcon.uri)),
+        metadataValues.issuerLogo?.uri
+          ? lastValueFrom(centrifuge.metadata.pinFile(metadataValues.issuerLogo.uri))
+          : null,
+        lastValueFrom(centrifuge.metadata.pinFile(metadataValues.executiveSummary.uri)),
       ])
 
-      metadataValues.issuerLogo = pinnedPoolIcon.uri
-      metadataValues.executiveSummary = pinnedExecSummary.uri
-      metadataValues.poolIcon = pinnedIssuerLogo?.uri || ''
+      metadataValues.issuerLogo = pinnedIssuerLogo?.uri
+        ? { uri: pinnedIssuerLogo.uri || '', mime: metadataValues?.issuerLogo?.mime ?? '' }
+        : null
+      metadataValues.executiveSummary = { uri: pinnedExecSummary.uri, mime: metadataValues.executiveSummary.mime }
+      metadataValues.poolIcon = { uri: pinnedPoolIcon.uri, mime: metadataValues.poolIcon.mime }
 
       // tranches must be reversed (most junior is the first in the UI but the last in the API)
       const noJuniorTranches = metadataValues.tranches.slice(1)
@@ -360,7 +350,7 @@ const CreatePoolForm: React.VFC = () => {
       <FormikProvider value={form}>
         <Form ref={formRef}>
           <PageHeader
-            icon={<PoolIcon icon={form.values.poolIcon as File}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
+            icon={<PoolIcon iconURI={form.values.poolIcon?.uri}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
             title={form.values.poolName || 'New Pool'}
             subtitle={
               <TextWithPlaceholder isLoading={waitingForStoredIssuer} width={15}>
@@ -398,11 +388,15 @@ const CreatePoolForm: React.VFC = () => {
                 <Field name="poolIcon" validate={validate.poolIcon}>
                   {({ field, meta, form }: FieldProps) => (
                     <FileUpload
-                      file={field.value}
-                      onFileChange={(file) => {
-                        form.setFieldTouched('poolIcon', true, false)
-                        form.setFieldValue('poolIcon', file)
+                      file={field.value?.file || null}
+                      onFileChange={async (file) => {
+                        if (file) {
+                          const uri = await getFileDataURI(file)
+                          form.setFieldTouched('poolIcon', true, false)
+                          form.setFieldValue('poolIcon', { uri, mime: file.type, file })
+                        }
                       }}
+                      onClear={() => form.setFieldValue('poolIcon', null)}
                       label="Pool icon: SVG in square size*"
                       placeholder="Choose pool icon"
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
@@ -495,11 +489,15 @@ const CreatePoolForm: React.VFC = () => {
                 <Field name="issuerLogo" validate={validate.issuerLogo}>
                   {({ field, meta, form }: FieldProps) => (
                     <FileUpload
-                      file={field.value}
-                      onFileChange={(file) => {
-                        form.setFieldTouched('issuerLogo', true, false)
-                        form.setFieldValue('issuerLogo', file)
+                      file={field.value?.file || null}
+                      onFileChange={async (file) => {
+                        if (file) {
+                          const uri = await getFileDataURI(file)
+                          form.setFieldTouched('issuerLogo', true, false)
+                          form.setFieldValue('issuerLogo', { uri, mime: file.type, file })
+                        }
                       }}
+                      onClear={() => form.setFieldValue('issuerLogo', null)}
                       label="Issuer logo (JPG/PNG/SVG, 480x480 px)"
                       placeholder="Choose issuer logo"
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
@@ -532,11 +530,15 @@ const CreatePoolForm: React.VFC = () => {
                 <Field name="executiveSummary" validate={validate.executiveSummary}>
                   {({ field, meta, form }: FieldProps) => (
                     <FileUpload
-                      file={field.value}
-                      onFileChange={(file) => {
-                        form.setFieldTouched('executiveSummary', true, false)
-                        form.setFieldValue('executiveSummary', file)
+                      file={field.value?.file || null}
+                      onFileChange={async (file) => {
+                        if (file) {
+                          const uri = await getFileDataURI(file)
+                          form.setFieldTouched('executiveSummary', true, false)
+                          form.setFieldValue('executiveSummary', { uri, mime: file.type, file })
+                        }
                       }}
+                      onClear={() => form.setFieldValue('executiveSummary', null)}
                       accept="application/pdf"
                       label="Executive summary PDF*"
                       placeholder="Choose file"

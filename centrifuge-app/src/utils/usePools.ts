@@ -1,6 +1,6 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
+import { PoolMetadata } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { combineLatest, map, Observable } from 'rxjs'
-import { PoolMetadata } from '../types'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 

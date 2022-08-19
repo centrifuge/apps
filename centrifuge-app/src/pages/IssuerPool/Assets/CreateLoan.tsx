@@ -1,3 +1,4 @@
+import { PoolMetadata } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import {
   Button,
   CurrencyInput,
@@ -18,7 +19,7 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { PoolMetadata, Schema } from '../../../types'
+import { Schema } from '../../../types'
 import { truncateText } from '../../../utils/formatting'
 import { useAddress } from '../../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
