@@ -1582,15 +1582,17 @@ export function getPoolsModule(inst: Centrifuge) {
         const activeLoanData = activeLoanValues.toJSON() as ActiveLoanData[]
         const interestAccrualKeys = activeLoanData.map((activeLoan) => hexToBN(activeLoan.interestRatePerSec))
         const $interestAccrual = api.query.interestAccrual.rate.multi(interestAccrualKeys).pipe(take(1))
+        const $interestLastUpdated = api.query.interestAccrual.lastUpdated()
         return combineLatest([
           api.query.loans.loan.entries(poolId),
           of(activeLoanValues),
           api.query.loans.closedLoans.entries(poolId),
           $interestAccrual,
+          $interestLastUpdated,
           of(poolValue),
         ])
       }),
-      map(([loanValues, activeLoanValues, closedLoansValues, interestAccrual, poolValue]) => {
+      map(([loanValues, activeLoanValues, closedLoansValues, interestAccrual, interestLastUpdated, poolValue]) => {
         const pool = poolValue.toJSON() as any as PoolDetailsData
         const currencyDecimals = getCurrencyDecimals(pool.currency)
         const loans = (loanValues as any[]).map(([key, value]) => {
@@ -1615,7 +1617,12 @@ export function getPoolsModule(inst: Centrifuge) {
               id: String(activeLoan.loanId),
               poolId,
               interestRatePerSec: new Rate(hexToBN(activeLoan.interestRatePerSec)),
-              outstandingDebt: getOutstandingDebt(activeLoan, currencyDecimals, interestData),
+              outstandingDebt: getOutstandingDebt(
+                activeLoan,
+                currencyDecimals,
+                interestLastUpdated.toJSON() as number,
+                interestData?.accumulatedRate
+              ),
               normalizedDebt: new CurrencyBalance(hexToBN(activeLoan.normalizedDebt), currencyDecimals),
               totalBorrowed: new CurrencyBalance(hexToBN(activeLoan.totalBorrowed), currencyDecimals),
               totalRepaid: new CurrencyBalance(hexToBN(activeLoan.totalRepaid), currencyDecimals),
