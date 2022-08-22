@@ -1,6 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Button, Shelf } from '@centrifuge/fabric'
+import { Button, IconInfo, Shelf, Text } from '@centrifuge/fabric'
 import { BN } from '@polkadot/util'
+import React from 'react'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useEpochTimeRemaining } from '../utils/useEpochTimeRemaining'
 import { EpochList } from './EpochList'
@@ -49,16 +50,18 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
     return prev.add(curr.outstandingRedeemOrders)
   }, new BN(0))
 
+  const noOrdersLocked = !epochTimeRemaining && outstandingInvestOrders.add(outstandingRedeemOrders).lten(0)
+
   return (
     <PageSection
       title={`Epoch ${pool.epoch.current}`}
-      titleAddition={epochTimeRemaining ? 'Ongoing' : 'Minimum duration ended'}
+      titleAddition={<Text variant="body2">{epochTimeRemaining ? 'Ongoing' : 'Minimum duration ended'}</Text>}
       headerRight={
         <Shelf gap="1">
-          {outstandingInvestOrders.add(outstandingRedeemOrders).gten(0) && 'No orders locked'}
-          {false && 'Orders executable'}
-          {false && 'Orders partially executable'}
-          {false && 'No orders executable'}
+          {noOrdersLocked && <Text variant="body2">No orders locked</Text>}
+          {false && <Text variant="body2">Orders executable</Text>}
+          {false && <Text variant="body2">Orders partially executable</Text>}
+          {false && <Text variant="body2">No orders executable</Text>}
           {epochTimeRemaining && <Tooltips type="epochTimeRemaining" label={epochTimeRemaining} />}
           <Button
             small
@@ -66,24 +69,32 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
             onClick={closeEpoch}
             disabled={!pool || loadingClose || !!epochTimeRemaining}
             loading={loadingClose}
-            loadingMessage="Closing epoch"
+            loadingMessage={loadingClose ? 'Closing epoch...' : ''}
           >
             Close
           </Button>
         </Shelf>
       }
     >
+      {noOrdersLocked && (
+        <Shelf mb={2} gap={1}>
+          <IconInfo size={16} />
+          <Text variant="body3">The epoch is continuing until orders have been locked and can be executed.</Text>
+        </Shelf>
+      )}
       <EpochList pool={pool} />
     </PageSection>
   )
 }
 
 const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
+  const [isFeasible, setIsFeasible] = React.useState(true)
   const { execute: submitSolutionTx, isLoading: loadingSolution } = useCentrifugeTransaction(
     'Submit solution',
     (cent) => cent.pools.submitSolution,
     {
       onSuccess: () => {
+        setIsFeasible(false)
         console.log('Solution successfully submitted')
       },
       onError: (error) => {
@@ -100,20 +111,28 @@ const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
   return (
     <PageSection
       title={`Epoch ${pool.epoch.current}`}
-      titleAddition={'In submission period'}
+      titleAddition={<Text variant="body2">In submission period</Text>}
       headerRight={
         <Button
           small
-          variant="secondary"
+          variant="primary"
           onClick={submitSolution}
-          disabled={!pool || loadingSolution}
+          disabled={loadingSolution || !isFeasible}
           loading={loadingSolution}
-          loadingMessage="Submitting solution"
+          loadingMessage={loadingSolution ? 'Submitting solution...' : ''}
         >
           Submit solution
         </Button>
       }
     >
+      {!isFeasible && (
+        <Shelf mb={2} gap={1}>
+          <IconInfo size={16} />
+          <Text variant="body3">
+            The solution provided by the system is not feasible. Please submit a solution manually.
+          </Text>
+        </Shelf>
+      )}
       <EpochList pool={pool} />
     </PageSection>
   )
@@ -142,7 +161,7 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
   return (
     <PageSection
       title={`Epoch ${pool.epoch.current}`}
-      titleAddition={'Closing'}
+      titleAddition={<Text variant="body2">Closing</Text>}
       headerRight={
         <Button
           small
@@ -150,12 +169,18 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
           onClick={executeEpoch}
           disabled={!pool || isInChallengePeriod}
           loading={isInChallengePeriod || loadingExecution}
-          loadingMessage={isInChallengePeriod ? `23 blocks remaining` : 'Closing epoch'}
+          loadingMessage={isInChallengePeriod ? `23 min until execution...` : 'Closing epoch...'}
         >
           Execute epoch
         </Button>
       }
     >
+      {isInChallengePeriod && (
+        <Shelf mb={2} gap={1}>
+          <IconInfo size={16} />
+          <Text variant="body3">There is a ~30 min challenge period before the orders can be executed.</Text>
+        </Shelf>
+      )}
       <EpochList pool={pool} />
     </PageSection>
   )

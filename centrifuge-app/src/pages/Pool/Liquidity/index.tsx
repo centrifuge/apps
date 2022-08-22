@@ -1,7 +1,6 @@
 import { Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { EpochList } from '../../../components/EpochList'
 import { LiquiditySection } from '../../../components/LiquiditySection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { MaxReserveForm } from '../../../components/MaxReserveForm'
@@ -63,9 +62,7 @@ export const PoolDetailLiquidity: React.FC = () => {
           <ReserveCashDragChart />
         </React.Suspense>
       </PageSection>
-      <LiquiditySection pool={pool}>
-        <EpochList pool={pool} />
-      </LiquiditySection>
+      <LiquiditySection pool={pool} />
     </>
   )
 }

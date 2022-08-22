@@ -49,13 +49,13 @@ export const calculateOptimalSolution = async (
   //   .join()
 
   const bounds = orders
-    .map(
-      (order, index) => `
-          0 <= tranche-${index}-invest  <= ${order.invest}
-          0 <= tranche-${index}-redeem  <= ${order.redeem}
-        `
-    )
+    .map((order, index) => [
+      `0 <= tranche-${index}-invest  <= ${order.invest}\n`,
+      `0 <= tranche-${index}-redeem  <= ${order.redeem}\n`,
+    ])
+    .flat()
     .join()
+    .replaceAll(',', '')
 
   const coefs = Array(state.tranches.length).fill([1, -1]).flat()
 

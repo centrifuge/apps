@@ -281,7 +281,7 @@ type WriteOffStatus = null | WrittenOff | WrittenOfByAdmin
 
 type InterestAccrual = {
   accumulatedRate: string
-  lastUpdated: number
+  referenceCount: number
 }
 
 // type from chain
@@ -866,7 +866,7 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap(([api, optimalSolution]) => {
         if (!optimalSolution.isFeasible) {
           console.warn('Calculated solution is not feasible')
-          return of(null)
+          return of(new Error('Solution not feasible'))
         }
         const submittable = api.tx.pools.submitSolution(poolId, optimalSolution.tranches)
         return inst.wrapSignAndSend(api, submittable, options)
@@ -1591,15 +1591,17 @@ export function getPoolsModule(inst: Centrifuge) {
         const activeLoanData = activeLoanValues.toJSON() as ActiveLoanData[]
         const interestAccrualKeys = activeLoanData.map((activeLoan) => hexToBN(activeLoan.interestRatePerSec))
         const $interestAccrual = api.query.interestAccrual.rate.multi(interestAccrualKeys).pipe(take(1))
+        const $interestLastUpdated = api.query.interestAccrual.lastUpdated()
         return combineLatest([
           api.query.loans.loan.entries(poolId),
           of(activeLoanValues),
           api.query.loans.closedLoans.entries(poolId),
           $interestAccrual,
+          $interestLastUpdated,
           of(poolValue),
         ])
       }),
-      map(([loanValues, activeLoanValues, closedLoansValues, interestAccrual, poolValue]) => {
+      map(([loanValues, activeLoanValues, closedLoansValues, interestAccrual, interestLastUpdated, poolValue]) => {
         const pool = poolValue.toJSON() as any as PoolDetailsData
         const currencyDecimals = getCurrencyDecimals(pool.currency)
         const loans = (loanValues as any[]).map(([key, value]) => {
@@ -1624,7 +1626,12 @@ export function getPoolsModule(inst: Centrifuge) {
               id: String(activeLoan.loanId),
               poolId,
               interestRatePerSec: new Rate(hexToBN(activeLoan.interestRatePerSec)),
-              outstandingDebt: getOutstandingDebt(activeLoan, currencyDecimals, interestData),
+              outstandingDebt: getOutstandingDebt(
+                activeLoan,
+                currencyDecimals,
+                interestLastUpdated.toJSON() as number,
+                interestData?.accumulatedRate
+              ),
               normalizedDebt: new CurrencyBalance(hexToBN(activeLoan.normalizedDebt), currencyDecimals),
               totalBorrowed: new CurrencyBalance(hexToBN(activeLoan.totalBorrowed), currencyDecimals),
               totalRepaid: new CurrencyBalance(hexToBN(activeLoan.totalRepaid), currencyDecimals),
@@ -1913,12 +1920,17 @@ function getLoanInfo(loanType: LoanInfoData, currencyDecimals: number): LoanInfo
   throw new Error(`Unrecognized loan info: ${JSON.stringify(loanType)}`)
 }
 
-function getOutstandingDebt(loan: ActiveLoanData, currencyDecimals: number, interestAccrual?: InterestAccrual) {
-  if (!interestAccrual) return new CurrencyBalance(0, currencyDecimals)
-  const accRate = new Rate(hexToBN(interestAccrual.accumulatedRate)).toDecimal()
+function getOutstandingDebt(
+  loan: ActiveLoanData,
+  currencyDecimals: number,
+  lastUpdated: number,
+  accumulatedRate?: InterestAccrual['accumulatedRate']
+) {
+  if (!accumulatedRate) return new CurrencyBalance(0, currencyDecimals)
+  const accRate = new Rate(hexToBN(accumulatedRate)).toDecimal()
   const rate = new Rate(hexToBN(loan.interestRatePerSec)).toDecimal()
   const normalizedDebt = new CurrencyBalance(hexToBN(loan.normalizedDebt), currencyDecimals).toDecimal()
-  const secondsSinceUpdated = Date.now() / 1000 - interestAccrual.lastUpdated
+  const secondsSinceUpdated = Date.now() / 1000 - lastUpdated
 
   const debtFromAccRate = normalizedDebt.mul(accRate)
   const debtSinceUpdated = normalizedDebt.mul(rate.minus(1).mul(secondsSinceUpdated))
