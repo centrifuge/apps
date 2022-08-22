@@ -10,7 +10,7 @@ import {
   Text,
   WalletButton,
 } from '@centrifuge/fabric'
-import { Wallet } from '@talisman-connect/wallets'
+import { Wallet } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
 import { useWeb3, wallets } from './Web3Provider'
 

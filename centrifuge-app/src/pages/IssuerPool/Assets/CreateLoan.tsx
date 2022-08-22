@@ -1,4 +1,4 @@
-import { PoolMetadata } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import {
   Button,
   CurrencyInput,

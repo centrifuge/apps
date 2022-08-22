@@ -7,8 +7,13 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { useIsPoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
 import { Admins } from './Admins'
+import { Details } from './Details'
+import { Epoch } from './Epoch'
+import { Issuer } from './Issuer'
 import { PoolConfig } from './PoolConfig'
 import { Schemas } from './Schemas'
+import { Tranches } from './Tranches'
+import { WriteOffGroups } from './WriteOffGroups'
 
 export const IssuerPoolConfigurationPage: React.FC = () => {
   return (
@@ -30,6 +35,11 @@ const IssuerPoolConfiguration: React.FC = () => {
     <Stack>
       {isPoolAdmin && (
         <>
+          <Details />
+          <Issuer />
+          <Epoch />
+          <Tranches />
+          <WriteOffGroups />
           <Admins />
           <Schemas />
           {editPoolConfig && <PoolConfig poolId={poolId} />}

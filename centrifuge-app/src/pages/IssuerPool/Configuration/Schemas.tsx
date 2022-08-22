@@ -39,7 +39,7 @@ export const Schemas: React.FC = () => {
       title="Asset templates"
       headerRight={
         <RouterLinkButton to={`/issuer/${poolId}/configuration/create-schema`} variant="secondary" small>
-          {tableData.length ? 'Add another' : 'Add schema'}
+          {tableData.length ? 'Add another' : 'Add'}
         </RouterLinkButton>
       }
     >
@@ -49,7 +49,7 @@ export const Schemas: React.FC = () => {
         columns={[
           {
             align: 'left',
-            header: 'Schema',
+            header: 'Template name',
             cell: (row: Row) => (
               <Text variant="body2" fontWeight="600" color="textInteractive">
                 {row.name}

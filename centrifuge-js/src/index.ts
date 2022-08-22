@@ -7,10 +7,13 @@ export {
   LoanInfoInput,
   LoanStatus,
   Pool,
+  PoolMetadata,
+  PoolMetadataInput,
   PoolRoles,
   Token,
   Tranche,
   TrancheWithTokenPrice,
+  WriteOffGroup,
 } from './modules/pools'
 export * from './types'
 export * from './utils'
