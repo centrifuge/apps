@@ -3,6 +3,7 @@ import { Button, Grid, NumberInput } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
+import { ButtonGroup } from '../../../components/ButtonGroup'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
@@ -37,8 +38,6 @@ export const Epoch: React.FC = () => {
   const form = useFormik({
     initialValues,
     onSubmit: async (values, actions) => {
-      const hasChanges = Object.entries(values).some(([k, v]) => (initialValues as any)[k] !== v)
-
       if (!hasChanges) {
         setIsEditing(false)
         actions.setSubmitting(false)
@@ -58,6 +57,13 @@ export const Epoch: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues])
 
+  React.useEffect(() => {
+    form.resetForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing])
+
+  const hasChanges = Object.entries(form.values).some(([k, v]) => (initialValues as any)[k] !== v)
+
   const delay = consts?.minUpdateDelay ? consts.minUpdateDelay / (60 * 60 * 24) : null
 
   return (
@@ -68,15 +74,21 @@ export const Epoch: React.FC = () => {
           subtitle={delay ? `A change Takes ${delay} days to take effect` : undefined}
           headerRight={
             isEditing ? (
-              <Button
-                type="submit"
-                small
-                loading={isLoading || form.isSubmitting}
-                loadingMessage={isLoading || form.isSubmitting ? 'Pending...' : undefined}
-                key="done"
-              >
-                Done
-              </Button>
+              <ButtonGroup variant="small">
+                <Button variant="secondary" onClick={() => setIsEditing(false)} small>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  small
+                  loading={isLoading || form.isSubmitting}
+                  loadingMessage={isLoading || form.isSubmitting ? 'Pending...' : undefined}
+                  key="done"
+                  disabled={!hasChanges}
+                >
+                  Done
+                </Button>
+              </ButtonGroup>
             ) : (
               <Button variant="secondary" onClick={() => setIsEditing(true)} small key="edit">
                 Edit
@@ -104,7 +116,10 @@ export const Epoch: React.FC = () => {
               />
             </Grid>
           ) : (
-            <LabelValueStack label="Minimum epoch duration" value={`${epochHours} hours and ${epochMinutes} minutes`} />
+            <LabelValueStack
+              label="Minimum epoch duration"
+              value={epochHours === 0 ? `${epochMinutes} minutes` : `${epochHours} hours and ${epochMinutes} minutes`}
+            />
           )}
         </PageSection>
       </Form>
