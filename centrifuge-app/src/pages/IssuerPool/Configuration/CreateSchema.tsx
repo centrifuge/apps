@@ -84,7 +84,7 @@ export const CreateSchema: React.FC = () => {
   const cent = useCentrifuge()
 
   const { execute: updateConfigTx, isLoading } = useCentrifugeTransaction(
-    'Create schema',
+    'Create asset template',
     (cent) => cent.pools.setMetadata,
     {
       onSuccess: () => {
@@ -140,7 +140,7 @@ export const CreateSchema: React.FC = () => {
     <FormikProvider value={form}>
       <Form>
         <PageHeader
-          title="Create schema"
+          title="Create asset template"
           subtitle={poolMetadata?.pool?.name}
           actions={
             <>
