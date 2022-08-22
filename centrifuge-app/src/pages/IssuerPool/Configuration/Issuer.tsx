@@ -1,4 +1,4 @@
-import { PoolMetadata, PoolMetadataInput } from '@centrifuge/centrifuge-js'
+import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { Button } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -12,10 +12,11 @@ import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransactio
 import { useFile } from '../../../utils/useFile'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { CreatePoolValues } from '../../IssuerCreatePool'
 import { IssuerInput } from '../../IssuerCreatePool/IssuerInput'
 
 type Values = Pick<
-  PoolMetadataInput,
+  CreatePoolValues,
   'issuerName' | 'issuerLogo' | 'issuerDescription' | 'executiveSummary' | 'website' | 'forum' | 'email'
 >
 
@@ -26,14 +27,14 @@ export const Issuer: React.FC = () => {
   const { data: metadata } = usePoolMetadata(pool)
   const cent = useCentrifuge()
   const prefetchMetadata = usePrefetchMetadata()
-  const { data: logoFile } = useFile(metadata?.pool?.issuer?.logo, 'logo')
+  const { data: logoFile } = useFile(metadata?.pool?.issuer?.logo?.uri, 'logo')
 
   const initialValues: Values = React.useMemo(
     () => ({
       issuerName: metadata?.pool?.issuer?.name ?? '',
       issuerLogo: logoFile ?? null,
       issuerDescription: metadata?.pool?.issuer?.description ?? '',
-      executiveSummary: metadata?.pool?.links?.executiveSummary ? 'executiveSummary.pdf' : '',
+      executiveSummary: metadata?.pool?.links?.executiveSummary ? 'executiveSummary.pdf' : ('' as any),
       website: metadata?.pool?.links?.website ?? '',
       forum: metadata?.pool?.links?.forum ?? '',
       email: metadata?.pool?.issuer?.email ?? '',
@@ -80,10 +81,13 @@ export const Issuer: React.FC = () => {
             name: values.issuerName,
             description: values.issuerDescription,
             email: values.email,
-            logo: logoChanged ? logoUri ?? null : oldMetadata.pool.issuer.logo,
+            logo:
+              logoChanged && logoUri ? { uri: logoUri, mime: values.issuerLogo!.type } : oldMetadata.pool.issuer.logo,
           },
           links: {
-            executiveSummary: execSummaryUri ?? oldMetadata.pool.links.executiveSummary,
+            executiveSummary: execSummaryUri
+              ? { uri: execSummaryUri, mime: values.executiveSummary!.type }
+              : oldMetadata.pool.links.executiveSummary,
             forum: values.forum,
             website: values.website,
           },

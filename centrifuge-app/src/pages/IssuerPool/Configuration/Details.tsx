@@ -1,4 +1,4 @@
-import { PoolMetadata, PoolMetadataInput } from '@centrifuge/centrifuge-js'
+import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { Box, Button, Checkbox, Grid, ImageUpload, Select, Shelf, Stack, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -16,9 +16,10 @@ import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransactio
 import { useFile } from '../../../utils/useFile'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { CreatePoolValues } from '../../IssuerCreatePool'
 import { validate } from '../../IssuerCreatePool/validate'
 
-type Values = Pick<PoolMetadataInput, 'poolName' | 'poolIcon' | 'assetClass' | 'nodeEndpoint'> & { listed: boolean }
+type Values = Pick<CreatePoolValues, 'poolName' | 'poolIcon' | 'assetClass' | 'nodeEndpoint'> & { listed: boolean }
 
 const ASSET_CLASSES = config.assetClasses.map((label) => ({
   label,
@@ -32,7 +33,7 @@ export const Details: React.FC = () => {
   const { data: metadata } = usePoolMetadata(pool)
   const cent = useCentrifuge()
   const prefetchMetadata = usePrefetchMetadata()
-  const { data: iconFile } = useFile(metadata?.pool?.icon, 'icon')
+  const { data: iconFile } = useFile(metadata?.pool?.icon?.uri, 'icon')
 
   const initialValues: Values = React.useMemo(
     () => ({
@@ -73,7 +74,7 @@ export const Details: React.FC = () => {
         pool: {
           ...oldMetadata.pool,
           name: values.poolName,
-          icon: iconUri || oldMetadata.pool.icon,
+          icon: iconUri ? { uri: iconUri, mime: values.poolIcon!.type } : oldMetadata.pool.icon,
           asset: {
             class: values.assetClass,
           },
@@ -96,7 +97,7 @@ export const Details: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues])
 
-  const icon = cent.metadata.parseMetadataUrl(metadata?.pool?.icon ?? '')
+  const icon = cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri ?? '')
 
   const currency = getCurrencySymbol(pool?.currency)
 

@@ -83,13 +83,13 @@ export const createEmptyRiskGroup = (): RiskGroupInput => ({
   discountRate: '',
 })
 
-type PoolValues = Omit<PoolMetadataInput, 'poolIcon' | 'issuerLogo' | 'executiveSummary'> & {
+export type CreatePoolValues = Omit<PoolMetadataInput, 'poolIcon' | 'issuerLogo' | 'executiveSummary'> & {
   poolIcon: File | null
   issuerLogo: File | null
   executiveSummary: File | null
 }
 
-const initialValues: PoolValues = {
+const initialValues: CreatePoolValues = {
   poolIcon: null,
   poolName: '',
   assetClass: DEFAULT_ASSET_CLASS,
