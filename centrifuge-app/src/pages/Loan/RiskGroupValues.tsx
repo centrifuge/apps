@@ -1,5 +1,4 @@
 import { Rate } from '@centrifuge/centrifuge-js'
-import { Shelf } from '@centrifuge/fabric'
 import BN from 'bn.js'
 import * as React from 'react'
 import { LabelValueStack } from '../../components/LabelValueStack'
@@ -28,7 +27,7 @@ export const RiskGroupValues: React.FC<{
   const discountRate = values?.discountRate ? new Rate(values.discountRate) : undefined
 
   return (
-    <Shelf gap={3} flexWrap="wrap">
+    <>
       {showMaturityDate && values.maturityDate && (
         <LabelValueStack label="Maturity date" value={formatDate(values.maturityDate)} />
       )}
@@ -58,6 +57,6 @@ export const RiskGroupValues: React.FC<{
       {shownFields.includes('discountRate') && (
         <LabelValueStack label="Discount rate" value={discountRate && formatPercentage(discountRate.toAprPercent())} />
       )}
-    </Shelf>
+    </>
   )
 }

@@ -9,7 +9,7 @@ import { config } from '../config'
 
 type CreatePoolArgs = Parameters<Centrifuge['pools']['createPool']>[0]
 
-export function useProposalEstimate(formValues: PoolMetadataInput) {
+export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranches' | 'currency' | 'maxReserve'>) {
   const [proposeFee, setProposeFee] = React.useState<CurrencyBalance | null>(null)
   const [chainDecimals, setChainDecimals] = React.useState(18)
   const { selectedAccount } = useWeb3()
@@ -54,7 +54,7 @@ export function useProposalEstimate(formValues: PoolMetadataInput) {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getProposeFee = React.useCallback(
-    debounce((values: PoolMetadataInput) => {
+    debounce((values: Pick<PoolMetadataInput, 'tranches' | 'currency' | 'maxReserve'>) => {
       if (!selectedAccount) return
 
       const noJuniorTranches = values.tranches.slice(1)

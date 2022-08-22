@@ -83,7 +83,13 @@ export const createEmptyRiskGroup = (): RiskGroupInput => ({
   discountRate: '',
 })
 
-const initialValues: PoolMetadataInput = {
+type PoolValues = Omit<PoolMetadataInput, 'poolIcon' | 'issuerLogo' | 'executiveSummary'> & {
+  poolIcon: File | null
+  issuerLogo: File | null
+  executiveSummary: File | null
+}
+
+const initialValues: PoolValues = {
   poolIcon: null,
   poolName: '',
   assetClass: DEFAULT_ASSET_CLASS,
@@ -107,21 +113,15 @@ const initialValues: PoolMetadataInput = {
 }
 
 const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children, icon }) => {
-  const [dataUri, setDataUri] = React.useState('')
-
+  const [uri, setUri] = React.useState('')
   React.useEffect(() => {
-    if (icon && icon.type === 'image/svg+xml') {
-      getFileDataURI(icon).then((d) => setDataUri(d))
-    } else {
-      setDataUri('')
-    }
+    ;(async () => {
+      if (!icon) return
+      const uri = await getFileDataURI(icon)
+      setUri(uri)
+    })()
   }, [icon])
-
-  return dataUri ? (
-    <img src={dataUri} width={40} height={40} alt="" />
-  ) : (
-    <Thumbnail label={children} type="pool" size="large" />
-  )
+  return uri ? <img src={uri} width={40} height={40} alt="" /> : <Thumbnail label={children} type="pool" size="large" />
 }
 
 const CreatePoolForm: React.VFC = () => {
@@ -209,7 +209,7 @@ const CreatePoolForm: React.VFC = () => {
     },
     validateOnMount: true,
     onSubmit: async (values, { setSubmitting }) => {
-      const metadataValues = { ...values }
+      const metadataValues: PoolMetadataInput = { ...values } as any
       if (!address) return
 
       const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
@@ -217,22 +217,20 @@ const CreatePoolForm: React.VFC = () => {
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
       const collectionId = await centrifuge.nfts.getAvailableCollectionId()
-
-      const [poolIconUri, issuerLogoUri, executiveSummaryUri] = await Promise.all([
-        getFileDataURI(metadataValues.poolIcon as any),
-        metadataValues?.issuerLogo ? getFileDataURI(metadataValues.issuerLogo as any) : null,
-        getFileDataURI(metadataValues.executiveSummary as any),
-      ])
-
+      if (!values.poolIcon || !values.executiveSummary) {
+        return
+      }
       const [pinnedPoolIcon, pinnedIssuerLogo, pinnedExecSummary] = await Promise.all([
-        lastValueFrom(centrifuge.metadata.pinFile(poolIconUri)),
-        issuerLogoUri ? lastValueFrom(centrifuge.metadata.pinFile(issuerLogoUri)) : null,
-        lastValueFrom(centrifuge.metadata.pinFile(executiveSummaryUri)),
+        lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.poolIcon))),
+        values.issuerLogo ? lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.issuerLogo))) : null,
+        lastValueFrom(centrifuge.metadata.pinFile(await getFileDataURI(values.executiveSummary))),
       ])
 
-      metadataValues.issuerLogo = pinnedIssuerLogo?.uri || null
-      metadataValues.executiveSummary = pinnedExecSummary.uri
-      metadataValues.poolIcon = pinnedPoolIcon.uri
+      metadataValues.issuerLogo = pinnedIssuerLogo?.uri
+        ? { uri: pinnedIssuerLogo.uri, mime: values?.issuerLogo?.type || '' }
+        : null
+      metadataValues.executiveSummary = { uri: pinnedExecSummary.uri, mime: values.executiveSummary.type }
+      metadataValues.poolIcon = { uri: pinnedPoolIcon.uri, mime: values.poolIcon.type }
 
       // tranches must be reversed (most junior is the first in the UI but the last in the API)
       const noJuniorTranches = metadataValues.tranches.slice(1)
@@ -309,7 +307,7 @@ const CreatePoolForm: React.VFC = () => {
       <FormikProvider value={form}>
         <Form ref={formRef}>
           <PageHeader
-            icon={<PoolIcon icon={form.values.poolIcon as File}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
+            icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
             title={form.values.poolName || 'New Pool'}
             subtitle={
               <TextWithPlaceholder isLoading={waitingForStoredIssuer} width={15}>
@@ -347,8 +345,8 @@ const CreatePoolForm: React.VFC = () => {
                 <Field name="poolIcon" validate={validate.poolIcon}>
                   {({ field, meta, form }: FieldProps) => (
                     <FileUpload
-                      file={field.value}
-                      onFileChange={(file) => {
+                      file={field.value?.file || null}
+                      onFileChange={async (file) => {
                         form.setFieldTouched('poolIcon', true, false)
                         form.setFieldValue('poolIcon', file)
                       }}
@@ -414,26 +412,6 @@ const CreatePoolForm: React.VFC = () => {
                   placeholder="https://"
                 />
               </Box>
-              {/* <Box gridColumn="span 1">
-              <FieldWithErrorMessage
-                validate={validate.epochHours}
-                name="epochHours"
-                as={NumberInput}
-                label="Minimum epoch duration"
-                placeholder="0"
-                rightElement="hrs"
-              />
-            </Box>
-            <Box gridColumn="span 1">
-              <FieldWithErrorMessage
-                validate={validate.epochMinutes}
-                name="epochMinutes"
-                as={NumberInput}
-                label={<Text color="transparent">.</Text>}
-                placeholder="0"
-                rightElement="min"
-              />
-            </Box> */}
             </Grid>
           </PageSection>
           <PageSection title="Issuer">

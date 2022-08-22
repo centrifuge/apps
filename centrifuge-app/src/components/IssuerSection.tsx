@@ -15,13 +15,12 @@ type IssuerSectionProps = {
 export const IssuerSection: React.VFC<IssuerSectionProps> = ({ metadata }) => {
   const cent = useCentrifuge()
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
-
   return (
     <Shelf alignItems="flex-start" gap="3" flexDirection={['column', 'row']}>
       <Stack gap={2}>
         <Box>
           {metadata?.pool?.issuer.logo && (
-            <StyledImage src={cent.metadata.parseMetadataUrl(metadata?.pool?.issuer.logo)} />
+            <StyledImage src={cent.metadata.parseMetadataUrl(metadata?.pool?.issuer.logo?.uri)} />
           )}
         </Box>
         <Text variant="body2">{metadata?.pool?.issuer.description}</Text>
@@ -36,7 +35,7 @@ export const IssuerSection: React.VFC<IssuerSectionProps> = ({ metadata }) => {
                   Executive&nbsp;summary
                 </Button>
                 <ExecutiveSummaryDialog
-                  href={cent.metadata.parseMetadataUrl(metadata.pool.links.executiveSummary)}
+                  href={cent.metadata.parseMetadataUrl(metadata?.pool?.links.executiveSummary?.uri)}
                   open={isDialogOpen}
                   onClose={() => setIsDialogOpen(false)}
                 />

@@ -109,6 +109,7 @@ const Spinner = styled(IconSpinner)`
 type FileUploadProps = {
   file?: File | string | null
   onFileChange?: (file: File | null) => void
+  onClear?: () => void
   validate?: (file: File) => string | undefined
   errorMessage?: string
   accept?: string
@@ -121,6 +122,7 @@ type FileUploadProps = {
 export const FileUpload: React.FC<FileUploadProps> = ({
   file: fileProp,
   onFileChange,
+  onClear,
   validate,
   errorMessage: errorMessageProp,
   accept,
@@ -141,6 +143,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   }
 
   function handleClear() {
+    if (onClear) {
+      onClear()
+    }
     setError(null)
     setCurFile(null)
   }

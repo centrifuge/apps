@@ -35,7 +35,7 @@ const TokenOverview: React.FC = () => {
             // bc we don't have a way to query for historical token prices yet
             // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
             yield: tranche.interestRatePerSec ? tranche.interestRatePerSec.toAprPercent().toNumber() : null,
-            protection: tranche.currentRiskBuffer?.toPercent().toNumber() || 0,
+            protection: tranche.minRiskBuffer?.toPercent().toNumber() || 0,
             capacity: tranche.capacity.toFloat(),
             valueLocked: tranche.totalIssuance
               .toDecimal()
