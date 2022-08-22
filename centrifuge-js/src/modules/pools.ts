@@ -280,7 +280,7 @@ type WriteOffStatus = null | WrittenOff | WrittenOfByAdmin
 
 type InterestAccrual = {
   accumulatedRate: string
-  lastUpdated: number
+  referenceCount: number
 }
 
 // type from chain
@@ -1958,12 +1958,17 @@ function getLoanInfo(loanType: LoanInfoData, currencyDecimals: number): LoanInfo
   throw new Error(`Unrecognized loan info: ${JSON.stringify(loanType)}`)
 }
 
-function getOutstandingDebt(loan: ActiveLoanData, currencyDecimals: number, interestAccrual?: InterestAccrual) {
-  if (!interestAccrual) return new CurrencyBalance(0, currencyDecimals)
-  const accRate = new Rate(hexToBN(interestAccrual.accumulatedRate)).toDecimal()
+function getOutstandingDebt(
+  loan: ActiveLoanData,
+  currencyDecimals: number,
+  lastUpdated: number,
+  accumulatedRate?: InterestAccrual['accumulatedRate']
+) {
+  if (!accumulatedRate) return new CurrencyBalance(0, currencyDecimals)
+  const accRate = new Rate(hexToBN(accumulatedRate)).toDecimal()
   const rate = new Rate(hexToBN(loan.interestRatePerSec)).toDecimal()
   const normalizedDebt = new CurrencyBalance(hexToBN(loan.normalizedDebt), currencyDecimals).toDecimal()
-  const secondsSinceUpdated = Date.now() / 1000 - interestAccrual.lastUpdated
+  const secondsSinceUpdated = Date.now() / 1000 - lastUpdated
 
   const debtFromAccRate = normalizedDebt.mul(accRate)
   const debtSinceUpdated = normalizedDebt.mul(rate.minus(1).mul(secondsSinceUpdated))
