@@ -24,7 +24,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useProposalEstimate } from '../../utils/useProposalEstimate'
 import { truncate } from '../../utils/web3'
 import { IssuerInput } from './IssuerInput'
-import { RiskGroupsInput } from './RiskGroupsInput'
+import { RiskGroupsSection } from './RiskGroupsInput'
 import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
@@ -420,7 +420,7 @@ const CreatePoolForm: React.VFC = () => {
 
           <TrancheSection />
 
-          <RiskGroupsInput />
+          <RiskGroupsSection />
         </Form>
       </FormikProvider>
     </>
