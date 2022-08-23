@@ -41,7 +41,7 @@ export const Details: React.FC = () => {
       poolName: metadata?.pool?.name ?? '',
       poolIcon: iconFile ?? null,
       assetClass: metadata?.pool?.asset?.class ?? '',
-      nodeEndpoint: metadata?.node?.url ?? '',
+      nodeEndpoint: metadata?.node?.url ?? config.defaultNodeUrl ?? '',
       listed: metadata?.pool?.listed ?? false,
     }),
     [metadata, iconFile]
@@ -187,7 +187,7 @@ export const Details: React.FC = () => {
                 validate={validate.nodeEndpoint}
                 name="nodeEndpoint"
                 as={TextInput}
-                label="Node enpoint*"
+                label={`Node endpoint${config.useDocumentNfts ? '*' : ''}`}
                 placeholder="https://..."
               />
 

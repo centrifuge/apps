@@ -21,6 +21,7 @@ jobs:
       network: centrifuge
       subquery-url: https://api.subquery.network/sq/centrifuge/pools-development
       pool-creation-type: immediate
+      default-node-url: ''
 
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -33,7 +33,7 @@ export const WriteOffInput: React.FC = () => {
               />
               <FieldWithErrorMessage
                 as={NumberInput}
-                label="Penalty interest*"
+                label="Penalty fee*"
                 placeholder="0.00"
                 rightElement="%"
                 name={`writeOffGroups.${index}.penaltyInterest`}

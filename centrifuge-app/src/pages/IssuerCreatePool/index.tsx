@@ -97,7 +97,7 @@ const initialValues: CreatePoolValues = {
   maxReserve: '',
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
-  nodeEndpoint: '',
+  nodeEndpoint: config.defaultNodeUrl ?? '',
 
   issuerName: '',
   issuerLogo: null,
@@ -408,7 +408,7 @@ const CreatePoolForm: React.VFC = () => {
                   validate={validate.nodeEndpoint}
                   name="nodeEndpoint"
                   as={TextInput}
-                  label="Node endpoint*"
+                  label={`Node endpoint${config.useDocumentNfts ? '*' : ''}`}
                   placeholder="https://"
                 />
               </Box>
