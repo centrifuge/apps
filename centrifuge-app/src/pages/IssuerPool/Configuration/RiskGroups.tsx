@@ -131,8 +131,7 @@ export const RiskGroups: React.FC = () => {
     <FormikProvider value={form}>
       <Form>
         <PageSection
-          title="Write-off schedule"
-          subtitle="At least one write-off activity is required"
+          title="Risk Groups"
           headerRight={
             <>
               {form.values.riskGroups.length === 0 && addButton}
