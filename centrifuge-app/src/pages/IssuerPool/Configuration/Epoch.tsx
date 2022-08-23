@@ -71,7 +71,13 @@ export const Epoch: React.FC = () => {
       <Form>
         <PageSection
           title="Epoch"
-          subtitle={delay ? `A change Takes ${delay} days to take effect` : undefined}
+          subtitle={
+            delay
+              ? `A change Takes ${
+                  delay < 0.5 ? `${Math.ceil(delay / 24)} hours` : `${Math.round(delay)} days`
+                } to take effect`
+              : undefined
+          }
           headerRight={
             isEditing ? (
               <ButtonGroup variant="small">
