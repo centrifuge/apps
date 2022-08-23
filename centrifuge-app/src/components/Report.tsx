@@ -249,27 +249,29 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
         name: ``,
         value: [
           loan.id,
-          loan.status === 'Active' ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '-',
-          loan.status === 'Active' ? formatBalance(loan.loanInfo.value.toDecimal()) : '-',
-          loan.status === 'Active' ? formatBalance((loan as ActiveLoan).outstandingDebt.toDecimal()) : '-',
-          loan.status === 'Active' ? formatBalance((loan as ActiveLoan).totalBorrowed.toDecimal()) : '-',
-          loan.status === 'Active' ? formatBalance((loan as ActiveLoan).totalRepaid.toDecimal()) : '-',
-          loan.status === 'Active' ? formatDate(loan.originationDate.toString()) : '-',
-          loan.status === 'Active' && 'maturityDate' in loan.loanInfo
+          loan.status !== 'Created' ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '-',
+          loan.status !== 'Created' ? formatBalance(loan.loanInfo.value.toDecimal()) : '-',
+          loan.status !== 'Created' ? formatBalance((loan as ActiveLoan).outstandingDebt.toDecimal()) : '-',
+          loan.status !== 'Created' ? formatBalance((loan as ActiveLoan).totalBorrowed.toDecimal()) : '-',
+          loan.status !== 'Created' ? formatBalance((loan as ActiveLoan).totalRepaid.toDecimal()) : '-',
+          loan.status !== 'Created' && loan.originationDate && Number(loan.originationDate) > 0
+            ? formatDate(loan.originationDate.toString())
+            : '-',
+          loan.status !== 'Created' && 'maturityDate' in loan.loanInfo
             ? formatDate(loan.loanInfo.maturityDate.toString())
             : '-',
-          loan.status === 'Active' ? formatPercentage(loan.interestRatePerSec.toAprPercent()) : '-',
-          loan.status === 'Active' ? formatPercentage(loan.loanInfo.advanceRate.toPercent()) : '-',
-          loan.status === 'Active' && 'probabilityOfDefault' in loan.loanInfo
+          loan.status !== 'Created' ? formatPercentage(loan.interestRatePerSec.toAprPercent()) : '-',
+          loan.status !== 'Created' ? formatPercentage(loan.loanInfo.advanceRate.toPercent()) : '-',
+          loan.status !== 'Created' && 'probabilityOfDefault' in loan.loanInfo
             ? formatPercentage(loan.loanInfo.probabilityOfDefault.toPercent())
             : '-',
-          loan.status === 'Active' && 'lossGivenDefault' in loan.loanInfo
+          loan.status !== 'Created' && 'lossGivenDefault' in loan.loanInfo
             ? formatPercentage(loan.loanInfo.lossGivenDefault.toPercent())
             : '-',
-          loan.status === 'Active' && 'discountRate' in loan.loanInfo
+          loan.status !== 'Created' && 'discountRate' in loan.loanInfo
             ? formatPercentage(loan.loanInfo.discountRate.toPercent())
             : '-',
-          // loan.status === 'Active' ? formatDate(loan.maturityDate.toString()) : '-',
+          // loan.status !== 'Created' ? formatDate(loan.maturityDate.toString()) : '-',
         ],
         heading: false,
       }
