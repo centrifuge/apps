@@ -53,7 +53,7 @@ jobs:
           NEXT_PUBLIC_INFURA_KEY: ${{ secrets.NEXT_PUBLIC_INFURA_KEY }}
           NEXT_PUBLIC_IPFS_GATEWAY: 'https://cloudflare-ipfs.com/ipfs/'
           NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
-          NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.centrifuge.io/'
+          NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.catalyst.cntrfg.com/'
           NEXT_PUBLIC_RWA_MARKET_ONBOARD_RETURN_URL: 'https://rwamarket.io'
           NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL: 'https://tinlake.centrifuge.io'
           NEXT_PUBLIC_POOL_REGISTRY: '0xddf1c516cf87126c6c610b52fd8d609e67fb6033'
