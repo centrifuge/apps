@@ -56,7 +56,7 @@ jobs:
           NEXT_PUBLIC_INFURA_KEY: ${{ secrets.NEXT_PUBLIC_INFURA_KEY }}
           NEXT_PUBLIC_IPFS_GATEWAY: 'https://cloudflare-ipfs.com/ipfs/'
           NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS: '0x2cc8688c5f75e365aaeeb4ea8d6a480405a48d2a'
-          NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.amber.cntrfg.com/'
+          NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.catalyst.cntrfg.com/'
           NEXT_PUBLIC_ONBOARD_UI_HOST: 'https://staging.onboarding.cntrfg.com'
           NEXT_PUBLIC_RWA_MARKET_ONBOARD_RETURN_URL: 'https://dev.rwamarket.io'
           NEXT_PUBLIC_POOL_REGISTRY: '0x8FE85CeAe6157C1dfcDD1c5ec99361c9722d97de'
