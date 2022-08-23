@@ -1,4 +1,4 @@
-import { PoolMetadata } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { Box, Button, Select, Stack } from '@centrifuge/fabric'
 import { Field, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'

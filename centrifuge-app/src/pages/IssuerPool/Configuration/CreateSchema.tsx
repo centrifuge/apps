@@ -1,3 +1,4 @@
+import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { Box, Button, TextAreaInput } from '@centrifuge/fabric'
 import { lastValueFrom } from '@polkadot/rpc-core/node_modules/rxjs'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
@@ -112,7 +113,7 @@ export const CreateSchema: React.FC = () => {
     onSubmit: async (values, { setSubmitting }) => {
       const schemaMetadataHash = await lastValueFrom(cent.metadata.pinJson(JSON.parse(values.metadata)))
       const newPoolMetadata = {
-        ...poolMetadata,
+        ...(poolMetadata as PoolMetadata),
         schemas: [
           ...(poolMetadata?.schemas ?? []),
           {

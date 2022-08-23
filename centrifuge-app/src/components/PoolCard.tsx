@@ -1,5 +1,4 @@
-import { Pool } from '@centrifuge/centrifuge-js'
-import { PoolMetadata } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { InteractiveCard, Shelf, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useRouteMatch } from 'react-router'

@@ -60,7 +60,6 @@ const StyledOutline = styled.span`
 
 const StyledWrapper = styled(Flex)<{ $hasLabel: boolean }>`
   position: relative;
-  top: ${(props) => (props.$hasLabel ? '3px' : 0)};
 
   &::before {
     content: '.';
