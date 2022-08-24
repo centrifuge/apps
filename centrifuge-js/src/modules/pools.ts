@@ -239,9 +239,6 @@ export type Pool = {
     current: number
     lastClosed: string
     lastExecuted: number
-    isInSubmissionPeriod: boolean
-    isInChallengePeriod: boolean
-    isInExecutionPeriod: boolean
     challengePeriodEnd: number
     status: 'submissionPeriod' | 'challengePeriod' | 'executionPeriod' | 'ongoing'
   }
@@ -1235,11 +1232,11 @@ export function getPoolsModule(inst: Centrifuge) {
         //   pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
         // )
 
-        const $block = api.rpc.chain.getBlock()
+        const $block = inst.getBlocks().pipe(take(1))
 
         return combineLatest([$issuance, $epochs, $block]).pipe(
           map(([rawIssuances, rawEpochs, { block }]) => {
-            const blockNumber = block?.header?.number.toNumber()
+            const blockNumber = block.header.number.toNumber()
             const epochs = rawEpochs.map((value) => (!value.isEmpty ? (value as any).toJSON() : null))
             const mappedPools = pools.map((poolObj) => {
               const { data: pool, id: poolId, metadata } = poolObj
@@ -1346,9 +1343,6 @@ export function getPoolsModule(inst: Centrifuge) {
                   ...pool.epoch,
                   lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
                   status: getEpochStatus(epochExecution, blockNumber),
-                  isInSubmissionPeriod: !!epochExecution && !epochExecution?.challengePeriodEnd,
-                  isInChallengePeriod: epochExecution?.challengePeriodEnd >= blockNumber,
-                  isInExecutionPeriod: epochExecution?.challengePeriodEnd < blockNumber,
                   challengePeriodEnd: epochExecution?.challengePeriodEnd,
                 },
                 parameters: {

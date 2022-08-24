@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { formatMilliseconds } from './date'
 import { usePool } from './usePools'
 
-export const useEpochTimeRemaining = (poolId: string) => {
+export const useEpochTimeCountdown = (poolId: string) => {
   const pool = usePool(poolId)
   const [{ hours, minutes, seconds }, setTimeRemaining] = React.useState({ hours: 0, minutes: 0, seconds: 0 })
 
@@ -15,7 +15,7 @@ export const useEpochTimeRemaining = (poolId: string) => {
       const interval = setInterval(() => {
         const newDifference = start + duration - Date.now()
         if (newDifference <= 0) {
-          return
+          return clearInterval()
         }
         setTimeRemaining(formatMilliseconds(newDifference))
       }, 1000)

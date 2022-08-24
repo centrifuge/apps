@@ -3,7 +3,8 @@ import { Button, IconInfo, Shelf, Text } from '@centrifuge/fabric'
 import { BN } from '@polkadot/util'
 import React from 'react'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
-import { useEpochTimeRemaining } from '../utils/useEpochTimeRemaining'
+import { useChallengeTimeCountdown } from '../utils/useChallengeTimeCountdown'
+import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { EpochList } from './EpochList'
 import { PageSection } from './PageSection'
 import { Tooltips } from './Tooltips'
@@ -26,8 +27,7 @@ export const LiquiditySection: React.FC<LiquiditySectionProps> = ({ pool }) => {
 }
 
 const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
-  const { message: epochTimeRemaining } = useEpochTimeRemaining(pool.id)
-
+  const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id)
   const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
     'Close epoch',
     (cent) => cent.pools.closeEpoch,
@@ -94,10 +94,10 @@ const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
     (cent) => cent.pools.submitSolution,
     {
       onSuccess: () => {
-        setIsFeasible(false)
         console.log('Solution successfully submitted')
       },
       onError: (error) => {
+        setIsFeasible(false)
         console.log('Solution unsuccesful', error?.toJSON())
       },
     }
@@ -140,6 +140,7 @@ const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
 
 const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
   const { status } = pool.epoch
+  const { minutes } = useChallengeTimeCountdown(pool.id)
   const { execute: executeEpochTx, isLoading: loadingExecution } = useCentrifugeTransaction(
     'Execute epoch',
     (cent) => cent.pools.executeEpoch,
@@ -167,9 +168,9 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
           small
           variant={isInChallengePeriod ? 'secondary' : 'primary'}
           onClick={executeEpoch}
-          disabled={!pool || isInChallengePeriod}
+          disabled={!pool || isInChallengePeriod || loadingExecution}
           loading={isInChallengePeriod || loadingExecution}
-          loadingMessage={isInChallengePeriod ? `23 min until execution...` : 'Closing epoch...'}
+          loadingMessage={isInChallengePeriod && minutes ? `${minutes} minutes until execution...` : 'Closing epoch...'}
         >
           Execute epoch
         </Button>
@@ -178,7 +179,9 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
       {isInChallengePeriod && (
         <Shelf mb={2} gap={1}>
           <IconInfo size={16} />
-          <Text variant="body3">There is a ~30 min challenge period before the orders can be executed.</Text>
+          <Text variant="body3">
+            There are about {minutes} min of the challenge period remaining before the orders can be executed.
+          </Text>
         </Shelf>
       )}
       <EpochList pool={pool} />

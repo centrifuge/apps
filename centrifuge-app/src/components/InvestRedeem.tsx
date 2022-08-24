@@ -28,7 +28,7 @@ import { formatBalance, getCurrencySymbol, roundDown } from '../utils/formatting
 import { useAddress } from '../utils/useAddress'
 import { getBalanceDec, useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
-import { useEpochTimeRemaining } from '../utils/useEpochTimeRemaining'
+import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { useFocusInvalidInput } from '../utils/useFocusInvalidInput'
 import { usePermissions } from '../utils/usePermissions'
 import { usePendingCollect, usePool, usePoolMetadata } from '../utils/usePools'
@@ -134,8 +134,7 @@ const InvestRedeemInner: React.VFC<Props> = ({
 
   if (!address) return null
 
-  const calculatingOrders =
-    pool?.epoch.isInSubmissionPeriod || pool?.epoch.isInChallengePeriod || pool?.epoch.isInExecutionPeriod
+  const calculatingOrders = pool?.epoch.status !== 'ongoing'
 
   return (
     <Stack as={Card} gap={2} p={2}>
@@ -328,8 +327,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({
   const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(
     tranche?.capacity.toDecimal() ?? 0
   )
-  const calculatingOrders =
-    pool?.epoch.isInSubmissionPeriod || pool?.epoch.isInChallengePeriod || pool?.epoch.isInExecutionPeriod
+  const calculatingOrders = pool?.epoch.status !== 'ongoing'
 
   function renderInput(cancelCb?: () => void) {
     return (
@@ -516,8 +514,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel, a
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
 
-  const calculatingOrders =
-    pool?.epoch.isInSubmissionPeriod || pool?.epoch.isInChallengePeriod || pool?.epoch.isInExecutionPeriod
+  const calculatingOrders = pool?.epoch.status !== 'ongoing'
 
   function renderInput(cancelCb?: () => void) {
     return (
@@ -654,9 +651,8 @@ const PendingOrder: React.FC<{
   isCancelling: boolean
   onChangeOrder: () => void
 }> = ({ type, amount, pool, onCancelOrder, isCancelling, onChangeOrder }) => {
-  const { message: epochTimeRemaining } = useEpochTimeRemaining(pool.id!)
-  const calculatingOrders =
-    pool?.epoch.isInSubmissionPeriod || pool?.epoch.isInChallengePeriod || pool?.epoch.isInExecutionPeriod
+  const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id!)
+  const calculatingOrders = pool.epoch.status !== 'ongoing'
   return (
     <Stack gap={2}>
       <EpochBusy busy={calculatingOrders} />
