@@ -33,7 +33,7 @@ export const PoolDetailReportingTab: React.FC = () => {
 
   // Custom filters for specific reports
   const [groupBy, setGroupBy] = React.useState('day' as GroupBy)
-  const [activeTranche, setActiveTranche] = React.useState(undefined as string | undefined)
+  const [activeTranche, setActiveTranche] = React.useState('all' as string | undefined)
 
   const exportRef = React.useRef<() => void>(() => {})
 
@@ -104,12 +104,18 @@ export const PoolDetailReportingTab: React.FC = () => {
                   placeholder="Select a token"
                   options={
                     metadata?.tranches
-                      ? Object.keys(metadata?.tranches).map((trancheId) => {
-                          return {
-                            label: `${metadata?.pool?.name} ${metadata.tranches![trancheId].name}`,
-                            value: trancheId,
-                          }
-                        })
+                      ? [
+                          {
+                            label: 'All tokens',
+                            value: 'all',
+                          },
+                          ...Object.keys(metadata?.tranches).map((trancheId) => {
+                            return {
+                              label: `${metadata?.pool?.name} ${metadata.tranches![trancheId].name}`,
+                              value: trancheId,
+                            }
+                          }),
+                        ]
                       : []
                   }
                   value={activeTranche}

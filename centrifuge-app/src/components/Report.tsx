@@ -41,7 +41,10 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
   const monthlyPoolStates = useMonthlyPoolStates(pool.id) // , startDate, endDate
   const poolStates =
     report === 'pool-balance' ? (customFilters.groupBy === 'day' ? dailyPoolStates : monthlyPoolStates) : []
-  const investorTransactions = useInvestorTransactions(pool.id, customFilters.activeTranche)
+  const investorTransactions = useInvestorTransactions(
+    pool.id,
+    customFilters.activeTranche === 'all' ? undefined : customFilters.activeTranche
+  )
   const loans = useLoans(pool.id)
 
   const columns: Column[] =
