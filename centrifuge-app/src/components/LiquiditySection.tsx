@@ -139,7 +139,6 @@ const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
 }
 
 const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
-  const { status } = pool.epoch
   const { minutes } = useChallengeTimeCountdown(pool.id)
   const { execute: executeEpochTx, isLoading: loadingExecution } = useCentrifugeTransaction(
     'Execute epoch',
@@ -158,7 +157,7 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
     if (!pool) return
     executeEpochTx([pool.id])
   }
-  const isInChallengePeriod = status === 'challengePeriod'
+
   return (
     <PageSection
       title={`Epoch ${pool.epoch.current}`}
@@ -166,17 +165,17 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
       headerRight={
         <Button
           small
-          variant={isInChallengePeriod ? 'secondary' : 'primary'}
+          variant={minutes > 0 ? 'secondary' : 'primary'}
           onClick={executeEpoch}
-          disabled={!pool || isInChallengePeriod || loadingExecution}
-          loading={isInChallengePeriod || loadingExecution}
-          loadingMessage={isInChallengePeriod && minutes ? `${minutes} minutes until execution...` : 'Closing epoch...'}
+          disabled={!pool || minutes !== 0 || loadingExecution}
+          loading={minutes > 0 || loadingExecution}
+          loadingMessage={minutes ? `${minutes} minutes until execution...` : 'Closing epoch...'}
         >
           Execute epoch
         </Button>
       }
     >
-      {isInChallengePeriod && (
+      {minutes > 0 && (
         <Shelf mb={2} gap={1}>
           <IconInfo size={16} />
           <Text variant="body3">

@@ -76,7 +76,8 @@ export const calculateOptimalSolution = async (
   const output = clp.solve(lp, 0)
 
   const solutionVector = output.solution.map((x: string) => new BN(clp.bnRound(x)))
-  const isFeasible = output.infeasibilityRay.length === 0 && output.integerSolution
+  // TODO: check if output.integerSolution is necessary for feasibility
+  const isFeasible = output.infeasibilityRay.length === 0
 
   if (!isFeasible) {
     return {

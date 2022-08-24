@@ -14,13 +14,14 @@ export const useChallengeTimeCountdown = (poolId: string) => {
     if (!pool) return
     async function asyncCallback() {
       const blockNumber = block?.header.number.toNumber()
-      if (pool?.epoch.challengePeriodEnd && blockNumber && pool.epoch.challengePeriodEnd > blockNumber) {
-        const avgTimePerBlock = await lastValueFrom(cent.utils.getAvgTimePerBlock())
+      if (pool?.epoch.challengePeriodEnd && blockNumber) {
         const blocksRemaining = pool.epoch.challengePeriodEnd - blockNumber
-        if (blocksRemaining <= 0) {
-          setMinutesRemaining(0)
+        if (blocksRemaining > 0) {
+          const avgTimePerBlock = await lastValueFrom(cent.utils.getAvgTimePerBlock())
+
+          setMinutesRemaining(Math.ceil((blocksRemaining * avgTimePerBlock) / 60000))
         }
-        setMinutesRemaining(Math.ceil((blocksRemaining * avgTimePerBlock) / 60000))
+        setMinutesRemaining(0)
       }
     }
     asyncCallback()
