@@ -9,23 +9,24 @@ export const useChallengeTimeCountdown = (poolId: string) => {
   const cent = useCentrifuge()
   const { block } = useBlock()
   const [minutesRemaining, setMinutesRemaining] = React.useState(0)
+  const [minutesTotal, setMinutesTotal] = React.useState(0)
 
   React.useEffect(() => {
     if (!pool) return
     async function asyncCallback() {
       const blockNumber = block?.header.number.toNumber()
       if (pool?.epoch.challengePeriodEnd && blockNumber) {
+        const avgTimePerBlock = await lastValueFrom(cent.utils.getAvgTimePerBlock())
         const blocksRemaining = pool.epoch.challengePeriodEnd - blockNumber
-        if (blocksRemaining > 0) {
-          const avgTimePerBlock = await lastValueFrom(cent.utils.getAvgTimePerBlock())
-
-          setMinutesRemaining(Math.ceil((blocksRemaining * avgTimePerBlock) / 60000))
+        if (blocksRemaining <= 0) {
+          setMinutesRemaining(0)
         }
-        setMinutesRemaining(0)
+        setMinutesTotal(Math.ceil((pool.epoch.challengeTime * avgTimePerBlock) / 60000))
+        setMinutesRemaining(Math.ceil((blocksRemaining * avgTimePerBlock) / 60000))
       }
     }
     asyncCallback()
   }, [block])
 
-  return { minutes: minutesRemaining }
+  return { minutes: minutesRemaining, minutesTotal }
 }

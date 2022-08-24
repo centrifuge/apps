@@ -139,18 +139,10 @@ const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
 }
 
 const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
-  const { minutes } = useChallengeTimeCountdown(pool.id)
+  const { minutes, minutesTotal } = useChallengeTimeCountdown(pool.id)
   const { execute: executeEpochTx, isLoading: loadingExecution } = useCentrifugeTransaction(
     'Execute epoch',
-    (cent) => cent.pools.executeEpoch,
-    {
-      onSuccess: () => {
-        console.log('Solution successfully submitted')
-      },
-      onError: (error) => {
-        console.log('Execution unsuccesful', error?.toJSON())
-      },
-    }
+    (cent) => cent.pools.executeEpoch
   )
 
   const executeEpoch = () => {
@@ -167,9 +159,11 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
           small
           variant={minutes > 0 ? 'secondary' : 'primary'}
           onClick={executeEpoch}
-          disabled={!pool || minutes !== 0 || loadingExecution}
+          disabled={!pool || minutes > 0 || loadingExecution}
           loading={minutes > 0 || loadingExecution}
-          loadingMessage={minutes ? `${minutes} minutes until execution...` : 'Closing epoch...'}
+          loadingMessage={
+            minutes > 0 ? `${minutes} minutes until execution...` : loadingExecution ? 'Closing epoch...' : ''
+          }
         >
           Execute epoch
         </Button>
@@ -179,7 +173,7 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
         <Shelf mb={2} gap={1}>
           <IconInfo size={16} />
           <Text variant="body3">
-            There are about {minutes} min of the challenge period remaining before the orders can be executed.
+            There is a ~{minutesTotal} min challenge period before the orders can be executed.
           </Text>
         </Shelf>
       )}
