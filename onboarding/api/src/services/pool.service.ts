@@ -218,7 +218,7 @@ export class PoolService {
           agreementId,
           user.entityName?.length > 0 ? user.entityName : user.fullName
         )
-        await this.mailer.sendWhitelistedEmail(user, pool, { tranche })
+        // await this.mailer.sendWhitelistedEmail(user, pool, { tranche })
       } else {
         this.logger.log(`${address.address} is not a member of ${pool.metadata.name} - ${tranche}`)
       }
