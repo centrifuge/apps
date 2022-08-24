@@ -1,4 +1,4 @@
-import { ActiveLoan, Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { ActiveLoan, Loan, Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import styled from 'styled-components'
@@ -75,6 +75,7 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
       ? [
           'ID',
           'Asset type',
+          'Status',
           'Collateral value',
           'Outstanding',
           'Total financed',
@@ -91,7 +92,7 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
             align: 'left',
             header: col,
             cell: (row: TableDataRow) => <Text variant="body2">{(row.value as any)[index]}</Text>,
-            flex: index === 0 ? '0 0 50px' : index === 1 ? '0 0 200px' : '0 0 100px',
+            flex: index === 0 ? '0 0 50px' : '0 0 100px',
           }
         })
       : [
@@ -244,38 +245,41 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
   )
 
   const loanListRecords: TableDataRow[] =
-    loans?.map((loan) => {
-      return {
-        name: ``,
-        value: [
-          loan.id,
-          loan.status !== 'Created' ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '-',
-          loan.status !== 'Created' ? formatBalance(loan.loanInfo.value.toDecimal()) : '-',
-          loan.status !== 'Created' ? formatBalance((loan as ActiveLoan).outstandingDebt.toDecimal()) : '-',
-          loan.status !== 'Created' ? formatBalance((loan as ActiveLoan).totalBorrowed.toDecimal()) : '-',
-          loan.status !== 'Created' ? formatBalance((loan as ActiveLoan).totalRepaid.toDecimal()) : '-',
-          loan.status !== 'Created' && loan.originationDate && Number(loan.originationDate) > 0
-            ? formatDate(loan.originationDate.toString())
-            : '-',
-          loan.status !== 'Created' && 'maturityDate' in loan.loanInfo
-            ? formatDate(loan.loanInfo.maturityDate.toString())
-            : '-',
-          loan.status !== 'Created' ? formatPercentage(loan.interestRatePerSec.toAprPercent()) : '-',
-          loan.status !== 'Created' ? formatPercentage(loan.loanInfo.advanceRate.toPercent()) : '-',
-          loan.status !== 'Created' && 'probabilityOfDefault' in loan.loanInfo
-            ? formatPercentage(loan.loanInfo.probabilityOfDefault.toPercent())
-            : '-',
-          loan.status !== 'Created' && 'lossGivenDefault' in loan.loanInfo
-            ? formatPercentage(loan.loanInfo.lossGivenDefault.toPercent())
-            : '-',
-          loan.status !== 'Created' && 'discountRate' in loan.loanInfo
-            ? formatPercentage(loan.loanInfo.discountRate.toPercent())
-            : '-',
-          // loan.status !== 'Created' ? formatDate(loan.maturityDate.toString()) : '-',
-        ],
-        heading: false,
-      }
-    }) || []
+    loans
+      ?.filter((loan: Loan) => loan.status !== 'Created')
+      .map((loan: Loan) => {
+        return {
+          name: ``,
+          value: [
+            loan.id,
+            'loanInfo' in loan ? LOAN_TYPE_LABELS[loan.loanInfo.type] : '-',
+            loan.status === 'Created' ? 'New' : loan.status,
+            'loanInfo' in loan ? formatBalance(loan.loanInfo.value.toDecimal()) : '-',
+            formatBalance((loan as ActiveLoan).outstandingDebt.toDecimal()),
+            formatBalance((loan as ActiveLoan).totalBorrowed.toDecimal()),
+            formatBalance((loan as ActiveLoan).totalRepaid.toDecimal()),
+            loan.status !== 'Created' && loan.originationDate && Number(loan.originationDate) > 0
+              ? formatDate(loan.originationDate.toString())
+              : '-',
+            loan.status !== 'Created' && 'maturityDate' in loan.loanInfo
+              ? formatDate(loan.loanInfo.maturityDate.toString())
+              : '-',
+            'interestRatePerSec' in loan ? formatPercentage(loan.interestRatePerSec.toAprPercent()) : '-',
+            'loanInfo' in loan ? formatPercentage(loan.loanInfo.advanceRate.toPercent()) : '-',
+            loan.status !== 'Created' && 'probabilityOfDefault' in loan.loanInfo
+              ? formatPercentage(loan.loanInfo.probabilityOfDefault.toPercent())
+              : '-',
+            loan.status !== 'Created' && 'lossGivenDefault' in loan.loanInfo
+              ? formatPercentage(loan.loanInfo.lossGivenDefault.toPercent())
+              : '-',
+            loan.status !== 'Created' && 'discountRate' in loan.loanInfo
+              ? formatPercentage(loan.loanInfo.discountRate.toPercent())
+              : '-',
+            // formatDate(loan.maturityDate.toString()),
+          ],
+          heading: false,
+        }
+      }) || []
 
   const investorTxRecords: TableDataRow[] =
     investorTransactions?.map((tx) => {

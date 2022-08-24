@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Button, Card, DateInput, InputGroup, RadioButton, Select, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Card, DateInput, Select, Shelf, Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
@@ -48,9 +48,8 @@ export const PoolDetailReportingTab: React.FC = () => {
       sidebar={
         <Stack gap={2}>
           <Stack as={Card} gap={2} p={2}>
-            <Text variant="heading3">Switch report</Text>
-
             <Select
+              label="Report"
               placeholder="Select a report"
               options={reportOptions}
               value={report}
@@ -60,41 +59,48 @@ export const PoolDetailReportingTab: React.FC = () => {
                 }
               }}
             />
-          </Stack>
-          <Stack as={Card} gap={2} p={2}>
-            <Text variant="heading3">Filter</Text>
             <Shelf gap={2}>
-              <Text>From</Text>
               <DateInput
+                label="From date"
                 value={startDate.toISOString().slice(0, 10)}
                 onChange={(event) => setStartDate(new Date(event.target.value))}
               />
             </Shelf>
             <Shelf gap={2}>
-              <Text>To</Text>
               <DateInput
+                label="To date"
                 value={endDate.toISOString().slice(0, 10)}
                 onChange={(event) => setEndDate(new Date(event.target.value))}
               />
             </Shelf>
             {report === 'pool-balance' && (
               <Shelf gap={2}>
-                <Text>Group by</Text>
-                <InputGroup>
-                  <RadioButton
-                    name="month"
-                    label="Month"
-                    onChange={() => setGroupBy('month')}
-                    checked={groupBy === 'month'}
-                  />
-                  <RadioButton name="day" label="Day" onChange={() => setGroupBy('day')} checked={groupBy === 'day'} />
-                </InputGroup>
+                <Select
+                  label="Group by"
+                  placeholder="Select a time period to group by"
+                  options={[
+                    {
+                      label: 'Day',
+                      value: 'day',
+                    },
+                    {
+                      label: 'Month',
+                      value: 'month',
+                    },
+                  ]}
+                  value={groupBy}
+                  onSelect={(newGroupBy) => {
+                    if (newGroupBy) {
+                      setGroupBy(newGroupBy as GroupBy)
+                    }
+                  }}
+                />
               </Shelf>
             )}
             {report === 'investor-tx' && (
-              <Shelf gap={2}>
-                <Text>Token</Text>
+              <Shelf>
                 <Select
+                  label="Token"
                   placeholder="Select a token"
                   options={
                     metadata?.tranches
@@ -115,12 +121,9 @@ export const PoolDetailReportingTab: React.FC = () => {
                 />
               </Shelf>
             )}
-          </Stack>
-          <Stack as={Card} gap={2} p={2}>
-            <Text variant="heading3">Export</Text>
-            <Shelf gap={2}>
-              <Button type="button" variant="primary" onClick={() => exportRef.current()}>
-                Export to CSV
+            <Shelf>
+              <Button type="button" variant="primary" small onClick={() => exportRef.current()}>
+                Export CSV
               </Button>
             </Shelf>
           </Stack>
