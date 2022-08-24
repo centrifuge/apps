@@ -139,7 +139,7 @@ const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
 }
 
 const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
-  const { minutes, minutesTotal } = useChallengeTimeCountdown(pool.id)
+  const { minutesRemaining, minutesTotal } = useChallengeTimeCountdown(pool.id)
   const { execute: executeEpochTx, isLoading: loadingExecution } = useCentrifugeTransaction(
     'Execute epoch',
     (cent) => cent.pools.executeEpoch
@@ -157,19 +157,23 @@ const EpochStatusExecution: React.FC<{ pool: Pool }> = ({ pool }) => {
       headerRight={
         <Button
           small
-          variant={minutes > 0 ? 'secondary' : 'primary'}
+          variant={minutesRemaining > 0 ? 'secondary' : 'primary'}
           onClick={executeEpoch}
-          disabled={!pool || minutes > 0 || loadingExecution}
-          loading={minutes > 0 || loadingExecution}
+          disabled={!pool || minutesRemaining > 0 || loadingExecution}
+          loading={minutesRemaining > 0 || loadingExecution}
           loadingMessage={
-            minutes > 0 ? `${minutes} minutes until execution...` : loadingExecution ? 'Closing epoch...' : ''
+            minutesRemaining > 0
+              ? `${minutesRemaining} minutes until execution...`
+              : loadingExecution
+              ? 'Closing epoch...'
+              : ''
           }
         >
           Execute epoch
         </Button>
       }
     >
-      {minutes > 0 && (
+      {minutesRemaining > 0 && (
         <Shelf mb={2} gap={1}>
           <IconInfo size={16} />
           <Text variant="body3">
