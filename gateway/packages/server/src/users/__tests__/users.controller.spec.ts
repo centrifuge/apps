@@ -44,7 +44,7 @@ describe('Users controller', () => {
       email: 'test1',
       account: '0x333',
       chain: {
-        centrifugeChainAccount: {
+        centrifuge_chain_account: {
           id: 'test',
           secret: 'test',
           ss_58_address: 'test',
@@ -63,7 +63,7 @@ describe('Users controller', () => {
       email: 'test2',
       account: '0x333',
       chain: {
-        centrifugeChainAccount: {
+        centrifuge_chain_account: {
           id: 'test',
           secret: 'test',
           ss_58_address: 'test',

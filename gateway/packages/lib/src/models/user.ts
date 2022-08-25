@@ -17,7 +17,7 @@ export interface IUser {
 }
 
 export interface IChainAccount {
-  centrifugeChainAccount: {
+  centrifuge_chain_account: {
     id: string
     secret: string
     ss_58_address: string
