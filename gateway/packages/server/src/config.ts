@@ -31,7 +31,7 @@ const config = {
     // Centrifuge Identity Address
     account: env.CENTRIFUGE_ADMIN_ACCOUNT,
     chain: {
-      centrifugeChainAccount: {
+      centrifuge_chain_account: {
         id: env.CENTRIFUGE_CHAIN_ID,
         secret: env.CENTRIFUGE_CHAIN_SECRET,
         ss_58_address: env.CENTRIFUGE_CHAIN_ADDRESS,
