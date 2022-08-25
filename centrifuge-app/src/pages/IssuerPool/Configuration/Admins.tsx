@@ -5,6 +5,7 @@ import { encodeAddress } from '@polkadot/util-crypto'
 import { Field, FieldArray, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
+import { ButtonGroup } from '../../../components/ButtonGroup'
 import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { DataTable } from '../../../components/DataTable'
 import { Identity } from '../../../components/Identity'
@@ -59,7 +60,6 @@ export const Admins: React.FC = () => {
     initialValues,
     onSubmit: (values, actions) => {
       actions.setSubmitting(false)
-      const { add, remove } = diffPermissions(initialValues.admins, values.admins)
       if (!add.length && !remove.length) {
         setIsEditing(false)
         return
@@ -75,9 +75,19 @@ export const Admins: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues])
 
+  React.useEffect(() => {
+    form.resetForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing])
+
   const rows = React.useMemo(
     () => form.values.admins.map((a, i) => ({ ...a, index: i })).sort((a, b) => a.address.localeCompare(b.address)),
     [form.values.admins]
+  )
+
+  const { add, remove } = React.useMemo(
+    () => diffPermissions(initialValues.admins, form.values.admins),
+    [initialValues, form.values]
   )
 
   const poolAdminCount = rows.filter((r) => r.roles.PoolAdmin).length
@@ -90,15 +100,21 @@ export const Admins: React.FC = () => {
           subtitle="At least one address is required"
           headerRight={
             isEditing ? (
-              <Button
-                type="submit"
-                small
-                loading={isLoading}
-                loadingMessage={isLoading ? 'Pending...' : undefined}
-                key="done"
-              >
-                Done
-              </Button>
+              <ButtonGroup variant="small">
+                <Button variant="secondary" onClick={() => setIsEditing(false)} small>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  small
+                  loading={isLoading}
+                  loadingMessage={isLoading ? 'Pending...' : undefined}
+                  key="done"
+                  disabled={!add.length && !remove.length}
+                >
+                  Done
+                </Button>
+              </ButtonGroup>
             ) : (
               <Button variant="secondary" onClick={() => setIsEditing(true)} small key="edit">
                 Edit

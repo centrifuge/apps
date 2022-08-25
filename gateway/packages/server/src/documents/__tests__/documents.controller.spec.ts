@@ -59,7 +59,7 @@ describe('DocumentsController', () => {
     account: 'user_account',
     email: 'test@centrifuge.io',
     chain: {
-      centrifugeChainAccount: {
+      centrifuge_chain_account: {
         id: 'string',
         secret: 'string',
         ss_58_address: 'string',

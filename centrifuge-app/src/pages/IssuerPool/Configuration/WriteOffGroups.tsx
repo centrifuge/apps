@@ -3,6 +3,7 @@ import { Box, Button, Stack } from '@centrifuge/fabric'
 import { FieldArray, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
+import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Column, DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
 import { formatPercentage } from '../../../utils/formatting'
@@ -97,7 +98,7 @@ export const WriteOffGroups: React.FC = () => {
           errors = setIn(
             errors,
             `writeOffGroups.${index}.penaltyInterest`,
-            'Penalty interest rate must stay equal or increase as days increase'
+            'Penalty fee must stay equal or increase as days increase'
           )
         } else {
           highestPenalty = g.penaltyInterest as number
@@ -164,15 +165,20 @@ export const WriteOffGroups: React.FC = () => {
             <>
               {form.values.writeOffGroups.length === 0 && addButton}
               {form.values.writeOffGroups.length > 0 && (
-                <Button
-                  type="submit"
-                  small
-                  loading={isLoading || form.isSubmitting}
-                  loadingMessage={isLoading || form.isSubmitting ? 'Pending...' : undefined}
-                  key="done"
-                >
-                  Done
-                </Button>
+                <ButtonGroup variant="small">
+                  <Button variant="secondary" onClick={() => form.resetForm()} small>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    small
+                    loading={isLoading || form.isSubmitting}
+                    loadingMessage={isLoading || form.isSubmitting ? 'Pending...' : undefined}
+                    key="done"
+                  >
+                    Done
+                  </Button>
+                </ButtonGroup>
               )}
             </>
           }

@@ -73,9 +73,11 @@ type EnvironmentConfig = {
   defaultLoanType: LoanInfo['type']
   poolCreationType: TransactionOptions['createType']
   useDocumentNfts: boolean
+  defaultNodeUrl: string
 }
 
 const poolCreationType: TransactionOptions['createType'] = import.meta.env.REACT_APP_POOL_CREATION_TYPE || 'immediate'
+const defaultNodeUrl: string = import.meta.env.REACT_APP_DEFAULT_NODE_URL || ''
 
 const ALTAIR: EnvironmentConfig = {
   name: 'Pools on Altair',
@@ -93,6 +95,7 @@ const ALTAIR: EnvironmentConfig = {
   defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
   useDocumentNfts: false,
+  defaultNodeUrl,
 }
 
 const CENTRIFUGE: EnvironmentConfig = {
@@ -117,6 +120,7 @@ const CENTRIFUGE: EnvironmentConfig = {
   defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
   useDocumentNfts: true,
+  defaultNodeUrl,
 }
 
 export const config = (import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge') === 'altair' ? ALTAIR : CENTRIFUGE

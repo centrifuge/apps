@@ -17,6 +17,7 @@ jobs:
       network: centrifuge
       subquery-url: ''
       pool-creation-type: propose
+      default-node-url: ''
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

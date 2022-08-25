@@ -24,7 +24,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useProposalEstimate } from '../../utils/useProposalEstimate'
 import { truncate } from '../../utils/web3'
 import { IssuerInput } from './IssuerInput'
-import { RiskGroupsInput } from './RiskGroupsInput'
+import { RiskGroupsSection } from './RiskGroupsInput'
 import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
@@ -97,7 +97,7 @@ const initialValues: CreatePoolValues = {
   maxReserve: '',
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
-  nodeEndpoint: '',
+  nodeEndpoint: config.defaultNodeUrl ?? '',
 
   issuerName: '',
   issuerLogo: null,
@@ -408,7 +408,7 @@ const CreatePoolForm: React.VFC = () => {
                   validate={validate.nodeEndpoint}
                   name="nodeEndpoint"
                   as={TextInput}
-                  label="Node endpoint*"
+                  label={`Node endpoint${config.useDocumentNfts ? '*' : ''}`}
                   placeholder="https://"
                 />
               </Box>
@@ -420,7 +420,7 @@ const CreatePoolForm: React.VFC = () => {
 
           <TrancheSection />
 
-          <RiskGroupsInput />
+          <RiskGroupsSection />
         </Form>
       </FormikProvider>
     </>
