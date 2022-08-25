@@ -28,7 +28,7 @@ export const Schemas: React.FC = () => {
     const meta = schemaMetadata[i].data
     const metaMeta = poolMetadata?.schemas?.[i]
     return {
-      name: meta?.name ?? `Schema ${i + 1}`,
+      name: meta?.name ?? `Template ${i + 1}`,
       createdAt: metaMeta?.createdAt ? new Date(metaMeta?.createdAt) : null,
       id,
     }

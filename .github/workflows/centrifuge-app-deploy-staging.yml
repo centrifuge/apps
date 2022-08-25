@@ -16,6 +16,7 @@ jobs:
       whitelisted-accounts: ''
       network: centrifuge
       pool-creation-type: notePreimage
+      default-node-url: ''
       subquery-url: ''
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

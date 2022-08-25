@@ -1,3 +1,4 @@
+import { config } from '../../config'
 import {
   combine,
   combineAsync,
@@ -22,7 +23,10 @@ export const validate = {
   poolIcon: combine(required(), mimeType('image/svg+xml', 'Icon must be an SVG file')),
   assetClass: required(),
   maxReserve: combine(required(), nonNegativeNumber(), max(Number.MAX_SAFE_INTEGER)),
-  nodeEndpoint: combine(required(), pattern(/^https?:\/\/.{4,}/, 'Not a valid URL')),
+  nodeEndpoint: combine(
+    config.useDocumentNfts ? required() : () => '',
+    pattern(/^https?:\/\/.{4,}/, 'Not a valid URL')
+  ),
 
   epochHours: combine(required(), nonNegativeNumber(), integer(), max(24 * 7 /* 1 week */)),
   epochMinutes: combine(required(), nonNegativeNumber(), integer(), max(59)),
@@ -30,7 +34,7 @@ export const validate = {
 
   issuerName: combine(required(), maxLength(100)),
   issuerDescription: combine(minLength(100), maxLength(1000)),
-  issuerLogo: combineAsync(imageFile(), maxFileSize(5 * MB), maxImageSize(480, 480)),
+  issuerLogo: combineAsync(imageFile(), maxFileSize(1 * MB), maxImageSize(480, 480)),
   executiveSummary: combine(required(), mimeType('application/pdf'), maxFileSize(5 * MB)),
   website: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),
   forum: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),

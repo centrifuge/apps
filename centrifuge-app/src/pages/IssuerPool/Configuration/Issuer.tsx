@@ -4,6 +4,7 @@ import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
+import { ButtonGroup } from '../../../components/ButtonGroup'
 import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { PageSection } from '../../../components/PageSection'
@@ -54,7 +55,6 @@ export const Issuer: React.FC = () => {
       const oldMetadata = metadata as PoolMetadata
       const execSummaryChanged = values.executiveSummary !== initialValues.executiveSummary
       const logoChanged = values.issuerLogo !== initialValues.issuerLogo
-      const hasChanges = Object.entries(values).some(([k, v]) => (initialValues as any)[k] !== v)
 
       if (!hasChanges) {
         setIsEditing(false)
@@ -106,6 +106,13 @@ export const Issuer: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues])
 
+  React.useEffect(() => {
+    form.resetForm()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing])
+
+  const hasChanges = Object.entries(form.values).some(([k, v]) => (initialValues as any)[k] !== v)
+
   return (
     <FormikProvider value={form}>
       <Form>
@@ -113,15 +120,21 @@ export const Issuer: React.FC = () => {
           title={`Issuer - ${metadata?.pool?.issuer.name}`}
           headerRight={
             isEditing ? (
-              <Button
-                type="submit"
-                small
-                loading={isLoading || form.isSubmitting}
-                loadingMessage={isLoading || form.isSubmitting ? 'Pending...' : undefined}
-                key="done"
-              >
-                Done
-              </Button>
+              <ButtonGroup variant="small">
+                <Button variant="secondary" onClick={() => setIsEditing(false)} small>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  small
+                  loading={isLoading || form.isSubmitting}
+                  loadingMessage={isLoading || form.isSubmitting ? 'Pending...' : undefined}
+                  key="done"
+                  disabled={!hasChanges}
+                >
+                  Done
+                </Button>
+              </ButtonGroup>
             ) : (
               <Button variant="secondary" onClick={() => setIsEditing(true)} small key="edit">
                 Edit
