@@ -98,7 +98,7 @@ export const WriteOffGroups: React.FC = () => {
           errors = setIn(
             errors,
             `writeOffGroups.${index}.penaltyInterest`,
-            'Penalty fee rate must stay equal or increase as days increase'
+            'Penalty fee must stay equal or increase as days increase'
           )
         } else {
           highestPenalty = g.penaltyInterest as number
