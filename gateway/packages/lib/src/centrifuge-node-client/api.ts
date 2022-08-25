@@ -117,7 +117,7 @@ export interface CoreapiAccount {
    * @type {ConfigCentChainAccount}
    * @memberof CoreapiAccount
    */
-  centrifugeChainAccount?: ConfigCentChainAccount
+  centrifuge_chain_account?: ConfigCentChainAccount
   /**
    *
    * @type {CoreapiEthAccount}
@@ -366,7 +366,7 @@ export interface CoreapiGenerateAccountPayload {
    * @type {ConfigCentChainAccount}
    * @memberof CoreapiGenerateAccountPayload
    */
-  centrifugeChainAccount?: ConfigCentChainAccount
+  centrifuge_chain_account?: ConfigCentChainAccount
 }
 /**
  *
