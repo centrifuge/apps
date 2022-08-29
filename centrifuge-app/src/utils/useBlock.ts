@@ -18,6 +18,7 @@ export const useBlock = () => {
     return () => {
       sub.unsubscribe()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return { block }

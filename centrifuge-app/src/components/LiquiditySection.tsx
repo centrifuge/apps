@@ -15,15 +15,12 @@ type LiquiditySectionProps = {
 
 export const LiquiditySection: React.FC<LiquiditySectionProps> = ({ pool }) => {
   const { status } = pool.epoch
-  if (status === 'ongoing') {
-    return <EpochStatusOngoing pool={pool} />
-  } else if (status === 'submissionPeriod') {
+  if (status === 'submissionPeriod') {
     return <EpochStatusSubmission pool={pool} />
   } else if (status === 'executionPeriod' || status === 'challengePeriod') {
     return <EpochStatusExecution pool={pool} />
-  } else {
-    return null
   }
+  return <EpochStatusOngoing pool={pool} />
 }
 
 const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {

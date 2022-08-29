@@ -830,8 +830,8 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function submitSolution(args: [poolId: string], options?: TransactionOptions) {
-    const [poolId] = args
+  function submitSolution(args: [poolId: string, dryRun?: boolean], options?: TransactionOptions) {
+    const [poolId, dryRun] = args
     const $pool = getPool([poolId]).pipe(take(1))
     const $api = inst.getApi()
     return combineLatest([$pool]).pipe(
@@ -865,6 +865,9 @@ export function getPoolsModule(inst: Centrifuge) {
         if (!optimalSolution.isFeasible) {
           console.warn('Calculated solution is not feasible')
           return of(new Error('Solution not feasible'))
+        }
+        if (dryRun) {
+          return of(optimalSolution)
         }
         const submittable = api.tx.pools.submitSolution(poolId, optimalSolution.tranches)
         return inst.wrapSignAndSend(api, submittable, options)

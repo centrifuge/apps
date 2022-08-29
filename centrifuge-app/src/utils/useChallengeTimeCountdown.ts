@@ -26,7 +26,7 @@ export const useChallengeTimeCountdown = (poolId: string) => {
       }
     }
     asyncCallback()
-  }, [block])
+  }, [block, cent.utils, pool])
 
-  return { minutes: minutesRemaining, minutesTotal }
+  return { minutesRemaining, minutesTotal }
 }

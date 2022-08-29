@@ -83,7 +83,16 @@ export const calculateOptimalSolution = async (
     return {
       isFeasible: false,
       tranches: state.tranches.map(() => {
-        return [Perquintill.fromFloat(0), Perquintill.fromFloat(0)]
+        return {
+          invest: {
+            perquintill: Perquintill.fromFloat(0),
+            amount: CurrencyBalance.fromFloat(0, state.currencyDecimals),
+          },
+          redeem: {
+            perquintill: Perquintill.fromFloat(0),
+            amount: CurrencyBalance.fromFloat(0, state.currencyDecimals),
+          },
+        }
       }),
     }
   }
@@ -99,7 +108,16 @@ export const calculateOptimalSolution = async (
       const redeemPerquintill = Perquintill.fromFloat(
         redeemSolution.gtn(0) ? redeemSolution.toDecimal().div(orders[index].redeem.toDecimal()).toString() : 0
       )
-      return [investPerquintill, redeemPerquintill]
+      return {
+        invest: {
+          perquintill: investPerquintill,
+          amount: investSolution,
+        },
+        redeem: {
+          perquintill: redeemPerquintill,
+          amount: redeemSolution,
+        },
+      }
     }),
   }
 }
@@ -143,7 +161,7 @@ export interface TrancheState {
 
 export interface State {
   netAssetValue: CurrencyBalance
-  reserve: CurrencyBalance // total?
+  reserve: CurrencyBalance
   tranches: TrancheState[]
   maxReserve: CurrencyBalance
   currencyDecimals: number
@@ -159,14 +177,16 @@ interface TrancheWeights {
   redeem: BN
 }
 
-export interface SolverSolution {
-  tinRedeem: BN
-  dropRedeem: BN
-  tinInvest: BN
-  dropInvest: BN
+export type TrancheResult = {
+  invest: {
+    perquintill: Perquintill
+    amount: CurrencyBalance
+  }
+  redeem: {
+    perquintill: Perquintill
+    amount: CurrencyBalance
+  }
 }
-
-type TrancheResult = [Perquintill, Perquintill]
 
 export interface SolverResult {
   isFeasible: boolean
