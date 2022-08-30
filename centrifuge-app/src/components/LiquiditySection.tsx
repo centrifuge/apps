@@ -1,11 +1,11 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { Button, IconInfo, Shelf, Text } from '@centrifuge/fabric'
-import { BN } from '@polkadot/util'
 import React from 'react'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useChallengeTimeCountdown } from '../utils/useChallengeTimeCountdown'
 import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { EpochList } from './EpochList'
+import { LiquidityProvider, useLiquidity } from './LiquidityProvider'
 import { PageSection } from './PageSection'
 import { Tooltips } from './Tooltips'
 
@@ -13,17 +13,34 @@ type LiquiditySectionProps = {
   pool: Pool
 }
 
+const ExtraInfo: React.FC = ({ children }) => {
+  return (
+    <Shelf mb={2} gap={1}>
+      <IconInfo size={16} />
+      <Text variant="body3">{children}</Text>
+    </Shelf>
+  )
+}
+
 export const LiquiditySection: React.FC<LiquiditySectionProps> = ({ pool }) => {
   const { status } = pool.epoch
-  if (status === 'submissionPeriod') {
-    return <EpochStatusSubmission pool={pool} />
-  } else if (status === 'executionPeriod' || status === 'challengePeriod') {
-    return <EpochStatusExecution pool={pool} />
-  }
-  return <EpochStatusOngoing pool={pool} />
+
+  return (
+    <LiquidityProvider>
+      {status === 'submissionPeriod' ? (
+        <EpochStatusSubmission pool={pool} />
+      ) : status === 'executionPeriod' || status === 'challengePeriod' ? (
+        <EpochStatusExecution pool={pool} />
+      ) : (
+        <EpochStatusOngoing pool={pool} />
+      )}
+    </LiquidityProvider>
+  )
 }
 
 const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
+  const { sumOfLockedInvestments, sumOfLockedRedemptions, sumOfExecutableInvestments, sumOfExecutableRedemptions } =
+    useLiquidity()
   const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id)
   const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
     'Close epoch',
@@ -40,14 +57,15 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
     closeEpochTx([pool.id])
   }
 
-  const outstandingInvestOrders = pool.tranches.reduce<BN>((prev, curr) => {
-    return prev.add(curr.outstandingInvestOrders)
-  }, new BN(0))
-  const outstandingRedeemOrders = pool.tranches.reduce<BN>((prev, curr) => {
-    return prev.add(curr.outstandingRedeemOrders)
-  }, new BN(0))
-
-  const noOrdersLocked = !epochTimeRemaining && outstandingInvestOrders.add(outstandingRedeemOrders).lten(0)
+  const ordersLocked = !epochTimeRemaining && sumOfLockedInvestments.add(sumOfLockedRedemptions).gt(0)
+  const ordersPartiallyExecutable =
+    (sumOfExecutableInvestments.gt(0) && sumOfExecutableInvestments.lt(sumOfLockedInvestments)) ||
+    (sumOfExecutableRedemptions.gt(0) && sumOfExecutableRedemptions.lt(sumOfLockedRedemptions))
+  const ordersFullyExecutable =
+    sumOfLockedInvestments.equals(sumOfExecutableInvestments) &&
+    sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
+  const noOrdersExecutable =
+    !ordersFullyExecutable && sumOfExecutableInvestments.eq(0) && sumOfExecutableRedemptions.eq(0)
 
   return (
     <PageSection
@@ -55,10 +73,10 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
       titleAddition={<Text variant="body2">{epochTimeRemaining ? 'Ongoing' : 'Minimum duration ended'}</Text>}
       headerRight={
         <Shelf gap="1">
-          {noOrdersLocked && <Text variant="body2">No orders locked</Text>}
-          {false && <Text variant="body2">Orders executable</Text>}
-          {false && <Text variant="body2">Orders partially executable</Text>}
-          {false && <Text variant="body2">No orders executable</Text>}
+          {!epochTimeRemaining && !ordersLocked && <Text variant="body2">No orders locked</Text>}
+          {ordersLocked && ordersFullyExecutable && <Text variant="body2">Orders executable</Text>}
+          {ordersLocked && ordersPartiallyExecutable && <Text variant="body2">Orders partially executable</Text>}
+          {ordersLocked && noOrdersExecutable && <Text variant="body2">No orders executable</Text>}
           {epochTimeRemaining && <Tooltips type="epochTimeRemaining" label={epochTimeRemaining} />}
           <Button
             small
@@ -73,11 +91,20 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
         </Shelf>
       }
     >
-      {noOrdersLocked && (
-        <Shelf mb={2} gap={1}>
-          <IconInfo size={16} />
-          <Text variant="body3">The epoch is continuing until orders have been locked and can be executed.</Text>
-        </Shelf>
+      {!epochTimeRemaining && !ordersLocked && (
+        <ExtraInfo>The epoch is continuing until orders have been locked and can be executed.</ExtraInfo>
+      )}
+      {ordersLocked && ordersPartiallyExecutable && (
+        <ExtraInfo>
+          The epoch continues until all orders can be executed. Close the epoch to partially execute orders and lock the
+          remaining orders into the following epoch.
+        </ExtraInfo>
+      )}
+      {!ordersLocked && noOrdersExecutable && (
+        <ExtraInfo>
+          The pool currently may be oversubscribed for additional investments or there is insufficient liquidity
+          available for redemptions. Closing of the epoch will not ensure execution of pending orders.
+        </ExtraInfo>
       )}
       <EpochList pool={pool} />
     </PageSection>
@@ -93,9 +120,8 @@ const EpochStatusSubmission: React.FC<{ pool: Pool }> = ({ pool }) => {
       onSuccess: () => {
         console.log('Solution successfully submitted')
       },
-      onError: (error) => {
+      onError: () => {
         setIsFeasible(false)
-        console.log('Solution unsuccesful', error?.toJSON())
       },
     }
   )

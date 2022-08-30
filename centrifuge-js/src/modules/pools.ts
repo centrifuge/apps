@@ -869,7 +869,10 @@ export function getPoolsModule(inst: Centrifuge) {
         if (dryRun) {
           return of(optimalSolution)
         }
-        const submittable = api.tx.pools.submitSolution(poolId, optimalSolution.tranches)
+        const solution = optimalSolution.tranches.map((tranche) => {
+          return [tranche.invest.perquintill, tranche.redeem.perquintill]
+        })
+        const submittable = api.tx.pools.submitSolution(poolId, solution)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -1176,9 +1179,9 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap(
         (api) =>
           combineLatest([
-            api.query.pools.pool.entries(),
-            api.query.loans.poolNAV.entries(),
-            api.query.pools.epochExecution.entries(),
+            api.query.pools.pool.entries().pipe(take(1)),
+            api.query.loans.poolNAV.entries().pipe(take(1)),
+            api.query.pools.epochExecution.entries().pipe(take(1)),
           ]),
         (api, [rawPools, rawNavs, rawEpochExecutions]) => ({ api, rawPools, rawNavs, rawEpochExecutions })
       ),
