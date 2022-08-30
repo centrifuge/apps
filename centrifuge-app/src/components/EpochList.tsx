@@ -56,7 +56,7 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
     investments,
     redemptions,
   } = useLiquidity()
-  const summaryInvestments = {
+  const summaryInvestments: LiquidityTableRow = {
     order: (
       <Text variant="body2" fontWeight={600}>
         Total investments
@@ -95,10 +95,10 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
     ),
   }
 
-  const summaryRedemptions = {
+  const summaryRedemptions: LiquidityTableRow = {
     order: (
       <Text variant="body2" fontWeight={600}>
-        Total investments
+        Total redemptions
       </Text>
     ),
     locked: (
