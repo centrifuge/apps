@@ -68,8 +68,11 @@ describe('pocc-solver tests', () => {
         DebugMode ||
         result.isFeasible !== expected.isFeasible ||
         result.tranches.every((result, index) => {
-          const [investResult, redeemResult] = result
-          return investResult !== expected.tranches[index].invest || redeemResult !== expected.tranches[index].redeem
+          const { invest: investResult, redeem: redeemResult } = result
+          return (
+            investResult.perquintill !== expected.tranches[index].invest ||
+            redeemResult.perquintill !== expected.tranches[index].redeem
+          )
         })
       ) {
         if (problem.explanation) console.log(`${problem.explanation}\n`)
@@ -94,14 +97,14 @@ describe('pocc-solver tests', () => {
 
       assert.strictEqual(result.isFeasible, expected.isFeasible, 'isFeasible does not match')
       result.tranches.forEach((result, index) => {
-        const [investResult, redeemResult] = result
+        const { invest: investResult, redeem: redeemResult } = result
         assert.strictEqual(
-          investResult.toString(),
+          investResult.perquintill.toString(),
           expected.tranches[index].invest.toString(),
           `tranche-${index}-invest is not correct`
         )
         assert.strictEqual(
-          redeemResult.toString(),
+          redeemResult.perquintill.toString(),
           expected.tranches[index].redeem.toString(),
           `tranche-${index}-redeem is not correct`
         )

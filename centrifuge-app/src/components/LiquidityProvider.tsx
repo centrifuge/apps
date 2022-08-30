@@ -45,6 +45,7 @@ export const LiquidityProvider: React.FC = ({ children }) => {
 
   React.useEffect(() => {
     submitSolution()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const investments: LiquidityTableRow[] = React.useMemo(() => {
@@ -57,7 +58,7 @@ export const LiquidityProvider: React.FC = ({ children }) => {
         executingPercentage: executableOrders?.[index]?.invest.perquintill || Perquintill.fromPercent(0),
       }
     })
-  }, [metadata, executableOrders])
+  }, [metadata, executableOrders, pool])
 
   const redemptions: LiquidityTableRow[] = React.useMemo(() => {
     return pool!.tranches.map((token, index) => {
@@ -69,7 +70,7 @@ export const LiquidityProvider: React.FC = ({ children }) => {
         executingPercentage: executableOrders?.[index]?.redeem.perquintill || Perquintill.fromPercent(0),
       }
     })
-  }, [metadata, executableOrders])
+  }, [metadata, executableOrders, pool])
 
   const { sumOfExecutableInvestments, sumOfExecutableRedemptions, sumOfLockedInvestments, sumOfLockedRedemptions } =
     React.useMemo(() => {
