@@ -3,7 +3,7 @@ import { hash } from '@stablelib/blake2b'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, expand, firstValueFrom, from, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
-import { calculateOptimalSolution } from '..'
+import { calculateOptimalSolution, SolverResult } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import { SubqueryPoolSnapshot } from '../types/subquery'
@@ -806,12 +806,26 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function closeEpoch(args: [poolId: string], options?: TransactionOptions) {
-    const [poolId] = args
+  function closeEpoch(args: [poolId: string, batchSolution: boolean], options?: TransactionOptions) {
+    const [poolId, batchSolution] = args
     const $api = inst.getApi()
 
-    return $api.pipe(
-      switchMap((api) => {
+    const $solution = batchSolution ? submitSolution([poolId, true]) : of(null)
+
+    return combineLatest([$api, $solution]).pipe(
+      switchMap(([api, optimalSolution]) => {
+        if (optimalSolution) {
+          const trancheSolution = (optimalSolution as SolverResult).tranches.map((tranche) => [
+            tranche.invest.perquintill,
+            tranche.redeem.perquintill,
+          ])
+          const submittable = api.tx.utility.batchAll([
+            api.tx.loans.updateNav(poolId),
+            api.tx.pools.closeEpoch(poolId),
+            api.tx.pools.submitSolution(poolId, trancheSolution),
+          ])
+          return inst.wrapSignAndSend(api, submittable, options)
+        }
         const submittable = api.tx.utility.batchAll([api.tx.loans.updateNav(poolId), api.tx.pools.closeEpoch(poolId)])
         return inst.wrapSignAndSend(api, submittable, options)
       })
@@ -869,9 +883,10 @@ export function getPoolsModule(inst: Centrifuge) {
         if (dryRun) {
           return of(optimalSolution)
         }
-        const solution = optimalSolution.tranches.map((tranche) => {
-          return [tranche.invest.perquintill, tranche.redeem.perquintill]
-        })
+        const solution = optimalSolution.tranches.map((tranche) => [
+          tranche.invest.perquintill,
+          tranche.redeem.perquintill,
+        ])
         const submittable = api.tx.pools.submitSolution(poolId, solution)
         return inst.wrapSignAndSend(api, submittable, options)
       })

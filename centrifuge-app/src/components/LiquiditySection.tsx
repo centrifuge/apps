@@ -54,7 +54,8 @@ const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
 
   const closeEpoch = async () => {
     if (!pool) return
-    closeEpochTx([pool.id])
+    const batchCloseAndSolution = ordersLocked && !ordersFullyExecutable
+    closeEpochTx([pool.id, batchCloseAndSolution])
   }
 
   const ordersLocked = !epochTimeRemaining && sumOfLockedInvestments.add(sumOfLockedRedemptions).gt(0)
