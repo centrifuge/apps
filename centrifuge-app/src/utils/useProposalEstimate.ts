@@ -25,14 +25,22 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
         const connectedCent = centrifuge.connect(selectedAccount?.address, selectedAccount?.signer as any)
         return combineLatest([
           centrifuge.getApi(),
-          connectedCent.pools.createPool(args, { batch: true, paymentInfo: selectedAccount.address }),
+          connectedCent.pools.createPool(args, {
+            batch: true,
+            paymentInfo: selectedAccount.address,
+            createType: config.poolCreationType,
+          }),
         ]).pipe(
           map(([api, submittable]) => {
             const { minimumDeposit, preimageByteDeposit } = api.consts.democracy
             setChainDecimals(api.registry.chainDecimals[0])
-            const feeBN = hexToBN(minimumDeposit.toHex()).add(
-              hexToBN(preimageByteDeposit.toHex()).mul(new BN((submittable as any).encodedLength))
+            const notePreimageDeposit = hexToBN(preimageByteDeposit.toHex()).mul(
+              new BN((submittable as any).encodedLength)
             )
+            const feeBN =
+              config.poolCreationType === 'notePreimage'
+                ? notePreimageDeposit
+                : notePreimageDeposit.add(hexToBN(minimumDeposit.toHex()))
             return new CurrencyBalance(feeBN, chainDecimals)
           })
         )
@@ -68,7 +76,7 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
 
       const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
 
-      // Complete the data in the form with some dummy data for things like poolId and metadata hash
+      // Complete the data in the form with some dummy data for things like poolId and metadata
       feeSubject.next([
         selectedAccount.address,
         '1234567890',
