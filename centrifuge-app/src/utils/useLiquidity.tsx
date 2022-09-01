@@ -23,16 +23,11 @@ export const useLiquidity = (poolId: string) => {
 
   const $source = cent.pools.submitSolution([poolId], { dryRun: true })
 
-  const { data: solution, refetch } = useQuery(
-    ['solution', { poolId }],
-    () => ($source ? firstValueFrom($source) : null),
-    {
-      onSuccess: (data: SolverResult) => {
-        console.log('🚀 ~ data inside', data)
-      },
-      enabled: !!poolId,
-    }
-  )
+  const { data, refetch } = useQuery(['solution', { poolId }], () => ($source ? firstValueFrom($source) : null), {
+    enabled: !!poolId,
+  })
+
+  const solution = data as SolverResult
 
   React.useEffect(() => {
     refetch()
