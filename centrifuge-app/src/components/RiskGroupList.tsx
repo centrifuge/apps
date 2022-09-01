@@ -14,7 +14,7 @@ import { Spinner } from './Spinner'
 
 const RiskGroupSharesPieChart = React.lazy(() => import('./Charts/RiskGroupSharesPieChart'))
 
-export type AssetByRiskGroup = {
+export type RiskGroupRow = {
   color?: string
   labelColor?: string
   name: string | React.ReactElement
@@ -22,13 +22,14 @@ export type AssetByRiskGroup = {
   share: string | React.ReactElement
   interestRatePerSec: string | React.ReactElement
   riskAdjustment: string | React.ReactElement
+  currency: string
 }
 
 const columns: Column[] = [
   {
     align: 'left',
     header: <SortableTableHeader label="Risk group" />,
-    cell: (riskGroup: AssetByRiskGroup) => (
+    cell: (riskGroup: RiskGroupRow) => (
       <Shelf gap="1">
         {riskGroup?.color && <Box width="10px" height="10px" backgroundColor={riskGroup.color} />}
         <Text variant="body2" fontWeight={600}>
@@ -41,19 +42,20 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Amount" />,
-    cell: ({ amount }: AssetByRiskGroup) => <Text variant="body2">{amount}</Text>,
+    cell: ({ amount, currency }: RiskGroupRow) =>
+      typeof amount === 'string' ? <Text variant="body2">{formatBalance(Dec(amount), currency)}</Text> : amount,
     flex: '1',
     sortKey: 'amount',
   },
   {
     header: <SortableTableHeader label="Share" />,
-    cell: ({ share }: AssetByRiskGroup) => <Text variant="body2">{share}%</Text>,
+    cell: ({ share }: RiskGroupRow) => <Text variant="body2">{share}%</Text>,
     flex: '1',
     sortKey: 'share',
   },
   {
     header: <SortableTableHeader label="Financing fee" />,
-    cell: ({ interestRatePerSec }: AssetByRiskGroup) => (
+    cell: ({ interestRatePerSec }: RiskGroupRow) => (
       <Text variant="body2">
         {interestRatePerSec && typeof interestRatePerSec === 'string'
           ? `${interestRatePerSec}%`
@@ -67,7 +69,7 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Risk adjustment" />,
-    cell: ({ riskAdjustment }: AssetByRiskGroup) => (
+    cell: ({ riskAdjustment }: RiskGroupRow) => (
       <Text variant="body2">
         {riskAdjustment && typeof riskAdjustment === 'string'
           ? `${riskAdjustment}%`
@@ -128,21 +130,23 @@ const RiskGroupList: React.FC = () => {
         )
         if (!amount || !totalAmountsSum) {
           return {
+            currency: pool?.currency || '',
             name: group.name,
             amount: '',
             share: '',
             interestRatePerSec,
             riskAdjustment,
-          } as AssetByRiskGroup
+          } as RiskGroupRow
         }
 
         return {
+          currency: pool?.currency || '',
           name: group.name,
-          amount: formatBalance(amount, pool?.currency),
+          amount: amount.toDecimal().toString(),
           share: Dec(amount?.toDecimal()).div(totalAmountsSum.toDecimal()).mul(100).toDecimalPlaces(0).toString(),
           interestRatePerSec,
           riskAdjustment,
-        } as AssetByRiskGroup
+        } as RiskGroupRow
       }) || []
     )
   }, [metadata, activeLoans, pool, totalAmountsSum])
@@ -150,21 +154,29 @@ const RiskGroupList: React.FC = () => {
   const totalSharesSum = riskGroups
     .reduce((prev, curr) => (typeof curr.share === 'string' ? prev.add(curr.share || 0) : prev), Dec(0))
     .toString()
-  const summaryRow = React.useMemo(() => {
+  const summaryRow: RiskGroupRow = React.useMemo(() => {
+    // average weighted by outstanding amounts
     const avgInterestRatePerSec = riskGroups
       .reduce(
-        (prev, curr) => (typeof curr.interestRatePerSec === 'string' ? prev.add(Dec(curr.interestRatePerSec)) : prev),
+        (prev, curr) =>
+          typeof curr.interestRatePerSec === 'string' && typeof curr.amount === 'string'
+            ? prev.add(Dec(curr.interestRatePerSec).mul(curr.amount))
+            : prev,
         Dec(0)
       )
-      .dividedBy(riskGroups.length)
+      .dividedBy(totalAmountsSum.toDecimal())
       .toDecimalPlaces(2)
 
+    // average weighted by outstanding amounts
     const avgRiskAdjustment = riskGroups
       .reduce(
-        (prev, curr) => (typeof curr.riskAdjustment === 'string' ? prev.add(Dec(curr.riskAdjustment)) : prev),
+        (prev, curr) =>
+          typeof curr.riskAdjustment === 'string' && typeof curr.amount === 'string'
+            ? prev.add(Dec(curr.riskAdjustment).mul(curr.amount))
+            : prev,
         Dec(0)
       )
-      .dividedBy(riskGroups.length)
+      .dividedBy(totalAmountsSum.toDecimal())
       .toDecimalPlaces(2)
 
     return {
@@ -187,6 +199,7 @@ const RiskGroupList: React.FC = () => {
       riskAdjustment: <Text variant="body2" fontWeight={600}>{`Avg. ${avgRiskAdjustment.toString()}%`}</Text>,
       color: '',
       labelColor: '',
+      currency: pool?.currency || '',
     }
   }, [riskGroups, pool?.currency, totalSharesSum, totalAmountsSum])
 
