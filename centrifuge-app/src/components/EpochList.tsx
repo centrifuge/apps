@@ -5,10 +5,10 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { useTheme } from 'styled-components'
 import { formatBalance, formatPercentage } from '../utils/formatting'
+import { useLiquidity } from '../utils/useLiquidity'
 import { usePool } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
 import { DataTableGroup } from './DataTableGroup'
-import { useLiquidity } from './LiquidityProvider'
 import { AnchorTextLink } from './TextLink'
 
 type Props = {
@@ -55,7 +55,7 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
     sumOfLockedRedemptions,
     investments,
     redemptions,
-  } = useLiquidity()
+  } = useLiquidity(pool.id)
   const summaryInvestments: LiquidityTableRow = {
     order: (
       <Text variant="body2" fontWeight={600}>
@@ -90,7 +90,11 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
             : theme.colors.textPrimary
         }
       >
-        {formatPercentage(Perquintill.fromFloat(sumOfExecutableInvestments.div(sumOfLockedInvestments)))}
+        {formatPercentage(
+          Perquintill.fromFloat(
+            sumOfExecutableInvestments.div(sumOfLockedInvestments.gt(0) ? sumOfLockedInvestments : 1)
+          )
+        )}
       </Text>
     ),
   }
@@ -129,7 +133,11 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
             : theme.colors.textPrimary
         }
       >
-        {formatPercentage(Perquintill.fromFloat(sumOfExecutableRedemptions.div(sumOfLockedRedemptions)))}
+        {formatPercentage(
+          Perquintill.fromFloat(
+            sumOfExecutableRedemptions.div(sumOfLockedRedemptions.gt(0) ? sumOfLockedRedemptions : 1)
+          )
+        )}
       </Text>
     ),
   }

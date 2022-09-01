@@ -4,8 +4,8 @@ import React from 'react'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useChallengeTimeCountdown } from '../utils/useChallengeTimeCountdown'
 import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
+import { useLiquidity } from '../utils/useLiquidity'
 import { EpochList } from './EpochList'
-import { LiquidityProvider, useLiquidity } from './LiquidityProvider'
 import { PageSection } from './PageSection'
 import { Tooltips } from './Tooltips'
 
@@ -26,7 +26,7 @@ export const LiquiditySection: React.FC<LiquiditySectionProps> = ({ pool }) => {
   const { status } = pool.epoch
 
   return (
-    <LiquidityProvider>
+    <>
       {status === 'submissionPeriod' ? (
         <EpochStatusSubmission pool={pool} />
       ) : status === 'executionPeriod' || status === 'challengePeriod' ? (
@@ -34,13 +34,13 @@ export const LiquiditySection: React.FC<LiquiditySectionProps> = ({ pool }) => {
       ) : (
         <EpochStatusOngoing pool={pool} />
       )}
-    </LiquidityProvider>
+    </>
   )
 }
 
 const EpochStatusOngoing: React.FC<{ pool: Pool }> = ({ pool }) => {
   const { sumOfLockedInvestments, sumOfLockedRedemptions, sumOfExecutableInvestments, sumOfExecutableRedemptions } =
-    useLiquidity()
+    useLiquidity(pool.id)
   const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id)
   const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
     'Close epoch',

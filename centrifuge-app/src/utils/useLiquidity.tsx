@@ -1,10 +1,11 @@
-import { Perquintill, TrancheResult } from '@centrifuge/centrifuge-js'
+import { Perquintill, SolverResult } from '@centrifuge/centrifuge-js'
+import { firstValueFrom } from '@polkadot/rpc-core/node_modules/rxjs'
 import Decimal from 'decimal.js-light'
 import React from 'react'
-import { useParams } from 'react-router'
+import { useQuery } from 'react-query'
+import { useCentrifuge } from '../components/CentrifugeProvider'
 import { LiquidityTableRow } from '../components/EpochList'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
-import { usePool, usePoolMetadata } from '../utils/usePools'
+import { usePool, usePoolMetadata } from './usePools'
 
 type Liquidity = {
   investments: LiquidityTableRow[]
@@ -15,38 +16,27 @@ type Liquidity = {
   sumOfLockedRedemptions: Decimal
 }
 
-const LiquidityContext = React.createContext<Liquidity>(null as any)
-
-export const LiquidityProvider: React.FC = ({ children }) => {
-  const { pid: poolId } = useParams<{ pid: string }>()
+export const useLiquidity = (poolId: string) => {
   const pool = usePool(poolId)
+  const cent = useCentrifuge()
   const { data: metadata } = usePoolMetadata(pool)
-  const [executableOrders, setExecutableOrders] = React.useState<TrancheResult[]>()
 
-  const { execute: submitSolutionTx } = useCentrifugeTransaction(
-    'Submit solution',
-    (cent) => cent.pools.submitSolution,
+  const $source = cent.pools.submitSolution([poolId], { dryRun: true })
+
+  const { data: solution, refetch } = useQuery(
+    ['solution', { poolId }],
+    () => ($source ? firstValueFrom($source) : null),
     {
-      onSuccess: (_, result) => {
-        // @ts-ignore
-        setExecutableOrders(result.tranches)
-        console.log('Solution successfully submitted')
+      onSuccess: (data: SolverResult) => {
+        console.log('🚀 ~ data inside', data)
       },
-      onError: (error) => {
-        console.log('Solution unsuccesful', error)
-      },
+      enabled: !!poolId,
     }
   )
 
-  const submitSolution = async () => {
-    if (!pool) return
-    submitSolutionTx([pool.id, true])
-  }
-
   React.useEffect(() => {
-    submitSolution()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    refetch()
+  }, [pool])
 
   const investments: LiquidityTableRow[] = React.useMemo(() => {
     return pool!.tranches.map((token, index) => {
@@ -54,11 +44,11 @@ export const LiquidityProvider: React.FC = ({ children }) => {
       return {
         order: `${trancheMeta?.symbol} investments`,
         locked: token.outstandingInvestOrders?.toDecimal() || new Decimal(0),
-        executing: executableOrders?.[index]?.invest.amount.toDecimal() || new Decimal(0),
-        executingPercentage: executableOrders?.[index]?.invest.perquintill || Perquintill.fromPercent(0),
+        executing: solution?.tranches?.[index]?.invest.amount.toDecimal() || new Decimal(0),
+        executingPercentage: solution?.tranches?.[index]?.invest.perquintill || Perquintill.fromPercent(0),
       }
     })
-  }, [metadata, executableOrders, pool])
+  }, [metadata, solution?.tranches, pool])
 
   const redemptions: LiquidityTableRow[] = React.useMemo(() => {
     return pool!.tranches.map((token, index) => {
@@ -66,11 +56,11 @@ export const LiquidityProvider: React.FC = ({ children }) => {
       return {
         order: `${trancheMeta?.symbol} redemptions`,
         locked: token.outstandingRedeemOrders?.toDecimal() || new Decimal(0),
-        executing: executableOrders?.[index]?.redeem.amount.toDecimal() || new Decimal(0),
-        executingPercentage: executableOrders?.[index]?.redeem.perquintill || Perquintill.fromPercent(0),
+        executing: solution?.tranches?.[index]?.redeem.amount.toDecimal() || new Decimal(0),
+        executingPercentage: solution?.tranches?.[index]?.redeem.perquintill || Perquintill.fromPercent(0),
       }
     })
-  }, [metadata, executableOrders, pool])
+  }, [metadata, solution?.tranches, pool])
 
   const { sumOfExecutableInvestments, sumOfExecutableRedemptions, sumOfLockedInvestments, sumOfLockedRedemptions } =
     React.useMemo(() => {
@@ -99,24 +89,12 @@ export const LiquidityProvider: React.FC = ({ children }) => {
       }
     }, [redemptions, investments])
 
-  return (
-    <LiquidityContext.Provider
-      value={{
-        investments,
-        redemptions,
-        sumOfLockedInvestments,
-        sumOfExecutableInvestments,
-        sumOfLockedRedemptions,
-        sumOfExecutableRedemptions,
-      }}
-    >
-      {children}
-    </LiquidityContext.Provider>
-  )
-}
-
-export function useLiquidity() {
-  const ctx = React.useContext(LiquidityContext)
-  if (!ctx) throw new Error('useLiquidity must be used within LiquidityProvider')
-  return ctx
+  return {
+    investments,
+    redemptions,
+    sumOfLockedInvestments,
+    sumOfExecutableInvestments,
+    sumOfLockedRedemptions,
+    sumOfExecutableRedemptions,
+  } as Liquidity
 }

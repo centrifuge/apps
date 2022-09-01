@@ -810,7 +810,7 @@ export function getPoolsModule(inst: Centrifuge) {
     const [poolId, batchSolution] = args
     const $api = inst.getApi()
 
-    const $solution = batchSolution ? submitSolution([poolId, true]) : of(null)
+    const $solution = batchSolution ? submitSolution([poolId], { dryRun: true }) : of(null)
 
     return combineLatest([$api, $solution]).pipe(
       switchMap(([api, optimalSolution]) => {
@@ -844,8 +844,8 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function submitSolution(args: [poolId: string, dryRun?: boolean], options?: TransactionOptions) {
-    const [poolId, dryRun] = args
+  function submitSolution(args: [poolId: string], options?: TransactionOptions) {
+    const [poolId] = args
     const $pool = getPool([poolId]).pipe(take(1))
     const $api = inst.getApi()
     return combineLatest([$pool]).pipe(
@@ -880,7 +880,7 @@ export function getPoolsModule(inst: Centrifuge) {
           console.warn('Calculated solution is not feasible')
           return of(new Error('Solution not feasible'))
         }
-        if (dryRun) {
+        if (options?.dryRun) {
           return of(optimalSolution)
         }
         const solution = optimalSolution.tranches.map((tranche) => [
@@ -1194,9 +1194,9 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap(
         (api) =>
           combineLatest([
-            api.query.pools.pool.entries().pipe(take(1)),
-            api.query.loans.poolNAV.entries().pipe(take(1)),
-            api.query.pools.epochExecution.entries().pipe(take(1)),
+            api.query.pools.pool.entries(),
+            api.query.loans.poolNAV.entries(),
+            api.query.pools.epochExecution.entries(),
           ]),
         (api, [rawPools, rawNavs, rawEpochExecutions]) => ({ api, rawPools, rawNavs, rawEpochExecutions })
       ),
