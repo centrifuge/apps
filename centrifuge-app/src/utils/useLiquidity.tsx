@@ -36,7 +36,7 @@ export const useLiquidity = (poolId: string) => {
 
   React.useEffect(() => {
     refetch()
-  }, [pool])
+  }, [pool, refetch])
 
   const investments: LiquidityTableRow[] = React.useMemo(() => {
     return pool!.tranches.map((token, index) => {
