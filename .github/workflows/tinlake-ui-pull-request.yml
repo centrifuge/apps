@@ -139,7 +139,7 @@ jobs:
           NEXT_PUBLIC_RWA_MARKET_ONBOARD_RETURN_URL: 'https://rwamarket.io'
           NEXT_PUBLIC_POOL_REGISTRY: '0xddf1c516cf87126c6c610b52fd8d609e67fb6033'
           NEXT_PUBLIC_POOLS_CONFIG: 'mainnetProduction'
-          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmZmXGymPherntXSkZDxS3t38f8KzRtAEhqQGjc3oFpugs'
+          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmYr9ievW13hdnJM29frdcAsiuxuJHX6XcxAi71zG9qt17'
           NEXT_PUBLIC_PORTIS_KEY: 'bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f'
           NEXT_PUBLIC_REWARDS_TREE_URL: 'https://storage.googleapis.com/rad-rewards-trees-mainnet-production/latest.json'
           NEXT_PUBLIC_RPC_URL: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516'
