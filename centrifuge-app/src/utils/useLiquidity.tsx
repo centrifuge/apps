@@ -20,69 +20,72 @@ export const useLiquidity = (poolId: string) => {
   const pool = usePool(poolId)
   const cent = useCentrifuge()
   const { data: metadata } = usePoolMetadata(pool)
+  const [investments, setInvestments] = React.useState<LiquidityTableRow[]>()
+  const [redemptions, setRedemptions] = React.useState<LiquidityTableRow[]>()
 
   const $source = cent.pools.submitSolution([poolId], { dryRun: true })
 
-  const { data, refetch } = useQuery(['solution', { poolId }], () => ($source ? firstValueFrom($source) : null), {
+  const { refetch } = useQuery(['solution', { poolId }], () => ($source ? firstValueFrom($source) : null), {
     enabled: !!poolId,
-  })
+    onSuccess: (solution: SolverResult) => {
+      const investmentsRow: LiquidityTableRow[] = pool!.tranches.map((token, index) => {
+        const trancheMeta = metadata?.tranches?.[token.id]
+        return {
+          order: `${trancheMeta?.symbol} investments`,
+          locked: token.outstandingInvestOrders?.toDecimal() || new Decimal(0),
+          executing: solution?.tranches?.[index]?.invest.amount.toDecimal() || new Decimal(0),
+          executingPercentage: solution?.tranches?.[index]?.invest.perquintill || Perquintill.fromPercent(0),
+        }
+      })
+      setInvestments(investmentsRow)
 
-  const solution = data as SolverResult
+      const redemptionsRow: LiquidityTableRow[] = pool!.tranches.map((token, index) => {
+        const trancheMeta = metadata?.tranches?.[token.id]
+        return {
+          order: `${trancheMeta?.symbol} redemptions`,
+          locked: token.outstandingRedeemOrders?.toDecimal() || new Decimal(0),
+          executing: solution?.tranches?.[index]?.redeem.amount.toDecimal() || new Decimal(0),
+          executingPercentage: solution?.tranches?.[index]?.redeem.perquintill || Perquintill.fromPercent(0),
+        }
+      })
+      setRedemptions(redemptionsRow)
+    },
+  })
 
   React.useEffect(() => {
     refetch()
   }, [pool, refetch])
 
-  const investments: LiquidityTableRow[] = React.useMemo(() => {
-    return pool!.tranches.map((token, index) => {
-      const trancheMeta = metadata?.tranches?.[token.id]
-      return {
-        order: `${trancheMeta?.symbol} investments`,
-        locked: token.outstandingInvestOrders?.toDecimal() || new Decimal(0),
-        executing: solution?.tranches?.[index]?.invest.amount.toDecimal() || new Decimal(0),
-        executingPercentage: solution?.tranches?.[index]?.invest.perquintill || Perquintill.fromPercent(0),
-      }
-    })
-  }, [metadata, solution?.tranches, pool])
+  const { sumOfExecutableInvestments, sumOfLockedInvestments } = React.useMemo(() => {
+    const sumOfLockedInvestments = investments?.reduce(
+      (prev, { locked }) => prev.add(locked as Decimal),
+      new Decimal(0)
+    )
+    const sumOfExecutableInvestments = investments?.reduce(
+      (prev, { executing }) => prev.add(executing as Decimal),
+      new Decimal(0)
+    )
 
-  const redemptions: LiquidityTableRow[] = React.useMemo(() => {
-    return pool!.tranches.map((token, index) => {
-      const trancheMeta = metadata?.tranches?.[token.id]
-      return {
-        order: `${trancheMeta?.symbol} redemptions`,
-        locked: token.outstandingRedeemOrders?.toDecimal() || new Decimal(0),
-        executing: solution?.tranches?.[index]?.redeem.amount.toDecimal() || new Decimal(0),
-        executingPercentage: solution?.tranches?.[index]?.redeem.perquintill || Perquintill.fromPercent(0),
-      }
-    })
-  }, [metadata, solution?.tranches, pool])
+    return {
+      sumOfExecutableInvestments,
+      sumOfLockedInvestments,
+    }
+  }, [investments])
 
-  const { sumOfExecutableInvestments, sumOfExecutableRedemptions, sumOfLockedInvestments, sumOfLockedRedemptions } =
-    React.useMemo(() => {
-      const sumOfLockedInvestments = investments.reduce(
-        (prev, { locked }) => prev.add(locked as Decimal),
-        new Decimal(0)
-      )
-      const sumOfExecutableInvestments = investments.reduce(
-        (prev, { executing }) => prev.add(executing as Decimal),
-        new Decimal(0)
-      )
-
-      const sumOfLockedRedemptions = redemptions.reduce(
-        (prev, { locked }) => prev.add(locked as Decimal),
-        new Decimal(0)
-      )
-      const sumOfExecutableRedemptions = redemptions.reduce(
-        (prev, { executing }) => prev.add(executing as Decimal),
-        new Decimal(0)
-      )
-      return {
-        sumOfExecutableInvestments,
-        sumOfExecutableRedemptions,
-        sumOfLockedInvestments,
-        sumOfLockedRedemptions,
-      }
-    }, [redemptions, investments])
+  const { sumOfExecutableRedemptions, sumOfLockedRedemptions } = React.useMemo(() => {
+    const sumOfLockedRedemptions = redemptions?.reduce(
+      (prev, { locked }) => prev.add(locked as Decimal),
+      new Decimal(0)
+    )
+    const sumOfExecutableRedemptions = redemptions?.reduce(
+      (prev, { executing }) => prev.add(executing as Decimal),
+      new Decimal(0)
+    )
+    return {
+      sumOfExecutableRedemptions,
+      sumOfLockedRedemptions,
+    }
+  }, [redemptions])
 
   return {
     investments,
