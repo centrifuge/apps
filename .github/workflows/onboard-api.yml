@@ -1,16 +1,16 @@
 name: 'onboarding-api'
-on: 
+on:
   push:
     branches:
       - main
   pull_request:
     paths:
-    - 'onboarding/api/**'
+      - 'onboarding-api/**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       # Setup
       - uses: actions/checkout@v2
@@ -31,16 +31,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - run: yarn install
-
       # Build
       - run: yarn run build
-        working-directory: ./onboarding/api
+        working-directory: ./onboarding-api
 
   push:
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -60,7 +59,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./onboarding/api/docker/Dockerfile
+          file: ./onboarding-api/docker/Dockerfile
           push: true
           tags: centrifugeio/onboard-api:latest
           # tags: centrifugeio/onboard-api:${{ steps.tag.outputs.TAG_NAME }}

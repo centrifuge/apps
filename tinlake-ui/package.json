@@ -8,11 +8,12 @@
     "fs": false
   },
   "scripts": {
-    "build": "yarn build:deps && yarn build:next && yarn build:lambda",
+    "build": "yarn build:deps && yarn build:onboarding-ui && yarn build:next && yarn build:lambda",
     "build-for-husky": "tsc",
-    "dev:next": "PORT=3000 node server.js",
+    "dev:next": "PORT=3001 node server.js",
     "build:next": "next build",
-    "start": "yarn build:deps && run-p -l dev:next dev:lambda",
+    "start": "yarn build:deps && yarn build:onboarding-ui && run-p -l dev:next dev:lambda",
+    "build:onboarding-ui": " cd ../onboarding-ui && yarn build && cd ../tinlake-ui",
     "serve": "next start",
     "test": "jest",
     "export": "yarn build && next export && yarn build:redirects",

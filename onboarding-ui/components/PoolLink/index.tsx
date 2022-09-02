@@ -9,8 +9,6 @@ interface Props {
   as?: string | UrlObject
 }
 
-const { NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL } = process.env
-
 // PoolLink allows navigation within the same pool (it pre-fixes the passed href by the root address)
 export const PoolLink: React.FC<Props> = ({ href, as, children }) => {
   const router = useRouter()
@@ -44,9 +42,9 @@ export const PoolLink: React.FC<Props> = ({ href, as, children }) => {
 
 function getHref(root: string | string[] | undefined, href: string | null | undefined | UrlObject): string {
   if (root) {
-    return `${NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL}/pool/${root}${href}`
+    return `/pool/[root]/[slug]${href}`
   }
-  return `${NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL}/pool${href}`
+  return `/pool/[slug]${href}`
 }
 
 function getAs(
@@ -55,7 +53,7 @@ function getAs(
   as: string | null | undefined | UrlObject
 ): string {
   if (slug) {
-    return `${NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL}/pool/${root}/${slug}${as}`
+    return `/pool/${root}/${slug}${as}`
   }
-  return `${NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL}/pool/${root}${as}`
+  return `/pool/${root}${as}`
 }

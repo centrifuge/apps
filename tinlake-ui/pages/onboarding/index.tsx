@@ -1,15 +1,18 @@
+import { InvestorOnboarding } from '@centrifuge/onboarding-ui'
 import { GetStaticProps } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import * as React from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Auth from '../../components/Auth'
 import { FunnelHeader } from '../../components/FunnelHeader'
 import { IpfsPoolsProvider } from '../../components/IpfsPoolsProvider'
-import { InvestorOnboarding } from '../../components/Onboarding'
-import { PageContainer } from '../../components/PageContainer'
 import { TinlakeProvider } from '../../components/TinlakeProvider'
 import WithFooter from '../../components/WithFooter'
 import { IpfsPools, loadPoolsFromIPFS } from '../../config'
+import { AuthState, ensureAuthed } from '../../ducks/auth'
+import { useAddress } from '../../utils/useAddress'
+import { useInvestorOnboardingState } from '../../utils/useOnboardingState'
 
 interface Props {
   ipfsPools: IpfsPools
@@ -18,6 +21,17 @@ interface Props {
 const InvestorOnboardingPage: React.FC<Props> = ({ ipfsPools }) => {
   const router = useRouter()
   const { from } = router.query
+
+  const address = useAddress()
+  const onboarding = useInvestorOnboardingState()
+
+  const { authState } = useSelector<any, AuthState>((state) => state.auth)
+
+  const dispatch = useDispatch()
+
+  function connect() {
+    dispatch(ensureAuthed())
+  }
 
   return (
     <IpfsPoolsProvider value={ipfsPools}>
@@ -28,9 +42,7 @@ const InvestorOnboardingPage: React.FC<Props> = ({ ipfsPools }) => {
           </Head>
           <FunnelHeader returnPath={(from as string) || '/'} />
           <Auth>
-            <PageContainer width="funnel" noMargin>
-              <InvestorOnboarding />
-            </PageContainer>
+            <InvestorOnboarding authState={authState} address={address} onboarding={onboarding} connect={connect} />
           </Auth>
         </WithFooter>
       </TinlakeProvider>
@@ -40,9 +52,12 @@ const InvestorOnboardingPage: React.FC<Props> = ({ ipfsPools }) => {
 
 export const getStaticProps: GetStaticProps = async () => {
   const ipfsPools = await loadPoolsFromIPFS()
-  // Fix to force page rerender, from https://github.com/vercel/next.js/issues/9992
-  const newProps: Props = { ipfsPools }
-  return { props: newProps }
+
+  return {
+    props: {
+      ipfsPools,
+    },
+  }
 }
 
 export default InvestorOnboardingPage

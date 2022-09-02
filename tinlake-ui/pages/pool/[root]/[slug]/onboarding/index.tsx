@@ -1,15 +1,18 @@
+import { PoolOnboarding } from '@centrifuge/onboarding-ui'
 import { GetStaticProps } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import * as React from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Auth from '../../../../../components/Auth'
 import { FunnelHeader } from '../../../../../components/FunnelHeader'
 import { IpfsPoolsProvider } from '../../../../../components/IpfsPoolsProvider'
-import { PoolOnboarding } from '../../../../../components/Onboarding'
-import { PageContainer } from '../../../../../components/PageContainer'
 import { TinlakeProvider } from '../../../../../components/TinlakeProvider'
 import WithFooter from '../../../../../components/WithFooter'
 import { IpfsPools, loadPoolsFromIPFS, Pool } from '../../../../../config'
+import { AuthState, ensureAuthed } from '../../../../../ducks/auth'
+import { useAddress } from '../../../../../utils/useAddress'
+import { useOnboardingState } from '../../../../../utils/useOnboardingState'
 
 interface Props {
   root: string
@@ -17,9 +20,27 @@ interface Props {
   ipfsPools: IpfsPools
 }
 
+type Tranche = 'junior' | 'senior'
+
+const DefaultTranche = 'senior'
+
 const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
   const router = useRouter()
   const { root, slug, from } = router.query
+
+  const trancheOverride = router.query.tranche as Tranche | undefined
+  const tranche = trancheOverride || DefaultTranche
+
+  const address = useAddress()
+  const onboarding = useOnboardingState(pool, tranche)
+  const { authState } = useSelector<any, AuthState>((state) => state.auth)
+
+  const dispatch = useDispatch()
+
+  function connect() {
+    dispatch(ensureAuthed())
+  }
+
   return (
     <IpfsPoolsProvider value={ipfsPools}>
       <TinlakeProvider addresses={pool.addresses} contractConfig={pool.contractConfig} contractVersions={pool.versions}>
@@ -29,9 +50,13 @@ const OnboardingPage: React.FC<Props> = ({ pool, ipfsPools }) => {
           </Head>
           <FunnelHeader returnPath={(from as string) || `/pool/${root}/${slug}/investments`} />
           <Auth>
-            <PageContainer width="funnel" noMargin>
-              <PoolOnboarding activePool={pool} />
-            </PageContainer>
+            <PoolOnboarding
+              authState={authState}
+              address={address}
+              pool={pool}
+              onboarding={onboarding}
+              connect={connect}
+            />
           </Auth>
         </WithFooter>
       </TinlakeProvider>
