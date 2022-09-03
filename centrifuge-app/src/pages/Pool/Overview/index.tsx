@@ -23,6 +23,7 @@ import { usePendingCollectMulti, usePool, usePoolMetadata } from '../../../utils
 import { PoolDetailHeader } from '../Header'
 
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
+const PriceYieldChart = React.lazy(() => import('../../../components/Charts/PriceYieldChart'))
 
 export const PoolDetailOverviewTab: React.FC = () => {
   const { state } = useLocation<{ token: string }>()
@@ -197,6 +198,7 @@ export const PoolDetailOverview: React.FC<{
           {tokens?.map((token, i) => (
             <div key={token.id} ref={(node) => node && handleTokenMount(node, token.id)}>
               <InteractiveCard
+                variant="collapsible"
                 icon={<Thumbnail label={metadata?.tranches?.[token.id]?.symbol ?? ''} type="token" />}
                 title={
                   <TextWithPlaceholder isLoading={metadataIsLoading}>
@@ -241,7 +243,11 @@ export const PoolDetailOverview: React.FC<{
                     )}
                   </Shelf>
                 }
-              />
+              >
+                <React.Suspense fallback={<Spinner />}>
+                  <PriceYieldChart />
+                </React.Suspense>
+              </InteractiveCard>
             </div>
           ))}
         </Stack>
