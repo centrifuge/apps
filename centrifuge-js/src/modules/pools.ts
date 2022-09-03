@@ -6,7 +6,7 @@ import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxj
 import { calculateOptimalSolution } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
-import { SubqueryPoolSnapshot } from '../types/subquery'
+import { SubqueryPoolSnapshot, SubqueryTrancheSnapshot } from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
@@ -1441,6 +1441,46 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getDailyTrancheState(args: [poolId: string, trancheId: string]) {
+    const [poolId, trancheId] = args
+    const $query = inst.getSubqueryObservable<{ trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] } }>(
+      `query($trancheId: String!) {
+        trancheSnapshots(
+          filter: { 
+            trancheId: { includes: $trancheId },
+          }) {
+          nodes {
+            price
+            blockNumber
+            timestamp
+            trancheId
+            tranche {
+              poolId
+              trancheId
+            }
+          }
+        }
+      }
+      `,
+      {
+        trancheId,
+      }
+    )
+    return $query.pipe(
+      map((data) => {
+        if (!data) {
+          return []
+        }
+        return data.trancheSnapshots.nodes.map((state) => {
+          return {
+            ...state,
+            price: new Price(state.price),
+          }
+        })
+      })
+    )
+  }
+
   function getNativeCurrency() {
     return inst.getApi().pipe(
       map((api) => ({
@@ -1904,6 +1944,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getAvailablePoolId,
     getDailyPoolStates,
     getNativeCurrency,
+    getDailyTrancheState,
   }
 }
 
