@@ -15,7 +15,7 @@ type ChartData = {
 const PriceYieldChart: React.VFC<{ trancheId: string }> = ({ trancheId }) => {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
-  const trancheStates = useDailyTrancheStates(poolId, trancheId)
+  const trancheStates = useDailyTrancheStates(trancheId)
   const pool = usePool(poolId)
 
   const data: ChartData[] = React.useMemo(() => {

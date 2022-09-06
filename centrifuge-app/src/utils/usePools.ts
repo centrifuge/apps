@@ -35,10 +35,10 @@ export function useDailyPoolStates(poolId: string) {
   return result
 }
 
-export function useDailyTrancheStates(poolId: string, trancheId: string) {
+export function useDailyTrancheStates(trancheId: string) {
   const [result] = useCentrifugeQuery(
-    ['dailyTrancheStates', { poolId }],
-    (cent) => cent.pools.getDailyTrancheState([poolId, trancheId]),
+    ['dailyTrancheStates', { trancheId }],
+    (cent) => cent.pools.getDailyTrancheStates([trancheId]),
     {
       suspense: true,
     }

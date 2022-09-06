@@ -1441,8 +1441,8 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getDailyTrancheState(args: [poolId: string, trancheId: string]) {
-    const [poolId, trancheId] = args
+  function getDailyTrancheStates(args: [trancheId: string]) {
+    const [trancheId] = args
     const $query = inst.getSubqueryObservable<{ trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] } }>(
       `query($trancheId: String!) {
         trancheSnapshots(
@@ -1944,7 +1944,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getAvailablePoolId,
     getDailyPoolStates,
     getNativeCurrency,
-    getDailyTrancheState,
+    getDailyTrancheStates,
   }
 }
 
