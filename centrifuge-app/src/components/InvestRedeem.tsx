@@ -672,7 +672,7 @@ const PendingOrder: React.FC<{
           </Shelf>
           <Text variant="body3">
             Locked {type === 'invest' ? 'investments' : 'redemptions'} are executed at the end of the epoch (
-            {epochTimeRemaining || `0 min remaining`}).{' '}
+            {(pool.epoch.status === 'ongoing' && epochTimeRemaining) || `0 min remaining`}).{' '}
             <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
           </Text>
         </Stack>

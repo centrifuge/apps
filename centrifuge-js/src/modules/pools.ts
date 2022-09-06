@@ -878,7 +878,7 @@ export function getPoolsModule(inst: Centrifuge) {
       switchMap(([api, optimalSolution]) => {
         if (!optimalSolution.isFeasible) {
           console.warn('Calculated solution is not feasible')
-          return of(new Error('Solution not feasible'))
+          return of(null)
         }
         if (options?.dryRun) {
           return of(optimalSolution)
