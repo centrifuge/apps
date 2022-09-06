@@ -245,7 +245,7 @@ export const PoolDetailOverview: React.FC<{
                 }
               >
                 <React.Suspense fallback={<Spinner />}>
-                  <PriceYieldChart />
+                  <PriceYieldChart trancheId={token.id} />
                 </React.Suspense>
               </InteractiveCard>
             </div>

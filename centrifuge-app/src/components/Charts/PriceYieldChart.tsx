@@ -12,10 +12,10 @@ type ChartData = {
   tokenPrice: number
 }
 
-const PriceYieldChart: React.VFC = () => {
+const PriceYieldChart: React.VFC<{ trancheId: string }> = ({ trancheId }) => {
   const theme = useTheme()
   const { pid: poolId } = useParams<{ pid: string }>()
-  const trancheStates = useDailyTrancheStates(poolId, '0xe881f34c28a53f3886d6d03eb30ba05b')
+  const trancheStates = useDailyTrancheStates(poolId, trancheId)
   const pool = usePool(poolId)
 
   const data: ChartData[] = React.useMemo(() => {
@@ -35,16 +35,16 @@ const PriceYieldChart: React.VFC = () => {
     day: new Date(),
     tokenPrice:
       pool?.tranches
-        .find((tranche) => tranche.id === '0xe881f34c28a53f3886d6d03eb30ba05b')
+        .find((tranche) => tranche.id === trancheId)
         ?.tokenPrice?.toDecimal()
-        .toNumber() || 1,
+        .toNumber() || 0,
   }
 
   const chartData = [...data, today]
 
   return (
     <Stack>
-      <CustomLegend data={today} />
+      <CustomLegend data={today} poolId={poolId} />
       <Shelf gap="4" width="100%" color="textSecondary">
         {chartData?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
@@ -63,7 +63,7 @@ const PriceYieldChart: React.VFC = () => {
                 }}
               />
               <CartesianGrid stroke={theme.colors.borderSecondary} />
-              <Tooltip content={<CustomizedTooltip currency={pool?.currency || ''} />} />
+              <Tooltip content={<CustomizedTooltip currency={pool?.currency || ''} precision={2} />} />
               <Line dot={false} dataKey="tokenPrice" stroke={theme.colors.accentPrimary} name="Pool value" />
             </ComposedChart>
           </ResponsiveContainer>
@@ -77,15 +77,17 @@ const PriceYieldChart: React.VFC = () => {
 
 const CustomLegend: React.VFC<{
   data: ChartData
-}> = ({ data }) => {
+  poolId: string
+}> = ({ data, poolId }) => {
   const theme = useTheme()
+  const pool = usePool(poolId)
 
   return (
     <Shelf bg="backgroundSecondary" width="100%" gap="2">
       <Grid pl="4" pb="4" columns={6} gap="3" width="100%">
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentPrimary}>
           <Text variant="label2">Token price</Text>
-          <Text variant="body2">{formatBalance(data.tokenPrice, undefined, 2)}</Text>
+          <Text variant="body2">{formatBalance(data.tokenPrice, pool?.currency, 2)}</Text>
         </Stack>
       </Grid>
     </Shelf>
