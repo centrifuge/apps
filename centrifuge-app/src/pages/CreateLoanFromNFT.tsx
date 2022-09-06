@@ -72,7 +72,7 @@ const CreateLoanFromNFT: React.FC = () => {
         const event = result.events.find(({ event }) => api.events.loans.Created.is(event))
         if (event) {
           const eventData = event.toHuman() as any
-          const loanId = eventData.event.data[1].replace(/\D/g, '')
+          const loanId = eventData.event.data.loanId
 
           // Doing the redirect via state, so it only happens if the user is still on this
           // page when the transaction completes
