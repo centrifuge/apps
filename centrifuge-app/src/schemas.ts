@@ -6,9 +6,11 @@ export const nftMetadataSchema = {
   description: {
     type: 'string',
     maxLength: 400,
+    optional: true,
   },
   image: {
     type: 'string',
+    optional: true,
   },
   properties: {
     type: 'any',

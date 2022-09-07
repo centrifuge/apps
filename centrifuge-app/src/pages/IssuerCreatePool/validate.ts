@@ -19,6 +19,8 @@ import {
 export const MB = 1024 ** 2
 
 export const validate = {
+  nftImage: combine(imageFile(), maxFileSize(1 * MB)),
+
   poolName: combine(required(), maxLength(100)),
   poolIcon: combine(required(), mimeType('image/svg+xml', 'Icon must be an SVG file')),
   assetClass: required(),

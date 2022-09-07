@@ -16,6 +16,7 @@ export type Transaction = {
 type TransactionsContextType = {
   transactions: Transaction[]
   addTransaction: (tx: Transaction) => void
+  addOrUpdateTransaction: (tx: Transaction) => void
   updateTransaction: (id: string, update: Partial<Transaction> | ((prev: Transaction) => Partial<Transaction>)) => void
 }
 
@@ -39,13 +40,23 @@ export const TransactionProvider: React.FC = ({ children }) => {
     []
   )
 
+  const addOrUpdateTransaction = React.useCallback((tx: Transaction) => {
+    setTransactions((prev) => {
+      if (prev.find((t) => t.id === tx.id)) {
+        return prev.map((t) => (t.id === tx.id ? { ...t, dismissed: false, ...tx } : t))
+      }
+      return [...prev, tx]
+    })
+  }, [])
+
   const ctx: TransactionsContextType = React.useMemo(
     () => ({
       transactions,
       addTransaction,
       updateTransaction,
+      addOrUpdateTransaction,
     }),
-    [transactions, addTransaction, updateTransaction]
+    [transactions, addTransaction, updateTransaction, addOrUpdateTransaction]
   )
 
   return <TransactionsContext.Provider value={ctx}>{children}</TransactionsContext.Provider>

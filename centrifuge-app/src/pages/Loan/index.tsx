@@ -1,26 +1,17 @@
-import {
-  Box,
-  Button,
-  IconAlertCircle,
-  IconNft,
-  InteractiveCard,
-  Shelf,
-  Stack,
-  Text,
-  Thumbnail,
-} from '@centrifuge/fabric'
+import { Box, IconAlertCircle, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { Identity } from '../../components/Identity'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import LoanLabel from '../../components/LoanLabel'
-import { useNodeAuth, useNodeDocument } from '../../components/NodeAuthProvider'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { PageSummary } from '../../components/PageSummary'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { AnchorPillButton } from '../../components/PillButton'
+import { usePodAuth, usePodDocument } from '../../components/PodAuthProvider'
+import { PodAuthSection } from '../../components/PodAuthSection'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
@@ -29,10 +20,10 @@ import { Schema, SchemaAttribute } from '../../types'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage, truncateText } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
-import { useAvailableFinancing, useLoan } from '../../utils/useLoans'
+import { useAvailableFinancing, useLoan, useNftDocumentId } from '../../utils/useLoans'
 import { useMetadata } from '../../utils/useMetadata'
 import { useNFT } from '../../utils/useNFTs'
-import { useCanBorrow, usePermissions } from '../../utils/usePermissions'
+import { useCanBorrowAsset, usePermissions } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
 import { PricingForm } from './PricingForm'
@@ -53,7 +44,7 @@ const LoanSidebar: React.FC = () => {
   const pool = usePool(pid)
   const address = useAddress()
   const permissions = usePermissions(address)
-  const canBorrow = useCanBorrow(pid, aid)
+  const canBorrow = useCanBorrowAsset(pid, aid)
   const canPrice = permissions?.pools[pid]?.roles.includes('PricingAdmin')
 
   if (loan && pool && loan?.status === 'Created' && canPrice) {
@@ -64,8 +55,6 @@ const LoanSidebar: React.FC = () => {
 
   return <FinanceForm loan={loan} />
 }
-
-const MOCK_NODE_URL = '0.0.0.0'
 
 const Loan: React.FC = () => {
   const { pid: poolId, aid: assetId } = useParams<{ pid: string; aid: string }>()
@@ -87,11 +76,13 @@ const Loan: React.FC = () => {
     nftMetadata?.properties?.schema && `ipfs://ipfs/${nftMetadata?.properties?.schema}`
   )
 
-  const { isLoggedIn, login, hasAccount } = useNodeAuth(MOCK_NODE_URL)
-  const { data: document } = useNodeDocument(MOCK_NODE_URL, 'testDocId')
+  const documentId = useNftDocumentId(nft?.collectionId, nft?.id)
+  const podUrl = poolMetadata?.node?.url
+  const { isLoggedIn } = usePodAuth(podUrl)
+  const { data: document } = usePodDocument(podUrl, documentId)
 
   const publicData = nftMetadata?.properties
-    ? Object.fromEntries(Object.entries(nftMetadata?.properties).map(([key, obj]: any) => [key, obj.value]))
+    ? Object.fromEntries(Object.entries(nftMetadata.properties).map(([key, obj]: any) => [key, obj]))
     : {}
   const privateData = document?.attributes
     ? Object.fromEntries(Object.entries(document.attributes).map(([key, obj]: any) => [key, obj.value]))
@@ -182,19 +173,12 @@ const Loan: React.FC = () => {
                   {section.attributes.map((attr) => {
                     const key = labelToKey(attr.label)
                     const value = section.public ? publicData[key] : privateData[key]
-                    const formatted = formatValue(value, attr)
+                    const formatted = value ? formatValue(value, attr) : '-'
                     return <LabelValueStack label={attr.label} value={formatted} key={key} />
                   })}
                 </Shelf>
-              ) : !section.public && !isLoggedIn && hasAccount ? (
-                <Shelf gap={2} justifyContent="center">
-                  <Shelf gap={1}>
-                    <IconAlertCircle size="iconSmall" /> <Text variant="body3">This information is private</Text>
-                  </Shelf>
-                  <Button onClick={login} small>
-                    Authenticate to view
-                  </Button>
-                </Shelf>
+              ) : !section.public && !isLoggedIn && podUrl ? (
+                <PodAuthSection podUrl={podUrl} buttonLabel="Authenticate to view" />
               ) : null}
             </PageSection>
           ))}

@@ -11,16 +11,23 @@ export function usePermissions(address?: string) {
   return result
 }
 
-export function useCanBorrow(poolId: string, assetId: string) {
+export function useCanBorrow(poolId: string) {
   const address = useAddress()
   const permissions = usePermissions(address)
   const { proxy } = useWeb3()
-  const loanNft = useLoanNft(poolId, assetId)
-  const isLoanOwner = isSameAddress(loanNft?.owner, address)
   const canBorrow =
     permissions?.pools[poolId]?.roles.includes('Borrower') &&
-    isLoanOwner &&
     (!proxy || proxy.types.includes('Borrow') || proxy.types.includes('Any'))
+
+  return !!canBorrow
+}
+
+export function useCanBorrowAsset(poolId: string, assetId: string) {
+  const address = useAddress()
+  const hasBorrowPermission = useCanBorrow(poolId)
+  const loanNft = useLoanNft(poolId, assetId)
+  const isLoanOwner = isSameAddress(loanNft?.owner, address)
+  const canBorrow = hasBorrowPermission && isLoanOwner
 
   return !!canBorrow
 }

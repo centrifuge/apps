@@ -345,7 +345,7 @@ const CreatePoolForm: React.VFC = () => {
                 <Field name="poolIcon" validate={validate.poolIcon}>
                   {({ field, meta, form }: FieldProps) => (
                     <FileUpload
-                      file={field.value?.file || null}
+                      file={field.value}
                       onFileChange={async (file) => {
                         form.setFieldTouched('poolIcon', true, false)
                         form.setFieldValue('poolIcon', file)

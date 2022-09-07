@@ -23,7 +23,7 @@ import { CentrifugeProvider } from './CentrifugeProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { GlobalStyle } from './GlobalStyle'
 import { LoadBoundary } from './LoadBoundary'
-import { NodeAuthProvider } from './NodeAuthProvider'
+import { PodAuthProvider } from './PodAuthProvider'
 import { TransactionProvider } from './TransactionsProvider'
 import { TransactionToasts } from './TransactionToasts'
 import { Web3Provider } from './Web3Provider'
@@ -58,7 +58,7 @@ export const Root: React.VFC = () => {
           <FabricGlobalStyle />
           <CentrifugeProvider>
             <Web3Provider>
-              <NodeAuthProvider>
+              <PodAuthProvider>
                 <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
                   <TransactionProvider>
                     <TransactionToasts />
@@ -69,7 +69,7 @@ export const Root: React.VFC = () => {
                     </Router>
                   </TransactionProvider>
                 </DebugFlags>
-              </NodeAuthProvider>
+              </PodAuthProvider>
             </Web3Provider>
           </CentrifugeProvider>
         </FabricProvider>
@@ -103,7 +103,7 @@ const Routes: React.VFC = () => {
       <Route path="/issuer/create-pool">
         <IssuerCreatePoolPage />
       </Route>
-      <Route path="/issuer/create-asset">
+      <Route path="/issuer/:pid/assets/create">
         <IssuerCreateLoanPage />
       </Route>
       <Route exact path="/issuer/:pid/assets/:aid">

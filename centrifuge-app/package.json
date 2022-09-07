@@ -31,6 +31,7 @@
     "bn.js": "^5.2.1",
     "form-data": "^4.0.0",
     "formik": "^2.2.9",
+    "jw3t": "^1.0.8",
     "netlify-lambda": "^2.0.15",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

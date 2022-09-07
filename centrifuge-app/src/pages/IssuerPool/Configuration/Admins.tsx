@@ -73,12 +73,7 @@ export const Admins: React.FC = () => {
     form.resetForm()
     form.setValues(initialValues, false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialValues])
-
-  React.useEffect(() => {
-    form.resetForm()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditing])
+  }, [initialValues, isEditing])
 
   const rows = React.useMemo(
     () => form.values.admins.map((a, i) => ({ ...a, index: i })).sort((a, b) => a.address.localeCompare(b.address)),

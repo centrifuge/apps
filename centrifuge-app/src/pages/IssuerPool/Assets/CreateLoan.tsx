@@ -1,5 +1,5 @@
-import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import {
+  Box,
   Button,
   CurrencyInput,
   DateInput,
@@ -13,20 +13,26 @@ import {
 } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } from 'formik'
 import * as React from 'react'
-import { Redirect, useHistory, useLocation } from 'react-router'
+import { Redirect, useHistory, useParams } from 'react-router'
+import { lastValueFrom, switchMap } from 'rxjs'
 import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
+import { usePodAuth } from '../../../components/PodAuthProvider'
+import { PodAuthSection } from '../../../components/PodAuthSection'
+import { Transaction, useTransactions } from '../../../components/TransactionsProvider'
+import { useWeb3 } from '../../../components/Web3Provider'
 import { Schema } from '../../../types'
 import { truncateText } from '../../../utils/formatting'
+import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useAddress } from '../../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadataMulti } from '../../../utils/useMetadata'
-import { usePermissions } from '../../../utils/usePermissions'
-import { usePools } from '../../../utils/usePools'
+import { useLoanCollectionId } from '../../../utils/useNFTs'
+import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { combine, max, maxLength, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
 
@@ -42,7 +48,6 @@ type FormValues = {
   image: File | null
   description: string
   assetName: string
-  poolId: string
   schemaId: string
   attributes: Record<string, string | number>
 }
@@ -124,73 +129,136 @@ const schemaFields = {
   percentage: PercentageField,
 }
 
+// 'integer' | 'decimal' | 'string' | 'bytes' | 'timestamp' | 'monetary'
+
 const IssuerCreateLoan: React.FC = () => {
-  const { state } = useLocation<{ pid: string }>()
-  const address = useAddress()
-  const permissions = usePermissions(address)
-  const pools = usePools()
+  const { pid } = useParams<{ pid: string }>()
+  const pool = usePool(pid)
   const [redirect, setRedirect] = React.useState<string>()
   const history = useHistory()
+  const address = useAddress()
   const centrifuge = useCentrifuge()
+  const { collateralCollectionId } = useLoanCollectionId(pid)
+  const { selectedAccount, proxy } = useWeb3()
+  const { addTransaction, updateTransaction } = useTransactions()
 
-  const poolIds = permissions
-    ? Object.entries(permissions.pools)
-        .filter(([_, p]) => p.roles.includes('Borrower'))
-        .map(([poolId]) => poolId)
-    : []
+  const { data: poolMetadata } = usePoolMetadata(pool)
+  const podUrl = poolMetadata?.node?.url
 
-  const allowedPools = pools ? pools.filter((p) => poolIds.includes(p.id)) : []
+  const { token, isLoggedIn } = usePodAuth(podUrl)
 
-  const poolMetadata = useMetadataMulti(allowedPools.map((pool) => pool.metadata))
+  const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
+    'Create asset',
+    (cent) =>
+      ([submittable], options) =>
+        cent.getApi().pipe(switchMap((api) => cent.wrapSignAndSend(api, submittable, { ...options, sendOnly: true }))),
+    {
+      onSuccess: async (_, result) => {
+        const api = await centrifuge.getApiPromise()
+        const event = result.events.find(({ event }) => api.events.loans.Created.is(event))
+        if (event) {
+          const eventData = event.toHuman() as any
+          const loanId = eventData.event.data.loanId.replace(/\D/g, '')
 
-  const poolSelectOptions = allowedPools.map((pool, i) => ({
-    label: truncateText((poolMetadata[i].data as PoolMetadata)?.pool?.name || pool.id, 30),
-    value: pool.id,
-  }))
+          // Doing the redirect via state, so it only happens if the user is still on this
+          // page when the transaction completes
+          setRedirect(`/issuer/${pid}/assets/${loanId}`)
+        }
+      },
+    }
+  )
 
   const form = useFormik<FormValues>({
     initialValues: {
       image: null,
       description: '',
       assetName: '',
-      poolId: state?.pid ?? '',
       schemaId: '',
       attributes: {},
     },
-    onSubmit: (values, { setSubmitting }) => {
-      // doTransaction([])
+    onSubmit: async (values, { setSubmitting }) => {
+      if (!podUrl || !collateralCollectionId || !address || !token) return
+
+      const txId = Math.random().toString(36).substr(2)
+
+      const tx: Transaction = {
+        id: txId,
+        title: 'Create document',
+        status: 'creating',
+        args: [],
+      }
+      addTransaction(tx)
+
+      const attributes = valuesToPodAttributes(values.attributes, selectedSchemaMetadata) as any
+      attributes.schema = { type: 'string', value: form.values.schemaId }
+
+      let imageMetadataHash
+      if (values.image) {
+        const fileDataUri = await getFileDataURI(values.image)
+        imageMetadataHash = await lastValueFrom(centrifuge.metadata.pinFile(fileDataUri))
+      }
+
+      const { documentId } = await centrifuge.pod.createDocument([
+        podUrl,
+        token!.signed,
+        {
+          attributes,
+          writeAccess: [address],
+        },
+      ])
+
+      const publicAttributes = selectedSchemaMetadata.sections
+        .filter((s) => s.public)
+        .flatMap((s) => s.attributes.map((a) => labelToKey(a.label)))
+      publicAttributes.push('schema')
+
+      const { nftId, jobId } = await centrifuge.pod.commitDocumentAndMintNft([
+        podUrl,
+        token.signed,
+        {
+          documentId,
+          collectionId: collateralCollectionId,
+          owner: address,
+          publicAttributes,
+          name: values.assetName,
+          description: values.description,
+          image: imageMetadataHash?.uri,
+        },
+      ])
+
+      updateTransaction(txId, { status: 'unconfirmed' })
+
+      const connectedCent = centrifuge.connect(selectedAccount!.address, selectedAccount!.signer as any)
+      if (proxy) {
+        connectedCent.setProxy(proxy.delegator)
+      }
+
+      // Sign createLoan transaction
+      const submittable = await lastValueFrom(
+        connectedCent.pools.createLoan([pid, collateralCollectionId, nftId], { signOnly: true, era: 0 })
+      )
+
+      updateTransaction(txId, { status: 'pending' })
+
+      await centrifuge.pod.awaitJob([podUrl, token.signed, jobId])
+
+      // Send the signed createLoan transaction
+      doTransaction([submittable], undefined, txId)
+
       setSubmitting(false)
     },
   })
 
-  const selectedPoolMetadata = poolMetadata[allowedPools?.findIndex((p) => p.id === form.values.poolId)]
-    ?.data as PoolMetadata
-
-  const schemaIds = selectedPoolMetadata?.schemas?.map((s) => s.id) ?? []
+  const schemaIds = poolMetadata?.schemas?.map((s) => s.id) ?? []
   const schemaMetadata = useMetadataMulti(schemaIds)
 
   const schemaSelectOptions = schemaIds.map((id, i) => ({
-    label: truncateText((schemaMetadata[i].data as Schema)?.name ?? `Schema ${i + 1}`, 30),
+    label: truncateText((schemaMetadata[i].data as Schema)?.name ?? `Template ${i + 1}`, 30),
     value: id,
   }))
 
   const selectedSchemaMetadata = schemaMetadata[schemaIds.findIndex((id) => id === form.values.schemaId)]
     ?.data as Schema
-
-  const { isLoading } = useCentrifugeTransaction('Create asset', (cent) => cent.pools.createLoan, {
-    onSuccess: async ([poolId], result) => {
-      const api = await centrifuge.getApiPromise()
-      const event = result.events.find(({ event }) => api.events.loans.Created.is(event))
-      if (event) {
-        const eventData = event.toHuman() as any
-        const loanId = eventData.event.data[1].replace(/\D/g, '')
-
-        // Doing the redirect via state, so it only happens if the user is still on this
-        // page when the transaction completes
-        setRedirect(`/issuer/${poolId}/assets/${loanId}`)
-      }
-    },
-  })
 
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
@@ -199,105 +267,112 @@ const IssuerCreateLoan: React.FC = () => {
     return <Redirect to={redirect} />
   }
 
+  const isPending = isTxLoading || form.isSubmitting
+
   return (
     <FormikProvider value={form}>
       <Form ref={formRef} noValidate>
         <Stack>
           <PageHeader
             title="Create asset"
-            subtitle={selectedPoolMetadata?.pool?.name}
+            subtitle={poolMetadata?.pool?.name}
             actions={
-              <>
-                <Button variant="secondary" onClick={() => history.goBack()}>
-                  Cancel
-                </Button>
-                <Button type="submit" loading={isLoading} disabled={!form.values.poolId}>
-                  Create
-                </Button>
-              </>
+              isLoggedIn && (
+                <>
+                  <Button variant="secondary" onClick={() => history.goBack()}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" loading={isPending} disabled={!form.values.schemaId}>
+                    Create
+                  </Button>
+                </>
+              )
             }
           />
-          <PageSection titleAddition="Select a schema to enter the asset details.">
-            <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
-              <FieldWithErrorMessage
-                validate={combine(required(), maxLength(100))}
-                name="assetName"
-                as={TextInput}
-                label="Asset name*"
-                placeholder=""
-                maxLength={100}
-              />
-              <Field name="poolId">
-                {({ field, form }: any) => (
-                  <Select
-                    placeholder="Select one"
-                    label="Asset originator"
-                    options={poolSelectOptions}
-                    value={field.value}
-                    onSelect={(v) => {
-                      form.setFieldValue('schemaId', '', false)
-                      form.setFieldTouched('schemaId', false)
-                      form.setFieldValue('poolId', v)
-                    }}
-                    disabled={isLoading}
+          {isLoggedIn ? (
+            <>
+              <PageSection titleAddition="Select a template to enter the asset details.">
+                <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
+                  <FieldWithErrorMessage
+                    validate={combine(required(), maxLength(100))}
+                    name="assetName"
+                    as={TextInput}
+                    label="Asset name*"
+                    placeholder=""
+                    maxLength={100}
                   />
-                )}
-              </Field>
-              <Field name="schemaId" validate={required()}>
-                {({ field, form, meta }: any) => (
-                  <Select
-                    placeholder="Select schema"
-                    label="Schema"
-                    options={schemaSelectOptions}
-                    value={field.value}
-                    onSelect={(v) => {
-                      form.setFieldValue('schemaId', v)
-                    }}
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    disabled={isLoading}
-                  />
-                )}
-              </Field>
-            </Grid>
-          </PageSection>
-          {selectedSchemaMetadata?.sections.map((section) => (
-            <PageSection title={section.name} titleAddition={section.public ? 'Public' : 'Private'} key={section.name}>
-              <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
-                {section.attributes?.map((attr) => {
-                  const Comp = schemaFields[attr.type] as React.VFC<any>
-                  const name = `attributes.${labelToKey(attr.label)}`
-                  return <Comp {...attr} name={name} key={attr.label} />
-                })}
-              </Grid>
-            </PageSection>
-          ))}
+                  <Field name="schemaId" validate={required()}>
+                    {({ field, form, meta }: any) => (
+                      <Select
+                        placeholder="Select template"
+                        label="Asset template"
+                        options={schemaSelectOptions}
+                        value={field.value}
+                        onSelect={(v) => {
+                          form.setFieldValue('schemaId', v)
+                        }}
+                        errorMessage={meta.touched ? meta.error : undefined}
+                        disabled={isPending}
+                      />
+                    )}
+                  </Field>
+                </Grid>
+              </PageSection>
+              {selectedSchemaMetadata?.sections.map((section) => (
+                <PageSection
+                  title={section.name}
+                  titleAddition={section.public ? 'Public' : 'Private'}
+                  key={section.name}
+                >
+                  <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
+                    {section.attributes?.map((attr) => {
+                      const Comp = schemaFields[attr.type] as React.VFC<any>
+                      const name = `attributes.${labelToKey(attr.label)}`
+                      return <Comp {...attr} name={name} key={attr.label} />
+                    })}
+                  </Grid>
+                </PageSection>
+              ))}
 
-          <PageSection title="Description" titleAddition="Optional">
-            <Stack gap={3}>
-              <Field name="image" validate={validate.issuerLogo}>
-                {({ field, meta, form }: FieldProps) => (
-                  <ImageUpload
-                    file={field.value}
-                    onFileChange={(file) => {
-                      form.setFieldTouched('image', true, false)
-                      form.setFieldValue('image', file)
-                    }}
-                    requirements="JPG/PNG, 500x500px, up to 1MB"
-                    label="Asset image"
-                    errorMessage={meta.touched ? meta.error : undefined}
-                    accept="image/jpeg,image/png"
-                  />
-                )}
-              </Field>
-              <FieldWithErrorMessage
-                name="description"
-                as={TextAreaInput}
-                label="Description"
-                placeholder="Add asset description paragraph..."
-                maxLength={100}
-              />
-            </Stack>
-          </PageSection>
+              {(selectedSchemaMetadata?.options.image || selectedSchemaMetadata?.options.description) && (
+                <PageSection title="Description" titleAddition="Optional">
+                  <Stack gap={3}>
+                    {selectedSchemaMetadata.options.image && (
+                      <Field name="image" validate={validate.nftImage}>
+                        {({ field, meta, form }: FieldProps) => (
+                          <ImageUpload
+                            file={field.value}
+                            onFileChange={(file) => {
+                              form.setFieldTouched('image', true, false)
+                              form.setFieldValue('image', file)
+                            }}
+                            requirements="JPG/PNG/SVG, max 1MB"
+                            label="Asset image"
+                            errorMessage={meta.touched ? meta.error : undefined}
+                          />
+                        )}
+                      </Field>
+                    )}
+                    {selectedSchemaMetadata.options.description && (
+                      <FieldWithErrorMessage
+                        name="description"
+                        as={TextAreaInput}
+                        label="Description"
+                        placeholder="Add asset description paragraph..."
+                        maxLength={100}
+                      />
+                    )}
+                  </Stack>
+                </PageSection>
+              )}
+            </>
+          ) : (
+            podUrl && (
+              <Box py={8}>
+                <PodAuthSection podUrl={podUrl} message="You need to be logged in to create assets" />
+              </Box>
+            )
+          )}
         </Stack>
       </Form>
     </FormikProvider>
@@ -306,4 +381,42 @@ const IssuerCreateLoan: React.FC = () => {
 
 function labelToKey(label: string) {
   return label.toLowerCase().replaceAll(/\s/g, '_')
+}
+
+function valuesToPodAttributes(values: FormValues['attributes'], schema: Schema) {
+  return Object.fromEntries(
+    schema.sections.flatMap((section) =>
+      section.attributes.map((attr) => {
+        const key = labelToKey(attr.label)
+        const value = values[key]
+        switch (attr.type) {
+          case 'timestamp':
+            return [
+              key,
+              {
+                type: 'timestamp',
+                value: new Date(value).toISOString(),
+              },
+            ]
+          case 'percentage':
+          case 'currency':
+            return [
+              key,
+              {
+                type: 'decimal',
+                value: String(value),
+              },
+            ]
+          default:
+            return [
+              key,
+              {
+                type: attr.type,
+                value: String(value),
+              },
+            ]
+        }
+      })
+    )
+  )
 }

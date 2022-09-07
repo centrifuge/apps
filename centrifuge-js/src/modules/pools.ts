@@ -1604,7 +1604,7 @@ export function getPoolsModule(inst: Centrifuge) {
             status: getLoanStatus(loan),
             asset: {
               collectionId: collectionId.toString(),
-              nftId: nftId.toString(),
+              nftId: hexToBN(nftId).toString(),
             },
           } as DefaultLoan
         })
@@ -1663,6 +1663,20 @@ export function getPoolsModule(inst: Centrifuge) {
         return loans.map((loan) => ({ ...loan, ...activeLoans[loan.id], ...closedLoans[loan.id] })) as Loan[]
       }),
       repeatWhen(() => $events)
+    )
+  }
+
+  function getNftDocumentId(args: [collectionId: string, nftId: string]) {
+    const [collectionId, nftId] = args
+    const $api = inst.getApi()
+
+    return $api.pipe(
+      switchMap((api) => api.query.uniques.attribute(collectionId, nftId, 'document_id')),
+      map((attributeValue) => {
+        const attribute = attributeValue.toJSON() as any
+        if (!attribute) return null
+        return attribute[0]
+      })
     )
   }
 
@@ -1904,6 +1918,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getAvailablePoolId,
     getDailyPoolStates,
     getNativeCurrency,
+    getNftDocumentId,
   }
 }
 
