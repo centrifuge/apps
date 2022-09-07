@@ -12,3 +12,16 @@ export type SubqueryPoolSnapshot = {
   totalInvested?: number | null
   totalRedeemed?: number | null
 }
+
+export type SubqueryTrancheSnapshot = {
+  __typename?: 'TrancheSnapshot'
+  id: string
+  price: string
+  blockNumber: number
+  timestamp: string
+  trancheId: string // poolId-trancheId
+  tranche: {
+    poolId: string
+    trancheId: string
+  }
+}

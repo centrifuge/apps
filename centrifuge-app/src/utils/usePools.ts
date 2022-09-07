@@ -24,9 +24,25 @@ export function useTokens() {
 }
 
 export function useDailyPoolStates(poolId: string) {
-  const [result] = useCentrifugeQuery(['dailyPoolStates', poolId], (cent) => cent.pools.getDailyPoolStates([poolId]), {
-    suspense: true,
-  })
+  const [result] = useCentrifugeQuery(
+    ['dailyPoolStates', { poolId }],
+    (cent) => cent.pools.getDailyPoolStates([poolId]),
+    {
+      suspense: true,
+    }
+  )
+
+  return result
+}
+
+export function useDailyTrancheStates(trancheId: string) {
+  const [result] = useCentrifugeQuery(
+    ['dailyTrancheStates', { trancheId }],
+    (cent) => cent.pools.getDailyTrancheStates([trancheId]),
+    {
+      suspense: true,
+    }
+  )
 
   return result
 }

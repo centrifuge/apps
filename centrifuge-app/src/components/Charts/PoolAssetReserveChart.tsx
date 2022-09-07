@@ -33,6 +33,7 @@ const PoolAssetReserveChart: React.VFC = () => {
 
   if (poolStates && poolStates?.length < 1) return <Text variant="body2">No data available</Text>
 
+  // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
   const todayPoolValue = pool?.value.toDecimal().toNumber() || 0
   const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
   const today: ChartData = {
@@ -42,7 +43,7 @@ const PoolAssetReserveChart: React.VFC = () => {
     reserve: [todayAssetValue, todayPoolValue],
   }
 
-  const chartData = [...data, today]
+  const chartData = [...data.slice(0, data.length - 1), today]
 
   return (
     <Stack>
@@ -50,7 +51,7 @@ const PoolAssetReserveChart: React.VFC = () => {
       <Shelf gap="4" width="100%" color="textSecondary">
         {chartData?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart data={chartData} margin={{ left: -30 }} reverseStackOrder>
+            <ComposedChart data={chartData} margin={{ left: -16 }} reverseStackOrder>
               <XAxis
                 dataKey="day"
                 tick={<CustomizedXAxisTick variant={chartData.length > 30 ? 'months' : 'days'} />}
@@ -92,7 +93,7 @@ const CustomLegend: React.VFC<{
 
   return (
     <Shelf bg="backgroundPage" width="100%" gap="2">
-      <Grid pl="4" pb="4" columns={6} gap="3" width="100%">
+      <Grid pl="5" pb="4" columns={6} gap="3" width="100%">
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentPrimary}>
           <Tooltips variant="secondary" type="poolValue" />
           <Text variant="body2">{formatBalance(data.poolValue, currency)}</Text>
