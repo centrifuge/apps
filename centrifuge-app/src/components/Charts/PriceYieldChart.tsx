@@ -31,29 +31,18 @@ const PriceYieldChart: React.VFC<{ trancheId: string }> = ({ trancheId }) => {
 
   if (trancheStates && trancheStates?.length < 1) return <Text variant="body2">No data available</Text>
 
-  const today: ChartData = {
-    day: new Date(),
-    tokenPrice:
-      pool?.tranches
-        .find((tranche) => tranche.id === trancheId)
-        ?.tokenPrice?.toDecimal()
-        .toNumber() || 0,
-  }
-
-  const chartData = [...data, today]
-
   return (
     <Stack>
-      <CustomLegend data={today} poolId={poolId} />
+      <CustomLegend data={data[data.length - 1]} poolId={poolId} />
       <Shelf gap="4" width="100%" color="textSecondary">
-        {chartData?.length ? (
+        {data?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart data={chartData} margin={{ left: -30, top: 2 }} reverseStackOrder>
+            <ComposedChart data={data} margin={{ left: -30, top: 2 }} reverseStackOrder>
               <XAxis
                 dataKey="day"
-                tick={<CustomizedXAxisTick variant={chartData.length > 30 ? 'months' : 'days'} />}
+                tick={<CustomizedXAxisTick variant={data.length > 30 ? 'months' : 'days'} />}
                 tickLine={false}
-                interval={chartData.length < 18 || chartData.length > 30 ? 0 : 1}
+                interval={data.length < 18 || data.length > 30 ? 0 : 1}
               />
               <YAxis
                 tickLine={false}

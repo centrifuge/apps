@@ -1446,6 +1446,7 @@ export function getPoolsModule(inst: Centrifuge) {
     const $query = inst.getSubqueryObservable<{ trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] } }>(
       `query($trancheId: String!) {
         trancheSnapshots(
+          orderBy: BLOCK_NUMBER_ASC,
           filter: { 
             trancheId: { includes: $trancheId },
           }) {
