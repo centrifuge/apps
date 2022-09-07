@@ -1,10 +1,12 @@
-import { Pool } from '@centrifuge/centrifuge-js'
+import { Perquintill, Pool } from '@centrifuge/centrifuge-js'
 import { Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { formatBalance } from '../utils/formatting'
-import { usePool, usePoolMetadata } from '../utils/usePools'
+import { useTheme } from 'styled-components'
+import { formatBalance, formatPercentage } from '../utils/formatting'
+import { useLiquidity } from '../utils/useLiquidity'
+import { usePool } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
 import { DataTableGroup } from './DataTableGroup'
 import { AnchorTextLink } from './TextLink'
@@ -13,45 +15,48 @@ type Props = {
   pool: Pool
 }
 
-type TableDataRow = {
+export type LiquidityTableRow = {
   order: string | React.ReactElement
   locked: Decimal | React.ReactElement
+  executing?: Decimal | React.ReactElement
+  executingPercentage?: Perquintill | React.ReactElement
 }
 
 const columns: Column[] = [
   {
     align: 'left',
     header: 'Order',
-    cell: (row: TableDataRow) => <Text variant="body2">{row.order}</Text>,
-    flex: '1',
+    cell: (row: LiquidityTableRow) => <Text variant="body2">{row.order}</Text>,
+    flex: '3',
   },
   {
     header: 'Locked',
-    cell: (row: TableDataRow) => <LockedRow row={row} />,
+    cell: (row: LiquidityTableRow) => <LockedRow row={row} />,
+    flex: '3',
+  },
+  {
+    header: 'Executing',
+    cell: (row: LiquidityTableRow) => <ExecutingRow row={row} />,
+    flex: '3',
+  },
+  {
+    header: '%',
+    cell: (row: LiquidityTableRow) => <ExecutingPercentageRow row={row} />,
     flex: '1',
   },
 ]
 
 export const EpochList: React.FC<Props> = ({ pool }) => {
-  const { data: metadata } = usePoolMetadata(pool)
-
-  const investments: TableDataRow[] = pool.tranches.map((token) => {
-    const trancheMeta = metadata?.tranches?.[token.id]
-    return {
-      order: `${trancheMeta?.symbol} investments`,
-      locked: token.outstandingInvestOrders?.toDecimal() || new Decimal(0),
-    }
-  })
-
-  const redmetions: TableDataRow[] = pool.tranches.map((token) => {
-    const trancheMeta = metadata?.tranches?.[token.id]
-    return {
-      order: `${trancheMeta?.symbol} redemptions`,
-      locked: token.outstandingRedeemOrders?.toDecimal() || new Decimal(0),
-    }
-  })
-
-  const summaryInvestments: TableDataRow = {
+  const theme = useTheme()
+  const {
+    sumOfExecutableInvestments,
+    sumOfLockedInvestments,
+    sumOfExecutableRedemptions,
+    sumOfLockedRedemptions,
+    investments,
+    redemptions,
+  } = useLiquidity(pool.id)
+  const summaryInvestments: LiquidityTableRow = {
     order: (
       <Text variant="body2" fontWeight={600}>
         Total investments
@@ -59,15 +64,42 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
     ),
     locked: (
       <Text variant="body2" fontWeight={600}>
-        {formatBalance(
-          investments.reduce((prev, curr) => prev.add(curr.locked as Decimal), new Decimal(0)),
-          pool.currency
+        {formatBalance(sumOfLockedInvestments, pool!.currency)}
+      </Text>
+    ),
+    executing: (
+      <Text
+        variant="body2"
+        fontWeight={600}
+        color={
+          !sumOfLockedInvestments.equals(sumOfExecutableInvestments)
+            ? theme.colors.statusWarning
+            : theme.colors.textPrimary
+        }
+      >
+        {formatBalance(sumOfExecutableInvestments, pool!.currency)}
+      </Text>
+    ),
+    executingPercentage: (
+      <Text
+        variant="body2"
+        fontWeight={600}
+        color={
+          !sumOfLockedInvestments.equals(sumOfExecutableInvestments)
+            ? theme.colors.statusWarning
+            : theme.colors.textPrimary
+        }
+      >
+        {formatPercentage(
+          Perquintill.fromFloat(
+            sumOfExecutableInvestments.div(sumOfLockedInvestments.gt(0) ? sumOfLockedInvestments : 1)
+          )
         )}
       </Text>
     ),
   }
 
-  const summaryRedemtions: TableDataRow = {
+  const summaryRedemptions: LiquidityTableRow = {
     order: (
       <Text variant="body2" fontWeight={600}>
         Total redemptions
@@ -75,9 +107,36 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
     ),
     locked: (
       <Text variant="body2" fontWeight={600}>
-        {formatBalance(
-          redmetions.reduce((prev, curr) => prev.add(curr.locked as Decimal), new Decimal(0)),
-          pool.currency
+        {formatBalance(sumOfLockedRedemptions, pool!.currency)}
+      </Text>
+    ),
+    executing: (
+      <Text
+        variant="body2"
+        fontWeight={600}
+        color={
+          !sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
+            ? theme.colors.statusWarning
+            : theme.colors.textPrimary
+        }
+      >
+        {formatBalance(sumOfExecutableRedemptions, pool!.currency)}
+      </Text>
+    ),
+    executingPercentage: (
+      <Text
+        variant="body2"
+        fontWeight={600}
+        color={
+          !sumOfLockedRedemptions.equals(sumOfExecutableRedemptions)
+            ? theme.colors.statusWarning
+            : theme.colors.textPrimary
+        }
+      >
+        {formatPercentage(
+          Perquintill.fromFloat(
+            sumOfExecutableRedemptions.div(sumOfLockedRedemptions.gt(0) ? sumOfLockedRedemptions : 1)
+          )
         )}
       </Text>
     ),
@@ -88,7 +147,7 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
       <Stack gap="3">
         <DataTableGroup>
           <DataTable data={investments} columns={columns} summary={summaryInvestments} />
-          <DataTable data={redmetions} columns={columns} summary={summaryRedemtions} />
+          <DataTable data={redemptions} columns={columns} summary={summaryRedemptions} />
         </DataTableGroup>
       </Stack>
       <Text variant="body3" color="textSecondary">
@@ -99,12 +158,32 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
   )
 }
 
-const LockedRow: React.VFC<{ row: TableDataRow }> = ({ row }) => {
+const LockedRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   return (
     <Text variant="body2">
       {React.isValidElement(row.locked) ? row.locked : formatBalance(row.locked, pool?.currency)}
+    </Text>
+  )
+}
+
+const ExecutingRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const pool = usePool(poolId)
+  return (
+    <Text variant="body2">
+      {React.isValidElement(row.executing) ? row.executing : formatBalance(row.executing || 0, pool?.currency)}
+    </Text>
+  )
+}
+
+const ExecutingPercentageRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
+  return (
+    <Text variant="body2">
+      {React.isValidElement(row.executingPercentage)
+        ? row.executingPercentage
+        : formatPercentage((row?.executingPercentage as Perquintill) || 0)}
     </Text>
   )
 }

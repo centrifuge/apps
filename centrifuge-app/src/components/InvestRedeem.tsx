@@ -23,12 +23,12 @@ import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from
 import * as React from 'react'
 import styled from 'styled-components'
 import { config } from '../config'
-import { getEpochTimeRemaining } from '../utils/date'
 import { Dec } from '../utils/Decimal'
 import { formatBalance, getCurrencySymbol, roundDown } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { getBalanceDec, useBalances } from '../utils/useBalances'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
+import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { useFocusInvalidInput } from '../utils/useFocusInvalidInput'
 import { usePermissions } from '../utils/usePermissions'
 import { usePendingCollect, usePool, usePoolMetadata } from '../utils/usePools'
@@ -134,8 +134,7 @@ const InvestRedeemInner: React.VFC<Props> = ({
 
   if (!address) return null
 
-  const calculatingOrders =
-    pool?.epoch.isInSubmissionPeriod || pool?.epoch.isInChallengePeriod || pool?.epoch.isInExecutionPeriod
+  const calculatingOrders = pool?.epoch.status !== 'ongoing'
 
   return (
     <Stack as={Card} gap={2} p={2}>
@@ -328,8 +327,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({
   const inputAmountCoveredByCapacity = inputToDecimal(form.values.amount).lessThanOrEqualTo(
     tranche?.capacity.toDecimal() ?? 0
   )
-  const calculatingOrders =
-    pool?.epoch.isInSubmissionPeriod || pool?.epoch.isInChallengePeriod || pool?.epoch.isInExecutionPeriod
+  const calculatingOrders = pool?.epoch.status !== 'ongoing'
 
   function renderInput(cancelCb?: () => void) {
     return (
@@ -516,8 +514,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel, a
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
 
-  const calculatingOrders =
-    pool?.epoch.isInSubmissionPeriod || pool?.epoch.isInChallengePeriod || pool?.epoch.isInExecutionPeriod
+  const calculatingOrders = pool?.epoch.status !== 'ongoing'
 
   function renderInput(cancelCb?: () => void) {
     return (
@@ -654,9 +651,8 @@ const PendingOrder: React.FC<{
   isCancelling: boolean
   onChangeOrder: () => void
 }> = ({ type, amount, pool, onCancelOrder, isCancelling, onChangeOrder }) => {
-  const { hours: hoursRemaining, minutes: minutesRemaining } = getEpochTimeRemaining(pool!)
-  const calculatingOrders =
-    pool?.epoch.isInSubmissionPeriod || pool?.epoch.isInChallengePeriod || pool?.epoch.isInExecutionPeriod
+  const { message: epochTimeRemaining } = useEpochTimeCountdown(pool.id!)
+  const calculatingOrders = pool.epoch.status !== 'ongoing'
   return (
     <Stack gap={2}>
       <EpochBusy busy={calculatingOrders} />
@@ -676,7 +672,7 @@ const PendingOrder: React.FC<{
           </Shelf>
           <Text variant="body3">
             Locked {type === 'invest' ? 'investments' : 'redemptions'} are executed at the end of the epoch (
-            {hoursRemaining} hrs and {minutesRemaining} min remaining).{' '}
+            {(pool.epoch.status === 'ongoing' && epochTimeRemaining) || `0 min remaining`}).{' '}
             <AnchorTextLink href="https://docs.centrifuge.io/learn/epoch/">Learn more</AnchorTextLink>
           </Text>
         </Stack>
