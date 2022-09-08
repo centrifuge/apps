@@ -469,9 +469,7 @@ export async function getPool(ipfsPools: IpfsPools, poolId: string, address?: st
   data.totalRedemptionsCurrency = juniorRedemptionsCurrency.add(seniorRedemptionsCurrency)
 
   data.isUpcoming =
-    pool.metadata.isUpcoming ||
-    (data.netAssetValue.isZero() && data.reserve.isZero()) ||
-    (!config.featureFlagNewOnboardingPools.includes(poolId) && !pool.metadata.isLaunching)
+    pool.metadata.isUpcoming || (!config.featureFlagNewOnboardingPools.includes(poolId) && !pool.metadata.isLaunching)
 
   data.isLaunching = !!pool.metadata.isLaunching
 
