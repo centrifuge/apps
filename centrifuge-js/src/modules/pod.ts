@@ -88,7 +88,7 @@ class JobFailedError extends Error {
 export function getPodModule() {
   async function callPod<T = any>(podUrl: string, path: string, method: string, token?: string, body?: object) {
     const url = new URL(path, podUrl)
-    const res = await fetch(url, {
+    const res = await fetch(url.toString(), {
       method,
       body: JSON.stringify(body),
       headers: {
