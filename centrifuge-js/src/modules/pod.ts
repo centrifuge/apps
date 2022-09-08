@@ -81,6 +81,10 @@ class JobFailedError extends Error {
   }
 }
 
+/**
+ * Module to interact with the Centrifuge P2P Node for sharing private documents
+ * @see https://github.com/centrifuge/go-centrifuge
+ */
 export function getPodModule() {
   async function callPod<T = any>(podUrl: string, path: string, method: string, token?: string, body?: object) {
     const url = new URL(path, podUrl)

@@ -77,7 +77,7 @@ const Loan: React.FC = () => {
   )
 
   const documentId = useNftDocumentId(nft?.collectionId, nft?.id)
-  const podUrl = poolMetadata?.node?.url
+  const podUrl = poolMetadata?.pod?.url
   const { isLoggedIn } = usePodAuth(podUrl)
   const { data: document } = usePodDocument(podUrl, documentId)
 

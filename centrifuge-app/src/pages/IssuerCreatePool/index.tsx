@@ -97,7 +97,7 @@ const initialValues: CreatePoolValues = {
   maxReserve: '',
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
-  nodeEndpoint: config.defaultNodeUrl ?? '',
+  podEndpoint: config.defaultPodUrl ?? '',
 
   issuerName: '',
   issuerLogo: null,
@@ -405,8 +405,8 @@ const CreatePoolForm: React.VFC = () => {
               </Box>
               <Box gridColumn="span 2">
                 <FieldWithErrorMessage
-                  validate={validate.nodeEndpoint}
-                  name="nodeEndpoint"
+                  validate={validate.podEndpoint}
+                  name="podEndpoint"
                   as={TextInput}
                   label={`Node endpoint${config.useDocumentNfts ? '*' : ''}`}
                   placeholder="https://"

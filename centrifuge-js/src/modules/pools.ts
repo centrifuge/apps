@@ -422,7 +422,7 @@ export interface PoolMetadataInput {
   maxReserve: number | ''
   epochHours: number | ''
   epochMinutes: number | ''
-  nodeEndpoint: string
+  podEndpoint: string
 
   // issuer
   issuerName: string
@@ -464,7 +464,7 @@ export type PoolMetadata = {
     status: PoolStatus
     listed: boolean
   }
-  node?: {
+  pod?: {
     url: string | null
   }
   tranches: Record<
@@ -636,8 +636,8 @@ export function getPoolsModule(inst: Centrifuge) {
         status: 'open',
         listed: true,
       },
-      node: {
-        url: metadata.nodeEndpoint ?? null,
+      pod: {
+        url: metadata.podEndpoint ?? null,
       },
       tranches: tranchesById,
       riskGroups: metadata.riskGroups.map((group) => ({
@@ -1666,20 +1666,6 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getNftDocumentId(args: [collectionId: string, nftId: string]) {
-    const [collectionId, nftId] = args
-    const $api = inst.getApi()
-
-    return $api.pipe(
-      switchMap((api) => api.query.uniques.attribute(collectionId, nftId, 'document_id')),
-      map((attributeValue) => {
-        const attribute = attributeValue.toJSON() as any
-        if (!attribute) return null
-        return attribute[0]
-      })
-    )
-  }
-
   function getWriteOffGroups(args: [poolId: string]) {
     const [poolId] = args
     const $api = inst.getApi()
@@ -1918,7 +1904,6 @@ export function getPoolsModule(inst: Centrifuge) {
     getAvailablePoolId,
     getDailyPoolStates,
     getNativeCurrency,
-    getNftDocumentId,
   }
 }
 

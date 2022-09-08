@@ -143,7 +143,7 @@ const IssuerCreateLoan: React.FC = () => {
   const { addTransaction, updateTransaction } = useTransactions()
 
   const { data: poolMetadata } = usePoolMetadata(pool)
-  const podUrl = poolMetadata?.node?.url
+  const podUrl = poolMetadata?.pod?.url
 
   const { token, isLoggedIn } = usePodAuth(podUrl)
 

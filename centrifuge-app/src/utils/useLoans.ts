@@ -35,7 +35,7 @@ export function useLoan(poolId: string, assetId: string) {
 export function useNftDocumentId(collectionId?: string, nftId?: string) {
   const [result] = useCentrifugeQuery(
     ['docId', collectionId, nftId],
-    (cent) => cent.pools.getNftDocumentId([collectionId!, nftId!]),
+    (cent) => cent.nfts.getNftDocumentId([collectionId!, nftId!]),
     {
       enabled: !!collectionId && !!nftId,
     }
