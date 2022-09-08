@@ -12,9 +12,38 @@ const PodAuthContext = React.createContext<{
   login: (address: string, onBehalfOf: string) => Promise<void>
 }>(null as any)
 
+function getPersisted() {
+  try {
+    return JSON.parse(sessionStorage.getItem('podAuth') ?? '')
+  } catch {
+    return {}
+  }
+}
+
 export const PodAuthProvider: React.FC = ({ children }) => {
-  const [tokens, setTokens] = React.useState<Record<string, { signed: string; payload: any } | undefined>>({})
+  const [tokens, setTokens] = React.useState<Record<string, { signed: string; payload: any } | undefined>>(getPersisted)
   const { selectedWallet } = useWeb3()
+
+  React.useEffect(() => {
+    sessionStorage.setItem('podAuth', JSON.stringify(tokens))
+  }, [tokens])
+
+  React.useEffect(() => {
+    function handleStorage(e: StorageEvent) {
+      setTokens((prev) => {
+        try {
+          if (e.key === 'podAuth') {
+            return JSON.parse(e.newValue ?? '{}')
+          }
+          return prev
+        } catch {
+          return prev
+        }
+      })
+    }
+    window.addEventListener('storage', handleStorage)
+    return () => window.removeEventListener('storage', handleStorage)
+  }, [])
 
   const login = React.useCallback(
     async (address: string, onBehalfOf: string) => {

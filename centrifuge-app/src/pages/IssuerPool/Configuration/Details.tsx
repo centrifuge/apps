@@ -41,7 +41,7 @@ export const Details: React.FC = () => {
       poolName: metadata?.pool?.name ?? '',
       poolIcon: iconFile ?? null,
       assetClass: metadata?.pool?.asset?.class ?? '',
-      podEndpoint: metadata?.pod?.url ?? config.defaultPodUrl ?? '',
+      podEndpoint: metadata?.pod?.url ?? '',
       listed: metadata?.pool?.listed ?? false,
     }),
     [metadata, iconFile]
@@ -99,6 +99,7 @@ export const Details: React.FC = () => {
 
   React.useEffect(() => {
     form.resetForm()
+    form.setValues(initialValues, false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing])
 
