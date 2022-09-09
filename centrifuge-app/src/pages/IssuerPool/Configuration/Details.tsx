@@ -195,7 +195,7 @@ export const Details: React.FC = () => {
               <Field name="listed" validate={validate.assetClass}>
                 {({ field, meta, form }: FieldProps) => (
                   <Stack px={2}>
-                    <LabelValueStack label="Menu listing" value={<Checkbox {...field} label="published" />} />
+                    <LabelValueStack label="Menu listing" value={<Checkbox {...field} label="Published" />} />
                   </Stack>
                 )}
               </Field>
@@ -209,7 +209,7 @@ export const Details: React.FC = () => {
 
               <LabelValueStack label="Currency" value={getCurrencySymbol(pool?.currency)} />
               <LabelValueStack label="POD endpoint" value={metadata?.pod?.url ?? '-'} />
-              <LabelValueStack label="Menu listing" value={metadata?.pool?.listed ? 'Listed' : 'Not Listed'} />
+              <LabelValueStack label="Menu listing" value={metadata?.pool?.listed ? 'Published' : 'Not published'} />
             </Shelf>
           )}
         </PageSection>
