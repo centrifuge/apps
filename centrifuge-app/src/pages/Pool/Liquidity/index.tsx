@@ -1,7 +1,7 @@
-import { Button, Shelf, Stack } from '@centrifuge/fabric'
+import { Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { EpochList } from '../../../components/EpochList'
+import { LiquiditySection } from '../../../components/LiquiditySection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { MaxReserveForm } from '../../../components/MaxReserveForm'
 import { PageSection } from '../../../components/PageSection'
@@ -9,9 +9,7 @@ import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
-import { getEpochTimeRemaining } from '../../../utils/date'
 import { formatBalance } from '../../../utils/formatting'
-import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { useLiquidityAdmin } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
@@ -42,7 +40,6 @@ export const PoolDetailLiquidityTab: React.FC = () => {
 export const PoolDetailLiquidity: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  const { hours, minutes } = getEpochTimeRemaining(pool!)
 
   const pageSummaryData = [
     {
@@ -55,59 +52,8 @@ export const PoolDetailLiquidity: React.FC = () => {
     },
   ]
 
-  const { execute: closeEpochTx, isLoading: loadingClose } = useCentrifugeTransaction(
-    'Close epoch',
-    (cent) => cent.pools.closeEpoch,
-    {
-      onSuccess: () => {
-        console.log('Epoch closed successfully')
-      },
-    }
-  )
-
-  const { execute: submitSolutionTx, isLoading: loadingSolution } = useCentrifugeTransaction(
-    'Submit solution',
-    (cent) => cent.pools.submitSolution,
-    {
-      onSuccess: () => {
-        console.log('Solution successfully submitted')
-      },
-      onError: (error) => {
-        console.log('Solution unsuccesful', error)
-      },
-    }
-  )
-
-  const { execute: executeEpochTx, isLoading: loadingExecution } = useCentrifugeTransaction(
-    'Execute epoch',
-    (cent) => cent.pools.executeEpoch,
-    {
-      onSuccess: () => {
-        console.log('Solution successfully submitted')
-      },
-      onError: (error) => {
-        console.log('Solution unsuccesful', error)
-      },
-    }
-  )
-
-  const closeEpoch = async () => {
-    if (!pool) return
-    closeEpochTx([pool.id])
-  }
-
-  const executeEpoch = () => {
-    if (!pool) return
-    executeEpochTx([pool.id])
-  }
-
-  const submitSolution = async () => {
-    if (!pool) return
-    submitSolutionTx([pool.id])
-  }
-
   if (!pool) return null
-  const { isInChallengePeriod, isInExecutionPeriod, isInSubmissionPeriod, challengePeriodEnd } = pool.epoch
+
   return (
     <>
       <PageSummary data={pageSummaryData}></PageSummary>
@@ -116,52 +62,7 @@ export const PoolDetailLiquidity: React.FC = () => {
           <ReserveCashDragChart />
         </React.Suspense>
       </PageSection>
-      <PageSection
-        title={`Epoch ${pool.epoch.current}`}
-        titleAddition={
-          isInSubmissionPeriod
-            ? 'In submission period'
-            : isInExecutionPeriod
-            ? 'Awaiting execution'
-            : isInChallengePeriod
-            ? `In challenge period (until block #${challengePeriodEnd})`
-            : 'Ongoing'
-        }
-        headerRight={
-          <Shelf gap="1">
-            {!isInSubmissionPeriod && !isInChallengePeriod && !isInExecutionPeriod && (
-              <Tooltips type="epochTimeRemaining" label={`${hours} hrs and ${minutes} min remaining`} />
-            )}
-            {(isInExecutionPeriod || isInChallengePeriod) && !isInSubmissionPeriod ? (
-              <Button
-                small
-                variant="secondary"
-                onClick={executeEpoch}
-                disabled={!pool || isInChallengePeriod}
-                loading={isInChallengePeriod || loadingExecution}
-              >
-                Execute epoch
-              </Button>
-            ) : isInSubmissionPeriod ? (
-              <Button
-                small
-                variant="secondary"
-                onClick={submitSolution}
-                disabled={!pool || loadingSolution}
-                loading={loadingSolution}
-              >
-                Submit solution
-              </Button>
-            ) : (
-              <Button small variant="secondary" onClick={closeEpoch} disabled={!pool || loadingClose}>
-                Close
-              </Button>
-            )}
-          </Shelf>
-        }
-      >
-        <EpochList pool={pool} />
-      </PageSection>
+      <LiquiditySection pool={pool} />
     </>
   )
 }

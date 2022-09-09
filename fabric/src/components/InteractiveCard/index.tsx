@@ -8,7 +8,7 @@ import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 
 export type InteractiveCardProps = {
-  variant?: 'collabsible' | 'button' | 'default'
+  variant?: 'collapsible' | 'button' | 'default'
   icon?: React.ReactNode
   title: React.ReactNode
   titleAddition?: React.ReactNode
@@ -31,7 +31,7 @@ export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'v
   const theme = useTheme()
 
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
-    if (variant === 'collabsible') {
+    if (variant === 'collapsible') {
       setOpen((prev) => !prev)
     }
     if (onClick) onClick(e)
@@ -84,10 +84,10 @@ export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'v
           {secondaryHeader}
         </Box>
       )}
-      {(variant !== 'collabsible' || open) && children && (
+      {(variant !== 'collapsible' || open) && children && (
         <Box
           p={2}
-          backgroundColor={variant === 'collabsible' ? 'backgroundSecondary' : undefined}
+          backgroundColor={variant === 'collapsible' ? 'backgroundSecondary' : undefined}
           borderBottomLeftRadius="card"
           borderBottomRightRadius="card"
           style={{

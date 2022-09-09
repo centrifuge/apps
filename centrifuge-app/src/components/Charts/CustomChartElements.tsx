@@ -32,9 +32,9 @@ export const CustomizedXAxisTick: React.VFC<CustomizedXAxisTickProps> = ({ paylo
   )
 }
 
-type CustomizedTooltipProps = TooltipProps<any, any> & { currency: string }
+type CustomizedTooltipProps = TooltipProps<any, any> & { currency: string; precision?: number }
 
-export const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, currency }) => {
+export const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, currency, precision }) => {
   const theme = useTheme()
   if (payload && payload?.length > 0) {
     return (
@@ -59,10 +59,10 @@ export const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, 
               </Shelf>
               <Text alignSelf="flex-end" textAlign="right" variant="label2">
                 {typeof item.value !== 'number'
-                  ? formatBalance(item.value[1] - item.value[0], currency)
+                  ? formatBalance(item.value[1] - item.value[0], currency, precision)
                   : item.unit === 'percent'
                   ? formatPercentage(item.value)
-                  : formatBalance(item.value, currency)}
+                  : formatBalance(item.value, currency, precision)}
               </Text>
             </Shelf>
           )
