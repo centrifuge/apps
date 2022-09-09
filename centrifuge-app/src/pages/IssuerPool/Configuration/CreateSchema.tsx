@@ -15,7 +15,7 @@ import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { isValidJsonString } from '../../../utils/validation'
 
 const initialSchemaJSON = `{
-  "name":"Example schema",
+  "name":"Example asset template",
   "options":{
     "assetClasses":[],
     "loanTypes":[],

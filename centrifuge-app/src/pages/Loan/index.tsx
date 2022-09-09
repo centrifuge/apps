@@ -198,56 +198,58 @@ const Loan: React.FC = () => {
                 </Shelf>
               }
             >
-              <Shelf gap={3} alignItems="flex-start">
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  flex="0 1 50%"
-                  style={{ aspectRatio: '1 / 1' }}
-                  backgroundColor="backgroundSecondary"
-                  borderRadius="8px"
-                  overflow="hidden"
-                >
-                  {imageUrl ? (
-                    <Box as="img" maxWidth="100%" maxHeight="100%" src={imageUrl} />
-                  ) : (
-                    <IconNft color="white" size="250px" />
-                  )}
-                </Box>
-                <Stack gap={2}>
-                  <LabelValueStack
-                    label="Description"
-                    value={
-                      <TextWithPlaceholder
-                        isLoading={nftMetadataIsLoading}
-                        words={2}
-                        width={80}
-                        variance={30}
-                        variant="body2"
-                        style={{ wordBreak: 'break-word' }}
-                      >
-                        {nftMetadata?.description || 'No description'}
-                      </TextWithPlaceholder>
-                    }
-                  />
-
-                  {imageUrl && (
+              {(nftMetadata?.description || imageUrl) && (
+                <Shelf gap={3} alignItems="flex-start">
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flex="0 1 50%"
+                    style={{ aspectRatio: '1 / 1' }}
+                    backgroundColor="backgroundSecondary"
+                    borderRadius="8px"
+                    overflow="hidden"
+                  >
+                    {imageUrl ? (
+                      <Box as="img" maxWidth="100%" maxHeight="100%" src={imageUrl} />
+                    ) : (
+                      <IconNft color="white" size="250px" />
+                    )}
+                  </Box>
+                  <Stack gap={2}>
                     <LabelValueStack
-                      label="Image"
+                      label="Description"
                       value={
-                        <AnchorPillButton
-                          href={imageUrl}
-                          target="_blank"
-                          style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
+                        <TextWithPlaceholder
+                          isLoading={nftMetadataIsLoading}
+                          words={2}
+                          width={80}
+                          variance={30}
+                          variant="body2"
+                          style={{ wordBreak: 'break-word' }}
                         >
-                          Source file
-                        </AnchorPillButton>
+                          {nftMetadata?.description || 'No description'}
+                        </TextWithPlaceholder>
                       }
                     />
-                  )}
-                </Stack>
-              </Shelf>
+
+                    {imageUrl && (
+                      <LabelValueStack
+                        label="Image"
+                        value={
+                          <AnchorPillButton
+                            href={imageUrl}
+                            target="_blank"
+                            style={{ wordBreak: 'break-all', whiteSpace: 'initial' }}
+                          >
+                            Source file
+                          </AnchorPillButton>
+                        }
+                      />
+                    )}
+                  </Stack>
+                </Shelf>
+              )}
             </InteractiveCard>
           </PageSection>
         </>
