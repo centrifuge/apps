@@ -1,5 +1,6 @@
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
+import { SignedBlock } from '@polkadot/types/interfaces'
 import { ISubmittableResult, Signer } from '@polkadot/types/types'
 import { hexToBn } from '@polkadot/util'
 import 'isomorphic-fetch'
@@ -321,6 +322,27 @@ export class CentrifugeBase {
 
   getRelayChainApiPromise() {
     return firstValueFrom(getPolkadotApi(this.relayChainUrl, relayChainTypes))
+  }
+
+  getBlocks(): Observable<SignedBlock> {
+    const $api = this.getApi()
+    // subscribes to all incoming headers
+    const $header = $api.pipe(switchMap((api) => api.rpc.chain.subscribeNewHeads()))
+    return combineLatest([$api, $header]).pipe(
+      switchMap(([api, header]) => {
+        return api.rpc.chain.getBlock(header.hash.toHex())
+      })
+    )
+  }
+
+  getBlockByBlockNumber(blockNumber: number): Observable<SignedBlock> {
+    const $api = this.getApi()
+    const $hash = $api.pipe(switchMap((api) => api.rpc.chain.getBlockHash(blockNumber)))
+    return combineLatest([$api, $hash]).pipe(
+      switchMap(([api, hashByBlockNumber]) => {
+        return api.rpc.chain.getBlock(hashByBlockNumber?.toHex())
+      })
+    )
   }
 
   getSigner() {

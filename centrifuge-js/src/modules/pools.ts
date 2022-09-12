@@ -3,10 +3,10 @@ import { hash } from '@stablelib/blake2b'
 import BN from 'bn.js'
 import { combineLatest, EMPTY, expand, firstValueFrom, from, of } from 'rxjs'
 import { combineLatestWith, filter, map, repeatWhen, switchMap, take } from 'rxjs/operators'
-import { calculateOptimalSolution } from '..'
+import { calculateOptimalSolution, SolverResult } from '..'
 import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
-import { SubqueryPoolSnapshot } from '../types/subquery'
+import { SubqueryPoolSnapshot, SubqueryTrancheSnapshot } from '../types/subquery'
 import { getRandomUint, isSameAddress } from '../utils'
 import { CurrencyBalance, Perquintill, Price, Rate, TokenBalance } from '../utils/BN'
 import { Dec } from '../utils/Decimal'
@@ -239,10 +239,9 @@ export type Pool = {
     current: number
     lastClosed: string
     lastExecuted: number
-    isInSubmissionPeriod: boolean
-    isInChallengePeriod: boolean
-    isInExecutionPeriod: boolean
     challengePeriodEnd: number
+    status: 'submissionPeriod' | 'challengePeriod' | 'executionPeriod' | 'ongoing'
+    challengeTime: number
   }
   nav: {
     latest: CurrencyBalance
@@ -800,12 +799,26 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function closeEpoch(args: [poolId: string], options?: TransactionOptions) {
-    const [poolId] = args
+  function closeEpoch(args: [poolId: string, batchSolution: boolean], options?: TransactionOptions) {
+    const [poolId, batchSolution] = args
     const $api = inst.getApi()
 
-    return $api.pipe(
-      switchMap((api) => {
+    const $solution = batchSolution ? submitSolution([poolId], { dryRun: true }) : of(null)
+
+    return combineLatest([$api, $solution]).pipe(
+      switchMap(([api, optimalSolution]) => {
+        if (optimalSolution) {
+          const trancheSolution = (optimalSolution as SolverResult).tranches.map((tranche) => [
+            tranche.invest.perquintill,
+            tranche.redeem.perquintill,
+          ])
+          const submittable = api.tx.utility.batchAll([
+            api.tx.loans.updateNav(poolId),
+            api.tx.pools.closeEpoch(poolId),
+            api.tx.pools.submitSolution(poolId, trancheSolution),
+          ])
+          return inst.wrapSignAndSend(api, submittable, options)
+        }
         const submittable = api.tx.utility.batchAll([api.tx.loans.updateNav(poolId), api.tx.pools.closeEpoch(poolId)])
         return inst.wrapSignAndSend(api, submittable, options)
       })
@@ -860,7 +873,14 @@ export function getPoolsModule(inst: Centrifuge) {
           console.warn('Calculated solution is not feasible')
           return of(null)
         }
-        const submittable = api.tx.pools.submitSolution(poolId, optimalSolution.tranches)
+        if (options?.dryRun) {
+          return of(optimalSolution)
+        }
+        const solution = optimalSolution.tranches.map((tranche) => [
+          tranche.invest.perquintill,
+          tranche.redeem.perquintill,
+        ])
+        const submittable = api.tx.pools.submitSolution(poolId, solution)
         return inst.wrapSignAndSend(api, submittable, options)
       })
     )
@@ -1227,11 +1247,11 @@ export function getPoolsModule(inst: Centrifuge) {
         //   pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
         // )
 
-        const $block = api.rpc.chain.getBlock()
+        const $block = inst.getBlocks().pipe(take(1))
 
         return combineLatest([$issuance, $epochs, $block]).pipe(
           map(([rawIssuances, rawEpochs, { block }]) => {
-            const blockNumber = block?.header?.number.toNumber()
+            const blockNumber = block.header.number.toNumber()
             const epochs = rawEpochs.map((value) => (!value.isEmpty ? (value as any).toJSON() : null))
             const mappedPools = pools.map((poolObj) => {
               const { data: pool, id: poolId, metadata } = poolObj
@@ -1337,10 +1357,9 @@ export function getPoolsModule(inst: Centrifuge) {
                 epoch: {
                   ...pool.epoch,
                   lastClosed: new Date(pool.epoch.lastClosed * 1000).toISOString(),
-                  isInSubmissionPeriod: !!epochExecution && !epochExecution?.challengePeriodEnd,
-                  isInChallengePeriod: epochExecution?.challengePeriodEnd >= blockNumber,
-                  isInExecutionPeriod: epochExecution?.challengePeriodEnd < blockNumber,
+                  status: getEpochStatus(epochExecution, blockNumber),
                   challengePeriodEnd: epochExecution?.challengePeriodEnd,
+                  challengeTime: api.consts.pools.challengeTime.toJSON() as number, // in blocks
                 },
                 parameters: {
                   ...pool.parameters,
@@ -1438,6 +1457,47 @@ export function getPoolsModule(inst: Centrifuge) {
           })
         )
       )
+    )
+  }
+
+  function getDailyTrancheStates(args: [trancheId: string]) {
+    const [trancheId] = args
+    const $query = inst.getSubqueryObservable<{ trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] } }>(
+      `query($trancheId: String!) {
+        trancheSnapshots(
+          orderBy: BLOCK_NUMBER_ASC,
+          filter: { 
+            trancheId: { includes: $trancheId },
+          }) {
+          nodes {
+            price
+            blockNumber
+            timestamp
+            trancheId
+            tranche {
+              poolId
+              trancheId
+            }
+          }
+        }
+      }
+      `,
+      {
+        trancheId,
+      }
+    )
+    return $query.pipe(
+      map((data) => {
+        if (!data) {
+          return []
+        }
+        return data.trancheSnapshots.nodes.map((state) => {
+          return {
+            ...state,
+            price: new Price(state.price),
+          }
+        })
+      })
     )
   }
 
@@ -1904,6 +1964,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getAvailablePoolId,
     getDailyPoolStates,
     getNativeCurrency,
+    getDailyTrancheStates,
   }
 }
 
@@ -1999,4 +2060,19 @@ function toHex(data: Uint8Array) {
     out.push(hex[data[i] & 0xf])
   }
   return `0x${out.join('')}`
+}
+
+const getEpochStatus = (
+  epochExecution: Pick<EpochExecutionData, 'challengePeriodEnd' | 'epoch'>,
+  blockNumber: number
+) => {
+  if (!!epochExecution && !epochExecution?.challengePeriodEnd) {
+    return 'submissionPeriod'
+  } else if (epochExecution?.challengePeriodEnd >= blockNumber) {
+    return 'challengePeriod'
+  } else if (epochExecution?.challengePeriodEnd < blockNumber) {
+    return 'executionPeriod'
+  } else {
+    return 'ongoing'
+  }
 }

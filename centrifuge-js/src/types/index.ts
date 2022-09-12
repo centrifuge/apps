@@ -10,6 +10,7 @@ export type TransactionOptions = {
   paymentInfo?: AddressOrPair
   onStatusChange?: (result: ISubmittableResult) => void
   createType?: 'immediate' | 'propose' | 'notePreimage'
+  dryRun?: boolean
 }
 
 export type Account = HexString | string | Uint8Array

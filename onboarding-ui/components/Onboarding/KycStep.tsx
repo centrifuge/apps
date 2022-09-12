@@ -76,15 +76,15 @@ const KycStep: React.FC<Props> = ({ state, onboardingData, kycStatus, accreditat
         <>
           <StepParagraph>
             Your KYC submission has been verified, but you still need to finish accreditation as a US tax resident. To
-            complete this step, please submit your accreditation information on InvestReady. Make sure you use the same
-            email address here that you entered on Securitize. If you experience any issues, please contact{' '}
+            complete this step, please submit your accreditation information on Securitize. If you experience any
+            issues, please contact{' '}
             <Anchor href="mailto:support@centrifuge.io" style={{ display: 'inline' }} label="support@centrifuge.io" />.
           </StepParagraph>
           <Button
             primary
             largeOnMobile={false}
-            label="Submit accreditation on InvestReady"
-            href={'https://centrifuge.investready.com/signup?app_id=7Ja9qnS6uckhHGA9pL49P5IwMDwt02y8MJhd6ajA'}
+            label="Submit accreditation on Securitize"
+            href={'https://id.securitize.io/#/profile/accreditation'}
             target="_blank"
           />
         </>
