@@ -5,10 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start:types": "tsc --watch",
-    "start:server": "nodemon -q dist/index.js",
-    "start": "run-p -l start:types start:server start:functions",
+    "start:server": "nodemon dist/index.js",
+    "start": "yarn build && run-p -l start:types start:server start:functions",
     "start:functions": "npx functions-framework --target=faucet"
   },
   "keywords": [],
@@ -16,15 +15,18 @@
   "license": "ISC",
   "dependencies": {
     "@centrifuge/centrifuge-js": "workspace:centrifuge-js",
+    "@google-cloud/firestore": "^6.0.0",
     "@google-cloud/functions-framework": "^3.1.2",
     "@polkadot/api": "^9.3.3",
     "@polkadot/keyring": "^10.1.7",
+    "bn.js": "^5.2.1",
     "dotenv": "^16.0.2",
     "nodemon": "^2.0.19",
     "npm-run-all": "^4.1.5",
     "rxjs": "^7.5.6"
   },
   "devDependencies": {
+    "@types/bn.js": "^5",
     "@types/node": "^18.7.16",
     "typescript": "^4.8.3"
   }
