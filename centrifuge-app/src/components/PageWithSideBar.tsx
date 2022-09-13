@@ -3,6 +3,7 @@ import React from 'react'
 import { useTheme } from 'styled-components'
 import { config } from '../config'
 import { AccountsMenu } from './AccountsMenu'
+import { Faucet } from './Faucet'
 import { Footer } from './Footer'
 import { LoadBoundary } from './LoadBoundary'
 import { Menu } from './Menu'
@@ -53,12 +54,13 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
       </Box>
       {sidebar && (
         <Box gridArea="sidebar" as="aside" zIndex="sticky">
-          <Box position="sticky" top={0} p={[0, 0, 3]}>
-            <Stack mb={9} px={8}>
+          <Stack gap={1} position="sticky" top={0} p={[0, 0, 3]}>
+            <Stack mb={9} px={8} gap={4}>
               <AccountsMenu />
             </Stack>
+            <Faucet />
             <LoadBoundary>{sidebar}</LoadBoundary>
-          </Box>
+          </Stack>
         </Box>
       )}
     </Box>

@@ -14,7 +14,8 @@
     "gateway/packages/ui",
     "gateway/packages/server",
     "simulation-tests",
-    "onboarding-ui"
+    "onboarding-ui",
+    "faucet-api"
   ],
   "devDependencies": {
     "@types/concurrently": "^5",
