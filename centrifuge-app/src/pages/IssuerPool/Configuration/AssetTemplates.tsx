@@ -21,11 +21,11 @@ export const AssetTemplates: React.FC = () => {
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
 
-  const schemaIds = poolMetadata?.assetTemplates?.map((s) => s.id) ?? []
-  const schemaMetadata = useMetadataMulti<AssetTemplate>(schemaIds)
+  const templateIds = poolMetadata?.assetTemplates?.map((s) => s.id) ?? []
+  const templateMetadata = useMetadataMulti<AssetTemplate>(templateIds)
 
-  const tableData = schemaIds.map((id, i) => {
-    const meta = schemaMetadata[i].data
+  const tableData = templateIds.map((id, i) => {
+    const meta = templateMetadata[i].data
     const metaMeta = poolMetadata?.assetTemplates?.[i]
     return {
       name: meta?.name ?? `Template ${i + 1}`,
@@ -38,14 +38,14 @@ export const AssetTemplates: React.FC = () => {
     <PageSection
       title="Asset templates"
       headerRight={
-        <RouterLinkButton to={`/issuer/${poolId}/configuration/create-schema`} variant="secondary" small>
+        <RouterLinkButton to={`/issuer/${poolId}/configuration/create-asset-template`} variant="secondary" small>
           {tableData.length ? 'Add another' : 'Add'}
         </RouterLinkButton>
       }
     >
       <DataTable
         data={tableData}
-        onRowClicked={(row) => `/issuer/${poolId}/configuration/view-schema/${row.id}`}
+        onRowClicked={(row) => `/issuer/${poolId}/configuration/view-asset-template/${row.id}`}
         columns={[
           {
             align: 'left',

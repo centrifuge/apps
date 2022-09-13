@@ -1,6 +1,4 @@
 import { Keyring } from '@polkadot/keyring'
-import { u8aToHex } from '@polkadot/util'
-import { decodeAddress } from '@polkadot/util-crypto'
 import * as jw3t from 'jw3t'
 import * as React from 'react'
 import { useQuery } from 'react-query'
@@ -54,9 +52,8 @@ export const PodAuthProvider: React.FC = ({ children }) => {
       }
       const now = Math.floor(Date.now() / 1000)
       const payload = {
-        address: u8aToHex(decodeAddress(address)),
-        on_behalf_of: u8aToHex(decodeAddress(onBehalfOf)),
-        proxy_type: 'any',
+        address,
+        on_behalf_of: onBehalfOf,
         proxy_type: 'pod_auth',
         expires_at: String(now + 60 * 60 * 24),
         issued_at: String(now),

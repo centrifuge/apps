@@ -73,8 +73,8 @@ const Loan: React.FC = () => {
   const name = truncateText(nftMetadata?.name || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? cent.metadata.parseMetadataUrl(nftMetadata.image) : ''
 
-  const { data: schemaData } = useMetadata<AssetTemplate>(
-    nftMetadata?.properties?.schema && `ipfs://ipfs/${nftMetadata?.properties?.schema}`
+  const { data: templateData } = useMetadata<AssetTemplate>(
+    nftMetadata?.properties?._template && `ipfs://ipfs/${nftMetadata?.properties?._template}`
   )
 
   const documentId = useNftDocumentId(nft?.collectionId, nft?.id)
@@ -167,7 +167,7 @@ const Loan: React.FC = () => {
         ))}
       {loan && nft && (
         <>
-          {schemaData?.sections?.map((section, i) => (
+          {templateData?.sections?.map((section, i) => (
             <PageSection title={section.name} titleAddition={section.public ? undefined : 'Private'} key={i}>
               {section.public || document ? (
                 <Shelf gap={6} flexWrap="wrap">

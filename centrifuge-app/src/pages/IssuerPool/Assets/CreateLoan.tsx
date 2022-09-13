@@ -211,7 +211,7 @@ const IssuerCreateLoan: React.FC = () => {
       const publicAttributes = selectedTemplateMetadata.sections
         .filter((s) => s.public)
         .flatMap((s) => s.attributes.map((a) => labelToKey(a.label)))
-      publicAttributes.push('template')
+      publicAttributes.push('_template')
 
       const { nftId, jobId } = await centrifuge.pod.commitDocumentAndMintNft([
         podUrl,

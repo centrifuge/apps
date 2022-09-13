@@ -111,19 +111,19 @@ export const CreateAssetTemplate: React.FC = () => {
       return errors
     },
     onSubmit: async (values, { setSubmitting }) => {
-      const schemaMetadataHash = await lastValueFrom(cent.metadata.pinJson(JSON.parse(values.metadata)))
+      const templateMetadataHash = await lastValueFrom(cent.metadata.pinJson(JSON.parse(values.metadata)))
       const newPoolMetadata = {
         ...(poolMetadata as PoolMetadata),
         assetTemplates: [
           ...(poolMetadata?.assetTemplates ?? []),
           {
-            id: schemaMetadataHash.ipfsHash,
+            id: templateMetadataHash.ipfsHash,
             createdAt: new Date().toISOString(),
           },
         ],
       }
 
-      prefetchMetadata(schemaMetadataHash.ipfsHash)
+      prefetchMetadata(templateMetadataHash.ipfsHash)
 
       updateConfigTx([poolId, newPoolMetadata])
       setSubmitting(false)
