@@ -78,7 +78,6 @@ app.get('/', async (req: Request, res: Response) => {
       return res.status(400).send({ error: 'Wallet already has sufficient balances' })
     }
 
-    // make sure wallet / ip address have not claimed within 24 hours
     const docId = `${ip}-${address}`
     const dripRef = firestore.collection('drips').doc(docId)
     const doc = await dripRef.get()
