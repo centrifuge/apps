@@ -6,15 +6,15 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { useMetadata } from '../../../utils/useMetadata'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 
-export const IssuerPoolViewSchemaPage: React.FC = () => {
+export const IssuerPoolViewAssetTemplatePage: React.FC = () => {
   return (
     <PageWithSideBar>
-      <ViewSchema />
+      <ViewAssetTemplate />
     </PageWithSideBar>
   )
 }
 
-export const ViewSchema: React.FC = () => {
+export const ViewAssetTemplate: React.FC = () => {
   const { pid: poolId, sid: schemaId } = useParams<{ pid: string; sid: string }>()
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)

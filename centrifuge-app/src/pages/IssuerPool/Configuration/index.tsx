@@ -7,12 +7,12 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { useIsPoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
 import { Admins } from './Admins'
+import { AssetTemplates } from './AssetTemplates'
 import { Details } from './Details'
 import { Epoch } from './Epoch'
 import { Issuer } from './Issuer'
 import { PoolConfig } from './PoolConfig'
 import { RiskGroups } from './RiskGroups'
-import { Schemas } from './Schemas'
 import { Tranches } from './Tranches'
 import { WriteOffGroups } from './WriteOffGroups'
 
@@ -43,7 +43,7 @@ const IssuerPoolConfiguration: React.FC = () => {
           <RiskGroups />
           <WriteOffGroups />
           <Admins />
-          <Schemas />
+          <AssetTemplates />
           {editPoolConfig && <PoolConfig poolId={poolId} />}
         </>
       )}

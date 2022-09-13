@@ -1,3 +1,4 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import {
   Box,
   Button,
@@ -24,7 +25,7 @@ import { usePodAuth } from '../../../components/PodAuthProvider'
 import { PodAuthSection } from '../../../components/PodAuthSection'
 import { Transaction, useTransactions } from '../../../components/TransactionsProvider'
 import { useWeb3 } from '../../../components/Web3Provider'
-import { Schema } from '../../../types'
+import { AssetTemplate } from '../../../types'
 import { truncateText } from '../../../utils/formatting'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useAddress } from '../../../utils/useAddress'
@@ -48,14 +49,14 @@ type FormValues = {
   image: File | null
   description: string
   assetName: string
-  schemaId: string
+  templateId: string
   attributes: Record<string, string | number>
 }
 
-type Attribute = Schema['sections'][0]['attributes'][0]
-type SchemaFieldProps<T extends string> = Attribute & { type: T; name: string }
+type Attribute = AssetTemplate['sections'][0]['attributes'][0]
+type TemplateFieldProps<T extends string> = Attribute & { type: T; name: string }
 
-const CurrencyField: React.VFC<SchemaFieldProps<'currency'>> = ({ name, label, currencySymbol }) => {
+const CurrencyField: React.VFC<TemplateFieldProps<'currency'>> = ({ name, label, currencySymbol }) => {
   const form = useFormikContext()
   return (
     <Field name={name} validate={combine(required(), positiveNumber(), max(Number.MAX_SAFE_INTEGER))} key={label}>
@@ -77,11 +78,11 @@ const CurrencyField: React.VFC<SchemaFieldProps<'currency'>> = ({ name, label, c
   )
 }
 
-const DecimalField: React.VFC<SchemaFieldProps<'decimal'>> = ({ name, label }) => {
+const DecimalField: React.VFC<TemplateFieldProps<'decimal'>> = ({ name, label }) => {
   return <FieldWithErrorMessage name={name} as={NumberInput} label={`${label}*`} validate={required()} key={label} />
 }
 
-const StringField: React.VFC<SchemaFieldProps<'string'>> = ({ name, label, ...attr }) => {
+const StringField: React.VFC<TemplateFieldProps<'string'>> = ({ name, label, ...attr }) => {
   if ('options' in attr) {
     return (
       <Field name={name} validate={required()} key={label}>
@@ -103,11 +104,11 @@ const StringField: React.VFC<SchemaFieldProps<'string'>> = ({ name, label, ...at
   return <FieldWithErrorMessage name={name} as={TextInput} label={`${label}*`} validate={required()} key={label} />
 }
 
-const TimestampField: React.VFC<SchemaFieldProps<'timestamp'>> = ({ name, label }) => {
+const TimestampField: React.VFC<TemplateFieldProps<'timestamp'>> = ({ name, label }) => {
   return <FieldWithErrorMessage name={name} as={DateInput} label={`${label}*`} validate={required()} key={label} />
 }
 
-const PercentageField: React.VFC<SchemaFieldProps<'percentage'>> = ({ name, label }) => {
+const PercentageField: React.VFC<TemplateFieldProps<'percentage'>> = ({ name, label }) => {
   return (
     <FieldWithErrorMessage
       name={name}
@@ -121,7 +122,7 @@ const PercentageField: React.VFC<SchemaFieldProps<'percentage'>> = ({ name, labe
   )
 }
 
-const schemaFields = {
+const templateFields = {
   currency: CurrencyField,
   decimal: DecimalField,
   string: StringField,
@@ -173,7 +174,7 @@ const IssuerCreateLoan: React.FC = () => {
       image: null,
       description: '',
       assetName: '',
-      schemaId: '',
+      templateId: '',
       attributes: {},
     },
     onSubmit: async (values, { setSubmitting }) => {
@@ -189,8 +190,8 @@ const IssuerCreateLoan: React.FC = () => {
       }
       addTransaction(tx)
 
-      const attributes = valuesToPodAttributes(values.attributes, selectedSchemaMetadata) as any
-      attributes.schema = { type: 'string', value: form.values.schemaId }
+      const attributes = valuesToPodAttributes(values.attributes, selectedTemplateMetadata) as any
+      attributes.template = { type: 'string', value: form.values.templateId }
 
       let imageMetadataHash
       if (values.image) {
@@ -207,10 +208,10 @@ const IssuerCreateLoan: React.FC = () => {
         },
       ])
 
-      const publicAttributes = selectedSchemaMetadata.sections
+      const publicAttributes = selectedTemplateMetadata.sections
         .filter((s) => s.public)
         .flatMap((s) => s.attributes.map((a) => labelToKey(a.label)))
-      publicAttributes.push('schema')
+      publicAttributes.push('template')
 
       const { nftId, jobId } = await centrifuge.pod.commitDocumentAndMintNft([
         podUrl,
@@ -249,16 +250,16 @@ const IssuerCreateLoan: React.FC = () => {
     },
   })
 
-  const schemaIds = poolMetadata?.schemas?.map((s) => s.id) ?? []
-  const schemaMetadata = useMetadataMulti(schemaIds)
+  const templateIds = poolMetadata?.assetTemplates?.map((s) => s.id) ?? []
+  const templateMetadata = useMetadataMulti(templateIds)
 
-  const schemaSelectOptions = schemaIds.map((id, i) => ({
-    label: truncateText((schemaMetadata[i].data as Schema)?.name ?? `Template ${i + 1}`, 30),
+  const templateSelectOptions = templateIds.map((id, i) => ({
+    label: truncateText((templateMetadata[i].data as AssetTemplate)?.name ?? `Template ${i + 1}`, 30),
     value: id,
   }))
 
-  const selectedSchemaMetadata = schemaMetadata[schemaIds.findIndex((id) => id === form.values.schemaId)]
-    ?.data as Schema
+  const selectedTemplateMetadata = templateMetadata[templateIds.findIndex((id) => id === form.values.templateId)]
+    ?.data as AssetTemplate
 
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
@@ -282,7 +283,7 @@ const IssuerCreateLoan: React.FC = () => {
                   <Button variant="secondary" onClick={() => history.goBack()}>
                     Cancel
                   </Button>
-                  <Button type="submit" loading={isPending} disabled={!form.values.schemaId}>
+                  <Button type="submit" loading={isPending} disabled={!form.values.templateId}>
                     Create
                   </Button>
                 </>
@@ -301,15 +302,15 @@ const IssuerCreateLoan: React.FC = () => {
                     placeholder=""
                     maxLength={100}
                   />
-                  <Field name="schemaId" validate={required()}>
+                  <Field name="templateId" validate={required()}>
                     {({ field, form, meta }: any) => (
                       <Select
                         placeholder="Select template"
                         label="Asset template"
-                        options={schemaSelectOptions}
+                        options={templateSelectOptions}
                         value={field.value}
                         onSelect={(v) => {
-                          form.setFieldValue('schemaId', v)
+                          form.setFieldValue('templateId', v)
                         }}
                         errorMessage={meta.touched ? meta.error : undefined}
                         disabled={isPending}
@@ -318,7 +319,7 @@ const IssuerCreateLoan: React.FC = () => {
                   </Field>
                 </Grid>
               </PageSection>
-              {selectedSchemaMetadata?.sections.map((section) => (
+              {selectedTemplateMetadata?.sections.map((section) => (
                 <PageSection
                   title={section.name}
                   titleAddition={section.public ? 'Public' : 'Private'}
@@ -326,7 +327,7 @@ const IssuerCreateLoan: React.FC = () => {
                 >
                   <Grid columns={[1, 2, 2, 3]} equalColumns gap={2} rowGap={3}>
                     {section.attributes?.map((attr) => {
-                      const Comp = schemaFields[attr.type] as React.VFC<any>
+                      const Comp = templateFields[attr.type] as React.VFC<any>
                       const name = `attributes.${labelToKey(attr.label)}`
                       return <Comp {...attr} name={name} key={attr.label} />
                     })}
@@ -334,10 +335,10 @@ const IssuerCreateLoan: React.FC = () => {
                 </PageSection>
               ))}
 
-              {(selectedSchemaMetadata?.options.image || selectedSchemaMetadata?.options.description) && (
+              {(selectedTemplateMetadata?.options.image || selectedTemplateMetadata?.options.description) && (
                 <PageSection title="Description" titleAddition="Optional">
                   <Stack gap={3}>
-                    {selectedSchemaMetadata.options.image && (
+                    {selectedTemplateMetadata.options.image && (
                       <Field name="image" validate={validate.nftImage}>
                         {({ field, meta, form }: FieldProps) => (
                           <ImageUpload
@@ -353,7 +354,7 @@ const IssuerCreateLoan: React.FC = () => {
                         )}
                       </Field>
                     )}
-                    {selectedSchemaMetadata.options.description && (
+                    {selectedTemplateMetadata.options.description && (
                       <FieldWithErrorMessage
                         name="description"
                         as={TextAreaInput}
@@ -383,9 +384,9 @@ function labelToKey(label: string) {
   return label.toLowerCase().replaceAll(/\s/g, '_')
 }
 
-function valuesToPodAttributes(values: FormValues['attributes'], schema: Schema) {
+function valuesToPodAttributes(values: FormValues['attributes'], template: AssetTemplate) {
   return Object.fromEntries(
-    schema.sections.flatMap((section) =>
+    template.sections.flatMap((section) =>
       section.attributes.map((attr) => {
         const key = labelToKey(attr.label)
         const value = values[key]
@@ -398,8 +399,15 @@ function valuesToPodAttributes(values: FormValues['attributes'], schema: Schema)
                 value: new Date(value).toISOString(),
               },
             ]
-          case 'percentage':
           case 'currency':
+            return [
+              key,
+              {
+                type: 'monetary',
+                value: CurrencyBalance.fromFloat(value, attr.currencyDecimals),
+              },
+            ]
+          case 'percentage':
             return [
               key,
               {

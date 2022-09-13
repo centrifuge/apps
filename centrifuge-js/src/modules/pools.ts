@@ -474,7 +474,7 @@ export type PoolMetadata = {
       minInitialInvestment: string
     }
   >
-  schemas?: {
+  assetTemplates?: {
     id: string
     createdAt: string
   }[]

@@ -57,6 +57,7 @@ export const PodAuthProvider: React.FC = ({ children }) => {
         address: u8aToHex(decodeAddress(address)),
         on_behalf_of: u8aToHex(decodeAddress(onBehalfOf)),
         proxy_type: 'any',
+        proxy_type: 'pod_auth',
         expires_at: String(now + 60 * 60 * 24),
         issued_at: String(now),
         not_before: String(now),

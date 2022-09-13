@@ -1,3 +1,4 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { Box, IconAlertCircle, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
@@ -16,7 +17,7 @@ import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
 import { nftMetadataSchema } from '../../schemas'
-import { Schema, SchemaAttribute } from '../../types'
+import { AssetTemplate, AssetTemplateAttribute } from '../../types'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage, truncateText } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
@@ -72,7 +73,7 @@ const Loan: React.FC = () => {
   const name = truncateText(nftMetadata?.name || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? cent.metadata.parseMetadataUrl(nftMetadata.image) : ''
 
-  const { data: schemaData } = useMetadata<Schema>(
+  const { data: schemaData } = useMetadata<AssetTemplate>(
     nftMetadata?.properties?.schema && `ipfs://ipfs/${nftMetadata?.properties?.schema}`
   )
 
@@ -262,7 +263,7 @@ function labelToKey(label: string) {
   return label.toLowerCase().replaceAll(/\s/g, '_')
 }
 
-function formatValue(value: any, attr: SchemaAttribute) {
+function formatValue(value: any, attr: AssetTemplateAttribute) {
   switch (attr.type) {
     case 'string':
       return value
@@ -271,7 +272,7 @@ function formatValue(value: any, attr: SchemaAttribute) {
     case 'decimal':
       return value.toLocaleString('en')
     case 'currency':
-      return formatBalance(value, attr.currencySymbol)
+      return formatBalance(new CurrencyBalance(value, attr.currencyDecimals), attr.currencySymbol)
     case 'timestamp':
       return formatDate(value)
     default:
