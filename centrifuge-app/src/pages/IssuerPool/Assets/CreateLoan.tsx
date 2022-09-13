@@ -191,7 +191,7 @@ const IssuerCreateLoan: React.FC = () => {
       addTransaction(tx)
 
       const attributes = valuesToPodAttributes(values.attributes, selectedTemplateMetadata) as any
-      attributes.template = { type: 'string', value: form.values.templateId }
+      attributes._template = { type: 'string', value: form.values.templateId }
 
       let imageMetadataHash
       if (values.image) {
