@@ -474,7 +474,7 @@ export type PoolMetadata = {
       minInitialInvestment: string
     }
   >
-  assetTemplates?: {
+  loanTemplates?: {
     id: string
     createdAt: string
   }[]

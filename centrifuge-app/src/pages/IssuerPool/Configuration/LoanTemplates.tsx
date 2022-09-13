@@ -4,7 +4,7 @@ import { useParams } from 'react-router'
 import { DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
-import { AssetTemplate } from '../../../types'
+import { LoanTemplate } from '../../../types'
 import { formatDate } from '../../../utils/date'
 import { useMetadataMulti } from '../../../utils/useMetadata'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
@@ -15,18 +15,18 @@ type Row = {
   id: string
 }
 
-export const AssetTemplates: React.FC = () => {
+export const LoanTemplates: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
 
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
 
-  const templateIds = poolMetadata?.assetTemplates?.map((s) => s.id) ?? []
-  const templateMetadata = useMetadataMulti<AssetTemplate>(templateIds)
+  const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
+  const templateMetadata = useMetadataMulti<LoanTemplate>(templateIds)
 
   const tableData = templateIds.map((id, i) => {
     const meta = templateMetadata[i].data
-    const metaMeta = poolMetadata?.assetTemplates?.[i]
+    const metaMeta = poolMetadata?.loanTemplates?.[i]
     return {
       name: meta?.name ?? `Template ${i + 1}`,
       createdAt: metaMeta?.createdAt ? new Date(metaMeta?.createdAt) : null,

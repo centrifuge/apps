@@ -25,7 +25,7 @@ import { usePodAuth } from '../../../components/PodAuthProvider'
 import { PodAuthSection } from '../../../components/PodAuthSection'
 import { Transaction, useTransactions } from '../../../components/TransactionsProvider'
 import { useWeb3 } from '../../../components/Web3Provider'
-import { AssetTemplate } from '../../../types'
+import { LoanTemplate } from '../../../types'
 import { truncateText } from '../../../utils/formatting'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useAddress } from '../../../utils/useAddress'
@@ -53,7 +53,7 @@ type FormValues = {
   attributes: Record<string, string | number>
 }
 
-type Attribute = AssetTemplate['sections'][0]['attributes'][0]
+type Attribute = LoanTemplate['sections'][0]['attributes'][0]
 type TemplateFieldProps<T extends string> = Attribute & { type: T; name: string }
 
 const CurrencyField: React.VFC<TemplateFieldProps<'currency'>> = ({ name, label, currencySymbol }) => {
@@ -250,16 +250,16 @@ const IssuerCreateLoan: React.FC = () => {
     },
   })
 
-  const templateIds = poolMetadata?.assetTemplates?.map((s) => s.id) ?? []
+  const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
   const templateMetadata = useMetadataMulti(templateIds)
 
   const templateSelectOptions = templateIds.map((id, i) => ({
-    label: truncateText((templateMetadata[i].data as AssetTemplate)?.name ?? `Template ${i + 1}`, 30),
+    label: truncateText((templateMetadata[i].data as LoanTemplate)?.name ?? `Template ${i + 1}`, 30),
     value: id,
   }))
 
   const selectedTemplateMetadata = templateMetadata[templateIds.findIndex((id) => id === form.values.templateId)]
-    ?.data as AssetTemplate
+    ?.data as LoanTemplate
 
   const formRef = React.useRef<HTMLFormElement>(null)
   useFocusInvalidInput(form, formRef)
@@ -384,7 +384,7 @@ function labelToKey(label: string) {
   return label.toLowerCase().replaceAll(/\s/g, '_')
 }
 
-function valuesToPodAttributes(values: FormValues['attributes'], template: AssetTemplate) {
+function valuesToPodAttributes(values: FormValues['attributes'], template: LoanTemplate) {
   return Object.fromEntries(
     template.sections.flatMap((section) =>
       section.attributes.map((attr) => {

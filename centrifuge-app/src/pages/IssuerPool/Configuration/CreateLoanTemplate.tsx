@@ -8,7 +8,7 @@ import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { AssetTemplate } from '../../../types'
+import { LoanTemplate } from '../../../types'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
@@ -66,15 +66,15 @@ const initialSchemaJSON = `{
   ]
 }`
 
-export const IssuerPoolCreateAssetTemplatePage: React.FC = () => {
+export const IssuerPoolCreateLoanTemplatePage: React.FC = () => {
   return (
     <PageWithSideBar>
-      <CreateAssetTemplate />
+      <CreateLoanTemplate />
     </PageWithSideBar>
   )
 }
 
-export const CreateAssetTemplate: React.FC = () => {
+export const CreateLoanTemplate: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
@@ -102,7 +102,7 @@ export const CreateAssetTemplate: React.FC = () => {
       if (!isValidJsonString(values.metadata)) {
         errors = setIn(errors, `metadata`, 'Must be a valid JSON string')
       } else {
-        const obj: Partial<AssetTemplate> = JSON.parse(values.metadata)
+        const obj: Partial<LoanTemplate> = JSON.parse(values.metadata)
         const labels = obj?.sections?.flatMap((section) => section?.attributes.map((attr) => attr?.label)) ?? []
         if (new Set(labels).size < labels.length) {
           errors = setIn(errors, `metadata`, 'Attribute labels must be unique across sections')
@@ -114,8 +114,8 @@ export const CreateAssetTemplate: React.FC = () => {
       const templateMetadataHash = await lastValueFrom(cent.metadata.pinJson(JSON.parse(values.metadata)))
       const newPoolMetadata = {
         ...(poolMetadata as PoolMetadata),
-        assetTemplates: [
-          ...(poolMetadata?.assetTemplates ?? []),
+        loanTemplates: [
+          ...(poolMetadata?.loanTemplates ?? []),
           {
             id: templateMetadataHash.ipfsHash,
             createdAt: new Date().toISOString(),

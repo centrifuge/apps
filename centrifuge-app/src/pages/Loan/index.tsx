@@ -17,7 +17,7 @@ import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
 import { nftMetadataSchema } from '../../schemas'
-import { AssetTemplate, AssetTemplateAttribute } from '../../types'
+import { LoanTemplate, LoanTemplateAttribute } from '../../types'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatPercentage, truncateText } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
@@ -73,7 +73,7 @@ const Loan: React.FC = () => {
   const name = truncateText(nftMetadata?.name || 'Unnamed asset', 30)
   const imageUrl = nftMetadata?.image ? cent.metadata.parseMetadataUrl(nftMetadata.image) : ''
 
-  const { data: templateData } = useMetadata<AssetTemplate>(
+  const { data: templateData } = useMetadata<LoanTemplate>(
     nftMetadata?.properties?._template && `ipfs://ipfs/${nftMetadata?.properties?._template}`
   )
 
@@ -263,7 +263,7 @@ function labelToKey(label: string) {
   return label.toLowerCase().replaceAll(/\s/g, '_')
 }
 
-function formatValue(value: any, attr: AssetTemplateAttribute) {
+function formatValue(value: any, attr: LoanTemplateAttribute) {
   switch (attr.type) {
     case 'string':
       return value
