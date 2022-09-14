@@ -1,5 +1,3 @@
-import { Keyring } from '@polkadot/keyring'
-import * as jw3t from 'jw3t'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useCentrifuge } from './CentrifugeProvider'
@@ -21,6 +19,7 @@ function getPersisted() {
 export const PodAuthProvider: React.FC = ({ children }) => {
   const [tokens, setTokens] = React.useState<Record<string, { signed: string; payload: any } | undefined>>(getPersisted)
   const { selectedWallet } = useWeb3()
+  const cent = useCentrifuge()
 
   React.useEffect(() => {
     sessionStorage.setItem('podAuth', JSON.stringify(tokens))
@@ -45,35 +44,12 @@ export const PodAuthProvider: React.FC = ({ children }) => {
 
   const login = React.useCallback(
     async (address: string, onBehalfOf: string) => {
-      const header = {
-        algorithm: 'sr25519',
-        token_type: 'JW3T',
-        address_type: 'ss58',
-      }
-      const now = Math.floor(Date.now() / 1000)
-      const payload = {
-        address,
-        on_behalf_of: onBehalfOf,
-        proxy_type: 'pod_auth',
-        expires_at: String(now + 60 * 60 * 24),
-        issued_at: String(now),
-        not_before: String(now),
-      }
-      const content = new jw3t.JW3TContent(header, payload)
-
-      const keyring = new Keyring({ type: 'sr25519' })
-      const account = keyring.addFromAddress(address)
-
-      const polkaJsSigner = new jw3t.PolkaJsSigner({
-        account,
-        signer: selectedWallet?.signer as any,
-      })
-      const signer = new jw3t.JW3TSigner(polkaJsSigner, content)
-      const { base64Content, base64Sig } = await signer.getSignature()
-      const token = `${base64Content}.${base64Sig}`
+      // @ts-expect-error Signer type version mismatch
+      const { payload, token } = await cent.pod.signToken([address, onBehalfOf, selectedWallet?.signer])
       setTokens((prev) => ({ ...prev, [`${address}-${onBehalfOf}`]: { signed: token, payload } }))
+      console.log('token', token, payload)
     },
-    [selectedWallet?.signer]
+    [selectedWallet?.signer, cent]
   )
 
   const ctx = React.useMemo(
@@ -105,8 +81,6 @@ export function usePodAuth(podUrl?: string | null | undefined) {
   } = useQuery(['podAccount', podUrl, token], () => cent.pod.getSelf([podUrl!, token!.signed]), {
     enabled: !!podUrl && !!token,
     staleTime: Infinity,
-    retry: false,
-    refetchOnWindowFocus: false,
   })
 
   async function login() {
