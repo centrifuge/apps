@@ -81,6 +81,8 @@ export function usePodAuth(podUrl?: string | null | undefined) {
   } = useQuery(['podAccount', podUrl, token], () => cent.pod.getSelf([podUrl!, token!.signed]), {
     enabled: !!podUrl && !!token,
     staleTime: Infinity,
+    retry: 1,
+    refetchOnMount: false,
   })
 
   async function login() {
