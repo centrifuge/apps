@@ -82,7 +82,7 @@ export function usePodAuth(podUrl?: string | null | undefined) {
     enabled: !!podUrl && !!token,
     staleTime: Infinity,
     retry: 1,
-    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   })
 
   async function login() {
