@@ -58,9 +58,11 @@ export const PoolDetailLiquidity: React.FC = () => {
     <>
       <PageSummary data={pageSummaryData}></PageSummary>
       <PageSection title="Reserve vs. cash drag">
-        <React.Suspense fallback={<Spinner />}>
-          <ReserveCashDragChart />
-        </React.Suspense>
+        <Stack height="290px">
+          <React.Suspense fallback={<Spinner />}>
+            <ReserveCashDragChart />
+          </React.Suspense>
+        </Stack>
       </PageSection>
       <LiquiditySection pool={pool} />
     </>
