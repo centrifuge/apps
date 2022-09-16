@@ -5,6 +5,7 @@ import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis
 import { useTheme } from 'styled-components'
 import { formatBalance } from '../../utils/formatting'
 import { useDailyTrancheStates, usePool } from '../../utils/usePools'
+import { Spinner } from '../Spinner'
 import { CustomizedTooltip, CustomizedXAxisTick } from './CustomChartElements'
 
 type ChartData = {
@@ -29,7 +30,7 @@ const PriceYieldChart: React.VFC<{ trancheId: string }> = ({ trancheId }) => {
     )
   }, [trancheStates])
 
-  if (trancheStates && trancheStates?.length < 1) return <Text variant="body2">No data available</Text>
+  if (trancheStates && trancheStates?.length < 1) return <Spinner>Loading</Spinner>
 
   return (
     <Stack>
@@ -50,9 +51,10 @@ const PriceYieldChart: React.VFC<{ trancheId: string }> = ({ trancheId }) => {
                 tickFormatter={(tick: number) => {
                   return tick.toFixed(2)
                 }}
+                domain={['dataMin - 0.2', 'dataMax + 0.2']}
               />
               <CartesianGrid stroke={theme.colors.borderSecondary} />
-              <Tooltip content={<CustomizedTooltip currency={pool?.currency || ''} precision={2} />} />
+              <Tooltip content={<CustomizedTooltip currency={pool?.currency || ''} precision={4} />} />
               <Line dot={false} dataKey="tokenPrice" stroke={theme.colors.accentPrimary} name="Pool value" />
             </ComposedChart>
           </ResponsiveContainer>
@@ -76,7 +78,7 @@ const CustomLegend: React.VFC<{
       <Grid pl="4" pb="4" columns={6} gap="3" width="100%">
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentPrimary}>
           <Text variant="label2">Token price</Text>
-          <Text variant="body2">{formatBalance(data.tokenPrice, pool?.currency, 2)}</Text>
+          <Text variant="body2">{formatBalance(data.tokenPrice, pool?.currency, 4)}</Text>
         </Stack>
       </Grid>
     </Shelf>
