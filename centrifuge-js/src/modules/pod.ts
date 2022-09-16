@@ -158,10 +158,14 @@ export function getPodModule() {
   async function awaitJob(args: [podUrl: string, token: string, jobId: string]) {
     let i = 100
     while (i--) {
-      const job = await getJob(args)
-      if (job.finished) {
-        if (job.tasks[job.tasks.length - 1]?.error) throw new JobFailedError(job)
-        return job
+      try {
+        const job = await getJob(args)
+        if (job.finished) {
+          if (job.tasks[job.tasks.length - 1]?.error) throw new JobFailedError(job)
+          return job
+        }
+      } catch (e) {
+        //
       }
       await wait(6000)
     }
