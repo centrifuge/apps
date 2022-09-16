@@ -236,7 +236,7 @@ const IssuerCreateLoan: React.FC = () => {
 
       // Sign createLoan transaction
       const submittable = await lastValueFrom(
-        connectedCent.pools.createLoan([pid, collateralCollectionId, nftId], { signOnly: true, era: 0 })
+        connectedCent.pools.createLoan([pid, collateralCollectionId, nftId], { signOnly: true, era: 100 })
       )
 
       updateTransaction(txId, { status: 'pending' })

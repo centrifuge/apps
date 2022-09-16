@@ -78,18 +78,18 @@ export function usePodAuth(podUrl?: string | null | undefined) {
     data: account,
     isLoading: isAccountLoading,
     error,
-  } = useQuery(['podAccount', podUrl, token], () => cent.pod.getSelf([podUrl!, token!.signed]), {
-    enabled: !!podUrl && !!token,
+  } = useQuery(['podAccount', podUrl, token, hasValidToken], () => cent.pod.getSelf([podUrl!, token!.signed]), {
+    enabled: !!podUrl && !!token && hasValidToken,
     staleTime: Infinity,
     retry: 1,
     refetchOnWindowFocus: false,
   })
 
   async function login() {
-    if (!address || !proxy?.delegator) return
+    if (!address) return
     setIsSigning(true)
     try {
-      await ctx.login(address, proxy.delegator)
+      await ctx.login(address, proxy?.delegator ?? address)
     } finally {
       setIsSigning(false)
     }
@@ -103,10 +103,10 @@ export function usePodAuth(podUrl?: string | null | undefined) {
     tokens: ctx.tokens,
     token: hasValidToken ? token : null,
     login,
-    canLogIn: !!proxy?.delegator,
+    canLogIn: !!address,
     isLoggingIn: isAccountLoading || isSigning,
     isLoggedIn: hasValidToken && !!account,
-    loginError: error,
+    loginError: hasValidToken ? error : null,
   }
 }
 
