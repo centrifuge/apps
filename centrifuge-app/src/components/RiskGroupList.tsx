@@ -43,41 +43,35 @@ const columns: Column[] = [
   {
     header: <SortableTableHeader label="Amount" />,
     cell: ({ amount, currency }: RiskGroupRow) =>
-      typeof amount === 'string' ? <Text variant="body2">{formatBalance(Dec(amount), currency)}</Text> : amount,
+      typeof amount === 'string' ? formatBalance(Dec(amount), currency) : amount,
     flex: '1',
     sortKey: 'amount',
   },
   {
     header: <SortableTableHeader label="Share" />,
-    cell: ({ share }: RiskGroupRow) => <Text variant="body2">{share}%</Text>,
+    cell: ({ share }: RiskGroupRow) => `${share}%`,
     flex: '1',
     sortKey: 'share',
   },
   {
     header: <SortableTableHeader label="Financing fee" />,
-    cell: ({ interestRatePerSec }: RiskGroupRow) => (
-      <Text variant="body2">
-        {interestRatePerSec && typeof interestRatePerSec === 'string'
-          ? `${interestRatePerSec}%`
-          : React.isValidElement(interestRatePerSec)
-          ? interestRatePerSec
-          : ''}
-      </Text>
-    ),
+    cell: ({ interestRatePerSec }: RiskGroupRow) =>
+      interestRatePerSec && typeof interestRatePerSec === 'string'
+        ? `${interestRatePerSec}%`
+        : React.isValidElement(interestRatePerSec)
+        ? interestRatePerSec
+        : '',
     flex: '1',
     sortKey: 'interestRatePerSec',
   },
   {
     header: <SortableTableHeader label="Risk adjustment" />,
-    cell: ({ riskAdjustment }: RiskGroupRow) => (
-      <Text variant="body2">
-        {riskAdjustment && typeof riskAdjustment === 'string'
-          ? `${riskAdjustment}%`
-          : React.isValidElement(riskAdjustment)
-          ? riskAdjustment
-          : ''}
-      </Text>
-    ),
+    cell: ({ riskAdjustment }: RiskGroupRow) =>
+      riskAdjustment && typeof riskAdjustment === 'string'
+        ? `${riskAdjustment}%`
+        : React.isValidElement(riskAdjustment)
+        ? riskAdjustment
+        : '',
     flex: '1',
     sortKey: 'riskAdjustment',
   },
