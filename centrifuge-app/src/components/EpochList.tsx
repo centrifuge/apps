@@ -26,7 +26,7 @@ const columns: Column[] = [
   {
     align: 'left',
     header: 'Order',
-    cell: (row: LiquidityTableRow) => <Text variant="body2">{row.order}</Text>,
+    cell: (row: LiquidityTableRow) => row.order,
     flex: '3',
   },
   {
@@ -161,29 +161,21 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
 const LockedRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  return (
-    <Text variant="body2">
-      {React.isValidElement(row.locked) ? row.locked : formatBalance(row.locked, pool?.currency)}
-    </Text>
-  )
+  return <>{React.isValidElement(row.locked) ? row.locked : formatBalance(row.locked, pool?.currency)}</>
 }
 
 const ExecutingRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  return (
-    <Text variant="body2">
-      {React.isValidElement(row.executing) ? row.executing : formatBalance(row.executing || 0, pool?.currency)}
-    </Text>
-  )
+  return <>{React.isValidElement(row.executing) ? row.executing : formatBalance(row.executing || 0, pool?.currency)}</>
 }
 
 const ExecutingPercentageRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
   return (
-    <Text variant="body2">
+    <>
       {React.isValidElement(row.executingPercentage)
         ? row.executingPercentage
         : formatPercentage((row?.executingPercentage as Perquintill) || 0)}
-    </Text>
+    </>
   )
 }

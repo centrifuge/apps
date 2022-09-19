@@ -51,7 +51,7 @@ export const Schemas: React.FC = () => {
             align: 'left',
             header: 'Template name',
             cell: (row: Row) => (
-              <Text variant="body2" fontWeight="600" color="textInteractive">
+              <Text fontWeight="600" color="textInteractive">
                 {row.name}
               </Text>
             ),
@@ -59,7 +59,7 @@ export const Schemas: React.FC = () => {
           },
           {
             header: 'Created',
-            cell: (row: Row) => <Text variant="body2">{row.createdAt && formatDate(row.createdAt)}</Text>,
+            cell: (row: Row) => row.createdAt && formatDate(row.createdAt),
             flex: '1',
           },
           {

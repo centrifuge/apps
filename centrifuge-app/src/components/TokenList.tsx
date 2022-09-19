@@ -41,23 +41,19 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Yield" />,
-    cell: (token: TokenTableData) => (
-      <Text variant="body2">{token.yield ? `Target: ${formatPercentage(token.yield)}` : ''}</Text>
-    ),
+    cell: (token: TokenTableData) => (token.yield ? `Target: ${formatPercentage(token.yield)}` : ''),
     flex: '4',
     sortKey: 'yield',
   },
   {
     header: <SortableTableHeader label="Max. protection" />,
-    cell: (token: TokenTableData) => (
-      <Text variant="body2">{token.protection ? formatPercentage(token.protection) : ''}</Text>
-    ),
+    cell: (token: TokenTableData) => (token.protection ? formatPercentage(token.protection) : ''),
     flex: '4',
     sortKey: 'protection',
   },
   {
     header: <SortableTableHeader label="Value locked" />,
-    cell: (token: TokenTableData) => <Text variant="body2">{formatBalance(token?.valueLocked, token.currency)}</Text>,
+    cell: (token: TokenTableData) => formatBalance(token?.valueLocked, token.currency),
     flex: '4',
     sortKey: 'valueLocked',
   },

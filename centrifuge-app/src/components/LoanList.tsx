@@ -1,5 +1,5 @@
 import { Loan } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
+import { IconChevronRight, Shelf, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
 import { nftMetadataSchema } from '../schemas'
@@ -33,17 +33,14 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Financing date" />,
-    cell: (l: Row) => (
-      <Text variant="body2">
-        {l.originationDateSortKey && l.status === 'Active' && l?.originationDate ? formatDate(l.originationDate) : ''}
-      </Text>
-    ),
+    cell: (l: Row) =>
+      l.originationDateSortKey && l.status === 'Active' && l?.originationDate ? formatDate(l.originationDate) : '',
     flex: '2',
     sortKey: 'originationDateSortKey',
   },
   {
     header: <SortableTableHeader label="Maturity date" />,
-    cell: (l: Row) => <Text variant="body2">{l.maturityDate ? formatDate(l.maturityDate) : ''}</Text>,
+    cell: (l: Row) => (l.maturityDate ? formatDate(l.maturityDate) : ''),
     flex: '2',
     sortKey: 'maturityDate',
   },
@@ -119,7 +116,5 @@ const AssetName: React.VFC<{ loan: Row }> = ({ loan }) => {
 const OutstandingDebt: React.VFC<{ loan: Row }> = ({ loan }) => {
   const pool = usePool(loan.poolId)
 
-  return (
-    <Text variant="body2">{loan.status !== 'Created' ? formatBalance(loan.outstandingDebt, pool?.currency) : ''}</Text>
-  )
+  return <>{loan.status !== 'Created' ? formatBalance(loan.outstandingDebt, pool?.currency) : ''}</>
 }
