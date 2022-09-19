@@ -233,10 +233,10 @@ const CreatePoolForm: React.VFC = () => {
       metadataValues.poolIcon = { uri: pinnedPoolIcon.uri, mime: values.poolIcon.type }
 
       // tranches must be reversed (most junior is the first in the UI but the last in the API)
-      const noJuniorTranches = metadataValues.tranches.slice(1)
+      const nonJuniorTranches = metadataValues.tranches.slice(1)
       const tranches = [
         {}, // most junior tranche
-        ...noJuniorTranches.map((tranche) => ({
+        ...nonJuniorTranches.map((tranche) => ({
           interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
           minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
         })),

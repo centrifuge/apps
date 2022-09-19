@@ -383,7 +383,6 @@ export type AccountTokenBalance = {
 export type TrancheInput = {
   interestRatePerSec?: BN
   minRiskBuffer?: BN
-  seniority?: number
 }
 
 export type DailyPoolState = {
@@ -655,16 +654,28 @@ export function getPoolsModule(inst: Centrifuge) {
   type UpdatePoolInput = [
     poolId: string,
     updates: {
-      minEpochTime?: { newValue: number }
-      tranches?: { newValue: any }
-      maxNavAge?: { newValue: number }
+      minEpochTime?: number
+      tranches?: TrancheInput[]
+      maxNavAge?: number
     }
   ]
 
   function updatePool(args: UpdatePoolInput, options?: TransactionOptions) {
     const [poolId, updates] = args
-    const { minEpochTime, tranches, maxNavAge } = updates
+    const { minEpochTime: minEpochTimeInput, tranches: tranchesInput, maxNavAge: maxNavAgeInput } = updates
     const $api = inst.getApi()
+
+    const minEpochTime = minEpochTimeInput ? { newValue: minEpochTimeInput } : undefined
+    const tranches = tranchesInput
+      ? {
+          newValue: tranchesInput.map((t) => [
+            t.interestRatePerSec
+              ? { NonResidual: [t.interestRatePerSec.toString(), t.minRiskBuffer?.toString()] }
+              : 'Residual',
+          ]),
+        }
+      : undefined
+    const maxNavAge = maxNavAgeInput ? { newValue: maxNavAgeInput } : undefined
 
     return $api.pipe(
       switchMap((api) => {
@@ -726,12 +737,6 @@ export function getPoolsModule(inst: Centrifuge) {
   function setMetadata(args: [poolId: string, metadata: PoolMetadata], options?: TransactionOptions) {
     const [poolId, metadata] = args
     const $api = inst.getApi()
-
-    if (metadata?.version) {
-      metadata.version = (metadata.version as number) + 1
-    } else {
-      metadata.version = 1
-    }
 
     const $pinnedMetadata = inst.metadata.pinJson(metadata)
     return combineLatest([$api, $pinnedMetadata]).pipe(

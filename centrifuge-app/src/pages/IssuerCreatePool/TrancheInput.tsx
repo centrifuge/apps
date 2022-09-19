@@ -41,7 +41,11 @@ export const TrancheSection: React.FC = () => {
   )
 }
 
-export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string }> = ({ canRemove, currency }) => {
+export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; isUpdating?: boolean }> = ({
+  canRemove,
+  currency,
+  isUpdating,
+}) => {
   const fmk = useFormikContext<PoolMetadataInput>()
   const currencies = useCurrencies()
   const { values } = fmk
@@ -69,6 +73,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string }> 
                   maxLength={30}
                   name={`tranches.${index}.tokenName`}
                   validate={validate.tokenName}
+                  disabled={isUpdating}
                 />
                 <Field name={`tranches.${index}.symbolName`} validate={validate.symbolName}>
                   {({ field, form, meta }: FieldProps) => (
@@ -80,6 +85,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string }> 
                       placeholder="4-12 characters"
                       minLength={4}
                       maxLength={12}
+                      disabled={isUpdating}
                     />
                   )}
                 </Field>
