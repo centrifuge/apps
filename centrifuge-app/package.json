@@ -10,7 +10,7 @@
     "start:fabric": "cd ../fabric && yarn start && cd ../centrifuge-app",
     "start:centjs": "cd ../centrifuge-js && yarn start && cd ../centrifuge-app",
     "build": "yarn build:deps && yarn build:lambda && yarn build:types && yarn build:app",
-    "build:deps": "yarn build-fabric && build-centjs",
+    "build:deps": "yarn build-fabric && yarn build-centjs",
     "build:lambda": "netlify-lambda build lambda",
     "build:app": "vite build",
     "build:types": "tsc",
