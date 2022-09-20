@@ -9,8 +9,9 @@ defaults:
     working-directory: faucet-api
 
 jobs:
-  build-and-deploy:
+  build-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -42,7 +43,7 @@ jobs:
           GOOGLE_PROJECT_ID: centy-test
           CORS_ORIGIN: http://localhost:8888
 
-       - name: Deploy gcloud function
+      - name: Deploy gcloud function
         id: deploy-function
         uses: google-github-actions/deploy-cloud-functions@v0.1.0
         with:
