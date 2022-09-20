@@ -3,14 +3,15 @@ on:
   pull_request:
     paths:
       - 'faucet-api/**'
+      - '.github/workflows/faucet-api-build-and-deploy.yml'
+
+defaults:
+  run:
+    working-directory: faucet-api
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: faucet-api
 
     steps:
       - name: Checkout
