@@ -4,6 +4,9 @@ on:
     paths:
       - 'faucet-api/**'
       - '.github/workflows/faucet-api-build-and-deploy.yml'
+    push:
+      branches:
+        - cent-app/devel-faucet
 
 defaults:
   run:
