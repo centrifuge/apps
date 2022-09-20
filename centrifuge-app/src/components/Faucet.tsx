@@ -23,10 +23,11 @@ export const Faucet: React.VFC = () => {
     e.preventDefault()
 
     const ipRes = await fetch(`https://api.ipify.org?format=json`)
-    const ip = await ipRes.json()
-    console.log('ip', ip)
+    const ipData = await ipRes.json()
 
-    const claimResponse = await fetch(`http://127.0.0.1:8080?address=${selectedAccount?.address}&ip=${ip}`)
+    const claimResponse = await fetch(
+      `${import.meta.env.REACT_APP_FAUCET_URL}?address=${selectedAccount?.address}&ip=${ipData.ip}`
+    )
     const claim = await claimResponse.json()
     if (claim?.hash) {
       setHash(claim.hash)

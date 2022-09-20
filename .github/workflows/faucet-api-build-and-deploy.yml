@@ -40,7 +40,7 @@ jobs:
           COLLATOR_WSS_UR: wss://fullnode.development.cntrfg.com
           GOOGLE_PRIVATE_KEY: ${{ secrets.google-private-key }}
           GOOGLE_CLIENT_EMAIL: ${{ secrets.google-client-email }}
-          GOOGLE_PROJECT_ID: centy-test
+          GOOGLE_PROJECT_ID: peak-vista-185616
           CORS_ORIGIN: http://localhost:8888
 
       - name: Deploy gcloud function
@@ -49,4 +49,4 @@ jobs:
         with:
           name: faucet
           runtime: nodejs16
-          env_vars: GOOGLE_PROJECT_ID:centy-test,CORS_ORIGIN:http://localhost:8888,COLLATOR_WSS_UR:wss://fullnode.development.cntrfg.com,GOOGLE_PRIVATE_KEY:${{ secrets.google-private-key }},GOOGLE_CLIENT_EMAIL:${{ secrets.google-client-email }},
+          env_vars: GOOGLE_PROJECT_ID:peak-vista-185616,CORS_ORIGIN:http://localhost:8888,COLLATOR_WSS_UR:wss://fullnode.development.cntrfg.com,GOOGLE_PRIVATE_KEY:${{ secrets.google-private-key }},GOOGLE_CLIENT_EMAIL:${{ secrets.google-client-email }},
