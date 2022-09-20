@@ -3229,6 +3229,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@eslint/eslintrc@npm:^1.3.2":
+  version: 1.3.2
+  resolution: "@eslint/eslintrc@npm:1.3.2"
+  dependencies:
+    ajv: ^6.12.4
+    debug: ^4.3.2
+    espree: ^9.4.0
+    globals: ^13.15.0
+    ignore: ^5.2.0
+    import-fresh: ^3.2.1
+    js-yaml: ^4.1.0
+    minimatch: ^3.1.2
+    strip-json-comments: ^3.1.1
+  checksum: b949489c4cb6a4ca4cb0d9fcb92cbb7307748911cc59858d4586e5d7aaed2f33b4c71dfcda3e05a7af0ce3dae9f9bc5710072d6a025126691714eac368026850
+  languageName: node
+  linkType: hard
+
 "@ethereumjs/common@npm:^2.5.0, @ethereumjs/common@npm:^2.6.4":
   version: 2.6.5
   resolution: "@ethereumjs/common@npm:2.6.5"
@@ -4348,6 +4365,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@humanwhocodes/config-array@npm:^0.10.4":
+  version: 0.10.4
+  resolution: "@humanwhocodes/config-array@npm:0.10.4"
+  dependencies:
+    "@humanwhocodes/object-schema": ^1.2.1
+    debug: ^4.1.1
+    minimatch: ^3.0.4
+  checksum: e3758d044c3024e301856f7a81395e81b3818377d45962a3fcef22c0be6e67393031c7032db7f118c736bc782b0974ab3f401d1bd5c2646135dbcbb25eddad61
+  languageName: node
+  linkType: hard
+
 "@humanwhocodes/config-array@npm:^0.5.0":
   version: 0.5.0
   resolution: "@humanwhocodes/config-array@npm:0.5.0"
@@ -4367,6 +4395,20 @@ __metadata:
     debug: ^4.1.1
     minimatch: ^3.0.4
   checksum: fec9b78d1ec9c688c6b9e0685a39598fafd9c16fb9ae0212b8160a5affeb56d99b5397132ca2bb44f8295a3262c7e88e9c45cd16272b0ae5207c3bc2e0cc71a7
+  languageName: node
+  linkType: hard
+
+"@humanwhocodes/gitignore-to-minimatch@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@humanwhocodes/gitignore-to-minimatch@npm:1.0.2"
+  checksum: 317138fc5fdfc5f3a6469e6c4ef22b6b1e4c9591e3cb5c6c50a6115e442b295e61cf420ba5cd04d03bef2a2b683faed6cb4382913e549cb3e5f55aeb5a19ab8c
+  languageName: node
+  linkType: hard
+
+"@humanwhocodes/module-importer@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@humanwhocodes/module-importer@npm:1.0.1"
+  checksum: 4a2e3f2866153b0587679ebb74dc08908ca9c7e23fe499633b30f79019ad8f6e83ab85ebe6f6dd57f23c5ea61fdbd2dbe117b13d3356c109219511028828ba28
   languageName: node
   linkType: hard
 
@@ -23444,6 +23486,55 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint@npm:8.23.1, eslint@npm:^8.23.1":
+  version: 8.23.1
+  resolution: "eslint@npm:8.23.1"
+  dependencies:
+    "@eslint/eslintrc": ^1.3.2
+    "@humanwhocodes/config-array": ^0.10.4
+    "@humanwhocodes/gitignore-to-minimatch": ^1.0.2
+    "@humanwhocodes/module-importer": ^1.0.1
+    ajv: ^6.10.0
+    chalk: ^4.0.0
+    cross-spawn: ^7.0.2
+    debug: ^4.3.2
+    doctrine: ^3.0.0
+    escape-string-regexp: ^4.0.0
+    eslint-scope: ^7.1.1
+    eslint-utils: ^3.0.0
+    eslint-visitor-keys: ^3.3.0
+    espree: ^9.4.0
+    esquery: ^1.4.0
+    esutils: ^2.0.2
+    fast-deep-equal: ^3.1.3
+    file-entry-cache: ^6.0.1
+    find-up: ^5.0.0
+    glob-parent: ^6.0.1
+    globals: ^13.15.0
+    globby: ^11.1.0
+    grapheme-splitter: ^1.0.4
+    ignore: ^5.2.0
+    import-fresh: ^3.0.0
+    imurmurhash: ^0.1.4
+    is-glob: ^4.0.0
+    js-sdsl: ^4.1.4
+    js-yaml: ^4.1.0
+    json-stable-stringify-without-jsonify: ^1.0.1
+    levn: ^0.4.1
+    lodash.merge: ^4.6.2
+    minimatch: ^3.1.2
+    natural-compare: ^1.4.0
+    optionator: ^0.9.1
+    regexpp: ^3.2.0
+    strip-ansi: ^6.0.1
+    strip-json-comments: ^3.1.0
+    text-table: ^0.2.0
+  bin:
+    eslint: bin/eslint.js
+  checksum: ce04ef4297937e454fd6afaac8ab2d0e97caf4a4834213d76974797525003e385e62016a1279e0478cf30fa5246da7940aaaf94cb2287b81319cbd2ecd88cb2b
+  languageName: node
+  linkType: hard
+
 "eslint@npm:8.4.1":
   version: 8.4.1
   resolution: "eslint@npm:8.4.1"
@@ -23572,7 +23663,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"espree@npm:^9.0.0":
+"espree@npm:^9.0.0, espree@npm:^9.4.0":
   version: 9.4.0
   resolution: "espree@npm:9.4.0"
   dependencies:
@@ -25131,11 +25222,13 @@ __metadata:
     "@polkadot/api": ^9.3.3
     "@polkadot/keyring": ^10.1.7
     "@types/bn.js": ^5
+    "@types/eslint": ^8
     "@types/node": ^18.7.16
     bn.js: ^5.2.1
     dotenv: ^16.0.2
     esbuild: ^0.15.8
     esbuild-node-externals: ^1.5.0
+    eslint: ^8.23.1
     nodemon: ^2.0.19
     npm-run-all: ^4.1.5
     rxjs: ^7.5.6
@@ -27004,6 +27097,13 @@ fsevents@^1.2.7:
   version: 4.2.10
   resolution: "graceful-fs@npm:4.2.10"
   checksum: f86679a8a53da3d8f10fd9c81a4e22f8064adf56e10a6fdb6a6aa5e6d05fea0067a99e9959c4b939b4a9c39dad02775d977bff4da9fff07d557aea840f72f0e8
+  languageName: node
+  linkType: hard
+
+"grapheme-splitter@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "grapheme-splitter@npm:1.0.4"
+  checksum: 6875e94add80360364a609e1fd0fe325e3b82326db2278dd36c1011a6bfc0e098811e791dedf9a88d4ae3f9d17a5c6a8d684948dd7b097f1f8d5ff905676e2b2
   languageName: node
   linkType: hard
 
@@ -31433,6 +31533,13 @@ fsevents@^1.2.7:
     html-beautify: js/bin/html-beautify.js
     js-beautify: js/bin/js-beautify.js
   checksum: 052846763217b7c8ee274141b0d0844090213fa4202705a1d5412461b191c7a7810d687f158ab386a67c8306f75bdf8baa37193a9b3dbecfcaf655a0c2094bc3
+  languageName: node
+  linkType: hard
+
+"js-sdsl@npm:^4.1.4":
+  version: 4.1.4
+  resolution: "js-sdsl@npm:4.1.4"
+  checksum: dd4cb784d2be1ddf587b04b5da83e5c2ba9a2fdd011f79a0e6b2751a9d051b7863470f295de2a1138569f7d5855f979f318320ee2b328cd6f48693015a1f6c4a
   languageName: node
   linkType: hard
 
