@@ -1,12 +1,8 @@
 name: 'faucet api build and deploy'
 on:
-  pull_request:
-    paths:
-      - 'faucet-api/**'
-      - '.github/workflows/faucet-api-build-and-deploy.yml'
-    push:
-      branches:
-        - cent-app/devel-faucet
+  push:
+    branches:
+      - cent-app/devel-faucet
 
 defaults:
   run:
