@@ -111,7 +111,7 @@ export class CentrifugeBase {
   }
 
   getChainId() {
-    return 136
+    return this.config.network === 'centrifuge' ? 36 : 136
   }
 
   wrapSignAndSend<T extends TransactionOptions>(api: ApiRx, submittable: SubmittableExtrinsic<'rxjs'>, options?: T) {
