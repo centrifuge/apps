@@ -11739,13 +11739,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cors@npm:^2":
-  version: 2.8.12
-  resolution: "@types/cors@npm:2.8.12"
-  checksum: f3b62196df42c286282b9dbda26e24d2264211d932e7d9c2240f361e27ef693a5cb03790daeb3610fd958a0690f4d31d45ef7848b0df7a0dd2afc698a4f9df76
-  languageName: node
-  linkType: hard
-
 "@types/cron@npm:^1, @types/cron@npm:^1.7.2":
   version: 1.7.3
   resolution: "@types/cron@npm:1.7.3"
@@ -19491,7 +19484,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cors@npm:2.8.5, cors@npm:^2.8.5":
+"cors@npm:2.8.5":
   version: 2.8.5
   resolution: "cors@npm:2.8.5"
   dependencies:
@@ -25138,10 +25131,8 @@ __metadata:
     "@polkadot/api": ^9.3.3
     "@polkadot/keyring": ^10.1.7
     "@types/bn.js": ^5
-    "@types/cors": ^2
     "@types/node": ^18.7.16
     bn.js: ^5.2.1
-    cors: ^2.8.5
     dotenv: ^16.0.2
     esbuild: ^0.15.8
     esbuild-node-externals: ^1.5.0
