@@ -1,6 +1,5 @@
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
-// import { Helmet } from 'react-helmet'
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
