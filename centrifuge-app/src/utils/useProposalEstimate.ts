@@ -34,8 +34,11 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
           map(([api, submittable]) => {
             const { minimumDeposit, preimageByteDeposit } = api.consts.democracy
             setChainDecimals(api.registry.chainDecimals[0])
+            // We need the first argument passed to the `notePreimage` extrinsic, which is the actual encoded proposal
             const notePreimageDeposit = hexToBN(preimageByteDeposit.toHex()).mul(
-              new BN((submittable as any).encodedLength)
+              config.poolCreationType === 'notePreimage'
+                ? new BN((submittable as any).method.args[0].length)
+                : new BN((submittable as any).method.args[0][0].args[0].length)
             )
             const feeBN =
               config.poolCreationType === 'notePreimage'
