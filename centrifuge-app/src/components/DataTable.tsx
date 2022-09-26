@@ -126,7 +126,6 @@ export const DataTable = <T extends Record<string, any>>({
 const Row = styled(Shelf)<any>`
   ${({ rounded, as: comp }) =>
     css({
-      gap: '5px',
       height: '48px',
       width: '100%',
       appearance: 'none',
