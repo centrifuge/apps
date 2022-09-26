@@ -35,7 +35,7 @@ const columns: Column[] = [
   {
     align: 'right',
     header: 'Penalty fee',
-    cell: (row: Row) => formatPercentage(row.penaltyInterestRate.toAprPercent()),
+    cell: (row: Row) => formatPercentage(row.penaltyInterestRate.fractionToAprPercent()),
     flex: '3',
   },
 ]
@@ -69,7 +69,7 @@ export const WriteOffGroups: React.FC = () => {
         ...(savedGroups ?? []).map((g) => ({
           days: g.overdueDays,
           writeOff: g.percentage.toPercent().toNumber(),
-          penaltyInterest: g.penaltyInterestRate.toAprPercent().toNumber(),
+          penaltyInterest: g.penaltyInterestRate.fractionToAprPercent().toNumber(),
           saved: true,
         })),
         ...values.writeOffGroups,
@@ -124,7 +124,7 @@ export const WriteOffGroups: React.FC = () => {
       const writeOffGroups = values.writeOffGroups.map((g) => ({
         overdueDays: g.days as number,
         percentage: Rate.fromPercent(g.writeOff),
-        penaltyInterestRate: Rate.fromAprPercent(g.penaltyInterest),
+        penaltyInterestRate: Rate.fractionFromAprPercent(g.penaltyInterest),
       }))
       execute([poolId, writeOffGroups])
       actions.setSubmitting(false)
