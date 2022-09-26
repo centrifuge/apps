@@ -601,7 +601,7 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     if (options?.paymentInfo) {
-      const hash = ''.padStart(46, '0')
+      const hash = '0'.repeat(46)
       return of({ uri: `ipfs://ipfs/${hash}`, ipfsHash: hash })
     }
 
