@@ -600,7 +600,8 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     if (options?.paymentInfo) {
-      return of({ uri: '', ipfsHash: '' })
+      const hash = '0'.repeat(46)
+      return of({ uri: `ipfs://ipfs/${hash}`, ipfsHash: hash })
     }
 
     const tranchesById: PoolMetadata['tranches'] = {}
