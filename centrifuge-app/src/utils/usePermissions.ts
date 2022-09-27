@@ -11,6 +11,7 @@ export function usePermissions(address?: string) {
   return result
 }
 
+// Returns whether the connected address can borrow from a pool in principle
 export function useCanBorrow(poolId: string) {
   const address = useAddress()
   const permissions = usePermissions(address)
@@ -22,6 +23,7 @@ export function useCanBorrow(poolId: string) {
   return !!canBorrow
 }
 
+// Returns whether the connected address can borrow against a specific asset from a pool
 export function useCanBorrowAsset(poolId: string, assetId: string) {
   const address = useAddress()
   const hasBorrowPermission = useCanBorrow(poolId)
