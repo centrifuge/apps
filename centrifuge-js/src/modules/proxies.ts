@@ -1,5 +1,5 @@
 import { encodeAddress } from '@polkadot/util-crypto'
-import { map } from 'rxjs/operators'
+import { map, switchMap } from 'rxjs/operators'
 import { CentrifugeBase } from '../CentrifugeBase'
 import { Account } from '../types'
 
@@ -7,24 +7,25 @@ export function getProxiesModule(inst: CentrifugeBase) {
   function getUserProxies(args: [address: Account]) {
     const [address] = args
 
-    const $query = inst.getSubqueryObservable<{
-      proxies: { nodes: { delegator: string; proxyType: string }[] }
-    }>(
-      `query($address: String!) {
-        proxies(filter: { delegatee: { equalTo: $address }}) {
-          nodes {
-            delegator
-            proxyType
+    return inst.getApi().pipe(
+      switchMap((api) => {
+        return inst.getSubqueryObservable<{
+          proxies: { nodes: { delegator: string; proxyType: string }[] }
+        }>(
+          `query($address: String!) {
+          proxies(filter: { delegatee: { equalTo: $address }}) {
+            nodes {
+              delegator
+              proxyType
+            }
           }
-        }
-      }`,
-      {
-        address: encodeAddress(address, inst.getChainId()),
-      },
-      false
-    )
-
-    return $query.pipe(
+        }`,
+          {
+            address: encodeAddress(address, api.registry.chainSS58),
+          },
+          false
+        )
+      }),
       map((data) => {
         const proxies: Record<string, { delegator: string; types: string[] }> = {}
         data?.proxies.nodes.forEach((node) => {
@@ -45,26 +46,27 @@ export function getProxiesModule(inst: CentrifugeBase) {
   function getMultiUserProxies(args: [addresses: Account[]]) {
     const [addresses] = args
 
-    const $query = inst.getSubqueryObservable<{
-      proxies: { nodes: { id: string; delegator: string; delegatee: string; proxyType: string }[] }
-    }>(
-      `query($addresses: [String!]) {
-        proxies(filter: { delegatee: { in: $addresses }}) {
-          nodes {
-            id
-            delegator
-            delegatee
-            proxyType
-          }
-        }
-      }`,
-      {
-        addresses: addresses.map((addr) => encodeAddress(addr, inst.getChainId())),
-      },
-      false
-    )
-
-    return $query.pipe(
+    return inst.getApi().pipe(
+      switchMap((api) => {
+        return inst.getSubqueryObservable<{
+          proxies: { nodes: { id: string; delegator: string; delegatee: string; proxyType: string }[] }
+        }>(
+          `query($addresses: [String!]) {
+            proxies(filter: { delegatee: { in: $addresses }}) {
+              nodes {
+                id
+                delegator
+                delegatee
+                proxyType
+              }
+            }
+          }`,
+          {
+            addresses: addresses.map((addr) => encodeAddress(addr, api.registry.chainSS58)),
+          },
+          false
+        )
+      }),
       map((data) => {
         const proxiesByUser: Record<string, { delegator: string; types: string[] }[]> = {}
         data?.proxies.nodes.forEach((node) => {
