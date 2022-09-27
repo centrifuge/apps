@@ -284,7 +284,7 @@ type InterestAccrual = {
 
 // type from chain
 type LoanData = {
-  status: LoanStatus
+  status: { [key in LoanStatus]: any }
   collateral: [collectionId: string, nftId: string]
 }
 
@@ -320,6 +320,7 @@ export type DefaultLoan = {
   status: 'Created'
   id: string
   poolId: string
+  closedAt: null
   asset: {
     collectionId: string
     nftId: string
@@ -337,6 +338,7 @@ export type ActiveLoan = {
   totalBorrowed: CurrencyBalance
   totalRepaid: CurrencyBalance
   lastUpdated: string
+  closedAt: null
   originationDate: string
   loanInfo: LoanInfo
   adminWrittenOff?: boolean
@@ -358,6 +360,7 @@ export type ClosedLoan = {
   totalBorrowed: CurrencyBalance
   totalRepaid: CurrencyBalance
   lastUpdated: string
+  closedAt: string
   originationDate?: string | null
   loanInfo: LoanInfo
   writeOffStatus: WriteOffStatus
@@ -1662,6 +1665,9 @@ export function getPoolsModule(inst: Centrifuge) {
             id: formatLoanKey(key as StorageKey<[u32, u32]>),
             poolId,
             status: getLoanStatus(loan),
+            closedAt: loan.status.Closed?.closed_at
+              ? new Date(loan.status.Closed?.closed_at * 1000).toISOString()
+              : null,
             asset: {
               collectionId: collectionId.toString(),
               nftId: nftId.toString(),
@@ -1670,7 +1676,7 @@ export function getPoolsModule(inst: Centrifuge) {
         })
 
         const activeLoanData = activeLoanValues.toJSON() as ActiveLoanData[]
-        const activeLoans = activeLoanData.reduce<Record<string, Omit<ActiveLoan, 'status' | 'asset'>>>(
+        const activeLoans = activeLoanData.reduce<Record<string, Omit<ActiveLoan, 'status' | 'asset' | 'closedAt'>>>(
           (prev, activeLoan, index) => {
             const interestData = interestAccrual[index].toJSON() as InterestAccrual
             const mapped = {
@@ -1700,7 +1706,7 @@ export function getPoolsModule(inst: Centrifuge) {
         )
 
         const closedLoans = (closedLoansValues as any[]).reduce<
-          Record<string, Omit<ClosedLoan, 'status' | 'asset' | 'adminWrittenOff'>>
+          Record<string, Omit<ClosedLoan, 'status' | 'asset' | 'adminWrittenOff' | 'closedAt'>>
         >((prev, [key, value]) => {
           const closedLoan = value.toJSON() as ClosedLoanData
           const loanId = formatLoanKey(key as StorageKey<[u32, u32]>)
