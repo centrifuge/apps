@@ -10,7 +10,7 @@ on:
 
 jobs:
   pull-request:
-    uses: centrifuge/apps/.github/workflows/centrifuge-app-build-and-deploy.yml@main
+    uses: centrifuge/apps/.github/workflows/centrifuge-app-build-and-deploy.yml@cent-app/devel-faucet
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
       ipfs-gateway: https://altair.mypinata.cloud/
