@@ -1,0 +1,60 @@
+name: 'centrifuge-app Build and deploy'
+on:
+  workflow_call:
+    secrets:
+      github-token:
+        required: true
+      google-application-credentials:
+        required: true
+      google-private-key:
+        required: true
+      google-client-email:
+        required: true
+      google-project-id:
+        required: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: faucet-api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: yarn
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Lint
+        run: yarn lint
+
+      - name: gcloud auth
+        id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: '${{ secrets.gcp_credentials }}'
+
+      - name: Build faucet + dependencies
+        run: yarn build
+        env:
+          CORS_ORIGIN: https://us-central1-centy-test.cloudfunctions.net/faucet
+          COLLATOR_WSS_UR: wss://fullnode.development.cntrfg.com
+          GOOGLE_PRIVATE_KEY: ${{ secrets.google-private-key }}
+          GOOGLE_CLIENT_EMAIL: ${{ secrets.google-client-email }}
+
+      - name: Deploy gcloud function
+        id: deploy-function
+        uses: google-github-actions/deploy-cloud-functions@v0.1.0
+        with:
+          name: faucet
+          runtime: nodejs16
+          env_vars: GOOGLE_PROJECT_ID:centy-test,CORS_ORIGIN:http://localhost:8888,COLLATOR_WSS_UR:wss://fullnode.development.cntrfg.com,GOOGLE_PRIVATE_KEY:${{ secrets.google-private-key }},GOOGLE_CLIENT_EMAIL:${{ secrets.google-client-email }}

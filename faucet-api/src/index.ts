@@ -4,6 +4,7 @@ import Keyring from '@polkadot/keyring'
 import BN from 'bn.js'
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
+
 dotenv.config()
 
 const URL = process.env.COLLATOR_WSS_URL ?? 'wss://fullnode.demo.cntrfg.com'
@@ -34,32 +35,24 @@ function hexToBN(value: string | number) {
   return new BN(value.toString().substring(2), 'hex')
 }
 
-// regex from https://stackoverflow.com/questions/4460586/javascript-regular-expression-to-check-for-ip-addresses
-function validateIpAddress(ipAddress: string | undefined) {
-  return (
-    ipAddress &&
-    /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
-      ipAddress
-    )
-  )
-}
-
 exports.faucet = async function faucet(req: Request, res: Response) {
+  console.log('faucet running')
   res.set('Access-Control-Allow-Origin', CORS_ORIGIN)
   if (req.method === 'OPTIONS') {
     res.set('Access-Control-Allow-Methods', 'GET')
     res.set('Access-Control-Allow-Headers', 'Content-Type')
     res.set('Access-Control-Max-Age', '3600')
-    res.status(204).send('')
+    return res.status(204).send('')
   }
   try {
-    const { address, ip } = req.query
+    const { address } = req.query
 
-    if (!address || !ip || !validateIpAddress(ip as string)) {
-      return res.status(400).send({ error: 'Invalid ip or address params' })
+    if (!address || (address as string).length !== 48) {
+      return res.status(400).send('Invalid address param')
     }
+
     if (!GOOGLE_PRIVATE_KEY || !GOOGLE_CLIENT_EMAIL || !GOOGLE_PROJECT_ID) {
-      return res.status(400).send({ error: 'Some env variables are missing' })
+      return res.status(400).send('Some env variables are missing')
     }
 
     const api = await ApiPromise.create({ provider: wsProvider })
@@ -69,34 +62,41 @@ exports.faucet = async function faucet(req: Request, res: Response) {
       api.query.system.account(address),
       api.query.ormlTokens.accounts(address, 'AUSD'),
     ])
-    // @ts-expect-error
-    const nativeBalance = hexToBN(nativeBalanceResponse?.toJSON()?.data?.free || 0)
-    // @ts-expect-error
-    const ausdBalance = hexToBN(ausdBalanceResponse?.toJSON()?.free || 0)
+    const nativeBalance = hexToBN((nativeBalanceResponse?.toJSON() as any)?.data?.free || 0)
+    const ausdBalance = hexToBN((ausdBalanceResponse?.toJSON() as any)?.free || 0)
     if (ausdBalance.gte(ONE_HUNDRED_AUSD) || nativeBalance.gte(TEN_DEVEL)) {
-      return res.status(400).send({ error: 'Wallet already has sufficient balances' })
+      api.disconnect()
+      return res.status(400).send('Wallet already has sufficient aUSD/DEVEL balances')
     }
 
-    const docId = `${ip}-${address}`
-    const dripRef = firestore.collection('drips').doc(docId)
+    const dripRef = firestore.collection('drips').doc(`${address}`)
     const doc = await dripRef.get()
     const data = doc.data()
-    const timestamp = data?.timestamp
-    const twentyFourHourLimit = new Date(timestamp).getTime() + 24 * 60 * 60 * 1000
 
-    // allow access once every 24 hours and maximum 100 times globally
-    if (doc.exists && (new Date().getTime() < twentyFourHourLimit || data?.count < 100 || data?.address !== address)) {
-      return res.status(400).send({ error: 'Faucet can only be used once in 24 hours' })
+    if (doc.exists && data?.address !== address) {
+      const twentyFourHourFreeze = new Date(data?.timestamp).getTime() + 24 * 60 * 60 * 1000
+      // allow access once every 24 hours
+      if (new Date().getTime() < twentyFourHourFreeze) {
+        api.disconnect()
+        return res.status(400).send('Faucet can only be used once in 24 hours')
+      }
+
+      if (data?.count > 100) {
+        api.disconnect()
+        return res.status(400).send('Maximum claims exceeded')
+      }
     }
 
     const newData = {
       address,
-      ipAddress: ip,
       timestamp: Date.now(),
       count: (doc.data()?.count ?? 0) + 1,
     }
 
-    await firestore.collection('drips').doc(docId).set(newData)
+    await firestore
+      .collection('drips')
+      .doc(address as string)
+      .set(newData)
 
     const txBatch = api.tx.utility.batchAll([
       api.tx.tokens.transfer(address, { Native: true }, ONE_THOUSAND_DEVEL.toString()),
@@ -104,11 +104,13 @@ exports.faucet = async function faucet(req: Request, res: Response) {
     ])
 
     const keyring = new Keyring({ type: 'sr25519' })
+    console.log('signing and sending tx')
     const hash = await txBatch.signAndSend(keyring.addFromUri('//Alice'))
 
+    api.disconnect()
     return res.status(200).json({ hash })
   } catch (e) {
     console.error('Error', e)
-    return res.status(500).send({ error: e })
+    return res.status(500).send(e)
   }
 }

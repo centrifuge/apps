@@ -1,7 +1,10 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { Box, Stack } from '@centrifuge/fabric'
 import React from 'react'
 import { useTheme } from 'styled-components'
 import { config } from '../config'
+import { useAddress } from '../utils/useAddress'
+import { useBalances } from '../utils/useBalances'
 import { AccountsMenu } from './AccountsMenu'
 import { Faucet } from './Faucet'
 import { Footer } from './Footer'
@@ -16,6 +19,12 @@ export const PAGE_GUTTER = ['gutterMobile', 'gutterTablet', 'gutterDesktop']
 
 export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) => {
   const theme = useTheme()
+  const balances = useBalances(useAddress())
+  const hasLowDevelBalance = balances && new CurrencyBalance(balances.native.balance, 18).toDecimal().lte(10)
+  const aUSD = balances && balances.currencies.find((curr) => curr.currency === 'ausd')
+  const hasLowAusdBalance =
+    (aUSD && new CurrencyBalance(aUSD.balance, aUSD.currencyDecimals).toDecimal().lte(100)) || !aUSD
+
   return (
     <Box
       display="grid"
@@ -58,7 +67,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
             <Stack mb={9} px={8} gap={4}>
               <AccountsMenu />
             </Stack>
-            <Faucet />
+            {import.meta.env.REACT_APP_FAUCET_URL && hasLowDevelBalance && hasLowAusdBalance && <Faucet />}
             <LoadBoundary>{sidebar}</LoadBoundary>
           </Stack>
         </Box>

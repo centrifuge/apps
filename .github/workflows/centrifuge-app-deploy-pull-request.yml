@@ -14,14 +14,15 @@ jobs:
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
       ipfs-gateway: https://altair.mypinata.cloud/
-      collator-wss-url: wss://fullnode.development.cntrfg.com
-      relay-wss-url: wss://fullnode-relay.development.cntrfg.com
+      collator-wss-url: wss://fullnode.demo.cntrfg.com
+      relay-wss-url: wss://fullnode-relay.demo.cntrfg.com
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
       network: centrifuge
-      subquery-url: https://api.subquery.network/sq/centrifuge/pools-development
+      subquery-url: https://api.subquery.network/sq/centrifuge/pools-demo
       pool-creation-type: immediate
       default-node-url: ''
+      faucet-url: https://us-central1-centy-test.cloudfunctions.net/faucet
 
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
