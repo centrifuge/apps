@@ -10,7 +10,7 @@ export const FinancingRepayment: React.FC<{
   return (
     <>
       {!!drawDownDate && <LabelValueStack label="1st drawdown date" value={drawDownDate} />}
-      {!!closingDate && <LabelValueStack label="Date Closing" value={closingDate} />}
+      {!!closingDate && <LabelValueStack label="Date Closed" value={closingDate} />}
       <LabelValueStack label="Total financed" value={totalFinanced} />
       <LabelValueStack label="Total repaid" value={totalRepaid} />
     </>
