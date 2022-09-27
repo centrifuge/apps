@@ -37,10 +37,9 @@ export function useAvailableFinancing(poolId: string, assetId: string) {
   if (!loan) return { current: Dec(0), initial: Dec(0) }
   if (loan.status !== 'Active') return { current: Dec(0), initial: Dec(0) }
 
-  const debtWithMargin = loan.normalizedDebt
+  const debtWithMargin = loan.outstandingDebt
     .toDecimal()
-    .add(loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
-
+    .add(loan.outstandingDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
   if (!loan?.loanInfo) {
     return { current: Dec(0), initial: Dec(0) }
   }
