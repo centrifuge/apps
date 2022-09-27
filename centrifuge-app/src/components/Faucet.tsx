@@ -27,13 +27,15 @@ export const Faucet: React.VFC = () => {
       return
     }
     const data = await response.json()
+    console.log('🚀 ~ data', data)
     if (data?.hash) {
       setHash('')
       setIsDialogOpen(true)
       setIsLoading(false)
+    } else {
+      setClaimError('Something went wrong')
+      setIsLoading(false)
     }
-    setClaimError('Something went wrong')
-    setIsLoading(false)
   }
 
   return pool ? (

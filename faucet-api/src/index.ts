@@ -20,8 +20,6 @@ const TEN_DEVEL = ONE_DEVEL.muln(10)
 const TEN_THOUSAND_AUSD = ONE_AUSD.muln(10000)
 const ONE_HUNDRED_AUSD = ONE_AUSD.muln(100)
 
-const wsProvider = new WsProvider(URL)
-
 const firestore = new Firestore({
   projectId: GOOGLE_PROJECT_ID,
   credentials: {
@@ -55,6 +53,7 @@ exports.faucet = async function faucet(req: Request, res: Response) {
       return res.status(400).send('Some env variables are missing')
     }
 
+    const wsProvider = new WsProvider(URL)
     const api = await ApiPromise.create({ provider: wsProvider })
 
     // check DEVEL and aUSD balances
@@ -87,16 +86,14 @@ exports.faucet = async function faucet(req: Request, res: Response) {
       }
     }
 
-    const newData = {
-      address,
-      timestamp: Date.now(),
-      count: (doc.data()?.count ?? 0) + 1,
-    }
-
     await firestore
       .collection('drips')
       .doc(address as string)
-      .set(newData)
+      .set({
+        address,
+        timestamp: Date.now(),
+        count: (doc.data()?.count ?? 0) + 1,
+      })
 
     const txBatch = api.tx.utility.batchAll([
       api.tx.tokens.transfer(address, { Native: true }, ONE_THOUSAND_DEVEL.toString()),
@@ -106,7 +103,7 @@ exports.faucet = async function faucet(req: Request, res: Response) {
     const keyring = new Keyring({ type: 'sr25519' })
     console.log('signing and sending tx')
     const hash = await txBatch.signAndSend(keyring.addFromUri('//Alice'))
-
+    console.log('signed and sent tx')
     api.disconnect()
     return res.status(200).json({ hash })
   } catch (e) {
