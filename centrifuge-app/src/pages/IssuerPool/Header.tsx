@@ -99,7 +99,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
         }
         border={false}
         actions={
-          pool.isInitialised ? (
+          !pool.isInitialised ? (
             <>
               <Text variant="body2">Pool is not yet initialised</Text>
               {isPoolAdmin && (
