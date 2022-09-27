@@ -2328,7 +2328,7 @@ __metadata:
     "@types/bn.js": ^5
     "@types/react": ^17.0.30
     "@types/react-dom": ^17
-    "@types/react-helmet": ^6
+    "@types/react-helmet-async": ^1.0.3
     "@types/react-router": ^5
     "@types/react-router-dom": ^5
     "@types/styled-components": ^5
@@ -2354,7 +2354,7 @@ __metadata:
     react: ^17.0.2
     react-dom: ^17.0.2
     react-error-boundary: ^3.1.4
-    react-helmet: ^6.1.0
+    react-helmet-async: ^1.3.0
     react-query: ^3.39.1
     react-router: ^5.2.1
     react-router-dom: ^5.3.0
@@ -12277,12 +12277,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-helmet@npm:^6":
-  version: 6.1.5
-  resolution: "@types/react-helmet@npm:6.1.5"
+"@types/react-helmet-async@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@types/react-helmet-async@npm:1.0.3"
   dependencies:
-    "@types/react": "*"
-  checksum: 527cdbcafa559d0dca4d7e9fc4e1c7d29fdc600e179c2968a7d2f26bd3cce5d8edb262195164d712c51edf781b82c41a158c0e21f1aae5eab9281e31e7dff5ec
+    react-helmet-async: "*"
+  checksum: e6f25578e106a764b67dcac8d449dcf91e741df142990c80c9fca5213b76b2177536c904b3780dc3e2aab08c89b793a4b317fe810bc215d47f179e146d9b4fcb
   languageName: node
   linkType: hard
 
@@ -39283,24 +39283,26 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"react-fast-compare@npm:^3.1.1":
+"react-fast-compare@npm:^3.2.0":
   version: 3.2.0
   resolution: "react-fast-compare@npm:3.2.0"
   checksum: 6fe65c889eb4f326e97769135f97b3d63ac68737866f9c37f9625c9de4f5eaa9abed6f748eb3fd6a66808392118842916309cab7cfa99c67991f0c837433d6d2
   languageName: node
   linkType: hard
 
-"react-helmet@npm:^6.1.0":
-  version: 6.1.0
-  resolution: "react-helmet@npm:6.1.0"
+"react-helmet-async@npm:*, react-helmet-async@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "react-helmet-async@npm:1.3.0"
   dependencies:
-    object-assign: ^4.1.1
+    "@babel/runtime": ^7.12.5
+    invariant: ^2.2.4
     prop-types: ^15.7.2
-    react-fast-compare: ^3.1.1
-    react-side-effect: ^2.1.0
+    react-fast-compare: ^3.2.0
+    shallowequal: ^1.1.0
   peerDependencies:
-    react: ">=16.3.0"
-  checksum: 56fd795b0aecc89bac8d2733268751f0ef463bf6764090f8a801778741d4a6eaf135234cdaa50188bbda29c8e2d3ec43e9a42d1ec06b60092645c8754c7bad81
+    react: ^16.6.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.6.0 || ^17.0.0 || ^18.0.0
+  checksum: 83c4fc96c8073482bc1531583fc645450b96cdca0a4d5cfdfe0a3571a102914ea0b15d80a6f76da920f590268aadc1a7328e8add8aaa90745d9e9400a6122e8d
   languageName: node
   linkType: hard
 
@@ -39628,15 +39630,6 @@ fsevents@^1.2.7:
   peerDependencies:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
   checksum: aee13814b623f9e535fc588a8f0925c192a08c5f6250a13dfc80f36358c4ef0507d3a3afd5ecdc3e857b68ec405a9eb3f3a0c0bcbb748f448ee77694dafef2ff
-  languageName: node
-  linkType: hard
-
-"react-side-effect@npm:^2.1.0":
-  version: 2.1.2
-  resolution: "react-side-effect@npm:2.1.2"
-  peerDependencies:
-    react: ^16.3.0 || ^17.0.0 || ^18.0.0
-  checksum: 17ac45cbf0e4fd84e525fef1aeb063074b0e1593b52f5f1e0ea2834f3c11f239dbfa5fdddedb9daf9adcd060061bf20f98c736d3d6aeeec55b8301c77ee9428c
   languageName: node
   linkType: hard
 

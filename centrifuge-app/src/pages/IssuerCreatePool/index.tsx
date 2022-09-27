@@ -317,7 +317,9 @@ const CreatePoolForm: React.VFC = () => {
             actions={
               <>
                 {proposeFee && (
-                  <Text variant="body3">Deposit required: {formatBalance(proposeFee, balances?.native.symbol)}</Text>
+                  <Text variant="body3">
+                    Deposit required: ~{formatBalance(proposeFee, balances?.native.symbol, 1)}
+                  </Text>
                 )}
                 <Button variant="secondary" onClick={() => history.goBack()}>
                   Cancel
