@@ -17,9 +17,6 @@ export const Faucet: React.VFC = () => {
   const handleClaim = async () => {
     setIsLoading(true)
     const response = await fetch(`${import.meta.env.REACT_APP_FAUCET_URL}?address=${selectedAccount?.address}`)
-    if (response.status === 408) {
-      setIsLoading(false)
-    }
     if (response.status !== 200) {
       setIsDialogOpen(true)
       setIsLoading(false)
@@ -27,9 +24,8 @@ export const Faucet: React.VFC = () => {
       return
     }
     const data = await response.json()
-    console.log('🚀 ~ data', data)
     if (data?.hash) {
-      setHash('')
+      setHash(data?.hash)
       setIsDialogOpen(true)
       setIsLoading(false)
     } else {

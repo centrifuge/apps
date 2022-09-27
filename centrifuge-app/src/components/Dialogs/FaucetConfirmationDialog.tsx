@@ -14,24 +14,22 @@ export const FaucetConfirmationDialog: React.FC<{
         <Stack gap={3}>
           <Stack gap={2}>
             <Text variant="body1">
-              {hash ? 'Please allow a couple of minutes for the tokens to reach your wallet' : error}
+              {hash ? 'Success. Please allow a couple of minutes for the tokens to reach your wallet' : error}
             </Text>
             {hash && !error && (
-              <Box alignSelf="flex-end">
-                <>
-                  <Text>Transaction hash:</Text>
-                  <Text
-                    style={{
-                      cursor: 'copy',
-                      wordBreak: 'break-word',
-                      whiteSpace: 'normal',
-                    }}
-                    variant="body2"
-                    onClick={() => copyToClipboard(hash)}
-                  >
-                    {hash}
-                  </Text>
-                </>
+              <Box>
+                <Text variant="body1">Transaction hash:</Text>
+                <Text
+                  style={{
+                    cursor: 'copy',
+                    wordBreak: 'break-word',
+                    whiteSpace: 'normal',
+                  }}
+                  variant="body1"
+                  onClick={() => copyToClipboard(hash)}
+                >
+                  {hash}
+                </Text>
               </Box>
             )}
           </Stack>
