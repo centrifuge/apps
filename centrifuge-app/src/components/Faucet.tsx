@@ -9,27 +9,27 @@ export const Faucet: React.VFC = () => {
   const { selectedAccount } = useWeb3()
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  const [hash, setHash] = React.useState<string>('')
-  const [claimError, setClaimError] = React.useState<string>('')
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false)
+  const [hash, setHash] = React.useState('')
+  const [error, setError] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
 
   const handleClaim = async () => {
     setIsLoading(true)
-    const response = await fetch(`${import.meta.env.REACT_APP_FAUCET_URL}?address=${selectedAccount?.address}`)
-    if (response.status !== 200) {
-      setIsDialogOpen(true)
-      setIsLoading(false)
-      setClaimError(await response.text())
-      return
-    }
-    const data = await response.json()
-    if (data?.hash) {
-      setHash(data?.hash)
-      setIsDialogOpen(true)
-      setIsLoading(false)
-    } else {
-      setClaimError('Something went wrong')
+    try {
+      const response = await fetch(`${import.meta.env.REACT_APP_FAUCET_URL}?address=${selectedAccount?.address}`)
+      if (response.status !== 200) {
+        setIsLoading(false)
+        setError(await response.text())
+        return
+      }
+      const data = await response.json()
+      if (data?.hash) {
+        setHash(data?.hash)
+        setIsLoading(false)
+      }
+    } catch (error) {
+      setError('Something went wrong')
+    } finally {
       setIsLoading(false)
     }
   }
@@ -37,13 +37,12 @@ export const Faucet: React.VFC = () => {
   return pool ? (
     <>
       <FaucetConfirmationDialog
-        error={claimError}
+        error={error}
         hash={hash}
-        open={isDialogOpen}
+        open={!!error || !!hash}
         onClose={() => {
-          setIsDialogOpen(false)
           setHash('')
-          setClaimError('')
+          setError('')
         }}
       />
       <Shelf as={Card} gap={2} p={2} justifyContent="space-between">
