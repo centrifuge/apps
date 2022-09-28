@@ -49,7 +49,7 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Share" />,
-    cell: ({ share }: RiskGroupRow) => `${share}%`,
+    cell: ({ share }: RiskGroupRow) => <>{share}%</>,
     flex: '1',
     sortKey: 'share',
   },
