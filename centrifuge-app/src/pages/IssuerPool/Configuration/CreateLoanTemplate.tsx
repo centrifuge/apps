@@ -8,14 +8,14 @@ import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { Schema } from '../../../types'
+import { LoanTemplate } from '../../../types'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { isValidJsonString } from '../../../utils/validation'
 
 const initialSchemaJSON = `{
-  "name":"Example schema",
+  "name":"Example asset template",
   "options":{
     "assetClasses":[],
     "loanTypes":[],
@@ -41,7 +41,7 @@ const initialSchemaJSON = `{
           "label":"Label 3",
           "type":"currency",
           "currencySymbol":"USD",
-          "currencyDecimals":18
+          "currencyDecimals": 6
         },
         {
           "label":"Label 4",
@@ -66,15 +66,15 @@ const initialSchemaJSON = `{
   ]
 }`
 
-export const IssuerPoolCreateSchemaPage: React.FC = () => {
+export const IssuerPoolCreateLoanTemplatePage: React.FC = () => {
   return (
     <PageWithSideBar>
-      <CreateSchema />
+      <CreateLoanTemplate />
     </PageWithSideBar>
   )
 }
 
-export const CreateSchema: React.FC = () => {
+export const CreateLoanTemplate: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
@@ -102,7 +102,7 @@ export const CreateSchema: React.FC = () => {
       if (!isValidJsonString(values.metadata)) {
         errors = setIn(errors, `metadata`, 'Must be a valid JSON string')
       } else {
-        const obj: Partial<Schema> = JSON.parse(values.metadata)
+        const obj: Partial<LoanTemplate> = JSON.parse(values.metadata)
         const labels = obj?.sections?.flatMap((section) => section?.attributes.map((attr) => attr?.label)) ?? []
         if (new Set(labels).size < labels.length) {
           errors = setIn(errors, `metadata`, 'Attribute labels must be unique across sections')
@@ -111,19 +111,19 @@ export const CreateSchema: React.FC = () => {
       return errors
     },
     onSubmit: async (values, { setSubmitting }) => {
-      const schemaMetadataHash = await lastValueFrom(cent.metadata.pinJson(JSON.parse(values.metadata)))
+      const templateMetadataHash = await lastValueFrom(cent.metadata.pinJson(JSON.parse(values.metadata)))
       const newPoolMetadata = {
         ...(poolMetadata as PoolMetadata),
-        schemas: [
-          ...(poolMetadata?.schemas ?? []),
+        loanTemplates: [
+          ...(poolMetadata?.loanTemplates ?? []),
           {
-            id: schemaMetadataHash.ipfsHash,
+            id: templateMetadataHash.ipfsHash,
             createdAt: new Date().toISOString(),
           },
         ],
       }
 
-      prefetchMetadata(schemaMetadataHash.ipfsHash)
+      prefetchMetadata(templateMetadataHash.ipfsHash)
 
       updateConfigTx([poolId, newPoolMetadata])
       setSubmitting(false)

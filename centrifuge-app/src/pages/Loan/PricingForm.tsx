@@ -150,7 +150,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
             <Field name="loanType">
               {({ field, meta, form }: FieldProps) => (
                 <Select
-                  label="Loan type"
+                  label="Asset type"
                   onSelect={(v) => form.setFieldValue('loanType', v, false)}
                   onBlur={field.onBlur}
                   errorMessage={meta.touched && meta.error ? meta.error : undefined}

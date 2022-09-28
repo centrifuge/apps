@@ -1,3 +1,4 @@
+import { BN } from 'bn.js'
 import { useQuery } from 'react-query'
 import { firstValueFrom } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
@@ -25,18 +26,34 @@ export function useNFT(collectionId?: string, nftId?: string, suspense = true) {
   return result
 }
 
-export function useLoanNft(poolId?: string, loanId?: string) {
+export function useLoanCollectionId(poolId?: string) {
   const cent = useCentrifuge()
-  const { data: collectionId } = useQuery(
+
+  const { data } = useQuery(
     ['poolToLoanCollection', poolId],
     async () => {
-      return firstValueFrom(cent.pools.getLoanCollectionIdForPool([poolId!]))
+      const collectionId = await firstValueFrom(cent.pools.getLoanCollectionIdForPool([poolId!]))
+      const collateralCollectionId = new BN(collectionId).add(new BN(1)).toString()
+      return {
+        collectionId,
+        collateralCollectionId,
+      }
     },
     {
       enabled: !!poolId,
       staleTime: Infinity,
     }
   )
+  return (
+    data ?? {
+      collectionId: undefined,
+      collateralCollectionId: undefined,
+    }
+  )
+}
+
+export function useLoanNft(poolId?: string, loanId?: string) {
+  const { collectionId } = useLoanCollectionId(poolId)
   return useNFT(collectionId, loanId, false)
 }
 
