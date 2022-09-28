@@ -9,6 +9,7 @@ import {
   NumberInput,
   Select,
   Stack,
+  Text,
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
@@ -367,12 +368,14 @@ const IssuerCreateLoan: React.FC = () => {
                 </PageSection>
               )}
             </>
+          ) : podUrl ? (
+            <Box py={8}>
+              <PodAuthSection podUrl={podUrl} message="You need to be logged in to create assets" />
+            </Box>
           ) : (
-            podUrl && (
-              <Box py={8}>
-                <PodAuthSection podUrl={podUrl} message="You need to be logged in to create assets" />
-              </Box>
-            )
+            <Stack alignItems="center" py={8}>
+              <Text>POD endpoint is missing in pool configuration</Text>
+            </Stack>
           )}
         </Stack>
       </Form>
