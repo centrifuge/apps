@@ -8,9 +8,6 @@ import { Request, Response } from 'express'
 dotenv.config()
 
 const URL = process.env.COLLATOR_WSS_URL ?? 'wss://fullnode.demo.cntrfg.com'
-const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY ?? ''
-const GOOGLE_PROJECT_ID = process.env.GOOGLE_PROJECT_ID ?? ''
-const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL ?? ''
 const CORS_ORIGIN = process.env.CORS_ORIGIN ?? 'https://pr-1049--dev-app-cntrfg.netlify.app'
 
 const ONE_AUSD = new BN(10).pow(new BN(12))
@@ -20,13 +17,7 @@ const TEN_DEVEL = ONE_DEVEL.muln(10)
 const TEN_THOUSAND_AUSD = ONE_AUSD.muln(10000)
 const ONE_HUNDRED_AUSD = ONE_AUSD.muln(100)
 
-const firestore = new Firestore({
-  projectId: GOOGLE_PROJECT_ID,
-  credentials: {
-    client_email: GOOGLE_CLIENT_EMAIL,
-    private_key: GOOGLE_PRIVATE_KEY,
-  },
-})
+const firestore = new Firestore()
 
 function hexToBN(value: string | number) {
   if (typeof value === 'number') return new BN(value)
@@ -34,23 +25,20 @@ function hexToBN(value: string | number) {
 }
 
 exports.faucet = async function faucet(req: Request, res: Response) {
-  console.log('faucet running')
-  res.set('Access-Control-Allow-Origin', CORS_ORIGIN)
-  if (req.method === 'OPTIONS') {
-    res.set('Access-Control-Allow-Methods', 'GET')
-    res.set('Access-Control-Allow-Headers', 'Content-Type')
-    res.set('Access-Control-Max-Age', '3600')
-    return res.status(204).send('')
-  }
   try {
+    console.log('faucet running')
+    // even if cors fails the request completes
+    res.set('Access-Control-Allow-Origin', '*')
+    if (req.method === 'OPTIONS') {
+      res.set('Access-Control-Allow-Methods', 'GET')
+      res.set('Access-Control-Allow-Headers', 'Content-Type')
+      res.set('Access-Control-Max-Age', '3600')
+      return res.status(204).send('')
+    }
     const { address } = req.query
 
     if (!address || (address as string).length !== 48) {
       return res.status(400).send('Invalid address param')
-    }
-
-    if (!GOOGLE_PRIVATE_KEY || !GOOGLE_CLIENT_EMAIL || !GOOGLE_PROJECT_ID) {
-      return res.status(400).send('Some env variables are missing')
     }
 
     const wsProvider = new WsProvider(URL)
