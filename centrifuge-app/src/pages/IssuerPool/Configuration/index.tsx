@@ -8,12 +8,11 @@ import { useIsPoolAdmin } from '../../../utils/usePermissions'
 import { IssuerPoolHeader } from '../Header'
 import { Admins } from './Admins'
 import { Details } from './Details'
-import { Epoch } from './Epoch'
+import { EpochAndTranches } from './EpochAndTranches'
 import { Issuer } from './Issuer'
 import { LoanTemplates } from './LoanTemplates'
 import { PoolConfig } from './PoolConfig'
 import { RiskGroups } from './RiskGroups'
-import { Tranches } from './Tranches'
 import { WriteOffGroups } from './WriteOffGroups'
 
 export const IssuerPoolConfigurationPage: React.FC = () => {
@@ -38,8 +37,7 @@ const IssuerPoolConfiguration: React.FC = () => {
         <>
           <Details />
           <Issuer />
-          <Epoch />
-          <Tranches />
+          <EpochAndTranches />
           <RiskGroups />
           <WriteOffGroups />
           <Admins />

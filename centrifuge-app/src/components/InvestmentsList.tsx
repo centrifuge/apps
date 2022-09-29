@@ -1,5 +1,5 @@
 import { AccountTokenBalance } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
+import { IconChevronRight, Shelf, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatBalance } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
@@ -66,7 +66,7 @@ const Token: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) =
 const AssetClass: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
   const { data: metadata } = usePoolMetadata(pool)
-  return <Text variant="body2">{metadata?.pool?.asset.class}</Text>
+  return <>{metadata?.pool?.asset.class}</>
 }
 
 const TokenBalance: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) => {
@@ -75,16 +75,12 @@ const TokenBalance: React.VFC<{ investment: AccountTokenBalance }> = ({ investme
   const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
   const trancheMeta = tranche ? metadata?.tranches?.[tranche.id] : null
 
-  return <Text variant="body2">{formatBalance(investment.balance.toFloat(), trancheMeta?.symbol)}</Text>
+  return <>{formatBalance(investment.balance.toFloat(), trancheMeta?.symbol)}</>
 }
 
 const TokenValue: React.VFC<{ investment: AccountTokenBalance }> = ({ investment }) => {
   const pool = usePool(investment.poolId)
   const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
 
-  return (
-    <Text variant="body2">
-      {formatBalance(investment.balance.toFloat() * (tranche?.tokenPrice?.toFloat() ?? 1), pool?.currency)}
-    </Text>
-  )
+  return <>{formatBalance(investment.balance.toFloat() * (tranche?.tokenPrice?.toFloat() ?? 1), pool?.currency)}</>
 }

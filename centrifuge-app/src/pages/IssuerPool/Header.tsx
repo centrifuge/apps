@@ -1,6 +1,8 @@
-import { Box, Shelf, Text } from '@centrifuge/fabric'
+import { getRandomUint } from '@centrifuge/centrifuge-js'
+import { Box, Button, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams, useRouteMatch } from 'react-router'
+import { combineLatest, EMPTY, expand, filter, firstValueFrom, map, take } from 'rxjs'
 import { useTheme } from 'styled-components'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
@@ -8,7 +10,8 @@ import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
 import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { useAddress } from '../../utils/useAddress'
-import { usePermissions } from '../../utils/usePermissions'
+import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
+import { useIsPoolAdmin, usePermissions } from '../../utils/usePermissions'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {
@@ -25,12 +28,45 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
 
   const address = useAddress()
   const permissions = usePermissions(address)
+  const isPoolAdmin = useIsPoolAdmin(pid)
+  const { execute: executeInitialise, isLoading: isInitialiseLoading } = useCentrifugeTransaction(
+    'Initialise pool',
+    (cent) => cent.pools.initialisePool
+  )
+
   if (!pool || !permissions) return null
 
   const configurePermission = permissions.pools[pid]?.roles.includes('PoolAdmin')
 
   const investPermission =
     permissions.pools[pid]?.roles.includes('PoolAdmin') || permissions.pools[pid]?.roles.includes('MemberListAdmin')
+
+  async function initialisePool() {
+    const { id } = await firstValueFrom(
+      cent.getApi().pipe(
+        map((api) => ({
+          api,
+          id: null,
+          triesLeft: 10,
+        })),
+        expand(({ api, triesLeft }) => {
+          const id = getRandomUint()
+          if (triesLeft <= 0) return EMPTY
+
+          return combineLatest([api.query.uniques.class(String(id)), api.query.uniques.class(String(id + 1))]).pipe(
+            map(([res1, res2]) => ({
+              api,
+              id: res1.toJSON() === null && res2.toJSON() === null ? [String(id), String(id + 1)] : null,
+              triesLeft: triesLeft - 1,
+            })),
+            take(1)
+          )
+        }),
+        filter(({ id }) => !!id)
+      )
+    )
+    executeInitialise([address!, pid, id![0], id![1]])
+  }
 
   return (
     <>
@@ -62,7 +98,20 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
           )
         }
         border={false}
-        actions={actions}
+        actions={
+          !pool.isInitialised ? (
+            <>
+              <Text variant="body2">Pool is not yet initialised</Text>
+              {isPoolAdmin && (
+                <Button small onClick={initialisePool} loading={isInitialiseLoading}>
+                  Initialise Pool
+                </Button>
+              )}
+            </>
+          ) : (
+            actions
+          )
+        }
       >
         <Shelf
           px={PAGE_GUTTER}

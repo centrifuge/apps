@@ -230,6 +230,8 @@ export type Pool = {
   value: CurrencyBalance
   createdAt: string | null
   tranches: Token[]
+  isInitialised: boolean
+  loanCollectionId: string | null
   reserve: {
     max: CurrencyBalance
     available: CurrencyBalance
@@ -384,7 +386,6 @@ export type AccountTokenBalance = {
 export type TrancheInput = {
   interestRatePerSec?: BN
   minRiskBuffer?: BN
-  seniority?: number
 }
 
 export type DailyPoolState = {
@@ -594,6 +595,34 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function initialisePool(
+    args: [admin: string, poolId: string, loanCollectionId: string, collateralCollectionId?: string],
+    options?: TransactionOptions
+  ) {
+    const [admin, poolId, loanCollectionId, collateralCollectionId] = args
+
+    return inst.getApi().pipe(
+      switchMap((api) => {
+        const submittable = api.tx.utility.batchAll(
+          [
+            api.tx.uniques.create(loanCollectionId, LoanPalletAccountId),
+            collateralCollectionId && api.tx.uniques.create(collateralCollectionId, admin),
+            api.tx.permissions.add(
+              { PoolRole: 'PoolAdmin' },
+              admin,
+              { Pool: poolId },
+              {
+                PoolRole: 'LoanAdmin',
+              }
+            ),
+            api.tx.loans.initialisePool(poolId, loanCollectionId),
+          ].filter(Boolean)
+        )
+        return inst.wrapSignAndSend(api, submittable, options)
+      })
+    )
+  }
+
   function pinPoolMetadata(
     metadata: PoolMetadataInput,
     poolId: string,
@@ -657,16 +686,28 @@ export function getPoolsModule(inst: Centrifuge) {
   type UpdatePoolInput = [
     poolId: string,
     updates: {
-      minEpochTime?: { newValue: number }
-      tranches?: { newValue: any }
-      maxNavAge?: { newValue: number }
+      minEpochTime?: number
+      tranches?: TrancheInput[]
+      maxNavAge?: number
     }
   ]
 
   function updatePool(args: UpdatePoolInput, options?: TransactionOptions) {
     const [poolId, updates] = args
-    const { minEpochTime, tranches, maxNavAge } = updates
+    const { minEpochTime: minEpochTimeInput, tranches: tranchesInput, maxNavAge: maxNavAgeInput } = updates
     const $api = inst.getApi()
+
+    const minEpochTime = minEpochTimeInput ? { newValue: minEpochTimeInput } : undefined
+    const tranches = tranchesInput
+      ? {
+          newValue: tranchesInput.map((t) => [
+            t.interestRatePerSec
+              ? { NonResidual: [t.interestRatePerSec.toString(), t.minRiskBuffer?.toString()] }
+              : 'Residual',
+          ]),
+        }
+      : undefined
+    const maxNavAge = maxNavAgeInput ? { newValue: maxNavAgeInput } : undefined
 
     return $api.pipe(
       switchMap((api) => {
@@ -728,12 +769,6 @@ export function getPoolsModule(inst: Centrifuge) {
   function setMetadata(args: [poolId: string, metadata: PoolMetadata], options?: TransactionOptions) {
     const [poolId, metadata] = args
     const $api = inst.getApi()
-
-    if (metadata?.version) {
-      metadata.version = (metadata.version as number) + 1
-    } else {
-      metadata.version = 1
-    }
 
     const $pinnedMetadata = inst.metadata.pinJson(metadata)
     return combineLatest([$api, $pinnedMetadata]).pipe(
@@ -1192,10 +1227,17 @@ export function getPoolsModule(inst: Centrifuge) {
             api.query.pools.pool.entries(),
             api.query.loans.poolNAV.entries(),
             api.query.pools.epochExecution.entries(),
+            api.query.loans.poolToLoanNftClass.entries(),
           ]),
-        (api, [rawPools, rawNavs, rawEpochExecutions]) => ({ api, rawPools, rawNavs, rawEpochExecutions })
+        (api, [rawPools, rawNavs, rawEpochExecutions, rawLoanColIds]) => ({
+          api,
+          rawPools,
+          rawNavs,
+          rawEpochExecutions,
+          rawLoanColIds,
+        })
       ),
-      switchMap(({ api, rawPools, rawNavs, rawEpochExecutions }) => {
+      switchMap(({ api, rawPools, rawNavs, rawEpochExecutions, rawLoanColIds }) => {
         if (!rawPools.length) return of([])
 
         const navMap = rawNavs.reduce((acc, [key, navValue]) => {
@@ -1217,6 +1259,13 @@ export function getPoolsModule(inst: Centrifuge) {
           }
           return acc
         }, {} as Record<string, Pick<EpochExecutionData, 'challengePeriodEnd' | 'epoch'>>)
+
+        const loanCollectionIdMap = rawLoanColIds.reduce((acc, [key, value]) => {
+          const poolId = formatPoolKey(key as StorageKey<[u32]>)
+          const colId = (value.toHuman() as string).replace(/\D/g, '')
+          acc[poolId] = colId
+          return acc
+        }, {} as Record<string, string>)
 
         // read pools, poolIds and metadata from observable
         const pools = rawPools.map(([poolKeys, poolValue]) => ({
@@ -1259,6 +1308,7 @@ export function getPoolsModule(inst: Centrifuge) {
               const { data: pool, id: poolId, metadata } = poolObj
               const navData = navMap[poolId]
               const epochExecution = epochExecutionMap[poolId]
+              const loanCollectionId = loanCollectionIdMap[poolId]
               const currency = getCurrency(pool.currency)
               const currencyDecimals = getCurrencyDecimals(pool.currency)
 
@@ -1279,6 +1329,8 @@ export function getPoolsModule(inst: Centrifuge) {
                 metadata,
                 currency,
                 currencyDecimals,
+                isInitialised: !!loanCollectionId,
+                loanCollectionId: loanCollectionId ?? null,
                 tranches: pool.tranches.tranches.map((tranche, index) => {
                   const trancheId = pool.tranches.ids[index]
                   const trancheIndex = trancheIdToIndex[trancheId]
@@ -1646,7 +1698,7 @@ export function getPoolsModule(inst: Centrifuge) {
         const activeLoanData = activeLoanValues.toJSON() as ActiveLoanData[]
         const interestAccrualKeys = activeLoanData.map((activeLoan) => hexToBN(activeLoan.interestRatePerSec))
         const $interestAccrual = api.query.interestAccrual.rate.multi(interestAccrualKeys).pipe(take(1))
-        const $interestLastUpdated = api.query.interestAccrual.lastUpdated()
+        const $interestLastUpdated = api.query.interestAccrual.lastUpdated().pipe(take(1))
         return combineLatest([
           api.query.loans.loan.entries(poolId),
           of(activeLoanValues),
@@ -1852,21 +1904,6 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  function getLoanCollectionIdForPool(args: [poolId: string]) {
-    const [poolId] = args
-    const $api = inst.getApi()
-
-    return $api.pipe(
-      switchMap((api) => api.query.loans.poolToLoanNftClass(poolId)),
-      map((result) => {
-        const collectionId = (result.toHuman() as string).replace(/\D/g, '')
-
-        return collectionId
-      }),
-      take(1)
-    )
-  }
-
   function addWriteOffGroups(
     args: [poolId: string, writeOffGroups: { percentage: BN; overdueDays: number; penaltyInterestRate: BN }[]],
     options?: TransactionOptions
@@ -1937,6 +1974,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
   return {
     createPool,
+    initialisePool,
     updatePool,
     setMaxReserve,
     setMetadata,
@@ -1964,7 +2002,6 @@ export function getPoolsModule(inst: Centrifuge) {
     getWriteOffGroups,
     addWriteOffGroups,
     adminWriteOff,
-    getLoanCollectionIdForPool,
     getAvailablePoolId,
     getDailyPoolStates,
     getNativeCurrency,
