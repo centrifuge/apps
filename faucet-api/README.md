@@ -20,7 +20,11 @@ yarn develop
 
 ## Deployment
 
-Authenticate with the gcloud cli
+Install the [gcloud cli](https://cloud.google.com/sdk/docs/install) and authenticate with your centrifuge account.
+
+```bash
+gcloud auth login
+```
 
 Build the app locally
 

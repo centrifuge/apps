@@ -204,28 +204,28 @@ const RiskGroupList: React.FC = () => {
   }, [riskGroups, pool?.currency, totalSharesSum, totalAmountsSum])
 
   // biggest share of pie gets darkest color
-  const tableDataWithColor = riskGroups
-    .sort((a, b) => Number(a.amount) - Number(b.amount))
-    .map((item, index) => {
-      if (metadata?.riskGroups!.length) {
-        const name = item.name ? `${index + 1} – ${item.name}` : `${index + 1}`
-        if (Dec(totalSharesSum).lessThanOrEqualTo(0)) {
-          return { ...item, name }
-        }
-        const nextShade = ((index + 2) % 8) * 100
-        return {
-          ...item,
-          name,
-          color: theme.colors.accentScale[nextShade],
-          labelColor: nextShade >= 500 ? 'white' : 'black',
-        }
+  const tableDataWithColor = riskGroups.map((item, index) => {
+    if (metadata?.riskGroups!.length) {
+      const name = item.name ? `${index + 1} – ${item.name}` : `${index + 1}`
+      if (Dec(totalSharesSum).lessThanOrEqualTo(0)) {
+        return { ...item, name }
       }
-      return item
-    })
-
-  const sharesForPie = tableDataWithColor.map(({ name, color, labelColor, share }) => {
-    return { value: Number(share), name: name as string, color, labelColor }
+      const nextShade = ((index + 2) % 8) * 100
+      return {
+        ...item,
+        name,
+        color: theme.colors.accentScale[nextShade],
+        labelColor: nextShade >= 500 ? 'white' : 'black',
+      }
+    }
+    return item
   })
+
+  const sharesForPie = tableDataWithColor
+    .sort((a, b) => Number(a.amount) - Number(b.amount))
+    .map(({ name, color, labelColor, share }) => {
+      return { value: Number(share), name: name as string, color, labelColor }
+    })
 
   return (
     <>

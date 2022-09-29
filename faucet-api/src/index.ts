@@ -8,7 +8,6 @@ import { Request, Response } from 'express'
 dotenv.config()
 
 const URL = process.env.COLLATOR_WSS_URL ?? 'wss://fullnode.demo.cntrfg.com'
-const CORS_ORIGIN = process.env.CORS_ORIGIN ?? 'https://pr-1049--dev-app-cntrfg.netlify.app'
 
 const ONE_AUSD = new BN(10).pow(new BN(12))
 const ONE_DEVEL = new BN(10).pow(new BN(18))
@@ -18,6 +17,7 @@ const TEN_THOUSAND_AUSD = ONE_AUSD.muln(10000)
 const ONE_HUNDRED_AUSD = ONE_AUSD.muln(100)
 
 const firestore = new Firestore()
+const wsProvider = new WsProvider(URL)
 
 function hexToBN(value: string | number) {
   if (typeof value === 'number') return new BN(value)
@@ -41,7 +41,6 @@ exports.faucet = async function faucet(req: Request, res: Response) {
       return res.status(400).send('Invalid address param')
     }
 
-    const wsProvider = new WsProvider(URL)
     const api = await ApiPromise.create({ provider: wsProvider })
 
     // check DEVEL and aUSD balances
