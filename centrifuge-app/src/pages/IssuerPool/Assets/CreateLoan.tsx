@@ -33,7 +33,7 @@ import { useAddress } from '../../../utils/useAddress'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadataMulti } from '../../../utils/useMetadata'
-import { useLoanCollectionId } from '../../../utils/useNFTs'
+import { useCollateralCollectionId } from '../../../utils/useNFTs'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { combine, max, maxLength, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
@@ -140,7 +140,7 @@ const IssuerCreateLoan: React.FC = () => {
   const history = useHistory()
   const address = useAddress()
   const centrifuge = useCentrifuge()
-  const { collateralCollectionId } = useLoanCollectionId(pid)
+  const collateralCollectionId = useCollateralCollectionId(pid)
   const { selectedAccount, proxy } = useWeb3()
   const { addTransaction, updateTransaction } = useTransactions()
 
