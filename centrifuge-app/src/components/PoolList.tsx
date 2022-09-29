@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Shelf, Text, Thumbnail } from '@centrifuge/fabric'
+import { IconChevronRight, Shelf, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import styled from 'styled-components'
@@ -30,7 +30,7 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
     },
     {
       header: 'Value',
-      cell: (p: Pool) => <Text variant="body2">{formatBalance(p.value, p.currency)}</Text>,
+      cell: (p: Pool) => formatBalance(p.value, p.currency),
     },
     {
       header: '',
@@ -61,7 +61,7 @@ const PoolName: React.VFC<{ pool: Pool }> = ({ pool }) => {
           size="small"
         />
       )}
-      <TextWithPlaceholder isLoading={isLoading} variant="body2" fontWeight={600} textOverflow="ellipsis">
+      <TextWithPlaceholder isLoading={isLoading} fontWeight={600} textOverflow="ellipsis">
         {data?.pool?.name ?? 'Unnamed Pool'}
       </TextWithPlaceholder>
     </Shelf>
@@ -74,9 +74,5 @@ const StyledLogo = styled.img`
 
 const AssetClass: React.VFC<{ pool: Pool }> = ({ pool }) => {
   const { data, isLoading } = usePoolMetadata(pool)
-  return (
-    <TextWithPlaceholder isLoading={isLoading} variant="body2">
-      {data?.pool?.asset?.class ?? 'n/a'}
-    </TextWithPlaceholder>
-  )
+  return <TextWithPlaceholder isLoading={isLoading}>{data?.pool?.asset?.class ?? 'n/a'}</TextWithPlaceholder>
 }

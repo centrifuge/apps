@@ -23,7 +23,7 @@ const columns: Column[] = [
   {
     align: 'left',
     header: <SortableTableHeader label="Seniority" />,
-    cell: (token: TokenByPoolTableData) => <Text variant="body2"> {token.seniority + 1}</Text>,
+    cell: (token: TokenByPoolTableData) => token.seniority + 1,
     flex: '2',
     sortKey: 'seniority',
   },
@@ -36,7 +36,7 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Symbol" />,
-    cell: (token: TokenByPoolTableData) => <Text variant="body2">{token?.symbol}</Text>,
+    cell: (token: TokenByPoolTableData) => token?.symbol,
     flex: '2',
     align: 'left',
     sortKey: 'symbol',
@@ -95,16 +95,16 @@ export const TokenListByPool: React.FC = () => {
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
   return (
-    <Text variant="body2" color="textInteractive" fontWeight={600} textOverflow="ellipsis">
+    <Text color="textInteractive" fontWeight={600} textOverflow="ellipsis">
       {token?.poolName} {token?.name}
     </Text>
   )
 }
 
 const APY: React.VFC<RowProps> = ({ token }) => {
-  return <Text variant="body2">{`${token.apy}%`}</Text>
+  return <>{`${token.apy}%`}</>
 }
 
 const Protection: React.VFC<RowProps> = ({ token }) => {
-  return <Text variant="body2">{Number(token.protection) > 0 ? `${token.protection}%` : ''}</Text>
+  return <>{Number(token.protection) > 0 ? `${token.protection}%` : ''}</>
 }

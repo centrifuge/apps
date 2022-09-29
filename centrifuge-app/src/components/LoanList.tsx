@@ -34,17 +34,14 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Financing date" />,
-    cell: (l: Row) => (
-      <Text variant="body2">
-        {l.originationDateSortKey && l.status === 'Active' && l?.originationDate ? formatDate(l.originationDate) : ''}
-      </Text>
-    ),
+    cell: (l: Row) =>
+      l.originationDateSortKey && l.status === 'Active' && l?.originationDate ? formatDate(l.originationDate) : '',
     flex: '2',
     sortKey: 'originationDateSortKey',
   },
   {
     header: <SortableTableHeader label="Maturity date" />,
-    cell: (l: Row) => <Text variant="body2">{l.maturityDate ? formatDate(l.maturityDate) : ''}</Text>,
+    cell: (l: Row) => (l.maturityDate ? formatDate(l.maturityDate) : ''),
     flex: '2',
     sortKey: 'maturityDate',
   },
@@ -142,9 +139,5 @@ const Amount: React.VFC<{ loan: Row }> = ({ loan }) => {
     }
   }
 
-  return (
-    <Text variant="body2" style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-      {getAmount(loan)}
-    </Text>
-  )
+  return <Text style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{getAmount(loan)}</Text>
 }

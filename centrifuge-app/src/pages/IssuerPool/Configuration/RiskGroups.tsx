@@ -77,7 +77,7 @@ export const RiskGroups: React.FC = () => {
   const pool = usePool(poolId)
 
   const { data: metadata } = usePoolMetadata(pool)
-  const savedGroups = metadata?.riskGroups || []
+  const savedGroups = metadata?.riskGroups
 
   const { execute, isLoading } = useCentrifugeTransaction('Update configuration', (cent) => cent.pools.setMetadata)
 
@@ -155,8 +155,8 @@ export const RiskGroups: React.FC = () => {
           }
         >
           <Stack gap={3}>
-            <DataTable data={savedGroups} columns={columns} />
-            <RiskGroupsInput startIndex={savedGroups.length} />
+            <DataTable data={savedGroups ?? []} columns={columns} />
+            <RiskGroupsInput startIndex={savedGroups?.length} />
             <Box>{form.values.riskGroups.length > 0 && addButton}</Box>
           </Stack>
         </PageSection>
