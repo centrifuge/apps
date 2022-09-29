@@ -95,7 +95,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                   placeholder="0.00"
                   name={`tranches.${index}.minInvestment`}
                   validate={validate.minInvestment}
-                  rightElement={currencies.find((c) => c.value === currency || values.currency)?.label}
+                  rightElement={currencies.find((c) => c.value === (currency || values.currency))?.label}
                 />
                 {index === juniorTrancheIndex ? (
                   <>

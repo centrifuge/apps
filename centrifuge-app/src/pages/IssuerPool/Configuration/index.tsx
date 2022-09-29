@@ -10,9 +10,9 @@ import { Admins } from './Admins'
 import { Details } from './Details'
 import { EpochAndTranches } from './EpochAndTranches'
 import { Issuer } from './Issuer'
+import { LoanTemplates } from './LoanTemplates'
 import { PoolConfig } from './PoolConfig'
 import { RiskGroups } from './RiskGroups'
-import { Schemas } from './Schemas'
 import { WriteOffGroups } from './WriteOffGroups'
 
 export const IssuerPoolConfigurationPage: React.FC = () => {
@@ -41,7 +41,7 @@ const IssuerPoolConfiguration: React.FC = () => {
           <RiskGroups />
           <WriteOffGroups />
           <Admins />
-          <Schemas />
+          <LoanTemplates />
           {editPoolConfig && <PoolConfig poolId={poolId} />}
         </>
       )}

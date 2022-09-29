@@ -8,7 +8,7 @@ export const palletErrors = {
     ValueOverflow: 'An operation lead to a number overflow',
     PrincipalDebtOverflow: 'Principal debt calculation failed due to overflow',
     LoanIsActive: "Can't update an active loan",
-    LoanTypeInvalid: 'Loan type given is not valid',
+    LoanTypeInvalid: 'Asset type given is not valid',
     LoanNotActive: 'Operation is done on an inactive loan',
     RepayTooEarly: 'Borrow and repay happens in the same block',
     NFTOwnerNotFound: 'The NFT owner is not found',

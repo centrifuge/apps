@@ -46,7 +46,7 @@ const columns: Column[] = [
     sortKey: 'yield',
   },
   {
-    header: <SortableTableHeader label="Max. protection" />,
+    header: <SortableTableHeader label="Protection" />,
     cell: (token: TokenTableData) => (token.protection ? formatPercentage(token.protection) : ''),
     flex: '4',
     sortKey: 'protection',
@@ -60,7 +60,7 @@ const columns: Column[] = [
   {
     header: <SortableTableHeader label="Capacity" />,
     cell: (token: TokenTableData) => (
-      <Text variant="body2" color={token.capacity > 0 ? 'statusOk' : 'statusWarning'}>
+      <Text variant="body2" fontWeight={600} color={token.capacity > 0 ? 'statusOk' : 'statusWarning'}>
         {formatBalanceAbbreviated(token.capacity, token.currency)}
       </Text>
     ),

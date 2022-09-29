@@ -20,7 +20,7 @@ import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { CreatePoolValues } from '../../IssuerCreatePool'
 import { validate } from '../../IssuerCreatePool/validate'
 
-type Values = Pick<CreatePoolValues, 'poolName' | 'poolIcon' | 'assetClass' | 'nodeEndpoint'> & { listed: boolean }
+type Values = Pick<CreatePoolValues, 'poolName' | 'poolIcon' | 'assetClass' | 'podEndpoint'> & { listed: boolean }
 
 const ASSET_CLASSES = config.assetClasses.map((label) => ({
   label,
@@ -41,7 +41,7 @@ export const Details: React.FC = () => {
       poolName: metadata?.pool?.name ?? '',
       poolIcon: iconFile ?? null,
       assetClass: metadata?.pool?.asset?.class ?? '',
-      nodeEndpoint: metadata?.node?.url ?? config.defaultNodeUrl ?? '',
+      podEndpoint: metadata?.pod?.url ?? '',
       listed: metadata?.pool?.listed ?? false,
     }),
     [metadata, iconFile]
@@ -80,8 +80,8 @@ export const Details: React.FC = () => {
           },
           listed: values.listed,
         },
-        node: {
-          url: values.nodeEndpoint,
+        pod: {
+          url: values.podEndpoint,
         },
       }
 
@@ -99,6 +99,7 @@ export const Details: React.FC = () => {
 
   React.useEffect(() => {
     form.resetForm()
+    form.setValues(initialValues, false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing])
 
@@ -184,17 +185,17 @@ export const Details: React.FC = () => {
                 disabled
               />
               <FieldWithErrorMessage
-                validate={validate.nodeEndpoint}
-                name="nodeEndpoint"
+                validate={validate.podEndpoint}
+                name="podEndpoint"
                 as={TextInput}
-                label={`Node endpoint${config.useDocumentNfts ? '*' : ''}`}
+                label={`POD endpoint${config.useDocumentNfts ? '*' : ''}`}
                 placeholder="https://..."
               />
 
               <Field name="listed" validate={validate.assetClass}>
                 {({ field, meta, form }: FieldProps) => (
                   <Stack px={2}>
-                    <LabelValueStack label="Menu listing" value={<Checkbox {...field} label="published" />} />
+                    <LabelValueStack label="Menu listing" value={<Checkbox {...field} label="Published" />} />
                   </Stack>
                 )}
               </Field>
@@ -207,8 +208,8 @@ export const Details: React.FC = () => {
               <LabelValueStack label="Asset class" value={metadata?.pool?.asset.class} />
 
               <LabelValueStack label="Currency" value={getCurrencySymbol(pool?.currency)} />
-              <LabelValueStack label="Node endpoint" value={metadata?.node?.url ?? '-'} />
-              <LabelValueStack label="Menu listing" value={metadata?.pool?.listed ? 'Listed' : 'Not Listed'} />
+              <LabelValueStack label="POD endpoint" value={metadata?.pod?.url ?? '-'} />
+              <LabelValueStack label="Menu listing" value={metadata?.pool?.listed ? 'Published' : 'Not published'} />
             </Shelf>
           )}
         </PageSection>

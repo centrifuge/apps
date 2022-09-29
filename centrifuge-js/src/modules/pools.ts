@@ -420,7 +420,7 @@ export interface PoolMetadataInput {
   maxReserve: number | ''
   epochHours: number | ''
   epochMinutes: number | ''
-  nodeEndpoint: string
+  podEndpoint: string
 
   // issuer
   issuerName: string
@@ -462,7 +462,7 @@ export type PoolMetadata = {
     status: PoolStatus
     listed: boolean
   }
-  node?: {
+  pod?: {
     url: string | null
   }
   tranches: Record<
@@ -473,7 +473,7 @@ export type PoolMetadata = {
       minInitialInvestment: string
     }
   >
-  schemas?: {
+  loanTemplates?: {
     id: string
     createdAt: string
   }[]
@@ -599,7 +599,8 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     if (options?.paymentInfo) {
-      return of({ uri: '', ipfsHash: '' })
+      const hash = '0'.repeat(46)
+      return of({ uri: `ipfs://ipfs/${hash}`, ipfsHash: hash })
     }
 
     const tranchesById: PoolMetadata['tranches'] = {}
@@ -634,8 +635,8 @@ export function getPoolsModule(inst: Centrifuge) {
         status: 'open',
         listed: true,
       },
-      node: {
-        url: metadata.nodeEndpoint ?? null,
+      pod: {
+        url: metadata.podEndpoint ?? null,
       },
       tranches: tranchesById,
       riskGroups: metadata.riskGroups.map((group) => ({
@@ -1669,7 +1670,7 @@ export function getPoolsModule(inst: Centrifuge) {
             status: getLoanStatus(loan),
             asset: {
               collectionId: collectionId.toString(),
-              nftId: nftId.toString(),
+              nftId: hexToBN(nftId).toString(),
             },
           } as DefaultLoan
         })

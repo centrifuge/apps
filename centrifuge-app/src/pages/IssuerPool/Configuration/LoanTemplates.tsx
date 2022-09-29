@@ -4,7 +4,7 @@ import { useParams } from 'react-router'
 import { DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
 import { RouterLinkButton } from '../../../components/RouterLinkButton'
-import { Schema } from '../../../types'
+import { LoanTemplate } from '../../../types'
 import { formatDate } from '../../../utils/date'
 import { useMetadataMulti } from '../../../utils/useMetadata'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
@@ -15,18 +15,18 @@ type Row = {
   id: string
 }
 
-export const Schemas: React.FC = () => {
+export const LoanTemplates: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
 
   const pool = usePool(poolId)
   const { data: poolMetadata } = usePoolMetadata(pool)
 
-  const schemaIds = poolMetadata?.schemas?.map((s) => s.id) ?? []
-  const schemaMetadata = useMetadataMulti<Schema>(schemaIds)
+  const templateIds = poolMetadata?.loanTemplates?.map((s) => s.id) ?? []
+  const templateMetadata = useMetadataMulti<LoanTemplate>(templateIds)
 
-  const tableData = schemaIds.map((id, i) => {
-    const meta = schemaMetadata[i].data
-    const metaMeta = poolMetadata?.schemas?.[i]
+  const tableData = templateIds.map((id, i) => {
+    const meta = templateMetadata[i].data
+    const metaMeta = poolMetadata?.loanTemplates?.[i]
     return {
       name: meta?.name ?? `Template ${i + 1}`,
       createdAt: metaMeta?.createdAt ? new Date(metaMeta?.createdAt) : null,
@@ -38,14 +38,14 @@ export const Schemas: React.FC = () => {
     <PageSection
       title="Asset templates"
       headerRight={
-        <RouterLinkButton to={`/issuer/${poolId}/configuration/create-schema`} variant="secondary" small>
+        <RouterLinkButton to={`/issuer/${poolId}/configuration/create-asset-template`} variant="secondary" small>
           {tableData.length ? 'Add another' : 'Add'}
         </RouterLinkButton>
       }
     >
       <DataTable
         data={tableData}
-        onRowClicked={(row) => `/issuer/${poolId}/configuration/view-schema/${row.id}`}
+        onRowClicked={(row) => `/issuer/${poolId}/configuration/view-asset-template/${row.id}`}
         columns={[
           {
             align: 'left',
