@@ -1,8 +1,6 @@
 import { BN } from 'bn.js'
-import { useQuery } from 'react-query'
-import { firstValueFrom } from 'rxjs'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
+import { usePool } from './usePools'
 
 export function useNFTs(collectionId?: string) {
   const [result] = useCentrifugeQuery(['nfts', collectionId], (cent) => cent.nfts.getCollectionNfts([collectionId!]), {
@@ -13,7 +11,7 @@ export function useNFTs(collectionId?: string) {
   return result
 }
 
-export function useNFT(collectionId?: string, nftId?: string, suspense = true) {
+export function useNFT(collectionId?: string | null, nftId?: string, suspense = true) {
   const [result] = useCentrifugeQuery(
     ['nft', collectionId, nftId],
     (cent) => cent.nfts.getNft([collectionId!, nftId!]),
@@ -26,35 +24,15 @@ export function useNFT(collectionId?: string, nftId?: string, suspense = true) {
   return result
 }
 
-export function useLoanCollectionId(poolId?: string) {
-  const cent = useCentrifuge()
-
-  const { data } = useQuery(
-    ['poolToLoanCollection', poolId],
-    async () => {
-      const collectionId = await firstValueFrom(cent.pools.getLoanCollectionIdForPool([poolId!]))
-      const collateralCollectionId = new BN(collectionId).add(new BN(1)).toString()
-      return {
-        collectionId,
-        collateralCollectionId,
-      }
-    },
-    {
-      enabled: !!poolId,
-      staleTime: Infinity,
-    }
-  )
-  return (
-    data ?? {
-      collectionId: undefined,
-      collateralCollectionId: undefined,
-    }
-  )
+export function useLoanNft(poolId: string, loanId?: string) {
+  const pool = usePool(poolId)
+  return useNFT(pool?.loanCollectionId, loanId, false)
 }
 
-export function useLoanNft(poolId?: string, loanId?: string) {
-  const { collectionId } = useLoanCollectionId(poolId)
-  return useNFT(collectionId, loanId, false)
+export function useCollateralCollectionId(poolId: string) {
+  const pool = usePool(poolId)
+  const collateralCollectionId = new BN(pool!.loanCollectionId!).add(new BN(1)).toString()
+  return collateralCollectionId
 }
 
 export function useAccountNfts(address?: string, suspense = true) {
