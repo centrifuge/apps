@@ -8,6 +8,7 @@ import { Request, Response } from 'express'
 dotenv.config()
 
 const URL = process.env.COLLATOR_WSS_URL ?? 'wss://fullnode.demo.cntrfg.com'
+const CORS_ORIGIN = process.env.CORS_ORIGIN ?? 'https://demo.app.cntrfg.com/'
 
 const ONE_AUSD = new BN(10).pow(new BN(12))
 const ONE_DEVEL = new BN(10).pow(new BN(18))
@@ -25,7 +26,7 @@ function hexToBN(value: string | number) {
 }
 
 async function faucet(req: Request, res: Response) {
-  res.set('Access-Control-Allow-Origin', '*')
+  res.set('Access-Control-Allow-Origin', CORS_ORIGIN)
   try {
     console.log('faucet running')
     // even if cors fails the request completes
@@ -100,4 +101,4 @@ async function faucet(req: Request, res: Response) {
 }
 
 exports.faucetDev = faucet
-exports.faucet = faucet
+exports.faucetDemo = faucet

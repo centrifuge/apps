@@ -9,7 +9,8 @@
     "start:types": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --watch",
     "start:functions": "npx functions-framework --target=faucet --signature-type=http --env-vars-file .env.yaml",
     "develop": "run-p -l start:functions start:types",
-    "deploy": "gcloud functions deploy faucet --region=us-central1 --source=dist --project=peak-vista-185616  --trigger-http --runtime=nodejs16 --env-vars-file .env.yaml --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com"
+    "deploy:demo": "gcloud functions deploy faucetDemo --region=us-central1 --source=dist --project=peak-vista-185616 --trigger-http --runtime=nodejs16 --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com --allow-unauthenticated --entry-point=faucetDemo",
+    "deploy:dev": "gcloud functions deploy faucetDev --region=us-central1 --source=dist --project=peak-vista-185616 --trigger-http --runtime=nodejs16 --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com --allow-unauthenticated --entry-point=faucetDev --env-vars-file .env.yaml "
   },
   "keywords": [],
   "author": "",

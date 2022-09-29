@@ -34,8 +34,9 @@ Build the app locally
 yarn build
 ```
 
-Then deploy
+Then deploy to develop or demo
 
 ```bash
-yarn deploy
+yarn deploy:demo
+yarn deploy:dev
 ```
