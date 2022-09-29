@@ -25,10 +25,10 @@ function hexToBN(value: string | number) {
 }
 
 exports.faucet = async function faucet(req: Request, res: Response) {
+  res.set('Access-Control-Allow-Origin', '*')
   try {
     console.log('faucet running')
     // even if cors fails the request completes
-    res.set('Access-Control-Allow-Origin', '*')
     if (req.method === 'OPTIONS') {
       res.set('Access-Control-Allow-Methods', 'GET')
       res.set('Access-Control-Allow-Headers', 'Content-Type')
