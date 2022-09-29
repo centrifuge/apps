@@ -34,7 +34,7 @@ export const Faucet: React.VFC = () => {
     }
   }
 
-  return pool ? (
+  return (
     <>
       <FaucetConfirmationDialog
         error={error}
@@ -55,5 +55,5 @@ export const Faucet: React.VFC = () => {
         </Button>
       </Shelf>
     </>
-  ) : null
+  )
 }
