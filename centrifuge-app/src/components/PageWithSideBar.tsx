@@ -37,7 +37,6 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
         maxHeight="100vh"
         gridArea="menu"
         position="sticky"
-        overflow="scroll"
         bottom={0}
         top={0}
         height="100%"

@@ -189,9 +189,11 @@ export const PoolDetailOverview: React.FC<{
     <>
       <PageSummary data={pageSummaryData} />
       <PageSection title="Pool value, asset value & reserve" titleAddition={formatDate(new Date().toString())}>
-        <React.Suspense fallback={<Spinner />}>
-          <PoolAssetReserveChart />
-        </React.Suspense>
+        <Stack height="290px">
+          <React.Suspense fallback={<Spinner />}>
+            <PoolAssetReserveChart />
+          </React.Suspense>
+        </Stack>
       </PageSection>
       <PageSection title="Pool tokens">
         <Stack gap={2}>
@@ -244,9 +246,11 @@ export const PoolDetailOverview: React.FC<{
                   </Shelf>
                 }
               >
-                <React.Suspense fallback={<Spinner />}>
-                  <PriceYieldChart trancheId={token.id} />
-                </React.Suspense>
+                <Stack height="300px">
+                  <React.Suspense fallback={<Spinner />}>
+                    <PriceYieldChart trancheId={token.id} />
+                  </React.Suspense>
+                </Stack>
               </InteractiveCard>
             </div>
           ))}

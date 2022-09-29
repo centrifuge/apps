@@ -1,5 +1,6 @@
 import * as CSS from 'csstype'
 import React from 'react'
+import styled from 'styled-components'
 import { ResponsiveValue, TLengthStyledSystem } from 'styled-system'
 import { mapResponsive } from '../../utils/styled'
 import { Box, BoxProps } from '../Box'
@@ -15,6 +16,12 @@ interface OwnProps {
 
 export type GridProps = OwnProps & BoxProps
 
+const StyledGrid = styled(Box)`
+  & > * {
+    min-width: 0;
+  }
+`
+
 export const Grid: React.FC<GridProps> = ({
   gap,
   rowGap = gap,
@@ -29,7 +36,7 @@ export const Grid: React.FC<GridProps> = ({
     : countToColumns(columns, equalColumns)
 
   return (
-    <Box
+    <StyledGrid
       display="grid"
       gridColumnGap={gap}
       gridRowGap={rowGap}
