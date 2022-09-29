@@ -20,6 +20,8 @@ yarn develop
 
 ## Deployment
 
+The function is [deployed on google cloud](https://console.cloud.google.com/functions/list?env=gen1&project=peak-vista-185616&tab=logs).
+
 Install the [gcloud cli](https://cloud.google.com/sdk/docs/install) and authenticate with your centrifuge account.
 
 ```bash

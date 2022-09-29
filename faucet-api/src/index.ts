@@ -24,7 +24,7 @@ function hexToBN(value: string | number) {
   return new BN(value.toString().substring(2), 'hex')
 }
 
-exports.faucet = async function faucet(req: Request, res: Response) {
+async function faucet(req: Request, res: Response) {
   res.set('Access-Control-Allow-Origin', '*')
   try {
     console.log('faucet running')
@@ -98,3 +98,6 @@ exports.faucet = async function faucet(req: Request, res: Response) {
     return res.status(500).send(e)
   }
 }
+
+exports.faucetDev = faucet
+exports.faucet = faucet
