@@ -46,7 +46,15 @@ export const Web3Provider: React.FC = ({ children }) => {
   const cent = useCentrifuge()
   const { data: proxies } = useQuery(
     ['proxies', accounts?.map((acc) => acc.address)],
-    () => firstValueFrom(cent.proxies.getMultiUserProxies([accounts!.map((acc) => acc.address)])),
+    () =>
+      firstValueFrom(cent.proxies.getMultiUserProxies([accounts!.map((acc) => acc.address)])).then((proxies) => {
+        return Object.fromEntries(
+          Object.entries(proxies).map(([delegatee, ps]) => [
+            cent.utils.formatAddress(delegatee),
+            ps.map((p) => ({ ...p, delegator: cent.utils.formatAddress(p.delegator) })),
+          ])
+        )
+      }),
     {
       enabled: !!accounts?.length,
       staleTime: Infinity,

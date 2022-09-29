@@ -131,7 +131,7 @@ export const RiskGroups: React.FC = () => {
     <FormikProvider value={form}>
       <Form>
         <PageSection
-          title="Risk Groups"
+          title="Risk groups"
           headerRight={
             <>
               {form.values.riskGroups.length === 0 && addButton}

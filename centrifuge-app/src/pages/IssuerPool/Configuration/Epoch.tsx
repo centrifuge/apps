@@ -59,6 +59,7 @@ export const Epoch: React.FC = () => {
 
   React.useEffect(() => {
     form.resetForm()
+    form.setValues(initialValues, false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing])
 

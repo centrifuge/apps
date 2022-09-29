@@ -43,7 +43,7 @@ export function getMetadataModule(inst: Centrifuge) {
 
       if (!url.includes(':')) {
         // string without protocol is assumed to be an IPFS hash
-        newUrl = new URL(`ipfs/${url}`, inst.config.metadataHost)
+        newUrl = new URL(`ipfs/${url.replace(/\/?(ipfs\/)/, '')}`, inst.config.metadataHost)
       } else if (url.startsWith('ipfs://')) {
         newUrl = new URL(url.substr(7), inst.config.metadataHost)
       } else {

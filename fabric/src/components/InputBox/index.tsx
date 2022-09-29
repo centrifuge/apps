@@ -41,8 +41,16 @@ export const InputBox: React.FC<StackProps & InputBoxProps> = React.forwardRef(
           )}
           <Stack>
             <Shelf>
-              <Box flex="1 1 auto">
-                <Text variant="body1" color={disabled ? 'textDisabled' : 'textPrimary'}>
+              <Box flex="1 1 auto" minWidth={0}>
+                <Text
+                  variant="body1"
+                  color={disabled ? 'textDisabled' : 'textPrimary'}
+                  style={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
                   {inputElement}
                 </Text>
               </Box>
