@@ -43,8 +43,14 @@ describe('pocc-solver tests', () => {
 
       const expectedSolution = problem.solution.map((tranche: any) => {
         return {
-          invest: objToNum(tranche.invest),
-          redeem: objToNum(tranche.redeem),
+          invest: {
+            amount: objToNum(tranche.invest.amount),
+            perquintill: objToNum(tranche.invest.perquintill),
+          },
+          redeem: {
+            amount: objToNum(tranche.redeem.amount),
+            perquintill: objToNum(tranche.redeem.perquintill),
+          },
         }
       })
 
@@ -70,8 +76,8 @@ describe('pocc-solver tests', () => {
         result.tranches.every((result, index) => {
           const { invest: investResult, redeem: redeemResult } = result
           return (
-            investResult.perquintill !== expected.tranches[index].invest ||
-            redeemResult.perquintill !== expected.tranches[index].redeem
+            investResult.amount !== expected.tranches[index].invest.amount ||
+            redeemResult.amount !== expected.tranches[index].redeem.amount
           )
         })
       ) {
@@ -99,14 +105,24 @@ describe('pocc-solver tests', () => {
       result.tranches.forEach((result, index) => {
         const { invest: investResult, redeem: redeemResult } = result
         assert.strictEqual(
+          investResult.amount.toString(),
+          expected.tranches[index].invest.amount.toString(),
+          `tranche-${index}-invest amount is not correct`
+        )
+        assert.strictEqual(
           investResult.perquintill.toString(),
-          expected.tranches[index].invest.toString(),
-          `tranche-${index}-invest is not correct`
+          expected.tranches[index].invest.perquintill.toString(),
+          `tranche-${index}-invest perquintill is not correct`
+        )
+        assert.strictEqual(
+          redeemResult.amount.toString(),
+          expected.tranches[index].redeem.amount.toString(),
+          `tranche-${index}-redeem amount is not correct`
         )
         assert.strictEqual(
           redeemResult.perquintill.toString(),
-          expected.tranches[index].redeem.toString(),
-          `tranche-${index}-redeem is not correct`
+          expected.tranches[index].redeem.perquintill.toString(),
+          `tranche-${index}-redeem perquintill is not correct`
         )
       })
     })
