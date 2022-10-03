@@ -144,7 +144,7 @@ const IssuerCreateLoan: React.FC = () => {
   const { selectedAccount, proxy } = useWeb3()
   const { addTransaction, updateTransaction } = useTransactions()
 
-  const { data: poolMetadata } = usePoolMetadata(pool)
+  const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const podUrl = poolMetadata?.pod?.url
 
   const { token, isLoggedIn } = usePodAuth(podUrl)
@@ -373,9 +373,11 @@ const IssuerCreateLoan: React.FC = () => {
               <PodAuthSection podUrl={podUrl} message="You need to be logged in to create assets" />
             </Box>
           ) : (
-            <Stack alignItems="center" py={8}>
-              <Text>POD endpoint is missing in pool configuration</Text>
-            </Stack>
+            !poolMetadataIsLoading && (
+              <Stack alignItems="center" py={8}>
+                <Text>POD endpoint is missing in pool configuration</Text>
+              </Stack>
+            )
           )}
         </Stack>
       </Form>
