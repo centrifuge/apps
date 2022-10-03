@@ -109,8 +109,10 @@ export function getPodModule() {
     return res as T
   }
 
-  async function signToken(args: [address: string, onBehalfOf: string, signer: Signer]) {
-    const [address, onBehalfOf, signer] = args
+  async function signToken(
+    args: [address: string, onBehalfOf: string, proxyType: 'any' | 'pod_auth' | 'node_admin', signer: Signer]
+  ) {
+    const [address, onBehalfOf, proxyType, signer] = args
     const header = {
       algorithm: 'sr25519',
       token_type: 'JW3T',
@@ -120,7 +122,7 @@ export function getPodModule() {
     const payload = {
       address,
       on_behalf_of: onBehalfOf,
-      proxy_type: 'pod_auth',
+      proxy_type: proxyType,
       expires_at: String(now + 60 * 60 * 24),
       issued_at: String(now),
       not_before: String(now),

@@ -18,7 +18,7 @@ function getPersisted() {
 
 export const PodAuthProvider: React.FC = ({ children }) => {
   const [tokens, setTokens] = React.useState<Record<string, { signed: string; payload: any } | undefined>>(getPersisted)
-  const { selectedWallet } = useWeb3()
+  const { selectedWallet, proxies } = useWeb3()
   const cent = useCentrifuge()
 
   React.useEffect(() => {
@@ -44,12 +44,13 @@ export const PodAuthProvider: React.FC = ({ children }) => {
 
   const login = React.useCallback(
     async (address: string, onBehalfOf: string) => {
+      const proxy = proxies?.[address]?.find((p) => p.delegator === onBehalfOf)
+      const type = proxy?.types.includes('Any') ? 'any' : proxy?.types.includes('PodAuth') ? 'pod_auth' : 'node_admin'
       // @ts-expect-error Signer type version mismatch
-      const { payload, token } = await cent.pod.signToken([address, onBehalfOf, selectedWallet?.signer])
+      const { payload, token } = await cent.pod.signToken([address, onBehalfOf, type, selectedWallet?.signer])
       setTokens((prev) => ({ ...prev, [`${address}-${onBehalfOf}`]: { signed: token, payload } }))
-      console.log('token', token, payload)
     },
-    [selectedWallet?.signer, cent]
+    [selectedWallet?.signer, cent, proxies]
   )
 
   const ctx = React.useMemo(
