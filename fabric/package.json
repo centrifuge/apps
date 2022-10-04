@@ -1,6 +1,6 @@
 {
   "name": "@centrifuge/fabric",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "Fabric Component Library",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -10,7 +10,7 @@
   "scripts": {
     "build": "yarn build:icons && tsc",
     "prepare": "yarn build",
-    "bump": "standard-version",
+    "bump": "standard-version --sign --release-as 1.0.0",
     "storybook": " install-peers && yarn build:icons --ignore-existing && start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "build:icons": "svgr --template ./iconTemplate.js -d ./src/icon ./src/icon-svg",
