@@ -17,6 +17,9 @@ const TEN_DEVEL = ONE_DEVEL.muln(10)
 const TEN_THOUSAND_AUSD = ONE_AUSD.muln(10000)
 const ONE_HUNDRED_AUSD = ONE_AUSD.muln(100)
 
+const MAX_API_REQUESTS_PER_WALLET = 100
+const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000
+
 const firestore = new Firestore()
 const wsProvider = new WsProvider(URL)
 
@@ -61,14 +64,14 @@ async function faucet(req: Request, res: Response) {
     const data = doc.data()
 
     if (doc.exists && data?.address !== address) {
-      const twentyFourHourFreeze = new Date(data?.timestamp).getTime() + 24 * 60 * 60 * 1000
+      const twentyFourHourFreeze = new Date(data?.timestamp).getTime() + TWENTY_FOUR_HOURS
       // allow access once every 24 hours
       if (new Date().getTime() < twentyFourHourFreeze) {
         api.disconnect()
         return res.status(400).send('Faucet can only be used once in 24 hours')
       }
 
-      if (data?.count > 100) {
+      if (data?.count > MAX_API_REQUESTS_PER_WALLET) {
         api.disconnect()
         return res.status(400).send('Maximum claims exceeded')
       }

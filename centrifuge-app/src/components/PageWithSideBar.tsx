@@ -15,15 +15,18 @@ type Props = {
   sidebar?: React.ReactNode
 }
 
+const MIN_DEVEL_BALANCE = 10
+const MIN_AUSD_BALANCE = 100
 export const PAGE_GUTTER = ['gutterMobile', 'gutterTablet', 'gutterDesktop']
 
 export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) => {
   const theme = useTheme()
   const balances = useBalances(useAddress())
-  const hasLowDevelBalance = balances && new CurrencyBalance(balances.native.balance, 18).toDecimal().lte(10)
+  const hasLowDevelBalance =
+    balances && new CurrencyBalance(balances.native.balance, 18).toDecimal().lte(MIN_DEVEL_BALANCE)
   const aUSD = balances && balances.currencies.find((curr) => curr.currency === 'ausd')
   const hasLowAusdBalance =
-    (aUSD && new CurrencyBalance(aUSD.balance, aUSD.currencyDecimals).toDecimal().lte(100)) || !aUSD
+    (aUSD && new CurrencyBalance(aUSD.balance, aUSD.currencyDecimals).toDecimal().lte(MIN_AUSD_BALANCE)) || !aUSD
 
   return (
     <Box
