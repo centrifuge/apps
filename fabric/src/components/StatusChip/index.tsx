@@ -3,9 +3,9 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Text } from '../Text'
 
-type Props = {
+type Props = React.PropsWithChildren<{
   status: 'default' | 'info' | 'ok' | 'warning' | 'critical'
-}
+}>
 
 export type StatusChipProps = React.PropsWithChildren<Props>
 

@@ -2440,7 +2440,8 @@ __metadata:
     "@types/eslint": ^7
     "@types/mdx-js__react": ^1
     "@types/prettier": ^2
-    "@types/react": ^17.0.21
+    "@types/react": ^18
+    "@types/react-dom": ^18
     "@types/styled-components": ^5
     "@types/styled-system": ^5
     "@types/styled-system__css": ^5.0.16
@@ -2455,14 +2456,16 @@ __metadata:
     install-peers-cli: ^2.2.0
     loki: ^0.28.1
     prettier: ^2.4.1
+    react: ^18.2.0
+    react-dom: ^18.2.0
     reg-cli: ^0.17.4
     standard-version: ^9.3.2
-    styled-components: ^5.3.1
+    styled-components: ^5.3.6
     styled-system: ^5.1.5
     typescript: ~4.4.4
   peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
+    react: "*"
+    react-dom: "*"
   languageName: unknown
   linkType: soft
 
@@ -12491,6 +12494,15 @@ __metadata:
   dependencies:
     "@types/react": ^17
   checksum: f31617c51845d096a83ad82787332a6d53a369391aa7d0cf2dff55abb6b8bb9c506ee52d04cd91af89a35a3b2069f3c608cdc9715ae4111a1545ea3c419c9179
+  languageName: node
+  linkType: hard
+
+"@types/react-dom@npm:^18":
+  version: 18.0.6
+  resolution: "@types/react-dom@npm:18.0.6"
+  dependencies:
+    "@types/react": "*"
+  checksum: bb6fe826f602aa81fbcc28616a2ec044870de7a0269477147f2f6a090cd1561dd5d87e5b2514092b626e6ed7a36897e84d4a0d5338dd473a32d88e53dbf2fa47
   languageName: node
   linkType: hard
 
@@ -43443,7 +43455,7 @@ resolve@1.18.1:
   languageName: node
   linkType: hard
 
-"styled-components@npm:^5.3.1, styled-components@npm:^5.3.5":
+"styled-components@npm:^5.3.5":
   version: 5.3.5
   resolution: "styled-components@npm:5.3.5"
   dependencies:
@@ -43462,6 +43474,28 @@ resolve@1.18.1:
     react-dom: ">= 16.8.0"
     react-is: ">= 16.8.0"
   checksum: 402ce2ab1099e6f4623f8e9e4976cca230929762f45b4ad9d6cd5307f4723a97a6f24e02ec302f66e2b09a11f2853ed7419941cbd3a411e8501d7b47b532bad1
+  languageName: node
+  linkType: hard
+
+"styled-components@npm:^5.3.6":
+  version: 5.3.6
+  resolution: "styled-components@npm:5.3.6"
+  dependencies:
+    "@babel/helper-module-imports": ^7.0.0
+    "@babel/traverse": ^7.4.5
+    "@emotion/is-prop-valid": ^1.1.0
+    "@emotion/stylis": ^0.8.4
+    "@emotion/unitless": ^0.7.4
+    babel-plugin-styled-components: ">= 1.12.0"
+    css-to-react-native: ^3.0.0
+    hoist-non-react-statics: ^3.0.0
+    shallowequal: ^1.1.0
+    supports-color: ^5.5.0
+  peerDependencies:
+    react: ">= 16.8.0"
+    react-dom: ">= 16.8.0"
+    react-is: ">= 16.8.0"
+  checksum: 7a4adee87ad1a052757033405b3ab2f2b8a78738e11936ee4a2e60a75a88adf4efffb926ac7244620d87e3ae27c51e7ee8508287ab24ef9bfcab5a1f015785e1
   languageName: node
   linkType: hard
 
