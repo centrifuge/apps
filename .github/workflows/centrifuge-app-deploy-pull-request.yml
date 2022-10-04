@@ -10,19 +10,19 @@ on:
 
 jobs:
   pull-request:
-    uses: centrifuge/apps/.github/workflows/centrifuge-app-build-and-deploy.yml@cent-app/devel-faucet
+    uses: centrifuge/apps/.github/workflows/centrifuge-app-build-and-deploy.yml@main
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
       ipfs-gateway: https://altair.mypinata.cloud/
-      collator-wss-url: wss://fullnode.demo.cntrfg.com
-      relay-wss-url: wss://fullnode-relay.demo.cntrfg.com
+      collator-wss-url: wss://fullnode.development.cntrfg.com
+      relay-wss-url: wss://fullnode-relay.development.cntrfg.com
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
       network: centrifuge
-      subquery-url: https://api.subquery.network/sq/centrifuge/pools-demo
+      subquery-url: https://api.subquery.network/sq/centrifuge/pools-development
       pool-creation-type: immediate
       default-node-url: ''
-      faucet-url: https://us-central1-peak-vista-185616.cloudfunctions.net/faucetDemo
+      faucet-url: https://us-central1-peak-vista-185616.cloudfunctions.net/faucetDev
 
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
