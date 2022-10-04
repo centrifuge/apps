@@ -19,6 +19,7 @@ const ONE_HUNDRED_AUSD = ONE_AUSD.muln(100)
 
 const MAX_API_REQUESTS_PER_WALLET = 100
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000
+const WALLET_ADDRESS_LENGTH = 48
 
 const firestore = new Firestore()
 const wsProvider = new WsProvider(URL)
@@ -41,7 +42,7 @@ async function faucet(req: Request, res: Response) {
     }
     const { address } = req.query
 
-    if (!address || (address as string).length !== 48) {
+    if (!address || (address as string).length !== WALLET_ADDRESS_LENGTH) {
       return res.status(400).send('Invalid address param')
     }
 
