@@ -2110,7 +2110,6 @@ const getEpochStatus = (
     return 'challengePeriod'
   } else if (epochExecution?.challengePeriodEnd < blockNumber) {
     return 'executionPeriod'
-  } else {
-    return 'ongoing'
   }
+  return 'ongoing'
 }
