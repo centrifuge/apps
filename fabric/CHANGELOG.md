@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.2](https://github.com/centrifuge/apps/compare/fabric/v1.0.1...fabric/v1.0.2) (2022-10-05)
+
+
+### Bug Fixes
+
+* **fabric:** Include styled-system types ([6816a33](https://github.com/centrifuge/apps/commit/6816a3365f5ccaec83143dcb1064aa51bd2ce0de))
+
 ### [1.0.1](https://github.com/centrifuge/apps/compare/fabric/v1.0.0...fabric/v1.0.1) (2022-10-04)
 
 
