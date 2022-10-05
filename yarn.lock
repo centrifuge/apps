@@ -2443,7 +2443,7 @@ __metadata:
     "@types/react": ^18
     "@types/react-dom": ^18
     "@types/styled-components": ^5
-    "@types/styled-system": ^5
+    "@types/styled-system": ^5.1.15
     "@types/styled-system__css": ^5.0.16
     "@types/styled-system__should-forward-prop": ^5
     "@typescript-eslint/eslint-plugin": ^4.32.0
@@ -2466,6 +2466,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-dom: "*"
+    styled-components: "*"
   languageName: unknown
   linkType: soft
 
@@ -12730,7 +12731,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/styled-system@npm:^5":
+"@types/styled-system@npm:^5, @types/styled-system@npm:^5.1.15":
   version: 5.1.15
   resolution: "@types/styled-system@npm:5.1.15"
   dependencies:

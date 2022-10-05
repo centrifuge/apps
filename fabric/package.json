@@ -43,7 +43,6 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/styled-components": "^5",
-    "@types/styled-system": "^5",
     "@types/styled-system__css": "^5.0.16",
     "@types/styled-system__should-forward-prop": "^5",
     "@typescript-eslint/eslint-plugin": "^4.32.0",
@@ -79,6 +78,7 @@
     "@react-stately/tooltip": "^3.0.8",
     "@styled-system/css": "^5.1.5",
     "@styled-system/should-forward-prop": "^5.1.5",
+    "@types/styled-system": "^5.1.15",
     "styled-system": "^5.1.5"
   },
   "svgr": {
