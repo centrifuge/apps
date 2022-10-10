@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.3](https://github.com/centrifuge/apps/compare/fabric/v1.0.2...fabric/v1.0.3) (2022-10-10)
+
+
+### Bug Fixes
+
+* **fabric:** Include color scales ([a358c71](https://github.com/centrifuge/apps/commit/a358c7124090a88546a26701f0811bbb5e8a2ae0))
+
 ### [1.0.2](https://github.com/centrifuge/apps/compare/fabric/v1.0.1...fabric/v1.0.2) (2022-10-05)
 
 

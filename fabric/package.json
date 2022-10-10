@@ -1,6 +1,6 @@
 {
   "name": "@centrifuge/fabric",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Fabric Component Library",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
