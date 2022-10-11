@@ -410,7 +410,7 @@ const CreatePoolForm: React.VFC = () => {
                   validate={validate.podEndpoint}
                   name="podEndpoint"
                   as={TextInput}
-                  label={`POD endpoint${config.useDocumentNfts ? '*' : ''}`}
+                  label={`POD endpoint`}
                   placeholder="https://"
                 />
               </Box>
