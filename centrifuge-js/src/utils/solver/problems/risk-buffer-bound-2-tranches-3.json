@@ -7,7 +7,7 @@
     "currencyDecimals": 18,
     "reserve": {
       "base": 18,
-      "value": 10
+      "value": 100
     },
     "tranches": [
       {
@@ -36,17 +36,17 @@
     {
       "invest": {
         "base": 18,
-        "value": 5
+        "value": 0
       },
       "redeem": {
         "base": 18,
-        "value": 0
+        "value": 0.01
       }
     },
     {
       "invest": {
         "base": 18,
-        "value": 10
+        "value": 0
       },
       "redeem": {
         "base": 18,
@@ -57,22 +57,46 @@
   "solution": [
     {
       "invest": {
-        "base": 18,
-        "value": 5
+        "amount": {
+          "base": 18,
+          "value": 0
+        },
+        "perquintill": {
+          "base": 18,
+          "value": 0
+        }
       },
       "redeem": {
-        "base": 18,
-        "value": 0
+        "amount": {
+          "base": 18,
+          "value": 0
+        },
+        "perquintill": {
+          "base": 18,
+          "value": 0
+        }
       }
     },
     {
       "invest": {
-        "base": 18,
-        "value": 5
+        "amount": {
+          "base": 18,
+          "value": 0
+        },
+        "perquintill": {
+          "base": 18,
+          "value": 0
+        }
       },
       "redeem": {
-        "base": 18,
-        "value": 0
+        "amount": {
+          "base": 18,
+          "value": 0
+        },
+        "perquintill": {
+          "base": 18,
+          "value": 0
+        }
       }
     }
   ]

@@ -8,7 +8,6 @@ export const calculateOptimalSolution = async (
   weights: TrancheWeights[],
   calcInvestmentCapacityForTranche?: number
 ): Promise<SolverResult> => {
-  // @ts-expect-error
   const res = await import('clp-wasm/clp-wasm.all')
   const clp: CLP = await res.default
   if (state.tranches.length !== orders.length || orders.length !== weights.length) {
@@ -31,7 +30,7 @@ export const calculateOptimalSolution = async (
     throw new Error('Trying to calculate investment capacity for an invalid tranche')
   }
 
-  // const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
+  const e27 = new BN(1).mul(new BN(10).pow(new BN(27)))
 
   const varWeights = weights
     .map((tranche) => [parseFloat(tranche.invest.toString()), parseFloat(tranche.redeem.toString())])
@@ -57,21 +56,81 @@ export const calculateOptimalSolution = async (
     .join()
     .replaceAll(',', '')
 
+  // senior first
+  const reversedTranches = state.tranches.reverse()
+  const trancheA = reversedTranches[0]
+  // const trancheB = reversedTranches[1]
+  // const trancheC = reversedTranches[2]
+
+  // 2 tranche model
+  const minA = trancheA.minRiskBuffer!.div(e27) // 8%
+  const maxA = e27.sub(minA).div(e27) // 92%
+  const minB = new BN(0) // junior tranche
+  const maxB = e27.div(e27) // junior tranche
+
+  const maxBLb = minA
+    .mul(state.netAssetValue)
+    .add(minA.mul(state.reserve))
+    .sub(trancheA.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
+
+  const minBLb = maxA
+    .neg()
+    .mul(state.netAssetValue)
+    .sub(maxA.mul(state.reserve))
+    .sub(trancheA.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
+
   const coefs = Array(state.tranches.length).fill([1, -1]).flat()
 
-  // TODO: add ${minRiskBufferConstraints}
+  // 2 tranche
   const lp = `
       Maximize
         ${linearExpression(varNames, varWeights)}
       Subject To
         reserve: ${linearExpression(varNames, coefs)} >= ${state.reserve.neg()}
         maxReserve: ${linearExpression(varNames, coefs)} <= ${state.maxReserve.sub(state.reserve)}
+        maxB: ${maxB} tranche-0-invest - ${maxB} tranche-0-redeem + ${minA} tranche-1-redeem - ${minA} tranche-1-invest >= ${maxBLb}
+        minB: ${maxA} tranche-1-invest - ${maxA} tranche-1-redeem + ${minB} tranche-0-redeem - ${minB} tranche-0-invest >= ${minBLb}
       Bounds
         ${bounds}
       End
     `
+  // minCRatioConstraint: maxBRatio(Cinv - Cred) + minCRatio(Ared - Ainv + Bred - Binv) >= minCRatioLb
+  // minCRatioConstraint: maxB*Cinv - maxB*Cred + minC*Ared - minC*Ainv + minC*Bred - minC*Binv
 
-  // console.log(lp)
+  // 3 tranche model
+  // const minA = trancheA.minRiskBuffer! // 8%
+  // const maxA = e27.sub(minA) // 92%
+  // const minB = trancheB.minRiskBuffer! // mezz tranche
+  // const maxB = e27.sub(minB) // mezz tranche
+  // const minC = 0 // in 3 tranche model this is the junior tranche
+  // const maxC = e27 // in 3 tranche model this is the junior tranche
+
+  // const maxABRatio = maxA.add(maxB)
+  // const minCLb = maxABRatio
+  //   .neg()
+  //   .mul(state.netAssetValue)
+  //   .sub(maxABRatio.mul(state.reserve))
+  //   .sub(trancheA.ratio.mul(state.netAssetValue.add(state.reserve)))
+  //   .sub(trancheB.ratio.mul(state.netAssetValue.add(state.reserve)))
+  //
+  // const lp = `
+  //   Maximize
+  //     ${linearExpression(varNames, varWeights)}
+  //   Subject To
+  //     reserve: ${linearExpression(varNames, coefs)} >= ${state.reserve.neg()}
+  //     maxReserve: ${linearExpression(varNames, coefs)} <= ${state.maxReserve.sub(state.reserve)}
+  //     minB: ${maxA} tranche-1-invest - ${maxA} tranche-1-redeem + ${minB} tranche-0-redeem - ${minB} tranche-0-invest >= ${minBLb}
+  //     maxC: ${maxB} tranche-0-invest - ${maxB} tranche-0-redeem + ${minA} tranche-1-redeem - ${minA} tranche-1-invest >= ${maxBLb}
+  //     minC: ${maxB} tranche-2-invest - ${maxB} tranche-2-redeem + ${minC} tranche-0-redeem - ${minC} tranche-0-invest + ${minC} tranche-1-redeem - ${minC} tranche-1-invest  >= ${minCLb}
+  //   Bounds
+  //     ${bounds}
+  //   End
+  // `
+
+  // `0 = A = senior = DROP`
+  // `1 = B = junior = TIN`
+
+  console.log(lp)
 
   const output = clp.solve(lp, 0)
 
