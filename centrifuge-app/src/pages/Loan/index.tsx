@@ -272,7 +272,7 @@ function formatValue(value: any, attr: LoanTemplateAttribute) {
     case 'decimal':
       return value.toLocaleString('en')
     case 'currency':
-      return formatBalance(new CurrencyBalance(value, attr.currencyDecimals), attr.currencySymbol)
+      return formatBalance(new CurrencyBalance(value.match(/^[\d.]+/)[0], attr.currencyDecimals), attr.currencySymbol)
     case 'timestamp':
       return formatDate(value)
     default:

@@ -94,7 +94,7 @@ const ALTAIR: EnvironmentConfig = {
   tokensPageSubtitle: 'Art NFTs',
   defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
-  useDocumentNfts: false,
+  useDocumentNfts: true,
   defaultPodUrl,
 }
 

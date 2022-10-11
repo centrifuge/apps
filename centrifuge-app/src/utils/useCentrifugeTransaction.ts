@@ -65,7 +65,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
                   console.error(`${section}.${method}: ${docs.join(' ')}`)
                 } else {
                   // Other, CannotLookup, BadOrigin, no extra info
-                  console.error(error.toString())
+                  console.error(error)
                 }
               }
 

@@ -200,52 +200,56 @@ const IssuerCreateLoan: React.FC = () => {
         imageMetadataHash = await lastValueFrom(centrifuge.metadata.pinFile(fileDataUri))
       }
 
-      const { documentId } = await centrifuge.pod.createDocument([
-        podUrl,
-        token!.signed,
-        {
-          attributes,
-          writeAccess: [address],
-        },
-      ])
+      try {
+        const { documentId } = await centrifuge.pod.createDocument([
+          podUrl,
+          token!.signed,
+          {
+            attributes,
+            writeAccess: [address],
+          },
+        ])
 
-      const publicAttributes = selectedTemplateMetadata.sections
-        .filter((s) => s.public)
-        .flatMap((s) => s.attributes.map((a) => labelToKey(a.label)))
-      publicAttributes.push('_template')
+        const publicAttributes = selectedTemplateMetadata.sections
+          .filter((s) => s.public)
+          .flatMap((s) => s.attributes.map((a) => labelToKey(a.label)))
+        publicAttributes.push('_template')
 
-      const { nftId, jobId } = await centrifuge.pod.commitDocumentAndMintNft([
-        podUrl,
-        token.signed,
-        {
-          documentId,
-          collectionId: collateralCollectionId,
-          owner: address,
-          publicAttributes,
-          name: values.assetName,
-          description: values.description,
-          image: imageMetadataHash?.uri,
-        },
-      ])
+        const { nftId, jobId } = await centrifuge.pod.commitDocumentAndMintNft([
+          podUrl,
+          token.signed,
+          {
+            documentId,
+            collectionId: collateralCollectionId,
+            owner: address,
+            publicAttributes,
+            name: values.assetName,
+            description: values.description,
+            image: imageMetadataHash?.uri,
+          },
+        ])
 
-      updateTransaction(txId, { status: 'unconfirmed' })
+        updateTransaction(txId, { status: 'unconfirmed' })
 
-      const connectedCent = centrifuge.connect(selectedAccount!.address, selectedAccount!.signer as any)
-      if (proxy) {
-        connectedCent.setProxy(proxy.delegator)
+        const connectedCent = centrifuge.connect(selectedAccount!.address, selectedAccount!.signer as any)
+        if (proxy) {
+          connectedCent.setProxy(proxy.delegator)
+        }
+
+        // Sign createLoan transaction
+        const submittable = await lastValueFrom(
+          connectedCent.pools.createLoan([pid, collateralCollectionId, nftId], { signOnly: true, era: 100 })
+        )
+
+        updateTransaction(txId, { status: 'pending' })
+
+        await centrifuge.pod.awaitJob([podUrl, token.signed, jobId])
+
+        // Send the signed createLoan transaction
+        doTransaction([submittable], undefined, txId)
+      } catch (e) {
+        updateTransaction(txId, { status: 'failed', failedReason: 'Failed to create document NFT' })
       }
-
-      // Sign createLoan transaction
-      const submittable = await lastValueFrom(
-        connectedCent.pools.createLoan([pid, collateralCollectionId, nftId], { signOnly: true, era: 100 })
-      )
-
-      updateTransaction(txId, { status: 'pending' })
-
-      await centrifuge.pod.awaitJob([podUrl, token.signed, jobId])
-
-      // Send the signed createLoan transaction
-      doTransaction([submittable], undefined, txId)
 
       setSubmitting(false)
     },
@@ -404,14 +408,21 @@ function valuesToPodAttributes(values: FormValues['attributes'], template: LoanT
                 value: new Date(value).toISOString(),
               },
             ]
-          case 'currency':
+          case 'currency': {
+            const formatted = CurrencyBalance.fromFloat(value, attr.currencyDecimals).toString()
             return [
               key,
               {
                 type: 'monetary',
-                value: CurrencyBalance.fromFloat(value, attr.currencyDecimals),
+                value: formatted,
+                monetary_value: {
+                  ID: attr.currencySymbol,
+                  Value: formatted,
+                  ChainID: 1,
+                },
               },
             ]
+          }
           case 'percentage':
             return [
               key,
