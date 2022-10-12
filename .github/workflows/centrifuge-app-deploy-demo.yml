@@ -24,6 +24,7 @@ jobs:
       pool-creation-type: immediate
       default-node-url: ''
       subquery-url: https://api.subquery.network/sq/centrifuge/pools-demo
+      faucet-url: https://us-central1-peak-vista-185616.cloudfunctions.net/faucetDemo
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

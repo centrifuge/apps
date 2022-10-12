@@ -22,6 +22,7 @@ jobs:
       subquery-url: https://api.subquery.network/sq/centrifuge/pools-development
       pool-creation-type: immediate
       default-node-url: ''
+      faucet-url: https://us-central1-peak-vista-185616.cloudfunctions.net/faucetDev
 
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

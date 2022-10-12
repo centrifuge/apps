@@ -374,6 +374,7 @@ export type Loan = DefaultLoan | ClosedLoan | ActiveLoan
 export type AccountCurrencyBalance = {
   currency: Currency
   balance: CurrencyBalance
+  currencyDecimals: number
 }
 
 export type AccountTokenBalance = {
@@ -1605,6 +1606,7 @@ export function getPoolsModule(inst: Centrifuge) {
             balances.currencies.push({
               currency,
               balance: new CurrencyBalance(hexToBN(value.free), currencyDecimals),
+              currencyDecimals,
             })
           } else if ('Tranche' in key) {
             const [pid, trancheId] = key.Tranche
@@ -1622,6 +1624,7 @@ export function getPoolsModule(inst: Centrifuge) {
               balances.currencies.push({
                 currency,
                 balance: new CurrencyBalance(hexToBN(value.free), 18),
+                currencyDecimals: 18,
               })
             }
           }
