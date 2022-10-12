@@ -18,36 +18,6 @@ export const calculateOptimalSolution = async (
       .sub(state.maxDropRatio.mul(state.reserve))
       .add(state.seniorAsset.mul(e27))
 
-    const maxBRatioLb = state.minARatio
-      .mul(state.netAssetValue)
-      .add(state.minARatio.mul(state.reserve))
-      .sub(state.AAsset.mul(e27))
-
-    const maxARatio = 1 - state.minARatio
-    const minBRatioLb = state.maxARatio
-      .neg()
-      .mul(state.netAssetValue)
-      .sub(state.maxARatio.mul(state.reserve))
-      .add(state.AAsset.mul(e27))
-
-    const maxBRatio = 1 - state.minBRatio
-    const maxABRatio = maxARatio.mul(maxBRatio)
-    const minCRatioLb = maxABRatio
-      .neg()
-      .mul(state.netAssetValue)
-      .sub(maxABRatio.mul(state.reserve))
-      .add(state.AAsset.mul(e27))
-      .add(state.BAsset.mul(e27))
-
-    // const maxCRatio = 1 - state.minCRatio
-    // const maxABCRatio = maxABRatio.mul(maxCRatio)
-    // const minDRatioLb = maxABCRatio
-    //   .neg()
-    //   .mul(state.netAssetValue)
-    //   .sub(minDRatioLb.mul(state.reserve))
-    //   .add(state.AAsset.mul(e27))
-    //   .add(state.BAsset.mul(e27))
-
     const maxTINRatioLb = state.minDropRatio
       .mul(state.netAssetValue)
       .add(state.minDropRatio.mul(state.reserve))
@@ -60,26 +30,8 @@ export const calculateOptimalSolution = async (
       parseFloat(weights.dropRedeem.toString()),
     ]
     const minTINRatioLbCoeffs = [state.maxDropRatio, minTinRatio.neg(), state.maxDropRatio.neg(), minTinRatio]
-
-    // minTINRatioLbCoeffs
-    // maxDrop*tinInv - maxDrop*tinRed + minTin*dropRed - minTin*dropInv
-    // maxDrop(tinInv - tinRed) + minTin(dropRed - dropInv)
-    // maxARat(invB - redB) + minBRat(redA - invA)
-    // maxA*invB - maxA*redB + minB*redA - minB*invA
-    const varNames = ['tinInvest', 'dropInvest', 'tinRedeem', 'dropRedeem']
     const maxTINRatioLbCoeffs = [state.minDropRatio.neg(), maxTinRatio, state.minDropRatio, maxTinRatio.neg()]
 
-    // maxTINRatioLbCoeffs
-    // -minDropRatio*tinInv + maxTinRatio*dropInv + minDropRatio*tinRed - maxTinRatio*dropRed
-    // maxTin(dropInv - dropRed) + minDrop(tinRed - tinInv)
-    // maxB(invA - redA) + minA(redB - invB)
-    // maxB*invA - maxB*redA + minA*redB - minA*invB
-
-    // minBRatioLbCoeffs = maxA*invB - maxA*redB + minB*redA - minB*invA
-    // maxTINRatioLbCoeffs = maxB*invA - maxB*redA + minA*redB - minA*invB
-
-    // minBRatioLbCoeffs = maxA*inv1 - maxA*red1 + minB*red0 - minB*inv0
-    // maxTINRatioLbCoeffs = maxB*inv0 - maxB*red0 + minA*red1 - minA*inv1
     const lp = `
       Maximize
         ${linearExpression(varWeights)}
