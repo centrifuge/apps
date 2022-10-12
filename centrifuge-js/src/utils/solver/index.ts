@@ -37,6 +37,7 @@ export const calculateOptimalSolution = async (
     .flat()
 
   const varNames = weights.map((_t, index) => [`tranche-${index}-invest`, `tranche-${index}-redeem`]).flat()
+  const reserveCoefs = Array(state.tranches.length).fill([1, -1]).flat()
 
   // const minRiskBufferConstraints = state.tranches
   //   .slice(1) // skip junior tranche
@@ -59,76 +60,107 @@ export const calculateOptimalSolution = async (
   // senior first
   const reversedTranches = state.tranches.reverse()
   const trancheA = reversedTranches[0]
-  // const trancheB = reversedTranches[1]
+  const trancheB = reversedTranches[1]
   // const trancheC = reversedTranches[2]
 
   // 2 tranche model
-  const minA = trancheA.minRiskBuffer!.div(e27) // 8%
-  const maxA = e27.sub(minA).div(e27) // 92%
-  const minB = new BN(0) // junior tranche
-  const maxB = e27.div(e27) // junior tranche
+  // const minA = trancheA.minRiskBuffer!.div(e27) // 8%
+  // const maxA = e27.sub(minA).div(e27) // 92%
+  // const minB = new BN(0) // junior tranche
+  // const maxB = e27.div(e27) // junior tranche
 
-  const maxBLb = minA
-    .mul(state.netAssetValue)
-    .add(minA.mul(state.reserve))
-    .sub(trancheA.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
+  // const maxBLb = minA
+  //   .mul(state.netAssetValue)
+  //   .add(minA.mul(state.reserve))
+  //   .sub(trancheA.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
 
-  const minBLb = maxA
-    .neg()
-    .mul(state.netAssetValue)
-    .sub(maxA.mul(state.reserve))
-    .sub(trancheA.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
+  // const minBLb = maxA
+  //   .neg()
+  //   .mul(state.netAssetValue)
+  //   .sub(maxA.mul(state.reserve))
+  //   .sub(trancheA.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
 
-  const coefs = Array(state.tranches.length).fill([1, -1]).flat()
-
-  // 2 tranche
-  const lp = `
-      Maximize
-        ${linearExpression(varNames, varWeights)}
-      Subject To
-        reserve: ${linearExpression(varNames, coefs)} >= ${state.reserve.neg()}
-        maxReserve: ${linearExpression(varNames, coefs)} <= ${state.maxReserve.sub(state.reserve)}
-        maxB: ${maxB} tranche-0-invest - ${maxB} tranche-0-redeem + ${minA} tranche-1-redeem - ${minA} tranche-1-invest >= ${maxBLb}
-        minB: ${maxA} tranche-1-invest - ${maxA} tranche-1-redeem + ${minB} tranche-0-redeem - ${minB} tranche-0-invest >= ${minBLb}
-      Bounds
-        ${bounds}
-      End
-    `
+  // const coefs = Array(state.tranches.length).fill([1, -1]).flat()
+  // const lp = `
+  //     Maximize
+  //       ${linearExpression(varNames, varWeights)}
+  //     Subject To
+  //       reserve: ${linearExpression(varNames, coefs)} >= ${state.reserve.neg()}
+  //       maxReserve: ${linearExpression(varNames, coefs)} <= ${state.maxReserve.sub(state.reserve)}
+  //       maxB1: ${maxB} tranche-0-invest - ${maxB} tranche-0-redeem + ${minA} tranche-1-redeem - ${minA} tranche-1-invest >= ${maxBLb}
+  //       minB1: ${maxA} tranche-1-invest - ${maxA} tranche-1-redeem + ${minB} tranche-0-redeem - ${minB} tranche-0-invest >= ${minBLb}
+  //     Bounds
+  //       ${bounds}
+  //     End
+  //   `
   // minCRatioConstraint: maxBRatio(Cinv - Cred) + minCRatio(Ared - Ainv + Bred - Binv) >= minCRatioLb
   // minCRatioConstraint: maxB*Cinv - maxB*Cred + minC*Ared - minC*Ainv + minC*Bred - minC*Binv
 
   // 3 tranche model
-  // const minA = trancheA.minRiskBuffer! // 8%
-  // const maxA = e27.sub(minA) // 92%
-  // const minB = trancheB.minRiskBuffer! // mezz tranche
-  // const maxB = e27.sub(minB) // mezz tranche
-  // const minC = 0 // in 3 tranche model this is the junior tranche
-  // const maxC = e27 // in 3 tranche model this is the junior tranche
+  const min0 = trancheA.minRiskBuffer! // 8%
+  const max0 = e27.sub(min0) // 92%
+  const min1 = trancheB.minRiskBuffer! // mezz tranche
+  const max1 = e27.sub(min1) // mezz tranche
+  const min2 = new BN(0) // in 3 tranche model this is the junior tranche
+  // const max2 = e27.div(e27) // in 3 tranche model this is the junior tranche
 
-  // const maxABRatio = maxA.add(maxB)
-  // const minCLb = maxABRatio
-  //   .neg()
-  //   .mul(state.netAssetValue)
-  //   .sub(maxABRatio.mul(state.reserve))
-  //   .sub(trancheA.ratio.mul(state.netAssetValue.add(state.reserve)))
-  //   .sub(trancheB.ratio.mul(state.netAssetValue.add(state.reserve)))
-  //
-  // const lp = `
-  //   Maximize
-  //     ${linearExpression(varNames, varWeights)}
-  //   Subject To
-  //     reserve: ${linearExpression(varNames, coefs)} >= ${state.reserve.neg()}
-  //     maxReserve: ${linearExpression(varNames, coefs)} <= ${state.maxReserve.sub(state.reserve)}
-  //     minB: ${maxA} tranche-1-invest - ${maxA} tranche-1-redeem + ${minB} tranche-0-redeem - ${minB} tranche-0-invest >= ${minBLb}
-  //     maxC: ${maxB} tranche-0-invest - ${maxB} tranche-0-redeem + ${minA} tranche-1-redeem - ${minA} tranche-1-invest >= ${maxBLb}
-  //     minC: ${maxB} tranche-2-invest - ${maxB} tranche-2-redeem + ${minC} tranche-0-redeem - ${minC} tranche-0-invest + ${minC} tranche-1-redeem - ${minC} tranche-1-invest  >= ${minCLb}
-  //   Bounds
-  //     ${bounds}
-  //   End
-  // `
+  const max1Lb = min0
+    .mul(state.netAssetValue)
+    .add(min0.mul(state.reserve))
+    .sub(trancheA.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
 
-  // `0 = A = senior = DROP`
-  // `1 = B = junior = TIN`
+  const smt = state.tranches.map((tranche, index) => {
+    if (index === 0) return ``
+    const max0 = index > 0 ? e27.sub(state.tranches[index - 1].minRiskBuffer!) : new BN(1) // 92%
+    const min1 = new BN(tranche.minRiskBuffer!) // mezz tranche
+
+    const varsMin1 = [min1.neg(), min1, ...[Array(index).fill([max0, max0.neg()])].flat()].flat() // max0, max0.neg()
+    console.log('🚀 ~ varsMin1', varsMin1)
+    const riskBufferVarNames = [...varNames.slice(0, 2 * (index + 1))]
+    console.log('🚀 ~ riskBufferVarNames', riskBufferVarNames)
+
+    // something here is causing an infinite loops when running tests, start here!!!!
+    const min1Lb = max0
+      .neg()
+      .mul(state.netAssetValue)
+      .sub(max0.mul(state.reserve))
+      .sub(state.tranches[index - 1].ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
+    console.log('🚀 ~ min1Lb', min1Lb)
+
+    return `min-${index + 1}-risk-buffer: ${linearExpression(riskBufferVarNames, varsMin1)} >= ${min1Lb}`
+  })
+  console.log('🚀 ~ smt', smt)
+
+  // const varsMax1 = [max1, max1.neg(), min0.neg(), min0]
+  // const varsMin1 = [min1.neg(), min1, max0, max0.neg()]
+  // const varsMin2 = [min2.neg(), min2, min2.neg(), min2, max1, max1.neg()]
+
+  const max01Ratio = max0.add(max1)
+  const min2Lb = max01Ratio
+    .neg()
+    .mul(state.netAssetValue)
+    .sub(max01Ratio.mul(state.reserve))
+    .sub(trancheA.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
+    .sub(trancheB.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
+
+  // minCRatioConstraint: maxBRatio(Cinv - Cred) + minCRatio(Ared - Ainv + Bred - Binv) >= minCRatioLb
+  const lp = `
+    Maximize
+      ${linearExpression(varNames, varWeights)}
+    Subject To
+      reserve: ${linearExpression(varNames, reserveCoefs)} >= ${state.reserve.neg()}
+      maxReserve: ${linearExpression(varNames, reserveCoefs)} <= ${state.maxReserve.sub(state.reserve)}
+      max1: ${max1} tranche-0-invest - ${max1} tranche-0-redeem - ${min0} tranche-1-invest + ${min0} tranche-1-redeem >= ${max1Lb}
+      min2:-${min2} tranche-0-invest + ${min2} tranche-0-redeem - ${min2} tranche-1-invest + ${min2} tranche-1-redeem + ${max1} tranche-2-invest - ${max1} tranche-2-redeem  >= ${min2Lb}
+      Bounds
+      ${bounds}
+      End
+      `
+  // min1:-${min1} tranche-0-invest + ${min1} tranche-0-redeem + ${max0} tranche-1-invest - ${max0} tranche-1-redeem >= ${min1Lb}
+
+  // minMezz s
+  // minJunior
+  // maxJunior
 
   console.log(lp)
 
@@ -204,6 +236,7 @@ const nameValToStr = (name: string, coef: BN | number, first: boolean) => {
 }
 
 const linearExpression = (varNames: string[], coefs: (BN | number)[]) => {
+  console.log('🚀 ~ linExpr varNames', varNames)
   let str = ''
   let first = true
   for (let i = 0; i < varNames.length; i += 1) {

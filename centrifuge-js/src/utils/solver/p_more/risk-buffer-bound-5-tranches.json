@@ -1,0 +1,184 @@
+{
+  "state": {
+    "netAssetValue": {
+      "base": 18,
+      "value": 400
+    },
+    "currencyDecimals": 18,
+    "reserve": {
+      "base": 18,
+      "value": 40
+    },
+    "tranches": [
+      {
+        "tranche": "E - Junior",
+        "ratio": {
+          "base": 27,
+          "value": 0
+        }
+      },
+      {
+        "tranche": "D - Mez 3",
+        "ratio": {
+          "base": 27,
+          "value": 0
+        },
+        "minRiskBuffer": {
+          "base": 27,
+          "value": 0.08
+        }
+      },
+      {
+        "tranche": "C - Mez 2",
+        "ratio": {
+          "base": 27,
+          "value": 0
+        },
+        "minRiskBuffer": {
+          "base": 27,
+          "value": 0.2
+        }
+      },
+      {
+        "tranche": "B - Mez 1",
+        "ratio": {
+          "base": 27,
+          "value": 0
+        },
+        "minRiskBuffer": {
+          "base": 27,
+          "value": 0.3
+        }
+      },
+      {
+        "tranche": "A - Senior",
+        "ratio": {
+          "base": 27,
+          "value": 0
+        },
+        "minRiskBuffer": {
+          "base": 27,
+          "value": 0.5
+        }
+      }
+    ],
+    "maxReserve": {
+      "base": 18,
+      "value": 60
+    }
+  },
+  "orders": [
+    {
+      "tranche": "E - Junior",
+      "invest": {
+        "base": 18,
+        "value": 20
+      },
+      "redeem": {
+        "base": 18,
+        "value": 35
+      }
+    },
+    {
+      "tranche": "D - Mez 3",
+      "invest": {
+        "base": 18,
+        "value": 30
+      },
+      "redeem": {
+        "base": 18,
+        "value": 55
+      }
+    },
+    {
+      "tranche": "C - Mez 2",
+      "invest": {
+        "base": 18,
+        "value": 10
+      },
+      "redeem": {
+        "base": 18,
+        "value": 30
+      }
+    },
+    {
+      "tranche": "B - Mez 1",
+      "invest": {
+        "base": 18,
+        "value": 40
+      },
+      "redeem": {
+        "base": 18,
+        "value": 10
+      }
+    },
+    {
+      "tranche": "A - Senior",
+      "invest": {
+        "base": 18,
+        "value": 60
+      },
+      "redeem": {
+        "base": 18,
+        "value": 100
+      }
+    }
+  ],
+  "solution": [
+    {
+      "tranche": "E - Junior",
+      "invest": {
+        "base": 18,
+        "value": 5
+      },
+      "redeem": {
+        "base": 18,
+        "value": 0
+      }
+    },
+    {
+      "tranche": "D - Mez 3",
+      "invest": {
+        "base": 18,
+        "value": 5
+      },
+      "redeem": {
+        "base": 18,
+        "value": 0
+      }
+    },
+    {
+      "tranche": "C - Mez 2",
+      "invest": {
+        "base": 18,
+        "value": 5
+      },
+      "redeem": {
+        "base": 18,
+        "value": 0
+      }
+    },
+    {
+      "tranche": "B - Mez 1",
+      "invest": {
+        "base": 18,
+        "value": 5
+      },
+      "redeem": {
+        "base": 18,
+        "value": 0
+      }
+    },
+    {
+      "tranche": "A - Senior",
+      "invest": {
+        "base": 18,
+        "value": 5
+      },
+      "redeem": {
+        "base": 18,
+        "value": 0
+      }
+    }
+  ]
+}

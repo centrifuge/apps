@@ -1,0 +1,103 @@
+{
+  "state": {
+    "netAssetValue": {
+      "base": 18,
+      "value": 0
+    },
+    "currencyDecimals": 18,
+    "reserve": {
+      "base": 18,
+      "value": 100
+    },
+    "tranches": [
+      {
+        "ratio": {
+          "base": 27,
+          "value": 0.2
+        }
+      },
+      {
+        "ratio": {
+          "base": 27,
+          "value": 0.8
+        },
+        "minRiskBuffer": {
+          "base": 27,
+          "value": 0.2
+        }
+      }
+    ],
+    "maxReserve": {
+      "base": 18,
+      "value": 1000
+    }
+  },
+  "orders": [
+    {
+      "invest": {
+        "base": 18,
+        "value": 0
+      },
+      "redeem": {
+        "base": 18,
+        "value": 10
+      }
+    },
+    {
+      "invest": {
+        "base": 18,
+        "value": 0
+      },
+      "redeem": {
+        "base": 18,
+        "value": 0
+      }
+    }
+  ],
+  "solution": [
+    {
+      "invest": {
+        "amount": {
+          "base": 18,
+          "value": 0
+        },
+        "perquintill": {
+          "base": 18,
+          "value": 0
+        }
+      },
+      "redeem": {
+        "amount": {
+          "base": 18,
+          "value": 0
+        },
+        "perquintill": {
+          "base": 18,
+          "value": 0
+        }
+      }
+    },
+    {
+      "invest": {
+        "amount": {
+          "base": 18,
+          "value": 0
+        },
+        "perquintill": {
+          "base": 18,
+          "value": 0
+        }
+      },
+      "redeem": {
+        "amount": {
+          "base": 18,
+          "value": 0
+        },
+        "perquintill": {
+          "base": 18,
+          "value": 0
+        }
+      }
+    }
+  ]
+}

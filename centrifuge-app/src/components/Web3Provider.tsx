@@ -38,6 +38,7 @@ let triedEager = false
 
 export const Web3Provider: React.FC = ({ children }) => {
   const [accounts, setAccounts] = React.useState<Account[] | null>(null)
+  console.log('🚀 ~ accounts', accounts)
   const [selectedAccountAddress, setSelectedAccountAddress] = React.useState<string | null>(null)
   const [proxyAddress, setProxyAddress] = React.useState<string | null>(null)
   const [isConnecting, setIsConnecting] = React.useState(false)
