@@ -27,8 +27,16 @@ export const blueScale = {
 }
 
 export const yellowScale = {
+  30: '##fffbf0',
+  50: '#fff4d6',
+  100: '#ffe9ad',
+  200: '#ffde85',
+  300: '#ffd561',
+  400: '#ffca38',
   500: '#ffc012',
-  700: '#574000',
+  600: '#d69d00',
+  700: '#9e7400',
+  800: '#001c66',
 }
 
 export const centrifugeBlue = blueScale[500]
