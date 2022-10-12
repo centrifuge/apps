@@ -39,15 +39,6 @@ export const calculateOptimalSolution = async (
   const varNames = weights.map((_t, index) => [`tranche-${index}-invest`, `tranche-${index}-redeem`]).flat()
   const reserveCoefs = Array(state.tranches.length).fill([1, -1]).flat()
 
-  // const minRiskBufferConstraints = state.tranches
-  //   .slice(1) // skip junior tranche
-  //   .map(
-  //     (tranche, index) => `
-  //       tranche-${index}-minRiskBuffer: ${linearExpression(varNames, [1, -1, 1, -1])} <= ${tranche.minRiskBuffer}
-  //     `
-  //   )
-  //   .join()
-
   const bounds = orders
     .map((order, index) => [
       `0 <= tranche-${index}-invest  <= ${order.invest}\n`,
@@ -58,9 +49,9 @@ export const calculateOptimalSolution = async (
     .replaceAll(',', '')
 
   // senior first
-  const reversedTranches = state.tranches.reverse()
-  const trancheA = reversedTranches[0]
-  const trancheB = reversedTranches[1]
+  // const reversedTranches = state.tranches.reverse()
+  // const trancheA = state.tranches[1] // senior
+  // const trancheB = state.tranches[0] // junior
   // const trancheC = reversedTranches[2]
 
   // 2 tranche model
@@ -93,55 +84,49 @@ export const calculateOptimalSolution = async (
   //       ${bounds}
   //     End
   //   `
+
+  // minRatio formula with 4 tranches
+  // minBRatioConstraint: maxARatio(Binv - Bred) + minBRatio(Ared - Ainv) >= minBRatioLb
   // minCRatioConstraint: maxBRatio(Cinv - Cred) + minCRatio(Ared - Ainv + Bred - Binv) >= minCRatioLb
-  // minCRatioConstraint: maxB*Cinv - maxB*Cred + minC*Ared - minC*Ainv + minC*Bred - minC*Binv
+  // minDRatioConstraint: maxCRatio(Dinv - Dred) + minDRatio(Ared - Ainv + Bred - Binv + Cred - Cinv) >= minDRatioLb
+  const minRiskBufferConstraints = state.tranches
+    .map((tranche, index) => {
+      if (index === 0) {
+        const minJun = new BN(0)
+        const minSen = state.tranches[index + 1].minRiskBuffer!.div(e27) // mezz tranche
+        // maxProtection = 1 - minRiskBuffer
+        const maxSen = e27.sub(minSen).div(e27)
+        const maxSeniorLb = minJun
+          .mul(state.netAssetValue)
+          .add(minJun.mul(state.reserve))
+          .sub(state.tranches[index + 1].ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
+        return `max${index}RiskBuffer: ${maxSen} tranche-0-invest - ${maxSen} tranche-0-redeem - ${minJun} tranche-1-invest + ${minJun} tranche-1-redeem >= ${maxSeniorLb}\n`
+      }
+      const maxJuniorRiskBuffer = index === 1 ? new BN(1) : e27.sub(state.tranches[index - 1].minRiskBuffer!) // e.g 92%
+      const minSeniorRiskBuffer = new BN(tranche.minRiskBuffer!)
 
-  // 3 tranche model
-  const min0 = trancheA.minRiskBuffer! // 8%
-  const max0 = e27.sub(min0) // 92%
-  const min1 = trancheB.minRiskBuffer! // mezz tranche
-  const max1 = e27.sub(min1) // mezz tranche
-  const min2 = new BN(0) // in 3 tranche model this is the junior tranche
-  // const max2 = e27.div(e27) // in 3 tranche model this is the junior tranche
+      const varsMin = [
+        minSeniorRiskBuffer.neg(),
+        minSeniorRiskBuffer,
+        ...[Array(index).fill([maxJuniorRiskBuffer, maxJuniorRiskBuffer.neg()]).flat()].flat(),
+      ]
+      const riskBufferVarNames = [...varNames.slice(0, 2 * (index + 1))]
+      const tranchesValues = state.tranches.slice(0, index).reduce((prev, curr) => {
+        return prev.add(curr.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
+      }, new BN(0))
 
-  const max1Lb = min0
-    .mul(state.netAssetValue)
-    .add(min0.mul(state.reserve))
-    .sub(trancheA.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
+      // minSeniorRatioLb always refers to the tranche that is next in senority
+      const minSeniorRatioLb = maxJuniorRiskBuffer
+        .neg()
+        .mul(state.netAssetValue)
+        .sub(maxJuniorRiskBuffer.mul(state.reserve))
+        .add(tranchesValues)
 
-  const smt = state.tranches.map((tranche, index) => {
-    if (index === 0) return ``
-    const max0 = index > 0 ? e27.sub(state.tranches[index - 1].minRiskBuffer!) : new BN(1) // 92%
-    const min1 = new BN(tranche.minRiskBuffer!) // mezz tranche
-
-    const varsMin1 = [min1.neg(), min1, ...[Array(index).fill([max0, max0.neg()])].flat()].flat() // max0, max0.neg()
-    console.log('🚀 ~ varsMin1', varsMin1)
-    const riskBufferVarNames = [...varNames.slice(0, 2 * (index + 1))]
-    console.log('🚀 ~ riskBufferVarNames', riskBufferVarNames)
-
-    // something here is causing an infinite loops when running tests, start here!!!!
-    const min1Lb = max0
-      .neg()
-      .mul(state.netAssetValue)
-      .sub(max0.mul(state.reserve))
-      .sub(state.tranches[index - 1].ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
-    console.log('🚀 ~ min1Lb', min1Lb)
-
-    return `min-${index + 1}-risk-buffer: ${linearExpression(riskBufferVarNames, varsMin1)} >= ${min1Lb}`
-  })
-  console.log('🚀 ~ smt', smt)
-
-  // const varsMax1 = [max1, max1.neg(), min0.neg(), min0]
-  // const varsMin1 = [min1.neg(), min1, max0, max0.neg()]
-  // const varsMin2 = [min2.neg(), min2, min2.neg(), min2, max1, max1.neg()]
-
-  const max01Ratio = max0.add(max1)
-  const min2Lb = max01Ratio
-    .neg()
-    .mul(state.netAssetValue)
-    .sub(max01Ratio.mul(state.reserve))
-    .sub(trancheA.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
-    .sub(trancheB.ratio.div(e27).mul(state.netAssetValue.add(state.reserve)))
+      return `min${index}RiskBuffer: ${linearExpression(riskBufferVarNames, varsMin)} >= ${minSeniorRatioLb}\n`
+    })
+    .flat()
+    .join()
+    .replaceAll(',', '')
 
   // minCRatioConstraint: maxBRatio(Cinv - Cred) + minCRatio(Ared - Ainv + Bred - Binv) >= minCRatioLb
   const lp = `
@@ -150,17 +135,11 @@ export const calculateOptimalSolution = async (
     Subject To
       reserve: ${linearExpression(varNames, reserveCoefs)} >= ${state.reserve.neg()}
       maxReserve: ${linearExpression(varNames, reserveCoefs)} <= ${state.maxReserve.sub(state.reserve)}
-      max1: ${max1} tranche-0-invest - ${max1} tranche-0-redeem - ${min0} tranche-1-invest + ${min0} tranche-1-redeem >= ${max1Lb}
-      min2:-${min2} tranche-0-invest + ${min2} tranche-0-redeem - ${min2} tranche-1-invest + ${min2} tranche-1-redeem + ${max1} tranche-2-invest - ${max1} tranche-2-redeem  >= ${min2Lb}
-      Bounds
+      ${minRiskBufferConstraints}
+    Bounds
       ${bounds}
-      End
+    End
       `
-  // min1:-${min1} tranche-0-invest + ${min1} tranche-0-redeem + ${max0} tranche-1-invest - ${max0} tranche-1-redeem >= ${min1Lb}
-
-  // minMezz s
-  // minJunior
-  // maxJunior
 
   console.log(lp)
 
@@ -236,7 +215,6 @@ const nameValToStr = (name: string, coef: BN | number, first: boolean) => {
 }
 
 const linearExpression = (varNames: string[], coefs: (BN | number)[]) => {
-  console.log('🚀 ~ linExpr varNames', varNames)
   let str = ''
   let first = true
   for (let i = 0; i < varNames.length; i += 1) {

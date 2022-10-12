@@ -13,13 +13,13 @@
       {
         "ratio": {
           "base": 27,
-          "value": 1
+          "value": 0.5
         }
       },
       {
         "ratio": {
           "base": 27,
-          "value": 0
+          "value": 0.5
         },
         "minRiskBuffer": {
           "base": 27,
