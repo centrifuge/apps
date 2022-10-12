@@ -27,7 +27,7 @@ export const blueScale = {
 }
 
 export const yellowScale = {
-  30: '##fffbf0',
+  30: '#fffbf0',
   50: '#fff4d6',
   100: '#ffe9ad',
   200: '#ffde85',
