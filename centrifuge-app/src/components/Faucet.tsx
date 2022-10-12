@@ -38,8 +38,12 @@ export const Faucet: React.VFC = () => {
       />
       <Shelf as={Card} gap={2} p={2} justifyContent="space-between">
         <Stack gap="4px">
-          <Text variant="body2">Faucet</Text>
-          <Text variant="heading3">1k DEVEL and 10k aUSD</Text>
+          <Text as="h2" variant="body2">
+            Faucet
+          </Text>
+          <Text as="p" variant="heading3">
+            1k DEVEL and 10k aUSD
+          </Text>
         </Stack>
         <Button loading={isLoading} disabled={isLoading} onClick={handleClaim} variant="primary">
           Claim

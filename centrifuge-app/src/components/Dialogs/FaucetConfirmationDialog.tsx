@@ -13,13 +13,17 @@ export const FaucetConfirmationDialog: React.FC<{
       <Box display="flex">
         <Stack gap={3}>
           <Stack gap={2}>
-            <Text variant="body1">
+            <Text variant="body1" as="h2">
               {hash ? 'Success. Please allow a couple of minutes for the tokens to reach your wallet' : error}
             </Text>
             {hash && !error && (
               <Box>
-                <Text variant="body1">Transaction hash:</Text>
+                <Text as="p" variant="body1">
+                  Transaction hash:
+                </Text>
                 <Text
+                  as="p"
+                  role="button"
                   style={{
                     cursor: 'copy',
                     wordBreak: 'break-word',
