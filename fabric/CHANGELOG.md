@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.6](https://github.com/centrifuge/apps/compare/fabric/v1.0.5...fabric/v1.0.6) (2022-10-13)
+
+
+### Bug Fixes
+
+* **fabric:** Fix Text props ([36c16ae](https://github.com/centrifuge/apps/commit/36c16aec3dd05626e8026f543096cade3caac78a))
+
 ### [1.0.5](https://github.com/centrifuge/apps/compare/fabric/v1.0.4...fabric/v1.0.5) (2022-10-12)
 
 
