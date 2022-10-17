@@ -1,4 +1,4 @@
-import { OverlayProps, useModal, useOverlay } from '@react-aria/overlays'
+import { useModal, useOverlay } from '@react-aria/overlays'
 import React from 'react'
 import { useTheme } from 'styled-components'
 import { IconX } from '../../icon'
@@ -9,7 +9,9 @@ import { Text } from '../Text'
 
 type BannerProps = {
   title: string
-} & OverlayProps
+  isOpen?: boolean
+  onClose?: () => void
+}
 
 export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => {
   const theme = useTheme()
