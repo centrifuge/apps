@@ -34,7 +34,7 @@ Default value: `wss://fullnode.centrifuge.io`
 
 Collator websocket URL.
 
-#### `centrifugeSubqueryUrl`
+#### `altairWsUrl`
 
 Default value: `https://api.subquery.network/sq/centrifuge/pools`
 
@@ -48,7 +48,7 @@ IPFS gateway url for retrieving metadata.
 
 #### `centrifugeSubqueryUrl`
 
-Default value: `https://api.subquery.network/sq/centrifuge/pools-altair`
+Default value: `https://api.subquery.network/sq/centrifuge/pools`
 
 Indexed subquery for retrieving historical chain data.
 
@@ -117,11 +117,11 @@ yarn add --save rxjs
 Then the query could look like this
 
 ```js
-import { lastValueFrom } from 'rxjs'
+import { firstValueFrom } from 'rxjs'
 
 // ...
 
-const pools = await lastValueFrom(cenrtifuge.pools.getPools()) // Pool[]
+const pools = await firstValueFrom(cenrtifuge.pools.getPools()) // Pool[]
 ```
 
 ## Transactions
@@ -148,8 +148,8 @@ connectedCent.pools.closeEpoch(["<your-pool-id>"]).subscribe({
   }
 });
 
-// or promise based (using lastValueFrom imported from rxjs)
-await lastValueFrom(connectedCent.pools.closeEpoch(["<your-pool-id>"]))
+// or promise based (using firstValueFrom imported from rxjs)
+await firstValueFrom(connectedCent.pools.closeEpoch(["<your-pool-id>"]))
 ```
 
 ## Development
