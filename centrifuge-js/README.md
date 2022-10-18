@@ -152,6 +152,65 @@ connectedCent.pools.closeEpoch(["<your-pool-id>"]).subscribe({
 await firstValueFrom(connectedCent.pools.closeEpoch(["<your-pool-id>"]))
 ```
 
+## Create a pool
+
+Creating a pool requires a series of extrinsics to be executed sequentially. Using the `cent.pools.createPool()` abstraction provides three ways of creating pools:
+
+1. No restrictions, pools is ready and available after tx is confirmed. Usually used in dev environments.
+2. Pool requires democracy but can be fast-tracked (noting the preimage). Usually used in staging environments, e.g Altair.
+3. Pool requires democracy and must go through the regular voting process (pool proposal). Offical POP (pool onboarding process).
+
+The method also uploads metadata using the `pinFile()` method should be defined when creating the `centrifuge` instance.
+
+### `createPool()` args
+
+#### `address: string`
+
+The wallet address creating the pool.
+
+#### `pool-id: string`
+
+A new unique pool ID. An available ID can be queried using `cent.pools.getAvailablePoolId()`.
+
+#### `collection-id: string`
+
+A new unique NFT collection ID (for assets). An available ID can be queried using `centrifuge.nfts.getAvailableCollectionId()`
+
+#### `tranches: { interestRatePerSecond: Rate; minRiskBuffer: Perquintill }[]`
+
+An array of tranches to be associated with the pool. The only data the pool is concerned about is `interestRatePerSec` (Rate) and `minRiskBuffer` (Perquintill) for all tranches that are not residual (the most junior tranche). For the most junior tranche an empty object is expected.
+
+Example:
+
+```typescript
+  const tranches = [
+    {}, // most junior tranche (residual tranche)
+    {
+      interestRatePerSec: Rate.fromAprPercent("2"),
+      minRiskBuffer: Perquintill.fromPercent("20"),
+    },
+    // ...
+  ]
+```
+
+#### `max-reserve: CurrencyBalance`
+
+The pools initial maximum reserve (can be changed later).
+
+#### `metadataValues: PoolMetadataInput`
+
+An object containing all of the required keys from the `PoolMetadataInput` type. Note that any images associated with the pool metadata must be uploaded prior to called the `createPoolMethod`
+
+### Options
+
+Along with the regular tx options the `createPool()` supports an additional option: `createType`. This refers to the three different ways to create pools.
+
+| createType     | Description                                                                                                                          |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `immediate`    | Sign the tx, no further actions required                                                                                             |
+| `notePreimage` | Signing the tx will create a fast tracked democracy proposal. Voting will be required. Pool must be initiliazed after voting period. |
+| `propose`      | Signing the tx will create a regular democracy proposal. Voting will be required. Pool must be initiliazed after voting period.      |
+
 ## Development
 
 Install dependencies with `yarn` or `npm`.
