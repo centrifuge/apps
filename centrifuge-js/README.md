@@ -8,7 +8,7 @@ CentrifugeJS provides a JavaScript client to interact with the Centrifuge/Altair
 npm install --save @centrifuge/centrifuge-js
 ```
 
-## Usage
+## Initialization and configuration
 
 Create an instance and pass optional configuration
 
@@ -64,9 +64,9 @@ Can either be passed in the config on initialization or can be set programmatica
 
 A function that returns an object `{ uri: string }` containing the URI of the pinned file. This is used to upload and reference metadata in pools, collections and nfts. If not set, `pools.createPool`, `nfts.mintNft` etc will not work.
 
-## How to use
+## Understanding how to find methods
 
-Creating a `centrifuge` instance will give you access to the entire polkadot API and subset of modules to make easier to query and write data.
+Creating a `centrifuge` instance will give you access to the entire polkadot API and subset of modules to make easier to query and write data. We recommend using Typescript for autocompletion.
 
 The modules include:
 
@@ -88,7 +88,7 @@ const data = centrifuge.nfts.mintNft([...])
 const data = centrifuge.metadata.getMetadata("uri")
 ```
 
-## Centrifuge queries
+## Queries
 
 All of the CentrifugeJS modules have queries prefixed with `get` that return [Observables](https://rxjs.dev/guide/observable).
 
@@ -201,7 +201,7 @@ The pools initial maximum reserve (can be changed later).
 
 An object containing all of the required keys from the `PoolMetadataInput` type. Note that any images associated with the pool metadata must be uploaded prior to called the `createPoolMethod`
 
-### Options
+### `createPool()` options
 
 Along with the regular tx options the `createPool()` supports an additional option: `createType`. This refers to the three different ways to create pools.
 
@@ -211,9 +211,15 @@ Along with the regular tx options the `createPool()` supports an additional opti
 | `notePreimage` | Signing the tx will create a fast tracked democracy proposal. Voting will be required. Pool must be initiliazed after voting period. |
 | `propose`      | Signing the tx will create a regular democracy proposal. Voting will be required. Pool must be initiliazed after voting period.      |
 
-## Development
+## Local development
 
 Install dependencies with `yarn` or `npm`.
+
+Start dev server
+
+```sh
+yarn start
+```
 
 ### Running tests
 
