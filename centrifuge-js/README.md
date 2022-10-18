@@ -8,7 +8,7 @@ CentrifugeJS provides a JavaScript client to interact with the Centrifuge/Altair
 npm install --save @centrifuge/centrifuge-js
 ```
 
-## Initialization and configuration
+## Init and config
 
 Create an instance and pass optional configuration
 
@@ -64,7 +64,7 @@ Can either be passed in the config on initialization or can be set programmatica
 
 A function that returns an object `{ uri: string }` containing the URI of the pinned file. This is used to upload and reference metadata in pools, collections and nfts. If not set, `pools.createPool`, `nfts.mintNft` etc will not work.
 
-## Understanding how to find methods
+## Library structure
 
 Creating a `centrifuge` instance will give you access to the entire polkadot API and subset of modules to make easier to query and write data. We recommend using Typescript for autocompletion.
 
@@ -152,7 +152,7 @@ connectedCent.pools.closeEpoch(["<your-pool-id>"]).subscribe({
 await firstValueFrom(connectedCent.pools.closeEpoch(["<your-pool-id>"]))
 ```
 
-## Create a pool
+## `cent.pools.createPool()`
 
 Creating a pool requires a series of extrinsics to be executed sequentially. Using the `cent.pools.createPool()` abstraction provides three ways of creating pools:
 
