@@ -8,7 +8,7 @@ import { Stack } from '../Stack'
 import { Text } from '../Text'
 
 type BannerProps = {
-  title: string
+  title: string | React.ReactElement
   isOpen?: boolean
   onClose?: () => void
 }
@@ -16,7 +16,7 @@ type BannerProps = {
 export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => {
   const theme = useTheme()
   const ref = React.useRef<HTMLDivElement>(null)
-  const { overlayProps } = useOverlay({ isDismissable: true, ...props }, ref)
+  const { overlayProps } = useOverlay({ ...props }, ref)
   const { modalProps } = useModal()
 
   return props.isOpen ? (
