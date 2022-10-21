@@ -1,10 +1,9 @@
 import { AccountTokenBalance } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Shelf, Thumbnail } from '@centrifuge/fabric'
+import { IconChevronRight, Shelf, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { formatBalance } from '../utils/formatting'
 import { usePool, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
-import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   investments: AccountTokenBalance[]

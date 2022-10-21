@@ -1,5 +1,15 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { Box, IconAlertCircle, IconNft, InteractiveCard, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
+import {
+  Box,
+  IconAlertCircle,
+  IconNft,
+  InteractiveCard,
+  Shelf,
+  Stack,
+  Text,
+  TextWithPlaceholder,
+  Thumbnail,
+} from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
@@ -13,7 +23,6 @@ import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { AnchorPillButton } from '../../components/PillButton'
 import { usePodAuth, usePodDocument } from '../../components/PodAuthProvider'
 import { PodAuthSection } from '../../components/PodAuthSection'
-import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
 import { nftMetadataSchema } from '../../schemas'

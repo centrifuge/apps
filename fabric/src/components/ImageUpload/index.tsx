@@ -206,7 +206,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     const child = node?.querySelector('.large')
     if (node && child) {
       const obs = new ResizeObserver((entries) => {
-        for (let entry of entries) {
+        for (const entry of entries) {
           let width
           if (entry.contentBoxSize) {
             // Firefox implements `contentBoxSize` as a single content rect, rather than an array

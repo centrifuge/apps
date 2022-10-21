@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Box, IconInvestments, IconNft, IconUser, Shelf } from '@centrifuge/fabric'
+import { Box, IconInvestments, IconNft, IconUser, Shelf, TextWithPlaceholder } from '@centrifuge/fabric'
 import React from 'react'
 import { useLocation } from 'react-router'
 import { Link } from 'react-router-dom'
@@ -9,7 +9,6 @@ import { usePermissions } from '../utils/usePermissions'
 import { usePoolMetadata, usePools } from '../utils/usePools'
 import { NavigationItem } from './NavigationItem'
 import { RouterLinkButton } from './RouterLinkButton'
-import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {}
 

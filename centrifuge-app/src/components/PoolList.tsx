@@ -1,5 +1,5 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Shelf, Thumbnail } from '@centrifuge/fabric'
+import { IconChevronRight, Shelf, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import styled from 'styled-components'
@@ -7,7 +7,6 @@ import { formatBalance } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { useCentrifuge } from './CentrifugeProvider'
 import { Column, DataTable } from './DataTable'
-import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   pools: Pool[]

@@ -16,6 +16,7 @@ import { PropsOf } from '../../utils/types'
 interface TypographyProps {
   textTransform?: ResponsiveValue<CSS.Property.TextTransform>
   whiteSpace?: ResponsiveValue<CSS.Property.WhiteSpace>
+  textDecoration?: ResponsiveValue<CSS.Property.TextDecoration>
 }
 
 const typography = system({
@@ -24,6 +25,9 @@ const typography = system({
   },
   whiteSpace: {
     property: 'whiteSpace',
+  },
+  textDecoration: {
+    property: 'textDecoration',
   },
 })
 
@@ -43,11 +47,10 @@ function useTextContext(): React.ContextType<typeof TextContext> {
 
 type TextProps = PropsOf<typeof StyledText> & {
   variant?: keyof DefaultTheme['typography']
-  underline?: boolean
   textOverflow?: 'ellipsis'
 }
 
-const Text: React.FC<TextProps> = (props) => {
+const Text = React.forwardRef<HTMLDivElement, TextProps>((props, ref) => {
   const isInText = useTextContext()
   const theme = useTheme()
 
@@ -68,7 +71,6 @@ const Text: React.FC<TextProps> = (props) => {
     ...rest
   } = textProps
 
-  const textDecoration = props.underline ? 'underline' : 'initial'
   const overflow = props.textOverflow ? { overflow: 'hidden', textOverflow: props.textOverflow } : {}
 
   return (
@@ -80,13 +82,14 @@ const Text: React.FC<TextProps> = (props) => {
         fontWeight={fontWeight}
         lineHeight={lineHeight}
         fontFamily={fontFamily}
-        style={{ textDecoration, ...overflow }}
+        style={{ ...overflow }}
+        ref={ref}
         {...rest}
       >
         {children}
       </StyledText>
     </TextContext.Provider>
   )
-}
+})
 
 export { Text, TextProps, useTextContext, TextContext }

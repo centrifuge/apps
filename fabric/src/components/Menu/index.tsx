@@ -27,7 +27,7 @@ const ScrollContainer = styled(Stack)`
   }
 `
 
-export const MenuItemGroup: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+export const MenuItemGroup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <>
       <MenuDivider borderColor="borderSecondary" />

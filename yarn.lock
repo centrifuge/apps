@@ -2453,7 +2453,6 @@ __metadata:
     eslint: ^7.32.0
     eslint-config-prettier: ^8.3.0
     eslint-plugin-prettier: ^4.0.0
-    install-peers-cli: ^2.2.0
     loki: ^0.28.1
     prettier: ^2.4.1
     react: ^18.2.0
@@ -24335,15 +24334,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"executioner@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "executioner@npm:2.0.1"
-  dependencies:
-    mixly: ^1.0.0
-  checksum: 0898391641df712976bd124069269834f62722981326735f7c3cc03f6440a15a1e97a14219fc73806aa0ab0acb2f44127f775a0742731a010c8bff40cf1a37e1
-  languageName: node
-  linkType: hard
-
 "exenv@npm:^1.2.0, exenv@npm:^1.2.2":
   version: 1.2.2
   resolution: "exenv@npm:1.2.2"
@@ -25770,13 +25760,6 @@ fsevents@^1.2.7:
     readable-stream: 1.1.x
     xregexp: 2.0.0
   checksum: a1f67af5e81bb3fba47d719df4f41072a4bff3a266da755c761f4472ec4b6dcfe528b3cc805ceeebe4a64d7bd36d6a2c8cc6b40be7f259f8523823bab334cf86
-  languageName: node
-  linkType: hard
-
-"fulcon@npm:^1.0.1":
-  version: 1.0.2
-  resolution: "fulcon@npm:1.0.2"
-  checksum: 8b81fd434e9783e01eec891c7f083b81e46bc5a55f2f623e2eb79e392060027bb3e82a39f209b82c03726d650b1e735059df4118523d703f56c6d35821895686
   languageName: node
   linkType: hard
 
@@ -28189,18 +28172,6 @@ fsevents@^1.2.7:
   version: 2.0.0
   resolution: "insert-css@npm:2.0.0"
   checksum: 5774edbc9c5982b4dc32e4781f34e5ced08be65ef4c9b494d43508a5b0c872202cd73ccf2af541efef4ed07f08b85802c255f619545f5a24e5fc25a45df27bd2
-  languageName: node
-  linkType: hard
-
-"install-peers-cli@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "install-peers-cli@npm:2.2.0"
-  dependencies:
-    commander: ^2.20.0
-    executioner: ^2.0.1
-  bin:
-    install-peers: ./install.js
-  checksum: 05b18063579206b6f8ef2ce75127f17f5d671f8d0c6a2a4afb01b0673413806e00ca9520aeff484fb834ddce35b1082c99f0d9b8fc212a013e0e5c275b7d7b17
   languageName: node
   linkType: hard
 
@@ -33674,15 +33645,6 @@ fsevents@^1.2.7:
     for-in: ^1.0.2
     is-extendable: ^1.0.1
   checksum: 68da98bc1af57ffccde7abdc86ac49feec263b73b3c483ab7e6e2fab9aa2b06fba075da9e86bcda725133c1d2a59e4c810a17b55865c67c827871c25d5713c33
-  languageName: node
-  linkType: hard
-
-"mixly@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "mixly@npm:1.0.0"
-  dependencies:
-    fulcon: ^1.0.1
-  checksum: e510d48c948b9410ce033389a9b516a773d8242b422fab2792b46798386a14f11ce3bc922c925e7fee7780f67dc38b24f38fdb23156eaac749891f8601b491a6
   languageName: node
   linkType: hard
 

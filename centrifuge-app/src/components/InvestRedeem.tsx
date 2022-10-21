@@ -14,6 +14,7 @@ import {
   Shelf,
   Stack,
   Text,
+  TextWithPlaceholder,
   useControlledState,
 } from '@centrifuge/fabric'
 import css from '@styled-system/css'
@@ -38,7 +39,6 @@ import { useDebugFlags } from './DebugFlags'
 import { LoadBoundary } from './LoadBoundary'
 import { Spinner } from './Spinner'
 import { AnchorTextLink } from './TextLink'
-import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   poolId: string
