@@ -1,8 +1,8 @@
-name: 'Fabric publish'
+name: 'centrifuge-react publish'
 on:
   push:
     tags:
-      - fabric/v*
+      - centrifuge-react/v*
 
 jobs:
   build-and-deploy:
@@ -10,7 +10,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: fabric
+        working-directory: centrifuge-react
 
     steps:
       - name: Checkout

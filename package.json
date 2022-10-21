@@ -9,6 +9,7 @@
     "tinlake.js",
     "centrifuge-js",
     "centrifuge-app",
+    "centrifuge-react",
     "gateway",
     "gateway/packages/lib",
     "gateway/packages/ui",

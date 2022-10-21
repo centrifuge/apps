@@ -30,6 +30,7 @@
     "@polkadot/api": "^8.0.1",
     "@polkadot/keyring": "^10.1.7",
     "@polkadot/util-crypto": "^9.0.1",
+    "@types/bn.js": "^5",
     "bn.js": "^5.2.0",
     "clp-wasm": "^0.0.15",
     "decimal.js-light": "^2.5.1",
@@ -38,7 +39,6 @@
     "rxjs": "^7.4.0"
   },
   "devDependencies": {
-    "@types/bn.js": "^5",
     "@types/isomorphic-fetch": "^0.0.36",
     "@types/jest": "^27.0.3",
     "@types/node": "^16.11.12",
