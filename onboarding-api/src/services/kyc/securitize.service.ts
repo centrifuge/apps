@@ -23,10 +23,9 @@ export class SecuritizeService {
   getAuthorizationLink(origin: string, address: string, poolId?: string, tranche?: 'senior' | 'junior'): string {
     const scope = `info%20details%20verification`
     const redirectUrl = poolId
-      ? `${config.onboardApiHost}pools/${poolId}/callback/${address}/securitize?tranche=${
-          tranche || 'senior'
-        }&origin=${origin}`
-      : `${config.onboardApiHost}callback/${address}/securitize?tranche=${tranche || 'senior'}&origin=${origin}`
+      ? `${config.onboardApiHost}pools/${poolId}/callback/${address}/securitize?tranche=${tranche}%26origin=${origin}`
+      : `${config.onboardApiHost}callback/${address}/securitize?tranche=${tranche || 'senior'}%26origin=${origin}`
+
     return `${config.securitize.idHost}#/authorize?issuerId=${config.securitize.clientId}&scope=${scope}&redirecturl=${redirectUrl}`
   }
 

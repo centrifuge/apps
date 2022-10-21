@@ -93,8 +93,8 @@ export class AgreementController {
     }
 
     const returnUrl = CustomPoolIds.includes(params.poolId)
-      ? `${query.origin}onboarding/${params.poolId}`
-      : `${query.origin}pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${agreement.tranche}`
+      ? `${query.origin}/onboarding/${params.poolId}`
+      : `${query.origin}/pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${agreement.tranche}`
     return res.redirect(returnUrl)
   }
 

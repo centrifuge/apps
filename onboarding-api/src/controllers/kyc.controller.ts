@@ -40,8 +40,8 @@ export class KycController {
     if (!kycInfo.providerAccountId) {
       this.logger.warn('Securitize code has already been used')
       const redirectUrl = CustomPoolIds.includes(params.poolId)
-        ? `${query.origin}onboarding/${params.poolId}`
-        : `${query.origin}pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${query.tranche || 'senior'}`
+        ? `${query.origin}/onboarding/${params.poolId}`
+        : `${query.origin}/pool/${params.poolId}/${pool.metadata.slug}/onboarding?tranche=${query.tranche || 'senior'}`
       return res.redirect(redirectUrl)
     }
 
@@ -90,10 +90,11 @@ export class KycController {
     const session = this.sessionService.create(userId)
 
     const redirectUrl = CustomPoolIds.includes(params.poolId)
-      ? `${query.origin}onboarding/${params.poolId}?session=${session}`
-      : `${query.origin}pool/${params.poolId}/${pool.metadata.slug}/onboarding?session=${session}&tranche=${
+      ? `${query.origin}/onboarding/${params.poolId}?session=${session}`
+      : `${query.origin}/pool/${params.poolId}/${pool.metadata.slug}/onboarding?session=${session}&tranche=${
           query.tranche || 'senior'
         }`
+
     return res.redirect(redirectUrl)
   }
 
@@ -110,7 +111,7 @@ export class KycController {
     // TODO: redirect to app?
     if (!kycInfo.providerAccountId) {
       this.logger.warn('Securitize code has already been used')
-      const redirectUrl = `${query.origin}onboarding?tranche=${query.tranche || 'senior'}`
+      const redirectUrl = `${query.origin}/onboarding?tranche=${query.tranche || 'senior'}`
       return res.redirect(redirectUrl)
     }
 
@@ -144,10 +145,10 @@ export class KycController {
       investor.domainInvestorDetails?.isAccredited
     )
 
-    //Send KYC status email if status is updated
+    // Send KYC status email if status is updated
     if (kyc.status !== investor.verificationStatus) {
       if (kyc.status === 'processing' && investor.verificationStatus === 'manual-review') {
-      } //do nothing
+      } // do nothing
       else {
         await this.mailer.sendKycStatusEmail(investor.fullName, investor.email, investor.verificationStatus)
       }
@@ -156,7 +157,7 @@ export class KycController {
     // Create session and redirect user
     const session = this.sessionService.create(userId)
 
-    const redirectUrl = `${query.origin}onboarding?session=${session}&tranche=${params.tranche || 'senior'}`
+    const redirectUrl = `${query.origin}/onboarding?session=${session}&tranche=${params.tranche || 'senior'}`
     return res.redirect(redirectUrl)
   }
 
