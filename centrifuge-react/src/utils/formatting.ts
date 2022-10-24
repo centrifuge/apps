@@ -15,7 +15,8 @@ export function getCurrencySymbol(currency?: string) {
 export function formatBalance(
   amount: CurrencyBalance | TokenBalance | Decimal | number,
   currency?: string,
-  precision = 0
+  precision = 0,
+  locale = 'en'
 ) {
   const formattedAmount = (
     amount instanceof TokenBalance || amount instanceof CurrencyBalance
@@ -23,7 +24,7 @@ export function formatBalance(
       : amount instanceof Decimal
       ? amount.toNumber()
       : amount
-  ).toLocaleString('en', {
+  ).toLocaleString(locale, {
     minimumFractionDigits: precision,
     maximumFractionDigits: precision,
   })
@@ -52,14 +53,14 @@ export function formatBalanceAbbreviated(
   return currency ? `${formattedAmount} ${getCurrencySymbol(currency)}` : formattedAmount
 }
 
-export function formatPercentage(amount: Perquintill | Decimal | number, includeSymbol = true) {
+export function formatPercentage(amount: Perquintill | Decimal | number, includeSymbol = true, locale = 'en') {
   const formattedAmount = (
     amount instanceof Perquintill
       ? amount.toPercent().toNumber()
       : amount instanceof Decimal
       ? amount.toNumber()
       : amount
-  ).toLocaleString('en', {
+  ).toLocaleString(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })

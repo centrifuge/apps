@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { CentrifugeProvider, CentrifugeProviderProps } from '../CentrifugeProvider'
-import { TransactionProvider, TransactionToasts } from '../Transactions'
+import { TransactionProvider, TransactionToasts, TransactionToastsProps } from '../Transactions'
 import { WalletProvider } from '../WalletProvider'
 
 const queryClient = new QueryClient({
@@ -16,15 +16,16 @@ export type ProviderProps = {
   children: React.ReactNode
   centrifugeConfig?: CentrifugeProviderProps['config']
   subscanUrl?: string
+  transactionToastPositionProps?: TransactionToastsProps['positionProps']
 }
 
-export function Provider({ children, centrifugeConfig, subscanUrl }: ProviderProps) {
+export function Provider({ children, centrifugeConfig, subscanUrl, transactionToastPositionProps }: ProviderProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <CentrifugeProvider config={centrifugeConfig}>
         <WalletProvider>
           <TransactionProvider>
-            <TransactionToasts subscanUrl={subscanUrl} />
+            <TransactionToasts subscanUrl={subscanUrl} positionProps={transactionToastPositionProps} />
             {children}
           </TransactionProvider>
         </WalletProvider>

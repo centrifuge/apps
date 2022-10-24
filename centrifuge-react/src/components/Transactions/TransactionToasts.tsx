@@ -20,17 +20,31 @@ const toastSublabel = {
 
 const TOAST_DURATION = 10000
 
-type TransactionToastsProps = {
+export type TransactionToastsProps = {
   subscanUrl?: string
+  positionProps?: {
+    top?: number | string
+    right?: number | string
+    bottom?: number | string
+    left?: number | string
+    width?: number | string
+    zIndex?: number | string
+  }
 }
 
-export function TransactionToasts({ subscanUrl }: TransactionToastsProps) {
+export function TransactionToasts({
+  subscanUrl,
+  positionProps = {
+    top: 64,
+    right: 1,
+  },
+}: TransactionToastsProps) {
   const { transactions, updateTransaction } = useTransactions()
 
   const dismiss = (txId: string) => () => updateTransaction(txId, { dismissed: true })
 
   return (
-    <Stack width={330} gap={2} position="fixed" top={64} right={1} zIndex="overlay">
+    <Stack gap={2} position="fixed" width={330} zIndex="overlay" {...positionProps}>
       {transactions
         .filter((tx) => !tx.dismissed && !['creating', 'unconfirmed'].includes(tx.status))
         .map((tx) => (

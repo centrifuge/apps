@@ -43,9 +43,9 @@ export function useCentrifugeQuery<T = any>(
           delay: (_, errorCount) => timer(Math.min(RETRY_MIN_DELAY * 2 ** (errorCount - 1), RETRY_MAX_DELAY)),
           resetOnSuccess: true,
         }),
-        catchError((e) => {
-          console.error('useCentrifugeQuery: query threw an error: ', e)
-          if (throwErrors) throw e
+        catchError((error) => {
+          console.error('useCentrifugeQuery: query threw an error: ', error)
+          if (throwErrors) throw error
           return of(null)
         }),
         // Share the observable between subscriber and provide new subscriber the latest cached value.

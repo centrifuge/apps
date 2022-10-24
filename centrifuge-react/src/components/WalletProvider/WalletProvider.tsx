@@ -28,6 +28,11 @@ const WalletContext = React.createContext<WalletContextType>(null as any)
 
 export const wallets = getWallets()
 
+const PERSIST_KEY = 'centrifugeWalletPersist'
+const PERSISTED_EXTENSION_KEY = 'centrifugeWalletPersistedExtension'
+const PERSISTED_ADDRESS_KEY = 'centrifugeWalletPersistedAddress'
+const PERSISTED_PROXY_KEY = 'centrifugeWalletPersistedProxy'
+
 export function useWallet() {
   const ctx = React.useContext(WalletContext)
   if (!ctx) throw new Error('useWallet must be used within Provider')
@@ -77,15 +82,15 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }))
 
     setAccounts(mappedAccounts)
-    const persistedAddress = localStorage.getItem('centrifugeWalletPersistedAddress')
-    const persistedProxy = localStorage.getItem('centrifugeWalletPersistedProxy')
+    const persistedAddress = localStorage.getItem(PERSISTED_ADDRESS_KEY)
+    const persistedProxy = localStorage.getItem(PERSISTED_PROXY_KEY)
     const matchingAccount = persistedAddress && mappedAccounts.find((acc) => acc.address === persistedAddress)?.address
     const address = matchingAccount || mappedAccounts[0]?.address
     setSelectedAccountAddress(address)
     if (matchingAccount && persistedProxy) {
       setProxyAddress(persistedProxy)
     }
-    localStorage.setItem('centrifugeWalletPersistedAddress', address ?? '')
+    localStorage.setItem(PERSISTED_ADDRESS_KEY, address ?? '')
   }
 
   const disconnect = React.useCallback(async () => {
@@ -94,10 +99,10 @@ export function WalletProvider({ children }: WalletProviderProps) {
     setIsConnecting(false)
     setProxyAddress(null)
     setSelectedWallet(null)
-    localStorage.setItem('centrifugeWalletPersist', '')
-    localStorage.setItem('centrifugeWalletPersistedWallet', '')
-    localStorage.setItem('centrifugeWalletPersistedAddress', '')
-    localStorage.setItem('centrifugeWalletPersistedProxy', '')
+    localStorage.removeItem(PERSIST_KEY)
+    localStorage.removeItem(PERSISTED_EXTENSION_KEY)
+    localStorage.removeItem(PERSISTED_ADDRESS_KEY)
+    localStorage.removeItem(PERSISTED_PROXY_KEY)
     if (unsubscribeRef.current) {
       unsubscribeRef.current()
       unsubscribeRef.current = null
@@ -121,14 +126,14 @@ export function WalletProvider({ children }: WalletProviderProps) {
       })
       unsubscribeRef.current = unsub as any
 
-      localStorage.setItem('centrifugeWalletPersist', '1')
-      localStorage.setItem('centrifugeWalletPersistedWallet', wallet.extensionName)
+      localStorage.setItem(PERSIST_KEY, '1')
+      localStorage.setItem(PERSISTED_EXTENSION_KEY, wallet.extensionName)
     } catch (e) {
       console.error(e)
-      localStorage.setItem('centrifugeWalletPersist', '')
-      localStorage.setItem('centrifugeWalletPersistedWallet', '')
-      localStorage.setItem('centrifugeWalletPersistedAddress', '')
-      localStorage.setItem('centrifugeWalletPersistedProxy', '')
+      localStorage.removeItem(PERSIST_KEY)
+      localStorage.removeItem(PERSISTED_EXTENSION_KEY)
+      localStorage.removeItem(PERSISTED_ADDRESS_KEY)
+      localStorage.removeItem(PERSISTED_PROXY_KEY)
       throw e
     } finally {
       setIsConnecting(false)
@@ -137,17 +142,17 @@ export function WalletProvider({ children }: WalletProviderProps) {
 
   const selectAccount = React.useCallback((address: string) => {
     setSelectedAccountAddress(address)
-    localStorage.setItem('centrifugeWalletPersistedAddress', address)
+    localStorage.setItem(PERSISTED_ADDRESS_KEY, address)
     setProxyAddress(null)
   }, [])
 
   const selectProxy = React.useCallback((address: string | null) => {
     setProxyAddress(address)
-    localStorage.setItem('centrifugeWalletPersistedProxy', address ?? '')
+    localStorage.setItem(PERSISTED_PROXY_KEY, address ?? '')
   }, [])
 
   async function tryReconnect() {
-    const source = localStorage.getItem('centrifugeWalletPersistedWallet')!
+    const source = localStorage.getItem(PERSISTED_EXTENSION_KEY)!
     // This script might have loaded quicker than the wallet extension,
     // so we'll wait up to 2 seconds for it to load
     let i = 8
@@ -166,7 +171,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
   }
 
   React.useEffect(() => {
-    if (!triedEager && localStorage.getItem('centrifugeWalletPersist')) {
+    if (!triedEager && localStorage.getItem(PERSIST_KEY)) {
       tryReconnect()
     }
     triedEager = true

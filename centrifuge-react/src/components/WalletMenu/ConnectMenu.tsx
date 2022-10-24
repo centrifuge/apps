@@ -27,11 +27,11 @@ export function ConnectMenu({ label = 'Connect', ...rest }: Props) {
 
   const installed: Wallet[] = []
   const notInstalled: Wallet[] = []
-  wallets.forEach((w) => {
-    if (w.installed) {
-      installed.push(w)
+  wallets.forEach((wallet) => {
+    if (wallet.installed) {
+      installed.push(wallet)
     } else {
-      notInstalled.push(w)
+      notInstalled.push(wallet)
     }
   })
 
@@ -56,7 +56,7 @@ export function ConnectMenu({ label = 'Connect', ...rest }: Props) {
                     rel="noopener noreferrer"
                     key={wallet.extensionName}
                     label={wallet.title}
-                    icon={<Box as="img" src={wallet.logo.src} alt={wallet.logo.alt} width="iconMedium" />}
+                    icon={<Box as="img" src={wallet.logo.src} alt={wallet.logo.alt ?? ''} width="iconMedium" />}
                     onClick={() => {
                       state.close()
                       connect(wallet.extensionName)
@@ -75,7 +75,7 @@ export function ConnectMenu({ label = 'Connect', ...rest }: Props) {
                     rel="noopener noreferrer"
                     key={wallet.extensionName}
                     label={wallet.title}
-                    icon={<Box as="img" src={wallet.logo.src} alt={wallet.logo.alt} width="iconMedium" />}
+                    icon={<Box as="img" src={wallet.logo.src} alt={wallet.logo.alt ?? ''} width="iconMedium" />}
                     iconRight={IconArrowUpRight}
                     onClick={() => {
                       state.close()
