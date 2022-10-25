@@ -235,15 +235,15 @@ The endpoint to reach the POD at.
 
 #### `signedToken: string`
 
-@Onno?
+TBD
 
 #### `document: CommitDocumentInput`
 
-@Onno?
+TBD
 
 ## `centrifuge.pod.commitDocumentAndMintNft([...args], options): { nftId: string; jobId: string}`
 
-After the document is created (and `documentId` is known) it needs to be commited to the chain to prevent changes in the future. The POD will take care of creating the NFT on-chain using the attributes from the provided `documentId`. `commitDocumentAndMintNft()` is doing a lot behind the scenes. So instead of completing immediatly, a `jobId` will be returned which can be used to track the progress of function call.
+After the document is created (and `documentId` is known) it needs to be commited to the chain to prevent changes in the future. The POD will take care of creating the NFT on-chain using the attributes from the provided `documentId`. `commitDocumentAndMintNft()` is doing a lot behind the scenes. So instead of completing immediately, a `jobId` will be returned which can be used to track the progress of function call.
 
 CentrifugeJS provides an async method to wait for the job to finish, which can be found under: `cent.pod.awaitJob()`.
 
@@ -251,11 +251,19 @@ CentrifugeJS provides an async method to wait for the job to finish, which can b
 
 #### `podUrl: string`
 
+The endpoint to reach the POD at.
+
 #### `signedToken: string`
 
-#### `document: CommitDocumentInput`
+TBD
+
+#### `document: CommitDocumentInput`\
+
+TBD
 
 ## `cent.pools.createLoan([...args], options): Observable<ISubmittableResult>`
+
+To assign the newly created asset to a pool the job must be completed. Make sure to use a connected instance of CentrifugeJS to make this request as it will require a signature.
 
 ### `createLoan` args
 
