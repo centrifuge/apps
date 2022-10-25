@@ -8,7 +8,7 @@ on:
       - '.github/workflows/tinlake-ui-deploy-to-dev.yml'
 
 jobs:
-  build-and-deploy-to-kovan:
+  build-and-deploy-to-goerli:
     runs-on: ubuntu-latest
 
     defaults:
@@ -54,21 +54,20 @@ jobs:
           NEXT_PUBLIC_CENTRIFUGE_CHAIN_URL: 'wss://fullnode.catalyst.cntrfg.com'
           NEXT_PUBLIC_CLAIM_CFG_CONTRACT_ADDRESS: '0x297237e17F327f8e5C8dEd78b15761A7D513353b'
           NEXT_PUBLIC_ENV: 'demo'
-          NEXT_PUBLIC_ETHERSCAN_URL: 'https://kovan.etherscan.io'
-          NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING: '0x1f4155D64D75555B9B36E4514C0FCC11313d5A54,0x25dF507570c8285E9c8E7FFabC87db7836850dCd'
+          NEXT_PUBLIC_ETHERSCAN_URL: 'https://goerli.etherscan.io'
+          NEXT_PUBLIC_FEATURE_FLAG_NEW_ONBOARDING: '0x5ca22a7cD0911c0b8279faEC3F3273AE94692E34,0xdA709C17ac67fA92d6cF6E92370809694fa9714a'
           NEXT_PUBLIC_INFURA_KEY: ${{ secrets.NEXT_PUBLIC_INFURA_KEY }}
           NEXT_PUBLIC_IPFS_GATEWAY: 'https://cloudflare-ipfs.com/ipfs/'
-          NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS: '0x2cc8688c5f75e365aaeeb4ea8d6a480405a48d2a'
+          NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS: '0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696'
           NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.catalyst.cntrfg.com/'
-          NEXT_PUBLIC_ONBOARD_UI_HOST: 'https://dev.onboarding.cntrfg.com'
           NEXT_PUBLIC_RWA_MARKET_ONBOARD_RETURN_URL: 'https://dev.rwamarket.io'
-          NEXT_PUBLIC_POOL_REGISTRY: '0x8FE85CeAe6157C1dfcDD1c5ec99361c9722d97de'
-          NEXT_PUBLIC_POOLS_CONFIG: 'kovanStaging'
-          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmQbyqTrrvMCB4ZuUietmpqWRV3zvMCTLUK5jHz5GgTa2N'
+          NEXT_PUBLIC_POOL_REGISTRY: '0x46A01532De22Baa1DFDB58b5bB62845667146E5c'
+          NEXT_PUBLIC_POOLS_CONFIG: 'goerliStaging'
+          NEXT_PUBLIC_POOLS_IPFS_HASH_OVERRIDE: 'QmXJTtXoBG9W4MhiDaXSZap3kfAoxSjMQaoVqWyNEbD16r'
           NEXT_PUBLIC_PORTIS_KEY: 'bc9e2922-2ebd-4e2b-86f6-7c7855bdf07f'
           NEXT_PUBLIC_REWARDS_TREE_URL: 'https://storage.googleapis.com/rad-rewards-trees-kovan-staging/latest.json'
-          NEXT_PUBLIC_RPC_URL: 'https://kovan.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5'
-          NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL: 'https://api.thegraph.com/subgraphs/name/centrifuge/tinlake-kovan-staging'
+          NEXT_PUBLIC_RPC_URL: 'https://goerli.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5'
+          NEXT_PUBLIC_TINLAKE_DATA_BACKEND_URL: 'https://api.thegraph.com/subgraphs/name/offerijns/tinlake-goerli'
           NEXT_PUBLIC_TRANSACTION_TIMEOUT: '3600'
 
       - name: Deploy To Netlify
@@ -83,7 +82,7 @@ jobs:
           publish-dir: ./tinlake-ui/out
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN  }}
-          NETLIFY_SITE_ID: ${{ secrets.TINLAKE_UI_KOVAN_DEV_NETLIFY_SITE_ID }}
+          NETLIFY_SITE_ID: ${{ secrets.TINLAKE_UI_GOERLI_DEV_NETLIFY_SITE_ID }}
 
   build-and-deploy-to-mainnet:
     runs-on: ubuntu-latest
@@ -137,7 +136,6 @@ jobs:
           NEXT_PUBLIC_IPFS_GATEWAY: 'https://cloudflare-ipfs.com/ipfs/'
           NEXT_PUBLIC_MULTICALL_CONTRACT_ADDRESS: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
           NEXT_PUBLIC_ONBOARD_API_HOST: 'https://onboard-api.catalyst.cntrfg.com/'
-          NEXT_PUBLIC_ONBOARD_UI_HOST: 'https://dev.onboarding.cntrfg.com'
           NEXT_PUBLIC_RWA_MARKET_ONBOARD_RETURN_URL: 'https://rwamarket.io'
           NEXT_PUBLIC_POOL_REGISTRY: '0xddf1c516cf87126c6c610b52fd8d609e67fb6033'
           NEXT_PUBLIC_POOLS_CONFIG: 'mainnetProduction'

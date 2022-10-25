@@ -1,5 +1,5 @@
-import { AddressStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { useQuery } from 'react-query'
+import { AddressStatus } from '../../onboarding-api/src/controllers/types'
 import { useDebugFlags } from '../components/DebugFlags'
 import config, { Pool, UpcomingPool } from '../config'
 import { useAddress } from './useAddress'
@@ -29,7 +29,10 @@ export function useOnboardingState(pool?: Pool | UpcomingPool, tranche?: Tranche
 }
 
 // TODO: Call onboard API URL that isn't pool dependant
-const placeholderPoolId = '0x560Ac248ce28972083B718778EEb0dbC2DE55740'
+const placeholderPoolId =
+  process.env.NEXT_PUBLIC_ENV === 'PROD'
+    ? '0x560Ac248ce28972083B718778EEb0dbC2DE55740'
+    : '0x5ca22a7cD0911c0b8279faEC3F3273AE94692E34'
 
 type AdditionalData = {
   kycStatus: AddressStatus['kyc']['status'] | 'requires-signin'

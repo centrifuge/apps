@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import { useDispatch } from 'react-redux'
-import config, { Pool, UpcomingPool } from '../../config'
+import { Pool, UpcomingPool } from '../../config'
 import { ensureAuthed } from '../../ducks/auth'
 import { useAddress } from '../../utils/useAddress'
 import { useInvestorOnboardingState } from '../../utils/useOnboardingState'
@@ -40,14 +40,14 @@ const InvestAction: React.FC<Props> = (props) => {
   function navigate() {
     if (isUpcoming) {
       if (!hasDoneKYC) {
-        router.push(`${config.onboardUIHost}?from=${encodeURIComponent(router.asPath)}`)
+        router.push(`/onboarding?from=${encodeURIComponent(router.asPath)}`)
       }
     } else {
       const basePath = `/pool/${(props.pool as Pool).addresses.ROOT_CONTRACT}/${props.pool?.metadata.slug}`
       if (canInvestInPool) {
         router.push(`${basePath}/investments`)
       } else {
-        router.push(`${config.onboardUIHost}${basePath}`)
+        router.push(`${basePath}/onboarding`)
       }
     }
   }

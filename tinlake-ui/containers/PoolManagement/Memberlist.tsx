@@ -1,7 +1,7 @@
-import { AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { Box, Button, FormField, Heading, Table, TableBody, TableCell, TableRow, TextInput } from 'grommet'
 import * as React from 'react'
 import { connect } from 'react-redux'
+import { AgreementsStatus } from '../../../onboarding-api/src/controllers/types'
 import { Card } from '../../components/Card'
 import { useTinlake } from '../../components/TinlakeProvider'
 import { Pool } from '../../config'

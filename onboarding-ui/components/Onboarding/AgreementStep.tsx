@@ -1,11 +1,11 @@
 import { Modal } from '@centrifuge/axis-modal'
-import { AddressStatus, AgreementsStatus } from '@centrifuge/onboarding-api/src/controllers/types'
 import { Anchor, Box, Button, Paragraph } from 'grommet'
 import { StatusInfo as StatusInfoIcon } from 'grommet-icons'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import * as React from 'react'
 import config, { Pool } from '../../config'
+import { AddressStatus, AgreementsStatus } from '../../types'
 import { Checkbox } from '../Checkbox'
 import { Step, StepProps } from './Step'
 import { StepParagraph } from './StepParagraph'
@@ -19,8 +19,6 @@ interface Props {
   agreementStatus: 'none' | 'signed' | 'countersigned' | 'declined' | 'voided'
   whitelistStatus: boolean
 }
-
-const { NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL } = process.env
 
 const AgreementStep: React.FC<Props> = ({
   state,
@@ -108,7 +106,7 @@ const AgreementStep: React.FC<Props> = ({
                   />
                   .
                 </StepParagraph>
-                <Link href={NEXT_PUBLIC_TINLAKE_ONBOARD_RETURN_URL as string}>
+                <Link href="/">
                   <Button label="Explore other pools" primary />
                 </Link>
               </>

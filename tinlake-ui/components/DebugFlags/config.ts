@@ -1,4 +1,4 @@
-import { AddressStatus } from '@centrifuge/onboarding-api/src/controllers/types'
+import { AddressStatus } from '../../../onboarding-api/src/controllers/types'
 
 const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : {})
 export const debug = process.env.NODE_ENV === 'development' || params.get('debug') != null
