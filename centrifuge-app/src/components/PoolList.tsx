@@ -11,7 +11,7 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
   return (
     <Grid columns={2} gap={2} m={3} equalColumns>
       {pools.map((pool) => {
-        return <PoolCard pool={pool} />
+        return <PoolCard key={pool.id} pool={pool} />
       })}
     </Grid>
   )
