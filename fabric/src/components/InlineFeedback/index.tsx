@@ -19,7 +19,7 @@ const icons = {
   critical: IconInfoFailed,
 }
 
-export const InlineFeedback: React.FC<Props> = ({ status = 'default', children }) => {
+export const InlineFeedback: React.FC<InlineFeedbackProps> = ({ status = 'default', children }) => {
   return (
     <Text variant="body3">
       <Shelf alignItems="baseline" gap="4px">

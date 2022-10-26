@@ -16,7 +16,7 @@ const PositionerInner: React.FC<Props> = ({
   isShown,
   targetRef,
   overlayRef,
-  placement = 'top',
+  placement = 'bottom',
   offset = 1,
   render,
 }) => {

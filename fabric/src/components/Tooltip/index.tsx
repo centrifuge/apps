@@ -58,6 +58,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
           isShown
           targetRef={triggerRef}
           overlayRef={overlayRef}
+          placement="top"
           render={(positionProps) => (
             <Stack
               {...tooltipElementProps}
