@@ -1,6 +1,8 @@
 export { useControlledState } from '@centrifuge/fabric'
 export * from './components/CentrifugeProvider'
+export * from './components/Provider'
 export * from './components/Transactions'
+export * from './components/WalletMenu'
 export * from './components/WalletProvider'
 export * from './hooks/useCentrifugeQuery'
 export { useCentrifugeTransaction } from './hooks/useCentrifugeTransaction'
