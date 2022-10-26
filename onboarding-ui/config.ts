@@ -89,7 +89,10 @@ interface Config {
 
 const config: Config = {
   isDemo: yup.string().required('PUBLIC_ENV is required').validateSync('demo') === 'demo',
-  onboardAPIHost: yup.string().required('ONBOARD_API_HOST is required').validateSync('http://localhost:3100/'),
+  onboardAPIHost: yup
+    .string()
+    .required('ONBOARD_API_HOST is required')
+    .validateSync(process.env.NEXT_PUBLIC_ONBOARD_API_HOST),
 }
 
 export default config
