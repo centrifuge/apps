@@ -12,7 +12,7 @@ type PoolCardProps = {
   pool: Pool
 }
 
-export const PoolCard: React.VFC<PoolCardProps> = ({ pool, width }) => {
+export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
   const cent = useCentrifuge()
   const history = useHistory()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
