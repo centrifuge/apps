@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/centrifuge/apps/compare/fabric/v1.1.0...fabric/v1.2.0) (2022-10-26)
+
+
+### Features
+
+* **fabric:** Add Placeholder component ([d5efef5](https://github.com/centrifuge/apps/commit/d5efef5338b949bc86be2852fd722f9d6da56ba2))
+
 ## [1.1.0](https://github.com/centrifuge/apps/compare/fabric/v1.0.6...fabric/v1.1.0) (2022-10-21)
 
 
