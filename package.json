@@ -43,7 +43,7 @@
     "onboarding-api": "yarn workspace @centrifuge/onboarding-api start",
     "onboarding-ui": "yarn workspace @centrifuge/onboarding-ui start",
     "tinlake-ui": "yarn workspace @centrifuge/tinlake-ui start",
-    "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\" \"yarn onboarding-ui\" \"yarn tinlake-ui\" -p name -n \"onboarding-api,onboarding-ui,tinlake-ui\"",
+    "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\" \"yarn tinlake-ui\" -p name -n \"onboarding-api,tinlake-ui\"",
     "postinstall": "npx husky install"
   },
   "resolutions": {
