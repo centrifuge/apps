@@ -5,6 +5,7 @@ import { Box } from '../Box'
 import { VisualButton } from '../Button'
 import { Card, CardProps } from '../Card'
 import { Shelf } from '../Shelf'
+import { Stack } from '../Stack'
 import { Text } from '../Text'
 
 export type InteractiveCardProps = {
@@ -12,6 +13,7 @@ export type InteractiveCardProps = {
   icon?: React.ReactNode
   title: React.ReactNode
   titleAddition?: React.ReactNode
+  subtitle?: React.ReactNode
   secondaryHeader?: React.ReactNode
   onClick?: React.MouseEventHandler<HTMLButtonElement>
 }
@@ -22,6 +24,7 @@ export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'v
   title,
   titleAddition,
   secondaryHeader,
+  subtitle,
   children,
   onClick,
   ...rest
@@ -52,10 +55,13 @@ export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'v
         <Shelf gap={1}>
           {icon}
           <Shelf gap={1} rowGap={0} alignItems="baseline" flexWrap="wrap">
-            <Text variant="heading2" color={variant === 'default' ? 'textPrimary' : 'textInteractive'}>
-              {title}
-            </Text>
-            <Text variant="body2">{titleAddition}</Text>
+            <Stack>
+              <Text variant="heading2" color={variant === 'default' ? 'textPrimary' : 'textInteractive'}>
+                {title}
+              </Text>
+              <Text variant="body2">{titleAddition}</Text>
+              <Text variant="heading6">{subtitle}</Text>
+            </Stack>
           </Shelf>
         </Shelf>
         <Box my="-10px">
