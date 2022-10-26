@@ -56,7 +56,7 @@ export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'v
           {icon}
           <Shelf gap={1} rowGap={0} alignItems="baseline" flexWrap="wrap">
             <Stack>
-              <Text variant="heading2" color={variant === 'default' ? 'textPrimary' : 'textInteractive'}>
+              <Text variant="heading3" color={variant === 'default' ? 'textPrimary' : 'textInteractive'}>
                 {title}
               </Text>
               <Text variant="body2">{titleAddition}</Text>
