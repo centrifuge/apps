@@ -94,7 +94,7 @@ const FormField = styled.input`
   width: 1px;
 `
 
-type ImageUploadProps = {
+export type ImageUploadProps = {
   file?: File | null
   onFileChange?: (file: File | null) => void
   validate?: (file: File) => string | undefined

@@ -3,11 +3,9 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Text } from '../Text'
 
-type Props = React.PropsWithChildren<{
+export type StatusChipProps = React.PropsWithChildren<{
   status: 'default' | 'info' | 'ok' | 'warning' | 'critical'
 }>
-
-export type StatusChipProps = React.PropsWithChildren<Props>
 
 const colors = {
   default: 'statusDefault',
@@ -27,7 +25,7 @@ const Wrapper = styled.span<{ $color: string }>((props) =>
   })
 )
 
-export const StatusChip: React.FC<Props> = ({ status, children }) => {
+export const StatusChip: React.FC<StatusChipProps> = ({ status, children }) => {
   const color = colors[status]
   return (
     <Wrapper $color={color}>

@@ -4,7 +4,7 @@ import IconNftThumbnail from '../../icon/IconNftThumbnail'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
-type ThumbnailProps = {
+export type ThumbnailProps = {
   label: string
   type?: 'token' | 'pool' | 'asset' | 'nft'
   size?: 'small' | 'large'

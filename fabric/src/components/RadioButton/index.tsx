@@ -5,7 +5,7 @@ import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
-type RadioButtonProps = React.InputHTMLAttributes<HTMLInputElement> & {
+export type RadioButtonProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string
   errorMessage?: string
 }

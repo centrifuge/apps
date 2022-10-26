@@ -4,7 +4,7 @@ import { OverlayTriggerState, useOverlayTriggerState } from '@react-stately/over
 import * as React from 'react'
 import { Positioner } from '../Positioner'
 
-type Props = {
+type PopoverProps = {
   renderTrigger: (
     props: React.HTMLAttributes<HTMLButtonElement>,
     ref: React.RefObject<HTMLDivElement>,
@@ -17,7 +17,7 @@ type Props = {
   ) => React.ReactElement
 }
 
-export const Popover: React.FC<Props> = ({ renderTrigger, renderContent }) => {
+export const Popover: React.FC<PopoverProps> = ({ renderTrigger, renderContent }) => {
   const state = useOverlayTriggerState({})
   const overlayRef = React.useRef<HTMLDivElement>(null)
   const triggerRef = React.useRef<HTMLDivElement>(null)

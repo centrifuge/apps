@@ -27,7 +27,7 @@ const LoadingWrapper = styled.div<{ $lines: number; $isLoading: boolean }>`
     `};
 `
 
-type Props = TextProps &
+export type TextWithPlaceholderProps = TextProps &
   React.PropsWithChildren<{
     words?: number
     maxLines?: number
@@ -36,7 +36,7 @@ type Props = TextProps &
     isLoading?: boolean
   }>
 
-export const TextWithPlaceholder: React.FC<Props> = ({
+export const TextWithPlaceholder: React.FC<TextWithPlaceholderProps> = ({
   words = 1,
   maxLines = 3,
   variance = 2,

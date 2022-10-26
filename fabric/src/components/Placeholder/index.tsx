@@ -1,5 +1,5 @@
 import styled, { keyframes } from 'styled-components'
-import { Box } from '../Box'
+import { Box, BoxProps } from '../Box'
 
 const load = keyframes`
 from {
@@ -9,6 +9,8 @@ to {
 	background-position-x: -200%;
 }
 `
+
+export type PlaceholderProps = BoxProps
 
 export const Placeholder = styled(Box)`
   --color1: ${({ theme }) => theme.colors.borderPrimary};

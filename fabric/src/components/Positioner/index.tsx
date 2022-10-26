@@ -3,7 +3,7 @@ import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { TextContext } from '../Text'
 
-type Props = {
+type PositionerProps = {
   isShown?: boolean
   targetRef: React.RefObject<HTMLElement>
   overlayRef: React.RefObject<HTMLElement>
@@ -12,7 +12,7 @@ type Props = {
   render: (props: React.HTMLAttributes<Element>) => React.ReactElement
 }
 
-const PositionerInner: React.FC<Props> = ({
+const PositionerInner: React.FC<PositionerProps> = ({
   isShown,
   targetRef,
   overlayRef,
@@ -32,7 +32,7 @@ const PositionerInner: React.FC<Props> = ({
   return render(overlayProps)
 }
 
-export const Positioner: React.FC<Props> = (props) => {
+export const Positioner: React.FC<PositionerProps> = (props) => {
   return props.isShown ? (
     <OverlayContainer>
       <TextContext.Provider value={false}>
