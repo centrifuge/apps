@@ -9,7 +9,7 @@ type Props = {
 
 export const PoolList: React.FC<Props> = ({ pools }) => {
   return (
-    <Grid columns={2} gap={2} m={3} equalColumns>
+    <Grid columns={[1, 2]} gap={[3, 2]} m={[2, 3]} equalColumns>
       {pools.map((pool) => {
         return <PoolCard key={pool.id} pool={pool} />
       })}
