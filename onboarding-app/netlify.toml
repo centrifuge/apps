@@ -1,5 +1,0 @@
-[build]
-  base = "onboarding-ui"
-  command = "yarn build"
-  publish = "out"
-  environment = { NETLIFY_USE_YARN = "true" }
