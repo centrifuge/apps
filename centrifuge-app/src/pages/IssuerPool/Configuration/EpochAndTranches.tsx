@@ -153,18 +153,10 @@ export const EpochAndTranches: React.FC = () => {
       const nonJuniorTranches = values.tranches.slice(1)
       const tranches = [
         {}, // most junior tranche
-        ...nonJuniorTranches.map(
-          (tranche) => (
-            console.log(
-              'Perquintill.fromPercent(tranche.minRiskBuffer)',
-              Perquintill.fromPercent(tranche.minRiskBuffer)
-            ),
-            {
-              interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
-              minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
-            }
-          )
-        ),
+        ...nonJuniorTranches.map((tranche) => ({
+          interestRatePerSec: Rate.fromAprPercent(tranche.interestRate),
+          minRiskBuffer: Perquintill.fromPercent(tranche.minRiskBuffer),
+        })),
       ]
       execute([poolId, newPoolMetadata, { minEpochTime: epochSeconds, tranches }])
       actions.setSubmitting(false)
