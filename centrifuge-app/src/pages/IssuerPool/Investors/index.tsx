@@ -1,4 +1,4 @@
-import { Tranche } from '@centrifuge/centrifuge-js'
+import { findBalance, Tranche } from '@centrifuge/centrifuge-js'
 import {
   Button,
   Grid,
@@ -21,6 +21,7 @@ import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { TextWithPlaceholder } from '../../../components/TextWithPlaceholder'
 import { useAddress } from '../../../utils/useAddress'
+import { useBalances } from '../../../utils/useBalances'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePermissions } from '../../../utils/usePermissions'
 import { useOrder, usePool, usePoolMetadata } from '../../../utils/usePools'
@@ -172,7 +173,10 @@ const InvestedCell: React.FC<{ address: string; poolId: string; trancheId: strin
   address,
 }) => {
   const order = useOrder(poolId, trancheId, address)
-  const hasInvested = order && (order?.epoch > 0 || !order.invest.isZero())
+  const balances = useBalances(address)
+  const hasBalance = balances && findBalance(balances.tranches, { Tranche: [poolId, trancheId] })
+  const hasOrder = order && (order?.submittedAt > 0 || !order.invest.isZero())
+  const hasInvested = hasBalance || hasOrder
 
   return <TextWithPlaceholder variant="body2">{hasInvested && 'Invested'}</TextWithPlaceholder>
 }

@@ -22,10 +22,10 @@
   "dependencies": {
     "@centrifuge/centrifuge-js": "workspace:*",
     "@centrifuge/fabric": "workspace:*",
-    "@polkadot/api": "^8.12.2",
+    "@polkadot/api": "^9.7.1",
     "@polkadot/extension-dapp": "^0.44.1",
     "@polkadot/react-identicon": "^2.8.2",
-    "@polkadot/util-crypto": "^10.0.2",
+    "@polkadot/util-crypto": "^10.1.11",
     "@stablelib/blake2b": "^1.0.1",
     "@styled-system/css": "^5.1.5",
     "@styled-system/should-forward-prop": "^5.1.5",

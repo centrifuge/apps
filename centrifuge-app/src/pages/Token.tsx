@@ -64,7 +64,7 @@ const TokenDetail: React.FC = () => {
           </Text>
         ),
       },
-      { label: <Tooltips type="valueLocked" />, value: `${formatBalance(valueLocked, pool?.currency)}` },
+      { label: <Tooltips type="valueLocked" />, value: `${formatBalance(valueLocked, pool?.currency.symbol)}` },
     ],
     [metadata, token, pool, valueLocked, tranche?.seniority]
   )

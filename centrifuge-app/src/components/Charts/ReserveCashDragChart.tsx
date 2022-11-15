@@ -44,7 +44,7 @@ const ReserveCashDragChart: React.VFC = () => {
 
   return (
     <Stack>
-      <CustomLegend data={today} currency={pool?.currency || ''} />
+      <CustomLegend data={today} currency={pool?.currency.symbol || ''} />
       <Shelf gap="4" width="100%" color="textSecondary">
         {chartData?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
@@ -70,7 +70,7 @@ const ReserveCashDragChart: React.VFC = () => {
                 tickFormatter={(tick: number) => `${tick}%`}
               />
               <CartesianGrid stroke={theme.colors.borderSecondary} />
-              <Tooltip content={<CustomizedTooltip currency={pool?.currency || ''} />} />
+              <Tooltip content={<CustomizedTooltip currency={pool?.currency.symbol || ''} />} />
               <Line dot={false} dataKey="reserve" yAxisId="left" stroke={theme.colors.accentPrimary} name="Reserve" />
               <Line
                 dot={false}

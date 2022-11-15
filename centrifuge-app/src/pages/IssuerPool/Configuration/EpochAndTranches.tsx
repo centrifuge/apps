@@ -11,7 +11,6 @@ import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
 import { formatBalance, formatPercentage } from '../../../utils/formatting'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
-import { getCurrencyDecimals } from '../../../utils/useCurrencies'
 import { useConstants, usePool, usePoolMetadata } from '../../../utils/usePools'
 import { TrancheInput } from '../../IssuerCreatePool/TrancheInput'
 import { validate } from '../../IssuerCreatePool/validate'
@@ -49,7 +48,7 @@ export const EpochAndTranches: React.FC = () => {
     {
       align: 'left',
       header: 'Min. investment',
-      cell: (token: Row) => (token.minInvestment ? formatBalance(token.minInvestment, pool?.currency) : '-'),
+      cell: (token: Row) => (token.minInvestment ? formatBalance(token.minInvestment, pool?.currency.symbol) : '-'),
       flex: '3',
     },
     {
@@ -76,7 +75,7 @@ export const EpochAndTranches: React.FC = () => {
           symbolName: metadata?.tranches?.[tranche.id]?.symbol || '',
           minInvestment: new CurrencyBalance(
             metadata?.tranches?.[tranche.id]?.minInitialInvestment ?? 0,
-            getCurrencyDecimals(pool?.currency)
+            pool?.currency.decimals
           ).toFloat(),
         }
         return row
@@ -141,7 +140,7 @@ export const EpochAndTranches: React.FC = () => {
               ...t,
               minInitialInvestment: CurrencyBalance.fromFloat(
                 values.tranches[i].minInvestment,
-                getCurrencyDecimals(pool!.currency)
+                pool.currency.decimals
               ).toString(),
             },
           ])
@@ -262,7 +261,7 @@ export const EpochAndTranches: React.FC = () => {
               <Text variant="heading3">Tranches</Text>
 
               {isEditing ? (
-                <TrancheInput currency={pool?.currency} isUpdating />
+                <TrancheInput currency={pool?.currency.symbol} isUpdating />
               ) : (
                 <DataTable data={trancheData} columns={columns} />
               )}
