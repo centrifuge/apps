@@ -33,7 +33,7 @@ async function faucet(req: Request, res: Response) {
   console.log('faucet running')
 
   const origin = req.get('origin') ?? ''
-  if ([CORS_ORIGIN].indexOf(origin) > 0) {
+  if (origin === CORS_ORIGIN) {
     res.set('Access-Control-Allow-Origin', origin)
     res.set('Access-Control-Allow-Methods', 'GET')
   } else {
