@@ -126,15 +126,19 @@ const Loan: React.FC = () => {
                 },
                 {
                   label: <Tooltips type="collateralValue" />,
-                  value: formatBalance(loan.loanInfo.value, pool?.currency),
+                  value: formatBalance(loan.loanInfo.value, pool?.currency.symbol),
                 },
                 {
                   label: <Tooltips type="availableFinancing" />,
-                  value: !availableFinancing.isZero() ? formatBalance(availableFinancing, pool?.currency) : 'n/a',
+                  value: !availableFinancing.isZero()
+                    ? formatBalance(availableFinancing, pool?.currency.symbol)
+                    : 'n/a',
                 },
                 {
                   label: <Tooltips type="outstanding" />,
-                  value: loan?.outstandingDebt?.gtn(0) ? formatBalance(loan.outstandingDebt, pool?.currency) : 'n/a',
+                  value: loan?.outstandingDebt?.gtn(0)
+                    ? formatBalance(loan.outstandingDebt, pool?.currency.symbol)
+                    : 'n/a',
                 },
               ]}
             />

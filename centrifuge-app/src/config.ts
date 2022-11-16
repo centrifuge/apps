@@ -66,7 +66,7 @@ type EnvironmentConfig = {
     dark: DefaultTheme
   }
   defaultTheme: 'light' | 'dark'
-  baseCurrency: 'Native' | 'kUsd' | 'PermissionedEur'
+  baseCurrency: 'AUSD'
   assetClasses: string[]
   defaultAssetClass: string
   tokensPageSubtitle: string
@@ -88,7 +88,7 @@ const ALTAIR: EnvironmentConfig = {
     dark: darkTheme,
   },
   defaultTheme: 'dark',
-  baseCurrency: 'Native',
+  baseCurrency: 'AUSD',
   assetClasses: ['Art NFTs'],
   defaultAssetClass: 'Art NFTs',
   tokensPageSubtitle: 'Art NFTs',
@@ -107,7 +107,7 @@ const CENTRIFUGE: EnvironmentConfig = {
     dark: darkTheme,
   },
   defaultTheme: 'light',
-  baseCurrency: 'kUsd',
+  baseCurrency: 'AUSD',
   assetClasses: [
     'Consumer Credit',
     'Corporate Credit',

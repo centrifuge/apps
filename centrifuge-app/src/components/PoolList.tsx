@@ -30,7 +30,7 @@ export const PoolList: React.FC<Props> = ({ pools }) => {
     },
     {
       header: 'Value',
-      cell: (p: Pool) => formatBalance(p.value, p.currency),
+      cell: (p: Pool) => formatBalance(p.value, p.currency.symbol),
     },
     {
       header: '',

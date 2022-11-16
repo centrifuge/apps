@@ -14,7 +14,6 @@ import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import styled from 'styled-components'
 import { useBalances } from '../../hooks/useBalances'
-import { Dec } from '../../utils/Decimal'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
 import { useAddress, useWallet } from '../WalletProvider'
 import { ConnectMenu } from './ConnectMenu'
@@ -43,6 +42,7 @@ function Accounts() {
   const balances = useBalances(address)
 
   if (!selectedAccount || !accounts) return null
+
   return (
     <Popover
       renderTrigger={(props, ref, state) => (
@@ -53,10 +53,7 @@ function Accounts() {
             alias={!proxy ? selectedAccount.name : undefined}
             balance={
               balances
-                ? formatBalanceAbbreviated(
-                    Dec(balances?.native.balance.toString()).div(Dec(10).pow(balances?.native.decimals)),
-                    balances?.native.symbol
-                  )
+                ? formatBalanceAbbreviated(balances?.native.balance, balances?.native.currency.symbol)
                 : undefined
             }
             {...props}

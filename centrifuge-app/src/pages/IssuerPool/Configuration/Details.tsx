@@ -11,7 +11,6 @@ import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
 import { Tooltips } from '../../../components/Tooltips'
 import { config } from '../../../config'
-import { getCurrencySymbol } from '../../../utils/formatting'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { useFile } from '../../../utils/useFile'
@@ -107,7 +106,7 @@ export const Details: React.FC = () => {
 
   const icon = cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri ?? '')
 
-  const currency = getCurrencySymbol(pool?.currency)
+  const currency = pool?.currency.symbol ?? ''
 
   return (
     <FormikProvider value={form}>
@@ -207,7 +206,7 @@ export const Details: React.FC = () => {
 
               <LabelValueStack label="Asset class" value={metadata?.pool?.asset.class} />
 
-              <LabelValueStack label="Currency" value={getCurrencySymbol(pool?.currency)} />
+              <LabelValueStack label="Currency" value={currency} />
               <LabelValueStack label="POD endpoint" value={metadata?.pod?.url ?? '-'} />
               <LabelValueStack label="Menu listing" value={metadata?.pool?.listed ? 'Published' : 'Not published'} />
             </Shelf>

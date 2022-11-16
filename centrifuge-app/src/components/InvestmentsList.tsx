@@ -82,5 +82,7 @@ const TokenValue: React.VFC<{ investment: AccountTokenBalance }> = ({ investment
   const pool = usePool(investment.poolId)
   const tranche = pool?.tranches.find((t) => t.id === investment.trancheId)
 
-  return <>{formatBalance(investment.balance.toFloat() * (tranche?.tokenPrice?.toFloat() ?? 1), pool?.currency)}</>
+  return (
+    <>{formatBalance(investment.balance.toFloat() * (tranche?.tokenPrice?.toFloat() ?? 1), pool?.currency.symbol)}</>
+  )
 }
