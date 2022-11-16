@@ -19,8 +19,8 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
   const { data: metadata } = usePoolMetadata(pool)
 
   const totalTrancheCapacity = pool.tranches.reduce((prev, curr) => {
-    return new CurrencyBalance(prev.add(curr.capacity), pool.currencyDecimals)
-  }, CurrencyBalance.fromFloat(0, pool.currencyDecimals))
+    return new CurrencyBalance(prev.add(curr.capacity), pool.currency.decimals)
+  }, CurrencyBalance.fromFloat(0, pool.currency.decimals))
 
   return (
     <InteractiveCard
