@@ -24,9 +24,9 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
   const balances = useBalances(useAddress())
   const hasLowDevelBalance =
     balances && new CurrencyBalance(balances.native.balance, 18).toDecimal().lte(MIN_DEVEL_BALANCE)
-  const aUSD = balances && balances.currencies.find((curr) => curr.currency === 'ausd')
+  const aUSD = balances && balances.currencies.find((curr) => curr.currency.key === 'AUSD')
   const hasLowAusdBalance =
-    (aUSD && new CurrencyBalance(aUSD.balance, aUSD.currencyDecimals).toDecimal().lte(MIN_AUSD_BALANCE)) || !aUSD
+    (aUSD && new CurrencyBalance(aUSD.balance, aUSD.currency.decimals).toDecimal().lte(MIN_AUSD_BALANCE)) || !aUSD
 
   return (
     <Box

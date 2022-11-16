@@ -44,11 +44,11 @@ export const PoolDetailLiquidity: React.FC = () => {
   const pageSummaryData = [
     {
       label: <Tooltips type="poolReserve" />,
-      value: formatBalance(pool?.reserve.total.toDecimal() || 0, pool?.currency || ''),
+      value: formatBalance(pool?.reserve.total.toDecimal() || 0, pool?.currency.symbol || ''),
     },
     {
       label: <Tooltips type="maxReserve" />,
-      value: formatBalance(pool?.reserve.max.toDecimal() || 0, pool?.currency || ''),
+      value: formatBalance(pool?.reserve.max.toDecimal() || 0, pool?.currency.symbol || ''),
     },
   ]
 

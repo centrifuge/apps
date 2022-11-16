@@ -1,17 +1,6 @@
 import { CurrencyBalance, Perquintill, TokenBalance } from '@centrifuge/centrifuge-js'
 import Decimal from 'decimal.js-light'
 
-const currencySymbols = {
-  native: 'AIR',
-  kusd: 'kUSD',
-  ausd: 'aUSD',
-  permissionedeur: 'pEUR',
-}
-
-export function getCurrencySymbol(currency?: string) {
-  return (currency && currencySymbols[currency.toLowerCase() as keyof typeof currencySymbols]) || currency || ''
-}
-
 export function formatBalance(
   amount: CurrencyBalance | TokenBalance | Decimal | number,
   currency?: string,
@@ -28,7 +17,7 @@ export function formatBalance(
     minimumFractionDigits: precision,
     maximumFractionDigits: precision,
   })
-  return currency ? `${formattedAmount} ${getCurrencySymbol(currency)}` : formattedAmount
+  return currency ? `${formattedAmount} ${currency}` : formattedAmount
 }
 
 export function formatBalanceAbbreviated(
@@ -50,7 +39,7 @@ export function formatBalanceAbbreviated(
   } else {
     formattedAmount = `${amountNumber.toFixed(decimals)}`
   }
-  return currency ? `${formattedAmount} ${getCurrencySymbol(currency)}` : formattedAmount
+  return currency ? `${formattedAmount} ${currency}` : formattedAmount
 }
 
 export function formatPercentage(amount: Perquintill | Decimal | number, includeSymbol = true, locale = 'en') {

@@ -11,7 +11,7 @@ import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { Tooltips } from '../components/Tooltips'
 import { config } from '../config'
 import { Dec } from '../utils/Decimal'
-import { formatBalance, getCurrencySymbol } from '../utils/formatting'
+import { formatBalance } from '../utils/formatting'
 import { useMetadataMulti } from '../utils/useMetadata'
 import { usePools } from '../utils/usePools'
 
@@ -55,7 +55,7 @@ const Pools: React.FC = () => {
   const pageSummaryData = [
     {
       label: <Tooltips type="tvl" />,
-      value: formatBalance(Dec(totalValueLocked || 0), getCurrencySymbol(config.baseCurrency)),
+      value: formatBalance(Dec(totalValueLocked || 0), config.baseCurrency),
     },
     { label: 'Pools', value: listedPools?.length || 0 },
     { label: <Tooltips type="tokens" />, value: listedTokens?.length || 0 },

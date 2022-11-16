@@ -1,30 +1,13 @@
-import { useQuery } from 'react-query'
-import { firstValueFrom } from 'rxjs'
-import { useCentrifuge } from '../components/CentrifugeProvider'
+import { useCentrifugeQuery } from './useCentrifugeQuery'
 
 export function useCurrencies() {
-  const cent = useCentrifuge()
-  const { data: native } = useQuery(['nativeCurrency'], () => firstValueFrom(cent.pools.getNativeCurrency()), {
-    staleTime: Infinity,
-  })
+  const [data] = useCentrifugeQuery(['currencies'], (cent) => cent.pools.getCurrencies())
+  return data
+}
 
-  return [
-    {
-      label: native?.symbol || 'AIR',
-      value: 'Native',
-      decimals: 18,
-    },
-    {
-      label: 'aUSD',
-      value: 'ausd',
-      decimals: 12,
-    },
-    {
-      label: 'pEUR',
-      value: 'PermissionedEur',
-      decimals: 18,
-    },
-  ]
+export function usePoolCurrencies() {
+  const data = useCurrencies()
+  return data?.filter((c) => c.isPoolCurrency)
 }
 
 export function getCurrencyDecimals(currency: string) {

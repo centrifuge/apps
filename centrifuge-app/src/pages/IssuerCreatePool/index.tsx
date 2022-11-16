@@ -19,7 +19,7 @@ import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { useBalances } from '../../utils/useBalances'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
-import { useCurrencies } from '../../utils/useCurrencies'
+import { usePoolCurrencies } from '../../utils/useCurrencies'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useProposalEstimate } from '../../utils/useProposalEstimate'
 import { truncate } from '../../utils/web3'
@@ -28,8 +28,6 @@ import { RiskGroupsSection } from './RiskGroupsInput'
 import { TrancheSection } from './TrancheInput'
 import { useStoredIssuer } from './useStoredIssuer'
 import { validate } from './validate'
-
-const DEFAULT_CURRENCY = 'Native'
 
 const ASSET_CLASSES = config.assetClasses.map((label) => ({
   label,
@@ -93,7 +91,7 @@ const initialValues: CreatePoolValues = {
   poolIcon: null,
   poolName: '',
   assetClass: DEFAULT_ASSET_CLASS,
-  currency: DEFAULT_CURRENCY,
+  currency: '',
   maxReserve: '',
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
@@ -127,7 +125,7 @@ const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children
 const CreatePoolForm: React.VFC = () => {
   const address = useAddress()
   const centrifuge = useCentrifuge()
-  const currencies = useCurrencies()
+  const currencies = usePoolCurrencies()
   const history = useHistory()
   const balances = useBalances(address)
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
@@ -209,11 +207,11 @@ const CreatePoolForm: React.VFC = () => {
     },
     validateOnMount: true,
     onSubmit: async (values, { setSubmitting }) => {
+      if (!currencies) return
       const metadataValues: PoolMetadataInput = { ...values } as any
       if (!address) return
 
-      const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
-      const currencyDecimals = currencies.find((c) => c.value === values.currency)!.decimals
+      const currency = currencies.find((c) => c.symbol === values.currency)!
 
       const poolId = await centrifuge.pools.getAvailablePoolId()
       const collectionId = await centrifuge.nfts.getAvailableCollectionId()
@@ -250,8 +248,8 @@ const CreatePoolForm: React.VFC = () => {
           poolId,
           collectionId,
           tranches,
-          currency,
-          CurrencyBalance.fromFloat(values.maxReserve, currencyDecimals),
+          currency.key,
+          CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
           metadataValues,
         ],
         { createType: config.poolCreationType }
@@ -318,7 +316,7 @@ const CreatePoolForm: React.VFC = () => {
               <>
                 {proposeFee && (
                   <Text variant="body3">
-                    Deposit required: ~{formatBalance(proposeFee, balances?.native.symbol, 1)}
+                    Deposit required: ~{formatBalance(proposeFee, balances?.native.currency.symbol, 1)}
                   </Text>
                 )}
                 <Button variant="secondary" onClick={() => history.goBack()}>
@@ -384,7 +382,7 @@ const CreatePoolForm: React.VFC = () => {
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}
-                      options={currencies}
+                      options={currencies?.map((c) => ({ value: c.symbol, label: c.symbol })) ?? []}
                       placeholder="Select..."
                     />
                   )}
@@ -398,7 +396,7 @@ const CreatePoolForm: React.VFC = () => {
                       name="maxReserve"
                       label="Initial maximum reserve*"
                       placeholder="0"
-                      currency={currencies.find((c) => c.value === form.values.currency)?.label}
+                      currency={form.values.currency}
                       variant="small"
                       onChange={(value) => form.setFieldValue('maxReserve', value)}
                     />

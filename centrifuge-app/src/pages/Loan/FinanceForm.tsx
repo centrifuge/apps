@@ -1,14 +1,13 @@
-import { CurrencyBalance, Loan as LoanType } from '@centrifuge/centrifuge-js'
-import { LoanInfo } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { CurrencyBalance, findBalance, Loan as LoanType, LoanInfo } from '@centrifuge/centrifuge-js'
 import { Button, Card, CurrencyInput, IconInfo, InlineFeedback, Shelf, Stack, Text } from '@centrifuge/fabric'
 import Decimal from 'decimal.js-light'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { config } from '../../config'
 import { Dec } from '../../utils/Decimal'
-import { formatBalance, getCurrencySymbol, roundDown } from '../../utils/formatting'
+import { formatBalance, roundDown } from '../../utils/formatting'
 import { useAddress } from '../../utils/useAddress'
-import { getBalanceDec, useBalances } from '../../utils/useBalances'
+import { useBalances } from '../../utils/useBalances'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { useAvailableFinancing } from '../../utils/useLoans'
@@ -29,7 +28,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const pool = usePool(loan.poolId)
   const address = useAddress()
   const balances = useBalances(address)
-  const balance = balances && pool ? getBalanceDec(balances, pool.currency) : Dec(0)
+  const balance = balances ? findBalance(balances.currencies, pool.currency.key)!.balance.toDecimal() : Dec(0)
   const { current: availableFinancing, initial: initialCeiling } = useAvailableFinancing(loan.poolId, loan.id)
   const { execute: doFinanceTransaction, isLoading: isFinanceLoading } = useCentrifugeTransaction(
     'Finance asset',
@@ -70,7 +69,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = CurrencyBalance.fromFloat(values.amount, pool!.currencyDecimals)
+      const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
       doFinanceTransaction([loan.poolId, loan.id, amount])
       actions.setSubmitting(false)
     },
@@ -82,7 +81,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
       amount: '',
     },
     onSubmit: (values, actions) => {
-      const amount = CurrencyBalance.fromFloat(values.amount, pool!.currencyDecimals)
+      const amount = CurrencyBalance.fromFloat(values.amount, pool.currency.decimals)
       doRepayTransaction([loan.poolId, loan.id, amount])
       actions.setSubmitting(false)
     },
@@ -122,11 +121,13 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Available financing</Text>
             {/* availableFinancing needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">{formatBalance(roundDown(availableFinancing), pool?.currency, 2)}</Text>
+            <Text variant="heading3">{formatBalance(roundDown(availableFinancing), pool?.currency.symbol, 2)}</Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total financed</Text>
-            <Text variant="label1">{formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency, 2)}</Text>
+            <Text variant="label1">
+              {formatBalance(loan.totalBorrowed?.toDecimal() ?? 0, pool?.currency.symbol, 2)}
+            </Text>
           </Shelf>
         </Stack>
         {loan.status === 'Active' &&
@@ -141,7 +142,7 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                     max(availableFinancing.toNumber(), 'Amount exceeds available financing'),
                     max(
                       maxBorrow.toNumber(),
-                      `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency, 2)})`
+                      `Amount exceeds available reserve (${formatBalance(maxBorrow, pool?.currency.symbol, 2)})`
                     )
                   )}
                 >
@@ -150,9 +151,9 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                       {...field}
                       label="Amount"
                       errorMessage={meta.touched ? meta.error : undefined}
-                      secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency, 2)} available`}
+                      secondaryLabel={`${formatBalance(roundDown(maxBorrow), pool?.currency.symbol, 2)} available`}
                       disabled={isFinanceLoading}
-                      currency={getCurrencySymbol(pool?.currency)}
+                      currency={pool?.currency.symbol}
                       onChange={(value: number) => form.setFieldValue('amount', value)}
                       onSetMax={() => form.setFieldValue('amount', maxBorrow)}
                     />
@@ -162,8 +163,8 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                   <Shelf alignItems="flex-start" justifyContent="start" gap="4px">
                     <IconInfo size="iconMedium" />
                     <Text variant="body3">
-                      The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency)}) is smaller than
-                      the available financing
+                      The pool&apos;s available reserve ({formatBalance(poolReserve, pool?.currency.symbol)}) is smaller
+                      than the available financing
                     </Text>
                   </Shelf>
                 )}
@@ -182,11 +183,11 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
           <Shelf justifyContent="space-between">
             <Text variant="heading3">Outstanding</Text>
             {/* outstandingDebt needs to be rounded down, b/c onSetMax displays the rounded down value as well */}
-            <Text variant="heading3">{formatBalance(roundDown(debt), pool?.currency, 2)}</Text>
+            <Text variant="heading3">{formatBalance(roundDown(debt), pool?.currency.symbol, 2)}</Text>
           </Shelf>
           <Shelf justifyContent="space-between">
             <Text variant="label1">Total repaid</Text>
-            <Text variant="label1">{formatBalance(loan?.totalRepaid || 0, pool?.currency, 2)}</Text>
+            <Text variant="label1">{formatBalance(loan?.totalRepaid || 0, pool?.currency.symbol, 2)}</Text>
           </Shelf>
         </Stack>
 
@@ -208,9 +209,9 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                         {...field}
                         label="Amount"
                         errorMessage={meta.touched ? meta.error : undefined}
-                        secondaryLabel={`${formatBalance(roundDown(maxRepay), pool?.currency, 2)} available`}
+                        secondaryLabel={`${formatBalance(roundDown(maxRepay), pool?.currency.symbol, 2)} available`}
                         disabled={isRepayLoading || isRepayAllLoading}
-                        currency={getCurrencySymbol(pool?.currency)}
+                        currency={pool?.currency.symbol}
                         onChange={(value) => form.setFieldValue('amount', value)}
                         onSetMax={() => form.setFieldValue('amount', maxRepay)}
                       />
@@ -219,8 +220,8 @@ export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
                 </Field>
                 {balance.lessThan(debt) && (
                   <InlineFeedback>
-                    Your wallet balance ({formatBalance(roundDown(balance), pool?.currency, 2)}) is smaller than the
-                    outstanding balance.
+                    Your wallet balance ({formatBalance(roundDown(balance), pool?.currency.symbol, 2)}) is smaller than
+                    the outstanding balance.
                   </InlineFeedback>
                 )}
                 <Stack gap={1} px={1}>
