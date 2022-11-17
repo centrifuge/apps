@@ -44,7 +44,7 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
           <LabelValueStack label="Tokens" value={pool.tranches.length} />
           <LabelValueStack
             label="Capacity"
-            value={formatBalance(totalTrancheCapacity.toFloat() + pool.reserve.total.toFloat(), pool.currency)}
+            value={formatBalance(totalTrancheCapacity.toFloat() + pool.reserve.total.toFloat(), pool.currency.symbol)}
           />
         </Shelf>
       }
