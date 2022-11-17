@@ -1,6 +1,6 @@
 # apps
 
-Monorepo for the Tinlake applications.
+Monorepo for the Centrifuge applications.
 
 ## Setup
 

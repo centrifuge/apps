@@ -37,7 +37,7 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool, metadata }) => {
         <Shelf gap="6" justifyContent="flex-start">
           <LabelValueStack
             label={<Tooltips type="valueLocked" variant="secondary" />}
-            value={formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency)}
+            value={formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency.symbol)}
           />
           <LabelValueStack label={<Tooltips type="age" variant="secondary" />} value={getAge(pool?.createdAt)} />
           <LabelValueStack label={<Tooltips type="averageAssetMaturity" variant="secondary" />} value={avgMaturity} />

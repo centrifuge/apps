@@ -4,7 +4,6 @@ import { Field, FieldProps, Form, FormikErrors, FormikProvider, useFormik } from
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { config } from '../../config'
-import { getCurrencySymbol } from '../../utils/formatting'
 import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePoolMetadata } from '../../utils/usePools'
@@ -46,7 +45,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
     },
     onSubmit: (values, { setSubmitting }) => {
       if (!riskGroup) return
-      const value = CurrencyBalance.fromFloat(values.value, pool.currencyDecimals)
+      const value = CurrencyBalance.fromFloat(values.value, pool.currency.decimals)
       const maturityDate = new Date(form.values.maturityDate).toISOString()
       const ratePerSec = fee!
 
@@ -111,7 +110,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
               variant="small"
               label="Collateral value*"
               errorMessage={meta.touched ? meta.error : undefined}
-              currency={getCurrencySymbol(pool?.currency)}
+              currency={pool?.currency.symbol}
               placeholder="0.00"
               name="value"
               onChange={(value) => form.setFieldValue('value', value)}

@@ -54,7 +54,7 @@ const PriceYieldChart: React.VFC<{ trancheId: string }> = ({ trancheId }) => {
                 domain={['dataMin - 0.2', 'dataMax + 0.2']}
               />
               <CartesianGrid stroke={theme.colors.borderSecondary} />
-              <Tooltip content={<CustomizedTooltip currency={pool?.currency || ''} precision={4} />} />
+              <Tooltip content={<CustomizedTooltip currency={pool?.currency.symbol || ''} precision={4} />} />
               <Line dot={false} dataKey="tokenPrice" stroke={theme.colors.accentPrimary} name="Pool value" />
             </ComposedChart>
           </ResponsiveContainer>
@@ -78,7 +78,7 @@ const CustomLegend: React.VFC<{
       <Grid pl="4" pb="4" columns={6} gap="3" width="100%">
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentPrimary}>
           <Text variant="label2">Token price</Text>
-          <Text variant="body2">{formatBalance(data.tokenPrice, pool?.currency, 4)}</Text>
+          <Text variant="body2">{formatBalance(data.tokenPrice, pool?.currency.symbol, 4)}</Text>
         </Stack>
       </Grid>
     </Shelf>

@@ -31,7 +31,7 @@ export function useLoanNft(poolId: string, loanId?: string) {
 
 export function useCollateralCollectionId(poolId: string) {
   const pool = usePool(poolId)
-  const collateralCollectionId = new BN(pool!.loanCollectionId!).add(new BN(1)).toString()
+  const collateralCollectionId = new BN(pool.loanCollectionId!).add(new BN(1)).toString()
   return collateralCollectionId
 }
 

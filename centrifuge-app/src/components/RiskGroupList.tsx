@@ -90,7 +90,7 @@ const RiskGroupList: React.FC = () => {
     () =>
       new CurrencyBalance(
         activeLoans?.reduce((prev, curr) => prev.add(curr?.outstandingDebt || new BN(0)), new BN(0)) || new BN(0),
-        pool?.currencyDecimals ?? 18
+        pool.currency.decimals
       ),
     [activeLoans, pool]
   )
@@ -120,11 +120,11 @@ const RiskGroupList: React.FC = () => {
 
         const amount = new CurrencyBalance(
           loansByRiskGroup?.reduce((prev, curr) => prev?.add(curr?.outstandingDebt || new BN(0)), new BN(0)),
-          pool?.currencyDecimals ?? 18
+          pool.currency.decimals
         )
         if (!amount || !totalAmountsSum) {
           return {
-            currency: pool?.currency || '',
+            currency: pool.currency.symbol || '',
             name: group.name,
             amount: '',
             share: '',
@@ -134,7 +134,7 @@ const RiskGroupList: React.FC = () => {
         }
 
         return {
-          currency: pool?.currency || '',
+          currency: pool?.currency.symbol || '',
           name: group.name,
           amount: amount.toDecimal().toString(),
           share: Dec(amount?.toDecimal()).div(totalAmountsSum.toDecimal()).mul(100).toDecimalPlaces(0).toString(),
@@ -181,7 +181,7 @@ const RiskGroupList: React.FC = () => {
       ),
       amount: (
         <Text variant="body2" fontWeight={600}>
-          {formatBalance(totalAmountsSum || 0, pool?.currency)}
+          {formatBalance(totalAmountsSum || 0, pool?.currency.symbol)}
         </Text>
       ),
       name: (
@@ -193,7 +193,7 @@ const RiskGroupList: React.FC = () => {
       riskAdjustment: <Text variant="body2" fontWeight={600}>{`Avg. ${avgRiskAdjustment.toString()}%`}</Text>,
       color: '',
       labelColor: '',
-      currency: pool?.currency || '',
+      currency: pool?.currency.symbol || '',
     }
   }, [riskGroups, pool?.currency, totalSharesSum, totalAmountsSum])
 
