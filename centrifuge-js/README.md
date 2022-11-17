@@ -215,17 +215,17 @@ Along with the regular tx options the `createPool()` supports an additional opti
 
 Like creating pools, minting assets also requires a series of transactions to be executed sequentially.
 
-> This guide does not cover authentication (yet), but it is required to make any requests to the POD.
+> This guide does not cover authentication (yet), but it is required to make any request to the POD.
 
 The following steps must be executed in order to mint an asset on-chain:
 
 1. `cent.pod.createDocument`: Create a document containing private and public data on the POD. The POD will handle pinning the public metadata to IPFS internally
-2. `cent.pod.commitDocumentAndMintNft`: Commit the document to the POD. This will automatically make a request on chain to mint the collateral NFT and will add it to a collection.
-3. `cent.pools.createLoan` Create the loan (asset) from the collateral NFT on-chain. This will require a signature by the wallet making the request.
+2. `cent.pod.commitDocumentAndMintNft`: Commit the document to the POD. This will automatically make a request on chain to mint the collateral NFT and will add it to the supplied collection.
+3. `cent.pools.createLoan` Create the loan (asset) from the collateral NFT on-chain. This is a transaction/extrinsic on chain and will therefore require a signature.
 
 ## `centrifuge.pod.createDocument([...args], options): { documentId: string }`
 
-First, create a document on the POD. This should include public and private asset data. The data will be stored encrypted in the POD. This tx does not require a signature, the POD will sign for it. Upon completion the request will return the newly created document ID which will be needed in the following steps.
+First, create a document on the POD. This should include public and private asset data. The private data will be stored and encrypted in the POD. Public data will be pinned to IPFS. This tx does not require a signature, the POD will sign for it. Upon completion the request will return the newly created document ID which will be needed in the following steps.
 
 ### `createDocument` args
 
@@ -263,7 +263,7 @@ TBD
 
 ## `cent.pools.createLoan([...args], options): Observable<ISubmittableResult>`
 
-To assign the newly created asset to a pool the job must be completed. Make sure to use a connected instance of CentrifugeJS to make this request as it will require a signature.
+To assign the newly created asset to a pool the job must be completed first. Make sure to use a connected instance of CentrifugeJS to that the transaction can be signed.
 
 ### `createLoan` args
 
