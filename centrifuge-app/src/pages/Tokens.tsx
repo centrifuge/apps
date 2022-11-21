@@ -47,12 +47,16 @@ const TokenOverview: React.FC = () => {
             ...tranche,
             poolId: tranche.poolId,
             poolMetadata: tranche.poolMetadata,
+            poolCurrency: tranche.poolCurrency.symbol,
             // feeToApr is a temporary solution for calculating yield
             // bc we don't have a way to query for historical token prices yet
             // Use this formula when prices can be fetched: https://docs.centrifuge.io/learn/terms/#30d-drop-yield
             yield: tranche.interestRatePerSec ? tranche.interestRatePerSec.toAprPercent().toNumber() : null,
             protection: tranche.minRiskBuffer?.toPercent().toNumber() || 0,
-            capacity: tranche.capacity.toFloat(),
+            capacity: tranche.capacity
+              .toDecimal()
+              .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
+              .toNumber(),
             valueLocked: tranche.totalIssuance
               .toDecimal()
               .mul(tranche.tokenPrice?.toDecimal() ?? Dec(0))
@@ -87,7 +91,11 @@ const TokenOverview: React.FC = () => {
 
   return (
     <Stack gap={0} flex={1} mb="6">
-      <PageHeader subtitle={config.tokensPageSubtitle} title="Investments" actions={<MenuSwitch />} />
+      <PageHeader
+        subtitle={`Pools and tokens ${config.network === 'centrifuge' ? 'of real-world assets' : ''}`}
+        title="Investments"
+        actions={<MenuSwitch />}
+      />
       {tokens?.length ? (
         <>
           <PageSummary data={pageSummaryData} />
