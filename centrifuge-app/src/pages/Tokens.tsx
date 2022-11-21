@@ -92,7 +92,7 @@ const TokenOverview: React.FC = () => {
   return (
     <Stack gap={0} flex={1} mb="6">
       <PageHeader
-        subtitle={`Pools and tokens ${config.network === 'centrifuge' ? 'of real-world assets' : ''}`}
+        subtitle={`Pools and tokens${config.network === 'centrifuge' ? ' of real-world assets' : ''}`}
         title="Investments"
         actions={<MenuSwitch />}
       />
