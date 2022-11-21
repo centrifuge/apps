@@ -69,7 +69,6 @@ type EnvironmentConfig = {
   baseCurrency: 'AUSD'
   assetClasses: string[]
   defaultAssetClass: string
-  tokensPageSubtitle: string
   defaultLoanType: LoanInfo['type']
   poolCreationType: TransactionOptions['createType']
   useDocumentNfts: boolean
@@ -91,7 +90,6 @@ const ALTAIR: EnvironmentConfig = {
   baseCurrency: 'AUSD',
   assetClasses: ['Art NFTs'],
   defaultAssetClass: 'Art NFTs',
-  tokensPageSubtitle: 'Art NFTs',
   defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
   useDocumentNfts: true,
@@ -116,7 +114,6 @@ const CENTRIFUGE: EnvironmentConfig = {
     'Project Finance',
   ],
   defaultAssetClass: 'Consumer Credit',
-  tokensPageSubtitle: 'Tokens of real-world assets',
   defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
   useDocumentNfts: true,

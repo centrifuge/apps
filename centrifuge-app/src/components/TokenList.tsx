@@ -17,6 +17,7 @@ export type TokenTableData = {
   id: string
   seniority: number
   poolId: string
+  poolCurrency: string
 }
 
 type Props = {
@@ -54,7 +55,7 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Value locked" />,
-    cell: (token: TokenTableData) => formatBalance(token?.valueLocked, token.currency.symbol),
+    cell: (token: TokenTableData) => formatBalance(token?.valueLocked, token.poolCurrency),
     flex: '4',
     sortKey: 'valueLocked',
   },
@@ -62,7 +63,7 @@ const columns: Column[] = [
     header: <SortableTableHeader label="Capacity" />,
     cell: (token: TokenTableData) => (
       <Text variant="body2" fontWeight={600} color={token.capacity > 0 ? 'statusOk' : 'statusWarning'}>
-        {formatBalanceAbbreviated(token.capacity, token.currency.symbol)}
+        {formatBalanceAbbreviated(token.capacity, token.poolCurrency)}
       </Text>
     ),
     flex: '4',
