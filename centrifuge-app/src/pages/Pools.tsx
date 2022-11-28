@@ -26,11 +26,11 @@ export const PoolsPage: React.FC = () => {
 const Pools: React.FC = () => {
   const pools = usePools()
 
-  const poolMetas = useMetadataMulti<PoolMetadata>(pools?.map((p) => p.metadata) ?? [])
+  const poolMetas = useMetadataMulti<PoolMetadata>(pools?.filter((p) => !!p.metadata).map((p) => p.metadata) ?? [])
 
   const [listedPools, listedTokens] = React.useMemo(
     () => {
-      const listedPools = pools?.filter((_, i) => poolMetas[i].data?.pool?.listed)
+      const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed)
       const listedTokens = listedPools?.flatMap((p) => p.tranches)
 
       return [listedPools, listedTokens]

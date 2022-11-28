@@ -602,6 +602,7 @@ export function getPoolsModule(inst: Centrifuge) {
                   maxReserve.toString(),
                   pinnedMetadata.ipfsHash
                 ),
+                api.tx.poolRegistry.setMetadata(inst.getSignerAddress(), poolId, pinnedMetadata.ipfsHash),
                 api.tx.permissions.add(
                   { PoolRole: 'PoolAdmin' },
                   admin,
@@ -1348,9 +1349,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
         const $prices = combineLatest(
           // @ts-expect-error
-          pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<
-            Codec[] | null
-          >[]
+          pools.map((p) => api.rpc.pools.trancheTokenPrices(p.id).pipe(startWith(null))) as Observable<Codec[] | null>[]
         )
 
         const $block = inst.getBlocks().pipe(take(1))
