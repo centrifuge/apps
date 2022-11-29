@@ -1,4 +1,4 @@
-import { Box, Button, IconX, Shelf } from '@centrifuge/fabric'
+import { Box, Button, Flex, IconX, Shelf, Stack } from '@centrifuge/fabric'
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AccountsMenu } from '../../components/AccountsMenu'
@@ -12,12 +12,13 @@ const Logo = config.logo
 export const OnboardingPage: React.FC = () => {
   const [activeStep, setActiveStep] = useState(1)
   const [investorType, setInvestorType] = useState<InvestorTypes>()
+  const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = useState(false)
 
   const nextStep = () => setActiveStep((current) => (current < 3 ? current + 1 : current))
 
   return (
-    <Box backgroundColor="#F9F9F9" paddingBottom={5} display="flex" height="100%" flexDirection="column">
-      <Box display="grid" gridTemplateColumns="auto 400px" justifyContent="space-between">
+    <Flex backgroundColor="backgroundSecondary" paddingBottom={5} height="100%" flexDirection="column">
+      <Shelf justifyContent="space-between">
         <Shelf>
           <Link to="/">
             <Box px={2}>
@@ -26,48 +27,52 @@ export const OnboardingPage: React.FC = () => {
           </Link>
           <Box>Pool</Box>
         </Shelf>
-        <Box px={8} alignSelf="center">
+        <Box px={6} alignSelf="center" width="400px">
           <AccountsMenu />
         </Box>
-      </Box>
-      <Box
-        display="grid"
-        gridTemplateColumns="315px 2px auto auto"
+      </Shelf>
+      <Shelf
         mx="150px"
         my={5}
         height="100%"
         borderRadius="18px"
-        backgroundColor="white"
+        backgroundColor="backgroundPrimary"
+        alignItems="flex-start"
       >
-        <Box paddingTop={10} paddingLeft={7} paddingRight={3} paddingBottom={6}>
+        <Box paddingTop={10} paddingLeft={7} paddingRight={3} paddingBottom={6} width="300px">
           <Stepper activeStep={activeStep}>
             <Step label="Selector investor type" />
             <Step label="Identity verification" />
             <Step label="Sign subscription agreement" />
           </Stepper>
         </Box>
-        <Box height="100%" width="1px" backgroundColor="#E0E0E0" />
-        <Box
+        <Box height="100%" width="1px" backgroundColor="borderPrimary" />
+        <Stack
           paddingTop={10}
           paddingLeft={3}
           paddingRight={7}
           paddingBottom={6}
-          display="grid"
-          alignItems="space-between"
+          justifyContent="space-between"
+          height="100%"
         >
-          <InvestorType setInvestorType={setInvestorType} />
-          <Box alignSelf="flex-end">
-            <Button variant="secondary" onClick={nextStep}>
+          <InvestorType
+            investorType={investorType}
+            isAgreedToDataSharingAgreement={isAgreedToDataSharingAgreement}
+            setInvestorType={setInvestorType}
+            setIsAgreedToDataSharingAgreement={setIsAgreedToDataSharingAgreement}
+          />
+          <Box>
+            <Button variant="secondary" onClick={nextStep} disabled={!investorType || !isAgreedToDataSharingAgreement}>
               Next
             </Button>
           </Box>
-        </Box>
-        <Box paddingTop={4} paddingRight={4} justifySelf="flex-end">
+        </Stack>
+        <Box paddingTop={4} paddingRight={4}>
           <Link to="/">
-            <IconX color="black" />
+            <IconX color="textPrimary" />
           </Link>
         </Box>
-      </Box>
-    </Box>
+      </Shelf>
+    </Flex>
   )
 }

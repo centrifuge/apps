@@ -1,4 +1,4 @@
-import { Box } from '@centrifuge/fabric'
+import { Box, Flex, Shelf } from '@centrifuge/fabric'
 import React, { Children } from 'react'
 
 type EnrichedStepProps = {
@@ -22,31 +22,29 @@ export const Step = (props: StepProps & EnrichedStepProps) => {
 
   return (
     <>
-      <Box display="flex" gridColumnGap={2}>
-        <Box
-          backgroundColor={isActive ? 'black' : 'transparent'}
+      <Shelf gap={2}>
+        <Flex
+          backgroundColor={isActive ? 'textPrimary' : 'transparent'}
           border="2px solid"
-          borderColor={isActive ? 'black' : '#BDBDBD'}
-          width="28px"
+          borderColor={isActive ? 'textPrimary' : 'borderPrimary'}
           minWidth="28px"
           height="28px"
           justifyContent="center"
           alignItems="center"
-          display="flex"
           borderRadius="50px"
-          color={isActive ? 'white' : '#BDBDBD'}
+          color={isActive ? 'backgroundPrimary' : 'borderPrimary'}
         >
           {(count as number) + 1}
-        </Box>
-        <Box display="flex" justifyContent="center" alignItems="center">
+        </Flex>
+        <Flex justifyContent="center" alignItems="center" maxHeight="28px" height="28px">
           {label}
-        </Box>
-      </Box>
+        </Flex>
+      </Shelf>
       {!isFinal && (
         <Box
           height={(activeStep as number) - 1 > (count as number) ? '30px' : '80px'}
           width="2px"
-          backgroundColor={isActive ? 'black' : '#BDBDBD'}
+          backgroundColor={isActive ? 'textPrimary' : 'borderPrimary'}
           marginLeft="13px"
         />
       )}
