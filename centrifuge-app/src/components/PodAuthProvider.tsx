@@ -47,7 +47,7 @@ export const PodAuthProvider: React.FC = ({ children }) => {
       const proxy = proxies?.[address]?.find((p) => p.delegator === onBehalfOf)
       const type = proxy?.types.includes('Any') ? 'any' : proxy?.types.includes('PodAuth') ? 'pod_auth' : 'node_admin'
       // @ts-expect-error Signer type version mismatch
-      const { payload, token } = await cent.pod.signToken([address, onBehalfOf, type, selectedWallet?.signer])
+      const { payload, token } = await cent.auth.generateJw3t(address, onBehalfOf, type, selectedWallet?.signer)
       setTokens((prev) => ({ ...prev, [`${address}-${onBehalfOf}`]: { signed: token, payload } }))
     },
     [selectedWallet?.signer, cent, proxies]

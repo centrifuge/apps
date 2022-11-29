@@ -2522,6 +2522,7 @@ __metadata:
     styled-components: ^5.3.5
     styled-system: ^5.1.5
     typescript: ^4.7.4
+    universal-cookie: ^4.0.4
     vite: ^2.9.14
   languageName: unknown
   linkType: soft
@@ -10331,6 +10332,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/cookie@npm:^0.3.3":
+  version: 0.3.3
+  resolution: "@types/cookie@npm:0.3.3"
+  checksum: 35d603d5e620ed8a0c4dedcf6b6e19e4981a4c44d40402de39e53f041ce74bf66b40272a355db37271b9557709fd3e6dfc8fe6ea4031f59b8b16cf0606ea3797
+  languageName: node
+  linkType: hard
+
 "@types/cookies@npm:*":
   version: 0.7.7
   resolution: "@types/cookies@npm:0.7.7"
@@ -16889,7 +16897,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cookie@npm:^0.4.1":
+"cookie@npm:^0.4.0, cookie@npm:^0.4.1":
   version: 0.4.2
   resolution: "cookie@npm:0.4.2"
   checksum: e523edba738f58310840a05330a0ae81dc7b35b4047be8fbd50a751bd9f89b61abfa35217d8c3b885118bdf1e75ec01d0851470e49cc0ace22b726fb33a34bbb
@@ -34984,6 +34992,16 @@ resolve@1.1.7:
     unist-util-is: ^4.0.0
     unist-util-visit-parents: ^3.0.0
   checksum: 7af837673e377693cf4c7bd966d5e088b52bd4a9c6e92f9b16ae5760a31243f627fbf3432ada6541e2b9091b8096007cb22aa8439cbbf04613898773743302d3
+  languageName: node
+  linkType: hard
+
+"universal-cookie@npm:^4.0.4":
+  version: 4.0.4
+  resolution: "universal-cookie@npm:4.0.4"
+  dependencies:
+    "@types/cookie": ^0.3.3
+    cookie: ^0.4.0
+  checksum: 182b97a2dd6a368f1940f8dd2d0ec3908f1add6f651a6bd30dac1a8083dd7f64c35e0a7fd4b3c923004f4fe85e838d2996bcd0057061a2f494782f65c2a105fc
   languageName: node
   linkType: hard
 

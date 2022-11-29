@@ -1,4 +1,4 @@
-import { isWeb3Injected } from '@polkadot/extension-dapp'
+import { isWeb3Injected, web3Accounts, web3Enable } from '@polkadot/extension-dapp'
 import { getWalletBySource, getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
 import { Wallet, WalletAccount } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
@@ -14,6 +14,7 @@ type Web3ContextType = {
   accounts: Account[] | null
   selectedAccount: Account | null
   isConnecting: boolean
+  isLoading: boolean
   isWeb3Injected: boolean
   connect: (source?: string) => Promise<void>
   disconnect: () => void
@@ -41,6 +42,7 @@ export const Web3Provider: React.FC = ({ children }) => {
   const [selectedAccountAddress, setSelectedAccountAddress] = React.useState<string | null>(null)
   const [proxyAddress, setProxyAddress] = React.useState<string | null>(null)
   const [isConnecting, setIsConnecting] = React.useState(false)
+  const [isLoading, setIsLoading] = React.useState(true)
   const [selectedWallet, setSelectedWallet] = React.useState<Wallet | null>(null)
   const unsubscribeRef = React.useRef<(() => void) | null>()
   const cent = useCentrifuge()
@@ -157,6 +159,22 @@ export const Web3Provider: React.FC = ({ children }) => {
     }
   }
 
+  async function getWalletStatus() {
+    try {
+      await web3Enable('centrifuge-app')
+      if (isWeb3Injected) {
+        await web3Accounts()
+      }
+    } catch {
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  React.useEffect(() => {
+    getWalletStatus()
+  }, [])
+
   React.useEffect(() => {
     if (!triedEager && localStorage.getItem('web3Persist')) {
       tryReconnect()
@@ -177,6 +195,7 @@ export const Web3Provider: React.FC = ({ children }) => {
       accounts,
       selectedAccount: accounts?.find((acc) => acc.address === selectedAccountAddress) ?? null,
       isConnecting,
+      isLoading,
       isWeb3Injected,
       connect,
       disconnect,
@@ -194,6 +213,7 @@ export const Web3Provider: React.FC = ({ children }) => {
       isConnecting,
       connect,
       disconnect,
+      isLoading,
       selectedWallet,
       selectAccount,
       selectProxy,
