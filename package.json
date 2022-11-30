@@ -2,12 +2,11 @@
   "private": true,
   "workspaces": [
     "fabric",
-    "onboarding-api",
     "centrifuge-js",
     "centrifuge-app",
     "centrifuge-react",
     "simulation-tests",
-    "onboarding-ui",
+    "onboarding-api",
     "faucet-api"
   ],
   "devDependencies": {
