@@ -602,7 +602,6 @@ export function getPoolsModule(inst: Centrifuge) {
                   maxReserve.toString(),
                   pinnedMetadata.ipfsHash
                 ),
-                api.tx.poolRegistry.setMetadata(inst.getSignerAddress(), poolId, pinnedMetadata.ipfsHash),
                 api.tx.permissions.add(
                   { PoolRole: 'PoolAdmin' },
                   admin,
