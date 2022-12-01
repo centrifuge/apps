@@ -1315,7 +1315,7 @@ export function getPoolsModule(inst: Centrifuge) {
 
         const metadataMap = rawMetadatas.reduce((acc, [key, metadataValue]) => {
           const poolId = formatPoolKey(key as StorageKey<[u32]>)
-          const metadata = metadataValue.toString()
+          const metadata = (metadataValue.toHuman() as { metadata: string }).metadata
           acc[poolId] = metadata
           return acc
         }, {} as Record<string, string>)
