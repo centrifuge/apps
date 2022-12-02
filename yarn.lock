@@ -1984,6 +1984,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.15.4":
+  version: 7.20.6
+  resolution: "@babel/runtime@npm:7.20.6"
+  dependencies:
+    regenerator-runtime: ^0.13.11
+  checksum: 384f319e814c424da551b428c9dbf8b70b2e0cb051617f5a95393eb56fa558fa901d0f69c4ac7dc0653d70ad5d8ffe4e94c2ec850826992462bdb30af50d1935
+  languageName: node
+  linkType: hard
+
 "@babel/runtime@npm:^7.19.4":
   version: 7.19.4
   resolution: "@babel/runtime@npm:7.19.4"
@@ -9170,6 +9179,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lodash@npm:^4.14.175":
+  version: 4.14.191
+  resolution: "@types/lodash@npm:4.14.191"
+  checksum: 396c2db72351426047ccb1d27bb3f7d237d8fec2edfc8b4af3c93ea27cdaeafb2a25e90e8faf7914b56ba2423de587d9bcfea8aacd289c28699de8c61aee8a21
+  languageName: node
+  linkType: hard
+
 "@types/long@npm:^4.0.0, @types/long@npm:^4.0.1":
   version: 4.0.2
   resolution: "@types/long@npm:4.0.2"
@@ -9615,6 +9631,13 @@ __metadata:
   version: 1.9.2
   resolution: "@types/yoga-layout@npm:1.9.2"
   checksum: a701328c5e3614847a92778b6b5e63e9d3fb8494f8aa807b21ef9359aff1b9b443c540e96fe7119008fc3572990afb8855d44864ddc250bc21a2aa1bd497f53c
+  languageName: node
+  linkType: hard
+
+"@types/yup@npm:^0":
+  version: 0.29.14
+  resolution: "@types/yup@npm:0.29.14"
+  checksum: 67e8bd02e762c0a80589b98a3b8dbcfa0a6d3a65936912425496f5d0ef2671e93cc01c617152a5a9b220b6fed9cdaf1cce43e5ad04976a6932d00437c62ac78b
   languageName: node
   linkType: hard
 
@@ -11989,6 +12012,26 @@ __metadata:
     type-is: ~1.6.18
     unpipe: 1.0.0
   checksum: b7bfe5463ecc2b1bece86d1798f973ab76585b41412670387a804f0ea5d3b886f2a57e0ce5744c4a29c17a3ddc17584d52a01c6a68b0a6bf74c3378bf6535c9e
+  languageName: node
+  linkType: hard
+
+"body-parser@npm:1.20.1":
+  version: 1.20.1
+  resolution: "body-parser@npm:1.20.1"
+  dependencies:
+    bytes: 3.1.2
+    content-type: ~1.0.4
+    debug: 2.6.9
+    depd: 2.0.0
+    destroy: 1.2.0
+    http-errors: 2.0.0
+    iconv-lite: 0.4.24
+    on-finished: 2.4.1
+    qs: 6.11.0
+    raw-body: 2.5.1
+    type-is: ~1.6.18
+    unpipe: 1.0.0
+  checksum: 473245b1ff1828a1c0b0aee08f6503aefba9ea5e0de21bf65f014295c262f4177e4d6e60f97e11eab15fb1dafdfeaaa9f5f99cbbf55682c3521905c68f593684
   languageName: node
   linkType: hard
 
@@ -17034,6 +17077,45 @@ __metadata:
   languageName: node
   linkType: hard
 
+"express@npm:^4.18.2":
+  version: 4.18.2
+  resolution: "express@npm:4.18.2"
+  dependencies:
+    accepts: ~1.3.8
+    array-flatten: 1.1.1
+    body-parser: 1.20.1
+    content-disposition: 0.5.4
+    content-type: ~1.0.4
+    cookie: 0.5.0
+    cookie-signature: 1.0.6
+    debug: 2.6.9
+    depd: 2.0.0
+    encodeurl: ~1.0.2
+    escape-html: ~1.0.3
+    etag: ~1.8.1
+    finalhandler: 1.2.0
+    fresh: 0.5.2
+    http-errors: 2.0.0
+    merge-descriptors: 1.0.1
+    methods: ~1.1.2
+    on-finished: 2.4.1
+    parseurl: ~1.3.3
+    path-to-regexp: 0.1.7
+    proxy-addr: ~2.0.7
+    qs: 6.11.0
+    range-parser: ~1.2.1
+    safe-buffer: 5.2.1
+    send: 0.18.0
+    serve-static: 1.15.0
+    setprototypeof: 1.2.0
+    statuses: 2.0.1
+    type-is: ~1.6.18
+    utils-merge: 1.0.1
+    vary: ~1.1.2
+  checksum: b3675a74759b8b38c4341507d26d50f01eda9e86d71ec03ff695b016fd7573702c591de6a63b28477cced061a9093603b8251e81da4a5b2081b6042a83755f0c
+  languageName: node
+  linkType: hard
+
 "ext-list@npm:^2.0.0":
   version: 2.2.2
   resolution: "ext-list@npm:2.2.2"
@@ -18016,15 +18098,18 @@ fsevents@^1.2.7:
   resolution: "functions@workspace:onboarding-api"
   dependencies:
     "@types/express": ^4.17.14
+    "@types/yup": ^0
     "@typescript-eslint/eslint-plugin": ^5.12.0
     "@typescript-eslint/parser": ^5.12.0
     eslint: ^8.9.0
     eslint-config-google: ^0.14.0
     eslint-plugin-import: ^2.25.4
+    express: ^4.18.2
     firebase-admin: ^10.0.2
     firebase-functions: ^3.18.0
     firebase-functions-test: ^0.2.0
     typescript: ^4.5.4
+    yup: ^0.32.11
   languageName: unknown
   linkType: soft
 
@@ -23395,6 +23480,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"nanoclone@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "nanoclone@npm:0.2.1"
+  checksum: f624fe519818ac2ab9fc2322d0bd8b54def4c0080123e7e4fa4a8d5fa331862e057a5c8fa1923cce6445d011a66718454750058a16c3a68b1912058288cd71a2
+  languageName: node
+  linkType: hard
+
 "nanoid@npm:^3.3.1, nanoid@npm:^3.3.4":
   version: 3.3.4
   resolution: "nanoid@npm:3.3.4"
@@ -25625,6 +25717,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"property-expr@npm:^2.0.4":
+  version: 2.0.5
+  resolution: "property-expr@npm:2.0.5"
+  checksum: 6d46a345eb75d6bcba3adb8ce932d4b273267e2dd4acfed2516cc520f6791be50f61d3610e7f2a70f8b209e56f8cf94c9e1e506b8f8f273e0213888ab234a188
+  languageName: node
+  linkType: hard
+
 "property-information@npm:^5.0.0, property-information@npm:^5.3.0":
   version: 5.6.0
   resolution: "property-information@npm:5.6.0"
@@ -25876,7 +25975,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"qs@npm:^6.10.0, qs@npm:^6.9.6":
+"qs@npm:6.11.0, qs@npm:^6.10.0, qs@npm:^6.9.6":
   version: 6.11.0
   resolution: "qs@npm:6.11.0"
   dependencies:
@@ -26608,7 +26707,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"regenerator-runtime@npm:^0.13.10":
+"regenerator-runtime@npm:^0.13.10, regenerator-runtime@npm:^0.13.11":
   version: 0.13.11
   resolution: "regenerator-runtime@npm:0.13.11"
   checksum: b7c850f32500838961c073b885f0b18671867e2f3626d0c6de18fc269147f57d1777fe42d045cb1b9c0dc31a69a5c456d684afeb9adb05cbd788dac521403e68
@@ -29262,6 +29361,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"toposort@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "toposort@npm:2.0.2"
+  checksum: 9e70bf92de5e65e77e89065f34b642a9ae75be5cf4896152b5a131ca66c77c4d9edf056942e988e29b534a83643f38860e148aa939cd3c489d00abbf5639f54f
+  languageName: node
+  linkType: hard
+
 "touch@npm:^3.1.0":
   version: 3.1.0
   resolution: "touch@npm:3.1.0"
@@ -31308,6 +31414,21 @@ fsevents@^1.2.7:
   dependencies:
     "@types/yoga-layout": 1.9.2
   checksum: e8db26850d5ea55d0538522245c2343d555e82d3528837cfb371040b4a877a7a4860aeb325e15fa5061bcca0a2dac6abd5af2051f584048009f2c5b4bb8afdf7
+  languageName: node
+  linkType: hard
+
+"yup@npm:^0.32.11":
+  version: 0.32.11
+  resolution: "yup@npm:0.32.11"
+  dependencies:
+    "@babel/runtime": ^7.15.4
+    "@types/lodash": ^4.14.175
+    lodash: ^4.17.21
+    lodash-es: ^4.17.21
+    nanoclone: ^0.2.1
+    property-expr: ^2.0.4
+    toposort: ^2.0.2
+  checksum: 1750cefef00e30132412bd5479c680474af65935a10ec78ab9144d6ade9663962a3e2124ce2de403e7418dee62380ae8ee0863a473063d5ef58a8524ad1ce261
   languageName: node
   linkType: hard
 

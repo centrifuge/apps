@@ -3,7 +3,7 @@
     "module": "commonjs",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "outDir": "dist",
+    "outDir": "lib",
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
