@@ -5,8 +5,10 @@ import { useWeb3 } from './Web3Provider'
 
 const PodAuthContext = React.createContext<{
   tokens: Record<string, { signed: string; payload: any } | undefined>
-  login: (address: string, onBehalfOf: string) => Promise<void>
+  login: (address: string) => Promise<void>
 }>(null as any)
+
+const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'NodeAdmin']
 
 function getPersisted() {
   try {
@@ -18,7 +20,7 @@ function getPersisted() {
 
 export const PodAuthProvider: React.FC = ({ children }) => {
   const [tokens, setTokens] = React.useState<Record<string, { signed: string; payload: any } | undefined>>(getPersisted)
-  const { selectedWallet, proxies } = useWeb3()
+  const { selectedWallet, proxy } = useWeb3()
   const cent = useCentrifuge()
 
   React.useEffect(() => {
@@ -43,14 +45,23 @@ export const PodAuthProvider: React.FC = ({ children }) => {
   }, [])
 
   const login = React.useCallback(
-    async (address: string, onBehalfOf: string) => {
-      const proxy = proxies?.[address]?.find((p) => p.delegator === onBehalfOf)
-      const type = proxy?.types.includes('Any') ? 'any' : proxy?.types.includes('PodAuth') ? 'pod_auth' : 'node_admin'
+    async (address: string) => {
       // @ts-expect-error Signer type version mismatch
-      const { payload, token } = await cent.auth.generateJw3t(address, onBehalfOf, type, selectedWallet?.signer)
-      setTokens((prev) => ({ ...prev, [`${address}-${onBehalfOf}`]: { signed: token, payload } }))
+      const { payload, token } = await cent.auth.generateJw3t(address, selectedWallet?.signer)
+
+      if (proxy) {
+        const { delegator, types } = proxy
+
+        const isAuthorizedProxy = AUTHORIZED_POD_PROXY_TYPES.some((proxyType) => types.includes(proxyType))
+
+        if (isAuthorizedProxy) {
+          setTokens((prev) => ({ ...prev, [`${address}-${delegator}`]: { signed: token, payload } }))
+        }
+      } else {
+        setTokens((prev) => ({ ...prev, [address]: { signed: token, payload } }))
+      }
     },
-    [selectedWallet?.signer, cent, proxies]
+    [selectedWallet?.signer, cent, proxy]
   )
 
   const ctx = React.useMemo(
@@ -90,7 +101,7 @@ export function usePodAuth(podUrl?: string | null | undefined) {
     if (!address) return
     setIsSigning(true)
     try {
-      await ctx.login(address, proxy?.delegator ?? address)
+      await ctx.login(address)
     } finally {
       setIsSigning(false)
     }

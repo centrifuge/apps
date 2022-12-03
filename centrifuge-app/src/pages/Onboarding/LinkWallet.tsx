@@ -14,37 +14,20 @@ const cookies = new Cookies()
 
 export const LinkWallet = ({ nextStep, isAuth, refetchAuth }: Props) => {
   const cent = useCentrifuge()
-  const { proxy, proxies, selectedWallet, selectedAccount, connect } = useWeb3()
+  const { selectedWallet, selectedAccount, connect, proxy } = useWeb3()
 
   const handleLogin = async () => {
     try {
       if (selectedAccount?.address && selectedWallet?.signer) {
         const { address } = selectedAccount
 
-        const onBehalfOf = proxy?.delegator ?? address
-
-        const proxyDelegator = proxies?.[address]?.find((p) => p.delegator === onBehalfOf)
-
-        let proxyType: 'any' | 'pod_auth' | 'node_admin'
-
-        if (proxyDelegator?.types.includes('Any')) {
-          proxyType = 'any'
-        } else {
-          if (proxyDelegator?.types.includes('PodAuth')) {
-            proxyType = 'pod_auth'
-          } else {
-            proxyType = 'node_admin'
-          }
-        }
-
         const { token } = await cent.auth.generateJw3t(
           address,
-          onBehalfOf,
-          proxyType,
           // @ts-expect-error Signer type version mismatch
           selectedWallet.signer
         )
-        cookies.set(`centrifuge-auth-${address}`, token)
+
+        cookies.set(proxy ? `centrifuge-auth-${address}-${proxy.delegator}` : `centrifuge-auth-${address}`, token)
         // update database with address
         refetchAuth()
       }

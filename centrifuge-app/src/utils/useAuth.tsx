@@ -5,8 +5,10 @@ import { useWeb3 } from '../components/Web3Provider'
 
 const cookies = new Cookies()
 
+const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
+
 export const useAuth = () => {
-  const { selectedAccount } = useWeb3()
+  const { selectedAccount, proxy } = useWeb3()
 
   const cent = useCentrifuge()
 
@@ -15,13 +17,34 @@ export const useAuth = () => {
     refetch: refetchAuth,
     isFetched: isAuthFetched,
   } = useQuery(
-    `authenticate-${selectedAccount?.address}`,
+    proxy ? `authenticate-${selectedAccount?.address}-${proxy?.delegator}` : `authenticate-${selectedAccount?.address}`,
     async () => {
-      const token = cookies.get(`centrifuge-auth-${selectedAccount?.address}`)
+      if (selectedAccount?.address) {
+        const { address } = selectedAccount
 
-      const payload = await cent.auth.verifyJw3t(token)
-      if (payload?.address === selectedAccount?.address) {
-        return true
+        if (proxy) {
+          const { delegator, types } = proxy
+
+          const token = cookies.get(`centrifuge-auth-${address}-${delegator}`)
+
+          if (token) {
+            const payload = await cent.auth.verifyJw3t(token)
+
+            if (payload) {
+              const isAuthorizedProxy = AUTHORIZED_ONBOARDING_PROXY_TYPES.some((proxyType) => types.includes(proxyType))
+
+              return isAuthorizedProxy
+            }
+          }
+        } else {
+          const token = cookies.get(`centrifuge-auth-${address}`)
+
+          if (token) {
+            const payload = await cent.auth.verifyJw3t(token)
+
+            return payload.address === address
+          }
+        }
       }
 
       return false
