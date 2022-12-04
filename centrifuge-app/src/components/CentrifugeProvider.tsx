@@ -30,6 +30,12 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ hash }),
           }),
+        auth: (address, authorizedProxyTypes, proxy) =>
+          fetchLambda('auth', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ address, authorizedProxyTypes, proxy }),
+          }),
       }),
     []
   )

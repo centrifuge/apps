@@ -1,6 +1,6 @@
 import { Box, Button, IconCheck, Shelf, Stack, Text } from '@centrifuge/fabric'
+import cookie from 'cookie'
 import { useMemo } from 'react'
-import Cookies from 'universal-cookie'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { useWeb3 } from '../../components/Web3Provider'
 
@@ -9,8 +9,6 @@ type Props = {
   nextStep: () => void
   refetchAuth: () => void
 }
-
-const cookies = new Cookies()
 
 export const LinkWallet = ({ nextStep, isAuth, refetchAuth }: Props) => {
   const { selectedWallet, selectedAccount, connect, proxy } = useWeb3()
@@ -27,9 +25,11 @@ export const LinkWallet = ({ nextStep, isAuth, refetchAuth }: Props) => {
           selectedWallet.signer
         )
 
-        cookies.set(proxy ? `centrifuge-auth-${address}-${proxy.delegator}` : `centrifuge-auth-${address}`, token, {
-          httpOnly: true,
-        })
+        document.cookie = cookie.serialize(
+          proxy ? `centrifuge-auth-${address}-${proxy.delegator}` : `centrifuge-auth-${address}`,
+          token
+        )
+
         // update database with address
         refetchAuth()
       }

@@ -11,7 +11,7 @@
     "start:centjs": "cd ../centrifuge-js && yarn start && cd ../centrifuge-app",
     "build": "yarn build:deps && yarn build:lambda && yarn build:types && yarn build:app",
     "build:deps": "yarn build-fabric && yarn build-centjs",
-    "build:lambda": "netlify-lambda build lambda",
+    "build:lambda": "netlify-lambda build lambda -c webpack.functions.js",
     "build:app": "vite build",
     "build:types": "tsc",
     "build-fabric": "cd ../fabric && yarn build && cd ../centrifuge-app",
@@ -22,6 +22,7 @@
   "dependencies": {
     "@centrifuge/centrifuge-js": "workspace:*",
     "@centrifuge/fabric": "workspace:*",
+    "@open-wc/webpack-import-meta-loader": "^0.4.7",
     "@polkadot/api": "^9.7.1",
     "@polkadot/extension-dapp": "^0.44.1",
     "@polkadot/react-identicon": "^2.8.2",
@@ -32,6 +33,7 @@
     "@subwallet/wallet-connect": "^0.2.3",
     "axios": "^0.24.0",
     "bn.js": "^5.2.1",
+    "cookie": "^0.5.0",
     "form-data": "^4.0.0",
     "formik": "^2.2.9",
     "jw3t": "^1.0.8",
@@ -47,11 +49,12 @@
     "rxjs": "^7.5.6",
     "styled-components": "^5.3.5",
     "styled-system": "^5.1.5",
-    "typescript": "^4.7.4",
-    "universal-cookie": "^4.0.4"
+    "typescript": "^4.7.4"
   },
   "devDependencies": {
     "@types/bn.js": "^5",
+    "@types/cookie": "^0",
+    "@types/open-wc__webpack-import-meta-loader": "^0",
     "@types/react": "^17.0.30",
     "@types/react-dom": "^17",
     "@types/react-helmet-async": "^1.0.3",
