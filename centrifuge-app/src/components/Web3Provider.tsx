@@ -165,7 +165,6 @@ export const Web3Provider: React.FC = ({ children }) => {
       if (isWeb3Injected) {
         await web3Accounts()
       }
-    } catch {
     } finally {
       setIsLoading(false)
     }

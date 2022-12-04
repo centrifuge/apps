@@ -13,8 +13,8 @@ type Props = {
 const cookies = new Cookies()
 
 export const LinkWallet = ({ nextStep, isAuth, refetchAuth }: Props) => {
-  const cent = useCentrifuge()
   const { selectedWallet, selectedAccount, connect, proxy } = useWeb3()
+  const cent = useCentrifuge()
 
   const handleLogin = async () => {
     try {
@@ -27,7 +27,9 @@ export const LinkWallet = ({ nextStep, isAuth, refetchAuth }: Props) => {
           selectedWallet.signer
         )
 
-        cookies.set(proxy ? `centrifuge-auth-${address}-${proxy.delegator}` : `centrifuge-auth-${address}`, token)
+        cookies.set(proxy ? `centrifuge-auth-${address}-${proxy.delegator}` : `centrifuge-auth-${address}`, token, {
+          httpOnly: true,
+        })
         // update database with address
         refetchAuth()
       }

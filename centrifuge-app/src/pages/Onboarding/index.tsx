@@ -12,6 +12,8 @@ import { LinkWallet } from './LinkWallet'
 
 const Logo = config.logo
 
+const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
+
 export const OnboardingPage: React.FC = () => {
   const { selectedAccount, isLoading } = useWeb3()
 
@@ -19,7 +21,7 @@ export const OnboardingPage: React.FC = () => {
 
   const [investorType, setInvestorType] = useState<InvestorTypes>()
   const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = useState(false)
-  const { isAuth, refetchAuth, isAuthFetched } = useAuth()
+  const { isAuth, refetchAuth, isAuthFetched } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
 
   const nextStep = () => setActiveStep((current) => current + 1)
 

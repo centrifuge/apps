@@ -55,21 +55,7 @@ export function getAuthModule() {
     return { payload, token }
   }
 
-  async function verifyJw3t(token: string) {
-    try {
-      const polkaJsVerifier = new jw3t.PolkaJsVerifier()
-      const verifier = new jw3t.JW3TVerifier(polkaJsVerifier)
-
-      const { payload } = await verifier.verify(token)
-
-      return payload
-    } catch {
-      return false
-    }
-  }
-
   return {
     generateJw3t,
-    verifyJw3t,
   }
 }

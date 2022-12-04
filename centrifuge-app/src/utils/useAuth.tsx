@@ -1,16 +1,9 @@
+import axios from 'axios'
 import { useQuery } from 'react-query'
-import Cookies from 'universal-cookie'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useWeb3 } from '../components/Web3Provider'
 
-const cookies = new Cookies()
-
-const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
-
-export const useAuth = () => {
+export const useAuth = (authorizedProxyTypes: string[]) => {
   const { selectedAccount, proxy } = useWeb3()
-
-  const cent = useCentrifuge()
 
   const {
     data: isAuth,
@@ -22,29 +15,17 @@ export const useAuth = () => {
       if (selectedAccount?.address) {
         const { address } = selectedAccount
 
-        if (proxy) {
-          const { delegator, types } = proxy
+        const response = await axios.get('/api/authenticateAndAuthorize.', {
+          data: {
+            address,
+            authorizedProxyTypes,
+            proxy,
+          },
+        })
 
-          const token = cookies.get(`centrifuge-auth-${address}-${delegator}`)
+        console.log('response', response)
 
-          if (token) {
-            const payload = await cent.auth.verifyJw3t(token)
-
-            if (payload) {
-              const isAuthorizedProxy = AUTHORIZED_ONBOARDING_PROXY_TYPES.some((proxyType) => types.includes(proxyType))
-
-              return isAuthorizedProxy
-            }
-          }
-        } else {
-          const token = cookies.get(`centrifuge-auth-${address}`)
-
-          if (token) {
-            const payload = await cent.auth.verifyJw3t(token)
-
-            return payload.address === address
-          }
-        }
+        return response.data
       }
 
       return false
