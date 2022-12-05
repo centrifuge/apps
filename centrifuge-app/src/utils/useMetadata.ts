@@ -43,7 +43,7 @@ async function metadataQueryFn<T extends Schema>(uri: string, cent: Centrifuge, 
 
     return result as Result<T>
   } catch (error) {
-    console.warn('Query error', error)
+    console.error('Metadata query error', error)
   }
 }
 
