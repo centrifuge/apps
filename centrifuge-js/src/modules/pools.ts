@@ -1235,8 +1235,8 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
-            api.events.poolSystem.Created.is(event) ||
-            api.events.poolSystem.Updated.is(event) ||
+            api.events.poolSystem.PoolCreated.is(event) ||
+            api.events.poolSystem.PoolUpdated.is(event) ||
             api.events.poolSystem.MaxReserveSet.is(event) ||
             api.events.poolRegistry.MetadataSet.is(event) ||
             api.events.poolSystem.EpochClosed.is(event) ||
