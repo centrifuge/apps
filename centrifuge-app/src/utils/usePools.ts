@@ -38,29 +38,31 @@ export function useTokens() {
 //   return result
 // }
 
-// export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
-//   const [result] = useCentrifugeQuery(
-//     ['monthlyPoolStates', poolId, from, to],
-//     (cent) => cent.pools.getMonthlyPoolStates([poolId, from, to]),
-//     {
-//       suspense: true,
-//     }
-//   )
+// @Hornebom
+export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
+  const [result] = useCentrifugeQuery(
+    ['monthlyPoolStates', poolId, from, to],
+    (cent) => cent.pools.getMonthlyPoolStates([poolId, from, to]),
+    {
+      suspense: true,
+    }
+  )
 
-//   return result
-// }
+  return result
+}
 
-// export function useInvestorTransactions(poolId: string, trancheId?: string, from?: Date, to?: Date) {
-//   const [result] = useCentrifugeQuery(
-//     ['investorTransactions', poolId, trancheId, from, to],
-//     (cent) => cent.pools.getInvestorTransactions([poolId, trancheId, from, to]),
-//     {
-//       suspense: true,
-//     }
-//   )
+// @Hornebom
+export function useInvestorTransactions(poolId: string, trancheId?: string, from?: Date, to?: Date) {
+  const [result] = useCentrifugeQuery(
+    ['investorTransactions', poolId, trancheId, from, to],
+    (cent) => cent.pools.getInvestorTransactions([poolId, trancheId, from, to]),
+    {
+      suspense: true,
+    }
+  )
 
-//   return result
-// }
+  return result
+}
 
 export function useDailyPoolStates(poolId: string) {
   const [result] = useCentrifugeQuery(
