@@ -126,9 +126,9 @@ export function useConstants() {
     async () => {
       const api = await centrifuge.getApiPromise()
       return {
-        minUpdateDelay: Number(api.consts.pools.minUpdateDelay.toHuman()),
-        maxTranches: Number(api.consts.pools.maxTranches.toHuman()),
-        challengeTime: Number(api.consts.pools.challengeTime.toHuman()),
+        minUpdateDelay: Number(api.consts.poolSystem.minUpdateDelay.toHuman()),
+        maxTranches: Number(api.consts.poolSystem.maxTranches.toHuman()),
+        challengeTime: Number(api.consts.poolSystem.challengeTime.toHuman()),
         maxWriteOffGroups: Number(api.consts.loans.maxWriteOffGroups.toHuman()),
       }
     },

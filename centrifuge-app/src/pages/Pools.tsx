@@ -30,7 +30,7 @@ const Pools: React.FC = () => {
 
   const [listedPools, listedTokens] = React.useMemo(
     () => {
-      const listedPools = pools?.filter((_, i) => poolMetas[i].data?.pool?.listed)
+      const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed)
       const listedTokens = listedPools?.flatMap((p) => p.tranches)
 
       return [listedPools, listedTokens]
