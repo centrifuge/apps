@@ -1,5 +1,4 @@
 import { Box, Button, IconCheck, Shelf, Stack, Text } from '@centrifuge/fabric'
-import cookie from 'cookie'
 import { useMemo } from 'react'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { useWeb3 } from '../../components/Web3Provider'
@@ -10,11 +9,13 @@ type Props = {
   refetchAuth: () => void
 }
 
+const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
+
 export const LinkWallet = ({ nextStep, isAuth, refetchAuth }: Props) => {
   const { selectedWallet, selectedAccount, connect, proxy } = useWeb3()
   const cent = useCentrifuge()
 
-  const handleLogin = async () => {
+  const login = async () => {
     try {
       if (selectedAccount?.address && selectedWallet?.signer) {
         const { address } = selectedAccount
@@ -25,13 +26,22 @@ export const LinkWallet = ({ nextStep, isAuth, refetchAuth }: Props) => {
           selectedWallet.signer
         )
 
-        document.cookie = cookie.serialize(
-          proxy ? `centrifuge-auth-${address}-${proxy.delegator}` : `centrifuge-auth-${address}`,
-          token
-        )
+        if (token) {
+          if (proxy) {
+            const { delegator, types } = proxy
 
-        // update database with address
-        refetchAuth()
+            const isAuthorizedProxy = AUTHORIZED_ONBOARDING_PROXY_TYPES.some((proxyType) => types.includes(proxyType))
+
+            if (isAuthorizedProxy) {
+              sessionStorage.setItem(`centrifuge-auth-${address}-${delegator}`, token)
+            }
+          } else {
+            sessionStorage.setItem(`centrifuge-auth-${address}`, token)
+          }
+
+          // update database with address
+          refetchAuth()
+        }
       }
     } catch {}
   }
@@ -90,7 +100,7 @@ export const LinkWallet = ({ nextStep, isAuth, refetchAuth }: Props) => {
             {connectButtonText}
           </button>
           <button
-            onClick={() => handleLogin()}
+            onClick={() => login()}
             disabled={!!isAuth}
             style={{
               background: 'none',

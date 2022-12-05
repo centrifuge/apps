@@ -2,40 +2,30 @@ import { Keyring } from '@polkadot/keyring'
 import { Signer } from '@polkadot/types/types'
 import * as jw3t from 'jw3t'
 
+type TokenOptions = {
+  [key in 'expiresAt']?: string
+}
+
 export function getAuthModule() {
-  async function generateJw3t(
-    address: string,
-    signer: Signer,
-    options: {
-      [key: string]: string
-    } = {}
-  ) {
+  async function generateJw3t(address: string, signer: Signer, options: TokenOptions = {}) {
     const header = {
       algorithm: 'sr25519',
       token_type: 'JW3T',
       address_type: 'ss58',
     }
 
-    const optionsWithSnakeCasedKeys = Object.keys(options).reduce((acc, key) => {
-      const snakeCaseKey = key.replace(/[A-Z]/g, (letter: string) => `_${letter.toLowerCase()}`)
-      acc[snakeCaseKey] = options[key]
-
-      return acc
-    }, {} as { [key: string]: string })
-
     const now = Math.floor(Date.now() / 1000)
 
-    const enrichedOptions = {
+    const defaultValues = {
       // default values
-      expires_at: String(now + 60 * 60 * 24 * 30), // 30 days
+      expires_at: options.expiresAt || String(now + 60 * 60 * 24 * 30), // 30 days
       not_before: String(now),
-      ...optionsWithSnakeCasedKeys,
     }
 
     const payload = {
       address,
       issued_at: String(now),
-      ...enrichedOptions,
+      ...defaultValues,
     }
 
     const content = new jw3t.JW3TContent(header, payload)
@@ -55,7 +45,28 @@ export function getAuthModule() {
     return { payload, token }
   }
 
+  async function authenticate(address: string, token: string) {
+    try {
+      const polkaJsVerifier = new jw3t.PolkaJsVerifier()
+      const verifier = new jw3t.JW3TVerifier(polkaJsVerifier)
+      const { payload } = await verifier.verify(token)
+
+      const expiry = Number(payload?.expires_at ?? 0) * 1000
+      const isExpired = expiry <= Date.now()
+
+      return payload.address === address && !isExpired
+    } catch {
+      return false
+    }
+  }
+
+  async function authorizeProxy(proxyTypes: string[], authorizedProxyTypes: string[]) {
+    return authorizedProxyTypes.some((authorizedProxyType) => proxyTypes.includes(authorizedProxyType))
+  }
+
   return {
+    authenticate,
+    authorizeProxy,
     generateJw3t,
   }
 }

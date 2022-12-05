@@ -30,6 +30,7 @@ import { LoanTemplate } from '../../../types'
 import { truncateText } from '../../../utils/formatting'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useAddress } from '../../../utils/useAddress'
+import { useAuth } from '../../../utils/useAuth'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadataMulti } from '../../../utils/useMetadata'
@@ -143,11 +144,12 @@ const IssuerCreateLoan: React.FC = () => {
   const collateralCollectionId = useCollateralCollectionId(pid)
   const { selectedAccount, proxy } = useWeb3()
   const { addTransaction, updateTransaction } = useTransactions()
+  const { authToken } = useAuth()
 
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const podUrl = poolMetadata?.pod?.url
 
-  const { token, isLoggedIn } = usePodAuth(podUrl)
+  const { isLoggedIn } = usePodAuth(podUrl)
 
   const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
     'Create asset',
@@ -179,7 +181,7 @@ const IssuerCreateLoan: React.FC = () => {
       attributes: {},
     },
     onSubmit: async (values, { setSubmitting }) => {
-      if (!podUrl || !collateralCollectionId || !address || !token) return
+      if (!podUrl || !collateralCollectionId || !address || !authToken) return
 
       const txId = Math.random().toString(36).substr(2)
 
@@ -203,7 +205,7 @@ const IssuerCreateLoan: React.FC = () => {
       try {
         const { documentId } = await centrifuge.pod.createDocument([
           podUrl,
-          token!.signed,
+          authToken,
           {
             attributes,
             writeAccess: [address],
@@ -217,7 +219,7 @@ const IssuerCreateLoan: React.FC = () => {
 
         const { nftId, jobId } = await centrifuge.pod.commitDocumentAndMintNft([
           podUrl,
-          token.signed,
+          authToken,
           {
             documentId,
             collectionId: collateralCollectionId,
@@ -243,7 +245,7 @@ const IssuerCreateLoan: React.FC = () => {
 
         updateTransaction(txId, { status: 'pending' })
 
-        await centrifuge.pod.awaitJob([podUrl, token.signed, jobId])
+        await centrifuge.pod.awaitJob([podUrl, authToken, jobId])
 
         // Send the signed createLoan transaction
         doTransaction([submittable], undefined, txId)

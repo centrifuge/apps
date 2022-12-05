@@ -2474,7 +2474,6 @@ __metadata:
   dependencies:
     "@centrifuge/centrifuge-js": "workspace:*"
     "@centrifuge/fabric": "workspace:*"
-    "@open-wc/webpack-import-meta-loader": ^0.4.7
     "@polkadot/api": ^9.7.1
     "@polkadot/extension-dapp": ^0.44.1
     "@polkadot/react-identicon": ^2.8.2
@@ -2484,8 +2483,6 @@ __metadata:
     "@styled-system/should-forward-prop": ^5.1.5
     "@subwallet/wallet-connect": ^0.2.3
     "@types/bn.js": ^5
-    "@types/cookie": ^0
-    "@types/open-wc__webpack-import-meta-loader": ^0
     "@types/react": ^17.0.30
     "@types/react-dom": ^17
     "@types/react-helmet-async": ^1.0.3
@@ -2501,7 +2498,6 @@ __metadata:
     axios: ^0.24.0
     babel-plugin-styled-components: ^2.0.7
     bn.js: ^5.2.1
-    cookie: ^0.5.0
     esbuild-darwin-64: ^0.14.49
     esbuild-darwin-arm64: ^0.14.49
     eslint: 7.32.0
@@ -6217,13 +6213,6 @@ __metadata:
   dependencies:
     "@octokit/openapi-types": ^12.11.0
   checksum: bd3802b953f1c66945083dcde42b3235fb6c4e34cfa1cc42f210e942fc6e7043a816ceef857a603a0cbf47c02b170eb9de969227d43d3cbdb1eb834d508bad9e
-  languageName: node
-  linkType: hard
-
-"@open-wc/webpack-import-meta-loader@npm:^0.4.7":
-  version: 0.4.7
-  resolution: "@open-wc/webpack-import-meta-loader@npm:0.4.7"
-  checksum: fc13ba07ee77fdc191a45df61e71d92cd630379bf09a8d763468490b91362eaf450110468d2c4f9dcbbb59dd4b8fccdde6c5942d6fb7a865b33fff2388031b66
   languageName: node
   linkType: hard
 
@@ -10342,13 +10331,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cookie@npm:^0":
-  version: 0.5.1
-  resolution: "@types/cookie@npm:0.5.1"
-  checksum: d6f95da464457c7735691d74a3da998b50abf0e886ce782ef26c429055a3ca7712d1c9ef67efbfe6d8579178a62010598c86e6b2ca72dbd3baddd320d582b77a
-  languageName: node
-  linkType: hard
-
 "@types/cookies@npm:*":
   version: 0.7.7
   resolution: "@types/cookies@npm:0.7.7"
@@ -10921,13 +10903,6 @@ __metadata:
   version: 4.1.4
   resolution: "@types/npmlog@npm:4.1.4"
   checksum: 9120e75d7a49faf378e43e4d747c7c66eca331111384fc6bfcbdc00b72fd8aa9c3c661060397ee553671e8613f266e683a6cb4ed84ba7792b6ab99e2d11109cd
-  languageName: node
-  linkType: hard
-
-"@types/open-wc__webpack-import-meta-loader@npm:^0":
-  version: 0.4.2
-  resolution: "@types/open-wc__webpack-import-meta-loader@npm:0.4.2"
-  checksum: 5081283354a6b4f74a67ba535be53124bdba02ef221e505e3200280faa703a61000f13973474c0bd58f5cdd9dc2e4f7167926af250de91027138d5f913a62de9
   languageName: node
   linkType: hard
 

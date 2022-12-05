@@ -31,8 +31,6 @@ import { TransactionOptions } from './types'
 import { CurrencyBalance } from './utils/BN'
 import { getPolkadotApi } from './utils/web3'
 
-type Proxy = { delegator: string; types: string[] }
-
 export type Config = {
   network: 'altair' | 'centrifuge'
   centrifugeWsUrl: string
@@ -44,7 +42,6 @@ export type Config = {
   metadataHost: string
   pinFile?: (b64URI: string) => Promise<{ uri: string }>
   unpinFile?: (hash: string) => Promise<void>
-  auth?: (address: string, authorizedProxyTypes?: string[], proxy?: Proxy | null) => Promise<boolean>
   signer?: Signer
   signingAddress?: AddressOrPair
   printExtrinsics?: boolean

@@ -22,7 +22,7 @@ export const PodAuthSection: React.FC<Props> = ({
           <IconAlertCircle size="iconSmall" /> <Text variant="body3">{message}</Text>
         </Shelf>
         {canLogIn && (
-          <Button onClick={login} small loading={isLoggingIn}>
+          <Button onClick={() => login()} small loading={isLoggingIn}>
             {buttonLabel}
           </Button>
         )}
