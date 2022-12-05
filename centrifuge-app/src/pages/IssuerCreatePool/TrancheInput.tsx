@@ -6,7 +6,6 @@ import { createEmptyTranche } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
-import { useCurrencies } from '../../utils/useCurrencies'
 import { validate } from './validate'
 
 const MAX_TRANCHES = 5
@@ -41,9 +40,12 @@ export const TrancheSection: React.FC = () => {
   )
 }
 
-export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string }> = ({ canRemove, currency }) => {
+export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; isUpdating?: boolean }> = ({
+  canRemove,
+  currency,
+  isUpdating,
+}) => {
   const fmk = useFormikContext<PoolMetadataInput>()
-  const currencies = useCurrencies()
   const { values } = fmk
 
   const juniorTrancheIndex = 0 // the first tranche is the most junior in the UI
@@ -69,6 +71,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string }> 
                   maxLength={30}
                   name={`tranches.${index}.tokenName`}
                   validate={validate.tokenName}
+                  disabled={isUpdating}
                 />
                 <Field name={`tranches.${index}.symbolName`} validate={validate.symbolName}>
                   {({ field, form, meta }: FieldProps) => (
@@ -80,6 +83,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string }> 
                       placeholder="4-12 characters"
                       minLength={4}
                       maxLength={12}
+                      disabled={isUpdating}
                     />
                   )}
                 </Field>
@@ -89,7 +93,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string }> 
                   placeholder="0.00"
                   name={`tranches.${index}.minInvestment`}
                   validate={validate.minInvestment}
-                  rightElement={currencies.find((c) => c.value === currency || values.currency)?.label}
+                  rightElement={values.currency}
                 />
                 {index === juniorTrancheIndex ? (
                   <>

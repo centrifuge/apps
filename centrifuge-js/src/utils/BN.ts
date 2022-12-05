@@ -91,6 +91,14 @@ export class Rate extends BNSubType {
   static fromAprPercent(apr: Numeric) {
     return this.fromApr(Dec(apr).div(100))
   }
+  static fractionFromApr(apr: Numeric) {
+    const i = Dec(apr)
+    const rate = i.div(secondsPerYear)
+    return Rate.fromFloat(rate)
+  }
+  static fractionFromAprPercent(apr: Numeric) {
+    return this.fractionFromApr(Dec(apr).div(100))
+  }
   toPercent() {
     return this.toDecimal().mul(100)
   }
@@ -106,5 +114,18 @@ export class Rate extends BNSubType {
   }
   toAprPercent() {
     return this.toApr().mul(100)
+  }
+  fractionToApr() {
+    const rate = this.toDecimal()
+
+    if (rate.isZero()) {
+      return rate
+    }
+
+    const i = rate.times(secondsPerYear)
+    return i
+  }
+  fractionToAprPercent() {
+    return this.fractionToApr().mul(100)
   }
 }

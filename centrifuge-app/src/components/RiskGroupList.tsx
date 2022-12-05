@@ -43,41 +43,35 @@ const columns: Column[] = [
   {
     header: <SortableTableHeader label="Amount" />,
     cell: ({ amount, currency }: RiskGroupRow) =>
-      typeof amount === 'string' ? <Text variant="body2">{formatBalance(Dec(amount), currency)}</Text> : amount,
+      typeof amount === 'string' ? formatBalance(Dec(amount), currency) : amount,
     flex: '1',
     sortKey: 'amount',
   },
   {
     header: <SortableTableHeader label="Share" />,
-    cell: ({ share }: RiskGroupRow) => <Text variant="body2">{share}%</Text>,
+    cell: ({ share }: RiskGroupRow) => <>{share}%</>,
     flex: '1',
     sortKey: 'share',
   },
   {
     header: <SortableTableHeader label="Financing fee" />,
-    cell: ({ interestRatePerSec }: RiskGroupRow) => (
-      <Text variant="body2">
-        {interestRatePerSec && typeof interestRatePerSec === 'string'
-          ? `${interestRatePerSec}%`
-          : React.isValidElement(interestRatePerSec)
-          ? interestRatePerSec
-          : ''}
-      </Text>
-    ),
+    cell: ({ interestRatePerSec }: RiskGroupRow) =>
+      interestRatePerSec && typeof interestRatePerSec === 'string'
+        ? `${interestRatePerSec}%`
+        : React.isValidElement(interestRatePerSec)
+        ? interestRatePerSec
+        : '',
     flex: '1',
     sortKey: 'interestRatePerSec',
   },
   {
     header: <SortableTableHeader label="Risk adjustment" />,
-    cell: ({ riskAdjustment }: RiskGroupRow) => (
-      <Text variant="body2">
-        {riskAdjustment && typeof riskAdjustment === 'string'
-          ? `${riskAdjustment}%`
-          : React.isValidElement(riskAdjustment)
-          ? riskAdjustment
-          : ''}
-      </Text>
-    ),
+    cell: ({ riskAdjustment }: RiskGroupRow) =>
+      riskAdjustment && typeof riskAdjustment === 'string'
+        ? `${riskAdjustment}%`
+        : React.isValidElement(riskAdjustment)
+        ? riskAdjustment
+        : '',
     flex: '1',
     sortKey: 'riskAdjustment',
   },
@@ -96,7 +90,7 @@ const RiskGroupList: React.FC = () => {
     () =>
       new CurrencyBalance(
         activeLoans?.reduce((prev, curr) => prev.add(curr?.outstandingDebt || new BN(0)), new BN(0)) || new BN(0),
-        pool?.currencyDecimals ?? 18
+        pool.currency.decimals
       ),
     [activeLoans, pool]
   )
@@ -126,11 +120,11 @@ const RiskGroupList: React.FC = () => {
 
         const amount = new CurrencyBalance(
           loansByRiskGroup?.reduce((prev, curr) => prev?.add(curr?.outstandingDebt || new BN(0)), new BN(0)),
-          pool?.currencyDecimals ?? 18
+          pool.currency.decimals
         )
         if (!amount || !totalAmountsSum) {
           return {
-            currency: pool?.currency || '',
+            currency: pool.currency.symbol || '',
             name: group.name,
             amount: '',
             share: '',
@@ -140,7 +134,7 @@ const RiskGroupList: React.FC = () => {
         }
 
         return {
-          currency: pool?.currency || '',
+          currency: pool?.currency.symbol || '',
           name: group.name,
           amount: amount.toDecimal().toString(),
           share: Dec(amount?.toDecimal()).div(totalAmountsSum.toDecimal()).mul(100).toDecimalPlaces(0).toString(),
@@ -187,7 +181,7 @@ const RiskGroupList: React.FC = () => {
       ),
       amount: (
         <Text variant="body2" fontWeight={600}>
-          {formatBalance(totalAmountsSum || 0, pool?.currency)}
+          {formatBalance(totalAmountsSum || 0, pool?.currency.symbol)}
         </Text>
       ),
       name: (
@@ -199,33 +193,33 @@ const RiskGroupList: React.FC = () => {
       riskAdjustment: <Text variant="body2" fontWeight={600}>{`Avg. ${avgRiskAdjustment.toString()}%`}</Text>,
       color: '',
       labelColor: '',
-      currency: pool?.currency || '',
+      currency: pool?.currency.symbol || '',
     }
   }, [riskGroups, pool?.currency, totalSharesSum, totalAmountsSum])
 
   // biggest share of pie gets darkest color
-  const tableDataWithColor = riskGroups
-    .sort((a, b) => Number(a.amount) - Number(b.amount))
-    .map((item, index) => {
-      if (metadata?.riskGroups!.length) {
-        const name = item.name ? `${index + 1} – ${item.name}` : `${index + 1}`
-        if (Dec(totalSharesSum).lessThanOrEqualTo(0)) {
-          return { ...item, name }
-        }
-        const nextShade = ((index + 2) % 8) * 100
-        return {
-          ...item,
-          name,
-          color: theme.colors.accentScale[nextShade],
-          labelColor: nextShade >= 500 ? 'white' : 'black',
-        }
+  const tableDataWithColor = riskGroups.map((item, index) => {
+    if (metadata?.riskGroups!.length) {
+      const name = item.name ? `${index + 1} – ${item.name}` : `${index + 1}`
+      if (Dec(totalSharesSum).lessThanOrEqualTo(0)) {
+        return { ...item, name }
       }
-      return item
-    })
-
-  const sharesForPie = tableDataWithColor.map(({ name, color, labelColor, share }) => {
-    return { value: Number(share), name: name as string, color, labelColor }
+      const nextShade = ((index + 2) % 8) * 100
+      return {
+        ...item,
+        name,
+        color: theme.colors.accentScale[nextShade],
+        labelColor: nextShade >= 500 ? 'white' : 'black',
+      }
+    }
+    return item
   })
+
+  const sharesForPie = tableDataWithColor
+    .sort((a, b) => Number(a.amount) - Number(b.amount))
+    .map(({ name, color, labelColor, share }) => {
+      return { value: Number(share), name: name as string, color, labelColor }
+    })
 
   return (
     <>

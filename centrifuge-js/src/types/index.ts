@@ -4,9 +4,13 @@ import { HexString } from '@polkadot/util/types'
 
 export type TransactionOptions = {
   batch?: boolean
+  signOnly?: boolean
+  sendOnly?: boolean
+  era?: number
   paymentInfo?: AddressOrPair
   onStatusChange?: (result: ISubmittableResult) => void
   createType?: 'immediate' | 'propose' | 'notePreimage'
+  dryRun?: boolean
 }
 
 export type Account = HexString | string | Uint8Array

@@ -34,9 +34,10 @@ async function metadataQueryFn<T extends Schema>(uri: string, cent: Centrifuge, 
       let value = res[key]
       if (!value) {
         if (!optional) return null
+      } else {
+        if (typeof value !== type && type !== 'any') return null
+        if (maxLength) value = value.slice(0, maxLength)
       }
-      if (typeof value !== type && type !== 'any') return null
-      if (maxLength) value = value.slice(0, maxLength)
       result[key] = value
     }
 
@@ -79,7 +80,7 @@ export function useMetadataMulti<T extends Schema>(uris: (string | undefined)[],
   const queries = useQueries(
     filteredUris?.map((uri) => {
       return {
-        queryKey: [uri],
+        queryKey: ['metadata', uri],
         queryFn: async () => metadataQueryFn(uri!, cent, schema),
         enabled: !!uri,
         staleTime: Infinity,

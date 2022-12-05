@@ -32,15 +32,26 @@ export function useLoan(poolId: string, assetId: string) {
   return loan
 }
 
+export function useNftDocumentId(collectionId?: string, nftId?: string) {
+  const [result] = useCentrifugeQuery(
+    ['docId', collectionId, nftId],
+    (cent) => cent.nfts.getNftDocumentId([collectionId!, nftId!]),
+    {
+      enabled: !!collectionId && !!nftId,
+    }
+  )
+
+  return result
+}
+
 export function useAvailableFinancing(poolId: string, assetId: string) {
   const loan = useLoan(poolId, assetId)
   if (!loan) return { current: Dec(0), initial: Dec(0) }
   if (loan.status !== 'Active') return { current: Dec(0), initial: Dec(0) }
 
-  const debtWithMargin = loan.normalizedDebt
+  const debtWithMargin = loan.outstandingDebt
     .toDecimal()
-    .add(loan.normalizedDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
-
+    .add(loan.outstandingDebt.toDecimal().mul(loan.interestRatePerSec.toDecimal().minus(1).mul(SEC_PER_DAY)))
   if (!loan?.loanInfo) {
     return { current: Dec(0), initial: Dec(0) }
   }

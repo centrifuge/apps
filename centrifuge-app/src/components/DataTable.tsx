@@ -107,6 +107,7 @@ export const DataTable = <T extends Record<string, any>>({
           >
             {columns.map((col, index) => (
               <DataCol
+                variant="body2"
                 style={{ flex: col.width !== undefined ? 'auto' : col.flex, width: col.width }}
                 align={col?.align}
                 key={index}
@@ -120,7 +121,7 @@ export const DataTable = <T extends Record<string, any>>({
         {summary && (
           <Row rounded={rounded && groupIndex === lastGroupIndex}>
             {columns.map((col, i) => (
-              <DataCol key={`${col.sortKey}-${i}`} style={{ flex: col.flex }} align={col?.align}>
+              <DataCol variant="body2" key={`${col.sortKey}-${i}`} style={{ flex: col.flex }} align={col?.align}>
                 {col.cell(summary, i)}
               </DataCol>
             ))}
@@ -166,7 +167,7 @@ const Row = styled(Shelf)<any>`
     })}
 `
 
-const DataCol = styled.div<{ align: Column['align'] }>`
+const DataCol = styled(Text)<{ align: Column['align'] }>`
   background: initial;
   border: none;
   padding: 8px 0 8px 16px;

@@ -2,7 +2,7 @@ export type PoolStatus = 'open' | 'upcoming' | 'hidden'
 export type PoolCountry = 'us' | 'non-us'
 export type NonSolicitationNotice = 'all' | 'non-us' | 'none'
 
-export type SchemaAttribute =
+export type LoanTemplateAttribute =
   | {
       label: string
       type: 'decimal'
@@ -36,10 +36,10 @@ export type SchemaAttribute =
 type Section = {
   name: string
   public: boolean
-  attributes: SchemaAttribute[]
+  attributes: LoanTemplateAttribute[]
 }
 
-export type Schema = {
+export type LoanTemplate = {
   name: string
   options: {
     assetClasses: string[]
@@ -49,3 +49,5 @@ export type Schema = {
   }
   sections: Section[]
 }
+
+export type InvestorTypes = 'individual' | 'entity'

@@ -2,7 +2,6 @@ import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
-import { getCurrencySymbol } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
 import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLiquidityAdmin } from '../utils/usePermissions'
@@ -29,7 +28,7 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
     },
     onSubmit: (values, actions) => {
       if (values.maxReserve) {
-        setMaxReserveTx([poolId, CurrencyBalance.fromFloat(values.maxReserve, pool!.currencyDecimals)])
+        setMaxReserveTx([poolId, CurrencyBalance.fromFloat(values.maxReserve, pool.currency.decimals)])
       } else {
         actions.setErrors({ maxReserve: 'Invalid number' })
       }
@@ -54,7 +53,7 @@ export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
                   initialValue={pool?.reserve.max.toDecimal().toNumber()}
                   errorMessage={meta.touched ? meta.error : undefined}
                   disabled={isLoading}
-                  currency={getCurrencySymbol(pool?.currency)}
+                  currency={pool?.currency.symbol}
                   onChange={(value) => form.setFieldValue('maxReserve', value)}
                 />
               )}

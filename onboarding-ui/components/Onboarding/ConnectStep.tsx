@@ -1,23 +1,15 @@
 import * as React from 'react'
-import { useDispatch } from 'react-redux'
-import { ensureAuthed } from '../../ducks/auth'
-import { useAddress } from '../../utils/useAddress'
 import { Button } from '../Button'
 import { Step, StepProps } from './Step'
 import { StepParagraph } from './StepParagraph'
 
 interface Props {
   state: StepProps['state']
+  address: string | null
+  connect: () => void
 }
 
-const ConnectStep: React.FC<Props> = ({ state }) => {
-  const address = useAddress()
-  const dispatch = useDispatch()
-
-  function connect() {
-    dispatch(ensureAuthed())
-  }
-
+const ConnectStep: React.FC<Props> = ({ address, connect, state }) => {
   return (
     <Step title="Connect wallet" state={state}>
       {!address && (

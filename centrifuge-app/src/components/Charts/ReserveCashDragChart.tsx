@@ -30,6 +30,7 @@ const ReserveCashDragChart: React.VFC = () => {
       return { day: new Date(day.timestamp), cashDrag: cashDrag || 0, reserve }
     }) || []
 
+  // querying chain for more accurate data, since data for today from subquery is not necessarily up to date
   const todayAssetValue = pool?.nav.latest.toDecimal().toNumber() || 0
   const todayReserve = pool?.reserve.total.toDecimal().toNumber() || 0
   const cashDrag = (todayReserve / (todayAssetValue + todayReserve)) * 100
@@ -39,15 +40,15 @@ const ReserveCashDragChart: React.VFC = () => {
     reserve: todayReserve,
   }
 
-  const chartData = [...data, today]
+  const chartData = [...data.slice(0, data.length - 1), today]
 
   return (
     <Stack>
-      <CustomLegend data={today} currency={pool?.currency || ''} />
+      <CustomLegend data={today} currency={pool?.currency.symbol || ''} />
       <Shelf gap="4" width="100%" color="textSecondary">
         {chartData?.length ? (
           <ResponsiveContainer width="100%" height="100%" minHeight="200px">
-            <ComposedChart data={chartData} margin={{ left: -30 }}>
+            <ComposedChart data={chartData} margin={{ left: -16 }}>
               <XAxis
                 dataKey="day"
                 tick={<CustomizedXAxisTick variant={chartData.length > 30 ? 'months' : 'days'} />}
@@ -69,7 +70,7 @@ const ReserveCashDragChart: React.VFC = () => {
                 tickFormatter={(tick: number) => `${tick}%`}
               />
               <CartesianGrid stroke={theme.colors.borderSecondary} />
-              <Tooltip content={<CustomizedTooltip currency={pool?.currency || ''} />} />
+              <Tooltip content={<CustomizedTooltip currency={pool?.currency.symbol || ''} />} />
               <Line dot={false} dataKey="reserve" yAxisId="left" stroke={theme.colors.accentPrimary} name="Reserve" />
               <Line
                 dot={false}
@@ -97,7 +98,7 @@ const CustomLegend: React.VFC<{
 
   return (
     <Shelf bg="backgroundPage" width="100%" gap="2">
-      <Grid pl="4" pb="4" columns={6} gap="3" width="100%">
+      <Grid pl="5" pb="4" columns={6} gap="3" width="100%">
         <Stack borderLeftWidth="3px" pl="4px" borderLeftStyle="solid" borderLeftColor={theme.colors.accentPrimary}>
           <Tooltips variant="secondary" type="poolReserve" />
           <Text variant="body2">{formatBalance(data.reserve, currency)}</Text>

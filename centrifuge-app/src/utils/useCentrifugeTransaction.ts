@@ -15,7 +15,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   transactionCallback: (centrifuge: Centrifuge) => (args: T, options?: TransactionOptions) => Observable<any>,
   options: { onSuccess?: (args: T, result: ISubmittableResult) => void; onError?: (error: any) => void } = {}
 ) {
-  const { addTransaction, updateTransaction } = useTransactions()
+  const { addOrUpdateTransaction, updateTransaction } = useTransactions()
   const { selectedAccount, connect, proxy } = useWeb3()
   const cent = useCentrifuge()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
@@ -39,7 +39,16 @@ export function useCentrifugeTransaction<T extends Array<any>>(
         transaction(args, {
           ...txOptions,
           onStatusChange: (result) => {
-            const errors = result.events.filter(({ event }) => api.events.system.ExtrinsicFailed.is(event))
+            const errors = result.events.filter(({ event }) => {
+              const possibleProxyErr = event.data[0]?.toHuman()
+              return (
+                api.events.system.ExtrinsicFailed.is(event) ||
+                (api.events.proxy.ProxyExecuted.is(event) &&
+                  possibleProxyErr &&
+                  typeof possibleProxyErr === 'object' &&
+                  'Err' in possibleProxyErr)
+              )
+            })
             let errorObject: any
 
             if (result.dispatchError || errors.length) {
@@ -56,7 +65,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
                   console.error(`${section}.${method}: ${docs.join(' ')}`)
                 } else {
                   // Other, CannotLookup, BadOrigin, no extra info
-                  console.error(error.toString())
+                  console.error(error)
                 }
               }
 
@@ -92,15 +101,15 @@ export function useCentrifugeTransaction<T extends Array<any>>(
     }
   }
 
-  function execute(args: T, options?: TxOptions) {
-    const id = Math.random().toString(36).substr(2)
+  function execute(args: T, options?: TxOptions, idOverride?: string) {
+    const id = idOverride ?? Math.random().toString(36).substr(2)
     const tx: Transaction = {
       id,
       title,
       status: 'creating',
       args,
     }
-    addTransaction(tx)
+    addOrUpdateTransaction(tx)
     setLastId(id)
 
     if (!selectedAccount) {

@@ -16,10 +16,16 @@ export type SubqueryPoolSnapshot = {
 export type SubqueryTrancheSnapshot = {
   __typename?: 'TrancheSnapshot'
   id: string
-  trancheId: string
+  price: string
+  blockNumber: number
   timestamp: string
+  trancheId: string // poolId-trancheId
+  tranche: {
+    poolId: string
+    trancheId: string
+  }
+  // todo @Hornebom: figure out if these are still used
   supply?: number | null
-  price?: number | null
   outstandingInvestOrders_: number
   outstandingRedeemOrders_: number
   fulfilledInvestOrders_: number

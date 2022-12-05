@@ -66,18 +66,17 @@ type EnvironmentConfig = {
     dark: DefaultTheme
   }
   defaultTheme: 'light' | 'dark'
-  baseCurrency: 'Native' | 'kUsd' | 'PermissionedEur'
+  baseCurrency: 'AUSD'
   assetClasses: string[]
   defaultAssetClass: string
-  tokensPageSubtitle: string
   defaultLoanType: LoanInfo['type']
   poolCreationType: TransactionOptions['createType']
   useDocumentNfts: boolean
-  defaultNodeUrl: string
+  defaultPodUrl: string
 }
 
 const poolCreationType: TransactionOptions['createType'] = import.meta.env.REACT_APP_POOL_CREATION_TYPE || 'immediate'
-const defaultNodeUrl: string = import.meta.env.REACT_APP_DEFAULT_NODE_URL || ''
+const defaultPodUrl: string = import.meta.env.REACT_APP_DEFAULT_NODE_URL || ''
 
 const ALTAIR: EnvironmentConfig = {
   name: 'Pools on Altair',
@@ -88,14 +87,13 @@ const ALTAIR: EnvironmentConfig = {
     dark: darkTheme,
   },
   defaultTheme: 'dark',
-  baseCurrency: 'Native',
+  baseCurrency: 'AUSD',
   assetClasses: ['Art NFTs'],
   defaultAssetClass: 'Art NFTs',
-  tokensPageSubtitle: 'Art NFTs',
   defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
-  useDocumentNfts: false,
-  defaultNodeUrl,
+  useDocumentNfts: true,
+  defaultPodUrl,
 }
 
 const CENTRIFUGE: EnvironmentConfig = {
@@ -107,7 +105,7 @@ const CENTRIFUGE: EnvironmentConfig = {
     dark: darkTheme,
   },
   defaultTheme: 'light',
-  baseCurrency: 'kUsd',
+  baseCurrency: 'AUSD',
   assetClasses: [
     'Consumer Credit',
     'Corporate Credit',
@@ -116,11 +114,10 @@ const CENTRIFUGE: EnvironmentConfig = {
     'Project Finance',
   ],
   defaultAssetClass: 'Consumer Credit',
-  tokensPageSubtitle: 'Tokens of real-world assets',
   defaultLoanType: 'CreditLineWithMaturity',
   poolCreationType,
   useDocumentNfts: true,
-  defaultNodeUrl,
+  defaultPodUrl,
 }
 
 export const config = (import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge') === 'altair' ? ALTAIR : CENTRIFUGE

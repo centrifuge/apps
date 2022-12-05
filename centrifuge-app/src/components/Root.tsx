@@ -1,6 +1,6 @@
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Helmet } from 'react-helmet'
+import { Helmet, HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import { config } from '../config'
@@ -15,15 +15,16 @@ import { LoanPage } from '../pages/Loan'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
 import { NotFoundPage } from '../pages/NotFound'
+import { OnboardingPage } from '../pages/Onboarding'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
-import { TokenDetailPage } from '../pages/Token'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
+import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { LoadBoundary } from './LoadBoundary'
-import { NodeAuthProvider } from './NodeAuthProvider'
+import { PodAuthProvider } from './PodAuthProvider'
 import { TransactionProvider } from './TransactionsProvider'
 import { TransactionToasts } from './TransactionToasts'
 import { Web3Provider } from './Web3Provider'
@@ -41,9 +42,11 @@ export const Root: React.VFC = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{config.network === 'centrifuge' ? 'Centrifuge App' : 'Altair App'}</title>
-      </Helmet>
+      <HelmetProvider>
+        <Helmet>
+          <title>{config.network === 'centrifuge' ? 'Centrifuge App' : 'Altair App'}</title>
+        </Helmet>
+      </HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <FabricProvider
           theme={
@@ -57,8 +60,9 @@ export const Root: React.VFC = () => {
           <GlobalStyle />
           <FabricGlobalStyle />
           <CentrifugeProvider>
+            <DemoBanner />
             <Web3Provider>
-              <NodeAuthProvider>
+              <PodAuthProvider>
                 <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
                   <TransactionProvider>
                     <TransactionToasts />
@@ -69,7 +73,7 @@ export const Root: React.VFC = () => {
                     </Router>
                   </TransactionProvider>
                 </DebugFlags>
-              </NodeAuthProvider>
+              </PodAuthProvider>
             </Web3Provider>
           </CentrifugeProvider>
         </FabricProvider>
@@ -99,24 +103,17 @@ const Routes: React.VFC = () => {
       <Route path="/nfts">
         <CollectionsPage />
       </Route>
-
       <Route path="/issuer/create-pool">
         <IssuerCreatePoolPage />
       </Route>
-      <Route path="/issuer/create-asset">
+      <Route path="/issuer/:pid/assets/create">
         <IssuerCreateLoanPage />
       </Route>
       <Route exact path="/issuer/:pid/assets/:aid">
         <LoanPage />
       </Route>
-      <Route path="/issuer/:pid/tokens/:tid">
-        <TokenDetailPage />
-      </Route>
       <Route path="/issuer/:pid">
         <IssuerPoolPage />
-      </Route>
-      <Route path="/investments/:pid/tokens/:tid">
-        <TokenDetailPage />
       </Route>
       <Route path="/investments/:pid/assets/:aid">
         <LoanPage />
@@ -129,6 +126,9 @@ const Routes: React.VFC = () => {
       </Route>
       <Route path="/investments">
         <PoolsPage />
+      </Route>
+      <Route exact path="/onboarding">
+        <OnboardingPage />
       </Route>
       <Route exact path="/">
         <Redirect to="/investments" />

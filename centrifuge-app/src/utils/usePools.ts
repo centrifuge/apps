@@ -15,7 +15,9 @@ export function usePools(suspense = true) {
 
 export function usePool(id: string) {
   const pools = usePools()
-  return pools?.find((p) => p.id === id)
+  const pool = pools?.find((p) => p.id === id)
+  if (!pool) throw new Error(`Pool not found`)
+  return pool
 }
 
 export function useTokens() {
@@ -23,10 +25,47 @@ export function useTokens() {
   return pools?.flatMap((p) => p.tranches)
 }
 
-export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {
+// Todo @Hornebom:
+// export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {
+//   const [result] = useCentrifugeQuery(
+//     ['dailyPoolStates', poolId, from, to],
+//     (cent) => cent.pools.getDailyPoolStates([poolId, from, to]),
+//     {
+//       suspense: true,
+//     }
+//   )
+
+//   return result
+// }
+
+// export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
+//   const [result] = useCentrifugeQuery(
+//     ['monthlyPoolStates', poolId, from, to],
+//     (cent) => cent.pools.getMonthlyPoolStates([poolId, from, to]),
+//     {
+//       suspense: true,
+//     }
+//   )
+
+//   return result
+// }
+
+// export function useInvestorTransactions(poolId: string, trancheId?: string, from?: Date, to?: Date) {
+//   const [result] = useCentrifugeQuery(
+//     ['investorTransactions', poolId, trancheId, from, to],
+//     (cent) => cent.pools.getInvestorTransactions([poolId, trancheId, from, to]),
+//     {
+//       suspense: true,
+//     }
+//   )
+
+//   return result
+// }
+
+export function useDailyPoolStates(poolId: string) {
   const [result] = useCentrifugeQuery(
-    ['dailyPoolStates', poolId, from, to],
-    (cent) => cent.pools.getDailyPoolStates([poolId, from, to]),
+    ['dailyPoolStates', { poolId }],
+    (cent) => cent.pools.getDailyPoolStates([poolId]),
     {
       suspense: true,
     }
@@ -35,10 +74,10 @@ export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {
   return result
 }
 
-export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
+export function useDailyTrancheStates(trancheId: string) {
   const [result] = useCentrifugeQuery(
-    ['monthlyPoolStates', poolId, from, to],
-    (cent) => cent.pools.getMonthlyPoolStates([poolId, from, to]),
+    ['dailyTrancheStates', { trancheId }],
+    (cent) => cent.pools.getDailyTrancheStates([trancheId]),
     {
       suspense: true,
     }
@@ -47,14 +86,8 @@ export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
   return result
 }
 
-export function useInvestorTransactions(poolId: string, trancheId?: string, from?: Date, to?: Date) {
-  const [result] = useCentrifugeQuery(
-    ['investorTransactions', poolId, trancheId, from, to],
-    (cent) => cent.pools.getInvestorTransactions([poolId, trancheId, from, to]),
-    {
-      suspense: true,
-    }
-  )
+export function usePoolOrders(poolId: string) {
+  const [result] = useCentrifugeQuery(['poolOrders', poolId], (cent) => cent.pools.getPoolOrders([poolId]))
 
   return result
 }
@@ -75,7 +108,7 @@ export function usePendingCollect(poolId: string, trancheId?: string, address?: 
   const pool = usePool(poolId)
   const [result] = useCentrifugeQuery(
     ['pendingCollect', poolId, trancheId, address],
-    (cent) => cent.pools.getPendingCollect([address!, poolId, trancheId!, pool!.epoch.lastExecuted]),
+    (cent) => cent.pools.getPendingCollect([address!, poolId, trancheId!, pool.epoch.lastExecuted]),
     {
       enabled: !!address && !!pool && !!trancheId,
     }
@@ -90,7 +123,7 @@ export function usePendingCollectMulti(poolId: string, trancheIds?: string[], ad
     ['pendingCollectPool', poolId, trancheIds, address],
     (cent) =>
       combineLatest(
-        trancheIds!.map((tid) => cent.pools.getPendingCollect([address!, poolId, tid, pool!.epoch.lastExecuted]))
+        trancheIds!.map((tid) => cent.pools.getPendingCollect([address!, poolId, tid, pool.epoch.lastExecuted]))
       ).pipe(
         map((orders) => {
           const obj: Record<

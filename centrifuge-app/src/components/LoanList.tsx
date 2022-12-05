@@ -5,6 +5,7 @@ import { useParams, useRouteMatch } from 'react-router'
 import { nftMetadataSchema } from '../schemas'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
+import { useAvailableFinancing } from '../utils/useLoans'
 import { useMetadata } from '../utils/useMetadata'
 import { useNFT } from '../utils/useNFTs'
 import { usePool } from '../utils/usePools'
@@ -33,24 +34,21 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Financing date" />,
-    cell: (l: Row) => (
-      <Text variant="body2">
-        {l.originationDateSortKey && l.status === 'Active' && l?.originationDate ? formatDate(l.originationDate) : ''}
-      </Text>
-    ),
+    cell: (l: Row) =>
+      l.originationDateSortKey && l.status === 'Active' && l?.originationDate ? formatDate(l.originationDate) : '',
     flex: '2',
     sortKey: 'originationDateSortKey',
   },
   {
     header: <SortableTableHeader label="Maturity date" />,
-    cell: (l: Row) => <Text variant="body2">{l.maturityDate ? formatDate(l.maturityDate) : ''}</Text>,
+    cell: (l: Row) => (l.maturityDate ? formatDate(l.maturityDate) : ''),
     flex: '2',
     sortKey: 'maturityDate',
   },
   {
-    header: <SortableTableHeader label="Outstanding" />,
-    cell: (l: Row) => <OutstandingDebt loan={l} />,
-    flex: '2',
+    header: <SortableTableHeader label="Amount" />,
+    cell: (l: Row) => <Amount loan={l} />,
+    flex: '3',
     sortKey: 'outstandingDebtSortKey',
   },
   {
@@ -116,10 +114,30 @@ const AssetName: React.VFC<{ loan: Row }> = ({ loan }) => {
   )
 }
 
-const OutstandingDebt: React.VFC<{ loan: Row }> = ({ loan }) => {
+const Amount: React.VFC<{ loan: Row }> = ({ loan }) => {
   const pool = usePool(loan.poolId)
+  const { current } = useAvailableFinancing(loan.poolId, loan.id)
 
-  return (
-    <Text variant="body2">{loan.status !== 'Created' ? formatBalance(loan.outstandingDebt, pool?.currency) : ''}</Text>
-  )
+  function getAmount(l: Row) {
+    switch (l.status) {
+      case 'Closed':
+        return `${formatBalance(l.totalRepaid, pool?.currency.symbol)} repaid`
+
+      case 'Active':
+        if (l.interestRatePerSec?.gtn(0) && l.totalBorrowed?.isZero()) {
+          return `${formatBalance(current, pool?.currency.symbol)} available`
+        }
+
+        if (l.outstandingDebt.isZero()) {
+          return `${formatBalance(l.totalRepaid, pool?.currency.symbol)} repaid`
+        }
+
+        return `${formatBalance(l.outstandingDebt, pool?.currency.symbol)} outstanding`
+
+      default:
+        return ''
+    }
+  }
+
+  return <Text style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{getAmount(loan)}</Text>
 }

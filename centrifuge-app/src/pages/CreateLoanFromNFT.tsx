@@ -77,6 +77,8 @@ const CreateLoanFromNFT: React.FC = () => {
           // Doing the redirect via state, so it only happens if the user is still on this
           // page when the transaction completes
           setRedirect(`/issuer/${poolId}/assets/${loanId}`)
+        } else {
+          setRedirect(`/issuer/${poolId}/assets`)
         }
       },
     }

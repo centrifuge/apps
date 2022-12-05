@@ -1,6 +1,3 @@
-declare module 'react-control-panel'
 declare module '@centrifuge/axis-modal'
 declare module '@centrifuge/axis-spinner'
-declare module '@centrifuge/axis-utils'
 declare module '@centrifuge/axis-theme'
-declare module '@makerdao/multicall'

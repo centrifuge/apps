@@ -2,19 +2,13 @@
   "private": true,
   "workspaces": [
     "fabric",
-    "tinlake-bot",
-    "e2e-tests",
-    "onboarding/api",
-    "tinlake-ui",
-    "tinlake.js",
+    "onboarding-api",
     "centrifuge-js",
     "centrifuge-app",
-    "gateway",
-    "gateway/packages/lib",
-    "gateway/packages/ui",
-    "gateway/packages/server",
+    "centrifuge-react",
     "simulation-tests",
-    "onboarding-ui"
+    "onboarding-ui",
+    "faucet-api"
   ],
   "devDependencies": {
     "@types/concurrently": "^5",
@@ -30,16 +24,15 @@
   "dependencies": {
     "@sendgrid/mail": "^7.6.2",
     "bn.js": "5.1.3",
-    "dotenv": "8.2.0",
-    "ethers": "5.4.7"
+    "dotenv": "8.2.0"
   },
   "scripts": {
     "format:run": "cd $INIT_CWD && prettier --write \"./**/*.{ts,tsx}\"",
     "format:check": "cd $INIT_CWD && prettier --check \"./**/*.{ts,tsx}\"",
-    "publish:develop": "yarn workspaces foreach run prepublish && lerna publish --canary --preid develop.$(git rev-parse --short HEAD) --yes --force-publish",
     "onboarding-api": "yarn workspace @centrifuge/onboarding-api start",
-    "tinlake-ui": "yarn workspace @centrifuge/tinlake-ui start",
-    "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\"  \"yarn tinlake-ui\" -p name -n \"onboarding-api,tinlake-ui\"",
+    "onboarding-ui": "yarn workspace @centrifuge/onboarding-ui start",
+    "centrifuge-app": "yarn workspace @centrifuge/centrifuge-app start",
+    "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\" \"yarn centrifuge-app\" -p name -n \"onboarding-api,centrifuge-app\"",
     "postinstall": "npx husky install"
   },
   "resolutions": {

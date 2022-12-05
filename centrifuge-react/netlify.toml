@@ -1,0 +1,5 @@
+[build]
+  base = "centrifuge-react"
+  command = "yarn build-storybook"
+  publish = "storybook-static"
+  environment = { NETLIFY_USE_YARN = "true" }

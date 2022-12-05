@@ -23,6 +23,7 @@ import { usePendingCollectMulti, usePool, usePoolMetadata } from '../../../utils
 import { PoolDetailHeader } from '../Header'
 
 const PoolAssetReserveChart = React.lazy(() => import('../../../components/Charts/PoolAssetReserveChart'))
+const PriceYieldChart = React.lazy(() => import('../../../components/Charts/PriceYieldChart'))
 
 export const PoolDetailOverviewTab: React.FC = () => {
   const { state } = useLocation<{ token: string }>()
@@ -149,7 +150,7 @@ export const PoolDetailOverview: React.FC<{
 
   const pageSummaryData = [
     { label: <Tooltips type="assetClass" />, value: metadata?.pool?.asset.class },
-    { label: <Tooltips type="valueLocked" />, value: formatBalance(pool?.value || 0, pool?.currency) },
+    { label: <Tooltips type="valueLocked" />, value: formatBalance(pool?.value || 0, pool?.currency.symbol) },
     { label: <Tooltips type="averageAssetMaturity" />, value: avgMaturity },
   ]
 
@@ -188,15 +189,18 @@ export const PoolDetailOverview: React.FC<{
     <>
       <PageSummary data={pageSummaryData} />
       <PageSection title="Pool value, asset value & reserve" titleAddition={formatDate(new Date().toString())}>
-        <React.Suspense fallback={<Spinner />}>
-          <PoolAssetReserveChart />
-        </React.Suspense>
+        <Stack height="290px">
+          <React.Suspense fallback={<Spinner />}>
+            <PoolAssetReserveChart />
+          </React.Suspense>
+        </Stack>
       </PageSection>
       <PageSection title="Pool tokens">
         <Stack gap={2}>
           {tokens?.map((token, i) => (
             <div key={token.id} ref={(node) => node && handleTokenMount(node, token.id)}>
               <InteractiveCard
+                variant="collapsible"
                 icon={<Thumbnail label={metadata?.tranches?.[token.id]?.symbol ?? ''} type="token" />}
                 title={
                   <TextWithPlaceholder isLoading={metadataIsLoading}>
@@ -211,7 +215,7 @@ export const PoolDetailOverview: React.FC<{
                     />
                     <LabelValueStack
                       label={<Tooltips variant="secondary" type="valueLocked" />}
-                      value={formatBalance(token.valueLocked, pool?.currency)}
+                      value={formatBalance(token.valueLocked, pool?.currency.symbol)}
                     />
                     <LabelValueStack
                       label={<Tooltips variant="secondary" type="apy" />}
@@ -225,7 +229,7 @@ export const PoolDetailOverview: React.FC<{
                           fontWeight={600}
                           color={token.capacity.isZero() ? 'statusWarning' : 'statusOk'}
                         >
-                          {formatBalanceAbbreviated(token.capacity, pool?.currency)}
+                          {formatBalanceAbbreviated(token.capacity, pool?.currency.symbol)}
                         </Text>
                       }
                     />
@@ -241,7 +245,13 @@ export const PoolDetailOverview: React.FC<{
                     )}
                   </Shelf>
                 }
-              />
+              >
+                <Stack height="300px">
+                  <React.Suspense fallback={<Spinner />}>
+                    <PriceYieldChart trancheId={token.id} />
+                  </React.Suspense>
+                </Stack>
+              </InteractiveCard>
             </div>
           ))}
         </Stack>
