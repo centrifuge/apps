@@ -18,6 +18,8 @@
     "express": "^4.18.2",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^3.18.0",
+    "jw3t": "^1.0.8",
+    "node-fetch": "2.6.1",
     "yup": "^0.32.11"
   },
   "devDependencies": {
