@@ -6,7 +6,7 @@ import { Positioner } from '../Positioner'
 import { Stack } from '../Stack'
 import { Text, TextProps } from '../Text'
 
-type TooltipProps = TextProps & {
+export type TooltipProps = TextProps & {
   title?: string
   body: string | React.ReactNode
   disabled?: boolean
@@ -58,6 +58,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disable
           isShown
           targetRef={triggerRef}
           overlayRef={overlayRef}
+          placement="top"
           render={(positionProps) => (
             <Stack
               {...tooltipElementProps}

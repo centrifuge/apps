@@ -1,4 +1,14 @@
-import { Box, Button, IconArrowRight, IconNft, IconPlus, Shelf, Stack, Text } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  IconArrowRight,
+  IconNft,
+  IconPlus,
+  Shelf,
+  Stack,
+  Text,
+  TextWithPlaceholder,
+} from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router-dom'
 import { BuyDialog } from '../components/BuyDialog'
@@ -12,7 +22,6 @@ import { PageSection } from '../components/PageSection'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { AnchorPillButton } from '../components/PillButton'
 import { RouterLinkButton } from '../components/RouterLinkButton'
-import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { nftMetadataSchema } from '../schemas'
 import { useAddress } from '../utils/useAddress'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'

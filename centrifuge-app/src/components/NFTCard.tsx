@@ -1,5 +1,5 @@
 import { NFT } from '@centrifuge/centrifuge-js'
-import { Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Card, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { nftMetadataSchema } from '../schemas'
@@ -8,7 +8,6 @@ import { useMetadata } from '../utils/useMetadata'
 import { useVisibilityChecker } from '../utils/useVisibilityChecker'
 import { useCentrifuge } from './CentrifugeProvider'
 import { Identity } from './Identity'
-import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   nft: NFT

@@ -1,4 +1,4 @@
-import { Box, Shelf, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams, useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
@@ -6,7 +6,6 @@ import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
-import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 
 type Props = {

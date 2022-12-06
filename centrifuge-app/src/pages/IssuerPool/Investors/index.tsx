@@ -11,6 +11,7 @@ import {
   Shelf,
   Stack,
   Text,
+  TextWithPlaceholder,
 } from '@centrifuge/fabric'
 import { isAddress } from '@polkadot/util-crypto'
 import * as React from 'react'
@@ -19,7 +20,6 @@ import { DataTable } from '../../../components/DataTable'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { TextWithPlaceholder } from '../../../components/TextWithPlaceholder'
 import { useAddress } from '../../../utils/useAddress'
 import { useBalances } from '../../../utils/useBalances'
 import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'

@@ -106,7 +106,7 @@ const Spinner = styled(IconSpinner)`
   animation: ${rotate} 600ms linear infinite;
 `
 
-type FileUploadProps = {
+export type FileUploadProps = {
   file?: File | string | null
   onFileChange?: (file: File | null) => void
   onClear?: () => void

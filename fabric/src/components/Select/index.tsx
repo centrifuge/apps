@@ -36,7 +36,7 @@ export type SelectOptionItem = {
   value: string
 }
 
-type SelectProps = {
+export type SelectProps = {
   options: SelectOptionItem[]
   onSelect?: OnSelectCallback
   onBlur?: (e: FocusEvent) => void

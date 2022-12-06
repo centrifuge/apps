@@ -11,10 +11,15 @@ export default {
 } as ComponentMeta<typeof Toast>
 
 type ToastStory = ComponentStory<typeof Toast>
-const Template: ToastStory = ({ status, ...args }) => (
+const Template: ToastStory = (args) => (
   <Stack gap={4}>
     {['info', 'pending', 'ok', 'warning', 'critical'].map((status) => (
-      <Toast {...args} status={status as any} action={<Button variant="tertiary" icon={IconExternalLink} />} />
+      <Toast
+        {...args}
+        status={status as any}
+        action={<Button variant="tertiary" icon={IconExternalLink} />}
+        key={status}
+      />
     ))}
   </Stack>
 )

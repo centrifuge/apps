@@ -1,35 +1,15 @@
-import { Box, Text, TextProps } from '@centrifuge/fabric'
 import * as React from 'react'
-import styled, { css, keyframes } from 'styled-components'
+import styled, { css } from 'styled-components'
+import { Placeholder } from '../Placeholder'
+import { Text, TextProps } from '../Text'
 
-const load = keyframes`
-  from {
-	  background-position-x: 0;
-  }
-  to {
-	  background-position-x: -200%;
-  }
-`
-
-const Loading = styled(Box)<{ $isLoading: boolean }>`
- display: inline;
- --color1: ${({ theme }) => theme.colors.borderPrimary};
- --color2: ${({ theme }) => theme.colors.borderSecondary};
- background: linear-gradient(
-   90deg,
-	 var(--color1),
-	 var(--color2),
-	 var(--color1)
-   );
-   background-size: 200% 80%;
-   background-position-y: 50%;
-   background-repeat: repeat-x;
-   border-radius: .4em;
-   -webkit-box-decoration-break: clone;
-   box-decoration-break: clone;
-   word-break: break-word;
-   animation: ${load} 1.5s ease infinite;
-}
+const Loading = styled(Placeholder)`
+  display: inline;
+  background-size: 200% 80%;
+  border-radius: 0.4em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  word-break: break-word;
 `
 
 const LoadingWrapper = styled.div<{ $lines: number; $isLoading: boolean }>`
@@ -47,15 +27,16 @@ const LoadingWrapper = styled.div<{ $lines: number; $isLoading: boolean }>`
     `};
 `
 
-type Props = TextProps & {
-  words?: number
-  maxLines?: number
-  variance?: number
-  width?: number
-  isLoading?: boolean
-}
+export type TextWithPlaceholderProps = TextProps &
+  React.PropsWithChildren<{
+    words?: number
+    maxLines?: number
+    variance?: number
+    width?: number
+    isLoading?: boolean
+  }>
 
-export const TextWithPlaceholder: React.FC<Props> = ({
+export const TextWithPlaceholder: React.FC<TextWithPlaceholderProps> = ({
   words = 1,
   maxLines = 3,
   variance = 2,
@@ -66,7 +47,7 @@ export const TextWithPlaceholder: React.FC<Props> = ({
 }) => {
   const [rand] = React.useState(() => Math.random())
   return (
-    <Text {...textProps} textOverflow="ellipsis" underline={isLoading ? undefined : textProps.underline}>
+    <Text {...textProps} textOverflow="ellipsis" textDecoration={isLoading ? 'none' : textProps.textDecoration}>
       {isLoading ? (
         <LoadingWrapper $lines={maxLines} $isLoading={isLoading}>
           {Array.from({ length: words }, (_, i) => (
