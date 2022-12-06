@@ -1,7 +1,7 @@
 {
   "name": "@centrifuge/centrifuge-react",
   "version": "0.0.3",
-  "description": "Centrifuge React Librarya",
+  "description": "Centrifuge React Library",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
