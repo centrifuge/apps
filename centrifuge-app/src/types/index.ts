@@ -49,3 +49,5 @@ export type LoanTemplate = {
   }
   sections: Section[]
 }
+
+export type InvestorTypes = 'individual' | 'entity'

@@ -1,5 +1,4 @@
 export * from './Box'
 export * from './Center'
-export * from './Grid'
 export * from './Shelf'
 export * from './Stack'

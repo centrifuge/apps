@@ -64,7 +64,7 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
     ),
     locked: (
       <Text variant="body2" fontWeight={600}>
-        {formatBalance(sumOfLockedInvestments, pool!.currency)}
+        {formatBalance(sumOfLockedInvestments, pool.currency.symbol)}
       </Text>
     ),
     executing: (
@@ -77,7 +77,7 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
             : theme.colors.textPrimary
         }
       >
-        {formatBalance(sumOfExecutableInvestments, pool!.currency)}
+        {formatBalance(sumOfExecutableInvestments, pool.currency.symbol)}
       </Text>
     ),
     executingPercentage: (
@@ -107,7 +107,7 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
     ),
     locked: (
       <Text variant="body2" fontWeight={600}>
-        {formatBalance(sumOfLockedRedemptions, pool!.currency)}
+        {formatBalance(sumOfLockedRedemptions, pool.currency.symbol)}
       </Text>
     ),
     executing: (
@@ -120,7 +120,7 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
             : theme.colors.textPrimary
         }
       >
-        {formatBalance(sumOfExecutableRedemptions, pool!.currency)}
+        {formatBalance(sumOfExecutableRedemptions, pool.currency.symbol)}
       </Text>
     ),
     executingPercentage: (
@@ -161,13 +161,15 @@ export const EpochList: React.FC<Props> = ({ pool }) => {
 const LockedRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  return <>{React.isValidElement(row.locked) ? row.locked : formatBalance(row.locked, pool?.currency)}</>
+  return <>{React.isValidElement(row.locked) ? row.locked : formatBalance(row.locked, pool.currency.symbol)}</>
 }
 
 const ExecutingRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  return <>{React.isValidElement(row.executing) ? row.executing : formatBalance(row.executing || 0, pool?.currency)}</>
+  return (
+    <>{React.isValidElement(row.executing) ? row.executing : formatBalance(row.executing || 0, pool.currency.symbol)}</>
+  )
 }
 
 const ExecutingPercentageRow: React.VFC<{ row: LiquidityTableRow }> = ({ row }) => {

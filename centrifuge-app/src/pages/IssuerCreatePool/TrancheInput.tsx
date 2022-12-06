@@ -6,7 +6,6 @@ import { createEmptyTranche } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'
 import { Tooltips } from '../../components/Tooltips'
-import { useCurrencies } from '../../utils/useCurrencies'
 import { validate } from './validate'
 
 const MAX_TRANCHES = 5
@@ -47,7 +46,6 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
   isUpdating,
 }) => {
   const fmk = useFormikContext<PoolMetadataInput>()
-  const currencies = useCurrencies()
   const { values } = fmk
 
   const juniorTrancheIndex = 0 // the first tranche is the most junior in the UI
@@ -95,7 +93,7 @@ export const TrancheInput: React.FC<{ canRemove?: boolean; currency?: string; is
                   placeholder="0.00"
                   name={`tranches.${index}.minInvestment`}
                   validate={validate.minInvestment}
-                  rightElement={currencies.find((c) => c.value === (currency || values.currency))?.label}
+                  rightElement={values.currency}
                 />
                 {index === juniorTrancheIndex ? (
                   <>

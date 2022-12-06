@@ -1,13 +1,12 @@
 import { Text, Tooltip as FabricTooltip } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { getCurrencySymbol } from '../utils/formatting'
 import { usePool } from '../utils/usePools'
 
 const ValueLockedTooltipBody: React.VFC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  return <>Value locked represents the current total value of pool tokens in {getCurrencySymbol(pool?.currency)}.</>
+  return <>Value locked represents the current total value of pool tokens in {pool?.currency.symbol}.</>
 }
 
 const tooltipText = {

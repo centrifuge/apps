@@ -15,9 +15,9 @@ import { LoanPage } from '../pages/Loan'
 import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
 import { NotFoundPage } from '../pages/NotFound'
+import { OnboardingPage } from '../pages/Onboarding'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
-import { TokenDetailPage } from '../pages/Token'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
@@ -103,7 +103,6 @@ const Routes: React.VFC = () => {
       <Route path="/nfts">
         <CollectionsPage />
       </Route>
-
       <Route path="/issuer/create-pool">
         <IssuerCreatePoolPage />
       </Route>
@@ -113,14 +112,8 @@ const Routes: React.VFC = () => {
       <Route exact path="/issuer/:pid/assets/:aid">
         <LoanPage />
       </Route>
-      <Route path="/issuer/:pid/tokens/:tid">
-        <TokenDetailPage />
-      </Route>
       <Route path="/issuer/:pid">
         <IssuerPoolPage />
-      </Route>
-      <Route path="/investments/:pid/tokens/:tid">
-        <TokenDetailPage />
       </Route>
       <Route path="/investments/:pid/assets/:aid">
         <LoanPage />
@@ -133,6 +126,9 @@ const Routes: React.VFC = () => {
       </Route>
       <Route path="/investments">
         <PoolsPage />
+      </Route>
+      <Route exact path="/onboarding">
+        <OnboardingPage />
       </Route>
       <Route exact path="/">
         <Redirect to="/investments" />

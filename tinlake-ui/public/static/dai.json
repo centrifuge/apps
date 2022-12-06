@@ -1,9 +1,0 @@
-{
-    "0x6b175474e89094c44da98b954eedeac495271d0f":{
-      "symbol": "DAI",
-      "logo": "/static/dai.svg",
-      "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
-      "decimals": 18,
-      "name": "Multi-collateral DAI"
-    }
-}

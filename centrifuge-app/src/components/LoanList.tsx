@@ -120,18 +120,18 @@ const Amount: React.VFC<{ loan: Row }> = ({ loan }) => {
   function getAmount(l: Row) {
     switch (l.status) {
       case 'Closed':
-        return `${formatBalance(l.totalRepaid, pool?.currency)} repaid`
+        return `${formatBalance(l.totalRepaid, pool?.currency.symbol)} repaid`
 
       case 'Active':
         if (l.interestRatePerSec?.gtn(0) && l.totalBorrowed?.isZero()) {
-          return `${formatBalance(current, pool?.currency)} available`
+          return `${formatBalance(current, pool?.currency.symbol)} available`
         }
 
         if (l.outstandingDebt.isZero()) {
-          return `${formatBalance(l.totalRepaid, pool?.currency)} repaid`
+          return `${formatBalance(l.totalRepaid, pool?.currency.symbol)} repaid`
         }
 
-        return `${formatBalance(l.outstandingDebt, pool?.currency)} outstanding`
+        return `${formatBalance(l.outstandingDebt, pool?.currency.symbol)} outstanding`
 
       default:
         return ''

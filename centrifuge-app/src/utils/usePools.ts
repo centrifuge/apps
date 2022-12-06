@@ -15,7 +15,9 @@ export function usePools(suspense = true) {
 
 export function usePool(id: string) {
   const pools = usePools()
-  return pools?.find((p) => p.id === id)
+  const pool = pools?.find((p) => p.id === id)
+  if (!pool) throw new Error(`Pool not found`)
+  return pool
 }
 
 export function useTokens() {
@@ -47,6 +49,12 @@ export function useDailyTrancheStates(trancheId: string) {
   return result
 }
 
+export function usePoolOrders(poolId: string) {
+  const [result] = useCentrifugeQuery(['poolOrders', poolId], (cent) => cent.pools.getPoolOrders([poolId]))
+
+  return result
+}
+
 export function useOrder(poolId: string, trancheId: string, address?: string) {
   const [result] = useCentrifugeQuery(
     ['order', trancheId, address],
@@ -63,7 +71,7 @@ export function usePendingCollect(poolId: string, trancheId?: string, address?: 
   const pool = usePool(poolId)
   const [result] = useCentrifugeQuery(
     ['pendingCollect', poolId, trancheId, address],
-    (cent) => cent.pools.getPendingCollect([address!, poolId, trancheId!, pool!.epoch.lastExecuted]),
+    (cent) => cent.pools.getPendingCollect([address!, poolId, trancheId!, pool.epoch.lastExecuted]),
     {
       enabled: !!address && !!pool && !!trancheId,
     }
@@ -78,7 +86,7 @@ export function usePendingCollectMulti(poolId: string, trancheIds?: string[], ad
     ['pendingCollectPool', poolId, trancheIds, address],
     (cent) =>
       combineLatest(
-        trancheIds!.map((tid) => cent.pools.getPendingCollect([address!, poolId, tid, pool!.epoch.lastExecuted]))
+        trancheIds!.map((tid) => cent.pools.getPendingCollect([address!, poolId, tid, pool.epoch.lastExecuted]))
       ).pipe(
         map((orders) => {
           const obj: Record<
@@ -118,9 +126,9 @@ export function useConstants() {
     async () => {
       const api = await centrifuge.getApiPromise()
       return {
-        minUpdateDelay: Number(api.consts.pools.minUpdateDelay.toHuman()),
-        maxTranches: Number(api.consts.pools.maxTranches.toHuman()),
-        challengeTime: Number(api.consts.pools.challengeTime.toHuman()),
+        minUpdateDelay: Number(api.consts.poolSystem.minUpdateDelay.toHuman()),
+        maxTranches: Number(api.consts.poolSystem.maxTranches.toHuman()),
+        challengeTime: Number(api.consts.poolSystem.challengeTime.toHuman()),
         maxWriteOffGroups: Number(api.consts.loans.maxWriteOffGroups.toHuman()),
       }
     },

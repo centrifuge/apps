@@ -149,7 +149,7 @@ export const PoolDetailOverview: React.FC<{
 
   const pageSummaryData = [
     { label: <Tooltips type="assetClass" />, value: metadata?.pool?.asset.class },
-    { label: <Tooltips type="valueLocked" />, value: formatBalance(pool?.value || 0, pool?.currency) },
+    { label: <Tooltips type="valueLocked" />, value: formatBalance(pool?.value || 0, pool?.currency.symbol) },
     { label: <Tooltips type="averageAssetMaturity" />, value: avgMaturity },
   ]
 
@@ -214,7 +214,7 @@ export const PoolDetailOverview: React.FC<{
                     />
                     <LabelValueStack
                       label={<Tooltips variant="secondary" type="valueLocked" />}
-                      value={formatBalance(token.valueLocked, pool?.currency)}
+                      value={formatBalance(token.valueLocked, pool?.currency.symbol)}
                     />
                     <LabelValueStack
                       label={<Tooltips variant="secondary" type="apy" />}
@@ -228,7 +228,7 @@ export const PoolDetailOverview: React.FC<{
                           fontWeight={600}
                           color={token.capacity.isZero() ? 'statusWarning' : 'statusOk'}
                         >
-                          {formatBalanceAbbreviated(token.capacity, pool?.currency)}
+                          {formatBalanceAbbreviated(token.capacity, pool?.currency.symbol)}
                         </Text>
                       }
                     />

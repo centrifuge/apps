@@ -1,3 +1,4 @@
+import { CurrencyMetadata } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
@@ -11,10 +12,11 @@ export type TokenTableData = {
   protection: number
   capacity: number
   valueLocked: number
-  currency: string
+  currency: CurrencyMetadata
   id: string
   seniority: number
   poolId: string
+  poolCurrency: string
 }
 
 type Props = {
@@ -52,7 +54,7 @@ const columns: Column[] = [
   },
   {
     header: <SortableTableHeader label="Value locked" />,
-    cell: (token: TokenTableData) => formatBalance(token?.valueLocked, token.currency),
+    cell: (token: TokenTableData) => formatBalance(token?.valueLocked, token.poolCurrency),
     flex: '4',
     sortKey: 'valueLocked',
   },
@@ -60,7 +62,7 @@ const columns: Column[] = [
     header: <SortableTableHeader label="Capacity" />,
     cell: (token: TokenTableData) => (
       <Text variant="body2" fontWeight={600} color={token.capacity > 0 ? 'statusOk' : 'statusWarning'}>
-        {formatBalanceAbbreviated(token.capacity, token.currency)}
+        {formatBalanceAbbreviated(token.capacity, token.poolCurrency)}
       </Text>
     ),
     flex: '4',
@@ -93,11 +95,9 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
   const { data: metadata, isLoading } = usePoolMetadata({ metadata: token.poolMetadata })
-  const trancheMeta = metadata?.tranches?.[token.id]
-  const symbol = trancheMeta?.symbol
   return (
     <Shelf gap="2" overflow="hidden">
-      <Thumbnail label={symbol || ''} size="small" />
+      <Thumbnail label={token.currency.symbol} size="small" />
       <TextWithPlaceholder
         isLoading={isLoading}
         variant="body2"
@@ -105,7 +105,7 @@ const TokenName: React.VFC<RowProps> = ({ token }) => {
         fontWeight={600}
         textOverflow="ellipsis"
       >
-        {metadata?.pool?.name} {trancheMeta?.name}
+        {metadata?.pool?.name} {token.currency.name}
       </TextWithPlaceholder>
     </Shelf>
   )
