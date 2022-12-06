@@ -6,6 +6,7 @@ import { getNftsModule } from './modules/nfts'
 import { getPodModule } from './modules/pod'
 import { getPoolsModule } from './modules/pools'
 import { getProxiesModule } from './modules/proxies'
+import { getTokensModule } from './modules/tokens'
 import { getUtilsModule } from './modules/utils'
 
 export class Centrifuge extends CentrifugeBase {
@@ -14,6 +15,7 @@ export class Centrifuge extends CentrifugeBase {
   utils = getUtilsModule(this)
   proxies = getProxiesModule(this)
   metadata = getMetadataModule(this)
+  tokens = getTokensModule(this)
   pod = getPodModule()
 
   constructor(config: UserProvidedConfig = {}) {

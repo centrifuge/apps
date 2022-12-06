@@ -59,7 +59,7 @@ export type PaymentInfo = {
 
 const defaultConfig: Config = {
   network: 'centrifuge',
-  centrifugeWsUrl: 'wss://fullnode.centrifuge.io',
+  centrifugeWsUrl: 'wss://fullnode.parachain.centrifuge.io',
   altairWsUrl: 'wss://fullnode.altair.centrifuge.io',
   polkadotWsUrl: 'wss://rpc.polkadot.io',
   kusamaWsUrl: 'wss://kusama-rpc.polkadot.io',
@@ -74,6 +74,15 @@ const parachainTypes = {
   // NFTs
   ClassId: 'u64',
   InstanceId: 'u128',
+  // Crowdloan
+  RootHashOf: 'Hash',
+  TrieIndex: 'u32',
+  RelayChainAccountId: 'AccountId',
+  ParachainAccountIdOf: 'AccountId',
+  Proof: {
+    leafHash: 'Hash',
+    sortedHashes: 'Vec<Hash>',
+  },
 }
 
 const parachainRpcMethods = {

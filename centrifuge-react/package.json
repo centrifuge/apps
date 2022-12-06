@@ -1,0 +1,71 @@
+{
+  "name": "@centrifuge/centrifuge-react",
+  "version": "0.0.2",
+  "description": "Centrifuge React Library",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "yarn build",
+    "bump": "standard-version --sign",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "lint": "eslint src",
+    "start": "tsc --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@centrifuge/centrifuge-js": "workspace:*",
+    "@centrifuge/fabric": "workspace:*",
+    "@mdx-js/preact": "^2.1.1",
+    "@mdx-js/react": "^1.6.22",
+    "@storybook/addon-actions": "^6.4.18",
+    "@storybook/addon-docs": "^6.4.18",
+    "@storybook/addon-essentials": "^6.4.18",
+    "@storybook/addon-links": "^6.4.18",
+    "@storybook/builder-vite": "^0.1.34",
+    "@storybook/react": "^6.4.18",
+    "@types/babel__core": "^7",
+    "@types/eslint": "^7",
+    "@types/mdx-js__react": "^1",
+    "@types/prettier": "^2",
+    "@types/react": "^17.0.21",
+    "@types/styled-components": "^5",
+    "@types/styled-system": "^5",
+    "@types/styled-system__css": "^5.0.16",
+    "@types/styled-system__should-forward-prop": "^5",
+    "@typescript-eslint/eslint-plugin": "^4.32.0",
+    "@typescript-eslint/parser": "^4.32.0",
+    "babel-loader": "8.1.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.4.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "standard-version": "^9.3.2",
+    "styled-components": "^5.3.6",
+    "typescript": "~4.4.4"
+  },
+  "peerDependencies": {
+    "@centrifuge/centrifuge-js": "*",
+    "@centrifuge/fabric": "*",
+    "react": "*",
+    "react-dom": "*"
+  },
+  "dependencies": {
+    "@polkadot/extension-dapp": "^0.44.6",
+    "@polkadot/react-identicon": "^2.9.12",
+    "@subwallet/wallet-connect": "^0.2.3",
+    "@types/bn.js": "^5",
+    "bn.js": "^5.2.1",
+    "decimal.js-light": "^2.5.1",
+    "react-query": "^3.39.1",
+    "rxjs": "^7.4.0"
+  }
+}

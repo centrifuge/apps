@@ -21,6 +21,7 @@ import { TokenDetailPage } from '../pages/Token'
 import { TokenOverviewPage } from '../pages/Tokens'
 import { CentrifugeProvider } from './CentrifugeProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
+import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { LoadBoundary } from './LoadBoundary'
 import { PodAuthProvider } from './PodAuthProvider'
@@ -59,6 +60,7 @@ export const Root: React.VFC = () => {
           <GlobalStyle />
           <FabricGlobalStyle />
           <CentrifugeProvider>
+            <DemoBanner />
             <Web3Provider>
               <PodAuthProvider>
                 <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
