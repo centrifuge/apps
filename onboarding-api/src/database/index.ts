@@ -1,5 +1,5 @@
-import * as admin from 'firebase-admin'
-import { bool, date, InferType, object, string } from 'yup'
+import * as admin from "firebase-admin";
+import {bool, date, InferType, object, string} from "yup";
 
 export const userSchema = object({
   lastUpdated: date().required(),
@@ -16,21 +16,21 @@ export const userSchema = object({
     taxInfoUploaded: bool().default(false),
     subscriptionSigned: bool().default(false),
   }).required(),
-})
+});
 
-admin.initializeApp()
-const { firestore } = admin
+admin.initializeApp();
+const {firestore} = admin;
 
 const schemas: Record<string, any> = {
   USER: userSchema,
-}
+};
 
 export type OnboardingUser = InferType<typeof userSchema>
 
 export const validateAndWriteToFirestore = async (key: string, data: OnboardingUser, schema: keyof typeof schemas) => {
-  const userCollection = firestore().collection('users')
-  await schemas[schema].validate(data)
-  await userCollection.doc(key).set(data)
-}
+  const userCollection = firestore().collection("users");
+  await schemas[schema].validate(data);
+  await userCollection.doc(key).set(data);
+};
 
-export { firestore }
+export {firestore};

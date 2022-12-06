@@ -17,7 +17,7 @@ const businessInfoInput = object({
 })
 
 export const businessInfoController = async (
-  req: Request<{}, {}, InferType<typeof businessInfoInput>>,
+  req: Request<any, any, InferType<typeof businessInfoInput>>,
   res: Response
 ) => {
   try {
@@ -29,9 +29,9 @@ export const businessInfoController = async (
 
     const {
       body: {
-        businessIncorporationDate,
-        companyJurisdictionCode,
-        companyRegistrationNumber,
+        // businessIncorporationDate,
+        // companyJurisdictionCode,
+        // companyRegistrationNumber,
         businessName,
         trancheId,
         poolId,
@@ -50,21 +50,20 @@ export const businessInfoController = async (
       reference: `BUSINESS_AML_REQUEST_${Math.random()}`,
       aml_for_businesses: {
         business_name: businessName,
-        business_incorporation_date: businessIncorporationDate,
-        ongoing: '0',
       },
     }
     const businessAML = await shuftiProRequest(req, payloadAML)
+    console.log('🚀 ~ businessAML', businessAML)
     const businessAmlVerified = businessAML.event === 'verification.accepted'
 
     const kybPayload = {
       reference: `KYB_REQUEST_${Math.random()}`,
       kyb: {
-        company_registration_number: companyRegistrationNumber,
-        company_jurisdiction_code: companyJurisdictionCode,
+        company_name: businessName,
       },
     }
     const kyb = await shuftiProRequest(req, kybPayload)
+    console.log('🚀 ~ kyb', kyb)
     const kybVerified = kyb.event === 'verification.accepted'
 
     const user = {
@@ -88,9 +87,9 @@ export const businessInfoController = async (
 
     res.json(user)
   } catch (error) {
-    // @ts-expect-error
+    // @ts-expect-error can't figure out typing
     functions.logger.log(error.message)
-    // @ts-expect-error
+    // @ts-expect-error can't figure out typing
     res.status(500).json({ error: error.message })
   }
 }

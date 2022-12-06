@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions'
-import { businessInfoController } from './controllers/businessInfo'
+import * as functions from "firebase-functions";
+import {businessInfoController} from "./controllers/businessInfo";
 
-exports.businessInfo = functions.https.onRequest(businessInfoController)
+exports.businessInfo = functions.https.onRequest(businessInfoController);
