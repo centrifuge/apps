@@ -1,4 +1,6 @@
-import * as functions from "firebase-functions";
-import {businessInfoController} from "./controllers/businessInfo";
+import * as functions from 'firebase-functions'
+import { businessVerificationController } from './controllers/business-verification'
+import { businessVerificationConfirmController } from './controllers/business-verification-confirm'
 
-exports.businessInfo = functions.https.onRequest(businessInfoController);
+exports.businessVerification = functions.https.onRequest(businessVerificationController)
+exports.businessVerificationConfirm = functions.https.onRequest(businessVerificationConfirmController)
