@@ -1,4 +1,5 @@
 import { Request } from 'express'
+import { HttpsError } from 'firebase-functions/v1/auth'
 import * as jw3t from 'jw3t'
 
 type Jw3TPayload = {
@@ -15,6 +16,6 @@ export async function verifyJw3t(request: Request) {
 
     return payload as Jw3TPayload
   } catch {
-    throw new Error('Token invalid')
+    throw new HttpsError('unauthenticated', 'Token invalid')
   }
 }
