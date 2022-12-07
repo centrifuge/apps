@@ -1150,7 +1150,7 @@ export function getPoolsModule(inst: Centrifuge) {
     options?: TransactionOptions
   ) {
     const [poolId, loanId, ratePerSec, loanInfoInput] = args
-    const ratePerYear = Rate.fromFloat(ratePerSec.toDecimal().sub(1)).muln(60 * 60 * 24 * 365)
+    const ratePerYear = Rate.fromFloat(new Rate(ratePerSec).toApr().toDecimalPlaces(4))
     const loanInfoFields = LOAN_FIELDS[loanInfoInput.type]
     const loanInfo = loanInfoFields.map((key) => (LOAN_INPUT_TRANSFORM as any)[key]((loanInfoInput as any)[key]))
     const $api = inst.getApi()
