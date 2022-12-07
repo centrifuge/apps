@@ -45,10 +45,8 @@ export const validateAndWriteToFirestore = async (
     await schemas[schema].schema.validate(data)
     await schemas[schema].collection.doc(key).set(data)
   } catch (error) {
-    if (error instanceof HttpsError) {
-      throw new HttpsError('invalid-argument', error.message)
-    }
-    throw new HttpsError('internal', 'An unknown error occured')
+    // @ts-expect-error error typing
+    throw new HttpsError('invalid-argument', error.message)
   }
 }
 
