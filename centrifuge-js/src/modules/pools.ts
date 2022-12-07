@@ -1146,17 +1146,18 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function priceLoan(
-    args: [poolId: string, loanId: string, interestRatePerSec: string, loanInfoInput: LoanInfoInput],
+    args: [poolId: string, loanId: string, interestRatePerSec: Rate, loanInfoInput: LoanInfoInput],
     options?: TransactionOptions
   ) {
     const [poolId, loanId, ratePerSec, loanInfoInput] = args
+    const ratePerYear = Rate.fromFloat(ratePerSec.toDecimal().sub(1)).muln(60 * 60 * 24 * 365)
     const loanInfoFields = LOAN_FIELDS[loanInfoInput.type]
     const loanInfo = loanInfoFields.map((key) => (LOAN_INPUT_TRANSFORM as any)[key]((loanInfoInput as any)[key]))
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.loans.price(poolId, loanId, ratePerSec, {
+        const submittable = api.tx.loans.price(poolId, loanId, ratePerYear, {
           [loanInfoInput.type]: loanInfo,
         })
         return inst.wrapSignAndSend(api, submittable, options)
