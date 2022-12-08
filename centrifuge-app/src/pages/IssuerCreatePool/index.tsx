@@ -1,6 +1,17 @@
 import { CurrencyBalance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { Box, Button, CurrencyInput, FileUpload, Grid, Select, Text, TextInput, Thumbnail } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  CurrencyInput,
+  FileUpload,
+  Grid,
+  Select,
+  Text,
+  TextInput,
+  TextWithPlaceholder,
+  Thumbnail,
+} from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { useHistory } from 'react-router'
@@ -11,7 +22,6 @@ import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
 import { PageSection } from '../../components/PageSection'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
-import { TextWithPlaceholder } from '../../components/TextWithPlaceholder'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
 import { formatBalance } from '../../utils/formatting'

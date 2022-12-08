@@ -1,4 +1,5 @@
 import { Centrifuge } from './Centrifuge'
+export { UserProvidedConfig } from './CentrifugeBase'
 export { Collection, NFT } from './modules/nfts'
 export * from './modules/pools'
 export * from './types'

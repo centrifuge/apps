@@ -7,23 +7,26 @@ import { Stack } from '../Stack'
 import { Text } from '../Text'
 
 type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
-  label?: string
+  label?: string | React.ReactElement
   errorMessage?: string
 }
 
 export const Checkbox: React.VFC<CheckboxProps> = ({ label, errorMessage, ...checkboxProps }) => {
   return (
     <label>
-      <Shelf as={Text} gap={1} alignItems="baseline">
+      <Shelf as={Text} gap={1} alignItems="center">
         <StyledWrapper minWidth="18px" height="18px" flex="0 0 18px" $hasLabel={!!label}>
           <StyledCheckbox type="checkbox" {...checkboxProps} />
           <StyledOutline />
         </StyledWrapper>
         {label && (
           <Stack gap={1} flex={1}>
-            <Text variant="body1" color={checkboxProps.disabled ? 'textDisabled' : 'textPrimary'}>
-              {label}
-            </Text>
+            {typeof label === 'string' && (
+              <Text variant="body1" color={checkboxProps.disabled ? 'textDisabled' : 'textPrimary'}>
+                {label}
+              </Text>
+            )}
+            {React.isValidElement(label) && label}
             {errorMessage && (
               <Text variant="label2" color="statusCritical">
                 {errorMessage}

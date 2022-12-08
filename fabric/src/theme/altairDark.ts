@@ -18,6 +18,8 @@ export const altairDark: FabricTheme = {
     textInteractive: yellowScale[500],
     textInteractiveHover: yellowScale[500],
     accentScale: blueScale,
+    blueScale,
+    yellowScale,
   },
   shadows: {
     ...baseTheme.shadows,

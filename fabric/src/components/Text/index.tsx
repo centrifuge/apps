@@ -1,17 +1,43 @@
 import shouldForwardProp from '@styled-system/should-forward-prop'
+import * as CSS from 'csstype'
 import * as React from 'react'
 import styled, { DefaultTheme, useTheme } from 'styled-components'
-import { color, ColorProps, compose, typography, TypographyProps } from 'styled-system'
+import {
+  color,
+  ColorProps,
+  compose,
+  ResponsiveValue,
+  system,
+  typography as typographySystem,
+  TypographyProps as TypographySystemProps,
+} from 'styled-system'
 import { PropsOf } from '../../utils/types'
 
-interface SystemProps extends TypographyProps, ColorProps {}
+interface TypographyProps {
+  textTransform?: ResponsiveValue<CSS.Property.TextTransform>
+  whiteSpace?: ResponsiveValue<CSS.Property.WhiteSpace>
+  textDecoration?: ResponsiveValue<CSS.Property.TextDecoration>
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+const typography = system({
+  textTransform: {
+    property: 'textTransform',
+  },
+  whiteSpace: {
+    property: 'whiteSpace',
+  },
+  textDecoration: {
+    property: 'textDecoration',
+  },
+})
+
+interface SystemProps extends TypographySystemProps, ColorProps, TypographyProps {}
+
 interface StyledTextProps extends SystemProps {}
 
 const StyledText = styled('span').withConfig({
   shouldForwardProp: (prop) => shouldForwardProp(prop),
-})<StyledTextProps>({ margin: 0 }, compose(typography, color))
+})<StyledTextProps>({ margin: 0 }, compose(typographySystem, typography, color))
 
 const TextContext = React.createContext(false)
 
@@ -21,11 +47,10 @@ function useTextContext(): React.ContextType<typeof TextContext> {
 
 type TextProps = PropsOf<typeof StyledText> & {
   variant?: keyof DefaultTheme['typography']
-  underline?: boolean
   textOverflow?: 'ellipsis'
 }
 
-const Text: React.FC<TextProps> = (props) => {
+const Text = React.forwardRef<HTMLDivElement, TextProps>((props, ref) => {
   const isInText = useTextContext()
   const theme = useTheme()
 
@@ -46,7 +71,6 @@ const Text: React.FC<TextProps> = (props) => {
     ...rest
   } = textProps
 
-  const textDecoration = props.underline ? 'underline' : 'initial'
   const overflow = props.textOverflow ? { overflow: 'hidden', textOverflow: props.textOverflow } : {}
 
   return (
@@ -58,13 +82,14 @@ const Text: React.FC<TextProps> = (props) => {
         fontWeight={fontWeight}
         lineHeight={lineHeight}
         fontFamily={fontFamily}
-        style={{ textDecoration, ...overflow }}
+        style={{ ...overflow }}
+        ref={ref}
         {...rest}
       >
         {children}
       </StyledText>
     </TextContext.Provider>
   )
-}
+})
 
 export { Text, TextProps, useTextContext, TextContext }

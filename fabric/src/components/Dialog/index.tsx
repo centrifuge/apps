@@ -16,13 +16,13 @@ type IconProps = {
   size?: ResponsiveValue<Size>
 }
 
-type Props = {
+type Props = React.PropsWithChildren<{
   isOpen: boolean
   onClose: () => void
   width?: string | number
-  title?: string
+  title?: string | React.ReactElement
   icon?: React.ComponentType<IconProps> | React.ReactElement
-}
+}>
 
 const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dialog', icon: IconComp, title }) => {
   const ref = React.useRef<HTMLDivElement>(null)
@@ -63,7 +63,8 @@ const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dial
           <Stack gap={3}>
             <Shelf gap={2}>
               {IconComp && (isComponent(IconComp) ? <IconComp size="iconMedium" /> : IconComp)}
-              <Text variant="heading2">{title}</Text>
+              {typeof title === 'string' && <Text variant="heading2">{title}</Text>}
+              {React.isValidElement(title) && title}
 
               <Button variant="tertiary" icon={IconX} onClick={() => onClose()} style={{ marginLeft: 'auto' }} />
             </Shelf>

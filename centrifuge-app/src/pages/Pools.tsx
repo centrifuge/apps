@@ -1,5 +1,5 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { IconChevronRight, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { DataTable } from '../components/DataTable'
 import { MenuSwitch } from '../components/MenuSwitch'
@@ -7,7 +7,6 @@ import { PageHeader } from '../components/PageHeader'
 import { PageSummary } from '../components/PageSummary'
 import { PageWithSideBar } from '../components/PageWithSideBar'
 import { PoolList } from '../components/PoolList'
-import { TextWithPlaceholder } from '../components/TextWithPlaceholder'
 import { Tooltips } from '../components/Tooltips'
 import { config } from '../config'
 import { Dec } from '../utils/Decimal'
@@ -30,7 +29,7 @@ const Pools: React.FC = () => {
 
   const [listedPools, listedTokens] = React.useMemo(
     () => {
-      const listedPools = pools?.filter((_, i) => poolMetas[i].data?.pool?.listed)
+      const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed)
       const listedTokens = listedPools?.flatMap((p) => p.tranches)
 
       return [listedPools, listedTokens]
