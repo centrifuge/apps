@@ -18,7 +18,7 @@ export class Centrifuge extends CentrifugeBase {
   metadata = getMetadataModule(this)
   tokens = getTokensModule(this)
   pod = getPodModule()
-  auth = getAuthModule()
+  auth = getAuthModule(this)
 
   constructor(config: UserProvidedConfig = {}) {
     super(config)

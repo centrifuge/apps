@@ -64,12 +64,14 @@ export const useAuth = (authorizedProxyTypes?: string[]) => {
 
         if (token) {
           setAuthToken(token)
-          const isAuthenticated = await cent.auth.authenticate(address, token)
+          const { verified, payload } = await cent.auth.authenticate(address, token)
 
-          if (isAuthenticated) {
-            if (proxy) {
+          const onBehalfOf = payload?.on_behalf_of
+
+          if (verified) {
+            if (onBehalfOf) {
               if (authorizedProxyTypes) {
-                const isAuthorizedProxy = await cent.auth.authorizeProxy(proxy.types, authorizedProxyTypes)
+                const isAuthorizedProxy = await cent.auth.authorizeProxy(address, onBehalfOf, authorizedProxyTypes)
 
                 return isAuthorizedProxy
               }
@@ -83,9 +85,8 @@ export const useAuth = (authorizedProxyTypes?: string[]) => {
       return false
     },
     {
-      staleTime: 0,
       enabled: !!selectedAccount,
-      retry: false,
+      retry: 1,
     }
   )
 

@@ -1,14 +1,17 @@
 import { Keyring } from '@polkadot/keyring'
 import { Signer } from '@polkadot/types/types'
 import * as jw3t from 'jw3t'
+import { firstValueFrom, switchMap } from 'rxjs'
+import { Centrifuge } from '../Centrifuge'
+import { isSameAddress } from '../utils'
 
 type TokenOptions = {
   expiresAt?: string
   onBehalfOf?: string
-  proxyTypes?: string[]
+  proxyType?: string[]
 }
 
-export function getAuthModule() {
+export function getAuthModule(inst: Centrifuge) {
   async function generateJw3t(address: string, signer: Signer, options: TokenOptions = {}) {
     const header = {
       algorithm: 'sr25519',
@@ -22,7 +25,7 @@ export function getAuthModule() {
       // default values
       expires_at: options.expiresAt || String(now + 60 * 60 * 24 * 30), // 30 days
       on_behalf_of: options.onBehalfOf,
-      proxy_types: options.proxyTypes,
+      proxy_type: options.proxyType,
       not_before: String(now),
     }
 
@@ -55,14 +58,29 @@ export function getAuthModule() {
       const verifier = new jw3t.JW3TVerifier(polkaJsVerifier)
       const { payload } = await verifier.verify(token)
 
-      return payload.address === address
+      return {
+        verified: payload.address === address,
+        payload,
+      }
     } catch {
-      return false
+      return {
+        verified: false,
+      }
     }
   }
 
-  async function authorizeProxy(proxyTypes: string[], authorizedProxyTypes: string[]) {
-    return authorizedProxyTypes.some((authorizedProxyType) => proxyTypes.includes(authorizedProxyType))
+  async function authorizeProxy(address: string, delegator: string, authorizedProxyTypes: string[]) {
+    const proxiesData = await firstValueFrom(inst.getApi().pipe(switchMap((api) => api.query.proxy.proxies(delegator))))
+    const proxies = proxiesData.toJSON() as { delegate: string; proxyType: string }[]
+
+    const addressProxies = proxies.filter((proxy) => isSameAddress(proxy.delegate, address))
+    const proxyTypes = addressProxies.map((proxy) => proxy.proxyType)
+
+    if (proxyTypes) {
+      return authorizedProxyTypes.some((authorizedProxyType) => proxyTypes.includes(authorizedProxyType))
+    }
+
+    return false
   }
 
   return {
