@@ -15,10 +15,9 @@ const Logo = config.logo
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export const OnboardingPage: React.FC = () => {
-  const { selectedAccount, isLoading } = useWeb3()
-
   const [activeStep, setActiveStep] = useState<number>(0)
 
+  const { selectedAccount, isConnecting } = useWeb3()
   const [investorType, setInvestorType] = useState<InvestorTypes>()
   const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = useState(false)
   const { isAuth, refetchAuth, isAuthFetched } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
@@ -26,14 +25,18 @@ export const OnboardingPage: React.FC = () => {
   const nextStep = () => setActiveStep((current) => current + 1)
 
   useEffect(() => {
-    if (isAuthFetched && isAuth && activeStep === 0) {
-      setActiveStep(2)
-    } else if (isAuthFetched && !isAuth) {
-      setActiveStep(1)
-    } else if (!isLoading && selectedAccount === null) {
-      setActiveStep(1)
+    if (!isConnecting && activeStep === 0) {
+      if (isAuthFetched) {
+        if (isAuth) {
+          setActiveStep(2)
+        } else {
+          setActiveStep(1)
+        }
+      } else if (selectedAccount === null) {
+        setActiveStep(1)
+      }
     }
-  }, [activeStep, isAuth, isAuthFetched, isLoading, selectedAccount])
+  }, [activeStep, isAuth, isAuthFetched, isConnecting, selectedAccount])
 
   return (
     <Flex backgroundColor="backgroundSecondary" minHeight="100vh" flexDirection="column">
@@ -50,7 +53,7 @@ export const OnboardingPage: React.FC = () => {
           <AccountsMenu />
         </Box>
       </Shelf>
-      {activeStep === 0 ? (
+      {activeStep === 0 || isConnecting ? (
         <Box
           mx="150px"
           my={5}
