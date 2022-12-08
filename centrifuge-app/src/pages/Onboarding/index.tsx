@@ -14,7 +14,7 @@ export const OnboardingPage: React.FC = () => {
   const [investorType, setInvestorType] = useState<InvestorTypes>()
   const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = useState(false)
 
-  const nextStep = () => setActiveStep((current) => (current < 3 ? current + 1 : current))
+  const nextStep = () => setActiveStep((current) => current + 1)
 
   return (
     <Flex backgroundColor="backgroundSecondary" paddingBottom={5} height="100%" flexDirection="column">
@@ -58,6 +58,7 @@ export const OnboardingPage: React.FC = () => {
           <InvestorType
             investorType={investorType}
             isAgreedToDataSharingAgreement={isAgreedToDataSharingAgreement}
+            nextStep={nextStep}
             setInvestorType={setInvestorType}
             setIsAgreedToDataSharingAgreement={setIsAgreedToDataSharingAgreement}
           />
