@@ -19,7 +19,6 @@ export const businessSchema = object({
     }),
     kyb: object({
       verified: bool().default(false),
-      verificationCode: string(),
     }), // business AML verified, KYB verified, and email verified
     kyc: object({
       verified: bool().default(false),

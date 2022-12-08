@@ -16,6 +16,6 @@ export async function verifyJw3t(request: Request) {
 
     return payload as Jw3TPayload
   } catch {
-    throw new HttpsError('unauthenticated', 'Token invalid')
+    throw new HttpsError('unauthenticated', 'Invalid token')
   }
 }

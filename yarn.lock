@@ -8802,6 +8802,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/cookie@npm:^0":
+  version: 0.5.1
+  resolution: "@types/cookie@npm:0.5.1"
+  checksum: d6f95da464457c7735691d74a3da998b50abf0e886ce782ef26c429055a3ca7712d1c9ef67efbfe6d8579178a62010598c86e6b2ca72dbd3baddd320d582b77a
+  languageName: node
+  linkType: hard
+
 "@types/cors@npm:^2.8.5":
   version: 2.8.12
   resolution: "@types/cors@npm:2.8.12"
@@ -18097,10 +18104,12 @@ fsevents@^1.2.7:
   version: 0.0.0-use.local
   resolution: "functions@workspace:onboarding-api"
   dependencies:
+    "@types/cookie": ^0
     "@types/express": ^4.17.14
     "@types/yup": ^0
     "@typescript-eslint/eslint-plugin": ^5.12.0
     "@typescript-eslint/parser": ^5.12.0
+    cookie: ^0.5.0
     eslint: ^8.9.0
     eslint-config-google: ^0.14.0
     eslint-plugin-import: ^2.25.4

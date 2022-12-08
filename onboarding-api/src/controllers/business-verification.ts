@@ -1,4 +1,3 @@
-import * as crypto from 'crypto'
 import { Request, Response } from 'express'
 import * as functions from 'firebase-functions'
 import { HttpsError } from 'firebase-functions/v1/https'
@@ -23,9 +22,9 @@ export const businessVerificationController = async (
   res: Response
 ) => {
   try {
-    const dryRun = req.query?.dryRun // dry run skips shuftipro requests and returns a mocked response
+    const dryRun = !!req.query?.dryRun ?? false // skips shuftipro requests and returns a failed event TODO: provide mocks
     if (req.method !== 'POST') {
-      throw new HttpsError('permission-denied', 'Method not allowed')
+      throw new HttpsError('internal', 'Method not allowed')
     }
     const { address } = await verifyJw3t(req)
     await businessVerificationInput.validate(req.body)
@@ -43,7 +42,7 @@ export const businessVerificationController = async (
     } = { ...req }
 
     const userDoc = await businessCollection.doc(address).get()
-    if (userDoc.exists && userDoc.data()?.steps?.businessVerification?.verified) {
+    if (userDoc.exists && userDoc.data()?.steps?.kyb?.verified) {
       throw new Error('Business already verified')
     }
 
@@ -56,10 +55,12 @@ export const businessVerificationController = async (
         business_incorporation_date: businessIncorporationDate,
       },
     }
-    const businessAML = !dryRun ? await shuftiProRequest(req, payloadAML) : { event: 'failed' }
+    const businessAML = await shuftiProRequest(req, payloadAML, { dryRun })
     console.log('🚀 ~ businessAML', businessAML)
     const businessAmlVerified = businessAML.event === 'verification.accepted'
-    // const businessAmlVerified = false
+    if (!businessAmlVerified) {
+      functions.logger.warn('KYB failed')
+    }
 
     const kybPayload = {
       reference: `KYB_REQUEST_${Math.random()}`,
@@ -68,19 +69,11 @@ export const businessVerificationController = async (
         company_registration_number: companyRegistrationNumber,
       },
     }
-
-    if (!businessAmlVerified) {
-      functions.logger.warn('KYB failed')
-    }
-
-    const kyb = !dryRun ? await shuftiProRequest(req, kybPayload) : { event: 'failed' }
+    const kyb = await shuftiProRequest(req, kybPayload, { dryRun })
     const kybVerified = kyb.event === 'verification.accepted'
-    // const kybVerified = false
     if (!kybVerified) {
       functions.logger.warn('KYB failed')
     }
-
-    const uboVerificationCode = crypto.randomBytes(27).toString('hex')
 
     const business = {
       lastUpdated: new Date(),
@@ -91,11 +84,10 @@ export const businessVerificationController = async (
       poolId,
       steps: {
         email: {
-          verificationCode: businessAmlVerified && kybVerified ? uboVerificationCode : '',
+          verificationCode: '',
           verified: false,
         },
         kyb: {
-          verificationCode: uboVerificationCode,
           verified: false,
         },
         kyc: {
@@ -111,6 +103,14 @@ export const businessVerificationController = async (
     // await firestore().collection('shuftipro-business-aml').doc('aml').set(businessAML)
 
     // add business owners to response
+
+    res.cookie('__session', JSON.stringify({ address, kybVerified, businessAmlVerified }), {
+      secure: process.env.NODE_ENV !== 'development',
+      httpOnly: true,
+      maxAge: 1000 * 60 * 5,
+      path: 'centrifuge-fargate-apps-dev/us-central1',
+    })
+
     res.json({
       ultimateBeneficialOwners: [],
       kyb,
