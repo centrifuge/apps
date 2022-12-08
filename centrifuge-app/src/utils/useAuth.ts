@@ -13,11 +13,14 @@ export const useAuth = (authorizedProxyTypes?: string[]) => {
       if (selectedAccount?.address && selectedWallet?.signer) {
         const { address } = selectedAccount
 
-        // @ts-expect-error Signer type version mismatch
-        const { token } = await cent.auth.generateJw3t(address, selectedWallet?.signer)
+        if (proxy) {
+          // @ts-expect-error Signer type version mismatch
+          const { token } = await cent.auth.generateJw3t(address, selectedWallet?.signer, {
+            onBehalfOf: proxy.delegator,
+            proxyTypes: proxy.types,
+          })
 
-        if (token) {
-          if (proxy) {
+          if (token) {
             if (authorizedProxyTypes) {
               const { delegator, types } = proxy
 
@@ -28,7 +31,12 @@ export const useAuth = (authorizedProxyTypes?: string[]) => {
                 refetchAuth()
               }
             }
-          } else {
+          }
+        } else {
+          // @ts-expect-error Signer type version mismatch
+          const { token } = await cent.auth.generateJw3t(address, selectedWallet?.signer)
+
+          if (token) {
             sessionStorage.setItem(`centrifuge-auth-${address}`, JSON.stringify(token))
             refetchAuth()
           }

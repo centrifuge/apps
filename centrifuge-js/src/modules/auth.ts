@@ -3,7 +3,9 @@ import { Signer } from '@polkadot/types/types'
 import * as jw3t from 'jw3t'
 
 type TokenOptions = {
-  [key in 'expiresAt']?: string
+  expiresAt?: string
+  onBehalfOf?: string
+  proxyTypes?: string[]
 }
 
 export function getAuthModule() {
@@ -19,6 +21,8 @@ export function getAuthModule() {
     const defaultValues = {
       // default values
       expires_at: options.expiresAt || String(now + 60 * 60 * 24 * 30), // 30 days
+      on_behalf_of: options.onBehalfOf,
+      proxy_types: options.proxyTypes,
       not_before: String(now),
     }
 
@@ -51,10 +55,7 @@ export function getAuthModule() {
       const verifier = new jw3t.JW3TVerifier(polkaJsVerifier)
       const { payload } = await verifier.verify(token)
 
-      const expiry = Number(payload?.expires_at ?? 0) * 1000
-      const isExpired = expiry <= Date.now()
-
-      return payload.address === address && !isExpired
+      return payload.address === address
     } catch {
       return false
     }
