@@ -17,26 +17,22 @@ const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonP
 export const OnboardingPage: React.FC = () => {
   const [activeStep, setActiveStep] = useState<number>(0)
 
-  const { selectedAccount, isConnecting } = useWeb3()
+  const { isConnecting } = useWeb3()
   const [investorType, setInvestorType] = useState<InvestorTypes>()
   const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = useState(false)
-  const { isAuth, refetchAuth, isAuthFetched } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
+  const { isAuth, refetchAuth, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
 
   const nextStep = () => setActiveStep((current) => current + 1)
 
   useEffect(() => {
-    if (!isConnecting && activeStep === 0) {
-      if (isAuthFetched) {
-        if (isAuth) {
-          setActiveStep(2)
-        } else {
-          setActiveStep(1)
-        }
-      } else if (selectedAccount === null) {
-        setActiveStep(1)
-      }
+    if (authToken === '') {
+      setActiveStep(1)
     }
-  }, [activeStep, isAuth, isAuthFetched, isConnecting, selectedAccount])
+
+    if (authToken && isAuth && activeStep === 0) {
+      setActiveStep(2)
+    }
+  }, [activeStep, isAuth, authToken])
 
   return (
     <Flex backgroundColor="backgroundSecondary" minHeight="100vh" flexDirection="column">
