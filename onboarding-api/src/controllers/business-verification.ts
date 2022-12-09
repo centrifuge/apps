@@ -43,7 +43,7 @@ export const businessVerificationController = async (
 
     const userDoc = await businessCollection.doc(address).get()
     if (userDoc.exists && userDoc.data()?.steps?.kyb?.verified) {
-      throw new Error('Business already verified')
+      throw new HttpsError('invalid-argument', 'Business already verified')
     }
 
     // send email verfication link

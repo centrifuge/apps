@@ -22,7 +22,7 @@ export const businessVerificationConfirmController = async (req: Request, res: R
       throw new HttpsError('not-found', 'Business not found')
     }
     if (businessDoc.exists && data?.steps.kyb.verified) {
-      throw new HttpsError('already-exists', 'Business verification step already confirmed')
+      throw new HttpsError('invalid-argument', 'Business verification step already confirmed')
     }
 
     await businessCollection.doc(address).set(
@@ -37,7 +37,8 @@ export const businessVerificationConfirmController = async (req: Request, res: R
     )
 
     res.clearCookie('__session')
-    res.status(201).send()
+    const freshData = (await businessCollection.doc(address).get()).data()
+    res.status(201).send({ freshData })
   } catch (error) {
     if (error instanceof HttpsError) {
       functions.logger.log(error.message)
