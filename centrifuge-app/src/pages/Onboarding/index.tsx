@@ -2,11 +2,11 @@ import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper } from '@centrifuge
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AccountsMenu } from '../../components/AccountsMenu'
+import { useAuth } from '../../components/AuthProvider'
 import { Spinner } from '../../components/Spinner'
 import { useWeb3 } from '../../components/Web3Provider'
 import { config } from '../../config'
 import { InvestorTypes } from '../../types'
-import { useAuth } from '../../utils/useAuth'
 import { InvestorType } from './InvestorType'
 import { LinkWallet } from './LinkWallet'
 

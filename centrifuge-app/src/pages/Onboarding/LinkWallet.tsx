@@ -1,6 +1,6 @@
 import { Box, Button, IconCheck, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useMemo } from 'react'
-import { useCentrifuge } from '../../components/CentrifugeProvider'
+import { useAuth } from '../../components/AuthProvider'
 import { useWeb3 } from '../../components/Web3Provider'
 
 type Props = {
@@ -11,40 +11,9 @@ type Props = {
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
-export const LinkWallet = ({ nextStep, isAuth, refetchAuth }: Props) => {
-  const { selectedWallet, selectedAccount, connect, proxy } = useWeb3()
-  const cent = useCentrifuge()
-
-  const login = async () => {
-    try {
-      if (selectedAccount?.address && selectedWallet?.signer) {
-        const { address } = selectedAccount
-
-        const { token } = await cent.auth.generateJw3t(
-          address,
-          // @ts-expect-error Signer type version mismatch
-          selectedWallet.signer
-        )
-
-        if (token) {
-          if (proxy) {
-            const { delegator, types } = proxy
-
-            const isAuthorizedProxy = AUTHORIZED_ONBOARDING_PROXY_TYPES.some((proxyType) => types.includes(proxyType))
-
-            if (isAuthorizedProxy) {
-              sessionStorage.setItem(`centrifuge-auth-${address}-${delegator}`, token)
-            }
-          } else {
-            sessionStorage.setItem(`centrifuge-auth-${address}`, token)
-          }
-
-          // update database with address
-          refetchAuth()
-        }
-      }
-    } catch {}
-  }
+export const LinkWallet = ({ nextStep, isAuth }: Props) => {
+  const { selectedAccount, connect } = useWeb3()
+  const { login } = useAuth()
 
   const linkButtonText = useMemo(() => {
     if (isAuth) {
@@ -100,7 +69,7 @@ export const LinkWallet = ({ nextStep, isAuth, refetchAuth }: Props) => {
             {connectButtonText}
           </button>
           <button
-            onClick={() => login()}
+            onClick={() => login(AUTHORIZED_ONBOARDING_PROXY_TYPES)}
             disabled={!!isAuth}
             style={{
               background: 'none',
