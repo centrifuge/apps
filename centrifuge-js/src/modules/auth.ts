@@ -52,14 +52,14 @@ export function getAuthModule(inst: Centrifuge) {
     return { payload, token }
   }
 
-  async function authenticate(address: string, token: string) {
+  async function verify(token: string) {
     try {
       const polkaJsVerifier = new jw3t.PolkaJsVerifier()
       const verifier = new jw3t.JW3TVerifier(polkaJsVerifier)
       const { payload } = await verifier.verify(token)
 
       return {
-        verified: payload.address === address,
+        verified: true,
         payload,
       }
     } catch {
@@ -69,7 +69,7 @@ export function getAuthModule(inst: Centrifuge) {
     }
   }
 
-  async function authorizeProxy(address: string, delegator: string, authorizedProxyTypes: string[]) {
+  async function verifyProxy(address: string, delegator: string, authorizedProxyTypes: string[]) {
     const proxiesData = await firstValueFrom(inst.getApi().pipe(switchMap((api) => api.query.proxy.proxies(delegator))))
     const proxies = proxiesData.toJSON() as { delegate: string; proxyType: string }[]
 
@@ -77,15 +77,18 @@ export function getAuthModule(inst: Centrifuge) {
     const proxyTypes = addressProxies.map((proxy) => proxy.proxyType)
 
     if (proxyTypes) {
-      return authorizedProxyTypes.some((authorizedProxyType) => proxyTypes.includes(authorizedProxyType))
+      return {
+        verified: authorizedProxyTypes.some((authorizedProxyType) => proxyTypes.includes(authorizedProxyType)),
+        proxyTypes,
+      }
     }
 
-    return false
+    return { verified: false }
   }
 
   return {
-    authenticate,
-    authorizeProxy,
+    verify,
+    verifyProxy,
     generateJw3t,
   }
 }

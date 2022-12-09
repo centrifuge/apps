@@ -1,12 +1,14 @@
 import { Button, IconAlertCircle, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { usePodAuth } from './PodAuthProvider'
+import { usePodAuth } from './AuthProvider'
 
 type Props = {
   podUrl: string
   message?: string
   buttonLabel?: string
 }
+
+const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'NodeAdmin']
 
 export const PodAuthSection: React.FC<Props> = ({
   podUrl,
@@ -22,7 +24,7 @@ export const PodAuthSection: React.FC<Props> = ({
           <IconAlertCircle size="iconSmall" /> <Text variant="body3">{message}</Text>
         </Shelf>
         {canLogIn && (
-          <Button onClick={() => login()} small loading={isLoggingIn}>
+          <Button onClick={() => login(AUTHORIZED_POD_PROXY_TYPES)} small loading={isLoggingIn}>
             {buttonLabel}
           </Button>
         )}

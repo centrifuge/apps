@@ -19,6 +19,7 @@ import { OnboardingPage } from '../pages/Onboarding'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
+import { AuthProvider } from './AuthProvider'
 import { CentrifugeProvider } from './CentrifugeProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
@@ -61,16 +62,18 @@ export const Root: React.VFC = () => {
           <CentrifugeProvider>
             <DemoBanner />
             <Web3Provider>
-              <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
-                <TransactionProvider>
-                  <TransactionToasts />
-                  <Router>
-                    <LoadBoundary>
-                      <Routes />
-                    </LoadBoundary>
-                  </Router>
-                </TransactionProvider>
-              </DebugFlags>
+              <AuthProvider>
+                <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
+                  <TransactionProvider>
+                    <TransactionToasts />
+                    <Router>
+                      <LoadBoundary>
+                        <Routes />
+                      </LoadBoundary>
+                    </Router>
+                  </TransactionProvider>
+                </DebugFlags>
+              </AuthProvider>
             </Web3Provider>
           </CentrifugeProvider>
         </FabricProvider>
