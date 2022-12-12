@@ -1,14 +1,15 @@
 import { Request, Response } from 'express'
 import * as functions from 'firebase-functions'
 import { HttpsError } from 'firebase-functions/v1/https'
-import { date, InferType, object, string } from 'yup'
+import { bool, date, InferType, object, string } from 'yup'
 import { businessCollection, validateAndWriteToFirestore } from '../database'
 import { shuftiProRequest } from '../utils/shuftiProRequest'
 import { verifyJw3t } from '../utils/verifyJw3t'
 
 const businessVerificationInput = object({
+  dryRun: bool().default(false).optional(), // skips shuftipro requests and returns a failed event. TODO: provide mocks
   email: string().email().required(),
-  address: string().required(), // make sure address matches address in payload
+  address: string().required(),
   poolId: string().required(),
   trancheId: string().required(),
   businessName: string().required(), // used for AML
@@ -23,7 +24,6 @@ export const businessVerificationController = async (
 ) => {
   let shuftiErrors: string[] = []
   try {
-    const dryRun = !!req.query?.dryRun ?? false // skips shuftipro requests and returns a failed event. TODO: provide mocks
     if (req.method !== 'POST') {
       throw new HttpsError('internal', 'Method not allowed')
     }
@@ -39,6 +39,7 @@ export const businessVerificationController = async (
         trancheId,
         poolId,
         email,
+        dryRun,
       },
     } = { ...req }
 
@@ -47,7 +48,7 @@ export const businessVerificationController = async (
       throw new HttpsError('invalid-argument', 'Business already verified')
     }
 
-    // send email verfication link
+    // TODO: send email verfication link
 
     const payloadAML = {
       reference: `BUSINESS_AML_REQUEST_${Math.random()}`,
