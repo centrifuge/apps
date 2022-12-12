@@ -13,7 +13,7 @@ export const shuftiProRequest = async (_req: Request, payload: any, options?: { 
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      Authorization: 'Basic ' + token,
+      Authorization: `Basic ${token}`,
     },
     body: JSON.stringify(payload),
   })
