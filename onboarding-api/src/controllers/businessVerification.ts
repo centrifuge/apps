@@ -21,8 +21,9 @@ export const businessVerificationController = async (
   req: Request<any, any, InferType<typeof businessVerificationInput>>,
   res: Response
 ) => {
+  let shuftiErrors: string[] = []
   try {
-    const dryRun = !!req.query?.dryRun ?? false // skips shuftipro requests and returns a failed event TODO: provide mocks
+    const dryRun = !!req.query?.dryRun ?? false // skips shuftipro requests and returns a failed event. TODO: provide mocks
     if (req.method !== 'POST') {
       throw new HttpsError('internal', 'Method not allowed')
     }
@@ -59,7 +60,8 @@ export const businessVerificationController = async (
     console.log('🚀 ~ businessAML', businessAML)
     const businessAmlVerified = businessAML.event === 'verification.accepted'
     if (!businessAmlVerified) {
-      functions.logger.warn('KYB failed')
+      shuftiErrors = [...shuftiErrors, 'Business AML failed']
+      functions.logger.warn('Business AML failed')
     }
 
     const kybPayload = {
@@ -72,6 +74,7 @@ export const businessVerificationController = async (
     const kyb = await shuftiProRequest(req, kybPayload, { dryRun })
     const kybVerified = kyb.event === 'verification.accepted'
     if (!kybVerified) {
+      shuftiErrors = [...shuftiErrors, 'KYB failed']
       functions.logger.warn('KYB failed')
     }
 
@@ -108,13 +111,14 @@ export const businessVerificationController = async (
       secure: process.env.NODE_ENV !== 'development',
       httpOnly: true,
       maxAge: 1000 * 60 * 5,
-      path: 'centrifuge-fargate-apps-dev/us-central1',
+      path: 'centrifuge-fargate-apps-dev/us-central1', // TODO: make dynamic
     })
 
     res.json({
+      errors: shuftiErrors,
       ultimateBeneficialOwners: [],
-      kyb,
-      businessAML,
+      // kyb,
+      // businessAML,
       ...business,
     })
   } catch (error) {

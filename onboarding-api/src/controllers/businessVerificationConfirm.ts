@@ -2,7 +2,7 @@ import * as cookie from 'cookie'
 import { Request, Response } from 'express'
 import * as functions from 'firebase-functions'
 import { HttpsError } from 'firebase-functions/v1/auth'
-import { businessCollection, BusinessOnboarding } from '../database'
+import { businessCollection, BusinessOnboarding, validateAndWriteToFirestore } from '../database'
 import { verifyJw3t } from '../utils/verifyJw3t'
 
 export const businessVerificationConfirmController = async (req: Request, res: Response) => {
@@ -25,16 +25,16 @@ export const businessVerificationConfirmController = async (req: Request, res: R
       throw new HttpsError('invalid-argument', 'Business verification step already confirmed')
     }
 
-    await businessCollection.doc(address).set(
-      {
-        steps: {
-          kyb: {
-            verified: true,
-          },
+    const verifyBusiness = {
+      steps: {
+        kyb: {
+          verified: true,
         },
       },
-      { mergeFields: ['steps.kyb.verified'] }
-    )
+    }
+
+    await validateAndWriteToFirestore(address, verifyBusiness, 'BUSINESS', 'steps.kyb.verified')
+    // await businessCollection.doc(address).set(verifyBusiness, { mergeFields: ['steps.kyb.verified'] })
 
     res.clearCookie('__session')
     const freshData = (await businessCollection.doc(address).get()).data()

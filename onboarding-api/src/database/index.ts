@@ -1,6 +1,8 @@
 import * as admin from 'firebase-admin'
 import { HttpsError } from 'firebase-functions/v1/auth'
 import { array, bool, date, InferType, object, string } from 'yup'
+import { OptionalObjectSchema } from 'yup/lib/object'
+import { Subset } from '../utils/types'
 
 admin.initializeApp()
 const { firestore } = admin
@@ -29,20 +31,40 @@ export const businessSchema = object({
 
 export const businessCollection = firestore().collection('businesses')
 
-const schemas: Record<'BUSINESS', any> = {
-  BUSINESS: { schema: businessSchema, collection: businessCollection },
+const schemas: Record<
+  'BUSINESS',
+  { schema: OptionalObjectSchema<any>; collection: admin.firestore.CollectionReference<admin.firestore.DocumentData> }
+> = {
+  BUSINESS: {
+    schema: businessSchema,
+    collection: businessCollection,
+  },
 }
 
 export type BusinessOnboarding = InferType<typeof businessSchema>
 
-export const validateAndWriteToFirestore = async (
+/**
+ *
+ * @param key primary key (documentID) for firestore collection
+ * @param data data to be set to firestore
+ * @param schema name of the validation schema e.g BUSINESS
+ * @param mergeFields optional, pass a value to update data in an existing collection e.g steps.kyb.verified
+ */
+export const validateAndWriteToFirestore = async <T = undefined | string>(
   key: string,
-  data: BusinessOnboarding,
-  schema: keyof typeof schemas
+  data: T extends 'undefined' ? BusinessOnboarding : Subset<BusinessOnboarding>,
+  schema: keyof typeof schemas,
+  mergeFields?: T
 ) => {
   try {
-    await schemas[schema].schema.validate(data)
-    await schemas[schema].collection.doc(key).set(data)
+    const validationSchema = schemas[schema]
+    if (typeof mergeFields === 'string') {
+      await validationSchema.schema.validateAt(mergeFields, data)
+      await validationSchema.collection.doc(key).set(data, { mergeFields: [mergeFields] })
+    } else {
+      await validationSchema.schema.validate(data)
+      await validationSchema.collection.doc(key).set(data)
+    }
   } catch (error) {
     // @ts-expect-error error typing
     throw new HttpsError('invalid-argument', error.message)
