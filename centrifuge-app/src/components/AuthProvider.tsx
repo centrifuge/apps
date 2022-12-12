@@ -119,20 +119,11 @@ export function usePodAuth(podUrl?: string | null) {
 export function useAuth(authorizedProxyTypes?: string[]) {
   const ctx = React.useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  const { selectedAccount, proxy } = useWeb3()
+  const { selectedAccount } = useWeb3()
 
   const cent = useCentrifuge()
 
-  const authToken = React.useMemo(() => {
-    if (ctx.token?.signed) {
-      if (proxy) {
-        return ctx.token.signed
-      }
-      return ctx.token.signed
-    }
-
-    return ''
-  }, [proxy, ctx.token])
+  const authToken = ctx.token?.signed ? ctx.token.signed : ''
 
   const {
     refetch: refetchAuth,
@@ -141,7 +132,7 @@ export function useAuth(authorizedProxyTypes?: string[]) {
     isLoading: isAccountLoading,
     error,
   } = useQuery(
-    ['authToken', authToken],
+    ['authToken', authToken, authorizedProxyTypes],
     async () => {
       try {
         const { verified, payload } = await cent.auth.verify(authToken!)
