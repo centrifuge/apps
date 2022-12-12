@@ -16,7 +16,7 @@ export type SubqueryPoolSnapshot = {
 export type SubqueryTrancheSnapshot = {
   __typename?: 'TrancheSnapshot'
   id: string
-  price: string
+  tokenPrice: string
   blockNumber: number
   timestamp: string
   trancheId: string // poolId-trancheId

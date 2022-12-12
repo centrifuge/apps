@@ -1581,7 +1581,7 @@ export function getPoolsModule(inst: Centrifuge) {
             trancheId: { includes: $trancheId },
           }) {
           nodes {
-            price
+            tokenPrice
             blockNumber
             timestamp
             trancheId
@@ -1605,7 +1605,7 @@ export function getPoolsModule(inst: Centrifuge) {
         return data.trancheSnapshots.nodes.map((state) => {
           return {
             ...state,
-            price: new Price(state.price),
+            tokenPrice: new Price(state.tokenPrice),
           }
         })
       })

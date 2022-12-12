@@ -199,6 +199,7 @@ export const PoolDetailOverview: React.FC<{
           {tokens?.map((token, i) => (
             <div key={token.id} ref={(node) => node && handleTokenMount(node, token.id)}>
               <InteractiveCard
+                isOpen={i === 0}
                 variant="collapsible"
                 icon={<Thumbnail label={metadata?.tranches?.[token.id]?.symbol ?? ''} type="token" />}
                 title={
@@ -245,7 +246,7 @@ export const PoolDetailOverview: React.FC<{
                   </Shelf>
                 }
               >
-                <Stack height="300px">
+                <Stack maxHeight="300px">
                   <React.Suspense fallback={<Spinner />}>
                     <PriceYieldChart trancheId={token.id} />
                   </React.Suspense>

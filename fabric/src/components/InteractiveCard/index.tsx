@@ -16,6 +16,7 @@ type OwnProps = {
   subtitle?: React.ReactNode
   secondaryHeader?: React.ReactNode
   onClick?: React.MouseEventHandler<HTMLButtonElement>
+  isOpen?: boolean
 }
 
 export type InteractiveCardProps = OwnProps & Omit<CardProps, 'variant'>
@@ -32,7 +33,7 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = ({
   ...rest
 }) => {
   const [hovered, setHovered] = React.useState(false)
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(rest.isOpen ?? false)
   const theme = useTheme()
 
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
