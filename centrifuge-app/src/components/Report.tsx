@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { LOAN_TYPE_LABELS } from '../pages/Loan/utils'
 import { GroupBy, Report } from '../pages/Pool/Reporting'
 import { formatDate } from '../utils/date'
-import { formatBalance, formatPercentage, formatPrice, getCurrencySymbol } from '../utils/formatting'
+import { formatBalance, formatPercentage } from '../utils/formatting'
 import { useLoans } from '../utils/useLoans'
 import { useDailyPoolStates, useInvestorTransactions, useMonthlyPoolStates, usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
@@ -104,7 +104,7 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
           'Epoch',
           'Date',
           'Type',
-          `${pool && getCurrencySymbol(pool.currency)} amount`,
+          `${pool ? `${pool.currency.symbol} amount` : '—'}`,
           'Token amount',
           'Price',
         ].map((col, index) => {
@@ -195,7 +195,9 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
           name: `\u00A0 \u00A0 ${trancheMeta?.name} tranche`,
           value:
             poolStates?.map((state) => {
-              return state.tranches[token.id].price ? formatPrice(state.tranches[token.id].price!) : '1.000'
+              return state.tranches[token.id].price
+                ? formatBalance(state.tranches[token.id].price?.toFloat()!)
+                : '1.000'
             }) || [],
           heading: false,
         }
@@ -299,7 +301,8 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
           tx.type,
           formatBalance(tx.currencyAmount.toDecimal()),
           formatBalance(tx.tokenAmount.toDecimal()),
-          tx.tokenPrice ? formatPrice(tx.tokenPrice) : '',
+          // tx.tokenPrice ? formatPrice(tx.tokenPrice) : '', // @Hornebom: needs to be of type: Price
+          tx.tokenPrice ? formatBalance(tx.tokenPrice) : '', // @Hornebom: needs to be of type: CurrencyBalance | TokenBalance | Decimal | number
         ],
         heading: false,
       }
@@ -320,9 +323,9 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
           {report === 'investor-tx' && <DataTable data={investorTxRecords} columns={columns} hoverable />}
         </GradientOverlay>
       </Stack>
-      {(report === 'pool-balance' || report === 'asset-list') && (
+      {(report === 'pool-balance' || report === 'asset-list') && pool && (
         <Text variant="body3" color="textSecondary">
-          All amounts are in {pool && getCurrencySymbol(pool.currency)}.
+          All amounts are in {pool.currency.symbol}.
         </Text>
       )}
     </Stack>

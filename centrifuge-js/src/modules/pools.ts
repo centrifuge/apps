@@ -1542,13 +1542,9 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
-  // Todo @Hornebom:
-  // function getDailyPoolStates(args: [poolId: string, from?: Date, to?: Date]) {
-  //   const [poolId, from, to] = args
-  //   const $api = inst.getApi()
-
-  function getDailyPoolStates(args: [poolId: string]) {
-    const [poolId] = args
+  function getDailyPoolStates(args: [poolId: string, from?: Date, to?: Date]) {
+    const [poolId, from, to] = args
+    // const $api = inst.getApi() // @Hornebom
 
     const $query = inst.getSubqueryObservable<{
       poolSnapshots: { nodes: SubqueryPoolSnapshot[] }
