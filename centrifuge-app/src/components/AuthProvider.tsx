@@ -1,44 +1,37 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useMutation, useQuery } from 'react-query'
 import { useCentrifuge } from './CentrifugeProvider'
 import { useWeb3 } from './Web3Provider'
 
 export const AuthContext = React.createContext<{
-  token?: { signed: string; payload: any } | null
+  session?: { signed: string; payload: any } | null
   login: (authorizedProxyTypes: string[]) => void
   isLoggingIn: boolean
 }>(null as any)
 
 export const AuthProvider: React.FC = ({ children }) => {
   const { selectedWallet, proxy, selectedAccount } = useWeb3()
-  const [token, setToken] = React.useState<{ signed: string; payload: any } | null>()
-
-  useEffect(() => {
-    if (selectedAccount?.address)
-      if (proxy) {
-        const rawItem = sessionStorage.getItem(`centrifuge-auth-${selectedAccount.address}-${proxy.delegator}`)
-        setToken(rawItem ? JSON.parse(rawItem) : null)
-      } else {
-        const rawItem = sessionStorage.getItem(`centrifuge-auth-${selectedAccount.address}`)
-        setToken(rawItem ? JSON.parse(rawItem) : null)
-      }
-    else {
-      setToken(null)
-    }
-  }, [proxy, selectedAccount?.address])
-
   const cent = useCentrifuge()
 
-  React.useEffect(() => {
-    if (selectedAccount?.address && token) {
-      if (proxy) {
-        sessionStorage.setItem(`centrifuge-auth-${selectedAccount.address}-${proxy.delegator}`, JSON.stringify(token))
-      } else {
-        sessionStorage.setItem(`centrifuge-auth-${selectedAccount.address}`, JSON.stringify(token))
+  const { data: session, refetch: refetchSession } = useQuery(
+    ['session', selectedAccount?.address, proxy?.delegator],
+    async () => {
+      if (selectedAccount?.address) {
+        if (proxy) {
+          const rawItem = sessionStorage.getItem(`centrifuge-auth-${selectedAccount.address}-${proxy.delegator}`)
+          if (rawItem) {
+            return JSON.parse(rawItem)
+          }
+        } else {
+          const rawItem = sessionStorage.getItem(`centrifuge-auth-${selectedAccount.address}`)
+          if (rawItem) {
+            return JSON.parse(rawItem)
+          }
+        }
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token])
+    },
+    { enabled: !!selectedAccount?.address }
+  )
 
   const { mutate: login, isLoading: isLoggingIn } = useMutation(async (authorizedProxyTypes: string[]) => {
     try {
@@ -56,7 +49,11 @@ export const AuthProvider: React.FC = ({ children }) => {
             const isAuthorizedProxy = await cent.auth.verifyProxy(address, proxy.delegator, authorizedProxyTypes)
 
             if (isAuthorizedProxy) {
-              setToken({ signed: token, payload })
+              sessionStorage.setItem(
+                `centrifuge-auth-${selectedAccount.address}-${proxy.delegator}`,
+                JSON.stringify({ signed: token, payload })
+              )
+              refetchSession()
             }
           }
         } else {
@@ -64,7 +61,11 @@ export const AuthProvider: React.FC = ({ children }) => {
           const { token, payload } = await cent.auth.generateJw3t(address, selectedWallet?.signer)
 
           if (token) {
-            setToken({ signed: token, payload })
+            sessionStorage.setItem(
+              `centrifuge-auth-${selectedAccount.address}`,
+              JSON.stringify({ signed: token, payload })
+            )
+            refetchSession()
           }
         }
       }
@@ -73,11 +74,11 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   const ctx = React.useMemo(
     () => ({
-      token,
+      session,
       login,
       isLoggingIn,
     }),
-    [token, login, isLoggingIn]
+    [session, login, isLoggingIn]
   )
 
   return <AuthContext.Provider value={ctx}>{children}</AuthContext.Provider>
@@ -86,33 +87,30 @@ export const AuthProvider: React.FC = ({ children }) => {
 export function usePodAuth(podUrl?: string | null) {
   const ctx = React.useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  const { selectedAccount } = useWeb3()
 
-  const authToken = React.useMemo(() => ctx.token, [ctx.token])
+  const { session } = ctx
   const cent = useCentrifuge()
 
   const {
     data: account,
-    isLoading: isAccountLoading,
     error,
+    isLoading: isPodAuthLoading,
     isSuccess,
-  } = useQuery(['podAccount', podUrl, authToken], () => cent.pod.getSelf([podUrl!, authToken!.signed]), {
-    enabled: !!podUrl && !!authToken?.signed,
+  } = useQuery(['podAccount', podUrl, session], () => cent.pod.getSelf([podUrl!, session!.signed]), {
+    enabled: !!podUrl && !!session?.signed,
     staleTime: Infinity,
     retry: 1,
     refetchOnWindowFocus: false,
   })
 
   return {
-    authToken,
-    login: ctx.login,
     account,
-    isAccountLoading,
     error,
     isLoggedIn: isSuccess,
-    isLoggingIn: isAccountLoading,
-    canLogIn: !!selectedAccount?.address,
+    isPodAuthLoading,
+    login: ctx.login,
     loginError: error,
+    session,
   }
 }
 
@@ -123,15 +121,11 @@ export function useAuth(authorizedProxyTypes?: string[]) {
 
   const cent = useCentrifuge()
 
-  const authToken = ctx.token?.signed ? ctx.token.signed : ''
+  const { session } = ctx
 
-  const {
-    refetch: refetchAuth,
-    isFetched: isAuthFetched,
-    data,
-    isLoading: isAccountLoading,
-    error,
-  } = useQuery(
+  const authToken = session?.signed ? session.signed : ''
+
+  const { refetch: refetchAuth, data } = useQuery(
     ['authToken', authToken, authorizedProxyTypes],
     async () => {
       try {
@@ -175,14 +169,9 @@ export function useAuth(authorizedProxyTypes?: string[]) {
   )
 
   return {
-    refetchAuth,
-    isAuthFetched,
-    isAuth: data?.verified,
     authToken,
+    isAuth: data?.verified,
     login: ctx.login,
-    isLoggingIn: ctx.isLoggingIn,
-    isAccountLoading,
-    account: data?.payload,
-    error,
+    refetchAuth,
   }
 }
