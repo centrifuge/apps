@@ -2,7 +2,7 @@ export type SubqueryPoolSnapshot = {
   __typename?: 'PoolSnapshot'
   id: string
   timestamp: string
-  netAssetValue: number
+  portfolioValuation: number
   totalReserve: number
   availableReserve: number
   maxReserve: number
@@ -16,7 +16,7 @@ export type SubqueryPoolSnapshot = {
 export type SubqueryTrancheSnapshot = {
   __typename?: 'TrancheSnapshot'
   id: string
-  price: string
+  tokenPrice: string
   blockNumber: number
   timestamp: string
   trancheId: string // poolId-trancheId

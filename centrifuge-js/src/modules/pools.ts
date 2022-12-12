@@ -395,7 +395,7 @@ export type TrancheInput = {
 
 export type DailyPoolState = {
   poolState: {
-    netAssetValue: CurrencyBalance
+    portfolioValuation: CurrencyBalance
     totalReserve: CurrencyBalance
   }
   poolValue: CurrencyBalance
@@ -1541,7 +1541,7 @@ export function getPoolsModule(inst: Centrifuge) {
             id
             timestamp
             totalReserve
-            netAssetValue
+            portfolioValuation
           }
         }
       }
@@ -1557,11 +1557,11 @@ export function getPoolsModule(inst: Centrifuge) {
           queryData?.poolSnapshots.nodes.map((state) => {
             const poolState = {
               id: state.id,
-              netAssetValue: new CurrencyBalance(state.netAssetValue, currency.decimals),
+              portfolioValuation: new CurrencyBalance(state.portfolioValuation, currency.decimals),
               totalReserve: new CurrencyBalance(state.totalReserve, currency.decimals),
             }
             const poolValue = new CurrencyBalance(
-              new BN(state?.netAssetValue || '0').add(new BN(state?.totalReserve || '0')),
+              new BN(state?.portfolioValuation || '0').add(new BN(state?.totalReserve || '0')),
               currency.decimals
             )
             return { ...state, poolState, poolValue }
@@ -1581,7 +1581,7 @@ export function getPoolsModule(inst: Centrifuge) {
             trancheId: { includes: $trancheId },
           }) {
           nodes {
-            price
+            tokenPrice
             blockNumber
             timestamp
             trancheId
@@ -1605,7 +1605,7 @@ export function getPoolsModule(inst: Centrifuge) {
         return data.trancheSnapshots.nodes.map((state) => {
           return {
             ...state,
-            price: new Price(state.price),
+            tokenPrice: new Price(state.tokenPrice),
           }
         })
       })
