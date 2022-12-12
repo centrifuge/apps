@@ -5,7 +5,7 @@ import { ResponsiveValue, TLengthStyledSystem } from 'styled-system'
 import { mapResponsive } from '../../utils/styled'
 import { Box, BoxProps } from '../Box'
 
-interface OwnProps {
+type OwnProps = {
   gap?: ResponsiveValue<CSS.Property.GridColumnGap<TLengthStyledSystem>>
   rowGap?: ResponsiveValue<CSS.Property.GridRowGap<TLengthStyledSystem>>
   equalRows?: boolean

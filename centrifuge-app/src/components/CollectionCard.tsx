@@ -1,5 +1,5 @@
 import { Collection } from '@centrifuge/centrifuge-js'
-import { Box, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Card, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -9,7 +9,6 @@ import { useVisibilityChecker } from '../utils/useVisibilityChecker'
 import { useCentrifuge } from './CentrifugeProvider'
 import { Identity } from './Identity'
 import { LogoAltair } from './LogoAltair'
-import { TextWithPlaceholder } from './TextWithPlaceholder'
 
 type Props = {
   collection: Collection

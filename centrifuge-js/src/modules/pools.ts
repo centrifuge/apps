@@ -1162,17 +1162,18 @@ export function getPoolsModule(inst: Centrifuge) {
   }
 
   function priceLoan(
-    args: [poolId: string, loanId: string, interestRatePerSec: string, loanInfoInput: LoanInfoInput],
+    args: [poolId: string, loanId: string, interestRatePerSec: Rate, loanInfoInput: LoanInfoInput],
     options?: TransactionOptions
   ) {
     const [poolId, loanId, ratePerSec, loanInfoInput] = args
+    const ratePerYear = Rate.fromFloat(new Rate(ratePerSec).toApr().toDecimalPlaces(4))
     const loanInfoFields = LOAN_FIELDS[loanInfoInput.type]
     const loanInfo = loanInfoFields.map((key) => (LOAN_INPUT_TRANSFORM as any)[key]((loanInfoInput as any)[key]))
     const $api = inst.getApi()
 
     return $api.pipe(
       switchMap((api) => {
-        const submittable = api.tx.loans.price(poolId, loanId, ratePerSec, {
+        const submittable = api.tx.loans.price(poolId, loanId, ratePerYear, {
           [loanInfoInput.type]: loanInfo,
         })
         return inst.wrapSignAndSend(api, submittable, options)
@@ -1251,8 +1252,8 @@ export function getPoolsModule(inst: Centrifuge) {
       filter(({ api, events }) => {
         const event = events.find(
           ({ event }) =>
-            api.events.poolSystem.Created.is(event) ||
-            api.events.poolSystem.Updated.is(event) ||
+            api.events.poolSystem.PoolCreated.is(event) ||
+            api.events.poolSystem.PoolUpdated.is(event) ||
             api.events.poolSystem.MaxReserveSet.is(event) ||
             api.events.poolRegistry.MetadataSet.is(event) ||
             api.events.poolSystem.EpochClosed.is(event) ||

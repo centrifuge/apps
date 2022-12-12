@@ -16,13 +16,13 @@ type IconProps = {
   size?: ResponsiveValue<Size>
 }
 
-type Props = {
+type Props = React.PropsWithChildren<{
   isOpen: boolean
   onClose: () => void
   width?: string | number
   title?: string | React.ReactElement
   icon?: React.ComponentType<IconProps> | React.ReactElement
-}
+}>
 
 const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dialog', icon: IconComp, title }) => {
   const ref = React.useRef<HTMLDivElement>(null)

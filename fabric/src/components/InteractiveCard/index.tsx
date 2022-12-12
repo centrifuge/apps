@@ -8,7 +8,7 @@ import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
-export type InteractiveCardProps = {
+type OwnProps = {
   variant?: 'collapsible' | 'button' | 'default'
   icon?: React.ReactNode
   title: React.ReactNode
@@ -18,7 +18,9 @@ export type InteractiveCardProps = {
   onClick?: React.MouseEventHandler<HTMLButtonElement>
 }
 
-export const InteractiveCard: React.FC<InteractiveCardProps & Omit<CardProps, 'variant'>> = ({
+export type InteractiveCardProps = OwnProps & Omit<CardProps, 'variant'>
+
+export const InteractiveCard: React.FC<InteractiveCardProps> = ({
   variant = 'default',
   icon,
   title,

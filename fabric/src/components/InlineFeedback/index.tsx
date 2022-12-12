@@ -5,11 +5,11 @@ import { Flex } from '../Flex'
 import { Shelf } from '../Shelf'
 import { Text } from '../Text'
 
-type Props = {
+type OwnProps = {
   status?: 'default' | 'info' | 'ok' | 'warning' | 'critical'
 }
 
-export type InlineFeedbackProps = React.PropsWithChildren<Props>
+export type InlineFeedbackProps = React.PropsWithChildren<OwnProps>
 
 const icons = {
   default: IconInfo,
@@ -19,7 +19,7 @@ const icons = {
   critical: IconInfoFailed,
 }
 
-export const InlineFeedback: React.FC<Props> = ({ status = 'default', children }) => {
+export const InlineFeedback: React.FC<InlineFeedbackProps> = ({ status = 'default', children }) => {
   return (
     <Text variant="body3">
       <Shelf alignItems="baseline" gap="4px">

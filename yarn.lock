@@ -2637,9 +2637,10 @@ __metadata:
     "@types/eslint": ^7
     "@types/mdx-js__react": ^1
     "@types/prettier": ^2
-    "@types/react": ^17.0.21
+    "@types/react": ^18
+    "@types/react-dom": ^18
     "@types/styled-components": ^5
-    "@types/styled-system": ^5
+    "@types/styled-system": ^5.1.15
     "@types/styled-system__css": ^5.0.16
     "@types/styled-system__should-forward-prop": ^5
     "@typescript-eslint/eslint-plugin": ^4.32.0
@@ -2649,17 +2650,19 @@ __metadata:
     eslint: ^7.32.0
     eslint-config-prettier: ^8.3.0
     eslint-plugin-prettier: ^4.0.0
-    install-peers-cli: ^2.2.0
     loki: ^0.28.1
     prettier: ^2.4.1
+    react: ^18.2.0
+    react-dom: ^18.2.0
     reg-cli: ^0.17.4
     standard-version: ^9.3.2
-    styled-components: ^5.3.1
+    styled-components: ^5.3.6
     styled-system: ^5.1.5
     typescript: ~4.4.4
   peerDependencies:
-    react: ^17.0.2
-    react-dom: ^17.0.2
+    react: "*"
+    react-dom: "*"
+    styled-components: "*"
   languageName: unknown
   linkType: soft
 
@@ -10989,6 +10992,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-dom@npm:^18":
+  version: 18.0.9
+  resolution: "@types/react-dom@npm:18.0.9"
+  dependencies:
+    "@types/react": "*"
+  checksum: b58788fcd7bf4625cd834749a225eb1d107f0a975957f3e75fd12e687b140d20f276eae44d0389126600f800e98109a2e5bdb9c490cabe6973896f59a15ff841
+  languageName: node
+  linkType: hard
+
 "@types/react-helmet-async@npm:^1.0.3":
   version: 1.0.3
   resolution: "@types/react-helmet-async@npm:1.0.3"
@@ -11102,7 +11114,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/styled-system@npm:^5":
+"@types/styled-system@npm:^5, @types/styled-system@npm:^5.1.15":
   version: 5.1.15
   resolution: "@types/styled-system@npm:5.1.15"
   dependencies:
@@ -20283,15 +20295,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"executioner@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "executioner@npm:2.0.1"
-  dependencies:
-    mixly: ^1.0.0
-  checksum: 0898391641df712976bd124069269834f62722981326735f7c3cc03f6440a15a1e97a14219fc73806aa0ab0acb2f44127f775a0742731a010c8bff40cf1a37e1
-  languageName: node
-  linkType: hard
-
 "exit@npm:^0.1.2":
   version: 0.1.2
   resolution: "exit@npm:0.1.2"
@@ -21465,13 +21468,6 @@ __metadata:
   dependencies:
     node-gyp: latest
   checksum: 7b25d9251aefe433d508a0eb614217f0495ae05a9e8af15f7dbf9998e08c4e675acd1cf32361e0fcf71d917d9e8c4b76301fdc72a1ec1105a3ea0994f5e15a8d
-  languageName: node
-  linkType: hard
-
-"fulcon@npm:^1.0.1":
-  version: 1.0.2
-  resolution: "fulcon@npm:1.0.2"
-  checksum: 8b81fd434e9783e01eec891c7f083b81e46bc5a55f2f623e2eb79e392060027bb3e82a39f209b82c03726d650b1e735059df4118523d703f56c6d35821895686
   languageName: node
   linkType: hard
 
@@ -23339,18 +23335,6 @@ __metadata:
   bin:
     insert-module-globals: bin/cmd.js
   checksum: 76fa7d3cb63411eaf4737a1c74ae1178791c3ddd2c68385af3986c816009bed208d29d14eacfb2846a433df3771c67a9ebcb346c4094ed0dabc96ef9661efa62
-  languageName: node
-  linkType: hard
-
-"install-peers-cli@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "install-peers-cli@npm:2.2.0"
-  dependencies:
-    commander: ^2.20.0
-    executioner: ^2.0.1
-  bin:
-    install-peers: ./install.js
-  checksum: 05b18063579206b6f8ef2ce75127f17f5d671f8d0c6a2a4afb01b0673413806e00ca9520aeff484fb834ddce35b1082c99f0d9b8fc212a013e0e5c275b7d7b17
   languageName: node
   linkType: hard
 
@@ -27182,15 +27166,6 @@ __metadata:
     for-in: ^1.0.2
     is-extendable: ^1.0.1
   checksum: 68da98bc1af57ffccde7abdc86ac49feec263b73b3c483ab7e6e2fab9aa2b06fba075da9e86bcda725133c1d2a59e4c810a17b55865c67c827871c25d5713c33
-  languageName: node
-  linkType: hard
-
-"mixly@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "mixly@npm:1.0.0"
-  dependencies:
-    fulcon: ^1.0.1
-  checksum: e510d48c948b9410ce033389a9b516a773d8242b422fab2792b46798386a14f11ce3bc922c925e7fee7780f67dc38b24f38fdb23156eaac749891f8601b491a6
   languageName: node
   linkType: hard
 
@@ -33350,7 +33325,7 @@ resolve@1.1.7:
   languageName: node
   linkType: hard
 
-"styled-components@npm:^5.3.1, styled-components@npm:^5.3.5, styled-components@npm:^5.3.6":
+"styled-components@npm:^5.3.5, styled-components@npm:^5.3.6":
   version: 5.3.6
   resolution: "styled-components@npm:5.3.6"
   dependencies:

@@ -52,9 +52,7 @@ function Accounts() {
             address={address}
             alias={!proxy ? selectedAccount.name : undefined}
             balance={
-              balances
-                ? formatBalanceAbbreviated(balances?.native.balance, balances?.native.currency.symbol)
-                : undefined
+              balances ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol) : undefined
             }
             {...props}
           />
