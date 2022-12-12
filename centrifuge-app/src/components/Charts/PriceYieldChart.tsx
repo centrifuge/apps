@@ -19,8 +19,6 @@ const PriceYieldChart: React.VFC<{ trancheId: string }> = ({ trancheId }) => {
   const trancheStates = useDailyTrancheStates(trancheId)
   const pool = usePool(poolId)
 
-  if (!trancheStates || trancheStates?.length === 1) return <Spinner />
-
   const data: ChartData[] = React.useMemo(() => {
     return (
       trancheStates?.map((day) => {
@@ -31,6 +29,8 @@ const PriceYieldChart: React.VFC<{ trancheId: string }> = ({ trancheId }) => {
       }) || []
     )
   }, [trancheStates])
+
+  if (!trancheStates || trancheStates?.length === 1) return <Spinner />
 
   return data && data.length > 0 ? (
     <Stack>
