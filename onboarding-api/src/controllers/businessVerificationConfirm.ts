@@ -3,13 +3,12 @@ import { Request, Response } from 'express'
 import * as functions from 'firebase-functions'
 import { HttpsError } from 'firebase-functions/v1/auth'
 import { businessCollection, BusinessOnboarding, validateAndWriteToFirestore } from '../database'
+import { checkHttpMethod } from '../utils/httpMethods'
 import { verifyJw3t } from '../utils/verifyJw3t'
 
 export const businessVerificationConfirmController = async (req: Request, res: Response) => {
   try {
-    if (req.method !== 'GET') {
-      throw new HttpsError('internal', 'Method not allowed')
-    }
+    checkHttpMethod(req, 'GET')
     const { address } = await verifyJw3t(req)
 
     const cookies = JSON.parse(cookie.parse(req.headers.cookie ?? '').__session)
