@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import * as functions from 'firebase-functions'
 import { HttpsError } from 'firebase-functions/v1/https'
 import { bool, date, InferType, object, string } from 'yup'
-import { businessCollection, validateAndWriteToFirestore } from '../database'
+import { businessCollection, firestore, validateAndWriteToFirestore } from '../database'
 import { shuftiProRequest } from '../utils/shuftiProRequest'
 import { verifyJw3t } from '../utils/verifyJw3t'
 
@@ -58,7 +58,6 @@ export const businessVerificationController = async (
       },
     }
     const businessAML = await shuftiProRequest(req, payloadAML, { dryRun })
-    console.log('🚀 ~ businessAML', businessAML)
     const businessAmlVerified = businessAML.event === 'verification.accepted'
     if (!businessAmlVerified) {
       shuftiErrors = [...shuftiErrors, 'Business AML failed']
@@ -101,25 +100,26 @@ export const businessVerificationController = async (
       },
     }
 
-    await validateAndWriteToFirestore(address, business, 'BUSINESS')
+    await Promise.all([
+      validateAndWriteToFirestore(address, business, 'BUSINESS'),
+      // TODO remove these after validating KYB with real data
+      firestore().collection('shuftipro-kyb').doc(`kyb${Math.random()}`).set(kyb),
+      firestore().collection(`shuftipro-business-aml`).doc(`aml${Math.random()}`).set(businessAML),
+    ])
 
-    // await firestore().collection('shuftipro-kyb').doc('kyb').set(kyb)
-    // await firestore().collection('shuftipro-business-aml').doc('aml').set(businessAML)
-
-    // add business owners to response
-
-    res.cookie('__session', JSON.stringify({ address, kybVerified, businessAmlVerified }), {
-      secure: process.env.NODE_ENV !== 'development',
-      httpOnly: true,
-      maxAge: 1000 * 60 * 5,
-      path: 'centrifuge-fargate-apps-dev/us-central1', // TODO: make dynamic
-    })
+    // only set cookie if businessAML and KYB were successful
+    if (shuftiErrors.length > 0) {
+      res.cookie('__session', JSON.stringify({ address }), {
+        secure: process.env.NODE_ENV !== 'development',
+        httpOnly: true,
+        maxAge: 1000 * 60 * 5,
+        path: 'centrifuge-fargate-apps-dev/us-central1', // TODO: make dynamic
+      })
+    }
 
     res.json({
       errors: shuftiErrors,
-      ultimateBeneficialOwners: [],
-      // kyb,
-      // businessAML,
+      ultimateBeneficialOwners: businessAML?.verification_data.kyb?.company_ultimate_beneficial_owners || [],
       ...business,
     })
   } catch (error) {

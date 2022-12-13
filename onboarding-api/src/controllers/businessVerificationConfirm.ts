@@ -13,7 +13,7 @@ export const businessVerificationConfirmController = async (req: Request, res: R
     const { address } = await verifyJw3t(req)
 
     const cookies = JSON.parse(cookie.parse(req.headers.cookie ?? '').__session)
-    if (address !== cookies.address || !cookies.businessAmlVerified || !cookies.kybVerified) {
+    if (address !== cookies.address) {
       throw new HttpsError('invalid-argument', 'Confirmation not possible. Either AML or KYB failed.')
     }
     const businessDoc = await businessCollection.doc(address).get()
@@ -34,11 +34,10 @@ export const businessVerificationConfirmController = async (req: Request, res: R
     }
 
     await validateAndWriteToFirestore(address, verifyBusiness, 'BUSINESS', 'steps.kyb.verified')
-    // await businessCollection.doc(address).set(verifyBusiness, { mergeFields: ['steps.kyb.verified'] })
 
     res.clearCookie('__session')
     const freshData = (await businessCollection.doc(address).get()).data()
-    res.status(201).send({ freshData })
+    res.status(201).send({ data: freshData })
   } catch (error) {
     if (error instanceof HttpsError) {
       functions.logger.log(error.message)
