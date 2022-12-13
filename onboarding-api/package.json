@@ -1,10 +1,11 @@
 {
-  "name": "functions",
+  "name": "@centrifuge/onboarding-api",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "serve": "yarn run build && firebase emulators:start --only functions",
+    "serve": "firebase emulators:start --only functions",
+    "dev": "run-p serve build:watch",
     "shell": "yarn run build && firebase functions:shell",
     "start": "yarn run shell",
     "deploy": "firebase deploy --only functions",
@@ -33,6 +34,7 @@
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.25.4",
     "firebase-functions-test": "^0.2.0",
+    "npm-run-all": "^4.1.5",
     "typescript": "^4.5.4"
   },
   "private": true
