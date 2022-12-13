@@ -167,7 +167,14 @@ export const PoolDetailReporting: React.FC<{
         titleAddition={start && end ? `${formatDate(start.toString())} to ${formatDate(end.toString())}` : ''}
       >
         <React.Suspense fallback={<Spinner />}>
-          <ReportComponent pool={pool} report={report} exportRef={exportRef} customFilters={customFilters} />
+          <ReportComponent
+            pool={pool}
+            report={report}
+            exportRef={exportRef}
+            customFilters={customFilters}
+            startDate={start}
+            endDate={end}
+          />
         </React.Suspense>
       </PageSection>
     </>

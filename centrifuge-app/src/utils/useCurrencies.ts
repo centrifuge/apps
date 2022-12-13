@@ -9,7 +9,3 @@ export function usePoolCurrencies() {
   const data = useCurrencies()
   return data?.filter((c) => c.isPoolCurrency)
 }
-
-export function getCurrencyDecimals(currency: string) {
-  return currency.endsWith('usd') ? 12 : 18
-}

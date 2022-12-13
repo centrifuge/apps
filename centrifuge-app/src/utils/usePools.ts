@@ -25,20 +25,6 @@ export function useTokens() {
   return pools?.flatMap((p) => p.tranches)
 }
 
-// Todo @Hornebom:
-// export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {
-//   const [result] = useCentrifugeQuery(
-//     ['dailyPoolStates', poolId, from, to],
-//     (cent) => cent.pools.getDailyPoolStates([poolId, from, to]),
-//     {
-//       suspense: true,
-//     }
-//   )
-
-//   return result
-// }
-
-// @Hornebom
 export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
   const [result] = useCentrifugeQuery(
     ['monthlyPoolStates', poolId, from, to],
@@ -51,7 +37,6 @@ export function useMonthlyPoolStates(poolId: string, from?: Date, to?: Date) {
   return result
 }
 
-// @Hornebom
 export function useInvestorTransactions(poolId: string, trancheId?: string, from?: Date, to?: Date) {
   const [result] = useCentrifugeQuery(
     ['investorTransactions', poolId, trancheId, from, to],
@@ -64,10 +49,10 @@ export function useInvestorTransactions(poolId: string, trancheId?: string, from
   return result
 }
 
-export function useDailyPoolStates(poolId: string) {
+export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {
   const [result] = useCentrifugeQuery(
-    ['dailyPoolStates', { poolId }],
-    (cent) => cent.pools.getDailyPoolStates([poolId]),
+    ['dailyPoolStates', poolId, from, to],
+    (cent) => cent.pools.getDailyPoolStates([poolId, from, to]),
     {
       suspense: true,
     }

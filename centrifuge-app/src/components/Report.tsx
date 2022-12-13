@@ -26,6 +26,8 @@ type Props = {
   report: Report
   exportRef: React.MutableRefObject<Function>
   customFilters: CustomFilters
+  startDate: Date | undefined
+  endDate: Date | undefined
 }
 
 type TableDataRow = {
@@ -34,11 +36,12 @@ type TableDataRow = {
   heading?: boolean
 }
 
-export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, customFilters }) => {
+export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, customFilters, startDate, endDate }) => {
   const { data: metadata } = usePoolMetadata(pool)
 
-  const dailyPoolStates = useDailyPoolStates(pool.id) // , startDate, endDate
-  const monthlyPoolStates = useMonthlyPoolStates(pool.id) // , startDate, endDate
+  const dailyPoolStates = useDailyPoolStates(pool.id, startDate, endDate)
+  const monthlyPoolStates = useMonthlyPoolStates(pool.id, startDate, endDate)
+
   const poolStates =
     report === 'pool-balance' ? (customFilters.groupBy === 'day' ? dailyPoolStates : monthlyPoolStates) : []
   const investorTransactions = useInvestorTransactions(
@@ -165,7 +168,7 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
       name: `Asset value`,
       value:
         poolStates?.map((state) => {
-          return formatBalance(state.poolState.netAssetValue.toDecimal())
+          return formatBalance(state.poolState.portfolioValuation.toDecimal())
         }) || [],
       heading: false,
     },
@@ -301,8 +304,7 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
           tx.type,
           formatBalance(tx.currencyAmount.toDecimal()),
           formatBalance(tx.tokenAmount.toDecimal()),
-          // tx.tokenPrice ? formatPrice(tx.tokenPrice) : '', // @Hornebom: needs to be of type: Price
-          tx.tokenPrice ? formatBalance(tx.tokenPrice) : '', // @Hornebom: needs to be of type: CurrencyBalance | TokenBalance | Decimal | number
+          tx.tokenPrice ? formatBalance(tx.tokenPrice) : '',
         ],
         heading: false,
       }

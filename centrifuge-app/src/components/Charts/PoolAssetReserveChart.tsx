@@ -24,7 +24,7 @@ const PoolAssetReserveChart: React.VFC = () => {
   const data: ChartData[] = React.useMemo(() => {
     return (
       poolStates?.map((day) => {
-        const assetValue = day.poolState.netAssetValue.toDecimal().toNumber()
+        const assetValue = day.poolState.portfolioValuation.toDecimal().toNumber()
         const poolValue = day.poolValue.toDecimal().toNumber()
         return { day: new Date(day.timestamp), poolValue, assetValue, reserve: [assetValue, poolValue] }
       }) || []

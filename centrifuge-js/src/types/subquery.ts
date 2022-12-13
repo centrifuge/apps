@@ -2,7 +2,7 @@ export type SubqueryPoolSnapshot = {
   __typename?: 'PoolSnapshot'
   id: string
   timestamp: string
-  netAssetValue: number
+  portfolioValuation: number
   totalReserve: number
   availableReserve: number
   maxReserve: number
@@ -16,7 +16,7 @@ export type SubqueryPoolSnapshot = {
 export type SubqueryTrancheSnapshot = {
   __typename?: 'TrancheSnapshot'
   id: string
-  price: string
+  tokenPrice: string
   blockNumber: number
   timestamp: string
   trancheId: string // poolId-trancheId
@@ -24,12 +24,12 @@ export type SubqueryTrancheSnapshot = {
     poolId: string
     trancheId: string
   }
-  // todo @Hornebom: figure out if these are still used
-  supply?: number | null
-  outstandingInvestOrders_: number
-  outstandingRedeemOrders_: number
-  fulfilledInvestOrders_: number
-  fulfilledRedeemOrders_: number
+  tokenSupply?: number | null
+
+  sumOutstandingInvestOrdersByPeriod: number
+  sumOutstandingRedeemOrdersByPeriod: number
+  sumFulfilledInvestOrdersByPeriod: number
+  sumFulfilledRedeemOrdersByPeriod: number
 }
 
 export type InvestorTransactionType =
