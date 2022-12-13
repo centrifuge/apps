@@ -84,36 +84,6 @@ export const AuthProvider: React.FC = ({ children }) => {
   return <AuthContext.Provider value={ctx}>{children}</AuthContext.Provider>
 }
 
-export function usePodAuth(podUrl?: string | null) {
-  const ctx = React.useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-
-  const { session } = ctx
-  const cent = useCentrifuge()
-
-  const {
-    data: account,
-    error,
-    isLoading: isPodAuthLoading,
-    isSuccess,
-  } = useQuery(['podAccount', podUrl, session], () => cent.pod.getSelf([podUrl!, session!.signed]), {
-    enabled: !!podUrl && !!session?.signed,
-    staleTime: Infinity,
-    retry: 1,
-    refetchOnWindowFocus: false,
-  })
-
-  return {
-    account,
-    error,
-    isLoggedIn: isSuccess,
-    isPodAuthLoading,
-    login: ctx.login,
-    loginError: error,
-    session,
-  }
-}
-
 export function useAuth(authorizedProxyTypes?: string[]) {
   const ctx = React.useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')

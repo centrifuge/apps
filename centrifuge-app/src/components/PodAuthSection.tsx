@@ -1,6 +1,6 @@
 import { Button, IconAlertCircle, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { usePodAuth } from './AuthProvider'
+import { usePod } from '../utils/usePod'
 import { useWeb3 } from './Web3Provider'
 
 type Props = {
@@ -17,7 +17,7 @@ export const PodAuthSection: React.FC<Props> = ({
   buttonLabel = 'Authenticate',
 }) => {
   const { selectedAccount } = useWeb3()
-  const { isLoggedIn, isPodAuthLoading, loginError, login } = usePodAuth(podUrl)
+  const { isLoggedIn, isPodLoading, loginError, login } = usePod(podUrl)
 
   return isLoggedIn ? null : (
     <Stack alignItems="center">
@@ -26,7 +26,7 @@ export const PodAuthSection: React.FC<Props> = ({
           <IconAlertCircle size="iconSmall" /> <Text variant="body3">{message}</Text>
         </Shelf>
         {selectedAccount?.address && (
-          <Button onClick={() => login(AUTHORIZED_POD_PROXY_TYPES)} small loading={isPodAuthLoading}>
+          <Button onClick={() => login(AUTHORIZED_POD_PROXY_TYPES)} small loading={isPodLoading}>
             {buttonLabel}
           </Button>
         )}

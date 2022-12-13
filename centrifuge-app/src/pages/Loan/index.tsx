@@ -12,7 +12,6 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
-import { usePodAuth } from '../../components/AuthProvider'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { Identity } from '../../components/Identity'
 import { LabelValueStack } from '../../components/LabelValueStack'
@@ -34,6 +33,7 @@ import { useAvailableFinancing, useLoan, useNftDocumentId } from '../../utils/us
 import { useMetadata } from '../../utils/useMetadata'
 import { useNFT } from '../../utils/useNFTs'
 import { useCanBorrowAsset, usePermissions } from '../../utils/usePermissions'
+import { usePod } from '../../utils/usePod'
 import { usePodDocument } from '../../utils/usePodDocument'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
@@ -89,7 +89,7 @@ const Loan: React.FC = () => {
 
   const documentId = useNftDocumentId(nft?.collectionId, nft?.id)
   const podUrl = poolMetadata?.pod?.url
-  const { isLoggedIn } = usePodAuth(podUrl)
+  const { isLoggedIn } = usePod(podUrl)
   const { data: document } = usePodDocument(podUrl, documentId)
 
   const publicData = nftMetadata?.properties

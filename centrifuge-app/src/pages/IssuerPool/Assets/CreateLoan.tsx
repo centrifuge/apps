@@ -17,7 +17,7 @@ import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } 
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { lastValueFrom, switchMap } from 'rxjs'
-import { useAuth, usePodAuth } from '../../../components/AuthProvider'
+import { useAuth } from '../../../components/AuthProvider'
 import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../../components/PageHeader'
@@ -34,6 +34,7 @@ import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransactio
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadataMulti } from '../../../utils/useMetadata'
 import { useCollateralCollectionId } from '../../../utils/useNFTs'
+import { usePod } from '../../../utils/usePod'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { combine, max, maxLength, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
@@ -151,7 +152,7 @@ const IssuerCreateLoan: React.FC = () => {
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const podUrl = poolMetadata?.pod?.url
 
-  const { isLoggedIn } = usePodAuth(podUrl)
+  const { isLoggedIn } = usePod(podUrl)
 
   const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
     'Create asset',
