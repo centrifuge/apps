@@ -17,12 +17,12 @@ import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } 
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { lastValueFrom, switchMap } from 'rxjs'
-import { useAuth } from '../../../components/AuthProvider'
 import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
+import { useAuth } from '../../../components/PodAuthProvider'
 import { PodAuthSection } from '../../../components/PodAuthSection'
 import { Transaction, useTransactions } from '../../../components/TransactionsProvider'
 import { useWeb3 } from '../../../components/Web3Provider'
@@ -54,8 +54,6 @@ type FormValues = {
   templateId: string
   attributes: Record<string, string | number>
 }
-
-const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'NodeAdmin']
 
 type Attribute = LoanTemplate['sections'][0]['attributes'][0]
 type TemplateFieldProps<T extends string> = Attribute & { type: T; name: string }
@@ -147,7 +145,7 @@ const IssuerCreateLoan: React.FC = () => {
   const { selectedAccount, proxy } = useWeb3()
   const { addTransaction, updateTransaction } = useTransactions()
 
-  const { isAuth, authToken } = useAuth(AUTHORIZED_POD_PROXY_TYPES)
+  const { isAuth, authToken } = useAuth()
 
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const podUrl = poolMetadata?.pod?.url

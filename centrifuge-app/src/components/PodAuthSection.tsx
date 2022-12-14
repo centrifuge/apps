@@ -9,8 +9,6 @@ type Props = {
   buttonLabel?: string
 }
 
-const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'NodeAdmin']
-
 export const PodAuthSection: React.FC<Props> = ({
   podUrl,
   message = 'This information is private',
@@ -26,7 +24,7 @@ export const PodAuthSection: React.FC<Props> = ({
           <IconAlertCircle size="iconSmall" /> <Text variant="body3">{message}</Text>
         </Shelf>
         {selectedAccount?.address && (
-          <Button onClick={() => login(AUTHORIZED_POD_PROXY_TYPES)} small loading={isPodLoading}>
+          <Button onClick={() => login()} small loading={isPodLoading}>
             {buttonLabel}
           </Button>
         )}

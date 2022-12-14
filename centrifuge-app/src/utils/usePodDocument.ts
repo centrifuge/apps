@@ -1,6 +1,6 @@
 import { useQuery } from 'react-query'
-import { useAuth } from '../components/AuthProvider'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { useAuth } from '../components/PodAuthProvider'
 
 export function usePodDocument(podUrl: string | null | undefined, documentId: string | undefined) {
   const cent = useCentrifuge()

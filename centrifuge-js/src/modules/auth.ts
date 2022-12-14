@@ -9,6 +9,7 @@ type TokenOptions = {
   expiresAt?: string
   onBehalfOf?: string
   notBefore?: string
+  proxyType?: string // remove once pod apis dont rely on proxy type in token
 }
 
 export function getAuthModule(inst: Centrifuge) {
@@ -27,6 +28,7 @@ export function getAuthModule(inst: Centrifuge) {
       expires_at: options.expiresAt || String(now + 60 * 60 * 24 * 30), // 30 days
       on_behalf_of: options.onBehalfOf,
       not_before: options.notBefore || String(now),
+      proxy_type: options.proxyType, // remove once pod apis dont rely on proxy type in token
     }
 
     const content = new jw3t.JW3TContent(header, payload)

@@ -25,6 +25,7 @@ import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { LoadBoundary } from './LoadBoundary'
+import { PodAuthProvider } from './PodAuthProvider'
 import { TransactionProvider } from './TransactionsProvider'
 import { TransactionToasts } from './TransactionToasts'
 import { Web3Provider } from './Web3Provider'
@@ -62,18 +63,20 @@ export const Root: React.VFC = () => {
           <CentrifugeProvider>
             <DemoBanner />
             <Web3Provider>
-              <AuthProvider>
-                <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
-                  <TransactionProvider>
-                    <TransactionToasts />
-                    <Router>
-                      <LoadBoundary>
-                        <Routes />
-                      </LoadBoundary>
-                    </Router>
-                  </TransactionProvider>
-                </DebugFlags>
-              </AuthProvider>
+              <PodAuthProvider>
+                <AuthProvider>
+                  <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
+                    <TransactionProvider>
+                      <TransactionToasts />
+                      <Router>
+                        <LoadBoundary>
+                          <Routes />
+                        </LoadBoundary>
+                      </Router>
+                    </TransactionProvider>
+                  </DebugFlags>
+                </AuthProvider>
+              </PodAuthProvider>
             </Web3Provider>
           </CentrifugeProvider>
         </FabricProvider>
