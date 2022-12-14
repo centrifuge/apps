@@ -3,12 +3,13 @@ import * as functions from 'firebase-functions'
 import { HttpsError } from 'firebase-functions/v1/https'
 import { bool, date, InferType, object, string } from 'yup'
 import { businessCollection, validateAndWriteToFirestore } from '../database'
+import { cors } from '../utils/cors'
 import { checkHttpMethod } from '../utils/httpMethods'
 import { shuftiProRequest } from '../utils/shuftiProRequest'
 import { verifyJw3t } from '../utils/verifyJw3t'
 
 const businessVerificationInput = object({
-  dryRun: bool().default(false).optional(), // skips shuftipro requests and returns a failed event. TODO: provide mocks
+  dryRun: bool().default(false).optional(), // skips shuftipro requests and returns a failed event
   email: string().email().required(),
   address: string().required(),
   poolId: string().required(),
@@ -25,6 +26,7 @@ export const businessVerificationController = async (
 ) => {
   let shuftiErrors: string[] = []
   try {
+    cors(req, res)
     checkHttpMethod(req, 'POST')
     const { address } = await verifyJw3t(req)
     await businessVerificationInput.validate(req.body)
@@ -102,7 +104,7 @@ export const businessVerificationController = async (
     await validateAndWriteToFirestore(address, business, 'BUSINESS')
 
     // only set cookie if businessAML and KYB were successful
-    if (shuftiErrors.length > 0) {
+    if (shuftiErrors.length === 0) {
       res.cookie('__session', JSON.stringify({ address }), {
         secure: process.env.NODE_ENV !== 'development',
         httpOnly: true,
