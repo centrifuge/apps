@@ -1669,7 +1669,7 @@ export function getPoolsModule(inst: Centrifuge) {
         return data.trancheSnapshots.nodes.map((state) => {
           return {
             ...state,
-            price: new Price(state.tokenPrice),
+            tokenPrice: new Price(state.tokenPrice),
           }
         })
       })
