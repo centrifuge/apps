@@ -42,7 +42,6 @@ export const AuthProvider: React.FC = ({ children }) => {
           // @ts-expect-error Signer type version mismatch
           const { token, payload } = await cent.auth.generateJw3t(address, selectedWallet?.signer, {
             onBehalfOf: proxy.delegator,
-            proxyTypes: proxy.types,
           })
 
           if (token) {

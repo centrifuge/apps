@@ -8,7 +8,7 @@ import { isSameAddress } from '../utils'
 type TokenOptions = {
   expiresAt?: string
   onBehalfOf?: string
-  proxyType?: string[]
+  notBefore?: string
 }
 
 export function getAuthModule(inst: Centrifuge) {
@@ -21,18 +21,12 @@ export function getAuthModule(inst: Centrifuge) {
 
     const now = Math.floor(Date.now() / 1000)
 
-    const defaultValues = {
-      // default values
-      expires_at: options.expiresAt || String(now + 60 * 60 * 24 * 30), // 30 days
-      on_behalf_of: options.onBehalfOf,
-      proxy_type: options.proxyType,
-      not_before: String(now),
-    }
-
     const payload = {
       address,
       issued_at: String(now),
-      ...defaultValues,
+      expires_at: options.expiresAt || String(now + 60 * 60 * 24 * 30), // 30 days
+      on_behalf_of: options.onBehalfOf,
+      not_before: options.notBefore || String(now),
     }
 
     const content = new jw3t.JW3TContent(header, payload)
