@@ -28,6 +28,7 @@ export type Key =
   | 'allowInvestBelowMin'
   | 'alternativeTheme'
   | 'editPoolConfig'
+  | 'poolReporting'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -48,6 +49,11 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
     alwaysShow: true,
   },
   editPoolConfig: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
+  },
+  poolReporting: {
     type: 'checkbox',
     default: false,
     alwaysShow: true,

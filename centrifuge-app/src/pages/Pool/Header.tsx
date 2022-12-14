@@ -3,6 +3,7 @@ import * as React from 'react'
 import { useLocation, useParams, useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
 import { useCentrifuge } from '../../components/CentrifugeProvider'
+import { useDebugFlags } from '../../components/DebugFlags'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
@@ -20,6 +21,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
   const { data: metadata, isLoading } = usePoolMetadata(pool)
   const theme = useTheme()
   const cent = useCentrifuge()
+  const { poolReporting } = useDebugFlags()
 
   return (
     <PageHeader
@@ -63,7 +65,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
           <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reporting</NavigationTabsItem>
+          {poolReporting && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reporting</NavigationTabsItem>}
         </NavigationTabs>
       </Shelf>
     </PageHeader>
