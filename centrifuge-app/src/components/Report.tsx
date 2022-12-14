@@ -293,7 +293,7 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
     investorTransactions?.map((tx) => {
       const tokenId = tx.trancheId.split('-')[1]
       const trancheMeta = metadata?.tranches?.[tokenId]
-
+      console.log('tx', tx)
       return {
         name: ``,
         value: [
@@ -304,7 +304,7 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
           tx.type,
           formatBalance(tx.currencyAmount.toDecimal()),
           formatBalance(tx.tokenAmount.toDecimal()),
-          tx.tokenPrice ? formatBalance(tx.tokenPrice) : '',
+          tx.tokenPrice ? formatBalance(tx.tokenPrice.toDecimal(), pool.currency.symbol, 4) : '',
         ],
         heading: false,
       }
