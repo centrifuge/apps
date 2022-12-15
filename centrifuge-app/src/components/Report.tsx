@@ -152,7 +152,7 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
 
     downloadCSV(rows, `${report}_${new Date().toISOString().slice(0, 10)}.csv`)
   }
-  exportRef.current = exportToCsv
+  React.useImperativeHandle(exportRef, () => exportToCsv)
 
   const overviewRecords: TableDataRow[] = [
     {
@@ -168,7 +168,7 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
       name: `Asset value`,
       value:
         poolStates?.map((state) => {
-          return formatBalance(state.poolState.portfolioValuation.toDecimal())
+          return formatBalance(state.poolState.portfolioValuation)
         }) || [],
       heading: false,
     },
@@ -176,7 +176,7 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
       name: `Reserve`,
       value:
         poolStates?.map((state) => {
-          return formatBalance(state.poolState.totalReserve.toDecimal())
+          return formatBalance(state.poolState.totalReserve)
         }) || [],
       heading: false,
     },
