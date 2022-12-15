@@ -9,6 +9,7 @@ import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
+import { formatDate } from '../../../utils/date'
 import { formatBalance } from '../../../utils/formatting'
 import { useLiquidityAdmin } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
@@ -41,6 +42,8 @@ export const PoolDetailLiquidity: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
 
+  if (!pool) return null
+
   const pageSummaryData = [
     {
       label: <Tooltips type="poolReserve" />,
@@ -52,8 +55,6 @@ export const PoolDetailLiquidity: React.FC = () => {
     },
   ]
 
-  if (!pool) return null
-
   return (
     <>
       <PageSummary data={pageSummaryData}></PageSummary>
@@ -64,6 +65,11 @@ export const PoolDetailLiquidity: React.FC = () => {
           </React.Suspense>
         </Stack>
       </PageSection>
+
+      <PageSection title="Repayments & originations" titleAddition={formatDate(new Date().toString())}></PageSection>
+
+      <PageSection title="Investments & redemptions" titleAddition={formatDate(new Date().toString())}></PageSection>
+
       <LiquiditySection pool={pool} />
     </>
   )
