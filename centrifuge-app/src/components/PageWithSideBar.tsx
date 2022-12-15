@@ -1,5 +1,5 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { Box, Stack } from '@centrifuge/fabric'
+import { Box, Grid, Stack } from '@centrifuge/fabric'
 import React from 'react'
 import { useTheme } from 'styled-components'
 import { config } from '../config'
@@ -29,11 +29,10 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
     (aUSD && new CurrencyBalance(aUSD.balance, aUSD.currency.decimals).toDecimal().lte(MIN_AUSD_BALANCE)) || !aUSD
 
   return (
-    <Box
-      display="grid"
+    <Grid
       gridTemplateAreas={[`"main" "sidebar" "menu"`, `"main" "sidebar" "menu"`, `"menu main sidebar"`]}
-      gridTemplateColumns={['1fr', '1fr', 'minmax(0, 2fr) 7fr 3fr']}
-      gridAutoRows={['1fr auto auto', '1fr auto auto', 'auto']}
+      gridTemplateColumns={['1fr', '1fr', '80px 1fr 355px', '235px 1fr 355px']}
+      // gridAutoRows={['1fr auto auto', '1fr auto auto', 'auto']}
       minHeight="100vh"
     >
       <Box
@@ -54,6 +53,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
           {config.network === 'centrifuge' && <Footer />}
         </Stack>
       </Box>
+
       <Box
         gridArea={sidebar ? 'main' : '1 / 2 / 1 / 4'}
         as="main"
@@ -63,6 +63,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
       >
         <LoadBoundary>{children}</LoadBoundary>
       </Box>
+
       {sidebar && (
         <Box gridArea="sidebar" as="aside" zIndex="sticky">
           <Stack gap={1} position="sticky" top={0} p={[0, 0, 3]}>
@@ -74,6 +75,6 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
           </Stack>
         </Box>
       )}
-    </Box>
+    </Grid>
   )
 }
