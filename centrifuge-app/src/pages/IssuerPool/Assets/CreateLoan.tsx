@@ -22,7 +22,7 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { usePodAuth } from '../../../components/PodAuthProvider'
+import { useAuth } from '../../../components/PodAuthProvider'
 import { PodAuthSection } from '../../../components/PodAuthSection'
 import { Transaction, useTransactions } from '../../../components/TransactionsProvider'
 import { useWeb3 } from '../../../components/Web3Provider'
@@ -34,6 +34,7 @@ import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransactio
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadataMulti } from '../../../utils/useMetadata'
 import { useCollateralCollectionId } from '../../../utils/useNFTs'
+import { usePod } from '../../../utils/usePod'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { combine, max, maxLength, positiveNumber, required } from '../../../utils/validation'
 import { validate } from '../../IssuerCreatePool/validate'
@@ -144,10 +145,12 @@ const IssuerCreateLoan: React.FC = () => {
   const { selectedAccount, proxy } = useWeb3()
   const { addTransaction, updateTransaction } = useTransactions()
 
+  const { isAuth, authToken } = useAuth()
+
   const { data: poolMetadata, isLoading: poolMetadataIsLoading } = usePoolMetadata(pool)
   const podUrl = poolMetadata?.pod?.url
 
-  const { token, isLoggedIn } = usePodAuth(podUrl)
+  const { isLoggedIn } = usePod(podUrl)
 
   const { isLoading: isTxLoading, execute: doTransaction } = useCentrifugeTransaction(
     'Create asset',
@@ -179,7 +182,7 @@ const IssuerCreateLoan: React.FC = () => {
       attributes: {},
     },
     onSubmit: async (values, { setSubmitting }) => {
-      if (!podUrl || !collateralCollectionId || !address || !token) return
+      if (!podUrl || !collateralCollectionId || !address || !isAuth || !authToken) return
 
       const txId = Math.random().toString(36).substr(2)
 
@@ -203,7 +206,7 @@ const IssuerCreateLoan: React.FC = () => {
       try {
         const { documentId } = await centrifuge.pod.createDocument([
           podUrl,
-          token!.signed,
+          authToken,
           {
             attributes,
             writeAccess: [address],
@@ -217,7 +220,7 @@ const IssuerCreateLoan: React.FC = () => {
 
         const { nftId, jobId } = await centrifuge.pod.commitDocumentAndMintNft([
           podUrl,
-          token.signed,
+          authToken,
           {
             documentId,
             collectionId: collateralCollectionId,
@@ -243,7 +246,7 @@ const IssuerCreateLoan: React.FC = () => {
 
         updateTransaction(txId, { status: 'pending' })
 
-        await centrifuge.pod.awaitJob([podUrl, token.signed, jobId])
+        await centrifuge.pod.awaitJob([podUrl, authToken, jobId])
 
         // Send the signed createLoan transaction
         doTransaction([submittable], undefined, txId)

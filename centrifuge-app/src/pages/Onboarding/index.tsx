@@ -1,4 +1,4 @@
-import { Box, Button, Flex, IconX, Shelf, Stack } from '@centrifuge/fabric'
+import { Box, Flex, IconX, Shelf, Stack } from '@centrifuge/fabric'
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AccountsMenu } from '../../components/AccountsMenu'
@@ -62,11 +62,6 @@ export const OnboardingPage: React.FC = () => {
             setInvestorType={setInvestorType}
             setIsAgreedToDataSharingAgreement={setIsAgreedToDataSharingAgreement}
           />
-          <Box>
-            <Button variant="secondary" onClick={nextStep} disabled={!investorType || !isAgreedToDataSharingAgreement}>
-              Next
-            </Button>
-          </Box>
         </Stack>
         <Box paddingTop={4} paddingRight={4}>
           <Link to="/">

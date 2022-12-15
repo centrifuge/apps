@@ -3,15 +3,13 @@ import { useMutation, useQuery } from 'react-query'
 import { useCentrifuge } from './CentrifugeProvider'
 import { useWeb3 } from './Web3Provider'
 
-const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'NodeAdmin']
-
-export const PodAuthContext = React.createContext<{
+export const AuthContext = React.createContext<{
   session?: { signed: string; payload: any } | null
-  login: () => void
+  login: (authorizedProxyTypes: string[]) => void
   isLoggingIn: boolean
 }>(null as any)
 
-export const PodAuthProvider: React.FC = ({ children }) => {
+export const AuthProvider: React.FC = ({ children }) => {
   const { selectedWallet, proxy, selectedAccount } = useWeb3()
   const cent = useCentrifuge()
 
@@ -35,26 +33,19 @@ export const PodAuthProvider: React.FC = ({ children }) => {
     { enabled: !!selectedAccount?.address }
   )
 
-  const { mutate: login, isLoading: isLoggingIn } = useMutation(async () => {
+  const { mutate: login, isLoading: isLoggingIn } = useMutation(async (authorizedProxyTypes: string[]) => {
     try {
       if (selectedAccount?.address && selectedWallet?.signer) {
         const { address } = selectedAccount
 
-        if (proxy) {
-          const proxyType = proxy?.types.includes('Any')
-            ? 'any'
-            : proxy?.types.includes('PodAuth')
-            ? 'pod_auth'
-            : 'node_admin'
-
+        if (proxy && authorizedProxyTypes) {
           // @ts-expect-error Signer type version mismatch
           const { token, payload } = await cent.auth.generateJw3t(address, selectedWallet?.signer, {
             onBehalfOf: proxy.delegator,
-            proxyType,
           })
 
           if (token) {
-            const isAuthorizedProxy = await cent.auth.verifyProxy(address, proxy.delegator, AUTHORIZED_POD_PROXY_TYPES)
+            const isAuthorizedProxy = await cent.auth.verifyProxy(address, proxy.delegator, authorizedProxyTypes)
 
             if (isAuthorizedProxy) {
               sessionStorage.setItem(
@@ -89,11 +80,11 @@ export const PodAuthProvider: React.FC = ({ children }) => {
     [session, login, isLoggingIn]
   )
 
-  return <PodAuthContext.Provider value={ctx}>{children}</PodAuthContext.Provider>
+  return <AuthContext.Provider value={ctx}>{children}</AuthContext.Provider>
 }
 
-export function useAuth() {
-  const ctx = React.useContext(PodAuthContext)
+export function useAuth(authorizedProxyTypes?: string[]) {
+  const ctx = React.useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   const { selectedAccount } = useWeb3()
 
@@ -104,7 +95,7 @@ export function useAuth() {
   const authToken = session?.signed ? session.signed : ''
 
   const { refetch: refetchAuth, data } = useQuery(
-    ['authToken', authToken],
+    ['authToken', authToken, authorizedProxyTypes],
     async () => {
       try {
         const { verified, payload } = await cent.auth.verify(authToken!)
@@ -113,8 +104,8 @@ export function useAuth() {
         const address = payload.address
 
         if (verified) {
-          if (payload.on_behalf_of) {
-            const isVerifiedProxy = await cent.auth.verifyProxy(address, onBehalfOf, AUTHORIZED_POD_PROXY_TYPES)
+          if (payload.on_behalf_of && authorizedProxyTypes) {
+            const isVerifiedProxy = await cent.auth.verifyProxy(address, onBehalfOf, authorizedProxyTypes)
 
             if (isVerifiedProxy.verified) {
               return {
