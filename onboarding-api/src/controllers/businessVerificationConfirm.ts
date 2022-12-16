@@ -1,19 +1,35 @@
 import * as cookie from 'cookie'
 import { Request, Response } from 'express'
 import * as functions from 'firebase-functions'
-import { HttpsError } from 'firebase-functions/v1/auth'
+import { HttpsError } from 'firebase-functions/v1/https'
+import * as jwt from 'jsonwebtoken'
+import { array, InferType, object, string } from 'yup'
 import { businessCollection, BusinessOnboarding, validateAndWriteToFirestore } from '../database'
 import { checkHttpMethod } from '../utils/httpMethods'
+import { validateInput } from '../utils/validateInput'
 import { verifyJw3t } from '../utils/verifyJw3t'
 
-export const businessVerificationConfirmController = async (req: Request, res: Response) => {
-  try {
-    checkHttpMethod(req, 'GET')
-    const { address } = await verifyJw3t(req)
+const businessVerificationConfirmInput = object({
+  ultimateBeneficialOwners: array(
+    object({
+      name: string().required(),
+    })
+  ).required(),
+})
 
-    const cookies = JSON.parse(cookie.parse(req.headers.cookie ?? '').__session)
-    if (address !== cookies.address) {
-      throw new HttpsError('invalid-argument', 'Confirmation not possible. Either AML or KYB failed.')
+export const businessVerificationConfirmController = async (
+  req: Request<any, any, InferType<typeof businessVerificationConfirmInput>>,
+  res: Response
+) => {
+  try {
+    checkHttpMethod(req, 'POST')
+    const { address } = await verifyJw3t(req)
+    await validateInput(req, businessVerificationConfirmInput)
+
+    const cookies = cookie.parse(req.headers.cookie ?? '').__session
+    const confirmationToken = jwt.verify(cookies, process.env.JWT_SECRET as string) as { address: string }
+    if (address !== confirmationToken.address) {
+      throw new HttpsError('invalid-argument', 'Confirmation not possible.')
     }
     const businessDoc = await businessCollection.doc(address).get()
     const data = businessDoc.data() as BusinessOnboarding
@@ -30,9 +46,13 @@ export const businessVerificationConfirmController = async (req: Request, res: R
           verified: true,
         },
       },
+      ultimateBeneficialOwners: req.body.ultimateBeneficialOwners,
     }
 
-    await validateAndWriteToFirestore(address, verifyBusiness, 'BUSINESS', 'steps.kyb.verified')
+    await validateAndWriteToFirestore(address, verifyBusiness, 'BUSINESS', [
+      'steps.kyb.verified',
+      'ultimateBeneficialOwners',
+    ])
 
     res.clearCookie('__session')
     const freshData = (await businessCollection.doc(address).get()).data()

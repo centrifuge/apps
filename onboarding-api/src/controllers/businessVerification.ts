@@ -7,6 +7,7 @@ import { businessCollection, validateAndWriteToFirestore } from '../database'
 import { cors } from '../utils/cors'
 import { checkHttpMethod } from '../utils/httpMethods'
 import { shuftiProRequest } from '../utils/shuftiProRequest'
+import { validateInput } from '../utils/validateInput'
 import { verifyJw3t } from '../utils/verifyJw3t'
 
 const businessVerificationInput = object({
@@ -30,7 +31,7 @@ export const businessVerificationController = async (
     cors(req, res)
     checkHttpMethod(req, 'POST')
     const { address } = await verifyJw3t(req)
-    await businessVerificationInput.validate(req.body)
+    await validateInput(req, businessVerificationInput)
 
     const {
       body: {
@@ -87,6 +88,7 @@ export const businessVerificationController = async (
       businessName,
       trancheId,
       poolId,
+      ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
       steps: {
         email: {
           verificationCode: '',
@@ -118,7 +120,6 @@ export const businessVerificationController = async (
 
     res.json({
       errors: shuftiErrors,
-      ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
       ...business,
     })
   } catch (error) {

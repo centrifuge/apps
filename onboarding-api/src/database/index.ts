@@ -27,6 +27,11 @@ export const businessSchema = object({
       users: array().default([]),
     }),
   }).required(),
+  ultimateBeneficialOwners: array().of(
+    object({
+      name: string(),
+    })
+  ),
 })
 
 export const businessCollection = firestore().collection('businesses')
@@ -50,7 +55,7 @@ export type BusinessOnboarding = InferType<typeof businessSchema>
  * @param schema name of the validation schema e.g BUSINESS
  * @param mergeFields optional, pass a value to update data in an existing collection e.g steps.kyb.verified
  */
-export const validateAndWriteToFirestore = async <T = undefined | string>(
+export const validateAndWriteToFirestore = async <T = undefined | string[]>(
   key: string,
   data: T extends 'undefined' ? BusinessOnboarding : Subset<BusinessOnboarding>,
   schema: keyof typeof schemas,
@@ -58,9 +63,12 @@ export const validateAndWriteToFirestore = async <T = undefined | string>(
 ) => {
   try {
     const validationSchema = schemas[schema]
-    if (typeof mergeFields === 'string') {
-      await validationSchema.schema.validateAt(mergeFields, data)
-      await validationSchema.collection.doc(key).set(data, { mergeFields: [mergeFields] })
+    if (typeof mergeFields !== 'undefined') {
+      const mergeValidations = (mergeFields as unknown as string[]).map((field) =>
+        validationSchema.schema.validateAt(field, data)
+      )
+      await Promise.all(mergeValidations)
+      await validationSchema.collection.doc(key).set(data, { mergeFields: mergeFields as unknown as string[] })
     } else {
       await validationSchema.schema.validate(data)
       await validationSchema.collection.doc(key).set(data)
