@@ -118,16 +118,16 @@ export const businessVerificationController = async (
       })
     }
 
-    res.json({
+    return res.json({
       errors: shuftiErrors,
       ...business,
     })
   } catch (error) {
     if (error instanceof HttpsError) {
       functions.logger.log(error.message)
-      res.status(error.httpErrorCode.status).send(error.message)
+      return res.status(error.httpErrorCode.status).send(error.message)
     } else {
-      res.status(500).send('An unexpected error occured')
+      return res.status(500).send('An unexpected error occured')
     }
   }
 }

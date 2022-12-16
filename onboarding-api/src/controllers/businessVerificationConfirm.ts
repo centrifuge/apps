@@ -25,8 +25,8 @@ export const businessVerificationConfirmController = async (
   try {
     cors(req, res)
     checkHttpMethod(req, 'POST')
-    const { address } = await verifyJw3t(req)
     await validateInput(req, businessVerificationConfirmInput)
+    const { address } = await verifyJw3t(req)
 
     const cookies = cookie.parse(req.headers.cookie ?? '').__session
     const confirmationToken = jwt.verify(cookies, process.env.JWT_SECRET as string) as { address: string }
@@ -58,14 +58,14 @@ export const businessVerificationConfirmController = async (
 
     res.clearCookie('__session')
     const freshData = (await businessCollection.doc(address).get()).data()
-    res.status(201).send({ data: freshData })
+    return res.status(201).send({ data: freshData })
   } catch (error) {
     if (error instanceof HttpsError) {
       functions.logger.log(error.message)
-      res.status(error.httpErrorCode.status).send(error.message)
+      return res.status(error.httpErrorCode.status).send(error.message)
     } else {
       functions.logger.log(error)
-      res.status(500).send('An unexpected error occured')
+      return res.status(500).send('An unexpected error occured')
     }
   }
 }
