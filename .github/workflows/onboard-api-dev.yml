@@ -30,5 +30,8 @@ jobs:
       - name: Install Firebase
         run: npm i firebase-tools -g
 
+      - name: Prepare environment
+        run: echo -e "SHUFTI_PRO_SECRET_KEY=${{ secrets.SHUFTI_PRO_SECRET_KEY }}\nSHUFTI_PRO_CLIENT_ID=${{ secrets.nSHUFTI_PRO_CLIENT_ID }}\nJWT_SECRET=${{ secrets.nJWT_SECRET }}\nNODE_ENV=development" >> .env
+
       - name: Deploy Functions
         run: firebase deploy --only functions --token ${{ secrets.FIREBASE_CI_TOKEN }}
