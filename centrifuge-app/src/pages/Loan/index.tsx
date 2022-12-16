@@ -37,6 +37,7 @@ import { usePod } from '../../utils/usePod'
 import { usePodDocument } from '../../utils/usePodDocument'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
+import { FinancingRepayment } from './FinancingRepayment'
 import { PricingForm } from './PricingForm'
 import { RiskGroupValues } from './RiskGroupValues'
 import { getMatchingRiskGroupIndex, LOAN_TYPE_LABELS } from './utils'
@@ -152,6 +153,17 @@ const Loan: React.FC = () => {
                 },
               ]}
             />
+
+            <PageSection title="Financing & repayment cash flow">
+              <Shelf gap={3} flexWrap="wrap">
+                <FinancingRepayment
+                  drawDownDate={loan.originationDate ? formatDate(loan.originationDate) : null}
+                  closingDate={loan.status === 'Closed' ? formatDate(loan.lastUpdated) : null}
+                  totalFinanced={formatBalance(loan.totalBorrowed, pool.currency)}
+                  totalRepaid={formatBalance(loan.totalRepaid, pool.currency)}
+                />
+              </Shelf>
+            </PageSection>
 
             <PageSection title="Pricing">
               <Shelf gap={3} flexWrap="wrap">
