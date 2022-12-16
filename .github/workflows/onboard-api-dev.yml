@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'onboarding-api/**'
+      - '.github/workflows/onboard-api-dev.yml'
 
 jobs:
   deploy:
@@ -13,6 +14,10 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+
+    defaults:
+      run:
+        working-directory: onboarding-api
 
     steps:
       - name: Checkout
@@ -24,7 +29,7 @@ jobs:
       - name: Lint
         run: yarn lint
 
-      - name: Compile Typescript
+      - name: Build
         run: yarn build
 
       - name: Install Firebase
