@@ -4,16 +4,15 @@ import { useAuth } from '../../components/AuthProvider'
 import { useWeb3 } from '../../components/Web3Provider'
 
 type Props = {
-  isAuth: boolean
   nextStep: () => void
   refetchAuth: () => void
 }
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
-export const LinkWallet = ({ nextStep, isAuth }: Props) => {
+export const LinkWallet = ({ nextStep }: Props) => {
   const { selectedAccount, connect } = useWeb3()
-  const { login } = useAuth()
+  const { login, isAuth } = useAuth()
 
   const linkButtonText = useMemo(() => {
     if (isAuth) {

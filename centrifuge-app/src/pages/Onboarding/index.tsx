@@ -17,22 +17,22 @@ const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonP
 export const OnboardingPage: React.FC = () => {
   const [activeStep, setActiveStep] = useState<number>(0)
 
-  const { isConnecting } = useWeb3()
+  const { isConnecting, selectedAccount } = useWeb3()
   const [investorType, setInvestorType] = useState<InvestorTypes>()
   const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = useState(false)
-  const { isAuth, refetchAuth, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
+  const { isAuth, refetchAuth } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
 
   const nextStep = () => setActiveStep((current) => current + 1)
 
   useEffect(() => {
-    if (authToken === '') {
-      setActiveStep(1)
+    if (!isConnecting) {
+      if (!selectedAccount || isAuth === false) {
+        setActiveStep(1)
+      } else if (isAuth && activeStep !== 1) {
+        setActiveStep(2)
+      }
     }
-
-    if (authToken && isAuth && activeStep === 0) {
-      setActiveStep(2)
-    }
-  }, [activeStep, isAuth, authToken])
+  }, [activeStep, isAuth, selectedAccount, isConnecting])
 
   return (
     <Flex backgroundColor="backgroundSecondary" minHeight="100vh" flexDirection="column">
@@ -104,7 +104,7 @@ export const OnboardingPage: React.FC = () => {
             justifyContent="space-between"
             minHeight="520px"
           >
-            {activeStep === 1 && <LinkWallet nextStep={nextStep} isAuth={!!isAuth} refetchAuth={refetchAuth} />}
+            {activeStep === 1 && <LinkWallet nextStep={nextStep} refetchAuth={refetchAuth} />}
             {activeStep === 2 && (
               <InvestorType
                 investorType={investorType}
