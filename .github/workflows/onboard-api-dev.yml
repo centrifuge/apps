@@ -1,0 +1,34 @@
+name: 'Onboarding dev deployment'
+on:
+  push:
+    branches:
+      - onboarding/github-action-setup
+      - main
+    paths:
+      - 'onboarding-api/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Compile Typescript
+        run: yarn build
+
+      - name: Install Firebase
+        run: npm i firebase-tools -g
+
+      - name: Deploy Functions
+        run: firebase deploy --only functions --token ${{ secrets.FIREBASE_CI_TOKEN }}
