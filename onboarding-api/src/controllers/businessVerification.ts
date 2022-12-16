@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import * as functions from 'firebase-functions'
 import { HttpsError } from 'firebase-functions/v1/https'
+import * as jwt from 'jsonwebtoken'
 import { bool, date, InferType, object, string } from 'yup'
 import { businessCollection, validateAndWriteToFirestore } from '../database'
 import { cors } from '../utils/cors'
@@ -105,17 +106,19 @@ export const businessVerificationController = async (
 
     // only set cookie if businessAML and KYB were successful
     if (shuftiErrors.length === 0) {
-      res.cookie('__session', JSON.stringify({ address }), {
+      const expiresIn = 1000 * 60 * 15 // 15 minutes
+      const token = jwt.sign({ address }, process.env.JWT_SECRET as string, { expiresIn })
+      res.cookie('__session', token, {
         secure: process.env.NODE_ENV !== 'development',
         httpOnly: true,
-        maxAge: 1000 * 60 * 5,
+        maxAge: expiresIn,
         path: 'centrifuge-fargate-apps-dev/us-central1', // TODO: make dynamic
       })
     }
 
     res.json({
       errors: shuftiErrors,
-      ultimateBeneficialOwners: businessAML?.verification_data.kyb?.company_ultimate_beneficial_owners || [],
+      ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
       ...business,
     })
   } catch (error) {
