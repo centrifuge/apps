@@ -61,7 +61,7 @@ steps: {
 }
 ```
 
-### `GET: /businessVerificationConfirm`
+### `POST: /businessVerificationConfirm`
 
 KYB and AML verification
 
@@ -70,6 +70,16 @@ KYB and AML verification
 ```js
 authorization: Bearer <jwt-signed-token>
 cookies: "__session=..." // httpOnly cookie set on /businessVerification
+```
+
+**Request body**
+
+```ts
+{
+    ultimateBeneficialOwners: [
+        {name: string}
+    ]
+}
 ```
 
 **Response**
