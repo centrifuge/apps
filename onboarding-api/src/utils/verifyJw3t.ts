@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { HttpsError } from 'firebase-functions/v1/auth'
+import { HttpsError } from 'firebase-functions/v1/https'
 import * as jw3t from 'jw3t'
 
 type Jw3TPayload = {

@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin'
-import { HttpsError } from 'firebase-functions/v1/auth'
+import { HttpsError } from 'firebase-functions/v1/https'
 import { array, bool, date, InferType, object, string } from 'yup'
 import { OptionalObjectSchema } from 'yup/lib/object'
 import { Subset } from '../utils/types'
