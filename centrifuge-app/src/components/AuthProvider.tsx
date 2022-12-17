@@ -95,7 +95,7 @@ export function useAuth(authorizedProxyTypes?: string[]) {
   const authToken = session?.signed ? session.signed : ''
 
   const { refetch: refetchAuth, data } = useQuery(
-    ['authToken', authToken, authorizedProxyTypes],
+    ['auth', authToken, authorizedProxyTypes],
     async () => {
       try {
         const { verified, payload } = await cent.auth.verify(authToken!)
@@ -131,7 +131,7 @@ export function useAuth(authorizedProxyTypes?: string[]) {
       }
     },
     {
-      enabled: !!selectedAccount && !!authToken,
+      enabled: !!selectedAccount,
       staleTime: Infinity,
       retry: 1,
     }
