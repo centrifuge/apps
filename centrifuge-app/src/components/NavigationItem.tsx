@@ -1,8 +1,9 @@
-import { Box, Button, IconChevronDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
+import { Box, Grid, IconChevronDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
 import React, { useState } from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
-import styled from 'styled-components'
-import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
+import { Link } from 'react-router-dom'
+import styled, { useTheme } from 'styled-components'
+import { uuidv4 } from '../utils/uuid'
 
 type Props = {
   label: React.ReactNode
@@ -10,69 +11,147 @@ type Props = {
   href?: string
   defaultOpen?: boolean
   active?: boolean
+  stacked?: boolean
 }
 
-const NavigationClickable = styled(Shelf)<{ $active?: boolean }>`
+const NavigationClickable = styled(Shelf)<{ $active?: boolean; stacked?: boolean }>`
+  width: 100%;
+  height: ${({ stacked }) => (stacked ? 'auto' : '32px')};
+  padding-block: ${({ theme }) => theme.space[2]}px;
+  padding-inline: ${({ theme }) => theme.space[1]}px;
+
+  justify-content: space-between;
+  align-items: center;
+
   cursor: pointer;
-  background: ${({ $active, theme }) => $active && theme.colors.secondarySelectedBackground};
+  background-color: ${({ $active, theme }) => ($active ? theme.colors.secondarySelectedBackground : 'transparent')};
   color: ${({ $active, theme }) => ($active ? theme.colors.textSelected : theme.colors.textPrimary)};
+  border: none;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints['XL']}) {
+    border-radius: 16px; // todo: this is non standard
+  }
+
   :hover {
     color: ${({ theme }) => theme.colors.textSelected};
   }
+
+  /**
+    todo: ask design for global focus styles
+    
+    :focus-visible {
+      outline: 1px solid magenta;
+    }
+  */
 `
 
-const IconWrapper = styled(Shelf)`
-  width: 24px;
-  min-width: 24px;
-  & svg {
-    vertical-align: baseline;
+const StyledLabel = styled(Grid)`
+  > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 `
-export const NavigationItem: React.FC<Props> = ({ label, icon, href, children, active, defaultOpen = false }) => {
-  const [open, setOpen] = useState(defaultOpen)
+
+export const StyledListItem = styled(Box)<{ stacked?: boolean }>``
+
+export const NavigationItem: React.FC<Props> = ({ label, icon, href, children, active, stacked, ...rest }) => {
   const history = useHistory()
   const match = useRouteMatch(href || '/ignore') || active
-  const isDesktop = useIsAboveBreakpoint('M')
 
   return (
-    <>
-      {isDesktop ? (
-        <>
-          <NavigationClickable
-            px={2}
-            py={1}
-            borderRadius={16}
-            height={32}
-            justifyContent="space-between"
-            alignItems="center"
-            onClick={() => {
-              if (children) setOpen(!open)
-              else if (href) history.push(href)
-            }}
-            $active={(!isDesktop || !children) && !!match}
-          >
-            <Shelf alignItems="center">
-              <IconWrapper>{icon}</IconWrapper>
-              {isDesktop && (
-                <Text variant="interactive1" color="inherit">
-                  {label}
-                </Text>
-              )}
-            </Shelf>
+    <NavigationClickable
+      as={href ? Link : 'button'}
+      {...(href ? { to: href } : {})}
+      $active={(!stacked || !children) && !!match}
+      stacked={stacked}
+    >
+      <Label {...{ label, icon, stacked }} />
+    </NavigationClickable>
+  )
+}
 
-            <Box>{children && isDesktop && (open ? <IconChevronDown /> : <IconChevronRight />)}</Box>
-          </NavigationClickable>
-          <Box>{open && isDesktop && children}</Box>
-        </>
-      ) : (
-        <Button
-          onClick={() => {
-            if (href) history.push(href)
-          }}
-          variant="tertiary"
-          icon={icon}
+function Label({ label, icon, stacked }: Props) {
+  return (
+    <StyledLabel
+      width="100%"
+      alignItems="center"
+      gap={1}
+      gridTemplateColumns={stacked ? '1fr' : '16px 1fr'}
+      gridTemplateRows={stacked ? '20px 1fr' : '1fr'}
+      gridAutoFlow={stacked ? 'column' : 'row'}
+      justifyItems={stacked ? 'center' : 'start'}
+    >
+      {!!icon && icon}
+      <Text
+        as="span"
+        variant="interactive1"
+        color="inherit"
+        style={{ gridColumn: stacked ? 'unset' : 2 }}
+        {...(stacked ? { fontSize: 10 } : {})}
+      >
+        {label}
+      </Text>
+    </StyledLabel>
+  )
+}
+
+const CollapsibleContent = styled(Box)<{ isShadow?: boolean }>`
+  box-shadow: ${({ isShadow, theme }) => (isShadow ? theme.shadows.cardOverlay : 'none')};
+`
+
+export function Collapsible({
+  defaultOpen = false,
+  children,
+  stacked,
+  ...rest
+}: Props & { children: React.ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen)
+  const { space } = useTheme()
+  const fullWidth = `calc(100vw - 2 * ${space[1]}px)`
+  const offset = `calc(100% + 2 * ${space[1]}px)`
+  const id = uuidv4()
+
+  return (
+    <Box position={['static', 'static', 'relative', 'relative', 'static']} width="100%">
+      {open && (
+        <Box
+          display={['block', 'block', 'block', 'block', 'none']}
+          position="fixed"
+          top="0"
+          left="0"
+          width="100%"
+          height="100%"
+          onClick={() => setOpen(false)}
         />
       )}
-    </>
+      <NavigationClickable
+        as="button"
+        id={`${id}-button`}
+        aria-controls={`${id}-menu`}
+        title={open ? 'Hide menu' : 'Show menu'}
+        onClick={() => setOpen(!open)}
+        stacked={stacked}
+      >
+        <Label {...rest} stacked={stacked} />
+        {!stacked && (open ? <IconChevronDown /> : <IconChevronRight />)}
+      </NavigationClickable>
+
+      <Box
+        as="section"
+        hidden={!open}
+        id={`${id}-menu`}
+        aria-labelledby={`${id}-button`}
+        aria-expanded={!!open}
+        position={['absolute', 'absolute', 'absolute', 'absolute', 'static']}
+        top={['auto', 'auto', 1, 1, 'auto']}
+        bottom={[offset, offset, 'auto']}
+        left={[1, 1, offset, offset, 'auto']}
+        width={[fullWidth, fullWidth, 300, 300, '100%']}
+      >
+        {children}
+      </Box>
+    </Box>
   )
 }

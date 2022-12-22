@@ -1,14 +1,16 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
-import { Box, Grid, Stack } from '@centrifuge/fabric'
+import { Box, Grid, Shelf, Stack } from '@centrifuge/fabric'
 import React from 'react'
 import { useTheme } from 'styled-components'
 import { config } from '../config'
 import { useAddress } from '../utils/useAddress'
 import { useBalances } from '../utils/useBalances'
+import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { AccountsMenu } from './AccountsMenu'
 import { Faucet } from './Faucet'
 import { Footer } from './Footer'
 import { LoadBoundary } from './LoadBoundary'
+import { LogoLink } from './LogoLink'
 import { Menu } from './Menu'
 
 type Props = {
@@ -17,9 +19,16 @@ type Props = {
 
 const MIN_DEVEL_BALANCE = 10
 const MIN_AUSD_BALANCE = 100
+
+const TOOLBAR_HEIGHT = 75
+const HEADER_HEIGHT = 56
+const MENU_WIDTH = 80
+
 export const PAGE_GUTTER = ['gutterMobile', 'gutterTablet', 'gutterDesktop']
 
 export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) => {
+  const isMedium = useIsAboveBreakpoint('M')
+
   const theme = useTheme()
   const balances = useBalances(useAddress())
   const hasLowDevelBalance =
@@ -30,49 +39,106 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
 
   return (
     <Grid
-      gridTemplateAreas={[`"main" "sidebar" "menu"`, `"main" "sidebar" "menu"`, `"menu main sidebar"`]}
-      gridTemplateColumns={['1fr', '1fr', '80px 1fr 355px', '235px 1fr 355px']}
-      // gridAutoRows={['1fr auto auto', '1fr auto auto', 'auto']}
+      gridTemplateAreas={[
+        `"menu" "main" "sidebar"`,
+        `"menu" "main" "sidebar"`,
+        `"menu main" "menu sidebar"`,
+        `"menu main sidebar"`,
+      ]}
+      gridTemplateColumns={['1fr', '1fr', `${MENU_WIDTH}px 1fr`, `${MENU_WIDTH}px 1fr`, '235px 1fr 355px']}
+      gridTemplateRows={[
+        `${HEADER_HEIGHT}px 1fr ${TOOLBAR_HEIGHT}px`,
+        `${HEADER_HEIGHT}px 1fr ${TOOLBAR_HEIGHT}px`,
+        'auto',
+      ]}
       minHeight="100vh"
     >
       <Box
+        as="header"
         maxHeight="100vh"
         gridArea="menu"
         position="sticky"
-        bottom={0}
         top={0}
-        height="100%"
+        bottom={['auto', 'auto', 0]}
+        height={[HEADER_HEIGHT, HEADER_HEIGHT, '100%']}
+        px={[2, 2, 0]}
+        py={[1, 1, 0]}
         zIndex={theme.zIndices.sticky + 1}
         background={theme.colors.backgroundPrimary}
-        style={{
-          boxShadow: `0 -1px 0 ${theme.colors.borderSecondary}, 1px 0 0 ${theme.colors.borderSecondary}`,
-        }}
+        borderWidth={0}
+        borderColor={theme.colors.borderSecondary}
+        borderStyle="solid"
+        borderBottomWidth={[1, 1, 0]}
+        borderRightWidth={[0, 0, 1]}
       >
-        <Stack height="100%" position="sticky" top={0} justifyContent="space-between">
-          <Menu />
-          {config.network === 'centrifuge' && <Footer />}
-        </Stack>
+        {!isMedium ? (
+          <Shelf justifyContent="space-between">
+            <LogoLink />
+            <Stack gap={4}>
+              <AccountsMenu />
+            </Stack>
+          </Shelf>
+        ) : (
+          <Grid height="100%" gridTemplateColumns="1fr" gridTemplateRows="1fr auto">
+            <Stack
+              alignItems={['center', 'center', 'center', 'center', 'start']}
+              gap={8}
+              position="sticky"
+              top={0}
+              pt={[0, 0, 2]}
+              px={[0, 0, 0, 0, 2]}
+            >
+              <LogoLink />
+              <Menu />
+            </Stack>
+            {config.network === 'centrifuge' && <Footer />}
+          </Grid>
+        )}
       </Box>
 
       <Box
-        gridArea={sidebar ? 'main' : '1 / 2 / 1 / 4'}
+        gridArea="main"
         as="main"
-        style={{
-          boxShadow: `1px 0 0 ${theme.colors.borderSecondary}`,
-        }}
+        borderRightColor={theme.colors.borderSecondary}
+        borderRightStyle="solid"
+        borderRightWidth={[0, 0, 1]}
       >
         <LoadBoundary>{children}</LoadBoundary>
+
+        {!isMedium && (
+          <>
+            <LoadBoundary>{sidebar}</LoadBoundary>
+            {config.network === 'centrifuge' && <Footer />}
+          </>
+        )}
       </Box>
 
       {sidebar && (
-        <Box gridArea="sidebar" as="aside" zIndex="sticky">
-          <Stack gap={1} position="sticky" top={0} p={[0, 0, 3]}>
-            <Stack mb={9} px={8} gap={4}>
-              <AccountsMenu />
+        <Box
+          gridArea="sidebar"
+          as="aside"
+          zIndex="sticky"
+          position={['sticky', 'sticky', 'relative']}
+          bottom={[0, 0, 'auto']}
+          height={[TOOLBAR_HEIGHT, TOOLBAR_HEIGHT, 'auto']}
+          backgroundColor={theme.colors.backgroundPrimary}
+          borderTopColor={theme.colors.borderSecondary}
+          borderTopStyle="solid"
+          borderTopWidth={[1, 1, 0]}
+        >
+          {!isMedium ? (
+            <Menu />
+          ) : (
+            <Stack gap={1} position="sticky" top={0} p={[0, 0, 3]}>
+              <Stack mb={9} px={8} gap={4}>
+                <AccountsMenu />
+              </Stack>
+
+              {import.meta.env.REACT_APP_FAUCET_URL && hasLowDevelBalance && hasLowAusdBalance && <Faucet />}
+
+              <LoadBoundary>{sidebar}</LoadBoundary>
             </Stack>
-            {import.meta.env.REACT_APP_FAUCET_URL && hasLowDevelBalance && hasLowAusdBalance && <Faucet />}
-            <LoadBoundary>{sidebar}</LoadBoundary>
-          </Stack>
+          )}
         </Box>
       )}
     </Grid>
