@@ -16,7 +16,7 @@ const businessVerificationInput = object({
   poolId: string().required(),
   trancheId: string().required(),
   businessName: string().required(), // used for AML
-  businessIncorporationDate: date(), // used for AML
+  businessIncorporationDate: date().required(), // used for AML
   companyRegistrationNumber: string().required(),
   companyJurisdictionCode: string().required(), // country of incorporation
 })
