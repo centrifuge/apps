@@ -1,24 +1,87 @@
-# onboard-api
-
-## Setup
-Make sure you have installed Yarn and NVM.
-
-1. Use Node v14.15.1: `nvm use` 
-2. Install dependencies: `yarn install`
-3. Create a Postgres database
-4. Add `.env` file to the `onboard-api` folder
-5. Run database migrations: `yarn db:migrate`
-
-It's also recommended to run Prettier automatically in your editor, e.g. using [this VS Code plugin](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode).
+# Centrifuge Onboarding API V2
 
 ## Development
 
-Compile & watch for changes: `yarn start`
+1. Install dependencies `yarn install`
+2. Install firebase globally: `npm install -g firebase-tools`
+3. Login to firebase `firebase login`
+4. Create an env file from the provided example. The ShuftiPro keys can be found in the dashboard settings.
+5. Start dev server with `yarn dev` [localhost:5001]
 
-## Env
+## Endpoints
 
-Generate a private key for the session cookies:
-`openssl genrsa -aes256 -out private.pem 2048`
+### `POST: /businessVerification`
 
-And a public key:
-`openssl rsa -in private.pem -outform PEM -pubout -out public.pem`
+KYB and AML verification
+
+**Request headers**
+
+```js
+authorization: Bearer <jwt-signed-token>
+```
+
+**Request body**
+
+```ts
+{
+    email: string
+    businessName: string
+    businessIncorporationDate: string // timestamp
+    companyRegistrationNumber: string
+    companyJurisdictionCode: string // e.g az_us
+    trancheId: string
+    poolId: string
+    address: string
+    dryRun?: boolean // mock KYB and AML
+}
+```
+
+**Response**
+
+200 ok
+
+An httpOnly cookie is set that is required to confirm business ownership in the next step (`/businessVerificationConfirm`)
+
+```js
+// ...
+ultimateBeneficialOwners: [],
+steps: {
+    email: {
+        verificationCode: "",
+        verified: false
+    },
+    kyb: {
+        requested: true,
+        verified: false
+    },
+    kyc: {
+        verified: false,
+        users: []
+    }
+}
+```
+
+### `POST: /businessVerificationConfirm`
+
+KYB and AML verification
+
+**Request headers**
+
+```js
+authorization: Bearer <jwt-signed-token>
+cookies: "__session=..." // httpOnly cookie set on /businessVerification
+```
+
+**Request body**
+
+```ts
+{
+    ultimateBeneficialOwners: [
+        {name: string}
+    ]
+}
+```
+
+**Response**
+
+201 created

@@ -21,7 +21,6 @@ import { PageSection } from '../../components/PageSection'
 import { PageSummary } from '../../components/PageSummary'
 import { PageWithSideBar } from '../../components/PageWithSideBar'
 import { AnchorPillButton } from '../../components/PillButton'
-import { usePodAuth, usePodDocument } from '../../components/PodAuthProvider'
 import { PodAuthSection } from '../../components/PodAuthSection'
 import { Tooltips } from '../../components/Tooltips'
 import { config } from '../../config'
@@ -34,8 +33,11 @@ import { useAvailableFinancing, useLoan, useNftDocumentId } from '../../utils/us
 import { useMetadata } from '../../utils/useMetadata'
 import { useNFT } from '../../utils/useNFTs'
 import { useCanBorrowAsset, usePermissions } from '../../utils/usePermissions'
+import { usePod } from '../../utils/usePod'
+import { usePodDocument } from '../../utils/usePodDocument'
 import { usePool, usePoolMetadata } from '../../utils/usePools'
 import { FinanceForm } from './FinanceForm'
+import { FinancingRepayment } from './FinancingRepayment'
 import { PricingForm } from './PricingForm'
 import { RiskGroupValues } from './RiskGroupValues'
 import { getMatchingRiskGroupIndex, LOAN_TYPE_LABELS } from './utils'
@@ -88,7 +90,7 @@ const Loan: React.FC = () => {
 
   const documentId = useNftDocumentId(nft?.collectionId, nft?.id)
   const podUrl = poolMetadata?.pod?.url
-  const { isLoggedIn } = usePodAuth(podUrl)
+  const { isLoggedIn } = usePod(podUrl)
   const { data: document } = usePodDocument(podUrl, documentId)
 
   const publicData = nftMetadata?.properties
@@ -151,6 +153,17 @@ const Loan: React.FC = () => {
                 },
               ]}
             />
+
+            <PageSection title="Financing & repayment cash flow">
+              <Shelf gap={3} flexWrap="wrap">
+                <FinancingRepayment
+                  drawDownDate={loan.originationDate ? formatDate(loan.originationDate) : null}
+                  closingDate={loan.status === 'Closed' ? formatDate(loan.lastUpdated) : null}
+                  totalFinanced={formatBalance(loan.totalBorrowed, pool.currency)}
+                  totalRepaid={formatBalance(loan.totalRepaid, pool.currency)}
+                />
+              </Shelf>
+            </PageSection>
 
             <PageSection title="Pricing">
               <Shelf gap={3} flexWrap="wrap">

@@ -101,3 +101,7 @@ export function isSameAddress(a?: string | Uint8Array, b?: string | Uint8Array) 
 export function isLoanPalletAccount(address?: string | Uint8Array) {
   return isSameAddress(address, LoanPalletAccountId)
 }
+
+export function getDateYearsFromNow(years: number) {
+  return new Date(new Date().setFullYear(new Date().getFullYear() + years))
+}
