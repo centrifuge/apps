@@ -2,12 +2,18 @@ import * as functions from 'firebase-functions'
 import { businessVerificationController } from './controllers/businessVerification'
 import { businessVerificationConfirmController } from './controllers/businessVerificationConfirm'
 
-const allowedDomains = ['http://localhost:3000']
+const centrifugeDomains = [
+  /^(https:\/\/.*cntrfg\.com)/,
+  /^(https:\/\/.*centrifuge\.io)/,
+  /^(https:\/\/.*altair\.network)/,
+]
 
 const cors = require('cors')({
   origin: (origin, callback) => {
-    const allowed = allowedDomains.includes(origin)
-    if (allowed) {
+    const isLocalhost = /^(http:\/\/localhost:)./.test(origin)
+    const isCentrifugeDomain = centrifugeDomains.some((regex) => regex.test(origin))
+
+    if (isLocalhost || isCentrifugeDomain) {
       callback(null, true)
     } else {
       callback(new Error('Not allowed by CORS'))
