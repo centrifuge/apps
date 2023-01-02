@@ -1,6 +1,7 @@
 import { AddressOrPair } from '@polkadot/api/types'
 import { Signer } from '@polkadot/types/types'
 import { CentrifugeBase, UserProvidedConfig } from './CentrifugeBase'
+import { getAuthModule } from './modules/auth'
 import { getMetadataModule } from './modules/metadata'
 import { getNftsModule } from './modules/nfts'
 import { getPodModule } from './modules/pod'
@@ -17,6 +18,7 @@ export class Centrifuge extends CentrifugeBase {
   metadata = getMetadataModule(this)
   tokens = getTokensModule(this)
   pod = getPodModule()
+  auth = getAuthModule(this)
 
   constructor(config: UserProvidedConfig = {}) {
     super(config)

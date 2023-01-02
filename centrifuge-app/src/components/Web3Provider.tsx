@@ -40,7 +40,7 @@ export const Web3Provider: React.FC = ({ children }) => {
   const [accounts, setAccounts] = React.useState<Account[] | null>(null)
   const [selectedAccountAddress, setSelectedAccountAddress] = React.useState<string | null>(null)
   const [proxyAddress, setProxyAddress] = React.useState<string | null>(null)
-  const [isConnecting, setIsConnecting] = React.useState(false)
+  const [isConnecting, setIsConnecting] = React.useState(!triedEager && !!localStorage.getItem('web3Persist'))
   const [selectedWallet, setSelectedWallet] = React.useState<Wallet | null>(null)
   const unsubscribeRef = React.useRef<(() => void) | null>()
   const cent = useCentrifuge()
@@ -109,20 +109,21 @@ export const Web3Provider: React.FC = ({ children }) => {
       const unsub = await wallet.subscribeAccounts((allAccounts) => {
         if (!allAccounts) throw new Error('No accounts')
         setFilteredAccounts(allAccounts)
+        setIsConnecting(false)
       })
+
       unsubscribeRef.current = unsub as any
 
       localStorage.setItem('web3Persist', '1')
       localStorage.setItem('web3PersistedWallet', wallet.extensionName)
-    } catch (e) {
-      console.error(e)
+    } catch (error) {
+      console.error(error)
       localStorage.setItem('web3Persist', '')
       localStorage.setItem('web3PersistedWallet', '')
       localStorage.setItem('web3PersistedAddress', '')
       localStorage.setItem('web3PersistedProxy', '')
-      throw e
-    } finally {
       setIsConnecting(false)
+      throw error
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -154,6 +155,8 @@ export const Web3Provider: React.FC = ({ children }) => {
     }
     if (hasWallet) {
       connect(source)
+    } else {
+      setIsConnecting(false)
     }
   }
 
