@@ -7,7 +7,7 @@ import { InvestorTypes } from '../../types'
 import { InvestorType } from './InvestorType'
 import { Step, Stepper } from './Stepper'
 
-const Logo = config.logo
+const [LogoMark, WordMark] = config.logo
 
 export const OnboardingPage: React.FC = () => {
   const [activeStep, setActiveStep] = useState(1)
@@ -17,17 +17,16 @@ export const OnboardingPage: React.FC = () => {
   const nextStep = () => setActiveStep((current) => current + 1)
 
   return (
-    <Flex backgroundColor="backgroundSecondary" paddingBottom={5} height="100%" flexDirection="column">
-      <Shelf justifyContent="space-between">
-        <Shelf>
-          <Link to="/">
-            <Box px={2}>
-              <Logo />
-            </Box>
-          </Link>
-          <Box>Pool</Box>
+    <Flex backgroundColor="backgroundSecondary" paddingBottom={5} minHeight="100vh" flexDirection="column">
+      <Shelf as="header" justifyContent="space-between" gap={2} p={3}>
+        <Shelf alignItems="center" gap={3}>
+          <Box as={Link} to="/" width={110}>
+            <WordMark />
+          </Box>
+
+          <Box pt={1}>Pool</Box>
         </Shelf>
-        <Box px={6} alignSelf="center" width="400px">
+        <Box width="300px">
           <AccountsMenu />
         </Box>
       </Shelf>
