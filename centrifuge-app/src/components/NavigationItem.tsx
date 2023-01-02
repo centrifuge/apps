@@ -1,6 +1,6 @@
 import { Box, Grid, IconChevronDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
 import React, { useState } from 'react'
-import { useHistory, useRouteMatch } from 'react-router'
+import { useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 
@@ -28,20 +28,12 @@ const NavigationClickable = styled(Shelf)<{ $active?: boolean; stacked?: boolean
   border: none;
 
   @media (min-width: ${({ theme }) => theme.breakpoints['XL']}) {
-    border-radius: 16px; // todo: this is non standard
+    border-radius: 16px;
   }
 
   :hover {
     color: ${({ theme }) => theme.colors.textSelected};
   }
-
-  /**
-    todo: ask design for global focus styles
-    
-    :focus-visible {
-      outline: 1px solid magenta;
-    }
-  */
 `
 
 const StyledLabel = styled(Grid)`
@@ -55,8 +47,7 @@ const StyledLabel = styled(Grid)`
 
 export const StyledListItem = styled(Box)<{ stacked?: boolean }>``
 
-export const NavigationItem: React.FC<Props> = ({ label, icon, href, children, active, stacked, ...rest }) => {
-  const history = useHistory()
+export const NavigationItem: React.FC<Props> = ({ label, icon, href, children, active, stacked }) => {
   const match = useRouteMatch(href || '/ignore') || active
 
   return (
@@ -95,10 +86,6 @@ function Label({ label, icon, stacked }: Props) {
     </StyledLabel>
   )
 }
-
-const CollapsibleContent = styled(Box)<{ isShadow?: boolean }>`
-  box-shadow: ${({ isShadow, theme }) => (isShadow ? theme.shadows.cardOverlay : 'none')};
-`
 
 export function Collapsible({
   defaultOpen = false,
