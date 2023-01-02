@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import { uuidv4 } from '../utils/uuid'
 
 type Props = {
   label: React.ReactNode
@@ -111,7 +110,7 @@ export function Collapsible({
   const { space } = useTheme()
   const fullWidth = `calc(100vw - 2 * ${space[1]}px)`
   const offset = `calc(100% + 2 * ${space[1]}px)`
-  const id = uuidv4()
+  const id = useState(() => Math.random().toString(36).substring(2))[0]
 
   return (
     <Box position={['static', 'static', 'relative', 'relative', 'static']} width="100%">
