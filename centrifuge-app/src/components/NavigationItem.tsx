@@ -34,6 +34,12 @@ const NavigationClickable = styled(Shelf)<{ $active?: boolean; stacked?: boolean
   :hover {
     color: ${({ theme }) => theme.colors.textSelected};
   }
+
+  :focus-visible {
+    color: ${({ theme }) => theme.colors.textSelected};
+    outline: solid ${({ theme }) => theme.colors.textSelected};
+    outline-offset: -1px;
+  }
 `
 
 const StyledLabel = styled(Grid)`
