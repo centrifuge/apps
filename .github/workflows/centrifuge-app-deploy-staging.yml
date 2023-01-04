@@ -18,6 +18,7 @@ jobs:
       pool-creation-type: notePreimage
       default-node-url: ''
       subquery-url: ''
+      onboarding-api-url: https://us-central1-centrifuge-fargate-apps-dev.cloudfunctions.net
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

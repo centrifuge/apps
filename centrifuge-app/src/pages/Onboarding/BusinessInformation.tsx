@@ -21,7 +21,7 @@ const businessVerificationInput = object({
   entityName: string().required(),
   registrationNumber: string().required(),
   countryOfIncorporation: string().required(),
-  businessIncorporationDate: date().required(),
+  businessIncorporationDate: date().required().max(new Date()),
 })
 
 const BusinessInformationInlineFeedback = ({ isError, isSuccess }: { isError: boolean; isSuccess: boolean }) => {
@@ -76,7 +76,7 @@ export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: P
     isSuccess,
     isError,
   } = useMutation(async () => {
-    const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API}/businessVerification`, {
+    const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/businessVerification`, {
       method: 'POST',
       body: JSON.stringify({
         email: formik.values.email,
@@ -107,6 +107,7 @@ export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: P
     }
 
     setUltimateBeneficialOwners(json.ultimateBeneficialOwners)
+
     return json.ultimateBeneficialOwners
   })
 
