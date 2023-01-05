@@ -70,7 +70,6 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
       )
       await Promise.all(mergeValidations)
       await validationSchema.collection.doc(key).set(data, { mergeFields: mergeFields as unknown as string[] })
-      console.log('After update')
     } else {
       await validationSchema.schema.validate(data)
       await validationSchema.collection.doc(key).set(data)
