@@ -1,8 +1,9 @@
-export function formatDate(timestamp: number | string | Date) {
+export function formatDate(timestamp: number | string | Date, options?: Intl.DateTimeFormatOptions) {
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    ...(options && options),
   })
 }
 

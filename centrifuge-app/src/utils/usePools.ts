@@ -1,9 +1,17 @@
-import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
+import Centrifuge, { Pool, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
+
+export function usePoolLiquidityTransactions(pool: Pool, fromEpoch: number, toEpoch: number) {
+  const [result] = useCentrifugeQuery(['poolsLiquidityTransactions', pool.id], (cent) =>
+    cent.pools.getPoolLiquidityTransactions([pool, fromEpoch, toEpoch])
+  )
+
+  return result
+}
 
 export function usePools(suspense = true) {
   const [result] = useCentrifugeQuery(['pools'], (cent) => cent.pools.getPools(), {

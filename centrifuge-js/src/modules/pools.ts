@@ -9,6 +9,7 @@ import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
   InvestorTransactionType,
+  SubqueryEpoch,
   SubqueryInvestorTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheSnapshot,
@@ -1638,6 +1639,58 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getPoolLiquidityTransactions(args: [pool: Pool, fromEpoch: number, toEpoch: number]) {
+    const [pool, fromEpoch, toEpoch] = args
+    const $query = inst.getSubqueryObservable<{ epoches: { nodes: SubqueryEpoch[] } }>(
+      `query($poolId: String!, $fromEpoch: Int!, $toEpoch: Int!) {
+        epoches(
+          filter: { 
+            id: { startsWith: $poolId },
+            index: { greaterThanOrEqualTo: $fromEpoch },
+            and: { index: { lessThanOrEqualTo: $toEpoch }}
+          },
+          orderBy: INDEX_ASC
+        ) {
+          nodes {
+            id
+            index
+            openedAt
+            closedAt
+            executedAt
+            sumBorrowedAmount
+            sumRepaidAmount
+            sumInvestedAmount
+            sumRedeemedAmount
+          }
+        }
+      }`,
+      { poolId: pool.id, fromEpoch, toEpoch }
+    )
+
+    return $query.pipe(
+      map((data) => {
+        if (!data) {
+          return []
+        }
+        return data.epoches.nodes.map((node) => ({
+          ...node,
+          sumBorrowedAmount: node.sumBorrowedAmount
+            ? new CurrencyBalance(node.sumBorrowedAmount, pool.currency.decimals)
+            : undefined,
+          sumRepaidAmount: node.sumRepaidAmount
+            ? new CurrencyBalance(node.sumRepaidAmount, pool.currency.decimals)
+            : undefined,
+          sumInvestedAmount: node.sumInvestedAmount
+            ? new CurrencyBalance(node.sumInvestedAmount, pool.currency.decimals)
+            : undefined,
+          sumRedeemedAmount: node.sumRedeemedAmount
+            ? new CurrencyBalance(node.sumRedeemedAmount, pool.currency.decimals)
+            : undefined,
+        }))
+      })
+    )
+  }
+
   function getDailyTrancheStates(args: [trancheId: string]) {
     const [trancheId] = args
     const $query = inst.getSubqueryObservable<{ trancheSnapshots: { nodes: SubqueryTrancheSnapshot[] } }>(
@@ -2321,6 +2374,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
+    getPoolLiquidityTransactions,
   }
 }
 

@@ -9,7 +9,7 @@ import { EpochList } from './EpochList'
 import { PageSection } from './PageSection'
 import { Tooltips } from './Tooltips'
 
-type LiquiditySectionProps = {
+type LiquidityEpochSectionProps = {
   pool: Pool
 }
 
@@ -22,7 +22,7 @@ const ExtraInfo: React.FC = ({ children }) => {
   )
 }
 
-export const LiquiditySection: React.FC<LiquiditySectionProps> = ({ pool }) => {
+export const LiquidityEpochSection: React.FC<LiquidityEpochSectionProps> = ({ pool }) => {
   const { status } = pool.epoch
 
   return (

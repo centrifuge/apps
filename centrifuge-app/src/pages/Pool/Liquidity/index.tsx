@@ -1,15 +1,16 @@
 import { Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { LiquiditySection } from '../../../components/LiquiditySection'
+import { InvestmentsRedemptionsSection } from '../../../components/InvestmentsRedemptionsSection'
+import { LiquidityEpochSection } from '../../../components/LiquidityEpochSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { MaxReserveForm } from '../../../components/MaxReserveForm'
 import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
+import { RepaymentsOriginationsSection } from '../../../components/RepaymentsOriginationsSection'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
-import { formatDate } from '../../../utils/date'
 import { formatBalance } from '../../../utils/formatting'
 import { useLiquidityAdmin } from '../../../utils/usePermissions'
 import { usePool } from '../../../utils/usePools'
@@ -66,11 +67,9 @@ export const PoolDetailLiquidity: React.FC = () => {
         </Stack>
       </PageSection>
 
-      <PageSection title="Repayments & originations" titleAddition={formatDate(new Date().toString())}></PageSection>
-
-      <PageSection title="Investments & redemptions" titleAddition={formatDate(new Date().toString())}></PageSection>
-
-      <LiquiditySection pool={pool} />
+      <RepaymentsOriginationsSection pool={pool} />
+      <InvestmentsRedemptionsSection pool={pool} />
+      <LiquidityEpochSection pool={pool} />
     </>
   )
 }
