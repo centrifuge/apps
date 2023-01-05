@@ -81,7 +81,7 @@ export const businessVerificationController = async (
     }
 
     const business = {
-      lastUpdated: new Date(),
+      lastUpdated: new Date().toISOString(),
       address,
       email,
       businessName,

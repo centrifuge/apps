@@ -63,7 +63,7 @@ steps: {
 
 ### `POST: /businessVerificationConfirm`
 
-KYB and AML verification
+Confirm AML and KYB and update UBOs
 
 **Request headers**
 
@@ -74,14 +74,19 @@ cookies: "__session=..." // httpOnly cookie set on /businessVerification
 
 **Request body**
 
+`ultimateBeneficialOwners` is required and will accept an array with max length of 3. A UBO must hold at least 25% of the company shares.
+
 ```ts
 {
     ultimateBeneficialOwners: [
-        {name: string}
+        {
+            name: string,
+            dateOfBirth: Date (iso string)
+        }
     ]
 }
 ```
 
 **Response**
 
-201 created
+200 ok
