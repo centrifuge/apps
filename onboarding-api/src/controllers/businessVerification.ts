@@ -4,7 +4,6 @@ import { HttpsError } from 'firebase-functions/v1/https'
 import * as jwt from 'jsonwebtoken'
 import { bool, date, InferType, object, string } from 'yup'
 import { businessCollection, validateAndWriteToFirestore } from '../database'
-import { cors } from '../utils/cors'
 import { checkHttpMethod } from '../utils/httpMethods'
 import { shuftiProRequest } from '../utils/shuftiProRequest'
 import { validateInput } from '../utils/validateInput'
@@ -28,8 +27,8 @@ export const businessVerificationController = async (
 ) => {
   let shuftiErrors: string[] = []
   try {
-    cors(req, res)
     checkHttpMethod(req, 'POST')
+
     const { address } = await verifyJw3t(req)
     await validateInput(req, businessVerificationInput)
 
@@ -111,10 +110,11 @@ export const businessVerificationController = async (
       const expiresIn = 1000 * 60 * 15 // 15 minutes
       const token = jwt.sign({ address }, process.env.JWT_SECRET as string, { expiresIn })
       res.cookie('__session', token, {
-        secure: process.env.NODE_ENV !== 'development',
+        secure: true,
         httpOnly: true,
         maxAge: expiresIn,
         path: 'centrifuge-fargate-apps-dev/us-central1', // TODO: make dynamic
+        sameSite: 'none',
       })
     }
 

@@ -5,7 +5,6 @@ import { HttpsError } from 'firebase-functions/v1/https'
 import * as jwt from 'jsonwebtoken'
 import { array, InferType, object, string } from 'yup'
 import { businessCollection, BusinessOnboarding, validateAndWriteToFirestore } from '../database'
-import { cors } from '../utils/cors'
 import { checkHttpMethod } from '../utils/httpMethods'
 import { validateInput } from '../utils/validateInput'
 import { verifyJw3t } from '../utils/verifyJw3t'
@@ -23,7 +22,6 @@ export const businessVerificationConfirmController = async (
   res: Response
 ) => {
   try {
-    cors(req, res)
     checkHttpMethod(req, 'POST')
     await validateInput(req, businessVerificationConfirmInput)
     const { address } = await verifyJw3t(req)
