@@ -6,7 +6,9 @@ import { useAuth } from '../../components/AuthProvider'
 import { Spinner } from '../../components/Spinner'
 import { useWeb3 } from '../../components/Web3Provider'
 import { config } from '../../config'
-import { InvestorTypes } from '../../types'
+import { InvestorTypes, ultimateBeneficialOwner } from '../../types'
+import { BusinessInformation } from './BusinessInformation'
+import { BusinessOwnership } from './BusinessOwnership'
 import { InvestorType } from './InvestorType'
 import { LinkWallet } from './LinkWallet'
 
@@ -21,6 +23,7 @@ export const OnboardingPage: React.FC = () => {
   const [investorType, setInvestorType] = useState<InvestorTypes>()
   const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = useState(false)
   const { isAuth, refetchAuth } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
+  const [ultimateBeneficialOwners, setUltimateBeneficialOwners] = useState<ultimateBeneficialOwner[]>([])
 
   const nextStep = () => setActiveStep((current) => current + 1)
 
@@ -28,7 +31,7 @@ export const OnboardingPage: React.FC = () => {
     if (!isConnecting) {
       if (!selectedAccount || isAuth === false) {
         setActiveStep(1)
-      } else if (isAuth && activeStep !== 1) {
+      } else if (isAuth && activeStep === 0) {
         setActiveStep(2)
       }
     }
@@ -113,6 +116,12 @@ export const OnboardingPage: React.FC = () => {
                 setInvestorType={setInvestorType}
                 setIsAgreedToDataSharingAgreement={setIsAgreedToDataSharingAgreement}
               />
+            )}
+            {activeStep === 3 && (
+              <BusinessInformation nextStep={nextStep} setUltimateBeneficialOwners={setUltimateBeneficialOwners} />
+            )}
+            {activeStep === 4 && (
+              <BusinessOwnership nextStep={nextStep} ultimateBeneficialOwners={ultimateBeneficialOwners} />
             )}
           </Stack>
           <Box paddingTop={4} paddingRight={4} justifyContent="flex-end">

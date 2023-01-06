@@ -24,6 +24,7 @@ jobs:
       pool-creation-type: immediate
       default-node-url: ''
       subquery-url: https://api.subquery.network/sq/centrifuge/pools-demo
+      onboarding-api-url: https://us-central1-centrifuge-fargate-apps-dev.cloudfunctions.net
       faucet-url: https://us-central1-peak-vista-185616.cloudfunctions.net/faucetDemo
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

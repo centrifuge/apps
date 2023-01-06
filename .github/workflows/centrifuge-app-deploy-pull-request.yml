@@ -6,11 +6,11 @@ on:
       - 'fabric/**' # dependency
       - 'centrifuge-js/**' # dependency
       - '.github/workflows/centrifuge-app-build-and-deploy.yml' # dependency
-      - '.github/workflows/centrifuge-app-pull-request.yml'
+      - '.github/workflows/centrifuge-app-deploy-pull-request.yml'
 
 jobs:
   pull-request:
-    uses: centrifuge/apps/.github/workflows/centrifuge-app-build-and-deploy.yml@main
+    uses: ./.github/workflows/centrifuge-app-build-and-deploy.yml
     with:
       netlify-alias: pr-${{ github.event.pull_request.number }}
       ipfs-gateway: https://altair.mypinata.cloud/
@@ -20,10 +20,10 @@ jobs:
       whitelisted-accounts: ''
       network: centrifuge
       subquery-url: https://api.subquery.network/sq/embrio-tech/centrifuge-subql
+      onboarding-api-url: https://us-central1-centrifuge-fargate-apps-dev.cloudfunctions.net
       pool-creation-type: immediate
       default-node-url: ''
       faucet-url: https://us-central1-peak-vista-185616.cloudfunctions.net/faucetDev
-
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
