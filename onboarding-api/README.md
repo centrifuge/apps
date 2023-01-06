@@ -3,10 +3,14 @@
 ## Development
 
 1. Install dependencies `yarn install`
-2. Install firebase globally: `npm install -g firebase-tools`
-3. Login to firebase `firebase login`
+2. Make sure gcloud CLI is installed and you have sufficient permissions.
+3. Authenticate your user and then set the application default
+   ```sh
+   gcloud auth login
+   gcloud auth application-default login
+   ```
 4. Create an env file from the provided example. The ShuftiPro keys can be found in the dashboard settings.
-5. Start dev server with `yarn dev` [localhost:5001]
+5. Start dev server with `yarn develop` [localhost:8080]
 
 ## Endpoints
 

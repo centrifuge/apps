@@ -1,13 +1,14 @@
+import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import * as functions from 'firebase-functions'
-import { HttpsError } from 'firebase-functions/v1/https'
 import * as jwt from 'jsonwebtoken'
 import { bool, date, InferType, object, string } from 'yup'
 import { businessCollection, validateAndWriteToFirestore } from '../database'
-import { checkHttpMethod } from '../utils/httpMethods'
+import { HttpsError } from '../utils/httpsError'
 import { shuftiProRequest } from '../utils/shuftiProRequest'
 import { validateInput } from '../utils/validateInput'
 import { verifyJw3t } from '../utils/verifyJw3t'
+
+dotenv.config()
 
 const businessVerificationInput = object({
   dryRun: bool().default(false).optional(), // skips shuftipro requests and returns a failed event
@@ -27,8 +28,6 @@ export const businessVerificationController = async (
 ) => {
   let shuftiErrors: string[] = []
   try {
-    checkHttpMethod(req, 'POST')
-
     const { address } = await verifyJw3t(req)
     await validateInput(req, businessVerificationInput)
 
@@ -47,7 +46,7 @@ export const businessVerificationController = async (
 
     const userDoc = await businessCollection.doc(address).get()
     if (userDoc.exists && userDoc.data()?.steps?.kyb?.verified) {
-      throw new HttpsError('invalid-argument', 'Business already verified')
+      throw new HttpsError(400, 'Business already verified')
     }
 
     // TODO: send email verfication link
@@ -63,7 +62,7 @@ export const businessVerificationController = async (
     const businessAmlVerified = businessAML.event === 'verification.accepted'
     if (!businessAmlVerified) {
       shuftiErrors = [...shuftiErrors, 'Business AML failed']
-      functions.logger.warn('Business AML failed')
+      console.warn('Business AML failed')
     }
 
     const kybPayload = {
@@ -77,7 +76,7 @@ export const businessVerificationController = async (
     const kybVerified = kyb.event === 'verification.accepted'
     if (!kybVerified) {
       shuftiErrors = [...shuftiErrors, 'KYB failed']
-      functions.logger.warn('KYB failed')
+      console.warn('KYB failed')
     }
 
     const business = {
@@ -104,7 +103,6 @@ export const businessVerificationController = async (
     }
 
     await validateAndWriteToFirestore(address, business, 'BUSINESS')
-
     // only set cookie if businessAML and KYB were successful
     if (shuftiErrors.length === 0) {
       const expiresIn = 1000 * 60 * 15 // 15 minutes
@@ -113,7 +111,7 @@ export const businessVerificationController = async (
         secure: true,
         httpOnly: true,
         maxAge: expiresIn,
-        path: 'centrifuge-fargate-apps-dev/us-central1', // TODO: make dynamic
+        path: '/',
         sameSite: 'none',
       })
     }
@@ -124,9 +122,10 @@ export const businessVerificationController = async (
     })
   } catch (error) {
     if (error instanceof HttpsError) {
-      functions.logger.log(error.message)
-      return res.status(error.httpErrorCode.status).send(error.message)
+      console.log(error.message)
+      return res.status(error.code).send(error.message)
     } else {
+      console.log(error)
       return res.status(500).send('An unexpected error occured')
     }
   }
