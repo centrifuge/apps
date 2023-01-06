@@ -64,9 +64,8 @@ export const businessVerificationConfirmController = async (
     if (error instanceof HttpsError) {
       console.log(error.message)
       return res.status(error.code).send(error.message)
-    } else {
-      console.log(error)
-      return res.status(500).send('An unexpected error occured')
     }
+    console.log(error)
+    return res.status(500).send('An unexpected error occured')
   }
 }
