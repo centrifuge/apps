@@ -27,11 +27,12 @@ export const businessSchema = object({
       users: array().default([]),
     }),
   }).required(),
-  ultimateBeneficialOwners: array().of(
+  ultimateBeneficialOwners: array(
     object({
-      name: string(),
-    })
-  ),
+      name: string().required(),
+      dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
+    }).required()
+  ).max(3),
 })
 
 export const businessCollection = firestore().collection('businesses')
