@@ -59,7 +59,7 @@ export const businessVerificationConfirmController = async (
 
     res.clearCookie('__session')
     const freshData = (await businessCollection.doc(address).get()).data()
-    res.status(200).send({ data: freshData })
+    return res.status(200).send({ data: freshData })
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

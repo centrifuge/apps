@@ -116,7 +116,7 @@ export const businessVerificationController = async (
       })
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       errors: shuftiErrors,
       ...business,
     })
