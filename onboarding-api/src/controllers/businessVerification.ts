@@ -11,13 +11,13 @@ import { verifyJw3t } from '../utils/verifyJw3t'
 dotenv.config()
 
 const businessVerificationInput = object({
-  dryRun: bool().default(false).optional(), // skips shuftipro requests and returns a failed event
+  dryRun: bool().default(false).optional(), // skips shuftipro requests
   email: string().email().required(),
   address: string().required(),
   poolId: string().required(),
   trancheId: string().required(),
   businessName: string().required(), // used for AML
-  businessIncorporationDate: date(), // used for AML
+  businessIncorporationDate: date().required(), // used for AML
   companyRegistrationNumber: string().required(),
   companyJurisdictionCode: string().required(), // country of incorporation
 })
@@ -80,7 +80,7 @@ export const businessVerificationController = async (
     }
 
     const business = {
-      lastUpdated: new Date(),
+      lastUpdated: new Date().toISOString(),
       address,
       email,
       businessName,
@@ -116,7 +116,7 @@ export const businessVerificationController = async (
       })
     }
 
-    return res.json({
+    res.status(200).json({
       errors: shuftiErrors,
       ...business,
     })

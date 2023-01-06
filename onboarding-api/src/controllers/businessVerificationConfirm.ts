@@ -2,7 +2,7 @@ import * as cookie from 'cookie'
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
-import { array, InferType, object, string } from 'yup'
+import { array, date, InferType, object, string } from 'yup'
 import { businessCollection, BusinessOnboarding, validateAndWriteToFirestore } from '../database'
 import { HttpsError } from '../utils/httpsError'
 import { validateInput } from '../utils/validateInput'
@@ -14,8 +14,11 @@ const businessVerificationConfirmInput = object({
   ultimateBeneficialOwners: array(
     object({
       name: string().required(),
-    })
-  ).required(),
+      dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
+    }).required()
+  )
+    .min(1)
+    .max(3),
 })
 
 export const businessVerificationConfirmController = async (
@@ -56,7 +59,7 @@ export const businessVerificationConfirmController = async (
 
     res.clearCookie('__session')
     const freshData = (await businessCollection.doc(address).get()).data()
-    return res.status(201).send({ data: freshData })
+    res.status(200).send({ data: freshData })
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)
