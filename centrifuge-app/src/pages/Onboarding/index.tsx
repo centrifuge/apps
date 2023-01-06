@@ -76,7 +76,7 @@ export const OnboardingPage: React.FC = () => {
           gridTemplateColumns="350px 1px 1fr min-content"
         >
           <Box paddingTop={10} paddingLeft={7} paddingRight={7} paddingBottom={6}>
-            <Stepper activeStep={activeStep}>
+            <Stepper activeStep={activeStep} setActiveStep={setActiveStep}>
               <Step label="Link wallet" />
               <Step label="Selector investor type" />
               {investorType === 'individual' && (

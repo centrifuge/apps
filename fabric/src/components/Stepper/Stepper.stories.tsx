@@ -28,7 +28,7 @@ export const Default = () => {
   return (
     <Box>
       <Box height="300px">
-        <Stepper activeStep={activeStep}>
+        <Stepper activeStep={activeStep} setActiveStep={setActiveStep}>
           <Step label="Step 1" />
           <Step label="Step 2" />
           <Step label="Step 3" />

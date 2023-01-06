@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Box } from '../Box'
 import { Flex } from '../Flex'
 import { Shelf } from '../Shelf'
@@ -8,6 +8,8 @@ type EnrichedStepProps = {
   isFinal?: boolean
   isActive?: boolean
   count?: number
+  setActiveStep?: (step: number) => void
+  maxStep?: number
 }
 
 type StepProps = {
@@ -17,6 +19,7 @@ type StepProps = {
 
 type StepperProps = {
   activeStep: number
+  setActiveStep: (step: number) => void
   children: React.ReactNode
 }
 
@@ -32,11 +35,18 @@ const getStepColor = (isActive: boolean, empty: boolean) => {
 }
 
 export const Step = (props: StepProps & EnrichedStepProps) => {
-  const { isActive, count, isFinal, activeStep, label, empty } = props
-
+  const { isActive, count, isFinal, activeStep, label, empty, setActiveStep, maxStep } = props
   return (
     <>
-      <Shelf gap={2}>
+      <Shelf
+        style={{ cursor: 'pointer' }}
+        gap={2}
+        onClick={() => {
+          if ((count as number) + 1 < (activeStep as number) || (count as number) + 1 <= (maxStep as number)) {
+            setActiveStep && setActiveStep((count as number) + 1)
+          }
+        }}
+      >
         <Flex
           backgroundColor={getStepColor(!!isActive, !!empty)}
           border="2px solid"
@@ -82,6 +92,14 @@ export const Stepper = (props: StepperProps) => {
   const steps = flattenReactChildren(props.children)
   const stepsCount = steps.length
 
+  const maxStep = useRef(1)
+
+  useEffect(() => {
+    if (props.activeStep > maxStep.current) {
+      maxStep.current = props.activeStep
+    }
+  }, [props.activeStep])
+
   const stepItems = steps.map((step, index) => {
     if (React.isValidElement(step)) {
       return React.cloneElement(step as React.ReactElement<EnrichedStepProps & StepProps>, {
@@ -89,6 +107,8 @@ export const Stepper = (props: StepperProps) => {
         isFinal: index === stepsCount - 1,
         isActive: index === props.activeStep - 1,
         count: index,
+        setActiveStep: props.setActiveStep,
+        maxStep: maxStep.current,
       })
     }
     return step
