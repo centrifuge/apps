@@ -34,7 +34,7 @@ const businessOwnershipInput = object({
   ),
 })
 
-const BusinessOwnershipInlineFeedback = ({ isError, isSuccess }: { isError: boolean; isSuccess: boolean }) => {
+const BusinessOwnershipInlineFeedback = ({ isError }: { isError: boolean }) => {
   if (isError) {
     return (
       <StyledInlineFeedback>
@@ -43,16 +43,6 @@ const BusinessOwnershipInlineFeedback = ({ isError, isSuccess }: { isError: bool
             Unable to confirm business ownership or business ownership has already been confirmed. Please try again or
             contact support@centrifuge.io.
           </Text>
-        </InlineFeedback>
-      </StyledInlineFeedback>
-    )
-  }
-
-  if (isSuccess) {
-    return (
-      <StyledInlineFeedback>
-        <InlineFeedback status="ok">
-          <Text fontSize="14px">Business ownership confirmed.</Text>
         </InlineFeedback>
       </StyledInlineFeedback>
     )
@@ -83,23 +73,29 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
   const {
     mutate: upsertBusinessOwnership,
     isLoading,
-    isSuccess,
     isError,
-  } = useMutation(async () => {
-    const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/businessVerificationConfirm`, {
-      method: 'POST',
-      body: JSON.stringify({ ultimateBeneficialOwners: formik.values.ultimateBeneficialOwners }),
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    })
+  } = useMutation(
+    async () => {
+      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/businessVerificationConfirm`, {
+        method: 'POST',
+        body: JSON.stringify({ ultimateBeneficialOwners: formik.values.ultimateBeneficialOwners }),
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      })
 
-    if (response.status !== 201) {
-      throw new Error()
+      if (response.status !== 200) {
+        throw new Error()
+      }
+    },
+    {
+      onSuccess: () => {
+        nextStep()
+      },
     }
-  })
+  )
 
   useEffect(() => {
     formik.validateForm()
@@ -152,7 +148,7 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
   return (
     <Stack gap={4}>
       <Box>
-        <BusinessOwnershipInlineFeedback isError={isError} isSuccess={isSuccess} />
+        <BusinessOwnershipInlineFeedback isError={isError} />
         <Text fontSize={5}>Confirm business ownership</Text>
         <Text fontSize={2}>
           Add the names of any individuals who own or control more than than 25% of the company. If no person does,
@@ -166,14 +162,14 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
                 value={owner.name}
                 label="Name*"
                 onChange={formik.handleChange}
-                disabled={isLoading || isSuccess}
+                disabled={isLoading}
               />
               <DateInput
                 id={`ultimateBeneficialOwners[${index}].dateOfBirth`}
                 value={owner.dateOfBirth}
                 label="Date of Birth*"
                 onChange={formik.handleChange}
-                disabled={isLoading || isSuccess}
+                disabled={isLoading}
               />
               <Button variant="secondary" onClick={() => removeOwner(index)}>
                 <Flex>
@@ -192,7 +188,7 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
         </Stack>
         <Box>
           <Checkbox
-            disabled={isLoading || isSuccess}
+            disabled={isLoading}
             style={{
               cursor: 'pointer',
             }}
@@ -204,20 +200,14 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
       </Box>
 
       <Box>
-        {isSuccess ? (
-          <Button variant="primary" onClick={nextStep}>
-            Next
-          </Button>
-        ) : (
-          <Button
-            onClick={formik.submitForm}
-            loading={isLoading}
-            disabled={isLoading || !isAccurate || !formik.isValid}
-            loadingMessage="Confirming"
-          >
-            Confirm
-          </Button>
-        )}
+        <Button
+          onClick={formik.submitForm}
+          loading={isLoading}
+          disabled={isLoading || !isAccurate || !formik.isValid}
+          loadingMessage="Confirming"
+        >
+          Confirm
+        </Button>
       </Box>
     </Stack>
   )

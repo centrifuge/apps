@@ -24,7 +24,7 @@ const businessVerificationInput = object({
   businessIncorporationDate: date().required().max(new Date()),
 })
 
-const BusinessInformationInlineFeedback = ({ isError, isSuccess }: { isError: boolean; isSuccess: boolean }) => {
+const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) => {
   if (isError) {
     return (
       <StyledInlineFeedback>
@@ -33,16 +33,6 @@ const BusinessInformationInlineFeedback = ({ isError, isSuccess }: { isError: bo
             Unable to verify business information or business has already been verified. Please try again or contact
             support@centrifuge.io.
           </Text>
-        </InlineFeedback>
-      </StyledInlineFeedback>
-    )
-  }
-
-  if (isSuccess) {
-    return (
-      <StyledInlineFeedback>
-        <InlineFeedback status="ok">
-          <Text fontSize="14px">Business information verified.</Text>
         </InlineFeedback>
       </StyledInlineFeedback>
     )
@@ -73,48 +63,50 @@ export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: P
   const {
     mutate: verifyBusinessInformation,
     isLoading,
-    isSuccess,
     isError,
-  } = useMutation(async () => {
-    const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/businessVerification`, {
-      method: 'POST',
-      body: JSON.stringify({
-        email: formik.values.email,
-        businessName: formik.values.entityName,
-        companyRegistrationNumber: formik.values.registrationNumber,
-        companyJurisdictionCode: formik.values.countryOfIncorporation,
-        businessIncorporationDate: formik.values.businessIncorporationDate,
-        trancheId,
-        poolId,
-        address: selectedAccount?.address,
-        dryRun: true,
-      }),
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    })
+  } = useMutation(
+    async () => {
+      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/businessVerification`, {
+        method: 'POST',
+        body: JSON.stringify({
+          email: formik.values.email,
+          businessName: formik.values.entityName,
+          companyRegistrationNumber: formik.values.registrationNumber,
+          companyJurisdictionCode: formik.values.countryOfIncorporation,
+          businessIncorporationDate: formik.values.businessIncorporationDate,
+          trancheId,
+          poolId,
+          address: selectedAccount?.address,
+          dryRun: true,
+        }),
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      })
 
-    if (response.status !== 200) {
-      throw new Error()
-    }
+      if (response.status !== 200) {
+        throw new Error()
+      }
 
-    const json = await response.json()
+      const json = await response.json()
 
-    if (json.errors.length) {
-      throw new Error()
-    }
+      if (json.errors.length) {
+        throw new Error()
+      }
 
-    setUltimateBeneficialOwners(json.ultimateBeneficialOwners)
+      setUltimateBeneficialOwners(json.ultimateBeneficialOwners)
 
-    return json.ultimateBeneficialOwners
-  })
+      return json.ultimateBeneficialOwners
+    },
+    { onSuccess: () => nextStep() }
+  )
 
   return (
     <Stack gap={4}>
       <Box>
-        <BusinessInformationInlineFeedback isError={isError} isSuccess={isSuccess} />
+        <BusinessInformationInlineFeedback isError={isError} />
         <Text fontSize={5}>Provide information about your business</Text>
         <Text fontSize={2}>
           Please verify email address, legal entity name, business incorporation date and country of incorporation and
@@ -125,7 +117,7 @@ export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: P
             id="email"
             label="Email address*"
             placeholder="Enter email address"
-            disabled={isLoading || isSuccess}
+            disabled={isLoading}
             onChange={formik.handleChange}
             value={formik.values.email}
           />
@@ -133,7 +125,7 @@ export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: P
             id="entityName"
             label="Legal entity name*"
             placeholder="Enter entity name"
-            disabled={isLoading || isSuccess}
+            disabled={isLoading}
             onChange={formik.handleChange}
             value={formik.values.entityName}
           />
@@ -146,7 +138,7 @@ export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: P
                 value: 'ch',
               },
             ]}
-            disabled={isLoading || isSuccess}
+            disabled={isLoading}
             onSelect={(countryCode) => formik.setFieldValue('countryOfIncorporation', countryCode)}
             value={formik.values.countryOfIncorporation}
           />
@@ -154,34 +146,28 @@ export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: P
             id="registrationNumber"
             label="Registration number*"
             placeholder="0000"
-            disabled={isLoading || isSuccess}
+            disabled={isLoading}
             onChange={formik.handleChange}
             value={formik.values.registrationNumber}
           />
           <DateInput
             id="businessIncorporationDate"
             label="Business Incorporation Date"
-            disabled={isLoading || isSuccess}
+            disabled={isLoading}
             onChange={formik.handleChange}
             value={formik.values.businessIncorporationDate}
           />
         </Stack>
       </Box>
       <Box>
-        {isSuccess ? (
-          <Button variant="primary" onClick={nextStep}>
-            Next
-          </Button>
-        ) : (
-          <Button
-            onClick={formik.submitForm}
-            loading={isLoading}
-            disabled={isLoading || !formik.isValid}
-            loadingMessage="Verifying"
-          >
-            Verify
-          </Button>
-        )}
+        <Button
+          onClick={formik.submitForm}
+          loading={isLoading}
+          disabled={isLoading || !formik.isValid}
+          loadingMessage="Verifying"
+        >
+          Verify
+        </Button>
       </Box>
     </Stack>
   )

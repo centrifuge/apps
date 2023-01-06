@@ -1,6 +1,7 @@
-import { Box, Button, IconCheck, Shelf, Stack, Text } from '@centrifuge/fabric'
-import { useMemo } from 'react'
+import { Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../../components/AuthProvider'
+import { DataSharingAgreementDialog } from '../../components/DataSharingAgreementDialog'
 import { useWeb3 } from '../../components/Web3Provider'
 
 type Props = {
@@ -11,87 +12,64 @@ type Props = {
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export const LinkWallet = ({ nextStep }: Props) => {
-  const { selectedAccount, connect } = useWeb3()
+  const [isDataSharingAgreementDialogOpen, setIsDataSharingAgreementDialogOpen] = useState(false)
+  const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = useState(false)
+
+  const { selectedAccount } = useWeb3()
   const { login, isAuth } = useAuth()
 
-  const linkButtonText = useMemo(() => {
+  useEffect(() => {
     if (isAuth) {
-      return (
-        <Shelf gap={1}>
-          <Text variant="heading2" color="textButtonSecondaryDisabled">
-            Linked
-          </Text>
-          <IconCheck />
-        </Shelf>
-      )
+      nextStep()
     }
-
-    return <Text variant="heading2">Link wallet</Text>
-  }, [isAuth])
-
-  const connectButtonText = useMemo(() => {
-    if (selectedAccount) {
-      return (
-        <Shelf gap={1}>
-          <Text variant="heading2" color="textButtonSecondaryDisabled">
-            Connected
-          </Text>
-          <IconCheck />
-        </Shelf>
-      )
-    }
-
-    return <Text variant="heading2">Connect wallet</Text>
-  }, [selectedAccount])
+  }, [isAuth, nextStep, isAgreedToDataSharingAgreement])
 
   return (
     <Stack gap={4}>
-      <Stack alignItems="flex-start" gap={10}>
+      <Stack alignItems="flex-start" gap={4}>
         <Text fontSize={5}>Connect and link your wallet</Text>
-        <Shelf gap={4}>
-          <button
-            onClick={() => connect()}
-            disabled={!!selectedAccount}
+        <Text>
+          To start, you need to connect your wallet and sign a message to verify the wallet. You also need to agree to
+          the data sharing agreement to continue with the identity verification process.
+        </Text>
+        <Shelf gap={1}>
+          <Checkbox
             style={{
-              background: 'none',
-              border: '1px solid #e0e0e0',
-              borderRadius: '11px',
-              width: '200px',
-              height: '200px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              cursor: !!selectedAccount ? 'not-allowed' : 'pointer',
-              backgroundColor: !!selectedAccount ? '#e0e0e0' : 'white',
+              cursor: 'pointer',
             }}
-          >
-            {connectButtonText}
-          </button>
-          <button
-            onClick={() => login(AUTHORIZED_ONBOARDING_PROXY_TYPES)}
-            disabled={!!isAuth}
-            style={{
-              background: 'none',
-              border: '1px solid #e0e0e0',
-              borderRadius: '11px',
-              width: '200px',
-              height: '200px',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              cursor: !!isAuth ? 'not-allowed' : 'pointer',
-              backgroundColor: !!isAuth ? '#e0e0e0' : 'white',
-            }}
-          >
-            {linkButtonText}
-          </button>
+            checked={isAgreedToDataSharingAgreement}
+            onChange={() => setIsAgreedToDataSharingAgreement((current) => !current)}
+            label={
+              <Shelf gap="4px">
+                <Text style={{ cursor: 'pointer' }}>I agree to the</Text>
+                <button
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontFamily: 'Inter,sans-serif',
+                  }}
+                  onClick={() => setIsDataSharingAgreementDialogOpen(true)}
+                >
+                  <Text variant="body1" color="textInteractive">
+                    Data sharing agreement.
+                  </Text>
+                </button>
+              </Shelf>
+            }
+          />
+          <DataSharingAgreementDialog
+            isDataSharingAgreementDialogOpen={isDataSharingAgreementDialogOpen}
+            setIsDataSharingAgreementDialogOpen={setIsDataSharingAgreementDialogOpen}
+          />
         </Shelf>
-      </Stack>
-      <Box>
-        <Button variant="primary" onClick={() => nextStep()} disabled={!isAuth || !selectedAccount}>
-          Next
+        <Button
+          disabled={!selectedAccount || !isAgreedToDataSharingAgreement}
+          onClick={() => login(AUTHORIZED_ONBOARDING_PROXY_TYPES)}
+        >
+          Link your wallet
         </Button>
-      </Box>
+      </Stack>
     </Stack>
   )
 }
