@@ -21,7 +21,6 @@ export const OnboardingPage: React.FC = () => {
 
   const { isConnecting, selectedAccount } = useWeb3()
   const [investorType, setInvestorType] = useState<InvestorTypes>()
-  const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = useState(false)
   const { isAuth, refetchAuth } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const [ultimateBeneficialOwners, setUltimateBeneficialOwners] = useState<ultimateBeneficialOwner[]>([])
 
@@ -77,7 +76,7 @@ export const OnboardingPage: React.FC = () => {
           gridTemplateColumns="350px 1px 1fr min-content"
         >
           <Box paddingTop={10} paddingLeft={7} paddingRight={7} paddingBottom={6}>
-            <Stepper activeStep={activeStep}>
+            <Stepper activeStep={activeStep} setActiveStep={setActiveStep}>
               <Step label="Link wallet" />
               <Step label="Selector investor type" />
               {investorType === 'individual' && (
@@ -109,13 +108,7 @@ export const OnboardingPage: React.FC = () => {
           >
             {activeStep === 1 && <LinkWallet nextStep={nextStep} refetchAuth={refetchAuth} />}
             {activeStep === 2 && (
-              <InvestorType
-                investorType={investorType}
-                isAgreedToDataSharingAgreement={isAgreedToDataSharingAgreement}
-                nextStep={nextStep}
-                setInvestorType={setInvestorType}
-                setIsAgreedToDataSharingAgreement={setIsAgreedToDataSharingAgreement}
-              />
+              <InvestorType investorType={investorType} nextStep={nextStep} setInvestorType={setInvestorType} />
             )}
             {activeStep === 3 && (
               <BusinessInformation nextStep={nextStep} setUltimateBeneficialOwners={setUltimateBeneficialOwners} />
