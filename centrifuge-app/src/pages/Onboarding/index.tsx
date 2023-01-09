@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper } from '@centrifuge/fabric'
+import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper, SubStep } from '@centrifuge/fabric'
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AccountsMenu } from '../../components/AccountsMenu'
@@ -10,6 +10,7 @@ import { InvestorTypes, ultimateBeneficialOwner } from '../../types'
 import { BusinessInformation } from './BusinessInformation'
 import { BusinessOwnership } from './BusinessOwnership'
 import { InvestorType } from './InvestorType'
+import { KnowYouCustomer } from './KnowYouCustomer'
 import { LinkWallet } from './LinkWallet'
 
 const Logo = config.logo
@@ -18,6 +19,7 @@ const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonP
 
 export const OnboardingPage: React.FC = () => {
   const [activeStep, setActiveStep] = useState<number>(0)
+  const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = useState<number>(0)
 
   const { isConnecting, selectedAccount } = useWeb3()
   const [investorType, setInvestorType] = useState<InvestorTypes>()
@@ -25,6 +27,8 @@ export const OnboardingPage: React.FC = () => {
   const [ultimateBeneficialOwners, setUltimateBeneficialOwners] = useState<ultimateBeneficialOwner[]>([])
 
   const nextStep = () => setActiveStep((current) => current + 1)
+
+  const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
 
   useEffect(() => {
     if (!isConnecting) {
@@ -89,7 +93,11 @@ export const OnboardingPage: React.FC = () => {
                 <>
                   <Step label="Business information" />
                   <Step label="Business ownership" />
-                  <Step label="Authorized signer verification" />
+                  <Step label="Authorized signer verification" activeSubStep={activeKnowYourCustomerStep}>
+                    <SubStep label="Country of issuance" />
+                    <SubStep label="Photo ID" />
+                    <SubStep label="Liveliness check" />
+                  </Step>
                   <Step label="Tax information" />
                   <Step label="Sign subscription agreement" />
                 </>
@@ -115,6 +123,13 @@ export const OnboardingPage: React.FC = () => {
             )}
             {activeStep === 4 && (
               <BusinessOwnership nextStep={nextStep} ultimateBeneficialOwners={ultimateBeneficialOwners} />
+            )}
+            {activeStep === 5 && (
+              <KnowYouCustomer
+                nextStep={nextStep}
+                nextKnowYourCustomerStep={nextKnowYourCustomerStep}
+                activeKnowYourCustomerStep={activeKnowYourCustomerStep}
+              />
             )}
           </Stack>
           <Box paddingTop={4} paddingRight={4} justifyContent="flex-end">
