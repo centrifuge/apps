@@ -4,6 +4,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Rectangle,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -12,6 +13,7 @@ import {
   YAxis,
 } from 'recharts'
 import { useTheme } from 'styled-components'
+import { PropsOf } from '../../../helpers'
 import { formatDate } from '../../utils/date'
 import { formatBalance, formatBalanceAbbreviated } from '../../utils/formatting'
 import { TooltipContainer, TooltipEntry, TooltipTitle } from './CustomChartElements'
@@ -72,10 +74,12 @@ export function StackedBarChart({ data, names, colors, xAxisLabel, currency }: S
   )
 }
 
-function TooltipCursor({ x, width, ...rest }) {
+type CursorProps = Required<Pick<PropsOf<typeof Rectangle>, 'width' | 'x'>>
+
+const TooltipCursor = (({ x, width, ...rest }: CursorProps) => {
   const theme = useTheme()
   return <Rectangle {...rest} x={x + width * 0.5 - 0.5} width={1} fill={theme.colors.textDisabled} />
-}
+}) as React.FC
 
 function TooltipContent({ payload, currency }: TooltipProps<any, any> & { currency: string }) {
   const theme = useTheme()
