@@ -13,9 +13,9 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useMutation } from 'react-query'
-import { array, date, object, string } from 'yup'
+import { array, boolean, date, object, string } from 'yup'
 import { useAuth } from '../../components/AuthProvider'
 import { ultimateBeneficialOwner } from '../../types'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
@@ -32,6 +32,7 @@ const businessOwnershipInput = object({
       dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
     })
   ),
+  isAccurate: boolean().oneOf([true]),
 })
 
 const BusinessOwnershipInlineFeedback = ({ isError }: { isError: boolean }) => {
@@ -53,7 +54,6 @@ const BusinessOwnershipInlineFeedback = ({ isError }: { isError: boolean }) => {
 
 export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props) => {
   const { authToken } = useAuth()
-  const [isAccurate, setIsAccurate] = useState(false)
 
   const formik = useFormik({
     initialValues: {
@@ -63,6 +63,7 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
             dateOfBirth: '',
           }))
         : [{ name: '', dateOfBirth: '' }],
+      isAccurate: false,
     },
     onSubmit: () => {
       upsertBusinessOwnership()
@@ -188,12 +189,13 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
         </Stack>
         <Box>
           <Checkbox
+            id="isAccurate"
             disabled={isLoading}
             style={{
               cursor: 'pointer',
             }}
-            checked={isAccurate}
-            onChange={() => setIsAccurate((current) => !current)}
+            checked={formik.values.isAccurate}
+            onChange={formik.handleChange}
             label="I confim that all the information provided is true and accurate, and I have identified all the benefical owners with more than 25% ownership."
           />
         </Box>
@@ -203,7 +205,7 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
         <Button
           onClick={formik.submitForm}
           loading={isLoading}
-          disabled={isLoading || !isAccurate || !formik.isValid}
+          disabled={isLoading || !formik.isValid}
           loadingMessage="Confirming"
         >
           Confirm
