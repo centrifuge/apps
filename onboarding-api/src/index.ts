@@ -7,6 +7,7 @@ const centrifugeDomains = [
   /^(https:\/\/.*cntrfg\.com)/,
   /^(https:\/\/.*centrifuge\.io)/,
   /^(https:\/\/.*altair\.network)/,
+  /^(https:\/\/pr-\d*--dev-app-cntrfg.netlify\.app)/,
 ]
 
 const onboarding = express()
