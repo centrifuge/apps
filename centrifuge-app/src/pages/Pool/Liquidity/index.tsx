@@ -1,14 +1,16 @@
 import { Stack } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
-import { InvestmentsRedemptionsSection } from '../../../components/InvestmentsRedemptionsSection'
+import { useTheme } from 'styled-components'
+// import { InvestmentsRedemptionsSection } from '../../../components/InvestmentsRedemptionsSection'
 import { LiquidityEpochSection } from '../../../components/LiquidityEpochSection'
+import { LiquidityTransactionsSection } from '../../../components/LiquidityTransactionsSection'
 import { LoadBoundary } from '../../../components/LoadBoundary'
 import { MaxReserveForm } from '../../../components/MaxReserveForm'
 import { PageSection } from '../../../components/PageSection'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
-import { RepaymentsOriginationsSection } from '../../../components/RepaymentsOriginationsSection'
+// import { RepaymentsOriginationsSection } from '../../../components/RepaymentsOriginationsSection'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
 import { formatBalance } from '../../../utils/formatting'
@@ -42,6 +44,7 @@ export const PoolDetailLiquidityTab: React.FC = () => {
 export const PoolDetailLiquidity: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
+  const { colors } = useTheme()
 
   if (!pool) return null
 
@@ -67,8 +70,24 @@ export const PoolDetailLiquidity: React.FC = () => {
         </Stack>
       </PageSection>
 
-      <RepaymentsOriginationsSection pool={pool} />
-      <InvestmentsRedemptionsSection pool={pool} />
+      {/* <RepaymentsOriginationsSection pool={pool} />
+      <InvestmentsRedemptionsSection pool={pool} /> */}
+
+      <LiquidityTransactionsSection
+        pool={pool}
+        title="Repayments & originations"
+        dataKeys={['sumBorrowedAmount', 'sumRepaidAmount']}
+        dataNames={['Repayment', 'Origination']}
+        dataColors={[colors.blueScale[200], colors.blueScale[400]]}
+      />
+      <LiquidityTransactionsSection
+        pool={pool}
+        title="Investments & redemptions"
+        dataKeys={['sumInvestedAmount', 'sumRedeemedAmount']}
+        dataNames={['Investment', 'Redemption']}
+        dataColors={[colors.statusOk, colors.statusCritical]}
+      />
+
       <LiquidityEpochSection pool={pool} />
     </>
   )

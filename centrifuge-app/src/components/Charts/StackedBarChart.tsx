@@ -4,7 +4,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Rectangle,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -78,7 +77,7 @@ function TooltipCursor({ x, width, ...rest }) {
   return <Rectangle {...rest} x={x + width * 0.5 - 0.5} width={1} fill={theme.colors.textDisabled} />
 }
 
-function TooltipContent({ payload, currency }: TooltipProps<any, any>) {
+function TooltipContent({ payload, currency }: TooltipProps<any, any> & { currency: string }) {
   const theme = useTheme()
   if (payload && payload?.length > 0) {
     return (
