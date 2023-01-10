@@ -2,50 +2,48 @@ import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { bool, date, InferType, object, string } from 'yup'
-import { businessCollection, validateAndWriteToFirestore } from '../database'
-import { HttpsError } from '../utils/httpsError'
-import { shuftiProRequest } from '../utils/shuftiProRequest'
-import { validateInput } from '../utils/validateInput'
-import { verifyJw3t } from '../utils/verifyJw3t'
+import { Business, businessCollection, User, userCollection, validateAndWriteToFirestore } from '../../database'
+import { HttpsError } from '../../utils/httpsError'
+import { shuftiProRequest } from '../../utils/shuftiProRequest'
+import { validateInput } from '../../utils/validateInput'
+import { verifyJw3t } from '../../utils/verifyJw3t'
 
 dotenv.config()
 
-const businessVerificationInput = object({
+const verifyBusinessInput = object({
   dryRun: bool().default(false).optional(), // skips shuftipro requests
   email: string().email().required(),
   address: string().required(),
   poolId: string().required(),
   trancheId: string().required(),
   businessName: string().required(), // used for AML
-  businessIncorporationDate: date().required(), // used for AML
-  companyRegistrationNumber: string().required(),
-  companyJurisdictionCode: string().required(), // country of incorporation
+  incorporationDate: date().required(), // used for AML
+  registrationNumber: string().required(),
+  jurisdictionCode: string().required(), // country of incorporation
 })
 
-export const businessVerificationController = async (
-  req: Request<any, any, InferType<typeof businessVerificationInput>>,
+/**
+ * Step 2
+ */
+export const verifyBusinessController = async (
+  req: Request<any, any, InferType<typeof verifyBusinessInput>>,
   res: Response
 ) => {
   let shuftiErrors: string[] = []
   try {
     const { address } = await verifyJw3t(req)
-    await validateInput(req, businessVerificationInput)
+    await validateInput(req, verifyBusinessInput)
 
     const {
-      body: {
-        businessIncorporationDate,
-        companyJurisdictionCode,
-        companyRegistrationNumber,
-        businessName,
-        trancheId,
-        poolId,
-        email,
-        dryRun,
-      },
+      body: { incorporationDate, jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
     } = { ...req }
 
-    const userDoc = await businessCollection.doc(address).get()
-    if (userDoc.exists && userDoc.data()?.steps?.kyb?.verified) {
+    const userDoc = await userCollection.doc(address).get()
+    // get users that have a pool entry with corresponding invType, pooldId nd tId
+    // if no entry exists then send error that user need to choose investment type
+    // or create user on the spot
+    const businessDoc = await businessCollection.doc(address).get()
+    if (businessDoc.exists && businessDoc.data()?.kybCompleted) {
       throw new HttpsError(400, 'Business already verified')
     }
 
@@ -55,7 +53,7 @@ export const businessVerificationController = async (
       reference: `BUSINESS_AML_REQUEST_${Math.random()}`,
       aml_for_businesses: {
         business_name: businessName,
-        business_incorporation_date: businessIncorporationDate,
+        business_incorporation_date: incorporationDate,
       },
     }
     const businessAML = await shuftiProRequest(req, payloadAML, { dryRun })
@@ -68,8 +66,8 @@ export const businessVerificationController = async (
     const kybPayload = {
       reference: `KYB_REQUEST_${Math.random()}`,
       kyb: {
-        company_jurisdiction_code: companyJurisdictionCode,
-        company_registration_number: companyRegistrationNumber,
+        company_jurisdiction_code: jurisdictionCode,
+        company_registration_number: registrationNumber,
       },
     }
     const kyb = await shuftiProRequest(req, kybPayload, { dryRun })
@@ -79,30 +77,29 @@ export const businessVerificationController = async (
       console.warn('KYB failed')
     }
 
-    const business = {
-      lastUpdated: new Date().toISOString(),
-      address,
-      email,
-      businessName,
-      trancheId,
-      poolId,
-      ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
-      steps: {
-        email: {
-          verificationCode: '',
-          verified: false,
+    const user: Partial<User> = {
+      pools: [
+        {
+          trancheId,
+          poolId,
+          investorType: 'entity',
         },
-        kyb: {
-          verified: false,
-        },
-        kyc: {
-          verified: false,
-          users: [],
-        },
-      },
+      ],
     }
 
-    await validateAndWriteToFirestore(address, business, 'BUSINESS')
+    const business: Partial<Business> = {
+      walletAddress: address,
+      email,
+      businessName,
+      ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
+      registrationNumber,
+      incorporationDate,
+      jurisdictionCode,
+    }
+
+    const businessId = `${address}-${poolId}`
+    await validateAndWriteToFirestore(businessId, business, 'BUSINESS')
+    await validateAndWriteToFirestore(address, user, 'USER', ['pools'])
     // only set cookie if businessAML and KYB were successful
     if (shuftiErrors.length === 0) {
       const expiresIn = 1000 * 60 * 15 // 15 minutes

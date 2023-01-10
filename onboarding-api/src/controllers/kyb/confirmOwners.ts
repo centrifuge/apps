@@ -3,14 +3,16 @@ import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import * as jwt from 'jsonwebtoken'
 import { array, date, InferType, object, string } from 'yup'
-import { businessCollection, BusinessOnboarding, validateAndWriteToFirestore } from '../database'
-import { HttpsError } from '../utils/httpsError'
-import { validateInput } from '../utils/validateInput'
-import { verifyJw3t } from '../utils/verifyJw3t'
+import { Business, businessCollection, validateAndWriteToFirestore } from '../../database'
+import { HttpsError } from '../../utils/httpsError'
+import { validateInput } from '../../utils/validateInput'
+import { verifyJw3t } from '../../utils/verifyJw3t'
 
 dotenv.config()
 
-const businessVerificationConfirmInput = object({
+const confirmOwnersInput = object({
+  poolId: string().required(),
+  trancheId: string().required(),
   ultimateBeneficialOwners: array(
     object({
       name: string().required(),
@@ -21,12 +23,12 @@ const businessVerificationConfirmInput = object({
     .max(3),
 })
 
-export const businessVerificationConfirmController = async (
-  req: Request<any, any, InferType<typeof businessVerificationConfirmInput>>,
+export const confirmOwnersController = async (
+  req: Request<any, any, InferType<typeof confirmOwnersInput>>,
   res: Response
 ) => {
   try {
-    await validateInput(req, businessVerificationConfirmInput)
+    await validateInput(req, confirmOwnersInput)
     const { address } = await verifyJw3t(req)
 
     const cookies = cookie.parse(req.headers.cookie ?? '').__session
@@ -34,31 +36,28 @@ export const businessVerificationConfirmController = async (
     if (address !== confirmationToken.address) {
       throw new HttpsError(400, 'Confirmation not possible.')
     }
-    const businessDoc = await businessCollection.doc(address).get()
-    const data = businessDoc.data() as BusinessOnboarding
+    const businessId = `${address}-${req.body.poolId}`
+    const businessDoc = await businessCollection.doc(businessId).get()
+    const data = businessDoc.data() as Business
     if (!businessDoc.exists || !data) {
       throw new HttpsError(404, 'Business not found')
     }
-    if (businessDoc.exists && data?.steps.kyb.verified) {
+    if (businessDoc.exists && data?.kybCompleted) {
       throw new HttpsError(400, 'Business verification step already confirmed')
     }
 
     const verifyBusiness = {
-      steps: {
-        kyb: {
-          verified: true,
-        },
-      },
+      kybCompleted: true,
       ultimateBeneficialOwners: req.body.ultimateBeneficialOwners,
     }
 
-    await validateAndWriteToFirestore(address, verifyBusiness, 'BUSINESS', [
-      'steps.kyb.verified',
+    await validateAndWriteToFirestore(`${address}-${req.body.poolId}`, verifyBusiness, 'BUSINESS', [
+      'kybCompleted',
       'ultimateBeneficialOwners',
     ])
 
     res.clearCookie('__session')
-    const freshData = (await businessCollection.doc(address).get()).data()
+    const freshData = (await businessCollection.doc(`${address}-${req.body.poolId}`).get()).data()
     return res.status(200).send({ data: freshData })
   } catch (error) {
     if (error instanceof HttpsError) {

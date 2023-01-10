@@ -7,48 +7,64 @@ import { Subset } from '../utils/types'
 
 dotenv.config()
 
+export const userSchema = object({
+  walletAddress: string().required(),
+  email: string().optional(),
+  fullName: string(),
+  dateOfBrith: date().min(new Date(1900, 0, 1)).max(new Date()),
+  citizenship: string(),
+  accreditedInvestor: bool(),
+  taxInfo: string(),
+  pools: array(
+    object({
+      investorType: string().oneOf(['individual', 'entity']),
+      poolId: string(),
+      trancheId: string(),
+    })
+  )
+    .required()
+    .min(1),
+  businessId: string(),
+  kycCompleted: bool(),
+})
+
 export const businessSchema = object({
-  lastUpdated: date().required(),
-  address: string().required(),
-  email: string().email().required(),
-  businessName: string().required(),
-  trancheId: string().required(),
-  poolId: string().required(),
-  steps: object({
-    email: object({
-      verified: bool().default(false),
-      verificationCode: string(),
-    }),
-    kyb: object({
-      verified: bool().default(false),
-    }), // business AML verified, KYB verified, and email verified
-    kyc: object({
-      verified: bool().default(false),
-      users: array().default([]),
-    }),
-  }).required(),
+  walletAddress: string().required(),
+  email: string().email(),
+  businessName: string(),
+  incorporationDate: date(),
+  registrationNumber: string(),
+  jurisdictionCode: string(), // country of incorporation
   ultimateBeneficialOwners: array(
     object({
       name: string().required(),
       dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
-    }).required()
+    })
   ).max(3),
+  emailVerified: bool(),
+  kybCompleted: bool(),
 })
 
 const firestore = new Firestore()
-export const businessCollection = firestore.collection('businesses')
+export const businessCollection = firestore.collection('onboarding-businesses')
+export const userCollection = firestore.collection('onboarding-users')
 
 const schemas: Record<
-  'BUSINESS',
+  'BUSINESS' | 'USER',
   { schema: OptionalObjectSchema<any>; collection: CollectionReference<DocumentData> }
 > = {
   BUSINESS: {
     schema: businessSchema,
     collection: businessCollection,
   },
+  USER: {
+    schema: userSchema,
+    collection: userCollection,
+  },
 }
 
-export type BusinessOnboarding = InferType<typeof businessSchema>
+export type Business = InferType<typeof businessSchema>
+export type User = InferType<typeof userSchema>
 
 /**
  *
@@ -59,7 +75,7 @@ export type BusinessOnboarding = InferType<typeof businessSchema>
  */
 export const validateAndWriteToFirestore = async <T = undefined | string[]>(
   key: string,
-  data: T extends 'undefined' ? BusinessOnboarding : Subset<BusinessOnboarding>,
+  data: T extends 'undefined' ? Business : Subset<Business>,
   schema: keyof typeof schemas,
   mergeFields?: T
 ) => {
