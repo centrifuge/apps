@@ -10,7 +10,7 @@ import { InvestorTypes } from '../../types'
 import { InvestorType } from './InvestorType'
 import { LinkWallet } from './LinkWallet'
 
-const [LogoMark, WordMark] = config.logo
+const [_, WordMark] = config.logo
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
