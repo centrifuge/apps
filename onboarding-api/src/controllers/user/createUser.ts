@@ -23,7 +23,7 @@ export const createUserController = async (
     const { investorType, poolId, trancheId } = req.body
 
     const user: Partial<User> = {
-      walletAddress: walletAddress,
+      walletAddress,
       pools: [
         {
           investorType,

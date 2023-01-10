@@ -11,7 +11,7 @@ export type Subset<K> = {
 export {}
 
 declare global {
-  namespace Express {
+  export namespace Express {
     export interface Request {
       walletAddress: string
     }
