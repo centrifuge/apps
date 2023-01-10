@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { User, validateAndWriteToFirestore } from '../../database'
+import { Business, KYBSteps, KYCSteps, User, validateAndWriteToFirestore } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
 
@@ -31,19 +31,20 @@ export const createUserController = async (
           trancheId,
         },
       ],
-      kycCompleted: false,
+      steps: KYCSteps.map((step) => (step.step === 'InvestorType' ? { ...step, completed: true } : step)),
     }
 
+    let business: undefined | Partial<Business> = undefined
     if (investorType === 'entity') {
-      const business = {
+      business = {
         walletAddress,
-        kybCompleted: false,
+        steps: KYBSteps,
       }
       await validateAndWriteToFirestore(walletAddress, business, 'BUSINESS')
     }
 
     await validateAndWriteToFirestore(walletAddress, user, 'USER')
-    return res.send({ user })
+    return res.send({ user, ...(business ? business : {}) })
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

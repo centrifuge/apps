@@ -99,6 +99,9 @@ export const verifyBusinessController = async (
       registrationNumber,
       incorporationDate,
       jurisdictionCode,
+      steps: (businessDoc?.data() as Business).steps.map((step) =>
+        step.step === 'VerifyBusiness' ? { ...step, completed: true } : step
+      ),
     }
 
     await validateAndWriteToFirestore(walletAddress, business, 'BUSINESS')

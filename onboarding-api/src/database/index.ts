@@ -1,11 +1,31 @@
 import { CollectionReference, DocumentData, Firestore } from '@google-cloud/firestore'
 import * as dotenv from 'dotenv'
-import { array, bool, date, InferType, object, string } from 'yup'
+import { array, bool, date, InferType, object, string, StringSchema } from 'yup'
 import { OptionalObjectSchema } from 'yup/lib/object'
 import { HttpsError } from '../utils/httpsError'
 import { Subset } from '../utils/types'
 
 dotenv.config()
+
+export type Step<Keys> = {
+  step: Keys
+  completed: boolean
+}
+
+export type KYCStepKeys = 'InvestorType' | 'VerifyIdentity' | 'SignAgreement'
+export const KYCSteps: Step<KYCStepKeys>[] = [
+  { step: 'InvestorType', completed: false },
+  { step: 'VerifyIdentity', completed: false },
+  { step: 'SignAgreement', completed: false },
+]
+
+export type KYBStepKeys = 'VerifyBusiness' | 'VerifyEmail' | 'ConfirmOwners' | 'TaxInfo'
+export const KYBSteps: Step<KYBStepKeys>[] = [
+  { step: 'VerifyBusiness', completed: false },
+  { step: 'VerifyEmail', completed: false },
+  { step: 'ConfirmOwners', completed: false },
+  { step: 'TaxInfo', completed: false },
+]
 
 export const businessSchema = object({
   walletAddress: string().required(),
@@ -22,6 +42,12 @@ export const businessSchema = object({
   ).max(3),
   emailVerified: bool(),
   kybCompleted: bool(),
+  steps: array(
+    object({
+      completed: bool(),
+      step: string().oneOf(['VerifyBusiness', 'VerifyEmail', 'ConfirmOwners', 'TaxInfo']) as StringSchema<KYBStepKeys>,
+    })
+  ).default(KYBSteps),
 })
 
 export const userSchema = object({
@@ -43,6 +69,12 @@ export const userSchema = object({
     .min(1),
   businessId: string(),
   kycCompleted: bool(),
+  steps: array(
+    object({
+      completed: bool(),
+      step: string().oneOf(['InvestorType', , 'VerifyIdentity', 'SignAgreement']) as StringSchema<KYCStepKeys>,
+    })
+  ).default(KYCSteps),
 })
 
 const firestore = new Firestore()
@@ -78,7 +110,7 @@ export type User = InferType<typeof userSchema>
  */
 export const validateAndWriteToFirestore = async <T = undefined | string[]>(
   key: string,
-  data: T extends 'undefined' ? Business : Subset<Business>,
+  data: T extends 'undefined' ? User | Business : Subset<User | Business>,
   schemaKey: keyof typeof schemas,
   mergeFields?: T
 ) => {

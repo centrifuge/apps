@@ -60,14 +60,13 @@ export const confirmOwnersController = async (
     // }
 
     const verifyBusiness = {
-      kybCompleted: true,
       ultimateBeneficialOwners: req.body.ultimateBeneficialOwners,
+      steps: (businessDoc?.data() as Business).steps.map((step) =>
+        step.step === 'ConfirmOwners' ? { ...step, completed: true } : step
+      ),
     }
 
-    await validateAndWriteToFirestore(walletAddress, verifyBusiness, 'BUSINESS', [
-      'kybCompleted',
-      'ultimateBeneficialOwners',
-    ])
+    await validateAndWriteToFirestore(walletAddress, verifyBusiness, 'BUSINESS', ['ultimateBeneficialOwners', 'steps'])
 
     const freshBusinessData = (await businessCollection.doc(walletAddress).get()).data()
     const freshUserData = (await userCollection.doc(walletAddress).get()).data()

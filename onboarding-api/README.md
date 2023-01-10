@@ -36,8 +36,32 @@ Initializes user and business.
 
 **Response**
 
-```ts
-
+```json
+{
+  "user": {
+    "walletAddress": "4e",
+    "pools": [
+      {
+        "investorType": "entity",
+        "poolId": "123abc",
+        "trancheId": "0x123456"
+      }
+    ],
+    "steps": [
+      {
+        "step": "InvestorType",
+        "completed": true // set to true in request
+      }
+      // ...
+    ]
+  },
+  "business": {
+    "walletAddress": "4exxx",
+    "steps": [
+      // ...
+    ]
+  }
+}
 ```
 
 ### `POST: /verifyBusiness`
@@ -63,8 +87,32 @@ KYB and AML verification
 
 200 ok
 
-```js
-// ...
+```json
+{
+  "user": {
+    "walletAddress": "4e",
+    "pools": [
+      {
+        "investorType": "entity",
+        "poolId": "123abc",
+        "trancheId": "0x123456"
+      }
+    ],
+    "steps": [
+      // ...
+    ]
+  },
+  "business": {
+    "walletAddress": "4exxx",
+    "steps": [
+      // ...
+      {
+        "step": "VerifyBusiness",
+        "completed": true // set to true in request
+      }
+    ]
+  }
+}
 ```
 
 ### `POST: /verifyBusinessConfirm`
@@ -89,3 +137,31 @@ Confirm AML and KYB and update UBOs
 **Response**
 
 200 ok
+
+```json
+{
+  "user": {
+    // ...
+    "pools": [
+      {
+        "investorType": "entity",
+        "poolId": "123abc",
+        "trancheId": "0x123456"
+      }
+    ],
+    "steps": [
+      // ...
+    ]
+  },
+  "business": {
+    // ...
+    "steps": [
+      // ...
+      {
+        "step": "ConfirmOwners",
+        "completed": true // set to true in request
+      }
+    ]
+  }
+}
+```
