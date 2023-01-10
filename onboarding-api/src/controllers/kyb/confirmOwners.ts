@@ -55,9 +55,9 @@ export const confirmOwnersController = async (
       throw new HttpsError(400, 'Business verification step already confirmed')
     }
 
-    if (!data.emailVerified) {
-      throw new HttpsError(400, 'Email must be verified before completing business verification')
-    }
+    // if (!data.emailVerified) {
+    //   throw new HttpsError(400, 'Email must be verified before completing business verification')
+    // }
 
     const verifyBusiness = {
       kybCompleted: true,
