@@ -20,7 +20,6 @@ export const createUserController = async (
   try {
     await validateInput(req, createUserInput)
     const { walletAddress } = req
-    console.log('🚀 ~ walletAddress', walletAddress)
     const { investorType, poolId, trancheId } = req.body
 
     const user: Partial<User> = {

@@ -69,8 +69,9 @@ export const confirmOwnersController = async (
       'ultimateBeneficialOwners',
     ])
 
-    const freshData = (await businessCollection.doc(walletAddress).get()).data()
-    return res.status(200).send({ data: freshData })
+    const freshBusinessData = (await businessCollection.doc(walletAddress).get()).data()
+    const freshUserData = (await userCollection.doc(walletAddress).get()).data()
+    return res.status(200).send({ user: freshUserData, business: freshBusinessData })
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

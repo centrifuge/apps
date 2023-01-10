@@ -104,9 +104,12 @@ export const verifyBusinessController = async (
     await validateAndWriteToFirestore(walletAddress, business, 'BUSINESS')
     await validateAndWriteToFirestore(walletAddress, user, 'USER', ['pools'])
 
+    const freshBusinessData = (await businessCollection.doc(walletAddress).get()).data()
+    const freshUserData = (await userCollection.doc(walletAddress).get()).data()
     return res.status(200).json({
       errors: shuftiErrors,
-      ...business,
+      business: freshBusinessData,
+      user: freshUserData,
     })
   } catch (error) {
     if (error instanceof HttpsError) {
