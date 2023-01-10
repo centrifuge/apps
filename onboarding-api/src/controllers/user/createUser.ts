@@ -44,7 +44,7 @@ export const createUserController = async (
     }
 
     await validateAndWriteToFirestore(walletAddress, user, 'USER')
-    return res.send({ user, ...(business ? business : {}) })
+    return res.send({ user, ...(business ? { business } : {}) })
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)
