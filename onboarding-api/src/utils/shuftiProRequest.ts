@@ -2,6 +2,7 @@ import { Request } from 'express'
 import fetch from 'node-fetch'
 import { businessAmlMockResponse } from '../mocks/businessAmlResponse'
 import { kybMockResponse } from '../mocks/kybResponse'
+import { HttpsError } from './httpsError'
 
 export const shuftiProRequest = async (_req: Request, payload: any, options?: { dryRun: boolean }) => {
   if (options?.dryRun) {
@@ -34,5 +35,6 @@ export const shuftiProRequest = async (_req: Request, payload: any, options?: { 
   } catch (error) {
     // @ts-expect-error error typing
     console.log(error.message)
+    throw new HttpsError(400, 'ShuftiPro request failed')
   }
 }

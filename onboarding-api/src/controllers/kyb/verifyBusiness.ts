@@ -1,12 +1,10 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import * as jwt from 'jsonwebtoken'
 import { bool, date, InferType, object, string } from 'yup'
 import { Business, businessCollection, User, userCollection, validateAndWriteToFirestore } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
-import { verifyJw3t } from '../../utils/verifyJw3t'
 
 dotenv.config()
 
@@ -31,18 +29,24 @@ export const verifyBusinessController = async (
 ) => {
   let shuftiErrors: string[] = []
   try {
-    const { address } = await verifyJw3t(req)
+    const { walletAddress } = req
     await validateInput(req, verifyBusinessInput)
 
     const {
       body: { incorporationDate, jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
     } = { ...req }
 
-    const userDoc = await userCollection.doc(address).get()
-    // get users that have a pool entry with corresponding invType, pooldId nd tId
-    // if no entry exists then send error that user need to choose investment type
-    // or create user on the spot
-    const businessDoc = await businessCollection.doc(address).get()
+    const userDoc = await userCollection.doc(req.walletAddress).get()
+    if (!userDoc.exists) {
+      throw new HttpsError(400, 'User must be created before verifying business (/createUser)')
+    }
+
+    const userData = userDoc.data() as User
+    if (!userData?.pools.find((pool) => pool.poolId === poolId && pool.investorType === 'entity')) {
+      throw new HttpsError(400, 'Verify business is only available for investorType "entity"')
+    }
+
+    const businessDoc = await businessCollection.doc(walletAddress).get()
     if (businessDoc.exists && businessDoc.data()?.kybCompleted) {
       throw new HttpsError(400, 'Business already verified')
     }
@@ -88,7 +92,7 @@ export const verifyBusinessController = async (
     }
 
     const business: Partial<Business> = {
-      walletAddress: address,
+      walletAddress,
       email,
       businessName,
       ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
@@ -97,21 +101,8 @@ export const verifyBusinessController = async (
       jurisdictionCode,
     }
 
-    const businessId = `${address}-${poolId}`
-    await validateAndWriteToFirestore(businessId, business, 'BUSINESS')
-    await validateAndWriteToFirestore(address, user, 'USER', ['pools'])
-    // only set cookie if businessAML and KYB were successful
-    if (shuftiErrors.length === 0) {
-      const expiresIn = 1000 * 60 * 15 // 15 minutes
-      const token = jwt.sign({ address }, process.env.JWT_SECRET as string, { expiresIn })
-      res.cookie('__session', token, {
-        secure: true,
-        httpOnly: true,
-        maxAge: expiresIn,
-        path: '/',
-        sameSite: 'none',
-      })
-    }
+    await validateAndWriteToFirestore(walletAddress, business, 'BUSINESS')
+    await validateAndWriteToFirestore(walletAddress, user, 'USER', ['pools'])
 
     return res.status(200).json({
       errors: shuftiErrors,

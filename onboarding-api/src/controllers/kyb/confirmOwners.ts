@@ -1,12 +1,9 @@
-import * as cookie from 'cookie'
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import * as jwt from 'jsonwebtoken'
 import { array, date, InferType, object, string } from 'yup'
-import { Business, businessCollection, validateAndWriteToFirestore } from '../../database'
+import { Business, businessCollection, User, userCollection, validateAndWriteToFirestore } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
-import { verifyJw3t } from '../../utils/verifyJw3t'
 
 dotenv.config()
 
@@ -29,21 +26,37 @@ export const confirmOwnersController = async (
 ) => {
   try {
     await validateInput(req, confirmOwnersInput)
-    const { address } = await verifyJw3t(req)
-
-    const cookies = cookie.parse(req.headers.cookie ?? '').__session
-    const confirmationToken = jwt.verify(cookies, process.env.JWT_SECRET as string) as { address: string }
-    if (address !== confirmationToken.address) {
-      throw new HttpsError(400, 'Confirmation not possible.')
+    const {
+      walletAddress,
+      body: { poolId, trancheId },
+    } = req
+    const userDoc = await userCollection.doc(walletAddress).get()
+    if (!userDoc.exists) {
+      throw new HttpsError(400, 'User must be created before verifying business (/createUser)')
     }
-    const businessId = `${address}-${req.body.poolId}`
-    const businessDoc = await businessCollection.doc(businessId).get()
+
+    const userData = userDoc.data() as User
+    if (
+      !userData?.pools.find(
+        (pool) => pool.poolId === poolId && pool.trancheId === trancheId && pool.investorType === 'entity'
+      )
+    ) {
+      throw new HttpsError(400, 'Verify business is only available for investorType "entity"')
+    }
+
+    const businessDoc = await businessCollection.doc(walletAddress).get()
     const data = businessDoc.data() as Business
     if (!businessDoc.exists || !data) {
       throw new HttpsError(404, 'Business not found')
     }
+
+    // TODO: check if email is verified: && data?.emailVerified
     if (businessDoc.exists && data?.kybCompleted) {
       throw new HttpsError(400, 'Business verification step already confirmed')
+    }
+
+    if (!data.emailVerified) {
+      throw new HttpsError(400, 'Email must be verified before completing business verification')
     }
 
     const verifyBusiness = {
@@ -51,13 +64,12 @@ export const confirmOwnersController = async (
       ultimateBeneficialOwners: req.body.ultimateBeneficialOwners,
     }
 
-    await validateAndWriteToFirestore(`${address}-${req.body.poolId}`, verifyBusiness, 'BUSINESS', [
+    await validateAndWriteToFirestore(walletAddress, verifyBusiness, 'BUSINESS', [
       'kybCompleted',
       'ultimateBeneficialOwners',
     ])
 
-    res.clearCookie('__session')
-    const freshData = (await businessCollection.doc(`${address}-${req.body.poolId}`).get()).data()
+    const freshData = (await businessCollection.doc(walletAddress).get()).data()
     return res.status(200).send({ data: freshData })
   } catch (error) {
     if (error instanceof HttpsError) {

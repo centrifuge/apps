@@ -7,3 +7,13 @@ export type Subset<K> = {
     ? Subset<K[attr]> | null | undefined
     : K[attr]
 }
+
+export {}
+
+declare global {
+  namespace Express {
+    export interface Request {
+      walletAddress: string
+    }
+  }
+}

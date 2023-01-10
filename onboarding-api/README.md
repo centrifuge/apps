@@ -14,15 +14,35 @@
 
 ## Endpoints
 
-### `POST: /businessVerification`
-
-KYB and AML verification
-
-**Request headers**
+Every endpoint expects a jw3t signed bearer token to be passed in the headers.
 
 ```js
 authorization: Bearer <jwt-signed-token>
 ```
+
+### `POST: /createUser`
+
+Initializes user and business.
+
+**Request body**
+
+```ts
+{
+	investorType: 'entity' | 'individual'
+	poolId: string
+	trancheId: string
+}
+```
+
+**Response**
+
+```ts
+
+```
+
+### `POST: /verifyBusiness`
+
+KYB and AML verification
 
 **Request body**
 
@@ -30,12 +50,11 @@ authorization: Bearer <jwt-signed-token>
 {
     email: string
     businessName: string
-    businessIncorporationDate: string // timestamp
-    companyRegistrationNumber: string
-    companyJurisdictionCode: string // e.g az_us
+    incorporationDate: string // timestamp
+    registrationNumber: string
+    jurisdictionCode: string // e.g az_us
     trancheId: string
     poolId: string
-    address: string
     dryRun?: boolean // mock KYB and AML
 }
 ```
@@ -44,37 +63,13 @@ authorization: Bearer <jwt-signed-token>
 
 200 ok
 
-An httpOnly cookie is set that is required to confirm business ownership in the next step (`/businessVerificationConfirm`)
-
 ```js
 // ...
-ultimateBeneficialOwners: [],
-steps: {
-    email: {
-        verificationCode: "",
-        verified: false
-    },
-    kyb: {
-        requested: true,
-        verified: false
-    },
-    kyc: {
-        verified: false,
-        users: []
-    }
-}
 ```
 
-### `POST: /businessVerificationConfirm`
+### `POST: /verifyBusinessConfirm`
 
 Confirm AML and KYB and update UBOs
-
-**Request headers**
-
-```js
-authorization: Bearer <jwt-signed-token>
-cookies: "__session=..." // httpOnly cookie set on /businessVerification
-```
 
 **Request body**
 

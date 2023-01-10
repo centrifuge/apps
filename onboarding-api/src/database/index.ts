@@ -7,6 +7,23 @@ import { Subset } from '../utils/types'
 
 dotenv.config()
 
+export const businessSchema = object({
+  walletAddress: string().required(),
+  email: string().email(),
+  businessName: string(),
+  incorporationDate: date(),
+  registrationNumber: string(),
+  jurisdictionCode: string(), // country of incorporation
+  ultimateBeneficialOwners: array(
+    object({
+      name: string().required(),
+      dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
+    })
+  ).max(3),
+  emailVerified: bool(),
+  kybCompleted: bool(),
+})
+
 export const userSchema = object({
   walletAddress: string().required(),
   email: string().optional(),
@@ -28,30 +45,16 @@ export const userSchema = object({
   kycCompleted: bool(),
 })
 
-export const businessSchema = object({
-  walletAddress: string().required(),
-  email: string().email(),
-  businessName: string(),
-  incorporationDate: date(),
-  registrationNumber: string(),
-  jurisdictionCode: string(), // country of incorporation
-  ultimateBeneficialOwners: array(
-    object({
-      name: string().required(),
-      dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
-    })
-  ).max(3),
-  emailVerified: bool(),
-  kybCompleted: bool(),
-})
-
 const firestore = new Firestore()
-export const businessCollection = firestore.collection('onboarding-businesses')
-export const userCollection = firestore.collection('onboarding-users')
+export const businessCollection = firestore.collection(`onboarding-business`)
+export const userCollection = firestore.collection(`onboarding-users`)
 
 const schemas: Record<
   'BUSINESS' | 'USER',
-  { schema: OptionalObjectSchema<any>; collection: CollectionReference<DocumentData> }
+  {
+    schema: OptionalObjectSchema<any>
+    collection: CollectionReference<DocumentData>
+  }
 > = {
   BUSINESS: {
     schema: businessSchema,
@@ -70,29 +73,27 @@ export type User = InferType<typeof userSchema>
  *
  * @param key primary key (documentID) for firestore collection
  * @param data data to be set to firestore
- * @param schema name of the validation schema e.g BUSINESS
+ * @param schemaKey name of the validation schema e.g BUSINESS or USER
  * @param mergeFields optional, pass a value to update data in an existing collection e.g steps.kyb.verified
  */
 export const validateAndWriteToFirestore = async <T = undefined | string[]>(
   key: string,
   data: T extends 'undefined' ? Business : Subset<Business>,
-  schema: keyof typeof schemas,
+  schemaKey: keyof typeof schemas,
   mergeFields?: T
 ) => {
   try {
-    const validationSchema = schemas[schema]
+    const { collection, schema } = schemas[schemaKey]
     if (typeof mergeFields !== 'undefined') {
-      const mergeValidations = (mergeFields as unknown as string[]).map((field) =>
-        validationSchema.schema.validateAt(field, data)
-      )
+      const mergeValidations = (mergeFields as unknown as string[]).map((field) => schema.validateAt(field, data))
       await Promise.all(mergeValidations)
-      await validationSchema.collection.doc(key).set(data, { mergeFields: mergeFields as unknown as string[] })
+      await collection.doc(key).set(data, { mergeFields: mergeFields as unknown as string[] })
     } else {
-      await validationSchema.schema.validate(data)
-      await validationSchema.collection.doc(key).set(data)
+      await schema.validate(data)
+      await collection.doc(key).set(data)
     }
   } catch (error) {
     // @ts-expect-error error typing
-    throw new HttpsError('invalid-argument', error.message)
+    throw new HttpsError(400, error.message)
   }
 }
