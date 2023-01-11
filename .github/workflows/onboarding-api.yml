@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
         with:
-          node_version: 16
+          node-version: 16
           cache: yarn
 
       - name: YARN install
@@ -42,6 +42,7 @@ jobs:
           path: onboarding-api/dist
 
   deployment:
+    needs: build
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/master' && 'production' || 'preview' }}
     steps:
