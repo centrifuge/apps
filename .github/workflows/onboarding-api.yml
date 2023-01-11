@@ -68,13 +68,13 @@ jobs:
         id: gclouddeploy
         uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
         with:
-          name: 'onboarding-api-${{ env.GITHUB_HEAD_REF }}'
+          name: 'onboarding-api-${{ github.head_ref || github.ref_name }}'
           runtime: 'nodejs16'
           region: 'europe-west3'
           source_dir: './' # downlaod artifacts sets the current directory as the one in the artifact.with.path
           # project_id: '${{ env.gcloud_project }}'
           # allow_unauthenticated: true
-          entry_point: 'handler'
+          entry_point: 'onboarding'
 
       - name: 'Gcloud functions URL:'
         run: 'curl "${{ steps.gclouddeploy.outputs.url }}"' 
