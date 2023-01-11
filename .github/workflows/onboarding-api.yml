@@ -61,7 +61,7 @@ jobs:
         id: gclouddeploy
         uses: google-github-actions/deploy-cloud-functions@14509ca #@v1
         with:
-          name: 'onboarding-api-${{ GITHUB_HEAD_REF }}'
+          name: 'onboarding-api-${{ env.GITHUB_HEAD_REF }}'
           runtime: 'nodejs16'
           region: 'europe-west-3'
           source_dir: 'onboarding-api/dist'
