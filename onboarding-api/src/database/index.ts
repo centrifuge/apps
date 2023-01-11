@@ -1,11 +1,11 @@
-import * as admin from 'firebase-admin'
-import { HttpsError } from 'firebase-functions/v1/https'
+import { CollectionReference, DocumentData, Firestore } from '@google-cloud/firestore'
+import * as dotenv from 'dotenv'
 import { array, bool, date, InferType, object, string } from 'yup'
 import { OptionalObjectSchema } from 'yup/lib/object'
+import { HttpsError } from '../utils/httpsError'
 import { Subset } from '../utils/types'
 
-admin.initializeApp()
-const { firestore } = admin
+dotenv.config()
 
 export const businessSchema = object({
   lastUpdated: date().required(),
@@ -27,18 +27,20 @@ export const businessSchema = object({
       users: array().default([]),
     }),
   }).required(),
-  ultimateBeneficialOwners: array().of(
+  ultimateBeneficialOwners: array(
     object({
-      name: string(),
-    })
-  ),
+      name: string().required(),
+      dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
+    }).required()
+  ).max(3),
 })
 
-export const businessCollection = firestore().collection('businesses')
+const firestore = new Firestore()
+export const businessCollection = firestore.collection('businesses')
 
 const schemas: Record<
   'BUSINESS',
-  { schema: OptionalObjectSchema<any>; collection: admin.firestore.CollectionReference<admin.firestore.DocumentData> }
+  { schema: OptionalObjectSchema<any>; collection: CollectionReference<DocumentData> }
 > = {
   BUSINESS: {
     schema: businessSchema,
@@ -78,5 +80,3 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
     throw new HttpsError('invalid-argument', error.message)
   }
 }
-
-export { firestore }

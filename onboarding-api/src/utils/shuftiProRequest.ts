@@ -1,5 +1,4 @@
 import { Request } from 'express'
-import * as functions from 'firebase-functions'
 import fetch from 'node-fetch'
 import { businessAmlMockResponse } from '../mocks/businessAmlResponse'
 import { kybMockResponse } from '../mocks/kybResponse'
@@ -29,11 +28,11 @@ export const shuftiProRequest = async (_req: Request, payload: any, options?: { 
 
     const data = await shuftiRes.json()
     if (data.error) {
-      functions.logger.log(data.error.message)
+      console.log(data.error.message)
     }
     return data
   } catch (error) {
     // @ts-expect-error error typing
-    functions.logger.log(error.message)
+    console.log(error.message)
   }
 }

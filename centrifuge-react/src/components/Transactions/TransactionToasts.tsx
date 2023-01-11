@@ -59,7 +59,7 @@ export function TransactionToasts({
               }
             }}
             action={
-              tx.hash ? (
+              tx.hash && subscanUrl ? (
                 <AnchorButton
                   variant="tertiary"
                   target="_blank"

@@ -1,23 +1,23 @@
+import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import * as functions from 'firebase-functions'
-import { HttpsError } from 'firebase-functions/v1/https'
 import * as jwt from 'jsonwebtoken'
 import { bool, date, InferType, object, string } from 'yup'
 import { businessCollection, validateAndWriteToFirestore } from '../database'
-import { cors } from '../utils/cors'
-import { checkHttpMethod } from '../utils/httpMethods'
+import { HttpsError } from '../utils/httpsError'
 import { shuftiProRequest } from '../utils/shuftiProRequest'
 import { validateInput } from '../utils/validateInput'
 import { verifyJw3t } from '../utils/verifyJw3t'
 
+dotenv.config()
+
 const businessVerificationInput = object({
-  dryRun: bool().default(false).optional(), // skips shuftipro requests and returns a failed event
+  dryRun: bool().default(false).optional(), // skips shuftipro requests
   email: string().email().required(),
   address: string().required(),
   poolId: string().required(),
   trancheId: string().required(),
   businessName: string().required(), // used for AML
-  businessIncorporationDate: date(), // used for AML
+  businessIncorporationDate: date().required(), // used for AML
   companyRegistrationNumber: string().required(),
   companyJurisdictionCode: string().required(), // country of incorporation
 })
@@ -28,8 +28,6 @@ export const businessVerificationController = async (
 ) => {
   let shuftiErrors: string[] = []
   try {
-    cors(req, res)
-    checkHttpMethod(req, 'POST')
     const { address } = await verifyJw3t(req)
     await validateInput(req, businessVerificationInput)
 
@@ -48,7 +46,7 @@ export const businessVerificationController = async (
 
     const userDoc = await businessCollection.doc(address).get()
     if (userDoc.exists && userDoc.data()?.steps?.kyb?.verified) {
-      throw new HttpsError('invalid-argument', 'Business already verified')
+      throw new HttpsError(400, 'Business already verified')
     }
 
     // TODO: send email verfication link
@@ -64,7 +62,7 @@ export const businessVerificationController = async (
     const businessAmlVerified = businessAML.event === 'verification.accepted'
     if (!businessAmlVerified) {
       shuftiErrors = [...shuftiErrors, 'Business AML failed']
-      functions.logger.warn('Business AML failed')
+      console.warn('Business AML failed')
     }
 
     const kybPayload = {
@@ -78,11 +76,11 @@ export const businessVerificationController = async (
     const kybVerified = kyb.event === 'verification.accepted'
     if (!kybVerified) {
       shuftiErrors = [...shuftiErrors, 'KYB failed']
-      functions.logger.warn('KYB failed')
+      console.warn('KYB failed')
     }
 
     const business = {
-      lastUpdated: new Date(),
+      lastUpdated: new Date().toISOString(),
       address,
       email,
       businessName,
@@ -105,29 +103,29 @@ export const businessVerificationController = async (
     }
 
     await validateAndWriteToFirestore(address, business, 'BUSINESS')
-
     // only set cookie if businessAML and KYB were successful
     if (shuftiErrors.length === 0) {
       const expiresIn = 1000 * 60 * 15 // 15 minutes
       const token = jwt.sign({ address }, process.env.JWT_SECRET as string, { expiresIn })
       res.cookie('__session', token, {
-        secure: process.env.NODE_ENV !== 'development',
+        secure: true,
         httpOnly: true,
         maxAge: expiresIn,
-        path: 'centrifuge-fargate-apps-dev/us-central1', // TODO: make dynamic
+        path: '/',
+        sameSite: 'none',
       })
     }
 
-    res.json({
+    return res.status(200).json({
       errors: shuftiErrors,
       ...business,
     })
   } catch (error) {
     if (error instanceof HttpsError) {
-      functions.logger.log(error.message)
-      res.status(error.httpErrorCode.status).send(error.message)
-    } else {
-      res.status(500).send('An unexpected error occured')
+      console.log(error.message)
+      return res.status(error.code).send(error.message)
     }
+    console.log(error)
+    return res.status(500).send('An unexpected error occured')
   }
 }

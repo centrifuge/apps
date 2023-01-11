@@ -16,6 +16,7 @@ jobs:
       whitelisted-accounts: ''
       network: centrifuge
       subquery-url: ''
+      onboarding-api-url: '' # add prod url
       pool-creation-type: propose
       default-node-url: ''
     secrets:

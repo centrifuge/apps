@@ -1,0 +1,47 @@
+# name: 'Onboarding dev deployment'
+# on:
+#   push:
+#     branches:
+#       - onboarding/github-action-setup
+#       - main
+#     paths:
+#       - 'onboarding-api/**'
+#       - '.github/workflows/onboard-api-dev.yml'
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: 'read'
+#       id-token: 'write'
+
+#     defaults:
+#       run:
+#         working-directory: onboarding-api
+
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v3
+
+#       - name: Install Dependencies
+#         run: yarn install
+
+#       - name: Lint
+#         run: yarn lint
+
+#       - name: Build
+#         run: yarn build
+
+#       - name: Gcloud Auth
+#         uses: google-github-actions/auth@v1
+#         with:
+#           workload_identity_provider: ${{ secrets.GCLOUD_WORKLOAD_IDENTITY_PROVIDER }}
+#           service_account: functions-firestore@peak-vista-185616.iam.gserviceaccount.com
+
+#       - name: Gcloud Deploy
+#         uses: google-github-actions/deploy-cloud-functions@v1
+#         with:
+#           name: onboarding
+#           runtime: nodejs16
+#           entryPoint: onboarding
+#           env_vars: SHUFTI_PRO_SECRET_KEY=${{secrets.SHUFTI_PRO_SECRET_KEY}},SHUFTI_PRO_CLIENT_ID=${{secrets.SHUFTI_PRO_CLIENT_ID}},JWT_SECRET=${{secrets.JWT_SECRET}}

@@ -3,10 +3,14 @@
 ## Development
 
 1. Install dependencies `yarn install`
-2. Install firebase globally: `npm install -g firebase-tools`
-3. Login to firebase `firebase login`
+2. Make sure gcloud CLI is installed and you have sufficient permissions.
+3. Authenticate your user and then set the application default
+   ```sh
+   gcloud auth login
+   gcloud auth application-default login
+   ```
 4. Create an env file from the provided example. The ShuftiPro keys can be found in the dashboard settings.
-5. Start dev server with `yarn dev` [localhost:5001]
+5. Start dev server with `yarn develop` [localhost:8080]
 
 ## Endpoints
 
@@ -63,7 +67,7 @@ steps: {
 
 ### `POST: /businessVerificationConfirm`
 
-KYB and AML verification
+Confirm AML and KYB and update UBOs
 
 **Request headers**
 
@@ -74,14 +78,19 @@ cookies: "__session=..." // httpOnly cookie set on /businessVerification
 
 **Request body**
 
+`ultimateBeneficialOwners` is required and will accept an array with max length of 3. A UBO must hold at least 25% of the company shares.
+
 ```ts
 {
     ultimateBeneficialOwners: [
-        {name: string}
+        {
+            name: string,
+            dateOfBirth: Date (iso string)
+        }
     ]
 }
 ```
 
 **Response**
 
-201 created
+200 ok
