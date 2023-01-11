@@ -23,9 +23,10 @@ jobs:
         with:
           node-version: 16
           cache: yarn
+          cache-dependency-path: orboarding-api/yarn.lock
           
       - name: YARN install
-        run: yarn install --cache
+        run: yarn install
 
       - name: Lint check
         run: yarn lint
