@@ -26,7 +26,7 @@ jobs:
 
       - name: YARN install
         run: yarn workspaces focus onboarding-api && yarn install
-        working-directory: '' # Use root ./ rather than ./onboarding-api
+        working-directory: './' # Use root ./ rather than ./onboarding-api
 
       - name: Lint check
         run: yarn lint
