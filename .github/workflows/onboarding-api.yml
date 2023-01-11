@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 16
           cache: yarn
-          cache-dependency-path: orboarding-api/yarn.lock
+          cache-dependency-path: onboarding-api/yarn.lock
           
       - name: YARN install
         run: yarn install
