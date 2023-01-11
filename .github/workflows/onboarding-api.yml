@@ -23,16 +23,9 @@ jobs:
         with:
           node-version: 16
           cache: yarn
-
-      - name: Cache 
-        uses: actions/cache@v3
-        with:
-          key: ${{GITHUB_REF##*/}}-yarn
-          path: node-modules
           
-
       - name: YARN install
-        run: yarn install
+        run: yarn install --prefer-offline
 
       - name: Lint check
         run: yarn lint
