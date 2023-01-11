@@ -74,7 +74,7 @@ jobs:
           source_dir: './' # downlaod artifacts sets the current directory as the one in the artifact.with.path
           # project_id: '${{ env.gcloud_project }}'
           # allow_unauthenticated: true
-          entry_point: 'handler'
+          entry_point: 'onboarding'
 
       - name: 'Gcloud functions URL:'
         run: 'curl "${{ steps.gclouddeploy.outputs.url }}"' 
