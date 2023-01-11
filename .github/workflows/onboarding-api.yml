@@ -3,11 +3,11 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'onboarding-api/**'
+    # paths:
+    #   - 'onboarding-api/**'
   pull_request:
-    paths:
-      - 'onboarding-api/**'
+    # paths:
+    #   - 'onboarding-api/**'
 
 jobs:
   build:
@@ -71,7 +71,7 @@ jobs:
 
       - name: 'Gcloud functions URL:'
         run: 'curl "${{ steps.gclouddeploy.outputs.url }}"' 
-        
+
       # ToDo: create a redirect rule in Cloudflare using CF_API_KEY
       # to route /onboard-api to the Gcloud URL
 
