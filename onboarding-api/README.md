@@ -36,7 +36,7 @@ Initializes user and business.
 
 **Response**
 
-```json
+```js
 {
   "user": {
     "walletAddress": "4e",
@@ -87,7 +87,7 @@ KYB and AML verification
 
 200 ok
 
-```json
+```js
 {
   "user": {
     "walletAddress": "4e",
@@ -138,7 +138,7 @@ Confirm AML and KYB and update UBOs
 
 200 ok
 
-```json
+```js
 {
   "user": {
     // ...
