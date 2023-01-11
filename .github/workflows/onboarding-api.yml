@@ -25,8 +25,7 @@ jobs:
           cache: yarn
 
       - name: YARN install
-        run: yarn workspaces focus onboarding-api && yarn install
-        working-directory: './' # Use root ./ rather than ./onboarding-api
+        run: yarn install
 
       - name: Lint check
         run: yarn lint
