@@ -115,7 +115,7 @@ KYB and AML verification
 }
 ```
 
-### `POST: /verifyBusinessConfirm`
+### `POST: /confirmOwners`
 
 Confirm AML and KYB and update UBOs
 
