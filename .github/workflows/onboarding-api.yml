@@ -27,7 +27,7 @@ jobs:
       - name: Cache 
         uses: actions/cache@v3
         with:
-          key: ${GITHUB_REF##*/}-yarn
+          key: ${{GITHUB_REF##*/}}-yarn
           path: node-modules
           
 
