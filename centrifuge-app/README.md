@@ -12,7 +12,7 @@
 
 Running `yarn start` will start the following processes:
 
-- `netlify dev`, which will run a local development server including the lambda proxy. It runs `yarn start:app` under the hood (defined in `./netlify.toml`), to start the [`vite`](https://vitejs.dev/guide/) local server
+- `netlify dev`, which will run a local development server including the lambda proxy. It runs `yarn start:app` under the hood (defined in `./netlify.toml`), to start the [`vite`](https://vitejs.dev/guide/) local server. The app will run on http://localhost:3000/
 - `yarn start:deps`, which will start a development mode on the dependencies (`fabric` & `centrifuge-js`), to allow HMR to work when making changes
 
 ### `yarn build`
