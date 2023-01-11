@@ -16,17 +16,17 @@ jobs:
       run:
         working-directory: onboarding-api
     steps:
-      - uses: actions/checkout@93ea575 #@v3.1.0
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
 
       - name: Setup Node
-        uses: actions/setup-node@8c91899 #@v3
+        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
         with:
-          node_version: 16
-          cache: yarn
-
+          node-version: 16
+          # cache: yarn
+          # cache-dependency-path: onboarding-api/yarn.lock
+          
       - name: YARN install
-        run: yarn workspaces focus onboarding-api && yarn install
-        working-directory: '' # Use root ./ rather than ./onboarding-api
+        run: yarn install
 
       - name: Lint check
         run: yarn lint
@@ -42,31 +42,38 @@ jobs:
           path: onboarding-api/dist
 
   deployment:
+    needs: build
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/master' && 'production' || 'preview' }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: retrieve artifacts
         uses: actions/download-artifact@v3
         with:
           name: onboarding-api
+      
+      - name: list artifacts
+        run: ls -R
 
       - name: Auth gcloud
         id: gauth
-        uses: google-github-actions/auth@ef5d53e # @v1
+        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
         with:
           workload_identity_provider: '${{ secrets.GWIP }}'
           service_account: '${{ secrets.GSA }}'      
 
       - name: Deploy to google functions
         id: gclouddeploy
-        uses: google-github-actions/deploy-cloud-functions@14509ca #@v1
+        uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
         with:
-          name: 'onboarding-api-${{ GITHUB_HEAD_REF }}'
+          name: 'onboarding-api-${{ env.GITHUB_HEAD_REF }}'
           runtime: 'nodejs16'
-          region: 'europe-west-3'
-          source_dir: 'onboarding-api/dist'
+          region: 'europe-west3'
+          source_dir: './' # downlaod artifacts sets the current directory as the one in the artifact.with.path
           # project_id: '${{ env.gcloud_project }}'
-          allow_unauthenticated: true
+          # allow_unauthenticated: true
           entry_point: 'handler'
 
       - name: 'Gcloud functions URL:'
