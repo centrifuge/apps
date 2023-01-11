@@ -27,8 +27,9 @@ jobs:
       - name: Cache 
         uses: actions/cache@v3
         with:
+          key: ${{ env.GITHUB_HEAD_REF }}-yarn
           path: node-modules
-          key: '${{ env.GITHUB_HEAD_REF }}'
+          
 
       - name: YARN install
         run: yarn install
