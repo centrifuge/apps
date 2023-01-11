@@ -22,8 +22,8 @@ jobs:
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
         with:
           node-version: 16
-          # cache: yarn
-          # cache-dependency-path: onboarding-api/yarn.lock
+          cache: yarn
+          cache-dependency-path: onboarding-api/yarn.lock
           
       - name: YARN install
         run: yarn install
@@ -68,7 +68,7 @@ jobs:
         id: gclouddeploy
         uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
         with:
-          name: 'onboarding-api-${{ env.GITHUB_HEAD_REF }}'
+          name: onboarding-api${{ github.ref_name }}
           runtime: 'nodejs16'
           region: 'europe-west3'
           source_dir: './' # downlaod artifacts sets the current directory as the one in the artifact.with.path
