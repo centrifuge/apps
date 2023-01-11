@@ -70,5 +70,8 @@ jobs:
           entry_point: 'handler'
 
       - name: 'Gcloud functions URL:'
-        run: 'curl "${{ steps.gclouddeploy.outputs.url }}"'   
+        run: 'curl "${{ steps.gclouddeploy.outputs.url }}"' 
+        
+      # ToDo: create a redirect rule in Cloudflare using CF_API_KEY
+      # to route /onboard-api to the Gcloud URL
 
