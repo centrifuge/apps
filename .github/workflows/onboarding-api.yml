@@ -68,7 +68,7 @@ jobs:
         id: gclouddeploy
         uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
         with:
-          name: 'onboarding-api-${{ github.ref_name }}'
+          name: 'onboarding-api'
           runtime: 'nodejs16'
           region: 'europe-west3'
           source_dir: './' # downlaod artifacts sets the current directory as the one in the artifact.with.path
