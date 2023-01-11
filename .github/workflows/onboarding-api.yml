@@ -43,7 +43,10 @@ jobs:
   deployment:
     needs: build
     runs-on: ubuntu-latest
-    environment: preview
+    environment: ${{ github.ref == 'refs/heads/master' && 'production' || 'preview' }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: retrieve artifacts
         uses: actions/download-artifact@v3
