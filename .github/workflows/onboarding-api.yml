@@ -25,7 +25,7 @@ jobs:
           cache: yarn
           
       - name: YARN install
-        run: yarn add --cache
+        run: yarn install --cache
 
       - name: Lint check
         run: yarn lint
