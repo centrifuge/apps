@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
         with:
           node-version: 16
-          # cache: yarn
+          cache: yarn
           # cache-dependency-path: onboarding-api/yarn.lock
           
       - name: YARN install
@@ -50,7 +50,7 @@ jobs:
       id-token: 'write'
     env:
       app_name: onboarding-api-${{ github.head_ref || github.ref_name }}
-      region: europe-west2
+      region: europe-central2
     steps:
       - name: retrieve artifacts
         uses: actions/download-artifact@v3
