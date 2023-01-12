@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
         with:
           node-version: 16
-          # cache: yarn
+          cache: yarn
           # cache-dependency-path: onboarding-api/yarn.lock
           
       - name: YARN install
@@ -48,6 +48,12 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+    env:
+      app_name: onboarding-api-${{ github.head_ref || github.ref_name }}
+      region: europe-central2
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: retrieve artifacts
         uses: actions/download-artifact@v3
@@ -68,17 +74,30 @@ jobs:
         id: gclouddeploy
         uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
         with:
-          name: 'onboarding-api-${{ github.head_ref || github.ref_name }}'
+          name: '${{ env.app_name }}'
           runtime: 'nodejs16'
-          region: 'europe-west3'
+          region: '${{ env.region }}'
           source_dir: './' # downlaod artifacts sets the current directory as the one in the artifact.with.path
           # project_id: '${{ env.gcloud_project }}'
           # allow_unauthenticated: true
           entry_point: 'onboarding'
 
-      - name: 'Gcloud functions URL:'
-        run: 'curl "${{ steps.gclouddeploy.outputs.url }}"' 
+      - name: Gcloud functions URL
+        run: echo "::notice::Function URL\:\ ${{ steps.gclouddeploy.outputs.url }}"
 
-      # ToDo: create a redirect rule in Cloudflare using CF_API_KEY
-      # to route /onboard-api to the Gcloud URL
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1 
+      - name: make function public
+        run: |
+          gcloud functions add-iam-policy-binding ${{env.app_name}} \
+          --member="allUsers" --role="roles/cloudfunctions.invoker" \
+          --region=${{ env.region }}
+
+      - name: Delete function when PR closed
+        if: github.event.action == 'closed' 
+        run: gcloud functions delete ${{env.app_name}} --region=${{ env.region }}
+
+      # ToDo: 
+      # - create a redirect rule in Cloudflare using CF_API_KEY
+      #   to proxy /onboard-api to the Gcloud URL transparently
 
