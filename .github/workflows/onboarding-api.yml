@@ -88,7 +88,10 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1 
       - name: make function public
-        run:  gcloud functions add-iam-policy-binding ${{env.app_name}} --member="allUsers" --role="roles/run.invoker" --region=${{ env.region }}
+        run: |
+          gcloud functions add-iam-policy-binding ${{env.app_name}} \
+          --member="allUsers" --role="roles/cloudfunctions.invoker" \
+          --region=${{ env.region }}
 
       - name: Delete function when PR closed
         if: github.event.action == 'closed' 
