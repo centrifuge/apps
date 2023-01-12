@@ -34,8 +34,10 @@ export function LiquidityTransactionsSection({
   // const data = usePoolLiquidityTransactions(pool, fromEpoch, toEpoch)
   const data = mockData(10, pool.currency.decimals)
 
+  console.log(data)
+
   const dataUrl: any = React.useMemo(() => {
-    if (!data) {
+    if (!data || !data?.length) {
       return undefined
     }
 

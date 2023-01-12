@@ -3,7 +3,7 @@ export function formatDate(timestamp: number | string | Date, options?: Intl.Dat
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-    ...(options && options),
+    ...options,
   })
 }
 
