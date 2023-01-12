@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "Deploy or delete org-api in Gfunctions"
+        description: "Deploy or delete org-api in Gfunctions, select main branch for prod"
         required: true
         type: choice
         default: "delete"
@@ -75,7 +75,9 @@ jobs:
           name: onboarding-api
           retention-days: 1
           path: onboarding-api/dist
-      - name: Set Gfunctions name
+      - name: Set deployment environment
+        shell: bash
+        id: setenv
         run: |
           echo "Discover GH environment secrets:"
           if ${{ github.ref == 'refs/tags/release*' }} ; then  
@@ -85,6 +87,8 @@ jobs:
           else
             echo "gh_env=preview" >> $GITHUB_OUTPUT
           fi
+    outputs:
+      gh_env: ${{ steps.setenv.outputs.gh_env }}
         
   deployment:
     if: github.event.action != 'closed' || inputs.choice == 'create'
@@ -109,7 +113,6 @@ jobs:
       
       - name: list artifacts
         run: ls -R
-
       - name: Auth gcloud
         id: gauth
         uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
@@ -118,6 +121,7 @@ jobs:
           service_account: '${{ secrets.GSA }}'      
 
       - name: Set Gfunctions name
+        shell: bash
         run: |
           echo "Discovering the environment to deploy:"
           if  ${{ job.deployment.environment == 'production' }}; then
@@ -129,9 +133,9 @@ jobs:
           elif  ${{ github.ref == 'refs/tags/rc*' }}; then
             echo "app_name=onboarding-api-catalyst" >> $GITHUB_ENV
           elif  ${{ github.ref == 'refs/heads/main' }}; then
-            echo "app_name=onboarding-api-dev >> $GITHUB_ENV
+            echo "app_name=onboarding-api-dev" >> $GITHUB_ENV
           else 
-            echo "app_name=onboarding-api-${{ github.head_ref || github.ref_name }}>> $GITHUB_ENV
+            echo "app_name=onboarding-api-${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
           fi
           echo "Environment stage is set:"
           echo "${{ env.app_name }}"
