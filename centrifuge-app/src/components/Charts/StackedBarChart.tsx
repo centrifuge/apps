@@ -37,40 +37,42 @@ export function StackedBarChart({ data, names, colors, xAxisLabel, currency }: S
   const axisStyle = { fontSize: '10px', fill: theme.colors.textSecondary }
 
   return (
-    <ResponsiveContainer width="100%" height={180}>
-      <BarChart
-        data={data.map(({ bottom, ...rest }) => ({ bottom: bottom * -1, ...rest }))}
-        margin={{ left: -16 }}
-        stackOffset="sign"
-      >
-        <CartesianGrid stroke={theme.colors.borderSecondary} vertical={false} />
+    <>
+      <ResponsiveContainer width="100%" height={180}>
+        <BarChart
+          data={data.map(({ bottom, ...rest }) => ({ bottom: bottom * -1, ...rest }))}
+          margin={{ left: -16 }}
+          stackOffset="sign"
+        >
+          <CartesianGrid stroke={theme.colors.borderSecondary} vertical={false} />
 
-        <XAxis
-          dataKey="xAxis"
-          style={axisStyle}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(tick: number, index: number) =>
-            xAxisLabel && index === data.length - 1 ? xAxisLabel : tick.toString()
-          }
-        />
+          <XAxis
+            dataKey="xAxis"
+            style={axisStyle}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(tick: number, index: number) =>
+              xAxisLabel && index === data.length - 1 ? xAxisLabel : tick.toString()
+            }
+          />
 
-        <YAxis
-          style={axisStyle}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(tick: number) => formatBalanceAbbreviated(Math.abs(tick), '', 0)}
-        />
+          <YAxis
+            style={axisStyle}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(tick: number) => formatBalanceAbbreviated(Math.abs(tick), '', 0)}
+          />
 
-        <ReferenceLine y={0} stroke={theme.colors.textDisabled} />
+          <ReferenceLine y={0} stroke={theme.colors.textDisabled} />
 
-        <Bar stackId="bar" dataKey="top" name={names[0]} fill={colors[0]} maxBarSize={maxBarSize} />
+          <Bar stackId="bar" dataKey="top" name={names[0]} fill={colors[0]} maxBarSize={maxBarSize} />
 
-        <Bar stackId="bar" dataKey="bottom" name={names[1]} fill={colors[1]} maxBarSize={maxBarSize} />
+          <Bar stackId="bar" dataKey="bottom" name={names[1]} fill={colors[1]} maxBarSize={maxBarSize} />
 
-        <Tooltip cursor={<TooltipCursor />} content={<TooltipContent currency={currency} />} />
-      </BarChart>
-    </ResponsiveContainer>
+          <Tooltip cursor={<TooltipCursor />} content={<TooltipContent currency={currency} />} />
+        </BarChart>
+      </ResponsiveContainer>
+    </>
   )
 }
 

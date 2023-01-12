@@ -190,9 +190,25 @@ const tooltipText = {
     label: 'Pool',
     body: 'Allows to manage pool configuration and manage other admins.',
   },
+  origination: {
+    label: 'Origination',
+    body: 'Origination is the process by which the issuer finances a new asset.',
+  },
+  repayment: {
+    label: 'Repayment',
+    body: 'Repayment is a structured repaying of funds that have been given to the issuer over a period of time, typically alongside a payment of interest.',
+  },
+  investment: {
+    label: 'Investment',
+    body: 'An investment is an asset or item acquired with the goal of generating income or appreciation.',
+  },
+  redemption: {
+    label: 'Redemption',
+    body: 'Redemption in a pool means withdrawal of investment by the lender.',
+  },
 }
 
-type TooltipsProps = {
+export type TooltipsProps = {
   type: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
   label?: string
