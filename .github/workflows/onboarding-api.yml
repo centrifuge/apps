@@ -3,21 +3,46 @@ on:
   push:
     branches:
       - main
-    # paths:
-    #   - 'onboarding-api/**'
+    paths:
+      - 'onboarding-api/**'
+      - '.github/workflows/onboarding-api.yml'
   pull_request:
-    # paths:
-    #   - 'onboarding-api/**'
+    types:
+      - "opened"
+      - "synchronize"
+      - "reopened"
+      - "closed"
+    paths:
+      - 'onboarding-api/**'
+      - '.github/workflows/onboarding-api.yml'
 
 jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed'
+    environment: preview
+    steps:
+      - name: Auth gcloud
+        id: gauth
+        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+        with:
+          workload_identity_provider: '${{ secrets.GWIP }}'
+          service_account: '${{ secrets.GSA }}'
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1     
+      - name: Delete function
+        run: gcloud functions delete ${{env.app_name}} --region=${{ env.region }}
+      # ToDO: remove Cloudflare redirection
+
   build:
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: onboarding-api
     steps:
       - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
-
+  
       - name: Setup Node
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
         with:
@@ -35,13 +60,14 @@ jobs:
         run: yarn build
 
       - name: Archive functions artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # @v3.1.2
         with:
           name: onboarding-api
           retention-days: 1
           path: onboarding-api/dist
-
+  
   deployment:
+    if: github.event.action != 'closed'
     needs: build
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/master' && 'production' || 'preview' }}
@@ -56,7 +82,7 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: retrieve artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
         with:
           name: onboarding-api
       
@@ -77,25 +103,19 @@ jobs:
           name: '${{ env.app_name }}'
           runtime: 'nodejs16'
           region: '${{ env.region }}'
-          source_dir: './' # downlaod artifacts sets the current directory as the one in the artifact.with.path
-          # project_id: '${{ env.gcloud_project }}'
-          # allow_unauthenticated: true
+          source_dir: './' # downlaod artifacts sets the current directory as the one in artifact.with.path
           entry_point: 'onboarding'
 
       - name: Gcloud functions URL
         run: echo "::notice::Function URL\:\ ${{ steps.gclouddeploy.outputs.url }}"
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1 
+        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1 
       - name: make function public
         run: |
           gcloud functions add-iam-policy-binding ${{env.app_name}} \
           --member="allUsers" --role="roles/cloudfunctions.invoker" \
           --region=${{ env.region }}
-
-      - name: Delete function when PR closed
-        if: github.event.action == 'closed' 
-        run: gcloud functions delete ${{env.app_name}} --region=${{ env.region }}
 
       # ToDo: 
       # - create a redirect rule in Cloudflare using CF_API_KEY
