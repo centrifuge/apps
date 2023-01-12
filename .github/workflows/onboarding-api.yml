@@ -15,11 +15,21 @@ on:
     paths:
       - 'onboarding-api/**'
       - '.github/workflows/onboarding-api.yml'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Deploy or delete org-api in Gfunctions"
+        required: true
+        type: choice
+        default: "delete"
+        options:
+          - "create" 
+          - "delete"
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
-    if: github.event.action == 'closed'
+    if: github.event.action == 'closed' || input.choice == 'delete'
     environment: preview
     steps:
       - name: Auth gcloud
@@ -35,7 +45,7 @@ jobs:
       # ToDO: remove Cloudflare redirection
 
   build:
-    if: github.event.action != 'closed'
+    if: github.event.action != 'closed' || input.choice == 'create'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -67,7 +77,7 @@ jobs:
           path: onboarding-api/dist
   
   deployment:
-    if: github.event.action != 'closed'
+    if: github.event.action != 'closed' || input.choice == 'create'
     needs: build
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/master' && 'production' || 'preview' }}
