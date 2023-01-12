@@ -50,7 +50,7 @@ jobs:
       id-token: 'write'
     env:
       app_name: onboarding-api-${{ github.head_ref || github.ref_name }}
-      region: europe-west4
+      region: europe-west2
     steps:
       - name: retrieve artifacts
         uses: actions/download-artifact@v3
