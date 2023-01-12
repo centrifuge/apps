@@ -84,18 +84,13 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1 
       - name: make function public
-        run:  gcloud run services add-iam-policy-binding ${{env.app_name}} --member="allUsers" --role="roles/run.invoker"
+        run:  gcloud functions add-iam-policy-binding ${{env.app_name}} --member="allUsers" --role="roles/run.invoker"
 
       - name: Delete function when PR closed
         if: github.event.action == 'closed' 
         run: gcloud functions delete ${{env.app_name}} --region=europe-west3
 
-
-
-
       # ToDo: 
-      # - Make the Gcloud function public when opening PR
-      # - Delete the function when closing PR
       # - create a redirect rule in Cloudflare using CF_API_KEY
-      # to route /onboard-api to the Gcloud URL
+      #   to proxy /onboard-api to the Gcloud URL transparently
 
