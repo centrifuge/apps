@@ -29,7 +29,7 @@ on:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
-    if: github.event.action == 'closed' || input.choice == 'delete'
+    if: github.event.action == 'closed' || inputs.choice == 'delete'
     environment: preview
     steps:
       - name: Auth gcloud
@@ -45,7 +45,7 @@ jobs:
       # ToDO: remove Cloudflare redirection
 
   build:
-    if: github.event.action != 'closed' || input.choice == 'create'
+    if: github.event.action != 'closed' || inputs.choice == 'create'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -77,7 +77,7 @@ jobs:
           path: onboarding-api/dist
   
   deployment:
-    if: github.event.action != 'closed' || input.choice == 'create'
+    if: github.event.action != 'closed' || inputs.choice == 'create'
     needs: build
     runs-on: ubuntu-latest
     environment: ${{ github.ref == 'refs/heads/master' && 'production' || 'preview' }}
