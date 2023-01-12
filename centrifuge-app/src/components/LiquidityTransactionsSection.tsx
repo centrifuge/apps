@@ -69,7 +69,7 @@ export function LiquidityTransactionsSection({
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' })
     return URL.createObjectURL(blob)
-  }, [data])
+  }, [data, dataKeys, dataNames, pool.currency.symbol])
 
   const chartData: StackedBarChartProps['data'] = React.useMemo(() => {
     return (
@@ -80,7 +80,7 @@ export function LiquidityTransactionsSection({
         date: entry.closedAt,
       })) || []
     )
-  }, [data])
+  }, [data, dataKeys])
 
   const legend: LegendProps['data'] = React.useMemo(() => {
     const topTotal = chartData.map(({ top }) => top).reduce((a, b) => a + b, 0)
@@ -100,7 +100,7 @@ export function LiquidityTransactionsSection({
           },
         ]
       : []
-  }, [chartData])
+  }, [chartData, dataColors, tooltips, pool.currency.symbol])
 
   return (
     <PageSection

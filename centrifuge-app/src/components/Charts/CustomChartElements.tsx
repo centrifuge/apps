@@ -35,7 +35,6 @@ export const CustomizedXAxisTick: React.VFC<CustomizedXAxisTickProps> = ({ paylo
 type CustomizedTooltipProps = TooltipProps<any, any> & { currency: string; precision?: number }
 
 export const CustomizedTooltip: React.VFC<CustomizedTooltipProps> = ({ payload, currency, precision }) => {
-  const theme = useTheme()
   if (payload && payload?.length > 0) {
     return (
       <TooltipContainer>
