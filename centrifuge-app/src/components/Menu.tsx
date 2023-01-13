@@ -1,13 +1,22 @@
 import { Pool } from '@centrifuge/centrifuge-js'
-import { Box, IconInvestments, IconNft, IconUser, Shelf, TextWithPlaceholder } from '@centrifuge/fabric'
+import {
+  Box,
+  IconInvestments,
+  IconNft,
+  IconUser,
+  Menu as Panel,
+  MenuItemGroup,
+  Shelf,
+  TextWithPlaceholder,
+} from '@centrifuge/fabric'
 import React from 'react'
 import { useLocation } from 'react-router'
-import { Link } from 'react-router-dom'
 import { config } from '../config'
 import { useAddress } from '../utils/useAddress'
+import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
 import { usePermissions } from '../utils/usePermissions'
 import { usePoolMetadata, usePools } from '../utils/usePools'
-import { NavigationItem } from './NavigationItem'
+import { Collapsible, NavigationItem } from './NavigationItem'
 import { RouterLinkButton } from './RouterLinkButton'
 
 type Props = {}
@@ -18,6 +27,7 @@ export const Menu: React.FC<Props> = () => {
   const allPools = usePools(false)
   const address = useAddress()
   const permissions = usePermissions(address)
+  const isXLarge = useIsAboveBreakpoint('XL')
 
   const pools = React.useMemo(() => {
     if (!allPools || !permissions) {
@@ -29,45 +39,45 @@ export const Menu: React.FC<Props> = () => {
     )
   }, [allPools, permissions])
 
-  const Logo = config.logo
-
   return (
-    <Box position="sticky" top={0} px={[0, 0, 2]}>
-      <Link to="/">
-        <Box pt={0} pb={0} px={1} mb={[1, 2, 6]} color="textPrimary">
-          <Logo />
-        </Box>
-      </Link>
-      <Shelf
-        gap={1}
-        flexDirection={['row', 'row', 'column']}
-        alignItems={['center', 'center', 'stretch']}
-        justifyContent="space-evenly"
-        px={[2, 2, 0]}
-      >
-        <NavigationItem
-          label="Investments"
-          href="/investments"
-          icon={<IconInvestments size="16px" />}
-          active={pathname.includes('investments')}
-        />
-        <NavigationItem label="NFTs" href="/nfts" icon={<IconNft size="16px" />} />
-        {(pools.length > 0 || config.poolCreationType === 'immediate') && (
-          <NavigationItem label="Issuer" href="issuer" icon={<IconUser size="16px" />} defaultOpen>
-            {pools.map((pool) => (
-              <PoolNavigationItem key={pool.id} pool={pool} />
-            ))}
+    <Shelf
+      width="100%"
+      position="relative"
+      gap={1}
+      flexDirection={['row', 'row', 'column']}
+      alignItems={['center', 'center', 'stretch']}
+    >
+      <NavigationItem
+        label="Investments"
+        href="/investments"
+        icon={<IconInvestments />}
+        active={pathname.includes('investments')}
+        stacked={!isXLarge}
+      />
+
+      <NavigationItem label="NFTs" href="/nfts" icon={<IconNft />} stacked={!isXLarge} />
+
+      {(pools.length > 0 || config.poolCreationType === 'immediate') && (
+        <Collapsible label="Issuer" icon={<IconUser />} defaultOpen={isXLarge} stacked={!isXLarge}>
+          <Box as={isXLarge ? 'ul' : Panel}>
+            {!!pools.length &&
+              pools.map((pool) => (
+                <Box as={isXLarge ? 'li' : MenuItemGroup} key={pool.id}>
+                  <PoolNavigationItem pool={pool} />
+                </Box>
+              ))}
+
             {address && config.poolCreationType === 'immediate' && (
-              <Shelf justifyContent="center" mt={1}>
+              <Shelf justifyContent="center" py={1}>
                 <RouterLinkButton to="/issuer/create-pool" variant="secondary" small>
                   Create pool
                 </RouterLinkButton>
               </Shelf>
             )}
-          </NavigationItem>
-        )}
-      </Shelf>
-    </Box>
+          </Box>
+        </Collapsible>
+      )}
+    </Shelf>
   )
 }
 
