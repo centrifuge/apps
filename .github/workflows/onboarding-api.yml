@@ -48,16 +48,10 @@ jobs:
       - name: Delete function
         run: gcloud functions delete ${{env.app_name}} --region=${{ env.region }}
       # ToDO: remove Cloudflare redirection
-  
-  prepare_checkout:
-    uses: ./.github/lib/checkout_prod.yml
-    with: 
-      deploy_prod: ${{ inputs.deploy_env == 'production' }}
 
   build:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
-    needs: prepare_checkout
     defaults:
       run:
         working-directory: onboarding-api
@@ -71,7 +65,7 @@ jobs:
       - id: checkout
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
         with:         
-          ref: '${{ needs.prepare_checkout.outputs.gitref }}'
+          ref: '${{ steps.ref.output.gitref }}'
   
       - name: Setup Node
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
@@ -135,16 +129,6 @@ jobs:
       group: ${{ github.ref }}
       cancel-in-progress: true
     steps:
-      - name: Fail if prod deploy but no tag given
-        shell: bash
-        run: |
-          if  ${{ inputs.deploy_env == 'production' }}; then 
-            if ${{ startsWith(inputs.release_tag, 'release') }}; then
-              # PROD
-              echo "::warning title=Deploying to prod::Replacing centrifuge prod function with ${{ inputs.release_tag }}"
-            else
-              echo "::error title=bad_tag::Selected production deploy but no release tag. Aborting..."
-            fi    
       - name: retrieve artifacts
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
         with:
