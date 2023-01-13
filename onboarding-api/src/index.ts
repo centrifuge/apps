@@ -1,4 +1,5 @@
-import * as functions from 'firebase-functions'
+const express = require('express')
+const cors = require('cors')
 import { businessVerificationController } from './controllers/businessVerification'
 import { businessVerificationConfirmController } from './controllers/businessVerificationConfirm'
 
@@ -6,25 +7,27 @@ const centrifugeDomains = [
   /^(https:\/\/.*cntrfg\.com)/,
   /^(https:\/\/.*centrifuge\.io)/,
   /^(https:\/\/.*altair\.network)/,
+  /^(https:\/\/pr-\d*--dev-app-cntrfg.netlify\.app)/,
 ]
 
-const cors = require('cors')({
-  origin: (origin, callback) => {
-    const isLocalhost = /^(http:\/\/localhost:)./.test(origin)
-    const isCentrifugeDomain = centrifugeDomains.some((regex) => regex.test(origin))
+const onboarding = express()
+onboarding.use(
+  cors({
+    origin: (origin, callback) => {
+      const isLocalhost = /^(http:\/\/localhost:)./.test(origin)
+      const isCentrifugeDomain = centrifugeDomains.some((regex) => regex.test(origin))
 
-    if (isLocalhost || isCentrifugeDomain) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  },
-  credentials: true,
-})
+      if (isLocalhost || isCentrifugeDomain) {
+        callback(null, true)
+      } else {
+        callback(new Error('Not allowed by CORS'))
+      }
+    },
+    credentials: true,
+  })
+)
 
-exports.businessVerification = functions.https.onRequest((request, response) =>
-  cors(request, response, () => businessVerificationController(request, response))
-)
-exports.businessVerificationConfirm = functions.https.onRequest((request, response) =>
-  cors(request, response, () => businessVerificationConfirmController(request, response))
-)
+onboarding.post('/businessVerification', businessVerificationController)
+onboarding.post('/businessVerificationConfirm', businessVerificationConfirmController)
+
+exports.onboarding = onboarding

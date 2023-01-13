@@ -1,17 +1,16 @@
 name: '.'
-on: 
-  pull_request
+on: pull_request
 
 jobs:
   check-format:
     runs-on: ubuntu-latest
-    
+
     steps:
       # Setup
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '12'
+          node-version: '16'
 
       # Cache
       - name: Get yarn cache directory path
@@ -26,6 +25,5 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - run: yarn install
-
       # Check formatting
       - run: yarn format:check

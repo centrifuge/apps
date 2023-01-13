@@ -51,3 +51,7 @@ export type LoanTemplate = {
 }
 
 export type InvestorTypes = 'individual' | 'entity'
+
+export type ultimateBeneficialOwner = {
+  name: string
+}
