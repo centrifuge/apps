@@ -48,34 +48,34 @@ runs:
       run: |
         echo "Set app name based on env strategy"
         if  ${{ inputs.set_env == 'production' }}; then
-        # Gcloud prod account
+         # Gcloud prod account
           if  ${{ github.ref == 'refs/tags/release*' }}; then
             # ALTAIR
             echo "::warning title=Deploying to prod::Replacing Altair prod function with tag ${{ github.ref }}"
-            echo "app_name=${{ inputs.app_base_name }}-altair" >> $GITHUB_ENV
-            echo "front_url=${{ inputs.app_base_name }}-altair.k-f.co" >> $GITHUB_ENV
+            echo "app_name=${{ inputs.app_base_name }}-altair" >> $GITHUB_OUTPUT
+            echo "front_url=${{ inputs.app_base_name }}-altair.k-f.co" >> $GITHUB_OUTPUT
           else
             # PROD
-            echo "app_name=${{ inputs.app_base_name }}" >> $GITHUB_ENV
-            echo "front_url=${{ inputs.app_base_name }}.k-f.co" >> $GITHUB_ENV
+            echo "app_name=${{ inputs.app_base_name }}" >> $GITHUB_OUTPUT
+            echo "front_url=${{ inputs.app_base_name }}.k-f.co" >> $GITHUB_OUTPUT
           fi
         elif  ${{ github.ref == 'refs/tags/rc*' }}; then
         # Gcloud dev account
           # CATALYST
-          echo "app_name=${{ inputs.app_base_name }}-catalyst" >> $GITHUB_ENV
-          echo "front_url=${{ inputs.app_base_name }}-catalyst.k-f.co" >> $GITHUB_ENV
+          echo "app_name=${{ inputs.app_base_name }}-catalyst" >> $GITHUB_OUTPUT
+          echo "front_url=${{ inputs.app_base_name }}-catalyst.k-f.co" >> $GITHUB_OUTPUT
         elif  ${{ github.ref == 'refs/heads/main' }}; then
           # DEV
-          echo "app_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_ENV
-          echo "front_url=${{ inputs.app_base_name }}-dev.k-f.co" >> $GITHUB_ENV
+          echo "app_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
+          echo "front_url=${{ inputs.app_base_name }}-dev.k-f.co" >> $GITHUB_OUTPUT
         elif ${{ inputs.deploy_env == 'demo' }}; then
           # DEMO
-          echo "app_name=${{ inputs.app_base_name }}-demo" >> $GITHUB_ENV
-          echo "front_url=${{ inputs.app_base_name }}-demo.k-f.co" >> $GITHUB_ENV
+          echo "app_name=${{ inputs.app_base_name }}-demo" >> $GITHUB_OUTPUT
+          echo "front_url=${{ inputs.app_base_name }}-demo.k-f.co" >> $GITHUB_OUTPUT
         else
           # PR
-          echo "app_name=${{ inputs.app_base_name }}-pr${{ github.event.number }}" >> $GITHUB_ENV
-          echo "front_url=${{ inputs.app_base_name }}-pr${{ github.event.number }}.k-f.co" >> $GITHUB_ENV
+          echo "app_name=${{ inputs.app_base_name }}-pr${{ github.event.number }}" >> $GITHUB_OUTPUT
+          echo "front_url=${{ inputs.app_base_name }}-pr${{ github.event.number }}.k-f.co" >> $GITHUB_OUTPUT
         fi
         echo "Environment stage is set:"
         echo "${{ env.app_name }}"      

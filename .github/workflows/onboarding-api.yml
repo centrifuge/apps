@@ -108,15 +108,16 @@ jobs:
           set_env: ${{ inputs.deploy_env }}
       
       - name: Fail if prod deploy but no tag given
+        if:  ${{ inputs.deploy_env == 'production' }}
         shell: bash
         run: |
-          if  ${{ inputs.deploy_env == 'production' }}; then 
-            if ${{ startsWith(inputs.release_tag, 'release') }}; then
-              # PROD
-              echo "::warning title=Deploying to prod::Replacing centrifuge prod function with ${{ inputs.release_tag }}"
-            else
-              echo "::error title=bad_tag::Selected production deploy but no release tag. Aborting..."
-            fi
+          if ${{ startsWith(inputs.release_tag, 'release') }}; then
+            # PROD
+            echo "::warning title=Deploying to prod::Replacing centrifuge prod function with ${{ inputs.release_tag }}"
+          else
+            echo "::error title=bad_tag::Selected production deploy but no release tag. Aborting..."
+          fi
+
     outputs:
       gh_env:  ${{ steps.prepare.outputs.gh_env }}
       app_name:  ${{ steps.prepare.outputs.app_name }}
