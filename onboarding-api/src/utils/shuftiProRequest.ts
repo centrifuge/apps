@@ -30,11 +30,12 @@ export const shuftiProRequest = async (_req: Request, payload: any, options?: { 
     const data = await shuftiRes.json()
     if (data.error) {
       console.log(data.error.message)
+      throw new HttpsError(400, `${payload.reference} ${data.error.message}`)
     }
     return data
   } catch (error) {
     // @ts-expect-error error typing
-    console.log(error.message)
-    throw new HttpsError(400, 'ShuftiPro request failed')
+    console.log(error.message, payload.reference)
+    throw new HttpsError(400, `ShuftiPro request failed (reference: ${payload.reference})`)
   }
 }
