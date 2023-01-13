@@ -187,7 +187,6 @@ export const Stepper = (props: StepperProps) => {
   }, [props.activeStep])
 
   const stepItems = steps.map((step, index) => {
-    console.log({ step })
     if (React.isValidElement(step)) {
       return React.cloneElement(step as React.ReactElement<EnrichedStepProps & StepProps>, {
         activeStep: props.activeStep,
