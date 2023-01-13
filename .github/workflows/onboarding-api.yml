@@ -32,7 +32,7 @@ on:
           - "demo"
 
 jobs:
-  cleanup:
+  cleanup-pr:
     runs-on: ubuntu-latest
     if: github.event.action == 'closed'
     environment: preview
@@ -55,47 +55,17 @@ jobs:
     defaults:
       run:
         working-directory: onboarding-api
-    steps:
-      - name: Set GH deployment environment
-        shell: bash
-        working-directory: './'
-        id: setenv
-        # Set Alatair and Centrifuge to deploy in the prod Gcloud account
-        # both will require approval to use the GCE prod secrets
-        run: |
-          echo "Discover GH environment for deploy:"
-          if ${{ github.ref == 'refs/tags/release*' }}; then
-            # ALTAIR
-            echo "gh_env=production" >> $GITHUB_OUTPUT
-          elif  ${{ inputs.deploy_env == 'production' }}; then 
-            if ${{ startsWith(inputs.release_tag, 'release') }}; then
-              # PROD
-              echo "gh_env=production" >> $GITHUB_OUTPUT
-            else
-              echo "::error title=bad_tag::Selected production deploy but no release tag. Aborting..."
-            fi
-          else
-            # Other ENV
-            echo "gh_env=preview" >> $GITHUB_OUTPUT
-          fi    
-
+    steps:   
       - name: set checkout SHA
-        working-directory: './'
-        shell: bash
-        run: |
-          # defaults to trigger origin:
-          echo "gitref=${{ github.ref }}" >> $GITHUB_ENV
-          if  ${{ inputs.deploy_env == 'production' }}; then 
-            if ${{ startsWith(inputs.release_tag, 'release') }}; then
-              # Override checkout with input tag for prod:
-              echo "gitref=refs/tags/${{inputs.release_tag}}" >> $GITHUB_ENV
-            fi
-          fi
+        id: ref
+        with: 
+          deploy_prod: ${{ inputs.deploy_env == 'production' }}
+        uses: ./.github/lib/checkout_prod.yml
 
       - id: checkout
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
         with:         
-          ref: '${{ env.gitref }}'
+          ref: '${{ steps.ref.output.gitref }}'
   
       - name: Setup Node
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
@@ -119,14 +89,36 @@ jobs:
           name: onboarding-api
           retention-days: 1
           path: onboarding-api/dist
+
+  prepare_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: prepare env logic
+        id: prepare
+        uses: ./.github/workflow/lib/deployment_strategy.yml
+        with:
+          app_base_name: 'onboarding-api'
+          set_env: ${{ inputs.deploy_env }}
+      
+      - name: Fail if prod deploy but no tag given
+        shell: bash
+        run: |
+          if  ${{ inputs.deploy_env == 'production' }}; then 
+            if ${{ startsWith(inputs.release_tag, 'release') }}; then
+              # PROD
+              echo "::warning title=Deploying to prod::Replacing centrifuge prod function with ${{ inputs.release_tag }}"
+            else
+              echo "::error title=bad_tag::Selected production deploy but no release tag. Aborting..."
+            fi
     outputs:
-      gh_env: ${{ steps.setenv.outputs.gh_env }}
-        
+      gh_env:  ${{ steps.prepare.outputs.gh_env }}
+      app_name:  ${{ steps.prepare.outputs.app_name }}
+  
   deployment:
     if: github.event.action != 'closed'
-    needs: build
+    needs: [build, prepare_deploy]
     runs-on: ubuntu-latest
-    environment: ${{ needs.build.outputs.gh_env }} # To control which Gcloud token is selected
+    environment: ${{ needs.prepare_deploy.outputs.gh_env }} # To control which Gcloud token is selected
     # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
     permissions:
       contents: 'read'
@@ -144,40 +136,6 @@ jobs:
       
       - name: list artifacts
         run: ls -R    
-
-      - name: Set Gfunctions name
-        shell: bash
-        # Follow deployment strategy from 
-        # https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?both#Environments
-        run: |
-          echo "Discovering the environment to deploy:"
-          if  ${{ inputs.deploy_env == 'production' }}; then
-          # Gcloud prod account
-            if  ${{ github.ref == 'refs/tags/release*' }}; then
-              # ALTAIR
-              echo "::warning title=Deploying to prod::Replacing Altair prod function with tag ${{ github.ref }}"
-              echo "app_name=onboarding-api-altair" >> $GITHUB_ENV
-            else
-              # PROD
-              echo "::warning title=Deploying to prod::Replacing centrifuge prod function with tag ${{ inputs.release_tag }}"
-              echo "app_name=onboarding-api" >> $GITHUB_ENV
-            fi
-          elif  ${{ github.ref == 'refs/tags/rc*' }}; then
-          # Gcloud dev account
-            # CATALYST
-            echo "app_name=onboarding-api-catalyst" >> $GITHUB_ENV
-          elif  ${{ github.ref == 'refs/heads/main' }}; then
-            # DEV
-            echo "app_name=onboarding-api-dev" >> $GITHUB_ENV
-          elif ${{ inputs.deploy_env == 'demo' }}; then
-            # DEMO
-            echo "app_name=onboarding-api-demo" >> $GITHUB_ENV
-          else
-            # PR
-            echo "app_name=onboarding-api-pr${{ github.event.number }}" >> $GITHUB_ENV
-          fi
-          echo "Environment stage is set:"
-          echo "${{ env.app_name }}"
           
       - name: Auth gcloud
         id: gauth
@@ -190,7 +148,7 @@ jobs:
         id: gclouddeploy
         uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
         with:
-          name: '${{ env.app_name }}'
+          name: '${{needs.prepare_deploy.outputs.app_name }}'
           runtime: 'nodejs16'
           region: '${{ env.region }}'
           source_dir: './' # downlaod artifacts sets the current directory as the one in artifact.with.path
