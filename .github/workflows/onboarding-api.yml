@@ -17,14 +17,14 @@ on:
       - '.github/workflows/onboarding-api.yml'
   workflow_dispatch:
     inputs:
-      action:
-        description: "Deploy or delete org-api in Gfunctions, select main branch for prod"
+      deploy_env:
+        description: "Environment to deploy, production will trigger an approval request"
         required: true
         type: choice
-        default: "delete"
+        default: "demo"
         options:
-          - "create" 
-          - "delete"
+          - "production" 
+          - "demo"
 
 jobs:
   cleanup:
@@ -51,7 +51,23 @@ jobs:
       run:
         working-directory: onboarding-api
     steps:
-      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
+      - name: Set GH deployment environment
+        shell: bash
+        id: setenv
+        # Set Alatair and Centrifuge to deploy in the prod Gcloud account
+        run: |
+          echo "Discover GH environment for deploy:"
+          if ${{ github.ref == 'refs/tags/release*' }} || ${{ inputs.deploy_env == 'production' }} ; then
+            if ${{ github.ref == 'refs/heads/main' }}  
+              echo "gh_env=production" >> $GITHUB_OUTPUT
+            else
+              echo "::error title=bad_branch::Selected production but not the main branch. Aborting..."
+          else
+            echo "gh_env=preview" >> $GITHUB_OUTPUT
+          fi    
+
+      - id: checkout
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
   
       - name: Setup Node
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
@@ -75,20 +91,6 @@ jobs:
           name: onboarding-api
           retention-days: 1
           path: onboarding-api/dist
-
-      - name: Set GH deployment environment
-        shell: bash
-        id: setenv
-        # Set Alatair and Centrifuge to deploy in the prod Gcloud account
-        run: |
-          echo "Discover GH environment secrets:"
-          if ${{ github.ref == 'refs/tags/release*' }} ; then  
-            echo "gh_env=production" >> $GITHUB_OUTPUT
-          elif ${{ github.ref == 'refs/heads/main' }}  && ${{ inputs.choice == 'create' }} ; then
-            echo "gh_env=production" >> $GITHUB_OUTPUT
-          else
-            echo "gh_env=preview" >> $GITHUB_OUTPUT
-          fi
     outputs:
       gh_env: ${{ steps.setenv.outputs.gh_env }}
         
@@ -121,18 +123,28 @@ jobs:
         # https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?both#Environments
         run: |
           echo "Discovering the environment to deploy:"
-          if  ${{ job.deployment.environment == 'production' }}; then
+          if  ${{ inputs.deploy_env == 'production' }}; then
+          # Gcloud prod account
             if  ${{ github.ref == 'refs/tags/release*' }}; then
+              # ALTAIR
               echo "app_name=onboarding-api-altair" >> $GITHUB_ENV
             else
+              # PROD
               echo "app_name=onboarding-api" >> $GITHUB_ENV
             fi
           elif  ${{ github.ref == 'refs/tags/rc*' }}; then
+          # Gcloud dev account
+            # CATALYST
             echo "app_name=onboarding-api-catalyst" >> $GITHUB_ENV
           elif  ${{ github.ref == 'refs/heads/main' }}; then
+            # DEV
             echo "app_name=onboarding-api-dev" >> $GITHUB_ENV
-          else 
-            echo "app_name=onboarding-api-${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+          elif ${{ inputs.deploy_env == 'demo' }}
+            # DEMO
+            echo "app_name=onboarding-api-demo" >> $GITHUB_ENV
+          else
+            # PR
+            echo "app_name=onboarding-api-pr${{ github.event.number }}" >> $GITHUB_ENV
           fi
           echo "Environment stage is set:"
           echo "${{ env.app_name }}"
