@@ -23,4 +23,8 @@ export const GlobalStyle = createGlobalStyle`
 	input[type='search']::-webkit-search-results-decoration {
 	  -webkit-appearance: none;
 	}
+
+	ul {
+		list-style: none;
+	}
 `
