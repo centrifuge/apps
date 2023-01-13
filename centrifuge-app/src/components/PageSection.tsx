@@ -1,14 +1,49 @@
-import { Box, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Collapsible, CollapsibleChevron, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import styled, { useTheme } from 'styled-components'
 
 type Props = {
   title?: string
   titleAddition?: React.ReactNode
   subtitle?: string
   headerRight?: React.ReactNode
+  collapsible?: boolean
+  defaultOpen?: boolean
 }
 
-export const PageSection: React.FC<Props> = ({ title, titleAddition, subtitle, headerRight, children }) => {
+const Chevron = styled(CollapsibleChevron)`
+  position: relative;
+  top: -0.1em;
+  align-self: center;
+`
+
+const CollapseButton = styled(Shelf)`
+  background-color: transparent;
+  outline: none;
+  border: none;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    color: ${({ theme }) => theme.colors.accentPrimary};
+  }
+`
+
+export const PageSection: React.FC<Props> = ({
+  title,
+  titleAddition,
+  subtitle,
+  headerRight,
+  collapsible,
+  defaultOpen = false,
+  children,
+}) => {
+  const [open, setOpen] = React.useState(defaultOpen)
+  const theme = useTheme()
+  console.log(theme)
+
   return (
     <Stack
       as="section"
@@ -25,11 +60,21 @@ export const PageSection: React.FC<Props> = ({ title, titleAddition, subtitle, h
         <Shelf justifyContent="space-between" as="header">
           <Stack>
             <Shelf pl={!title ? [0, 0, 4] : undefined} gap={1} alignItems="baseline">
-              {title && (
-                <Text variant="heading2" as="h1">
-                  {title}
+              {collapsible ? (
+                <Text variant="heading2" as="h2">
+                  <CollapseButton as="button" gap={2} alignItems="baseline" onClick={() => setOpen(!open)}>
+                    <Chevron open={open} />
+                    {title && <>{title}</>}
+                  </CollapseButton>
                 </Text>
+              ) : (
+                title && (
+                  <Text variant="heading2" as="h2">
+                    {title}
+                  </Text>
+                )
               )}
+
               <Text variant="body2" color="textSecondary">
                 {titleAddition}
               </Text>
@@ -44,7 +89,7 @@ export const PageSection: React.FC<Props> = ({ title, titleAddition, subtitle, h
           {headerRight}
         </Shelf>
       )}
-      <Box pl={[0, 0, 4]}>{children}</Box>
+      <Box pl={[0, 0, 4]}>{collapsible ? <Collapsible open={open}>{children}</Collapsible> : children}</Box>
     </Stack>
   )
 }
