@@ -67,7 +67,7 @@ export function getAuthModule(inst: Centrifuge) {
 
   async function verifyProxy(address: string, delegator: string, authorizedProxyTypes: string[]) {
     const proxiesData = await firstValueFrom(inst.getApi().pipe(switchMap((api) => api.query.proxy.proxies(delegator))))
-    const proxies = proxiesData.toJSON() as { delegate: string; proxyType: string }[]
+    const [proxies] = proxiesData.toJSON() as [{ delegate: string; proxyType: string }[]]
 
     const addressProxies = proxies.filter((proxy) => isSameAddress(proxy.delegate, address))
     const proxyTypes = addressProxies.map((proxy) => proxy.proxyType)
