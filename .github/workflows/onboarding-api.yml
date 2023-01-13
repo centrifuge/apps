@@ -60,7 +60,7 @@ jobs:
         id: ref
         with: 
           deploy_prod: ${{ inputs.deploy_env == 'production' }}
-        uses: ./.github/actions/checkout_prod.yml
+        uses: ./.github/actions/checkout_prod
 
       - id: checkout
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
@@ -95,7 +95,7 @@ jobs:
     steps:
       - name: prepare env logic
         id: prepare
-        uses: ./.github/workflow/actions/deployment_strategy.yml
+        uses: ./.github/actions/deployment_strategy
         with:
           app_base_name: 'onboarding-api'
           set_env: ${{ inputs.deploy_env }}
