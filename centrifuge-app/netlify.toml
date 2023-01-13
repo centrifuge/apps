@@ -7,6 +7,9 @@
 
 [dev]
   command = "yarn start:app"
+  port = 8888
+  targetPort = 3000
+  autoLaunch = false
 
 [[redirects]]
   from = "/*"
