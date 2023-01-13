@@ -16,7 +16,14 @@ on:
         type: choice
         options:
           - "production" 
-          - "demo"        
+          - "demo"  
+    outputs:      
+      app_name: 
+        value: ${{ jobs.prepare_env.outputs.app_name}}
+      frontend_url: 
+        value: ${{ jobs.prepare_env.outputs.front_url }}
+      gh_env:  
+        value: ${{ jobs.prepare_env.outputs.gh_env }}      
 
 jobs:
   prepare_env:

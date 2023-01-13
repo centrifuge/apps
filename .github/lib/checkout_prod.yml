@@ -5,6 +5,8 @@ on:
       deploy_prod:
         type: boolean
         default: false
+    outputs:
+      gitref: ${{ jobs.determine_gitref.outputs.gitref }}
 
 jobs:
   determine_gitref:
