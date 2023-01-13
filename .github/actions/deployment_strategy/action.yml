@@ -16,7 +16,7 @@ outputs:
   app_name: 
     description: "App name with environment appended"
     value: ${{ steps.naming.outputs.app_name}}
-  frontend_url: 
+  front_url: 
     description: "Full URL for your front-end piece"
     value: ${{ steps.naming.outputs.front_url }}
   gh_env:  

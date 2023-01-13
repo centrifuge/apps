@@ -156,7 +156,7 @@ jobs:
         id: gclouddeploy
         uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
         with:
-          name: '${{needs.prepare_deploy.outputs.app_name }}'
+          name: '${{ needs.prepare_deploy.outputs.app_name }}'
           runtime: 'nodejs16'
           region: '${{ env.region }}'
           source_dir: './' # downlaod artifacts sets the current directory as the one in artifact.with.path
@@ -170,9 +170,9 @@ jobs:
 
       - name: Change function to allow_unathorized calls 
         run: |
-          gcloud functions add-iam-policy-binding ${{ env.app_name }} \
-          --member="allUsers" --role="roles/cloudfunctions.invoker" \
-          --region=${{ env.region }}
+          gcloud functions add-iam-policy-binding ${{ needs.prepare_deploy.outputs.app_name }} \
+          --region=${{ env.region }} \
+          --member="allUsers" --role="roles/cloudfunctions.invoker"
 
       # ToDo: 
       # - create a redirect rule in Cloudflare using CF_API_KEY
