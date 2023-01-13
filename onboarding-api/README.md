@@ -18,7 +18,7 @@ https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?both#Desired-deployment-work
 
 DEV: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-dev
 DEMO: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-demo
-DEMO: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-catalyst
+CATALYST: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-catalyst
 ALTAIR: https://europe-central2-centrifuge-production-x.cloudfunctions.net/onboarding-api-altair
 CENTRIFUGE: https://europe-central2-centrifuge-production-x.cloudfunctions.net/onboarding-api
 
