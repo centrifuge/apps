@@ -1,5 +1,5 @@
-import path from 'path'
-import { pinFile, unpinFile } from './pinata/api'
+const path = require('path')
+const { pinFile, unpinFile } = require('./pinata/api')
 
 const fs = require('fs')
 
@@ -37,37 +37,32 @@ const dataUriToReadStream = (uri) => {
 
 const ipfsHashToURI = (hash) => `ipfs://ipfs/${hash}`
 
-const handler = async (event) => {
+const handler = async (req, res) => {
   try {
-    const { uri } = JSON.parse(event.body)
-    if (event.httpMethod === 'DELETE') {
+    const { uri } = req.body
+    if (req.method === 'DELETE') {
       const ipfsHash = parseIPFSHash(uri)
       await unpinFile(ipfsHash)
-      return {
-        statusCode: 204,
-      }
+      return res.status(204).send()
     }
 
     // check incoming data
     if (!uri) {
-      return { statusCode: 400, body: 'Bad request: uri is required' }
+      return res.status(400).send('Bad request: uri is required')
     }
 
     const fileStream = dataUriToReadStream(uri)
 
     // pin the image file
     const pinFileResponse = await pinFile(fileStream)
-    const fileHash = pinFileResponse.data.IpfsHash
+    const fileHash = pinFileResponse.IpfsHash
     const fileURL = ipfsHashToURI(fileHash)
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ uri: fileURL }),
-    }
+    return res.status(200).send(JSON.stringify({ uri: fileURL }))
   } catch (e) {
-    console.log(e)
-    return { statusCode: 500, body: e.message || 'Server error' }
+    console.log('e', e.message)
+    return res.status(500).send(e.message || 'Server error')
   }
 }
 
-export { handler }
+module.exports = handler
