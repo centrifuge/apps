@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import { array, date, InferType, object, string } from 'yup'
-import { Business, businessCollection, User, userCollection, validateAndWriteToFirestore } from '../../database'
+import { User, userCollection, validateAndWriteToFirestore } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
 
@@ -31,28 +31,26 @@ export const confirmOwnersController = async (
       body: { poolId, trancheId },
     } = req
     const userDoc = await userCollection.doc(walletAddress).get()
-    if (!userDoc.exists) {
-      throw new HttpsError(400, 'User must be created before verifying business (/createUser)')
+    const userData = userDoc.data() as User
+    if (!userDoc.exists || !userData?.business) {
+      throw new HttpsError(404, 'Business not found')
     }
 
-    const userData = userDoc.data() as User
+    if (userData.business.steps.find(({ step, completed }) => step === 'VerifyBusiness' && !completed)) {
+      throw new HttpsError(400, 'Business must be verified before confirming ownership')
+    }
+
     if (
       !userData?.pools.find(
         (pool) => pool.poolId === poolId && pool.trancheId === trancheId && pool.investorType === 'entity'
       )
     ) {
-      throw new HttpsError(400, 'Verify business is only available for investorType "entity"')
-    }
-
-    const businessDoc = await businessCollection.doc(walletAddress).get()
-    const data = businessDoc.data() as Business
-    if (!businessDoc.exists || !data) {
-      throw new HttpsError(404, 'Business not found')
+      throw new HttpsError(400, 'Bad poolId, trancheId or investorType')
     }
 
     // TODO: check if email is verified: && data?.emailVerified
-    if (businessDoc.exists && data?.kybCompleted) {
-      throw new HttpsError(400, 'Business verification step already confirmed')
+    if (userData.business.steps.filter((step) => step.completed).length === userData.business.steps.length) {
+      throw new HttpsError(400, 'KYB already completed')
     }
 
     // if (!data.emailVerified) {
@@ -60,17 +58,21 @@ export const confirmOwnersController = async (
     // }
 
     const verifyBusiness = {
-      ultimateBeneficialOwners: req.body.ultimateBeneficialOwners,
-      steps: (businessDoc?.data() as Business).steps.map((step) =>
-        step.step === 'ConfirmOwners' ? { ...step, completed: true } : step
-      ),
+      business: {
+        ultimateBeneficialOwners: req.body.ultimateBeneficialOwners,
+        steps: userData.business.steps.map((step) =>
+          step.step === 'ConfirmOwners' ? { ...step, completed: true } : step
+        ),
+      },
     }
 
-    await validateAndWriteToFirestore(walletAddress, verifyBusiness, 'BUSINESS', ['ultimateBeneficialOwners', 'steps'])
+    await validateAndWriteToFirestore(walletAddress, verifyBusiness, 'USER', [
+      'business.steps',
+      'business.ultimateBeneficialOwners',
+    ])
 
-    const freshBusinessData = (await businessCollection.doc(walletAddress).get()).data()
     const freshUserData = (await userCollection.doc(walletAddress).get()).data()
-    return res.status(200).send({ user: freshUserData, business: freshBusinessData })
+    return res.status(200).send({ user: freshUserData })
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

@@ -12,9 +12,8 @@ export type Step<Keys> = {
   completed: boolean
 }
 
-export type KYCStepKeys = 'InvestorType' | 'VerifyIdentity' | 'SignAgreement'
+export type KYCStepKeys = 'VerifyIdentity' | 'SignAgreement'
 export const KYCSteps: Step<KYCStepKeys>[] = [
-  { step: 'InvestorType', completed: false },
   { step: 'VerifyIdentity', completed: false },
   { step: 'SignAgreement', completed: false },
 ]
@@ -28,7 +27,6 @@ export const KYBSteps: Step<KYBStepKeys>[] = [
 ]
 
 export const businessSchema = object({
-  walletAddress: string().required(),
   email: string().email(),
   businessName: string(),
   incorporationDate: date(),
@@ -40,8 +38,6 @@ export const businessSchema = object({
       dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
     })
   ).max(3),
-  emailVerified: bool(),
-  kybCompleted: bool(),
   steps: array(
     object({
       completed: bool(),
@@ -52,7 +48,7 @@ export const businessSchema = object({
 
 export const userSchema = object({
   walletAddress: string().required(),
-  email: string().optional(),
+  email: string(),
   fullName: string(),
   dateOfBrith: date().min(new Date(1900, 0, 1)).max(new Date()),
   citizenship: string(),
@@ -68,30 +64,25 @@ export const userSchema = object({
     .required()
     .min(1),
   businessId: string(),
-  kycCompleted: bool(),
   steps: array(
     object({
       completed: bool(),
-      step: string().oneOf(['InvestorType', , 'VerifyIdentity', 'SignAgreement']) as StringSchema<KYCStepKeys>,
+      step: string().oneOf(['VerifyIdentity', 'SignAgreement']) as StringSchema<KYCStepKeys>,
     })
   ).default(KYCSteps),
+  business: businessSchema.optional(),
 })
 
 const firestore = new Firestore()
-export const businessCollection = firestore.collection(`onboarding-business`)
 export const userCollection = firestore.collection(`onboarding-users`)
 
 const schemas: Record<
-  'BUSINESS' | 'USER',
+  'USER',
   {
     schema: OptionalObjectSchema<any>
     collection: CollectionReference<DocumentData>
   }
 > = {
-  BUSINESS: {
-    schema: businessSchema,
-    collection: businessCollection,
-  },
   USER: {
     schema: userSchema,
     collection: userCollection,
