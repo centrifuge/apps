@@ -3,7 +3,7 @@ import { AnchorButton, IconDownload, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
-// import { usePoolLiquidityTransactions } from '../utils/usePools'
+import { usePoolLiquidityTransactions } from '../utils/usePools'
 import { Legend, LegendProps } from './Charts/Legend'
 import { StackedBarChart, StackedBarChartProps } from './Charts/StackedBarChart'
 import { PageSection } from './PageSection'
@@ -31,10 +31,8 @@ export function LiquidityTransactionsSection({
   const maxEpochs = 10
   const toEpoch = pool.epoch.lastExecuted
   const fromEpoch = toEpoch >= maxEpochs ? toEpoch - maxEpochs : 0
-  // const data = usePoolLiquidityTransactions(pool, fromEpoch, toEpoch)
-  const data = mockData(10, pool.currency.decimals)
-
-  console.log(data)
+  const data = usePoolLiquidityTransactions(pool, fromEpoch, toEpoch)
+  // const data = mockData(10, pool.currency.decimals)
 
   const dataUrl: any = React.useMemo(() => {
     if (!data || !data?.length) {
