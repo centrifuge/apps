@@ -41,7 +41,7 @@ export function LiquidityTransactionsSection({
 
     const csvData = []
     const formatted = data.map((entry) => ({
-      'Epoche index': entry.index,
+      Epoche: entry.index,
       'Opened at': `"${formatDate(entry.openedAt)}"`,
       'Executed at': `"${formatDate(entry.executedAt)}"`,
       'Closed at': `"${formatDate(entry.closedAt)}"`,
