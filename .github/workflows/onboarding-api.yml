@@ -17,6 +17,11 @@ on:
       - '.github/workflows/onboarding-api.yml'
   workflow_dispatch:
     inputs:
+      release_tag:
+        description: Tag to checkout - Useful only if you select prodution environment
+        required: false
+        type: string
+
       deploy_env:
         description: "Environment to deploy, production will trigger an approval request"
         required: true
@@ -29,7 +34,7 @@ on:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
-    if: github.event.action == 'closed' || inputs.choice == 'delete'
+    if: github.event.action == 'closed'
     environment: preview
     steps:
       - name: Auth gcloud
@@ -45,7 +50,7 @@ jobs:
       # ToDO: remove Cloudflare redirection
 
   build:
-    if: github.event.action != 'closed' || inputs.choice == 'create'
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -56,20 +61,41 @@ jobs:
         working-directory: './'
         id: setenv
         # Set Alatair and Centrifuge to deploy in the prod Gcloud account
+        # both will require approval to use the GCE prod secrets
         run: |
           echo "Discover GH environment for deploy:"
-          if ${{ github.ref == 'refs/tags/release*' }} || ${{ inputs.deploy_env == 'production' }} ; then
-            if ${{ github.ref == 'refs/heads/main' }}; then 
+          if ${{ github.ref == 'refs/tags/release*' }}; then
+            # ALTAIR
+            echo "gh_env=production" >> $GITHUB_OUTPUT
+          elif  ${{ inputs.deploy_env == 'production' }}; then 
+            if ${{ startsWith(inputs.release_tag, 'release') }}; then
+              # PROD
               echo "gh_env=production" >> $GITHUB_OUTPUT
             else
-              echo "::error title=bad_branch::Selected production but not the main branch. Aborting..."
+              echo "::error title=bad_tag::Selected production deploy but no release tag. Aborting..."
             fi
           else
+            # Other ENV
             echo "gh_env=preview" >> $GITHUB_OUTPUT
           fi    
 
+      - name: set checkout SHA
+        working-directory: './'
+        shell: bash
+        run: |
+          # defaults to trigger origin:
+          echo "gitref=${{ github.ref }}" >> $GITHUB_ENV
+          if  ${{ inputs.deploy_env == 'production' }}; then 
+            if ${{ startsWith(inputs.release_tag, 'release') }}; then
+              # Override checkout with input tag for prod:
+              echo "gitref=refs/tags/${{inputs.release_tag}}" >> $GITHUB_ENV
+            fi
+          fi
+
       - id: checkout
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
+        with:         
+          ref: '${{ env.gitref }}'
   
       - name: Setup Node
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
@@ -97,7 +123,7 @@ jobs:
       gh_env: ${{ steps.setenv.outputs.gh_env }}
         
   deployment:
-    if: github.event.action != 'closed' || inputs.choice == 'create'
+    if: github.event.action != 'closed'
     needs: build
     runs-on: ubuntu-latest
     environment: ${{ needs.build.outputs.gh_env }} # To control which Gcloud token is selected
@@ -129,9 +155,11 @@ jobs:
           # Gcloud prod account
             if  ${{ github.ref == 'refs/tags/release*' }}; then
               # ALTAIR
+              echo "::warning title=Deploying to prod::Replacing Altair prod function with tag ${{ github.ref }}"
               echo "app_name=onboarding-api-altair" >> $GITHUB_ENV
             else
               # PROD
+              echo "::warning title=Deploying to prod::Replacing centrifuge prod function with tag ${{ inputs.release_tag }}"
               echo "app_name=onboarding-api" >> $GITHUB_ENV
             fi
           elif  ${{ github.ref == 'refs/tags/rc*' }}; then
