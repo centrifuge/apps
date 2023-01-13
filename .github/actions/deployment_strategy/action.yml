@@ -77,5 +77,10 @@ runs:
           echo "app_name=${{ inputs.app_base_name }}-pr${{ github.event.number }}" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-pr${{ github.event.number }}.k-f.co" >> $GITHUB_OUTPUT
         fi
-        echo "Environment stage is set:"
-        echo "${{ env.app_name }}"      
+
+    - name: debug outputs
+      shell: bash
+      run: |
+        echo "URL ${{ steps.naming.outputs.front_url }}"
+        echo "App name: ${{ steps.naming.outputs.app_name }}"
+        
