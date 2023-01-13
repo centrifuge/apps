@@ -53,6 +53,13 @@ export const confirmOwnersController = async (
       throw new HttpsError(400, 'KYB already completed')
     }
 
+    if (
+      userDoc.exists &&
+      userData?.business.steps.find(({ step, completed }) => step === 'ConfirmOwners' && completed)
+    ) {
+      throw new HttpsError(400, 'Owners already confirmed')
+    }
+
     // if (!data.emailVerified) {
     //   throw new HttpsError(400, 'Email must be verified before completing business verification')
     // }
