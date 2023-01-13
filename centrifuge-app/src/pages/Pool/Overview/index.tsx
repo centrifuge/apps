@@ -42,7 +42,7 @@ export const PoolDetailOverviewTab: React.FC = () => {
   )
 }
 
-export const PoolDetailSideBar: React.FC<{
+const CentrifugeInvestBox: React.FC<{
   selectedToken: string | null
   setSelectedToken: (token: string | null) => void
 }> = ({ selectedToken, setSelectedToken }) => {
@@ -51,13 +51,18 @@ export const PoolDetailSideBar: React.FC<{
   const address = useAddress()
   const permissions = usePermissions(address)
   const balances = useBalances(address)
-  const allowedTranches = Object.keys(pool ? permissions?.pools[poolId]?.tranches ?? {} : {}).sort((a, b) => {
-    const tA = pool?.tranches.find((t) => t.id === a)
-    const tB = pool?.tranches.find((t) => t.id === b)
-    return tB!.seniority - tA!.seniority
+
+  const seniorityMap: Record<string, number> = {}
+  pool?.tranches.forEach((t) => (seniorityMap[t.id] = t.seniority))
+  const allowedTrancheIds = Object.keys(pool ? permissions?.pools[poolId]?.tranches ?? {} : {}).sort((a, b) => {
+    const seniorityA = seniorityMap[a]
+    const seniorityB = seniorityMap[b]
+    return seniorityB - seniorityA
   })
-  const orders = usePendingCollectMulti(poolId, allowedTranches, address)
-  const hasInvestments = allowedTranches.map((tid, i) => {
+
+  const orders = usePendingCollectMulti(poolId, allowedTrancheIds, address)
+
+  const hasInvestments = allowedTrancheIds.map((tid, i) => {
     const trancheBalance =
       balances?.tranches.find((t) => t.poolId === poolId && t.trancheId === tid)?.balance.toDecimal() ?? Dec(0)
     const order = orders?.[tid]
@@ -68,17 +73,17 @@ export const PoolDetailSideBar: React.FC<{
   })
   const hasAnyInvestment = hasInvestments.some((inv) => inv)
 
-  if (pool && permissions && selectedToken && !allowedTranches.includes(selectedToken)) {
+  if (pool && permissions && selectedToken && !allowedTrancheIds.includes(selectedToken)) {
     // TODO: Redirect to onboarding
     return <InvestRedeem poolId={poolId} trancheId={selectedToken} key="notallowed" />
   }
 
-  if (pool && permissions && !allowedTranches.length) {
+  if (pool && permissions && !allowedTrancheIds.length) {
     // TODO: Show onboarding card
     return <InvestRedeem poolId={poolId} key="notallowed" />
   }
 
-  if (allowedTranches.length && orders && !hasAnyInvestment) {
+  if (allowedTrancheIds.length && orders && !hasAnyInvestment) {
     return (
       <InvestRedeem
         poolId={poolId}
@@ -89,10 +94,10 @@ export const PoolDetailSideBar: React.FC<{
     )
   }
 
-  if (allowedTranches.length && orders && hasAnyInvestment) {
+  if (allowedTrancheIds.length && orders && hasAnyInvestment) {
     return (
       <Stack gap={2}>
-        {allowedTranches.map((tid, i) => {
+        {allowedTrancheIds.map((tid, i) => {
           if (hasInvestments[i] || tid === selectedToken) {
             return (
               <InvestRedeemBox
@@ -112,14 +117,24 @@ export const PoolDetailSideBar: React.FC<{
 
   return null
 }
+export const PoolDetailSideBar: React.FC<{
+  selectedToken: string | null
+  setSelectedToken: (token: string | null) => void
+}> = ({ selectedToken, setSelectedToken }) => {
+  const { pid: poolId } = useParams<{ pid: string }>()
+
+  // TODO: Tinlake invest box
+  if (poolId.startsWith('0x')) return null
+
+  return <CentrifugeInvestBox selectedToken={selectedToken} setSelectedToken={setSelectedToken} />
+}
 
 const InvestRedeemBox: React.FC<{
   selectedToken: string | null
   setSelectedToken: (token: string | null) => void
   poolId: string
   tokenId: string
-}> = ({ selectedToken, setSelectedToken, tokenId }) => {
-  const { pid: poolId } = useParams<{ pid: string }>()
+}> = ({ selectedToken, setSelectedToken, tokenId, poolId }) => {
   const [view, setViewState] = React.useState<'start' | 'invest' | 'redeem'>(
     selectedToken === tokenId ? 'invest' : 'start'
   )
@@ -140,6 +155,7 @@ export const PoolDetailOverview: React.FC<{
   setSelectedToken?: (token: string | null) => void
 }> = ({ setSelectedToken }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
+  const isTinlakePool = poolId.startsWith('0x')
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
@@ -164,8 +180,8 @@ export const PoolDetailOverview: React.FC<{
         apy: tranche?.interestRatePerSec ? tranche?.interestRatePerSec.toAprPercent() : Dec(0),
         protection: protection.mul(100),
         ratio: tranche.ratio.toFloat(),
-        name: metadata?.tranches?.[tranche.id]?.name || '',
-        symbol: metadata?.tranches?.[tranche.id]?.symbol || '',
+        name: tranche.currency.name,
+        symbol: tranche.currency.symbol,
         poolName: metadata?.pool?.name || '',
         seniority: Number(tranche.seniority),
         valueLocked: tranche?.tokenPrice
@@ -201,10 +217,10 @@ export const PoolDetailOverview: React.FC<{
               <InteractiveCard
                 isOpen={i === 0}
                 variant="collapsible"
-                icon={<Thumbnail label={metadata?.tranches?.[token.id]?.symbol ?? ''} type="token" />}
+                icon={<Thumbnail label={token.symbol ?? ''} type="token" />}
                 title={
                   <TextWithPlaceholder isLoading={metadataIsLoading}>
-                    {metadata?.pool?.name} {metadata?.tranches?.[token.id]?.name}
+                    {metadata?.pool?.name} {token.name}
                   </TextWithPlaceholder>
                 }
                 secondaryHeader={

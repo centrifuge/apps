@@ -1,4 +1,4 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
 import {
   Box,
   IconAlertCircle,
@@ -53,7 +53,7 @@ export const LoanPage: React.FC = () => {
 const LoanSidebar: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
-  const pool = usePool(pid)
+  const pool = usePool(pid) as Pool
   const address = useAddress()
   const permissions = usePermissions(address)
   const canBorrow = useCanBorrowAsset(pid, aid)

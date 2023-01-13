@@ -482,8 +482,8 @@ export type PoolMetadata = {
     }
     links: {
       executiveSummary: { uri: string; mime: string } | null
-      forum: string
-      website: string
+      forum?: string
+      website?: string
     }
     status: PoolStatus
     listed: boolean
@@ -494,9 +494,8 @@ export type PoolMetadata = {
   tranches: Record<
     string,
     {
-      name: string
-      symbol: string
-      minInitialInvestment: string
+      icon?: { uri: string; mime: string } | null
+      minInitialInvestment?: string
     }
   >
   loanTemplates?: {

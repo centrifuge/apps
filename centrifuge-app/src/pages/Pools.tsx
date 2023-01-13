@@ -11,8 +11,10 @@ import { Tooltips } from '../components/Tooltips'
 import { config } from '../config'
 import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
+import { useTinlakePools } from '../utils/tinlake/usePools'
 import { useMetadataMulti } from '../utils/useMetadata'
 import { usePools } from '../utils/usePools'
+import { PodConfig } from './IssuerPool/Configuration/PodConfig'
 
 export const PoolsPage: React.FC = () => {
   return (
@@ -24,19 +26,29 @@ export const PoolsPage: React.FC = () => {
 
 const Pools: React.FC = () => {
   const pools = usePools()
+  const tinlakePools = useTinlakePools()
+
+  console.log('tinlakePools', tinlakePools)
 
   const poolMetas = useMetadataMulti<PoolMetadata>(pools?.map((p) => p.metadata) ?? [])
 
   const [listedPools, listedTokens] = React.useMemo(
     () => {
-      const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed)
-      const listedTokens = listedPools?.flatMap((p) => p.tranches)
+      const listedTinlakePools = tinlakePools.data?.pools ?? []
+      const listedTinlakeTokens = listedTinlakePools.flatMap((p) => p.tranches)
+      const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed) ?? []
+      const listedTokens = listedPools.flatMap((p) => p.tranches)
 
-      return [listedPools, listedTokens]
+      return [
+        [...listedPools, ...listedTinlakePools],
+        [...listedTokens, ...listedTinlakeTokens],
+      ]
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    poolMetas.map((q) => q.data)
+    [...poolMetas.map((q) => q.data), tinlakePools]
   )
+
+  console.log('listedPools', listedPools)
 
   const totalValueLocked = React.useMemo(() => {
     return (
@@ -67,6 +79,8 @@ const Pools: React.FC = () => {
         subtitle={`Pools and tokens ${config.network === 'centrifuge' ? 'of real-world assets' : ''}`}
         actions={<MenuSwitch />}
       />
+
+      <PodConfig />
       {listedPools?.length ? (
         <>
           <PageSummary data={pageSummaryData} />

@@ -7,7 +7,7 @@ import { GroupBy, Report } from '../pages/Pool/Reporting'
 import { formatDate } from '../utils/date'
 import { formatBalance, formatPercentage } from '../utils/formatting'
 import { useLoans } from '../utils/useLoans'
-import { useDailyPoolStates, useInvestorTransactions, useMonthlyPoolStates, usePoolMetadata } from '../utils/usePools'
+import { useDailyPoolStates, useInvestorTransactions, useMonthlyPoolStates } from '../utils/usePools'
 import { Column, DataTable } from './DataTable'
 import { DataTableGroup } from './DataTableGroup'
 
@@ -37,8 +37,6 @@ type TableDataRow = {
 }
 
 export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, customFilters, startDate, endDate }) => {
-  const { data: metadata } = usePoolMetadata(pool)
-
   const dailyPoolStates = useDailyPoolStates(pool.id, startDate, endDate)
   const monthlyPoolStates = useMonthlyPoolStates(pool.id, startDate, endDate)
 
@@ -193,9 +191,8 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
       .slice()
       .reverse()
       .map((token) => {
-        const trancheMeta = metadata?.tranches?.[token.id]
         return {
-          name: `\u00A0 \u00A0 ${trancheMeta?.name} tranche`,
+          name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
           value:
             poolStates?.map((state) => {
               return state.tranches[token.id].price
@@ -218,9 +215,8 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
       .slice()
       .reverse()
       .map((token) => {
-        const trancheMeta = metadata?.tranches?.[token.id]
         return {
-          name: `\u00A0 \u00A0 ${trancheMeta?.name} tranche`,
+          name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
           value:
             poolStates?.map((state) => {
               return formatBalance(state.tranches[token.id].fulfilledInvestOrders.toDecimal())
@@ -239,9 +235,8 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
         .slice()
         .reverse()
         .map((token) => {
-          const trancheMeta = metadata?.tranches?.[token.id]
           return {
-            name: `\u00A0 \u00A0 ${trancheMeta?.name} tranche`,
+            name: `\u00A0 \u00A0 ${token.currency.name.split(' ').at(-1)} tranche`,
             value:
               poolStates?.map((state) => {
                 return formatBalance(state.tranches[token.id].fulfilledRedeemOrders.toDecimal())
@@ -292,11 +287,11 @@ export const ReportComponent: React.FC<Props> = ({ pool, report, exportRef, cust
   const investorTxRecords: TableDataRow[] =
     investorTransactions?.map((tx) => {
       const tokenId = tx.trancheId.split('-')[1]
-      const trancheMeta = metadata?.tranches?.[tokenId]
+      const token = pool.tranches.find((t) => t.id === tokenId)!
       return {
         name: ``,
         value: [
-          `${metadata?.pool?.name} ${trancheMeta?.name}`,
+          token.currency.name,
           tx.accountId,
           tx.epochNumber,
           formatDate(tx.timestamp.toString()),

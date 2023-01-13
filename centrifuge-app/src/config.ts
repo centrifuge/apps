@@ -120,4 +120,22 @@ const CENTRIFUGE: EnvironmentConfig = {
   defaultPodUrl,
 }
 
+const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK as 'goerli' | 'mainnet'
+
+const goerliConfig = {
+  rpcUrl: 'https://goerli.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5',
+  poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
+}
+const mainnetConfig = {
+  rpcUrl: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516',
+  poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
+}
+
+export const ethConfig = {
+  poolsHash: import.meta.env.REACT_APP_TINLAKE_POOLS_HASH as string,
+  network: ethNetwork,
+  multicallContractAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // Same for all networks
+  ...(ethNetwork === 'goerli' ? goerliConfig : mainnetConfig),
+}
+
 export const config = (import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge') === 'altair' ? ALTAIR : CENTRIFUGE

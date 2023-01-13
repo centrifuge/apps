@@ -1,10 +1,11 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { Grid } from '@centrifuge/fabric'
 import * as React from 'react'
+import { TinlakePool } from '../utils/tinlake/usePools'
 import { PoolCard } from './PoolCard'
 
 type Props = {
-  pools: Pool[]
+  pools: (Pool | TinlakePool)[]
 }
 
 export const PoolList: React.FC<Props> = ({ pools }) => {

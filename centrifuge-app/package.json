@@ -22,6 +22,7 @@
   "dependencies": {
     "@centrifuge/centrifuge-js": "workspace:*",
     "@centrifuge/fabric": "workspace:*",
+    "@makerdao/multicall": "^0.12.0",
     "@polkadot/api": "^9.7.1",
     "@polkadot/extension-dapp": "^0.44.1",
     "@polkadot/react-identicon": "^2.8.2",
@@ -32,6 +33,7 @@
     "@subwallet/wallet-connect": "^0.2.3",
     "axios": "^0.24.0",
     "bn.js": "^5.2.1",
+    "ethers": "^5.7.2",
     "form-data": "^4.0.0",
     "formik": "^2.2.9",
     "jw3t": "^1.0.8",

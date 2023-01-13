@@ -1,15 +1,16 @@
-import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Pool, Token } from '@centrifuge/centrifuge-js'
 import { InteractiveCard, Shelf, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
 import { formatBalance } from '../utils/formatting'
+import { TinlakePool } from '../utils/tinlake/usePools'
 import { usePoolMetadata } from '../utils/usePools'
 import { useCentrifuge } from './CentrifugeProvider'
 import { LabelValueStack } from './LabelValueStack'
 import { Tooltips } from './Tooltips'
 
 type PoolCardProps = {
-  pool: Pool
+  pool: Pool | TinlakePool
 }
 
 export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
@@ -18,7 +19,7 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
   const { data: metadata } = usePoolMetadata(pool)
 
-  const totalTrancheCapacity = pool.tranches.reduce((prev, curr) => {
+  const totalTrancheCapacity = (pool.tranches as Token[]).reduce((prev, curr) => {
     return new CurrencyBalance(prev.add(curr.capacity), pool.currency.decimals)
   }, CurrencyBalance.fromFloat(0, pool.currency.decimals))
 
@@ -38,7 +39,7 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
       secondaryHeader={
         <Shelf gap="6" justifyContent="flex-start">
           <LabelValueStack
-            label={<Tooltips type="valueLocked" variant="secondary" />}
+            label={<Tooltips type="valueLocked" variant="secondary" props={{ poolId: pool.id }} />}
             value={formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency.symbol)}
           />
           <LabelValueStack label="Tokens" value={pool.tranches.length} />
