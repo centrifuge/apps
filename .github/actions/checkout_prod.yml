@@ -1,0 +1,33 @@
+name: 'Prepare env strategy'
+description: "Selects either the origin git.ref or sets the tag for prod"
+inputs:
+  deploy_prod:
+    description: "Deploying to prod? (True/False)"
+    required: true
+    default: 'false'
+  release_tag:
+    description: "Release tag to deploy to prod"
+    required: true
+outputs:
+      gitref: 
+        value: ${{ steps.getref.outputs.gitref }}
+        description: "Github Ref (branch, tag, or commit)"
+
+runs:
+  using: composite
+  steps:
+    - name: determine branch for prod deploys
+      id: getref
+      working-directory: './'
+      shell: bash
+      run: |
+        # defaults to trigger origin:
+        echo "gitref=${{ github.ref }}" >> $GITHUB_OUTPUT
+        if  ${{ tolower(inputs.deploy_prod) == 'true' }}; then 
+          if ${{ startsWith(inputs.release_tag, 'release') }}; then
+            # Override checkout with input tag for prod:
+            echo "gitref=refs/tags/${{inputs.release_tag}}" >> $GITHUB_OUTPUT
+          else
+            echo "::error title=bad_tag::Selected production deploy but no release tag. Aborting..."
+          fi
+        fi

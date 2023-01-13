@@ -62,6 +62,12 @@ jobs:
       run:
         working-directory: onboarding-api
     steps:   
+      - name: set checkout SHA
+        id: ref
+        with: 
+          deploy_prod: ${{ inputs.deploy_env == 'production' }}
+        uses: ./.github/actions/checkout_prod.yml
+
       - id: checkout
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
         with:         
@@ -91,10 +97,28 @@ jobs:
           path: onboarding-api/dist
 
   prepare_deploy:
-    uses: .github/workflow/lib/deployment_strategy.yml
-    with:
-      app_base_name: 'onboarding-api'
-      set_env: ${{ inputs.deploy_env }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: prepare env logic
+        id: prepare
+        uses: ./.github/workflow/actions/deployment_strategy.yml
+        with:
+          app_base_name: 'onboarding-api'
+          set_env: ${{ inputs.deploy_env }}
+      
+      - name: Fail if prod deploy but no tag given
+        shell: bash
+        run: |
+          if  ${{ inputs.deploy_env == 'production' }}; then 
+            if ${{ startsWith(inputs.release_tag, 'release') }}; then
+              # PROD
+              echo "::warning title=Deploying to prod::Replacing centrifuge prod function with ${{ inputs.release_tag }}"
+            else
+              echo "::error title=bad_tag::Selected production deploy but no release tag. Aborting..."
+            fi
+    outputs:
+      gh_env:  ${{ steps.prepare.outputs.gh_env }}
+      app_name:  ${{ steps.prepare.outputs.app_name }}
   
   deployment:
     if: github.event.action != 'closed'
