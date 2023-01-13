@@ -20,50 +20,6 @@ Every endpoint expects a jw3t signed bearer token to be passed in the headers.
 authorization: Bearer <jwt-signed-token>
 ```
 
-### `POST: /createUser`
-
-Initializes user and business.
-
-**Request body**
-
-```ts
-{
-	investorType: 'entity' | 'individual'
-	poolId: string
-	trancheId: string
-}
-```
-
-**Response**
-
-```js
-{
-  "user": {
-    "walletAddress": "4e",
-    "pools": [
-      {
-        "investorType": "entity",
-        "poolId": "123abc",
-        "trancheId": "0x123456"
-      }
-    ],
-    "steps": [
-      {
-        "step": "InvestorType",
-        "completed": true // set to true in request
-      }
-      // ...
-    ]
-  },
-  "business": {
-    "walletAddress": "4exxx",
-    "steps": [
-      // ...
-    ]
-  }
-}
-```
-
 ### `POST: /verifyBusiness`
 
 KYB and AML verification
@@ -89,29 +45,33 @@ KYB and AML verification
 
 ```js
 {
-  "user": {
-    "walletAddress": "4e",
-    "pools": [
-      {
-        "investorType": "entity",
-        "poolId": "123abc",
-        "trancheId": "0x123456"
-      }
-    ],
-    "steps": [
-      // ...
-    ]
-  },
-  "business": {
-    "walletAddress": "4exxx",
-    "steps": [
-      // ...
-      {
-        "step": "VerifyBusiness",
-        "completed": true // set to true in request
-      }
-    ]
-  }
+	"user": {
+		"pools": [
+			{
+				"poolId": "123abc",
+				"investorType": "entity",
+				"trancheId": "0x123456"
+			}
+		],
+		"steps": [
+			// ...
+		],
+		"business": {
+			"jurisdictionCode": "us_ar",
+			"businessName": "Walmart inc",
+			"incorporationDate": "2021-04-11",
+			"email": "info@centrifuge.io",
+			"registrationNumber": "710794409",
+			"ultimateBeneficialOwners": [],
+			"steps": [
+				{
+					"completed": true, // set to true in request
+					"step": "VerifyBusiness"
+				},
+			// ...
+			]
+		}
+	}
 }
 ```
 
@@ -125,6 +85,8 @@ Confirm AML and KYB and update UBOs
 
 ```ts
 {
+  	trancheId: string,
+    poolId: string,
     ultimateBeneficialOwners: [
         {
             name: string,
@@ -165,3 +127,5 @@ Confirm AML and KYB and update UBOs
   }
 }
 ```
+
+### `POST: /getUser`
