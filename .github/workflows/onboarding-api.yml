@@ -53,15 +53,17 @@ jobs:
     steps:
       - name: Set GH deployment environment
         shell: bash
+        working-directory: './'
         id: setenv
         # Set Alatair and Centrifuge to deploy in the prod Gcloud account
         run: |
           echo "Discover GH environment for deploy:"
           if ${{ github.ref == 'refs/tags/release*' }} || ${{ inputs.deploy_env == 'production' }} ; then
-            if ${{ github.ref == 'refs/heads/main' }}  
+            if ${{ github.ref == 'refs/heads/main' }}; then 
               echo "gh_env=production" >> $GITHUB_OUTPUT
             else
               echo "::error title=bad_branch::Selected production but not the main branch. Aborting..."
+            fi
           else
             echo "gh_env=preview" >> $GITHUB_OUTPUT
           fi    
@@ -139,7 +141,7 @@ jobs:
           elif  ${{ github.ref == 'refs/heads/main' }}; then
             # DEV
             echo "app_name=onboarding-api-dev" >> $GITHUB_ENV
-          elif ${{ inputs.deploy_env == 'demo' }}
+          elif ${{ inputs.deploy_env == 'demo' }}; then
             # DEMO
             echo "app_name=onboarding-api-demo" >> $GITHUB_ENV
           else
