@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import { IconInfoFailed, IconSearch } from '../..'
 import { Box } from '../Box'
 import { InputBox, InputBoxProps } from '../InputBox'
-import { Stack } from '../Stack'
 import { Text } from '../Text'
 
 export type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & InputBoxProps
@@ -186,11 +185,9 @@ export const TextAreaInput: React.FC<TextAreaInputProps> = ({
       errorMessage={errorMessage}
       pr={1}
       inputElement={
-        <Stack>
-          <Text variant="body2">
-            <StyledTextArea as="textarea" mt="4px" pr={1} disabled={disabled} {...inputProps} />
-          </Text>
-        </Stack>
+        <Text variant="body2">
+          <StyledTextArea as="textarea" mt="4px" pr={1} disabled={disabled} {...inputProps} />
+        </Text>
       }
       rightElement={rightElement}
     />
