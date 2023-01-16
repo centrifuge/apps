@@ -80,7 +80,7 @@ export function getMetadataModule(inst: Centrifuge) {
 function jsonToBase64(jsonInput: Record<any, any>) {
   try {
     const json = JSON.stringify(jsonInput)
-    return btoa(json)
+    return btoa(unescape(encodeURIComponent(json)))
   } catch (error) {
     throw new Error('Invalid JSON')
   }
