@@ -21,25 +21,20 @@ export const CollapsibleChevron = styled(IconChevronDown)<{ open: boolean }>`
 export function Collapsible({ open, children }: CollapsibleProps) {
   const duration = 250
   const root = React.useRef<HTMLDivElement>(null)
-  const [enhanced, setEnhanced] = React.useState(false)
-  let animation: Animation | undefined = undefined
+  const animation = React.useRef<Animation | undefined>(undefined)
 
   React.useEffect(() => {
-    setEnhanced(root?.current?.animate !== undefined)
-  }, [root])
-
-  React.useEffect(() => {
-    if (enhanced) {
+    if (root?.current?.animate !== undefined) {
       animate()
     }
-  }, [open, enhanced])
+  }, [open])
 
   function animate() {
-    if (animation) {
-      animation.onfinish = () => {}
+    if (animation?.current) {
+      animation.current.onfinish = () => {}
     }
 
-    animation = root?.current?.animate(
+    animation.current = root?.current?.animate(
       {
         height: [`${root?.current?.clientHeight}px`, open ? `${root?.current?.scrollHeight}px` : '0px'],
       },
@@ -50,8 +45,8 @@ export function Collapsible({ open, children }: CollapsibleProps) {
       }
     )
 
-    if (open && animation) {
-      animation.onfinish = () => {
+    if (open && animation?.current) {
+      animation.current.onfinish = () => {
         root?.current?.animate({ height: 'auto' }, { duration: 0.1, fill: 'both' })
       }
     }

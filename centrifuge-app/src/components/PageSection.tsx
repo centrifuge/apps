@@ -1,6 +1,6 @@
 import { Box, Collapsible, CollapsibleChevron, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
 type Props = {
   title?: string
@@ -41,9 +41,6 @@ export const PageSection: React.FC<Props> = ({
   children,
 }) => {
   const [open, setOpen] = React.useState(defaultOpen)
-  const theme = useTheme()
-  console.log(theme)
-
   return (
     <Stack
       as="section"
