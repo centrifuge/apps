@@ -1,9 +1,10 @@
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
-import { IconChevronDown, IconChevronRight, IconChevronUp } from '../../icon'
+import { IconChevronRight } from '../../icon'
 import { Box } from '../Box'
 import { VisualButton } from '../Button'
 import { Card, CardProps } from '../Card'
+import { Collapsible, CollapsibleChevron } from '../Collapsible'
 import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
@@ -70,19 +71,15 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = ({
           </Shelf>
         </Shelf>
         <Box my="-10px">
-          <VisualButton
-            variant="tertiary"
-            active={hovered}
-            icon={
-              variant === 'default'
-                ? undefined
-                : variant === 'button'
-                ? IconChevronRight
-                : open
-                ? IconChevronUp
-                : IconChevronDown
-            }
-          />
+          {variant !== 'collapsible' ? (
+            <VisualButton
+              variant="tertiary"
+              active={hovered}
+              icon={variant === 'default' ? undefined : IconChevronRight}
+            />
+          ) : (
+            <VisualButton variant="tertiary" active={hovered} icon={<CollapsibleChevron open={open} />} />
+          )}
         </Box>
       </Header>
       {secondaryHeader && (
@@ -95,20 +92,39 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = ({
           {secondaryHeader}
         </Box>
       )}
-      {(variant !== 'collapsible' || open) && children && (
-        <Box
-          p={2}
-          backgroundColor={variant === 'collapsible' ? 'backgroundSecondary' : undefined}
-          borderBottomLeftRadius="card"
-          borderBottomRightRadius="card"
-          style={{
-            boxShadow: `0 -1px 0 ${theme.colors.borderSecondary}`,
-          }}
-        >
-          {children}
-        </Box>
-      )}
+
+      {children &&
+        (variant === 'collapsible' ? (
+          <Collapsible open={open}>
+            <Content backgroundColor="backgroundSecondary">{children}</Content>
+          </Collapsible>
+        ) : (
+          <Content>{children}</Content>
+        ))}
     </Card>
+  )
+}
+
+type ContentProps = {
+  backgroundColor?: string
+  children: React.ReactNode
+}
+
+function Content({ backgroundColor = 'none', children }: ContentProps) {
+  const { colors } = useTheme()
+
+  return (
+    <Box
+      p={2}
+      backgroundColor={backgroundColor}
+      borderBottomLeftRadius="card"
+      borderBottomRightRadius="card"
+      style={{
+        boxShadow: `0 -1px 0 ${colors.borderSecondary}`,
+      }}
+    >
+      {children}
+    </Box>
   )
 }
 
