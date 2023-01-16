@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { IconInfoFailed, IconSearch } from '../..'
 import { Box } from '../Box'
 import { InputBox, InputBoxProps } from '../InputBox'
@@ -151,7 +151,7 @@ export type TextAreaInputProps = React.InputHTMLAttributes<HTMLTextAreaElement> 
 const StyledTextArea = styled(Box)`
   display: block;
   width: 100%;
-  border: 2px solid transparent;
+  border: none;
   background: transparent;
   min-height: 66px;
   font-size: inherit;
@@ -178,20 +178,17 @@ export const TextAreaInput: React.FC<TextAreaInputProps> = ({
   rightElement,
   ...inputProps
 }) => {
-  const {
-    space: [, one, two],
-  } = useTheme()
   return (
     <InputBox
       label={label}
       secondaryLabel={secondaryLabel}
       disabled={disabled}
       errorMessage={errorMessage}
+      pr={1}
       inputElement={
-        <Stack bleedX={2} bleedY={1}>
+        <Stack>
           <Text variant="body2">
-            {/* Offset the padding by 2px, to move the browser's resize gizmo a little inwards, so it doesn't overlap the rounded border  */}
-            <StyledTextArea as="textarea" px={`${two - 2}px`} py={`${one - 2}px`} disabled={disabled} {...inputProps} />
+            <StyledTextArea as="textarea" mt="4px" pr={1} disabled={disabled} {...inputProps} />
           </Text>
         </Stack>
       }
