@@ -1,29 +1,86 @@
+import { useFormik } from 'formik'
+import { useMemo, useState } from 'react'
+import { useMutation } from 'react-query'
+import { boolean, date, object, string } from 'yup'
+import { useAuth } from '../../../components/AuthProvider'
+import { useOnboardingUser } from '../../../components/OnboardingUserProvider'
 import { AuthorizedSignerVerification } from './AuthorizedSignerVerification'
-import { CountryOfIssuance } from './CountryOfIssuance'
-import { LivelinessCheck } from './LivelinessCheck'
-import { PhotoID } from './PhotoID'
+import { IdentityVerification } from './IdentityVerification'
 
 type Props = {
-  nextKnowYourCustomerStep: () => void
   nextStep: () => void
-  activeKnowYourCustomerStep: number
+  backStep: () => void
 }
 
-export const KnowYourCustomer = ({ nextStep, activeKnowYourCustomerStep, nextKnowYourCustomerStep }: Props) => {
+const authorizedSignerInput = object({
+  name: string().required(),
+  dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
+  countryOfCitizenship: string().required(),
+  isAccurate: boolean().oneOf([true]),
+})
+
+export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
+  const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = useState<number>(0)
+
+  const { onboardingUser, refetchOnboardingUser } = useOnboardingUser()
+  const { authToken } = useAuth()
+
+  // TODO: show a completion screen
+  const isCompleted = useMemo(() => {
+    if (onboardingUser?.steps.verifyIdentity.completed) {
+      return true
+    }
+
+    return false
+  }, [onboardingUser])
+
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      dateOfBirth: '',
+      countryOfCitizenship: '',
+      isAccurate: false,
+    },
+    onSubmit: () => {
+      nextKnowYourCustomerStep()
+    },
+    validationSchema: authorizedSignerInput,
+    validateOnMount: true,
+  })
+
+  const { mutate: verifyIdentity } = useMutation(
+    async () => {
+      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyIdentity`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formik.values.name,
+          dateOfBirth: formik.values.dateOfBirth,
+          countryOfCitizenship: formik.values.countryOfCitizenship,
+        }),
+      })
+
+      return response.json()
+    },
+    {
+      onSuccess: () => {
+        refetchOnboardingUser()
+        nextStep()
+      },
+    }
+  )
+
+  const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
+
   if (activeKnowYourCustomerStep === 0) {
-    return <AuthorizedSignerVerification nextKnowYourCustomerStep={nextKnowYourCustomerStep} />
+    return <AuthorizedSignerVerification backStep={backStep} formik={formik} />
   }
 
   if (activeKnowYourCustomerStep === 1) {
-    return <CountryOfIssuance nextKnowYourCustomerStep={nextKnowYourCustomerStep} />
-  }
-
-  if (activeKnowYourCustomerStep === 2) {
-    return <PhotoID nextKnowYourCustomerStep={nextKnowYourCustomerStep} />
-  }
-
-  if (activeKnowYourCustomerStep === 3) {
-    return <LivelinessCheck nextStep={nextStep} />
+    return <IdentityVerification verifyIdentity={verifyIdentity} />
   }
 
   return null

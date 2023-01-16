@@ -1,12 +1,13 @@
-import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper, SubStep } from '@centrifuge/fabric'
+import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper } from '@centrifuge/fabric'
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AccountsMenu } from '../../components/AccountsMenu'
 import { useAuth } from '../../components/AuthProvider'
+import { useOnboardingUser } from '../../components/OnboardingUserProvider'
 import { Spinner } from '../../components/Spinner'
 import { useWeb3 } from '../../components/Web3Provider'
 import { config } from '../../config'
-import { InvestorTypes, ultimateBeneficialOwner } from '../../types'
+import { InvestorTypes } from '../../types'
 import { BusinessInformation } from './BusinessInformation'
 import { BusinessOwnership } from './BusinessOwnership'
 import { InvestorType } from './InvestorType'
@@ -15,30 +16,62 @@ import { LinkWallet } from './LinkWallet'
 
 const [_, WordMark] = config.logo
 
+// TODO: make dynamic based on the pool and tranche that the user is onboarding to
+const trancheId = 'sdf'
+const poolId = '21323432'
+
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export const OnboardingPage: React.FC = () => {
   const [activeStep, setActiveStep] = useState<number>(0)
-  const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = useState<number>(0)
 
   const { isConnecting, selectedAccount } = useWeb3()
   const [investorType, setInvestorType] = useState<InvestorTypes>()
-  const { isAuth, refetchAuth } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
-  const [ultimateBeneficialOwners, setUltimateBeneficialOwners] = useState<ultimateBeneficialOwner[]>([])
+  const { refetchAuth, isAuth } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
+  const { onboardingUser, isOnboardingUserLoading, isOnboardingUserFetched } = useOnboardingUser()
 
   const nextStep = () => setActiveStep((current) => current + 1)
-
-  const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
+  const backStep = () => setActiveStep((current) => current - 1)
 
   useEffect(() => {
-    if (!isConnecting) {
-      if (!selectedAccount || isAuth === false) {
-        setActiveStep(1)
-      } else if (isAuth && activeStep === 0) {
-        setActiveStep(2)
+    if (!isConnecting && !isAuth) {
+      setActiveStep(1)
+    }
+
+    if (!isConnecting && isOnboardingUserFetched && (!selectedAccount || !Object.keys(onboardingUser).length)) {
+      setActiveStep(1)
+    }
+
+    if (!isConnecting && selectedAccount && onboardingUser) {
+      const { investorType, steps } = onboardingUser
+
+      if (investorType === 'entity') {
+        setInvestorType('entity')
+        if (steps.signAgreements[poolId][trancheId].completed) {
+          setActiveStep(7) // done
+        } else if (steps.verifyIdentity.completed) {
+          setActiveStep(6)
+        } else if (steps.confirmOwners.completed) {
+          setActiveStep(5)
+        } else if (steps.verifyBusiness.completed) {
+          setActiveStep(4)
+        } else {
+          setActiveStep(1)
+        }
+      }
+
+      if (investorType === 'individual') {
+        setInvestorType('individual')
+        if (steps.signAgreements[poolId][trancheId].completed) {
+          setActiveStep(4) // done
+        } else if (steps.verifyIdentity.completed) {
+          setActiveStep(3)
+        } else {
+          setActiveStep(1)
+        }
       }
     }
-  }, [activeStep, isAuth, selectedAccount, isConnecting])
+  }, [onboardingUser, isConnecting, selectedAccount, isOnboardingUserFetched, isAuth])
 
   return (
     <Flex backgroundColor="backgroundSecondary" minHeight="100vh" flexDirection="column">
@@ -54,7 +87,7 @@ export const OnboardingPage: React.FC = () => {
           <AccountsMenu />
         </Box>
       </Shelf>
-      {activeStep === 0 || isConnecting ? (
+      {activeStep === 0 || isConnecting || isOnboardingUserLoading ? (
         <Box
           mx="150px"
           my={5}
@@ -82,26 +115,21 @@ export const OnboardingPage: React.FC = () => {
             <Stepper activeStep={activeStep} setActiveStep={setActiveStep}>
               <Step label="Link wallet" />
               <Step label="Selector investor type" />
-              {investorType === 'individual' && (
+              {investorType === 'individual' && activeStep > 2 && (
                 <>
                   <Step label="Identity verification" />
                   <Step label="Sign subscription agreement" />
                 </>
               )}
-              {investorType === 'entity' && (
+              {investorType === 'entity' && activeStep > 2 && (
                 <>
                   <Step label="Business information" />
                   <Step label="Business ownership" />
-                  <Step label="Authorized signer verification" activeSubStep={activeKnowYourCustomerStep}>
-                    <SubStep label="Country of issuance" />
-                    <SubStep label="Photo ID" />
-                    <SubStep label="Liveliness check" />
-                  </Step>
-                  <Step label="Tax information" />
+                  <Step label="Authorized signer verification" />
                   <Step label="Sign subscription agreement" />
                 </>
               )}
-              {investorType === undefined && <Step empty />}
+              {activeStep < 3 && <Step empty />}
             </Stepper>
           </Box>
           <Box height="100%" backgroundColor="borderPrimary" />
@@ -115,21 +143,16 @@ export const OnboardingPage: React.FC = () => {
           >
             {activeStep === 1 && <LinkWallet nextStep={nextStep} refetchAuth={refetchAuth} />}
             {activeStep === 2 && (
-              <InvestorType investorType={investorType} nextStep={nextStep} setInvestorType={setInvestorType} />
-            )}
-            {activeStep === 3 && (
-              <BusinessInformation nextStep={nextStep} setUltimateBeneficialOwners={setUltimateBeneficialOwners} />
-            )}
-            {activeStep === 4 && (
-              <BusinessOwnership nextStep={nextStep} ultimateBeneficialOwners={ultimateBeneficialOwners} />
-            )}
-            {activeStep === 5 && (
-              <KnowYourCustomer
+              <InvestorType
+                investorType={investorType}
                 nextStep={nextStep}
-                nextKnowYourCustomerStep={nextKnowYourCustomerStep}
-                activeKnowYourCustomerStep={activeKnowYourCustomerStep}
+                backStep={backStep}
+                setInvestorType={setInvestorType}
               />
             )}
+            {activeStep === 3 && <BusinessInformation nextStep={nextStep} backStep={backStep} />}
+            {activeStep === 4 && <BusinessOwnership nextStep={nextStep} backStep={backStep} />}
+            {activeStep === 5 && <KnowYourCustomer backStep={backStep} nextStep={nextStep} />}
           </Stack>
           <Box paddingTop={4} paddingRight={4} justifyContent="flex-end">
             <Link to="/">

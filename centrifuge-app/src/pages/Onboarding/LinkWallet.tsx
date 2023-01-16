@@ -1,5 +1,5 @@
 import { Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../../components/AuthProvider'
 import { DataSharingAgreementDialog } from '../../components/DataSharingAgreementDialog'
 import { useWeb3 } from '../../components/Web3Provider'
@@ -18,12 +18,6 @@ export const LinkWallet = ({ nextStep }: Props) => {
   const { selectedAccount } = useWeb3()
   const { login, isAuth } = useAuth()
 
-  useEffect(() => {
-    if (isAuth) {
-      nextStep()
-    }
-  }, [isAuth, nextStep, isAgreedToDataSharingAgreement])
-
   return (
     <Stack gap={4}>
       <Stack alignItems="flex-start" gap={4}>
@@ -37,8 +31,9 @@ export const LinkWallet = ({ nextStep }: Props) => {
             style={{
               cursor: 'pointer',
             }}
-            checked={isAgreedToDataSharingAgreement}
+            checked={isAgreedToDataSharingAgreement || isAuth}
             onChange={() => setIsAgreedToDataSharingAgreement((current) => !current)}
+            disabled={isAuth}
             label={
               <Shelf gap="4px">
                 <Text style={{ cursor: 'pointer' }}>I agree to the</Text>
@@ -63,12 +58,16 @@ export const LinkWallet = ({ nextStep }: Props) => {
             setIsDataSharingAgreementDialogOpen={setIsDataSharingAgreementDialogOpen}
           />
         </Shelf>
-        <Button
-          disabled={!selectedAccount || !isAgreedToDataSharingAgreement}
-          onClick={() => login(AUTHORIZED_ONBOARDING_PROXY_TYPES)}
-        >
-          Link your wallet
-        </Button>
+        {isAuth ? (
+          <Button onClick={() => nextStep()}>Next</Button>
+        ) : (
+          <Button
+            disabled={!selectedAccount || !isAgreedToDataSharingAgreement}
+            onClick={() => login(AUTHORIZED_ONBOARDING_PROXY_TYPES)}
+          >
+            Link your wallet
+          </Button>
+        )}
       </Stack>
     </Stack>
   )
