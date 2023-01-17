@@ -2,12 +2,12 @@ import * as React from 'react'
 import { debug, flagsConfig, Key } from './config'
 
 export type Flags = {
-  [T in Key]: typeof flagsConfig[T] extends { options: { [key: string]: infer Y } }
+  [T in Key]: (typeof flagsConfig)[T] extends { options: { [key: string]: infer Y } }
     ? Y
-    : typeof flagsConfig[T]['default']
+    : (typeof flagsConfig)[T]['default']
 }
 export type FlagsState = {
-  [T in Key]: typeof flagsConfig[T]['default']
+  [T in Key]: (typeof flagsConfig)[T]['default']
 }
 
 interface Context {

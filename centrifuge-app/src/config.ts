@@ -3,8 +3,8 @@ import { LoanInfo } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { altairDark, centrifugeLight } from '@centrifuge/fabric'
 import React from 'react'
 import { DefaultTheme } from 'styled-components'
-import { LogoAltairText } from './components/LogoAltair'
-import { LogoCentrifuge } from './components/LogoCentrifuge'
+import { LogoAltair, LogoAltairText } from './components/LogoAltair'
+import { LogoCentrifuge, LogoCentrifugeText } from './components/LogoCentrifuge'
 
 export const FEATURED_COLLECTIONS = [
   '3410462771',
@@ -59,7 +59,7 @@ const darkTheme: DefaultTheme = {
 
 type EnvironmentConfig = {
   name: string
-  logo: React.ComponentType<any>
+  logo: React.ComponentType<any>[]
   network: 'altair' | 'centrifuge'
   themes: {
     light: DefaultTheme
@@ -80,7 +80,7 @@ const defaultPodUrl: string = import.meta.env.REACT_APP_DEFAULT_NODE_URL || ''
 
 const ALTAIR: EnvironmentConfig = {
   name: 'Pools on Altair',
-  logo: LogoAltairText,
+  logo: [LogoAltair, LogoAltairText],
   network: 'altair',
   themes: {
     light: lightTheme,
@@ -98,7 +98,7 @@ const ALTAIR: EnvironmentConfig = {
 
 const CENTRIFUGE: EnvironmentConfig = {
   name: 'Centrifuge App',
-  logo: LogoCentrifuge,
+  logo: [LogoCentrifuge, LogoCentrifugeText],
   network: 'centrifuge',
   themes: {
     light: lightTheme,

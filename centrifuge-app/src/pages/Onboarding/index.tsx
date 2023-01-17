@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper } from '@centrifuge/fabric'
+import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper, SubStep } from '@centrifuge/fabric'
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AccountsMenu } from '../../components/AccountsMenu'
@@ -10,14 +10,16 @@ import { InvestorTypes, ultimateBeneficialOwner } from '../../types'
 import { BusinessInformation } from './BusinessInformation'
 import { BusinessOwnership } from './BusinessOwnership'
 import { InvestorType } from './InvestorType'
+import { KnowYourCustomer } from './KnowYourCustomer'
 import { LinkWallet } from './LinkWallet'
 
-const Logo = config.logo
+const [_, WordMark] = config.logo
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export const OnboardingPage: React.FC = () => {
   const [activeStep, setActiveStep] = useState<number>(0)
+  const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = useState<number>(0)
 
   const { isConnecting, selectedAccount } = useWeb3()
   const [investorType, setInvestorType] = useState<InvestorTypes>()
@@ -25,6 +27,8 @@ export const OnboardingPage: React.FC = () => {
   const [ultimateBeneficialOwners, setUltimateBeneficialOwners] = useState<ultimateBeneficialOwner[]>([])
 
   const nextStep = () => setActiveStep((current) => current + 1)
+
+  const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
 
   useEffect(() => {
     if (!isConnecting) {
@@ -38,16 +42,15 @@ export const OnboardingPage: React.FC = () => {
 
   return (
     <Flex backgroundColor="backgroundSecondary" minHeight="100vh" flexDirection="column">
-      <Shelf justifyContent="space-between">
-        <Shelf>
-          <Link to="/">
-            <Box px={2}>
-              <Logo />
-            </Box>
-          </Link>
-          <Box>Pool</Box>
+      <Shelf as="header" justifyContent="space-between" gap={2} p={3}>
+        <Shelf alignItems="center" gap={3}>
+          <Box as={Link} to="/" width={110}>
+            <WordMark />
+          </Box>
+
+          <Box pt={1}>Pool</Box>
         </Shelf>
-        <Box px={6} alignSelf="center" width="400px">
+        <Box width="300px">
           <AccountsMenu />
         </Box>
       </Shelf>
@@ -89,7 +92,11 @@ export const OnboardingPage: React.FC = () => {
                 <>
                   <Step label="Business information" />
                   <Step label="Business ownership" />
-                  <Step label="Authorized signer verification" />
+                  <Step label="Authorized signer verification" activeSubStep={activeKnowYourCustomerStep}>
+                    <SubStep label="Country of issuance" />
+                    <SubStep label="Photo ID" />
+                    <SubStep label="Liveliness check" />
+                  </Step>
                   <Step label="Tax information" />
                   <Step label="Sign subscription agreement" />
                 </>
@@ -115,6 +122,13 @@ export const OnboardingPage: React.FC = () => {
             )}
             {activeStep === 4 && (
               <BusinessOwnership nextStep={nextStep} ultimateBeneficialOwners={ultimateBeneficialOwners} />
+            )}
+            {activeStep === 5 && (
+              <KnowYourCustomer
+                nextStep={nextStep}
+                nextKnowYourCustomerStep={nextKnowYourCustomerStep}
+                activeKnowYourCustomerStep={activeKnowYourCustomerStep}
+              />
             )}
           </Stack>
           <Box paddingTop={4} paddingRight={4} justifyContent="flex-end">

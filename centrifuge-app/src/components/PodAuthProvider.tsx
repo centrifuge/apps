@@ -3,7 +3,7 @@ import { useMutation, useQuery } from 'react-query'
 import { useCentrifuge } from './CentrifugeProvider'
 import { useWeb3 } from './Web3Provider'
 
-const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'NodeAdmin']
+const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'PodAdmin']
 
 export const PodAuthContext = React.createContext<{
   session?: { signed: string; payload: any } | null
@@ -42,10 +42,10 @@ export const PodAuthProvider: React.FC = ({ children }) => {
 
         if (proxy) {
           const proxyType = proxy?.types.includes('Any')
-            ? 'any'
+            ? 'Any'
             : proxy?.types.includes('PodAuth')
-            ? 'pod_auth'
-            : 'node_admin'
+            ? 'PodAuth'
+            : 'PodAdmin'
 
           // @ts-expect-error Signer type version mismatch
           const { token, payload } = await cent.auth.generateJw3t(address, selectedWallet?.signer, {

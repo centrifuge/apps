@@ -22,7 +22,7 @@ export function useStoredIssuer() {
   const { data, isLoading } = usePoolMetadata(pools[0])
 
   return {
-    data: data?.pool?.issuer,
+    data: permissions ? data?.pool?.issuer : undefined,
     isLoading: isLoading || !permissions,
   }
 }

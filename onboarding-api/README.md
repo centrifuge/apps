@@ -13,6 +13,17 @@
 5. Start dev server with `yarn develop` [localhost:8080]
 
 ## Endpoints
+Deployment strategy:
+https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?both#Desired-deployment-workflow
+
+DEV: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-dev
+DEMO: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-demo
+CATALYST: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-catalyst
+ALTAIR: https://europe-central2-centrifuge-production-x.cloudfunctions.net/onboarding-api-altair
+CENTRIFUGE: https://europe-central2-centrifuge-production-x.cloudfunctions.net/onboarding-api
+
+Code Ref: https://github.com/centrifuge/apps/blob/fff5a5b8928a4e75419931f11a73cc0c91d5230b/.github/workflows/onboarding-api.yml#L126
+
 
 Every endpoint expects a jw3t signed bearer token to be passed in the headers.
 
