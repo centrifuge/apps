@@ -106,6 +106,7 @@ const initialValues: CreatePoolValues = {
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
   podEndpoint: config.defaultPodUrl ?? '',
+  listed: !window.location.hostname.includes('demo'),
 
   issuerName: '',
   issuerLogo: null,

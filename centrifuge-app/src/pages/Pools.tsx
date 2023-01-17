@@ -33,8 +33,8 @@ const Pools: React.FC = () => {
 
   const [listedPools, listedTokens] = React.useMemo(
     () => {
-      const poolAdmins = pools?.map(({ id }) => !!permissions?.pools[id]?.roles) ?? []
-      const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed || poolAdmins[i])
+      const poolVisibilities = pools?.map(({ id }) => !!permissions?.pools[id]) ?? []
+      const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed || poolVisibilities[i])
       const listedTokens = listedPools?.flatMap((p) => p.tranches)
 
       return [listedPools, listedTokens]
