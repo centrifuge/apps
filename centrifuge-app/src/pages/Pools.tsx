@@ -30,7 +30,7 @@ const Pools: React.FC = () => {
   const permissions = usePermissions(address)
 
   const poolMetas = useMetadataMulti<PoolMetadata>(pools?.map((p) => p.metadata) ?? [])
-  console.log('poolMetas', poolMetas)
+
   const [listedPools, listedTokens] = React.useMemo(
     () => {
       const poolAdmins = pools?.map(({ id }) => permissions?.pools[id]?.roles.includes('PoolAdmin')) ?? []
