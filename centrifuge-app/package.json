@@ -3,20 +3,18 @@
   "private": true,
   "scripts": {
     "start": "yarn build:fabric && yarn start:all",
-    "start:all": "run-p -l start:centjs start:fabric start:types start:functions start:app",
+    "start:all": "run-p -l start:centjs start:fabric start:types start:app",
     "start:app": "vite",
     "start:types": "tsc --watch",
     "start:fabric": "cd ../fabric && yarn start && cd ../centrifuge-app",
     "start:centjs": "cd ../centrifuge-js && yarn start && cd ../centrifuge-app",
-    "start:functions": "nodemon --watch ./functions --exec npx functions-framework --source=functions --target=lambdas",
     "build": "yarn build:fabric && yarn build:centjs && yarn build:types && yarn build:app",
     "build:app": "vite build",
     "build:types": "tsc",
     "build:fabric": "cd ../fabric && yarn build && cd ../centrifuge-app",
     "build:centjs": "cd ../centrifuge-js && yarn build && cd ../centrifuge-app",
     "lint": "eslint -c .eslintrc.js '*/**/*.{js,ts,tsx}'",
-    "lint:fix": "npm run lint -- --fix",
-    "deploy": "gcloud functions deploy lambdas --region=us-central1 --source=functions --project=peak-vista-185616 --trigger-http --runtime=nodejs16 --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com --allow-unauthenticated --entry-point=lambdas --env-vars-file functions/.env.yaml"
+    "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
     "@centrifuge/centrifuge-js": "workspace:*",
