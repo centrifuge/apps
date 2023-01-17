@@ -5,6 +5,9 @@ const routes = [
   {
     name: 'unpinFile',
   },
+  {
+    name: 'pinJson',
+  },
 ]
 
 const centrifugeDomains = [
@@ -21,7 +24,6 @@ exports.lambdas = async (req, res) => {
     }
 
     const origin = req.get('origin')
-
     const isCentrifugeDomain = centrifugeDomains.some((regex) => regex.test(origin))
     const isLocalhost = /^(http:\/\/localhost:)./.test(origin)
     if (isCentrifugeDomain || isLocalhost) {
@@ -39,15 +41,15 @@ exports.lambdas = async (req, res) => {
     }
 
     for (let route of routes) {
-      if (req.path.replace('/lambdas/', '') === route.name) {
+      const incomingPath = req.path.split('/')[req.path.split('/').length - 1]
+      if (incomingPath === route.name) {
         const method = require(`./src/${route.name}`)
         return method(req, res, route?.options ?? {})
-      } else {
-        throw new Error('No routes')
       }
     }
+    return res.status(400).send('Bad request')
   } catch (error) {
-    console.log('error', error)
+    console.log(error)
     return res.status(500).send('An error occured')
   }
 }

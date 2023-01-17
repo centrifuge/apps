@@ -1,5 +1,6 @@
 const FormData = require('form-data')
 const fetch = require('node-fetch')
+require('dotenv').config()
 
 const PINATA_BASE_URL = 'https://api.pinata.cloud'
 const PINATA_AUTH_HEADERS = {
@@ -9,7 +10,11 @@ const PINATA_AUTH_HEADERS = {
 
 const pinJson = async (jsonBody) => {
   const url = `${PINATA_BASE_URL}/pinning/pinJSONToIPFS`
-  const res = await fetch(url, { method: 'POST', body: jsonBody, headers: PINATA_AUTH_HEADERS })
+  const res = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify(jsonBody),
+    headers: { ...PINATA_AUTH_HEADERS, 'content-type': 'application/json' },
+  })
   return res.json()
 }
 

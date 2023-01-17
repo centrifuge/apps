@@ -30,6 +30,12 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ hash }),
           }),
+        pinJson: (json) =>
+          fetchLambda('pinJson', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ json }),
+          }),
       }),
     []
   )
