@@ -1,6 +1,5 @@
 const express = require('express')
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
-import { getBusinessController } from './controllers/kyb/getBusiness'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
 import { getUserController } from './controllers/user/getUser'
 import { corsMiddleware } from './middleware/cors'
@@ -14,6 +13,5 @@ onboarding.post('/getUser', getUserController)
 
 onboarding.post('/verifyBusiness', verifyBusinessController)
 onboarding.post('/confirmOwners', confirmOwnersController)
-onboarding.post('/getBusiness', getBusinessController)
 
 exports.onboarding = onboarding
