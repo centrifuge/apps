@@ -595,6 +595,7 @@ export function getPoolsModule(inst: Centrifuge) {
     return inst.getApi().pipe(
       switchMap((api) =>
         api.query.ormlAssetRegistry.metadata(currency).pipe(
+          take(1),
           switchMap((rawCurrencyMeta) => {
             const currencyMeta = rawCurrencyMeta.toHuman() as AssetCurrencyData
             return pinPoolMetadata(metadata, poolId, currencyMeta.decimals, options)
