@@ -11,7 +11,9 @@ import { Tooltips } from '../components/Tooltips'
 import { config } from '../config'
 import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
+import { useAddress } from '../utils/useAddress'
 import { useMetadataMulti } from '../utils/useMetadata'
+import { usePermissions } from '../utils/usePermissions'
 import { usePools } from '../utils/usePools'
 
 export const PoolsPage: React.FC = () => {
@@ -24,18 +26,21 @@ export const PoolsPage: React.FC = () => {
 
 const Pools: React.FC = () => {
   const pools = usePools()
+  const address = useAddress()
+  const permissions = usePermissions(address)
 
   const poolMetas = useMetadataMulti<PoolMetadata>(pools?.map((p) => p.metadata) ?? [])
-
+  console.log('poolMetas', poolMetas)
   const [listedPools, listedTokens] = React.useMemo(
     () => {
-      const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed)
+      const poolAdmins = pools?.map(({ id }) => permissions?.pools[id]?.roles.includes('PoolAdmin')) ?? []
+      const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed || poolAdmins[i])
       const listedTokens = listedPools?.flatMap((p) => p.tranches)
 
       return [listedPools, listedTokens]
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    poolMetas.map((q) => q.data)
+    [...poolMetas.map((q) => q.data), address]
   )
 
   const totalValueLocked = React.useMemo(() => {

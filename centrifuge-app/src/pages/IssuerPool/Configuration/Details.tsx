@@ -6,6 +6,7 @@ import { useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
 import { useCentrifuge } from '../../../components/CentrifugeProvider'
+import { useDebugFlags } from '../../../components/DebugFlags'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
@@ -34,6 +35,7 @@ export const Details: React.FC = () => {
   const cent = useCentrifuge()
   const prefetchMetadata = usePrefetchMetadata()
   const { data: iconFile } = useFile(metadata?.pool?.icon?.uri, 'icon')
+  const { editPoolVisibility } = useDebugFlags()
 
   const initialValues: Values = React.useMemo(
     () => ({
@@ -191,13 +193,18 @@ export const Details: React.FC = () => {
                 placeholder="https://..."
               />
 
-              <Field name="listed" validate={validate.assetClass}>
-                {({ field, meta, form }: FieldProps) => (
-                  <Stack px={2}>
-                    <LabelValueStack label="Menu listing" value={<Checkbox {...field} label="Published" />} />
-                  </Stack>
-                )}
-              </Field>
+              {!!editPoolVisibility && (
+                <Field name="listed" validate={validate.assetClass}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <Stack px={2}>
+                      <LabelValueStack
+                        label="Menu listing"
+                        value={<Checkbox {...field} checked={field.value} label="Published" />}
+                      />
+                    </Stack>
+                  )}
+                </Field>
+              )}
             </Grid>
           ) : (
             <Shelf gap={3} flexWrap="wrap">

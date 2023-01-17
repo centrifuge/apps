@@ -29,6 +29,7 @@ export type Key =
   | 'alternativeTheme'
   | 'editPoolConfig'
   | 'poolReporting'
+  | 'editPoolVisibility'
 
 export const flagsConfig: Record<Key, DebugFlagConfig> = {
   address: {
@@ -66,5 +67,10 @@ export const flagsConfig: Record<Key, DebugFlagConfig> = {
   showUnusedFlags: {
     type: 'checkbox',
     default: false,
+  },
+  editPoolVisibility: {
+    type: 'checkbox',
+    default: false,
+    alwaysShow: true,
   },
 }
