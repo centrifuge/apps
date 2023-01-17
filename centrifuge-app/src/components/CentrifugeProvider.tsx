@@ -1,7 +1,7 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
 import * as React from 'react'
 import { config } from '../config'
-import { fetchLambda } from '../utils/fetchLambda'
+import { pinToApi } from '../utils/pinToApi'
 
 const CentrifugeContext = React.createContext<Centrifuge>(null as any)
 
@@ -19,19 +19,19 @@ export const CentrifugeProvider: React.FC = ({ children }) => {
         altairSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,
         metadataHost: import.meta.env.REACT_APP_IPFS_GATEWAY as string,
         pinFile: (b64URI) =>
-          fetchLambda('pinFile', {
+          pinToApi('pinFile', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ uri: b64URI }),
           }),
         unpinFile: (hash) =>
-          fetchLambda('unpinFile', {
+          pinToApi('unpinFile', {
             method: 'DELETE',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ hash }),
           }),
         pinJson: (json) =>
-          fetchLambda('pinJson', {
+          pinToApi('pinJson', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ json }),
