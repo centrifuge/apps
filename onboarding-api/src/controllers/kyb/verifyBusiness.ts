@@ -62,7 +62,7 @@ export const verifyBusinessController = async (
     const kyb = await shuftiProRequest(req, kybPayload, { dryRun })
     const kybVerified = kyb.event === 'verification.accepted'
 
-    const user: Partial<EntityUser> = {
+    const user: EntityUser = {
       investorType: 'entity',
       walletAddress,
       email,
