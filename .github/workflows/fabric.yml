@@ -1,0 +1,44 @@
+name: 'Fabric'
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'fabric/**' # dependency
+      - '.github/workflows/fabric.yml'
+
+jobs:
+  build-n-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: fabric
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          cache: yarn
+
+      - run: yarn install
+      - run: yarn build
+      - run: yarn ci:loki
+
+      - name: Build fabric storybook
+        run: yarn build-storybook
+
+      - use: actions/upload-artifact@v3.1.2
+
+  deploy-storybook:
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: google-github-actions/auth@v3.1.2
+      - name: Publish to bucket
+      - uses: google-github-actions/deploy-cloud-functions@v3.1.2
+        publish-dir: ./fabric/storybook-static        

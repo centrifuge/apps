@@ -1,0 +1,53 @@
+name: 'NPM publish'
+on:
+  workflow_dispatch:
+    app_name:
+      description: "Choose an app to publish to NPM"
+      type: choice
+      options:
+      - fabric
+      - centrifuge-js
+      - centrifuge-react
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.app_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          cache: yarn
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Lint and build for centrifuge-js
+        run: yarn lint && yarn build
+        if: ${{ inputs.app_name == 'centrifuge-js' }}
+
+      - name: Publish
+        id: publish
+        run: JS-DevTools/npm-publish@v1
+        with:
+          token:  ${{secrets.NPM_TOKEN}}
+          package: './${{ inputs.app_name }}/package.json'
+
+      - uses: actions-ecosystem/action-push-tag@v1
+        if: steps.publish.outputs.type != 'none'
+        with:
+          tag: ${{ inputs.appname }}/v${{ steps.publish.outputs.version }}
+          message: auto-created from GHActions after publishing npm package
+
+      - if: steps.publish.outputs.type != 'none'
+        run: |
+          echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"          
