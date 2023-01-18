@@ -16,7 +16,7 @@ export function formatBalance(
     minimumFractionDigits: precision,
     maximumFractionDigits: precision,
   })
-  return currency ? `${formattedAmount} ${currency}` : formattedAmount
+  return currency ? `${formattedAmount} ${typeof currency === 'string' ? currency : currency.symbol}` : formattedAmount
 }
 
 export function formatBalanceAbbreviated(
