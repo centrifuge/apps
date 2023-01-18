@@ -13,16 +13,27 @@
 5. Start dev server with `yarn develop` [localhost:8080]
 
 ## Endpoints
+Deployment strategy:
+https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?both#Desired-deployment-workflow
 
-### `POST: /businessVerification`
+DEV: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-dev
+DEMO: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-demo
+CATALYST: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-catalyst
+ALTAIR: https://europe-central2-centrifuge-production-x.cloudfunctions.net/onboarding-api-altair
+CENTRIFUGE: https://europe-central2-centrifuge-production-x.cloudfunctions.net/onboarding-api
 
-KYB and AML verification
+Code Ref: https://github.com/centrifuge/apps/blob/fff5a5b8928a4e75419931f11a73cc0c91d5230b/.github/workflows/onboarding-api.yml#L126
 
-**Request headers**
+
+Every endpoint expects a jw3t signed bearer token to be passed in the headers.
 
 ```js
 authorization: Bearer <jwt-signed-token>
 ```
+
+### `POST: /verifyBusiness`
+
+KYB and AML verification
 
 **Request body**
 
@@ -30,12 +41,11 @@ authorization: Bearer <jwt-signed-token>
 {
     email: string
     businessName: string
-    businessIncorporationDate: string // timestamp
-    companyRegistrationNumber: string
-    companyJurisdictionCode: string // e.g az_us
+    incorporationDate: string // timestamp
+    registrationNumber: string
+    jurisdictionCode: string // e.g az_us
     trancheId: string
     poolId: string
-    address: string
     dryRun?: boolean // mock KYB and AML
 }
 ```
@@ -44,37 +54,41 @@ authorization: Bearer <jwt-signed-token>
 
 200 ok
 
-An httpOnly cookie is set that is required to confirm business ownership in the next step (`/businessVerificationConfirm`)
-
 ```js
-// ...
-ultimateBeneficialOwners: [],
-steps: {
-    email: {
-        verificationCode: "",
-        verified: false
-    },
-    kyb: {
-        requested: true,
-        verified: false
-    },
-    kyc: {
-        verified: false,
-        users: []
-    }
+{
+	"user": {
+		"pools": [
+			{
+				"poolId": "123abc",
+				"investorType": "entity",
+				"trancheId": "0x123456"
+			}
+		],
+		"steps": [
+			// ...
+		],
+		"business": {
+			"jurisdictionCode": "us_ar",
+			"businessName": "Walmart inc",
+			"incorporationDate": "2021-04-11",
+			"email": "info@centrifuge.io",
+			"registrationNumber": "710794409",
+			"ultimateBeneficialOwners": [],
+			"steps": [
+				{
+					"completed": true, // set to true in request
+					"step": "VerifyBusiness"
+				},
+			// ...
+			]
+		}
+	}
 }
 ```
 
-### `POST: /businessVerificationConfirm`
+### `POST: /confirmOwners`
 
 Confirm AML and KYB and update UBOs
-
-**Request headers**
-
-```js
-authorization: Bearer <jwt-signed-token>
-cookies: "__session=..." // httpOnly cookie set on /businessVerification
-```
 
 **Request body**
 
@@ -82,6 +96,8 @@ cookies: "__session=..." // httpOnly cookie set on /businessVerification
 
 ```ts
 {
+  	trancheId: string,
+    poolId: string,
     ultimateBeneficialOwners: [
         {
             name: string,
@@ -94,3 +110,33 @@ cookies: "__session=..." // httpOnly cookie set on /businessVerification
 **Response**
 
 200 ok
+
+```js
+{
+  "user": {
+    // ...
+    "pools": [
+      {
+        "investorType": "entity",
+        "poolId": "123abc",
+        "trancheId": "0x123456"
+      }
+    ],
+    "steps": [
+      // ...
+    ]
+  },
+  "business": {
+    // ...
+    "steps": [
+      // ...
+      {
+        "step": "ConfirmOwners",
+        "completed": true // set to true in request
+      }
+    ]
+  }
+}
+```
+
+### `POST: /getUser`

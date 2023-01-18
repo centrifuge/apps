@@ -22,20 +22,7 @@ jobs:
         with:
           node-version: '16'
           registry-url: 'https://registry.npmjs.org'
-
-      # Cache
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
-
-      - name: Cache
-        uses: actions/cache@v2
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          cache: yarn
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'

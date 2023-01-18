@@ -194,7 +194,10 @@ export const Details: React.FC = () => {
               <Field name="listed" validate={validate.assetClass}>
                 {({ field, meta, form }: FieldProps) => (
                   <Stack px={2}>
-                    <LabelValueStack label="Menu listing" value={<Checkbox {...field} label="Published" />} />
+                    <LabelValueStack
+                      label="Menu listing"
+                      value={<Checkbox {...field} checked={field.value} label="Published" />}
+                    />
                   </Stack>
                 )}
               </Field>

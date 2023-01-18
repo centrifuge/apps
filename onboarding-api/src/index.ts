@@ -1,33 +1,17 @@
 const express = require('express')
-const cors = require('cors')
-import { businessVerificationController } from './controllers/businessVerification'
-import { businessVerificationConfirmController } from './controllers/businessVerificationConfirm'
-
-const centrifugeDomains = [
-  /^(https:\/\/.*cntrfg\.com)/,
-  /^(https:\/\/.*centrifuge\.io)/,
-  /^(https:\/\/.*altair\.network)/,
-  /^(https:\/\/pr-\d*--dev-app-cntrfg.netlify\.app)/,
-]
+import { confirmOwnersController } from './controllers/kyb/confirmOwners'
+import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
+import { getUserController } from './controllers/user/getUser'
+import { corsMiddleware } from './middleware/cors'
+import { verifyJw3t } from './middleware/verifyJw3t'
 
 const onboarding = express()
-onboarding.use(
-  cors({
-    origin: (origin, callback) => {
-      const isLocalhost = /^(http:\/\/localhost:)./.test(origin)
-      const isCentrifugeDomain = centrifugeDomains.some((regex) => regex.test(origin))
+onboarding.use(corsMiddleware)
+onboarding.use(verifyJw3t)
 
-      if (isLocalhost || isCentrifugeDomain) {
-        callback(null, true)
-      } else {
-        callback(new Error('Not allowed by CORS'))
-      }
-    },
-    credentials: true,
-  })
-)
+onboarding.post('/getUser', getUserController)
 
-onboarding.post('/businessVerification', businessVerificationController)
-onboarding.post('/businessVerificationConfirm', businessVerificationConfirmController)
+onboarding.post('/verifyBusiness', verifyBusinessController)
+onboarding.post('/confirmOwners', confirmOwnersController)
 
 exports.onboarding = onboarding
