@@ -1,4 +1,4 @@
-name: 'Prepare env strategy'
+name: Env strategy
 description: 'Determine functions name, URL and GHA environment secrets'
 
 inputs:
@@ -9,7 +9,7 @@ inputs:
   app_base_name:
     description: "app name you're deploying"
     required: true
-  set_env:
+  deploy_demo:
     description: "(Optional) Manual trigger to deploy: demo or prod"
     required: false
 outputs:
@@ -22,6 +22,9 @@ outputs:
   gh_env:  
     description: "Github actions environment to use for deployment"
     value: ${{ steps.setenv.outputs.gh_env }} 
+  env_name:
+    description: "Environment name for reference"
+    value: ${{ steps.naming.outputs.env_name }}
 
 runs:
   using: composite
@@ -47,37 +50,47 @@ runs:
       # https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?both#Environments
       run: |
         echo "Set app name based on env strategy"
-        if  ${{ inputs.set_env == 'production' }}; then
-         # Gcloud prod account
-          if  ${{ github.ref == 'refs/tags/release*' }}; then
+
+        # Gcloud prod account
+        if  ${{ github.ref == 'refs/tags/release*' }}; then
+          if ${{ github.event_name == 'release' }}
+            # PROD
+            echo "app_name=${{ inputs.app_base_name }}" >> $GITHUB_OUTPUT
+            echo "front_url=${{ inputs.app_base_name }}.centrifuge.io" >> $GITHUB_OUTPUT
+            echo "env_name=production" >> $GITHUB_OUTPUT
+            echo "::warning title=Deploying to prod::Replacing centrifuge prod function with ${{ github.ref }}"
+          else
             # ALTAIR
             echo "::warning title=Deploying to prod::Replacing Altair prod function with tag ${{ github.ref }}"
             echo "app_name=${{ inputs.app_base_name }}-altair" >> $GITHUB_OUTPUT
             echo "front_url=${{ inputs.app_base_name }}-altair.k-f.co" >> $GITHUB_OUTPUT
-          else
-            # PROD
-            echo "app_name=${{ inputs.app_base_name }}" >> $GITHUB_OUTPUT
-            echo "front_url=${{ inputs.app_base_name }}.k-f.co" >> $GITHUB_OUTPUT
+            echo "env_name=altair" >> $GITHUB_OUTPUT
           fi
         elif  ${{ github.ref == 'refs/tags/rc*' }}; then
-        # Gcloud dev account
           # CATALYST
           echo "app_name=${{ inputs.app_base_name }}-catalyst" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-catalyst.k-f.co" >> $GITHUB_OUTPUT
+          echo "env_name=catalyst" >> $GITHUB_OUTPUT
         elif  ${{ github.ref == 'refs/heads/main' }}; then
           # DEV
           echo "app_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-dev.k-f.co" >> $GITHUB_OUTPUT
-        elif ${{ inputs.deploy_env == 'demo' }}; then
-          # DEMO
-          echo "app_name=${{ inputs.app_base_name }}-demo" >> $GITHUB_OUTPUT
-          echo "front_url=${{ inputs.app_base_name }}-demo.k-f.co" >> $GITHUB_OUTPUT
-        else
+          echo "env_name=dev" >> $GITHUB_OUTPUT
+          if ${{ inputs.deploy_demo == 'true' }}; then
+            # DEMO
+            echo "app_name=${{ inputs.app_base_name }}-demo" >> $GITHUB_OUTPUT
+            echo "front_url=${{ inputs.app_base_name }}-demo.k-f.co" >> $GITHUB_OUTPUT
+            echo "env_name=demo" >> $GITHUB_OUTPUT
+          fi
+        elfif ${{ github.event_name == 'pull_request' }}
           # PR
           echo "app_name=${{ inputs.app_base_name }}-pr${{ github.event.number }}" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-pr${{ github.event.number }}.k-f.co" >> $GITHUB_OUTPUT
+          echo "env_name=dev" >> $GITHUB_OUTPUT
+        else
+          echo "::error title=No env to deploy::Workflow called from non-deployable branch/tag"
         fi
-
+    
     - name: debug outputs
       shell: bash
       run: |

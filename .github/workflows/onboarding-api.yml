@@ -1,5 +1,8 @@
 name: 'onboarding-api'
 on:
+  release:
+    types:
+      - "released"
   push:
     branches:
       - main
@@ -20,22 +23,12 @@ on:
       - '.github/workflows/onboarding-api.yml'
   workflow_dispatch:
     inputs:
-      release_tag:
-        description: Tag to checkout - Useful only if you select prodution environment
-        required: false
-        type: string
-
-      deploy_env:
-        description: 'Environment to deploy, production will trigger an approval request'
+      deploy_to_demo:
+        description: "Deploy to demo?"
         required: true
-        type: choice
-        default: 'demo'
-        options:
-          - 'production'
-          - 'demo'
-
+        type: boolean
+        default: false
 jobs:
-
   build:
     runs-on: ubuntu-latest
     defaults:
@@ -45,17 +38,6 @@ jobs:
       # Check out default first
       - id: checkout
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
-
-      - name: set checkout SHA
-        if: ${{ inputs.deploy_env == 'production' }}
-        id: ref
-        uses: ./.github/actions/checkout_prod
-        with:
-          deploy_prod: ${{ inputs.deploy_env == 'production' }}
-
-      - name: print current branch
-        if: ${{ inputs.deploy_env == 'production' }}
-        run: git status
 
       - name: Setup Node
         uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
@@ -90,73 +72,18 @@ jobs:
         id: prepare
         uses: ./.github/actions/deployment_strategy
         with:
-          app_base_name: 'onboarding-api'
-          set_env: ${{ inputs.deploy_env }}
-
-      - name: Fail if prod deploy but no tag given
-        if: ${{ inputs.deploy_env == 'production' }}
-        shell: bash
-        run: |
-          if ${{ startsWith(inputs.release_tag, 'release') }}; then
-            # PROD
-            echo "::warning title=Deploying to prod::Replacing centrifuge prod function with ${{ inputs.release_tag }}"
-          else
-            echo "::error title=bad_tag::Selected production deploy but no release tag. Aborting..."
-          fi
+          app_base_name: onboarding-api
+          deploy_demo: ${{ inputs.deploy_to_demo}}
     outputs:
-      gh_env: ${{ steps.prepare.outputs.gh_env }}
-      app_name: ${{ steps.prepare.outputs.app_name }}
-
-  deployment:
+      gh_env:  ${{ steps.prepare.outputs.gh_env }}
+      app_name:  ${{ steps.prepare.outputs.app_name }}  
+  
+  trigger_function_deploy:
     needs: [build, prepare_deploy]
-    runs-on: ubuntu-latest
-    environment: ${{ needs.prepare_deploy.outputs.gh_env }} # To control which Gcloud token is selected
-    # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    env:
-      region: europe-central2
-    concurrency:
-      group: ${{ github.ref }}
-      cancel-in-progress: true
-    steps:
-      - name: retrieve artifacts
-        id: download
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
-        with:
-          name: onboarding-api
-          path: functions
-      
-      - name: list artifacts
-        run: ls -R
-
-      - name: Auth gcloud
-        id: gauth
-        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
-        with:
-          workload_identity_provider: '${{ secrets.GWIP }}'
-          service_account: '${{ secrets.GSA }}'
-
-      - name: Deploy to google functions
-        id: gclouddeploy
-        uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
-        with:
-          name: '${{ needs.prepare_deploy.outputs.app_name }}'
-          runtime: 'nodejs16'
-          region: '${{ env.region }}'
-          source_dir: './${{steps.download.outputs.download-path}}' # downlaod artifacts sets the current directory as the one in artifact.with.path
-          entry_point: 'onboarding'
-
-      - name: Print Gcloud functions URL
-        run: echo "::notice title=Function_URL::${{ steps.gclouddeploy.outputs.url }}"
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1
-
-      - name: Change function to allow_unathorized calls
-        run: |
-          gcloud functions add-iam-policy-binding ${{ needs.prepare_deploy.outputs.app_name }} \
-          --region=${{ env.region }} \
-          --member="allUsers" --role="roles/cloudfunctions.invoker"
-
+    uses: ./.github/workflow/function-deploy.yml
+    secrets: inherit
+    with:
+      function_name: ${{ needs.prepare_deploy.outputs.app_name }}
+      gh_env: ${{ needs.prepare_deploy.outputs.gh_env }}
+      artifact_name: onboarding-api
+    

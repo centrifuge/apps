@@ -1,0 +1,93 @@
+name: centrifuge-app
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "rc*"
+      - "release*"
+    paths:
+      - 'centrifuge-app/**'
+      - '.github/workflows/centrifuge-app.yml'
+  pull_request:
+    types:
+      - "opened"
+      - "synchronize"
+      - "reopened"
+      # - "closed"
+    paths:
+      - 'centrifuge-app/**'
+      - '.github/workflows/centrifuge-app.yml'
+  workflow_dispatch:
+    inputs:
+      deploy_to_demo:
+        description: "Deploy to demo?"
+        required: true
+        type: boolean
+        default: false
+jobs:        
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: centrifuge-app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: yarn
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Lint
+        run: yarn lint
+
+      - name: load general env vars
+        working-directory: ./.github/envfiles
+        run: cat ./global >> $GITHUB_ENV
+      - name: load env specific vars
+        working-directory: ./.github/envfiles
+        run: cat ./${{ steps.naming.outputs.env_name }} >> $GITHUB_ENV
+
+      - name: Build centrifuge-app
+        run: yarn build
+      
+      - uses: actions/upload-artifact@v3
+        with: 
+          name: webpack
+          path: ./centrifuge-app/build
+          if-no-files-found: error
+
+  prepare_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
+
+      - name: prepare env logic
+        id: prepare
+        uses: ./.github/actions/deployment_strategy
+        with:
+          app_base_name: ${{ inputs.app_base_name }}
+          set_env: ${{ inputs.deploy_env }}
+    outputs:
+      gh_env:  ${{ steps.prepare.outputs.gh_env }}
+      url:  ${{ steps.prepare.outputs.front_url }}         
+
+  deploy_to_gcs:
+    uses: ./.github/workflow/gcs-deploy.yml
+    needs: [prepare_deploy, build]
+    secrets: inherit 
+    with:
+      env_url: ${{ needs.prepare_deploy.front_url }}
+      gh_env: ${{ needs.prepare_deploy.gh_env }}
+      artifact_name: webpack # From the upload-artifact@ above
+
+
