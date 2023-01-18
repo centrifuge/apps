@@ -12,7 +12,7 @@ const onboarding = express()
 onboarding.use(corsMiddleware)
 onboarding.use(verifyJw3t)
 
-onboarding.post('/getUser', getUserController)
+onboarding.get('/getUser', getUserController)
 
 onboarding.post('/verifyBusiness', verifyBusinessController)
 onboarding.post('/confirmOwners', confirmOwnersController)
