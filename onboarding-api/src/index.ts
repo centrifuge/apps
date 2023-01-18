@@ -1,9 +1,12 @@
 const express = require('express')
+import * as dotenv from 'dotenv'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
 import { getUserController } from './controllers/user/getUser'
 import { corsMiddleware } from './middleware/cors'
 import { verifyJw3t } from './middleware/verifyJw3t'
+
+dotenv.config()
 
 const onboarding = express()
 onboarding.use(corsMiddleware)

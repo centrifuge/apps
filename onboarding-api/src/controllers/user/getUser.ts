@@ -1,11 +1,12 @@
 import { Request, Response } from 'express'
-import { userCollection } from '../../database'
+import { entityCollection } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 
 export const getUserController = async (req: Request, res: Response) => {
   try {
-    const user = (await userCollection.doc(req.walletAddress).get())?.data()
-    return res.send({ user })
+    const entityUser = (await entityCollection.doc(req.walletAddress).get())?.data()
+    const individualUser = (await entityCollection.doc(req.walletAddress).get())?.data()
+    return res.send({ ...(entityUser ?? individualUser ?? {}) })
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)
