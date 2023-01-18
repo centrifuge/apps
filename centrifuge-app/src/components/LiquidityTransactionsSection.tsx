@@ -1,8 +1,9 @@
-import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { Pool } from '@centrifuge/centrifuge-js'
 import { AnchorButton, IconDownload, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
+import { getCSVDownloadUrl } from '../utils/getCSVDownloadUrl'
 import { usePoolLiquidityTransactions } from '../utils/usePools'
 import { Legend, LegendProps } from './Charts/Legend'
 import { StackedBarChart, StackedBarChartProps } from './Charts/StackedBarChart'
@@ -32,14 +33,12 @@ export function LiquidityTransactionsSection({
   const toEpoch = pool.epoch.lastExecuted
   const fromEpoch = toEpoch >= maxEpochs ? toEpoch - maxEpochs : 0
   const data = usePoolLiquidityTransactions(pool, fromEpoch, toEpoch)
-  // const data = mockData(10, pool.currency.decimals)
 
   const dataUrl: any = React.useMemo(() => {
     if (!data || !data?.length) {
       return undefined
     }
 
-    const csvData = []
     const formatted = data.map((entry) => ({
       Epoche: entry.index,
       'Opened at': `"${formatDate(entry.openedAt)}"`,
@@ -53,20 +52,7 @@ export function LiquidityTransactionsSection({
         : formatBalance(0, pool.currency.symbol),
     }))
 
-    const columnHeaders = Object.keys(formatted[0])
-    csvData.push(columnHeaders)
-
-    formatted.forEach((entry) => {
-      csvData.push(Object.values(entry))
-    })
-
-    let csvContent = ''
-    csvData.forEach((row) => {
-      csvContent += row.join(',') + '\n'
-    })
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' })
-    return URL.createObjectURL(blob)
+    return getCSVDownloadUrl(formatted)
   }, [data, dataKeys, dataNames, pool.currency.symbol])
 
   const chartData: StackedBarChartProps['data'] = React.useMemo(() => {
@@ -106,7 +92,7 @@ export function LiquidityTransactionsSection({
       titleAddition={
         !!data &&
         !!data.length &&
-        formatDate(data[0].closedAt, { year: undefined }) + ' - ' + formatDate(data[data.length - 1].closedAt)
+        `${formatDate(data[0].closedAt, { year: undefined })} - ${formatDate(data[data.length - 1].closedAt)}`
       }
       headerRight={
         !!dataUrl && (
@@ -136,32 +122,4 @@ export function LiquidityTransactionsSection({
       )}
     </PageSection>
   )
-}
-
-//======================
-
-function mockData(size: number, decimals: number) {
-  const date = new Date()
-
-  return new Array(size).fill(true).map((_, index) => {
-    const newDate = new Date(date.setDate(date.getDate() + index + 1)).toISOString()
-
-    return {
-      index: index + 4,
-      closedAt: newDate,
-      executedAt: newDate,
-      id: Math.random().toString(36).substring(2),
-      openedAt: newDate,
-      sumBorrowedAmount: new CurrencyBalance(getRandomInt(10, 40000), decimals),
-      sumRepaidAmount: new CurrencyBalance(getRandomInt(0, 40000), decimals),
-      sumInvestedAmount: new CurrencyBalance(getRandomInt(10, 40000), decimals),
-      sumRedeemedAmount: new CurrencyBalance(getRandomInt(0, 40000), decimals),
-    }
-  })
-}
-
-function getRandomInt(min: number, max: number) {
-  min = Math.ceil(min)
-  max = Math.floor(max)
-  return Math.floor(Math.random() * (max - min + 1)) + min
 }
