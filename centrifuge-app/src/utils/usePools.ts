@@ -6,7 +6,7 @@ import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 
 export function usePoolLiquidityTransactions(pool: Pool, fromEpoch: number, toEpoch: number) {
-  const [result] = useCentrifugeQuery(['poolsLiquidityTransactions', pool.id], (cent) =>
+  const [result] = useCentrifugeQuery(['poolsLiquidityTransactions', pool.id, fromEpoch, toEpoch], (cent) =>
     cent.pools.getPoolLiquidityTransactions([pool, fromEpoch, toEpoch])
   )
 
