@@ -14,15 +14,12 @@ on:
         required: true
         default: development
         type: string
-      env_to_deploy:
-        required: true
-        type: string
 
 
 jobs:
   deployment:
     concurrency:
-      group: ${{ inputs_function_name }}-${{ github.ref }}
+      group: ${{ inputs.function_name }}-${{ github.ref }}
       cancel-in-progress: true    
     runs-on: ubuntu-latest
     environment: ${{ inputs.gh_env }} # To control which Gcloud token is selected
