@@ -144,7 +144,9 @@ export function usePoolPermissions(poolId?: string) {
   return result
 }
 
-export function usePoolMetadata(pool?: { metadata?: string } | { id: string; metadata: Partial<PoolMetadata> }) {
+export function usePoolMetadata(
+  pool?: { metadata?: string } | { id: string; metadata?: string | Partial<PoolMetadata> }
+) {
   const data = useMetadata<PoolMetadata>(typeof pool?.metadata === 'string' ? pool.metadata : undefined)
   const tinlakeData = useQuery(
     ['tinlakeMetadata', pool && 'id' in pool && pool.id],
