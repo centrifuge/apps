@@ -28,7 +28,9 @@ on:
 jobs:        
   build:
     runs-on: ubuntu-latest
-
+    concurrency:
+      group: cent-app-${{ github.ref }}
+      cancel-in-progress: true   
     defaults:
       run:
         working-directory: centrifuge-app

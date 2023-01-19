@@ -20,8 +20,10 @@ on:
 
 
 jobs:
-  
   deployment:
+    concurrency:
+      group: ${{ inputs_function_name }}-${{ github.ref }}
+      cancel-in-progress: true    
     runs-on: ubuntu-latest
     environment: ${{ inputs.gh_env }} # To control which Gcloud token is selected
     # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch

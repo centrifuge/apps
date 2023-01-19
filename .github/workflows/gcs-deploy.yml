@@ -18,6 +18,9 @@ on:
 jobs:
 
   deploy-gcs-website:
+    concurrency:
+      group: ${{ inputs.artifact_name }}-${{ github.ref }}
+      cancel-in-progress: true    
     runs-on: ubuntu-latest
     environment: ${{inputs.gh_env}}
     steps:

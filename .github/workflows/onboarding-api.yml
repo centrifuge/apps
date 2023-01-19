@@ -30,6 +30,9 @@ on:
         default: false
 jobs:
   build:
+    concurrency:
+      group: onboarding-${{ github.ref }}
+      cancel-in-progress: true    
     runs-on: ubuntu-latest
     defaults:
       run:
