@@ -21,7 +21,7 @@ on:
     paths:
       - 'onboarding-api/**'
       - '.github/workflows/onboarding-api.yml'
-  workflow_run:
+  workflow_call:
     inputs:
       deploy_to_demo:
         description: "Deploy to demo?"
