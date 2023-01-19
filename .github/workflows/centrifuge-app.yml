@@ -76,7 +76,7 @@ jobs:
         uses: ./.github/actions/deployment_strategy
         with:
           app_base_name: ${{ inputs.app_base_name }}
-          set_env: ${{ inputs.deploy_env }}
+          deploy_demo: ${{ inputs.deploy_to_demo }}
     outputs:
       gh_env:  ${{ steps.prepare.outputs.gh_env }}
       url:  ${{ steps.prepare.outputs.front_url }}         

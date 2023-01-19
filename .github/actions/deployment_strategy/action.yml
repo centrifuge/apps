@@ -53,7 +53,7 @@ runs:
 
         # Gcloud prod account
         if  ${{ github.ref == 'refs/tags/release*' }}; then
-          if ${{ github.event_name == 'release' }}
+          if ${{ github.event_name == 'release' }}; then
             # PROD
             echo "app_name=${{ inputs.app_base_name }}" >> $GITHUB_OUTPUT
             echo "front_url=${{ inputs.app_base_name }}.centrifuge.io" >> $GITHUB_OUTPUT
@@ -82,7 +82,7 @@ runs:
             echo "front_url=${{ inputs.app_base_name }}-demo.k-f.co" >> $GITHUB_OUTPUT
             echo "env_name=demo" >> $GITHUB_OUTPUT
           fi
-        elfif ${{ github.event_name == 'pull_request' }}
+        elif ${{ github.event_name == 'pull_request' }}; then
           # PR
           echo "app_name=${{ inputs.app_base_name }}-pr${{ github.event.number }}" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-pr${{ github.event.number }}.k-f.co" >> $GITHUB_OUTPUT
