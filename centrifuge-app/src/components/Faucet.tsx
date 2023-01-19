@@ -1,10 +1,10 @@
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { FaucetConfirmationDialog } from './Dialogs/FaucetConfirmationDialog'
-import { useWeb3 } from './Web3Provider'
 
 export const Faucet: React.VFC = () => {
-  const { selectedAccount } = useWeb3()
+  const { selectedAccount } = useWallet()
   const [hash, setHash] = React.useState('')
   const [error, setError] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)

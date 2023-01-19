@@ -1,8 +1,8 @@
 import { Perquintill } from '@centrifuge/centrifuge-js'
+import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import Decimal from 'decimal.js-light'
 import React from 'react'
 import { LiquidityTableRow } from '../components/EpochList'
-import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { usePool, usePoolOrders } from './usePools'
 
 type Liquidity = {

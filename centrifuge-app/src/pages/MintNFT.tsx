@@ -1,4 +1,5 @@
 import { NFTMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
+import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -14,7 +15,6 @@ import {
 import { lastValueFrom } from '@polkadot/api-base/node_modules/rxjs'
 import React, { useReducer, useState } from 'react'
 import { useHistory, useParams } from 'react-router'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useDebugFlags } from '../components/DebugFlags'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
@@ -25,7 +25,6 @@ import { getFileDataURI } from '../utils/getFileDataURI'
 import { useAddress } from '../utils/useAddress'
 import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useIsPageUnchanged } from '../utils/useIsPageUnchanged'
 import { isSameAddress } from '../utils/web3'

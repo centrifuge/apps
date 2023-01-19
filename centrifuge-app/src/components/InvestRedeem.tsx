@@ -1,4 +1,5 @@
 import { CurrencyBalance, findBalance, Pool, TokenBalance } from '@centrifuge/centrifuge-js'
+import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
@@ -26,8 +27,6 @@ import styled from 'styled-components'
 import { Dec } from '../utils/Decimal'
 import { formatBalance, roundDown } from '../utils/formatting'
 import { useAddress } from '../utils/useAddress'
-import { useBalances } from '../utils/useBalances'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { useFocusInvalidInput } from '../utils/useFocusInvalidInput'
 import { usePermissions } from '../utils/usePermissions'

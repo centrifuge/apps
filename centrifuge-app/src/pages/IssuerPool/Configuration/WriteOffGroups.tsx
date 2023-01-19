@@ -1,4 +1,5 @@
 import { Rate, WriteOffGroup } from '@centrifuge/centrifuge-js'
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Stack } from '@centrifuge/fabric'
 import { FieldArray, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
@@ -7,7 +8,6 @@ import { ButtonGroup } from '../../../components/ButtonGroup'
 import { Column, DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
 import { formatPercentage } from '../../../utils/formatting'
-import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { useConstants, useWriteOffGroups } from '../../../utils/usePools'
 import { WriteOffInput } from './WriteOffInput'
 

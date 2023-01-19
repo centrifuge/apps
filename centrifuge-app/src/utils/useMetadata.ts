@@ -1,8 +1,8 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { lastValueFrom } from '@polkadot/api-base/node_modules/rxjs'
 import { useCallback } from 'react'
 import { useQueries, useQuery, useQueryClient, UseQueryResult } from 'react-query'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 
 type Schema = {
   [key: string]: {

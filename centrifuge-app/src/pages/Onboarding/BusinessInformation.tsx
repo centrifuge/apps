@@ -1,9 +1,9 @@
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, DateInput, InlineFeedback, NumberInput, Select, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import { useMutation } from 'react-query'
 import { date, object, string } from 'yup'
 import { useAuth } from '../../components/AuthProvider'
-import { useWeb3 } from '../../components/Web3Provider'
 import { ultimateBeneficialOwner } from '../../types'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
 
@@ -42,7 +42,7 @@ const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) =>
 }
 
 export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: Props) => {
-  const { selectedAccount } = useWeb3()
+  const { selectedAccount } = useWallet()
   const { authToken } = useAuth()
 
   const formik = useFormik({

@@ -1,3 +1,10 @@
+import { UserProvidedConfig } from '@centrifuge/centrifuge-js'
+import {
+  CentrifugeProvider,
+  TransactionProvider,
+  TransactionToasts,
+  WalletProvider,
+} from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Helmet, HelmetProvider } from 'react-helmet-async'
@@ -19,16 +26,13 @@ import { OnboardingPage } from '../pages/Onboarding'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
+import { fetchLambda } from '../utils/fetchLambda'
 import { AuthProvider } from './AuthProvider'
-import { CentrifugeProvider } from './CentrifugeProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { LoadBoundary } from './LoadBoundary'
 import { PodAuthProvider } from './PodAuthProvider'
-import { TransactionProvider } from './TransactionsProvider'
-import { TransactionToasts } from './TransactionToasts'
-import { Web3Provider } from './Web3Provider'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,6 +41,30 @@ const queryClient = new QueryClient({
     },
   },
 })
+
+const centConfig: UserProvidedConfig = {
+  network: config.network,
+  kusamaWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL,
+  polkadotWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL,
+  altairWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL,
+  centrifugeWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL,
+  printExtrinsics: import.meta.env.NODE_ENV === 'development',
+  centrifugeSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL,
+  altairSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL,
+  metadataHost: import.meta.env.REACT_APP_IPFS_GATEWAY,
+  pinFile: (b64URI) =>
+    fetchLambda('pinFile', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ uri: b64URI }),
+    }),
+  unpinFile: (hash) =>
+    fetchLambda('unpinFile', {
+      method: 'DELETE',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ hash }),
+    }),
+}
 
 export const Root: React.VFC = () => {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
@@ -60,14 +88,14 @@ export const Root: React.VFC = () => {
         >
           <GlobalStyle />
           <FabricGlobalStyle />
-          <CentrifugeProvider>
+          <CentrifugeProvider config={centConfig}>
             <DemoBanner />
-            <Web3Provider>
+            <WalletProvider>
               <PodAuthProvider>
                 <AuthProvider>
                   <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
                     <TransactionProvider>
-                      <TransactionToasts />
+                      <TransactionToasts subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL} />
                       <Router>
                         <LoadBoundary>
                           <Routes />
@@ -77,7 +105,7 @@ export const Root: React.VFC = () => {
                   </DebugFlags>
                 </AuthProvider>
               </PodAuthProvider>
-            </Web3Provider>
+            </WalletProvider>
           </CentrifugeProvider>
         </FabricProvider>
       </QueryClientProvider>

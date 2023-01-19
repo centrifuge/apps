@@ -1,12 +1,11 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { useBalances, WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Grid, Shelf, Stack } from '@centrifuge/fabric'
 import React from 'react'
 import { useTheme } from 'styled-components'
 import { config } from '../config'
 import { useAddress } from '../utils/useAddress'
-import { useBalances } from '../utils/useBalances'
 import { useIsAboveBreakpoint } from '../utils/useIsAboveBreakpoint'
-import { AccountsMenu } from './AccountsMenu'
 import { Faucet } from './Faucet'
 import { Footer } from './Footer'
 import { LoadBoundary } from './LoadBoundary'
@@ -75,7 +74,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
           <Shelf justifyContent="space-between">
             <LogoLink />
             <Stack gap={4}>
-              <AccountsMenu />
+              <WalletMenu />
             </Stack>
           </Shelf>
         ) : (
@@ -131,7 +130,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
           ) : (
             <Stack gap={1} position="sticky" top={0} p={[0, 0, 3]}>
               <Stack mb={9} px={8} gap={4}>
-                <AccountsMenu />
+                <WalletMenu />
               </Stack>
 
               {import.meta.env.REACT_APP_FAUCET_URL && hasLowDevelBalance && hasLowAusdBalance && <Faucet />}
