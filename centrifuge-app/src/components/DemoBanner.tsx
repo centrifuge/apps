@@ -3,11 +3,10 @@ import React from 'react'
 
 export const DemoBanner = () => {
   const storageKey = 'demo-banner-seen'
-  const [isDemo, setIsDemo] = React.useState(false)
+  const isDemo = window.location.hostname.includes('demo')
   const [isOpen, setIsOpen] = React.useState(false)
 
   React.useEffect(() => {
-    setIsDemo(window.location.hostname.includes('demo'))
     setIsOpen(localStorage.getItem(storageKey) !== 'true')
   }, [])
 
