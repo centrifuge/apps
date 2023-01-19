@@ -27,6 +27,10 @@ jobs:
         with:
           name: ${{ inputs.artifact_name }}
           path: webpack
+      ## Every module from here on could potentially expose the Gcloud Auth Token
+      ## Do not add untrusted code with `uses`
+      ## Ideally run only google-github-actions code with commit SHA at the end from here on
+      ## or `run` commands that we write.
 
       - name: Auth gcloud
         id: gauth
@@ -49,10 +53,17 @@ jobs:
       - name: push to bucket
         id: push
         run: gsutil -m rsync -d -c -r ${{steps.download.outputs.download-path}} gs://${{ inputs.env_url }}
-
+  
+  comment_pr:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: deploy-gcs-website
+    steps:
+    # This step is separated to avoid using it while having access to Gcloud Auth credentials
+    # saved in GH environments
       - name: PR comment with preview URL
         uses: thollander/actions-comment-pull-request@v2
-        if: github.event_name == 'pull_request' && steps.push.outcome == 'success'
+        # if: github.event_name == 'pull_request' && steps.push.outcome == 'success'
         with:
           message: |
             Deployed webiste in Google Cloud

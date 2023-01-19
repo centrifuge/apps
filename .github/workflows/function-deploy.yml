@@ -43,7 +43,10 @@ jobs:
       
       - name: list artifacts
         run: ls -R    
-          
+      ## Every module from here on could potentially expose the Gcloud Auth Token
+      ## Do not add untrusted code with `uses`
+      ## Ideally run only google-github-actions code with commit SHA at the end from here on
+      ## or `run` commands that we write.
       - name: Auth gcloud
         id: gauth
         uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
