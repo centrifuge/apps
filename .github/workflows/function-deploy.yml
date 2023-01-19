@@ -32,9 +32,6 @@ jobs:
       id-token: 'write'
     env:
       region: europe-central2
-    concurrency:
-      group: ${{ github.ref }}-${{ inputs.function_name }}
-      cancel-in-progress: true
     steps:
       - name: retrieve artifacts
         id: download
