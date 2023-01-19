@@ -1,11 +1,11 @@
 import { Request, Response } from 'express'
-import { entityCollection } from '../../database'
+import { entityCollection, individualCollection } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 
 export const getUserController = async (req: Request, res: Response) => {
   try {
     const entityUser = (await entityCollection.doc(req.walletAddress).get())?.data()
-    const individualUser = (await entityCollection.doc(req.walletAddress).get())?.data()
+    const individualUser = (await individualCollection.doc(req.walletAddress).get())?.data()
     return res.send({ ...(entityUser ?? individualUser ?? {}) })
   } catch (error) {
     if (error instanceof HttpsError) {
