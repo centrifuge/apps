@@ -28,47 +28,45 @@ export const OnboardingPage: React.FC = () => {
   const { isConnecting, selectedAccount } = useWeb3()
   const [investorType, setInvestorType] = useState<InvestorTypes>()
   const { refetchAuth, isAuth } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
-  const { onboardingUser, isOnboardingUserLoading, isOnboardingUserFetched } = useOnboardingUser()
+  const { onboardingUser, isOnboardingUserFetching, isOnboardingUserFetched } = useOnboardingUser()
 
   const nextStep = () => setActiveStep((current) => current + 1)
   const backStep = () => setActiveStep((current) => current - 1)
 
   useEffect(() => {
     if (!isConnecting && !isAuth) {
-      setActiveStep(1)
+      return setActiveStep(1)
     }
 
     if (!isConnecting && isOnboardingUserFetched && (!selectedAccount || !Object.keys(onboardingUser).length)) {
-      setActiveStep(1)
+      return setActiveStep(1)
     }
 
     if (!isConnecting && selectedAccount && onboardingUser) {
-      const { investorType, steps } = onboardingUser
-
-      if (investorType === 'entity') {
+      if (onboardingUser.investorType === 'entity') {
         setInvestorType('entity')
-        if (steps.signAgreements[poolId][trancheId].completed) {
-          setActiveStep(7) // done
-        } else if (steps.verifyIdentity.completed) {
-          setActiveStep(6)
-        } else if (steps.confirmOwners.completed) {
-          setActiveStep(5)
-        } else if (steps.verifyBusiness.completed) {
-          setActiveStep(4)
-        } else {
-          setActiveStep(1)
+        if (onboardingUser.steps.signAgreements[poolId][trancheId].completed) {
+          return setActiveStep(7) // done
+        } else if (onboardingUser.steps.verifyIdentity.completed) {
+          return setActiveStep(6)
+        } else if (onboardingUser.steps.confirmOwners.completed) {
+          return setActiveStep(5)
+        } else if (onboardingUser.steps.verifyBusiness.completed) {
+          return setActiveStep(4)
         }
+
+        return setActiveStep(1)
       }
 
-      if (investorType === 'individual') {
+      if (onboardingUser.investorType === 'individual') {
         setInvestorType('individual')
-        if (steps.signAgreements[poolId][trancheId].completed) {
-          setActiveStep(4) // done
-        } else if (steps.verifyIdentity.completed) {
-          setActiveStep(3)
-        } else {
-          setActiveStep(1)
+        if (onboardingUser.steps.signAgreements[poolId][trancheId].completed) {
+          return setActiveStep(4) // done
+        } else if (onboardingUser.steps.verifyIdentity.completed) {
+          return setActiveStep(3)
         }
+
+        return setActiveStep(1)
       }
     }
   }, [onboardingUser, isConnecting, selectedAccount, isOnboardingUserFetched, isAuth])
@@ -87,7 +85,7 @@ export const OnboardingPage: React.FC = () => {
           <AccountsMenu />
         </Box>
       </Shelf>
-      {activeStep === 0 || isConnecting || isOnboardingUserLoading ? (
+      {activeStep === 0 || isConnecting || isOnboardingUserFetching ? (
         <Box
           mx="150px"
           my={5}
@@ -115,13 +113,13 @@ export const OnboardingPage: React.FC = () => {
             <Stepper activeStep={activeStep} setActiveStep={setActiveStep}>
               <Step label="Link wallet" />
               <Step label="Selector investor type" />
-              {investorType === 'individual' && activeStep > 2 && (
+              {investorType === 'individual' && (activeStep > 2 || !!onboardingUser?.investorType) && (
                 <>
                   <Step label="Identity verification" />
                   <Step label="Sign subscription agreement" />
                 </>
               )}
-              {investorType === 'entity' && activeStep > 2 && (
+              {investorType === 'entity' && (activeStep > 2 || !!onboardingUser?.investorType) && (
                 <>
                   <Step label="Business information" />
                   <Step label="Business ownership" />
@@ -129,7 +127,7 @@ export const OnboardingPage: React.FC = () => {
                   <Step label="Sign subscription agreement" />
                 </>
               )}
-              {activeStep < 3 && <Step empty />}
+              {activeStep < 3 && <Step empty={!onboardingUser?.investorType} />}
             </Stepper>
           </Box>
           <Box height="100%" backgroundColor="borderPrimary" />

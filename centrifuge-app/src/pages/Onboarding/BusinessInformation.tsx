@@ -11,7 +11,6 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
-import { useMemo } from 'react'
 import { useMutation } from 'react-query'
 import { date, object, string } from 'yup'
 import { useAuth } from '../../components/AuthProvider'
@@ -62,13 +61,7 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
     refetchOnboardingUser: () => void
   }
 
-  const isCompleted = useMemo(() => {
-    if (onboardingUser?.steps?.verifyBusiness.completed) {
-      return true
-    }
-
-    return false
-  }, [onboardingUser])
+  const isCompleted = onboardingUser?.steps?.verifyBusiness.completed
 
   const formik = useFormik({
     initialValues: {

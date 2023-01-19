@@ -57,19 +57,7 @@ export type UltimateBeneficialOwner = {
   dateOfBirth: string
 }
 
-export type EntityOnboardingSteps = {
-  verifyBusiness: {
-    completed: boolean
-    timeStamp: string
-  }
-  verifyEmail: {
-    completed: boolean
-    timeStamp: string
-  }
-  confirmOwners: {
-    completed: boolean
-    timeStamp: string
-  }
+type IndividualUserSteps = {
   verifyIdentity: {
     completed: boolean
     timeStamp: string
@@ -81,6 +69,21 @@ export type EntityOnboardingSteps = {
         timeStamp: string
       }
     }
+  }
+}
+
+export interface EntityOnboardingSteps extends IndividualUserSteps {
+  verifyBusiness: {
+    completed: boolean
+    timeStamp: string
+  }
+  verifyEmail: {
+    completed: boolean
+    timeStamp: string
+  }
+  confirmOwners: {
+    completed: boolean
+    timeStamp: string
   }
 }
 
@@ -105,20 +108,7 @@ type IndividualUser = {
   name: string
   dateOfBirth: string
   countryOfCitizenship: string
-  steps: {
-    verifyIdentity: {
-      completed: boolean
-      timeStamp: string
-    }
-    signAgreements: {
-      [poolId: string]: {
-        [trancheId: string]: {
-          completed: boolean
-          timeStamp: string
-        }
-      }
-    }
-  }
+  steps: IndividualUserSteps
 }
 
 export type OnboardingUser = IndividualUser | EntityUser

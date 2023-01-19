@@ -1,5 +1,5 @@
 import { useFormik } from 'formik'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useMutation } from 'react-query'
 import { boolean, date, object, string } from 'yup'
 import { useAuth } from '../../../components/AuthProvider'
@@ -26,13 +26,7 @@ export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
   const { authToken } = useAuth()
 
   // TODO: show a completion screen
-  const isCompleted = useMemo(() => {
-    if (onboardingUser?.steps.verifyIdentity.completed) {
-      return true
-    }
-
-    return false
-  }, [onboardingUser])
+  const isCompleted = onboardingUser?.steps?.verifyIdentity.completed
 
   const formik = useFormik({
     initialValues: {

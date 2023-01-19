@@ -9,18 +9,18 @@ const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonP
 const OnboardingUserContext = React.createContext<{
   onboardingUser: OnboardingUser
   refetchOnboardingUser: () => void
-  isOnboardingUserLoading: boolean
+  isOnboardingUserFetching: boolean
   isOnboardingUserFetched: boolean
 } | null>(null)
 
-export const OnboardingUserProvider = ({ children }: { children: React.ReactNode }) => {
+export const OnboardingUserProvider: React.FC = ({ children }) => {
   const { isAuth, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const { selectedAccount } = useWeb3()
 
   const {
     data: onboardingUserData,
     refetch: refetchOnboardingUser,
-    isLoading: isOnboardingUserLoading,
+    isFetching: isOnboardingUserFetching,
     isFetched: isOnboardingUserFetched,
   } = useQuery(
     ['getUser', selectedAccount?.address],
@@ -50,7 +50,7 @@ export const OnboardingUserProvider = ({ children }: { children: React.ReactNode
       value={{
         onboardingUser: onboardingUserData,
         refetchOnboardingUser,
-        isOnboardingUserLoading,
+        isOnboardingUserFetching,
         isOnboardingUserFetched,
       }}
     >

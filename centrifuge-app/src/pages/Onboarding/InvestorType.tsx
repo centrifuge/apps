@@ -1,5 +1,5 @@
 import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
-import { Dispatch, SetStateAction, useMemo } from 'react'
+import { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
 import { useOnboardingUser } from '../../components/OnboardingUserProvider'
 import { InvestorTypes } from '../../types'
@@ -45,13 +45,7 @@ const InvestorTypeButton = styled(Button)<{ selected: boolean }>`
 export const InvestorType = ({ investorType, backStep, nextStep, setInvestorType }: Props) => {
   const { onboardingUser } = useOnboardingUser()
 
-  const isDisabled = useMemo(() => {
-    if (onboardingUser?.investorType) {
-      return true
-    }
-
-    return false
-  }, [onboardingUser])
+  const isDisabled = onboardingUser?.investorType ? true : false
 
   return (
     <Stack gap={4}>
