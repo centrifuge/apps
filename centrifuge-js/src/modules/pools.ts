@@ -690,8 +690,6 @@ export function getPoolsModule(inst: Centrifuge) {
     const tranchesById: PoolMetadata['tranches'] = {}
     metadata.tranches.forEach((tranche, index) => {
       tranchesById[computeTrancheId(index, poolId)] = {
-        name: tranche.tokenName,
-        symbol: tranche.symbolName,
         minInitialInvestment: CurrencyBalance.fromFloat(tranche.minInvestment, currencyDecimals).toString(),
       }
     })

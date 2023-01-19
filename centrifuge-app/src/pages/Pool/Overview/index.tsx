@@ -150,6 +150,10 @@ const InvestRedeemBox: React.FC<{
   return <InvestRedeem poolId={poolId} trancheId={tokenId} view={view} onSetView={setView} autoFocus />
 }
 
+const AvgMaturity: React.FC<{ poolId: string }> = ({ poolId }) => {
+  return <>{useAverageMaturity(poolId)}</>
+}
+
 export const PoolDetailOverview: React.FC<{
   selectedToken?: string | null
   setSelectedToken?: (token: string | null) => void
@@ -159,16 +163,23 @@ export const PoolDetailOverview: React.FC<{
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const avgMaturity = useAverageMaturity(poolId)
   const address = useAddress()
   const permissions = usePermissions(address)
 
   const pageSummaryData = [
-    { label: <Tooltips type="assetClass" />, value: metadata?.pool?.asset.class },
+    {
+      label: <Tooltips type="assetClass" />,
+      value: <TextWithPlaceholder isLoading={metadataIsLoading}>{metadata?.pool?.asset.class}</TextWithPlaceholder>,
+    },
     { label: <Tooltips type="valueLocked" />, value: formatBalance(pool?.value || 0, pool?.currency.symbol) },
-    { label: <Tooltips type="averageAssetMaturity" />, value: avgMaturity },
   ]
 
+  if (!isTinlakePool) {
+    pageSummaryData.push({
+      label: <Tooltips type="averageAssetMaturity" />,
+      value: <AvgMaturity poolId={poolId} />,
+    })
+  }
   if (pool?.createdAt) {
     pageSummaryData.splice(2, 0, { label: <Tooltips type="age" />, value: getAge(pool.createdAt) })
   }
@@ -182,7 +193,6 @@ export const PoolDetailOverview: React.FC<{
         ratio: tranche.ratio.toFloat(),
         name: tranche.currency.name,
         symbol: tranche.currency.symbol,
-        poolName: metadata?.pool?.name || '',
         seniority: Number(tranche.seniority),
         valueLocked: tranche?.tokenPrice
           ? tranche.totalIssuance.toDecimal().mul(tranche.tokenPrice.toDecimal())
@@ -203,13 +213,15 @@ export const PoolDetailOverview: React.FC<{
   return (
     <>
       <PageSummary data={pageSummaryData} />
-      <PageSection title="Pool value, asset value & reserve" titleAddition={formatDate(new Date().toString())}>
-        <Stack height="290px">
-          <React.Suspense fallback={<Spinner />}>
-            <PoolAssetReserveChart />
-          </React.Suspense>
-        </Stack>
-      </PageSection>
+      {!isTinlakePool && (
+        <PageSection title="Pool value, asset value & reserve" titleAddition={formatDate(new Date().toString())}>
+          <Stack height="290px">
+            <React.Suspense fallback={<Spinner />}>
+              <PoolAssetReserveChart />
+            </React.Suspense>
+          </Stack>
+        </PageSection>
+      )}
       <PageSection title="Pool tokens">
         <Stack gap={2}>
           {tokens?.map((token, i) => (
@@ -218,11 +230,7 @@ export const PoolDetailOverview: React.FC<{
                 isOpen={i === 0}
                 variant="collapsible"
                 icon={<Thumbnail label={token.symbol ?? ''} type="token" />}
-                title={
-                  <TextWithPlaceholder isLoading={metadataIsLoading}>
-                    {metadata?.pool?.name} {token.name}
-                  </TextWithPlaceholder>
-                }
+                title={<Text>{token.name}</Text>}
                 secondaryHeader={
                   <Shelf gap={6}>
                     <LabelValueStack
@@ -275,9 +283,11 @@ export const PoolDetailOverview: React.FC<{
       <PageSection title="Issuer">
         <IssuerSection metadata={metadata} />
       </PageSection>
-      <PageSection title=" Asset portfolio" titleAddition="By risk groups">
-        <RiskGroupList />
-      </PageSection>
+      {!isTinlakePool && (
+        <PageSection title=" Asset portfolio" titleAddition="By risk groups">
+          <RiskGroupList />
+        </PageSection>
+      )}
     </>
   )
 }

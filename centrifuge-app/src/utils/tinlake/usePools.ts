@@ -69,7 +69,6 @@ export interface PoolsData {
 }
 
 function parsePoolsMetadata(poolsMetadata: TinlakeMetadataPool[]): IpfsPools {
-  console.log('poolsMetadata', poolsMetadata)
   const launching = poolsMetadata.filter((p): p is LaunchingPool => !!p.metadata.isLaunching)
   const active = poolsMetadata.filter(
     (p): p is ActivePool => !!('addresses' in p && p.addresses.ROOT_CONTRACT && !launching.includes(p))
@@ -84,7 +83,7 @@ function useIpfsPools(suspense = false) {
   // TODO get hash from registry
   const cent = useCentrifuge()
   const uri = ethConfig.poolsHash
-  const { data, isLoading } = useQuery(
+  const { data } = useQuery(
     ['metadata', uri],
     async () => {
       const res = await lastValueFrom(cent.metadata.getMetadata(uri!))
@@ -96,8 +95,6 @@ function useIpfsPools(suspense = false) {
     }
   )
 
-  console.log('ipfsdata', data, ethConfig.poolsHash, isLoading)
-
   const parsed = React.useMemo(
     () => (data ? parsePoolsMetadata(Object.values(data) as TinlakeMetadataPool[]) : undefined),
     [data]
@@ -108,7 +105,6 @@ function useIpfsPools(suspense = false) {
 
 export function useTinlakePools(suspense = false) {
   const ipfsPools = useIpfsPools(suspense)
-  console.log('ipfsPools', ipfsPools)
   return useQuery(['tinlakePools', !!ipfsPools], () => getPools(ipfsPools!), { enabled: !!ipfsPools, suspense })
 }
 
@@ -317,7 +313,6 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
     )
 
     if (pool.addresses.CLERK !== undefined && pool.metadata.maker?.ilk !== '') {
-      console.log('pool.addresses.CLERK', pool.addresses.CLERK)
       calls.push(
         {
           target: pool.addresses.CLERK,

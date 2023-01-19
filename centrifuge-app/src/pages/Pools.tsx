@@ -28,8 +28,6 @@ const Pools: React.FC = () => {
   const pools = usePools()
   const tinlakePools = useTinlakePools()
 
-  console.log('tinlakePools', tinlakePools)
-
   const poolMetas = useMetadataMulti<PoolMetadata>(pools?.map((p) => p.metadata) ?? [])
 
   const [listedPools, listedTokens] = React.useMemo(
@@ -47,8 +45,6 @@ const Pools: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [...poolMetas.map((q) => q.data), tinlakePools]
   )
-
-  console.log('listedPools', listedPools)
 
   const totalValueLocked = React.useMemo(() => {
     return (

@@ -75,8 +75,8 @@ type EnvironmentConfig = {
   defaultPodUrl: string
 }
 
-const poolCreationType: TransactionOptions['createType'] = import.meta.env.REACT_APP_POOL_CREATION_TYPE || 'immediate'
-const defaultPodUrl: string = import.meta.env.REACT_APP_DEFAULT_NODE_URL || ''
+const poolCreationType = import.meta.env.REACT_APP_POOL_CREATION_TYPE || 'immediate'
+const defaultPodUrl = import.meta.env.REACT_APP_DEFAULT_NODE_URL || ''
 
 const ALTAIR: EnvironmentConfig = {
   name: 'Pools on Altair',
@@ -120,7 +120,7 @@ const CENTRIFUGE: EnvironmentConfig = {
   defaultPodUrl,
 }
 
-const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK as 'goerli' | 'mainnet'
+const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK
 
 const goerliConfig = {
   rpcUrl: 'https://goerli.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5',
@@ -132,10 +132,10 @@ const mainnetConfig = {
 }
 
 export const ethConfig = {
-  poolsHash: import.meta.env.REACT_APP_TINLAKE_POOLS_HASH as string,
+  poolsHash: import.meta.env.REACT_APP_TINLAKE_POOLS_HASH,
   network: ethNetwork,
   multicallContractAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // Same for all networks
   ...(ethNetwork === 'goerli' ? goerliConfig : mainnetConfig),
 }
 
-export const config = (import.meta.env.REACT_APP_NETWORK as 'altair' | 'centrifuge') === 'altair' ? ALTAIR : CENTRIFUGE
+export const config = import.meta.env.REACT_APP_NETWORK === 'altair' ? ALTAIR : CENTRIFUGE

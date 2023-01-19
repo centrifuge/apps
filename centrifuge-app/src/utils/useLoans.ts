@@ -6,8 +6,10 @@ import { useCentrifugeQuery } from './useCentrifugeQuery'
 const SEC_PER_DAY = 24 * 60 * 60
 
 export function useLoans(poolId: string) {
+  const isTinlakePool = poolId.startsWith('0x')
   const [result] = useCentrifugeQuery(['loans', poolId], (cent) => cent.pools.getLoans([poolId]), {
     suspense: true,
+    enabled: !isTinlakePool,
   })
 
   return result

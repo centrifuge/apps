@@ -10,7 +10,6 @@ export function usePools(suspense = true) {
   const [result] = useCentrifugeQuery(['pools'], (cent) => cent.pools.getPools(), {
     suspense,
   })
-  console.log('result', result)
 
   return result
 }
@@ -22,7 +21,6 @@ export function usePool(id: string) {
   const pool = isTinlakePool
     ? tinlakePools?.data?.pools?.find((p) => p.id.toLowerCase() === id.toLowerCase())
     : pools?.find((p) => p.id === id)
-  console.log('tinlakePools?.data?.pools', tinlakePools?.data?.pools)
   if (!pool) throw new Error(`Pool not found`)
   return pool
 }
