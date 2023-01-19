@@ -21,7 +21,7 @@ on:
     paths:
       - 'onboarding-api/**'
       - '.github/workflows/onboarding-api.yml'
-  workflow_dispatch:
+  workflow_run:
     inputs:
       deploy_to_demo:
         description: "Deploy to demo?"
@@ -80,7 +80,7 @@ jobs:
   
   trigger_function_deploy:
     needs: [build, prepare_deploy]
-    uses: ./.github/workflow/function-deploy.yml
+    uses: ./.github/workflows/function-deploy.yml
     secrets: inherit
     with:
       function_name: ${{ needs.prepare_deploy.outputs.app_name }}

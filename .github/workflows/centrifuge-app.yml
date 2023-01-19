@@ -82,7 +82,7 @@ jobs:
       url:  ${{ steps.prepare.outputs.front_url }}         
 
   deploy_to_gcs:
-    uses: ./.github/workflow/gcs-deploy.yml
+    uses: ./.github/workflows/gcs-deploy.yml
     needs: [prepare_deploy, build]
     secrets: inherit 
     with:
