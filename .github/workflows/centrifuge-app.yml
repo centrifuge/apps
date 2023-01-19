@@ -39,6 +39,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: load general env vars
+        working-directory: ./.github/envfiles
+        run: cat "./global" >> $GITHUB_ENV
+      - name: load env specific vars
+        working-directory: ./.github/envfiles
+        run: cat "./${{ steps.naming.outputs.env_name }}" >> $GITHUB_ENV
+      
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
@@ -47,17 +54,8 @@ jobs:
 
       - name: Install Dependencies
         run: yarn install
-
       - name: Lint
         run: yarn lint
-
-      - name: load general env vars
-        working-directory: ./.github/envfiles
-        run: cat "./global" >> $GITHUB_ENV
-      - name: load env specific vars
-        working-directory: ./.github/envfiles
-        run: cat "./${{ steps.naming.outputs.env_name }}" >> $GITHUB_ENV
-
       - name: Build centrifuge-app
         run: yarn build
       
