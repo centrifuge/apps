@@ -14,6 +14,7 @@ import { InvestorType } from './InvestorType'
 import { KnowYourCustomer } from './KnowYourCustomer'
 import { LinkWallet } from './LinkWallet'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const [_, WordMark] = config.logo
 
 // TODO: make dynamic based on the pool and tranche that the user is onboarding to
@@ -61,8 +62,10 @@ export const OnboardingPage: React.FC = () => {
       if (onboardingUser.investorType === 'individual') {
         setInvestorType('individual')
         if (onboardingUser.steps.signAgreements[poolId][trancheId].completed) {
-          return setActiveStep(4) // done
+          return setActiveStep(5) // done
         } else if (onboardingUser.steps.verifyIdentity.completed) {
+          return setActiveStep(4)
+        } else if (onboardingUser.name) {
           return setActiveStep(3)
         }
 
@@ -127,7 +130,7 @@ export const OnboardingPage: React.FC = () => {
                   <Step label="Sign subscription agreement" />
                 </>
               )}
-              {activeStep < 3 && <Step empty={!onboardingUser?.investorType} />}
+              {activeStep < 3 && !onboardingUser?.investorType && <Step empty />}
             </Stepper>
           </Box>
           <Box height="100%" backgroundColor="borderPrimary" />
@@ -148,9 +151,22 @@ export const OnboardingPage: React.FC = () => {
                 setInvestorType={setInvestorType}
               />
             )}
-            {activeStep === 3 && <BusinessInformation nextStep={nextStep} backStep={backStep} />}
-            {activeStep === 4 && <BusinessOwnership nextStep={nextStep} backStep={backStep} />}
-            {activeStep === 5 && <KnowYourCustomer backStep={backStep} nextStep={nextStep} />}
+            {investorType === 'entity' && (
+              <>
+                {activeStep === 3 && <BusinessInformation nextStep={nextStep} backStep={backStep} />}
+                {activeStep === 4 && <BusinessOwnership nextStep={nextStep} backStep={backStep} />}
+                {activeStep === 5 && <KnowYourCustomer backStep={backStep} nextStep={nextStep} />}
+                {activeStep === 6 && null /* <SignSubscriptionAgreement backStep={backStep} nextStep={nextStep} /> */}
+                {activeStep === 7 && null /* <Completed /> */}
+              </>
+            )}
+            {investorType === 'individual' && (
+              <>
+                {activeStep === 3 && <KnowYourCustomer backStep={backStep} nextStep={nextStep} />}
+                {activeStep === 4 && null /* <SignSubscriptionAgreement backStep={backStep} nextStep={nextStep} /> */}
+                {activeStep === 5 && null /* <Completed /> */}
+              </>
+            )}
           </Stack>
           <Box paddingTop={4} paddingRight={4} justifyContent="flex-end">
             <Link to="/">
