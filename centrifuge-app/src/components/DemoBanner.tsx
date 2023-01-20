@@ -2,7 +2,8 @@ import { Banner, Text } from '@centrifuge/fabric'
 import React from 'react'
 
 export const DemoBanner = () => {
-  const [isOpen, setIsOpen] = React.useState(window.location.hostname.includes('demo'))
+  const [isOpen, setIsOpen] = React.useState(import.meta.env.REACT_APP_IS_DEMO)
+
   return (
     <Banner
       isOpen={isOpen}

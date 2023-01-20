@@ -28,9 +28,9 @@ const ASSET_CLASSES = config.assetClasses.map((label) => ({
 }))
 
 export const Details: React.FC = () => {
+  const isDemo = import.meta.env.REACT_APP_IS_DEMO
   const { pid: poolId } = useParams<{ pid: string }>()
   const [isEditing, setIsEditing] = React.useState(false)
-  const [isDemo, setIsDemo] = React.useState(false)
   const pool = usePool(poolId)
   const { data: metadata } = usePoolMetadata(pool)
   const cent = useCentrifuge()
@@ -91,8 +91,6 @@ export const Details: React.FC = () => {
       actions.setSubmitting(false)
     },
   })
-
-  React.useEffect(() => setIsDemo(window.location.hostname.includes('demo')), [])
 
   React.useEffect(() => {
     if (isEditing && !isLoading) return
@@ -196,19 +194,18 @@ export const Details: React.FC = () => {
                 placeholder="https://..."
               />
 
-              {(isDemo && editPoolVisibility) ||
-                (!isDemo && (
-                  <Field name="listed" validate={validate.assetClass}>
-                    {({ field, meta, form }: FieldProps) => (
-                      <Stack px={2}>
-                        <LabelValueStack
-                          label="Menu listing"
-                          value={<Checkbox {...field} checked={field.value} label="Published" />}
-                        />
-                      </Stack>
-                    )}
-                  </Field>
-                ))}
+              {((isDemo && editPoolVisibility) || !isDemo) && (
+                <Field name="listed" validate={validate.assetClass}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <Stack px={2}>
+                      <LabelValueStack
+                        label="Menu listing"
+                        value={<Checkbox {...field} checked={field.value} label="Published" />}
+                      />
+                    </Stack>
+                  )}
+                </Field>
+              )}
             </Grid>
           ) : (
             <Shelf gap={3} flexWrap="wrap">
