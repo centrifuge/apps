@@ -64,7 +64,13 @@ export const verifyBusinessController = async (
 
     const user: EntityUser = {
       investorType: 'entity',
-      walletAddress,
+      wallet: {
+        address: walletAddress,
+        network: 'polkadot',
+      },
+      name: null,
+      dateOfBirth: null,
+      countryOfCitizenship: null,
       email,
       businessName,
       ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
@@ -75,7 +81,6 @@ export const verifyBusinessController = async (
         verifyBusiness: { completed: !!(kybVerified && businessAmlVerified), timeStamp: new Date().toISOString() },
         verifyEmail: { completed: false, timeStamp: null },
         confirmOwners: { completed: false, timeStamp: null },
-        taxInfo: { completed: false, timeStamp: null },
         verifyIdentity: { completed: false, timeStamp: null },
         signAgreements: {
           [poolId]: {
@@ -88,7 +93,7 @@ export const verifyBusinessController = async (
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, user, 'ENTITY')
+    await validateAndWriteToFirestore(walletAddress, user, 'entity')
 
     const freshUserData = await entityCollection.doc(walletAddress).get()
     return res.status(200).json({

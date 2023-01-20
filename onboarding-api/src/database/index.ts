@@ -6,9 +6,20 @@ import { Subset } from '../utils/types'
 
 dotenv.config()
 
+type Individual = 'individual'
+type Entity = 'entity'
+export type InvestorType = Individual | Entity
+
+export type SupportedNetworks = 'polkadot'
+
 const uboSchema = object({
   name: string().required(),
   dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
+})
+
+const walletSchema = object({
+  address: string().required(),
+  network: string().required().default('polkadot') as StringSchema<SupportedNetworks>,
 })
 
 const stepsSchema = object({
@@ -24,10 +35,10 @@ const stepsSchema = object({
     completed: bool(),
     timeStamp: string().nullable(),
   }),
-  taxInfo: object({
-    completed: bool(),
-    timeStamp: string().nullable(),
-  }),
+  // taxInfo: object({
+  //   completed: bool(),
+  //   timeStamp: string().nullable(),
+  // }),
   verifyIdentity: object({
     completed: bool(),
     timeStamp: string().nullable(),
@@ -55,21 +66,27 @@ const stepsSchema = object({
 })
 
 export const entityUserSchema = object({
-  investorType: string() as StringSchema<'entity'>,
-  walletAddress: string(),
-  email: string().email(),
-  businessName: string(),
-  incorporationDate: date(),
-  registrationNumber: string(),
-  jurisdictionCode: string(),
+  investorType: string().default('entity') as StringSchema<Entity>,
+  wallet: walletSchema,
+  email: string().email().default(null),
+  businessName: string().required(),
+  incorporationDate: date().required(),
+  registrationNumber: string().required(),
+  jurisdictionCode: string().required(),
   ultimateBeneficialOwners: array(uboSchema).max(3),
+  name: string().nullable().default(null),
+  dateOfBirth: string().nullable().default(null),
+  countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
   steps: stepsSchema,
 })
 
 export const individualUserSchema = object({
-  investorType: string() as StringSchema<'individual'>,
-  walletAddress: string().required(),
-  email: string(),
+  investorType: string().default('individual') as StringSchema<Individual>,
+  wallet: walletSchema,
+  email: string().default(null),
+  name: string().nullable().default(null),
+  dateOfBirth: string().nullable().default(null),
+  countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
   steps: stepsSchema.pick(['verifyIdentity', 'signAgreements']),
 })
 
@@ -81,12 +98,12 @@ export const firestore = new Firestore()
 export const individualCollection = firestore.collection(`onboarding-individuals`)
 export const entityCollection = firestore.collection(`onboarding-entities`)
 
-const schemas = {
-  ENTITY: {
+const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
+  entity: {
     schema: entityUserSchema,
     collection: entityCollection,
   },
-  INDIVIDUAL: {
+  individual: {
     schema: individualUserSchema,
     collection: individualCollection,
   },
