@@ -20,7 +20,7 @@ jobs:
       whitelisted-accounts: ''
       network: centrifuge
       subquery-url: https://api.subquery.network/sq/embrio-tech/centrifuge-subql
-      onboarding-api-url: https://us-central1-centrifuge-fargate-apps-dev.cloudfunctions.net
+      onboarding-api-url: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-dev
       pool-creation-type: immediate
       default-node-url: ''
       faucet-url: https://us-central1-peak-vista-185616.cloudfunctions.net/faucetDev
