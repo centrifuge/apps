@@ -4,6 +4,8 @@ import {
   Checkbox,
   DateInput,
   Flex,
+  IconAlertCircle,
+  IconCheckCircle,
   IconPlus,
   IconTrash,
   InlineFeedback,
@@ -13,9 +15,13 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
+import * as React from 'react'
 import { useMutation } from 'react-query'
+import styled from 'styled-components'
 import { array, boolean, date, object, string } from 'yup'
 import { useAuth } from '../../components/AuthProvider'
+import { ConfirmResendEmailVerificationDialog } from '../../components/Dialogs/ConfirmResendEmailVerificationDialog'
+import { EditOnboardingEmailAddressDialog } from '../../components/Dialogs/EditOnboardingEmailAddressDialog'
 import { useOnboardingUser } from '../../components/OnboardingUserProvider'
 import { EntityUser } from '../../types'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
@@ -29,6 +35,22 @@ type Props = {
 const trancheId = 'FAKETRANCHEID'
 const poolId = 'FAKEPOOLID'
 
+const ClickableText = styled(Text)`
+  color: #0000ee;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &:active {
+    color: #ff0000;
+  }
+
+  &:visited {
+    color: #551a8b;
+  }
+`
+
 const businessOwnershipInput = object({
   ultimateBeneficialOwners: array().of(
     object({
@@ -38,6 +60,49 @@ const businessOwnershipInput = object({
   ),
   isAccurate: boolean().oneOf([true]),
 })
+
+const EmailVerificationInlineFeedback = ({ email, completed }: { email: string; completed: boolean }) => {
+  const [isEditOnboardingEmailAddressDialogOpen, setIsEditOnboardingEmailAddressDialogOpen] = React.useState(false)
+  const [isConfirmResendEmailVerificationDialogOpen, setIsConfirmResendEmailVerificationDialogOpen] =
+    React.useState(false)
+
+  if (completed) {
+    return (
+      <StyledInlineFeedback>
+        <Shelf gap={1}>
+          <Flex>
+            <IconCheckCircle size="16px" />
+          </Flex>
+          <Text fontSize="14px">Email address verified</Text>
+        </Shelf>
+      </StyledInlineFeedback>
+    )
+  }
+  return (
+    <StyledInlineFeedback>
+      <Shelf gap={1}>
+        <Box>
+          <IconAlertCircle size="16px" />
+        </Box>
+        <Text fontSize="14px">
+          Please verify your email address. Email sent to {email}. If you did not receive any email{' '}
+          <ClickableText onClick={() => setIsConfirmResendEmailVerificationDialogOpen(true)}>send again</ClickableText>{' '}
+          or <ClickableText onClick={() => setIsEditOnboardingEmailAddressDialogOpen(true)}>edit email</ClickableText>.
+          Otherwise contact <a href="mailto:support@centrifuge.io">support@centrifuge.io</a>.
+        </Text>
+        <EditOnboardingEmailAddressDialog
+          currentEmail={email}
+          isEditOnboardingEmailAddressDialogOpen={isEditOnboardingEmailAddressDialogOpen}
+          setIsEditOnboardingEmailAddressDialogOpen={setIsEditOnboardingEmailAddressDialogOpen}
+        />
+        <ConfirmResendEmailVerificationDialog
+          isConfirmResendEmailVerificationDialogOpen={isConfirmResendEmailVerificationDialogOpen}
+          setIsConfirmResendEmailVerificationDialogOpen={setIsConfirmResendEmailVerificationDialogOpen}
+        />
+      </Shelf>
+    </StyledInlineFeedback>
+  )
+}
 
 const BusinessOwnershipInlineFeedback = ({ isError }: { isError: boolean }) => {
   if (isError) {
@@ -64,6 +129,7 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
   }
 
   const isCompleted = !!onboardingUser?.steps?.confirmOwners.completed
+  const isEmailVerified = !!onboardingUser?.steps?.verifyEmail.completed
 
   const formik = useFormik({
     initialValues: {
@@ -166,6 +232,10 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
   return (
     <Stack gap={4}>
       <Box>
+        <EmailVerificationInlineFeedback
+          email={onboardingUser.email}
+          completed={onboardingUser.steps.verifyEmail.completed}
+        />
         <BusinessOwnershipInlineFeedback isError={isError} />
         <Text fontSize={5}>Confirm business ownership</Text>
         <Text fontSize={2}>
@@ -217,7 +287,7 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
           />
         </Box>
       </Box>
-      <Shelf gap="2">
+      <Shelf gap={2}>
         <Button onClick={() => backStep()} disabled={isLoading} variant="secondary">
           Back
         </Button>
@@ -226,7 +296,7 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
             isCompleted ? nextStep() : formik.submitForm()
           }}
           loading={isLoading}
-          disabled={isLoading || !formik.isValid}
+          disabled={isLoading || !formik.isValid || !isEmailVerified}
           loadingMessage="Confirming"
         >
           Next
