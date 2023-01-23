@@ -67,6 +67,7 @@ const stepsSchema = object({
 
 export const entityUserSchema = object({
   investorType: string().default('entity') as StringSchema<Entity>,
+  kycReference: string().optional(),
   wallet: walletSchema,
   email: string().email().default(null),
   businessName: string().required(),
@@ -83,7 +84,8 @@ export const entityUserSchema = object({
 export const individualUserSchema = object({
   investorType: string().default('individual') as StringSchema<Individual>,
   wallet: walletSchema,
-  email: string().default(null),
+  kycReference: string().optional(),
+  email: string().default(null).nullable(),
   name: string().nullable().default(null),
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
@@ -95,17 +97,16 @@ export type IndividualUser = InferType<typeof individualUserSchema>
 export type OnboardingUser = IndividualUser | EntityUser
 
 export const firestore = new Firestore()
-export const individualCollection = firestore.collection(`onboarding-individuals`)
-export const entityCollection = firestore.collection(`onboarding-entities`)
+export const userCollection = firestore.collection(`onboarding-users`)
 
 const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
   entity: {
     schema: entityUserSchema,
-    collection: entityCollection,
+    collection: userCollection,
   },
   individual: {
     schema: individualUserSchema,
-    collection: individualCollection,
+    collection: userCollection,
   },
 }
 

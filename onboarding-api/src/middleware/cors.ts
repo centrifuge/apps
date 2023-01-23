@@ -15,7 +15,7 @@ export const corsMiddleware = cors({
     if (isLocalhost || isCentrifugeDomain) {
       callback(null, true)
     } else {
-      callback(new Error('Not allowed by CORS'))
+      callback(new Error(`Not allowed by CORS, ${origin}`))
     }
   },
   credentials: true,

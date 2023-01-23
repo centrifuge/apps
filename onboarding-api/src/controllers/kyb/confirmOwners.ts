@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { array, date, InferType, object, string } from 'yup'
-import { entityCollection, EntityUser, validateAndWriteToFirestore } from '../../database'
+import { OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
 
@@ -27,9 +27,9 @@ export const confirmOwnersController = async (
       walletAddress,
       body: { poolId, trancheId },
     } = req
-    const entityDoc = await entityCollection.doc(walletAddress).get()
-    const entityData = entityDoc.data() as EntityUser
-    if (!entityDoc.exists) {
+    const entityDoc = await userCollection.doc(walletAddress).get()
+    const entityData = entityDoc.data() as OnboardingUser
+    if (!entityDoc.exists || entityData.investorType !== 'entity') {
       throw new HttpsError(404, 'Business not found')
     }
 
@@ -57,7 +57,7 @@ export const confirmOwnersController = async (
 
     await validateAndWriteToFirestore(walletAddress, verifyEntity, 'entity', ['steps', 'ultimateBeneficialOwners'])
 
-    const freshUserData = (await entityCollection.doc(walletAddress).get()).data()
+    const freshUserData = (await userCollection.doc(walletAddress).get()).data()
     return res.status(200).send({ ...freshUserData })
   } catch (error) {
     if (error instanceof HttpsError) {
