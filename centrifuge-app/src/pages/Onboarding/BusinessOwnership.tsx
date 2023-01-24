@@ -73,7 +73,7 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
             dateOfBirth: owner.dateOfBirth,
           }))
         : [{ name: '', dateOfBirth: '' }],
-      isAccurate: isCompleted,
+      isAccurate: !!isCompleted,
     },
     onSubmit: () => {
       upsertBusinessOwnership()
