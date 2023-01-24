@@ -67,7 +67,6 @@ export const verifyBusinessController = async (
         address: walletAddress,
         network: 'polkadot',
       },
-      kycReference: '',
       name: null,
       dateOfBirth: null,
       countryOfCitizenship: null,

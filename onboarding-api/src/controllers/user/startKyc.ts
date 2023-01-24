@@ -17,7 +17,6 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
   try {
     const { walletAddress, body } = req
     await validateInput(req, kycInput)
-    const kycReference = `KYC_${Math.random()}`
 
     const userDoc = await userCollection.doc(walletAddress).get()
     let userData = userDoc.data() as OnboardingUser
@@ -28,7 +27,6 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
 
     if (body.poolId && body.trancheId) {
       userData = {
-        kycReference,
         investorType: 'individual',
         wallet: {
           address: walletAddress,
@@ -47,6 +45,8 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
               [body.trancheId]: {
                 completed: false,
                 timeStamp: null,
+                // poolId: body.poolId
+                // trancheId: body.trancheId
               },
             },
           },
@@ -56,7 +56,6 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       await validateAndWriteToFirestore(walletAddress, userData, 'individual')
     } else {
       const updatedUser = {
-        kycReference,
         name: body.name,
         countryOfCitizenship: body.countryOfCitizenship,
         dateOfBirth: body.dateOfBirth,
@@ -73,33 +72,57 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       }
     }
 
+    /**
+     *
+     * Face Verification, {face: {}}
+     * Address  Verification, {address: {}}
+     * Document Verification, {document: {}}
+     *    Document Issue Date,
+     *    Document Expiry Date,
+     *    Document Number
+     *    Name Verification,
+     *    Dob Verification,
+     *
+     * OCR = confirmation dialog, make sure scanned info is correct
+     */
+
     const payloadKYC = {
-      reference: kycReference,
+      reference: `KYC_${walletAddress}`,
       callback_url: '',
       email: userData.email || '',
       country: userData.countryOfCitizenship,
       language: 'EN',
       redirect_url: '',
       verification_mode: 'any',
+      face: {
+        proof: '',
+        allow_offline: '1',
+        check_duplicate_request: '1',
+      },
       document: {
         proof: '',
         supported_types: ['id_card'],
-        name: '',
-        dob: '',
+        dob: body.dateOfBirth,
         issue_date: '',
         expiry_date: '',
         document_number: '',
-        age: '', // minimum age for someone doing KYC
+        age: '',
+        name: {
+          full_name: body.name,
+        },
       },
-      // address: {
-      //   proof: '',
-      //   supported_types: ['id_card', 'bank_statement'],
-      //   name: '',
-      //   issue_date: '',
-      //   full_address: '',
-      //   address_fuzzy_match: '1',
-      //   document_number: '',
-      // },
+      address: {
+        proof: '',
+        supported_types: ['id_card', 'bank_statement', 'envelope'],
+        name: {
+          full_name: body.name,
+        },
+        issue_date: '',
+        full_address: '',
+        address_fuzzy_match: '1',
+        backside_proof_required: '0',
+        show_ocr_form: '1',
+      },
     }
     const kyc = await shuftiProRequest(req, payloadKYC)
     return res.send({ ...kyc })
