@@ -5,8 +5,6 @@ import { HttpsError } from '../../utils/httpsError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { Subset } from '../../utils/types'
 
-// add dryRun?
-
 const setVerifiedIdentityInput = object({
   dryRun: bool().optional(),
 })
@@ -35,7 +33,7 @@ export const setVerifiedIdentityController = async (
           },
         },
       }
-      await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['steps']) // maybe has this return the updated user so I don't have to makethe request again
+      await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['steps'])
       const freshUserData = (await userCollection.doc(user.wallet.address).get()).data()
       return res.status(200).send({ ...freshUserData })
     }

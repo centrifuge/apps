@@ -128,6 +128,8 @@ Sets the ultimate beneficial owners for the entity.
   name: string,
   dateOfBirth: string,
   countryOfCitizenship: string
+  poolId?: string // pass poolId only for KYC step 1
+	trancheId?: string // pass trancheId only for KYC step 1
 }
 ```
 
