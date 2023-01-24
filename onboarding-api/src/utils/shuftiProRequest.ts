@@ -10,6 +10,8 @@ export const shuftiProRequest = async (_req: Request, payload: any, options?: { 
       return businessAmlMockResponse
     } else if (payload.reference.startsWith('KYB_REQUEST')) {
       return kybMockResponse
+    } else if (payload.reference.startsWith) {
+      return { event: 'verification.accepted', reference: payload.reference }
     }
     return { event: 'failed', reference: payload.reference }
   }

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { bool, InferType, object } from 'yup'
 import { OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
@@ -6,16 +7,24 @@ import { Subset } from '../../utils/types'
 
 // add dryRun?
 
-export const setVerifiedIdentityController = async (req: Request, res: Response) => {
+const setVerifiedIdentityInput = object({
+  dryRun: bool().optional(),
+})
+
+export const setVerifiedIdentityController = async (
+  req: Request<any, any, InferType<typeof setVerifiedIdentityInput>>,
+  res: Response
+) => {
   try {
+    const { dryRun } = { ...req.body }
     const userDoc = await userCollection.doc(req.walletAddress).get()
-    let user = userDoc.data() as OnboardingUser
+    const user = userDoc.data() as OnboardingUser
 
     if (!user || user.steps.verifyIdentity.completed) {
       throw new HttpsError(400, 'Unable to process request')
     }
 
-    const status = await shuftiProRequest(req, { reference: user.kycReference }, { path: 'status' })
+    const status = await shuftiProRequest(req, { reference: user.kycReference }, { path: 'status', dryRun })
     if (user && status.event === 'verification.accepted') {
       const updatedUser: Subset<OnboardingUser> = {
         steps: {
