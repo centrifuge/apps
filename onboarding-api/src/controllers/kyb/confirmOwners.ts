@@ -5,8 +5,6 @@ import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
 
 const confirmOwnersInput = object({
-  poolId: string().required(),
-  trancheId: string().required(),
   ultimateBeneficialOwners: array(
     object({
       name: string().required(),
@@ -23,10 +21,7 @@ export const confirmOwnersController = async (
 ) => {
   try {
     await validateInput(req, confirmOwnersInput)
-    const {
-      walletAddress,
-      body: { poolId, trancheId },
-    } = req
+    const { walletAddress } = req
     const entityDoc = await userCollection.doc(walletAddress).get()
     const entityData = entityDoc.data() as OnboardingUser
     if (!entityDoc.exists || entityData.investorType !== 'entity') {
@@ -35,11 +30,6 @@ export const confirmOwnersController = async (
 
     if (!entityData.steps.verifyBusiness.completed) {
       throw new HttpsError(400, 'Business must be verified before confirming ownership')
-    }
-
-    // make sure theres a pool that matches body inside signedAgreements
-    if (!entityData?.steps.signAgreements?.[poolId]?.[trancheId]) {
-      throw new HttpsError(400, 'Bad poolId, trancheId or investorType')
     }
 
     if (entityData?.steps.confirmOwners.completed) {

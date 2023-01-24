@@ -8,7 +8,6 @@ import { validateInput } from '../../utils/validateInput'
 const verifyBusinessInput = object({
   dryRun: bool().default(false).optional(), // skips shuftipro requests
   email: string().email().required(),
-  address: string().required(),
   poolId: string().required(),
   trancheId: string().required(),
   businessName: string().required(), // used for AML

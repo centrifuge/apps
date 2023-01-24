@@ -19,7 +19,6 @@ onboarding.use(verifyJw3t)
 
 onboarding.get('/getUser', getUserController)
 
-// TODO: GET /getStatus
 onboarding.post('/startKyc', startKycController)
 onboarding.post('/setVerifiedIdentity', setVerifiedIdentityController)
 
