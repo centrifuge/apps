@@ -1,5 +1,8 @@
 const express = require('express')
 import * as dotenv from 'dotenv'
+import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
+import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
+import { signAgreementController } from './controllers/agreement/signAgreement'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
 import { getUserController } from './controllers/user/getUser'
@@ -24,5 +27,9 @@ onboarding.post('/setVerifiedIdentity', setVerifiedIdentityController)
 
 onboarding.post('/verifyBusiness', verifyBusinessController)
 onboarding.post('/confirmOwners', confirmOwnersController)
+
+onboarding.get('/getUnsignedAgreement', getUnsignedAgreementController)
+onboarding.post('/signAgreement', signAgreementController)
+onboarding.get('/getSignedAgreement', getSignedAgreementController)
 
 exports.onboarding = onboarding

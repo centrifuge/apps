@@ -26,8 +26,8 @@ type Props = {
 }
 
 // TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'sdf'
-const poolId = '21323432'
+const trancheId = 'FAKETRANCHEID'
+const poolId = 'FAKEPOOLID'
 
 const businessOwnershipInput = object({
   ultimateBeneficialOwners: array().of(
@@ -63,7 +63,7 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
     refetchOnboardingUser: () => void
   }
 
-  const isCompleted = onboardingUser?.steps?.confirmOwners.completed
+  const isCompleted = !!onboardingUser?.steps?.confirmOwners.completed
 
   const formik = useFormik({
     initialValues: {
@@ -211,7 +211,7 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
             style={{
               cursor: 'pointer',
             }}
-            checked={isCompleted ? true : formik.values.isAccurate}
+            checked={formik.values.isAccurate}
             onChange={formik.handleChange}
             label="I confim that all the information provided is true and accurate, and I have identified all the benefical owners with more than 25% ownership."
           />

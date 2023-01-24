@@ -9,7 +9,7 @@ type EnrichedStepProps = {
   isFinal?: boolean
   isActive?: boolean
   count?: number
-  setActiveStep?: (step: number) => void
+  setActiveStep?: Function | null
   maxStep?: number
 }
 
@@ -20,7 +20,7 @@ type StepProps = {
 
 type StepperProps = {
   activeStep: number
-  setActiveStep: (step: number) => void
+  setActiveStep: Function | null
   children: React.ReactNode
 }
 
@@ -41,7 +41,7 @@ export const Step = (props: StepProps & EnrichedStepProps) => {
   return (
     <>
       <Shelf
-        style={{ cursor: 'pointer' }}
+        style={{ cursor: setActiveStep ? 'pointer' : 'default' }}
         gap={2}
         onClick={() => {
           if ((count as number) + 1 < (activeStep as number) || (count as number) + 1 <= (maxStep as number)) {

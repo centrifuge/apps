@@ -1,4 +1,5 @@
 import { Firestore } from '@google-cloud/firestore'
+import { Storage } from '@google-cloud/storage'
 import * as dotenv from 'dotenv'
 import { array, bool, date, InferType, lazy, object, string, StringSchema } from 'yup'
 import { HttpsError } from '../utils/httpsError'
@@ -103,6 +104,10 @@ export type OnboardingUser = IndividualUser | EntityUser
 export const firestore = new Firestore()
 export const userCollection = firestore.collection(`onboarding-users`)
 
+export const storage = new Storage()
+export const unsignedAgreements = storage.bucket('subscription-agreements')
+export const signedAgreements = storage.bucket('signed-subscription-agreements')
+
 const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
   entity: {
     schema: entityUserSchema,
@@ -137,6 +142,41 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
       await schema.validate(data)
       await collection.doc(key).set(data)
     }
+  } catch (error) {
+    // @ts-expect-error error typing
+    throw new HttpsError(400, error.message)
+  }
+}
+
+/**
+ *
+ * @param signedAgreement signed agreement pdf
+ * @param walletAddress wallet address of investor
+ * @param poolId poolId of the pool
+ * @param trancheId trancheId of the tranche
+ */
+export const writeToBucket = async (
+  signedAgreement: Uint8Array,
+  walletAddress: string,
+  poolId: string,
+  trancheId: string
+) => {
+  try {
+    const blob = signedAgreements.file(`${walletAddress}/${poolId}/${trancheId}.pdf`)
+    const blobStream = blob.createWriteStream({
+      resumable: false,
+    })
+
+    blobStream.end(signedAgreement)
+
+    return new Promise((resolve, reject) => {
+      blobStream.on('finish', () => {
+        resolve(true)
+      })
+      blobStream.on('error', (err) => {
+        reject(err)
+      })
+    })
   } catch (error) {
     // @ts-expect-error error typing
     throw new HttpsError(400, error.message)
