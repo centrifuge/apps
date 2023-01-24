@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { unsignedAgreements } from '../../database'
+import { onboardingBucket } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
 
@@ -16,7 +16,7 @@ export const getUnsignedAgreementController = async (
   try {
     await validateInput(req.query, getUnsignedAgreementInput)
     const { poolId, trancheId } = req.query
-    const unsignedAgreement = await unsignedAgreements.file(`${poolId}/${trancheId}.pdf`)
+    const unsignedAgreement = await onboardingBucket.file(`subscription-agreements/${poolId}/${trancheId}.pdf`)
 
     const [unsignedAgreementExists] = await unsignedAgreement.exists()
 

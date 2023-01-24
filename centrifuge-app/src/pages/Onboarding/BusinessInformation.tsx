@@ -153,6 +153,10 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
                 label: 'Switzerland',
                 value: 'ch',
               },
+              {
+                label: 'United States',
+                value: 'us',
+              },
             ]}
             disabled={isLoading || isCompleted}
             onSelect={(countryCode) => formik.setFieldValue('jurisdictionCode', countryCode)}

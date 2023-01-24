@@ -2,11 +2,11 @@ import { Request, Response } from 'express'
 import { PDFDocument } from 'pdf-lib'
 import { InferType, object, string } from 'yup'
 import {
+  onboardingBucket,
   OnboardingUser,
-  unsignedAgreements,
   userCollection,
   validateAndWriteToFirestore,
-  writeToBucket,
+  writeToOnboardingBucket,
 } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { Subset } from '../../utils/types'
@@ -27,11 +27,8 @@ export const signAgreementController = async (
     const walletAddress = req.walletAddress
     const user = (await userCollection.doc(walletAddress).get())?.data()
 
-    if (
-      user?.steps.verifyIdentity.completed &&
-      !user?.steps.signAgreements[poolId]?.[trancheId]?.completed
-    ) {
-      const unsignedAgreement = await unsignedAgreements.file(`${poolId}/${trancheId}.pdf`)
+    if (user?.steps.verifyIdentity.completed && !user?.steps.signAgreements[poolId]?.[trancheId]?.completed) {
+      const unsignedAgreement = await onboardingBucket.file(`subscription-agreements/${poolId}/${trancheId}.pdf`)
       const [unsignedAgreementExists] = await unsignedAgreement.exists()
 
       if (unsignedAgreementExists) {
@@ -50,7 +47,10 @@ export const signAgreementController = async (
 
         const signedAgreement = await pdfDoc.save()
 
-        await writeToBucket(signedAgreement, walletAddress, poolId, trancheId)
+        await writeToOnboardingBucket(
+          signedAgreement,
+          `signed-subscription-agreements/${walletAddress}/${poolId}/${trancheId}.pdf`
+        )
 
         const updatedUser: Subset<OnboardingUser> = {
           steps: {

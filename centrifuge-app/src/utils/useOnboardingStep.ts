@@ -10,8 +10,8 @@ const poolId = 'FAKEPOOLID'
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export const useOnboardingStep = () => {
-  const { isConnecting, selectedAccount } = useWallet()
-  const { isAuth } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
+  const { isConnecting } = useWallet()
+  const { isAuth, isAuthFetched } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const [activeStep, setActiveStep] = React.useState<number>(0)
   const { onboardingUser, isOnboardingUserFetched, isOnboardingUserFetching } = useOnboardingUser()
 
@@ -20,14 +20,28 @@ export const useOnboardingStep = () => {
 
   React.useEffect(() => {
     if (!isConnecting) {
-      if (!isAuth) {
+      if (isAuthFetched && !isAuth) {
         return setActiveStep(1)
       }
 
-      if (selectedAccount && isOnboardingUserFetched && Object.keys(onboardingUser).length) {
+      if (isOnboardingUserFetched && Object.keys(onboardingUser).length) {
         if (onboardingUser.investorType === 'entity') {
-          if (onboardingUser.steps.signAgreements[poolId][trancheId].completed) {
-            return setActiveStep(7) // done
+          if (onboardingUser.jurisdictionCode === 'us') {
+            if (onboardingUser.steps.signAgreements[poolId][trancheId].completed) {
+              return setActiveStep(9) // done
+            } else if (onboardingUser.steps.verifyAccreditation.completed) {
+              return setActiveStep(8)
+            }
+          } else {
+            if (onboardingUser.steps.signAgreements[poolId][trancheId].completed) {
+              return setActiveStep(8) // done
+            } else if (onboardingUser.steps.verifyAccreditation.completed) {
+              return setActiveStep(7)
+            }
+          }
+
+          if (onboardingUser.steps.verifyTaxInfo.completed) {
+            return setActiveStep(7)
           } else if (onboardingUser.steps.verifyIdentity.completed) {
             return setActiveStep(6)
           } else if (onboardingUser.steps.confirmOwners.completed) {
@@ -40,8 +54,22 @@ export const useOnboardingStep = () => {
         }
 
         if (onboardingUser.investorType === 'individual') {
-          if (onboardingUser.steps.signAgreements[poolId][trancheId].completed) {
-            return setActiveStep(5) // done
+          if (onboardingUser.countryOfCitizenship === 'us') {
+            if (onboardingUser.steps.signAgreements[poolId][trancheId].completed) {
+              return setActiveStep(7) // done
+            } else if (onboardingUser.steps.verifyAccreditation.completed) {
+              return setActiveStep(6)
+            }
+          } else {
+            if (onboardingUser.steps.signAgreements[poolId][trancheId].completed) {
+              return setActiveStep(6) // done
+            } else if (onboardingUser.steps.verifyAccreditation.completed) {
+              return setActiveStep(5)
+            }
+          }
+
+          if (onboardingUser.steps.verifyTaxInfo.completed) {
+            return setActiveStep(5)
           } else if (onboardingUser.steps.verifyIdentity.completed) {
             return setActiveStep(4)
           } else if (onboardingUser.name) {
@@ -56,7 +84,7 @@ export const useOnboardingStep = () => {
         return setActiveStep(1)
       }
     }
-  }, [onboardingUser, isConnecting, selectedAccount, isOnboardingUserFetched, isAuth])
+  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched])
 
   return {
     activeStep,

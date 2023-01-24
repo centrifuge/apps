@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { signedAgreements } from '../../database'
+import { onboardingBucket } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
 
@@ -18,7 +18,9 @@ export const getSignedAgreementController = async (
     const { poolId, trancheId } = req.query
     const walletAddress = req.walletAddress
 
-    const signedAgreement = await signedAgreements.file(`${walletAddress}/${poolId}/${trancheId}.pdf`)
+    const signedAgreement = await onboardingBucket.file(
+      `signed-subscription-agreements/${walletAddress}/${poolId}/${trancheId}.pdf`
+    )
 
     const [signedAgreementExists] = await signedAgreement.exists()
 

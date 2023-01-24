@@ -1941,6 +1941,7 @@ __metadata:
     "@types/cookie": ^0
     "@types/cors": ^2
     "@types/express": ^4.17.14
+    "@types/express-fileupload": ^1
     "@types/jsonwebtoken": ^8
     "@types/yup": ^0
     "@typescript-eslint/eslint-plugin": ^5.12.0
@@ -1954,6 +1955,7 @@ __metadata:
     eslint-config-google: ^0.14.0
     eslint-plugin-import: ^2.25.4
     express: ^4.18.2
+    express-fileupload: ^1.4.0
     firebase-functions-test: ^0.2.0
     jsonwebtoken: ^8.5.1
     jw3t: ^1.0.8
@@ -7915,6 +7917,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/busboy@npm:*":
+  version: 1.5.0
+  resolution: "@types/busboy@npm:1.5.0"
+  dependencies:
+    "@types/node": "*"
+  checksum: 7e3f073c1f8595ddbd7c91e2b7fb8ed237e52b5ea38979fc11b5606d189c6e093e45888b52705d52e0f4cbeb28ad4ceccbb27c605997952e709fc6d09b94fd65
+  languageName: node
+  linkType: hard
+
 "@types/cacheable-request@npm:^6.0.1":
   version: 6.0.3
   resolution: "@types/cacheable-request@npm:6.0.3"
@@ -8080,6 +8091,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/express-fileupload@npm:^1":
+  version: 1.4.1
+  resolution: "@types/express-fileupload@npm:1.4.1"
+  dependencies:
+    "@types/busboy": "*"
+    "@types/express": "*"
+  checksum: e239cf2a434d2311d974fb5f2f354f3b2d44d422edcaeac1bba242f15c96dd12e7c7a242131b485884036f3334b1a8b6a4de54133deb6f0991b5e0d644c3287e
+  languageName: node
+  linkType: hard
+
 "@types/express-serve-static-core@npm:^4.17.18, @types/express-serve-static-core@npm:^4.17.31":
   version: 4.17.32
   resolution: "@types/express-serve-static-core@npm:4.17.32"
@@ -8088,6 +8109,18 @@ __metadata:
     "@types/qs": "*"
     "@types/range-parser": "*"
   checksum: a0ed5606359b805d39b612c635ee15bf6c5bf35eabda7344ca78946475b3d46759a670f6d3c426e197bf8b6096ff838044a4a73524b3e2c4957a7c03cc890d4c
+  languageName: node
+  linkType: hard
+
+"@types/express@npm:*":
+  version: 4.17.16
+  resolution: "@types/express@npm:4.17.16"
+  dependencies:
+    "@types/body-parser": "*"
+    "@types/express-serve-static-core": ^4.17.31
+    "@types/qs": "*"
+    "@types/serve-static": "*"
+  checksum: 42930b52ee4a7d4b760cf82f5b7a3985b6c6ee825eb387b019245be84b6a5f686b92fe74471a32be74b55b3d65f7177469f7f324a9f3f8d43fbf435cb24f2544
   languageName: node
   linkType: hard
 
@@ -11325,6 +11358,15 @@ __metadata:
   dependencies:
     semver: ^7.0.0
   checksum: 84f830260b5388a0d058aa693f0d8b256edebf10049cf40e40cca999dfdfd698c6d75d909d8c03acfe006ea1f3b2499a0f7bef389b10afcad968449c79056c84
+  languageName: node
+  linkType: hard
+
+"busboy@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "busboy@npm:1.6.0"
+  dependencies:
+    streamsearch: ^1.1.0
+  checksum: aff2a4abe324563f8bb7f4c4c8d2d497c54a9e4fe6872775847a9d302cb91f96f9d82a9e9b35aa9478ff421ed13a8d367ba4d006f1a9e7283b19c8666b7bad8e
   languageName: node
   linkType: hard
 
@@ -16053,6 +16095,15 @@ __metadata:
     jest-matcher-utils: ^27.5.1
     jest-message-util: ^27.5.1
   checksum: 6b0978df66843fc6c484447c52afbe57d16cd5a1f98edbf11dcb9fc6e1ce735d1bcb87e9dcb9296bd3b4478539f8533b7cf99e367cc87da7c7f196500dca5c11
+  languageName: node
+  linkType: hard
+
+"express-fileupload@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "express-fileupload@npm:1.4.0"
+  dependencies:
+    busboy: ^1.6.0
+  checksum: 79d7dc1b5a3f82add689b586c90e9058341e40efdcbee7ac4c8bc0f3fda75197a2d605fa87da2fc946e9a081b3dc5ce5c254070b9a72c1f819434f48fc6c0f23
   languageName: node
   linkType: hard
 
@@ -27095,6 +27146,13 @@ fsevents@^1.2.7:
   version: 1.0.1
   resolution: "stream-shift@npm:1.0.1"
   checksum: 5d777b222e460dc660ee29acad4f99649eb8d0051d3cb648fc92f3f77557b33d0a8ad656291c2cfa87703204191534a6003c2b035606a699674d0bb600353ad3
+  languageName: node
+  linkType: hard
+
+"streamsearch@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "streamsearch@npm:1.1.0"
+  checksum: c340904d03eee9857b635d4a8b2b56ccfce3d623f91139dc21b9b239ee19e19ec3a13b49adf28c0ba3382e16f11d6497a23f31918b5dade69e7f942bfa3e787f
   languageName: node
   linkType: hard
 
