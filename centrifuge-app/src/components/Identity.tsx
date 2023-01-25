@@ -13,6 +13,7 @@ type Props = TextProps & {
   labelForConnectedAddress?: boolean | string
 }
 
+// TODO: Fix for when connected with a proxy
 export const Identity: React.FC<Props> = ({ address, clickToCopy, labelForConnectedAddress = true, ...textProps }) => {
   const identity = useIdentity(address)
   const myAddress = useAddress()

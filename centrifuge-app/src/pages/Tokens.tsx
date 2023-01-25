@@ -1,4 +1,3 @@
-import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { DataTable } from '../components/DataTable'
@@ -11,8 +10,7 @@ import { Tooltips } from '../components/Tooltips'
 import { config } from '../config'
 import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
-import { useTinlakePools } from '../utils/tinlake/usePools'
-import { useMetadataMulti } from '../utils/useMetadata'
+import { useListedPools } from '../utils/useListedPools'
 import { usePools } from '../utils/usePools'
 
 export const TokenOverviewPage: React.FC = () => {
@@ -25,25 +23,8 @@ export const TokenOverviewPage: React.FC = () => {
 
 const TokenOverview: React.FC = () => {
   const pools = usePools()
-  const tinlakePools = useTinlakePools()
 
-  const poolMetas = useMetadataMulti<PoolMetadata>(pools?.map((p) => p.metadata) ?? [])
-
-  const [listedPools, listedTokens] = React.useMemo(
-    () => {
-      const listedTinlakePools = tinlakePools.data?.pools ?? []
-      const listedTinlakeTokens = listedTinlakePools.flatMap((p) => p.tranches)
-      const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed) ?? []
-      const listedTokens = listedPools.flatMap((p) => p.tranches)
-
-      return [
-        [...listedPools, ...listedTinlakePools],
-        [...listedTokens, ...listedTinlakeTokens],
-      ]
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [...poolMetas.map((q) => q.data), tinlakePools]
-  )
+  const [listedPools, listedTokens] = useListedPools()
 
   const tokens: TokenTableData[] | undefined = React.useMemo(
     () =>

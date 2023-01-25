@@ -4,6 +4,7 @@ import * as React from 'react'
 import { useLocation, useParams, useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
 import { useDebugFlags } from '../../components/DebugFlags'
+import { Eththumbnail } from '../../components/EthThumbnail'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
@@ -19,6 +20,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(pid)
   const { data: metadata, isLoading } = usePoolMetadata(pool)
+  const isTinlakePool = pool.id.startsWith('0x')
   const theme = useTheme()
   const cent = useCentrifuge()
   const { poolReporting } = useDebugFlags()
@@ -31,24 +33,26 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
       }
       parent={{ to: `/investments${state?.token ? '/tokens' : ''}`, label: state?.token ? 'Tokens' : 'Pools' }}
       icon={
-        metadata?.pool?.icon ? (
-          <Box
-            as="img"
-            width="iconLarge"
-            height="iconLarge"
-            src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)}
-          />
-        ) : (
-          <Shelf
-            width="iconLarge"
-            height="iconLarge"
-            borderRadius="card"
-            backgroundColor={isLoading ? 'borderSecondary' : 'backgroundThumbnail'}
-            justifyContent="center"
-          >
-            <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>
-          </Shelf>
-        )
+        <Eththumbnail show={isTinlakePool}>
+          {metadata?.pool?.icon ? (
+            <Box
+              as="img"
+              width="iconLarge"
+              height="iconLarge"
+              src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)}
+            />
+          ) : (
+            <Shelf
+              width="iconLarge"
+              height="iconLarge"
+              borderRadius="card"
+              backgroundColor={isLoading ? 'borderSecondary' : 'backgroundThumbnail'}
+              justifyContent="center"
+            >
+              <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>
+            </Shelf>
+          )}
+        </Eththumbnail>
       }
       border={false}
       actions={actions}
@@ -64,7 +68,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
         <NavigationTabs basePath={`${basePath}/${pid}`}>
           <NavigationTabsItem to={`${basePath}/${pid}`}>Overview</NavigationTabsItem>
           <NavigationTabsItem to={`${basePath}/${pid}/assets`}>Assets</NavigationTabsItem>
-          <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>
+          {!isTinlakePool && <NavigationTabsItem to={`${basePath}/${pid}/liquidity`}>Liquidity</NavigationTabsItem>}
           {poolReporting && <NavigationTabsItem to={`${basePath}/${pid}/reporting`}>Reporting</NavigationTabsItem>}
         </NavigationTabs>
       </Shelf>
