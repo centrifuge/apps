@@ -71,8 +71,8 @@ export const EpochAndTranches: React.FC = () => {
         const row: Row = {
           minRiskBuffer: tranche.minRiskBuffer?.toPercent().toNumber() ?? '',
           interestRate: tranche.interestRatePerSec?.toAprPercent().toNumber() ?? '',
-          tokenName: metadata?.tranches?.[tranche.id]?.name || '',
-          symbolName: metadata?.tranches?.[tranche.id]?.symbol || '',
+          tokenName: tranche.currency.name,
+          symbolName: tranche.currency.symbol,
           minInvestment: new CurrencyBalance(
             metadata?.tranches?.[tranche.id]?.minInitialInvestment ?? 0,
             pool?.currency.decimals

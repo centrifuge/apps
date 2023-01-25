@@ -1,4 +1,4 @@
-import { CurrencyMetadata } from '@centrifuge/centrifuge-js'
+import { CurrencyMetadata, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
@@ -7,7 +7,7 @@ import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
 
 export type TokenTableData = {
-  poolMetadata?: string
+  poolMetadata?: string | Partial<PoolMetadata>
   yield: number | null
   protection: number
   capacity: number
@@ -94,7 +94,7 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
 }
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
-  const { data: metadata, isLoading } = usePoolMetadata({ metadata: token.poolMetadata })
+  const { data: metadata, isLoading } = usePoolMetadata({ id: token.poolId, metadata: token.poolMetadata })
   return (
     <Shelf gap="2" overflow="hidden">
       <Thumbnail label={token.currency.symbol} size="small" />
@@ -112,7 +112,7 @@ const TokenName: React.VFC<RowProps> = ({ token }) => {
 }
 
 const AssetClass: React.VFC<RowProps> = ({ token }) => {
-  const { data: metadata, isLoading } = usePoolMetadata({ metadata: token.poolMetadata })
+  const { data: metadata, isLoading } = usePoolMetadata({ id: token.poolId, metadata: token.poolMetadata })
   return (
     <TextWithPlaceholder isLoading={isLoading} variant="body2">
       {metadata?.pool?.asset.class}

@@ -26,11 +26,24 @@ export const PoolDetailAssetsTab: React.FC = () => {
   )
 }
 
+const AvgMaturity: React.FC<{ poolId: string }> = ({ poolId }) => {
+  return <>{useAverageMaturity(poolId)}</>
+}
+
 export const PoolDetailAssets: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
   const loans = useLoans(poolId)
-  const avgMaturity = useAverageMaturity(poolId)
+  const isTinlakePool = poolId.startsWith('0x')
+
+  if (isTinlakePool) {
+    // TODO: Link to the right pool on Tinlake
+    return (
+      <Shelf p="4">
+        <Text>View assets on Tinlake</Text>
+      </Shelf>
+    )
+  }
 
   if (!pool || !loans) return null
 
@@ -49,12 +62,18 @@ export const PoolDetailAssets: React.FC = () => {
     .dividedBy(ongoingAssets?.length)
     .toDecimalPlaces(2)
 
-  const pageSummaryData = [
+  const pageSummaryData: { label: React.ReactNode; value: React.ReactNode }[] = [
     { label: <Tooltips type="ongoingAssets" />, value: ongoingAssets?.length || 0 },
-    { label: <Tooltips type="averageMaturity" />, value: avgMaturity },
     { label: <Tooltips type="averageFinancingFee" />, value: formatPercentage(avgInterestRatePerSec) },
     { label: <Tooltips type="averageAmount" />, value: formatBalance(avgAmount, pool.currency.symbol) },
   ]
+
+  if (!isTinlakePool) {
+    pageSummaryData.splice(1, 0, {
+      label: <Tooltips type="averageMaturity" />,
+      value: <AvgMaturity poolId={poolId} />,
+    })
+  }
 
   return (
     <>

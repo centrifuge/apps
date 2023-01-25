@@ -2,6 +2,7 @@ import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
 import { useCentrifuge } from '../components/CentrifugeProvider'
+import { useTinlakePools } from './tinlake/usePools'
 import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 
@@ -14,8 +15,12 @@ export function usePools(suspense = true) {
 }
 
 export function usePool(id: string) {
+  const isTinlakePool = id.startsWith('0x')
+  const tinlakePools = useTinlakePools(isTinlakePool)
   const pools = usePools()
-  const pool = pools?.find((p) => p.id === id)
+  const pool = isTinlakePool
+    ? tinlakePools?.data?.pools?.find((p) => p.id.toLowerCase() === id.toLowerCase())
+    : pools?.find((p) => p.id === id)
   if (!pool) throw new Error(`Pool not found`)
   return pool
 }
@@ -50,6 +55,7 @@ export function useInvestorTransactions(poolId: string, trancheId?: string, from
 }
 
 export function useDailyPoolStates(poolId: string, from?: Date, to?: Date) {
+  if (poolId.startsWith('0x')) throw new Error('Only works with Centrifuge Pools')
   const [result] = useCentrifugeQuery(
     ['dailyPoolStates', poolId, from, to],
     (cent) => cent.pools.getDailyPoolStates([poolId, from, to]),
@@ -139,8 +145,15 @@ export function usePoolPermissions(poolId?: string) {
   return result
 }
 
-export function usePoolMetadata(pool?: { metadata?: string }) {
-  return useMetadata<PoolMetadata>(pool?.metadata)
+export function usePoolMetadata(
+  pool?: { metadata?: string } | { id: string; metadata?: string | Partial<PoolMetadata> }
+) {
+  const data = useMetadata<PoolMetadata>(typeof pool?.metadata === 'string' ? pool.metadata : undefined)
+  const tinlakeData = useQuery(
+    ['tinlakeMetadata', pool && 'id' in pool && pool.id],
+    () => pool?.metadata as PoolMetadata
+  )
+  return typeof pool?.metadata === 'string' ? data : tinlakeData
 }
 
 export function useConstants() {

@@ -8,7 +8,7 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { CustomFilters, ReportComponent } from '../../../components/Report'
 import { Spinner } from '../../../components/Spinner'
 import { formatDate } from '../../../utils/date'
-import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 export type GroupBy = 'day' | 'month'
@@ -23,8 +23,7 @@ const titleByReport: { [key: string]: string } = {
 
 export const PoolDetailReportingTab: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const pool = usePool(poolId)
-  const { data: metadata } = usePoolMetadata(pool)
+  const pool = usePool(poolId) as Pool
 
   // Global filters
   const [startDate, setStartDate] = React.useState(pool?.createdAt ? new Date(pool?.createdAt) : new Date())
@@ -102,22 +101,18 @@ export const PoolDetailReportingTab: React.FC = () => {
                 <Select
                   label="Token"
                   placeholder="Select a token"
-                  options={
-                    metadata?.tranches
-                      ? [
-                          {
-                            label: 'All tokens',
-                            value: 'all',
-                          },
-                          ...Object.keys(metadata?.tranches).map((trancheId) => {
-                            return {
-                              label: `${metadata?.pool?.name} ${metadata.tranches![trancheId].name}`,
-                              value: trancheId,
-                            }
-                          }),
-                        ]
-                      : []
-                  }
+                  options={[
+                    {
+                      label: 'All tokens',
+                      value: 'all',
+                    },
+                    ...pool.tranches.map((token) => {
+                      return {
+                        label: token.currency.name,
+                        value: token.id,
+                      }
+                    }),
+                  ]}
                   value={activeTranche}
                   onSelect={(newTranche) => {
                     if (newTranche) {
