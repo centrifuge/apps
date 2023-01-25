@@ -37,6 +37,7 @@
     "@subwallet/wallet-connect": "^0.2.3",
     "axios": "^0.24.0",
     "bn.js": "^5.2.1",
+    "ethers": "^5.7.2",
     "form-data": "^4.0.0",
     "formik": "^2.2.9",
     "jw3t": "^1.0.8",

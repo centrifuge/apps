@@ -25,17 +25,8 @@ const StyledTrigger = styled(Text)`
   font-family: ${({ theme }) => theme.fonts.standard};
   position: relative;
   width: fit-content;
-
-  ::after {
-    position: absolute;
-    content: '';
-    height: 1px;
-    bottom: 0px;
-    left: 0;
-    width: 100%;
-    background: transparent;
-    border-bottom: 1px dotted ${({ theme }) => theme.colors.textSecondary};
-  }
+  text-decoration: underline dotted ${({ theme }) => theme.colors.textSecondary};
+  text-underline-offset: 3px;
 `
 
 export const Tooltip: React.FC<TooltipProps> = ({ title, body, children, disabled, delay = 1000, ...textProps }) => {

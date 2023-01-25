@@ -6,7 +6,6 @@ node_modules
 out
 services/tinlake/addresses_tinlake.json
 nft_data_definition.json
-functions
 dist
 
 # Local Netlify folder

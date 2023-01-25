@@ -15,6 +15,7 @@ import {
 } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
+import { useQueryClient } from 'react-query'
 import { useHistory } from 'react-router'
 import { filter, lastValueFrom } from 'rxjs'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
@@ -29,6 +30,7 @@ import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
 import { usePoolCurrencies } from '../../utils/useCurrencies'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
+import { usePools } from '../../utils/usePools'
 import { useProposalEstimate } from '../../utils/useProposalEstimate'
 import { truncate } from '../../utils/web3'
 import { IssuerInput } from './IssuerInput'
@@ -134,12 +136,15 @@ const CreatePoolForm: React.VFC = () => {
   const address = useAddress()
   const centrifuge = useCentrifuge()
   const currencies = usePoolCurrencies()
+  const pools = usePools()
   const history = useHistory()
   const balances = useBalances(address)
+  const queryClient = useQueryClient()
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [preimageHash, setPreimageHash] = React.useState('')
+  const [createdPoolId, setCreatedPoolId] = React.useState('')
 
   React.useEffect(() => {
     // If the hash can't be found on Pinata the request can take a long time to time out
@@ -147,6 +152,20 @@ const CreatePoolForm: React.VFC = () => {
     // Set a deadline for how long we're willing to wait on a stored issuer
     setTimeout(() => setWaitingForStoredIssuer(false), 10000)
   }, [])
+
+  React.useEffect(() => {
+    if (storedIssuer) setWaitingForStoredIssuer(false)
+  }, [storedIssuer])
+
+  React.useEffect(() => {
+    if (createdPoolId && pools?.find((p) => p.id === createdPoolId)) {
+      // Redirecting only when we find the newly created pool in the data from usePools
+      // Otherwise the Issue Overview page will throw an error when it can't find the pool
+      // It can take a second for the new data to come in after creating the pool
+      history.push(`/issuer/${createdPoolId}`)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pools, createdPoolId])
 
   const txMessage = {
     immediate: 'Create pool',
@@ -160,7 +179,7 @@ const CreatePoolForm: React.VFC = () => {
       onSuccess: (args) => {
         const [, poolId] = args
         if (config.poolCreationType === 'immediate') {
-          history.push(`/issuer/${poolId}`)
+          setCreatedPoolId(poolId)
         }
       },
     }
@@ -311,7 +330,7 @@ const CreatePoolForm: React.VFC = () => {
     <>
       <PreimageHashDialog preimageHash={preimageHash} open={isDialogOpen} onClose={() => setIsDialogOpen(false)} />
       <FormikProvider value={form}>
-        <Form ref={formRef}>
+        <Form ref={formRef} noValidate>
           <PageHeader
             icon={<PoolIcon icon={form.values.poolIcon}>{(form.values.poolName || 'New Pool')[0]}</PoolIcon>}
             title={form.values.poolName || 'New Pool'}
