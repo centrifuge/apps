@@ -120,7 +120,7 @@ const CENTRIFUGE: EnvironmentConfig = {
   defaultPodUrl,
 }
 
-const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK
+const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'goerli'
 
 const goerliConfig = {
   rpcUrl: 'https://goerli.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5',
@@ -132,7 +132,7 @@ const mainnetConfig = {
 }
 
 export const ethConfig = {
-  poolsHash: import.meta.env.REACT_APP_TINLAKE_POOLS_HASH,
+  poolsHash: 'QmYY9GPHZ19A75S1UUQCiY1ckxchaJdRpESpkRvZTVDBPM', // TODO: add registry to config and fetch poolHash
   network: ethNetwork,
   multicallContractAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // Same for all networks
   ...(ethNetwork === 'goerli' ? goerliConfig : mainnetConfig),

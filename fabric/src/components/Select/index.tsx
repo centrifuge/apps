@@ -95,31 +95,31 @@ const SelectInputInt: React.FC<SelectIntProps> = (props) => {
   return (
     <Stack gap={1} width="100%">
       <Stack position="relative" width="100%">
-        <StyledTrigger {...buttonProps} ref={ref}>
-          <InputBox
-            label={props.label}
-            as="div"
-            disabled={props.isDisabled}
-            active={(state.isOpen || state.isFocused) && !props.isDisabled}
-            inputElement={
-              <Text
-                color={
-                  !state.selectedItem || props.isDisabled
-                    ? 'textDisabled'
-                    : state.isFocused
-                    ? 'accentPrimary'
-                    : 'textPrimary'
-                }
-                {...valueProps}
-              >
-                {state.selectedItem ? state.selectedItem.rendered : props.placeholder}
-              </Text>
-            }
-            rightElement={
-              <IconComp color={props.isDisabled ? 'textSecondary' : 'textPrimary'} style={{ margin: '-8px 0' }} />
-            }
-          />
-        </StyledTrigger>
+        <StyledTrigger {...buttonProps} ref={ref} />
+        <InputBox
+          width="100%"
+          label={props.label}
+          as="div"
+          disabled={props.isDisabled}
+          active={(state.isOpen || state.isFocused) && !props.isDisabled}
+          inputElement={
+            <Text
+              color={
+                !state.selectedItem || props.isDisabled
+                  ? 'textDisabled'
+                  : state.isFocused
+                  ? 'accentPrimary'
+                  : 'textPrimary'
+              }
+              {...valueProps}
+            >
+              {state.selectedItem ? state.selectedItem.rendered : props.placeholder}
+            </Text>
+          }
+          rightElement={
+            <IconComp color={props.isDisabled ? 'textSecondary' : 'textPrimary'} style={{ margin: '-8px 0' }} />
+          }
+        />
         <HiddenSelect
           state={state}
           triggerRef={ref}
@@ -204,13 +204,13 @@ const Popover: React.FC<PopoverProps> = (props) => {
 // Styles
 
 const StyledTrigger = styled.button`
-  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  padding: 0;
-  appearance: none;
-  background: transparent;
-  border: none;
-  text-align: left;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
 `
 
 const StyledPopover = styled.div`

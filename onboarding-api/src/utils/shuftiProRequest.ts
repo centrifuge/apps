@@ -2,6 +2,7 @@ import { Request } from 'express'
 import fetch from 'node-fetch'
 import { businessAmlMockResponse } from '../mocks/businessAmlResponse'
 import { kybMockResponse } from '../mocks/kybResponse'
+import { HttpsError } from './httpsError'
 
 export const shuftiProRequest = async (_req: Request, payload: any, options?: { dryRun: boolean }) => {
   if (options?.dryRun) {
@@ -29,10 +30,12 @@ export const shuftiProRequest = async (_req: Request, payload: any, options?: { 
     const data = await shuftiRes.json()
     if (data.error) {
       console.log(data.error.message)
+      throw new HttpsError(400, `${payload.reference} ${data.error.message}`)
     }
     return data
   } catch (error) {
     // @ts-expect-error error typing
-    console.log(error.message)
+    console.log(error.message, payload.reference)
+    throw new HttpsError(400, `ShuftiPro request failed (reference: ${payload.reference})`)
   }
 }

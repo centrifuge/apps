@@ -5,7 +5,7 @@
     "lint": "eslint src/**/*.ts",
     "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --minify",
     "start:types": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --watch",
-    "start:functions": "npx functions-framework --target=onboarding --signature-type=http --env-vars-file .env.yaml",
+    "start:functions": "npx functions-framework --target=onboarding --signature-type=http",
     "develop": "run-p -l start:functions start:types",
     "deploy:dev": "gcloud functions deploy onboarding --region=us-central1 --source=dist --project=peak-vista-185616 --trigger-http --runtime=nodejs16 --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com --allow-unauthenticated --entry-point=onboarding --env-vars-file .env.yaml"
   },
@@ -38,6 +38,7 @@
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.25.4",
     "firebase-functions-test": "^0.2.0",
+    "nodemon": "^2.0.20",
     "npm-run-all": "^4.1.5",
     "typescript": "^4.5.4"
   },
