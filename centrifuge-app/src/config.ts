@@ -132,7 +132,7 @@ const mainnetConfig = {
 }
 
 export const ethConfig = {
-  poolsHash: import.meta.env.REACT_APP_TINLAKE_POOLS_HASH || 'QmYY9GPHZ19A75S1UUQCiY1ckxchaJdRpESpkRvZTVDBPM',
+  poolsHash: 'QmYY9GPHZ19A75S1UUQCiY1ckxchaJdRpESpkRvZTVDBPM', // TODO: add registry to config and fetch poolHash
   network: ethNetwork,
   multicallContractAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // Same for all networks
   ...(ethNetwork === 'goerli' ? goerliConfig : mainnetConfig),

@@ -25,3 +25,4 @@ jobs:
       netlify-site-id: ''
       pinata-api-key: ${{ secrets.PINATA_API_KEY }}
       pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}
+      tinlake-network: mainnet
