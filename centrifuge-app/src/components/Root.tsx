@@ -32,6 +32,7 @@ import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { LoadBoundary } from './LoadBoundary'
+import { OnboardingUserProvider } from './OnboardingUserProvider'
 import { PodAuthProvider } from './PodAuthProvider'
 
 const queryClient = new QueryClient({
@@ -159,7 +160,9 @@ const Routes: React.VFC = () => {
         <PoolsPage />
       </Route>
       <Route exact path="/onboarding">
-        <OnboardingPage />
+        <OnboardingUserProvider>
+          <OnboardingPage />
+        </OnboardingUserProvider>
       </Route>
       <Route exact path="/">
         <Redirect to="/investments" />

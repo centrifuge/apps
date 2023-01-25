@@ -7,7 +7,7 @@
     "start:types": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --watch",
     "start:functions": "npx functions-framework --target=onboarding --signature-type=http",
     "develop": "run-p -l start:functions start:types",
-    "deploy:dev": "gcloud functions deploy onboarding --region=us-central1 --source=dist --project=peak-vista-185616 --trigger-http --runtime=nodejs16 --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com --allow-unauthenticated --entry-point=onboarding --env-vars-file .env.yaml"
+    "deploy:dev": "gcloud functions deploy onboarding-api-dev --region=europe-central2 --source=dist --project=peak-vista-185616 --trigger-http --runtime=nodejs16 --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com --allow-unauthenticated --entry-point=onboarding --env-vars-file .env.yaml"
   },
   "engines": {
     "node": "16"

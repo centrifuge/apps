@@ -1,15 +1,27 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
-import { Box, Button, DateInput, InlineFeedback, NumberInput, Select, Stack, Text, TextInput } from '@centrifuge/fabric'
+import {
+  Box,
+  Button,
+  DateInput,
+  InlineFeedback,
+  NumberInput,
+  Select,
+  Shelf,
+  Stack,
+  Text,
+  TextInput,
+} from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import { useMutation } from 'react-query'
 import { date, object, string } from 'yup'
 import { useAuth } from '../../components/AuthProvider'
-import { ultimateBeneficialOwner } from '../../types'
+import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { EntityUser } from '../../types'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
 
 type Props = {
   nextStep: () => void
-  setUltimateBeneficialOwners: (owners: ultimateBeneficialOwner[]) => void
+  backStep: () => void
 }
 
 // TODO: make dynamic based on the pool and tranche that the user is onboarding to
@@ -18,10 +30,10 @@ const poolId = '21323432'
 
 const businessVerificationInput = object({
   email: string().email().required(),
-  entityName: string().required(),
+  businessName: string().required(),
   registrationNumber: string().required(),
-  countryOfIncorporation: string().required(),
-  businessIncorporationDate: date().required().max(new Date()),
+  jurisdictionCode: string().required(),
+  incorporationDate: date().required().max(new Date()),
 })
 
 const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) => {
@@ -41,17 +53,23 @@ const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) =>
   return null
 }
 
-export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: Props) => {
+export const BusinessInformation = ({ backStep, nextStep }: Props) => {
   const { selectedAccount } = useWallet()
   const { authToken } = useAuth()
+  const { onboardingUser, refetchOnboardingUser } = useOnboardingUser() as {
+    onboardingUser: EntityUser
+    refetchOnboardingUser: () => void
+  }
+
+  const isCompleted = onboardingUser?.steps?.verifyBusiness.completed
 
   const formik = useFormik({
     initialValues: {
-      entityName: '',
-      email: '',
-      registrationNumber: '',
-      countryOfIncorporation: '',
-      businessIncorporationDate: '',
+      businessName: onboardingUser?.businessName || '',
+      email: onboardingUser?.email || '',
+      registrationNumber: onboardingUser?.registrationNumber || '',
+      jurisdictionCode: onboardingUser?.jurisdictionCode || '',
+      incorporationDate: onboardingUser?.incorporationDate || '',
     },
     onSubmit: () => {
       verifyBusinessInformation()
@@ -66,14 +84,14 @@ export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: P
     isError,
   } = useMutation(
     async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/businessVerification`, {
+      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyBusiness`, {
         method: 'POST',
         body: JSON.stringify({
           email: formik.values.email,
-          businessName: formik.values.entityName,
-          companyRegistrationNumber: formik.values.registrationNumber,
-          companyJurisdictionCode: formik.values.countryOfIncorporation,
-          businessIncorporationDate: formik.values.businessIncorporationDate,
+          businessName: formik.values.businessName,
+          registrationNumber: formik.values.registrationNumber,
+          jurisdictionCode: formik.values.jurisdictionCode,
+          incorporationDate: formik.values.incorporationDate,
           trancheId,
           poolId,
           address: selectedAccount?.address,
@@ -92,15 +110,16 @@ export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: P
 
       const json = await response.json()
 
-      if (json.errors.length) {
+      if (!json.steps?.verifyBusiness?.completed) {
         throw new Error()
       }
-
-      setUltimateBeneficialOwners(json.ultimateBeneficialOwners)
-
-      return json.ultimateBeneficialOwners
     },
-    { onSuccess: () => nextStep() }
+    {
+      onSuccess: () => {
+        refetchOnboardingUser()
+        nextStep()
+      },
+    }
   )
 
   return (
@@ -117,17 +136,17 @@ export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: P
             id="email"
             label="Email address*"
             placeholder="Enter email address"
-            disabled={isLoading}
+            disabled={isLoading || isCompleted}
             onChange={formik.handleChange}
             value={formik.values.email}
           />
           <TextInput
-            id="entityName"
+            id="businessName"
             label="Legal entity name*"
             placeholder="Enter entity name"
-            disabled={isLoading}
+            disabled={isLoading || isCompleted}
             onChange={formik.handleChange}
-            value={formik.values.entityName}
+            value={formik.values.businessName}
           />
           <Select
             label="Country of incorporation*"
@@ -138,37 +157,42 @@ export const BusinessInformation = ({ nextStep, setUltimateBeneficialOwners }: P
                 value: 'ch',
               },
             ]}
-            disabled={isLoading}
-            onSelect={(countryCode) => formik.setFieldValue('countryOfIncorporation', countryCode)}
-            value={formik.values.countryOfIncorporation}
+            disabled={isLoading || isCompleted}
+            onSelect={(countryCode) => formik.setFieldValue('jurisdictionCode', countryCode)}
+            value={formik.values.jurisdictionCode}
           />
           <NumberInput
             id="registrationNumber"
             label="Registration number*"
             placeholder="0000"
-            disabled={isLoading}
+            disabled={isLoading || isCompleted}
             onChange={formik.handleChange}
             value={formik.values.registrationNumber}
           />
           <DateInput
-            id="businessIncorporationDate"
+            id="incorporationDate"
             label="Business Incorporation Date"
-            disabled={isLoading}
+            disabled={isLoading || isCompleted}
             onChange={formik.handleChange}
-            value={formik.values.businessIncorporationDate}
+            value={formik.values.incorporationDate}
           />
         </Stack>
       </Box>
-      <Box>
+      <Shelf gap="2">
+        <Button onClick={() => backStep()} disabled={isLoading} variant="secondary">
+          Back
+        </Button>
         <Button
-          onClick={formik.submitForm}
+          onClick={() => {
+            isCompleted ? nextStep() : formik.submitForm()
+          }}
           loading={isLoading}
           disabled={isLoading || !formik.isValid}
           loadingMessage="Verifying"
         >
-          Verify
+          Next
         </Button>
-      </Box>
+      </Shelf>
     </Stack>
   )
 }

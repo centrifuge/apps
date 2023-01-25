@@ -55,7 +55,7 @@ export const confirmOwnersController = async (
       steps: { ...entityData.steps, confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
-    await validateAndWriteToFirestore(walletAddress, verifyEntity, 'ENTITY', ['steps', 'ultimateBeneficialOwners'])
+    await validateAndWriteToFirestore(walletAddress, verifyEntity, 'entity', ['steps', 'ultimateBeneficialOwners'])
 
     const freshUserData = (await entityCollection.doc(walletAddress).get()).data()
     return res.status(200).send({ ...freshUserData })
