@@ -1,12 +1,12 @@
 import { CurrencyBalance, Pool, Token } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, InteractiveCard, Shelf, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
+import { InteractiveCard, Shelf, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
-import ethereumLogo from '../assets/images/ethereum.svg'
 import { formatBalance } from '../utils/formatting'
 import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { usePoolMetadata } from '../utils/usePools'
+import { Eththumbnail } from './EthThumbnail'
 import { LabelValueStack } from './LabelValueStack'
 import { Tooltips } from './Tooltips'
 
@@ -30,27 +30,13 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
   return (
     <InteractiveCard
       icon={
-        <Box position="relative">
+        <Eththumbnail show={pool?.id.startsWith('0x')}>
           {metadata?.pool?.icon?.uri ? (
             <img src={cent.metadata.parseMetadataUrl(metadata?.pool?.icon?.uri)} alt="" height="40" width="40" />
           ) : (
             <Thumbnail type="pool" label="LP" size="large" />
           )}
-          {pool?.id.startsWith('0x') && (
-            <Shelf
-              position="absolute"
-              bottom={0}
-              left={0}
-              width={22}
-              height={22}
-              borderRadius="50%"
-              background="white"
-              style={{ transform: 'translate(-50%, 50%)' }}
-            >
-              <Box as="img" src={ethereumLogo} height={18} mx="auto" />
-            </Shelf>
-          )}
-        </Box>
+        </Eththumbnail>
       }
       variant="button"
       title={<TextWithPlaceholder isLoading={!metadata}>{metadata?.pool?.name}</TextWithPlaceholder>}

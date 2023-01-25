@@ -1,10 +1,10 @@
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Box, Flex, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
+import { Box, Shelf, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams, useRouteMatch } from 'react-router'
 import { useTheme } from 'styled-components'
-import ethereumLogo from '../../assets/images/ethereum.svg'
 import { useDebugFlags } from '../../components/DebugFlags'
+import { Eththumbnail } from '../../components/EthThumbnail'
 import { NavigationTabs, NavigationTabsItem } from '../../components/NavigationTabs'
 import { PageHeader } from '../../components/PageHeader'
 import { PAGE_GUTTER } from '../../components/PageWithSideBar'
@@ -33,7 +33,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
       }
       parent={{ to: `/investments${state?.token ? '/tokens' : ''}`, label: state?.token ? 'Tokens' : 'Pools' }}
       icon={
-        <Flex position="relative">
+        <Eththumbnail show={isTinlakePool}>
           {metadata?.pool?.icon ? (
             <Box
               as="img"
@@ -52,21 +52,7 @@ export const PoolDetailHeader: React.FC<Props> = ({ actions }) => {
               <Text variant="body1">{(isLoading ? '' : metadata?.pool?.name ?? 'U')[0]}</Text>
             </Shelf>
           )}
-          {isTinlakePool && (
-            <Shelf
-              position="absolute"
-              bottom={0}
-              left={0}
-              width={22}
-              height={22}
-              borderRadius="50%"
-              background="white"
-              style={{ transform: 'translate(-50%, 50%)' }}
-            >
-              <Box as="img" src={ethereumLogo} height={18} mx="auto" />
-            </Shelf>
-          )}
-        </Flex>
+        </Eththumbnail>
       }
       border={false}
       actions={actions}
