@@ -190,6 +190,22 @@ const tooltipText = {
     label: 'Pool',
     body: 'Allows to manage pool configuration and manage other admins.',
   },
+  noTranchProtection: {
+    label: 'Min. protection',
+    body: 'The first, most junior tranche is not protected by subordinated tranches.',
+  },
+  tranchProtection: {
+    label: 'Min. protection',
+    body: 'Minimum protection required for this tranche by all subordinated tranches.',
+  },
+  variableTranchInterest: {
+    label: 'Interest rate',
+    body: 'The first, most junior tranche receives a variable return.',
+  },
+  fixedTranchInterest: {
+    label: 'Fixed interest rate',
+    body: 'Fixed interest rate (APR) this tranche accrues on deployed capital.',
+  },
 }
 
 type TooltipsProps = {
