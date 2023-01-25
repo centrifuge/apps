@@ -1,7 +1,8 @@
 import { CurrencyMetadata, PoolMetadata } from '@centrifuge/centrifuge-js'
-import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
+import { Box, IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
+import ethereumLogo from '../assets/images/ethereum.svg'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
@@ -95,8 +96,24 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
   return (
-    <Shelf gap="2" overflow="hidden">
-      <Thumbnail label={token.currency.symbol} size="small" />
+    <Shelf gap="2">
+      <Box position="relative">
+        <Thumbnail label={token.currency.symbol} size="small" />
+        {token.poolId.startsWith('0x') && (
+          <Shelf
+            position="absolute"
+            bottom={0}
+            left={0}
+            width={16}
+            height={16}
+            borderRadius="50%"
+            background="white"
+            style={{ transform: 'translate(-50%, 50%)' }}
+          >
+            <Box as="img" src={ethereumLogo} height={12} mx="auto" />
+          </Shelf>
+        )}
+      </Box>
       <Text variant="body2" color="textPrimary" fontWeight={600} textOverflow="ellipsis">
         {token.currency.name}
       </Text>
