@@ -64,7 +64,6 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         'name',
         'countryOfCitizenship',
         'dateOfBirth',
-        'kycReference',
       ])
       const entityUserData = userDoc.data() as EntityUser
       if (entityUserData.steps.verifyIdentity.completed) {

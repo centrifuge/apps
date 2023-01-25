@@ -189,7 +189,6 @@ Sets the ultimate beneficial owners for the entity.
     "address": "4g8zNcypnFHE5jqCifLGYoutCCM7uKWhF1NjWHka29hQE2rx",
     "network": "polkadot"
   },
-  "kycReference": "KYC_0.8391372155700734",
   "registrationNumber": "710794409",
   "name": "Tester",
   "jurisdictionCode": "CH",
