@@ -22,7 +22,7 @@ export const setVerifiedIdentityController = async (
       throw new HttpsError(400, 'Unable to process request')
     }
 
-    const status = await shuftiProRequest(req, { reference: `KYC_${req.walletAddress}` }, { path: 'status', dryRun })
+    const status = await shuftiProRequest(req, { reference: user.kycReference }, { path: 'status', dryRun })
     if (user && status.event === 'verification.accepted') {
       const updatedUser: Subset<OnboardingUser> = {
         steps: {

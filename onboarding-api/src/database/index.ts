@@ -68,6 +68,7 @@ const stepsSchema = object({
 export const entityUserSchema = object({
   investorType: string().default('entity') as StringSchema<Entity>,
   wallet: walletSchema,
+  kycReference: string().optional(),
   email: string().email().default(null),
   businessName: string().required(),
   incorporationDate: date().required(),
@@ -83,6 +84,7 @@ export const entityUserSchema = object({
 export const individualUserSchema = object({
   investorType: string().default('individual') as StringSchema<Individual>,
   wallet: walletSchema,
+  kycReference: string().optional(),
   email: string().default(null).nullable(),
   name: string().nullable().default(null),
   dateOfBirth: string().nullable().default(null),

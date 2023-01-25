@@ -63,6 +63,7 @@ export const verifyBusinessController = async (
 
     const user: EntityUser = {
       investorType: 'entity',
+      kycReference: '',
       wallet: {
         address: walletAddress,
         network: 'polkadot',
