@@ -1,4 +1,5 @@
 import { CurrencyBalance, Perquintill, PoolMetadata, PoolMetadataInput, Rate } from '@centrifuge/centrifuge-js'
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Grid, NumberInput, Shelf, Stack, Text, Thumbnail } from '@centrifuge/fabric'
 import { Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
@@ -10,7 +11,6 @@ import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage
 import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
 import { formatBalance, formatPercentage } from '../../../utils/formatting'
-import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { useConstants, usePool, usePoolMetadata } from '../../../utils/usePools'
 import { TrancheInput } from '../../IssuerCreatePool/TrancheInput'
 import { validate } from '../../IssuerCreatePool/validate'

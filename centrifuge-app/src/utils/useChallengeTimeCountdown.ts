@@ -1,6 +1,6 @@
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { lastValueFrom } from '@polkadot/api-base/node_modules/rxjs'
 import React from 'react'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useBlock } from './useBlock'
 import { usePool } from './usePools'
 

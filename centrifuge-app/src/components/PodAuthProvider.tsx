@@ -1,7 +1,6 @@
+import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import React from 'react'
 import { useMutation, useQuery } from 'react-query'
-import { useCentrifuge } from './CentrifugeProvider'
-import { useWeb3 } from './Web3Provider'
 
 const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'PodAdmin']
 
@@ -12,7 +11,7 @@ export const PodAuthContext = React.createContext<{
 }>(null as any)
 
 export const PodAuthProvider: React.FC = ({ children }) => {
-  const { selectedWallet, proxy, selectedAccount } = useWeb3()
+  const { selectedWallet, proxy, selectedAccount } = useWallet()
   const cent = useCentrifuge()
 
   const { data: session, refetch: refetchSession } = useQuery(
@@ -95,7 +94,7 @@ export const PodAuthProvider: React.FC = ({ children }) => {
 export function useAuth() {
   const ctx = React.useContext(PodAuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  const { selectedAccount } = useWeb3()
+  const { selectedAccount } = useWallet()
 
   const cent = useCentrifuge()
 

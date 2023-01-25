@@ -1,11 +1,11 @@
 import { CurrencyBalance, Pool, Token } from '@centrifuge/centrifuge-js'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { InteractiveCard, Shelf, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
 import { formatBalance } from '../utils/formatting'
 import { TinlakePool } from '../utils/tinlake/usePools'
 import { usePoolMetadata } from '../utils/usePools'
-import { useCentrifuge } from './CentrifugeProvider'
 import { LabelValueStack } from './LabelValueStack'
 import { Tooltips } from './Tooltips'
 

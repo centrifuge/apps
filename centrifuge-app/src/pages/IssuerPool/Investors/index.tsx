@@ -1,4 +1,5 @@
 import { findBalance, Pool, Token } from '@centrifuge/centrifuge-js'
+import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Button,
   Grid,
@@ -21,8 +22,6 @@ import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { useAddress } from '../../../utils/useAddress'
-import { useBalances } from '../../../utils/useBalances'
-import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePermissions } from '../../../utils/usePermissions'
 import { useOrder, usePool } from '../../../utils/usePools'
 import { IssuerPoolHeader } from '../Header'

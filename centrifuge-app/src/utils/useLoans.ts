@@ -1,7 +1,7 @@
+import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { combineLatest } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { Dec } from './Decimal'
-import { useCentrifugeQuery } from './useCentrifugeQuery'
 
 const SEC_PER_DAY = 24 * 60 * 60
 

@@ -1,6 +1,6 @@
 import { Pool } from '@centrifuge/centrifuge-js'
+import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { BN } from 'bn.js'
-import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { usePool } from './usePools'
 
 export function useNFTs(collectionId?: string) {

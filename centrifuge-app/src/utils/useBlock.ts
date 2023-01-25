@@ -1,4 +1,4 @@
-import { useCentrifugeQuery } from './useCentrifugeQuery'
+import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 
 export const useBlock = () => {
   const [result] = useCentrifugeQuery(['block'], (cent) => {

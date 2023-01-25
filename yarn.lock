@@ -1733,6 +1733,7 @@ __metadata:
   resolution: "@centrifuge/centrifuge-app@workspace:centrifuge-app"
   dependencies:
     "@centrifuge/centrifuge-js": "workspace:*"
+    "@centrifuge/centrifuge-react": "workspace:*"
     "@centrifuge/fabric": "workspace:*"
     "@makerdao/multicall": ^0.12.0
     "@polkadot/api": ^9.7.1
@@ -1819,7 +1820,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@centrifuge/centrifuge-react@workspace:centrifuge-react":
+"@centrifuge/centrifuge-react@workspace:*, @centrifuge/centrifuge-react@workspace:centrifuge-react":
   version: 0.0.0-use.local
   resolution: "@centrifuge/centrifuge-react@workspace:centrifuge-react"
   dependencies:

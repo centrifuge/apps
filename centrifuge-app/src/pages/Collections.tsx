@@ -1,6 +1,6 @@
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Button, IconPlus, LayoutGrid, LayoutGridItem, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { CollectionCard, CollectionCardInner } from '../components/CollectionCard'
 import { CreateCollectionDialog } from '../components/Dialogs/CreateCollectionDialog'
 import { Identity } from '../components/Identity'

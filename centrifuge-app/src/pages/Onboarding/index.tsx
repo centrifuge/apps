@@ -1,10 +1,9 @@
+import { useWallet, WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper, SubStep } from '@centrifuge/fabric'
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AccountsMenu } from '../../components/AccountsMenu'
 import { useAuth } from '../../components/AuthProvider'
 import { Spinner } from '../../components/Spinner'
-import { useWeb3 } from '../../components/Web3Provider'
 import { config } from '../../config'
 import { InvestorTypes, ultimateBeneficialOwner } from '../../types'
 import { BusinessInformation } from './BusinessInformation'
@@ -21,7 +20,7 @@ export const OnboardingPage: React.FC = () => {
   const [activeStep, setActiveStep] = useState<number>(0)
   const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = useState<number>(0)
 
-  const { isConnecting, selectedAccount } = useWeb3()
+  const { isConnecting, selectedAccount } = useWallet()
   const [investorType, setInvestorType] = useState<InvestorTypes>()
   const { isAuth, refetchAuth } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const [ultimateBeneficialOwners, setUltimateBeneficialOwners] = useState<ultimateBeneficialOwner[]>([])
@@ -51,7 +50,7 @@ export const OnboardingPage: React.FC = () => {
           <Box pt={1}>Pool</Box>
         </Shelf>
         <Box width="300px">
-          <AccountsMenu />
+          <WalletMenu />
         </Box>
       </Shelf>
       {activeStep === 0 || isConnecting ? (

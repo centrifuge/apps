@@ -1,7 +1,6 @@
+import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import React from 'react'
 import { useMutation, useQuery } from 'react-query'
-import { useCentrifuge } from './CentrifugeProvider'
-import { useWeb3 } from './Web3Provider'
 
 export const AuthContext = React.createContext<{
   session?: { signed: string; payload: any } | null
@@ -10,7 +9,7 @@ export const AuthContext = React.createContext<{
 }>(null as any)
 
 export const AuthProvider: React.FC = ({ children }) => {
-  const { selectedWallet, proxy, selectedAccount } = useWeb3()
+  const { selectedWallet, proxy, selectedAccount } = useWallet()
   const cent = useCentrifuge()
 
   const { data: session, refetch: refetchSession } = useQuery(
@@ -86,7 +85,7 @@ export const AuthProvider: React.FC = ({ children }) => {
 export function useAuth(authorizedProxyTypes?: string[]) {
   const ctx = React.useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  const { selectedAccount } = useWeb3()
+  const { selectedAccount } = useWallet()
 
   const cent = useCentrifuge()
 

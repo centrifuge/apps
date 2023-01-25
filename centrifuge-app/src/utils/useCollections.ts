@@ -1,7 +1,7 @@
+import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import * as React from 'react'
 import { FEATURED_COLLECTIONS } from '../config'
 import { collectionMetadataSchema } from '../schemas'
-import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useMetadata } from './useMetadata'
 
 export function useCollections() {
