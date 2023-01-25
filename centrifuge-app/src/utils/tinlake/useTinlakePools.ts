@@ -1,10 +1,11 @@
 import { CurrencyBalance, Perquintill, Pool, PoolMetadata, Price, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import { BigNumber } from '@ethersproject/bignumber'
 import BN from 'bn.js'
-import { BigNumber } from 'ethers'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { lastValueFrom } from 'rxjs'
+import { useDebugFlags } from '../../components/DebugFlags'
 import { ethConfig } from '../../config'
 import { Dec } from '../Decimal'
 import { Call, multicall } from './multicall'
@@ -14,6 +15,7 @@ import {
   ArchivedPool,
   IpfsPools,
   LaunchingPool,
+  PoolMetadataDetails,
   PoolStatus,
   TinlakeMetadataPool,
   UpcomingPool,
@@ -104,52 +106,17 @@ function useIpfsPools(suspense = false) {
 }
 
 export function useTinlakePools(suspense = false) {
+  const { showTinlakePools } = useDebugFlags()
   const ipfsPools = useIpfsPools(suspense)
-  return useQuery(['tinlakePools', !!ipfsPools], () => getPools(ipfsPools!), { enabled: !!ipfsPools, suspense })
+  return useQuery(['tinlakePools', !!ipfsPools], () => getPools(ipfsPools!), {
+    enabled: !!ipfsPools && !!showTinlakePools,
+    suspense,
+  })
 }
-
-// export type TinlakeMetadata = {
-//   //// Do something with:
-//   // "shortName": "GIG Pool",
-//   // "slug": "gig-pool",
-//   // "currencySymbol": "DAI",
-//   // "maker": {
-//   //   "ilk": "RWA010-A",
-//   //   "minNonMakerDropShare": 0.25
-//   // },
-//   // "juniorInvestors": [
-//   //   {
-//   //     "name": "BlockTower Credit Partners, LP",
-//   //     "address": "0x1bd5d6e5d95393a3175C56683B2cB9ddB3188fC1"
-//   //   }
-//   // ],
-//   pool: {
-//     name: string
-//     icon: { uri: string; mime: string } | null
-//     asset: { class: string }
-//     issuer: {
-//       name: string | undefined
-//       description: string | undefined
-//       email: string | undefined
-//       logo: { uri: string; mime: string } | null
-//     }
-//     links: {
-//       executiveSummary: { uri: string | undefined; mime: string }
-//       forum: string | undefined
-//       website: string | undefined
-//     }
-//     status: string
-//     listed: boolean
-//     tranches: {
-//       [x: string]:
-//         | { icon: { uri: string | undefined; mime: string }; minInitialInvestment?: undefined }
-//         | { icon: { uri: string | undefined; mime: string }; minInitialInvestment: string }
-//     }
-//   }
-// }
 
 export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches'> & {
   metadata: PoolMetadata
+  tinlakeMetadata: PoolMetadataDetails
   tranches: (Omit<Pool['tranches'][0], 'poolMetadata'> & { poolMetadata: PoolMetadata })[]
 
   creditline: { available: CurrencyBalance; used: CurrencyBalance; unused: CurrencyBalance } | null
@@ -488,20 +455,6 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
     const capacity = new CurrencyBalance(capacityPerPool[id], 18)
     const capacityGivenMaxReserve = new CurrencyBalance(capacityGivenMaxReservePerPool[id], 18)
     const metadata: PoolMetadata = {
-      //// Do something with:
-      // "shortName": "GIG Pool",
-      // "slug": "gig-pool",
-      // "currencySymbol": "DAI",
-      // "maker": {
-      //   "ilk": "RWA010-A",
-      //   "minNonMakerDropShare": 0.25
-      // },
-      // "juniorInvestors": [
-      //   {
-      //     "name": "BlockTower Credit Partners, LP",
-      //     "address": "0x1bd5d6e5d95393a3175C56683B2cB9ddB3188fC1"
-      //   }
-      // ],
       pool: {
         name: p.metadata.name,
         icon: p.metadata.media?.icon ? { uri: p.metadata.media.icon, mime: 'image/svg' } : null,
@@ -567,6 +520,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
     return {
       ...p,
       metadata,
+      tinlakeMetadata: p.metadata,
       id,
       isTinlakePool: true,
       isClosing: data.poolClosing,

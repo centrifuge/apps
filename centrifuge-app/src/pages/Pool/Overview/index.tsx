@@ -150,7 +150,7 @@ const InvestRedeemBox: React.FC<{
   return <InvestRedeem poolId={poolId} trancheId={tokenId} view={view} onSetView={setView} autoFocus />
 }
 
-const AvgMaturity: React.FC<{ poolId: string }> = ({ poolId }) => {
+const AverageMaturity: React.FC<{ poolId: string }> = ({ poolId }) => {
   return <>{useAverageMaturity(poolId)}</>
 }
 
@@ -177,7 +177,7 @@ export const PoolDetailOverview: React.FC<{
   if (!isTinlakePool) {
     pageSummaryData.push({
       label: <Tooltips type="averageAssetMaturity" />,
-      value: <AvgMaturity poolId={poolId} />,
+      value: <AverageMaturity poolId={poolId} />,
     })
   }
   if (pool?.createdAt) {

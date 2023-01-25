@@ -5,6 +5,7 @@ import { useRouteMatch } from 'react-router'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
+import { Eththumbnail } from './EthThumbnail'
 
 export type TokenTableData = {
   poolMetadata?: string | Partial<PoolMetadata>
@@ -94,19 +95,14 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
 }
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
-  const { data: metadata, isLoading } = usePoolMetadata({ id: token.poolId, metadata: token.poolMetadata })
   return (
-    <Shelf gap="2" overflow="hidden">
-      <Thumbnail label={token.currency.symbol} size="small" />
-      <TextWithPlaceholder
-        isLoading={isLoading}
-        variant="body2"
-        color="textPrimary"
-        fontWeight={600}
-        textOverflow="ellipsis"
-      >
-        {metadata?.pool?.name} {token.currency.name}
-      </TextWithPlaceholder>
+    <Shelf gap="2">
+      <Eththumbnail show={token.poolId.startsWith('0x')} size="small">
+        <Thumbnail label={token.currency.symbol} size="small" />
+      </Eththumbnail>
+      <Text variant="body2" color="textPrimary" fontWeight={600} textOverflow="ellipsis">
+        {token.currency.name}
+      </Text>
     </Shelf>
   )
 }

@@ -1,5 +1,5 @@
 import { ActiveLoan } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { Box, Shelf, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, IconExternalLink, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
@@ -7,8 +7,10 @@ import { LoanList } from '../../../components/LoanList'
 import { PageSummary } from '../../../components/PageSummary'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { Tooltips } from '../../../components/Tooltips'
+import { ethConfig } from '../../../config'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatPercentage } from '../../../utils/formatting'
+import { TinlakePool } from '../../../utils/tinlake/useTinlakePools'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { useLoans } from '../../../utils/useLoans'
 import { usePool } from '../../../utils/usePools'
@@ -26,7 +28,7 @@ export const PoolDetailAssetsTab: React.FC = () => {
   )
 }
 
-const AvgMaturity: React.FC<{ poolId: string }> = ({ poolId }) => {
+const AverageMaturity: React.FC<{ poolId: string }> = ({ poolId }) => {
   return <>{useAverageMaturity(poolId)}</>
 }
 
@@ -37,10 +39,19 @@ export const PoolDetailAssets: React.FC = () => {
   const isTinlakePool = poolId.startsWith('0x')
 
   if (isTinlakePool) {
-    // TODO: Link to the right pool on Tinlake
     return (
-      <Shelf p="4">
-        <Text>View assets on Tinlake</Text>
+      <Shelf p="4" justifyContent="center">
+        <AnchorButton
+          href={new URL(
+            `/pools/${pool.id}/${(pool as TinlakePool).tinlakeMetadata.slug}/assets`,
+            ethConfig.tinlakeUrl
+          ).toString()}
+          target="_blank"
+          variant="secondary"
+          iconRight={IconExternalLink}
+        >
+          View assets on Tinlake
+        </AnchorButton>
       </Shelf>
     )
   }
@@ -71,7 +82,7 @@ export const PoolDetailAssets: React.FC = () => {
   if (!isTinlakePool) {
     pageSummaryData.splice(1, 0, {
       label: <Tooltips type="averageMaturity" />,
-      value: <AvgMaturity poolId={poolId} />,
+      value: <AverageMaturity poolId={poolId} />,
     })
   }
 

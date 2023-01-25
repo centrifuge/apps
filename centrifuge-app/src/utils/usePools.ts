@@ -2,7 +2,7 @@ import Centrifuge, { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
 import { combineLatest, map, Observable } from 'rxjs'
-import { useTinlakePools } from './tinlake/usePools'
+import { useTinlakePools } from './tinlake/useTinlakePools'
 import { useMetadata } from './useMetadata'
 
 export function usePools(suspense = true) {
