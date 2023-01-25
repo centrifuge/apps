@@ -42,6 +42,8 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
             completed: false,
             timeStamp: null,
           },
+          verifyAccreditdation: { completed: false, timeStamp: null },
+          verifyTaxInfo: { completed: false, timeStamp: null },
           signAgreements: {
             [body.poolId]: {
               [body.trancheId]: {

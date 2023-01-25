@@ -35,10 +35,14 @@ const stepsSchema = object({
     completed: bool(),
     timeStamp: string().nullable(),
   }),
-  // taxInfo: object({
-  //   completed: bool(),
-  //   timeStamp: string().nullable(),
-  // }),
+  verifyTaxInfo: object({
+    completed: bool(),
+    timeStamp: string().nullable(),
+  }),
+  verifyAccreditdation: object({
+    completed: bool(),
+    timeStamp: string().nullable(),
+  }),
   verifyIdentity: object({
     completed: bool(),
     timeStamp: string().nullable(),
@@ -89,7 +93,7 @@ export const individualUserSchema = object({
   name: string().nullable().default(null),
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
-  steps: stepsSchema.pick(['verifyIdentity', 'signAgreements']),
+  steps: stepsSchema.pick(['verifyIdentity', 'verifyAccreditdation', 'verifyTaxInfo', 'signAgreements']),
 })
 
 export type EntityUser = InferType<typeof entityUserSchema>
