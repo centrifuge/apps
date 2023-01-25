@@ -26,7 +26,7 @@ export const PoolDetailAssetsTab: React.FC = () => {
   )
 }
 
-const AvgMaturity: React.FC<{ poolId: string }> = ({ poolId }) => {
+const AverageMaturity: React.FC<{ poolId: string }> = ({ poolId }) => {
   return <>{useAverageMaturity(poolId)}</>
 }
 
@@ -71,7 +71,7 @@ export const PoolDetailAssets: React.FC = () => {
   if (!isTinlakePool) {
     pageSummaryData.splice(1, 0, {
       label: <Tooltips type="averageMaturity" />,
-      value: <AvgMaturity poolId={poolId} />,
+      value: <AverageMaturity poolId={poolId} />,
     })
   }
 

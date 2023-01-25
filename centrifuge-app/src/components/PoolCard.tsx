@@ -1,16 +1,17 @@
 import { CurrencyBalance, Pool, Token } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { InteractiveCard, Shelf, Thumbnail } from '@centrifuge/fabric'
+import { InteractiveCard, Shelf, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useRouteMatch } from 'react-router'
 import { formatBalance } from '../utils/formatting'
-import { TinlakePool } from '../utils/tinlake/usePools'
+import { TinlakePool } from '../utils/tinlake/useTinlakePools'
 import { usePoolMetadata } from '../utils/usePools'
 import { LabelValueStack } from './LabelValueStack'
 import { Tooltips } from './Tooltips'
 
 type PoolCardProps = {
-  pool: Pool | TinlakePool
+  // Not passing a pool shows a placeholder card
+  pool?: Pool | TinlakePool
 }
 
 export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
@@ -19,9 +20,11 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
   const { data: metadata } = usePoolMetadata(pool)
 
-  const totalTrancheCapacity = (pool.tranches as Token[]).reduce((prev, curr) => {
-    return new CurrencyBalance(prev.add(curr.capacity), pool.currency.decimals)
-  }, CurrencyBalance.fromFloat(0, pool.currency.decimals))
+  const totalTrancheCapacity =
+    pool &&
+    (pool.tranches as Token[]).reduce((prev, curr) => {
+      return new CurrencyBalance(prev.add(curr.capacity), pool.currency.decimals)
+    }, CurrencyBalance.fromFloat(0, pool.currency.decimals))
 
   return (
     <InteractiveCard
@@ -33,19 +36,36 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
         )
       }
       variant="button"
-      title={metadata?.pool?.name}
-      subtitle={metadata?.pool?.issuer.name}
-      onClick={() => history.push(`${basePath}/${pool.id}`)}
+      title={<TextWithPlaceholder isLoading={!metadata}>{metadata?.pool?.name}</TextWithPlaceholder>}
+      subtitle={<TextWithPlaceholder isLoading={!metadata}>{metadata?.pool?.issuer.name}</TextWithPlaceholder>}
+      onClick={pool ? () => history.push(`${basePath}/${pool.id}`) : undefined}
       secondaryHeader={
         <Shelf gap="6" justifyContent="flex-start">
           <LabelValueStack
-            label={<Tooltips type="valueLocked" variant="secondary" props={{ poolId: pool.id }} />}
-            value={formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency.symbol)}
+            label={
+              pool ? <Tooltips type="valueLocked" variant="secondary" props={{ poolId: pool.id }} /> : 'Value locked'
+            }
+            value={
+              pool ? (
+                formatBalance(pool.nav.latest.toFloat() + pool.reserve.total.toFloat(), pool.currency.symbol)
+              ) : (
+                <TextWithPlaceholder isLoading />
+              )
+            }
           />
-          <LabelValueStack label="Tokens" value={pool.tranches.length} />
+          <LabelValueStack
+            label="Tokens"
+            value={pool ? pool.tranches.length : <TextWithPlaceholder isLoading width={2} variance={0} />}
+          />
           <LabelValueStack
             label="Capacity"
-            value={formatBalance(totalTrancheCapacity.toFloat() + pool.reserve.total.toFloat(), pool.currency.symbol)}
+            value={
+              totalTrancheCapacity ? (
+                formatBalance(totalTrancheCapacity.toFloat() + pool.reserve.total.toFloat(), pool.currency.symbol)
+              ) : (
+                <TextWithPlaceholder isLoading />
+              )
+            }
           />
         </Shelf>
       }
