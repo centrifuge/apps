@@ -14,7 +14,6 @@ import { formatBalance } from '../utils/formatting'
 import { useTinlakePools } from '../utils/tinlake/usePools'
 import { useMetadataMulti } from '../utils/useMetadata'
 import { usePools } from '../utils/usePools'
-import { PodConfig } from './IssuerPool/Configuration/PodConfig'
 
 export const PoolsPage: React.FC = () => {
   return (
@@ -76,7 +75,6 @@ const Pools: React.FC = () => {
         actions={<MenuSwitch />}
       />
 
-      <PodConfig />
       {listedPools?.length ? (
         <>
           <PageSummary data={pageSummaryData} />
