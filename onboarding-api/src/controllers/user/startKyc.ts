@@ -25,6 +25,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       throw new HttpsError(400, 'trancheId and poolId required for individual kyc')
     }
 
+    const kycReference = `KYC_${Math.random()}`
     if (body.poolId && body.trancheId) {
       userData = {
         investorType: 'individual',
@@ -32,6 +33,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
           address: walletAddress,
           network: 'polkadot',
         },
+        kycReference,
         name: body.name,
         dateOfBirth: body.dateOfBirth,
         countryOfCitizenship: body.countryOfCitizenship,
@@ -45,8 +47,6 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
               [body.trancheId]: {
                 completed: false,
                 timeStamp: null,
-                // poolId: body.poolId
-                // trancheId: body.trancheId
               },
             },
           },
@@ -71,55 +71,37 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       }
     }
 
-    /**
-     *
-     * Face Verification, {face: {}}
-     * Address  Verification, {address: {}}
-     * Document Verification, {document: {}}
-     *    Document Issue Date,
-     *    Document Expiry Date,
-     *    Document Number
-     *    Name Verification,
-     *    Dob Verification,
-     *
-     * OCR = confirmation dialog, make sure scanned info is correct
-     */
-
     const payloadKYC = {
-      reference: `KYC_${walletAddress}`,
+      reference: kycReference,
       callback_url: '',
-      email: userData.email || '',
-      country: userData.countryOfCitizenship,
+      email: userData.email ?? '',
+      country: body.countryOfCitizenship,
       language: 'EN',
       redirect_url: '',
       verification_mode: 'any',
+      allow_offline: '1',
+      show_feedback_form: '0',
+      ttl: 1800, // time in seconds for the verification url to stay active
       face: {
         proof: '',
-        allow_offline: '1',
+        allow_offline: '0',
         check_duplicate_request: '1',
       },
       document: {
         proof: '',
-        supported_types: ['id_card'],
+        supported_types: ['id_card', 'passport', 'driving_license'],
         dob: body.dateOfBirth,
-        issue_date: '',
-        expiry_date: '',
-        document_number: '',
-        age: '',
         name: {
           full_name: body.name,
         },
       },
       address: {
         proof: '',
-        supported_types: ['id_card', 'bank_statement', 'envelope'],
+        supported_types: ['any'],
         name: {
           full_name: body.name,
         },
-        issue_date: '',
-        full_address: '',
         address_fuzzy_match: '1',
-        backside_proof_required: '0',
         show_ocr_form: '1',
       },
     }
