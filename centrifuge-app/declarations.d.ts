@@ -13,6 +13,5 @@ interface ImportMetaEnv {
   REACT_APP_DEFAULT_NODE_URL: string
   REACT_APP_FAUCET_URL: string
   REACT_APP_ONBOARDING_API_URL: string
-  REACT_APP_TINLAKE_POOLS_HASH: string
   REACT_APP_TINLAKE_NETWORK: 'goerli' | 'mainnet'
 }
