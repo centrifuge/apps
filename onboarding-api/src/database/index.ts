@@ -35,10 +35,14 @@ const stepsSchema = object({
     completed: bool(),
     timeStamp: string().nullable(),
   }),
-  // taxInfo: object({
-  //   completed: bool(),
-  //   timeStamp: string().nullable(),
-  // }),
+  verifyTaxInfo: object({
+    completed: bool(),
+    timeStamp: string().nullable(),
+  }),
+  verifyAccreditdation: object({
+    completed: bool(),
+    timeStamp: string().nullable(),
+  }),
   verifyIdentity: object({
     completed: bool(),
     timeStamp: string().nullable(),
@@ -68,6 +72,7 @@ const stepsSchema = object({
 export const entityUserSchema = object({
   investorType: string().default('entity') as StringSchema<Entity>,
   wallet: walletSchema,
+  kycReference: string().optional(),
   email: string().email().default(null),
   businessName: string().required(),
   incorporationDate: date().required(),
@@ -83,11 +88,12 @@ export const entityUserSchema = object({
 export const individualUserSchema = object({
   investorType: string().default('individual') as StringSchema<Individual>,
   wallet: walletSchema,
-  email: string().default(null),
+  kycReference: string().optional(),
+  email: string().default(null).nullable(),
   name: string().nullable().default(null),
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
-  steps: stepsSchema.pick(['verifyIdentity', 'signAgreements']),
+  steps: stepsSchema.pick(['verifyIdentity', 'verifyAccreditdation', 'verifyTaxInfo', 'signAgreements']),
 })
 
 export type EntityUser = InferType<typeof entityUserSchema>
@@ -95,17 +101,16 @@ export type IndividualUser = InferType<typeof individualUserSchema>
 export type OnboardingUser = IndividualUser | EntityUser
 
 export const firestore = new Firestore()
-export const individualCollection = firestore.collection(`onboarding-individuals`)
-export const entityCollection = firestore.collection(`onboarding-entities`)
+export const userCollection = firestore.collection(`onboarding-users`)
 
 const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
   entity: {
     schema: entityUserSchema,
-    collection: entityCollection,
+    collection: userCollection,
   },
   individual: {
     schema: individualUserSchema,
-    collection: individualCollection,
+    collection: userCollection,
   },
 }
 

@@ -15,7 +15,6 @@ import { useMutation } from 'react-query'
 import { date, object, string } from 'yup'
 import { useAuth } from '../../components/AuthProvider'
 import { useOnboardingUser } from '../../components/OnboardingUserProvider'
-import { useWeb3 } from '../../components/Web3Provider'
 import { EntityUser } from '../../types'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
 
@@ -54,7 +53,6 @@ const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) =>
 }
 
 export const BusinessInformation = ({ backStep, nextStep }: Props) => {
-  const { selectedAccount } = useWeb3()
   const { authToken } = useAuth()
   const { onboardingUser, refetchOnboardingUser } = useOnboardingUser() as {
     onboardingUser: EntityUser
@@ -94,7 +92,6 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
           incorporationDate: formik.values.incorporationDate,
           trancheId,
           poolId,
-          address: selectedAccount?.address,
           dryRun: true,
         }),
         headers: {
