@@ -12,7 +12,8 @@ import {
 } from '@centrifuge/fabric'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import * as React from 'react'
-import { useWallet, wallets } from '../WalletProvider'
+import { EvmConnectorMeta } from '../../utils/evmConnectors'
+import { useEvmWallet, useWallet, wallets } from '../WalletProvider'
 
 type Props = ButtonProps & {
   label?: string
@@ -20,6 +21,15 @@ type Props = ButtonProps & {
 
 export function ConnectMenu({ label = 'Connect', ...rest }: Props) {
   const { accounts, isConnecting, connect, selectedAccount } = useWallet()
+  const {
+    connectors,
+    connect: connectEvm,
+    selectedAccount: selectedEvmAccount,
+    selectedConnector,
+    activating,
+    chainId,
+    accounts: evmAccounts,
+  } = useEvmWallet()
 
   if (accounts) {
     return selectedAccount ? null : <WalletButton connectLabel="No account connected" disabled {...rest} />
@@ -34,6 +44,29 @@ export function ConnectMenu({ label = 'Connect', ...rest }: Props) {
       notInstalled.push(wallet)
     }
   })
+
+  const evmInstalled: EvmConnectorMeta[] = []
+  const evmNotInstalled: EvmConnectorMeta[] = []
+  connectors.forEach((wallet) => {
+    if (wallet.isInstalled()) {
+      evmInstalled.push(wallet)
+    } else {
+      evmNotInstalled.push(wallet)
+    }
+  })
+
+  console.log(
+    'selectedEvmAccount',
+    selectedEvmAccount,
+    'selectedConnector',
+    selectedConnector,
+    'activating',
+    activating,
+    'chainId',
+    chainId,
+    'evmAccounts',
+    evmAccounts
+  )
 
   return (
     <Popover
@@ -84,6 +117,21 @@ export function ConnectMenu({ label = 'Connect', ...rest }: Props) {
                 ))}
               </MenuItemGroup>
             )}
+            <MenuItemGroup>
+              {evmInstalled.map((wallet) => (
+                <MenuItem
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key={wallet.name}
+                  label={wallet.name}
+                  icon={<Box as="img" src={wallet.logo.src} alt={wallet.logo.alt ?? ''} width="iconMedium" />}
+                  onClick={() => {
+                    state.close()
+                    connectEvm(wallet.connector)
+                  }}
+                />
+              ))}
+            </MenuItemGroup>
           </Menu>
         </div>
       )}

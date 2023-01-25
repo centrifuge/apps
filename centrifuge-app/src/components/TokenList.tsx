@@ -94,19 +94,12 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
 }
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
-  const { data: metadata, isLoading } = usePoolMetadata({ id: token.poolId, metadata: token.poolMetadata })
   return (
     <Shelf gap="2" overflow="hidden">
       <Thumbnail label={token.currency.symbol} size="small" />
-      <TextWithPlaceholder
-        isLoading={isLoading}
-        variant="body2"
-        color="textPrimary"
-        fontWeight={600}
-        textOverflow="ellipsis"
-      >
-        {metadata?.pool?.name} {token.currency.name}
-      </TextWithPlaceholder>
+      <Text variant="body2" color="textPrimary" fontWeight={600} textOverflow="ellipsis">
+        {token.currency.name}
+      </Text>
     </Shelf>
   )
 }

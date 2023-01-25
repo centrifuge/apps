@@ -66,6 +66,21 @@ const centConfig: UserProvidedConfig = {
     }),
 }
 
+const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
+
+const evmChains = {
+  1: {
+    urls: [infuraKey ? `https://mainnet.infura.io/v3/${infuraKey}` : '', 'https://cloudflare-eth.com'].filter(
+      (url) => url !== ''
+    ),
+    name: 'Mainnet',
+  },
+  5: {
+    urls: [infuraKey ? `https://goerli.infura.io/v3/${infuraKey}` : ''].filter((url) => url !== ''),
+    name: 'Görli',
+  },
+}
+
 export const Root: React.VFC = () => {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
 
@@ -90,7 +105,7 @@ export const Root: React.VFC = () => {
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
             <DemoBanner />
-            <WalletProvider>
+            <WalletProvider evmChains={evmChains}>
               <PodAuthProvider>
                 <AuthProvider>
                   <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>

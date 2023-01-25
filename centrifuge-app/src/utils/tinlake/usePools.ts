@@ -1,7 +1,7 @@
 import { CurrencyBalance, Perquintill, Pool, PoolMetadata, Price, Rate, TokenBalance } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
+import { BigNumber } from '@ethersproject/bignumber'
 import BN from 'bn.js'
-import { BigNumber } from 'ethers'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { lastValueFrom } from 'rxjs'
