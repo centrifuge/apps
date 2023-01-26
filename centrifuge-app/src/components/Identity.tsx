@@ -1,7 +1,7 @@
 import { isSameAddress } from '@centrifuge/centrifuge-js'
 import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import { Text, TextProps } from '@centrifuge/fabric'
-import React, { useMemo } from 'react'
+import * as React from 'react'
 import { copyToClipboard } from '../utils/copyToClipboard'
 import { useAddress } from '../utils/useAddress'
 import { useIdentity } from '../utils/useIdentity'
@@ -21,7 +21,7 @@ export const Identity: React.FC<Props> = ({ address, clickToCopy, labelForConnec
   const { selectedAccount } = useWallet()
 
   const addr = cent.utils.formatAddress(address)
-  const isMe = useMemo(() => isSameAddress(addr, myAddress), [addr, myAddress])
+  const isMe = React.useMemo(() => isSameAddress(addr, myAddress), [addr, myAddress])
   const truncated = truncate(cent.utils.formatAddress(address))
   const display = identity?.display || truncated
   const meLabel =

@@ -1,5 +1,5 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
-import React, { useContext } from 'react'
+import * as React from 'react'
 import { useQuery } from 'react-query'
 import { OnboardingUser } from '../types'
 import { useAuth } from './AuthProvider'
@@ -13,7 +13,7 @@ const OnboardingUserContext = React.createContext<{
   isOnboardingUserFetched: boolean
 } | null>(null)
 
-export const OnboardingUserProvider: React.FC = ({ children }) => {
+export function OnboardingUserProvider({ children }: { children?: React.ReactNode }) {
   const { isAuth, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const { selectedAccount } = useWallet()
 
@@ -60,7 +60,7 @@ export const OnboardingUserProvider: React.FC = ({ children }) => {
 }
 
 export const useOnboardingUser = () => {
-  const ctx = useContext(OnboardingUserContext)
+  const ctx = React.useContext(OnboardingUserContext)
   if (!ctx) throw new Error('useOnboardingUser must be used within OnboardingUserProvider')
   return ctx
 }

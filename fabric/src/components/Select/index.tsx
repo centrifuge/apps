@@ -6,7 +6,7 @@ import { AriaSelectOptions, HiddenSelect, useSelect } from '@react-aria/select'
 import { Item } from '@react-stately/collections'
 import { SelectState, useSelectState } from '@react-stately/select'
 import { CollectionElement, Node } from '@react-types/shared'
-import React, { FocusEvent } from 'react'
+import * as React from 'react'
 import styled from 'styled-components'
 import { IconChevronDown, IconChevronUp } from '../..'
 import { Box } from '../Box'
@@ -17,6 +17,7 @@ import { Text } from '../Text'
 type PopoverProps = {
   isOpen: boolean
   onClose: () => void
+  children?: React.ReactNode
 }
 
 type OptionProps = {
@@ -39,7 +40,7 @@ export type SelectOptionItem = {
 export type SelectProps = {
   options: SelectOptionItem[]
   onSelect?: OnSelectCallback
-  onBlur?: (e: FocusEvent) => void
+  onBlur?: (e: React.FocusEvent) => void
   value?: string
   label?: string | React.ReactElement
   placeholder: string

@@ -9,7 +9,7 @@ type GroupedProps = {
   lastGroupIndex?: number
 }
 
-type Props<T> = {
+export type DataTableProps<T = any> = {
   data: Array<T>
   columns: Column[]
   keyField?: string
@@ -51,7 +51,7 @@ export const DataTable = <T extends Record<string, any>>({
   groupIndex,
   lastGroupIndex,
   defaultSortOrder = 'desc',
-}: Props<T>) => {
+}: DataTableProps<T>) => {
   const [orderBy, setOrderBy] = React.useState<Record<string, OrderBy>>(
     defaultSortKey ? { [defaultSortKey]: defaultSortOrder } : {}
   )

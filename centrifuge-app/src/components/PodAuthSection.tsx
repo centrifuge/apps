@@ -29,11 +29,13 @@ export const PodAuthSection: React.FC<Props> = ({
           </Button>
         )}
       </Shelf>
-      {loginError && (
-        <Text variant="body3" color="statusCritical">
-          Failed to authenticate
-        </Text>
-      )}
+      <>
+        {loginError && (
+          <Text variant="body3" color="statusCritical">
+            Failed to authenticate
+          </Text>
+        )}
+      </>
     </Stack>
   )
 }

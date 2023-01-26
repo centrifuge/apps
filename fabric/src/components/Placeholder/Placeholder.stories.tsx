@@ -1,5 +1,5 @@
 import { ComponentMeta } from '@storybook/react'
-import React from 'react'
+import * as React from 'react'
 import { Placeholder } from '.'
 import { Stack } from '../Stack'
 

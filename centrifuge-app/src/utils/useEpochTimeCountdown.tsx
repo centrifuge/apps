@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import * as React from 'react'
 import { formatMilliseconds } from './date'
 import { usePool } from './usePools'
 
@@ -6,7 +6,7 @@ export const useEpochTimeCountdown = (poolId: string) => {
   const pool = usePool(poolId)
   const [{ hours, minutes, seconds }, setTimeRemaining] = React.useState({ hours: 0, minutes: 0, seconds: 0 })
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!pool) return
     const start = new Date(pool.epoch.lastClosed).getTime()
     const duration = pool.parameters.minEpochTime * 1000

@@ -9,6 +9,7 @@ type Props = {
   headerRight?: React.ReactNode
   collapsible?: boolean
   defaultOpen?: boolean
+  children: React.ReactNode
 }
 
 const Chevron = styled(CollapsibleChevron)`

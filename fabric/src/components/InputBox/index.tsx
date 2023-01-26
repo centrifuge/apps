@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { Box } from '../Box'
 import { Shelf } from '../Shelf'

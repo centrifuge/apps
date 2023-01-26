@@ -1,7 +1,7 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Button, IconDownload, Shelf, Stack, Text } from '@centrifuge/fabric'
-import React from 'react'
+import * as React from 'react'
 import styled from 'styled-components'
 import { PaddingProps } from 'styled-system'
 import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'

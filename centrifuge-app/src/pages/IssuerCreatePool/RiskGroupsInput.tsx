@@ -1,7 +1,7 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Button, Grid, IconMinusCircle, NumberInput, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { FieldArray, useFormikContext } from 'formik'
-import React from 'react'
+import * as React from 'react'
 import { createEmptyRiskGroup } from '.'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageSection } from '../../components/PageSection'

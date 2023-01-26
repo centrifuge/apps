@@ -1,6 +1,6 @@
 import { useWallet, WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper } from '@centrifuge/fabric'
-import React, { useEffect, useState } from 'react'
+import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../components/AuthProvider'
 import { useOnboardingUser } from '../../components/OnboardingUserProvider'
@@ -23,17 +23,17 @@ const poolId = '21323432'
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export const OnboardingPage: React.FC = () => {
-  const [activeStep, setActiveStep] = useState<number>(0)
+  const [activeStep, setActiveStep] = React.useState<number>(0)
 
   const { isConnecting, selectedAccount } = useWallet()
-  const [investorType, setInvestorType] = useState<InvestorTypes>()
+  const [investorType, setInvestorType] = React.useState<InvestorTypes>()
   const { refetchAuth, isAuth } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const { onboardingUser, isOnboardingUserFetching, isOnboardingUserFetched } = useOnboardingUser()
 
   const nextStep = () => setActiveStep((current) => current + 1)
   const backStep = () => setActiveStep((current) => current - 1)
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isConnecting && !isAuth) {
       return setActiveStep(1)
     }
