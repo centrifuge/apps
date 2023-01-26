@@ -11,7 +11,7 @@
     "start:centjs": "cd ../centrifuge-js && yarn start && cd ../centrifuge-app",
     "start:centreact": "cd ../centrifuge-react && yarn start && cd ../centrifuge-app",
     "build": "yarn build:deps && yarn build:lambda && yarn build:types && yarn build:app",
-    "build:deps": "yarn build:fabric && yarn build:centjs && build:centreact",
+    "build:deps": "yarn build:fabric && yarn build:centjs && yarn build:centreact",
     "build:lambda": "netlify-lambda build lambda",
     "build:app": "vite build",
     "build:types": "tsc",
