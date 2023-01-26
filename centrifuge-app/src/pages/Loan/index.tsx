@@ -1,4 +1,5 @@
-import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { CurrencyBalance, Pool } from '@centrifuge/centrifuge-js'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
   IconAlertCircle,
@@ -12,7 +13,6 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useHistory, useParams, useRouteMatch } from 'react-router'
-import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { Identity } from '../../components/Identity'
 import { LabelValueStack } from '../../components/LabelValueStack'
 import LoanLabel from '../../components/LoanLabel'
@@ -53,7 +53,7 @@ export const LoanPage: React.FC = () => {
 const LoanSidebar: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
-  const pool = usePool(pid)
+  const pool = usePool(pid) as Pool
   const address = useAddress()
   const permissions = usePermissions(address)
   const canBorrow = useCanBorrowAsset(pid, aid)

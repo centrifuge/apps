@@ -1,4 +1,5 @@
-import { findBalance, Tranche } from '@centrifuge/centrifuge-js'
+import { findBalance, Pool, Token } from '@centrifuge/centrifuge-js'
+import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Button,
   Grid,
@@ -21,10 +22,8 @@ import { LoadBoundary } from '../../../components/LoadBoundary'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { useAddress } from '../../../utils/useAddress'
-import { useBalances } from '../../../utils/useBalances'
-import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePermissions } from '../../../utils/usePermissions'
-import { useOrder, usePool, usePoolMetadata } from '../../../utils/usePools'
+import { useOrder, usePool } from '../../../utils/usePools'
 import { IssuerPoolHeader } from '../Header'
 
 export const IssuerPoolInvestorsPage: React.FC = () => {
@@ -66,8 +65,7 @@ export const Investors: React.FC = () => {
     .filter(([, till]) => new Date(till).getTime() - Date.now() > SevenDaysMs)
     .map(([tid]) => tid)
 
-  const pool = usePool(poolId)
-  const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
+  const pool = usePool(poolId) as Pool
 
   function toggleAllowed(trancheId: string) {
     if (!validAddress) return
@@ -126,23 +124,23 @@ export const Investors: React.FC = () => {
               {
                 align: 'left',
                 header: 'Token',
-                cell: (row: Tranche) => (
-                  <TextWithPlaceholder isLoading={metadataIsLoading} textOverflow="ellipsis" variant="body2">
-                    {metadata?.tranches?.[row.id]?.name}
-                  </TextWithPlaceholder>
+                cell: (row: Token) => (
+                  <Text textOverflow="ellipsis" variant="body2">
+                    {row.currency.name}
+                  </Text>
                 ),
                 flex: '1',
               },
               {
                 align: 'left',
                 header: 'Investment',
-                cell: (row: Tranche) => <InvestedCell address={validAddress} poolId={poolId} trancheId={row.id} />,
+                cell: (row: Token) => <InvestedCell address={validAddress} poolId={poolId} trancheId={row.id} />,
                 flex: '1',
               },
               {
                 header: '',
                 align: 'right',
-                cell: (row: Tranche) => {
+                cell: (row: Token) => {
                   const isAllowed = allowedTranches.includes(row.id)
 
                   return (

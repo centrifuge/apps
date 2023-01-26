@@ -1,6 +1,6 @@
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { ConnectButton } from '../components/ConnectButton'
 import { NFTCard } from '../components/NFTCard'
 import { PageHeader } from '../components/PageHeader'

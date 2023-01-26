@@ -1,8 +1,8 @@
+import { useWallet } from '@centrifuge/centrifuge-react'
 import React, { useContext } from 'react'
 import { useQuery } from 'react-query'
 import { OnboardingUser } from '../types'
 import { useAuth } from './AuthProvider'
-import { useWeb3 } from './Web3Provider'
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
@@ -15,7 +15,7 @@ const OnboardingUserContext = React.createContext<{
 
 export const OnboardingUserProvider: React.FC = ({ children }) => {
   const { isAuth, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
-  const { selectedAccount } = useWeb3()
+  const { selectedAccount } = useWallet()
 
   const {
     data: onboardingUserData,

@@ -1,6 +1,5 @@
-import { useWeb3 } from '../components/Web3Provider'
+import { useCentrifugeQuery, useWallet } from '@centrifuge/centrifuge-react'
 import { useAddress } from './useAddress'
-import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { useLoanNft } from './useNFTs'
 import { isSameAddress } from './web3'
 
@@ -15,7 +14,7 @@ export function usePermissions(address?: string) {
 export function useCanBorrow(poolId: string) {
   const address = useAddress()
   const permissions = usePermissions(address)
-  const { proxy } = useWeb3()
+  const { proxy } = useWallet()
   const canBorrow =
     permissions?.pools[poolId]?.roles.includes('Borrower') &&
     (!proxy || proxy.types.includes('Borrow') || proxy.types.includes('Any'))

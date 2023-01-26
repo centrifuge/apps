@@ -3,9 +3,9 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { usePool } from '../utils/usePools'
 
-const ValueLockedTooltipBody: React.VFC = () => {
-  const { pid: poolId } = useParams<{ pid: string }>()
-  const pool = usePool(poolId)
+const ValueLockedTooltipBody: React.FC<{ poolId?: string }> = ({ poolId }) => {
+  const { pid: poolIdParam } = useParams<{ pid: string }>()
+  const pool = usePool(poolId || poolIdParam)
   return <>Value locked represents the current total value of pool tokens in {pool?.currency.symbol}.</>
 }
 
@@ -212,13 +212,14 @@ type TooltipsProps = {
   type: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
   label?: string
+  props?: any
 }
 
-export const Tooltips: React.VFC<TooltipsProps> = ({ type, label: labelOverride, variant = 'primary' }) => {
+export const Tooltips: React.VFC<TooltipsProps> = ({ type, label: labelOverride, variant = 'primary', props }) => {
   const { label, body } = tooltipText[type]
   const isPrimary = variant === 'primary'
   return (
-    <FabricTooltip body={body}>
+    <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body}>
       <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
         {labelOverride || label}
       </Text>

@@ -5,7 +5,7 @@ import { useParams } from 'react-router'
 import { Column, DataTable } from '../../../components/DataTable'
 import { PageSection } from '../../../components/PageSection'
 import { formatPercentage } from '../../../utils/formatting'
-import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { usePool } from '../../../utils/usePools'
 
 type Row = {
   minRiskBuffer: Perquintill
@@ -53,7 +53,6 @@ const columns: Column[] = [
 export const Tranches: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  const { data: metadata } = usePoolMetadata(pool)
 
   const tokens =
     pool?.tranches
@@ -61,8 +60,8 @@ export const Tranches: React.FC = () => {
         return {
           minRiskBuffer: tranche.minRiskBuffer,
           interest: tranche.interestRatePerSec,
-          name: metadata?.tranches?.[tranche.id]?.name || '',
-          symbol: metadata?.tranches?.[tranche.id]?.symbol || '',
+          name: tranche.currency.name,
+          symbol: tranche.currency.symbol,
           seniority: Number(tranche.seniority),
           id: tranche.id,
         }

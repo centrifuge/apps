@@ -1,4 +1,5 @@
 import { Collection } from '@centrifuge/centrifuge-js'
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { Box, Card, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
@@ -6,7 +7,6 @@ import styled from 'styled-components'
 import { collectionMetadataSchema } from '../schemas'
 import { useMetadata } from '../utils/useMetadata'
 import { useVisibilityChecker } from '../utils/useVisibilityChecker'
-import { useCentrifuge } from './CentrifugeProvider'
 import { Identity } from './Identity'
 import { LogoAltair } from './LogoAltair'
 

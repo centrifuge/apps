@@ -1,4 +1,5 @@
 import { CollectionMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
+import { useCentrifuge, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -18,10 +19,7 @@ import { collectionMetadataSchema } from '../../schemas'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAsyncCallback } from '../../utils/useAsyncCallback'
 import { useBalance } from '../../utils/useBalance'
-import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { ButtonGroup } from '../ButtonGroup'
-import { useCentrifuge } from '../CentrifugeProvider'
-import { useWeb3 } from '../Web3Provider'
 
 // TODO: replace with better fee estimate
 const CREATE_FEE_ESTIMATE = 2
@@ -30,7 +28,7 @@ const MAX_FILE_SIZE_IN_BYTES = 1024 ** 2 // 1 MB limit by default
 const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
-  const { selectedAccount } = useWeb3()
+  const { selectedAccount } = useWallet()
   const [name, setName] = useState<string>('')
   const [description, setDescription] = useState<string>('')
   const [logo, setLogo] = useState<File | null>(null)
