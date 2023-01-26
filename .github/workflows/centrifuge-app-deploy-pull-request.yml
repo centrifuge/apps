@@ -19,7 +19,7 @@ jobs:
       subscan-url: https://rococo.subscan.io
       whitelisted-accounts: ''
       network: centrifuge
-      subquery-url: https://api.subquery.network/sq/embrio-tech/centrifuge-subql
+      subquery-url: https://api.subquery.network/sq/centrifuge/pools-development
       onboarding-api-url: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-dev
       pool-creation-type: immediate
       default-node-url: ''
