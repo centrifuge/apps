@@ -13,6 +13,7 @@
     "node": "16"
   },
   "dependencies": {
+    "@centrifuge/centrifuge-js": "workspace:centrifuge-js",
     "@google-cloud/firestore": "^6.4.1",
     "@google-cloud/functions-framework": "^3.1.3",
     "cookie": "^0.5.0",
