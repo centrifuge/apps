@@ -1,9 +1,12 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
+import BN from 'bn.js'
 import * as React from 'react'
 import { useDebugFlags } from '../components/DebugFlags'
 import { useMetadataMulti } from '../utils/useMetadata'
 import { usePools } from '../utils/usePools'
 import { useTinlakePools } from './tinlake/useTinlakePools'
+
+const sign = (n: BN) => (n.isZero() ? 0 : n.isNeg() ? -1 : 1)
 
 export function useListedPools() {
   const pools = usePools()
@@ -20,8 +23,10 @@ export function useListedPools() {
       const listedTokens = listedPools.flatMap((p) => p.tranches)
 
       return [
-        [...listedPools, ...listedTinlakePools],
-        [...listedTokens, ...listedTinlakeTokens],
+        [...listedPools, ...listedTinlakePools].sort((a, b) =>
+          sign(b.tranches.at(-1)!.capacity.sub(a.tranches.at(-1)!.capacity))
+        ),
+        [...listedTokens, ...listedTinlakeTokens].sort((a, b) => sign(b.capacity.sub(a.capacity))),
       ]
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
