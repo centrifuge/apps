@@ -22,33 +22,36 @@ export const signAgreementController = async (
   res: Response
 ) => {
   try {
-    await validateInput(req, signAgreementInput)
+    await validateInput(req.body, signAgreementInput)
     const { poolId, trancheId } = req.body
     const walletAddress = req.walletAddress
-    const unsignedAgreement = await unsignedAgreements.file(`${poolId}/${trancheId}.pdf`)
     const user = (await userCollection.doc(walletAddress).get())?.data()
 
-    const [unsignedAgreementExists] = await unsignedAgreement.exists()
+    if (
+      user?.steps.verifyIdentity.completed === true &&
+      user?.steps.signAgreements[poolId]?.[trancheId]?.completed !== true
+    ) {
+      const unsignedAgreement = await unsignedAgreements.file(`${poolId}/${trancheId}.pdf`)
+      const [unsignedAgreementExists] = await unsignedAgreement.exists()
 
-    if (unsignedAgreementExists) {
-      const pdf = await unsignedAgreement.download()
+      if (unsignedAgreementExists) {
+        const pdf = await unsignedAgreement.download()
 
-      const pdfDoc = await PDFDocument.load(pdf[0])
+        const pdfDoc = await PDFDocument.load(pdf[0])
 
-      const pages = pdfDoc.getPages()
+        const pages = pdfDoc.getPages()
 
-      const lastPage = pages[pages.length - 1]
-      lastPage.drawText(user?.name, {
-        x: 100,
-        y: 400,
-        size: 20,
-      })
+        const lastPage = pages[pages.length - 1]
+        lastPage.drawText(user?.name, {
+          x: 100,
+          y: 400,
+          size: 20,
+        })
 
-      const signedAgreement = await pdfDoc.save()
+        const signedAgreement = await pdfDoc.save()
 
-      await writeToBucket(signedAgreement, walletAddress, poolId, trancheId)
+        await writeToBucket(signedAgreement, walletAddress, poolId, trancheId)
 
-      if (user) {
         const updatedUser: Subset<OnboardingUser> = {
           steps: {
             ...user.steps,
@@ -70,9 +73,11 @@ export const signAgreementController = async (
         const freshUserData = (await userCollection.doc(walletAddress).get()).data()
         return res.status(200).send({ ...freshUserData })
       }
+
+      throw new HttpsError(400, 'Agreement not found')
     }
 
-    throw new Error()
+    throw new HttpsError(400, 'User must be verified before signing agreements')
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

@@ -1,9 +1,22 @@
 import { Request, Response } from 'express'
+import { object, string } from 'yup'
 import { signedAgreements } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
+import { validateInput } from '../../utils/validateInput'
 
-export const getSignedAgreementController = async (req: Request, res: Response) => {
+type Params = {
+  poolId: string
+  trancheId: string
+}
+
+const getSignedAgreementInput = object({
+  poolId: string().required(),
+  trancheId: string().required(),
+})
+
+export const getSignedAgreementController = async (req: Request<{}, {}, {}, Params>, res: Response) => {
   try {
+    await validateInput(req.query, getSignedAgreementInput)
     const { poolId, trancheId } = req.query
     const walletAddress = req.walletAddress
 
@@ -16,7 +29,7 @@ export const getSignedAgreementController = async (req: Request, res: Response) 
       return res.send({ signedAgreement: pdf[0] })
     }
 
-    throw new Error()
+    throw new HttpsError(400, 'Agreement not found')
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

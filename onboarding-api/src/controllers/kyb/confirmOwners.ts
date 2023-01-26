@@ -20,7 +20,7 @@ export const confirmOwnersController = async (
   res: Response
 ) => {
   try {
-    await validateInput(req, confirmOwnersInput)
+    await validateInput(req.body, confirmOwnersInput)
     const { walletAddress } = req
     const entityDoc = await userCollection.doc(walletAddress).get()
     const entityData = entityDoc.data() as OnboardingUser

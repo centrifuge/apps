@@ -1,9 +1,22 @@
 import { Request, Response } from 'express'
+import { object, string } from 'yup'
 import { unsignedAgreements } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
+import { validateInput } from '../../utils/validateInput'
 
-export const getUnsignedAgreementController = async (req: Request, res: Response) => {
+type Params = {
+  poolId: string
+  trancheId: string
+}
+
+const getUnsignedAgreementInput = object({
+  poolId: string().required(),
+  trancheId: string().required(),
+})
+
+export const getUnsignedAgreementController = async (req: Request<{}, {}, {}, Params>, res: Response) => {
   try {
+    await validateInput(req.query, getUnsignedAgreementInput)
     const { poolId, trancheId } = req.query
     const unsignedAgreement = await unsignedAgreements.file(`${poolId}/${trancheId}.pdf`)
 
@@ -14,7 +27,7 @@ export const getUnsignedAgreementController = async (req: Request, res: Response
       return res.send({ unsignedAgreement: pdf[0] })
     }
 
-    throw new Error()
+    throw new HttpsError(400, 'Agreement not found')
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

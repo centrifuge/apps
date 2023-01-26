@@ -231,7 +231,7 @@ Sets the ultimate beneficial owners for the entity.
 
 ### `POST: /signAgreement`
 
-> Final step in KYB/KYC.
+> Step 8 in KYB (US), Step 7 in KYB (non-US) — Step 6 in KYC (US), Step 5 in KYC (non-US).
 
 **Request body**
 
