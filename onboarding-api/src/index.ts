@@ -3,8 +3,8 @@ import * as dotenv from 'dotenv'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
 import { getUserController } from './controllers/user/getUser'
-import { kycStatusController } from './controllers/user/kycStatus'
-import { verifyIdentityController } from './controllers/user/verifyIdentity'
+import { setVerifiedIdentityController } from './controllers/user/setVerifiedIdentity'
+import { startKycController } from './controllers/user/startKyc'
 import { corsMiddleware } from './middleware/cors'
 import { verifyJw3t } from './middleware/verifyJw3t'
 
@@ -18,10 +18,9 @@ onboarding.use(corsMiddleware)
 onboarding.use(verifyJw3t)
 
 onboarding.get('/getUser', getUserController)
-onboarding.get('/kycStatus', kycStatusController)
 
-onboarding.post('/verifyIdentity', verifyIdentityController)
-onboarding.post('/kyc', verifyIdentityController)
+onboarding.post('/startKyc', startKycController)
+onboarding.post('/setVerifiedIdentity', setVerifiedIdentityController)
 
 onboarding.post('/verifyBusiness', verifyBusinessController)
 onboarding.post('/confirmOwners', confirmOwnersController)

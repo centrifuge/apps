@@ -1,4 +1,3 @@
-import { useWallet } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -54,7 +53,6 @@ const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) =>
 }
 
 export const BusinessInformation = ({ backStep, nextStep }: Props) => {
-  const { selectedAccount } = useWallet()
   const { authToken } = useAuth()
   const { onboardingUser, refetchOnboardingUser } = useOnboardingUser() as {
     onboardingUser: EntityUser
@@ -94,7 +92,6 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
           incorporationDate: formik.values.incorporationDate,
           trancheId,
           poolId,
-          address: selectedAccount?.address,
           dryRun: true,
         }),
         headers: {

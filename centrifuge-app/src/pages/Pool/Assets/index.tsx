@@ -43,7 +43,7 @@ export const PoolDetailAssets: React.FC = () => {
       <Shelf p="4" justifyContent="center">
         <AnchorButton
           href={new URL(
-            `/pools/${pool.id}/${(pool as TinlakePool).tinlakeMetadata.slug}/assets`,
+            `/pool/${pool.id}/${(pool as TinlakePool).tinlakeMetadata.slug}/assets`,
             ethConfig.tinlakeUrl
           ).toString()}
           target="_blank"
