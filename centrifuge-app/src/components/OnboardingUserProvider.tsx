@@ -41,6 +41,7 @@ export function OnboardingUserProvider({ children }: { children?: React.ReactNod
       return response.json()
     },
     {
+      refetchOnWindowFocus: false,
       enabled: !!isAuth,
     }
   )

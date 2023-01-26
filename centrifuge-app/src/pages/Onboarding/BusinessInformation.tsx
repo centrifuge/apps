@@ -24,8 +24,8 @@ type Props = {
 }
 
 // TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'sdf'
-const poolId = '21323432'
+const trancheId = 'FAKETRANCHEID'
+const poolId = 'FAKEPOOLID'
 
 const businessVerificationInput = object({
   email: string().email().required(),
@@ -59,7 +59,7 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
     refetchOnboardingUser: () => void
   }
 
-  const isCompleted = onboardingUser?.steps?.verifyBusiness.completed
+  const isCompleted = !!onboardingUser?.steps?.verifyBusiness.completed
 
   const formik = useFormik({
     initialValues: {

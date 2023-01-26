@@ -1,5 +1,5 @@
 import { useFormik } from 'formik'
-import { useEffect, useState } from 'react'
+import * as React from 'react'
 import { useMutation } from 'react-query'
 import { boolean, date, object, string } from 'yup'
 import { useAuth } from '../../../components/AuthProvider'
@@ -13,8 +13,8 @@ type Props = {
 }
 
 // TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'sdf'
-const poolId = '21323432'
+const trancheId = 'FAKETRANCHEID'
+const poolId = 'FAKEPOOLID'
 
 const authorizedSignerInput = object({
   name: string().required(),
@@ -24,14 +24,14 @@ const authorizedSignerInput = object({
 })
 
 export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
-  const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = useState<number>(0)
+  const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = React.useState<number>(0)
 
   const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
 
   const { onboardingUser, refetchOnboardingUser } = useOnboardingUser()
   const { authToken } = useAuth()
 
-  const isCompleted = onboardingUser?.steps?.verifyIdentity.completed
+  const isCompleted = !!onboardingUser?.steps?.verifyIdentity.completed
 
   const formik = useFormik({
     initialValues: {
@@ -95,7 +95,7 @@ export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
     }
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     window.addEventListener('message', handleVerifiedIdentity)
 
     return () => {
@@ -104,7 +104,7 @@ export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (startKYCData?.verification_url) {
       nextKnowYourCustomerStep()
     }

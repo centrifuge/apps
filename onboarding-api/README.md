@@ -177,7 +177,7 @@ Sets the ultimate beneficial owners for the entity.
 
 **Response**
 
-> Entity user exmaple object:
+> Entity user example object:
 
 ```json
 {
@@ -226,5 +226,80 @@ Sets the ultimate beneficial owners for the entity.
       }
     }
   }
+}
+```
+
+### `POST: /signAgreement`
+
+> Step 8 in KYB (US), Step 7 in KYB (non-US) — Step 6 in KYC (US), Step 5 in KYC (non-US).
+
+**Request body**
+
+```ts
+{
+  poolId: string,
+  trancheId: string,
+}
+```
+
+**Response**
+
+```js
+{
+  // ...
+  "steps": {
+    // ...
+    "signAgreements": {
+      [poolId]: {
+        [trancheId]: {
+          "completed": true,
+          "timeStamp": "2023-01-23T20:56:50.039Z"
+        }
+      }
+    }
+  },
+  // ...
+}
+```
+
+### `GET: /unsignedAgreement`
+
+> Unsigned subscription agreement
+
+**Query params**
+
+```ts
+{
+  poolId: string,
+  trancheId: string,
+}
+```
+
+**Response**
+
+```js
+{
+  unsignedAgreement: Buffer
+}
+```
+
+### `GET: /signedAgreement`
+
+> Signed subscription agreement
+
+**Query params**
+
+```ts
+{
+  poolId: string,
+  trancheId: string,
+}
+```
+
+**Response**
+
+```js
+{
+  signedAgreement: Buffer
 }
 ```
