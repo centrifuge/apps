@@ -206,6 +206,22 @@ const tooltipText = {
     label: 'Redemption',
     body: 'Redemption in a pool means withdrawal of investment by the lender.',
   },
+  noTranchProtection: {
+    label: 'Min. protection',
+    body: 'The first, most junior tranche is not protected by subordinated tranches.',
+  },
+  tranchProtection: {
+    label: 'Min. protection',
+    body: 'Minimum protection required for this tranche by all subordinated tranches.',
+  },
+  variableTranchInterest: {
+    label: 'Interest rate',
+    body: 'The first, most junior tranche receives a variable return.',
+  },
+  fixedTranchInterest: {
+    label: 'Fixed interest rate',
+    body: 'Fixed interest rate (APR) this tranche accrues on deployed capital.',
+  },
 }
 
 export type TooltipsProps = {

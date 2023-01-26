@@ -20,7 +20,15 @@ export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => 
   const { modalProps } = useModal()
 
   return props.isOpen ? (
-    <Shelf position="fixed" zIndex={theme.zIndices.overlay} bottom="24px" left="0" right="0" justifyContent="center">
+    <Shelf
+      position="fixed"
+      zIndex={theme.zIndices.overlay}
+      bottom="24px"
+      left="0"
+      right="0"
+      justifyContent="center"
+      px={2}
+    >
       <Stack
         {...overlayProps}
         {...modalProps}

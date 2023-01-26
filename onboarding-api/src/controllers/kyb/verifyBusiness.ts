@@ -1,20 +1,13 @@
-import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import { bool, date, InferType, object, string } from 'yup'
-import { KYBSteps, KYCSteps, User, userCollection, validateAndWriteToFirestore } from '../../database'
+import { EntityUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
 
-dotenv.config()
-
-const markStepAsCompleted = (steps: any[], completed: string) =>
-  steps.map((step) => (step.step === completed ? { ...step, completed: true } : step))
-
 const verifyBusinessInput = object({
   dryRun: bool().default(false).optional(), // skips shuftipro requests
   email: string().email().required(),
-  address: string().required(),
   poolId: string().required(),
   trancheId: string().required(),
   businessName: string().required(), // used for AML
@@ -35,26 +28,14 @@ export const verifyBusinessController = async (
       body: { incorporationDate, jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
     } = { ...req }
 
-    const userDoc = await userCollection.doc(req.walletAddress).get()
-    const userData = userDoc.data() as User
-    if (
-      userDoc.exists &&
-      (!userData?.business || !userData?.pools.find((pool) => pool.poolId === poolId && pool.investorType === 'entity'))
-    ) {
+    const entityDoc = await userCollection.doc(req.walletAddress).get()
+    const entityData = entityDoc.data() as OnboardingUser
+    if (entityDoc.exists && entityData.investorType !== 'entity') {
       throw new HttpsError(400, 'Verify business is only available for investorType "entity"')
     }
 
-    if (
-      userDoc.exists &&
-      userData?.business.steps.filter((step) => step.completed).length === userData?.business.steps.length
-    ) {
-      throw new HttpsError(400, 'KYB already completed')
-    }
-
-    if (
-      userDoc.exists &&
-      userData?.business.steps.find(({ step, completed }) => step === 'VerifyBusiness' && completed)
-    ) {
+    // @ts-expect-error
+    if (entityDoc.exists && entityData.steps?.verifyBusiness.completed) {
       throw new HttpsError(400, 'Business already verified')
     }
 
@@ -80,32 +61,45 @@ export const verifyBusinessController = async (
     const kyb = await shuftiProRequest(req, kybPayload, { dryRun })
     const kybVerified = kyb.event === 'verification.accepted'
 
-    const user: Partial<User> = {
-      walletAddress,
-      pools: [
-        {
-          trancheId,
-          poolId,
-          investorType: 'entity',
+    const user: EntityUser = {
+      investorType: 'entity',
+      kycReference: '',
+      wallet: {
+        address: walletAddress,
+        network: 'polkadot',
+      },
+      name: null,
+      dateOfBirth: null,
+      countryOfCitizenship: null,
+      email,
+      businessName,
+      ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
+      registrationNumber,
+      incorporationDate,
+      jurisdictionCode,
+      steps: {
+        verifyBusiness: { completed: !!(kybVerified && businessAmlVerified), timeStamp: new Date().toISOString() },
+        verifyEmail: { completed: false, timeStamp: null },
+        confirmOwners: { completed: false, timeStamp: null },
+        verifyIdentity: { completed: false, timeStamp: null },
+        verifyAccreditdation: { completed: false, timeStamp: null },
+        verifyTaxInfo: { completed: false, timeStamp: null },
+        signAgreements: {
+          [poolId]: {
+            [trancheId]: {
+              completed: false,
+              timeStamp: null,
+            },
+          },
         },
-      ],
-      steps: KYCSteps,
-      business: {
-        email,
-        businessName,
-        ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
-        registrationNumber,
-        incorporationDate,
-        jurisdictionCode,
-        steps: kybVerified && businessAmlVerified ? markStepAsCompleted(KYBSteps, 'VerifyBusiness') : KYBSteps,
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, user, 'USER')
+    await validateAndWriteToFirestore(walletAddress, user, 'entity')
 
     const freshUserData = await userCollection.doc(walletAddress).get()
     return res.status(200).json({
-      user: freshUserData.data(),
+      ...freshUserData.data(),
     })
   } catch (error) {
     if (error instanceof HttpsError) {

@@ -13,17 +13,21 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
-import { useEffect } from 'react'
 import { useMutation } from 'react-query'
 import { array, boolean, date, object, string } from 'yup'
 import { useAuth } from '../../components/AuthProvider'
-import { ultimateBeneficialOwner } from '../../types'
+import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { EntityUser } from '../../types'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
 
 type Props = {
   nextStep: () => void
-  ultimateBeneficialOwners: ultimateBeneficialOwner[]
+  backStep: () => void
 }
+
+// TODO: make dynamic based on the pool and tranche that the user is onboarding to
+const trancheId = 'sdf'
+const poolId = '21323432'
 
 const businessOwnershipInput = object({
   ultimateBeneficialOwners: array().of(
@@ -52,23 +56,30 @@ const BusinessOwnershipInlineFeedback = ({ isError }: { isError: boolean }) => {
   return null
 }
 
-export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props) => {
+export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
   const { authToken } = useAuth()
+  const { onboardingUser, refetchOnboardingUser } = useOnboardingUser() as {
+    onboardingUser: EntityUser
+    refetchOnboardingUser: () => void
+  }
+
+  const isCompleted = onboardingUser?.steps?.confirmOwners.completed
 
   const formik = useFormik({
     initialValues: {
-      ultimateBeneficialOwners: ultimateBeneficialOwners.length
-        ? ultimateBeneficialOwners.map((owner) => ({
+      ultimateBeneficialOwners: onboardingUser?.ultimateBeneficialOwners?.length
+        ? onboardingUser.ultimateBeneficialOwners.map((owner) => ({
             name: owner.name,
-            dateOfBirth: '',
+            dateOfBirth: owner.dateOfBirth,
           }))
         : [{ name: '', dateOfBirth: '' }],
-      isAccurate: false,
+      isAccurate: !!isCompleted,
     },
     onSubmit: () => {
       upsertBusinessOwnership()
     },
     validationSchema: businessOwnershipInput,
+    validateOnMount: true,
   })
 
   const {
@@ -77,9 +88,13 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
     isError,
   } = useMutation(
     async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/businessVerificationConfirm`, {
+      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/confirmOwners`, {
         method: 'POST',
-        body: JSON.stringify({ ultimateBeneficialOwners: formik.values.ultimateBeneficialOwners }),
+        body: JSON.stringify({
+          ultimateBeneficialOwners: formik.values.ultimateBeneficialOwners,
+          poolId,
+          trancheId,
+        }),
         headers: {
           Authorization: `Bearer ${authToken}`,
           'Content-Type': 'application/json',
@@ -90,18 +105,20 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
       if (response.status !== 200) {
         throw new Error()
       }
+
+      const json = await response.json()
+
+      if (!json.steps?.confirmOwners?.completed) {
+        throw new Error()
+      }
     },
     {
       onSuccess: () => {
+        refetchOnboardingUser()
         nextStep()
       },
     }
   )
-
-  useEffect(() => {
-    formik.validateForm()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik.values.ultimateBeneficialOwners])
 
   const removeOwner = (index: number) => {
     if (formik.values.ultimateBeneficialOwners.length === 1) {
@@ -163,16 +180,16 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
                 value={owner.name}
                 label="Name*"
                 onChange={formik.handleChange}
-                disabled={isLoading}
+                disabled={isLoading || isCompleted}
               />
               <DateInput
                 id={`ultimateBeneficialOwners[${index}].dateOfBirth`}
                 value={owner.dateOfBirth}
                 label="Date of Birth*"
                 onChange={formik.handleChange}
-                disabled={isLoading}
+                disabled={isLoading || isCompleted}
               />
-              <Button variant="secondary" onClick={() => removeOwner(index)}>
+              <Button variant="secondary" onClick={() => removeOwner(index)} disabled={isLoading || isCompleted}>
                 <Flex>
                   <IconTrash size="20px" />
                 </Flex>
@@ -180,7 +197,7 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
             </Shelf>
           ))}
           {formik.values.ultimateBeneficialOwners.length <= 2 && (
-            <Button variant="secondary" onClick={() => addOwner()}>
+            <Button variant="secondary" onClick={() => addOwner()} disabled={isLoading || isCompleted}>
               <Flex>
                 <IconPlus />
               </Flex>
@@ -190,27 +207,31 @@ export const BusinessOwnership = ({ nextStep, ultimateBeneficialOwners }: Props)
         <Box>
           <Checkbox
             id="isAccurate"
-            disabled={isLoading}
+            disabled={isLoading || isCompleted}
             style={{
               cursor: 'pointer',
             }}
-            checked={formik.values.isAccurate}
+            checked={isCompleted ? true : formik.values.isAccurate}
             onChange={formik.handleChange}
             label="I confim that all the information provided is true and accurate, and I have identified all the benefical owners with more than 25% ownership."
           />
         </Box>
       </Box>
-
-      <Box>
+      <Shelf gap="2">
+        <Button onClick={() => backStep()} disabled={isLoading} variant="secondary">
+          Back
+        </Button>
         <Button
-          onClick={formik.submitForm}
+          onClick={() => {
+            isCompleted ? nextStep() : formik.submitForm()
+          }}
           loading={isLoading}
           disabled={isLoading || !formik.isValid}
           loadingMessage="Confirming"
         >
-          Confirm
+          Next
         </Button>
-      </Box>
+      </Shelf>
     </Stack>
   )
 }

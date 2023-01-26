@@ -1,96 +1,118 @@
-import { CollectionReference, DocumentData, Firestore } from '@google-cloud/firestore'
+import { Firestore } from '@google-cloud/firestore'
 import * as dotenv from 'dotenv'
-import { array, bool, date, InferType, object, string, StringSchema } from 'yup'
-import { OptionalObjectSchema } from 'yup/lib/object'
+import { array, bool, date, InferType, lazy, object, string, StringSchema } from 'yup'
 import { HttpsError } from '../utils/httpsError'
 import { Subset } from '../utils/types'
 
 dotenv.config()
 
-export type Step<Keys> = {
-  step: Keys
-  completed: boolean
-}
+type Individual = 'individual'
+type Entity = 'entity'
+export type InvestorType = Individual | Entity
 
-export type KYCStepKeys = 'VerifyIdentity' | 'SignAgreement'
-export const KYCSteps: Step<KYCStepKeys>[] = [
-  { step: 'VerifyIdentity', completed: false },
-  { step: 'SignAgreement', completed: false },
-]
+export type SupportedNetworks = 'polkadot'
 
-export type KYBStepKeys = 'VerifyBusiness' | 'VerifyEmail' | 'ConfirmOwners' | 'TaxInfo'
-export const KYBSteps: Step<KYBStepKeys>[] = [
-  { step: 'VerifyBusiness', completed: false },
-  { step: 'VerifyEmail', completed: false },
-  { step: 'ConfirmOwners', completed: false },
-  { step: 'TaxInfo', completed: false },
-]
-
-export const businessSchema = object({
-  email: string().email(),
-  businessName: string(),
-  incorporationDate: date(),
-  registrationNumber: string(),
-  jurisdictionCode: string(), // country of incorporation
-  ultimateBeneficialOwners: array(
-    object({
-      name: string().required(),
-      dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
-    })
-  ).max(3),
-  steps: array(
-    object({
-      completed: bool(),
-      step: string().oneOf(['VerifyBusiness', 'VerifyEmail', 'ConfirmOwners', 'TaxInfo']) as StringSchema<KYBStepKeys>,
-    })
-  ).default(KYBSteps),
+const uboSchema = object({
+  name: string().required(),
+  dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
 })
 
-export const userSchema = object({
-  walletAddress: string().required(),
-  email: string(),
-  fullName: string(),
-  dateOfBrith: date().min(new Date(1900, 0, 1)).max(new Date()),
-  citizenship: string(),
-  accreditedInvestor: bool(),
-  taxInfo: string(),
-  pools: array(
-    object({
-      investorType: string().oneOf(['individual', 'entity']),
-      poolId: string(),
-      trancheId: string(),
-    })
-  )
-    .required()
-    .min(1),
-  businessId: string(),
-  steps: array(
-    object({
-      completed: bool(),
-      step: string().oneOf(['VerifyIdentity', 'SignAgreement']) as StringSchema<KYCStepKeys>,
-    })
-  ).default(KYCSteps),
-  business: businessSchema.optional(),
+const walletSchema = object({
+  address: string().required(),
+  network: string().required().default('polkadot') as StringSchema<SupportedNetworks>,
 })
 
-const firestore = new Firestore()
+const stepsSchema = object({
+  verifyBusiness: object({
+    completed: bool(),
+    timeStamp: string().nullable(),
+  }),
+  verifyEmail: object({
+    completed: bool(),
+    timeStamp: string().nullable(),
+  }),
+  confirmOwners: object({
+    completed: bool(),
+    timeStamp: string().nullable(),
+  }),
+  verifyTaxInfo: object({
+    completed: bool(),
+    timeStamp: string().nullable(),
+  }),
+  verifyAccreditdation: object({
+    completed: bool(),
+    timeStamp: string().nullable(),
+  }),
+  verifyIdentity: object({
+    completed: bool(),
+    timeStamp: string().nullable(),
+  }),
+  signAgreements: lazy((value) => {
+    const poolId = Object.keys(value)[0]
+    if (typeof poolId === 'string') {
+      return object({
+        [poolId]: lazy((value) => {
+          const trancheId = Object.keys(value)[0]
+          if (typeof trancheId === 'string') {
+            return object({
+              [trancheId]: object({
+                completed: bool(),
+                timeStamp: string().nullable(),
+              }),
+            })
+          }
+          throw new Error('Bad trancheId')
+        }),
+      })
+    }
+    throw new Error('Bad poolId')
+  }),
+})
+
+export const entityUserSchema = object({
+  investorType: string().default('entity') as StringSchema<Entity>,
+  wallet: walletSchema,
+  kycReference: string().optional(),
+  email: string().email().default(null),
+  businessName: string().required(),
+  incorporationDate: date().required(),
+  registrationNumber: string().required(),
+  jurisdictionCode: string().required(),
+  ultimateBeneficialOwners: array(uboSchema).max(3),
+  name: string().nullable().default(null),
+  dateOfBirth: string().nullable().default(null),
+  countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
+  steps: stepsSchema,
+})
+
+export const individualUserSchema = object({
+  investorType: string().default('individual') as StringSchema<Individual>,
+  wallet: walletSchema,
+  kycReference: string().optional(),
+  email: string().default(null).nullable(),
+  name: string().nullable().default(null),
+  dateOfBirth: string().nullable().default(null),
+  countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
+  steps: stepsSchema.pick(['verifyIdentity', 'verifyAccreditdation', 'verifyTaxInfo', 'signAgreements']),
+})
+
+export type EntityUser = InferType<typeof entityUserSchema>
+export type IndividualUser = InferType<typeof individualUserSchema>
+export type OnboardingUser = IndividualUser | EntityUser
+
+export const firestore = new Firestore()
 export const userCollection = firestore.collection(`onboarding-users`)
 
-const schemas: Record<
-  'USER',
-  {
-    schema: OptionalObjectSchema<any>
-    collection: CollectionReference<DocumentData>
-  }
-> = {
-  USER: {
-    schema: userSchema,
+const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
+  entity: {
+    schema: entityUserSchema,
+    collection: userCollection,
+  },
+  individual: {
+    schema: individualUserSchema,
     collection: userCollection,
   },
 }
-
-export type Business = InferType<typeof businessSchema>
-export type User = InferType<typeof userSchema>
 
 /**
  *
@@ -101,7 +123,7 @@ export type User = InferType<typeof userSchema>
  */
 export const validateAndWriteToFirestore = async <T = undefined | string[]>(
   key: string,
-  data: T extends 'undefined' ? User | Business : Subset<User | Business>,
+  data: T extends 'undefined' ? OnboardingUser : Subset<OnboardingUser>,
   schemaKey: keyof typeof schemas,
   mergeFields?: T
 ) => {
