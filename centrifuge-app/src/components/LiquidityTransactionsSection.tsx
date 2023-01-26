@@ -1,6 +1,6 @@
 import { Pool } from '@centrifuge/centrifuge-js'
 import { AnchorButton, IconDownload, Text } from '@centrifuge/fabric'
-import React from 'react'
+import * as React from 'react'
 import { formatDate } from '../utils/date'
 import { formatBalance } from '../utils/formatting'
 import { getCSVDownloadUrl } from '../utils/getCSVDownloadUrl'

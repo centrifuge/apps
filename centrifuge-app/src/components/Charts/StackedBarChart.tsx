@@ -1,5 +1,5 @@
 import { Text } from '@centrifuge/fabric'
-import React from 'react'
+import * as React from 'react'
 import {
   Bar,
   BarChart,
