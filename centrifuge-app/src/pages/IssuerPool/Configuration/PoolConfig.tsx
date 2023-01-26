@@ -1,9 +1,9 @@
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, TextAreaInput } from '@centrifuge/fabric'
 import { Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { PageSection } from '../../../components/PageSection'
-import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { isValidJsonString } from '../../../utils/validation'
 

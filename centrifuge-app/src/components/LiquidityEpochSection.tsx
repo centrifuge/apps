@@ -1,7 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js'
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, IconInfo, Shelf, Text } from '@centrifuge/fabric'
 import React from 'react'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useChallengeTimeCountdown } from '../utils/useChallengeTimeCountdown'
 import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { useLiquidity } from '../utils/useLiquidity'

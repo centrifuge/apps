@@ -1,5 +1,6 @@
+import { Pool } from '@centrifuge/centrifuge-js'
+import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { BN } from 'bn.js'
-import { useCentrifugeQuery } from './useCentrifugeQuery'
 import { usePool } from './usePools'
 
 export function useNFTs(collectionId?: string) {
@@ -25,12 +26,12 @@ export function useNFT(collectionId?: string | null, nftId?: string, suspense = 
 }
 
 export function useLoanNft(poolId: string, loanId?: string) {
-  const pool = usePool(poolId)
+  const pool = usePool(poolId) as Pool
   return useNFT(pool?.loanCollectionId, loanId, false)
 }
 
 export function useCollateralCollectionId(poolId: string) {
-  const pool = usePool(poolId)
+  const pool = usePool(poolId) as Pool
   const collateralCollectionId = new BN(pool.loanCollectionId!).add(new BN(1)).toString()
   return collateralCollectionId
 }

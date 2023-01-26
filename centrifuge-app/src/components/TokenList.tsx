@@ -1,13 +1,14 @@
-import { CurrencyMetadata } from '@centrifuge/centrifuge-js'
+import { CurrencyMetadata, PoolMetadata } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../utils/formatting'
 import { usePoolMetadata } from '../utils/usePools'
 import { Column, DataTable, SortableTableHeader } from './DataTable'
+import { Eththumbnail } from './EthThumbnail'
 
 export type TokenTableData = {
-  poolMetadata?: string
+  poolMetadata?: string | Partial<PoolMetadata>
   yield: number | null
   protection: number
   capacity: number
@@ -94,25 +95,20 @@ export const TokenList: React.FC<Props> = ({ tokens }) => {
 }
 
 const TokenName: React.VFC<RowProps> = ({ token }) => {
-  const { data: metadata, isLoading } = usePoolMetadata({ metadata: token.poolMetadata })
   return (
-    <Shelf gap="2" overflow="hidden">
-      <Thumbnail label={token.currency.symbol} size="small" />
-      <TextWithPlaceholder
-        isLoading={isLoading}
-        variant="body2"
-        color="textPrimary"
-        fontWeight={600}
-        textOverflow="ellipsis"
-      >
-        {metadata?.pool?.name} {token.currency.name}
-      </TextWithPlaceholder>
+    <Shelf gap="2">
+      <Eththumbnail show={token.poolId.startsWith('0x')} size="small">
+        <Thumbnail label={token.currency.symbol} size="small" />
+      </Eththumbnail>
+      <Text variant="body2" color="textPrimary" fontWeight={600} textOverflow="ellipsis">
+        {token.currency.name}
+      </Text>
     </Shelf>
   )
 }
 
 const AssetClass: React.VFC<RowProps> = ({ token }) => {
-  const { data: metadata, isLoading } = usePoolMetadata({ metadata: token.poolMetadata })
+  const { data: metadata, isLoading } = usePoolMetadata({ id: token.poolId, metadata: token.poolMetadata })
   return (
     <TextWithPlaceholder isLoading={isLoading} variant="body2">
       {metadata?.pool?.asset.class}

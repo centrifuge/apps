@@ -1,8 +1,8 @@
+import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { useState } from 'react'
 import { useAuth } from '../../components/AuthProvider'
 import { DataSharingAgreementDialog } from '../../components/DataSharingAgreementDialog'
-import { useWeb3 } from '../../components/Web3Provider'
 
 type Props = {
   nextStep: () => void
@@ -15,7 +15,7 @@ export const LinkWallet = ({ nextStep }: Props) => {
   const [isDataSharingAgreementDialogOpen, setIsDataSharingAgreementDialogOpen] = useState(false)
   const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = useState(false)
 
-  const { selectedAccount } = useWeb3()
+  const { selectedAccount } = useWallet()
   const { login, isAuth } = useAuth()
 
   return (

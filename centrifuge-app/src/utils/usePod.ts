@@ -1,5 +1,5 @@
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { useAuth } from '../components/PodAuthProvider'
 
 export function usePod(podUrl?: string | null) {

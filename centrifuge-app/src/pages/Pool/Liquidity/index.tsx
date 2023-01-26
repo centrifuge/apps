@@ -60,33 +60,37 @@ export const PoolDetailLiquidity: React.FC = () => {
   return (
     <>
       <PageSummary data={pageSummaryData}></PageSummary>
-      <PageSection title="Reserve vs. cash drag">
-        <Stack height="290px">
-          <React.Suspense fallback={<Spinner />}>
-            <ReserveCashDragChart />
-          </React.Suspense>
-        </Stack>
-      </PageSection>
+      {!('addresses' in pool) && (
+        <>
+          <PageSection title="Reserve vs. cash drag">
+            <Stack height="290px">
+              <React.Suspense fallback={<Spinner />}>
+                <ReserveCashDragChart />
+              </React.Suspense>
+            </Stack>
+          </PageSection>
 
-      <LiquidityTransactionsSection
-        pool={pool}
-        title="Repayments & originations"
-        dataKeys={['sumBorrowedAmount', 'sumRepaidAmount']}
-        dataNames={['Repayment', 'Origination']}
-        dataColors={[colors.blueScale[200], colors.blueScale[400]]}
-        tooltips={['repayment', 'origination']}
-      />
+          <LiquidityTransactionsSection
+            pool={pool}
+            title="Repayments & originations"
+            dataKeys={['sumBorrowedAmount', 'sumRepaidAmount']}
+            dataNames={['Repayment', 'Origination']}
+            dataColors={[colors.blueScale[200], colors.blueScale[400]]}
+            tooltips={['repayment', 'origination']}
+          />
 
-      <LiquidityTransactionsSection
-        pool={pool}
-        title="Investments & redemptions"
-        dataKeys={['sumInvestedAmount', 'sumRedeemedAmount']}
-        dataNames={['Investment', 'Redemption']}
-        dataColors={[colors.statusOk, colors.statusCritical]}
-        tooltips={['investment', 'redemption']}
-      />
+          <LiquidityTransactionsSection
+            pool={pool}
+            title="Investments & redemptions"
+            dataKeys={['sumInvestedAmount', 'sumRedeemedAmount']}
+            dataNames={['Investment', 'Redemption']}
+            dataColors={[colors.statusOk, colors.statusCritical]}
+            tooltips={['investment', 'redemption']}
+          />
 
-      <LiquidityEpochSection pool={pool} />
+          <LiquidityEpochSection pool={pool} />
+        </>
+      )}
     </>
   )
 }

@@ -1,5 +1,6 @@
 import { CurrencyBalance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { useBalances, useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -16,7 +17,6 @@ import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik
 import * as React from 'react'
 import { useHistory } from 'react-router'
 import { filter, lastValueFrom } from 'rxjs'
-import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
@@ -27,8 +27,6 @@ import { config } from '../../config'
 import { formatBalance } from '../../utils/formatting'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
-import { useBalances } from '../../utils/useBalances'
-import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { usePoolCurrencies } from '../../utils/useCurrencies'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePools } from '../../utils/usePools'
