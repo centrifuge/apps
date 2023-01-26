@@ -22,6 +22,7 @@ type Props = React.PropsWithChildren<{
   width?: string | number
   title?: string | React.ReactElement
   icon?: React.ComponentType<IconProps> | React.ReactElement
+  children?: React.ReactNode
 }>
 
 const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dialog', icon: IconComp, title }) => {

@@ -1,5 +1,5 @@
 import { ComponentMeta } from '@storybook/react'
-import React from 'react'
+import * as React from 'react'
 import { Popover } from '.'
 import { Box } from '../Box'
 import { Button } from '../Button'

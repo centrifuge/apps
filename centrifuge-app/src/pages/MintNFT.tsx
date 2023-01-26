@@ -13,7 +13,7 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import { lastValueFrom } from '@polkadot/api-base/node_modules/rxjs'
-import React, { useReducer, useState } from 'react'
+import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
 import { useDebugFlags } from '../components/DebugFlags'
 import { PageHeader } from '../components/PageHeader'
@@ -61,14 +61,14 @@ const MintNFT: React.FC = () => {
   const balance = useBalance()
   const address = useAddress()
   const cent = useCentrifuge()
-  const [version, setNextVersion] = useReducer((s) => s + 1, 0)
+  const [version, setNextVersion] = React.useReducer((s) => s + 1, 0)
   const history = useHistory()
 
-  const [nftName, setNftName] = useState('')
-  const [nftAmount, setNftAmount] = useState(1)
-  const [nftDescription, setNftDescription] = useState('')
-  const [fileDataUri, setFileDataUri] = useState('')
-  const [file, setFile] = useState<File | null>(null)
+  const [nftName, setNftName] = React.useState('')
+  const [nftAmount, setNftAmount] = React.useState(1)
+  const [nftDescription, setNftDescription] = React.useState('')
+  const [fileDataUri, setFileDataUri] = React.useState('')
+  const [file, setFile] = React.useState<File | null>(null)
 
   const isPageUnchanged = useIsPageUnchanged()
 

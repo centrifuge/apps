@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import * as React from 'react'
 import { Box } from '../Box'
 import { Flex } from '../Flex'
 import { Shelf } from '../Shelf'
@@ -95,9 +95,9 @@ export const Stepper = (props: StepperProps) => {
 
   const stepsCount = steps.length
 
-  const maxStep = useRef(1)
+  const maxStep = React.useRef(1)
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (props.activeStep > maxStep.current) {
       maxStep.current = props.activeStep
     }

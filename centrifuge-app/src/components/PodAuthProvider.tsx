@@ -1,5 +1,5 @@
 import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
-import React from 'react'
+import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
 
 const AUTHORIZED_POD_PROXY_TYPES = ['Any', 'PodAuth', 'PodAdmin']
@@ -10,7 +10,7 @@ export const PodAuthContext = React.createContext<{
   isLoggingIn: boolean
 }>(null as any)
 
-export const PodAuthProvider: React.FC = ({ children }) => {
+export function PodAuthProvider({ children }: { children?: React.ReactNode }) {
   const { selectedWallet, proxy, selectedAccount } = useWallet()
   const cent = useCentrifuge()
 

@@ -7,6 +7,7 @@ type Props = {
     label: React.ReactNode
     value: React.ReactNode
   }[]
+  children?: React.ReactNode
 }
 
 export const PageSummary: React.FC<Props> = ({ data, children }) => {

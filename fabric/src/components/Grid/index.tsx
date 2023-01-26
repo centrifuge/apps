@@ -1,5 +1,5 @@
 import * as CSS from 'csstype'
-import React from 'react'
+import * as React from 'react'
 import styled from 'styled-components'
 import { ResponsiveValue, TLengthStyledSystem } from 'styled-system'
 import { mapResponsive } from '../../utils/styled'

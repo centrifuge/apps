@@ -1,5 +1,5 @@
 import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
-import React from 'react'
+import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
 
 export const AuthContext = React.createContext<{
@@ -8,7 +8,7 @@ export const AuthContext = React.createContext<{
   isLoggingIn: boolean
 }>(null as any)
 
-export const AuthProvider: React.FC = ({ children }) => {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { selectedWallet, proxy, selectedAccount } = useWallet()
   const cent = useCentrifuge()
 

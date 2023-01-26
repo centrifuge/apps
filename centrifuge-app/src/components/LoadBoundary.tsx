@@ -6,11 +6,13 @@ import { Spinner } from './Spinner'
 
 type ErrorCb = (args: { error: any; retry: () => void }) => React.ReactElement | null
 
-export const LoadBoundary: React.FC<{ fallback?: React.ReactNode; renderError?: ErrorCb }> = ({
-  children,
-  fallback,
-  renderError,
-}) => {
+type Props = {
+  children: React.ReactNode
+  fallback?: React.ReactNode
+  renderError?: ErrorCb
+}
+
+export function LoadBoundary({ children, fallback, renderError }: Props) {
   return (
     <React.Suspense
       fallback={
@@ -26,7 +28,7 @@ export const LoadBoundary: React.FC<{ fallback?: React.ReactNode; renderError?: 
   )
 }
 
-const ErrorBoundary: React.FC<{ renderError?: ErrorCb }> = ({ children, renderError }) => {
+function ErrorBoundary({ children, renderError }: { children: React.ReactNode; renderError?: ErrorCb }) {
   const { reset } = useQueryErrorResetBoundary()
   return (
     <ReactErrorBoundary

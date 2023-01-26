@@ -1,5 +1,5 @@
 import { Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
-import React from 'react'
+import * as React from 'react'
 import { useParams } from 'react-router'
 import { CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useTheme } from 'styled-components'

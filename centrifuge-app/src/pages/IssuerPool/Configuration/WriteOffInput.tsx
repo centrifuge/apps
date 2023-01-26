@@ -1,6 +1,6 @@
 import { Box, Button, Grid, IconMinusCircle, NumberInput } from '@centrifuge/fabric'
 import { FieldArray, useFormikContext } from 'formik'
-import React from 'react'
+import * as React from 'react'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { validate } from '../../IssuerCreatePool/validate'
 import { WriteOffGroupValues } from './WriteOffGroups'

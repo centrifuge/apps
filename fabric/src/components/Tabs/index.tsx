@@ -8,10 +8,10 @@ import { Text } from '../Text'
 export type TabsProps = {
   selectedIndex: number
   onChange?: (index: number) => void
-  children: React.ReactNode[]
+  children: (React.ReactElement<TabsItemProps> | string | boolean | null | undefined)[]
 }
 
-export const Tabs: React.VFC<TabsProps> = ({ selectedIndex, onChange, children }) => {
+export const Tabs: React.FC<TabsProps> = ({ selectedIndex, onChange, children }) => {
   return (
     <Shelf>
       {React.Children.map(children, (child, index) =>

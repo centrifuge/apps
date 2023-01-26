@@ -1,7 +1,7 @@
 import { TransactionOptions } from '@centrifuge/centrifuge-js'
 import { LoanInfo } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { altairDark, centrifugeLight } from '@centrifuge/fabric'
-import React from 'react'
+import * as React from 'react'
 import { DefaultTheme } from 'styled-components'
 import { LogoAltair, LogoAltairText } from './components/LogoAltair'
 import { LogoCentrifuge, LogoCentrifugeText } from './components/LogoCentrifuge'

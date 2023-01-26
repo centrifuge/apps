@@ -3,7 +3,7 @@
   "version": "1.2.0",
   "description": "Fabric Component Library",
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "typings": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
