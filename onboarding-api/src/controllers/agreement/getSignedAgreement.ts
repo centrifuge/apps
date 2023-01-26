@@ -1,20 +1,18 @@
 import { Request, Response } from 'express'
-import { object, string } from 'yup'
+import { InferType, object, string } from 'yup'
 import { signedAgreements } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
-
-type Params = {
-  poolId: string
-  trancheId: string
-}
 
 const getSignedAgreementInput = object({
   poolId: string().required(),
   trancheId: string().required(),
 })
 
-export const getSignedAgreementController = async (req: Request<{}, {}, {}, Params>, res: Response) => {
+export const getSignedAgreementController = async (
+  req: Request<{}, {}, {}, InferType<typeof getSignedAgreementInput>>,
+  res: Response
+) => {
   try {
     await validateInput(req.query, getSignedAgreementInput)
     const { poolId, trancheId } = req.query
