@@ -28,8 +28,8 @@ export const signAgreementController = async (
     const user = (await userCollection.doc(walletAddress).get())?.data()
 
     if (
-      user?.steps.verifyIdentity.completed === true &&
-      user?.steps.signAgreements[poolId]?.[trancheId]?.completed !== true
+      user?.steps.verifyIdentity.completed &&
+      !user?.steps.signAgreements[poolId]?.[trancheId]?.completed
     ) {
       const unsignedAgreement = await unsignedAgreements.file(`${poolId}/${trancheId}.pdf`)
       const [unsignedAgreementExists] = await unsignedAgreement.exists()
