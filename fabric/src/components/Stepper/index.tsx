@@ -9,7 +9,7 @@ type EnrichedStepProps = {
   isFinal?: boolean
   isActive?: boolean
   count?: number
-  setActiveStep?: (step: number) => void | null
+  setActiveStep?: Function | null
   maxStep?: number
 }
 
@@ -20,7 +20,7 @@ type StepProps = {
 
 type StepperProps = {
   activeStep: number
-  setActiveStep: (step: number) => void | null
+  setActiveStep: Function | null
   children: React.ReactNode
 }
 
