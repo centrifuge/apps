@@ -152,7 +152,6 @@ export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches
 }
 
 async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
-  const toBN = (val: BigNumber) => new BN(val.toString())
   const toDateString = (val: BigNumber) => new Date(val.toNumber() * 1000).toISOString()
   const toNumber = (val: BigNumber) => val.toNumber()
   const toCurrencyBalance = (val: BigNumber) => new CurrencyBalance(val.toString(), 18)
@@ -281,21 +280,22 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
 
     if (pool.addresses.CLERK !== undefined && pool.metadata.maker?.ilk !== '') {
       calls.push(
-        {
-          target: pool.addresses.CLERK,
-          call: ['debt()(uint256)'],
-          returns: [[`${poolId}.usedCreditline`, toCurrencyBalance]],
-        },
-        {
-          target: pool.addresses.CLERK,
-          call: ['remainingCredit()(uint)'],
-          returns: [[`${poolId}.unusedCreditline`, toBN]],
-        },
-        {
-          target: pool.addresses.CLERK,
-          call: ['creditline()(uint256)'],
-          returns: [[`${poolId}.availableCreditline`, toCurrencyBalance]],
-        },
+        // TODO: Find out why these break
+        // {
+        //   target: pool.addresses.CLERK,
+        //   call: ['debt()(uint256)'],
+        //   returns: [[`${poolId}.usedCreditline`, toCurrencyBalance]],
+        // },
+        // {
+        //   target: pool.addresses.CLERK,
+        //   call: ['remainingCredit()(uint256)'],
+        //   returns: [[`${poolId}.unusedCreditline`, toCurrencyBalance]],
+        // },
+        // {
+        //   target: pool.addresses.CLERK,
+        //   call: ['creditline()(uint256)'],
+        //   returns: [[`${poolId}.availableCreditline`, toCurrencyBalance]],
+        // },
         {
           target: pool.addresses.ASSESSOR,
           call: ['totalBalance()(uint256)'],

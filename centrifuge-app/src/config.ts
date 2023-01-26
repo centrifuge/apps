@@ -120,21 +120,22 @@ const CENTRIFUGE: EnvironmentConfig = {
   defaultPodUrl,
 }
 
-const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'goerli'
+const ethNetwork = import.meta.env.REACT_APP_TINLAKE_NETWORK || 'mainnet'
 
 const goerliConfig = {
   rpcUrl: 'https://goerli.infura.io/v3/f9ba987e8cb34418bb53cdbd4d8321b5',
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://goerli.staging.tinlake.cntrfg.com/',
+  poolsHash: 'QmYY9GPHZ19A75S1UUQCiY1ckxchaJdRpESpkRvZTVDBPM', // TODO: add registry to config and fetch poolHash
 }
 const mainnetConfig = {
   rpcUrl: 'https://mainnet.infura.io/v3/ed5e0e19bcbc427cbf8f661736d44516',
   poolRegistryAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
   tinlakeUrl: 'https://tinlake.centrifuge.io',
+  poolsHash: 'QmcqJHaFR7VRcdFgtHsqoZvN1iE1Z2q7mPgqd3N8XM4FPE', // TODO: add registry to config and fetch poolHash
 }
 
 export const ethConfig = {
-  poolsHash: 'QmYY9GPHZ19A75S1UUQCiY1ckxchaJdRpESpkRvZTVDBPM', // TODO: add registry to config and fetch poolHash
   network: ethNetwork,
   multicallContractAddress: '0x5ba1e12693dc8f9c48aad8770482f4739beed696', // Same for all networks
   ...(ethNetwork === 'goerli' ? goerliConfig : mainnetConfig),

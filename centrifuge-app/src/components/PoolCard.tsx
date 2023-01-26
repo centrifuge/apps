@@ -1,4 +1,4 @@
-import { CurrencyBalance, Pool, Token } from '@centrifuge/centrifuge-js'
+import { Pool } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { InteractiveCard, Shelf, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
@@ -20,12 +20,6 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
   const history = useHistory()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
   const { data: metadata } = usePoolMetadata(pool)
-
-  const totalTrancheCapacity =
-    pool &&
-    (pool.tranches as Token[]).reduce((prev, curr) => {
-      return new CurrencyBalance(prev.add(curr.capacity), pool.currency.decimals)
-    }, CurrencyBalance.fromFloat(0, pool.currency.decimals))
 
   return (
     <InteractiveCard
@@ -63,8 +57,8 @@ export const PoolCard: React.VFC<PoolCardProps> = ({ pool }) => {
           <LabelValueStack
             label="Capacity"
             value={
-              totalTrancheCapacity ? (
-                formatBalance(totalTrancheCapacity.toFloat() + pool.reserve.total.toFloat(), pool.currency.symbol)
+              pool ? (
+                formatBalance(pool.tranches.at(-1)!.capacity, pool.currency.symbol)
               ) : (
                 <TextWithPlaceholder isLoading />
               )
