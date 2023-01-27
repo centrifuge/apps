@@ -3,7 +3,7 @@
   "version": "0.0.4",
   "description": "Centrifuge React Library",
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "typings": "./dist/index.d.ts",
   "files": [
     "dist"
   ],

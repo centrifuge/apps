@@ -5,10 +5,10 @@ import { Link } from 'react-router-dom'
 
 type Props = {
   basePath?: string
-  children: React.ReactNode[]
+  children: (React.ReactElement<TabsItemProps> | string | boolean | null | undefined)[]
 }
 
-export const NavigationTabs: React.VFC<Props> = ({ basePath = '', children }) => {
+export function NavigationTabs({ basePath = '', children }: Props) {
   const match = useRouteMatch<{ tab: string }>(`${basePath}/:tab`)
   let matchedIndex = -1
   React.Children.forEach(children, (child, i) => {
@@ -22,6 +22,6 @@ export const NavigationTabs: React.VFC<Props> = ({ basePath = '', children }) =>
   return <Tabs selectedIndex={index}>{children}</Tabs>
 }
 
-export const NavigationTabsItem: React.FC<TabsItemProps> = (props) => {
+export function NavigationTabsItem(props: TabsItemProps) {
   return <TabsItem as={Link} {...props} />
 }

@@ -1,12 +1,10 @@
 import { Request, Response } from 'express'
 import { array, date, InferType, object, string } from 'yup'
-import { entityCollection, EntityUser, validateAndWriteToFirestore } from '../../database'
+import { OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
 
 const confirmOwnersInput = object({
-  poolId: string().required(),
-  trancheId: string().required(),
   ultimateBeneficialOwners: array(
     object({
       name: string().required(),
@@ -22,24 +20,16 @@ export const confirmOwnersController = async (
   res: Response
 ) => {
   try {
-    await validateInput(req, confirmOwnersInput)
-    const {
-      walletAddress,
-      body: { poolId, trancheId },
-    } = req
-    const entityDoc = await entityCollection.doc(walletAddress).get()
-    const entityData = entityDoc.data() as EntityUser
-    if (!entityDoc.exists) {
+    await validateInput(req.body, confirmOwnersInput)
+    const { walletAddress } = req
+    const entityDoc = await userCollection.doc(walletAddress).get()
+    const entityData = entityDoc.data() as OnboardingUser
+    if (!entityDoc.exists || entityData.investorType !== 'entity') {
       throw new HttpsError(404, 'Business not found')
     }
 
     if (!entityData.steps.verifyBusiness.completed) {
       throw new HttpsError(400, 'Business must be verified before confirming ownership')
-    }
-
-    // make sure theres a pool that matches body inside signedAgreements
-    if (!entityData?.steps.signAgreements?.[poolId]?.[trancheId]) {
-      throw new HttpsError(400, 'Bad poolId, trancheId or investorType')
     }
 
     if (entityData?.steps.confirmOwners.completed) {
@@ -55,9 +45,9 @@ export const confirmOwnersController = async (
       steps: { ...entityData.steps, confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
-    await validateAndWriteToFirestore(walletAddress, verifyEntity, 'ENTITY', ['steps', 'ultimateBeneficialOwners'])
+    await validateAndWriteToFirestore(walletAddress, verifyEntity, 'entity', ['steps', 'ultimateBeneficialOwners'])
 
-    const freshUserData = (await entityCollection.doc(walletAddress).get()).data()
+    const freshUserData = (await userCollection.doc(walletAddress).get()).data()
     return res.status(200).send({ ...freshUserData })
   } catch (error) {
     if (error instanceof HttpsError) {

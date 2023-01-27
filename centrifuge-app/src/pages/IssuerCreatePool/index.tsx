@@ -15,7 +15,6 @@ import {
 } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
-import { useQueryClient } from 'react-query'
 import { useHistory } from 'react-router'
 import { filter, lastValueFrom } from 'rxjs'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
@@ -139,7 +138,6 @@ const CreatePoolForm: React.VFC = () => {
   const pools = usePools()
   const history = useHistory()
   const balances = useBalances(address)
-  const queryClient = useQueryClient()
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)

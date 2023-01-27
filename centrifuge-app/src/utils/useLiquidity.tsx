@@ -1,7 +1,7 @@
 import { Perquintill } from '@centrifuge/centrifuge-js'
 import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import Decimal from 'decimal.js-light'
-import React from 'react'
+import * as React from 'react'
 import { LiquidityTableRow } from '../components/EpochList'
 import { usePool, usePoolOrders } from './usePools'
 

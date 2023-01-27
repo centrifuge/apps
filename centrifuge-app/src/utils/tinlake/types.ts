@@ -15,7 +15,7 @@ export interface JuniorInvestor {
   address: string
 }
 
-interface PoolMetadataDetails {
+export interface PoolMetadataDetails {
   name: string
   shortName?: string
   slug: string
@@ -33,58 +33,6 @@ interface PoolMetadataDetails {
   maker?: { ilk: string }
   issuerEmail?: string
   juniorInvestors?: JuniorInvestor[]
-}
-type P = {
-  version?: number
-  pool: {
-    name: string
-    icon: {
-      uri: string
-      mime: string
-    } | null
-    asset: {
-      class: string
-    }
-    issuer: {
-      name: string
-      description: string
-      email: string
-      logo?: {
-        uri: string
-        mime: string
-      } | null
-    }
-    links: {
-      executiveSummary: {
-        uri: string
-        mime: string
-      } | null
-      forum: string
-      website: string
-    }
-    status: PoolStatus
-    listed: boolean
-  }
-  // pod?: {
-  //     url: string | null;
-  // };
-  // tranches: Record<string, {
-  //     name: string;
-  //     symbol: string;
-  //     minInitialInvestment: string;
-  // }>;
-  // loanTemplates?: {
-  //     id: string;
-  //     createdAt: string;
-  // }[];
-  // riskGroups: {
-  //     name: string | undefined;
-  //     advanceRate: string;
-  //     interestRatePerSec: string;
-  //     probabilityOfDefault: string;
-  //     lossGivenDefault: string;
-  //     discountRate: string;
-  // }[];
 }
 
 interface BasePool {

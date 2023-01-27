@@ -1,43 +1,39 @@
-import { useWallet, WalletMenu } from '@centrifuge/centrifuge-react'
-import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper, SubStep } from '@centrifuge/fabric'
-import React, { useEffect, useState } from 'react'
+import { WalletMenu } from '@centrifuge/centrifuge-react'
+import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper } from '@centrifuge/fabric'
+import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../../components/AuthProvider'
+import { useOnboardingUser } from '../../components/OnboardingUserProvider'
 import { Spinner } from '../../components/Spinner'
 import { config } from '../../config'
-import { InvestorTypes, ultimateBeneficialOwner } from '../../types'
+import { InvestorTypes } from '../../types'
+import { useOnboardingStep } from '../../utils/useOnboardingStep'
 import { BusinessInformation } from './BusinessInformation'
 import { BusinessOwnership } from './BusinessOwnership'
+import { Completed } from './Completed'
 import { InvestorType } from './InvestorType'
 import { KnowYourCustomer } from './KnowYourCustomer'
 import { LinkWallet } from './LinkWallet'
+import { SignSubscriptionAgreement } from './SignSubscriptionAgreement'
 
+// TODO: make dynamic based on the pool and tranche that the user is onboarding to
+const trancheId = 'FAKETRANCHEID'
+const poolId = 'FAKEPOOLID'
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const [_, WordMark] = config.logo
 
-const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
-
 export const OnboardingPage: React.FC = () => {
-  const [activeStep, setActiveStep] = useState<number>(0)
-  const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = useState<number>(0)
+  const { onboardingUser } = useOnboardingUser()
+  const [investorType, setInvestorType] = React.useState<InvestorTypes>()
+  const { activeStep, nextStep, backStep, setActiveStep, isFetchingStep } = useOnboardingStep()
 
-  const { isConnecting, selectedAccount } = useWallet()
-  const [investorType, setInvestorType] = useState<InvestorTypes>()
-  const { isAuth, refetchAuth } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
-  const [ultimateBeneficialOwners, setUltimateBeneficialOwners] = useState<ultimateBeneficialOwner[]>([])
+  const isOnboarded = !!onboardingUser?.steps?.signAgreements[poolId][trancheId].completed
 
-  const nextStep = () => setActiveStep((current) => current + 1)
-
-  const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
-
-  useEffect(() => {
-    if (!isConnecting) {
-      if (!selectedAccount || isAuth === false) {
-        setActiveStep(1)
-      } else if (isAuth && activeStep === 0) {
-        setActiveStep(2)
-      }
+  React.useEffect(() => {
+    if (onboardingUser?.investorType) {
+      setInvestorType(onboardingUser.investorType)
     }
-  }, [activeStep, isAuth, selectedAccount, isConnecting])
+  }, [onboardingUser?.investorType])
 
   return (
     <Flex backgroundColor="backgroundSecondary" minHeight="100vh" flexDirection="column">
@@ -53,7 +49,7 @@ export const OnboardingPage: React.FC = () => {
           <WalletMenu />
         </Box>
       </Shelf>
-      {activeStep === 0 || isConnecting ? (
+      {isFetchingStep ? (
         <Box
           mx="150px"
           my={5}
@@ -78,29 +74,24 @@ export const OnboardingPage: React.FC = () => {
           gridTemplateColumns="350px 1px 1fr min-content"
         >
           <Box paddingTop={10} paddingLeft={7} paddingRight={7} paddingBottom={6}>
-            <Stepper activeStep={activeStep} setActiveStep={setActiveStep}>
+            <Stepper activeStep={activeStep} setActiveStep={isOnboarded ? null : setActiveStep}>
               <Step label="Link wallet" />
               <Step label="Selector investor type" />
-              {investorType === 'individual' && (
+              {investorType === 'individual' && (activeStep > 2 || !!onboardingUser?.investorType) && (
                 <>
                   <Step label="Identity verification" />
                   <Step label="Sign subscription agreement" />
                 </>
               )}
-              {investorType === 'entity' && (
+              {investorType === 'entity' && (activeStep > 2 || !!onboardingUser?.investorType) && (
                 <>
                   <Step label="Business information" />
                   <Step label="Business ownership" />
-                  <Step label="Authorized signer verification" activeSubStep={activeKnowYourCustomerStep}>
-                    <SubStep label="Country of issuance" />
-                    <SubStep label="Photo ID" />
-                    <SubStep label="Liveliness check" />
-                  </Step>
-                  <Step label="Tax information" />
+                  <Step label="Authorized signer verification" />
                   <Step label="Sign subscription agreement" />
                 </>
               )}
-              {investorType === undefined && <Step empty />}
+              {activeStep < 3 && !onboardingUser?.investorType && <Step empty />}
             </Stepper>
           </Box>
           <Box height="100%" backgroundColor="borderPrimary" />
@@ -112,22 +103,30 @@ export const OnboardingPage: React.FC = () => {
             justifyContent="space-between"
             minHeight="520px"
           >
-            {activeStep === 1 && <LinkWallet nextStep={nextStep} refetchAuth={refetchAuth} />}
+            {activeStep === 1 && <LinkWallet nextStep={nextStep} />}
             {activeStep === 2 && (
-              <InvestorType investorType={investorType} nextStep={nextStep} setInvestorType={setInvestorType} />
-            )}
-            {activeStep === 3 && (
-              <BusinessInformation nextStep={nextStep} setUltimateBeneficialOwners={setUltimateBeneficialOwners} />
-            )}
-            {activeStep === 4 && (
-              <BusinessOwnership nextStep={nextStep} ultimateBeneficialOwners={ultimateBeneficialOwners} />
-            )}
-            {activeStep === 5 && (
-              <KnowYourCustomer
+              <InvestorType
+                investorType={investorType}
                 nextStep={nextStep}
-                nextKnowYourCustomerStep={nextKnowYourCustomerStep}
-                activeKnowYourCustomerStep={activeKnowYourCustomerStep}
+                backStep={backStep}
+                setInvestorType={setInvestorType}
               />
+            )}
+            {investorType === 'entity' && (
+              <>
+                {activeStep === 3 && <BusinessInformation nextStep={nextStep} backStep={backStep} />}
+                {activeStep === 4 && <BusinessOwnership nextStep={nextStep} backStep={backStep} />}
+                {activeStep === 5 && <KnowYourCustomer backStep={backStep} nextStep={nextStep} />}
+                {activeStep === 6 && <SignSubscriptionAgreement backStep={backStep} nextStep={nextStep} />}
+                {activeStep === 7 && <Completed />}
+              </>
+            )}
+            {investorType === 'individual' && (
+              <>
+                {activeStep === 3 && <KnowYourCustomer backStep={backStep} nextStep={nextStep} />}
+                {activeStep === 4 && <SignSubscriptionAgreement backStep={backStep} nextStep={nextStep} />}
+                {activeStep === 5 && <Completed />}
+              </>
             )}
           </Stack>
           <Box paddingTop={4} paddingRight={4} justifyContent="flex-end">

@@ -1,6 +1,6 @@
 import { Box } from '@centrifuge/fabric'
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import React from 'react'
+import * as React from 'react'
 import { WalletMenu } from '.'
 
 export default {

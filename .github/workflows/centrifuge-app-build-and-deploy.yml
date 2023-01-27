@@ -38,6 +38,9 @@ on:
       onboarding-api-url:
         required: true
         type: string
+      tinlake-network:
+        required: true
+        type: string
 
     secrets:
       github-token:
