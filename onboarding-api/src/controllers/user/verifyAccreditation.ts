@@ -8,7 +8,7 @@ export const verifyAccreditationController = async (req: Request, res: Response)
     const userDoc = await userCollection.doc(req.walletAddress).get()
     const user = userDoc.data() as OnboardingUser
 
-    if (!user || user.steps.verifyAccreditation.completed) {
+    if (!userDoc.exists || user.steps.verifyAccreditation.completed) {
       throw new HttpsError(400, 'Unable to process request')
     }
 

@@ -10,11 +10,24 @@ const uploadTaxInfoInput = object({
   trancheId: string().required(),
 })
 
+const validateTaxInfoFile = async (file: Buffer) => {
+  if (file.length > 1024 * 1024) {
+    throw new HttpsError(400, 'Maximum file size allowed is 1MB')
+  }
+
+  const fileString = file.toString('utf8')
+
+  if (!fileString.includes('Content-Type: application/pdf')) {
+    throw new HttpsError(400, 'Only PDF files are allowed')
+  }
+}
+
 export const uploadTaxInfoController = async (
   req: Request<{}, {}, Buffer, InferType<typeof uploadTaxInfoInput>>,
   res: Response
 ) => {
   try {
+    await validateTaxInfoFile(req.body)
     await validateInput(req.query, uploadTaxInfoInput)
 
     const { poolId, trancheId } = req.query

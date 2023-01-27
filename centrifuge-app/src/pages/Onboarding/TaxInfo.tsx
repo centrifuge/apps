@@ -22,30 +22,32 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
 
   const { mutate: uploadTaxInfo, isLoading } = useMutation(
     async () => {
-      const formData = new FormData()
-      formData.append('taxInfo', taxInfo as File, 'taxInfo.pdf')
+      if (taxInfo) {
+        const formData = new FormData()
+        formData.append('taxInfo', taxInfo)
 
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/uploadTaxInfo?poolId=${poolId}&trancheId=${trancheId}`,
-        {
-          method: 'POST',
-          body: formData,
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'multipart/form-data',
-          },
-          credentials: 'include',
+        const response = await fetch(
+          `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/uploadTaxInfo?poolId=${poolId}&trancheId=${trancheId}`,
+          {
+            method: 'POST',
+            body: formData,
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              'Content-Type': 'multipart/form-data',
+            },
+            credentials: 'include',
+          }
+        )
+
+        if (response.status !== 200) {
+          throw new Error()
         }
-      )
 
-      if (response.status !== 200) {
-        throw new Error()
-      }
+        const json = await response.json()
 
-      const json = await response.json()
-
-      if (!json.steps?.verifyTaxInfo?.completed) {
-        throw new Error()
+        if (!json.steps?.verifyTaxInfo?.completed) {
+          throw new Error()
+        }
       }
     },
     {
@@ -56,6 +58,16 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
     }
   )
 
+  const validateFileUpload = (file: File) => {
+    if (file.type !== 'application/pdf') {
+      return 'Only PDF files are allowed'
+    }
+
+    if (file.size > 1024 * 1024) {
+      return 'Maximum file size allowed is 1MB'
+    }
+  }
+
   return (
     <Stack gap={4}>
       <Box>
@@ -64,7 +76,13 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
           {isCompleted ? (
             <Text fontSize={2}>Tax information uploaded</Text>
           ) : (
-            <FileUpload placeholder="Upload file" onFileChange={(file) => setTaxInfo(file)} disabled={isLoading} />
+            <FileUpload
+              placeholder="Upload file"
+              onFileChange={setTaxInfo}
+              disabled={isLoading}
+              file={taxInfo}
+              validate={validateFileUpload}
+            />
           )}
         </Stack>
         <Shelf gap="2">

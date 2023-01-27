@@ -12,7 +12,7 @@ import { uploadTaxInfoController } from './controllers/user/uploadTaxInfo'
 import { verifyAccreditationController } from './controllers/user/verifyAccreditation'
 import { corsMiddleware } from './middleware/cors'
 import { verifyJw3t } from './middleware/verifyJw3t'
-const fileUpload = require('express-fileupload')
+import fileUpload = require('express-fileupload')
 
 dotenv.config()
 
