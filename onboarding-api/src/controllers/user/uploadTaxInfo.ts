@@ -31,10 +31,9 @@ export const uploadTaxInfoController = async (
     await validateInput(req.query, uploadTaxInfoInput)
 
     const { poolId, trancheId } = req.query
+    const { walletAddress } = req
 
-    const walletAddress = req.walletAddress
-
-    const user = (await userCollection.doc(req.walletAddress).get())?.data()
+    const user = (await userCollection.doc(walletAddress).get())?.data()
 
     await writeToOnboardingBucket(
       Uint8Array.from(req.body),

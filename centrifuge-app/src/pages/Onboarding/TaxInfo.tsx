@@ -1,8 +1,9 @@
-import { Box, Button, FileUpload, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, FileUpload, Flex, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useMutation } from 'react-query'
+import { useMutation, useQuery } from 'react-query'
 import { useAuth } from '../../components/AuthProvider'
 import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { Spinner } from '../../components/Spinner'
 
 type Props = {
   nextStep: () => void
@@ -18,7 +19,44 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
   const [taxInfo, setTaxInfo] = React.useState<File | null>(null)
   const { authToken } = useAuth()
 
-  const isCompleted = !!onboardingUser?.steps?.verifyTaxInfo?.completed
+  const isCompleted = !!onboardingUser?.steps?.verifyTaxInfo?.completed && !!taxInfo
+
+  const { data: taxInfoData, isLoading: isTaxInfoLoading } = useQuery(
+    ['tax info'],
+    async () => {
+      const response = await fetch(
+        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getTaxInfo?poolId=${poolId}&trancheId=${trancheId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
+      )
+
+      const json = await response.json()
+
+      const documentBlob = new Blob([Uint8Array.from(json.taxInfo.data).buffer], {
+        type: 'application/pdf',
+      })
+
+      const file = new File([documentBlob], 'taxInfo.pdf', { type: 'application/pdf' })
+
+      return file
+    },
+    {
+      refetchOnWindowFocus: false,
+      enabled: !!authToken,
+    }
+  )
+
+  React.useEffect(() => {
+    if (taxInfoData) {
+      setTaxInfo(taxInfoData)
+    }
+  }, [taxInfoData])
 
   const { mutate: uploadTaxInfo, isLoading } = useMutation(
     async () => {
@@ -72,34 +110,39 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
     <Stack gap={4}>
       <Box>
         <Text fontSize={5}>Tax information</Text>
-        <Stack gap={2} py={6}>
-          {isCompleted ? (
-            <Text fontSize={2}>Tax information uploaded</Text>
-          ) : (
-            <FileUpload
-              placeholder="Upload file"
-              onFileChange={setTaxInfo}
-              disabled={isLoading}
-              file={taxInfo}
-              validate={validateFileUpload}
-            />
-          )}
-        </Stack>
-        <Shelf gap="2">
-          <Button onClick={() => backStep()} variant="secondary" disabled={isLoading}>
-            Back
-          </Button>
-          <Button
-            onClick={() => {
-              isCompleted ? nextStep() : uploadTaxInfo()
-            }}
-            disabled={isCompleted ? false : isLoading || !taxInfo}
-            loading={isLoading}
-            loadingMessage="Uploading"
-          >
-            Next
-          </Button>
-        </Shelf>
+        {isTaxInfoLoading ? (
+          <Flex alignItems="center" justifyContent="center" py={100}>
+            <Spinner />
+          </Flex>
+        ) : (
+          <>
+            <Stack gap={2} py={6}>
+              <FileUpload
+                placeholder="Upload file"
+                onFileChange={setTaxInfo}
+                disabled={isLoading}
+                file={taxInfo}
+                validate={validateFileUpload}
+              />
+            </Stack>
+            <Shelf gap="2">
+              <Button onClick={() => backStep()} variant="secondary" disabled={isLoading}>
+                Back
+              </Button>
+
+              <Button
+                onClick={() => {
+                  isCompleted && taxInfo === taxInfoData ? nextStep() : uploadTaxInfo()
+                }}
+                disabled={isCompleted ? false : isLoading || !taxInfo}
+                loading={isLoading}
+                loadingMessage="Uploading"
+              >
+                Next
+              </Button>
+            </Shelf>
+          </>
+        )}
       </Box>
     </Stack>
   )

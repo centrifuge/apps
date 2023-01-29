@@ -4,32 +4,31 @@ import { onboardingBucket } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
 
-const getSignedAgreementInput = object({
+const getTaxInfoInput = object({
   poolId: string().required(),
   trancheId: string().required(),
 })
 
-export const getSignedAgreementController = async (
-  req: Request<{}, {}, {}, InferType<typeof getSignedAgreementInput>>,
+export const getTaxInfoController = async (
+  req: Request<{}, {}, {}, InferType<typeof getTaxInfoInput>>,
   res: Response
 ) => {
   try {
-    await validateInput(req.query, getSignedAgreementInput)
+    await validateInput(req.query, getTaxInfoInput)
+
     const { poolId, trancheId } = req.query
     const { walletAddress } = req
 
-    const signedAgreement = await onboardingBucket.file(
-      `signed-subscription-agreements/${walletAddress}/${poolId}/${trancheId}.pdf`
-    )
+    const taxInfo = await onboardingBucket.file(`tax-information/${walletAddress}/${poolId}/${trancheId}.pdf`)
 
-    const [signedAgreementExists] = await signedAgreement.exists()
+    const [taxInfoExists] = await taxInfo.exists()
 
-    if (signedAgreementExists) {
-      const pdf = await signedAgreement.download()
-      return res.send({ signedAgreement: pdf[0] })
+    if (taxInfoExists) {
+      const pdf = await taxInfo.download()
+      return res.send({ taxInfo: pdf[0] })
     }
 
-    throw new HttpsError(400, 'Agreement not found')
+    throw new HttpsError(400, 'Tax info not found')
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

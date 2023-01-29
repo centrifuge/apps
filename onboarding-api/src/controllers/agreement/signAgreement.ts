@@ -24,7 +24,7 @@ export const signAgreementController = async (
   try {
     await validateInput(req.body, signAgreementInput)
     const { poolId, trancheId } = req.body
-    const walletAddress = req.walletAddress
+    const { walletAddress } = req
     const user = (await userCollection.doc(walletAddress).get())?.data()
 
     if (user?.steps.verifyIdentity.completed && !user?.steps.signAgreements[poolId]?.[trancheId]?.completed) {

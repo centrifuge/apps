@@ -5,6 +5,7 @@ import { getUnsignedAgreementController } from './controllers/agreement/getUnsig
 import { signAgreementController } from './controllers/agreement/signAgreement'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
+import { getTaxInfoController } from './controllers/user/getTaxInfo'
 import { getUserController } from './controllers/user/getUser'
 import { setVerifiedIdentityController } from './controllers/user/setVerifiedIdentity'
 import { startKycController } from './controllers/user/startKyc'
@@ -29,6 +30,7 @@ onboarding.post('/startKyc', startKycController)
 onboarding.post('/setVerifiedIdentity', setVerifiedIdentityController)
 onboarding.post('/uploadTaxInfo', fileUpload(), uploadTaxInfoController)
 onboarding.post('/verifyAccreditation', verifyAccreditationController)
+onboarding.get('/getTaxInfo', getTaxInfoController)
 
 onboarding.post('/verifyBusiness', verifyBusinessController)
 onboarding.post('/confirmOwners', confirmOwnersController)
