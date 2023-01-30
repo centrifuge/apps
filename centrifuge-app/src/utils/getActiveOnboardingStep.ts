@@ -5,16 +5,7 @@ const BASE_STEPS = {
   CHOOSE_INVESTOR_TYPE: 2,
 }
 
-const ENTITY_STEPS = {
-  US: {
-    VERIFY_ACCREDITATION: 7,
-    SIGN_AGREEMENT: 8,
-    COMPLETE: 9,
-  },
-  NON_US: {
-    SIGN_AGREEMENT: 7,
-    COMPLETE: 8,
-  },
+const BASE_ENTITY_STEPS = {
   ...BASE_STEPS,
   VERIFY_BUSINESS: 3,
   CONFIRM_OWNERS: 4,
@@ -22,19 +13,36 @@ const ENTITY_STEPS = {
   VERIFY_TAX_INFO: 6,
 }
 
-const INDIVIDUAL_STEPS = {
-  US: {
-    VERIFY_ACCREDITATION: 5,
-    SIGN_AGREEMENT: 6,
-    COMPLETE: 7,
-  },
-  NON_US: {
-    SIGN_AGREEMENT: 5,
-    COMPLETE: 6,
-  },
+const BASE_INDIVIDUAL_STEPS = {
   ...BASE_STEPS,
   VERIFY_IDENTITY: 3,
   VERIFY_TAX_INFO: 4,
+}
+
+const ENTITY_US_STEPS = {
+  ...BASE_ENTITY_STEPS,
+  VERIFY_ACCREDITATION: 7,
+  SIGN_AGREEMENT: 8,
+  COMPLETE: 9,
+}
+
+const ENTITY_NON_US_STEPS = {
+  ...BASE_ENTITY_STEPS,
+  SIGN_AGREEMENT: 7,
+  COMPLETE: 8,
+}
+
+const INDIVIDUAL_US_STEPS = {
+  ...BASE_INDIVIDUAL_STEPS,
+  VERIFY_ACCREDITATION: 5,
+  SIGN_AGREEMENT: 6,
+  COMPLETE: 7,
+}
+
+const INDIVIDUAL_NON_US_STEPS = {
+  ...BASE_INDIVIDUAL_STEPS,
+  SIGN_AGREEMENT: 5,
+  COMPLETE: 6,
 }
 
 export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId: string, trancheId: string) => {
@@ -51,30 +59,30 @@ export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId: 
     const { confirmOwners, verifyBusiness } = onboardingUser.steps
 
     if (jurisdictionCode === 'us') {
-      if (completed) return ENTITY_STEPS.US.COMPLETE
-      if (verifyAccreditation.completed) return ENTITY_STEPS.US.SIGN_AGREEMENT
-      if (verifyTaxInfo.completed) return ENTITY_STEPS.US.VERIFY_ACCREDITATION
+      if (completed) return ENTITY_US_STEPS.COMPLETE
+      if (verifyAccreditation.completed) return ENTITY_US_STEPS.SIGN_AGREEMENT
+      if (verifyTaxInfo.completed) return ENTITY_US_STEPS.VERIFY_ACCREDITATION
     } else {
-      if (completed) return ENTITY_STEPS.NON_US.COMPLETE
-      if (verifyTaxInfo.completed) return ENTITY_STEPS.US.SIGN_AGREEMENT
+      if (completed) return ENTITY_NON_US_STEPS.COMPLETE
+      if (verifyTaxInfo.completed) return ENTITY_NON_US_STEPS.SIGN_AGREEMENT
     }
 
-    if (verifyIdentity.completed) return ENTITY_STEPS.VERIFY_TAX_INFO
-    if (confirmOwners.completed) return ENTITY_STEPS.VERIFY_IDENTITY
-    if (verifyBusiness.completed) return ENTITY_STEPS.CONFIRM_OWNERS
+    if (verifyIdentity.completed) return BASE_ENTITY_STEPS.VERIFY_TAX_INFO
+    if (confirmOwners.completed) return BASE_ENTITY_STEPS.VERIFY_IDENTITY
+    if (verifyBusiness.completed) return BASE_ENTITY_STEPS.CONFIRM_OWNERS
   }
 
   if (investorType === 'individual') {
     if (countryOfCitizenship === 'us') {
-      if (completed) return INDIVIDUAL_STEPS.US.COMPLETE
-      if (verifyAccreditation.completed) return INDIVIDUAL_STEPS.US.SIGN_AGREEMENT
-      if (verifyTaxInfo.completed) return INDIVIDUAL_STEPS.US.VERIFY_ACCREDITATION
+      if (completed) return INDIVIDUAL_US_STEPS.COMPLETE
+      if (verifyAccreditation.completed) return INDIVIDUAL_US_STEPS.SIGN_AGREEMENT
+      if (verifyTaxInfo.completed) return INDIVIDUAL_US_STEPS.VERIFY_ACCREDITATION
     } else {
-      if (completed) return INDIVIDUAL_STEPS.NON_US.COMPLETE
-      if (verifyTaxInfo.completed) return INDIVIDUAL_STEPS.NON_US.SIGN_AGREEMENT
+      if (completed) return INDIVIDUAL_NON_US_STEPS.COMPLETE
+      if (verifyTaxInfo.completed) return INDIVIDUAL_NON_US_STEPS.SIGN_AGREEMENT
     }
 
-    if (verifyIdentity.completed) return INDIVIDUAL_STEPS.VERIFY_TAX_INFO
+    if (verifyIdentity.completed) return BASE_INDIVIDUAL_STEPS.VERIFY_TAX_INFO
   }
 
   return BASE_STEPS.LINK_WALLET
