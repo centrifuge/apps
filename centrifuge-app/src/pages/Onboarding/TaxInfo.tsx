@@ -21,7 +21,7 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
 
   const isCompleted = !!onboardingUser?.steps?.verifyTaxInfo?.completed && !!taxInfo
 
-  const { data: taxInfoData, isLoading: isTaxInfoLoading } = useQuery(
+  const { data: taxInfoData, isFetching: isTaxInfoFetching } = useQuery(
     ['tax info'],
     async () => {
       const response = await fetch(
@@ -110,7 +110,7 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
     <Stack gap={4}>
       <Box>
         <Text fontSize={5}>Tax information</Text>
-        {isTaxInfoLoading ? (
+        {isTaxInfoFetching ? (
           <Flex alignItems="center" justifyContent="center" py={100}>
             <Spinner />
           </Flex>
