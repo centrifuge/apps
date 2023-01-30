@@ -42,6 +42,7 @@ export default defineConfig({
         plugins: ['babel-plugin-styled-components'],
       },
     }),
+    // The Coinbase and WalletConnect connectors rely on node globals
     nodePolyfills(),
     splitVendorChunkPlugin(),
   ],
