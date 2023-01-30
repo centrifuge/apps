@@ -35,12 +35,12 @@ export const uploadTaxInfoController = async (
 
     const user = (await userCollection.doc(walletAddress).get())?.data()
 
-    await writeToOnboardingBucket(
-      Uint8Array.from(req.body),
-      `tax-information/${walletAddress}/${poolId}/${trancheId}.pdf`
-    )
-
     if (user) {
+      await writeToOnboardingBucket(
+        Uint8Array.from(req.body),
+        `tax-information/${walletAddress}/${poolId}/${trancheId}.pdf`
+      )
+
       const updatedUser: Subset<OnboardingUser> = {
         steps: {
           ...user.steps,
@@ -57,7 +57,7 @@ export const uploadTaxInfoController = async (
       return res.status(200).send({ ...freshUserData })
     }
 
-    throw new Error()
+    throw new HttpsError(400, 'User not found')
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)
