@@ -53,6 +53,8 @@ jobs:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     defaults:
+      run:
+        working-directory: ./
     steps:
       # Check out default first
       - id: checkout
