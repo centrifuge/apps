@@ -8,10 +8,10 @@ on:
       - '.github/workflows/onboarding-api.yml'
   pull_request:
     types:
-      - "opened"
-      - "synchronize"
-      - "reopened"
-      - "closed"
+      - 'opened'
+      - 'synchronize'
+      - 'reopened'
+      - 'closed'
     paths:
       - 'onboarding-api/**'
       - '.github/workflows/onboarding-api.yml'
@@ -23,13 +23,13 @@ on:
         type: string
 
       deploy_env:
-        description: "Environment to deploy, production will trigger an approval request"
+        description: 'Environment to deploy, production will trigger an approval request'
         required: true
         type: choice
-        default: "demo"
+        default: 'demo'
         options:
-          - "production" 
-          - "demo"
+          - 'production'
+          - 'demo'
 
 jobs:
   cleanup-pr:
@@ -44,7 +44,7 @@ jobs:
           workload_identity_provider: '${{ secrets.GWIP }}'
           service_account: '${{ secrets.GSA }}'
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1     
+        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1
       - name: Delete function
         run: gcloud functions delete ${{env.app_name}} --region=${{ env.region }}
       # ToDO: remove Cloudflare redirection
@@ -55,7 +55,7 @@ jobs:
     defaults:
       run:
         working-directory: onboarding-api
-    steps: 
+    steps:
       # Check out default first
       - id: checkout
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
@@ -64,9 +64,9 @@ jobs:
         if: ${{ inputs.deploy_env == 'production' }}
         id: ref
         uses: ./.github/actions/checkout_prod
-        with: 
+        with:
           deploy_prod: ${{ inputs.deploy_env == 'production' }}
-        
+
       - name: print current branch
         if: ${{ inputs.deploy_env == 'production' }}
         run: git status
@@ -77,7 +77,7 @@ jobs:
           node-version: 16
           cache: yarn
           # cache-dependency-path: onboarding-api/yarn.lock
-          
+
       - name: YARN install
         run: yarn install
 
@@ -106,9 +106,9 @@ jobs:
         with:
           app_base_name: 'onboarding-api'
           set_env: ${{ inputs.deploy_env }}
-      
+
       - name: Fail if prod deploy but no tag given
-        if:  ${{ inputs.deploy_env == 'production' }}
+        if: ${{ inputs.deploy_env == 'production' }}
         shell: bash
         run: |
           if ${{ startsWith(inputs.release_tag, 'release') }}; then
@@ -119,9 +119,9 @@ jobs:
           fi
 
     outputs:
-      gh_env:  ${{ steps.prepare.outputs.gh_env }}
-      app_name:  ${{ steps.prepare.outputs.app_name }}
-  
+      gh_env: ${{ steps.prepare.outputs.gh_env }}
+      app_name: ${{ steps.prepare.outputs.app_name }}
+
   deployment:
     if: github.event.action != 'closed'
     needs: [build, prepare_deploy]
@@ -141,17 +141,17 @@ jobs:
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
         with:
           name: onboarding-api
-      
+
       - name: list artifacts
-        run: ls -R    
-          
+        run: ls -R
+
       - name: Auth gcloud
         id: gauth
         uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
         with:
           workload_identity_provider: '${{ secrets.GWIP }}'
-          service_account: '${{ secrets.GSA }}'            
-      
+          service_account: '${{ secrets.GSA }}'
+
       - name: Deploy to google functions
         id: gclouddeploy
         uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
@@ -166,15 +166,14 @@ jobs:
         run: echo "::notice title=Function_URL::${{ steps.gclouddeploy.outputs.url }}"
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1 
+        uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1
 
-      - name: Change function to allow_unathorized calls 
+      - name: Change function to allow_unathorized calls
         run: |
           gcloud functions add-iam-policy-binding ${{ needs.prepare_deploy.outputs.app_name }} \
           --region=${{ env.region }} \
           --member="allUsers" --role="roles/cloudfunctions.invoker"
 
-      # ToDo: 
+      # ToDo:
       # - create a redirect rule in Cloudflare using CF_API_KEY
       #   to proxy /onboard-api to the Gcloud URL transparently
-
