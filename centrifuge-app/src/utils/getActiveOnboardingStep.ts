@@ -1,22 +1,12 @@
 import { OnboardingUser } from '../types'
 
-const BASE_STEPS = {
+const BASE_ENTITY_STEPS = {
   LINK_WALLET: 1,
   CHOOSE_INVESTOR_TYPE: 2,
-}
-
-const BASE_ENTITY_STEPS = {
-  ...BASE_STEPS,
   VERIFY_BUSINESS: 3,
   CONFIRM_OWNERS: 4,
   VERIFY_IDENTITY: 5,
   VERIFY_TAX_INFO: 6,
-}
-
-const BASE_INDIVIDUAL_STEPS = {
-  ...BASE_STEPS,
-  VERIFY_IDENTITY: 3,
-  VERIFY_TAX_INFO: 4,
 }
 
 const ENTITY_US_STEPS = {
@@ -32,6 +22,13 @@ const ENTITY_NON_US_STEPS = {
   COMPLETE: 8,
 }
 
+const BASE_INDIVIDUAL_STEPS = {
+  LINK_WALLET: 1,
+  CHOOSE_INVESTOR_TYPE: 2,
+  VERIFY_IDENTITY: 3,
+  VERIFY_TAX_INFO: 4,
+}
+
 const INDIVIDUAL_US_STEPS = {
   ...BASE_INDIVIDUAL_STEPS,
   VERIFY_ACCREDITATION: 5,
@@ -41,13 +38,14 @@ const INDIVIDUAL_US_STEPS = {
 
 const INDIVIDUAL_NON_US_STEPS = {
   ...BASE_INDIVIDUAL_STEPS,
+  VERIFY_TAX_INFO: 4,
   SIGN_AGREEMENT: 5,
   COMPLETE: 6,
 }
 
 export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId: string, trancheId: string) => {
   // user does not exist
-  if (!Object.keys(onboardingUser).length) return BASE_STEPS.LINK_WALLET
+  if (!Object.keys(onboardingUser).length) return 1
 
   const { investorType, countryOfCitizenship } = onboardingUser
   const { verifyIdentity, verifyTaxInfo, verifyAccreditation } = onboardingUser.steps
@@ -85,5 +83,5 @@ export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId: 
     if (verifyIdentity.completed) return BASE_INDIVIDUAL_STEPS.VERIFY_TAX_INFO
   }
 
-  return BASE_STEPS.LINK_WALLET
+  return 1
 }

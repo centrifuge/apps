@@ -1956,6 +1956,7 @@ __metadata:
     eslint-plugin-import: ^2.25.4
     express: ^4.18.2
     express-fileupload: ^1.4.0
+    file-type: ^18.2.0
     firebase-functions-test: ^0.2.0
     jsonwebtoken: ^8.5.1
     jw3t: ^1.0.8
@@ -7812,6 +7813,13 @@ __metadata:
   dependencies:
     defer-to-connect: ^2.0.0
   checksum: 51297e5f70d4cbc1ceb6751fc26f6e9668d2ee448062d198a97b0ab022bd90a0e957f23ec6b2344966bba6c3dfd44231883bacc106070f95e69e5e99e9372f5f
+  languageName: node
+  linkType: hard
+
+"@tokenizer/token@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@tokenizer/token@npm:0.3.0"
+  checksum: e4db685bcb759ded5e4e58dc4df0b15f4b816fb54147391efba2be9a95218aa29b7d98f7d6ff1a903c6d6e7d27ddb47acfbf95f2f2545bb170d27eaea8a5cedc
   languageName: node
   linkType: hard
 
@@ -16518,6 +16526,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"file-type@npm:^18.2.0":
+  version: 18.2.0
+  resolution: "file-type@npm:18.2.0"
+  dependencies:
+    readable-web-to-node-stream: ^3.0.2
+    strtok3: ^7.0.0
+    token-types: ^5.0.1
+  checksum: fa5f560303a318647e456ac685d762a77ca41d20958f3d9efd39b190199038add695e812626ad386699b79ec17aa90e26cde056542e732e951a2993dfa906330
+  languageName: node
+  linkType: hard
+
 "file-type@npm:^3.8.0":
   version: 3.9.0
   resolution: "file-type@npm:3.9.0"
@@ -18405,7 +18424,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"ieee754@npm:^1.1.13, ieee754@npm:^1.1.4":
+"ieee754@npm:^1.1.13, ieee754@npm:^1.1.4, ieee754@npm:^1.2.1":
   version: 1.2.1
   resolution: "ieee754@npm:1.2.1"
   checksum: 6c1cfab995ecab3b0dbb6cfb7e192686eb02f0f8e788f2d962e1fc02e2d5ab38a85e06d417221f136bd029663a77cdb920d99605d68d3730a05597dd7910426a
@@ -24041,6 +24060,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"peek-readable@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "peek-readable@npm:5.0.0"
+  checksum: a51e4377dd1cac058792a67a34272ae8a776a144f1d910b61b522ce144d501806c400bfec836dc91badb952fcef2e6f1dbba8b3304ac4569f6b609bc0f14526b
+  languageName: node
+  linkType: hard
+
 "pend@npm:~1.2.0":
   version: 1.2.0
   resolution: "pend@npm:1.2.0"
@@ -25411,6 +25437,15 @@ fsevents@^1.2.7:
     string_decoder: ^1.1.1
     util-deprecate: ^1.0.1
   checksum: f178b1daa80d9e58ebba71dbb08486430aa6f0dea3a22a1b7401f3f6983077d0bc0edea43099db06b8d006c9ad48d6383e8fb72c05d5b187670aeaf1b9b44f00
+  languageName: node
+  linkType: hard
+
+"readable-web-to-node-stream@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "readable-web-to-node-stream@npm:3.0.2"
+  dependencies:
+    readable-stream: ^3.6.0
+  checksum: 3abfec81321447ff798072c3bc9cc2f463d76d6de045726964f17a0dca309d2d9eb7fe82898dff41fdaaf03c7cf235b862f945990fa139b88193488633fdeb26
   languageName: node
   linkType: hard
 
@@ -27485,6 +27520,16 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"strtok3@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "strtok3@npm:7.0.0"
+  dependencies:
+    "@tokenizer/token": ^0.3.0
+    peek-readable: ^5.0.0
+  checksum: dbdd6e6304166ee849dc7c3a9218f5617d149de778737f2d175b8d40bf05b7554c93f223a42e0ae4a5d0f3bf56f133d36f546f90fa9dcf699cdd2921a5ef5379
+  languageName: node
+  linkType: hard
+
 "stubs@npm:^3.0.0":
   version: 3.0.0
   resolution: "stubs@npm:3.0.0"
@@ -28201,6 +28246,16 @@ fsevents@^1.2.7:
   version: 1.0.1
   resolution: "toidentifier@npm:1.0.1"
   checksum: 2b5c573af97e7c12f91aeade737a40a539da3c123f43099bbddcd40c3365941b9877b482b994a89a3173c4e3f4f70fea887ae44242ade009efb4841f1dad9822
+  languageName: node
+  linkType: hard
+
+"token-types@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "token-types@npm:5.0.1"
+  dependencies:
+    "@tokenizer/token": ^0.3.0
+    ieee754: ^1.2.1
+  checksum: e144490eaee07a3282f33c924d4442b431915d9531387c5fd16423a76c2079ae1a364baa24f544c43a20814e6a655efb1f22ddff1c8f594e8917705ceebe336b
   languageName: node
   linkType: hard
 

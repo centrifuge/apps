@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { fileTypeFromBuffer } from 'file-type'
 import { InferType, object, string } from 'yup'
 import { OnboardingUser, userCollection, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
@@ -17,7 +18,10 @@ const validateTaxInfoFile = async (file: Buffer) => {
 
   const fileString = file.toString('utf8')
 
-  if (!fileString.includes('Content-Type: application/pdf')) {
+  const body = fileString.slice(fileString.indexOf('\r\n\r\n') + 4)
+  const type = await fileTypeFromBuffer(Buffer.from(body))
+
+  if (type?.mime !== 'application/pdf') {
     throw new HttpsError(400, 'Only PDF files are allowed')
   }
 }
