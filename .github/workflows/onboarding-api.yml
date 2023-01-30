@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./
+        working-directory: onboarding-api
     steps:
       # Check out default first
       - id: checkout
