@@ -6,3 +6,4 @@ REACT_APP_WHITELISTED_ACCOUNTS=
 REACT_APP_POOL_CREATION_TYPE=notePreimage
 REACT_APP_DEFAULT_NODE_URL=
 REACT_APP_ONBOARDING_API_URL=https://us-central1-centrifuge-fargate-apps-dev.cloudfunctions.net
+REACT_APP_IPFS_GATEWAY=https://altair.mypinata.cloud/
