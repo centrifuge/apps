@@ -1,0 +1,54 @@
+name: Upload static web to GCloud bucket
+description: "deploy website in google cloud buckets"
+inputs:
+  bucket_url:
+    description: Name of bucket ending in k-f.dev
+    required: true
+  GWIP:
+    description: Google Workflow Identity provider
+    required: true
+  GSA:
+    description: Google Service Account
+    required: true
+  artifact_name:
+    description: Name of artifact from GH upload
+    required: true  
+
+runs:
+  using: composite
+  steps:
+      - name: download webpack
+        id: download
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: webpack
+      ## Every module from here on could potentially expose the Gcloud Auth Token
+      ## Do not add untrusted code with `uses`
+      ## Ideally run only google-github-actions code with commit SHA at the end from here on
+      ## or `run` commands that we write.
+
+      - name: Auth gcloud
+        id: gauth
+        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+        with:
+          workload_identity_provider: '${{ inputs.GWIP }}'
+          service_account: '${{ inputs.GSA }}'
+      # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1' 
+
+      - name: try to create bucket
+        shell: sh
+        id: create_bucket
+        continue-on-error: true
+        run: |
+          gsutil mb gs://${{ inputs.bucket_url }}
+          gsutil iam ch allUsers:objectViewer gs://${{ inputs.bucket_url }}
+          gsutil web set -m index.html -e 404.html gs://${{ inputs.bucket_url }}
+
+      - name: push to bucket
+        shell: sh
+        id: push
+        run: gsutil -m rsync -d -c -r ${{steps.download.outputs.download-path}} gs://${{ inputs.bucket_url }}
+    

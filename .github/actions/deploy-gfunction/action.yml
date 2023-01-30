@@ -1,0 +1,72 @@
+name: Deploy Gfunction
+description: 'Determine functions name, URL and GHA environment secrets'
+
+inputs:
+  function_name:
+    description: "function name"
+    required: true
+  GWIP:
+    description: Google Workflow Identity provider
+    required: true
+  GSA:
+    description: Google Service Account
+    required: true
+  artifact_name:
+    description: Name of artifact from GH upload
+    required: true  
+# outputs:
+#   function_url:
+#     description: "URL from the function"
+#     value: 
+
+runs:
+  using: composite
+  steps:
+    - id: setregion
+      shell: sh
+      run: echo "region=europe-central2" >> $GITHUB_ENV
+
+    - name: retrieve artifacts
+      id: download
+      uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
+      with:
+        name: ${{ inputs.artifact_name }}
+        path: functions
+    
+    - name: list artifacts
+      shell: sh
+      run: ls -R    
+    ## Every module from here on could potentially expose the Gcloud Auth Token
+    ## Do not add untrusted code with `uses`
+    ## Ideally run only google-github-actions code with commit SHA at the end from here on
+    ## or `run` commands that we write.
+    - name: Auth gcloud
+      id: gauth
+      uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+      with:
+        workload_identity_provider: '${{ inputs.GWIP }}'
+        service_account: '${{ inputs.GSA }}'            
+    
+    - name: Deploy to google functions
+      id: gclouddeploy
+      uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
+      with:
+        name: '${{ inputs.function_name }}'
+        runtime: 'nodejs16'
+        region: '${{ env.region }}'
+        source_dir: './${{steps.download.outputs.download-path}}' # downlaod artifacts sets the current directory as the one in artifact.with.path
+        entry_point: 'onboarding'
+
+    - name: Print Gcloud functions URL
+      shell: sh
+      run: echo "::notice title=Function_URL::${{ steps.gclouddeploy.outputs.url }}"
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1 
+
+    - name: Change function to allow_unathorized calls 
+      shell: sh
+      run: |
+        gcloud functions add-iam-policy-binding ${{ inputs.function_name }} \
+        --region=${{ env.region }} \
+        --member="allUsers" --role="roles/cloudfunctions.invoker"

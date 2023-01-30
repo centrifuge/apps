@@ -35,7 +35,7 @@ runs:
       # both will require approval to use the GCE prod secrets
       run: |
         echo "Discover GH environment for deploy:"
-        if  ${{ inputs.set_env == 'production' }}; then
+        if  ${{ github.ref == 'refs/tags/release*' }}; then
           # ALTAIR & PROD
           echo "gh_env=production" >> $GITHUB_OUTPUT
         else
@@ -47,10 +47,9 @@ runs:
       id: naming
       shell: bash
       # Follow deployment strategy from 
-      # https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?both#Environments
+      # https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?both#Environments    
       run: |
         echo "Set app name based on env strategy"
-
         # Gcloud prod account
         if  ${{ github.ref == 'refs/tags/release*' }}; then
           if ${{ github.event_name == 'release' }}; then
