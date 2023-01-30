@@ -71,14 +71,11 @@ const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
 
 const evmChains = {
   1: {
-    urls: [
-      infuraKey && new URL(`v3/${infuraKey}`, 'https://mainnet.infura.io').href,
-      'https://cloudflare-eth.com',
-    ].filter(Boolean),
+    urls: [infuraKey && `https://mainnet.infura.io/v3/${infuraKey}`, 'https://cloudflare-eth.com'].filter(Boolean),
     name: 'Mainnet',
   },
   5: {
-    urls: [infuraKey && new URL(`v3/${infuraKey}`, 'https://goerli.infura.io')].filter(Boolean),
+    urls: [infuraKey && `https://goerli.infura.io/v3/${infuraKey}`].filter(Boolean),
     name: 'Görli',
   },
 }
