@@ -41,18 +41,18 @@ export function OnboardingUserProvider({ children }: { children?: React.ReactNod
 
         return response.json()
       }
-      return {}
     },
     {
       refetchOnWindowFocus: false,
       enabled: !!selectedAccount,
+      retry: 1,
     }
   )
 
   return (
     <OnboardingUserContext.Provider
       value={{
-        onboardingUser: onboardingUserData,
+        onboardingUser: onboardingUserData || {},
         refetchOnboardingUser,
         isOnboardingUserFetching,
         isOnboardingUserFetched,
