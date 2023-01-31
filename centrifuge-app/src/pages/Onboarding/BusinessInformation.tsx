@@ -16,6 +16,7 @@ import { date, object, string } from 'yup'
 import { useAuth } from '../../components/AuthProvider'
 import { useOnboardingUser } from '../../components/OnboardingUserProvider'
 import { EntityUser } from '../../types'
+import { KYB_COUNTRY_CODES, US_STATE_CODES } from './geography_codes'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
 
 type Props = {
@@ -33,6 +34,10 @@ const businessVerificationInput = object({
   registrationNumber: string().required(),
   jurisdictionCode: string().required(),
   incorporationDate: date().required().max(new Date()),
+  stateCode: string().when('jurisdictionCode', {
+    is: 'us',
+    then: string().required(),
+  }),
 })
 
 const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) => {
@@ -66,8 +71,13 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
       businessName: onboardingUser?.businessName || '',
       email: onboardingUser?.email || '',
       registrationNumber: onboardingUser?.registrationNumber || '',
-      jurisdictionCode: onboardingUser?.jurisdictionCode || '',
+      jurisdictionCode: onboardingUser?.jurisdictionCode?.startsWith('us')
+        ? 'us'
+        : onboardingUser?.jurisdictionCode || '',
       incorporationDate: onboardingUser?.incorporationDate || '',
+      stateCode: onboardingUser?.jurisdictionCode?.startsWith('us')
+        ? onboardingUser?.jurisdictionCode.split('_')[1]
+        : '',
     },
     onSubmit: () => {
       verifyBusinessInformation()
@@ -88,7 +98,10 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
           email: formik.values.email,
           businessName: formik.values.businessName,
           registrationNumber: formik.values.registrationNumber,
-          jurisdictionCode: formik.values.jurisdictionCode,
+          jurisdictionCode:
+            formik.values.jurisdictionCode === 'us'
+              ? `${formik.values.jurisdictionCode}_${formik.values.stateCode}`
+              : formik.values.jurisdictionCode,
           incorporationDate: formik.values.incorporationDate,
           trancheId,
           poolId,
@@ -119,6 +132,20 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
     }
   )
 
+  const formatCountryCodes = (countryCodes: { [key: string]: string }) => {
+    return Object.keys(countryCodes).map((key) => ({
+      label: countryCodes[key],
+      value: key,
+    }))
+  }
+
+  const formatStateCodes = (stateCodes: { [key: string]: string }) => {
+    return Object.keys(stateCodes).map((key) => ({
+      label: stateCodes[key],
+      value: key,
+    }))
+  }
+
   return (
     <Stack gap={4}>
       <Box>
@@ -148,16 +175,22 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
           <Select
             label="Country of incorporation*"
             placeholder="Select a country"
-            options={[
-              {
-                label: 'Switzerland',
-                value: 'ch',
-              },
-            ]}
+            options={formatCountryCodes(KYB_COUNTRY_CODES)}
             disabled={isLoading || isCompleted}
             onSelect={(countryCode) => formik.setFieldValue('jurisdictionCode', countryCode)}
             value={formik.values.jurisdictionCode}
           />
+          {formik.values.jurisdictionCode === 'us' && (
+            <Select
+              label="State of incorporation*"
+              placeholder="Select a state"
+              options={formatStateCodes(US_STATE_CODES)}
+              disabled={isLoading || isCompleted}
+              onSelect={(stateCode) => formik.setFieldValue('stateCode', stateCode)}
+              value={formik.values.stateCode}
+            />
+          )}
+
           <NumberInput
             id="registrationNumber"
             label="Registration number*"

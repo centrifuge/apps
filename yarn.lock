@@ -1942,6 +1942,7 @@ __metadata:
     "@types/cookie": ^0
     "@types/cors": ^2
     "@types/express": ^4.17.14
+    "@types/express-fileupload": ^1
     "@types/jsonwebtoken": ^8
     "@types/yup": ^0
     "@typescript-eslint/eslint-plugin": ^5.12.0
@@ -1955,6 +1956,8 @@ __metadata:
     eslint-config-google: ^0.14.0
     eslint-plugin-import: ^2.25.4
     express: ^4.18.2
+    express-fileupload: ^1.4.0
+    file-type: ^18.2.0
     firebase-functions-test: ^0.2.0
     jsonwebtoken: ^8.5.1
     jw3t: ^1.0.8
@@ -7814,6 +7817,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tokenizer/token@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@tokenizer/token@npm:0.3.0"
+  checksum: e4db685bcb759ded5e4e58dc4df0b15f4b816fb54147391efba2be9a95218aa29b7d98f7d6ff1a903c6d6e7d27ddb47acfbf95f2f2545bb170d27eaea8a5cedc
+  languageName: node
+  linkType: hard
+
 "@tootallnate/once@npm:1":
   version: 1.1.2
   resolution: "@tootallnate/once@npm:1.1.2"
@@ -7913,6 +7923,15 @@ __metadata:
     "@types/connect": "*"
     "@types/node": "*"
   checksum: bd4e6dc17c8d5d83a84717a4af276dfab351ca7a09b6b4d29d35ae3c01e29f9c88f28dcec194943a9cec4690568fb42470d8af06097cd0dcd85ee3d32ea6a9fd
+  languageName: node
+  linkType: hard
+
+"@types/busboy@npm:*":
+  version: 1.5.0
+  resolution: "@types/busboy@npm:1.5.0"
+  dependencies:
+    "@types/node": "*"
+  checksum: 7e3f073c1f8595ddbd7c91e2b7fb8ed237e52b5ea38979fc11b5606d189c6e093e45888b52705d52e0f4cbeb28ad4ceccbb27c605997952e709fc6d09b94fd65
   languageName: node
   linkType: hard
 
@@ -8081,6 +8100,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/express-fileupload@npm:^1":
+  version: 1.4.1
+  resolution: "@types/express-fileupload@npm:1.4.1"
+  dependencies:
+    "@types/busboy": "*"
+    "@types/express": "*"
+  checksum: e239cf2a434d2311d974fb5f2f354f3b2d44d422edcaeac1bba242f15c96dd12e7c7a242131b485884036f3334b1a8b6a4de54133deb6f0991b5e0d644c3287e
+  languageName: node
+  linkType: hard
+
 "@types/express-serve-static-core@npm:^4.17.18, @types/express-serve-static-core@npm:^4.17.31":
   version: 4.17.32
   resolution: "@types/express-serve-static-core@npm:4.17.32"
@@ -8089,6 +8118,18 @@ __metadata:
     "@types/qs": "*"
     "@types/range-parser": "*"
   checksum: a0ed5606359b805d39b612c635ee15bf6c5bf35eabda7344ca78946475b3d46759a670f6d3c426e197bf8b6096ff838044a4a73524b3e2c4957a7c03cc890d4c
+  languageName: node
+  linkType: hard
+
+"@types/express@npm:*":
+  version: 4.17.16
+  resolution: "@types/express@npm:4.17.16"
+  dependencies:
+    "@types/body-parser": "*"
+    "@types/express-serve-static-core": ^4.17.31
+    "@types/qs": "*"
+    "@types/serve-static": "*"
+  checksum: 42930b52ee4a7d4b760cf82f5b7a3985b6c6ee825eb387b019245be84b6a5f686b92fe74471a32be74b55b3d65f7177469f7f324a9f3f8d43fbf435cb24f2544
   languageName: node
   linkType: hard
 
@@ -11326,6 +11367,15 @@ __metadata:
   dependencies:
     semver: ^7.0.0
   checksum: 84f830260b5388a0d058aa693f0d8b256edebf10049cf40e40cca999dfdfd698c6d75d909d8c03acfe006ea1f3b2499a0f7bef389b10afcad968449c79056c84
+  languageName: node
+  linkType: hard
+
+"busboy@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "busboy@npm:1.6.0"
+  dependencies:
+    streamsearch: ^1.1.0
+  checksum: aff2a4abe324563f8bb7f4c4c8d2d497c54a9e4fe6872775847a9d302cb91f96f9d82a9e9b35aa9478ff421ed13a8d367ba4d006f1a9e7283b19c8666b7bad8e
   languageName: node
   linkType: hard
 
@@ -16057,6 +16107,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"express-fileupload@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "express-fileupload@npm:1.4.0"
+  dependencies:
+    busboy: ^1.6.0
+  checksum: 79d7dc1b5a3f82add689b586c90e9058341e40efdcbee7ac4c8bc0f3fda75197a2d605fa87da2fc946e9a081b3dc5ce5c254070b9a72c1f819434f48fc6c0f23
+  languageName: node
+  linkType: hard
+
 "express-logging@npm:^1.1.1":
   version: 1.1.1
   resolution: "express-logging@npm:1.1.1"
@@ -16465,6 +16524,17 @@ __metadata:
   version: 11.1.0
   resolution: "file-type@npm:11.1.0"
   checksum: 00798b174c7dc5522f1a9d6efb2e19534a386bcbbeb9efce3d315ab288cf969bb8ee6e2d232bc23631cfc9d9872e18055e7e4b52f2c09e0a0f8cd79151412bda
+  languageName: node
+  linkType: hard
+
+"file-type@npm:^18.2.0":
+  version: 18.2.0
+  resolution: "file-type@npm:18.2.0"
+  dependencies:
+    readable-web-to-node-stream: ^3.0.2
+    strtok3: ^7.0.0
+    token-types: ^5.0.1
+  checksum: fa5f560303a318647e456ac685d762a77ca41d20958f3d9efd39b190199038add695e812626ad386699b79ec17aa90e26cde056542e732e951a2993dfa906330
   languageName: node
   linkType: hard
 
@@ -18355,7 +18425,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"ieee754@npm:^1.1.13, ieee754@npm:^1.1.4":
+"ieee754@npm:^1.1.13, ieee754@npm:^1.1.4, ieee754@npm:^1.2.1":
   version: 1.2.1
   resolution: "ieee754@npm:1.2.1"
   checksum: 6c1cfab995ecab3b0dbb6cfb7e192686eb02f0f8e788f2d962e1fc02e2d5ab38a85e06d417221f136bd029663a77cdb920d99605d68d3730a05597dd7910426a
@@ -23991,6 +24061,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"peek-readable@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "peek-readable@npm:5.0.0"
+  checksum: a51e4377dd1cac058792a67a34272ae8a776a144f1d910b61b522ce144d501806c400bfec836dc91badb952fcef2e6f1dbba8b3304ac4569f6b609bc0f14526b
+  languageName: node
+  linkType: hard
+
 "pend@npm:~1.2.0":
   version: 1.2.0
   resolution: "pend@npm:1.2.0"
@@ -25361,6 +25438,15 @@ fsevents@^1.2.7:
     string_decoder: ^1.1.1
     util-deprecate: ^1.0.1
   checksum: f178b1daa80d9e58ebba71dbb08486430aa6f0dea3a22a1b7401f3f6983077d0bc0edea43099db06b8d006c9ad48d6383e8fb72c05d5b187670aeaf1b9b44f00
+  languageName: node
+  linkType: hard
+
+"readable-web-to-node-stream@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "readable-web-to-node-stream@npm:3.0.2"
+  dependencies:
+    readable-stream: ^3.6.0
+  checksum: 3abfec81321447ff798072c3bc9cc2f463d76d6de045726964f17a0dca309d2d9eb7fe82898dff41fdaaf03c7cf235b862f945990fa139b88193488633fdeb26
   languageName: node
   linkType: hard
 
@@ -27099,6 +27185,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"streamsearch@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "streamsearch@npm:1.1.0"
+  checksum: c340904d03eee9857b635d4a8b2b56ccfce3d623f91139dc21b9b239ee19e19ec3a13b49adf28c0ba3382e16f11d6497a23f31918b5dade69e7f942bfa3e787f
+  languageName: node
+  linkType: hard
+
 "strict-uri-encode@npm:^1.0.0":
   version: 1.1.0
   resolution: "strict-uri-encode@npm:1.1.0"
@@ -27425,6 +27518,16 @@ fsevents@^1.2.7:
   dependencies:
     escape-string-regexp: ^1.0.2
   checksum: 5a01031e8b6662fbc2397360916e0b8ee66cc74c15a292c15ab82b5067728165ad730fa5289b12c2875e17660e21450515958a83636462bba3900ea5bc964082
+  languageName: node
+  linkType: hard
+
+"strtok3@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "strtok3@npm:7.0.0"
+  dependencies:
+    "@tokenizer/token": ^0.3.0
+    peek-readable: ^5.0.0
+  checksum: dbdd6e6304166ee849dc7c3a9218f5617d149de778737f2d175b8d40bf05b7554c93f223a42e0ae4a5d0f3bf56f133d36f546f90fa9dcf699cdd2921a5ef5379
   languageName: node
   linkType: hard
 
@@ -28144,6 +28247,16 @@ fsevents@^1.2.7:
   version: 1.0.1
   resolution: "toidentifier@npm:1.0.1"
   checksum: 2b5c573af97e7c12f91aeade737a40a539da3c123f43099bbddcd40c3365941b9877b482b994a89a3173c4e3f4f70fea887ae44242ade009efb4841f1dad9822
+  languageName: node
+  linkType: hard
+
+"token-types@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "token-types@npm:5.0.1"
+  dependencies:
+    "@tokenizer/token": ^0.3.0
+    ieee754: ^1.2.1
+  checksum: e144490eaee07a3282f33c924d4442b431915d9531387c5fd16423a76c2079ae1a364baa24f544c43a20814e6a655efb1f22ddff1c8f594e8917705ceebe336b
   languageName: node
   linkType: hard
 

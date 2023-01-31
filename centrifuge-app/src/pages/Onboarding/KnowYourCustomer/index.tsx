@@ -35,9 +35,9 @@ export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
 
   const formik = useFormik({
     initialValues: {
-      name: isCompleted ? onboardingUser.name : '',
-      dateOfBirth: isCompleted ? onboardingUser.dateOfBirth : '',
-      countryOfCitizenship: isCompleted ? onboardingUser.countryOfCitizenship : '',
+      name: onboardingUser.name || '',
+      dateOfBirth: onboardingUser.dateOfBirth || '',
+      countryOfCitizenship: onboardingUser.countryOfCitizenship || '',
       isAccurate: !!isCompleted,
     },
     onSubmit: () => {
