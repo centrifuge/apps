@@ -78,6 +78,9 @@ jobs:
       - name: Lint
         run: yarn lint
 
+      - name: Test
+        run: yarn test:ci
+
       - name: Build centrifuge-app + dependencies
         run: yarn build
         env:

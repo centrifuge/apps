@@ -54,17 +54,12 @@ export const KYB_COUNTRY_CODES = {
   me: 'Montenegro',
   mm: 'Myanmar',
   nl: 'Netherlands',
-  ca_nb: 'New Brunswick (Canada)',
   nz: 'New Zealand',
-  ca_nl: 'Newfoundland and Labrador (Canada)',
   no: 'Norway',
-  ca_ns: 'Nova Scotia (Canada)',
   pk: 'Pakistan',
   pa: 'Panama',
   pl: 'Poland',
-  ca_pe: 'Prince Edward Island (Canada)',
   pr: 'Puerto Rico',
-  ca_qc: 'Quebec (Canada)',
   ro: 'Romania',
   rw: 'Rwanda',
   re: 'Réunion',
@@ -339,6 +334,14 @@ export const KYC_COUNTRY_CODES = {
   ye: 'Yemen',
   zm: 'Zambia',
   zw: 'Zimbabwe',
+}
+
+export const CA_PROVINCE_CODES = {
+  nb: 'New Brunswick',
+  nl: 'Newfoundland and Labrador',
+  ns: 'Nova Scotia',
+  pe: 'Prince Edward Island',
+  qc: 'Quebec',
 }
 
 export const US_STATE_CODES = {
