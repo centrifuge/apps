@@ -1,0 +1,14 @@
+name: Deploy Altair and prod"
+on:
+  release:
+    types:
+      - prereleased
+      - released     
+    
+jobs:
+  sync_preprod_prod:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      # ToDo: Auth with gcloud and sync preprod with prod buckets
+      # ToDo: Auth with gcloud and sync functions code with prod.

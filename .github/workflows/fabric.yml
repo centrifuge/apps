@@ -4,7 +4,7 @@ on:
     branches:
       - main
     paths:
-      - 'fabric/**' # dependency
+      - 'fabric/**' 
       - '.github/workflows/fabric.yml'
 
 jobs:
@@ -32,13 +32,13 @@ jobs:
       - name: Build fabric storybook
         run: yarn build-storybook
 
-      - use: actions/upload-artifact@v3.1.2
+      - name: Archive storybook artifacts
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # @v3.1.2
+        with:
+          name: onboarding-api
+          retention-days: 1
+          path: ./fabric/storybook-static
 
-  deploy-storybook:
-    runs-on: ubuntu-latest
-    environment: development
-    steps:
-      - uses: google-github-actions/auth@v3.1.2
-      - name: Publish to bucket
-      - uses: google-github-actions/deploy-cloud-functions@v3.1.2
-        publish-dir: ./fabric/storybook-static        
+
+  deploy-storybook: # too google storage
+        

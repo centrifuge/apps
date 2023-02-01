@@ -1,4 +1,4 @@
-name: Pipeliene for centrifuge-app
+name: Deploy Gfunction
 on:
   push:
     branches:
@@ -17,12 +17,13 @@ on:
       deploy_env:
         type: string
         required: true
-jobs:  
-  
+
+
+jobs:
   build:
     runs-on: ubuntu-latest
     concurrency:
-      group: cent-app-${{ github.ref }}
+      group: cent-functions-${{ github.ref }}
       cancel-in-progress: true   
     defaults:
       run:
@@ -62,39 +63,26 @@ jobs:
           if-no-files-found: error
     outputs:
       front_url: ${{ steps.prepare.outputs.front_url }}
-           
 
-  deploy:
+  deployment:
+    concurrency:
+      group: cent-functions-${{ github.ref }}
+      cancel-in-progress: true    
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_call' && production || development }}
+    # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
     permissions:
       contents: 'read'
-      id-token: 'write'  
-    runs-on: ubuntu-latest
-    needs: build
-    environment: ${{ github.event_name == 'workflow_call' && production || development }}
+      id-token: 'write'
+    env:
+      region: europe-central2
     steps:
       - name: deploy to GCS
-        id: gcsdeploy
+        id: functionsdeploy
         uses: ./.github/actions/deploy-gcs
         with:
           artifact_name: webpack 
           bucket_url: ${{ needs.build.front_url }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
-    outputs:
-      env_url: ${{ steps.gcsdepoy.outputs.env_url }}
 
-  comment_pr:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    needs: deploy
-    steps:
-    # This step is separated to avoid using it while having access to Gcloud Auth credentials
-    # saved in GH environments
-      - name: PR comment with preview URL
-        uses: thollander/actions-comment-pull-request@v2
-        # if: github.event_name == 'pull_request' && steps.push.outcome == 'success'
-        with:
-          message: |
-            Deployed webiste in Google Cloud
-            URL: http://${{ needs.deploy.outputs.env_url }}
-            Commit #: ${{ github.event.pull_request.head.sha }}

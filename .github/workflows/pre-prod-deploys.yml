@@ -1,0 +1,48 @@
+name: Deploy Altair and preprod"
+on:
+  release:
+    types:
+      - prereleased
+      - released     
+    
+jobs:
+
+  deploy_app:
+    strategy:
+      fail-fast: true
+      matrix:
+        deploy_to: ["altair", "preprod"]
+    uses: ./.github/workflows/centrifuge-app.yml
+    secrets: inherit
+    with:
+      deploy_env: ${{ matrix.deploy_to }}
+
+
+  deploy_functions:
+    strategy:
+      fail-fast: true
+      matrix:
+        deploy_to: ["altair", "preprod"]
+    uses: ./.github/workflows/centrifuge-functions.yml
+    secrets: inherit
+    with:
+      deploy_env: ${{ matrix.deploy_to }}
+
+
+  deploy_onboarding:
+    strategy:
+      fail-fast: true
+      matrix:
+        deploy_to: ["altair", "preprod"]
+    uses: ./.github/workflows/onboarding-api.yml
+    secrets: inherit
+    with:
+      deploy_env: ${{ matrix.deploy_to }}
+  
+  archive_artifacts:
+    strategy:
+      fail-fast: true
+      matrix:
+        artifact_name: ["webpack", "functions", "onboardingd"]
+
+  

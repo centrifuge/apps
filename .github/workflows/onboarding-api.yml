@@ -7,27 +7,27 @@ on:
     branches:
       - main
     tags:
-      - "rc*"
       - "release*"
     paths:
       - 'onboarding-api/**'
       - '.github/workflows/onboarding-api.yml'
   pull_request:
-    types:
-      - "opened"
-      - "synchronize"
-      - "reopened"
-      # - "closed"
     paths:
       - 'onboarding-api/**'
       - '.github/workflows/onboarding-api.yml'
   workflow_call:
     inputs:
-      deploy_to_demo:
+      deploy_demo:
         description: "Deploy to demo?"
         required: true
         type: boolean
         default: false
+      deploy_prod:
+        description: "Deploy to prod?"
+        required: true
+        type: boolean
+        default: false
+
 jobs:
   build:
     concurrency:

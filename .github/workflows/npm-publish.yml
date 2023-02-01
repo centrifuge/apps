@@ -1,13 +1,20 @@
-name: 'NPM publish'
+name: 'NPM publish (manual)'
 on:
   workflow_dispatch:
-    app_name:
-      description: "Choose an app to publish to NPM"
-      type: choice
-      options:
-      - fabric
-      - centrifuge-js
-      - centrifuge-react
+    inputs:
+      app_name:
+        description: "Choose an app to publish to NPM"
+        type: choice
+        options:
+        - fabric
+        - centrifuge-js
+        - centrifuge-react
+      build_cmd:
+        description: "build command"
+        default: 'yarn build'
+        type: string
+      test_cmd:
+
 
 jobs:
   publish-npm:
@@ -32,8 +39,16 @@ jobs:
         run: yarn install
 
       - name: Lint and build for centrifuge-js
-        run: yarn lint && yarn build
+        run: |
+          yarn lint
+          yarn build
         if: ${{ inputs.app_name == 'centrifuge-js' }}
+
+      - name: Build fabric
+        run: |
+          yarn build
+          yarn ci:loki
+        if: ${{ inputs.app_name == 'fabric' }}
 
       - name: Publish
         id: publish
