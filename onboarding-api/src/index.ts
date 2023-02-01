@@ -3,6 +3,8 @@ import * as dotenv from 'dotenv'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
 import { signAgreementController } from './controllers/agreement/signAgreement'
+import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'
+import { verifyEmailController } from './controllers/emails/verifyEmail'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
 import { getUserController } from './controllers/user/getUser'
@@ -18,18 +20,20 @@ const onboarding = express()
 onboarding.options('*', corsMiddleware)
 
 onboarding.use(corsMiddleware)
-onboarding.use(verifyJw3t)
 
-onboarding.get('/getUser', getUserController)
+onboarding.get('/getUser', verifyJw3t, getUserController)
 
-onboarding.post('/startKyc', startKycController)
-onboarding.post('/setVerifiedIdentity', setVerifiedIdentityController)
+onboarding.post('/startKyc', verifyJw3t, startKycController)
+onboarding.post('/setVerifiedIdentity', verifyJw3t, setVerifiedIdentityController)
 
-onboarding.post('/verifyBusiness', verifyBusinessController)
-onboarding.post('/confirmOwners', confirmOwnersController)
+onboarding.post('/verifyBusiness', verifyJw3t, verifyBusinessController)
+onboarding.post('/confirmOwners', verifyJw3t, confirmOwnersController)
 
-onboarding.get('/getUnsignedAgreement', getUnsignedAgreementController)
-onboarding.post('/signAgreement', signAgreementController)
-onboarding.get('/getSignedAgreement', getSignedAgreementController)
+onboarding.get('/getUnsignedAgreement', verifyJw3t, getUnsignedAgreementController)
+onboarding.post('/signAgreement', verifyJw3t, signAgreementController)
+onboarding.get('/getSignedAgreement', verifyJw3t, getSignedAgreementController)
+
+onboarding.post('/sendVerifyEmail', verifyJw3t, sendVerifyEmailController)
+onboarding.get('/verifyEmail', verifyEmailController)
 
 exports.onboarding = onboarding

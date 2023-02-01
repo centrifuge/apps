@@ -50,23 +50,23 @@ const stepsSchema = object({
   }),
   signAgreements: lazy((value) => {
     const poolId = Object.keys(value)[0]
-    if (typeof poolId === 'string') {
-      return object({
-        [poolId]: lazy((value) => {
-          const trancheId = Object.keys(value)[0]
-          if (typeof trancheId === 'string') {
-            return object({
-              [trancheId]: object({
-                completed: bool(),
-                timeStamp: string().nullable(),
-              }),
-            })
-          }
-          throw new Error('Bad trancheId')
-        }),
-      })
+    if (typeof poolId !== 'string') {
+      throw new Error('Bad poolId')
     }
-    throw new Error('Bad poolId')
+    return object({
+      [poolId]: lazy((value) => {
+        const trancheId = Object.keys(value)[0]
+        if (typeof trancheId !== 'string') {
+          throw new Error('Bad trancheId')
+        }
+        return object({
+          [trancheId]: object({
+            completed: bool(),
+            timeStamp: string().nullable(),
+          }),
+        })
+      }),
+    })
   }),
 })
 
@@ -135,9 +135,9 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
   try {
     const { collection, schema } = schemas[schemaKey]
     if (typeof mergeFields !== 'undefined') {
-      const mergeValidations = (mergeFields as unknown as string[]).map((field) => schema.validateAt(field, data))
+      const mergeValidations = (mergeFields as string[]).map((field) => schema.validateAt(field, data))
       await Promise.all(mergeValidations)
-      await collection.doc(key).set(data, { mergeFields: mergeFields as unknown as string[] })
+      await collection.doc(key).set(data, { mergeFields: mergeFields as string[] })
     } else {
       await schema.validate(data)
       await collection.doc(key).set(data)
