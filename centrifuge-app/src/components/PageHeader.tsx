@@ -41,7 +41,7 @@ export const PageHeader: React.FC<Props> = ({
     <Box
       as="header"
       position="sticky"
-      top={0}
+      top={[0, 0, theme.sizes.headerHeight]}
       zIndex="sticky"
       style={{
         boxShadow: border ? `0 1px 0 ${theme.colors.borderSecondary}` : undefined,

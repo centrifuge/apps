@@ -16,11 +16,14 @@ export const FEATURED_COLLECTIONS = [
   '353744957',
 ]
 
+const headerHeight = 56
+
 const lightTheme: DefaultTheme = {
   ...centrifugeLight,
   sizes: {
     ...centrifugeLight.sizes,
     container: '100%',
+    headerHeight,
   },
   colors: {
     ...centrifugeLight.colors,
@@ -41,6 +44,7 @@ const darkTheme: DefaultTheme = {
   sizes: {
     ...altairDark.sizes,
     container: '100%',
+    headerHeight,
   },
   colors: {
     ...altairDark.colors,
