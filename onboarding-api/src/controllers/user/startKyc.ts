@@ -16,7 +16,7 @@ const kycInput = object({
 export const startKycController = async (req: Request<any, any, InferType<typeof kycInput>>, res: Response) => {
   try {
     const { walletAddress, body } = req
-    await validateInput(req, kycInput)
+    await validateInput(req.body, kycInput)
 
     const userDoc = await userCollection.doc(walletAddress).get()
     let userData = userDoc.data() as OnboardingUser
@@ -42,7 +42,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
             completed: false,
             timeStamp: null,
           },
-          verifyAccreditdation: { completed: false, timeStamp: null },
+          verifyAccreditation: { completed: false, timeStamp: null },
           verifyTaxInfo: { completed: false, timeStamp: null },
           signAgreements: {
             [body.poolId]: {

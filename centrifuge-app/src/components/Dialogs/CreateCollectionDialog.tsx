@@ -12,7 +12,7 @@ import {
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
-import React, { useEffect, useState } from 'react'
+import * as React from 'react'
 import { Redirect } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { collectionMetadataSchema } from '../../schemas'
@@ -29,14 +29,14 @@ const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const { selectedAccount } = useWallet()
-  const [name, setName] = useState<string>('')
-  const [description, setDescription] = useState<string>('')
-  const [logo, setLogo] = useState<File | null>(null)
+  const [name, setName] = React.useState<string>('')
+  const [description, setDescription] = React.useState<string>('')
+  const [logo, setLogo] = React.useState<File | null>(null)
   const cent = useCentrifuge()
   const balance = useBalance()
-  const [redirect, setRedirect] = useState<string>('')
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [termsAccepted, setTermsAccepted] = useState(false)
+  const [redirect, setRedirect] = React.useState<string>('')
+  const [confirmOpen, setConfirmOpen] = React.useState(false)
+  const [termsAccepted, setTermsAccepted] = React.useState(false)
 
   const isConnected = !!selectedAccount?.address
 
@@ -80,7 +80,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   })
 
   // Only close if the modal is still showing the last created collection
-  useEffect(() => {
+  React.useEffect(() => {
     if (lastCreatedTransaction?.status === 'pending') {
       close()
     }

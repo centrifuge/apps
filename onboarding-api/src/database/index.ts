@@ -1,4 +1,5 @@
 import { Firestore } from '@google-cloud/firestore'
+import { Storage } from '@google-cloud/storage'
 import * as dotenv from 'dotenv'
 import { array, bool, date, InferType, lazy, object, string, StringSchema } from 'yup'
 import { HttpsError } from '../utils/httpsError'
@@ -39,7 +40,7 @@ const stepsSchema = object({
     completed: bool(),
     timeStamp: string().nullable(),
   }),
-  verifyAccreditdation: object({
+  verifyAccreditation: object({
     completed: bool(),
     timeStamp: string().nullable(),
   }),
@@ -93,7 +94,7 @@ export const individualUserSchema = object({
   name: string().nullable().default(null),
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
-  steps: stepsSchema.pick(['verifyIdentity', 'verifyAccreditdation', 'verifyTaxInfo', 'signAgreements']),
+  steps: stepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'signAgreements']),
 })
 
 export type EntityUser = InferType<typeof entityUserSchema>
@@ -102,6 +103,9 @@ export type OnboardingUser = IndividualUser | EntityUser
 
 export const firestore = new Firestore()
 export const userCollection = firestore.collection(`onboarding-users`)
+
+export const storage = new Storage()
+export const onboardingBucket = storage.bucket('onboarding-api-dev')
 
 const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
   entity: {
@@ -137,6 +141,36 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
       await schema.validate(data)
       await collection.doc(key).set(data)
     }
+  } catch (error) {
+    // @ts-expect-error error typing
+    throw new HttpsError(400, error.message)
+  }
+}
+
+/**
+ *
+ * @param signedAgreement signed agreement pdf
+ * @param walletAddress wallet address of investor
+ * @param poolId poolId of the pool
+ * @param trancheId trancheId of the tranche
+ */
+export const writeToOnboardingBucket = async (document: Uint8Array, path: string) => {
+  try {
+    const blob = onboardingBucket.file(path)
+    const blobStream = blob.createWriteStream({
+      resumable: false,
+    })
+
+    blobStream.end(document)
+
+    return new Promise((resolve, reject) => {
+      blobStream.on('finish', () => {
+        resolve(true)
+      })
+      blobStream.on('error', (err) => {
+        reject(err)
+      })
+    })
   } catch (error) {
     // @ts-expect-error error typing
     throw new HttpsError(400, error.message)

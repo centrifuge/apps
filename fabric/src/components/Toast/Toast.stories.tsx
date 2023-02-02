@@ -1,5 +1,5 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import React from 'react'
+import * as React from 'react'
 import { Toast } from '.'
 import { IconExternalLink } from '../..'
 import { Button } from '../Button'

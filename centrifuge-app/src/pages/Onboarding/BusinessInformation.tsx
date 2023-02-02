@@ -16,6 +16,8 @@ import { date, object, string } from 'yup'
 import { useAuth } from '../../components/AuthProvider'
 import { useOnboardingUser } from '../../components/OnboardingUserProvider'
 import { EntityUser } from '../../types'
+import { formatGeographyCodes } from '../../utils/formatGeographyCodes'
+import { CA_PROVINCE_CODES, KYB_COUNTRY_CODES, US_STATE_CODES } from './geography_codes'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
 
 type Props = {
@@ -24,8 +26,8 @@ type Props = {
 }
 
 // TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'sdf'
-const poolId = '21323432'
+const trancheId = 'FAKETRANCHEID'
+const poolId = 'FAKEPOOLID'
 
 const businessVerificationInput = object({
   email: string().email().required(),
@@ -33,6 +35,10 @@ const businessVerificationInput = object({
   registrationNumber: string().required(),
   jurisdictionCode: string().required(),
   incorporationDate: date().required().max(new Date()),
+  regionCode: string().when('jurisdictionCode', {
+    is: (jurisdictionCode: string) => jurisdictionCode === 'us' || jurisdictionCode === 'ca',
+    then: string().required(),
+  }),
 })
 
 const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) => {
@@ -59,15 +65,21 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
     refetchOnboardingUser: () => void
   }
 
-  const isCompleted = onboardingUser?.steps?.verifyBusiness.completed
+  const isUSOrCA =
+    onboardingUser?.jurisdictionCode?.startsWith('us') || onboardingUser?.jurisdictionCode?.startsWith('ca')
+
+  const isCompleted = !!onboardingUser?.steps?.verifyBusiness.completed
 
   const formik = useFormik({
     initialValues: {
       businessName: onboardingUser?.businessName || '',
       email: onboardingUser?.email || '',
       registrationNumber: onboardingUser?.registrationNumber || '',
-      jurisdictionCode: onboardingUser?.jurisdictionCode || '',
+      jurisdictionCode: isUSOrCA
+        ? onboardingUser?.jurisdictionCode.slice(0, 2)
+        : onboardingUser?.jurisdictionCode || '',
       incorporationDate: onboardingUser?.incorporationDate || '',
+      regionCode: isUSOrCA ? onboardingUser?.jurisdictionCode.split('_')[1] : '',
     },
     onSubmit: () => {
       verifyBusinessInformation()
@@ -88,7 +100,10 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
           email: formik.values.email,
           businessName: formik.values.businessName,
           registrationNumber: formik.values.registrationNumber,
-          jurisdictionCode: formik.values.jurisdictionCode,
+          jurisdictionCode:
+            formik.values.jurisdictionCode === 'us' || formik.values.jurisdictionCode === 'ca'
+              ? `${formik.values.jurisdictionCode}_${formik.values.regionCode}`
+              : formik.values.jurisdictionCode,
           incorporationDate: formik.values.incorporationDate,
           trancheId,
           poolId,
@@ -119,6 +134,36 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
     }
   )
 
+  const renderRegionCodeSelect = () => {
+    if (formik.values.jurisdictionCode === 'us') {
+      return (
+        <Select
+          label="State of incorporation*"
+          placeholder="Select a state"
+          options={formatGeographyCodes(US_STATE_CODES)}
+          disabled={isLoading || isCompleted}
+          onSelect={(regionCode) => formik.setFieldValue('regionCode', regionCode)}
+          value={formik.values.regionCode}
+        />
+      )
+    }
+
+    if (formik.values.jurisdictionCode === 'ca') {
+      return (
+        <Select
+          label="Province of incorporation*"
+          placeholder="Select a province"
+          options={formatGeographyCodes(CA_PROVINCE_CODES)}
+          disabled={isLoading || isCompleted}
+          onSelect={(regionCode) => formik.setFieldValue('regionCode', regionCode)}
+          value={formik.values.regionCode}
+        />
+      )
+    }
+
+    return null
+  }
+
   return (
     <Stack gap={4}>
       <Box>
@@ -148,16 +193,19 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
           <Select
             label="Country of incorporation*"
             placeholder="Select a country"
-            options={[
-              {
-                label: 'Switzerland',
-                value: 'ch',
-              },
-            ]}
+            options={formatGeographyCodes(KYB_COUNTRY_CODES)}
             disabled={isLoading || isCompleted}
-            onSelect={(countryCode) => formik.setFieldValue('jurisdictionCode', countryCode)}
+            onSelect={(countryCode) => {
+              formik.setValues({
+                ...formik.values,
+                jurisdictionCode: countryCode as string,
+                regionCode: '',
+              })
+            }}
             value={formik.values.jurisdictionCode}
           />
+          {renderRegionCodeSelect()}
+
           <NumberInput
             id="registrationNumber"
             label="Registration number*"

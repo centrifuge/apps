@@ -1,7 +1,7 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import { useBalances, WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Grid, Shelf, Stack } from '@centrifuge/fabric'
-import React from 'react'
+import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { config } from '../config'
 import { useAddress } from '../utils/useAddress'
@@ -14,6 +14,7 @@ import { Menu } from './Menu'
 
 type Props = {
   sidebar?: React.ReactNode
+  children?: React.ReactNode
 }
 
 const MIN_DEVEL_BALANCE = 10

@@ -1,5 +1,5 @@
 import { Box, Grid, IconChevronDown, IconChevronRight, Shelf, Text } from '@centrifuge/fabric'
-import React, { useState } from 'react'
+import * as React from 'react'
 import { useRouteMatch } from 'react-router'
 import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
@@ -11,6 +11,7 @@ type Props = {
   defaultOpen?: boolean
   active?: boolean
   stacked?: boolean
+  children?: React.ReactNode
 }
 
 const NavigationClickable = styled(Shelf)<{ $active?: boolean; stacked?: boolean }>`
@@ -99,11 +100,11 @@ export function Collapsible({
   stacked,
   ...rest
 }: Props & { children: React.ReactNode }) {
-  const [open, setOpen] = useState(defaultOpen)
+  const [open, setOpen] = React.useState(defaultOpen)
   const { space } = useTheme()
   const fullWidth = `calc(100vw - 2 * ${space[1]}px)`
   const offset = `calc(100% + 2 * ${space[1]}px)`
-  const id = useState(() => Math.random().toString(36).substring(2))[0]
+  const id = React.useState(() => Math.random().toString(36).substring(2))[0]
 
   return (
     <Box position={['static', 'static', 'relative', 'relative', 'static']} width="100%">

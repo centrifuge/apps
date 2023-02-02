@@ -1,5 +1,5 @@
 import { useModal, useOverlay } from '@react-aria/overlays'
-import React from 'react'
+import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { IconX } from '../../icon'
 import { Button } from '../Button'
@@ -11,6 +11,7 @@ type BannerProps = {
   title: string | React.ReactElement
   isOpen?: boolean
   onClose?: () => void
+  children?: React.ReactNode
 }
 
 export const Banner: React.FC<BannerProps> = ({ children, title, ...props }) => {

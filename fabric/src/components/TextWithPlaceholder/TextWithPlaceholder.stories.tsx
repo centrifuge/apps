@@ -1,5 +1,5 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import React from 'react'
+import * as React from 'react'
 import { useTheme } from 'styled-components'
 import { TextWithPlaceholder } from '.'
 import { TextVariantName } from '../../theme'

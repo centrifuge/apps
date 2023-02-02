@@ -1,5 +1,5 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
-import React, { useContext } from 'react'
+import * as React from 'react'
 import { useQuery } from 'react-query'
 import { OnboardingUser } from '../types'
 import { useAuth } from './AuthProvider'
@@ -13,8 +13,8 @@ const OnboardingUserContext = React.createContext<{
   isOnboardingUserFetched: boolean
 } | null>(null)
 
-export const OnboardingUserProvider: React.FC = ({ children }) => {
-  const { isAuth, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
+export function OnboardingUserProvider({ children }: { children?: React.ReactNode }) {
+  const { authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const { selectedAccount } = useWallet()
 
   const {
@@ -23,32 +23,36 @@ export const OnboardingUserProvider: React.FC = ({ children }) => {
     isFetching: isOnboardingUserFetching,
     isFetched: isOnboardingUserFetched,
   } = useQuery(
-    ['getUser', selectedAccount?.address],
+    ['getUser', authToken],
     async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUser`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
+      if (authToken) {
+        const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUser`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        })
 
-      if (response.status !== 200) {
-        throw new Error()
+        if (response.status !== 200) {
+          throw new Error()
+        }
+
+        return response.json()
       }
-
-      return response.json()
     },
     {
-      enabled: !!isAuth,
+      refetchOnWindowFocus: false,
+      enabled: !!selectedAccount,
+      retry: 1,
     }
   )
 
   return (
     <OnboardingUserContext.Provider
       value={{
-        onboardingUser: onboardingUserData,
+        onboardingUser: onboardingUserData || {},
         refetchOnboardingUser,
         isOnboardingUserFetching,
         isOnboardingUserFetched,
@@ -60,7 +64,7 @@ export const OnboardingUserProvider: React.FC = ({ children }) => {
 }
 
 export const useOnboardingUser = () => {
-  const ctx = useContext(OnboardingUserContext)
+  const ctx = React.useContext(OnboardingUserContext)
   if (!ctx) throw new Error('useOnboardingUser must be used within OnboardingUserProvider')
   return ctx
 }

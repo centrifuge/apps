@@ -1,6 +1,6 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { Button, Card, Shelf, Stack, Text } from '@centrifuge/fabric'
-import React from 'react'
+import * as React from 'react'
 import { FaucetConfirmationDialog } from './Dialogs/FaucetConfirmationDialog'
 
 export const Faucet: React.VFC = () => {

@@ -22,7 +22,7 @@ export const verifyBusinessController = async (
 ) => {
   try {
     const { walletAddress } = req
-    await validateInput(req, verifyBusinessInput)
+    await validateInput(req.body, verifyBusinessInput)
 
     const {
       body: { incorporationDate, jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
@@ -82,7 +82,7 @@ export const verifyBusinessController = async (
         verifyEmail: { completed: false, timeStamp: null },
         confirmOwners: { completed: false, timeStamp: null },
         verifyIdentity: { completed: false, timeStamp: null },
-        verifyAccreditdation: { completed: false, timeStamp: null },
+        verifyAccreditation: { completed: false, timeStamp: null },
         verifyTaxInfo: { completed: false, timeStamp: null },
         signAgreements: {
           [poolId]: {

@@ -1,5 +1,5 @@
 import { ComponentMeta } from '@storybook/react'
-import React from 'react'
+import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
 import { Text } from '../components/Text'
 

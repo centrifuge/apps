@@ -1,5 +1,5 @@
 import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
-import React from 'react'
+import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
 
 export const AuthContext = React.createContext<{
@@ -8,7 +8,7 @@ export const AuthContext = React.createContext<{
   isLoggingIn: boolean
 }>(null as any)
 
-export const AuthProvider: React.FC = ({ children }) => {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { selectedWallet, proxy, selectedAccount } = useWallet()
   const cent = useCentrifuge()
 
@@ -93,7 +93,11 @@ export function useAuth(authorizedProxyTypes?: string[]) {
 
   const authToken = session?.signed ? session.signed : ''
 
-  const { refetch: refetchAuth, data } = useQuery(
+  const {
+    refetch: refetchAuth,
+    data,
+    isFetched,
+  } = useQuery(
     ['auth', authToken, authorizedProxyTypes],
     async () => {
       try {
@@ -141,5 +145,6 @@ export function useAuth(authorizedProxyTypes?: string[]) {
     isAuth: data?.verified,
     login: ctx.login,
     refetchAuth,
+    isAuthFetched: isFetched,
   }
 }

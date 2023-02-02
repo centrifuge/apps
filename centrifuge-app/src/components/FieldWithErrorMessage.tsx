@@ -1,5 +1,5 @@
 import { Field, FieldAttributes, useField } from 'formik'
-import React from 'react'
+import * as React from 'react'
 
 type Props = FieldAttributes<any> & {
   label?: string | React.ReactElement
