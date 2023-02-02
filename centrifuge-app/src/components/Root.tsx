@@ -160,14 +160,14 @@ const Routes: React.VFC = () => {
       <Route path="/investments">
         <PoolsPage />
       </Route>
-      <OnboardingUserProvider>
-        <Route exact path="/onboarding">
+      <Route exact path="/onboarding">
+        <OnboardingUserProvider>
           <OnboardingPage />
-        </Route>
-        <Route exact path="/onboarding/verifyEmail">
-          <EmailVerified />
-        </Route>
-      </OnboardingUserProvider>
+        </OnboardingUserProvider>
+      </Route>
+      <Route exact path="/onboarding/verifyEmail">
+        <EmailVerified />
+      </Route>
       <Route exact path="/">
         <Redirect to="/investments" />
       </Route>
