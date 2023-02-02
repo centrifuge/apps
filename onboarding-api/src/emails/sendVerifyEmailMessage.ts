@@ -12,7 +12,7 @@ export const sendVerifyEmailMessage = async (user: OnboardingUser) => {
     throw new Error('No email found')
   }
   const payload: VerifyEmailPayload = { email: user.email, walletAddress: user.wallet.address }
-  const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
+  const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: '10m',
   })
 

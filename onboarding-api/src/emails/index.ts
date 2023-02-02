@@ -6,7 +6,7 @@ export const sendEmail = async (message: any) => {
   if (!apiKey) {
     throw new Error('API key undefined')
   }
-  sendgridMail.setApiKey(process.env.SENDGRID_API_KEY || '')
+  sendgridMail.setApiKey(process.env.SENDGRID_API_KEY)
   try {
     return sendgridMail.send(message)
   } catch (error) {
