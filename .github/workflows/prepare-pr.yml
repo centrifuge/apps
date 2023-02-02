@@ -1,17 +1,40 @@
-name: Delete lingering functions and buckets
+name: Create and delete PR functions
 
 on:
   pull_request:
     types:
       - "closed"
+      - "opened"
+      - "reopened"
 
 jobs:
+  deploy_app:
+    if: | 
+      github.event.action == 'open' || 
+      github.event.action == 'reopen'
+    uses: ./.github/workflows/centrifuge-app.yml
+    secrets: inherit
+
+  deploy_pinning:
+    if: | 
+      github.event.action == 'open' || 
+      github.event.action == 'reopen'
+    uses: ./.github/workflows/pinning-api.yml
+    secrets: inherit
+
+  deploy_onboarding:
+    if: | 
+      github.event.action == 'open' || 
+      github.event.action == 'reopen'
+    uses: ./.github/workflows/onboarding-api.yml
+    secrets: inherit
+
   cleanup-pr:
+    if: github.event.action == 'closed'
     permissions:
       contents: 'read'
       id-token: 'write'
     runs-on: ubuntu-latest
-    if: github.event.action == 'closed'
     environment: preview
     steps:
       - name: Auth gcloud
