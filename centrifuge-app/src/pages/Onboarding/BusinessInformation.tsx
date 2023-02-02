@@ -138,7 +138,7 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
     if (formik.values.jurisdictionCode === 'us') {
       return (
         <Select
-          name="state"
+          name="regionCode"
           label="State of incorporation*"
           placeholder="Select a state"
           options={formatGeographyCodes(US_STATE_CODES)}
@@ -152,7 +152,7 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
     if (formik.values.jurisdictionCode === 'ca') {
       return (
         <Select
-          name="province"
+          name="regionCode"
           label="Province of incorporation*"
           placeholder="Select a province"
           options={formatGeographyCodes(CA_PROVINCE_CODES)}
@@ -193,7 +193,7 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
             value={formik.values.businessName}
           />
           <Select
-            name="country"
+            name="jurisdictionCode"
             label="Country of incorporation*"
             placeholder="Select a country"
             options={formatGeographyCodes(KYB_COUNTRY_CODES)}

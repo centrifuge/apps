@@ -109,7 +109,7 @@ const CreateLoanFromNFT: React.FC = () => {
               <Field name="poolId">
                 {({ field, form }: any) => (
                   <Select
-                    name="pool"
+                    name="poolId"
                     placeholder="Select a pool"
                     label="Pool"
                     options={poolSelectOptions}

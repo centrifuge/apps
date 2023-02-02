@@ -76,7 +76,7 @@ export const PoolDetailReportingTab: React.FC = () => {
             {report === 'pool-balance' && (
               <Shelf gap={2}>
                 <Select
-                  name="group"
+                  name="groupBy"
                   label="Group by"
                   placeholder="Select a time period to group by"
                   options={[
@@ -101,7 +101,7 @@ export const PoolDetailReportingTab: React.FC = () => {
             {report === 'investor-tx' && (
               <Shelf>
                 <Select
-                  name="token"
+                  name="activeTranche"
                   label="Token"
                   placeholder="Select a token"
                   options={[

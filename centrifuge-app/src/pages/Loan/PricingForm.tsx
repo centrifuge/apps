@@ -149,7 +149,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
             <Field name="loanType">
               {({ field, meta, form }: FieldProps) => (
                 <Select
-                  name="asset-type"
+                  name="loanType"
                   label="Asset type"
                   onChange={(event) => form.setFieldValue('loanType', event.target.value, false)}
                   onBlur={field.onBlur}
@@ -168,7 +168,7 @@ export const PricingForm: React.VFC<{ loan: LoanType; pool: Pool }> = ({ loan, p
           <Field name="riskGroup" validate={required()}>
             {({ field, meta, form }: FieldProps) => (
               <Select
-                name="risk-group"
+                name="riskGroup"
                 label="Risk group"
                 onChange={(event) => form.setFieldValue('riskGroup', event.target.value, false)}
                 onBlur={field.onBlur}

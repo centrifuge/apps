@@ -45,7 +45,7 @@ export const AuthorizedSignerVerification = ({ backStep, formik, isLoading, isCo
           disabled={isLoading || isCompleted}
         />
         <Select
-          name="country-citizenship"
+          name="countryOfCitizenship"
           label="Country of Citizenship*"
           placeholder="Select a country"
           options={formatCountryCodes(KYC_COUNTRY_CODES)}
