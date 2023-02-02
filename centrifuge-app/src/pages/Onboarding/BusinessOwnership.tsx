@@ -92,12 +92,12 @@ const EmailVerificationInlineFeedback = ({ email, completed }: { email: string; 
         </Text>
         <EditOnboardingEmailAddressDialog
           currentEmail={email}
-          isEditOnboardingEmailAddressDialogOpen={isEditOnboardingEmailAddressDialogOpen}
-          setIsEditOnboardingEmailAddressDialogOpen={setIsEditOnboardingEmailAddressDialogOpen}
+          isDialogOpen={isEditOnboardingEmailAddressDialogOpen}
+          setIsDialogOpen={setIsEditOnboardingEmailAddressDialogOpen}
         />
         <ConfirmResendEmailVerificationDialog
-          isConfirmResendEmailVerificationDialogOpen={isConfirmResendEmailVerificationDialogOpen}
-          setIsConfirmResendEmailVerificationDialogOpen={setIsConfirmResendEmailVerificationDialogOpen}
+          isDialogOpen={isConfirmResendEmailVerificationDialogOpen}
+          setIsDialogOpen={setIsConfirmResendEmailVerificationDialogOpen}
         />
       </Shelf>
     </StyledInlineFeedback>

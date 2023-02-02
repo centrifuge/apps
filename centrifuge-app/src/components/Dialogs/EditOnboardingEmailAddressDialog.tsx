@@ -6,16 +6,12 @@ import { useAuth } from '../AuthProvider'
 import { useOnboardingUser } from '../OnboardingUserProvider'
 
 type Props = {
-  isEditOnboardingEmailAddressDialogOpen: boolean
-  setIsEditOnboardingEmailAddressDialogOpen: (isEditOnboardingEmailAddressDialogOpen: boolean) => void
+  isDialogOpen: boolean
+  setIsDialogOpen: (isDialogOpen: boolean) => void
   currentEmail: string
 }
 
-export const EditOnboardingEmailAddressDialog = ({
-  isEditOnboardingEmailAddressDialogOpen,
-  setIsEditOnboardingEmailAddressDialogOpen,
-  currentEmail,
-}: Props) => {
+export const EditOnboardingEmailAddressDialog = ({ isDialogOpen, setIsDialogOpen, currentEmail }: Props) => {
   const [newEmail, setNewEmail] = React.useState('')
   const { authToken } = useAuth()
   const { refetchOnboardingUser } = useOnboardingUser()
@@ -43,7 +39,7 @@ export const EditOnboardingEmailAddressDialog = ({
     {
       onSuccess: () => {
         refetchOnboardingUser()
-        setIsEditOnboardingEmailAddressDialogOpen(false)
+        setIsDialogOpen(false)
       },
     }
   )
@@ -51,8 +47,8 @@ export const EditOnboardingEmailAddressDialog = ({
   return (
     <Dialog
       width="30%"
-      isOpen={isLoading ? true : isEditOnboardingEmailAddressDialogOpen}
-      onClose={() => setIsEditOnboardingEmailAddressDialogOpen(false)}
+      isOpen={isLoading ? true : isDialogOpen}
+      onClose={() => setIsDialogOpen(false)}
       title={<Text variant="heading1">Edit Email Address</Text>}
     >
       <Box p={4}>
@@ -60,11 +56,7 @@ export const EditOnboardingEmailAddressDialog = ({
           <TextInput value={currentEmail} label="Current Email Address" disabled />
           <TextInput value={newEmail} label="New Email Address" onChange={(event) => setNewEmail(event.target.value)} />
           <Shelf justifyContent="flex-end" gap={2}>
-            <Button
-              onClick={() => setIsEditOnboardingEmailAddressDialogOpen(false)}
-              variant="secondary"
-              disabled={isLoading}
-            >
+            <Button onClick={() => setIsDialogOpen(false)} variant="secondary" disabled={isLoading}>
               Cancel
             </Button>
             <Button

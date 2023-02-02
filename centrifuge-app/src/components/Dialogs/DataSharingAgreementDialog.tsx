@@ -1,18 +1,15 @@
 import { Button, Dialog, Flex, Stack, Text } from '@centrifuge/fabric'
 
 type Props = {
-  isDataSharingAgreementDialogOpen: boolean
-  setIsDataSharingAgreementDialogOpen: (isDataSharingAgreementDialogOpen: boolean) => void
+  isDialogOpen: boolean
+  setIsDialogOpen: (isDialogOpen: boolean) => void
 }
 
-export const DataSharingAgreementDialog = ({
-  isDataSharingAgreementDialogOpen,
-  setIsDataSharingAgreementDialogOpen,
-}: Props) => (
+export const DataSharingAgreementDialog = ({ isDialogOpen, setIsDialogOpen }: Props) => (
   <Dialog
     width="50%"
-    isOpen={isDataSharingAgreementDialogOpen}
-    onClose={() => setIsDataSharingAgreementDialogOpen(false)}
+    isOpen={isDialogOpen}
+    onClose={() => setIsDialogOpen(false)}
     title={<Text variant="heading1">Data Sharing Consent</Text>}
   >
     <Stack height="452px" gap={3} overflowY="scroll">
@@ -70,7 +67,7 @@ export const DataSharingAgreementDialog = ({
       </Text>
     </Stack>
     <Flex justifyContent="flex-end">
-      <Button onClick={() => setIsDataSharingAgreementDialogOpen(false)}>Close</Button>
+      <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
     </Flex>
   </Dialog>
 )

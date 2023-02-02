@@ -4,14 +4,11 @@ import { useAuth } from '../AuthProvider'
 import { useOnboardingUser } from '../OnboardingUserProvider'
 
 type Props = {
-  isConfirmResendEmailVerificationDialogOpen: boolean
-  setIsConfirmResendEmailVerificationDialogOpen: (isConfirmResendEmailVerificationDialogOpen: boolean) => void
+  isDialogOpen: boolean
+  setIsDialogOpen: (isDialogOpen: boolean) => void
 }
 
-export const ConfirmResendEmailVerificationDialog = ({
-  isConfirmResendEmailVerificationDialogOpen,
-  setIsConfirmResendEmailVerificationDialogOpen,
-}: Props) => {
+export const ConfirmResendEmailVerificationDialog = ({ isDialogOpen, setIsDialogOpen }: Props) => {
   const { authToken } = useAuth()
   const { refetchOnboardingUser } = useOnboardingUser()
 
@@ -33,7 +30,7 @@ export const ConfirmResendEmailVerificationDialog = ({
     {
       onSuccess: () => {
         refetchOnboardingUser()
-        setIsConfirmResendEmailVerificationDialogOpen(false)
+        setIsDialogOpen(false)
       },
     }
   )
@@ -41,19 +38,15 @@ export const ConfirmResendEmailVerificationDialog = ({
   return (
     <Dialog
       width="25%"
-      isOpen={isLoading ? true : isConfirmResendEmailVerificationDialogOpen}
-      onClose={() => setIsConfirmResendEmailVerificationDialogOpen(false)}
+      isOpen={isLoading ? true : isDialogOpen}
+      onClose={() => setIsDialogOpen(false)}
       title={<Text variant="heading1">Send Confirmation Email</Text>}
     >
       <Box p={2}>
         <Stack gap={4}>
           <Text variant="body1">Are you sure you want to resend a confirmation email?</Text>
           <Shelf justifyContent="flex-end" gap={2}>
-            <Button
-              onClick={() => setIsConfirmResendEmailVerificationDialogOpen(false)}
-              variant="secondary"
-              disabled={isLoading}
-            >
+            <Button onClick={() => setIsDialogOpen(false)} variant="secondary" disabled={isLoading}>
               Cancel
             </Button>
             <Button onClick={() => sendVerifyEmail()} loading={isLoading} disabled={isLoading} loadingMessage="Sending">
