@@ -48,13 +48,15 @@ export const PoolDetailReportingTab: React.FC = () => {
         <Stack gap={2}>
           <Stack as={Card} gap={2} p={2}>
             <Select
+              id="select-report"
+              name="report"
               label="Report"
               placeholder="Select a report"
               options={reportOptions}
               value={report}
-              onSelect={(newReport) => {
-                if (newReport) {
-                  setReport(newReport as Report)
+              onChange={(event) => {
+                if (event.target.value) {
+                  setReport(event.target.value as Report)
                 }
               }}
             />
@@ -75,6 +77,8 @@ export const PoolDetailReportingTab: React.FC = () => {
             {report === 'pool-balance' && (
               <Shelf gap={2}>
                 <Select
+                  id="select-group"
+                  name="group"
                   label="Group by"
                   placeholder="Select a time period to group by"
                   options={[
@@ -88,9 +92,9 @@ export const PoolDetailReportingTab: React.FC = () => {
                     },
                   ]}
                   value={groupBy}
-                  onSelect={(newGroupBy) => {
-                    if (newGroupBy) {
-                      setGroupBy(newGroupBy as GroupBy)
+                  onChange={(event) => {
+                    if (event.target.value) {
+                      setGroupBy(event.target.value as GroupBy)
                     }
                   }}
                 />
@@ -99,6 +103,8 @@ export const PoolDetailReportingTab: React.FC = () => {
             {report === 'investor-tx' && (
               <Shelf>
                 <Select
+                  id="select-token"
+                  name="token"
                   label="Token"
                   placeholder="Select a token"
                   options={[
@@ -114,9 +120,9 @@ export const PoolDetailReportingTab: React.FC = () => {
                     }),
                   ]}
                   value={activeTranche}
-                  onSelect={(newTranche) => {
-                    if (newTranche) {
-                      setActiveTranche(newTranche as string)
+                  onChange={(event) => {
+                    if (event.target.value) {
+                      setActiveTranche(event.target.value)
                     }
                   }}
                 />

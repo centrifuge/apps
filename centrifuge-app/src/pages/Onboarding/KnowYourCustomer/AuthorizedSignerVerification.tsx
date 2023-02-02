@@ -45,10 +45,12 @@ export const AuthorizedSignerVerification = ({ backStep, formik, isLoading, isCo
           disabled={isLoading || isCompleted}
         />
         <Select
+          id="select-country-citizenship"
+          name="country-citizenship"
           label="Country of Citizenship*"
           placeholder="Select a country"
           options={formatCountryCodes(KYC_COUNTRY_CODES)}
-          onSelect={(countryCode) => formik.setFieldValue('countryOfCitizenship', countryCode)}
+          onChange={(event) => formik.setFieldValue('countryOfCitizenship', event.target.value)}
           value={formik.values.countryOfCitizenship}
           disabled={isLoading || isCompleted}
         />

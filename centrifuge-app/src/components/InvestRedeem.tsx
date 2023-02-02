@@ -157,10 +157,12 @@ const InvestRedeemInner: React.VFC<Props> = ({
           <>
             {!trancheIdProp && allowedTranches.length > 1 && (
               <Select
+                id="selected-token"
+                name="token"
                 placeholder="Select a token"
                 options={allowedTranches.map((id) => ({ label: tranche.currency.symbol, value: id }))}
                 value={trancheId}
-                onSelect={(v) => setTrancheId(v as any)}
+                onChange={(event) => setTrancheId(event.target.value as any)}
               />
             )}
             {order.payoutTokenAmount.isZero() && combinedBalance.isZero() && pendingRedeem.isZero() ? (

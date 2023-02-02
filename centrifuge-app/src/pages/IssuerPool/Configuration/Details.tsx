@@ -164,8 +164,10 @@ export const Details: React.FC = () => {
               <Field name="assetClass" validate={validate.assetClass}>
                 {({ field, meta, form }: FieldProps) => (
                   <Select
+                    id="select-assetClass"
+                    name="assetClass"
                     label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
-                    onSelect={(v) => form.setFieldValue('assetClass', v)}
+                    onChange={(event) => form.setFieldValue('assetClass', event.target.value)}
                     onBlur={field.onBlur}
                     errorMessage={meta.touched && meta.error ? meta.error : undefined}
                     value={field.value}
@@ -175,8 +177,9 @@ export const Details: React.FC = () => {
                 )}
               </Field>
               <Select
+                id="select-currency"
+                name="currency"
                 label="Currency"
-                onSelect={() => {}}
                 value={currency}
                 options={[{ label: currency, value: currency }]}
                 placeholder=""

@@ -387,8 +387,10 @@ const CreatePoolForm: React.VFC = () => {
                 <Field name="assetClass" validate={validate.assetClass}>
                   {({ field, meta, form }: FieldProps) => (
                     <Select
+                      id="pool-assetClass"
+                      name="assetClass"
                       label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
-                      onSelect={(v) => form.setFieldValue('assetClass', v)}
+                      onChange={(event) => form.setFieldValue('assetClass', event.target.value)}
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}
@@ -402,8 +404,10 @@ const CreatePoolForm: React.VFC = () => {
                 <Field name="currency" validate={validate.currency}>
                   {({ field, form, meta }: FieldProps) => (
                     <Select
+                      id="pool-currency"
+                      name="currency"
                       label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
-                      onSelect={(v) => form.setFieldValue('currency', v)}
+                      onChange={(event) => form.setFieldValue('currency', event.target.value)}
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}

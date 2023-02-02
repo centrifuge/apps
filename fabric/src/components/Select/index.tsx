@@ -6,23 +6,15 @@ import { InputBox } from '../InputBox'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
-type OnSelectCallback = (key?: string | number) => void
-
 export type SelectOptionItem = {
   label: string
   value: string
 }
 
-export type SelectProps = {
+export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   options: SelectOptionItem[]
-  name?: string
-  id?: string
-  onSelect?: OnSelectCallback
-  onBlur?: (e: React.FocusEvent) => void
-  value?: string
   label?: string | React.ReactElement
   placeholder: string
-  disabled?: boolean
   errorMessage?: string
 }
 
@@ -48,28 +40,7 @@ const StyledSelect = styled.select`
   }
 `
 
-export const Select: React.FC<SelectProps> = ({
-  options,
-  name,
-  id,
-  onSelect,
-  onBlur,
-  label,
-  placeholder,
-  value,
-  disabled,
-  errorMessage,
-}) => {
-  const [selected, setSelected] = React.useState(value ?? '')
-
-  function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    setSelected(event.target.value)
-
-    if (onSelect) {
-      onSelect(event.target.value)
-    }
-  }
-
+export const Select: React.FC<SelectProps> = ({ options, label, placeholder, errorMessage, disabled, ...rest }) => {
   return (
     <Stack gap={1} width="100%">
       <InputBox
@@ -78,14 +49,7 @@ export const Select: React.FC<SelectProps> = ({
         as="div"
         disabled={disabled}
         inputElement={
-          <StyledSelect
-            id={id ?? ''}
-            name={name ?? ''}
-            value={selected}
-            disabled={disabled}
-            onChange={handleChange}
-            onBlur={onBlur}
-          >
+          <StyledSelect {...rest}>
             <option value="">{placeholder}</option>
             {options.map((option, index) => (
               <option key={`${index}${option.value}`} value={option.value}>

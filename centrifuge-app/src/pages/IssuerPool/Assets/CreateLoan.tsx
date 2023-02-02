@@ -93,12 +93,14 @@ const StringField: React.VFC<TemplateFieldProps<'string'>> = ({ name, label, ...
       <Field name={name} validate={required()} key={label}>
         {({ field, form }: any) => (
           <Select
+            id={`select-${name}`}
+            name={name}
             placeholder="Select one"
             label={`${label}*`}
             options={attr.options.map((o) => ({ label: o, value: o }))}
             value={field.value}
-            onSelect={(v) => {
-              form.setFieldValue(name, v)
+            onChange={(event) => {
+              form.setFieldValue(name, event.target.value)
             }}
           />
         )}
@@ -316,12 +318,14 @@ const IssuerCreateLoan: React.FC = () => {
                   <Field name="templateId" validate={required()}>
                     {({ field, form, meta }: any) => (
                       <Select
+                        id="select-templateId"
+                        name="templateId"
                         placeholder="Select template"
                         label="Asset template"
                         options={templateSelectOptions}
                         value={field.value}
-                        onSelect={(v) => {
-                          form.setFieldValue('templateId', v)
+                        onChange={(event) => {
+                          form.setFieldValue('templateId', event.target.value)
                         }}
                         errorMessage={meta.touched ? meta.error : undefined}
                         disabled={isPending}
