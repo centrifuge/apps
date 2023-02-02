@@ -16,4 +16,13 @@ declare global {
       walletAddress: string
     }
   }
+  declare namespace NodeJS {
+    interface ProcessEnv {
+      SHUFTI_PRO_SECRET_KEY: string
+      SHUFTI_PRO_CLIENT_ID: string
+      JWT_SECRET: string
+      REDIRECT_URL: string
+      SENDGRID_API_KEY: string
+    }
+  }
 }

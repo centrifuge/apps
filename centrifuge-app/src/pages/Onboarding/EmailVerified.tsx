@@ -25,13 +25,12 @@ export const EmailVerified: React.FC = () => {
         credentials: 'include',
       })
 
-      if (response.status === 201) {
+      if (response.status === 204) {
         return response
       }
       throw response.statusText
     },
     {
-      enabled: true,
       retry: 1,
     }
   )

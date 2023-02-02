@@ -2,7 +2,7 @@ import * as jwt from 'jsonwebtoken'
 import { HttpsError } from '../utils/httpsError'
 
 export const verifyJwt = <T extends any>(token: string) => {
-  const payload = jwt.verify(token, process.env.JWT_SECRET as string, (error, data) => {
+  const payload = jwt.verify(token, process.env.JWT_SECRET, (error, data) => {
     if (error) {
       throw new HttpsError(400, 'Bad request')
     }
