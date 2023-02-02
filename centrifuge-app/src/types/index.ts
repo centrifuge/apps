@@ -58,6 +58,14 @@ export type UltimateBeneficialOwner = {
 }
 
 type IndividualUserSteps = {
+  verifyTaxInfo: {
+    completed: boolean
+    timeStamp: string
+  }
+  verifyAccreditation: {
+    completed: boolean | null
+    timeStamp: string | null
+  }
   verifyIdentity: {
     completed: boolean
     timeStamp: string

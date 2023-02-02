@@ -7,11 +7,15 @@ import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'
 import { verifyEmailController } from './controllers/emails/verifyEmail'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
+import { getTaxInfoController } from './controllers/user/getTaxInfo'
 import { getUserController } from './controllers/user/getUser'
 import { setVerifiedIdentityController } from './controllers/user/setVerifiedIdentity'
 import { startKycController } from './controllers/user/startKyc'
+import { uploadTaxInfoController } from './controllers/user/uploadTaxInfo'
+import { verifyAccreditationController } from './controllers/user/verifyAccreditation'
 import { corsMiddleware } from './middleware/cors'
 import { verifyJw3t } from './middleware/verifyJw3t'
+import fileUpload = require('express-fileupload')
 
 dotenv.config()
 
@@ -24,7 +28,11 @@ onboarding.use(corsMiddleware)
 onboarding.get('/getUser', verifyJw3t, getUserController)
 
 onboarding.post('/startKyc', verifyJw3t, startKycController)
-onboarding.post('/setVerifiedIdentity', verifyJw3t, setVerifiedIdentityController)
+onboarding.post('/setVerifiedIdentity',verifyJw3t, setVerifiedIdentityController)
+
+onboarding.post('/uploadTaxInfo', verifyJw3t, fileUpload(), uploadTaxInfoController)
+onboarding.post('/verifyAccreditation', verifyJw3t, verifyAccreditationController)
+onboarding.get('/getTaxInfo',verifyJw3t, getTaxInfoController)
 
 onboarding.post('/verifyBusiness', verifyJw3t, verifyBusinessController)
 onboarding.post('/confirmOwners', verifyJw3t, confirmOwnersController)
