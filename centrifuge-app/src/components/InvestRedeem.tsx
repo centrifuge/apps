@@ -157,7 +157,6 @@ const InvestRedeemInner: React.VFC<Props> = ({
           <>
             {!trancheIdProp && allowedTranches.length > 1 && (
               <Select
-                id="selected-token"
                 name="token"
                 placeholder="Select a token"
                 options={allowedTranches.map((id) => ({ label: tranche.currency.symbol, value: id }))}

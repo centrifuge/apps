@@ -93,7 +93,6 @@ const StringField: React.VFC<TemplateFieldProps<'string'>> = ({ name, label, ...
       <Field name={name} validate={required()} key={label}>
         {({ field, form }: any) => (
           <Select
-            id={`select-${name}`}
             name={name}
             placeholder="Select one"
             label={`${label}*`}
@@ -318,7 +317,6 @@ const IssuerCreateLoan: React.FC = () => {
                   <Field name="templateId" validate={required()}>
                     {({ field, form, meta }: any) => (
                       <Select
-                        id="select-templateId"
                         name="templateId"
                         placeholder="Select template"
                         label="Asset template"

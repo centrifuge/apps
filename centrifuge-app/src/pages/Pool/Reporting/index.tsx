@@ -48,7 +48,6 @@ export const PoolDetailReportingTab: React.FC = () => {
         <Stack gap={2}>
           <Stack as={Card} gap={2} p={2}>
             <Select
-              id="select-report"
               name="report"
               label="Report"
               placeholder="Select a report"
@@ -77,7 +76,6 @@ export const PoolDetailReportingTab: React.FC = () => {
             {report === 'pool-balance' && (
               <Shelf gap={2}>
                 <Select
-                  id="select-group"
                   name="group"
                   label="Group by"
                   placeholder="Select a time period to group by"
@@ -103,7 +101,6 @@ export const PoolDetailReportingTab: React.FC = () => {
             {report === 'investor-tx' && (
               <Shelf>
                 <Select
-                  id="select-token"
                   name="token"
                   label="Token"
                   placeholder="Select a token"

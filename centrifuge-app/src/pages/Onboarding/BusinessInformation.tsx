@@ -138,7 +138,6 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
     if (formik.values.jurisdictionCode === 'us') {
       return (
         <Select
-          id="select-state"
           name="state"
           label="State of incorporation*"
           placeholder="Select a state"
@@ -153,7 +152,6 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
     if (formik.values.jurisdictionCode === 'ca') {
       return (
         <Select
-          id="select-province"
           name="province"
           label="Province of incorporation*"
           placeholder="Select a province"
@@ -195,7 +193,6 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
             value={formik.values.businessName}
           />
           <Select
-            id="select-country"
             name="country"
             label="Country of incorporation*"
             placeholder="Select a country"

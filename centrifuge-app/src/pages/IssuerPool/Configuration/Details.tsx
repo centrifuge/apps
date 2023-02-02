@@ -164,7 +164,6 @@ export const Details: React.FC = () => {
               <Field name="assetClass" validate={validate.assetClass}>
                 {({ field, meta, form }: FieldProps) => (
                   <Select
-                    id="select-assetClass"
                     name="assetClass"
                     label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
                     onChange={(event) => form.setFieldValue('assetClass', event.target.value)}
@@ -177,7 +176,6 @@ export const Details: React.FC = () => {
                 )}
               </Field>
               <Select
-                id="select-currency"
                 name="currency"
                 label="Currency"
                 value={currency}
