@@ -11,13 +11,19 @@ inputs:
   GSA:
     description: Google Service Account
     required: true
-  artifact_name:
-    description: Name of artifact from GH upload
-    required: true  
-# outputs:
-#   function_url:
-#     description: "URL from the function"
-#     value: 
+
+  function_secrets:
+    description: GCloud secret keys
+    required: false
+
+  function_env:
+    description: GCloud secret keys
+    required: false
+
+  target:
+    description: "Gfunction target handler"
+    required: true
+    default: handler   
 
 runs:
   using: composite
@@ -30,7 +36,7 @@ runs:
       id: download
       uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
       with:
-        name: ${{ inputs.artifact_name }}
+        name: ${{ inputs.function_name }}
         path: functions
     
     - name: list artifacts
@@ -56,6 +62,8 @@ runs:
         region: '${{ env.region }}'
         source_dir: './${{steps.download.outputs.download-path}}' # downlaod artifacts sets the current directory as the one in artifact.with.path
         entry_point: 'onboarding'
+        secret_environment_variables: ${{ inputs.function_secrets }}
+        env_vars: ${{ inputs.functions_env }}
 
     - name: Print Gcloud functions URL
       shell: sh

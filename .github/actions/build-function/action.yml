@@ -1,0 +1,41 @@
+name: Generic yarn build process
+description: 'Determine functions name, URL and GHA environment secrets'
+
+inputs:
+  artifact_name:
+    description: "function name"
+    required: true
+  build_cmd:
+    description: "command for build after yarn install"
+    required: false
+    default: yarn build
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        cache: yarn
+
+    - name: Install Dependencies
+      working-directory: ${{ artifact_name }}
+      shell: sh
+      run: yarn install
+
+    - name: Lint
+      working-directory: ${{ artifact_name }}
+      shell: sh
+      run: yarn lint
+
+    - name: Build pinning-api
+      working-directory: ${{ artifact_name }}
+      shell: sh
+      run: ${{ inputs.build_cmd }}
+    
+    - uses: actions/upload-artifact@v3
+      with: 
+        name: ${{ artifact_name }}
+        path: ./${{ artifact_name }}/dist
+        if-no-files-found: error  
