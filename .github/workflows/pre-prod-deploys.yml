@@ -40,9 +40,10 @@ jobs:
       deploy_env: ${{ matrix.deploy_to }}
   
   archive_artifacts:
+    runs-on: 
     strategy:
       fail-fast: true
       matrix:
-        artifact_name: ["webpack", "functions", "onboardingd"]
+        artifact_name: ["webpack", "pinning-api", "onboarding-api"]
 
   

@@ -75,7 +75,3 @@ jobs:
           function_env: |
             COLLATOR_WSS_URL=wss://fullnode.${{ needs.build.env_name }}.cntrfg.com
             CORS_ORIGIN=https://${{ needs.build.env_name }}.app.cntrfg.com
-          function_secrets: |
-            PINATA_API_KEY=${{ secrets.GCLOUDPINATAKEY }}
-            PINATA_SECRET_API_KEY=${{ secrets.GCLOUDPINATASECRET }}
-
