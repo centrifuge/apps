@@ -45,7 +45,7 @@ const INDIVIDUAL_NON_US_STEPS = {
 
 export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId: string, trancheId: string) => {
   // user does not exist
-  if (!Object.keys(onboardingUser).length) return 1
+  if (!Object.keys(onboardingUser).length) return 2
 
   const { investorType, countryOfCitizenship } = onboardingUser
   const { verifyIdentity, verifyTaxInfo, verifyAccreditation } = onboardingUser.steps

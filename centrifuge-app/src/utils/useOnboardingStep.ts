@@ -11,7 +11,7 @@ const poolId = 'FAKEPOOLID'
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export const useOnboardingStep = () => {
-  const { isConnecting } = useWallet()
+  const { isConnecting, selectedAccount } = useWallet()
   const { isAuth, isAuthFetched } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const [activeStep, setActiveStep] = React.useState<number>(0)
   const { onboardingUser, isOnboardingUserFetched, isOnboardingUserFetching } = useOnboardingUser()
@@ -20,6 +20,10 @@ export const useOnboardingStep = () => {
   const backStep = () => setActiveStep((current) => current - 1)
 
   React.useEffect(() => {
+    // tried to connect but no wallet is connected
+    if (!isConnecting && !selectedAccount) {
+      return setActiveStep(1)
+    }
     // wallet finished connection attempt, authentication was attempted, and user is not authenticated
     if (!isConnecting && isAuthFetched && !isAuth) {
       return setActiveStep(1)
@@ -31,7 +35,7 @@ export const useOnboardingStep = () => {
 
       return setActiveStep(activeOnboardingStep)
     }
-  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched])
+  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched, selectedAccount])
 
   return {
     activeStep,
