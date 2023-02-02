@@ -1,7 +1,9 @@
 import {
   Box,
   Button,
+  Card,
   DateInput,
+  Flex,
   InlineFeedback,
   NumberInput,
   Select,
@@ -173,7 +175,9 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
           Please verify email address, legal entity name, business incorporation date and country of incorporation and
           registration number.
         </Text>
-        <Stack gap={2} py={6} width="493px">
+      </Box>
+      <Shelf gap={4}>
+        <Stack gap={2} width="493px">
           <TextInput
             id="email"
             label="Email address*"
@@ -222,8 +226,26 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
             value={formik.values.incorporationDate}
           />
         </Stack>
-      </Box>
-      <Shelf gap="2">
+        <Flex alignSelf="flex-start">
+          <Card
+            width="260px"
+            p={2}
+            style={{
+              backgroundColor: 'black',
+            }}
+          >
+            <Stack gap={1}>
+              <Text size="12px" fontWeight="600" color="white">
+                Please enter a valid email
+              </Text>
+              <Text size="12px" color="white">
+                Your email will be verified. Please make sure you have access to confirm.
+              </Text>
+            </Stack>
+          </Card>
+        </Flex>
+      </Shelf>
+      <Shelf gap={2}>
         <Button onClick={() => backStep()} disabled={isLoading} variant="secondary">
           Back
         </Button>

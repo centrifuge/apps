@@ -53,8 +53,8 @@ export const LinkWallet = ({ nextStep }: Props) => {
             }
           />
           <DataSharingAgreementDialog
-            isDataSharingAgreementDialogOpen={isDataSharingAgreementDialogOpen}
-            setIsDataSharingAgreementDialogOpen={setIsDataSharingAgreementDialogOpen}
+            isDialogOpen={isDataSharingAgreementDialogOpen}
+            setIsDialogOpen={setIsDataSharingAgreementDialogOpen}
           />
         </Shelf>
         {isAuth ? (

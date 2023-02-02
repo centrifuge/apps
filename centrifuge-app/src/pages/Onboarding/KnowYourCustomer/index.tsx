@@ -77,6 +77,9 @@ export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
           Authorization: `Bearer ${authToken}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          dryRun: true,
+        }),
       })
 
       return response.json()
