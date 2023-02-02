@@ -16,8 +16,8 @@ declare global {
       walletAddress: string
     }
   }
-  declare namespace NodeJS {
-    interface ProcessEnv {
+  export namespace NodeJS {
+    export interface ProcessEnv {
       SHUFTI_PRO_SECRET_KEY: string
       SHUFTI_PRO_CLIENT_ID: string
       JWT_SECRET: string
