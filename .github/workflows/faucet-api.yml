@@ -1,0 +1,81 @@
+name: Pinning API
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'faucet-api/**'
+      - '.github/workflows/faucet-api.yml'
+  pull_request:
+    paths:
+      - 'faucet-api/**'
+      - '.github/workflows/faucet-api.yml'
+  workflow_call:
+    inputs:
+      deploy_env:
+        type: string
+        required: true
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: cent-functions-${{ github.ref }}
+      cancel-in-progress: true   
+    defaults:
+      run:
+        working-directory: faucet-api
+    env:
+      app_name: faucet-api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: prepare env logic
+        id: prepare
+        uses: ./.github/actions/deployment_strategy
+        with:
+          app_base_name: ${{ env.app_name }}
+          deploy_to: ${{ inputs.deploy_env }}
+
+      - name: build function
+        uses: ./.github/actions/build-function
+        with:
+          artifact_name: ${{ env.app_name }}
+          build_cmd: 'NODE_ENV=${{ prepare.outputs.env_name }} yarn build'
+
+    outputs:
+      front_url: ${{ steps.prepare.outputs.front_url }}
+      gh_env: ${{ steps.prepare.outputs.gh_env }}
+      env_name: 
+
+  deployment:
+    needs: build
+    concurrency:
+      group: cent-functions-${{ github.ref }}
+      cancel-in-progress: true    
+    runs-on: ubuntu-latest
+    environment: ${{ needs.build.gh_env }}
+    # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    env:
+      region: europe-central2
+    steps:
+      - name: deploy to GCS
+        id: functionsdeploy
+        uses: ./.github/actions/deploy-gcs
+        with:
+          artifact_name: webpack 
+          bucket_url: ${{ needs.build.front_url }}
+          GWIP: ${{ secrets.GWIP }}
+          GSA: ${{ secrets.GSA }}
+          function_env: |
+            COLLATOR_WSS_URL=wss://fullnode.${{ needs.build.env_name }}.cntrfg.com
+            CORS_ORIGIN=https://${{ needs.build.env_name }}.app.cntrfg.com
+          function_secrets: |
+            PINATA_API_KEY=${{ secrets.GCLOUDPINATAKEY }}
+            PINATA_SECRET_API_KEY=${{ secrets.GCLOUDPINATASECRET }}
+
