@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import * as jwt from 'jsonwebtoken'
 import { InferType, object, string } from 'yup'
 import { EntityUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
 import { VerifyEmailPayload } from '../../emails/sendVerifyEmailMessage'
+import { verifyJwt } from '../../middleware/verifyJwt'
 import { HttpsError } from '../../utils/httpsError'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
@@ -20,22 +20,17 @@ export const verifyEmailController = async (
     const {
       query: { token },
     } = req
-
-    // TODO: fix cors issues
-    // TODO: generate secure jwt secret
-
-    const payload = jwt.verify(token, 'mysecret') as VerifyEmailPayload
-
+    const payload = verifyJwt<VerifyEmailPayload>(token)
     const userDoc = await userCollection.doc(payload.walletAddress).get()
     const userData = userDoc.data() as OnboardingUser
 
     // individual users don't have email addresses yet
     if (!userDoc.exists || userData.investorType !== 'entity') {
-      throw new HttpsError(400, 'Bad token')
+      throw new HttpsError(400, 'Bad request')
     }
 
     if (userData.steps.verifyEmail.completed) {
-      throw new HttpsError(404, 'Email already verified')
+      throw new HttpsError(400, 'Email already verified')
     }
 
     const steps: Subset<EntityUser> = {
@@ -43,7 +38,7 @@ export const verifyEmailController = async (
     }
 
     await validateAndWriteToFirestore(payload.walletAddress, steps, 'entity', ['steps'])
-    return res.send(301).redirect(301, `https://dev.app.cntrfg.com/onboarding`)
+    return res.status(201).send()
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

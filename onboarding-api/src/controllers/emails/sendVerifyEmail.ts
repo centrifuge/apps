@@ -24,14 +24,14 @@ export const sendVerifyEmailController = async (
 
     // individual users don't have email addresses yet
     if (!userDoc.exists || userData.investorType !== 'entity') {
-      throw new HttpsError(404, 'User not found')
+      throw new HttpsError(400, 'Bad request')
     }
 
     if (userData.steps.verifyEmail.completed) {
-      throw new HttpsError(404, 'Email already verified')
+      throw new HttpsError(400, 'Email already verified')
     }
 
-    if (email !== userData.email) {
+    if (email && email !== userData.email) {
       await validateAndWriteToFirestore(walletAddress, { email }, 'entity', ['email'])
     }
     const freshUserData = (await userCollection.doc(walletAddress).get()).data() as OnboardingUser
@@ -43,6 +43,6 @@ export const sendVerifyEmailController = async (
       return res.status(error.code).send(error.message)
     }
     console.log(error)
-    return res.status(500).send('An unexpected error occured')
+    return res.status(500).send({ error: 'An unexpected error occured' })
   }
 }

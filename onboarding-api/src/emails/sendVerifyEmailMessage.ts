@@ -12,7 +12,7 @@ export const sendVerifyEmailMessage = async (user: OnboardingUser) => {
     throw new Error('No email found')
   }
   const payload: VerifyEmailPayload = { email: user.email, walletAddress: user.wallet.address }
-  const token = jwt.sign(payload, 'mysecret', {
+  const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
     expiresIn: '10m',
   })
 
@@ -25,14 +25,14 @@ export const sendVerifyEmailMessage = async (user: OnboardingUser) => {
           },
         ],
         dynamic_template_data: {
-          verifyLink: `http://localhost:8080/verifyEmail?token=${token}`,
+          verifyLink: `${process.env.REDIRECT_URL}/onboarding/verifyEmail?token=${encodeURIComponent(token)}`,
         },
       },
     ],
     template_id: 'd-624f08ad697943929064772c0ac2aca1',
     from: {
       name: 'Centrifuge',
-      email: `issuer@centrifuge.io`,
+      email: `issuer@centrifuge.io`, // TODO: use pool issuer in email address
     },
   }
   await sendEmail(message)

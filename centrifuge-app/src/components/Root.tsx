@@ -23,6 +23,7 @@ import { MintNFTPage } from '../pages/MintNFT'
 import { NFTPage } from '../pages/NFT'
 import { NotFoundPage } from '../pages/NotFound'
 import { OnboardingPage } from '../pages/Onboarding'
+import { EmailVerified } from '../pages/Onboarding/EmailVerified'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
@@ -159,11 +160,14 @@ const Routes: React.VFC = () => {
       <Route path="/investments">
         <PoolsPage />
       </Route>
-      <Route exact path="/onboarding">
-        <OnboardingUserProvider>
+      <OnboardingUserProvider>
+        <Route exact path="/onboarding">
           <OnboardingPage />
-        </OnboardingUserProvider>
-      </Route>
+        </Route>
+        <Route exact path="/onboarding/verifyEmail">
+          <EmailVerified />
+        </Route>
+      </OnboardingUserProvider>
       <Route exact path="/">
         <Redirect to="/investments" />
       </Route>

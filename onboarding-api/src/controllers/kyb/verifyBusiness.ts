@@ -40,8 +40,6 @@ export const verifyBusinessController = async (
       throw new HttpsError(400, 'Business already verified')
     }
 
-    await sendVerifyEmailMessage(entityData)
-
     const payloadAML = {
       reference: `BUSINESS_AML_REQUEST_${Math.random()}`,
       aml_for_businesses: {
@@ -97,7 +95,7 @@ export const verifyBusinessController = async (
     }
 
     await validateAndWriteToFirestore(walletAddress, user, 'entity')
-
+    await sendVerifyEmailMessage(user)
     const freshUserData = await userCollection.doc(walletAddress).get()
     return res.status(200).json({
       ...freshUserData.data(),
