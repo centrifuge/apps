@@ -64,7 +64,7 @@ export const EmailVerified: React.FC = () => {
           minHeight="520px"
         >
           <Text fontSize={5}>
-            {data ? 'Thanks for verifying your email' : error ? 'An error occuered' : <Spinner />}
+            {data ? 'Thanks for verifying your email' : error ? 'An error occurred' : <Spinner />}
           </Text>
         </Stack>
       </Grid>
