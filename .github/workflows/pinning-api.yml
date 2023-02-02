@@ -1,4 +1,4 @@
-name: Deploy Gfunction
+name: Pinning API
 on:
   push:
     branches:
@@ -6,12 +6,12 @@ on:
     tags:
       - "rc*"
     paths:
-      - 'centrifuge-app/**'
-      - '.github/workflows/centrifuge-app.yml'
+      - 'pinning-api/**'
+      - '.github/workflows/pinning-api.yml'
   pull_request:
     paths:
-      - 'centrifuge-app/**'
-      - '.github/workflows/centrifuge-app.yml'
+      - 'pinning-api/**'
+      - '.github/workflows/pinning-api.yml'
   workflow_call:
     inputs:
       deploy_env:
@@ -27,49 +27,36 @@ jobs:
       cancel-in-progress: true   
     defaults:
       run:
-        working-directory: centrifuge-app
+        working-directory: pinning-api
+    env:
+      app_name: pinning-api
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: prepare env logic
         id: prepare
         uses: ./.github/actions/deployment_strategy
         with:
-          app_base_name: app
+          app_base_name: ${{ env.app_name }}
           deploy_to: ${{ inputs.deploy_env }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - name: build function
+        uses: ./.github/actions/build-function
         with:
-          node-version: '16'
-          cache: yarn
+          artifact_name: ${{ env.app_name }}
 
-      - name: Install Dependencies
-        run: yarn install
-      - name: Lint
-        run: yarn lint
-
-      - name: Build centrifuge-app
-        env:
-          config_file: ./centrifuge-app/env-config/${{ matrix.deploy_env}}
-        run: |
-          cat .env-conf/${{ steps.prepare.outputs.env_name }}
-          vite build -mode ${{ steps.prepare.outputs.env_name }}
-      
-      - uses: actions/upload-artifact@v3
-        with: 
-          name: webpack
-          path: ./centrifuge-app/build
-          if-no-files-found: error
     outputs:
       front_url: ${{ steps.prepare.outputs.front_url }}
+      gh_env: ${{ steps.prepare.outputs.gh_env }}
 
   deployment:
+    needs: build
     concurrency:
       group: cent-functions-${{ github.ref }}
       cancel-in-progress: true    
     runs-on: ubuntu-latest
-    environment: ${{ github.event_name == 'workflow_call' && production || development }}
+    environment: ${{ needs.build.gh_env }}
     # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
     permissions:
       contents: 'read'
@@ -85,4 +72,7 @@ jobs:
           bucket_url: ${{ needs.build.front_url }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
+          function_secrets: |
+            PINATA_API_KEY=${{ secrets.GCLOUDPINATAKEY }}
+            PINATA_SECRET_API_KEY=${{ secrets.GCLOUDPINATASECRET }}
 
