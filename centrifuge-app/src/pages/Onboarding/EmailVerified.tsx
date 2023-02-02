@@ -25,7 +25,6 @@ export const EmailVerified: React.FC = () => {
         credentials: 'include',
       })
 
-      console.log('🚀 ~ response', response.statusText)
       if (response.status === 201) {
         return response
       }

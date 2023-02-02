@@ -28,11 +28,11 @@ onboarding.use(corsMiddleware)
 onboarding.get('/getUser', verifyJw3t, getUserController)
 
 onboarding.post('/startKyc', verifyJw3t, startKycController)
-onboarding.post('/setVerifiedIdentity',verifyJw3t, setVerifiedIdentityController)
+onboarding.post('/setVerifiedIdentity', verifyJw3t, setVerifiedIdentityController)
 
 onboarding.post('/uploadTaxInfo', verifyJw3t, fileUpload(), uploadTaxInfoController)
 onboarding.post('/verifyAccreditation', verifyJw3t, verifyAccreditationController)
-onboarding.get('/getTaxInfo',verifyJw3t, getTaxInfoController)
+onboarding.get('/getTaxInfo', verifyJw3t, getTaxInfoController)
 
 onboarding.post('/verifyBusiness', verifyJw3t, verifyBusinessController)
 onboarding.post('/confirmOwners', verifyJw3t, confirmOwnersController)
