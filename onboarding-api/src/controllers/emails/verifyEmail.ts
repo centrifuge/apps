@@ -38,7 +38,7 @@ export const verifyEmailController = async (
     }
 
     await validateAndWriteToFirestore(payload.walletAddress, steps, 'entity', ['steps'])
-    return res.status(201).send()
+    return res.status(204).send()
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)
