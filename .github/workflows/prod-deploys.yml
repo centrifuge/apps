@@ -2,13 +2,72 @@ name: Deploy Altair and prod"
 on:
   release:
     types:
-      - prereleased
       - released     
     
 jobs:
-  sync_preprod_prod:
+  sync_preprod:
     runs-on: ubuntu-latest
     environment: production
     steps:
       # ToDo: Auth with gcloud and sync preprod with prod buckets
       # ToDo: Auth with gcloud and sync functions code with prod.
+      
+      - name: Auth gcloud
+        id: gauth
+        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+        with:
+          workload_identity_provider: '${{ secrets.GWIP }}'
+          service_account: '${{ secrets.GSA }}'
+      # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1' 
+
+      - name: Sync webpack from preprod
+        run: |
+          echo "Archiving ${{ matrix.artifact_name }} in gs://preprod-releases/${{ matrix.artifact_name }}"
+          gsutil -m rsync -d -c -r ${{ matrix.artifact_name }}/ gs://preprod-releases/${{ github.ref_name }}/${{ matrix.artifact_name }}/
+  
+  retrieve_release_assets:
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+    steps:  
+      - uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: 'dsaltares/godot-wild-jam-18'
+          version: 'tags/${{ github.ref_name }}'
+          file: '*.zip'
+          # target: 'subdir/${{ matrix.artifact_name }}.zip'
+          # token: ${{ secrets.GITHUB_TOKEN }}   
+      - name: Unzip release files
+        run: |
+          unzip pinning-api.zip -d pinning-api
+          unzip onboarding-api.zip -d onboarding-api
+
+      - uses: actions/upload-artifact@v3
+        with: 
+          name: onboading-api
+          path: ./onboading-api
+          if-no-files-found: error 
+      - uses: actions/upload-artifact@v3
+        with: 
+          name: pinning-api
+          path: ./pinning-api
+          if-no-files-found: error 
+
+  deploy_pinning:
+    uses: ./.github/workflows/centrifuge-functions.yml
+    secrets: inherit
+    with:
+      deploy_env: production
+      artifact_name: pinning-api
+
+
+  deploy_onboarding:
+    uses: ./.github/workflows/onboarding-api.yml
+    secrets: inherit
+    with:
+      deploy_env: production
+      artifact-name: onboarding-api
+    

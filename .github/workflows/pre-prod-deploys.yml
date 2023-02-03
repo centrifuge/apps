@@ -2,11 +2,9 @@ name: Deploy Altair and preprod"
 on:
   release:
     types:
-      - prereleased
-      - released     
+      - prereleased  
     
 jobs:
-
   deploy_app:
     strategy:
       fail-fast: true
@@ -40,10 +38,56 @@ jobs:
       deploy_env: ${{ matrix.deploy_to }}
   
   archive_artifacts:
-    runs-on: 
+    runs-on: ubuntu-latest
+    environment:  production
     strategy:
       fail-fast: true
       matrix:
         artifact_name: ["webpack", "pinning-api", "onboarding-api"]
+    permissions:
+      contents: write
+    steps:
+      - name: retrieve ${{ matrix.artifact_name }} from GH
+        id: download
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_name }}
+
+      - name: ZIP ${{ matrix.artifact_name }}
+        shell: bash
+        run: zip -r  "${{ matrix.artifact_name }}.zip"  ./${{ matrix.artifact_name }}/
+
+
+      - name: upload ${{ matrix.artifact_name }} to release tag ${{ github.ref_name }}
+        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # @v1
+        # https://github.com/ncipollo/release-action
+        with:
+          artifacts: "${{ matrix.artifact_name }}.zip"
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifactContentType: zip
+          omitBodyDuringUpdate: true
+          omitDraftDuringUpdate: true
+          omitNameDuringUpdate: true
+          omitPrereleaseDuringUpdate: true
+          updateOnlyUnreleased: true # When allowUpdates is enabled, this will fail the action if the release it is updating is not a draft or a prerelease.
+          
+
+    # Code to archive in Gcloud bucket:
+      # - name: Auth gcloud
+      #   id: gauth
+      #   uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+      #   with:
+      #     workload_identity_provider: '${{ secrets.GWIP }}'
+      #     service_account: '${{ secrets.GSA }}'
+      # # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+      # - name: 'Set up Cloud SDK'
+      #   uses: 'google-github-actions/setup-gcloud@v1' 
+
+      # - name: Archive ${{ matrix.artifact_name }} in gcloud bucket
+      #   run: |
+      #     echo "Archiving ${{ matrix.artifact_name }} in gs://preprod-releases/${{ matrix.artifact_name }}"
+      #     gsutil -m rsync -d -c -r ${{ matrix.artifact_name }}/ gs://preprod-releases/${{ github.ref_name }}/${{ matrix.artifact_name }}/
 
   
