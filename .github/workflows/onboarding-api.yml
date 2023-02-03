@@ -82,36 +82,6 @@ jobs:
             GWIP: ${{ secrets.GWIP }}
             GSA: ${{ secrets.GSA }}
             target: "onboarding"
-            function_secrets: |
-              PINATA_API_KEY=${{ secrets.GCLOUDPINATAKEY }}
-              PINATA_SECRET_API_KEY=${{ secrets.GCLOUDPINATASECRET }}
-
-
-
-
-
-  prepare_deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - id: checkout
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
-
-      - name: prepare env logic
-        id: prepare
-        uses: ./.github/actions/deployment_strategy
-        with:
-          app_base_name: onboarding-api
-          deploy_demo: ${{ inputs.deploy_to_demo}}
-    outputs:
-      gh_env:  ${{ steps.prepare.outputs.gh_env }}
-      app_name:  ${{ steps.prepare.outputs.app_name }}  
-  
-  trigger_function_deploy:
-    needs: [build, prepare_deploy]
-    uses: ./.github/workflows/function-deploy.yml
-    secrets: inherit
-    with:
-      function_name: ${{ needs.prepare_deploy.outputs.app_name }}
-      gh_env: ${{ needs.prepare_deploy.outputs.gh_env }}
-      artifact_name: onboarding-api
-    
+            # function_secrets: |
+            #   PINATA_API_KEY=${{ secrets.GCLOUDPINATAKEY }}
+            #   PINATA_SECRET_API_KEY=${{ secrets.GCLOUDPINATASECRET }}
