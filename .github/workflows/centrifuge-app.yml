@@ -50,7 +50,7 @@ jobs:
 
       - name: Build centrifuge-app
         run: |
-          cat .env-config/${{ steps.prepare.outputs.env_name }}
+          cat .env-config/.env.${{ steps.prepare.outputs.env_name }}
           vite build -mode ${{ steps.prepare.outputs.env_name }}
       
       - uses: actions/upload-artifact@v3
