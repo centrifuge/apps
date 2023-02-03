@@ -74,6 +74,8 @@ jobs:
         region: europe-central2
         app_name: onboarding-api
       steps:
+        - name: Checkout
+          uses: actions/checkout@v3      
         - name: Deploy Gfunction
           id: functionsdeploy
           uses: ./.github/actions/deploy-gfunction

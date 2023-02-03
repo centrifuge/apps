@@ -49,10 +49,8 @@ jobs:
         run: yarn lint
 
       - name: Build centrifuge-app
-        env:
-          config_file: ./centrifuge-app/env-config/${{ matrix.deploy_env}}
         run: |
-          cat .env-conf/${{ steps.prepare.outputs.env_name }}
+          cat .env-config/${{ steps.prepare.outputs.env_name }}
           vite build -mode ${{ steps.prepare.outputs.env_name }}
       
       - uses: actions/upload-artifact@v3
@@ -72,6 +70,9 @@ jobs:
     needs: build
     environment: ${{ github.event_name == 'workflow_call' && 'production' || 'development' }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+            
       - name: deploy to GCS
         id: gcsdeploy
         uses: ./.github/actions/deploy-gcs

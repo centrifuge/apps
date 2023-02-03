@@ -72,9 +72,12 @@ jobs:
     env:
       region: europe-central2
     steps:
-      - name: deploy to GCS
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Deploy Gfunction
         id: functionsdeploy
-        uses: ./.github/actions/deploy-gcs
+        uses: ./.github/actions/deploy-gfunction
         with:
           artifact_name: webpack 
           bucket_url: ${{ needs.build.front_url }}
