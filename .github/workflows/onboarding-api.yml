@@ -1,4 +1,4 @@
-name: 'onboarding-api'
+name: Onboarding API
 on:
   release:
     types:
@@ -32,7 +32,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     concurrency:
-      group: cent-functions-${{ github.ref }}
+      group: onboarding-api-${{ github.ref }}
       cancel-in-progress: true   
     defaults:
       run:
@@ -45,7 +45,7 @@ jobs:
 
       - name: prepare env logic
         id: prepare
-        uses: ./.github/actions/deployment_strategy
+        uses: ./.github/actions/prepare-deploy
         with:
           app_base_name: ${{ env.app_name }}
           deploy_to: ${{ inputs.deploy_env }}
@@ -62,7 +62,7 @@ jobs:
   deployment:
       needs: build
       concurrency:
-        group: cent-functions-${{ github.ref }}
+        group: onboarding-api-${{ github.ref }}
         cancel-in-progress: true    
       runs-on: ubuntu-latest
       environment: ${{ needs.build.gh_env }}

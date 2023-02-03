@@ -1,4 +1,4 @@
-name: Pipeliene for centrifuge-app
+name: Centrifuge App
 on:
   push:
     branches:
@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v3
       - name: prepare env logic
         id: prepare
-        uses: ./.github/actions/deployment_strategy
+        uses: ./.github/actions/prepare-deploy
         with:
           app_base_name: app
           deploy_to: ${{ inputs.deploy_env }}

@@ -1,4 +1,4 @@
-name: 'Fabric'
+name: Fabric and storybook
 on:
   push:
     branches:
