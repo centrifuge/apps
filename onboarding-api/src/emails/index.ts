@@ -1,6 +1,10 @@
 import * as sendgridMail from '@sendgrid/mail'
 import { HttpsError } from '../utils/httpsError'
 
+export const templateIds = {
+  verifyEmail: 'd-624f08ad697943929064772c0ac2aca1',
+}
+
 export const sendEmail = async (message: any) => {
   const apiKey = process.env.SENDGRID_API_KEY
   if (!apiKey) {
