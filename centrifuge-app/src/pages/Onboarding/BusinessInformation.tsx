@@ -140,11 +140,12 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
     if (formik.values.jurisdictionCode === 'us') {
       return (
         <Select
+          name="regionCode"
           label="State of incorporation*"
           placeholder="Select a state"
           options={formatGeographyCodes(US_STATE_CODES)}
           disabled={isLoading || isCompleted}
-          onSelect={(regionCode) => formik.setFieldValue('regionCode', regionCode)}
+          onChange={(event) => formik.setFieldValue('regionCode', event.target.value)}
           value={formik.values.regionCode}
         />
       )
@@ -153,11 +154,12 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
     if (formik.values.jurisdictionCode === 'ca') {
       return (
         <Select
+          name="regionCode"
           label="Province of incorporation*"
           placeholder="Select a province"
           options={formatGeographyCodes(CA_PROVINCE_CODES)}
           disabled={isLoading || isCompleted}
-          onSelect={(regionCode) => formik.setFieldValue('regionCode', regionCode)}
+          onChange={(event) => formik.setFieldValue('regionCode', event.target.value)}
           value={formik.values.regionCode}
         />
       )
@@ -195,14 +197,15 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
             value={formik.values.businessName}
           />
           <Select
+            name="jurisdictionCode"
             label="Country of incorporation*"
             placeholder="Select a country"
             options={formatGeographyCodes(KYB_COUNTRY_CODES)}
             disabled={isLoading || isCompleted}
-            onSelect={(countryCode) => {
+            onChange={(event) => {
               formik.setValues({
                 ...formik.values,
-                jurisdictionCode: countryCode as string,
+                jurisdictionCode: event.target.value,
                 regionCode: '',
               })
             }}
