@@ -45,7 +45,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
         `"menu main" "menu sidebar"`,
         `"menu main sidebar"`,
       ]}
-      gridTemplateColumns={['1fr', '1fr', `${MENU_WIDTH}px 1fr`, `${MENU_WIDTH}px 1fr`, '235px 1fr 440px']}
+      gridTemplateColumns={['1fr', '1fr', `${MENU_WIDTH}px 1fr`, `${MENU_WIDTH}px 1fr 350px`, '235px 1fr 440px']}
       gridTemplateRows={[
         `${HEADER_HEIGHT}px 1fr ${TOOLBAR_HEIGHT}px`,
         `${HEADER_HEIGHT}px 1fr ${TOOLBAR_HEIGHT}px`,

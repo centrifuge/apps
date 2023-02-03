@@ -44,8 +44,14 @@ export function LiquidityTransactionsSection({
       'Opened at': `"${formatDate(entry.openedAt)}"`,
       'Executed at': `"${formatDate(entry.executedAt)}"`,
       'Closed at': `"${formatDate(entry.closedAt)}"`,
-      [dataNames[0]]: `${formatBalance(entry[dataKeys[0]] ? entry[dataKeys[0]]!.toNumber() : 0, pool.currency.symbol)}`,
-      [dataNames[1]]: `${formatBalance(entry[dataKeys[1]] ? entry[dataKeys[1]]!.toNumber() : 0, pool.currency.symbol)}`,
+      [dataNames[0]]: `"${formatBalance(
+        entry[dataKeys[0]] ? entry[dataKeys[0]]!.toDecimal().toNumber() : 0,
+        pool.currency.symbol
+      )}"`,
+      [dataNames[1]]: `"${formatBalance(
+        entry[dataKeys[1]] ? entry[dataKeys[1]]!.toDecimal().toNumber() : 0,
+        pool.currency.symbol
+      )}"`,
     }))
 
     return getCSVDownloadUrl(formatted)
@@ -55,8 +61,8 @@ export function LiquidityTransactionsSection({
     return (
       data?.map((entry) => ({
         xAxis: entry.index,
-        top: entry[dataKeys[0]]?.toNumber() || 0,
-        bottom: entry[dataKeys[1]]?.toNumber() || 0,
+        top: entry[dataKeys[0]]?.toDecimal().toNumber() || 0,
+        bottom: entry[dataKeys[1]]?.toDecimal().toNumber() || 0,
         date: entry.closedAt,
       })) || []
     )

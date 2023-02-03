@@ -1642,8 +1642,8 @@ export function getPoolsModule(inst: Centrifuge) {
     const $query = inst.getSubqueryObservable<{ epoches: { nodes: SubqueryEpoch[] } }>(
       `query($poolId: String!, $fromEpoch: Int!, $toEpoch: Int!) {
         epoches(
-          filter: { 
-            id: { startsWith: $poolId },
+          filter: {
+            poolId: { equalTo: $poolId },
             index: { greaterThanOrEqualTo: $fromEpoch },
             and: { index: { lessThanOrEqualTo: $toEpoch }}
           },
@@ -1662,15 +1662,13 @@ export function getPoolsModule(inst: Centrifuge) {
           }
         }
       }`,
-      { poolId: pool.id, fromEpoch, toEpoch }
+      { poolId: pool.id, fromEpoch, toEpoch },
+      false
     )
 
     return $query.pipe(
       map((data) => {
-        if (!data) {
-          return []
-        }
-        return data.epoches.nodes.map((node) => ({
+        return data!.epoches.nodes.map((node) => ({
           ...node,
           sumBorrowedAmount: node.sumBorrowedAmount
             ? new CurrencyBalance(node.sumBorrowedAmount, pool.currency.decimals)
