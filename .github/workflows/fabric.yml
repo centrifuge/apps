@@ -35,10 +35,26 @@ jobs:
       - name: Archive storybook artifacts
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # @v3.1.2
         with:
-          name: onboarding-api
+          name: fabric-storybook
           retention-days: 1
           path: ./fabric/storybook-static
 
 
-  deploy-storybook: # too google storage
-        
+  deploy-storybook: # to google storage
+    needs: build-n-test
+    permissions:
+      contents: 'read'
+      id-token: 'write'  
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: deploy to GCS
+        id: gcsdeploy
+        uses: ./.github/actions/deploy-gcs
+        with:
+          artifact_name: fabric-storybook
+          bucket_url: 'fabric-storybook.k-f.dev'
+          GWIP: ${{ secrets.GWIP }}
+          GSA: ${{ secrets.GSA }}
+  
+  # ToDo: send notification when deployed?

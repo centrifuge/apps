@@ -29,7 +29,7 @@ runs:
       shell: sh
       run: yarn lint
 
-    - name: Build pinning-api
+    - name: Build ${{ artifact_name }}
       working-directory: ${{ artifact_name }}
       shell: sh
       run: ${{ inputs.build_cmd }}

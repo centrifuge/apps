@@ -29,6 +29,14 @@ jobs:
     env:
       app_name: faucet-api
     steps:
+    
+      - name: deploy check env
+        if: github.event_name == 'workflow_call'
+        run: |
+          if ${{ inputs.deploy_env != 'demo' }}; then
+            echo "::error title=Failed to deploy faucet::Error while trying to deploy faucet to ${{ inputs.deploy_env }}, Faucet can only be deployed in demo"
+            exit 1
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -48,7 +56,7 @@ jobs:
     outputs:
       front_url: ${{ steps.prepare.outputs.front_url }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
-      env_name: 
+      env_name: ${{ steps.prepare.outputs.env_name }}
 
   deployment:
     needs: build

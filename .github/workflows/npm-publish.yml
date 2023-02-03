@@ -13,8 +13,6 @@ on:
         description: "build command"
         default: 'yarn build'
         type: string
-      test_cmd:
-
 
 jobs:
   publish-npm:

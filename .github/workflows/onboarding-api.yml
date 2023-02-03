@@ -30,40 +30,65 @@ on:
 
 jobs:
   build:
-    concurrency:
-      group: onboarding-${{ github.ref }}
-      cancel-in-progress: true    
     runs-on: ubuntu-latest
+    concurrency:
+      group: cent-functions-${{ github.ref }}
+      cancel-in-progress: true   
     defaults:
       run:
         working-directory: onboarding-api
+    env:
+      app_name: onboarding-api
     steps:
-      # Check out default first
-      - id: checkout
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 #@v3.1.0
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Setup Node
-        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 #@v3
+      - name: prepare env logic
+        id: prepare
+        uses: ./.github/actions/deployment_strategy
         with:
-          node-version: 16
-          cache: yarn
-          # cache-dependency-path: onboarding-api/yarn.lock
+          app_base_name: ${{ env.app_name }}
+          deploy_to: ${{ inputs.deploy_env }}
 
-      - name: YARN install
-        run: yarn install
-
-      - name: Lint check
-        run: yarn lint
-
-      - name: Build function
-        run: yarn build
-
-      - name: Archive functions artifacts
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # @v3.1.2
+      - name: build function
+        uses: ./.github/actions/build-function
         with:
-          name: onboarding-api
-          retention-days: 1
-          path: onboarding-api/dist
+          artifact_name: ${{ env.app_name }}
+
+    outputs:
+      front_url: ${{ steps.prepare.outputs.front_url }}
+      gh_env: ${{ steps.prepare.outputs.gh_env }}
+
+  deployment:
+      needs: build
+      concurrency:
+        group: cent-functions-${{ github.ref }}
+        cancel-in-progress: true    
+      runs-on: ubuntu-latest
+      environment: ${{ needs.build.gh_env }}
+      # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
+      permissions:
+        contents: 'read'
+        id-token: 'write'
+      env:
+        region: europe-central2
+        app_name: onboarding-api
+      steps:
+        - name: Deploy Gfunction
+          id: functionsdeploy
+          uses: ./.github/actions/deploy-gfunction
+          with:
+            function_name: env.app_name 
+            GWIP: ${{ secrets.GWIP }}
+            GSA: ${{ secrets.GSA }}
+            target: "onboarding"
+            function_secrets: |
+              PINATA_API_KEY=${{ secrets.GCLOUDPINATAKEY }}
+              PINATA_SECRET_API_KEY=${{ secrets.GCLOUDPINATASECRET }}
+
+
+
+
 
   prepare_deploy:
     runs-on: ubuntu-latest
