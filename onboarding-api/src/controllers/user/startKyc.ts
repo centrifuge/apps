@@ -69,11 +69,13 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         name: body.name,
         countryOfCitizenship: body.countryOfCitizenship,
         dateOfBirth: body.dateOfBirth,
+        kycReference,
       }
       await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', [
         'name',
         'countryOfCitizenship',
         'dateOfBirth',
+        'kycReference',
       ])
     }
 

@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
 import { fileTypeFromBuffer } from 'file-type'
 import { InferType, object, string } from 'yup'
-import { OnboardingUser, userCollection, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
+import { OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
+import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
@@ -37,31 +38,27 @@ export const uploadTaxInfoController = async (
     const { poolId, trancheId } = req.query
     const { walletAddress } = req
 
-    const user = (await userCollection.doc(walletAddress).get())?.data()
+    const user = await fetchUser(walletAddress)
 
-    if (user) {
-      await writeToOnboardingBucket(
-        Uint8Array.from(req.body),
-        `tax-information/${walletAddress}/${poolId}/${trancheId}.pdf`
-      )
+    await writeToOnboardingBucket(
+      Uint8Array.from(req.body),
+      `tax-information/${walletAddress}/${poolId}/${trancheId}.pdf`
+    )
 
-      const updatedUser: Subset<OnboardingUser> = {
-        steps: {
-          ...user.steps,
-          verifyTaxInfo: {
-            completed: true,
-            timeStamp: new Date().toISOString(),
-          },
+    const updatedUser: Subset<OnboardingUser> = {
+      steps: {
+        ...user.steps,
+        verifyTaxInfo: {
+          completed: true,
+          timeStamp: new Date().toISOString(),
         },
-      }
-
-      await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['steps'])
-
-      const freshUserData = (await userCollection.doc(walletAddress).get()).data()
-      return res.status(200).send({ ...freshUserData })
+      },
     }
 
-    throw new HttpsError(400, 'User not found')
+    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['steps'])
+
+    const freshUserData = await fetchUser(walletAddress)
+    return res.status(200).send({ ...freshUserData })
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { bool, date, InferType, object, string } from 'yup'
 import { EntityUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
 import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
+import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
@@ -22,10 +23,9 @@ export const verifyBusinessController = async (
   res: Response
 ) => {
   try {
-    const { walletAddress } = req
     await validateInput(req.body, verifyBusinessInput)
-
     const {
+      walletAddress,
       body: { incorporationDate, jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
     } = { ...req }
 
@@ -96,10 +96,8 @@ export const verifyBusinessController = async (
 
     await validateAndWriteToFirestore(walletAddress, user, 'entity')
     await sendVerifyEmailMessage(user)
-    const freshUserData = await userCollection.doc(walletAddress).get()
-    return res.status(200).json({
-      ...freshUserData.data(),
-    })
+    const freshUserData = await fetchUser(walletAddress)
+    return res.status(200).json({ ...freshUserData })
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

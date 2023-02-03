@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { array, date, InferType, object, string } from 'yup'
-import { OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
+import { validateAndWriteToFirestore } from '../../database'
+import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
 
@@ -22,32 +23,31 @@ export const confirmOwnersController = async (
   try {
     await validateInput(req.body, confirmOwnersInput)
     const { walletAddress } = req
-    const entityDoc = await userCollection.doc(walletAddress).get()
-    const entityData = entityDoc.data() as OnboardingUser
-    if (!entityDoc.exists || entityData.investorType !== 'entity') {
+    const user = await fetchUser(walletAddress)
+    if (user.investorType !== 'entity') {
       throw new HttpsError(404, 'Business not found')
     }
 
-    if (!entityData.steps.verifyBusiness.completed) {
+    if (!user.steps.verifyBusiness.completed) {
       throw new HttpsError(400, 'Business must be verified before confirming ownership')
     }
 
-    if (entityData?.steps.confirmOwners.completed) {
+    if (user?.steps.confirmOwners.completed) {
       throw new HttpsError(400, 'Owners already confirmed')
     }
 
-    // if (!data.emailVerified) {
-    //   throw new HttpsError(400, 'Email must be verified before completing business verification')
-    // }
+    if (!user.steps.verifyEmail.completed) {
+      throw new HttpsError(400, 'Email must be verified before completing business verification')
+    }
 
     const verifyEntity = {
       ultimateBeneficialOwners: req.body.ultimateBeneficialOwners,
-      steps: { ...entityData.steps, confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
+      steps: { ...user.steps, confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
     await validateAndWriteToFirestore(walletAddress, verifyEntity, 'entity', ['steps', 'ultimateBeneficialOwners'])
 
-    const freshUserData = (await userCollection.doc(walletAddress).get()).data()
+    const freshUserData = await fetchUser(walletAddress)
     return res.status(200).send({ ...freshUserData })
   } catch (error) {
     if (error instanceof HttpsError) {
