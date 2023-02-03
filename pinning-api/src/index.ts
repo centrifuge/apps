@@ -22,7 +22,7 @@ const centrifugeDomains = [
   /^(https:\/\/.*cntrfg\.com)/,
   /^(https:\/\/.*centrifuge\.io)/,
   /^(https:\/\/.*altair\.network)/,
-  /^(https:\/\/pr-\d*--dev-app-cntrfg.netlify\.app)/,
+  /^(https:\/\/.*k-f\.dev)/,
 ]
 
 exports.pinningApi = async (req: Request, res: Response) => {
