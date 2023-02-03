@@ -51,7 +51,7 @@ jobs:
         uses: ./.github/actions/build-function
         with:
           artifact_name: ${{ env.app_name }}
-          build_cmd: 'NODE_ENV=${{ prepare.outputs.env_name }} yarn build'
+          build_cmd: 'NODE_ENV=${{ steps.prepare.outputs.env_name }} yarn build'
 
     outputs:
       front_url: ${{ steps.prepare.outputs.front_url }}
