@@ -48,7 +48,7 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
     },
     {
       refetchOnWindowFocus: false,
-      enabled: !!authToken,
+      enabled: isCompleted,
     }
   )
 
