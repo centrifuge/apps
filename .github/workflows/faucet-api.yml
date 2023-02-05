@@ -69,6 +69,8 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+    env:
+      app_name: faucet-api      
     steps:
       - name: Checkout
         uses: Bhacaz/checkout-files@v2
@@ -83,7 +85,7 @@ jobs:
         id: functionsdeploy
         uses: ./.github/actions/deploy-gfunction
         with:
-          function_name: webpack 
+          function_name: ${{ env.app_name }} 
           target: faucetDev
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
