@@ -69,22 +69,22 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    env:
-      region: europe-central2
     steps:
       - name: Checkout
         uses: Bhacaz/checkout-files@v2
         with:
           files: .github/actions/deploy-gfunction/action.yml
           branch: ${{ github.head_ref || github.ref_name }} 
-      - run: ls -R
-          
+
+      - run: ls -R ./
+      - run: echo "Running with env secrets from -> ${{ needs.build.gh_env }}"
+
       - name: Deploy Gfunction
         id: functionsdeploy
         uses: ./.github/actions/deploy-gfunction
         with:
-          artifact_name: webpack 
-          bucket_url: ${{ needs.build.front_url }}
+          function_name: webpack 
+          target: faucetDev
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
           function_env: |
