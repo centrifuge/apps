@@ -75,7 +75,7 @@ jobs:
       - name: Checkout
         uses: Bhacaz/checkout-files@v2
         with:
-          files: .github/.actions
+          files: .github/actions/deploy-gfunction/action.yml
           branch: ${{ github.head_ref || github.ref_name }} 
       - run: ls -R
           
