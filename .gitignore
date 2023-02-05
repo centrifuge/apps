@@ -8,10 +8,9 @@ services/tinlake/addresses_tinlake.json
 nft_data_definition.json
 dist
 
-# Local Netlify folder
-.netlify
 
 # Yarn
+yarn.lock
 yarn-error.log
 .yarn
 !.yarn/releases
