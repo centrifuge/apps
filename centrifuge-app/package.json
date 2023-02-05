@@ -17,7 +17,7 @@
     "lint:fix": "npm run lint -- --fix",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "test:ci": "vitest run"    
+    "test:ci": "vitest run"
   },
   "dependencies": {
     "@centrifuge/centrifuge-js": "workspace:*",
