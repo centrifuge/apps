@@ -1,9 +1,9 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, Card, CurrencyInput, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useAddress } from '../utils/useAddress'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
 import { useLiquidityAdmin } from '../utils/usePermissions'
 import { usePool } from '../utils/usePools'
 

@@ -1,6 +1,6 @@
 import { ComponentMeta } from '@storybook/react'
-import React, { useState } from 'react'
-import { Step, Stepper, SubStep } from '.'
+import * as React from 'react'
+import { Step, Stepper } from '.'
 import { Button } from '../Button'
 import { Shelf } from '../Shelf'
 import { Stack } from '../Stack'
@@ -12,9 +12,7 @@ export default {
 
 export const Default = () => {
   const totalSteps = 3
-  const totalSubSteps = 6
-  const [activeStep, setActiveStep] = useState(1)
-  const [activeSubStep, setActiveSubStep] = useState(1)
+  const [activeStep, setActiveStep] = React.useState(1)
 
   const handleBackStep = () => {
     if (activeStep !== 1) {
@@ -28,31 +26,10 @@ export const Default = () => {
     }
   }
 
-  const handleBackSubStep = () => {
-    if (activeSubStep !== 1) {
-      setActiveSubStep((prev) => prev - 1)
-    }
-  }
-
-  const handleNextSubStep = () => {
-    if (activeSubStep !== totalSubSteps) {
-      setActiveSubStep((prev) => prev + 1)
-    }
-  }
-
   return (
     <Stack gap="24px">
       <Stepper activeStep={activeStep} setActiveStep={setActiveStep}>
-        <>
-          <Step label="Authorised signer verification" activeSubStep={activeSubStep}>
-            <SubStep label="Country of issuance" />
-            <SubStep label="Photo ID" />
-            <SubStep label="Liveliness check" />
-            <SubStep label="4" />
-            <SubStep label="5" />
-            <SubStep label="6" />
-          </Step>
-        </>
+        <Step label="Authorised signer verification" />
         <Step label="Step 2" />
         <Step label="Step 3" />
       </Stepper>
@@ -62,14 +39,6 @@ export const Default = () => {
         </Button>
         <Button onClick={() => handleNextStep()} disabled={activeStep === totalSteps}>
           Next Step
-        </Button>
-      </Shelf>
-      <Shelf gap="12px">
-        <Button onClick={() => handleBackSubStep()} disabled={activeSubStep === 1}>
-          Back Sub Step
-        </Button>
-        <Button onClick={() => handleNextSubStep()} disabled={activeSubStep === totalSubSteps}>
-          Next Sub Step
         </Button>
       </Shelf>
     </Stack>

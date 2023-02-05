@@ -1,5 +1,6 @@
 import { CurrencyBalance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { useBalances, useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -14,10 +15,8 @@ import {
 } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikErrors, FormikProvider, setIn, useFormik } from 'formik'
 import * as React from 'react'
-import { useQueryClient } from 'react-query'
 import { useHistory } from 'react-router'
 import { filter, lastValueFrom } from 'rxjs'
-import { useCentrifuge } from '../../components/CentrifugeProvider'
 import { PreimageHashDialog } from '../../components/Dialogs/PreimageHashDialog'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../components/PageHeader'
@@ -28,8 +27,6 @@ import { config } from '../../config'
 import { formatBalance } from '../../utils/formatting'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAddress } from '../../utils/useAddress'
-import { useBalances } from '../../utils/useBalances'
-import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { usePoolCurrencies } from '../../utils/useCurrencies'
 import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePools } from '../../utils/usePools'
@@ -141,7 +138,6 @@ const CreatePoolForm: React.VFC = () => {
   const pools = usePools()
   const history = useHistory()
   const balances = useBalances(address)
-  const queryClient = useQueryClient()
   const { data: storedIssuer, isLoading: isStoredIssuerLoading } = useStoredIssuer()
   const [waitingForStoredIssuer, setWaitingForStoredIssuer] = React.useState(true)
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
@@ -391,8 +387,9 @@ const CreatePoolForm: React.VFC = () => {
                 <Field name="assetClass" validate={validate.assetClass}>
                   {({ field, meta, form }: FieldProps) => (
                     <Select
+                      name="assetClass"
                       label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
-                      onSelect={(v) => form.setFieldValue('assetClass', v)}
+                      onChange={(event) => form.setFieldValue('assetClass', event.target.value)}
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}
@@ -406,8 +403,9 @@ const CreatePoolForm: React.VFC = () => {
                 <Field name="currency" validate={validate.currency}>
                   {({ field, form, meta }: FieldProps) => (
                     <Select
+                      name="currency"
                       label={<Tooltips type="currency" label="Currency*" variant="secondary" />}
-                      onSelect={(v) => form.setFieldValue('currency', v)}
+                      onChange={(event) => form.setFieldValue('currency', event.target.value)}
                       onBlur={field.onBlur}
                       errorMessage={meta.touched && meta.error ? meta.error : undefined}
                       value={field.value}

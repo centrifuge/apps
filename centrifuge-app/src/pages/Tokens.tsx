@@ -1,4 +1,3 @@
-import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { IconChevronRight, Shelf, Stack, Text, TextWithPlaceholder } from '@centrifuge/fabric'
 import * as React from 'react'
 import { DataTable } from '../components/DataTable'
@@ -11,7 +10,7 @@ import { Tooltips } from '../components/Tooltips'
 import { config } from '../config'
 import { Dec } from '../utils/Decimal'
 import { formatBalance } from '../utils/formatting'
-import { useMetadataMulti } from '../utils/useMetadata'
+import { useListedPools } from '../utils/useListedPools'
 import { usePools } from '../utils/usePools'
 
 export const TokenOverviewPage: React.FC = () => {
@@ -25,18 +24,7 @@ export const TokenOverviewPage: React.FC = () => {
 const TokenOverview: React.FC = () => {
   const pools = usePools()
 
-  const poolMetas = useMetadataMulti<PoolMetadata>(pools?.map((p) => p.metadata) ?? [])
-
-  const [listedPools, listedTokens] = React.useMemo(
-    () => {
-      const listedPools = pools?.filter((_, i) => poolMetas[i].data?.pool?.listed)
-      const listedTokens = listedPools?.flatMap((p) => p.tranches)
-
-      return [listedPools, listedTokens]
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    poolMetas.map((q) => q.data)
-  )
+  const [listedPools, listedTokens] = useListedPools()
 
   const tokens: TokenTableData[] | undefined = React.useMemo(
     () =>

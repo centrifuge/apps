@@ -38,6 +38,9 @@ on:
       onboarding-api-url:
         required: true
         type: string
+      tinlake-network:
+        required: true
+        type: string
 
     secrets:
       github-token:
@@ -75,6 +78,9 @@ jobs:
       - name: Lint
         run: yarn lint
 
+      - name: Test
+        run: yarn test:ci
+
       - name: Build centrifuge-app + dependencies
         run: yarn build
         env:
@@ -92,6 +98,7 @@ jobs:
           PINATA_SECRET_API_KEY: ${{ secrets.pinata-secret-api-key }}
           REACT_APP_FAUCET_URL: ${{ inputs.faucet-url }}
           REACT_APP_ONBOARDING_API_URL: ${{ inputs.onboarding-api-url }}
+          REACT_APP_TINLAKE_NETWORK: ${{ inputs.tinlake-network }}
 
       - name: Deploy To Netlify
         uses: nwtgck/actions-netlify@v1.2.0

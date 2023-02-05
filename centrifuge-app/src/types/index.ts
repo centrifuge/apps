@@ -52,6 +52,71 @@ export type LoanTemplate = {
 
 export type InvestorTypes = 'individual' | 'entity'
 
-export type ultimateBeneficialOwner = {
+export type UltimateBeneficialOwner = {
   name: string
+  dateOfBirth: string
 }
+
+type IndividualUserSteps = {
+  verifyTaxInfo: {
+    completed: boolean
+    timeStamp: string
+  }
+  verifyAccreditation: {
+    completed: boolean | null
+    timeStamp: string | null
+  }
+  verifyIdentity: {
+    completed: boolean
+    timeStamp: string
+  }
+  signAgreements: {
+    [poolId: string]: {
+      [trancheId: string]: {
+        completed: boolean
+        timeStamp: string
+      }
+    }
+  }
+}
+
+export interface EntityOnboardingSteps extends IndividualUserSteps {
+  verifyBusiness: {
+    completed: boolean
+    timeStamp: string
+  }
+  verifyEmail: {
+    completed: boolean
+    timeStamp: string
+  }
+  confirmOwners: {
+    completed: boolean
+    timeStamp: string
+  }
+}
+
+export type EntityUser = {
+  investorType: 'entity'
+  walletAddress: string
+  businessName: string
+  email: string
+  incorporationDate: string
+  jurisdictionCode: string
+  registrationNumber: number
+  ultimateBeneficialOwners: UltimateBeneficialOwner[]
+  steps: EntityOnboardingSteps
+  name: string
+  dateOfBirth: string
+  countryOfCitizenship: string
+}
+
+type IndividualUser = {
+  investorType: 'individual'
+  walletAddress: string
+  name: string
+  dateOfBirth: string
+  countryOfCitizenship: string
+  steps: IndividualUserSteps
+}
+
+export type OnboardingUser = IndividualUser | EntityUser

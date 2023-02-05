@@ -1,18 +1,17 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
+import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Checkbox, Grid, ImageUpload, Select, Shelf, Stack, TextInput } from '@centrifuge/fabric'
 import { Field, FieldProps, Form, FormikProvider, useFormik } from 'formik'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
-import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
 import { Tooltips } from '../../../components/Tooltips'
 import { config } from '../../../config'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
-import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { useFile } from '../../../utils/useFile'
 import { usePrefetchMetadata } from '../../../utils/useMetadata'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
@@ -165,8 +164,9 @@ export const Details: React.FC = () => {
               <Field name="assetClass" validate={validate.assetClass}>
                 {({ field, meta, form }: FieldProps) => (
                   <Select
+                    name="assetClass"
                     label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
-                    onSelect={(v) => form.setFieldValue('assetClass', v)}
+                    onChange={(event) => form.setFieldValue('assetClass', event.target.value)}
                     onBlur={field.onBlur}
                     errorMessage={meta.touched && meta.error ? meta.error : undefined}
                     value={field.value}
@@ -176,8 +176,8 @@ export const Details: React.FC = () => {
                 )}
               </Field>
               <Select
+                name="currency"
                 label="Currency"
-                onSelect={() => {}}
                 value={currency}
                 options={[{ label: currency, value: currency }]}
                 placeholder=""

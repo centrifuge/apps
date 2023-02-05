@@ -4,7 +4,13 @@ import styled from 'styled-components'
 import { flagsConfig, Key } from './config'
 import { DebugFlagsContext, FlagsState, initialFlagsState, useDebugFlags } from './context'
 
-const DebugFlagsImpl: React.FC<{ onChange?: (state: FlagsState) => void }> = ({ children, onChange }) => {
+function DebugFlagsImpl({
+  children,
+  onChange,
+}: {
+  children?: React.ReactNode
+  onChange?: (state: FlagsState) => void
+}) {
   const [state, setState] = React.useState(initialFlagsState)
   const [tracked, setTracked] = React.useState({})
 

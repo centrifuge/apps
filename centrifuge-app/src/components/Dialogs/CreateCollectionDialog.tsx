@@ -1,4 +1,5 @@
 import { CollectionMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
+import { useCentrifuge, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -11,17 +12,14 @@ import {
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
-import React, { useEffect, useState } from 'react'
+import * as React from 'react'
 import { Redirect } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { collectionMetadataSchema } from '../../schemas'
 import { getFileDataURI } from '../../utils/getFileDataURI'
 import { useAsyncCallback } from '../../utils/useAsyncCallback'
 import { useBalance } from '../../utils/useBalance'
-import { useCentrifugeTransaction } from '../../utils/useCentrifugeTransaction'
 import { ButtonGroup } from '../ButtonGroup'
-import { useCentrifuge } from '../CentrifugeProvider'
-import { useWeb3 } from '../Web3Provider'
 
 // TODO: replace with better fee estimate
 const CREATE_FEE_ESTIMATE = 2
@@ -30,15 +28,15 @@ const MAX_FILE_SIZE_IN_BYTES = 1024 ** 2 // 1 MB limit by default
 const isImageFile = (file: File): boolean => !!file.type.match(/^image\//)
 
 export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
-  const { selectedAccount } = useWeb3()
-  const [name, setName] = useState<string>('')
-  const [description, setDescription] = useState<string>('')
-  const [logo, setLogo] = useState<File | null>(null)
+  const { selectedAccount } = useWallet()
+  const [name, setName] = React.useState<string>('')
+  const [description, setDescription] = React.useState<string>('')
+  const [logo, setLogo] = React.useState<File | null>(null)
   const cent = useCentrifuge()
   const balance = useBalance()
-  const [redirect, setRedirect] = useState<string>('')
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [termsAccepted, setTermsAccepted] = useState(false)
+  const [redirect, setRedirect] = React.useState<string>('')
+  const [confirmOpen, setConfirmOpen] = React.useState(false)
+  const [termsAccepted, setTermsAccepted] = React.useState(false)
 
   const isConnected = !!selectedAccount?.address
 
@@ -82,7 +80,7 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   })
 
   // Only close if the modal is still showing the last created collection
-  useEffect(() => {
+  React.useEffect(() => {
     if (lastCreatedTransaction?.status === 'pending') {
       close()
     }

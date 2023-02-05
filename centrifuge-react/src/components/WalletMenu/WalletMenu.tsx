@@ -49,7 +49,7 @@ function Accounts() {
         <Stack ref={ref} width="100%" alignItems="stretch">
           <WalletButton
             active={state.isOpen}
-            address={address}
+            address={proxy?.delegator ?? selectedAccount.address}
             alias={!proxy ? selectedAccount.name : undefined}
             balance={
               balances ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol) : undefined

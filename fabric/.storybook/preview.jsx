@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 import { ThemeProvider } from 'styled-components'
 import { Box, GlobalStyle } from '../src'
 import altairDark from '../src/theme/altairDark'

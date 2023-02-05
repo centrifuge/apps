@@ -1,3 +1,4 @@
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -12,7 +13,6 @@ import {
 import * as React from 'react'
 import { useParams } from 'react-router-dom'
 import { BuyDialog } from '../components/BuyDialog'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 import { RemoveListingDialog } from '../components/Dialogs/RemoveListingDialog'
 import { SellDialog } from '../components/Dialogs/SellDialog'
 import { TransferDialog } from '../components/Dialogs/TransferDialog'

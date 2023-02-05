@@ -1,6 +1,6 @@
+import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { map, switchMap } from 'rxjs/operators'
 import { useAddress } from './useAddress'
-import { useCentrifugeQuery } from './useCentrifugeQuery'
 
 export function useBalance() {
   const address = useAddress()
