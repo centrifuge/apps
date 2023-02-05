@@ -44,6 +44,8 @@ jobs:
           cache: yarn
 
       - name: Install Dependencies
+        # env:
+        #   NODE_ENV: production      
         run: yarn install # --immutable
       - name: Lint
         run: yarn lint
@@ -51,6 +53,8 @@ jobs:
       - name: Build centrifuge-app
         working-directory: centrifuge-app
         shell: bash
+        # env:
+        #   NODE_ENV: production        
         run: |
           cat .env-config/.env.${{ steps.prepare.outputs.env_name }}
           yarn build -mode ${{ steps.prepare.outputs.env_name }}
@@ -84,20 +88,34 @@ jobs:
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
     outputs:
-      env_url: ${{ steps.gcsdepoy.outputs.env_url }}
+      bucket_url: ${{ needs.build.front_url }}
 
-  comment_pr:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+  notify:
     needs: deploy
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || inputs.deploy_env == 'production'
     steps:
-    # This step is separated to avoid using it while having access to Gcloud Auth credentials
-    # saved in GH environments
       - name: PR comment with preview URL
         uses: thollander/actions-comment-pull-request@v2
-        # if: github.event_name == 'pull_request' && steps.push.outcome == 'success'
+        if: github.event_name == 'pull_request'
+        env:
+          pull_sha: ${{ github.event.pull_request.head.sha }}
         with:
           message: |
             Deployed webiste in Google Cloud
-            URL: http://${{ needs.deploy.outputs.env_url }}
-            Commit #: ${{ github.event.pull_request.head.sha }}
+            URL: http://${{ needs.deploy.outputs.bucket_url }}
+            Commit #: ${{ env.pull_sha }}   
+      - run: echo "::notice title=web_url::${{ needs.deploy.outputs.bucket_url  }}"      
+      
+      - name: Notify prod deploy
+        if: inputs.deploy_env == 'production'
+        uses: rtCamp/action-slack-notify@12e36fc18b0689399306c2e0b3e0f2978b7f1ee7
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: "Main site deployed, go to ${{ needs.deploy.outputs.bucket_url  }} to check out what's new!"
+          SLACK_USERNAME: "Centrifuge GHA Bot"
+          SLACK_ICON: "https://centrifuge.io/favicon.ico"
+          SLACK_TITLE: "Deployment using production credentials finished"
+          SLACK_FOOTER: "Automatic message from centrifuge/website repository Actions"

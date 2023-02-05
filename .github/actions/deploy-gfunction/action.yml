@@ -70,6 +70,7 @@ runs:
 
     - name: Print Gcloud functions URL
       shell: sh
+      if: ${{ github.event_name == 'pull_request'}}
       run: echo "::notice title=Function_URL::${{ steps.gclouddeploy.outputs.url }}"
 
     - name: Set up Cloud SDK

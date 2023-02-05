@@ -42,15 +42,18 @@ runs:
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1' 
 
-      - name: try to create bucket
+      - name: Create bucket
         shell: sh
         id: create_bucket
-        continue-on-error: true
         run: |
-          gsutil mb gs://${{ inputs.bucket_url }}
-          gsutil iam ch allUsers:objectViewer gs://${{ inputs.bucket_url }}
-          gsutil web set -m index.html -e 404.html gs://${{ inputs.bucket_url }}
-
+          if ! gsutil ls gs://${{ env.bucket_url }} 1> /dev/null; then
+            gsutil mb gs://${{ env.bucket_url }}
+            echo "Setup bucket settings to serve the site"
+            gsutil iam ch allUsers:objectViewer gs://${{ env.bucket_url }}
+            gsutil web set -m index.html -e 404.html gs://${{ env.bucket_url }}            
+          else
+            echo "Bucket ${{ env.bucket_url }} found! No need to create it"
+          fi 
       - name: push to bucket
         shell: sh
         id: push
