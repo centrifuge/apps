@@ -25,7 +25,7 @@ jobs:
           node-version: '16'
           cache: yarn
 
-      - run: yarn install --immutable
+      - run: yarn install # --immutable
       - run: yarn build
       - run: yarn ci:loki
 

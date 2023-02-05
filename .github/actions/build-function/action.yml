@@ -22,7 +22,7 @@ runs:
     - name: Install Dependencies
       working-directory: ${{ inputs.artifact_name }}
       shell: sh
-      run: yarn install --immutable
+      run: yarn install # --immutable
 
     - name: Lint
       working-directory: ${{ inputs.artifact_name }}
