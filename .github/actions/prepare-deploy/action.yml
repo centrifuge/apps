@@ -33,11 +33,13 @@ runs:
       shell: bash
       # Set Alatair and Centrifuge to deploy in the prod Gcloud account
       # both will require approval to use the GCE prod secrets
+      env:
+        condition: 
       run: |
         echo "Discover GH environment for deploy:"
-        if  [${{ contains(inputs.deploy_to, 'altair') }} ||
-             ${{ contains(inputs.deploy_to, 'preprod') }} ||
-             ${{ contains(inputs.deploy_to, 'prodution') }} ]; then
+        if  [${{ contains(inputs.deploy_to, 'altair') ||
+              contains(inputs.deploy_to, 'preprod') ||
+              contains(inputs.deploy_to, 'prodution') }} ]; then
           echo "gh_env=production" >> $GITHUB_OUTPUT
         else
           echo "gh_env=development" >> $GITHUB_OUTPUT
@@ -97,4 +99,6 @@ runs:
       run: |
         echo "URL ${{ steps.naming.outputs.front_url }}"
         echo "App name: ${{ steps.naming.outputs.app_name }}"
+        echo "Env name: ${{ steps.naming.outputs.env_name }}"
+        echo "GH env: ${{ steps.setenv.outputs.gh_env }}"
         
