@@ -3,8 +3,11 @@ description: 'Determine functions name, URL and GHA environment secrets'
 
 inputs:
   function_name:
-    description: "function name"
+    description: "function name from prepare-deploy"
     required: true
+  artifact_name:
+    description: "From the actions/upload step"
+    required: true  
   GWIP:
     description: Google Workflow Identity provider
     required: true
@@ -17,7 +20,7 @@ inputs:
     required: false
 
   function_env:
-    description: GCloud secret keys
+    description: GCloud env keys
     required: false
 
   target:
@@ -40,7 +43,7 @@ runs:
       id: download
       uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
       with:
-        name: ${{ inputs.function_name }}
+        name: ${{ inputs.artifact_name }}
         path: functions
 
     - name: Auth gcloud
@@ -60,7 +63,7 @@ runs:
         name: '${{ inputs.function_name }}'
         runtime: 'nodejs16'
         region: '${{ env.region }}'
-        source_dir: './${{steps.download.outputs.download-path}}' # downlaod artifacts sets the current directory as the one in artifact.with.path
+        source_dir: '${{steps.download.outputs.download-path}}' # downlaod artifacts sets the current directory as the one in artifact.with.path
         entry_point: '${{ inputs.target }}'
         secret_environment_variables: ${{ inputs.function_secrets }}
         env_vars: ${{ inputs.functions_env }}

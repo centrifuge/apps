@@ -27,7 +27,9 @@ on:
         required: true
         type: boolean
         default: false
-
+env:
+  app_name: onboarding-api
+  
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -37,8 +39,7 @@ jobs:
     defaults:
       run:
         working-directory: onboarding-api
-    env:
-      app_name: onboarding-api
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -56,7 +57,7 @@ jobs:
           artifact_name: ${{ env.app_name }}
 
     outputs:
-      front_url: ${{ steps.prepare.outputs.front_url }}
+      app_name: ${{ steps.prepare.outputs.app_name }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
 
   deployment:
@@ -65,30 +66,35 @@ jobs:
         group: onboarding-api-${{ github.ref }}
         cancel-in-progress: true    
       runs-on: ubuntu-latest
-      environment: ${{ needs.build.gh_env }}
+      environment: ${{ needs.build.outputs.gh_env }}
       # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
       permissions:
         contents: 'read'
         id-token: 'write'
       env:
         region: europe-central2
-        app_name: onboarding-api
       steps:
         - name: Checkout
           uses: Bhacaz/checkout-files@v2
           with:
-            files: .github
+            files: .github/actions/deploy-gfunction/action.yml
+            branch: ${{ github.head_ref || github.ref_name }} 
             
-        - run: echo "Using GH env ->  ${{ needs.build.gh_env }}"
+        - run: echo "Using GH env ->  ${{ needs.build.outputs.gh_env }}"
 
         - name: Deploy Gfunction
           id: functionsdeploy
           uses: ./.github/actions/deploy-gfunction
           with:
-            function_name: ${{ env.app_name }}
+            function_name: ${{ needs.build.outputs.app_name }}
+            artifact_name: ${{ env.app_name }}
             GWIP: ${{ secrets.GWIP }}
             GSA: ${{ secrets.GSA }}
-            target: "onboarding"
-            # function_secrets: |
-            #   PINATA_API_KEY=${{ secrets.GCLOUDPINATAKEY }}
-            #   PINATA_SECRET_API_KEY=${{ secrets.GCLOUDPINATASECRET }}
+            target: onboarding
+            function_secrets: |
+              SHUFTI_PRO_SECRET_KEY=${{ secrets.SHUFTI_PRO_SECRET_KEY }}
+              SHUFTI_PRO_CLIENT_ID=${{ secrets.SHUFTI_PRO_CLIENT_ID }}
+              JWT_SECRET=${{ secrets.JWT_SECRET }}
+              SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
+              PINATA_API_KEY=${{ secrets.GCLOUDPINATAKEY }}
+              PINATA_SECRET_API_KEY=${{ secrets.GCLOUDPINATASECRET }}

@@ -15,7 +15,8 @@ on:
       deploy_env:
         type: string
         required: true
-
+env:
+  app_name: faucet-api
 
 jobs:
   build:
@@ -26,8 +27,6 @@ jobs:
     defaults:
       run:
         working-directory: faucet-api
-    env:
-      app_name: faucet-api
     steps:
     
       - name: deploy check env
@@ -46,6 +45,7 @@ jobs:
         with:
           app_base_name: ${{ env.app_name }}
           deploy_to: ${{ inputs.deploy_env }}
+      - run: echo "Running with env secrets from -> ${{ steps.prepare.outputs.gh_env }}"
 
       - name: build function
         uses: ./.github/actions/build-function
@@ -54,7 +54,7 @@ jobs:
           build_cmd: 'NODE_ENV=${{ steps.prepare.outputs.env_name }} yarn build'
 
     outputs:
-      front_url: ${{ steps.prepare.outputs.front_url }}
+      app_name: ${{ steps.prepare.outputs.app_name }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
       env_name: ${{ steps.prepare.outputs.env_name }}
 
@@ -64,13 +64,11 @@ jobs:
       group: faucet-api-${{ github.ref }}
       cancel-in-progress: true    
     runs-on: ubuntu-latest
-    environment: ${{ needs.build.gh_env }}
+    environment: ${{ needs.build.outputs.gh_env }}
     # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
     permissions:
       contents: 'read'
-      id-token: 'write'
-    env:
-      app_name: faucet-api      
+      id-token: 'write'  
     steps:
       - name: Checkout
         uses: Bhacaz/checkout-files@v2
@@ -79,16 +77,17 @@ jobs:
           branch: ${{ github.head_ref || github.ref_name }} 
 
       - run: ls -R ./
-      - run: echo "Running with env secrets from -> ${{ needs.build.gh_env }}"
+      - run: echo "Running with env secrets from -> ${{ needs.build.outputs.gh_env }}"
 
       - name: Deploy Gfunction
         id: functionsdeploy
         uses: ./.github/actions/deploy-gfunction
         with:
-          function_name: ${{ env.app_name }} 
+          function_name: ${{ needs.build.outputs.app_name }}
+          artifact_name: ${{ env.app_name }}
           target: faucetDev
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
           function_env: |
-            COLLATOR_WSS_URL=wss://fullnode.${{ needs.build.env_name }}.cntrfg.com
-            CORS_ORIGIN=https://${{ needs.build.env_name }}.app.cntrfg.com
+            COLLATOR_WSS_URL=wss://fullnode.${{ needs.build.outputs.env_name }}.cntrfg.com
+            CORS_ORIGIN=https://${{ needs.build.outputs.env_name }}.app.cntrfg.com
