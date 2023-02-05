@@ -44,14 +44,16 @@ jobs:
           cache: yarn
 
       - name: Install Dependencies
-        run: yarn install
+        run: yarn install --immutable
       - name: Lint
         run: yarn lint
 
       - name: Build centrifuge-app
+        working-directory: centrifuge-app
+        shell: bash
         run: |
           cat .env-config/.env.${{ steps.prepare.outputs.env_name }}
-          vite build -mode ${{ steps.prepare.outputs.env_name }}
+          yarn build -mode ${{ steps.prepare.outputs.env_name }}
       
       - uses: actions/upload-artifact@v3
         with: 

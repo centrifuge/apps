@@ -34,7 +34,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install Dependencies
-        run: yarn install
+        run: yarn install --immutable
 
       - name: Lint and build for centrifuge-js
         run: |

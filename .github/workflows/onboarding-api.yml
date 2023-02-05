@@ -75,12 +75,17 @@ jobs:
         app_name: onboarding-api
       steps:
         - name: Checkout
-          uses: actions/checkout@v3      
+          uses: actions/checkout-files@v2
+          with:
+            files: .github
+            
+        - run: echo "Using GH env ->  ${{ needs.build.gh_env }}"
+
         - name: Deploy Gfunction
           id: functionsdeploy
           uses: ./.github/actions/deploy-gfunction
           with:
-            function_name: env.app_name 
+            function_name: ${{ env.app_name }}
             GWIP: ${{ secrets.GWIP }}
             GSA: ${{ secrets.GSA }}
             target: "onboarding"
