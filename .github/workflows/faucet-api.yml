@@ -76,6 +76,7 @@ jobs:
         uses: Bhacaz/checkout-files@v2
         with:
           files: .github
+      - run: ls -R
           
       - name: Deploy Gfunction
         id: functionsdeploy
