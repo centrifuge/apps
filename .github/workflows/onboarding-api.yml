@@ -75,7 +75,7 @@ jobs:
         app_name: onboarding-api
       steps:
         - name: Checkout
-          uses: actions/checkout-files@v2
+          uses: Bhacaz/checkout-files@v2
           with:
             files: .github
             
