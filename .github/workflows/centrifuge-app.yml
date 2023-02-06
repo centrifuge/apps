@@ -72,6 +72,9 @@ jobs:
            
 
   deploy:
+    concurrency:
+      group: cent-app-${{ github.ref }}
+      cancel-in-progress: true     
     permissions:
       contents: 'read'
       id-token: 'write'  
