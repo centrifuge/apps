@@ -48,7 +48,7 @@ exports.pinningApi = async (req: Request, res: Response) => {
       return res.status(204).send('')
     }
 
-    for (let route of routes) {
+    for (const route of routes) {
       const incomingPath = req.path.split('/')[req.path.split('/').length - 1]
       if (incomingPath === route.name) {
         return route.controller(req, res)
