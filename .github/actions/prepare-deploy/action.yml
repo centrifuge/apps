@@ -77,7 +77,7 @@ runs:
           # DEV
           echo "app_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-dev.k-f.co" >> $GITHUB_OUTPUT
-          echo "env_name=dev" >> $GITHUB_OUTPUT
+          echo "env_name=development" >> $GITHUB_OUTPUT
         elif ${{ contains(inputs.deploy_env, 'demo') }}; then
           # DEMO
           echo "app_name=${{ inputs.app_base_name }}-demo" >> $GITHUB_OUTPUT
@@ -87,7 +87,7 @@ runs:
           # PR
           echo "app_name=${{ inputs.app_base_name }}-pr${{ github.event.number }}" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-pr${{ github.event.number }}.k-f.co" >> $GITHUB_OUTPUT
-          echo "env_name=dev" >> $GITHUB_OUTPUT
+          echo "env_name=development" >> $GITHUB_OUTPUT
         else
           echo "::error title=No env to deploy::Workflow called from non-deployable branch/tag"
         fi
