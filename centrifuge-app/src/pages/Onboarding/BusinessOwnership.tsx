@@ -66,6 +66,20 @@ const EmailVerificationInlineFeedback = ({ email, completed }: { email: string; 
   const [isConfirmResendEmailVerificationDialogOpen, setIsConfirmResendEmailVerificationDialogOpen] =
     React.useState(false)
 
+  const { refetchOnboardingUser } = useOnboardingUser()
+
+  const onFocus = () => {
+    refetchOnboardingUser()
+  }
+
+  React.useEffect(() => {
+    window.addEventListener('focus', onFocus)
+    return () => {
+      window.removeEventListener('focus', onFocus)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   if (completed) {
     return (
       <StyledInlineFeedback>

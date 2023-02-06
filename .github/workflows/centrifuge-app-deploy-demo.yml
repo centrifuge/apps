@@ -26,6 +26,8 @@ jobs:
       subquery-url: https://api.subquery.network/sq/centrifuge/pools-demo
       onboarding-api-url: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-dev
       faucet-url: https://us-central1-peak-vista-185616.cloudfunctions.net/faucetDemo
+      default-unlist-new-pools: true
+      is-demo: true
       tinlake-network: mainnet
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}

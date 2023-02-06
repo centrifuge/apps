@@ -105,6 +105,7 @@ const initialValues: CreatePoolValues = {
   epochHours: 23, // in hours
   epochMinutes: 50, // in minutes
   podEndpoint: config.defaultPodUrl ?? '',
+  listed: !import.meta.env.REACT_APP_DEFAULT_UNLIST_NEW_POOLS,
 
   issuerName: '',
   issuerLogo: null,

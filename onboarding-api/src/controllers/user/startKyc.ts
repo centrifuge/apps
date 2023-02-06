@@ -92,8 +92,8 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       ttl: 1800, // 30 minutes: time in seconds for the verification url to stay active
       face: {
         proof: '',
-        allow_offline: '0',
-        check_duplicate_request: '1',
+        allow_offline: '1', // TODO: disable once we go live
+        check_duplicate_request: '0', // TODO: enable once we go live
       },
       document: {
         proof: '',

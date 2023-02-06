@@ -2,7 +2,9 @@ import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import BN from 'bn.js'
 import * as React from 'react'
 import { useDebugFlags } from '../components/DebugFlags'
+import { useAddress } from '../utils/useAddress'
 import { useMetadataMulti } from '../utils/useMetadata'
+import { usePermissions } from '../utils/usePermissions'
 import { usePools } from '../utils/usePools'
 import { useTinlakePools } from './tinlake/useTinlakePools'
 
@@ -13,13 +15,17 @@ export function useListedPools() {
   const tinlakePools = useTinlakePools()
   const { showTinlakePools } = useDebugFlags()
 
+  const address = useAddress()
+  const permissions = usePermissions(address)
+
   const poolMetas = useMetadataMulti<PoolMetadata>(pools?.map((p) => p.metadata) ?? [])
 
   const [listedPools, listedTokens] = React.useMemo(
     () => {
+      const poolVisibilities = pools?.map(({ id }) => !!permissions?.pools[id]) ?? []
       const listedTinlakePools = showTinlakePools ? tinlakePools.data?.pools ?? [] : []
       const listedTinlakeTokens = listedTinlakePools.flatMap((p) => p.tranches)
-      const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed) ?? []
+      const listedPools = pools?.filter((_, i) => poolMetas[i]?.data?.pool?.listed || poolVisibilities[i]) ?? []
       const listedTokens = listedPools.flatMap((p) => p.tranches)
 
       return [
@@ -30,7 +36,7 @@ export function useListedPools() {
       ]
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [...poolMetas.map((q) => q.data), tinlakePools]
+    [...poolMetas.map((q) => q.data), tinlakePools, address]
   )
 
   const isLoading = tinlakePools.isLoading || poolMetas.some((q) => q.isLoading)
