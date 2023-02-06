@@ -59,6 +59,7 @@ jobs:
     outputs:
       app_name: ${{ steps.prepare.outputs.app_name }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
+      front_url: ${{ steps.prepare.outputs.gh_env }}
 
   deployment:
       needs: build
@@ -92,9 +93,6 @@ jobs:
             GSA: ${{ secrets.GSA }}
             target: onboarding
             function_secrets: |
-              SHUFTI_PRO_SECRET_KEY=${{ secrets.SHUFTI_PRO_SECRET_KEY }}
-              SHUFTI_PRO_CLIENT_ID=${{ secrets.SHUFTI_PRO_CLIENT_ID }}
-              JWT_SECRET=${{ secrets.JWT_SECRET }}
-              SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
-              PINATA_API_KEY=${{ secrets.GCLOUDPINATAKEY }}
-              PINATA_SECRET_API_KEY=${{ secrets.GCLOUDPINATASECRET }}
+                ${{ secrets.ONBOARDING_SECRETS}}
+            function_env: |
+              REDIRECT_URL=${{ needs.build.outputs.front_url}}
