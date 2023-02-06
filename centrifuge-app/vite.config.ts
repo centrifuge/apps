@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   envPrefix: 'REACT_APP_',
-  envDir: '.env-conf',
+  envDir: '.env-config',
   build: {
     target: 'esnext',
     outDir: 'build',
