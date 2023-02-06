@@ -38,6 +38,14 @@ on:
       onboarding-api-url:
         required: true
         type: string
+      default-unlist-new-pools:
+        required: false
+        type: boolean
+        default: false
+      is-demo:
+        required: false
+        type: boolean
+        default: false
       tinlake-network:
         required: true
         type: string
@@ -98,6 +106,8 @@ jobs:
           PINATA_SECRET_API_KEY: ${{ secrets.pinata-secret-api-key }}
           REACT_APP_FAUCET_URL: ${{ inputs.faucet-url }}
           REACT_APP_ONBOARDING_API_URL: ${{ inputs.onboarding-api-url }}
+          REACT_APP_DEFAULT_UNLIST_NEW_POOLS: ${{ inputs.default-unlist-new-pools == 'true' }}
+          REACT_APP_IS_DEMO: ${{ inputs.is-demo == 'true' }}
           REACT_APP_TINLAKE_NETWORK: ${{ inputs.tinlake-network }}
 
       - name: Deploy To Netlify
