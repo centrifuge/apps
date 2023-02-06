@@ -57,6 +57,7 @@ jobs:
         run: |
           yarn build:fabric 
           yarn build:centjs 
+          yarn build:centReact
           cat .env-config/.env.${{ steps.prepare.outputs.env_name }}
           yarn build:app --mode ${{ steps.prepare.outputs.env_name }}
       
