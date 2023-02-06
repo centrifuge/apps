@@ -49,15 +49,16 @@ jobs:
         run: yarn install # --immutable
       - name: Lint
         run: yarn lint
-
       - name: Build centrifuge-app
         working-directory: centrifuge-app
         shell: bash
         # env:
         #   NODE_ENV: production        
         run: |
+          yarn build:fabric 
+          yarn build:centjs 
           cat .env-config/.env.${{ steps.prepare.outputs.env_name }}
-          yarn build -mode ${{ steps.prepare.outputs.env_name }}
+          yarn build:app -mode ${{ steps.prepare.outputs.env_name }}
       
       - uses: actions/upload-artifact@v3
         with: 
