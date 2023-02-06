@@ -82,4 +82,5 @@ jobs:
           target: pinningApi
           function_secrets: |
             ${{ vars.PINNING_SECRETS }}
+          
 

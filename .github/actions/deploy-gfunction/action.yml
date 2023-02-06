@@ -66,7 +66,7 @@ runs:
         source_dir: '${{steps.download.outputs.download-path}}' # downlaod artifacts sets the current directory as the one in artifact.with.path
         entry_point: '${{ inputs.target }}'
         secret_environment_variables: ${{ inputs.function_secrets }}
-        env_vars: ${{ inputs.functions_env }}
+        env_vars: ${{ inputs.function_env }}
 
     - name: Print Gcloud functions URL
       shell: sh
