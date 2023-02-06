@@ -90,11 +90,11 @@ jobs:
         uses: ./.github/actions/deploy-gcs
         with:
           artifact_name: webpack
-          bucket_url: ${{ needs.build.front_url }}
+          bucket_url: ${{ needs.build.outputs.front_url }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
     outputs:
-      bucket_url: ${{ needs.build.front_url }}
+      bucket_url: ${{ needs.build.outputs.front_url }}
       gh_env: ${{ needs.build.outputs.gh_env }}
 
   notify:
