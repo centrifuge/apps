@@ -21,7 +21,7 @@ on:
     #       - others
 env:
   app_name: faucet-api
-  deploy_to: ${{ github.event_name == workflow_dispatch && 'demo' || '' }}
+  deploy_to: ${{ github.event_name == 'workflow_dispatch' && 'demo' || '' }}
   # deploy_to: ${{ inputs_deploy_env }}
 
 jobs:
