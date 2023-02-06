@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { bool, date, InferType, object, string } from 'yup'
 import { EntityUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
+import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
 import { HttpsError } from '../../utils/httpsError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
@@ -38,8 +39,6 @@ export const verifyBusinessController = async (
     if (entityDoc.exists && entityData.steps?.verifyBusiness.completed) {
       throw new HttpsError(400, 'Business already verified')
     }
-
-    // TODO: send email verfication link
 
     const payloadAML = {
       reference: `BUSINESS_AML_REQUEST_${Math.random()}`,
@@ -96,7 +95,7 @@ export const verifyBusinessController = async (
     }
 
     await validateAndWriteToFirestore(walletAddress, user, 'entity')
-
+    await sendVerifyEmailMessage(user)
     const freshUserData = await userCollection.doc(walletAddress).get()
     return res.status(200).json({
       ...freshUserData.data(),

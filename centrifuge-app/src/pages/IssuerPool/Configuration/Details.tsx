@@ -6,6 +6,7 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { lastValueFrom } from 'rxjs'
 import { ButtonGroup } from '../../../components/ButtonGroup'
+import { useDebugFlags } from '../../../components/DebugFlags'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { LabelValueStack } from '../../../components/LabelValueStack'
 import { PageSection } from '../../../components/PageSection'
@@ -26,6 +27,7 @@ const ASSET_CLASSES = config.assetClasses.map((label) => ({
 }))
 
 export const Details: React.FC = () => {
+  const isDemo = import.meta.env.REACT_APP_IS_DEMO
   const { pid: poolId } = useParams<{ pid: string }>()
   const [isEditing, setIsEditing] = React.useState(false)
   const pool = usePool(poolId)
@@ -33,6 +35,7 @@ export const Details: React.FC = () => {
   const cent = useCentrifuge()
   const prefetchMetadata = usePrefetchMetadata()
   const { data: iconFile } = useFile(metadata?.pool?.icon?.uri, 'icon')
+  const { editPoolVisibility } = useDebugFlags()
 
   const initialValues: Values = React.useMemo(
     () => ({
@@ -164,8 +167,9 @@ export const Details: React.FC = () => {
               <Field name="assetClass" validate={validate.assetClass}>
                 {({ field, meta, form }: FieldProps) => (
                   <Select
+                    name="assetClass"
                     label={<Tooltips type="assetClass" label="Asset class*" variant="secondary" />}
-                    onSelect={(v) => form.setFieldValue('assetClass', v)}
+                    onChange={(event) => form.setFieldValue('assetClass', event.target.value)}
                     onBlur={field.onBlur}
                     errorMessage={meta.touched && meta.error ? meta.error : undefined}
                     value={field.value}
@@ -175,8 +179,8 @@ export const Details: React.FC = () => {
                 )}
               </Field>
               <Select
+                name="currency"
                 label="Currency"
-                onSelect={() => {}}
                 value={currency}
                 options={[{ label: currency, value: currency }]}
                 placeholder=""
@@ -190,16 +194,18 @@ export const Details: React.FC = () => {
                 placeholder="https://..."
               />
 
-              <Field name="listed" validate={validate.assetClass}>
-                {({ field, meta, form }: FieldProps) => (
-                  <Stack px={2}>
-                    <LabelValueStack
-                      label="Menu listing"
-                      value={<Checkbox {...field} checked={field.value} label="Published" />}
-                    />
-                  </Stack>
-                )}
-              </Field>
+              {((isDemo && editPoolVisibility) || !isDemo) && (
+                <Field name="listed" validate={validate.assetClass}>
+                  {({ field, meta, form }: FieldProps) => (
+                    <Stack px={2}>
+                      <LabelValueStack
+                        label="Menu listing"
+                        value={<Checkbox {...field} checked={field.value} label="Published" />}
+                      />
+                    </Stack>
+                  )}
+                </Field>
+              )}
             </Grid>
           ) : (
             <Shelf gap={3} flexWrap="wrap">

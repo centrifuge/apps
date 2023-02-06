@@ -448,6 +448,7 @@ export interface PoolMetadataInput {
   epochHours: number | ''
   epochMinutes: number | ''
   podEndpoint: string
+  listed?: boolean
 
   // issuer
   issuerName: string
@@ -714,7 +715,7 @@ export function getPoolsModule(inst: Centrifuge) {
           website: metadata.website,
         },
         status: 'open',
-        listed: true,
+        listed: metadata.listed ?? true,
       },
       pod: {
         url: metadata.podEndpoint ?? null,
