@@ -10,13 +10,19 @@ on:
     paths:
       - 'faucet-api/**'
       - '.github/workflows/faucet-api.yml'
-  workflow_call:
-    inputs:
-      deploy_env:
-        type: string
-        required: true
+  workflow_dispatch:
+    # inputs:
+    #   deploy_env:
+    #     type: choice
+    #     required: true
+    #     default: demo
+    #     options:
+    #       - demo
+    #       - others
 env:
   app_name: faucet-api
+  deploy_to: ${{ github.event_name == workflow_dispatch && 'demo' || '' }}
+  # deploy_to: ${{ inputs_deploy_env }}
 
 jobs:
   build:
@@ -28,14 +34,6 @@ jobs:
       run:
         working-directory: faucet-api
     steps:
-    
-      - name: deploy check env
-        if: github.event_name == 'workflow_call'
-        run: |
-          if ${{ inputs.deploy_env != 'demo' }}; then
-            echo "::error title=Failed to deploy faucet::Error while trying to deploy faucet to ${{ inputs.deploy_env }}, Faucet can only be deployed in demo"
-            exit 1
-
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -44,14 +42,14 @@ jobs:
         uses: ./.github/actions/prepare-deploy
         with:
           app_base_name: ${{ env.app_name }}
-          deploy_to: ${{ inputs.deploy_env }}
+          deploy_to: ${{ env.deploy_to }}
       - run: echo "Running with env secrets from -> ${{ steps.prepare.outputs.gh_env }}"
 
       - name: build function
         uses: ./.github/actions/build-function
         with:
           artifact_name: ${{ env.app_name }}
-          build_cmd: 'NODE_ENV=${{ steps.prepare.outputs.env_name }} yarn build'
+          # build_cmd: 'NODE_ENV=${{ steps.prepare.outputs.env_name }} yarn build'
 
     outputs:
       app_name: ${{ steps.prepare.outputs.app_name }}

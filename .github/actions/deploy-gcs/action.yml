@@ -58,4 +58,8 @@ runs:
         shell: sh
         id: push
         run: gsutil -m rsync -d -c -r ${{steps.download.outputs.download-path}} gs://${{ inputs.bucket_url }}
+      
+      - shell: sh
+        id: push
+        run: echo "::notice title=web_url::${{ inputs.bucket_url  }}"      
     

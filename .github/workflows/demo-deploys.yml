@@ -1,0 +1,26 @@
+name: "Manual deployments"
+on:
+  workflow_dispatch:
+    # inputs:
+    #   deploy_to:
+    #     type: choice
+jobs:
+  deploy_app:
+    uses: ./.github/workflows/centrifuge-app.yml
+    secrets: inherit
+    with:
+      deploy_env: demo
+
+
+  deploy_pinning:
+    uses: ./.github/workflows/centrifuge-functions.yml
+    secrets: inherit
+    with:
+      deploy_env: demo
+
+
+  deploy_onboarding:
+    uses: ./.github/workflows/onboarding-api.yml
+    secrets: inherit
+    with:
+      deploy_env: demo

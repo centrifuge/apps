@@ -27,7 +27,7 @@ yarn-error.log
 !.env.goerli-example
 !.env.mainnet-example
 !.env.altair
-!.env.dev
+!.env.development
 !.env.demo
 !.env.catalyst
 !.env.production
