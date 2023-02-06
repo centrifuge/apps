@@ -6,6 +6,7 @@ import { useAuth } from '../../components/AuthProvider'
 import { Spinner } from '../../components/Spinner'
 import { config } from '../../config'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const [_, WordMark] = config.logo
 
 export const EmailVerified: React.FC = () => {
