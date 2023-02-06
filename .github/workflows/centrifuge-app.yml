@@ -58,7 +58,7 @@ jobs:
           yarn build:fabric 
           yarn build:centjs 
           cat .env-config/.env.${{ steps.prepare.outputs.env_name }}
-          yarn build:app -mode ${{ steps.prepare.outputs.env_name }}
+          yarn build:app --mode ${{ steps.prepare.outputs.env_name }}
       
       - uses: actions/upload-artifact@v3
         with: 
