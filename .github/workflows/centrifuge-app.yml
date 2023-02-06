@@ -86,7 +86,7 @@ jobs:
         id: gcsdeploy
         uses: ./.github/actions/deploy-gcs
         with:
-          artifact_name: cent-app 
+          artifact_name: webpack
           bucket_url: ${{ needs.build.front_url }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
