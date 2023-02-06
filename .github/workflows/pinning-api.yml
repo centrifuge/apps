@@ -69,7 +69,7 @@ jobs:
         with:
           files: .github/actions/deploy-gfunction/action.yml
           branch: ${{ github.head_ref || github.ref_name }} 
-      - run: echo "${{ vars.gfunction_secrets }}"
+      - run: echo "${{ vars.PINNING_SECRETS }}"
 
       - name: Deploy Gfunction
         id: functionsdeploy
@@ -81,5 +81,5 @@ jobs:
           GSA: ${{ secrets.GSA }}
           target: pinningApi
           function_secrets: |
-            ${{ vars.gfunction_secrets }}
+            ${{ vars.PINNING_SECRETS }}
 
