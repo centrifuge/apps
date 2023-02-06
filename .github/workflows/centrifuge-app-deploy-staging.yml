@@ -18,10 +18,11 @@ jobs:
       pool-creation-type: notePreimage
       default-node-url: ''
       subquery-url: ''
-      onboarding-api-url: https://us-central1-centrifuge-fargate-apps-dev.cloudfunctions.net
+      onboarding-api-url: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-dev
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
       netlify-site-id: ''
       pinata-api-key: ${{ secrets.PINATA_API_KEY }}
       pinata-secret-api-key: ${{ secrets.PINATA_SECRET_API_KEY }}
+      tinlake-network: mainnet

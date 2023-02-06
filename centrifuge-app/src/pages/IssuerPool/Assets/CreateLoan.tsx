@@ -1,5 +1,12 @@
 import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import {
+  Transaction,
+  useCentrifuge,
+  useCentrifugeTransaction,
+  useTransactions,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
+import {
   Box,
   Button,
   CurrencyInput,
@@ -17,20 +24,16 @@ import { Field, FieldProps, Form, FormikProvider, useFormik, useFormikContext } 
 import * as React from 'react'
 import { Redirect, useHistory, useParams } from 'react-router'
 import { lastValueFrom, switchMap } from 'rxjs'
-import { useCentrifuge } from '../../../components/CentrifugeProvider'
 import { FieldWithErrorMessage } from '../../../components/FieldWithErrorMessage'
 import { PageHeader } from '../../../components/PageHeader'
 import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { useAuth } from '../../../components/PodAuthProvider'
 import { PodAuthSection } from '../../../components/PodAuthSection'
-import { Transaction, useTransactions } from '../../../components/TransactionsProvider'
-import { useWeb3 } from '../../../components/Web3Provider'
 import { LoanTemplate } from '../../../types'
 import { truncateText } from '../../../utils/formatting'
 import { getFileDataURI } from '../../../utils/getFileDataURI'
 import { useAddress } from '../../../utils/useAddress'
-import { useCentrifugeTransaction } from '../../../utils/useCentrifugeTransaction'
 import { useFocusInvalidInput } from '../../../utils/useFocusInvalidInput'
 import { useMetadataMulti } from '../../../utils/useMetadata'
 import { useCollateralCollectionId } from '../../../utils/useNFTs'
@@ -90,12 +93,13 @@ const StringField: React.VFC<TemplateFieldProps<'string'>> = ({ name, label, ...
       <Field name={name} validate={required()} key={label}>
         {({ field, form }: any) => (
           <Select
+            name={name}
             placeholder="Select one"
             label={`${label}*`}
             options={attr.options.map((o) => ({ label: o, value: o }))}
             value={field.value}
-            onSelect={(v) => {
-              form.setFieldValue(name, v)
+            onChange={(event) => {
+              form.setFieldValue(name, event.target.value)
             }}
           />
         )}
@@ -142,7 +146,7 @@ const IssuerCreateLoan: React.FC = () => {
   const address = useAddress()
   const centrifuge = useCentrifuge()
   const collateralCollectionId = useCollateralCollectionId(pid)
-  const { selectedAccount, proxy } = useWeb3()
+  const { selectedAccount, proxy } = useWallet()
   const { addTransaction, updateTransaction } = useTransactions()
 
   const { isAuth, authToken } = useAuth()
@@ -313,12 +317,13 @@ const IssuerCreateLoan: React.FC = () => {
                   <Field name="templateId" validate={required()}>
                     {({ field, form, meta }: any) => (
                       <Select
+                        name="templateId"
                         placeholder="Select template"
                         label="Asset template"
                         options={templateSelectOptions}
                         value={field.value}
-                        onSelect={(v) => {
-                          form.setFieldValue('templateId', v)
+                        onChange={(event) => {
+                          form.setFieldValue('templateId', event.target.value)
                         }}
                         errorMessage={meta.touched ? meta.error : undefined}
                         disabled={isPending}

@@ -19,6 +19,7 @@ jobs:
       onboarding-api-url: '' # add prod url
       pool-creation-type: propose
       default-node-url: ''
+      tinlake-network: mainnet
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

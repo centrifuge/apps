@@ -1,5 +1,5 @@
+import { useCentrifuge } from '@centrifuge/centrifuge-react'
 import { useQuery } from 'react-query'
-import { useCentrifuge } from '../components/CentrifugeProvider'
 
 export function useFile(uri: string | undefined | null, fileName: string) {
   const cent = useCentrifuge()

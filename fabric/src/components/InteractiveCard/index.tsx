@@ -18,6 +18,7 @@ type OwnProps = {
   secondaryHeader?: React.ReactNode
   onClick?: React.MouseEventHandler<HTMLButtonElement>
   isOpen?: boolean
+  children?: React.ReactNode
 }
 
 export type InteractiveCardProps = OwnProps & Omit<CardProps, 'variant'>

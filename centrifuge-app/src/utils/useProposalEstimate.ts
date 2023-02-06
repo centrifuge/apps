@@ -1,10 +1,9 @@
 import Centrifuge, { CurrencyBalance, Perquintill, Rate } from '@centrifuge/centrifuge-js'
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
+import { useCentrifuge, useWallet } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'
 import * as React from 'react'
 import { combineLatest, map, of, Subject, switchMap } from 'rxjs'
-import { useCentrifuge } from '../components/CentrifugeProvider'
-import { useWeb3 } from '../components/Web3Provider'
 import { config } from '../config'
 
 type CreatePoolArgs = Parameters<Centrifuge['pools']['createPool']>[0]
@@ -12,7 +11,7 @@ type CreatePoolArgs = Parameters<Centrifuge['pools']['createPool']>[0]
 export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranches' | 'currency' | 'maxReserve'>) {
   const [proposeFee, setProposeFee] = React.useState<CurrencyBalance | null>(null)
   const [chainDecimals, setChainDecimals] = React.useState(18)
-  const { selectedAccount } = useWeb3()
+  const { selectedAccount } = useWallet()
   const centrifuge = useCentrifuge()
 
   // Retrieve the submittable with data currently in the form to see how much the transaction would cost

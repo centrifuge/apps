@@ -20,6 +20,7 @@ type Props = {
   actions?: React.ReactNode
   icon?: React.ReactNode
   border?: boolean
+  children?: React.ReactNode
 }
 
 export const PageHeader: React.FC<Props> = ({

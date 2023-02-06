@@ -1,7 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js'
+import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Button, IconInfo, Shelf, Text } from '@centrifuge/fabric'
-import React from 'react'
-import { useCentrifugeTransaction } from '../utils/useCentrifugeTransaction'
+import * as React from 'react'
 import { useChallengeTimeCountdown } from '../utils/useChallengeTimeCountdown'
 import { useEpochTimeCountdown } from '../utils/useEpochTimeCountdown'
 import { useLiquidity } from '../utils/useLiquidity'
@@ -13,7 +13,7 @@ type LiquiditySectionProps = {
   pool: Pool
 }
 
-const ExtraInfo: React.FC = ({ children }) => {
+function ExtraInfo({ children }: { children?: React.ReactNode }) {
   return (
     <Shelf mb={2} gap={1}>
       <IconInfo size={16} />

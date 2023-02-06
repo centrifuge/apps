@@ -3,9 +3,9 @@ import * as React from 'react'
 import { useParams } from 'react-router'
 import { usePool } from '../utils/usePools'
 
-const ValueLockedTooltipBody: React.VFC = () => {
-  const { pid: poolId } = useParams<{ pid: string }>()
-  const pool = usePool(poolId)
+const ValueLockedTooltipBody: React.FC<{ poolId?: string }> = ({ poolId }) => {
+  const { pid: poolIdParam } = useParams<{ pid: string }>()
+  const pool = usePool(poolId || poolIdParam)
   return <>Value locked represents the current total value of pool tokens in {pool?.currency.symbol}.</>
 }
 
@@ -190,19 +190,36 @@ const tooltipText = {
     label: 'Pool',
     body: 'Allows to manage pool configuration and manage other admins.',
   },
+  noTranchProtection: {
+    label: 'Min. protection',
+    body: 'The first, most junior tranche is not protected by subordinated tranches.',
+  },
+  tranchProtection: {
+    label: 'Min. protection',
+    body: 'Minimum protection required for this tranche by all subordinated tranches.',
+  },
+  variableTranchInterest: {
+    label: 'Interest rate',
+    body: 'The first, most junior tranche receives a variable return.',
+  },
+  fixedTranchInterest: {
+    label: 'Fixed interest rate',
+    body: 'Fixed interest rate (APR) this tranche accrues on deployed capital.',
+  },
 }
 
 type TooltipsProps = {
   type: keyof typeof tooltipText
   variant?: 'primary' | 'secondary'
   label?: string
+  props?: any
 }
 
-export const Tooltips: React.VFC<TooltipsProps> = ({ type, label: labelOverride, variant = 'primary' }) => {
+export const Tooltips: React.VFC<TooltipsProps> = ({ type, label: labelOverride, variant = 'primary', props }) => {
   const { label, body } = tooltipText[type]
   const isPrimary = variant === 'primary'
   return (
-    <FabricTooltip body={body}>
+    <FabricTooltip body={React.isValidElement(body) ? React.cloneElement(body, props) : body}>
       <Text textAlign="left" variant="label2" color={isPrimary ? 'textPrimary' : 'textSecondary'}>
         {labelOverride || label}
       </Text>

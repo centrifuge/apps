@@ -1,9 +1,9 @@
 import { Perquintill } from '@centrifuge/centrifuge-js'
+import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import Decimal from 'decimal.js-light'
-import React from 'react'
+import * as React from 'react'
 import { LiquidityTableRow } from '../components/EpochList'
-import { useCentrifugeQuery } from './useCentrifugeQuery'
-import { usePool, usePoolMetadata, usePoolOrders } from './usePools'
+import { usePool, usePoolOrders } from './usePools'
 
 type Liquidity = {
   investments: LiquidityTableRow[]
@@ -17,7 +17,6 @@ type Liquidity = {
 export const useLiquidity = (poolId: string) => {
   const pool = usePool(poolId)
 
-  const { data: metadata } = usePoolMetadata(pool)
   const poolOrders = usePoolOrders(poolId)
 
   const [solution] = useCentrifugeQuery(
@@ -38,10 +37,9 @@ export const useLiquidity = (poolId: string) => {
   const { investments, sumOfExecutableInvestments, sumOfLockedInvestments } = React.useMemo(() => {
     const investments =
       (pool?.tranches.map((tranche, index) => {
-        const trancheMeta = metadata?.tranches?.[tranche.id]
         const orders = poolOrders?.[index]
         return {
-          order: `${trancheMeta?.symbol || ''} investments`,
+          order: `${tranche.currency.symbol} investments`,
           locked: orders ? orders.outstandingInvest.toDecimal() : new Decimal(0),
           executing:
             solution && 'tranches' in solution
@@ -67,16 +65,15 @@ export const useLiquidity = (poolId: string) => {
       sumOfLockedInvestments,
       sumOfExecutableInvestments,
     }
-  }, [pool, solution, metadata, poolOrders])
+  }, [pool, solution, poolOrders])
 
   const { redemptions, sumOfExecutableRedemptions, sumOfLockedRedemptions } = React.useMemo(() => {
     const redemptions =
       (pool?.tranches.map((tranche, index) => {
-        const trancheMeta = metadata?.tranches?.[tranche.id]
         const price = pool.tranches[index].tokenPrice?.toDecimal()
         const orders = poolOrders?.[index]
         return {
-          order: `${trancheMeta?.symbol || ''} redemptions`,
+          order: `${tranche.currency.symbol} redemptions`,
           locked: orders ? orders.outstandingRedeem.toDecimal().mul(price || 1) : new Decimal(0),
           executing:
             solution && 'tranches' in solution
@@ -103,7 +100,7 @@ export const useLiquidity = (poolId: string) => {
       sumOfExecutableRedemptions,
       sumOfLockedRedemptions,
     }
-  }, [pool, solution, metadata, poolOrders])
+  }, [pool, solution, poolOrders])
 
   return {
     investments,

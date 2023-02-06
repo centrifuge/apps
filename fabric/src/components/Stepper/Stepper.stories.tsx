@@ -1,5 +1,5 @@
 import { ComponentMeta } from '@storybook/react'
-import React, { useState } from 'react'
+import * as React from 'react'
 import { Step, Stepper } from '.'
 import { Button } from '../Button'
 import { Shelf } from '../Shelf'
@@ -12,7 +12,7 @@ export default {
 
 export const Default = () => {
   const totalSteps = 3
-  const [activeStep, setActiveStep] = useState(1)
+  const [activeStep, setActiveStep] = React.useState(1)
 
   const handleBackStep = () => {
     if (activeStep !== 1) {

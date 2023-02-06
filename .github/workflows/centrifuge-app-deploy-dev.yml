@@ -23,9 +23,10 @@ jobs:
       network: centrifuge
       pool-creation-type: immediate
       default-node-url: ''
-      subquery-url: https://api.subquery.network/sq/embrio-tech/centrifuge-subql
-      onboarding-api-url: https://us-central1-centrifuge-fargate-apps-dev.cloudfunctions.net
+      subquery-url: https://api.subquery.network/sq/centrifuge/pools-development
+      onboarding-api-url: https://europe-central2-peak-vista-185616.cloudfunctions.net/onboarding-api-dev
       faucet-url: https://us-central1-peak-vista-185616.cloudfunctions.net/faucetDev
+      tinlake-network: mainnet
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
       netlify-auth-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

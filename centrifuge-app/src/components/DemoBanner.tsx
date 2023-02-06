@@ -1,5 +1,5 @@
 import { Banner, Text } from '@centrifuge/fabric'
-import React from 'react'
+import * as React from 'react'
 
 export const DemoBanner = () => {
   const storageKey = 'demo-banner-seen'

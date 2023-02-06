@@ -1,5 +1,5 @@
 import { useFormik } from 'formik'
-import { useState } from 'react'
+import * as React from 'react'
 import { useMutation } from 'react-query'
 import { boolean, date, object, string } from 'yup'
 import { useAuth } from '../../../components/AuthProvider'
@@ -12,6 +12,10 @@ type Props = {
   backStep: () => void
 }
 
+// TODO: make dynamic based on the pool and tranche that the user is onboarding to
+const trancheId = 'FAKETRANCHEID'
+const poolId = 'FAKEPOOLID'
+
 const authorizedSignerInput = object({
   name: string().required(),
   dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
@@ -20,41 +24,59 @@ const authorizedSignerInput = object({
 })
 
 export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
-  const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = useState<number>(0)
+  const [activeKnowYourCustomerStep, setActiveKnowYourCustomerStep] = React.useState<number>(0)
+
+  const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
 
   const { onboardingUser, refetchOnboardingUser } = useOnboardingUser()
   const { authToken } = useAuth()
 
-  // TODO: show a completion screen
-  const isCompleted = onboardingUser?.steps?.verifyIdentity.completed
+  const isCompleted = !!onboardingUser?.steps?.verifyIdentity.completed
 
   const formik = useFormik({
     initialValues: {
-      name: '',
-      dateOfBirth: '',
-      countryOfCitizenship: '',
-      isAccurate: false,
+      name: onboardingUser.name || '',
+      dateOfBirth: onboardingUser.dateOfBirth || '',
+      countryOfCitizenship: onboardingUser.countryOfCitizenship || '',
+      isAccurate: !!isCompleted,
     },
     onSubmit: () => {
-      nextKnowYourCustomerStep()
+      startKYC()
     },
     validationSchema: authorizedSignerInput,
     validateOnMount: true,
   })
 
-  const { mutate: verifyIdentity } = useMutation(
+  const {
+    mutate: startKYC,
+    data: startKYCData,
+    isLoading: isStartKYCLoading,
+  } = useMutation(async () => {
+    const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/startKYC`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: formik.values.name,
+        dateOfBirth: formik.values.dateOfBirth,
+        countryOfCitizenship: formik.values.countryOfCitizenship,
+        ...(onboardingUser.investorType === undefined && { poolId, trancheId }),
+      }),
+    })
+
+    return response.json()
+  })
+
+  const { mutate: setVerifiedIdentity } = useMutation(
     async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyIdentity`, {
+      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/setVerifiedIdentity`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: formik.values.name,
-          dateOfBirth: formik.values.dateOfBirth,
-          countryOfCitizenship: formik.values.countryOfCitizenship,
-        }),
       })
 
       return response.json()
@@ -67,14 +89,41 @@ export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
     }
   )
 
-  const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
+  const handleVerifiedIdentity = (event: MessageEvent) => {
+    if (event.origin === 'https://app.shuftipro.com') {
+      setVerifiedIdentity()
+    }
+  }
+
+  React.useEffect(() => {
+    window.addEventListener('message', handleVerifiedIdentity)
+
+    return () => {
+      window.removeEventListener('message', handleVerifiedIdentity)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  React.useEffect(() => {
+    if (startKYCData?.verification_url) {
+      nextKnowYourCustomerStep()
+    }
+  }, [startKYCData, refetchOnboardingUser])
 
   if (activeKnowYourCustomerStep === 0) {
-    return <AuthorizedSignerVerification backStep={backStep} formik={formik} />
+    return (
+      <AuthorizedSignerVerification
+        nextStep={nextStep}
+        backStep={backStep}
+        formik={formik}
+        isLoading={isStartKYCLoading}
+        isCompleted={isCompleted}
+      />
+    )
   }
 
   if (activeKnowYourCustomerStep === 1) {
-    return <IdentityVerification verifyIdentity={verifyIdentity} />
+    return <IdentityVerification verificationURL={startKYCData.verification_url} />
   }
 
   return null

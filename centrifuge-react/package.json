@@ -3,7 +3,7 @@
   "version": "0.0.4",
   "description": "Centrifuge React Library",
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "typings": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -34,7 +34,7 @@
     "@types/eslint": "^7",
     "@types/mdx-js__react": "^1",
     "@types/prettier": "^2",
-    "@types/react": "^17.0.21",
+    "@types/react": "^18.0.27",
     "@types/styled-components": "^5",
     "@types/styled-system": "^5",
     "@types/styled-system__css": "^5.0.16",
@@ -46,8 +46,8 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "prettier": "^2.4.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "standard-version": "^9.3.2",
     "styled-components": "^5.3.6",
     "typescript": "~4.4.4"
@@ -55,8 +55,8 @@
   "peerDependencies": {
     "@centrifuge/centrifuge-js": "*",
     "@centrifuge/fabric": "*",
-    "react": "*",
-    "react-dom": "*"
+    "react": ">18",
+    "react-dom": ">18"
   },
   "dependencies": {
     "@polkadot/extension-dapp": "^0.44.6",

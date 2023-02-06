@@ -8,7 +8,7 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { CustomFilters, ReportComponent } from '../../../components/Report'
 import { Spinner } from '../../../components/Spinner'
 import { formatDate } from '../../../utils/date'
-import { usePool, usePoolMetadata } from '../../../utils/usePools'
+import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
 export type GroupBy = 'day' | 'month'
@@ -23,8 +23,7 @@ const titleByReport: { [key: string]: string } = {
 
 export const PoolDetailReportingTab: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const pool = usePool(poolId)
-  const { data: metadata } = usePoolMetadata(pool)
+  const pool = usePool(poolId) as Pool
 
   // Global filters
   const [startDate, setStartDate] = React.useState(pool?.createdAt ? new Date(pool?.createdAt) : new Date())
@@ -49,13 +48,14 @@ export const PoolDetailReportingTab: React.FC = () => {
         <Stack gap={2}>
           <Stack as={Card} gap={2} p={2}>
             <Select
+              name="report"
               label="Report"
               placeholder="Select a report"
               options={reportOptions}
               value={report}
-              onSelect={(newReport) => {
-                if (newReport) {
-                  setReport(newReport as Report)
+              onChange={(event) => {
+                if (event.target.value) {
+                  setReport(event.target.value as Report)
                 }
               }}
             />
@@ -76,6 +76,7 @@ export const PoolDetailReportingTab: React.FC = () => {
             {report === 'pool-balance' && (
               <Shelf gap={2}>
                 <Select
+                  name="groupBy"
                   label="Group by"
                   placeholder="Select a time period to group by"
                   options={[
@@ -89,9 +90,9 @@ export const PoolDetailReportingTab: React.FC = () => {
                     },
                   ]}
                   value={groupBy}
-                  onSelect={(newGroupBy) => {
-                    if (newGroupBy) {
-                      setGroupBy(newGroupBy as GroupBy)
+                  onChange={(event) => {
+                    if (event.target.value) {
+                      setGroupBy(event.target.value as GroupBy)
                     }
                   }}
                 />
@@ -100,28 +101,25 @@ export const PoolDetailReportingTab: React.FC = () => {
             {report === 'investor-tx' && (
               <Shelf>
                 <Select
+                  name="activeTranche"
                   label="Token"
                   placeholder="Select a token"
-                  options={
-                    metadata?.tranches
-                      ? [
-                          {
-                            label: 'All tokens',
-                            value: 'all',
-                          },
-                          ...Object.keys(metadata?.tranches).map((trancheId) => {
-                            return {
-                              label: `${metadata?.pool?.name} ${metadata.tranches![trancheId].name}`,
-                              value: trancheId,
-                            }
-                          }),
-                        ]
-                      : []
-                  }
+                  options={[
+                    {
+                      label: 'All tokens',
+                      value: 'all',
+                    },
+                    ...pool.tranches.map((token) => {
+                      return {
+                        label: token.currency.name,
+                        value: token.id,
+                      }
+                    }),
+                  ]}
                   value={activeTranche}
-                  onSelect={(newTranche) => {
-                    if (newTranche) {
-                      setActiveTranche(newTranche as string)
+                  onChange={(event) => {
+                    if (event.target.value) {
+                      setActiveTranche(event.target.value)
                     }
                   }}
                 />

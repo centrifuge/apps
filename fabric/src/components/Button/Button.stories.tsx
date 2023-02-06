@@ -1,5 +1,5 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react'
-import React from 'react'
+import * as React from 'react'
 import { AnchorButton as AnchorButtonComp, Button as ButtonComp } from '.'
 import { IconChevronDown, IconClock } from '../../icon'
 import { Grid } from '../Grid'

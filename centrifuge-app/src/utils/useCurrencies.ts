@@ -1,4 +1,4 @@
-import { useCentrifugeQuery } from './useCentrifugeQuery'
+import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 
 export function useCurrencies() {
   const [data] = useCentrifugeQuery(['currencies'], (cent) => cent.pools.getCurrencies())

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import * as React from 'react'
 import styled from 'styled-components'
 import { IconInfoFailed, IconSearch } from '../..'
 import { Box } from '../Box'
@@ -63,7 +63,7 @@ export const SearchInput: React.FC<Omit<TextInputProps, 'rightElement'> & { clea
   clear,
   ...inputProps
 }) => {
-  const ref = useRef<HTMLInputElement>(null)
+  const ref = React.useRef<HTMLInputElement>(null)
   return (
     <InputBox
       ref={ref}
