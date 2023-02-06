@@ -94,5 +94,4 @@ jobs:
             target: onboarding
             function_secrets: |
                 ${{ vars.ONBOARDING_SECRETS }}
-            function_env: |
-              REDIRECT_URL=${{ needs.build.outputs.front_url}}
+            function_env: "REDIRECT_URL=${{ needs.build.outputs.front_url}}"

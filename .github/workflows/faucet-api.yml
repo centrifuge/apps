@@ -86,6 +86,5 @@ jobs:
           target: faucetDev
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
-          function_env: |
-            COLLATOR_WSS_URL=wss://fullnode.${{ needs.build.outputs.env_name }}.cntrfg.com
-            CORS_ORIGIN=https://${{ needs.build.outputs.env_name }}.app.cntrfg.com
+          function_env: "COLLATOR_WSS_URL=wss://fullnode.${{ needs.build.outputs.env_name }}.cntrfg.com, CORS_ORIGIN=https://${{ needs.build.outputs.env_name }}.app.cntrfg.com"
+            
