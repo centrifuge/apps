@@ -93,6 +93,6 @@ jobs:
             GSA: ${{ secrets.GSA }}
             target: onboarding
             function_secrets: |
-                ${{ secrets.ONBOARDING_SECRETS}}
+                ${{ vars.ONBOARDING_SECRETS }}
             function_env: |
               REDIRECT_URL=${{ needs.build.outputs.front_url}}
