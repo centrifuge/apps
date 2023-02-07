@@ -48,7 +48,7 @@ const CentrifugeInvestBox: React.FC<{
 }> = ({ selectedToken, setSelectedToken }) => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const pool = usePool(poolId)
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const balances = useBalances(address)
 
@@ -163,7 +163,7 @@ export const PoolDetailOverview: React.FC<{
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
 
   const pageSummaryData = [

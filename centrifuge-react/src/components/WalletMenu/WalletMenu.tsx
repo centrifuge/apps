@@ -1,47 +1,53 @@
 import {
   Box,
-  IconCheck,
+  Button,
+  IconCopy,
   Menu,
   MenuItem,
   MenuItemGroup,
   Popover,
-  Shelf,
   Stack,
   Text,
   WalletButton,
 } from '@centrifuge/fabric'
-import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
-import styled from 'styled-components'
 import { useBalances } from '../../hooks/useBalances'
-import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
+import { useEnsName } from '../../hooks/useEnsName'
+import { copyToClipboard } from '../../utils/copyToClipboard'
+import { formatBalanceAbbreviated } from '../../utils/formatting'
 import { useAddress, useWallet } from '../WalletProvider'
-import { ConnectMenu } from './ConnectMenu'
+import { ConnectButton } from './ConnectButton'
 
 export function WalletMenu() {
-  const { selectedAccount, accounts } = useWallet()
-  return selectedAccount && accounts?.length ? (
-    <Accounts />
+  const ctx = useWallet()
+  const { connectedType } = ctx
+  const accounts = connectedType && ctx[connectedType].accounts
+  const address = useAddress()
+  return address ? (
+    <ConnectedMenu />
   ) : accounts && !accounts.length ? (
     <WalletButton connectLabel="No accounts available" disabled />
   ) : (
-    <ConnectMenu />
+    <ConnectButton />
   )
 }
 
-const PROXY_TYPE_LABELS = {
-  Any: 'Any rights',
-  Borrow: 'Borrower',
-  Invest: 'Investor',
-  Price: 'Pricing',
-}
-
-function Accounts() {
-  const { selectedAccount, accounts, selectAccount, proxy, selectProxy, proxies, disconnect } = useWallet()
-  const address = useAddress()
-  const balances = useBalances(address)
-
-  if (!selectedAccount || !accounts) return null
+function ConnectedMenu() {
+  const address = useAddress()!
+  const ctx = useWallet()
+  const {
+    connectedType,
+    substrate,
+    disconnect,
+    showWallets,
+    showAccounts,
+    connectedNetwork,
+    connectedNetworkName,
+    substrate: { accounts, proxies },
+  } = ctx
+  const wallet = ctx[connectedType!]?.selectedWallet
+  const ensName = useEnsName(connectedType === 'evm' ? address : undefined)
+  const balances = useBalances(connectedType === 'substrate' ? address : undefined)
 
   return (
     <Popover
@@ -49,11 +55,18 @@ function Accounts() {
         <Stack ref={ref} width="100%" alignItems="stretch">
           <WalletButton
             active={state.isOpen}
-            address={proxy?.delegator ?? selectedAccount.address}
-            alias={!proxy ? selectedAccount.name : undefined}
+            address={address}
+            alias={
+              connectedType === 'evm'
+                ? ensName ?? undefined
+                : !substrate.proxy
+                ? substrate.selectedAccount?.name
+                : undefined
+            }
             balance={
               balances ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol) : undefined
             }
+            iconStyle={connectedType === 'evm' ? 'ethereum' : 'polkadot'}
             {...props}
           />
         </Stack>
@@ -61,85 +74,27 @@ function Accounts() {
       renderContent={(props, ref, state) => (
         <div {...props} ref={ref}>
           <Menu>
-            {accounts.map((acc) => (
-              <MenuItemGroup key={acc.address}>
+            <MenuItemGroup>
+              <Button icon={IconCopy} variant="tertiary" small onClick={() => copyToClipboard(address)}></Button>
+              <Text>network: {connectedNetworkName}</Text>
+              <MenuItem
+                label="Switch wallet"
+                icon={<Box minWidth="iconMedium" />}
+                onClick={() => {
+                  state.close()
+                  showWallets(connectedNetwork, wallet)
+                }}
+              />
+              {connectedType === 'substrate' && (accounts!.length > 1 || !!proxies?.[address]?.length) && (
                 <MenuItem
-                  label={
-                    acc.name ? (
-                      <Text
-                        style={{
-                          display: 'block',
-                          maxWidth: '250px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {acc.name}
-                      </Text>
-                    ) : (
-                      truncateAddress(acc.address)
-                    )
-                  }
-                  sublabel={acc.address}
-                  icon={
-                    <IdenticonWrapper>
-                      <Identicon value={acc.address} size={24} theme="polkadot" />
-                    </IdenticonWrapper>
-                  }
-                  iconRight={selectedAccount.address === acc.address && !proxy ? IconCheck : <Box width={16} />}
+                  label="Switch account"
+                  icon={<Box minWidth="iconMedium" />}
                   onClick={() => {
                     state.close()
-                    selectAccount(acc.address)
+                    showAccounts()
                   }}
                 />
-                {proxies?.[acc.address]?.map((p) => (
-                  <MenuItem
-                    label={
-                      <Shelf alignItems="baseline" gap="5px">
-                        <Text
-                          variant="interactive2"
-                          color="inherit"
-                          style={{
-                            maxWidth: '100px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {acc.name || truncateAddress(acc.address)}
-                        </Text>
-                        <span>/</span>
-                        <span>{truncateAddress(p.delegator)}</span>
-                        <Text variant="label2">
-                          {p.types.map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type).join(' / ')}
-                        </Text>
-                      </Shelf>
-                    }
-                    sublabel={p.delegator}
-                    key={p.delegator}
-                    icon={
-                      <IdenticonWrapper>
-                        <Identicon value={p.delegator} size={24} theme="polkadot" />
-                      </IdenticonWrapper>
-                    }
-                    iconRight={
-                      selectedAccount.address === acc.address && proxy?.delegator === p.delegator ? (
-                        IconCheck
-                      ) : (
-                        <Box width={16} />
-                      )
-                    }
-                    onClick={() => {
-                      state.close()
-                      if (acc.address !== selectedAccount.address) selectAccount(acc.address)
-                      selectProxy(p.delegator)
-                    }}
-                  />
-                ))}
-              </MenuItemGroup>
-            ))}
-            <MenuItemGroup>
+              )}
               <MenuItem
                 label="Disconnect"
                 icon={<Box minWidth="iconMedium" />}
@@ -155,7 +110,3 @@ function Accounts() {
     />
   )
 }
-
-const IdenticonWrapper = styled.div`
-  pointer-events: none;
-`

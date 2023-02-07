@@ -9,7 +9,7 @@ export const AuthContext = React.createContext<{
 }>(null as any)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { selectedWallet, proxy, selectedAccount } = useWallet()
+  const { selectedWallet, proxy, selectedAccount } = useWallet().substrate
   const cent = useCentrifuge()
 
   const { data: session, refetch: refetchSession } = useQuery(
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth(authorizedProxyTypes?: string[]) {
   const ctx = React.useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
 
   const cent = useCentrifuge()
 

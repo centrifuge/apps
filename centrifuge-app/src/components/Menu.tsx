@@ -25,7 +25,7 @@ export const Menu: React.FC<Props> = () => {
   const { pathname } = useLocation()
 
   const allPools = usePools(false)
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const isXLarge = useIsAboveBreakpoint('XL')
 

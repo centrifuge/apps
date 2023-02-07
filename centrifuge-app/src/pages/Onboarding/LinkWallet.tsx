@@ -14,7 +14,7 @@ export const LinkWallet = ({ nextStep }: Props) => {
   const [isDataSharingAgreementDialogOpen, setIsDataSharingAgreementDialogOpen] = React.useState(false)
   const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = React.useState(false)
 
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
   const { login, isAuth } = useAuth()
 
   return (

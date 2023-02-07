@@ -32,7 +32,7 @@ const Collection: React.FC = () => {
   const {
     params: { cid: collectionId },
   } = useRouteMatch<{ cid: string }>()
-  const address = useAddress()
+  const address = useAddress('substrate')
   const collection = useCollection(collectionId)
   const nfts = useNFTs(collectionId)
   const { data: metadata, isLoading } = useMetadata(collection?.metadataUri, collectionMetadataSchema)

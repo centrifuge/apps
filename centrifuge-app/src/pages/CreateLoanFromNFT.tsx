@@ -28,7 +28,7 @@ type FormValues = {
 const CreateLoanFromNFT: React.FC = () => {
   const { cid: collectionId, nftid: nftId } = useParams<{ cid: string; nftid: string }>()
 
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const pools = usePools()
   const [redirect, setRedirect] = React.useState<string>()

@@ -104,7 +104,7 @@ export function Collapsible({
   const { space } = useTheme()
   const fullWidth = `calc(100vw - 2 * ${space[1]}px)`
   const offset = `calc(100% + 2 * ${space[1]}px)`
-  const id = React.useState(() => Math.random().toString(36).substring(2))[0]
+  const id = React.useId()
 
   return (
     <Box position={['static', 'static', 'relative', 'relative', 'static']} width="100%">

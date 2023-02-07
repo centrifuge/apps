@@ -16,9 +16,9 @@ type Props = TextProps & {
 // TODO: Fix for when connected with a proxy
 export const Identity: React.FC<Props> = ({ address, clickToCopy, labelForConnectedAddress = true, ...textProps }) => {
   const identity = useIdentity(address)
-  const myAddress = useAddress()
+  const myAddress = useAddress('substrate')
   const cent = useCentrifuge()
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
 
   const addr = cent.utils.formatAddress(address)
   const isMe = React.useMemo(() => isSameAddress(addr, myAddress), [addr, myAddress])

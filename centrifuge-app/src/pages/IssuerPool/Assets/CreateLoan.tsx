@@ -142,10 +142,10 @@ const IssuerCreateLoan: React.FC = () => {
   const pool = usePool(pid)
   const [redirect, setRedirect] = React.useState<string>()
   const history = useHistory()
-  const address = useAddress()
+  const address = useAddress('substrate')
   const centrifuge = useCentrifuge()
   const collateralCollectionId = useCollateralCollectionId(pid)
-  const { selectedAccount, proxy } = useWallet()
+  const { selectedAccount, proxy } = useWallet().substrate
   const { addTransaction, updateTransaction } = useTransactions()
 
   const { isAuth, authToken } = useAuth()

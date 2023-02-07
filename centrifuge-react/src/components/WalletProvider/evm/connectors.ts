@@ -1,24 +1,23 @@
-// @ts-expect-error
 import metamaskLogo from '@subwallet/wallet-connect/evm/predefinedWallet/MetaMaskLogo.svg'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { MetaMask } from '@web3-react/metamask'
 import { Connector } from '@web3-react/types'
 import { WalletConnect } from '@web3-react/walletconnect'
-import { createConnector } from './evm'
-
 // @ ts-expect-error
 // import subwalletLogo from '@subwallet/wallet-connect/evm/predefinedWallet/SubWalletLogo.svg'
-// import metamaskLogo from '../assets/metamaskLogo.svg'
+// import metamaskLogo2 from '../assets/metamaskLogo.svg'
+import { createConnector } from './utils'
 
 export type EvmConnectorMeta = {
-  name: string
+  id: string
+  title: string
   installUrl: string
   logo: {
     src: string
     alt: string
   }
   connector: Connector
-  isInstalled: () => boolean
+  get installed(): boolean
 }
 
 export function getEvmConnectors(
@@ -48,34 +47,43 @@ export function getEvmConnectors(
 
   return [
     {
-      name: 'MetaMask',
+      id: 'metamask',
+      title: 'MetaMask',
       installUrl: 'https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn',
       logo: {
         src: metamaskLogo,
         alt: 'MetaMask',
       },
       connector: metaMask,
-      isInstalled: () => !!window.ethereum && (window.ethereum as any).isMetaMask,
+      get installed() {
+        return !!window.ethereum
+      },
     },
     {
-      name: 'WalletConnect',
+      id: 'walletconnect',
+      title: 'WalletConnect',
       installUrl: '',
       logo: {
         src: metamaskLogo,
         alt: 'WalletConnect',
       },
       connector: walletConnect,
-      isInstalled: () => true,
+      get installed() {
+        return true
+      },
     },
     {
-      name: 'Coinbase Wallet',
+      id: 'coinbase',
+      title: 'Coinbase Wallet',
       installUrl: '',
       logo: {
         src: metamaskLogo,
         alt: 'Coinbase Wallet',
       },
       connector: coinbase,
-      isInstalled: () => true,
+      get installed() {
+        return true
+      },
     },
     ...(additionalConnectors ?? []),
   ]

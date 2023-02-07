@@ -51,7 +51,8 @@ export type MenuItemProps = {
   sublabel?: string
   icon?: React.ComponentType<IconProps> | React.ReactElement
   iconRight?: React.ComponentType<IconProps> | React.ReactElement
-} & PropsOf<typeof MenuItemButton>
+} & PropsOf<typeof MenuItemButton> &
+  React.HTMLAttributes<HTMLButtonElement>
 
 export const MenuItem: React.FC<MenuItemProps> = ({
   label,

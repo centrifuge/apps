@@ -54,7 +54,7 @@ const LoanSidebar: React.FC = () => {
   const { pid, aid } = useParams<{ pid: string; aid: string }>()
   const loan = useLoan(pid, aid)
   const pool = usePool(pid) as Pool
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const canBorrow = useCanBorrowAsset(pid, aid)
   const canPrice = permissions?.pools[pid]?.roles.includes('PricingAdmin')

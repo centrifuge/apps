@@ -31,6 +31,8 @@ const StyledButton = styled.button({
 })
 
 const IdenticonWrapper = styled(Flex)({
+  borderRadius: '50%',
+  overflow: 'hidden',
   pointerEvents: 'none',
 })
 
