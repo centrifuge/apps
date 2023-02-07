@@ -29,10 +29,11 @@
   "scripts": {
     "format:run": "cd $INIT_CWD && prettier --write \"./**/*.{ts,tsx}\"",
     "format:check": "cd $INIT_CWD && prettier --check \"./**/*.{ts,tsx}\"",
-    "onboarding-api": "yarn workspace @centrifuge/onboarding-api start",
-    "onboarding-ui": "yarn workspace @centrifuge/onboarding-ui start",
+    "onboarding-api": "yarn workspace @centrifuge/onboarding-api start:functions",
+    "pinning-api": "yarn workspace @centrifuge/pinning-api start:functions",
     "centrifuge-app": "yarn workspace @centrifuge/centrifuge-app start",
-    "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\" \"yarn centrifuge-app\" -p name -n \"onboarding-api,centrifuge-app\"",
+    "faucet-api": "yarn workspace @centrifuge/faucet-api start",
+    "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\" \"yarn pinning-api\" \"yarn centrifuge-app\" -p name -n \"onboarding-api,pinning-api,centrifuge-app\"",
     "postinstall": "npx husky install"
   },
   "resolutions": {
