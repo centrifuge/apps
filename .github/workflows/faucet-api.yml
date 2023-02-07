@@ -21,6 +21,7 @@ on:
     #       - others
 env:
   app_name: faucet-api
+  # For now deploy only on demo when triggered manually:
   deploy_to: ${{ github.event_name == 'workflow_dispatch' && 'demo' || '' }}
   # deploy_to: ${{ inputs_deploy_env }}
 

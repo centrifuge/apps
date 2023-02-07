@@ -33,6 +33,7 @@ jobs:
         run: yarn build-storybook
 
       - name: Archive storybook artifacts
+        if: github.ref === 'refs/heads/main'
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # @v3.1.2
         with:
           name: fabric-storybook
@@ -41,6 +42,7 @@ jobs:
 
 
   deploy-storybook: # to google storage
+    if: github.ref === 'refs/heads/main'
     needs: build-n-test
     permissions:
       contents: 'read'

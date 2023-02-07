@@ -1,9 +1,7 @@
 name: "Manual deployments"
 on:
   workflow_dispatch:
-    # inputs:
-    #   deploy_to:
-    #     type: choice
+  
 jobs:
   deploy_app:
     uses: ./.github/workflows/centrifuge-app.yml

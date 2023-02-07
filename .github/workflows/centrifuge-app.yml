@@ -7,10 +7,14 @@ on:
       - "rc*"
     paths:
       - 'centrifuge-app/**'
+      - 'centrifuge-js/**'
+      - 'centrifuge-react/**'
       - '.github/workflows/centrifuge-app.yml'
   pull_request:
     paths:
       - 'centrifuge-app/**'
+      - 'centrifuge-js/**'
+      - 'centrifuge-react/**'
       - '.github/workflows/centrifuge-app.yml'
   workflow_call:
     inputs:
