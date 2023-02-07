@@ -20,9 +20,9 @@ import { MetaMask } from '@web3-react/metamask'
 import * as React from 'react'
 import styled from 'styled-components'
 import { truncateAddress } from '../../utils/formatting'
-import { isMetaMaskWallet } from '../../wallets/evm/utils'
 import { EvmChains } from './evm/chains'
 import { EvmConnectorMeta } from './evm/connectors'
+import { isMetaMaskWallet } from './evm/utils'
 import { useWallet, wallets } from './WalletProvider'
 
 type Props = {
