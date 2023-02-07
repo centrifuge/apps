@@ -33,7 +33,7 @@ export const sendVerifyEmailMessage = async (user: OnboardingUser) => {
     template_id: templateIds.verifyEmail,
     from: {
       name: 'Centrifuge',
-      email: `issuer@centrifuge.io`,
+      email: `hello@centrifuge.io`,
     },
   }
   await sendEmail(message)

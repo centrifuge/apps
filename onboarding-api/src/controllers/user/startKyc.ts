@@ -25,8 +25,13 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       throw new HttpsError(400, 'trancheId and poolId required for individual kyc')
     }
 
-    if (userData.investorType === 'entity' && !userData.steps.verifyEmail.completed) {
-      throw new HttpsError(400, 'Email must be verified before starting KYC')
+    if (
+      userData.investorType === 'entity' &&
+      !userData.steps.verifyEmail.completed &&
+      !userData.steps.verifyBusiness.completed &&
+      !userData.steps.confirmOwners.completed
+    ) {
+      throw new HttpsError(400, 'Entities must complete verifyEmail, verifyBusiness, confirmOwners before starting KYC')
     }
 
     if (userData.steps.verifyIdentity.completed) {

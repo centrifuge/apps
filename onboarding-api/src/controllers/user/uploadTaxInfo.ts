@@ -35,8 +35,10 @@ export const uploadTaxInfoController = async (
     await validateTaxInfoFile(req.body)
     await validateInput(req.query, uploadTaxInfoInput)
 
-    const { poolId, trancheId } = req.query
-    const { walletAddress } = req
+    const {
+      query: { poolId, trancheId },
+      walletAddress,
+    } = req
 
     const user = await fetchUser(walletAddress)
 
