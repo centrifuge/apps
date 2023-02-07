@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
 import { OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
 import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
+import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
 
@@ -19,19 +20,18 @@ export const sendVerifyEmailController = async (
       walletAddress,
       body: { email },
     } = req
-    const userDoc = await userCollection.doc(walletAddress).get()
-    const userData = userDoc.data() as OnboardingUser
+    const user = await fetchUser(walletAddress)
 
     // individual users don't have email addresses yet
-    if (!userDoc.exists || userData.investorType !== 'entity') {
+    if (user.investorType !== 'entity') {
       throw new HttpsError(400, 'Bad request')
     }
 
-    if (userData.steps.verifyEmail.completed) {
+    if (user.steps.verifyEmail.completed) {
       throw new HttpsError(400, 'Email already verified')
     }
 
-    if (email && email !== userData.email) {
+    if (email && email !== user.email) {
       await validateAndWriteToFirestore(walletAddress, { email }, 'entity', ['email'])
     }
     const freshUserData = (await userCollection.doc(walletAddress).get()).data() as OnboardingUser

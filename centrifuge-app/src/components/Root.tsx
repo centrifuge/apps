@@ -15,6 +15,7 @@ import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
 import { CreateLoanFromNFTPage } from '../pages/CreateLoanFromNFT'
+import { InvestmentDisclaimerPage } from '../pages/InvestmentDisclaimer'
 import { IssuerCreatePoolPage } from '../pages/IssuerCreatePool'
 import { IssuerPoolPage } from '../pages/IssuerPool'
 import { IssuerCreateLoanPage } from '../pages/IssuerPool/Assets/CreateLoan'
@@ -159,6 +160,9 @@ const Routes: React.VFC = () => {
       </Route>
       <Route path="/investments">
         <PoolsPage />
+      </Route>
+      <Route path="/disclaimer">
+        <InvestmentDisclaimerPage />
       </Route>
       <Route exact path="/onboarding">
         <OnboardingUserProvider>

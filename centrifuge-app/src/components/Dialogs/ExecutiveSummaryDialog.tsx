@@ -34,5 +34,5 @@ export const ExecutiveSummaryDialog: React.FC<{
 
 const UnstyledLink = styled.a`
   color: inherit;
-  underline: none;
+  text-decoration: none;
 `
