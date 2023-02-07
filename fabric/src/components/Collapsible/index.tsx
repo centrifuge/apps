@@ -1,14 +1,14 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import IconChevronDown from '../../icon/IconChevronDown'
-import { Box } from '../Box'
+import { Box, BoxProps } from '../Box'
 
 const Root = styled(Box)<{ open: boolean; delay: number }>`
   visibility: ${({ open }) => (open ? 'visible' : 'hidden')};
   transition: ${({ open, delay }) => `visibility 0ms ${open ? 0 : delay}ms`};
 `
 
-export type CollapsibleProps = {
+export type CollapsibleProps = BoxProps & {
   open: boolean
   children: React.ReactNode
 }
@@ -18,7 +18,7 @@ export const CollapsibleChevron = styled(IconChevronDown)<{ open: boolean }>`
   transition: transform 0.25s;
 `
 
-export function Collapsible({ open, children }: CollapsibleProps) {
+export function Collapsible({ open, children, ...boxProps }: CollapsibleProps) {
   const duration = 250
   const root = React.useRef<HTMLDivElement>(null)
   const animation = React.useRef<Animation | undefined>(undefined)
@@ -53,7 +53,15 @@ export function Collapsible({ open, children }: CollapsibleProps) {
   }
 
   return (
-    <Root ref={root} aria-hidden={!open} height={open ? 'auto' : 0} overflow="hidden" open={open} delay={duration}>
+    <Root
+      ref={root}
+      aria-hidden={!open}
+      height={open ? 'auto' : 0}
+      overflow="hidden"
+      open={open}
+      delay={duration}
+      {...boxProps}
+    >
       {children}
     </Root>
   )

@@ -437,6 +437,11 @@ interface RiskGroupFormValues {
   discountRate: number | ''
 }
 
+export type IssuerDetails = {
+  title: string
+  body: string
+}
+
 export interface PoolMetadataInput {
   // details
   poolIcon: { uri: string; mime: string } | null
@@ -458,6 +463,7 @@ export interface PoolMetadataInput {
   website: string
   forum: string
   email: string
+  details?: IssuerDetails[]
 
   // tranche
   tranches: TrancheFormValues[]
@@ -486,6 +492,7 @@ export type PoolMetadata = {
       forum?: string
       website?: string
     }
+    details?: IssuerDetails[]
     status: PoolStatus
     listed: boolean
   }
@@ -713,6 +720,7 @@ export function getPoolsModule(inst: Centrifuge) {
           forum: metadata.forum,
           website: metadata.website,
         },
+        details: metadata.details,
         status: 'open',
         listed: metadata.listed ?? true,
       },

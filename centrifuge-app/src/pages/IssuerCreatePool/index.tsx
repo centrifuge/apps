@@ -32,6 +32,7 @@ import { useFocusInvalidInput } from '../../utils/useFocusInvalidInput'
 import { usePools } from '../../utils/usePools'
 import { useProposalEstimate } from '../../utils/useProposalEstimate'
 import { truncate } from '../../utils/web3'
+import { createDetail, IssuerDetail } from './CustomDetails'
 import { IssuerInput } from './IssuerInput'
 import { RiskGroupsSection } from './RiskGroupsInput'
 import { TrancheSection } from './TrancheInput'
@@ -94,6 +95,7 @@ export type CreatePoolValues = Omit<PoolMetadataInput, 'poolIcon' | 'issuerLogo'
   poolIcon: File | null
   issuerLogo: File | null
   executiveSummary: File | null
+  details: IssuerDetail[]
 }
 
 const initialValues: CreatePoolValues = {
@@ -115,6 +117,7 @@ const initialValues: CreatePoolValues = {
   website: '',
   forum: '',
   email: '',
+  details: [createDetail()],
 
   tranches: [createEmptyTranche(true)],
   riskGroups: [createEmptyRiskGroup()],
