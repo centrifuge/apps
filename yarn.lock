@@ -9258,6 +9258,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:^1.3.2":
+  version: 1.3.2
+  resolution: "axios@npm:1.3.2"
+  dependencies:
+    follow-redirects: ^1.15.0
+    form-data: ^4.0.0
+    proxy-from-env: ^1.1.0
+  checksum: 9c3c3010e6f52b847fba1d75724016efda84dfd4a68a55565712856d00913e4ddfbe3d7cf78098c544fa0cceeb1fad9ca56eab0d5f446b45ad4f53a2932bd525
+  languageName: node
+  linkType: hard
+
 "axobject-query@npm:^2.2.0":
   version: 2.2.0
   resolution: "axobject-query@npm:2.2.0"
@@ -14540,7 +14551,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.14.0, follow-redirects@npm:^1.14.4, follow-redirects@npm:^1.14.8":
+"follow-redirects@npm:^1.14.0, follow-redirects@npm:^1.14.4, follow-redirects@npm:^1.14.8, follow-redirects@npm:^1.15.0":
   version: 1.15.2
   resolution: "follow-redirects@npm:1.15.2"
   peerDependenciesMeta:
@@ -20273,12 +20284,12 @@ fsevents@^1.2.7:
     "@types/eslint": ^8
     "@types/express": ^4.17.15
     "@types/node": ^18.7.16
+    axios: ^1.3.2
     dotenv: ^16.0.2
     esbuild: ^0.15.8
     esbuild-node-externals: ^1.5.0
     eslint: ^8.23.1
     form-data: ^4.0.0
-    node-fetch: ^3.3.0
     npm-run-all: ^4.1.5
     typescript: ^4.8.3
   languageName: unknown
@@ -20767,6 +20778,13 @@ fsevents@^1.2.7:
     forwarded: 0.2.0
     ipaddr.js: 1.9.1
   checksum: ad78682246dc20ed6ca4080539349828bc2708cf0b69c55d6a3c41532780a8d05f563dcbac6ec4b74dce367421bff6fc4bc6b700b14319ecf57c93bd62727fc6
+  languageName: node
+  linkType: hard
+
+"proxy-from-env@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "proxy-from-env@npm:1.1.0"
+  checksum: 6459372a57f3e8ef5211f7847ca2fffabcdd6490005892fcc0dcd62fe2b3551900c8a07fad7df9de3897547b1ab4ac7a7197964cd6fa7e76303caa4936bfaf32
   languageName: node
   linkType: hard
 

@@ -1,5 +1,5 @@
+import axios from 'axios'
 import FormData from 'form-data'
-import fetch from 'node-fetch'
 require('dotenv').config()
 
 const PINATA_BASE_URL = 'https://api.pinata.cloud'
@@ -9,35 +9,31 @@ const PINATA_AUTH_HEADERS = {
 }
 
 export const pinJson = async (jsonBody: any) => {
-  console.log('🚀 ~ something random', process.env.PINATA_API_KEY)
   const url = `${PINATA_BASE_URL}/pinning/pinJSONToIPFS`
-  const res = await fetch(url, {
-    method: 'POST',
-    body: JSON.stringify(jsonBody),
-    headers: { ...PINATA_AUTH_HEADERS, 'content-type': 'application/json' },
+  return axios.post(url, jsonBody, {
+    headers: PINATA_AUTH_HEADERS,
   })
-  return res.json() as Promise<{ IpfsHash: string }>
 }
 
 export const unpinFile = async (hashToUnpin: string) => {
   const url = `${PINATA_BASE_URL}/pinning/unpin/${hashToUnpin}`
-  const res = await fetch(url, { method: 'DELETE', headers: PINATA_AUTH_HEADERS })
-  return res.json() as Promise<{ IpfsHash: string }>
+  return axios.delete(url, {
+    headers: PINATA_AUTH_HEADERS,
+  })
 }
 
 export const pinFile = async (fileReadStream: any) => {
   const data = new FormData()
   data.append('file', fileReadStream)
+  console.log('🚀 ~ headers', JSON.stringify(PINATA_AUTH_HEADERS))
 
-  const res = await fetch(`${PINATA_BASE_URL}/pinning/pinFileToIPFS`, {
-    method: 'POST',
+  return axios.post(`${PINATA_BASE_URL}/pinning/pinFileToIPFS`, data, {
+    // maxBodyLength: 'Infinity', // this is needed to prevent axios from erroring out with large files
     headers: {
       'Content-Type': `multipart/form-data; boundary=${data.getBoundary()}`,
       ...PINATA_AUTH_HEADERS,
     },
-    body: data,
   })
-  return res.json() as Promise<{ IpfsHash: string }>
 }
 
 export const ipfsHashToURI = (hash: string) => `ipfs://ipfs/${hash}`
