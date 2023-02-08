@@ -12,14 +12,14 @@ export const pinJson = async (jsonBody: any) => {
   const url = `${PINATA_BASE_URL}/pinning/pinJSONToIPFS`
   return axios.post(url, jsonBody, {
     headers: PINATA_AUTH_HEADERS,
-  })
+  }) as Promise<{ IpfsHash: string }>
 }
 
 export const unpinFile = async (hashToUnpin: string) => {
   const url = `${PINATA_BASE_URL}/pinning/unpin/${hashToUnpin}`
   return axios.delete(url, {
     headers: PINATA_AUTH_HEADERS,
-  })
+  }) as Promise<{ IpfsHash: string }>
 }
 
 export const pinFile = async (fileReadStream: any) => {
@@ -35,7 +35,7 @@ export const pinFile = async (fileReadStream: any) => {
       'Content-Type': `multipart/form-data; boundary=${data._boundary}`,
       ...PINATA_AUTH_HEADERS,
     },
-  })
+  }) as Promise<{ IpfsHash: string }>
 }
 
 export const ipfsHashToURI = (hash: string) => `ipfs://ipfs/${hash}`
