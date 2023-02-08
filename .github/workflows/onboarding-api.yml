@@ -89,6 +89,7 @@ jobs:
             artifact_name: ${{ env.app_name }}
             GWIP: ${{ secrets.GWIP }}
             GSA: ${{ secrets.GSA }}
+            gcloud_region: ${{ env.GCLOUD_REGION }}
             target: onboarding
             function_secrets: |
                 ${{ vars.ONBOARDING_SECRETS }}

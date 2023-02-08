@@ -77,6 +77,7 @@ jobs:
           artifact_name: ${{ env.app_name }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
+          gcloud_region: ${{ env.GCLOUD_REGION }}
           target: pinningApi
           function_secrets: |
             ${{ vars.PINNING_SECRETS }}

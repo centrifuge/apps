@@ -26,7 +26,12 @@ inputs:
   target:
     description: "Gfunction target handler"
     required: true
-    default: handler   
+    default: handler
+    
+  gcloud_region:
+    description: "Google Cloud region to use"
+    required: false
+    default: europe-central2    
 
 runs:
 ## Every module from here on could potentially expose the Gcloud Auth Token
@@ -58,7 +63,7 @@ runs:
       with:
         name: '${{ inputs.function_name }}'
         runtime: 'nodejs16'
-        region: '${{ vars.GCLOUD_REGION }}'
+        region: '${{ inputs.gcloud_region }}'
         source_dir: '${{steps.download.outputs.download-path}}' # downlaod artifacts sets the current directory as the one in artifact.with.path
         entry_point: '${{ inputs.target }}'
         secret_environment_variables: ${{ inputs.function_secrets }}
@@ -76,5 +81,5 @@ runs:
       shell: sh
       run: |
         gcloud functions add-iam-policy-binding ${{ inputs.function_name }} \
-        --region=${{ vars.GCLOUD_REGION }} \
+        --region=${{ inputs.gcloud_region }} \
         --member="allUsers" --role="roles/cloudfunctions.invoker"
