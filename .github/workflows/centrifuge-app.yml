@@ -51,12 +51,15 @@ jobs:
         if: github.event_name == 'pull_request'
         shell: bash
         env:
-          PINNING_URL: https://${{ vars.GCLOUD_REGION }}-${{ vars.GCP_DEV_PROJ }}.cloudfunctions.net/pinning-api-pr${{ github.event.number }}
-          ONBOARDING_URL: https://${{ vars.GCLOUD_REGION }}-${{ vars.GCP_DEV_PROJ }}.cloudfunctions.net/onboarding-api-pr${{ github.event.number }}
+          PINNING_URL: https:\/\/${{ vars.GCLOUD_REGION }}-${{ vars.GCP_DEV_PROJ }}.cloudfunctions.net\/pinning-api-pr${{ github.event.number }}
+          ONBOARDING_URL: https:\/\/${{ vars.GCLOUD_REGION }}-${{ vars.GCP_DEV_PROJ }}.cloudfunctions.net\/onboarding-api-pr${{ github.event.number }}
+        # Ex: 
+        # sed -i .bak -e '/^REACT_APP_ONBOARDING_API_URL=/s/=.*/=https:\/\/europe-central2-peak-vista.cloudfunctions.net\/onboarding-api-pr1144/' $PWD/.env-config/.env.development
         run: |
-          sed -i~ '/^REACT_APP_PINNING_API_URL=/s/=.*/=/${{ env.PINNING_URL }}' .env-config/.env.${{ steps.prepare.outputs.env_name }}
-          sed -i~ '/^REACT_APP_ONBOARDING_API_URL=/s/=.*/=/${{ env.ONBOARDING_URL }}' .env-config/.env.${{ steps.prepare.outputs.env_name }}
-
+          sed -i -e '/^REACT_APP_PINNING_API_URL=/s/=.*/=${{ env.PINNING_URL }}/' $PWD/.env-config/.env.${{ steps.prepare.outputs.env_name }}
+          sed -i -e '/^REACT_APP_ONBOARDING_API_URL=/s/=.*/=${{ env.ONBOARDING_URL }}/' $PWD/.env-config/.env.${{ steps.prepare.outputs.env_name }}
+          cat .env-config/.env.${{ steps.prepare.outputs.env_name }} | grep API
+          
       - name: Install Dependencies
         # env:
         #   NODE_ENV: production      
