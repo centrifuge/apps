@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
-import { userCollection } from '../../database'
+import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 
 export const getUserController = async (req: Request, res: Response) => {
   try {
-    const user = (await userCollection.doc(req.walletAddress).get())?.data()
+    const user = await fetchUser(req.walletAddress)
     return res.send({ ...user })
   } catch (error) {
     if (error instanceof HttpsError) {

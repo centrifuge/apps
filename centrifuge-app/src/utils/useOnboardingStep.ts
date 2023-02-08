@@ -2,6 +2,7 @@ import { useWallet } from '@centrifuge/centrifuge-react'
 import * as React from 'react'
 import { useAuth } from '../components/AuthProvider'
 import { useOnboardingUser } from '../components/OnboardingUserProvider'
+import { getActiveOnboardingStep } from './getActiveOnboardingStep'
 
 // TODO: make dynamic based on the pool and tranche that the user is onboarding to
 const trancheId = 'FAKETRANCHEID'
@@ -14,7 +15,7 @@ export const useOnboardingStep = () => {
     pendingConnect: { isConnecting },
     substrate: { selectedAccount },
   } = useWallet()
-  const { isAuth } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
+  const { isAuth, isAuthFetched } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const [activeStep, setActiveStep] = React.useState<number>(0)
   const { onboardingUser, isOnboardingUserFetched, isOnboardingUserFetching } = useOnboardingUser()
 
@@ -22,44 +23,22 @@ export const useOnboardingStep = () => {
   const backStep = () => setActiveStep((current) => current - 1)
 
   React.useEffect(() => {
-    if (!isConnecting) {
-      if (!isAuth) {
-        return setActiveStep(1)
-      }
-
-      if (selectedAccount && isOnboardingUserFetched && Object.keys(onboardingUser).length) {
-        if (onboardingUser.investorType === 'entity') {
-          if (onboardingUser.steps.signAgreements[poolId][trancheId].completed) {
-            return setActiveStep(7) // done
-          } else if (onboardingUser.steps.verifyIdentity.completed) {
-            return setActiveStep(6)
-          } else if (onboardingUser.steps.confirmOwners.completed) {
-            return setActiveStep(5)
-          } else if (onboardingUser.steps.verifyBusiness.completed) {
-            return setActiveStep(4)
-          }
-
-          return setActiveStep(1)
-        }
-
-        if (onboardingUser.investorType === 'individual') {
-          if (onboardingUser.steps.signAgreements[poolId][trancheId].completed) {
-            return setActiveStep(5) // done
-          } else if (onboardingUser.steps.verifyIdentity.completed) {
-            return setActiveStep(4)
-          } else if (onboardingUser.name) {
-            return setActiveStep(3)
-          }
-
-          return setActiveStep(1)
-        }
-      }
-
-      if (isOnboardingUserFetched) {
-        return setActiveStep(1)
-      }
+    // tried to connect but no wallet is connected
+    if (!isConnecting && !selectedAccount) {
+      return setActiveStep(1)
     }
-  }, [onboardingUser, isConnecting, selectedAccount, isOnboardingUserFetched, isAuth])
+    // wallet finished connection attempt, authentication was attempted, and user is not authenticated
+    if (!isConnecting && isAuthFetched && !isAuth) {
+      return setActiveStep(1)
+    }
+
+    // wallet finished connection attempt, user was fetched
+    if (!isConnecting && isOnboardingUserFetched) {
+      const activeOnboardingStep = getActiveOnboardingStep(onboardingUser, poolId, trancheId)
+
+      return setActiveStep(activeOnboardingStep)
+    }
+  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched, selectedAccount])
 
   return {
     activeStep,

@@ -93,7 +93,11 @@ export function useAuth(authorizedProxyTypes?: string[]) {
 
   const authToken = session?.signed ? session.signed : ''
 
-  const { refetch: refetchAuth, data } = useQuery(
+  const {
+    refetch: refetchAuth,
+    data,
+    isFetched,
+  } = useQuery(
     ['auth', authToken, authorizedProxyTypes],
     async () => {
       try {
@@ -141,5 +145,6 @@ export function useAuth(authorizedProxyTypes?: string[]) {
     isAuth: data?.verified,
     login: ctx.login,
     refetchAuth,
+    isAuthFetched: isFetched,
   }
 }

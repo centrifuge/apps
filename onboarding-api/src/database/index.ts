@@ -40,7 +40,7 @@ const stepsSchema = object({
     completed: bool(),
     timeStamp: string().nullable(),
   }),
-  verifyAccreditdation: object({
+  verifyAccreditation: object({
     completed: bool(),
     timeStamp: string().nullable(),
   }),
@@ -50,23 +50,23 @@ const stepsSchema = object({
   }),
   signAgreements: lazy((value) => {
     const poolId = Object.keys(value)[0]
-    if (typeof poolId === 'string') {
-      return object({
-        [poolId]: lazy((value) => {
-          const trancheId = Object.keys(value)[0]
-          if (typeof trancheId === 'string') {
-            return object({
-              [trancheId]: object({
-                completed: bool(),
-                timeStamp: string().nullable(),
-              }),
-            })
-          }
-          throw new Error('Bad trancheId')
-        }),
-      })
+    if (typeof poolId !== 'string') {
+      throw new Error('Bad poolId')
     }
-    throw new Error('Bad poolId')
+    return object({
+      [poolId]: lazy((value) => {
+        const trancheId = Object.keys(value)[0]
+        if (typeof trancheId !== 'string') {
+          throw new Error('Bad trancheId')
+        }
+        return object({
+          [trancheId]: object({
+            completed: bool(),
+            timeStamp: string().nullable(),
+          }),
+        })
+      }),
+    })
   }),
 })
 
@@ -94,7 +94,7 @@ export const individualUserSchema = object({
   name: string().nullable().default(null),
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
-  steps: stepsSchema.pick(['verifyIdentity', 'verifyAccreditdation', 'verifyTaxInfo', 'signAgreements']),
+  steps: stepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'signAgreements']),
 })
 
 export type EntityUser = InferType<typeof entityUserSchema>
@@ -105,8 +105,7 @@ export const firestore = new Firestore()
 export const userCollection = firestore.collection(`onboarding-users`)
 
 export const storage = new Storage()
-export const unsignedAgreements = storage.bucket('subscription-agreements')
-export const signedAgreements = storage.bucket('signed-subscription-agreements')
+export const onboardingBucket = storage.bucket('onboarding-api-dev')
 
 const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
   entity: {
@@ -135,9 +134,9 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
   try {
     const { collection, schema } = schemas[schemaKey]
     if (typeof mergeFields !== 'undefined') {
-      const mergeValidations = (mergeFields as unknown as string[]).map((field) => schema.validateAt(field, data))
+      const mergeValidations = (mergeFields as string[]).map((field) => schema.validateAt(field, data))
       await Promise.all(mergeValidations)
-      await collection.doc(key).set(data, { mergeFields: mergeFields as unknown as string[] })
+      await collection.doc(key).set(data, { mergeFields: mergeFields as string[] })
     } else {
       await schema.validate(data)
       await collection.doc(key).set(data)
@@ -155,19 +154,14 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
  * @param poolId poolId of the pool
  * @param trancheId trancheId of the tranche
  */
-export const writeToBucket = async (
-  signedAgreement: Uint8Array,
-  walletAddress: string,
-  poolId: string,
-  trancheId: string
-) => {
+export const writeToOnboardingBucket = async (document: Uint8Array, path: string) => {
   try {
-    const blob = signedAgreements.file(`${walletAddress}/${poolId}/${trancheId}.pdf`)
+    const blob = onboardingBucket.file(path)
     const blobStream = blob.createWriteStream({
       resumable: false,
     })
 
-    blobStream.end(signedAgreement)
+    blobStream.end(document)
 
     return new Promise((resolve, reject) => {
       blobStream.on('finish', () => {

@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import { bool, date, InferType, object, string } from 'yup'
 import { EntityUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
+import { sendVerifyEmailMessage } from '../../emails/sendVerifyEmailMessage'
+import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { validateInput } from '../../utils/validateInput'
@@ -21,10 +23,9 @@ export const verifyBusinessController = async (
   res: Response
 ) => {
   try {
-    const { walletAddress } = req
     await validateInput(req.body, verifyBusinessInput)
-
     const {
+      walletAddress,
       body: { incorporationDate, jurisdictionCode, registrationNumber, businessName, trancheId, poolId, email, dryRun },
     } = { ...req }
 
@@ -38,8 +39,6 @@ export const verifyBusinessController = async (
     if (entityDoc.exists && entityData.steps?.verifyBusiness.completed) {
       throw new HttpsError(400, 'Business already verified')
     }
-
-    // TODO: send email verfication link
 
     const payloadAML = {
       reference: `BUSINESS_AML_REQUEST_${Math.random()}`,
@@ -82,7 +81,7 @@ export const verifyBusinessController = async (
         verifyEmail: { completed: false, timeStamp: null },
         confirmOwners: { completed: false, timeStamp: null },
         verifyIdentity: { completed: false, timeStamp: null },
-        verifyAccreditdation: { completed: false, timeStamp: null },
+        verifyAccreditation: { completed: false, timeStamp: null },
         verifyTaxInfo: { completed: false, timeStamp: null },
         signAgreements: {
           [poolId]: {
@@ -96,11 +95,9 @@ export const verifyBusinessController = async (
     }
 
     await validateAndWriteToFirestore(walletAddress, user, 'entity')
-
-    const freshUserData = await userCollection.doc(walletAddress).get()
-    return res.status(200).json({
-      ...freshUserData.data(),
-    })
+    await sendVerifyEmailMessage(user)
+    const freshUserData = await fetchUser(walletAddress)
+    return res.status(200).json({ ...freshUserData })
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

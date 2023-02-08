@@ -14,7 +14,7 @@ const OnboardingUserContext = React.createContext<{
 } | null>(null)
 
 export function OnboardingUserProvider({ children }: { children?: React.ReactNode }) {
-  const { isAuth, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
+  const { authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const { selectedAccount } = useWallet().substrate
 
   const {
@@ -23,33 +23,36 @@ export function OnboardingUserProvider({ children }: { children?: React.ReactNod
     isFetching: isOnboardingUserFetching,
     isFetched: isOnboardingUserFetched,
   } = useQuery(
-    ['getUser', selectedAccount?.address],
+    ['getUser', authToken],
     async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUser`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
+      if (authToken) {
+        const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUser`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        })
 
-      if (response.status !== 200) {
-        throw new Error()
+        if (response.status !== 200) {
+          throw new Error()
+        }
+
+        return response.json()
       }
-
-      return response.json()
     },
     {
       refetchOnWindowFocus: false,
-      enabled: !!isAuth,
+      enabled: !!selectedAccount,
+      retry: 1,
     }
   )
 
   return (
     <OnboardingUserContext.Provider
       value={{
-        onboardingUser: onboardingUserData,
+        onboardingUser: onboardingUserData || {},
         refetchOnboardingUser,
         isOnboardingUserFetching,
         isOnboardingUserFetched,

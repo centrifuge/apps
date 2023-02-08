@@ -1,5 +1,6 @@
 import { Box, Button, Checkbox, DateInput, Select, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { FormikProps } from 'formik'
+import { KYC_COUNTRY_CODES } from '../geography_codes'
 
 type Props = {
   backStep: () => void
@@ -12,6 +13,13 @@ type Props = {
   isLoading: boolean
   isCompleted: boolean
   nextStep: () => void
+}
+
+const formatCountryCodes = (countryCodes: { [key: string]: string }) => {
+  return Object.keys(countryCodes).map((key) => ({
+    label: countryCodes[key],
+    value: key,
+  }))
 }
 
 export const AuthorizedSignerVerification = ({ backStep, formik, isLoading, isCompleted, nextStep }: Props) => (
@@ -37,16 +45,11 @@ export const AuthorizedSignerVerification = ({ backStep, formik, isLoading, isCo
           disabled={isLoading || isCompleted}
         />
         <Select
+          name="countryOfCitizenship"
           label="Country of Citizenship*"
           placeholder="Select a country"
-          options={[
-            {
-              label: 'Switzerland',
-              value: 'ch',
-            },
-            { label: 'United States', value: 'us' },
-          ]}
-          onSelect={(countryCode) => formik.setFieldValue('countryOfCitizenship', countryCode)}
+          options={formatCountryCodes(KYC_COUNTRY_CODES)}
+          onChange={(event) => formik.setFieldValue('countryOfCitizenship', event.target.value)}
           value={formik.values.countryOfCitizenship}
           disabled={isLoading || isCompleted}
         />

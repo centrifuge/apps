@@ -3,7 +3,7 @@ import * as React from 'react'
 
 export const DemoBanner = () => {
   const storageKey = 'demo-banner-seen'
-  const isDemo = window.location.hostname.includes('demo')
+  const isDemo = import.meta.env.REACT_APP_IS_DEMO
   const [isOpen, setIsOpen] = React.useState(false)
 
   React.useEffect(() => {
