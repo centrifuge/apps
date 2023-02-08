@@ -30,7 +30,7 @@ export const signAgreementController = async (
     } = req
     const user = await fetchUser(walletAddress)
 
-    if (!user.steps.verifyIdentity.completed || user?.steps.signAgreements[poolId]?.[trancheId]?.completed) {
+    if (!user.steps.verifyIdentity.completed || user?.steps.signAgreements[poolId]?.[trancheId]?.signedDocument) {
       throw new HttpsError(400, 'User must be verified before signing agreements')
     }
 
@@ -68,8 +68,8 @@ export const signAgreementController = async (
           [poolId]: {
             ...user.steps.signAgreements[poolId],
             [trancheId]: {
-              completed: true,
-              timeStamp: new Date().toISOString(),
+              ...user.steps.signAgreements[poolId][trancheId],
+              signedDocument: true,
             },
           },
         },
