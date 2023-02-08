@@ -3,6 +3,8 @@ import * as dotenv from 'dotenv'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
 import { signAgreementController } from './controllers/agreement/signAgreement'
+import { storeTransactionHashController } from './controllers/agreement/storeTransactionHash'
+import { sendDocumentsToIssuerController } from './controllers/emails/sendDocumentsToIssuer'
 import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'
 import { verifyEmailController } from './controllers/emails/verifyEmail'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
@@ -11,6 +13,7 @@ import { getTaxInfoController } from './controllers/user/getTaxInfo'
 import { getUserController } from './controllers/user/getUser'
 import { setVerifiedIdentityController } from './controllers/user/setVerifiedIdentity'
 import { startKycController } from './controllers/user/startKyc'
+import { updateInvestorStatusController } from './controllers/user/updateInvestorStatus'
 import { uploadTaxInfoController } from './controllers/user/uploadTaxInfo'
 import { verifyAccreditationController } from './controllers/user/verifyAccreditation'
 import { corsMiddleware } from './middleware/cors'
@@ -40,8 +43,12 @@ onboarding.post('/confirmOwners', verifyJw3t, confirmOwnersController)
 onboarding.get('/getUnsignedAgreement', verifyJw3t, getUnsignedAgreementController)
 onboarding.post('/signAgreement', verifyJw3t, signAgreementController)
 onboarding.get('/getSignedAgreement', verifyJw3t, getSignedAgreementController)
+onboarding.post('/storeTransactionHash', verifyJw3t, storeTransactionHashController)
 
 onboarding.post('/sendVerifyEmail', verifyJw3t, sendVerifyEmailController)
+onboarding.post('/sendDocumentsToIssuer', verifyJw3t, sendDocumentsToIssuerController)
 onboarding.get('/verifyEmail', verifyEmailController)
+
+onboarding.post('/updateInvestorStatus', updateInvestorStatusController)
 
 exports.onboarding = onboarding

@@ -60,13 +60,21 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
           signAgreements: {
             [body.poolId]: {
               [body.trancheId]: {
-                completed: false,
-                timeStamp: null,
+                signedDocument: false,
+                transactionHash: null,
               },
             },
           },
         },
         email: null,
+        onboardingStatus: {
+          [body.poolId]: {
+            [body.trancheId]: {
+              status: null,
+              timeStamp: null,
+            },
+          },
+        },
       }
       await validateAndWriteToFirestore(walletAddress, updatedUserData, 'individual')
     } else {

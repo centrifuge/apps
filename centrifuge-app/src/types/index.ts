@@ -73,8 +73,8 @@ type IndividualUserSteps = {
   signAgreements: {
     [poolId: string]: {
       [trancheId: string]: {
-        completed: boolean
-        timeStamp: string
+        transactionHash: string | null
+        signedDocument: boolean
       }
     }
   }
@@ -108,6 +108,14 @@ export type EntityUser = {
   name: string
   dateOfBirth: string
   countryOfCitizenship: string
+  onboardingStatus: {
+    [poolId: string]: {
+      [trancheId: string]: {
+        status: 'pending' | 'approved' | 'rejected'
+        timeStamp: string
+      }
+    }
+  }
 }
 
 type IndividualUser = {
@@ -117,6 +125,14 @@ type IndividualUser = {
   dateOfBirth: string
   countryOfCitizenship: string
   steps: IndividualUserSteps
+  onboardingStatus: {
+    [poolId: string]: {
+      [trancheId: string]: {
+        status: 'pending' | 'approved' | 'rejected'
+        timeStamp: string
+      }
+    }
+  }
 }
 
 export type OnboardingUser = IndividualUser | EntityUser

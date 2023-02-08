@@ -1,7 +1,7 @@
 import { Firestore } from '@google-cloud/firestore'
 import { Storage } from '@google-cloud/storage'
 import * as dotenv from 'dotenv'
-import { array, bool, date, InferType, lazy, object, string, StringSchema } from 'yup'
+import { array, bool, date, InferType, lazy, mixed, object, string, StringSchema } from 'yup'
 import { HttpsError } from '../utils/httpsError'
 import { Subset } from '../utils/types'
 
@@ -61,8 +61,8 @@ const stepsSchema = object({
         }
         return object({
           [trancheId]: object({
-            completed: bool(),
-            timeStamp: string().nullable(),
+            signedDocument: bool(),
+            transactionHash: string().nullable(),
           }),
         })
       }),
@@ -84,6 +84,26 @@ export const entityUserSchema = object({
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
   steps: stepsSchema,
+  onboardingStatus: lazy((value) => {
+    const poolId = Object.keys(value)[0]
+    if (typeof poolId !== 'string') {
+      throw new Error('Bad poolId')
+    }
+    return object({
+      [poolId]: lazy((value) => {
+        const trancheId = Object.keys(value)[0]
+        if (typeof trancheId !== 'string') {
+          throw new Error('Bad trancheId')
+        }
+        return object({
+          [trancheId]: object({
+            status: mixed().oneOf(['approved', 'rejected', 'pending', null]),
+            timeStamp: string().nullable(),
+          }),
+        })
+      }),
+    })
+  }),
 })
 
 export const individualUserSchema = object({
@@ -95,6 +115,26 @@ export const individualUserSchema = object({
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
   steps: stepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'signAgreements']),
+  onboardingStatus: lazy((value) => {
+    const poolId = Object.keys(value)[0]
+    if (typeof poolId !== 'string') {
+      throw new Error('Bad poolId')
+    }
+    return object({
+      [poolId]: lazy((value) => {
+        const trancheId = Object.keys(value)[0]
+        if (typeof trancheId !== 'string') {
+          throw new Error('Bad trancheId')
+        }
+        return object({
+          [trancheId]: object({
+            status: mixed().oneOf(['approved', 'rejected', 'pending', null]),
+            timeStamp: string().nullable(),
+          }),
+        })
+      }),
+    })
+  }),
 })
 
 export type EntityUser = InferType<typeof entityUserSchema>

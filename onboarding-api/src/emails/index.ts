@@ -3,6 +3,7 @@ import { HttpsError } from '../utils/httpsError'
 
 export const templateIds = {
   verifyEmail: 'd-624f08ad697943929064772c0ac2aca1',
+  updateInvestorStatus: 'd-42fe587e381345ecb52dd072c299a499',
 }
 
 export const sendEmail = async (message: any) => {
