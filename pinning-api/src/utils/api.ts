@@ -9,6 +9,7 @@ const PINATA_AUTH_HEADERS = {
 }
 
 export const pinJson = async (jsonBody: any) => {
+  console.log('🚀 ~ something random', process.env.PINATA_API_KEY)
   const url = `${PINATA_BASE_URL}/pinning/pinJSONToIPFS`
   const res = await fetch(url, {
     method: 'POST',
