@@ -46,6 +46,16 @@ jobs:
         with:
           node-version: '16'
           cache: yarn
+      
+      - name: set PR function values
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          PINNING_URL: https://${{ vars.GCLOUD_REGION }}-${{ vars.GCP_DEV_PROJ }}.cloudfunctions.net/pinning-api-pr${{ github.event.number }}
+          ONBOARDING_URL: https://${{ vars.GCLOUD_REGION }}-${{ vars.GCP_DEV_PROJ }}.cloudfunctions.net/onboarding-api-pr${{ github.event.number }}
+        run: |
+          sed -i~ '/^REACT_APP_PINNING_API_URL=/s/=.*/=/${{ env.PINNING_URL }}' .env-config/.env.${{ steps.prepare.outputs.env_name }}
+          sed -i~ '/^REACT_APP_ONBOARDING_API_URL=/s/=.*/=/${{ env.ONBOARDING_URL }}' .env-config/.env.${{ steps.prepare.outputs.env_name }}
 
       - name: Install Dependencies
         # env:
