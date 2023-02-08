@@ -6,7 +6,6 @@ import { WalletConnect } from '@web3-react/walletconnect'
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { firstValueFrom } from 'rxjs'
-// import ethereumLogo from '../../assets/ethereum.svg'
 import { ReplacedError, useAsyncCallback } from '../../hooks/useAsyncCallback'
 import { useCentrifuge } from '../CentrifugeProvider'
 import { EvmChains, getAddChainParameters, getEvmUrls } from './evm/chains'
@@ -208,7 +207,6 @@ export function WalletProvider({
     const { connector } = wallet
     try {
       const accounts = await setPendingConnect(wallet, async () => {
-        console.log('connect chainId', chainId)
         await (connector instanceof WalletConnect
           ? connector.activate(chainId)
           : connector.activate(chainId ? getAddChainParameters(evmChains, chainId) : undefined))

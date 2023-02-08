@@ -108,46 +108,6 @@ export function useTinlakePools(suspense = false) {
   return useQuery(['tinlakePools', !!ipfsPools], () => getPools(ipfsPools!), { enabled: !!ipfsPools, suspense })
 }
 
-// export type TinlakeMetadata = {
-//   //// Do something with:
-//   // "shortName": "GIG Pool",
-//   // "slug": "gig-pool",
-//   // "currencySymbol": "DAI",
-//   // "maker": {
-//   //   "ilk": "RWA010-A",
-//   //   "minNonMakerDropShare": 0.25
-//   // },
-//   // "juniorInvestors": [
-//   //   {
-//   //     "name": "BlockTower Credit Partners, LP",
-//   //     "address": "0x1bd5d6e5d95393a3175C56683B2cB9ddB3188fC1"
-//   //   }
-//   // ],
-//   pool: {
-//     name: string
-//     icon: { uri: string; mime: string } | null
-//     asset: { class: string }
-//     issuer: {
-//       name: string | undefined
-//       description: string | undefined
-//       email: string | undefined
-//       logo: { uri: string; mime: string } | null
-//     }
-//     links: {
-//       executiveSummary: { uri: string | undefined; mime: string }
-//       forum: string | undefined
-//       website: string | undefined
-//     }
-//     status: string
-//     listed: boolean
-//     tranches: {
-//       [x: string]:
-//         | { icon: { uri: string | undefined; mime: string }; minInitialInvestment?: undefined }
-//         | { icon: { uri: string | undefined; mime: string }; minInitialInvestment: string }
-//     }
-//   }
-// }
-
 export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches'> & {
   metadata: PoolMetadata
   tranches: (Omit<Pool['tranches'][0], 'poolMetadata'> & { poolMetadata: PoolMetadata })[]
@@ -366,10 +326,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
     }
   })
 
-  const [multicallData] = await Promise.all([
-    // Apollo.getPools(pools),
-    multicall<{ [key: string]: State }>(calls),
-  ])
+  const multicallData = await multicall<{ [key: string]: State }>(calls)
 
   const capacityPerPool: { [key: string]: BN } = {}
   const capacityGivenMaxReservePerPool: { [key: string]: BN } = {}
@@ -401,40 +358,18 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         .sub(newUsedCreditline)
     )
 
-    // console.log(poolId)
-    // console.log(
-    //   `newReserve: ${parseFloat(state.reserve.toString()) / 10 ** 24}M + ${
-    //     parseFloat(state.pendingSeniorInvestments.toString()) / 10 ** 24
-    //   }M + ${parseFloat(state.pendingJuniorInvestments.toString()) / 10 ** 24}M - ${
-    //     parseFloat(state.pendingSeniorRedemptions.toString()) / 10 ** 24
-    //   }M - ${parseFloat(state.pendingJuniorRedemptions.toString()) / 10 ** 24}M`
-    // )
-
-    // console.log(
-    //   ` - capacityGivenMaxReserve: ${parseFloat(state.maxReserve.toString()) / 10 ** 24}M - ${
-    //     parseFloat(newReserve.toString()) / 10 ** 24
-    //   }M- ${parseFloat((newUnusedCreditline || new BN(0)).toString()) / 10 ** 24}M`
-    // )
-
     const capacityGivenMaxReserve = BN.max(
       new BN(0),
       state.maxReserve.sub(newReserve).sub(newUnusedCreditline || new BN(0))
     )
 
-    // senior debt is reduced by any increase in the used creditline or increased by any decrease in the used creditline
     const newSeniorDebt = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
       ? state.seniorDebt.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
       : state.seniorDebt.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
 
-    // TODO: the change in senior balance should be multiplied by the mat here
     const newSeniorBalance = (state.usedCreditline || new BN(0)).gt(newUsedCreditline)
       ? state.seniorBalance.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
       : state.seniorBalance.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
-
-    // console.log(` - oldSeniorDebt: ${parseFloat(state.seniorDebt.toString()) / 10 ** 24}M `)
-    // console.log(` - newSeniorDebt: ${parseFloat(newSeniorDebt.toString()) / 10 ** 24}M `)
-    // console.log(` - oldSeniorBalance: ${parseFloat(state.seniorBalance.toString()) / 10 ** 24}M `)
-    // console.log(` - newSeniorBalance: ${parseFloat(newSeniorBalance.toString()) / 10 ** 24}M `)
 
     const newSeniorAsset = newSeniorDebt
       .add(newSeniorBalance)
@@ -446,27 +381,9 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
       .mul(Fixed27Base.mul(new BN(10).pow(new BN(6))).div(Fixed27Base.sub(state.maxSeniorRatio)))
       .div(new BN(10).pow(new BN(6)))
 
-    // console.log(` - newJuniorAsset: ${parseFloat(newJuniorAsset.toString()) / 10 ** 24}M `)
-    // console.log(
-    //   ` - mul: ${Fixed27Base.mul(new BN(10).pow(new BN(6)))
-    //     .div(Fixed27Base.sub(state.maxSeniorRatio))
-    //     .toString()}`
-    // )
-    // console.log(` - maxPoolSize: ${parseFloat(maxPoolSize.toString()) / 10 ** 24}M `)
-
     const maxSeniorAsset = maxPoolSize.sub(newJuniorAsset)
 
     const capacityGivenMaxDropRatio = BN.max(new BN(0), maxSeniorAsset.sub(newSeniorAsset))
-
-    // console.log(
-    //   ` - capacityGivenMaxDropRatioPerPool: ${parseFloat(state.maxSeniorRatio.toString()) / 10 ** 27}% * (${
-    //     parseFloat(state.netAssetValue.toString()) / 10 ** 24
-    //   }M +  ${parseFloat(newReserve.toString()) / 10 ** 24}M) -  ${
-    //     parseFloat(newSeniorAsset.toString()) / 10 ** 24
-    //   }M`
-    // )
-    // console.log('\n\n')
-    // console.log('\n\n')
 
     capacityPerPool[poolId] = BN.min(capacityGivenMaxReserve, capacityGivenMaxDropRatio)
     capacityGivenMaxReservePerPool[poolId] = capacityGivenMaxReserve
@@ -488,7 +405,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
     const capacity = new CurrencyBalance(capacityPerPool[id], 18)
     const capacityGivenMaxReserve = new CurrencyBalance(capacityGivenMaxReservePerPool[id], 18)
     const metadata: PoolMetadata = {
-      //// Do something with:
+      // TODO: Add these into the metadata
       // "shortName": "GIG Pool",
       // "slug": "gig-pool",
       // "currencySymbol": "DAI",
@@ -585,7 +502,6 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
       },
       createdAt: null,
       isInitialised: true,
-      // loanCollectionId: string | null;
       currency,
       tranches: [
         {
@@ -656,58 +572,6 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
           }
         : null,
     }
-    /*
-interface PoolMetadataDetails {
-  name: string
-  shortName?: string
-  slug: string
-  description?: string
-  media?: PoolMedia
-  website?: string
-  asset: string
-  securitize?: SecuritizeData
-  attributes?: { [key: string]: string | { [key: string]: string } }
-  assetMaturity?: string
-  currencySymbol?: string
-  isUpcoming?: boolean
-  isArchived?: boolean
-  isLaunching?: boolean
-  maker?: { ilk: string }
-  issuerEmail?: string
-  juniorInvestors?: JuniorInvestor[]
-}
-type P = {
-  version?: number;
-  pool: {
-    name: string;
-    icon: {
-        uri: string;
-        mime: string;
-    } | null;
-    asset: {
-        class: string;
-    };
-    issuer: {
-        name: string;
-        description: string;
-        email: string;
-        logo?: {
-            uri: string;
-            mime: string;
-        } | null;
-    };
-    links: {
-        executiveSummary: {
-            uri: string;
-            mime: string;
-        } | null;
-        forum: string;
-        website: string;
-    };
-    status: PoolStatus;
-    listed: boolean;
-  };
-*/
   })
 
   return { pools: combined }

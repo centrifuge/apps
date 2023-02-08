@@ -3,10 +3,7 @@ import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { MetaMask } from '@web3-react/metamask'
 import { Connector } from '@web3-react/types'
 import { WalletConnect } from '@web3-react/walletconnect'
-// @ ts-expect-error
-// import subwalletLogo from '@subwallet/wallet-connect/evm/predefinedWallet/SubWalletLogo.svg'
-// import metamaskLogo2 from '../assets/metamaskLogo.svg'
-import { createConnector } from './utils'
+import { createConnector, isInjected } from './utils'
 
 export type EvmConnectorMeta = {
   id: string
@@ -56,7 +53,7 @@ export function getEvmConnectors(
       },
       connector: metaMask,
       get installed() {
-        return !!window.ethereum
+        return isInjected()
       },
     },
     {

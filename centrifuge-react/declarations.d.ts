@@ -1,3 +1,8 @@
+declare module '*.svg' {
+  const content: string
+  export default content
+}
+
 interface Window {
   // walletLinkExtension is injected by the Coinbase Wallet extension
   walletLinkExtension?: any
