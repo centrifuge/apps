@@ -132,7 +132,7 @@ export const OnboardingPage: React.FC = () => {
                   <Step label="Business ownership" />
                   <Step label="Authorized signer verification" />
                   <Step label="Tax information" />
-                  {onboardingUser?.investorType === 'entity' && onboardingUser?.jurisdictionCode === 'us' && (
+                  {onboardingUser?.investorType === 'entity' && onboardingUser?.jurisdictionCode.startsWith('us') && (
                     <Step label="Accreditation" />
                   )}
                   <Step label="Sign subscription agreement" />
@@ -166,7 +166,7 @@ export const OnboardingPage: React.FC = () => {
                 {activeStep === 4 && <BusinessOwnership nextStep={nextStep} backStep={backStep} />}
                 {activeStep === 5 && <KnowYourCustomer backStep={backStep} nextStep={nextStep} />}
                 {activeStep === 6 && <TaxInfo backStep={backStep} nextStep={nextStep} />}
-                {onboardingUser?.investorType === 'entity' && onboardingUser.jurisdictionCode === 'us' ? (
+                {onboardingUser?.investorType === 'entity' && onboardingUser.jurisdictionCode.startsWith('us') ? (
                   <>
                     {activeStep === 7 && <Accreditation backStep={backStep} nextStep={nextStep} />}
                     {activeStep === 8 && (

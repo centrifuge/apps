@@ -107,7 +107,7 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
       }
     }
 
-    if (onboardingUser.investorType === 'entity' && onboardingUser.jurisdictionCode !== 'us') {
+    if (onboardingUser.investorType === 'entity' && !onboardingUser.jurisdictionCode.startsWith('us')) {
       return {
         type: 'W-8BEN-E',
         url: 'https://www.irs.gov/pub/irs-pdf/fw8bene.pdf',

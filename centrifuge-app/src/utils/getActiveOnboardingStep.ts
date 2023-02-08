@@ -56,7 +56,7 @@ export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId: 
     const { jurisdictionCode } = onboardingUser
     const { confirmOwners, verifyBusiness } = onboardingUser.steps
 
-    if (jurisdictionCode === 'us') {
+    if (jurisdictionCode.startsWith('us')) {
       if (hasSignedAgreement) return ENTITY_US_STEPS.COMPLETE
       if (verifyAccreditation.completed) return ENTITY_US_STEPS.SIGN_AGREEMENT
       if (verifyTaxInfo.completed) return ENTITY_US_STEPS.VERIFY_ACCREDITATION
