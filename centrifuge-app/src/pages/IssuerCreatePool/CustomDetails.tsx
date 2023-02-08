@@ -24,7 +24,7 @@ export function CustomDetails() {
       {(fldArr) => (
         <Box>
           <Shelf justifyContent="space-between">
-            <Text>Custom content</Text>
+            <Text>Issuer profile</Text>
             <Button
               variant="secondary"
               type="button"
