@@ -61,8 +61,6 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    env:
-      region: europe-central2
     steps:
       - name: Checkout
         uses: Bhacaz/checkout-files@v2

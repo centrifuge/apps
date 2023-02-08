@@ -35,10 +35,6 @@ runs:
 ## or `run` commands that we write.
   using: composite
   steps:
-    - id: setregion
-      shell: sh
-      run: echo "region=europe-central2" >> $GITHUB_ENV
-
     - name: retrieve artifacts
       id: download
       uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
@@ -62,7 +58,7 @@ runs:
       with:
         name: '${{ inputs.function_name }}'
         runtime: 'nodejs16'
-        region: '${{ env.region }}'
+        region: '${{ vars.GCLOUD_REGION }}'
         source_dir: '${{steps.download.outputs.download-path}}' # downlaod artifacts sets the current directory as the one in artifact.with.path
         entry_point: '${{ inputs.target }}'
         secret_environment_variables: ${{ inputs.function_secrets }}
@@ -80,5 +76,5 @@ runs:
       shell: sh
       run: |
         gcloud functions add-iam-policy-binding ${{ inputs.function_name }} \
-        --region=${{ env.region }} \
+        --region=${{ vars.GCLOUD_REGION }} \
         --member="allUsers" --role="roles/cloudfunctions.invoker"
