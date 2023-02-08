@@ -28,9 +28,11 @@ export const pinFile = async (fileReadStream: any) => {
   console.log('🚀 ~ headers', JSON.stringify(PINATA_AUTH_HEADERS))
 
   return axios.post(`${PINATA_BASE_URL}/pinning/pinFileToIPFS`, data, {
-    // maxBodyLength: 'Infinity', // this is needed to prevent axios from erroring out with large files
+    // @ts-expect-error
+    maxBodyLength: 'Infinity', // this is needed to prevent axios from erroring out with large files
     headers: {
-      'Content-Type': `multipart/form-data; boundary=${data.getBoundary()}`,
+      // @ts-expect-error
+      'Content-Type': `multipart/form-data; boundary=${data._boundary}`,
       ...PINATA_AUTH_HEADERS,
     },
   })
