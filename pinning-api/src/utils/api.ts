@@ -25,7 +25,6 @@ export const unpinFile = async (hashToUnpin: string) => {
 export const pinFile = async (fileReadStream: any) => {
   const data = new FormData()
   data.append('file', fileReadStream)
-  console.log('🚀 ~ headers', JSON.stringify(PINATA_AUTH_HEADERS))
 
   return axios.post(`${PINATA_BASE_URL}/pinning/pinFileToIPFS`, data, {
     // @ts-expect-error
