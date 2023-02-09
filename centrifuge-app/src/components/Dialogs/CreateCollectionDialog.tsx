@@ -1,5 +1,11 @@
 import { CollectionMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
-import { useAsyncCallback, useCentrifuge, useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
+import {
+  ConnectionGuard,
+  useAsyncCallback,
+  useCentrifuge,
+  useCentrifugeTransaction,
+  useWallet,
+} from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -115,54 +121,56 @@ export const CreateCollectionDialog: React.FC<{ open: boolean; onClose: () => vo
   return (
     <>
       <Dialog isOpen={open && !confirmOpen} onClose={close} title="Create new collection">
-        <form onSubmit={() => setConfirmOpen(true)}>
-          <Stack gap={3}>
-            <TextInput
-              label="Name"
-              value={name}
-              maxLength={collectionMetadataSchema.name.maxLength}
-              onChange={(e) => setName(e.target.value)}
-              disabled={fieldDisabled}
-            />
-            <TextAreaInput
-              label="Description"
-              value={description}
-              maxLength={collectionMetadataSchema.description.maxLength}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={fieldDisabled}
-            />
-            <FileUpload
-              label="Collection logo (JPEG, SVG, PNG, or GIF up to 1 MB)"
-              placeholder="Choose image"
-              file={logo}
-              onFileChange={(file) => setLogo(file)}
-              validate={(file) => {
-                if (!isImageFile(file)) {
-                  return 'File format not supported'
-                }
-                if (file.size > MAX_FILE_SIZE_IN_BYTES) {
-                  return 'File too large'
-                }
-              }}
-              accept="image/*"
-            />
-            <Shelf justifyContent="space-between">
-              {balanceLow && (
-                <Text variant="label1" color="criticalForeground">
-                  Your balance is too low ({(balance || 0).toFixed(2)} AIR)
-                </Text>
-              )}
-              <ButtonGroup ml="auto">
-                <Button variant="secondary" onClick={close}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={disabled}>
-                  Next
-                </Button>
-              </ButtonGroup>
-            </Shelf>
-          </Stack>
-        </form>
+        <ConnectionGuard networks={['centrifuge']}>
+          <form onSubmit={() => setConfirmOpen(true)}>
+            <Stack gap={3}>
+              <TextInput
+                label="Name"
+                value={name}
+                maxLength={collectionMetadataSchema.name.maxLength}
+                onChange={(e) => setName(e.target.value)}
+                disabled={fieldDisabled}
+              />
+              <TextAreaInput
+                label="Description"
+                value={description}
+                maxLength={collectionMetadataSchema.description.maxLength}
+                onChange={(e) => setDescription(e.target.value)}
+                disabled={fieldDisabled}
+              />
+              <FileUpload
+                label="Collection logo (JPEG, SVG, PNG, or GIF up to 1 MB)"
+                placeholder="Choose image"
+                file={logo}
+                onFileChange={(file) => setLogo(file)}
+                validate={(file) => {
+                  if (!isImageFile(file)) {
+                    return 'File format not supported'
+                  }
+                  if (file.size > MAX_FILE_SIZE_IN_BYTES) {
+                    return 'File too large'
+                  }
+                }}
+                accept="image/*"
+              />
+              <Shelf justifyContent="space-between">
+                {balanceLow && (
+                  <Text variant="label1" color="criticalForeground">
+                    Your balance is too low ({(balance || 0).toFixed(2)} AIR)
+                  </Text>
+                )}
+                <ButtonGroup ml="auto">
+                  <Button variant="secondary" onClick={close}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={disabled}>
+                    Next
+                  </Button>
+                </ButtonGroup>
+              </Shelf>
+            </Stack>
+          </form>
+        </ConnectionGuard>
       </Dialog>
       <Dialog isOpen={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <form onSubmit={execute}>
