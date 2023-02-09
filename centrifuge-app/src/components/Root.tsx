@@ -7,7 +7,7 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Helmet, HelmetProvider } from 'react-helmet-async'
+import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import { config } from '../config'
@@ -34,6 +34,7 @@ import { AuthProvider } from './AuthProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
+import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
 import { OnboardingUserProvider } from './OnboardingUserProvider'
 import { PodAuthProvider } from './PodAuthProvider'
@@ -76,9 +77,7 @@ export const Root: React.VFC = () => {
   return (
     <>
       <HelmetProvider>
-        <Helmet>
-          <title>{config.network === 'centrifuge' ? 'Centrifuge App' : 'Altair App'}</title>
-        </Helmet>
+        <Head />
       </HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <FabricProvider
