@@ -126,6 +126,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
             {configurePermission && (
               <NavigationTabsItem to={`${basePath}/${pid}/configuration`}>Configuration</NavigationTabsItem>
             )}
+            <NavigationTabsItem to={`${basePath}/${pid}/access`}>Access</NavigationTabsItem>
           </NavigationTabs>
         </Shelf>
       </PageHeader>
