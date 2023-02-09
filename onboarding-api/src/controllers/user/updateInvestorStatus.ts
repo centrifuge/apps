@@ -3,6 +3,7 @@ import { InferType, object, string, StringSchema } from 'yup'
 import { OnboardingUser, validateAndWriteToFirestore } from '../../database'
 import { sendApproveInvestorMessage } from '../../emails/sendApproveInvestorMessage'
 import { UpdateInvestorStatusPayload } from '../../emails/sendDocumentsToIssuer'
+import { sendRejectInvestorMessage } from '../../emails/sendRejectInvestorMessage'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { Subset } from '../../utils/types'
@@ -44,9 +45,10 @@ export const updateInvestorStatusController = async (
 
     await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['onboardingStatus'])
 
-    // TODO: send email to investor
-    if (user.email && status === 'approved') {
+    if (user?.email && status === 'approved') {
       await sendApproveInvestorMessage(user.email, poolId, trancheId)
+    } else if (user?.email && status === 'rejected') {
+      await sendRejectInvestorMessage(user.email, poolId)
     }
     return res.status(204).send()
   } catch (error) {

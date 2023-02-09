@@ -1,9 +1,8 @@
 import { sendEmail, templateIds } from '.'
 import { getPoolById } from '../utils/getPoolById'
 
-export const sendApproveInvestorMessage = async (to: string, poolId: string, trancheId: string) => {
-  const { pool, metadata } = await getPoolById(poolId)
-  const trancheName = pool?.tranches.find((t) => t.id === trancheId)?.currency.name
+export const sendRejectInvestorMessage = async (to: string, poolId: string) => {
+  const { metadata } = await getPoolById(poolId)
   const message = {
     personalizations: [
       {
@@ -14,12 +13,11 @@ export const sendApproveInvestorMessage = async (to: string, poolId: string, tra
         ],
         dynamic_template_data: {
           poolName: metadata?.pool.name,
-          trancheName,
-          poolUrl: `${process.env.REDIRECT_URL}/investments/${poolId}`,
+          issuerEmail: metadata.pool.issuer.email,
         },
       },
     ],
-    template_id: templateIds.investorApproved,
+    template_id: templateIds.investorRejected,
     from: {
       name: 'Centrifuge',
       email: `issuer+${metadata.poolName.replaceAll(' ', '')}@centrifuge.io`,
