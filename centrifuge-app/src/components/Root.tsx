@@ -36,7 +36,7 @@ import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
-import { OnboardingUserProvider } from './OnboardingUserProvider'
+import { OnboardingProvider } from './OnboardingProvider'
 import { PodAuthProvider } from './PodAuthProvider'
 
 const queryClient = new QueryClient({
@@ -165,9 +165,9 @@ const Routes: React.VFC = () => {
         <InvestmentDisclaimerPage />
       </Route>
       <Route exact path="/onboarding">
-        <OnboardingUserProvider>
+        <OnboardingProvider>
           <OnboardingPage />
-        </OnboardingUserProvider>
+        </OnboardingProvider>
       </Route>
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />

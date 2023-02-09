@@ -3,7 +3,6 @@ import * as dotenv from 'dotenv'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
 import { signAgreementController } from './controllers/agreement/signAgreement'
-import { storeTransactionHashController } from './controllers/agreement/storeTransactionHash'
 import { sendDocumentsToIssuerController } from './controllers/emails/sendDocumentsToIssuer'
 import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'
 import { verifyEmailController } from './controllers/emails/verifyEmail'
@@ -43,7 +42,6 @@ onboarding.post('/confirmOwners', verifyJw3t, confirmOwnersController)
 onboarding.get('/getUnsignedAgreement', verifyJw3t, getUnsignedAgreementController)
 onboarding.post('/signAgreement', verifyJw3t, signAgreementController)
 onboarding.get('/getSignedAgreement', verifyJw3t, getSignedAgreementController)
-onboarding.post('/storeTransactionHash', verifyJw3t, storeTransactionHashController)
 
 onboarding.post('/sendVerifyEmail', verifyJw3t, sendVerifyEmailController)
 onboarding.post('/sendDocumentsToIssuer', verifyJw3t, sendDocumentsToIssuerController)

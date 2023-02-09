@@ -5,10 +5,15 @@ import { sendDocumentsToIssuer } from '../../emails/sendDocumentsToIssuer'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { validateInput } from '../../utils/validateInput'
+import { validateRemark } from '../../utils/validateRemark'
 
-const sendDocumentsToIssuerInput = object({
+export const sendDocumentsToIssuerInput = object({
   poolId: string().required(),
   trancheId: string().required(),
+  transactionInfo: object({
+    extrinsicHash: string().required(),
+    blockNumber: string().required(),
+  }).required(),
 })
 
 export const sendDocumentsToIssuerController = async (
@@ -18,10 +23,12 @@ export const sendDocumentsToIssuerController = async (
   try {
     await validateInput(req.body, sendDocumentsToIssuerInput)
 
-    const { poolId, trancheId } = req.body
+    const { poolId, trancheId, transactionInfo } = req.body
     const { walletAddress } = req
 
     const user = await fetchUser(walletAddress)
+
+    await validateRemark(transactionInfo, `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`)
 
     if (
       !user?.steps.signAgreements[poolId]?.[trancheId]?.signedDocument &&
@@ -48,7 +55,6 @@ export const sendDocumentsToIssuerController = async (
     const taxInfoPDF = await taxInfo.download()
 
     await sendDocumentsToIssuer(
-      'jp@k-f.co',
       walletAddress,
       poolId,
       trancheId,
@@ -67,9 +73,20 @@ export const sendDocumentsToIssuerController = async (
             },
           },
         },
+        steps: {
+          ...user?.steps,
+          signAgreements: {
+            [poolId]: {
+              [trancheId]: {
+                ...user?.steps.signAgreements[poolId]?.[trancheId],
+                transactionInfo,
+              },
+            },
+          },
+        },
       },
       'entity',
-      ['onboardingStatus']
+      ['onboardingStatus', 'steps']
     )
     const freshUserData = (await userCollection.doc(walletAddress).get()).data() as OnboardingUser
     return res.status(201).send({ ...freshUserData })
