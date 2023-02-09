@@ -22,7 +22,7 @@ export const sendApproveInvestorMessage = async (to: string, poolId: string, tra
     template_id: templateIds.investorApproved,
     from: {
       name: 'Centrifuge',
-      email: `issuer+${metadata.poolName.replaceAll(' ', '')}@centrifuge.io`,
+      email: `issuer+${metadata.pool.name?.replaceAll(' ', '')}@centrifuge.io`,
     },
   }
   await sendEmail(message)

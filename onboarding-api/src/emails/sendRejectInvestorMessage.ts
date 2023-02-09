@@ -20,7 +20,7 @@ export const sendRejectInvestorMessage = async (to: string, poolId: string) => {
     template_id: templateIds.investorRejected,
     from: {
       name: 'Centrifuge',
-      email: `issuer+${metadata.poolName.replaceAll(' ', '')}@centrifuge.io`,
+      email: `issuer+${metadata.pool.name?.replaceAll(' ', '')}@centrifuge.io`,
     },
   }
   await sendEmail(message)
