@@ -12,18 +12,18 @@ export function Head() {
         name="description"
         content="The on-chain ecosystem for structured credit. Institutional investors earn yield backed by tokenized RWAs, while SMEs get access to a cheaper cost of capital."
       />
-      <link rel="icon" href={`${network}/favicon.ico`} />
-      <link rel="apple-touch-icon" sizes="180x180" href={`${network}/apple-touch-icon.png`} />
-      <link rel="icon" type="image/png" sizes="32x32" href={`${network}/favicon-32x32.png`} />
-      <link rel="icon" type="image/png" sizes="16x16" href={`${network}/favicon-16x16.png`} />
-      <link rel="manifest" href={`${network}/site.webmanifest`} />
-      <link rel="mask-icon" href={`${network}/safari-pinned-tab.svg`} color="#5bbad5" />
-      <meta name="msapplication-config" content={`${network}/browserconfig.xml`} />
+      <link rel="icon" href={`/${network}/favicon.ico`} />
+      <link rel="apple-touch-icon" sizes="180x180" href={`/${network}/apple-touch-icon.png`} />
+      <link rel="icon" type="image/png" sizes="32x32" href={`/${network}/favicon-32x32.png`} />
+      <link rel="icon" type="image/png" sizes="16x16" href={`/${network}/favicon-16x16.png`} />
+      <link rel="manifest" href={`/${network}/site.webmanifest`} />
+      <link rel="mask-icon" href={`/${network}/safari-pinned-tab.svg`} color="#5bbad5" />
+      <meta name="msapplication-config" content={`/${network}/browserconfig.xml`} />
       <meta name="msapplication-TileColor" content={network === 'centrifuge' ? '#1253FF' : '#FFC012'} />
       <meta name="theme-color" content="#ffffff" />
       {/* manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/ */}
-      <link rel="manifest" href={`${network}/manifest.json`} />
+      <link rel="manifest" href={`/${network}/manifest.json`} />
     </Helmet>
   )
 }
