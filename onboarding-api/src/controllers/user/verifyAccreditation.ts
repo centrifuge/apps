@@ -1,18 +1,18 @@
 import { Request, Response } from 'express'
-import { OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
+import { OnboardingUser, validateAndWriteToFirestore } from '../../database'
+import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { Subset } from '../../utils/types'
 
 export const verifyAccreditationController = async (req: Request, res: Response) => {
   try {
-    const userDoc = await userCollection.doc(req.walletAddress).get()
-    const user = userDoc.data() as OnboardingUser
+    const user = await fetchUser(req.walletAddress)
 
-    if (!userDoc.exists || user.steps.verifyAccreditation.completed) {
+    if (user.steps.verifyAccreditation.completed) {
       throw new HttpsError(400, 'Unable to process request')
     }
 
-    if (user.investorType === 'entity' && user.jurisdictionCode !== 'us') {
+    if (user.investorType === 'entity' && !user.jurisdictionCode.startsWith('us')) {
       throw new HttpsError(400, 'Only US entities need to verify their accreditation status')
     }
 
@@ -30,7 +30,7 @@ export const verifyAccreditationController = async (req: Request, res: Response)
       },
     }
     await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['steps'])
-    const freshUserData = (await userCollection.doc(user.wallet.address).get()).data()
+    const freshUserData = await fetchUser(req.walletAddress)
     return res.status(200).send({ ...freshUserData })
   } catch (error) {
     if (error instanceof HttpsError) {

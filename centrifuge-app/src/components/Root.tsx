@@ -7,7 +7,7 @@ import {
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import * as React from 'react'
-import { Helmet, HelmetProvider } from 'react-helmet-async'
+import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import { config } from '../config'
@@ -15,6 +15,7 @@ import { AccountNFTsPage } from '../pages/AccountNFTs'
 import { CollectionPage } from '../pages/Collection'
 import { CollectionsPage } from '../pages/Collections'
 import { CreateLoanFromNFTPage } from '../pages/CreateLoanFromNFT'
+import { InvestmentDisclaimerPage } from '../pages/InvestmentDisclaimer'
 import { IssuerCreatePoolPage } from '../pages/IssuerCreatePool'
 import { IssuerPoolPage } from '../pages/IssuerPool'
 import { IssuerCreateLoanPage } from '../pages/IssuerPool/Assets/CreateLoan'
@@ -24,6 +25,7 @@ import { NFTPage } from '../pages/NFT'
 import { NotFoundPage } from '../pages/NotFound'
 import { OnboardingPage } from '../pages/Onboarding'
 import { EmailVerified } from '../pages/Onboarding/EmailVerified'
+import { UpdateInvestorStatus } from '../pages/Onboarding/UpdateInvestorStatus'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
@@ -32,6 +34,7 @@ import { AuthProvider } from './AuthProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
+import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
 import { OnboardingUserProvider } from './OnboardingUserProvider'
 import { PodAuthProvider } from './PodAuthProvider'
@@ -74,9 +77,7 @@ export const Root: React.VFC = () => {
   return (
     <>
       <HelmetProvider>
-        <Helmet>
-          <title>{config.network === 'centrifuge' ? 'Centrifuge App' : 'Altair App'}</title>
-        </Helmet>
+        <Head />
       </HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <FabricProvider
@@ -160,6 +161,9 @@ const Routes: React.VFC = () => {
       <Route path="/investments">
         <PoolsPage />
       </Route>
+      <Route path="/disclaimer">
+        <InvestmentDisclaimerPage />
+      </Route>
       <Route exact path="/onboarding">
         <OnboardingUserProvider>
           <OnboardingPage />
@@ -167,6 +171,9 @@ const Routes: React.VFC = () => {
       </Route>
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />
+      </Route>
+      <Route exact path="/onboarding/updateInvestorStatus">
+        <UpdateInvestorStatus />
       </Route>
       <Route exact path="/">
         <Redirect to="/investments" />
