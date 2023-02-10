@@ -144,21 +144,23 @@ export function useWalletStateInternal(evmConnectors: EvmConnectorMeta[]) {
 
   React.useEffect(() => {
     if (state.connectedType === 'evm') {
-      if (evmState.accounts?.length)
+      if (evmState.accounts?.length) {
         persist({
           type: 'evm',
           wallet: evmConnectors.find((c) => c.connector === state.evm.selectedWallet!.connector)!.id,
           address: evmState.accounts[0],
           chainId: evmState.chainId,
         })
+      }
     } else if (state.connectedType === 'substrate') {
-      if (state.substrate.selectedAccountAddress)
+      if (state.substrate.selectedAccountAddress) {
         persist({
           type: 'substrate',
           wallet: state.substrate.selectedWallet?.extensionName,
           address: state.substrate.selectedAccountAddress,
           proxy: state.substrate.proxyAddress,
         })
+      }
     }
   }, [state])
 
