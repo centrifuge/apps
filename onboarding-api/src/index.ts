@@ -2,9 +2,8 @@ const express = require('express')
 import * as dotenv from 'dotenv'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
-import { signAgreementController } from './controllers/agreement/signAgreement'
-import { sendDocumentsToIssuerController } from './controllers/emails/sendDocumentsToIssuer'
 import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'
+import { signAndSendDocumentsController } from './controllers/emails/signAndSendDocuments'
 import { verifyEmailController } from './controllers/emails/verifyEmail'
 import { confirmOwnersController } from './controllers/kyb/confirmOwners'
 import { verifyBusinessController } from './controllers/kyb/verifyBusiness'
@@ -40,11 +39,10 @@ onboarding.post('/verifyBusiness', verifyJw3t, verifyBusinessController)
 onboarding.post('/confirmOwners', verifyJw3t, confirmOwnersController)
 
 onboarding.get('/getUnsignedAgreement', verifyJw3t, getUnsignedAgreementController)
-onboarding.post('/signAgreement', verifyJw3t, signAgreementController)
 onboarding.get('/getSignedAgreement', verifyJw3t, getSignedAgreementController)
 
 onboarding.post('/sendVerifyEmail', verifyJw3t, sendVerifyEmailController)
-onboarding.post('/sendDocumentsToIssuer', verifyJw3t, sendDocumentsToIssuerController)
+onboarding.post('/signAndSendDocuments', verifyJw3t, signAndSendDocumentsController)
 onboarding.get('/verifyEmail', verifyEmailController)
 
 onboarding.post('/updateInvestorStatus', updateInvestorStatusController)

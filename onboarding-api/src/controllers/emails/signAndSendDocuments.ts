@@ -1,13 +1,20 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { onboardingBucket, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
-import { sendDocumentsToIssuer } from '../../emails/sendDocumentsToIssuer'
+import {
+  onboardingBucket,
+  OnboardingUser,
+  userCollection,
+  validateAndWriteToFirestore,
+  writeToOnboardingBucket,
+} from '../../database'
+import { sendDocuments } from '../../emails/sendDocuments'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
+import { signAndAnnotateAgreement } from '../../utils/signAndAnnotateAgreement'
 import { validateInput } from '../../utils/validateInput'
 import { validateRemark } from '../../utils/validateRemark'
 
-export const sendDocumentsToIssuerInput = object({
+export const signAndSendDocumentsInput = object({
   poolId: string().required(),
   trancheId: string().required(),
   transactionInfo: object({
@@ -16,12 +23,12 @@ export const sendDocumentsToIssuerInput = object({
   }).required(),
 })
 
-export const sendDocumentsToIssuerController = async (
-  req: Request<any, any, InferType<typeof sendDocumentsToIssuerInput>>,
+export const signAndSendDocumentsController = async (
+  req: Request<any, any, InferType<typeof signAndSendDocumentsInput>>,
   res: Response
 ) => {
   try {
-    await validateInput(req.body, sendDocumentsToIssuerInput)
+    await validateInput(req.body, signAndSendDocumentsInput)
 
     const { poolId, trancheId, transactionInfo } = req.body
     const { walletAddress } = req
@@ -37,29 +44,43 @@ export const sendDocumentsToIssuerController = async (
       throw new HttpsError(400, 'User must sign document before documents can be sent to issuer')
     }
 
-    const signedAgreement = await onboardingBucket.file(
-      `signed-subscription-agreements/${walletAddress}/${poolId}/${trancheId}.pdf`
+    const unsignedAgreement = await onboardingBucket.file(`subscription-agreements/${poolId}/${trancheId}.pdf`)
+    const [unsignedAgreementExists] = await unsignedAgreement.exists()
+
+    if (!unsignedAgreementExists) {
+      throw new HttpsError(400, 'Agreement not found')
+    }
+
+    const pdfDoc = await signAndAnnotateAgreement(
+      unsignedAgreement,
+      walletAddress,
+      transactionInfo,
+      user?.name as string
     )
 
-    const [signedAgreementExists] = await signedAgreement.exists()
+    const signedAgreementPDF = await pdfDoc.save()
+
+    await writeToOnboardingBucket(
+      signedAgreementPDF,
+      `signed-subscription-agreements/${walletAddress}/${poolId}/${trancheId}.pdf`
+    )
 
     const taxInfo = await onboardingBucket.file(`tax-information/${walletAddress}/${poolId}/${trancheId}.pdf`)
 
     const [taxInfoExists] = await taxInfo.exists()
 
-    if (!signedAgreementExists || !taxInfoExists) {
-      throw new HttpsError(400, 'Signed agreement or tax info not found')
+    if (!taxInfoExists) {
+      throw new HttpsError(400, 'Tax info not found')
     }
 
-    const signedAgreementPDF = await signedAgreement.download()
     const taxInfoPDF = await taxInfo.download()
 
-    await sendDocumentsToIssuer(
+    await sendDocuments(
       walletAddress,
       poolId,
       trancheId,
       taxInfoPDF[0].toString('base64'),
-      signedAgreementPDF[0].toString('base64')
+      Buffer.from(signedAgreementPDF).toString('base64')
     )
 
     await validateAndWriteToFirestore(
@@ -78,7 +99,7 @@ export const sendDocumentsToIssuerController = async (
           signAgreements: {
             [poolId]: {
               [trancheId]: {
-                ...user?.steps.signAgreements[poolId]?.[trancheId],
+                signedDocument: true,
                 transactionInfo,
               },
             },
