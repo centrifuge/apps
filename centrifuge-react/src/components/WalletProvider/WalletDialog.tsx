@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Dialog,
-  Grid,
   IconAlertCircle,
   IconCheck,
   IconDownload,
@@ -23,6 +22,8 @@ import { truncateAddress } from '../../utils/formatting'
 import { EvmChains } from './evm/chains'
 import { EvmConnectorMeta } from './evm/connectors'
 import { isMetaMaskWallet } from './evm/utils'
+import { SelectionStep } from './SelectionStep'
+import { UserSelection } from './UserSelection'
 import { useWallet, wallets } from './WalletProvider'
 
 type Props = {
@@ -66,78 +67,72 @@ export function WalletDialog({ evmChains }: Props) {
   }
 
   return (
-    <Dialog title="Select a wallet" isOpen={!!view} onClose={close}>
+    <Dialog title="Connect wallet" isOpen={!!view} onClose={close}>
       <Stack gap={4}>
-        <Grid columns={2} equalColumns>
-          <Text>network: {selectedNetwork}</Text>
-          <Text>wallet: {selectedWallet?.title}</Text>
-        </Grid>
+        <UserSelection network={selectedNetwork} wallet={selectedWallet} />
+
         {view === 'wallets' ? (
           <>
-            <Stack gap={2}>
-              <Text variant="heading6">Network</Text>
-              <Grid minColumnWidth={120}>
+            <SelectionStep step={1} title="Network">
+              <Button
+                onClick={() => showWallets('centrifuge')}
+                active={selectedNetwork === 'centrifuge'}
+                variant="tertiary"
+                small
+              >
+                Centrifuge
+              </Button>
+              {Object.entries(evmChains).map(([chainId, chain]) => (
                 <Button
-                  onClick={() => showWallets('centrifuge')}
-                  active={selectedNetwork === 'centrifuge'}
+                  // icon={<Box as="img" src={chain.logo?.src ?? ''} alt="" width="iconMedium" />}
+                  key={chainId}
+                  onClick={() => showWallets(Number(chainId))}
+                  active={selectedNetwork === Number(chainId)}
                   variant="tertiary"
                   small
                 >
-                  Centrifuge
+                  {chain.name}
                 </Button>
-                {Object.entries(evmChains).map(([chainId, chain]) => (
+              ))}
+            </SelectionStep>
+
+            <SelectionStep step={2} title="Wallet" disabled={!(shownWallets?.length > 0)}>
+              {shownWallets.map((wallet) =>
+                wallet.installed ? (
                   <Button
-                    // icon={<Box as="img" src={chain.logo?.src ?? ''} alt="" width="iconMedium" />}
-                    onClick={() => showWallets(Number(chainId))}
-                    active={selectedNetwork === Number(chainId)}
+                    key={wallet.title}
+                    icon={<Box as="img" src={getWalletIcon(wallet)} alt="" width="iconMedium" />}
+                    iconRight={
+                      selectedWallet && isConnectError && selectedWallet === wallet ? IconAlertCircle : undefined
+                    }
+                    onClick={() => {
+                      showWallets(selectedNetwork, wallet)
+                      connect(wallet)
+                    }}
+                    disabled={!isEnabled(wallet)}
+                    loading={isConnecting && wallet === pendingWallet}
+                    active={ctx[connectedType!]?.selectedWallet === wallet}
                     variant="tertiary"
                     small
                   >
-                    {chain.name}
+                    {getWalletLabel(wallet)}
                   </Button>
-                ))}
-              </Grid>
-            </Stack>
-            <Stack gap={2}>
-              <Text variant="heading6">Wallet</Text>
-              <Grid minColumnWidth={120} gap={2}>
-                {shownWallets.map((wallet) =>
-                  wallet.installed ? (
-                    <Button
-                      key={wallet.title}
-                      icon={<Box as="img" src={getWalletIcon(wallet)} alt="" width="iconMedium" />}
-                      iconRight={
-                        selectedWallet && isConnectError && selectedWallet === wallet ? IconAlertCircle : undefined
-                      }
-                      onClick={() => {
-                        showWallets(selectedNetwork, wallet)
-                        connect(wallet)
-                      }}
-                      disabled={!isEnabled(wallet)}
-                      loading={isConnecting && wallet === pendingWallet}
-                      active={ctx[connectedType!]?.selectedWallet === wallet}
-                      variant="tertiary"
-                      small
-                    >
-                      {getWalletLabel(wallet)}
-                    </Button>
-                  ) : (
-                    <AnchorButton
-                      href={wallet.installUrl}
-                      target="_blank"
-                      key={wallet.title}
-                      icon={<Box as="img" src={getWalletIcon(wallet)} alt="" width="iconMedium" />}
-                      iconRight={IconDownload}
-                      disabled={!isEnabled(wallet)}
-                      variant="tertiary"
-                      small
-                    >
-                      {getWalletLabel(wallet)}
-                    </AnchorButton>
-                  )
-                )}
-              </Grid>
-            </Stack>
+                ) : (
+                  <AnchorButton
+                    href={wallet.installUrl}
+                    target="_blank"
+                    key={wallet.title}
+                    icon={<Box as="img" src={getWalletIcon(wallet)} alt="" width="iconMedium" />}
+                    iconRight={IconDownload}
+                    disabled={!isEnabled(wallet)}
+                    variant="tertiary"
+                    small
+                  >
+                    {getWalletLabel(wallet)}
+                  </AnchorButton>
+                )
+              )}
+            </SelectionStep>
           </>
         ) : (
           <>
