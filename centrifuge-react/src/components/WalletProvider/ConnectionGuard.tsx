@@ -57,6 +57,7 @@ export function ConnectionGuard({ networks, children, body = 'Unsupported networ
                             state.close()
                             switchNetwork(network)
                           }}
+                          key={network}
                         />
                       ))}
                     </MenuItemGroup>

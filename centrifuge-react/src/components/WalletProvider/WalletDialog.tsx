@@ -42,7 +42,7 @@ export function WalletDialog({ evmChains }: Props) {
   } = ctx
 
   const shownWallets = (
-    selectedNetwork === 'centrifuge' ? [...wallets] : !!selectedNetwork ? [...evm.connectors] : []
+    selectedNetwork === 'centrifuge' ? [...wallets] : selectedNetwork ? [...evm.connectors] : []
   ).sort((wallet) => (wallet.installed ? -1 : 1))
 
   function isEnabled(wallet: Wallet | EvmConnectorMeta) {
@@ -62,7 +62,9 @@ export function WalletDialog({ evmChains }: Props) {
       } else {
         close()
       }
-    } catch {}
+    } catch {
+      //
+    }
   }
 
   return (
@@ -92,6 +94,7 @@ export function WalletDialog({ evmChains }: Props) {
                     active={selectedNetwork === Number(chainId)}
                     variant="tertiary"
                     small
+                    key={chainId}
                   >
                     {chain.name}
                   </Button>
@@ -151,13 +154,15 @@ export function WalletDialog({ evmChains }: Props) {
 }
 
 function getWalletLabel(wallet: EvmConnectorMeta | Wallet) {
-  if ('connector' in wallet && wallet.connector instanceof MetaMask)
+  if ('connector' in wallet && wallet.connector instanceof MetaMask) {
     return !wallet.installed || isMetaMaskWallet() ? wallet.title : 'Browser Wallet'
+  }
   return wallet.title
 }
 function getWalletIcon(wallet: EvmConnectorMeta | Wallet) {
-  if ('connector' in wallet && wallet.connector instanceof MetaMask)
+  if ('connector' in wallet && wallet.connector instanceof MetaMask) {
     return !wallet.installed || isMetaMaskWallet() ? wallet.logo.src : ''
+  }
   return wallet.logo.src
 }
 
