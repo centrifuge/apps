@@ -1,10 +1,10 @@
-import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
-import { switchMap, tap } from 'rxjs'
+import { switchMap } from 'rxjs'
 import { useAuth } from '../../components/AuthProvider'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 import { PDFViewer } from '../../components/PDFViewer'
 
 type Props = {
@@ -14,10 +14,6 @@ type Props = {
   isSignedAgreementFetched: boolean
 }
 
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
-
 export const SignSubscriptionAgreement = ({
   nextStep,
   backStep,
@@ -26,10 +22,12 @@ export const SignSubscriptionAgreement = ({
 }: Props) => {
   const [isAgreed, setIsAgreed] = React.useState(false)
   const { authToken } = useAuth()
-  const { refetchOnboardingUser, onboardingUser } = useOnboardingUser()
-  const [transactionHash, setTransactionHash] = React.useState<string>()
+  const { refetchOnboardingUser, onboardingUser, pool } = useOnboarding()
+  const { selectedAccount } = useWallet()
 
-  const isCompleted = onboardingUser?.steps?.signAgreements[poolId]?.[trancheId]?.signedDocument
+  const isCompleted =
+    onboardingUser.steps.signAgreements[pool.id][pool.trancheId].signedDocument &&
+    !!onboardingUser.steps.signAgreements[pool.id][pool.trancheId].transactionInfo.extrinsicHash
 
   React.useEffect(() => {
     if (isCompleted) {
@@ -38,10 +36,12 @@ export const SignSubscriptionAgreement = ({
   }, [isCompleted])
 
   const { data: unsignedAgreementData, isFetched: isUnsignedAgreementFetched } = useQuery(
-    ['unsignedSubscriptionAgreement', poolId, trancheId],
+    ['unsignedSubscriptionAgreement', pool.id, pool.trancheId],
     async () => {
       const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUnsignedAgreement?poolId=${poolId}&trancheId=${trancheId}`,
+        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUnsignedAgreement?poolId=${pool.id}&trancheId=${
+          pool.trancheId
+        }`,
         {
           method: 'GET',
           headers: {
@@ -67,28 +67,24 @@ export const SignSubscriptionAgreement = ({
   )
 
   const { execute: signRemark, isLoading: isSigningTransaction } = useCentrifugeTransaction(
-    'Update configuration',
-    (cent) => () => {
-      return cent.getApi().pipe(
-        switchMap((api) =>
-          cent.wrapSignAndSend(
-            api,
-            api.tx.system.remark(`Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`)
+    'sign remark',
+    (cent) => () =>
+      cent
+        .getApi()
+        .pipe(
+          switchMap((api) =>
+            cent.wrapSignAndSend(
+              api,
+              api.tx.system.remark(`Signed subscription agreement for pool: ${pool.id} tranche: ${pool.trancheId}`)
+            )
           )
         ),
-        tap((result) => {
-          // @ts-expect-error
-          if (result?.txHash) {
-            // @ts-expect-error
-            setTransactionHash(result.txHash.toHex())
-          }
-        })
-      )
-    },
     {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        nextStep()
+      onSuccess: async (_, result) => {
+        const extrinsicHash = result.txHash.toHex()
+        // @ts-expect-error
+        const blockNumber = result.blockNumber.toString()
+        await sendDocumentsToIssuer({ extrinsicHash, blockNumber })
       },
     }
   )
@@ -102,8 +98,8 @@ export const SignSubscriptionAgreement = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          poolId,
-          trancheId,
+          poolId: pool.id,
+          trancheId: pool.trancheId,
         }),
         credentials: 'include',
       })
@@ -116,33 +112,50 @@ export const SignSubscriptionAgreement = ({
     }
   )
 
-  const { mutate: storeTransactionHash } = useMutation(async (hash: string) => {
-    const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/storeTransactionHash`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        poolId,
-        trancheId,
-        transactionHash: hash,
-      }),
-      credentials: 'include',
-    })
-    return response.json()
-  })
+  const { mutate: sendDocumentsToIssuer } = useMutation(
+    ['onboardingStatus', selectedAccount?.address, pool.id, pool.trancheId],
+    async (transactionInfo: { extrinsicHash: string; blockNumber: string }) => {
+      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/sendDocumentsToIssuer`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          transactionInfo,
+          trancheId: pool.trancheId,
+          poolId: pool.id,
+        }),
+        credentials: 'include',
+      })
 
-  React.useEffect(() => {
-    if (transactionHash) {
-      storeTransactionHash(transactionHash)
+      if (response.status === 201) {
+        return response
+      }
+      throw response.statusText
+    },
+    {
+      onSuccess: () => {
+        refetchOnboardingUser()
+        nextStep()
+      },
     }
-  }, [transactionHash, storeTransactionHash])
+  )
 
   const isAgreementFetched = React.useMemo(
     () => isUnsignedAgreementFetched || isSignedAgreementFetched,
     [isSignedAgreementFetched, isUnsignedAgreementFetched]
   )
+
+  const handleSubmit = () => {
+    if (isCompleted) {
+      nextStep()
+    } else if (onboardingUser.steps.signAgreements[pool.id][pool.trancheId].signedDocument) {
+      signRemark([])
+    } else {
+      signForm()
+    }
+  }
 
   return (
     <Stack gap={4}>
@@ -169,7 +182,7 @@ export const SignSubscriptionAgreement = ({
           Back
         </Button>
         <Button
-          onClick={isCompleted ? () => nextStep() : () => signForm()}
+          onClick={() => handleSubmit()}
           loadingMessage="Signing"
           loading={isSigningTransaction || isSigningAgreement}
           disabled={!isAgreed || isSigningTransaction || isSigningAgreement}

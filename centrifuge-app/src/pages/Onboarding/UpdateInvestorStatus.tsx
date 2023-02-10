@@ -1,4 +1,3 @@
-import { useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Flex, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
 import { useQuery } from 'react-query'
@@ -10,19 +9,14 @@ import { config } from '../../config'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const [_, WordMark] = config.logo
 
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
-
 export const UpdateInvestorStatus: React.FC = () => {
   const { authToken } = useAuth()
   const { search } = useLocation()
-  const { selectedAccount } = useWallet()
   const token = new URLSearchParams(search).get('token')
   const status = new URLSearchParams(search).get('status')
 
   const { error, data } = useQuery(
-    ['update investor status', selectedAccount?.address, poolId, trancheId],
+    ['update investor status'],
     async () => {
       const response = await fetch(
         `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/updateInvestorStatus?token=${token}&status=${status}`,
@@ -44,6 +38,7 @@ export const UpdateInvestorStatus: React.FC = () => {
     },
     {
       retry: 1,
+      refetchOnWindowFocus: false,
     }
   )
 

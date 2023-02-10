@@ -50,7 +50,9 @@ export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId: 
   const { investorType, countryOfCitizenship } = onboardingUser
   const { verifyIdentity, verifyTaxInfo, verifyAccreditation } = onboardingUser.steps
 
-  const hasSignedAgreement = onboardingUser.steps.signAgreements[poolId][trancheId].signedDocument
+  const hasSignedAgreement =
+    onboardingUser.steps.signAgreements[poolId][trancheId].signedDocument &&
+    !!onboardingUser.steps.signAgreements[poolId][trancheId].transactionInfo.extrinsicHash
 
   if (investorType === 'entity') {
     const { jurisdictionCode } = onboardingUser

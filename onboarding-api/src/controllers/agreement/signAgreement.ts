@@ -46,8 +46,7 @@ export const signAgreementController = async (
     const pages = pdfDoc.getPages()
     const lastPage = pages[pages.length - 1]
 
-    // @ts-expect-error
-    lastPage.drawText(user?.name, {
+    lastPage.drawText(user?.name as string, {
       x: 100,
       y: 400,
       size: 20,

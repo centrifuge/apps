@@ -2,7 +2,7 @@ import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useMutation } from 'react-query'
 import { useAuth } from '../../components/AuthProvider'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 
 type Props = {
   nextStep: () => void
@@ -11,7 +11,7 @@ type Props = {
 
 export const Accreditation = ({ backStep, nextStep }: Props) => {
   const [isAccredited, setIsAccredited] = React.useState(false)
-  const { refetchOnboardingUser, onboardingUser } = useOnboardingUser()
+  const { refetchOnboardingUser, onboardingUser } = useOnboarding()
   const { authToken } = useAuth()
 
   const isCompleted = !!onboardingUser?.steps?.verifyAccreditation?.completed

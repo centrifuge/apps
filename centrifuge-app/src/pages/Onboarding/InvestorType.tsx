@@ -1,7 +1,7 @@
 import { Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
 import { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 import { InvestorTypes } from '../../types'
 
 // TODO: use real pool title
@@ -43,7 +43,7 @@ const InvestorTypeButton = styled(Button)<{ selected: boolean }>`
 `
 
 export const InvestorType = ({ investorType, backStep, nextStep, setInvestorType }: Props) => {
-  const { onboardingUser } = useOnboardingUser()
+  const { onboardingUser } = useOnboarding()
 
   const isDisabled = onboardingUser?.investorType ? true : false
 

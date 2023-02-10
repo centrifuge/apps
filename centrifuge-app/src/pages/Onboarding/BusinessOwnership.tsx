@@ -22,7 +22,7 @@ import { array, boolean, date, object, string } from 'yup'
 import { useAuth } from '../../components/AuthProvider'
 import { ConfirmResendEmailVerificationDialog } from '../../components/Dialogs/ConfirmResendEmailVerificationDialog'
 import { EditOnboardingEmailAddressDialog } from '../../components/Dialogs/EditOnboardingEmailAddressDialog'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 import { EntityUser } from '../../types'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
 
@@ -30,10 +30,6 @@ type Props = {
   nextStep: () => void
   backStep: () => void
 }
-
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
 
 const ClickableText = styled(Text)`
   color: #0000ee;
@@ -65,20 +61,6 @@ const EmailVerificationInlineFeedback = ({ email, completed }: { email: string; 
   const [isEditOnboardingEmailAddressDialogOpen, setIsEditOnboardingEmailAddressDialogOpen] = React.useState(false)
   const [isConfirmResendEmailVerificationDialogOpen, setIsConfirmResendEmailVerificationDialogOpen] =
     React.useState(false)
-
-  const { refetchOnboardingUser } = useOnboardingUser()
-
-  const onFocus = () => {
-    refetchOnboardingUser()
-  }
-
-  React.useEffect(() => {
-    window.addEventListener('focus', onFocus)
-    return () => {
-      window.removeEventListener('focus', onFocus)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   if (completed) {
     return (
@@ -137,10 +119,32 @@ const BusinessOwnershipInlineFeedback = ({ isError }: { isError: boolean }) => {
 
 export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
   const { authToken } = useAuth()
-  const { onboardingUser, refetchOnboardingUser } = useOnboardingUser() as {
+  const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding() as {
     onboardingUser: EntityUser
     refetchOnboardingUser: () => void
+    pool: {
+      id: string
+      trancheId: string
+      title: string
+    }
   }
+
+  const onFocus = () => {
+    refetchOnboardingUser()
+  }
+
+  React.useEffect(() => {
+    if (onboardingUser.steps.verifyEmail.completed) {
+      window.removeEventListener('focus', onFocus)
+    } else {
+      window.addEventListener('focus', onFocus)
+    }
+
+    return () => {
+      window.removeEventListener('focus', onFocus)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboardingUser.steps.verifyEmail.completed])
 
   const isCompleted = !!onboardingUser?.steps?.confirmOwners.completed
   const isEmailVerified = !!onboardingUser?.steps?.verifyEmail.completed
@@ -172,8 +176,8 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
         method: 'POST',
         body: JSON.stringify({
           ultimateBeneficialOwners: formik.values.ultimateBeneficialOwners,
-          poolId,
-          trancheId,
+          poolId: pool.id,
+          trancheId: pool.trancheId,
         }),
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -247,7 +251,7 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
     <Stack gap={4}>
       <Box>
         <EmailVerificationInlineFeedback
-          email={onboardingUser.email}
+          email={onboardingUser.email as string}
           completed={onboardingUser.steps.verifyEmail.completed}
         />
         <BusinessOwnershipInlineFeedback isError={isError} />

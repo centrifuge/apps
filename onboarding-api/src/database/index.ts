@@ -62,7 +62,10 @@ const stepsSchema = object({
         return object({
           [trancheId]: object({
             signedDocument: bool(),
-            transactionHash: string().nullable(),
+            transactionInfo: object({
+              extrinsicHash: string().nullable(),
+              blockNumber: string().nullable(),
+            }),
           }),
         })
       }),

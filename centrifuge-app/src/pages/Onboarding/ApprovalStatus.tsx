@@ -1,75 +1,41 @@
-import { useWallet } from '@centrifuge/centrifuge-react'
-import { AnchorButton, Box, Button, Flex, Shelf, Stack, Text } from '@centrifuge/fabric'
-import { useQuery } from 'react-query'
+import { AnchorButton, Box, Button, Shelf, Stack, Text } from '@centrifuge/fabric'
+import * as React from 'react'
 import { useHistory } from 'react-router-dom'
-import { useAuth } from '../../components/AuthProvider'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
-import { Spinner } from '../../components/Spinner'
+import { useOnboarding } from '../../components/OnboardingProvider'
 
 type Props = {
   signedAgreementUrl: string | undefined
 }
 
-// TODO: use real pool title
-const examplePool = {
-  title: 'New Silver Junior Token',
-}
-
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
-
 export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
   const history = useHistory()
-  const { onboardingUser, refetchOnboardingUser } = useOnboardingUser()
-  const { selectedAccount } = useWallet()
-  const { authToken } = useAuth()
+  const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding()
 
-  const onboardingStatus = onboardingUser?.onboardingStatus?.[poolId]?.[trancheId].status
+  const onboardingStatus = onboardingUser?.onboardingStatus?.[pool.id]?.[pool.trancheId].status
 
-  const { isFetching } = useQuery(
-    ['onboardingStatus', selectedAccount?.address, poolId, trancheId],
-    async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/sendDocumentsToIssuer`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          trancheId,
-          poolId,
-        }),
-        credentials: 'include',
-      })
-
-      if (response.status === 201) {
-        return response
-      }
-      throw response.statusText
-    },
-    {
-      enabled: onboardingStatus === null,
-      onSuccess: () => {
-        refetchOnboardingUser()
-      },
-    }
-  )
-
-  if (isFetching) {
-    return (
-      <Flex height="520px" justifyContent="center">
-        <Spinner />
-      </Flex>
-    )
+  const onFocus = () => {
+    refetchOnboardingUser()
   }
+
+  React.useEffect(() => {
+    if (onboardingUser.onboardingStatus[pool.id]?.[pool.trancheId]?.status === 'pending') {
+      window.addEventListener('focus', onFocus)
+    } else {
+      window.removeEventListener('focus', onFocus)
+    }
+
+    return () => {
+      window.removeEventListener('focus', onFocus)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboardingUser.onboardingStatus])
 
   if (onboardingStatus === 'approved') {
     return (
       <Stack gap={4}>
         <Box>
           <Text fontSize={5}>Onboarding complete!</Text>
-          <Text>You have succesfully completed the onboarding for {examplePool.title}</Text>
+          <Text>You have succesfully completed the onboarding for {pool.title}</Text>
         </Box>
         <Shelf gap="2">
           <AnchorButton variant="secondary" href={signedAgreementUrl} target="__blank">

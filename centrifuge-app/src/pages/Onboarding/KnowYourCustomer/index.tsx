@@ -3,7 +3,7 @@ import * as React from 'react'
 import { useMutation } from 'react-query'
 import { boolean, date, object, string } from 'yup'
 import { useAuth } from '../../../components/AuthProvider'
-import { useOnboardingUser } from '../../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../../components/OnboardingProvider'
 import { AuthorizedSignerVerification } from './AuthorizedSignerVerification'
 import { IdentityVerification } from './IdentityVerification'
 
@@ -11,10 +11,6 @@ type Props = {
   nextStep: () => void
   backStep: () => void
 }
-
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
 
 const authorizedSignerInput = object({
   name: string().required(),
@@ -28,7 +24,7 @@ export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
 
   const nextKnowYourCustomerStep = () => setActiveKnowYourCustomerStep((current) => current + 1)
 
-  const { onboardingUser, refetchOnboardingUser } = useOnboardingUser()
+  const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding()
   const { authToken } = useAuth()
 
   const isCompleted = !!onboardingUser?.steps?.verifyIdentity.completed
@@ -62,7 +58,7 @@ export const KnowYourCustomer = ({ backStep, nextStep }: Props) => {
         name: formik.values.name,
         dateOfBirth: formik.values.dateOfBirth,
         countryOfCitizenship: formik.values.countryOfCitizenship,
-        ...(onboardingUser.investorType === undefined && { poolId, trancheId }),
+        ...(onboardingUser.investorType === undefined && { poolId: pool.id, trancheId: pool.trancheId }),
       }),
     })
 
