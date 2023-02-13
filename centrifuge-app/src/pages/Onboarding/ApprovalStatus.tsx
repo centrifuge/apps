@@ -41,7 +41,7 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
           <AnchorButton variant="secondary" href={signedAgreementUrl} target="__blank">
             View subscription agreement
           </AnchorButton>
-          <Button onClick={() => history.push('/')}>Invest</Button>
+          <Button onClick={() => history.push(`/investments/${pool.id}`)}>Invest</Button>
         </Shelf>
       </Stack>
     )
