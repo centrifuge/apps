@@ -8,7 +8,7 @@ export type UpdateInvestorStatusPayload = {
   trancheId: string
 }
 
-export const sendDocumentsToIssuer = async (
+export const sendDocuments = async (
   walletAddress: string,
   poolId: string,
   trancheId: string,
@@ -26,7 +26,7 @@ export const sendDocumentsToIssuer = async (
       {
         to: [
           {
-            email: metadata?.pool?.issuer?.email || 'jp@k-f.com', // TODO: remove, obvs
+            email: metadata?.pool?.issuer?.email || 'jp@k-f.co', // TODO: remove, obvs
           },
         ],
         dynamic_template_data: {

@@ -89,33 +89,10 @@ export const SignSubscriptionAgreement = ({
     }
   )
 
-  const { mutate: signForm, isLoading: isSigningAgreement } = useMutation(
-    async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/signAgreement`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          poolId: pool.id,
-          trancheId: pool.trancheId,
-        }),
-        credentials: 'include',
-      })
-      return response.json()
-    },
-    {
-      onSuccess: () => {
-        signRemark([])
-      },
-    }
-  )
-
-  const { mutate: sendDocumentsToIssuer } = useMutation(
+  const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useMutation(
     ['onboardingStatus', selectedAccount?.address, pool.id, pool.trancheId],
     async (transactionInfo: { extrinsicHash: string; blockNumber: string }) => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/sendDocumentsToIssuer`, {
+      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/signAndSendDocuments`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -150,10 +127,8 @@ export const SignSubscriptionAgreement = ({
   const handleSubmit = () => {
     if (isCompleted) {
       nextStep()
-    } else if (onboardingUser.steps.signAgreements[pool.id][pool.trancheId].signedDocument) {
-      signRemark([])
     } else {
-      signForm()
+      signRemark([])
     }
   }
 
@@ -175,17 +150,17 @@ export const SignSubscriptionAgreement = ({
         checked={isCompleted || isAgreed}
         onChange={() => setIsAgreed((current) => !current)}
         label={<Text style={{ cursor: 'pointer' }}>I agree to the agreement</Text>}
-        disabled={isSigningTransaction || isSigningAgreement || isCompleted}
+        disabled={isSigningTransaction || isSending || isCompleted}
       />
       <Shelf gap="2">
-        <Button onClick={() => backStep()} variant="secondary" disabled={isSigningTransaction || isSigningAgreement}>
+        <Button onClick={() => backStep()} variant="secondary" disabled={isSigningTransaction || isSending}>
           Back
         </Button>
         <Button
           onClick={() => handleSubmit()}
           loadingMessage="Signing"
-          loading={isSigningTransaction || isSigningAgreement}
-          disabled={!isAgreed || isSigningTransaction || isSigningAgreement}
+          loading={isSigningTransaction || isSending}
+          disabled={!isAgreed || isSigningTransaction || isSending}
         >
           {isCompleted ? 'Next' : 'Sign'}
         </Button>

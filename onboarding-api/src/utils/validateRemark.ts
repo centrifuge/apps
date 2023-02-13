@@ -1,11 +1,11 @@
 import { firstValueFrom } from 'rxjs'
 import { InferType } from 'yup'
-import { sendDocumentsToIssuerInput } from '../controllers/emails/sendDocumentsToIssuer'
+import { signAndSendDocumentsInput } from '../controllers/emails/signAndSendDocuments'
 import { centrifuge } from './centrifuge'
 import { HttpsError } from './httpsError'
 
 export const validateRemark = async (
-  transactionInfo: InferType<typeof sendDocumentsToIssuerInput>['transactionInfo'],
+  transactionInfo: InferType<typeof signAndSendDocumentsInput>['transactionInfo'],
   expectedRemark: string
 ) => {
   const block = await firstValueFrom(centrifuge.getBlockByBlockNumber(Number(transactionInfo.blockNumber)))
