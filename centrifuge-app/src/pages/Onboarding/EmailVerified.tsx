@@ -1,40 +1,15 @@
 import { Box, Flex, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
-import { useQuery } from 'react-query'
-import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../../components/AuthProvider'
+import { Link } from 'react-router-dom'
 import { Spinner } from '../../components/Spinner'
 import { config } from '../../config'
+import { useVerifyEmail } from './queries/useVerifyEmail'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const [_, WordMark] = config.logo
 
 export const EmailVerified: React.FC = () => {
-  const { authToken } = useAuth()
-  const { search } = useLocation()
-  const token = new URLSearchParams(search).get('token')
-
-  const { error, data } = useQuery(
-    'emailVerified',
-    async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyEmail?token=${token}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
-
-      if (response.status === 204) {
-        return response
-      }
-      throw response.statusText
-    },
-    {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    }
-  )
+  const { error, data } = useVerifyEmail()
 
   return (
     <Flex backgroundColor="backgroundSecondary" minHeight="100vh" flexDirection="column" textAlign="center">
