@@ -4,11 +4,6 @@ import styled from 'styled-components'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { InvestorTypes } from '../../types'
 
-// TODO: use real pool title
-const examplePool = {
-  title: 'New Silver Junior Token',
-}
-
 type Props = {
   investorType: InvestorTypes | undefined
   nextStep: () => void
@@ -43,14 +38,14 @@ const InvestorTypeButton = styled(Button)<{ selected: boolean }>`
 `
 
 export const InvestorType = ({ investorType, backStep, nextStep, setInvestorType }: Props) => {
-  const { onboardingUser } = useOnboarding()
+  const { onboardingUser, pool } = useOnboarding()
 
   const isDisabled = onboardingUser?.investorType ? true : false
 
   return (
     <Stack gap={4}>
       <Box>
-        <Text fontSize={5}>Start onboarding to {examplePool.title}</Text>
+        <Text fontSize={5}>Start onboarding to {pool.title}</Text>
         <Stack gap={2} py={6}>
           <InvestorTypeButton
             onClick={() => setInvestorType('individual')}
