@@ -3,20 +3,16 @@ import { AnchorButton, Box, Button, FileUpload, Shelf, Stack, Text } from '@cent
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
 import { useAuth } from '../../components/AuthProvider'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 
 type Props = {
   nextStep: () => void
   backStep: () => void
 }
 
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
-
 export const TaxInfo = ({ backStep, nextStep }: Props) => {
   const { selectedAccount } = useWallet()
-  const { refetchOnboardingUser, onboardingUser } = useOnboardingUser()
+  const { refetchOnboardingUser, onboardingUser, pool } = useOnboarding()
   const [taxInfo, setTaxInfo] = React.useState<File | null>(null)
   const { authToken } = useAuth()
 
@@ -26,7 +22,7 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
     ['tax info', selectedAccount?.address],
     async () => {
       const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getTaxInfo?poolId=${poolId}&trancheId=${trancheId}`,
+        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getTaxInfo?poolId=${pool.id}&trancheId=${pool.trancheId}`,
         {
           method: 'GET',
           headers: {
@@ -58,7 +54,7 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
         formData.append('taxInfo', taxInfo)
 
         const response = await fetch(
-          `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/uploadTaxInfo?poolId=${poolId}&trancheId=${trancheId}`,
+          `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/uploadTaxInfo?poolId=${pool.id}&trancheId=${pool.trancheId}`,
           {
             method: 'POST',
             body: formData,

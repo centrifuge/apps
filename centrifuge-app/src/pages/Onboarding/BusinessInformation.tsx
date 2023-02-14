@@ -16,7 +16,7 @@ import { useFormik } from 'formik'
 import { useMutation } from 'react-query'
 import { date, object, string } from 'yup'
 import { useAuth } from '../../components/AuthProvider'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 import { EntityUser } from '../../types'
 import { formatGeographyCodes } from '../../utils/formatGeographyCodes'
 import { CA_PROVINCE_CODES, KYB_COUNTRY_CODES, US_STATE_CODES } from './geography_codes'
@@ -26,10 +26,6 @@ type Props = {
   nextStep: () => void
   backStep: () => void
 }
-
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
 
 const businessVerificationInput = object({
   email: string().email().required(),
@@ -62,9 +58,10 @@ const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) =>
 
 export const BusinessInformation = ({ backStep, nextStep }: Props) => {
   const { authToken } = useAuth()
-  const { onboardingUser, refetchOnboardingUser } = useOnboardingUser() as {
+  const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding() as {
     onboardingUser: EntityUser
     refetchOnboardingUser: () => void
+    pool: { id: string; trancheId: string; title: string }
   }
 
   const isUSOrCA =
@@ -107,8 +104,8 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
               ? `${formik.values.jurisdictionCode}_${formik.values.regionCode}`
               : formik.values.jurisdictionCode,
           incorporationDate: formik.values.incorporationDate,
-          trancheId,
-          poolId,
+          trancheId: pool.trancheId,
+          poolId: pool.id,
           dryRun: true,
         }),
         headers: {

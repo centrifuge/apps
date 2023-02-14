@@ -1,5 +1,6 @@
 import * as jwt from 'jsonwebtoken'
 import { sendEmail, templateIds } from '.'
+import { getPoolById } from '../utils/getPoolById'
 
 export type UpdateInvestorStatusPayload = {
   poolId: string
@@ -7,14 +8,14 @@ export type UpdateInvestorStatusPayload = {
   trancheId: string
 }
 
-export const sendDocumentsToIssuer = async (
-  issuerEmail: string,
+export const sendDocuments = async (
   walletAddress: string,
   poolId: string,
   trancheId: string,
   taxInfo: any,
   signedAgreement: any
 ) => {
+  const { metadata } = await getPoolById(poolId)
   const payload: UpdateInvestorStatusPayload = { walletAddress, poolId, trancheId }
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: '7d',
@@ -25,7 +26,7 @@ export const sendDocumentsToIssuer = async (
       {
         to: [
           {
-            email: issuerEmail,
+            email: metadata?.pool?.issuer?.email || 'jp@k-f.co', // TODO: remove, obvs
           },
         ],
         dynamic_template_data: {
