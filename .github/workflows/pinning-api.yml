@@ -41,22 +41,17 @@ jobs:
           app_base_name: ${{ env.app_name }}
           deploy_to: ${{ inputs.deploy_env }}
 
-      - name: set secrets for Gfunction deploy
-        id: set_secrets
-        shell: bash
-        run: |
-          if ${{ steps.prepare.outputs.gh_env == 'production'}}; then
-            FILE=env-vars/prod.secrets
-          else
-            FILE=env-vars/dev.secrets
-          fi
-          delimiter="$(openssl rand -hex 8)"
-          # Add a new line at the end if not already there:
-          sed -i -e '$a\' $FILE
-          echo 'gcloud_secrets<<${delimiter}' >> $GITHUB_OUTPUT
-          cat $FILE >> $GITHUB_OUTPUT
-          echo '${delimiter}' >> $GITHUB_OUTPUT
-
+      # Uncomment if var files are added to pinning
+      # - name: Function env secrets
+      #   uses: ./.github/actions/fetch-function-secrets
+      #   with:       
+      #     vars_file: ${{ env.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env  
+          
+      - name: Function env secrets
+        uses: ./.github/actions/fetch-function-secrets
+        with:
+          app_name: ${{ env.app_name }}    
+          
       - name: build function
         uses: ./.github/actions/build-function
         with:

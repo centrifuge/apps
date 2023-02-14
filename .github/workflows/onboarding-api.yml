@@ -41,33 +41,18 @@ jobs:
           app_base_name: ${{ env.app_name }}
           deploy_to: ${{ inputs.deploy_env }}
 
-      - name: set secrets for Gfunction deploy
-        shell: bash
-        id: set_secrets
-        run: |
-          if ${{ steps.prepare.outputs.gh_env == 'production'}}; then
-            FILE=env-vars/prod.secrets
-          else
-            FILE=env-vars/dev.secrets
-          fi
-          delimiter="$(openssl rand -hex 8)"
-          # Add a new line at the end if not already there:
-          sed -i -e '$a\' $FILE 
-          echo "gcloud_secrets<<${delimiter}" >> $GITHUB_OUTPUT
-          cat $FILE >> $GITHUB_OUTPUT
-          echo "${delimiter}" >> $GITHUB_OUTPUT
-          
-      - name: set env vars for Gfunction deploy
-        shell: bash
-        id: set_env
-        run: |
-          VARS_COMMA=$(cat env-vars/${{ steps.prepare.outputs.env_name }}.env | paste -s -d, -)
-          VARS="'$VARS_COMMA'"
-          echo $VARS
-          echo "gcloud_env=$VARS_COMMA" >> $GITHUB_OUTPUT
-
       - run: echo ${{ steps.set_env.outputs.gcloud_env }}
-      
+
+      - name: Function env vars
+        uses: ./.github/actions/fetch-function-vars
+        with:
+          app_name: ${{ env.app_name }}
+
+      - name: Function env secrets
+        uses: ./.github/actions/fetch-function-secrets
+        with:       
+          vars_file: ${{ env.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env  
+
       - name: build function
         uses: ./.github/actions/build-function
         with:
@@ -77,8 +62,8 @@ jobs:
       app_name: ${{ steps.prepare.outputs.app_name }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
       front_url: ${{ steps.prepare.outputs.gh_env }}
-      function_secrets: ${{ steps.set_secrets.outputs.gcloud_secrets }}
-      function_env: ${{ steps.set_env.outputs.gcloud_env }}
+      function_secrets: ${{ steps.set_secrets.outputs.function_secrets }}
+      function_vars: ${{ steps.set_env.outputs.function_vars }}
 
 
   deployment:
@@ -113,5 +98,5 @@ jobs:
             target: onboarding
             function_secrets: |
                 ${{ needs.build.outputs.function_secrets }}
-            function_env: "${{ needs.build.outputs.function_env }}"
+            function_env: "${{ needs.build.outputs.function_vars}}"
             service_account: "${{ vars.ONBOARDING_FUNCT_SA }}"
