@@ -29,9 +29,20 @@ export const updateInvestorStatusController = async (
     const { poolId, trancheId, walletAddress } = payload
     const user = await fetchUser(walletAddress)
 
-    // if (Object.entries(user.steps).find(([,step]) => !step.completed)) {
-    //   throw new HttpsError(400, "All other steps must be completed")
-    // }
+    const incompleteSteps = Object.entries(user.steps).filter(([name, step]) => {
+      if (name === 'signAgreements') {
+        return !step?.[poolId]?.[trancheId]?.signedDocument
+      }
+      return !step?.completed
+    })
+    if (incompleteSteps.length > 0) {
+      if (incompleteSteps) {
+        throw new HttpsError(
+          400,
+          `Incomplete onboarding steps for investor: ${incompleteSteps.map((step) => step[0]).join(', ')}`
+        )
+      }
+    }
 
     if (user.onboardingStatus[poolId][trancheId].status !== 'pending') {
       throw new HttpsError(400, 'Investor status may have already been updated')

@@ -23,6 +23,7 @@ declare global {
       JWT_SECRET: string
       REDIRECT_URL: string
       SENDGRID_API_KEY: string
+      ONBOARDING_PURE_PROXY: string
     }
   }
 }
