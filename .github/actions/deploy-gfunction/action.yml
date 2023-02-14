@@ -23,6 +23,10 @@ inputs:
     description: GCloud env keys
     required: false
 
+  service_account:
+    description: Gcloud SA for the function
+    required: false
+
   target:
     description: "Gfunction target handler"
     required: true
@@ -68,6 +72,7 @@ runs:
         entry_point: '${{ inputs.target }}'
         secret_environment_variables: ${{ inputs.function_secrets }}
         env_vars: ${{ inputs.function_env }}
+        service_account_email: ${{ inputs.service_account }}
 
     - name: Print Gcloud functions URL
       shell: sh

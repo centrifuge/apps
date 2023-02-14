@@ -45,10 +45,19 @@ jobs:
         uses: ./.github/actions/build-function
         with:
           artifact_name: ${{ env.app_name }}
+      
+      - name: set secrets for Gfunction deploy
+        run: |
+          if ${{ steps.prepare.outputs.gh_env }} == production; then
+            echo "gcloud_secrets=$(cat env-vars/prod.secrets)" >> $GIHTUB_OUTPUT
+          else
+            echo "gcloud_secrets=$(cat env-vars/dev.secrets)" >> $GIHTUB_OUTPUT
+          fi
 
     outputs:
       app_name: ${{ steps.prepare.outputs.app_name }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
+      gcloud_secrets: ${{ steps.prepare.outputs.set_secrets }}
 
   deployment:
     needs: build
@@ -67,7 +76,8 @@ jobs:
         with:
           files: .github/actions/deploy-gfunction/action.yml
           branch: ${{ github.head_ref || github.ref_name }} 
-      - run: echo "${{ vars.PINNING_SECRETS }}"
+          
+      - run: echo "${{ needs.build.outputs.gcloud_secrets }}"
 
       - name: Deploy Gfunction
         id: functionsdeploy
@@ -80,6 +90,6 @@ jobs:
           gcloud_region: ${{ env.GCLOUD_REGION }}
           target: pinningApi
           function_secrets: |
-            ${{ vars.PINNING_SECRETS }}
-          
+            ${{ needs.build.outputs.gcloud_secrets }}
+          service_account: "${{ vars.PINNING_API_FUNCT_SA }}"
 

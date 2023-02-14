@@ -53,10 +53,29 @@ jobs:
         with:
           artifact_name: ${{ env.app_name }}
 
+      - name: set secrets for Gfunction deploy
+        id: set_secrets
+        run: |
+          if ${{ steps.prepare.outputs.gh_env }} == production; then
+            echo "gcloud_secrets=$(cat env-vars/prod.secrets)" >> $GIHTUB_OUTPUT
+          else
+            echo "gcloud_secrets=$(cat env-vars/dev.secrets)" >> $GIHTUB_OUTPUT
+          fi
+      - name: set env vars for Gfunction deploy
+        shell: bash
+        id: set_env
+        run: |
+          VARS_COMMA=cat env-vars/${{ steps.prepare.outputs.env_name }}.env | paste -s -d, -
+          echo $VARS_COMMA
+          echo "gcloud_env=$VARS_COMMA" >> $GIHTUB_OUTPUT
+
     outputs:
       app_name: ${{ steps.prepare.outputs.app_name }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
       front_url: ${{ steps.prepare.outputs.gh_env }}
+      function_secrets: ${{ steps.set_secrets.outputs.gh_env }}
+      function_env: ${{ steps.set_env.outputs.gh_env }}
+
 
   deployment:
       needs: build
@@ -89,5 +108,6 @@ jobs:
             gcloud_region: ${{ env.GCLOUD_REGION }}
             target: onboarding
             function_secrets: |
-                ${{ vars.ONBOARDING_SECRETS }}
-            function_env: "REDIRECT_URL=${{ needs.build.outputs.front_url}}"
+                ${{ needs.build.outputs.function_secrets }}
+            function_env: "${{ needs.build.outputs.function_env }}"
+            service_account: "${{ vars.ONBOARDING_FUNCT_SA }}"

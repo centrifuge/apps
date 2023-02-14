@@ -11,4 +11,5 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - run: 'echo "No build required"'      
+      - run: |
+          echo "This job is always green to ensure PRs without code changes to the main folders can also merge"     
