@@ -1,15 +1,16 @@
-name: Deploy Altair and preprod"
+name: Deploy Altair and staging"
 on:
   release:
     types:
       - prereleased  
-    
+  workflow_dispatch:
+
 jobs:
   deploy_app:
     strategy:
       fail-fast: true
       matrix:
-        deploy_to: ["altair", "preprod"]
+        deploy_to: ["altair", "staging"]
     uses: ./.github/workflows/centrifuge-app.yml
     secrets: inherit
     with:
@@ -20,7 +21,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        deploy_to: ["altair", "preprod"]
+        deploy_to: ["altair", "staging"]
     uses: ./.github/workflows/centrifuge-functions.yml
     secrets: inherit
     with:
@@ -31,7 +32,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        deploy_to: ["altair", "preprod"]
+        deploy_to: ["altair", "staging"]
     uses: ./.github/workflows/onboarding-api.yml
     secrets: inherit
     with:
@@ -98,7 +99,7 @@ jobs:
 
       # - name: Archive ${{ matrix.artifact_name }} in gcloud bucket
       #   run: |
-      #     echo "Archiving ${{ matrix.artifact_name }} in gs://preprod-releases/${{ matrix.artifact_name }}"
-      #     gsutil -m rsync -d -c -r ${{ matrix.artifact_name }}/ gs://preprod-releases/${{ github.ref_name }}/${{ matrix.artifact_name }}/
+      #     echo "Archiving ${{ matrix.artifact_name }} in gs://staging-releases/${{ matrix.artifact_name }}"
+      #     gsutil -m rsync -d -c -r ${{ matrix.artifact_name }}/ gs://staging-releases/${{ github.ref_name }}/${{ matrix.artifact_name }}/
 
   

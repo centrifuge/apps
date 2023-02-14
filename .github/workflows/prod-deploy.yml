@@ -3,13 +3,14 @@ on:
   release:
     types:
       - released     
+  workflow_dispatch:
     
 jobs:
-  sync_preprod:
+  sync_staging:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      # ToDo: Auth with gcloud and sync preprod with prod buckets
+      # ToDo: Auth with gcloud and sync staging with prod buckets
       # ToDo: Auth with gcloud and sync functions code with prod.
       
       - name: Auth gcloud
@@ -22,10 +23,10 @@ jobs:
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v1' 
 
-      - name: Sync webpack from preprod
+      - name: Sync webpack from staging
         run: |
-          echo "Archiving ${{ matrix.artifact_name }} in gs://preprod-releases/${{ matrix.artifact_name }}"
-          gsutil -m rsync -d -c -r ${{ matrix.artifact_name }}/ gs://preprod-releases/${{ github.ref_name }}/${{ matrix.artifact_name }}/
+          echo "Archiving ${{ matrix.artifact_name }} in gs://staging-releases/${{ matrix.artifact_name }}"
+          gsutil -m rsync -d -c -r ${{ matrix.artifact_name }}/ gs://staging-releases/${{ github.ref_name }}/${{ matrix.artifact_name }}/
   
   retrieve_release_assets:
     runs-on: ubuntu-latest
