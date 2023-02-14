@@ -1,8 +1,17 @@
 import Centrifuge from '@centrifuge/centrifuge-js'
+import { ApiPromise, WsProvider } from '@polkadot/api'
+import { Keyring } from '@polkadot/keyring'
+import { cryptoWaitReady } from '@polkadot/util-crypto'
 import { firstValueFrom } from 'rxjs'
 
+const TenYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
+const WHITELIST_PROXY = 'kANivz3Jbu7eaKmve9Q5eLSkPgKAh6vADZjKmgieCNbh4ioHb'
+
 export const centrifuge = new Centrifuge({
+  network: 'centrifuge',
   centrifugeWsUrl: 'wss://fullnode.development.cntrfg.com',
+  polkadotWsUrl: 'wss://fullnode-relay.development.cntrfg.com',
+  printExtrinsics: true,
 })
 
 export const getPoolById = async (poolId: string) => {
@@ -12,9 +21,21 @@ export const getPoolById = async (poolId: string) => {
   return { pool, metadata }
 }
 
-const TenYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
 export const whitelistInvestor = async (walletAddress: string, poolId: string, trancheId: string) => {
-  await firstValueFrom(
-    centrifuge.pools.updatePoolRoles([poolId, [], [[walletAddress, { TrancheInvestor: [trancheId, TenYearsFromNow] }]]])
+  await cryptoWaitReady()
+  const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 })
+  // both Dave and Alice can execute the proxy call because they have been added to the pure proxy
+  const signer = keyring.addFromUri('//Dave')
+  const api = await ApiPromise.create({ provider: new WsProvider('wss://fullnode.development.cntrfg.com') })
+  const submittable = api.tx.permissions.add(
+    { PoolRole: 'MemberListAdmin' },
+    walletAddress,
+    { Pool: poolId },
+    { PoolRole: { TrancheInvestor: [trancheId, TenYearsFromNow] } }
   )
+
+  const proxiedSubmittable = api.tx.proxy.proxy(WHITELIST_PROXY, undefined, submittable)
+  const hash = await proxiedSubmittable.signAndSend(signer)
+  await api.disconnect()
+  return hash.toHuman()
 }

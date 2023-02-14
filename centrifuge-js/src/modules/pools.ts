@@ -629,6 +629,15 @@ export function getPoolsModule(inst: Centrifuge) {
                     PoolRole: 'LoanAdmin',
                   }
                 ),
+                // give the pure proxy permissions to whitelist investor for onboarding
+                api.tx.permissions.add(
+                  { PoolRole: 'PoolAdmin' },
+                  'kANivz3Jbu7eaKmve9Q5eLSkPgKAh6vADZjKmgieCNbh4ioHb',
+                  { Pool: poolId },
+                  {
+                    PoolRole: 'MemberListAdmin',
+                  }
+                ),
                 api.tx.loans.initialisePool(poolId, collectionId),
               ])
             }

@@ -29,6 +29,10 @@ export const updateInvestorStatusController = async (
     const { poolId, trancheId, walletAddress } = payload
     const user = await fetchUser(walletAddress)
 
+    // if (Object.entries(user.steps).find(([,step]) => !step.completed)) {
+    //   throw new HttpsError(400, "All other steps must be completed")
+    // }
+
     if (user.onboardingStatus[poolId][trancheId].status !== 'pending') {
       throw new HttpsError(400, 'Investor status may have already been updated')
     }
@@ -48,11 +52,13 @@ export const updateInvestorStatusController = async (
 
     if (user?.email && status === 'approved') {
       await sendApproveInvestorMessage(user.email, poolId, trancheId)
-      await whitelistInvestor(walletAddress, poolId, trancheId)
+      const hash = await whitelistInvestor(walletAddress, poolId, trancheId)
+      return res.status(200).send({ hash })
     } else if (user?.email && status === 'rejected') {
       await sendRejectInvestorMessage(user.email, poolId)
+      throw new HttpsError(400, 'Investor has been rejected')
     }
-    return res.status(204).send()
+    throw new HttpsError(400, 'Investor status may have already been updated')
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)
