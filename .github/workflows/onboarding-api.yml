@@ -24,7 +24,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     concurrency:
-      group: onboarding-api-${{ github.ref }}
+      group: ${{ deploy_env }}onboarding-api-${{ github.ref }}
       cancel-in-progress: true   
     defaults:
       run:
@@ -73,7 +73,7 @@ jobs:
   deployment:
       needs: build
       concurrency:
-        group: onboarding-api-${{ github.ref }}
+        group: ${{ deploy_env }}onboarding-api-${{ github.ref }}
         cancel-in-progress: true    
       runs-on: ubuntu-latest
       environment: ${{ needs.build.outputs.gh_env }}
