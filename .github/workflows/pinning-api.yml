@@ -42,12 +42,18 @@ jobs:
           deploy_to: ${{ inputs.deploy_env }}
 
       - name: set secrets for Gfunction deploy
+        shell: bash
         run: |
           if ${{ steps.prepare.outputs.gh_env == 'production'}}; then
-            echo "gcloud_secrets=$(cat env-vars/prod.secrets)" >> $GIHTUB_OUTPUT
+            FILE=env-vars/prod.secrets
           else
-            echo "gcloud_secrets=$(cat env-vars/dev.secrets)" >> $GIHTUB_OUTPUT
+            FILE=env-vars/dev.secrets
           fi
+          delimiter="$(openssl rand -hex 8)"
+          sed -i -e '$a\' $FILE # Add a new line at the end if not already there
+          echo 'gcloud_secrets<<${delimiter}' >> $GITHUB_OUTPUT
+          cat $FILE >> $GITHUB_OUTPUT
+          echo '${delimiter}' >> $GITHUB_OUTPUT
 
       - name: build function
         uses: ./.github/actions/build-function
