@@ -24,7 +24,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     concurrency:
-      group: ${{ deploy_env }}onboarding-api-${{ github.ref }}
+      group: ${{ inputs.deploy_env }}onboarding-api-${{ github.ref }}
       cancel-in-progress: true   
     defaults:
       run:
@@ -49,7 +49,7 @@ jobs:
       - name: set secrets for Gfunction deploy
         id: set_secrets
         run: |
-          if ${{ steps.prepare.outputs.gh_env }} == production; then
+          if ${{ steps.prepare.outputs.gh_env == 'production'}}; then
             echo "gcloud_secrets=$(cat env-vars/prod.secrets)" >> $GIHTUB_OUTPUT
           else
             echo "gcloud_secrets=$(cat env-vars/dev.secrets)" >> $GIHTUB_OUTPUT
@@ -73,7 +73,7 @@ jobs:
   deployment:
       needs: build
       concurrency:
-        group: ${{ deploy_env }}onboarding-api-${{ github.ref }}
+        group: ${{ inputs.deploy_env }}onboarding-api-${{ github.ref }}
         cancel-in-progress: true    
       runs-on: ubuntu-latest
       environment: ${{ needs.build.outputs.gh_env }}
