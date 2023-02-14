@@ -570,11 +570,12 @@ export function getPoolsModule(inst: Centrifuge) {
       tranches: TrancheInput[],
       currency: CurrencyKey,
       maxReserve: BN,
-      metadata: PoolMetadataInput
+      metadata: PoolMetadataInput,
+      pureProxy: string
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata] = args
+    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, pureProxy] = args
 
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
@@ -632,7 +633,7 @@ export function getPoolsModule(inst: Centrifuge) {
                 // give the pure proxy permissions to whitelist investor for onboarding
                 api.tx.permissions.add(
                   { PoolRole: 'PoolAdmin' },
-                  'kANivz3Jbu7eaKmve9Q5eLSkPgKAh6vADZjKmgieCNbh4ioHb',
+                  pureProxy,
                   { Pool: poolId },
                   {
                     PoolRole: 'MemberListAdmin',

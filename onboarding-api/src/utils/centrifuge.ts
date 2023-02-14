@@ -5,7 +5,7 @@ import { cryptoWaitReady } from '@polkadot/util-crypto'
 import { firstValueFrom } from 'rxjs'
 
 const TenYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
-const WHITELIST_PROXY = 'kANivz3Jbu7eaKmve9Q5eLSkPgKAh6vADZjKmgieCNbh4ioHb'
+const proxyAddress = process.env.MEMBERLIST_ADMIN_PURE_PROXY
 
 export const centrifuge = new Centrifuge({
   network: 'centrifuge',
@@ -34,7 +34,7 @@ export const whitelistInvestor = async (walletAddress: string, poolId: string, t
     { PoolRole: { TrancheInvestor: [trancheId, TenYearsFromNow] } }
   )
 
-  const proxiedSubmittable = api.tx.proxy.proxy(WHITELIST_PROXY, undefined, submittable)
+  const proxiedSubmittable = api.tx.proxy.proxy(proxyAddress, undefined, submittable)
   const hash = await proxiedSubmittable.signAndSend(signer)
   await api.disconnect()
   return hash.toHuman()

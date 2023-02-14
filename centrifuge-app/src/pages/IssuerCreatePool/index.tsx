@@ -277,6 +277,7 @@ const CreatePoolForm: React.VFC = () => {
           currency.key,
           CurrencyBalance.fromFloat(values.maxReserve, currency.decimals),
           metadataValues,
+          import.meta.env.REACT_APP_ONBOARDING_PURE_PROXY as string,
         ],
         { createType: config.poolCreationType }
       )
