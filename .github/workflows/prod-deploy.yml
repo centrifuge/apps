@@ -4,7 +4,9 @@ on:
     types:
       - released     
   workflow_dispatch:
-    
+  pull_request:
+    paths:
+      - '.github/workflows/prod-deploy.yml'
 jobs:
   sync_staging:
     runs-on: ubuntu-latest
