@@ -1991,21 +1991,20 @@ export function getPoolsModule(inst: Centrifuge) {
         (api, [activeLoanValues, poolValue]) => ({ api, activeLoanValues, poolValue })
       ),
       switchMap(({ api, activeLoanValues, poolValue }) => {
-        const activeLoanData = activeLoanValues.toJSON() as ActiveLoanData[]
-        const interestAccrualKeys = activeLoanData.map((activeLoan) => hexToBN(activeLoan.interestRatePerSec))
-        const $interestAccrual = api.query.interestAccrual.rate.multi(interestAccrualKeys).pipe(take(1))
+        const $rates = api.query.interestAccrual.rates().pipe(take(1))
         const $interestLastUpdated = api.query.interestAccrual.lastUpdated().pipe(take(1))
         const $currencyMeta = api.query.ormlAssetRegistry.metadata((poolValue.toHuman() as any).currency).pipe(take(1))
         return combineLatest([
           api.query.loans.loan.entries(poolId),
           of(activeLoanValues),
           api.query.loans.closedLoans.entries(poolId),
-          $interestAccrual,
+          $rates,
           $interestLastUpdated,
           $currencyMeta,
         ])
       }),
-      map(([loanValues, activeLoanValues, closedLoansValues, interestAccrual, interestLastUpdated, rawCurrency]) => {
+      map(([loanValues, activeLoanValues, closedLoansValues, rates, interestLastUpdated, rawCurrency]) => {
+        console.log('rates', rates)
         const currency = rawCurrency.toHuman() as AssetCurrencyData
         const loans = (loanValues as any[]).map(([key, value]) => {
           const loan = value.toJSON() as unknown as LoanData
@@ -2027,7 +2026,7 @@ export function getPoolsModule(inst: Centrifuge) {
         const activeLoanData = activeLoanValues.toJSON() as ActiveLoanData[]
         const activeLoans = activeLoanData.reduce<Record<string, Omit<ActiveLoan, 'status' | 'asset' | 'closedAt'>>>(
           (prev, activeLoan, index) => {
-            const interestData = interestAccrual[index].toJSON() as InterestAccrual
+            const interestData = undefined // rates[index].toJSON() as InterestAccrual
             const mapped = {
               id: String(activeLoan.loanId),
               poolId,
