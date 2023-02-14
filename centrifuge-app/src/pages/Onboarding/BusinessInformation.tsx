@@ -50,27 +50,22 @@ const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) =>
 }
 
 export const BusinessInformation = () => {
-  const { onboardingUser, previousStep, nextStep } = useOnboarding() as {
-    onboardingUser: EntityUser
-    previousStep: () => void
-    nextStep: () => void
-  }
+  const { onboardingUser, previousStep, nextStep } = useOnboarding()
 
-  const isUSOrCA =
-    onboardingUser?.jurisdictionCode?.startsWith('us') || onboardingUser?.jurisdictionCode?.startsWith('ca')
+  const entityUser = onboardingUser as EntityUser
 
-  const isCompleted = !!onboardingUser?.steps?.verifyBusiness.completed
+  const isUSOrCA = entityUser?.jurisdictionCode?.startsWith('us') || entityUser?.jurisdictionCode?.startsWith('ca')
+
+  const isCompleted = !!entityUser?.steps?.verifyBusiness.completed
 
   const formik = useFormik({
     initialValues: {
-      businessName: onboardingUser?.businessName || '',
-      email: onboardingUser?.email || '',
-      registrationNumber: onboardingUser?.registrationNumber || '',
-      jurisdictionCode: isUSOrCA
-        ? onboardingUser?.jurisdictionCode.slice(0, 2)
-        : onboardingUser?.jurisdictionCode || '',
-      incorporationDate: onboardingUser?.incorporationDate || '',
-      regionCode: isUSOrCA ? onboardingUser?.jurisdictionCode.split('_')[1] : '',
+      businessName: entityUser?.businessName || '',
+      email: entityUser?.email || '',
+      registrationNumber: entityUser?.registrationNumber || '',
+      jurisdictionCode: isUSOrCA ? entityUser?.jurisdictionCode.slice(0, 2) : entityUser?.jurisdictionCode || '',
+      incorporationDate: entityUser?.incorporationDate || '',
+      regionCode: isUSOrCA ? entityUser?.jurisdictionCode.split('_')[1] : '',
     },
     onSubmit: (values) => {
       verifyBusinessInformation(values)
