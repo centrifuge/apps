@@ -63,7 +63,7 @@ jobs:
       - name: Install Dependencies
         # env:
         #   NODE_ENV: production      
-        run: yarn install # --immutable
+        run: yarn install --immutable
       - name: Lint
         run: yarn lint
       - name: Build centrifuge-app

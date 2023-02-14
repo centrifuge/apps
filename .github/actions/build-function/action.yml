@@ -20,7 +20,7 @@ runs:
       shell: sh
       # env:
       #   NODE_ENV: production
-      run: yarn install # --immutable
+      run: yarn install --immutable
 
     - name: Lint
       working-directory: ${{ inputs.artifact_name }}
