@@ -41,13 +41,9 @@ jobs:
           app_base_name: ${{ env.app_name }}
           deploy_to: ${{ inputs.deploy_env }}
 
-      - name: build function
-        uses: ./.github/actions/build-function
-        with:
-          artifact_name: ${{ env.app_name }}
-
       - name: set secrets for Gfunction deploy
         id: set_secrets
+        shell: bash
         run: |
           if ${{ steps.prepare.outputs.gh_env == 'production'}}; then
             echo "gcloud_secrets=$(cat env-vars/prod.secrets)" >> $GIHTUB_OUTPUT
@@ -61,6 +57,11 @@ jobs:
           VARS_COMMA=cat env-vars/${{ steps.prepare.outputs.env_name }}.env | paste -s -d, -
           echo $VARS_COMMA
           echo "gcloud_env=$VARS_COMMA" >> $GIHTUB_OUTPUT
+
+      - name: build function
+        uses: ./.github/actions/build-function
+        with:
+          artifact_name: ${{ env.app_name }}
 
     outputs:
       app_name: ${{ steps.prepare.outputs.app_name }}
