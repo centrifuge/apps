@@ -14,16 +14,9 @@ on:
       - '.github/workflows/onboarding-api.yml'
   workflow_call:
     inputs:
-      deploy_demo:
-        description: "Deploy to demo?"
+      deploy_env:
+        type: string
         required: true
-        type: boolean
-        default: false
-      deploy_prod:
-        description: "Deploy to prod?"
-        required: true
-        type: boolean
-        default: false
 env:
   app_name: onboarding-api
   
