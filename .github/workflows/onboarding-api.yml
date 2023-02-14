@@ -62,9 +62,10 @@ jobs:
         id: set_env
         run: |
           VARS_COMMA=$(cat env-vars/${{ steps.prepare.outputs.env_name }}.env | paste -s -d, -)
-          echo $VARS_COMMA
-          echo "gcloud_env=$VARS_COMMA" >> $GIHTUB_OUTPUT
-
+          VARS="'$VARS_COMMA'"
+          echo $VARS
+          echo "gcloud_env=$VARS_COMMA" >> $GITHUB_OUTPUT
+      - run: echo ${{ steps.set_env.outputs.gcloud_env }}
       - name: build function
         uses: ./.github/actions/build-function
         with:
