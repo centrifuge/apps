@@ -61,7 +61,7 @@ jobs:
         shell: bash
         id: set_env
         run: |
-          VARS_COMMA=cat env-vars/${{ steps.prepare.outputs.env_name }}.env | paste -s -d, -
+          VARS_COMMA=$(cat env-vars/${{ steps.prepare.outputs.env_name }}.env | paste -s -d, -)
           echo $VARS_COMMA
           echo "gcloud_env=$VARS_COMMA" >> $GIHTUB_OUTPUT
 
