@@ -25,9 +25,8 @@ const OnboardingContext = React.createContext<{
 } | null>(null)
 
 export function OnboardingProvider({ children }: { children?: React.ReactNode }) {
-  const { authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const { isConnecting, selectedAccount } = useWallet()
-  const { isAuth, isAuthFetched } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
+  const { isAuth, isAuthFetched, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const [activeStep, setActiveStep] = React.useState<number>(0)
 
   const nextStep = () => setActiveStep((current) => current + 1)
