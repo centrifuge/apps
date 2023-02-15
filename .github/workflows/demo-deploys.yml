@@ -4,21 +4,21 @@ on:
   
 jobs:
   deploy_app:
-    uses: ./.github/workflows/centrifuge-app.yml
+    uses: centrifuge/apps/.github/workflows/centrifuge-app.yml@gh-actions-refactor
     secrets: inherit
     with:
       deploy_env: demo
 
 
   deploy_pinning:
-    uses: ./.github/workflows/centrifuge-functions.yml
+    uses:  centrifuge/apps/.github/workflows/pinning-api.yml@gh-actions-refactor
     secrets: inherit
     with:
       deploy_env: demo
 
 
   deploy_onboarding:
-    uses: ./.github/workflows/onboarding-api.yml
+    uses: centrifuge/apps/.github/workflows/onboarding-api.yml@gh-actions-refactor
     secrets: inherit
     with:
       deploy_env: demo

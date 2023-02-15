@@ -1,5 +1,5 @@
-name: Generic yarn build process
-description: 'Determine functions name, URL and GHA environment secrets'
+name: Build and upload functions code
+description: 'Build a generic function usin yarn build and archiving the results'
 
 inputs:
   artifact_name:
@@ -10,7 +10,7 @@ runs:
   using: composite
   steps:
     - name: Setup Node
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c #@v3.6.0
       with:
         node-version: '16'
         cache: yarn
@@ -34,8 +34,8 @@ runs:
       #   NODE_ENV: production      
       # run: ${{ inputs.build_cmd }}
       run: yarn build
-    
-    - uses: actions/upload-artifact@v3
+
+    - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
       with: 
         name: ${{ inputs.artifact_name }}
         path: ./${{ inputs.artifact_name }}/dist

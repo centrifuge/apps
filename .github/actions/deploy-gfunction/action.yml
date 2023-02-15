@@ -38,10 +38,6 @@ inputs:
     default: europe-central2    
 
 runs:
-## Every module from here on could potentially expose the Gcloud Auth Token
-## Do not add untrusted code with `uses`
-## Ideally run only google-github-actions code with commit SHA at the end from here on
-## or `run` commands that we write.
   using: composite
   steps:
     - name: retrieve artifacts
@@ -51,6 +47,10 @@ runs:
         name: ${{ inputs.artifact_name }}
         path: functions
 
+    ## Every module from here on could potentially expose the Gcloud Auth Token
+    ## Do not add untrusted code with `uses`
+    ## Ideally run only google-github-actions code with commit SHA at the end from here on
+    ## or `run` commands that we write.
     - name: Auth gcloud
       id: gauth
       uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
@@ -68,7 +68,7 @@ runs:
         name: '${{ inputs.function_name }}'
         runtime: 'nodejs16'
         region: '${{ inputs.gcloud_region }}'
-        source_dir: '${{steps.download.outputs.download-path}}' # downlaod artifacts sets the current directory as the one in artifact.with.path
+        source_dir: '${{steps.download.outputs.download-path}}'
         entry_point: '${{ inputs.target }}'
         secret_environment_variables: ${{ inputs.function_secrets }}
         env_vars: ${{ inputs.function_env }}

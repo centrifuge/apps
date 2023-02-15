@@ -2,10 +2,6 @@ name: Env strategy
 description: 'Determine functions name, URL and GHA environment secrets'
 
 inputs:
-  # git_ref:
-  #   description: "branch, tag, or commit #"
-  #   required: true
-  #   type: string
   app_base_name:
     description: "app name you're deploying"
     required: true

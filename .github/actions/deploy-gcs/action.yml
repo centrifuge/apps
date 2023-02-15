@@ -1,5 +1,5 @@
 name: Upload static web to GCloud bucket
-description: 'deploy website in google cloud buckets'
+description: 'deploy front-end in google cloud buckets'
 inputs:
   bucket_url:
     description: Name of bucket ending in k-f.dev
@@ -23,6 +23,7 @@ runs:
       with:
         name: ${{ inputs.artifact_name }}
         path: webpack
+
     ## Every module from here on could potentially expose the Gcloud Auth Token
     ## Do not add untrusted code with `uses`
     ## Ideally run only google-github-actions code with commit SHA at the end from here on
@@ -40,7 +41,7 @@ runs:
 
     # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
     - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v1'
+      uses: google-github-actions/setup-gcloud@62d4898025f6041e16b1068643bfc5a696863587 # @v1
 
     - name: Create bucket
       shell: sh
@@ -59,6 +60,6 @@ runs:
       id: push
       run: gsutil -m rsync -d -c -r ${{steps.download.outputs.download-path}} gs://${{ inputs.bucket_url }}
 
-    # - shell: sh
-    #   id: push
-    #   run: echo "::notice title=web_url::${{ inputs.bucket_url  }}"
+    - shell: sh
+      id: push
+      run: echo "::notice title=front_URL::${{ inputs.bucket_url  }}"

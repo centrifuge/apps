@@ -1,4 +1,4 @@
-name: Deploy Altair and prod"
+name: Deploy Prod
 on:
   release:
     types:
@@ -6,27 +6,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  sync_staging:
+  sync_staging_prod:
     runs-on: ubuntu-latest
     environment: production
-    steps:
-      # ToDo: Auth with gcloud and sync staging with prod buckets
-      # ToDo: Auth with gcloud and sync functions code with prod.
-      
+    steps:   
       - name: Auth gcloud
         id: gauth
         uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
         with:
           workload_identity_provider: '${{ secrets.GWIP }}'
           service_account: '${{ secrets.GSA }}'
-      # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+
       - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v1' 
+        uses: google-github-actions/setup-gcloud@62d4898025f6041e16b1068643bfc5a696863587 # @v1 
 
       - name: Sync webpack from staging
-        run: |
-          echo "Archiving ${{ matrix.artifact_name }} in gs://staging-releases/${{ matrix.artifact_name }}"
-          gsutil -m rsync -d -c -r ${{ matrix.artifact_name }}/ gs://staging-releases/${{ github.ref_name }}/${{ matrix.artifact_name }}/
+        run: gsutil -m rsync -d -c -r gs://app-staging.centrifuge.io gs://app.centrifuge.io
   
   retrieve_release_assets:
     runs-on: ubuntu-latest
@@ -36,7 +31,7 @@ jobs:
     steps:  
       - uses: dsaltares/fetch-gh-release-asset@master
         with:
-          repo: 'dsaltares/godot-wild-jam-18'
+          repo: 'centrifuge/apps'
           version: 'tags/${{ github.ref_name }}'
           file: '*.zip'
           # target: 'subdir/${{ matrix.artifact_name }}.zip'
@@ -46,18 +41,19 @@ jobs:
           unzip pinning-api.zip -d pinning-api
           unzip onboarding-api.zip -d onboarding-api
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
         with: 
           name: onboading-api
           path: ./onboading-api
           if-no-files-found: error 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
         with: 
           name: pinning-api
           path: ./pinning-api
           if-no-files-found: error 
 
   deploy_pinning:
+    needs: retrieve_release_assets
     uses: ./.github/workflows/pinning-api.yml
     secrets: inherit
     with:
@@ -66,6 +62,7 @@ jobs:
 
 
   deploy_onboarding:
+    needs: retrieve_release_assets
     uses: ./.github/workflows/onboarding-api.yml
     secrets: inherit
     with:

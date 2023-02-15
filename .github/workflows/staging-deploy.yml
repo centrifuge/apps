@@ -1,4 +1,4 @@
-name: Deploy Altair and staging
+name: Deploy Altair and Staging
 on:
   release:
     types:
@@ -35,7 +35,7 @@ jobs:
       fail-fast: true
       matrix:
         deploy_to: ["altair", "staging"]
-    uses: ./.github/workflows/onboarding-api.yml
+    uses: centrifuge/apps/.github/workflows/onboarding-api.yml@gh-actions-refactor
     secrets: inherit
     with:
       deploy_env: ${{ matrix.deploy_to }}
@@ -50,6 +50,4 @@ jobs:
     #     SLACK_ICON: "https://centrifuge.io/favicon.ico"
     #     SLACK_TITLE: "Deployment using production credentials finished"
     #     SLACK_FOOTER: "Automatic message from centrifuge/website repository Actions"  
-
-
   
