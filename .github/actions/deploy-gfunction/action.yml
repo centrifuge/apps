@@ -3,10 +3,10 @@ description: 'Determine functions name, URL and GHA environment secrets'
 
 inputs:
   function_name:
-    description: "function name from prepare-deploy"
+    description: function name from prepare-deploy
     required: true
   artifact_name:
-    description: "From the actions/upload step"
+    description: From the actions/upload step
     required: true  
   GWIP:
     description: Google Workflow Identity provider

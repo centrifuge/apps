@@ -54,8 +54,6 @@ jobs:
         with:       
           app_name: ${{ env.app_name }} 
            
-           
-
       - name: build function
         uses: ./.github/actions/build-function
         with:
@@ -82,17 +80,15 @@ jobs:
         id-token: 'write'
       steps:
         - name: Checkout
-          uses: Bhacaz/checkout-files@v2
+          uses: actions/checkout@v3
           with:
-            files: .github/actions/
-            branch: 'gh-actions-refactor' 
-            # ${{ github.head_ref || github.ref_name }} 
-
+            path: apps  
+            
         - run: echo "Using GH env ->  ${{ needs.build.outputs.gh_env }}"
 
         - name: Deploy Gfunction
           id: functionsdeploy
-          uses: ./.github/actions/deploy-gfunction
+          uses: ./apps/.github/actions/deploy-gfunction
           with:
             function_name: ${{ needs.build.outputs.app_name }}
             artifact_name: ${{ env.app_name }}
@@ -104,3 +100,4 @@ jobs:
                 ${{ needs.build.outputs.function_secrets }}
             function_env: "${{ needs.build.outputs.function_vars}}"
             service_account: "${{ vars.ONBOARDING_FUNCT_SA }}"
+            

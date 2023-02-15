@@ -75,16 +75,15 @@ jobs:
       id-token: 'write'
     steps:
       - name: Checkout
-        uses: Bhacaz/checkout-files@v2
+        uses: actions/checkout@v3
         with:
-          files: .github/actions/deploy-gfunction/action.yml
-          branch: ${{ github.head_ref || github.ref_name }} 
+          path: apps 
           
       - run: echo "${{ needs.build.outputs.gcloud_secrets }}"
 
       - name: Deploy Gfunction
         id: functionsdeploy
-        uses: ./.github/actions/deploy-gfunction
+        uses: ./apps/.github/actions/deploy-gfunction
         with:
           function_name: ${{ needs.build.outputs.app_name }}
           artifact_name: ${{ env.app_name }}
