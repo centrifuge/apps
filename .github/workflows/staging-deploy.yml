@@ -3,6 +3,9 @@ on:
   release:
     types:
       - prereleased
+  pull_request:
+    paths:
+      - '.github/workflows/staging-deploy.yml'
 jobs:
   deploy_app:
     strategy:
