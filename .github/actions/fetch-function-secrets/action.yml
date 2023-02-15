@@ -4,6 +4,9 @@ inputs:
   app_name:
     description: app name to guess the folder for the vars
     required: true
+  deploy_env:
+    description: environment being deployed
+    required: true  
 
 runs:
   using: composite
@@ -12,7 +15,7 @@ runs:
         shell: bash
         id: set_secrets
         run: |
-          if ${{ steps.prepare.outputs.gh_env == 'production'}}; then
+          if ${{ inputs.deploy_env == 'production'}}; then
             FILE=${{ inputs.app_name }}/env-vars/prod.secrets
           else
             FILE=${{ inputs.app_name }}/env-vars/dev.secrets

@@ -137,9 +137,17 @@ jobs:
         with:
           message: |
             Deployed webiste in Google Cloud
-            URL: http://${{ needs.deploy.outputs.bucket_url }}
+            URL: https://${{ needs.deploy.outputs.bucket_url }}
             Commit #: ${{ env.pull_sha }}   
       
-            
+  # owasp_scan:
+  #   needs: deploy
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: ZAP Scan
+  #       uses: zaproxy/action-baseline@v0.7.0
+  #       with:
+  #         target: https://${{ needs.deploy.outputs.bucket_url }}
+  #         allow_issue_writing: false # Remove this to activate creating issues with the report
       
 
