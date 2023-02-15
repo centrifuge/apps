@@ -23,7 +23,9 @@ declare global {
       JWT_SECRET: string
       REDIRECT_URL: string
       SENDGRID_API_KEY: string
-      ONBOARDING_PURE_PROXY: string
+      MEMBERLIST_ADMIN_PURE_PROXY: string
+      COLLATOR_WSS_URL: string
+      RELAY_WSS_URL: string
     }
   }
 }
