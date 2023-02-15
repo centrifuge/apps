@@ -86,7 +86,7 @@ jobs:
 
       - name: Archive staging artifacts
         id: archive_staging
-        if: contains(inputs.artifact_name, 'staging')
+        if: inputs.deploy_env == 'staging' && github.event_name == 'release'
         uses: ./.github/actions/archive-release
         with:
           name: webpack
