@@ -107,10 +107,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        with:
+          path: apps
             
       - name: deploy to GCS
         id: gcsdeploy
-        uses: ./.github/actions/deploy-gcs
+        uses: ./apps/.github/actions/deploy-gcs
         with:
           artifact_name: webpack
           bucket_url: ${{ needs.build.outputs.front_url }}
