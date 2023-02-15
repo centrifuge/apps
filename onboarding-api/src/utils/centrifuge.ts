@@ -34,8 +34,17 @@ export const whitelistInvestor = async (walletAddress: string, poolId: string, t
     { PoolRole: { TrancheInvestor: [trancheId, TenYearsFromNow] } }
   )
 
+  // this doens't work b/c .connect() exepcts a Signer, not a KeyringPair
+  // how it is: cent-js.signAndSend(signingAddress, { signer, era })
+  // how it should be: cent-js.signAndSend(signer)
+  // centrifuge.config.proxy = proxyAddress
+  // const result = await firstValueFrom(
+  //   centrifuge
+  //     .connect(signer.address, signer)
+  //     .pools.updatePoolRoles([poolId, [[walletAddress, { TrancheInvestor: [trancheId, TenYearsFromNow] }]], []])
+  // )
   const proxiedSubmittable = api.tx.proxy.proxy(proxyAddress, undefined, submittable)
   const hash = await proxiedSubmittable.signAndSend(signer)
   await api.disconnect()
-  return hash.toHuman()
+  return hash
 }
