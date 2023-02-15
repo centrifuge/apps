@@ -50,9 +50,7 @@ const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) =>
 }
 
 export const BusinessInformation = () => {
-  const { onboardingUser, previousStep, nextStep } = useOnboarding()
-
-  const entityUser = onboardingUser as EntityUser
+  const { onboardingUser: entityUser, previousStep, nextStep } = useOnboarding<EntityUser>()
 
   const isUSOrCA = entityUser?.jurisdictionCode?.startsWith('us') || entityUser?.jurisdictionCode?.startsWith('ca')
 
@@ -63,9 +61,10 @@ export const BusinessInformation = () => {
       businessName: entityUser?.businessName || '',
       email: entityUser?.email || '',
       registrationNumber: entityUser?.registrationNumber || '',
-      jurisdictionCode: isUSOrCA ? entityUser?.jurisdictionCode.slice(0, 2) : entityUser?.jurisdictionCode || '',
+      jurisdictionCode:
+        (isUSOrCA ? entityUser?.jurisdictionCode.slice(0, 2) : entityUser?.jurisdictionCode || '') ?? '',
       incorporationDate: entityUser?.incorporationDate || '',
-      regionCode: isUSOrCA ? entityUser?.jurisdictionCode.split('_')[1] : '',
+      regionCode: (isUSOrCA ? entityUser?.jurisdictionCode.split('_')[1] : '') ?? '',
     },
     onSubmit: (values) => {
       verifyBusinessInformation(values)

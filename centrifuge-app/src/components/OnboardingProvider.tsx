@@ -7,8 +7,8 @@ import { useAuth } from './AuthProvider'
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
-const OnboardingContext = React.createContext<{
-  onboardingUser: OnboardingUser
+interface OnboardingContext<T> {
+  onboardingUser: T | null
   refetchOnboardingUser: () => void
   isOnboardingUserFetching: boolean
   isOnboardingUserFetched: boolean
@@ -22,9 +22,11 @@ const OnboardingContext = React.createContext<{
   nextStep: () => void
   previousStep: () => void
   isFetchingStep: boolean
-} | null>(null)
+}
 
-export function OnboardingProvider({ children }: { children?: React.ReactNode }) {
+const OnboardingContext = React.createContext<OnboardingContext<OnboardingUser> | null>(null)
+
+export function OnboardingProvider({ children }: { children: React.ReactNode }) {
   const { isConnecting, selectedAccount } = useWallet()
   const { isAuth, isAuthFetched, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const [activeStep, setActiveStep] = React.useState<number>(0)
@@ -41,7 +43,7 @@ export function OnboardingProvider({ children }: { children?: React.ReactNode })
   }
 
   const {
-    data: onboardingUser = {},
+    data: onboardingUser = null,
     refetch: refetchOnboardingUser,
     isFetching: isOnboardingUserFetching,
     isFetched: isOnboardingUserFetched,
@@ -119,8 +121,8 @@ export function OnboardingProvider({ children }: { children?: React.ReactNode })
   )
 }
 
-export const useOnboarding = () => {
-  const ctx = React.useContext(OnboardingContext)
+export const useOnboarding = <T extends OnboardingUser = OnboardingUser>() => {
+  const ctx = React.useContext(OnboardingContext) as OnboardingContext<T>
   if (!ctx) throw new Error('useOnboarding must be used within OnboardingProvider')
   return ctx
 }
