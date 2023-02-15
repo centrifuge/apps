@@ -9,7 +9,7 @@ on:
 jobs:
   deploy_app:
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         deploy_to: ["altair", "staging"]
     uses: centrifuge/apps/.github/workflows/centrifuge-app.yml@gh-actions-refactor
@@ -20,7 +20,7 @@ jobs:
 
   deploy_pinning:
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         deploy_to: ["altair", "staging"]
     uses: centrifuge/apps/.github/workflows/pinning-api.yml@gh-actions-refactor
@@ -31,7 +31,7 @@ jobs:
 
   deploy_onboarding:
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         deploy_to: ["altair", "staging"]
     uses: centrifuge/apps/.github/workflows/onboarding-api.yml@gh-actions-refactor
