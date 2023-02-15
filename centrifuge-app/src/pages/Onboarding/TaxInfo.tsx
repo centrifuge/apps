@@ -23,14 +23,14 @@ export const TaxInfo = () => {
   }
 
   const taxForm = React.useMemo(() => {
-    if (onboardingUser.investorType === 'individual' && onboardingUser.countryOfCitizenship !== 'us') {
+    if (onboardingUser?.investorType === 'individual' && onboardingUser?.countryOfCitizenship !== 'us') {
       return {
         type: 'W-8BEN',
         url: 'https://www.irs.gov/pub/irs-pdf/fw8ben.pdf',
       }
     }
 
-    if (onboardingUser.investorType === 'entity' && !onboardingUser.jurisdictionCode.startsWith('us')) {
+    if (onboardingUser?.investorType === 'entity' && !onboardingUser?.jurisdictionCode.startsWith('us')) {
       return {
         type: 'W-8BEN-E',
         url: 'https://www.irs.gov/pub/irs-pdf/fw8bene.pdf',

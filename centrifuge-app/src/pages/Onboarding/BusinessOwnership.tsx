@@ -112,16 +112,15 @@ const BusinessOwnershipInlineFeedback = ({ isError }: { isError: boolean }) => {
 }
 
 export const BusinessOwnership = () => {
-  const { onboardingUser, refetchOnboardingUser, previousStep, nextStep } = useOnboarding()
+  const { onboardingUser, refetchOnboardingUser, previousStep, nextStep } = useOnboarding<EntityUser>()
 
-  const entityUser = onboardingUser as EntityUser
-
-  const isCompleted = !!entityUser?.steps?.confirmOwners.completed
+  const isCompleted = !!onboardingUser?.steps.confirmOwners.completed
+  const isEmailVerified = !!onboardingUser?.steps.verifyEmail.completed
 
   const formik = useFormik({
     initialValues: {
-      ultimateBeneficialOwners: entityUser?.ultimateBeneficialOwners?.length
-        ? entityUser.ultimateBeneficialOwners.map((owner) => ({
+      ultimateBeneficialOwners: onboardingUser?.ultimateBeneficialOwners.length
+        ? onboardingUser?.ultimateBeneficialOwners.map((owner) => ({
             name: owner.name,
             dateOfBirth: owner.dateOfBirth,
           }))
@@ -142,7 +141,7 @@ export const BusinessOwnership = () => {
   }
 
   React.useEffect(() => {
-    if (entityUser.steps.verifyEmail.completed) {
+    if (isEmailVerified) {
       window.removeEventListener('focus', onFocus)
     } else {
       window.addEventListener('focus', onFocus)
@@ -152,9 +151,7 @@ export const BusinessOwnership = () => {
       window.removeEventListener('focus', onFocus)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entityUser.steps.verifyEmail.completed])
-
-  const isEmailVerified = !!entityUser?.steps?.verifyEmail.completed
+  }, [isEmailVerified])
 
   const removeOwner = (index: number) => {
     if (formik.values.ultimateBeneficialOwners.length === 1) {
@@ -202,10 +199,7 @@ export const BusinessOwnership = () => {
   return (
     <Stack gap={4}>
       <Box>
-        <EmailVerificationInlineFeedback
-          email={entityUser.email as string}
-          completed={entityUser.steps.verifyEmail.completed}
-        />
+        <EmailVerificationInlineFeedback email={onboardingUser?.email as string} completed={isEmailVerified} />
         <BusinessOwnershipInlineFeedback isError={isError} />
         <Text fontSize={5}>Confirm business ownership</Text>
         <Text fontSize={2}>

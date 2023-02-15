@@ -7,8 +7,8 @@ export const useUnsignedAgreement = () => {
   const { pool, onboardingUser } = useOnboarding()
 
   const isCompleted =
-    onboardingUser.steps.signAgreements[pool.id][pool.trancheId].signedDocument &&
-    !!onboardingUser.steps.signAgreements[pool.id][pool.trancheId].transactionInfo.extrinsicHash
+    onboardingUser?.steps.signAgreements[pool.id][pool.trancheId].signedDocument &&
+    !!onboardingUser?.steps.signAgreements[pool.id][pool.trancheId].transactionInfo.extrinsicHash
 
   const query = useQuery(
     ['unsigned-subscription-agreement', pool.id, pool.trancheId],

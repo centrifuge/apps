@@ -43,12 +43,12 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   }
 
   const {
-    data: onboardingUser = null,
+    data: onboardingUser,
     refetch: refetchOnboardingUser,
     isFetching: isOnboardingUserFetching,
     isFetched: isOnboardingUserFetched,
   } = useQuery(
-    ['get-user', selectedAccount?.address],
+    ['get-user', authToken],
     async () => {
       if (authToken) {
         const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUser`, {
@@ -104,7 +104,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   return (
     <OnboardingContext.Provider
       value={{
-        onboardingUser,
+        onboardingUser: onboardingUser || null,
         refetchOnboardingUser,
         isOnboardingUserFetching,
         isOnboardingUserFetched,

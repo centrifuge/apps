@@ -25,9 +25,9 @@ export const KnowYourCustomer = () => {
 
   const formik = useFormik({
     initialValues: {
-      name: onboardingUser.name || '',
-      dateOfBirth: onboardingUser.dateOfBirth || '',
-      countryOfCitizenship: onboardingUser.countryOfCitizenship || '',
+      name: onboardingUser?.name || '',
+      dateOfBirth: onboardingUser?.dateOfBirth || '',
+      countryOfCitizenship: onboardingUser?.countryOfCitizenship || '',
       isAccurate: !!isCompleted,
     },
     onSubmit: (values) => {

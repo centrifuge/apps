@@ -23,7 +23,7 @@ export const useStartKYC = () => {
         name: values.name,
         dateOfBirth: values.dateOfBirth,
         countryOfCitizenship: values.countryOfCitizenship,
-        ...(onboardingUser.investorType === undefined && { poolId: pool.id, trancheId: pool.trancheId }),
+        ...(onboardingUser?.investorType === undefined && { poolId: pool.id, trancheId: pool.trancheId }),
       }),
     })
 
