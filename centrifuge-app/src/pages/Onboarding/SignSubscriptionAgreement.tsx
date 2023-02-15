@@ -1,29 +1,47 @@
+import { useCentrifugeTransaction, useWallet } from '@centrifuge/centrifuge-react'
 import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
+import { switchMap } from 'rxjs'
 import { useAuth } from '../../components/AuthProvider'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 import { PDFViewer } from '../../components/PDFViewer'
 
 type Props = {
   nextStep: () => void
   backStep: () => void
+  signedAgreementUrl: string | undefined
+  isSignedAgreementFetched: boolean
 }
 
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
-
-export const SignSubscriptionAgreement = ({ nextStep, backStep }: Props) => {
+export const SignSubscriptionAgreement = ({
+  nextStep,
+  backStep,
+  signedAgreementUrl,
+  isSignedAgreementFetched,
+}: Props) => {
   const [isAgreed, setIsAgreed] = React.useState(false)
   const { authToken } = useAuth()
-  const { refetchOnboardingUser } = useOnboardingUser()
+  const { refetchOnboardingUser, onboardingUser, pool } = useOnboarding()
+  const { selectedAccount } = useWallet()
 
-  const { data } = useQuery(
-    'unsignedSubscriptionAgreement',
+  const isCompleted =
+    onboardingUser.steps.signAgreements[pool.id][pool.trancheId].signedDocument &&
+    !!onboardingUser.steps.signAgreements[pool.id][pool.trancheId].transactionInfo.extrinsicHash
+
+  React.useEffect(() => {
+    if (isCompleted) {
+      setIsAgreed(true)
+    }
+  }, [isCompleted])
+
+  const { data: unsignedAgreementData, isFetched: isUnsignedAgreementFetched } = useQuery(
+    ['unsignedSubscriptionAgreement', pool.id, pool.trancheId],
     async () => {
       const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUnsignedAgreement?poolId=${poolId}&trancheId=${trancheId}`,
+        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUnsignedAgreement?poolId=${pool.id}&trancheId=${
+          pool.trancheId
+        }`,
         {
           method: 'GET',
           headers: {
@@ -43,25 +61,55 @@ export const SignSubscriptionAgreement = ({ nextStep, backStep }: Props) => {
       return URL.createObjectURL(documentBlob)
     },
     {
+      enabled: !isCompleted,
       refetchOnWindowFocus: false,
     }
   )
 
-  const { mutate: signForm, isLoading } = useMutation(
-    async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/signAgreement`, {
+  const { execute: signRemark, isLoading: isSigningTransaction } = useCentrifugeTransaction(
+    'sign remark',
+    (cent) => () =>
+      cent
+        .getApi()
+        .pipe(
+          switchMap((api) =>
+            cent.wrapSignAndSend(
+              api,
+              api.tx.system.remark(`Signed subscription agreement for pool: ${pool.id} tranche: ${pool.trancheId}`)
+            )
+          )
+        ),
+    {
+      onSuccess: async (_, result) => {
+        const extrinsicHash = result.txHash.toHex()
+        // @ts-expect-error
+        const blockNumber = result.blockNumber.toString()
+        await sendDocumentsToIssuer({ extrinsicHash, blockNumber })
+      },
+    }
+  )
+
+  const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useMutation(
+    ['onboardingStatus', selectedAccount?.address, pool.id, pool.trancheId],
+    async (transactionInfo: { extrinsicHash: string; blockNumber: string }) => {
+      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/signAndSendDocuments`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          poolId,
-          trancheId,
+          transactionInfo,
+          trancheId: pool.trancheId,
+          poolId: pool.id,
         }),
         credentials: 'include',
       })
-      return response.json()
+
+      if (response.status === 201) {
+        return response
+      }
+      throw response.statusText
     },
     {
       onSuccess: () => {
@@ -71,14 +119,27 @@ export const SignSubscriptionAgreement = ({ nextStep, backStep }: Props) => {
     }
   )
 
+  const isAgreementFetched = React.useMemo(
+    () => isUnsignedAgreementFetched || isSignedAgreementFetched,
+    [isSignedAgreementFetched, isUnsignedAgreementFetched]
+  )
+
+  const handleSubmit = () => {
+    if (isCompleted) {
+      nextStep()
+    } else {
+      signRemark([])
+    }
+  }
+
   return (
     <Stack gap={4}>
       <Box>
         <Text fontSize={5}>Sign subscription agreement</Text>
         <Text fontSize={2}>Complete subscription agreement</Text>
-        {data && (
+        {isAgreementFetched && (
           <Box overflowY="scroll" height="500px">
-            <PDFViewer file={data} />
+            <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementData) as string} />
           </Box>
         )}
       </Box>
@@ -86,22 +147,22 @@ export const SignSubscriptionAgreement = ({ nextStep, backStep }: Props) => {
         style={{
           cursor: 'pointer',
         }}
-        checked={isAgreed}
+        checked={isCompleted || isAgreed}
         onChange={() => setIsAgreed((current) => !current)}
         label={<Text style={{ cursor: 'pointer' }}>I agree to the agreement</Text>}
-        disabled={isLoading}
+        disabled={isSigningTransaction || isSending || isCompleted}
       />
       <Shelf gap="2">
-        <Button onClick={() => backStep()} variant="secondary" disabled={isLoading}>
+        <Button onClick={() => backStep()} variant="secondary" disabled={isSigningTransaction || isSending}>
           Back
         </Button>
         <Button
-          onClick={() => signForm()}
+          onClick={() => handleSubmit()}
           loadingMessage="Signing"
-          loading={isLoading}
-          disabled={!isAgreed || isLoading}
+          loading={isSigningTransaction || isSending}
+          disabled={!isAgreed || isSigningTransaction || isSending}
         >
-          Sign
+          {isCompleted ? 'Next' : 'Sign'}
         </Button>
       </Shelf>
     </Stack>

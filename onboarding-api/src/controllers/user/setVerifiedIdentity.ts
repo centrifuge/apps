@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { bool, InferType, object } from 'yup'
-import { OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
+import { OnboardingUser, validateAndWriteToFirestore } from '../../database'
+import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { shuftiProRequest } from '../../utils/shuftiProRequest'
 import { Subset } from '../../utils/types'
@@ -14,30 +15,33 @@ export const setVerifiedIdentityController = async (
   res: Response
 ) => {
   try {
-    const { dryRun } = { ...req.body }
-    const userDoc = await userCollection.doc(req.walletAddress).get()
-    const user = userDoc.data() as OnboardingUser
+    const {
+      body: { dryRun },
+      walletAddress,
+    } = { ...req }
+    const user = await fetchUser(walletAddress)
 
-    if (!user || user.steps.verifyIdentity.completed) {
+    if (user.steps.verifyIdentity.completed) {
       throw new HttpsError(400, 'Unable to process request')
     }
 
     const status = await shuftiProRequest(req, { reference: user.kycReference }, { path: 'status', dryRun })
-    if (user && status.event === 'verification.accepted') {
-      const updatedUser: Subset<OnboardingUser> = {
-        steps: {
-          ...user.steps,
-          verifyIdentity: {
-            completed: true,
-            timeStamp: new Date().toISOString(),
-          },
-        },
-      }
-      await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['steps'])
-      const freshUserData = (await userCollection.doc(user.wallet.address).get()).data()
-      return res.status(200).send({ ...freshUserData })
+    if (status.event !== 'verification.accepted') {
+      throw new HttpsError(400, `Failed because ${status.reference} is in "${status.event}" state`)
     }
-    throw new HttpsError(400, `Failed because ${status.reference} is in "${status.event}" state`)
+
+    const updatedUser: Subset<OnboardingUser> = {
+      steps: {
+        ...user.steps,
+        verifyIdentity: {
+          completed: true,
+          timeStamp: new Date().toISOString(),
+        },
+      },
+    }
+    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['steps'])
+    const freshUserData = await fetchUser(walletAddress)
+    return res.status(200).send({ ...freshUserData })
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

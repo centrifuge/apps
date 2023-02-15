@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken'
-import { sendEmail } from '.'
+import { sendEmail, templateIds } from '.'
 import { OnboardingUser } from '../database'
 
 export type VerifyEmailPayload = {
@@ -26,13 +26,14 @@ export const sendVerifyEmailMessage = async (user: OnboardingUser) => {
         ],
         dynamic_template_data: {
           verifyLink: `${process.env.REDIRECT_URL}/onboarding/verifyEmail?token=${encodeURIComponent(token)}`,
+          disclaimerLink: `${process.env.REDIRECT_URL}/disclaimer`,
         },
       },
     ],
-    template_id: 'd-624f08ad697943929064772c0ac2aca1',
+    template_id: templateIds.verifyEmail,
     from: {
       name: 'Centrifuge',
-      email: `issuer@centrifuge.io`, // TODO: use pool issuer in email address
+      email: `hello@centrifuge.io`,
     },
   }
   await sendEmail(message)

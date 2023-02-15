@@ -1,11 +1,12 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import { EntityUser, OnboardingUser, userCollection, validateAndWriteToFirestore } from '../../database'
+import { EntityUser, validateAndWriteToFirestore } from '../../database'
 import { VerifyEmailPayload } from '../../emails/sendVerifyEmailMessage'
-import { verifyJwt } from '../../middleware/verifyJwt'
+import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
+import { verifyJwt } from '../../utils/verifyJwt'
 
 const verifyEmailParams = object({
   token: string().required(),
@@ -21,20 +22,19 @@ export const verifyEmailController = async (
       query: { token },
     } = req
     const payload = verifyJwt<VerifyEmailPayload>(token)
-    const userDoc = await userCollection.doc(payload.walletAddress).get()
-    const userData = userDoc.data() as OnboardingUser
+    const user = await fetchUser(payload.walletAddress)
 
     // individual users don't have email addresses yet
-    if (!userDoc.exists || userData.investorType !== 'entity') {
+    if (user.investorType !== 'entity') {
       throw new HttpsError(400, 'Bad request')
     }
 
-    if (userData.steps.verifyEmail.completed) {
+    if (user.steps.verifyEmail.completed) {
       throw new HttpsError(400, 'Email already verified')
     }
 
     const steps: Subset<EntityUser> = {
-      steps: { ...userData.steps, verifyEmail: { completed: true, timeStamp: new Date().toISOString() } },
+      steps: { ...user.steps, verifyEmail: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
     await validateAndWriteToFirestore(payload.walletAddress, steps, 'entity', ['steps'])
