@@ -19,13 +19,12 @@ on:
         required: true
 env:
   app_name: pinning-api
-
+concurrency:
+  group: pinning-api-${{ github.event.inputs.deploy_env || github.ref }}
+  cancel-in-progress: true    
 jobs:
   build:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ inputs.deploy_env }}pinning-api-${{ github.ref }}
-      cancel-in-progress: true   
     defaults:
       run:
         working-directory: pinning-api
@@ -68,9 +67,6 @@ jobs:
 
   deployment:
     needs: build
-    concurrency:
-      group: ${{ inputs.deploy_env }}pinning-api-${{ github.ref }}
-      cancel-in-progress: true    
     runs-on: ubuntu-latest
     environment: ${{ needs.build.outputs.gh_env }}
     # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch

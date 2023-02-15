@@ -24,13 +24,13 @@ env:
   # For now deploy only on demo when triggered manually:
   deploy_to: ${{ github.event_name == 'workflow_dispatch' && 'demo' || '' }}
   # deploy_to: ${{ inputs_deploy_env }}
+concurrency:
+  group: faucet-api-${{ github.ref }}
+  cancel-in-progress: true  
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    concurrency:
-      group: faucet-api-${{ github.ref }}
-      cancel-in-progress: true   
+    runs-on: ubuntu-latest 
     defaults:
       run:
         working-directory: faucet-api
@@ -64,10 +64,7 @@ jobs:
       function_vars: ${{ steps.set_env.outputs.function_vars }}
 
   deployment:
-    needs: build
-    concurrency:
-      group: faucet-api-${{ github.ref }}
-      cancel-in-progress: true    
+    needs: build 
     runs-on: ubuntu-latest
     environment: ${{ needs.build.outputs.gh_env }}
     # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch

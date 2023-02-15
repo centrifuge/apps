@@ -20,12 +20,13 @@ on:
 env:
   app_name: onboarding-api
   
+concurrency:
+  group: onboarding-api-${{ github.event.inputs.deploy_env || github.ref }}
+  cancel-in-progress: true    
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ inputs.deploy_env }}onboarding-api-${{ github.ref }}
-      cancel-in-progress: true   
     defaults:
       run:
         working-directory: onboarding-api
@@ -40,8 +41,6 @@ jobs:
         with:
           app_base_name: ${{ env.app_name }}
           deploy_to: ${{ inputs.deploy_env }}
-
-      - run: echo ${{ steps.set_env.outputs.gcloud_env }}
 
       - name: Function env vars
         id: set_env
@@ -72,9 +71,6 @@ jobs:
 
   deployment:
       needs: build
-      concurrency:
-        group: ${{ inputs.deploy_env }}onboarding-api-${{ github.ref }}
-        cancel-in-progress: true    
       runs-on: ubuntu-latest
       environment: ${{ needs.build.outputs.gh_env }}
       # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch

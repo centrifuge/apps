@@ -21,13 +21,13 @@ on:
       deploy_env:
         type: string
         required: true
+concurrency:
+  group: cent-app-${{ github.event.inputs.deploy_env || github.ref }}
+  cancel-in-progress: true       
+      
 jobs:  
-  
   build:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ inputs.deploy_env }}cent-app-${{ github.ref }}
-      cancel-in-progress: true   
     defaults:
       run:
         working-directory: centrifuge-app
@@ -98,9 +98,6 @@ jobs:
            
 
   deploy:
-    concurrency:
-      group: ${{ inputs.deploy_env }}cent-app-${{ github.ref }}
-      cancel-in-progress: true     
     permissions:
       contents: 'read'
       id-token: 'write'  
