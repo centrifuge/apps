@@ -40,3 +40,17 @@ runs:
         name: ${{ inputs.artifact_name }}
         path: ./${{ inputs.artifact_name }}/dist
         if-no-files-found: error  
+        
+    - shell: bash
+      id: debug1
+      run: | 
+        echo "${{inputs.artifact_name}}"
+        echo "${{ contains(inputs.artifact_name, 'staging')}}"
+
+    - name: Archive staging artifacts
+      id: archive_staging
+      if: contains(inputs.artifact_name, 'staging')
+      uses: ./.github/actions/archive-release
+      with:
+        name: ${{ inputs.artifact_name }}
+        path: ./${{ inputs.artifact_name }}/dist

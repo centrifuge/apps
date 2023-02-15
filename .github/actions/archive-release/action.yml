@@ -1,0 +1,59 @@
+name: Archive staging artifact
+description: Read the files from env-vars folder and massage to fit the input for google-github-actions/deploy-cloud-functions
+inputs:
+  name:
+    description: name of the app - determines the zip file name
+    required: true
+  path:
+    description: path to the files to ZIP for upload
+    required: true    
+
+    
+runs:
+  using: composite
+  steps:  
+      # - name: retrieve ${{ inputs.artifact_name }} from GH
+      #   id: download
+      #   uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
+      #   with:
+      #     name: ${{ inputs.artifact_name }}
+      #     path: ${{ inputs.artifact_name }}
+
+      - name: ZIP ${{ inputs.artifact_name }}
+        shell: bash
+        run: zip -r  "${{ inputs.artifact_name }}.zip"  ./${{ inputs.artifact_name }}/
+
+# This action will fail if the calling workflow is not a release
+# ncipollo/release-action expects an existing release to be updated, and it needs to be a draft/pre-release
+      - name: upload ${{ inputs.artifact_name }} to release tag ${{ github.ref_name }}
+        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # @v1
+        # https://github.com/ncipollo/release-action
+        with:
+          tag: ${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          artifacts: "${{ inputs.artifact_name }}.zip"
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifactContentType: zip
+          omitBodyDuringUpdate: true
+          omitDraftDuringUpdate: true
+          omitNameDuringUpdate: true
+          omitPrereleaseDuringUpdate: true
+          updateOnlyUnreleased: true # When allowUpdates is enabled, this will fail the action if the release it is updating is not a draft or a prerelease.
+          
+
+    # Alernative: archive in a gcloud bucket:
+      # - name: Auth gcloud
+      #   id: gauth
+      #   uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+      #   with:
+      #     workload_identity_provider: '${{ secrets.GWIP }}'
+      #     service_account: '${{ secrets.GSA }}'
+      # # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+      # - name: 'Set up Cloud SDK'
+      #   uses: 'google-github-actions/setup-gcloud@v1' 
+
+      # - name: Archive ${{ inputs.artifact_name }} in gcloud bucket
+      #   run: |
+      #     echo "Archiving ${{ inputs.artifact_name }} in gs://staging-releases/${{ inputs.artifact_name }}"
+      #     gsutil -m rsync -d -c -r ${{ inputs.artifact_name }}/ gs://staging-releases/${{ github.ref_name }}/${{ inputs.artifact_name }}/

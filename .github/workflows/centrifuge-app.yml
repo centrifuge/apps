@@ -83,6 +83,15 @@ jobs:
           name: webpack
           path: ./centrifuge-app/build
           if-no-files-found: error
+
+      - name: Archive staging artifacts
+        id: archive_staging
+        if: contains(inputs.artifact_name, 'staging')
+        uses: ./.github/actions/archive-release
+        with:
+          name: webpack
+          path: ./centrifuge-app/build
+
     outputs:
       front_url: ${{ steps.prepare.outputs.front_url }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
