@@ -22,9 +22,9 @@ on:
         type: string
         required: true
 concurrency:
-  group: cent-app-${{ github.event.inputs.deploy_env || github.ref }}
+  group: 'cent-app-${{ toJson(github.event.inputs.deploy_env) || github.ref }}'
   cancel-in-progress: true       
-      
+
 jobs:  
   build:
     runs-on: ubuntu-latest

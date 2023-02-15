@@ -20,7 +20,7 @@ on:
 env:
   app_name: pinning-api
 concurrency:
-  group: pinning-api-${{ github.event.inputs.deploy_env || github.ref }}
+  group: 'pinning-api-${{ toJson(github.event.inputs.deploy_env) || github.ref }}'
   cancel-in-progress: true    
 jobs:
   build:

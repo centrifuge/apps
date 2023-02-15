@@ -21,7 +21,7 @@ env:
   app_name: onboarding-api
   
 concurrency:
-  group: onboarding-api-${{ github.event.inputs.deploy_env || github.ref }}
+  group: 'onboarding-api-${{ toJson(github.event.inputs.deploy_env) || github.ref }}'
   cancel-in-progress: true    
  
 jobs:
