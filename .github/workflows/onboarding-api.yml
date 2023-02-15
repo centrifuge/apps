@@ -19,6 +19,7 @@ on:
         required: true
 env:
   app_name: onboarding-api
+  function_handler: onboarding
   
 concurrency:
   group:  'onboarding-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
@@ -42,25 +43,33 @@ jobs:
           app_base_name: ${{ env.app_name }}
           deploy_to: ${{ inputs.deploy_env }}
 
-      - name: Function env vars
+      - name: Set function env vars
         id: set_env
         uses: ./.github/actions/fetch-function-vars
         with:
           vars_file: ${{ env.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env 
           
 
-      - name: Function env secrets
+      - name: Set function env secrets
         id: set_secrets
         uses: ./.github/actions/fetch-function-secrets
         with:       
           app_name: ${{ env.app_name }}
           deploy_env:  ${{ steps.prepare.outputs.gh_env }}
-           
+                    
       - name: build function
         uses: ./.github/actions/build-function
         with:
           artifact_name: ${{ env.app_name }}
 
+      - name: Archive staging artifacts
+        id: archive_staging
+        if: inputs.deploy_env == 'staging' && github.event_name == 'release'
+        uses: ./.github/actions/archive-release
+        with:
+          name: ${{ env.app_name }}
+          path: ./${{ env.app_name }}/dist
+          
     outputs:
       app_name: ${{ steps.prepare.outputs.app_name }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
@@ -82,8 +91,6 @@ jobs:
           uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
           with:
             path: apps  
-            
-        - run: echo "Using GH env ->  ${{ needs.build.outputs.gh_env }}"
 
         - name: Deploy Gfunction
           id: functionsdeploy
@@ -94,7 +101,7 @@ jobs:
             GWIP: ${{ secrets.GWIP }}
             GSA: ${{ secrets.GSA }}
             gcloud_region: ${{ env.GCLOUD_REGION }}
-            target: onboarding
+            target: ${{ env.function_handler }}
             function_secrets: |
                 ${{ needs.build.outputs.function_secrets }}
             function_env: "${{ needs.build.outputs.function_vars }}"

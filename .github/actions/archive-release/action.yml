@@ -13,19 +13,19 @@ runs:
   using: composite
   steps:  
 
-      - name: ZIP ${{ inputs.artifact_name }}
+      - name: ZIP ${{ inputs.name }}
         shell: bash
-        run: zip -r  "${{ inputs.artifact_name }}.zip"  ./${{ inputs.artifact_name }}/
+        run: zip -r  "${{ inputs.name }}.zip"  ./${{ inputs.path }}/ 1> /dev/null
 
 # This action will fail if the calling workflow is not a release
 # ncipollo/release-action expects an existing release to be updated, and it needs to be a draft/pre-release
-      - name: upload ${{ inputs.artifact_name }} to release tag ${{ github.ref_name }}
+      - name: upload ${{ inputs.name }} to release tag ${{ github.ref_name }}
         uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # @v1
         # https://github.com/ncipollo/release-action
         with:
           tag: ${{ github.ref_name }}
           commit: ${{ github.sha }}
-          artifacts: "${{ inputs.artifact_name }}.zip"
+          artifacts: "${{ inputs.name }}.zip"
           allowUpdates: true
           artifactErrorsFailBuild: true
           artifactContentType: zip
@@ -47,7 +47,7 @@ runs:
       # - name: 'Set up Cloud SDK'
       #   uses: google-github-actions/setup-gcloud@62d4898025f6041e16b1068643bfc5a696863587 # @v1 
 
-      # - name: Archive ${{ inputs.artifact_name }} in gcloud bucket
+      # - name: Archive ${{ inputs.name }} in gcloud bucket
       #   run: |
-      #     echo "Archiving ${{ inputs.artifact_name }} in gs://staging-releases/${{ inputs.artifact_name }}"
-      #     gsutil -m rsync -d -c -r ${{ inputs.artifact_name }}/ gs://staging-releases/${{ github.ref_name }}/${{ inputs.artifact_name }}/
+      #     echo "Archiving ${{ inputs.name }} in gs://staging-releases/${{ inputs.name }}"
+      #     gsutil -m rsync -d -c -r ${{ inputs.name }}/ gs://staging-releases/${{ github.ref_name }}/${{ inputs.name }}/
