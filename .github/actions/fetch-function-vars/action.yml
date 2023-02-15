@@ -4,7 +4,10 @@ inputs:
   vars_file:
     description: variable file to ingest
     required: true
-
+outputs:
+  function_vars: 
+    description: "Formatted variables for Gfunctions"
+    value: ${{ steps.set_env.outputs.function_vars}}
 runs:
   using: composite
   steps:

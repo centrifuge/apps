@@ -44,12 +44,14 @@ jobs:
       - run: echo ${{ steps.set_env.outputs.gcloud_env }}
 
       - name: Function env vars
+        id: set_env
         uses: ./.github/actions/fetch-function-vars
         with:
           vars_file: ${{ env.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env 
           
 
       - name: Function env secrets
+        id: set_secrets
         uses: ./.github/actions/fetch-function-secrets
         with:       
           app_name: ${{ env.app_name }}
@@ -99,6 +101,6 @@ jobs:
             target: onboarding
             function_secrets: |
                 ${{ needs.build.outputs.function_secrets }}
-            function_env: "${{ needs.build.outputs.function_vars}}"
+            function_env: "${{ needs.build.outputs.function_vars }}"
             service_account: "${{ vars.ONBOARDING_FUNCT_SA }}"
             

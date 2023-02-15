@@ -47,6 +47,7 @@ jobs:
       - run: echo "Running with env secrets from -> ${{ steps.prepare.outputs.gh_env }}"
       
       - name: Function env vars
+        id: set_env
         uses: ./.github/actions/fetch-function-vars
         with:
           vars_file: ${{ env.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env 
@@ -94,5 +95,5 @@ jobs:
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
           gcloud_region: ${{ env.GCLOUD_REGION }}
-          function_env: "${{ needs.build.outputs.function_vars}}"
+          function_env: "${{ needs.build.outputs.function_vars }}"
             
