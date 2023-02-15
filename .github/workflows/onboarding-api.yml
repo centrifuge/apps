@@ -84,9 +84,10 @@ jobs:
         - name: Checkout
           uses: Bhacaz/checkout-files@v2
           with:
-            files: .github/actions/deploy-gfunction/action.yml
-            branch: ${{ github.head_ref || github.ref_name }} 
-            
+            files: .github/actions/
+            branch: 'gh-actions-refactor' 
+            # ${{ github.head_ref || github.ref_name }} 
+
         - run: echo "Using GH env ->  ${{ needs.build.outputs.gh_env }}"
 
         - name: Deploy Gfunction
