@@ -290,6 +290,7 @@ type WrittenOff = {
 type WriteOffStatus = null | WrittenOff | WrittenOfByAdmin
 
 type InterestAccrual = {
+  interestRatePerSec: string
   accumulatedRate: string
   referenceCount: number
 }
@@ -2003,8 +2004,7 @@ export function getPoolsModule(inst: Centrifuge) {
           $currencyMeta,
         ])
       }),
-      map(([loanValues, activeLoanValues, closedLoansValues, rates, interestLastUpdated, rawCurrency]) => {
-        console.log('rates', rates)
+      map(([loanValues, activeLoanValues, closedLoansValues, rateValues, interestLastUpdated, rawCurrency]) => {
         const currency = rawCurrency.toHuman() as AssetCurrencyData
         const loans = (loanValues as any[]).map(([key, value]) => {
           const loan = value.toJSON() as unknown as LoanData
@@ -2024,9 +2024,11 @@ export function getPoolsModule(inst: Centrifuge) {
         })
 
         const activeLoanData = activeLoanValues.toJSON() as ActiveLoanData[]
+        const rates = rateValues.toJSON() as InterestAccrual[]
+
         const activeLoans = activeLoanData.reduce<Record<string, Omit<ActiveLoan, 'status' | 'asset' | 'closedAt'>>>(
-          (prev, activeLoan, index) => {
-            const interestData = undefined // rates[index].toJSON() as InterestAccrual
+          (prev, activeLoan) => {
+            const interestData = rates.find((rate) => rate.interestRatePerSec === activeLoan.interestRatePerSec)
             const mapped = {
               id: String(activeLoan.loanId),
               poolId,
