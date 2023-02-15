@@ -45,6 +45,11 @@ jobs:
           app_base_name: ${{ env.app_name }}
           deploy_to: ${{ env.deploy_to }}
       - run: echo "Running with env secrets from -> ${{ steps.prepare.outputs.gh_env }}"
+      
+      - name: Function env vars
+        uses: ./.github/actions/fetch-function-vars
+        with:
+          vars_file: ${{ env.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env 
 
       - name: build function
         uses: ./.github/actions/build-function
@@ -56,6 +61,7 @@ jobs:
       app_name: ${{ steps.prepare.outputs.app_name }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
       env_name: ${{ steps.prepare.outputs.env_name }}
+      function_vars: ${{ steps.set_env.outputs.function_vars }}
 
   deployment:
     needs: build
@@ -88,5 +94,5 @@ jobs:
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
           gcloud_region: ${{ env.GCLOUD_REGION }}
-          function_env: "COLLATOR_WSS_URL=wss://fullnode.${{ needs.build.outputs.env_name }}.cntrfg.com, CORS_ORIGIN=https://${{ needs.build.outputs.env_name }}.app.cntrfg.com"
+          function_env: "${{ needs.build.outputs.function_vars}}"
             
