@@ -21,7 +21,7 @@ env:
   app_name: onboarding-api
   
 concurrency:
-  group:  '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  group:  'onboarding-api@${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: false    
  
 jobs:

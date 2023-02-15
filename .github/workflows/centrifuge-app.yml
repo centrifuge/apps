@@ -22,7 +22,7 @@ on:
         type: string
         required: true
 concurrency:
-  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  group: 'centrifuge-app@${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: false      
 
 jobs:  

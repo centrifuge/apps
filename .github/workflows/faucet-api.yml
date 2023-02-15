@@ -25,7 +25,7 @@ env:
   deploy_to: ${{ github.event_name == 'workflow_dispatch' && 'demo' || '' }}
   # deploy_to: ${{ inputs_deploy_env }}
 concurrency:
-  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  group: 'faucet-api@${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: false  
 
 jobs:
