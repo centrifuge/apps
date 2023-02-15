@@ -20,8 +20,8 @@ on:
 env:
   app_name: pinning-api
 concurrency:
-  group: 'pinning-api-${{ toJson(github.event.inputs.deploy_env) || github.ref }}'
-  cancel-in-progress: true    
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: false    
 jobs:
   build:
     runs-on: ubuntu-latest
