@@ -2,20 +2,27 @@ import {
   Box,
   Button,
   IconCopy,
+  IconLogOut,
+  IconSwitch,
   Menu,
   MenuItem,
   MenuItemGroup,
   Popover,
+  Shelf,
   Stack,
   Text,
   WalletButton,
 } from '@centrifuge/fabric'
+import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import { useBalances } from '../../hooks/useBalances'
 import { useEnsName } from '../../hooks/useEnsName'
 import { copyToClipboard } from '../../utils/copyToClipboard'
-import { formatBalanceAbbreviated } from '../../utils/formatting'
+import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
 import { useAddress, useWallet } from '../WalletProvider'
+import { Logo } from '../WalletProvider/SelectButton'
+import { NetworkIcon } from '../WalletProvider/UserSelection'
+import { getWalletIcon, getWalletLabel } from '../WalletProvider/WalletDialog'
 import { ConnectButton } from './ConnectButton'
 
 export function WalletMenu() {
@@ -64,7 +71,9 @@ function ConnectedMenu() {
                 : undefined
             }
             balance={
-              balances ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol) : undefined
+              balances
+                ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol, 0)
+                : undefined
             }
             iconStyle={connectedType === 'evm' ? 'ethereum' : 'polkadot'}
             {...props}
@@ -75,29 +84,73 @@ function ConnectedMenu() {
         <div {...props} ref={ref}>
           <Menu>
             <MenuItemGroup>
-              <Button icon={IconCopy} variant="tertiary" small onClick={() => copyToClipboard(address)}></Button>
-              <Text>network: {connectedNetworkName}</Text>
-              <MenuItem
-                label="Switch wallet"
-                icon={<Box minWidth="iconMedium" />}
-                onClick={() => {
-                  state.close()
-                  showWallets(connectedNetwork, wallet)
-                }}
-              />
+              <Shelf px={2} pt={1} gap={1} alignItems="center">
+                <Box style={{ pointerEvents: 'none' }}>
+                  <Identicon value={address} size={17} theme="polkadot" />
+                </Box>
+                <Text variant="interactive1" fontWeight={400}>
+                  {truncateAddress(address)}
+                </Text>
+                <Button icon={IconCopy} variant="tertiary" small onClick={() => copyToClipboard(address)}></Button>
+              </Shelf>
+              <Stack gap={0} px={2} pb={1}>
+                <Text variant="label2" textAlign="center">
+                  Balance
+                </Text>
+                <Text variant="body1" fontWeight={500} textAlign="center">
+                  {balances
+                    ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol)
+                    : undefined}
+                </Text>
+              </Stack>
+            </MenuItemGroup>
+
+            <MenuItemGroup>
+              <Box px={2} py={1}>
+                <Text variant="label2">Network</Text>
+                <Shelf gap={1}>
+                  <NetworkIcon network={connectedNetwork} size="iconSmall" />
+                  <Text variant="interactive1">{connectedNetworkName}</Text>
+                </Shelf>
+              </Box>
+            </MenuItemGroup>
+
+            <MenuItemGroup>
+              {wallet && (
+                <Box px={2} py={1}>
+                  <Text variant="label2">Wallet</Text>
+                  <Shelf gap={1}>
+                    <Logo src={getWalletIcon(wallet)} size="iconSmall" />
+                    <Text variant="interactive1">{getWalletLabel(wallet)}</Text>
+                  </Shelf>
+                </Box>
+              )}
               {connectedType === 'substrate' && (accounts!.length > 1 || !!proxies?.[address]?.length) && (
                 <MenuItem
                   label="Switch account"
-                  icon={<Box minWidth="iconMedium" />}
+                  icon={<IconSwitch size="iconSmall" />}
                   onClick={() => {
                     state.close()
                     showAccounts()
                   }}
                 />
               )}
+              {connectedType === 'evm' && (
+                <MenuItem
+                  label="Switch wallet"
+                  icon={<IconSwitch size="iconSmall" />}
+                  onClick={() => {
+                    state.close()
+                    showWallets(connectedNetwork, wallet)
+                  }}
+                />
+              )}
+            </MenuItemGroup>
+
+            <MenuItemGroup>
               <MenuItem
                 label="Disconnect"
-                icon={<Box minWidth="iconMedium" />}
+                icon={<IconLogOut size="iconSmall" />}
                 onClick={() => {
                   state.close()
                   disconnect()

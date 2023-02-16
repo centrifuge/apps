@@ -30,3 +30,7 @@ export function mapResponsive<ResponsiveInput extends ResponsiveValue<any>, Outp
 
   return null
 }
+
+export function toPx(n: number | string) {
+  return typeof n === 'number' ? `${n}px` : n
+}

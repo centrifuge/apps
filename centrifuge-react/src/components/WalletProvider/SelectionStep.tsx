@@ -14,7 +14,7 @@ const Marker = styled(Text)<{ disabled: boolean }>`
   vertical-align: baseline;
   width: 1.6em;
   height: 1.6em;
-  margin-right: 0.6em;
+  margin-right: 0.7em;
   border-radius: 50%;
   background-color: ${({ theme, disabled }) => (disabled ? theme.colors.textDisabled : theme.colors.textPrimary)};
 `
@@ -28,7 +28,9 @@ export function SelectionStep({ step, title, disabled = false, children }: Selec
         </Marker>
         {title}
       </Text>
-      <Grid minColumnWidth={120}>{children}</Grid>
+      <Grid minColumnWidth={120} mt={2} pl={4} gap={1}>
+        {children}
+      </Grid>
     </Stack>
   )
 }

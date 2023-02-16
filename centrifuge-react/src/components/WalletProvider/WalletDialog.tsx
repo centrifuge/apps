@@ -1,33 +1,34 @@
 import {
-  AnchorButton,
   Box,
   Button,
+  Card,
   Dialog,
   IconAlertCircle,
-  IconCheck,
+  IconChevronLeft,
   IconDownload,
-  Menu,
-  MenuItem,
   MenuItemGroup,
-  Shelf,
   Stack,
-  Text,
 } from '@centrifuge/fabric'
-import Identicon from '@polkadot/react-identicon'
+import centrifugeLogo from '@centrifuge/fabric/assets/logos/centrifuge.svg'
 import { Wallet } from '@subwallet/wallet-connect/types'
 import { MetaMask } from '@web3-react/metamask'
 import * as React from 'react'
-import styled from 'styled-components'
-import { truncateAddress } from '../../utils/formatting'
+import { AccountButton, AccountIcon, AccountName } from './AccountButton'
 import { EvmChains } from './evm/chains'
 import { EvmConnectorMeta } from './evm/connectors'
 import { isMetaMaskWallet } from './evm/utils'
+import { Logo, SelectAnchor, SelectButton } from './SelectButton'
 import { SelectionStep } from './SelectionStep'
 import { UserSelection } from './UserSelection'
 import { useWallet, wallets } from './WalletProvider'
 
 type Props = {
   evmChains: EvmChains
+}
+
+const title = {
+  accounts: 'Choose Account',
+  wallets: 'Choose wallet',
 }
 
 export function WalletDialog({ evmChains }: Props) {
@@ -69,43 +70,45 @@ export function WalletDialog({ evmChains }: Props) {
   }
 
   return (
-    <Dialog title="Connect wallet" isOpen={!!view} onClose={close}>
+    <Dialog title={view ? title[view] : undefined} isOpen={!!view} onClose={close}>
       <Stack gap={4}>
         <UserSelection network={selectedNetwork} wallet={selectedWallet} />
 
         {view === 'wallets' ? (
           <>
             <SelectionStep step={1} title="Network">
-              <Button
+              <SelectButton
+                logo={<Logo src={centrifugeLogo} />}
                 onClick={() => showWallets('centrifuge')}
                 active={selectedNetwork === 'centrifuge'}
-                variant="tertiary"
-                small
               >
                 Centrifuge
-              </Button>
+              </SelectButton>
+
               {Object.entries(evmChains).map(([chainId, chain]) => (
-                <Button
-                  // icon={<Box as="img" src={chain.logo?.src ?? ''} alt="" width="iconMedium" />}
+                <SelectButton
                   key={chainId}
+                  logo={chain.logo?.src ? <Logo src={chain.logo.src} /> : undefined}
                   onClick={() => showWallets(Number(chainId))}
                   active={selectedNetwork === Number(chainId)}
-                  variant="tertiary"
-                  small
                 >
                   {chain.name}
-                </Button>
+                </SelectButton>
               ))}
             </SelectionStep>
+
+            <Box as="hr" borderStyle="solid" borderWidth={0} borderTopWidth={1} borderColor="borderPrimary" />
 
             <SelectionStep step={2} title="Wallet" disabled={!(shownWallets?.length > 0)}>
               {shownWallets.map((wallet) =>
                 wallet.installed ? (
-                  <Button
+                  <SelectButton
                     key={wallet.title}
-                    icon={<Box as="img" src={getWalletIcon(wallet)} alt="" width="iconMedium" />}
+                    logo={<Logo src={getWalletIcon(wallet)} />}
                     iconRight={
-                      selectedWallet && isConnectError && selectedWallet === wallet ? IconAlertCircle : undefined
+                      selectedWallet && isConnectError && selectedWallet === wallet ? (
+                        <IconAlertCircle size="iconSmall" />
+                      ) : undefined
                     }
                     onClick={() => {
                       showWallets(selectedNetwork, wallet)
@@ -114,33 +117,37 @@ export function WalletDialog({ evmChains }: Props) {
                     disabled={!isEnabled(wallet)}
                     loading={isConnecting && wallet === pendingWallet}
                     active={ctx[connectedType!]?.selectedWallet === wallet}
-                    variant="tertiary"
-                    small
-                    key={chainId}
                   >
                     {getWalletLabel(wallet)}
-                  </Button>
+                  </SelectButton>
                 ) : (
-                  <AnchorButton
-                    href={wallet.installUrl}
-                    target="_blank"
+                  <SelectAnchor
                     key={wallet.title}
-                    icon={<Box as="img" src={getWalletIcon(wallet)} alt="" width="iconMedium" />}
-                    iconRight={IconDownload}
+                    href={wallet.installUrl}
+                    logo={<Logo src={getWalletIcon(wallet)} />}
+                    iconRight={<IconDownload size="iconSmall" color="textPrimary" />}
                     disabled={!isEnabled(wallet)}
-                    variant="tertiary"
-                    small
                   >
                     {getWalletLabel(wallet)}
-                  </AnchorButton>
+                  </SelectAnchor>
                 )
               )}
             </SelectionStep>
           </>
         ) : (
           <>
-            <button onClick={() => showWallets(selectedNetwork, selectedWallet)}>Back</button>
             <SubstrateAccounts onClose={close} />
+
+            <Box mt={1}>
+              <Button
+                variant="secondary"
+                icon={IconChevronLeft}
+                onClick={() => showWallets(selectedNetwork, selectedWallet)}
+                small
+              >
+                Back
+              </Button>
+            </Box>
           </>
         )}
       </Stack>
@@ -148,13 +155,14 @@ export function WalletDialog({ evmChains }: Props) {
   )
 }
 
-function getWalletLabel(wallet: EvmConnectorMeta | Wallet) {
+export function getWalletLabel(wallet: EvmConnectorMeta | Wallet) {
   if ('connector' in wallet && wallet.connector instanceof MetaMask) {
     return !wallet.installed || isMetaMaskWallet() ? wallet.title : 'Browser Wallet'
   }
   return wallet.title
 }
-function getWalletIcon(wallet: EvmConnectorMeta | Wallet) {
+
+export function getWalletIcon(wallet: EvmConnectorMeta | Wallet) {
   if ('connector' in wallet && wallet.connector instanceof MetaMask) {
     return !wallet.installed || isMetaMaskWallet() ? wallet.logo.src : ''
   }
@@ -172,93 +180,46 @@ function SubstrateAccounts({ onClose }: { onClose: () => void }) {
   const {
     substrate: { accounts, selectAccount, selectProxy, selectedAccount, proxy, proxies },
   } = useWallet()
+
   if (!accounts) return null
+
   return (
     <>
-      <Menu>
+      <Card maxHeight="50vh" style={{ overflow: 'auto' }}>
         {accounts.map((acc) => (
-          <MenuItemGroup key={acc.address}>
-            <MenuItem
-              label={
-                acc.name ? (
-                  <Text
-                    style={{
-                      display: 'block',
-                      maxWidth: '250px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {acc.name}
-                  </Text>
-                ) : (
-                  truncateAddress(acc.address)
-                )
-              }
-              sublabel={acc.address}
-              icon={
-                <IdenticonWrapper>
-                  <Identicon value={acc.address} size={24} theme="polkadot" />
-                </IdenticonWrapper>
-              }
-              iconRight={selectedAccount?.address === acc.address && !proxy ? IconCheck : <Box width={16} />}
-              onClick={() => {
-                onClose()
-                selectAccount(acc.address)
-              }}
-            />
-            {proxies?.[acc.address]?.map((p) => (
-              <MenuItem
-                label={
-                  <Shelf alignItems="baseline" gap="5px">
-                    <Text
-                      variant="interactive2"
-                      color="inherit"
-                      style={{
-                        maxWidth: '100px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {acc.name || truncateAddress(acc.address)}
-                    </Text>
-                    <span>/</span>
-                    <span>{truncateAddress(p.delegator)}</span>
-                    <Text variant="label2">
-                      {p.types.map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type).join(' / ')}
-                    </Text>
-                  </Shelf>
-                }
-                sublabel={p.delegator}
-                key={p.delegator}
-                icon={
-                  <IdenticonWrapper>
-                    <Identicon value={p.delegator} size={24} theme="polkadot" />
-                  </IdenticonWrapper>
-                }
-                iconRight={
-                  selectedAccount?.address === acc.address && proxy?.delegator === p.delegator ? (
-                    IconCheck
-                  ) : (
-                    <Box width={16} />
-                  )
-                }
+          <React.Fragment key={acc.address}>
+            <MenuItemGroup>
+              <AccountButton
+                address={acc.address}
+                icon={<AccountIcon id={acc.address} />}
+                label={<AccountName account={acc} />}
                 onClick={() => {
                   onClose()
-                  if (acc.address !== selectedAccount?.address) selectAccount(acc.address)
-                  selectProxy(p.delegator)
+                  selectAccount(acc.address)
                 }}
+                selected={selectedAccount?.address === acc.address && !proxy}
               />
+            </MenuItemGroup>
+
+            {proxies?.[acc.address]?.map((p, index) => (
+              <MenuItemGroup key={`${p.delegator}${index}`}>
+                <AccountButton
+                  address={acc.address}
+                  icon={<AccountIcon id={p.delegator} />}
+                  label={<AccountName account={acc} delegator={p.delegator} />}
+                  proxyRights={p.types.map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type).join(' / ')}
+                  onClick={() => {
+                    onClose()
+                    if (acc.address !== selectedAccount?.address) selectAccount(acc.address)
+                    selectProxy(p.delegator)
+                  }}
+                  selected={selectedAccount?.address === acc.address && proxy?.delegator === p.delegator}
+                />
+              </MenuItemGroup>
             ))}
-          </MenuItemGroup>
+          </React.Fragment>
         ))}
-      </Menu>
+      </Card>
     </>
   )
 }
-
-const IdenticonWrapper = styled.div`
-  pointer-events: none;
-`
