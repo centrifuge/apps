@@ -96,7 +96,7 @@ export function AccountIcon({ id }: { id: string }) {
 
   return (
     <IdenticonWrapper>
-      <Identicon value={id} size={sizes.iconRegular} theme="polkadot" />
+      <Identicon value={id} size={sizes.iconRegular as number} theme="polkadot" />
     </IdenticonWrapper>
   )
 }
