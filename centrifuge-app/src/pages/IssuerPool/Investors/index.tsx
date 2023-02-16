@@ -82,7 +82,10 @@ export const Investors: React.FC = () => {
   }
 
   return (
-    <PageSection title="Investor status" subtitle="Display investor status, and add or remove from Investor whitelist.">
+    <PageSection
+      title="Investor status"
+      subtitle="Display investor status, and add or remove from investor memberlist."
+    >
       <Stack gap={2}>
         <Grid columns={2} equalColumns gap={4} alignItems="center">
           <SearchInput
@@ -151,7 +154,7 @@ export const Investors: React.FC = () => {
                       loading={isTransactionPending && pendingTrancheId === row.id}
                       small
                     >
-                      {isAllowed ? 'Remove action' : 'Add token'}
+                      {isAllowed ? 'Remove from memberlist' : 'Add to memberlist'}
                     </Button>
                   )
                 },
