@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useQuery } from 'react-query'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../components/AuthProvider'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 import { Spinner } from '../../components/Spinner'
 import { config } from '../../config'
 import { InvestorTypes } from '../../types'
@@ -19,32 +19,33 @@ import { LinkWallet } from './LinkWallet'
 import { SignSubscriptionAgreement } from './SignSubscriptionAgreement'
 import { TaxInfo } from './TaxInfo'
 
-// const getTransactionInformation = (transactionHash: string) => {
-
-// }
-
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const [_, WordMark] = config.logo
 
 export const OnboardingPage: React.FC = () => {
   const { selectedAccount } = useWallet()
-  const { onboardingUser } = useOnboardingUser()
+  const { onboardingUser, pool } = useOnboarding()
   const [investorType, setInvestorType] = React.useState<InvestorTypes>()
   const { activeStep, nextStep, backStep, setActiveStep, isFetchingStep } = useOnboardingStep()
   const { authToken } = useAuth()
-  // TODO: check trx hash for status
+  const [hasSignedAgreement, setHasSignedAgreement] = React.useState(false)
 
-  const hasSignedAgreement = !!onboardingUser?.steps?.signAgreements[poolId]?.[trancheId]?.signedDocument
+  React.useEffect(() => {
+    if (onboardingUser?.steps?.signAgreements) {
+      setHasSignedAgreement(
+        onboardingUser.steps.signAgreements[pool.id][pool.trancheId].signedDocument &&
+          !!onboardingUser.steps.signAgreements[pool.id][pool.trancheId].transactionInfo.extrinsicHash
+      )
+    }
+  }, [onboardingUser?.steps?.signAgreements, pool.id, pool.trancheId])
 
   const { data: signedAgreementData, isFetched: isSignedAgreementFetched } = useQuery(
-    ['signed subscription agreement', selectedAccount?.address, poolId, trancheId],
+    ['signed subscription agreement', selectedAccount?.address, pool.id, pool.trancheId],
     async () => {
       const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getSignedAgreement?poolId=${poolId}&trancheId=${trancheId}`,
+        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getSignedAgreement?poolId=${pool.id}&trancheId=${
+          pool.trancheId
+        }`,
         {
           method: 'GET',
           headers: {

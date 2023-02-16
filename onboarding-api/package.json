@@ -31,6 +31,7 @@
     "jw3t": "^1.0.8",
     "node-fetch": "2.6.7",
     "pdf-lib": "^1.17.1",
+    "rxjs": "^7.8.0",
     "yup": "^0.32.11"
   },
   "devDependencies": {

@@ -87,7 +87,10 @@ export const verifyBusinessController = async (
           [poolId]: {
             [trancheId]: {
               signedDocument: false,
-              transactionHash: null,
+              transactionInfo: {
+                extrinsicHash: null,
+                blockNumber: null,
+              },
             },
           },
         },

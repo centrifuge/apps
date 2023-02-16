@@ -61,7 +61,10 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
             [body.poolId]: {
               [body.trancheId]: {
                 signedDocument: false,
-                transactionHash: null,
+                transactionInfo: {
+                  extrinsicHash: null,
+                  blockNumber: null,
+                },
               },
             },
           },
