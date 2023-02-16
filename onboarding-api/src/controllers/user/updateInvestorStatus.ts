@@ -4,7 +4,7 @@ import { OnboardingUser, validateAndWriteToFirestore } from '../../database'
 import { sendApproveInvestorMessage } from '../../emails/sendApproveInvestorMessage'
 import { UpdateInvestorStatusPayload } from '../../emails/sendDocuments'
 import { sendRejectInvestorMessage } from '../../emails/sendRejectInvestorMessage'
-import { whitelistInvestor } from '../../utils/centrifuge'
+import { addInvestorToMemberList } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { Subset } from '../../utils/types'
@@ -65,7 +65,7 @@ export const updateInvestorStatusController = async (
     await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['onboardingStatus'])
 
     if (user?.email && status === 'approved') {
-      await whitelistInvestor(walletAddress, poolId, trancheId)
+      await addInvestorToMemberList(walletAddress, poolId, trancheId)
       await sendApproveInvestorMessage(user.email, poolId, trancheId)
       return res.status(204).send()
     } else if (user?.email && status === 'rejected') {

@@ -570,8 +570,7 @@ export function getPoolsModule(inst: Centrifuge) {
       tranches: TrancheInput[],
       currency: CurrencyKey,
       maxReserve: BN,
-      metadata: PoolMetadataInput,
-      pureProxy: string
+      metadata: PoolMetadataInput
     ],
     options?: TransactionOptions
   ) {
@@ -628,15 +627,6 @@ export function getPoolsModule(inst: Centrifuge) {
                   { Pool: poolId },
                   {
                     PoolRole: 'LoanAdmin',
-                  }
-                ),
-                // give the pure proxy permissions to whitelist investor for onboarding
-                api.tx.permissions.add(
-                  { PoolRole: 'PoolAdmin' },
-                  pureProxy,
-                  { Pool: poolId },
-                  {
-                    PoolRole: 'MemberListAdmin',
                   }
                 ),
                 api.tx.loans.initialisePool(poolId, collectionId),

@@ -87,7 +87,6 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
         currency,
         CurrencyBalance.fromFloat(values.maxReserve || 0, chainDecimals),
         {} as any,
-        '4e',
       ] as CreatePoolArgs)
     }, 1000),
     []
