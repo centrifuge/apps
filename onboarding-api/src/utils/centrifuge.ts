@@ -4,7 +4,7 @@ import { Keyring } from '@polkadot/keyring'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
 import { firstValueFrom } from 'rxjs'
 
-const TenYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
+const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 100 * 365 * 24 * 60 * 60)
 const PROXY_ADDRESS = process.env.MEMBERLIST_ADMIN_PURE_PROXY
 
 export const centrifuge = new Centrifuge({
@@ -21,7 +21,7 @@ export const getPoolById = async (poolId: string) => {
   return { pool, metadata }
 }
 
-export const whitelistInvestor = async (walletAddress: string, poolId: string, trancheId: string) => {
+export const addInvestorToMemberList = async (walletAddress: string, poolId: string, trancheId: string) => {
   await cryptoWaitReady()
   const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 })
   // both Dave and Alice can execute the proxy call because they have been added to the pure proxy
@@ -31,7 +31,7 @@ export const whitelistInvestor = async (walletAddress: string, poolId: string, t
     { PoolRole: 'MemberListAdmin' },
     walletAddress,
     { Pool: poolId },
-    { PoolRole: { TrancheInvestor: [trancheId, TenYearsFromNow] } }
+    { PoolRole: { TrancheInvestor: [trancheId, OneHundredYearsFromNow] } }
   )
 
   // this doens't work b/c .connect() exepcts a Signer, not a KeyringPair
