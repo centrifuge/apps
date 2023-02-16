@@ -2,7 +2,7 @@ import {
   Box,
   Button,
   IconCopy,
-  IconLogOut,
+  IconPower,
   IconSwitch,
   Menu,
   MenuItem,
@@ -158,7 +158,7 @@ function ConnectedMenu() {
             <MenuItemGroup>
               <MenuItem
                 label="Disconnect"
-                icon={<IconLogOut size="iconSmall" />}
+                icon={<IconPower size="iconSmall" />}
                 onClick={() => {
                   state.close()
                   disconnect()
