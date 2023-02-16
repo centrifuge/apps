@@ -1,31 +1,28 @@
-import { Box, Button, FileUpload, Flex, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { useWallet } from '@centrifuge/centrifuge-react'
+import { AnchorButton, Box, Button, FileUpload, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useMutation, useQuery } from 'react-query'
 import { useAuth } from '../../components/AuthProvider'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
-import { Spinner } from '../../components/Spinner'
+import { useOnboarding } from '../../components/OnboardingProvider'
 
 type Props = {
   nextStep: () => void
   backStep: () => void
 }
 
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
-
 export const TaxInfo = ({ backStep, nextStep }: Props) => {
-  const { refetchOnboardingUser, onboardingUser } = useOnboardingUser()
+  const { selectedAccount } = useWallet()
+  const { refetchOnboardingUser, onboardingUser, pool } = useOnboarding()
   const [taxInfo, setTaxInfo] = React.useState<File | null>(null)
   const { authToken } = useAuth()
 
-  const isCompleted = !!onboardingUser?.steps?.verifyTaxInfo?.completed && !!taxInfo
+  const isCompleted = !!onboardingUser?.steps?.verifyTaxInfo?.completed
 
-  const { data: taxInfoData, isFetching: isTaxInfoFetching } = useQuery(
-    ['tax info'],
+  const { data: taxInfoData } = useQuery(
+    ['tax info', selectedAccount?.address],
     async () => {
       const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getTaxInfo?poolId=${poolId}&trancheId=${trancheId}`,
+        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getTaxInfo?poolId=${pool.id}&trancheId=${pool.trancheId}`,
         {
           method: 'GET',
           headers: {
@@ -42,21 +39,13 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
         type: 'application/pdf',
       })
 
-      const file = new File([documentBlob], 'taxInfo.pdf', { type: 'application/pdf' })
-
-      return file
+      return URL.createObjectURL(documentBlob)
     },
     {
       refetchOnWindowFocus: false,
-      enabled: isCompleted,
+      enabled: !!onboardingUser?.steps?.verifyTaxInfo?.completed,
     }
   )
-
-  React.useEffect(() => {
-    if (taxInfoData) {
-      setTaxInfo(taxInfoData)
-    }
-  }, [taxInfoData])
 
   const { mutate: uploadTaxInfo, isLoading } = useMutation(
     async () => {
@@ -65,7 +54,7 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
         formData.append('taxInfo', taxInfo)
 
         const response = await fetch(
-          `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/uploadTaxInfo?poolId=${poolId}&trancheId=${trancheId}`,
+          `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/uploadTaxInfo?poolId=${pool.id}&trancheId=${pool.trancheId}`,
           {
             method: 'POST',
             body: formData,
@@ -106,43 +95,70 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
     }
   }
 
+  const taxForm = React.useMemo(() => {
+    if (onboardingUser.investorType === 'individual' && onboardingUser.countryOfCitizenship !== 'us') {
+      return {
+        type: 'W-8BEN',
+        url: 'https://www.irs.gov/pub/irs-pdf/fw8ben.pdf',
+      }
+    }
+
+    if (onboardingUser.investorType === 'entity' && !onboardingUser.jurisdictionCode.startsWith('us')) {
+      return {
+        type: 'W-8BEN-E',
+        url: 'https://www.irs.gov/pub/irs-pdf/fw8bene.pdf',
+      }
+    }
+
+    return {
+      type: 'W9',
+      url: 'https://www.irs.gov/pub/irs-pdf/fw9.pdf',
+    }
+  }, [onboardingUser])
+
   return (
     <Stack gap={4}>
       <Box>
         <Text fontSize={5}>Tax information</Text>
-        {isTaxInfoFetching ? (
-          <Flex alignItems="center" justifyContent="center" py={100}>
-            <Spinner />
-          </Flex>
-        ) : (
-          <>
-            <Stack gap={2} py={6}>
-              <FileUpload
-                placeholder="Upload file"
-                onFileChange={setTaxInfo}
-                disabled={isLoading}
-                file={taxInfo}
-                validate={validateFileUpload}
-              />
-            </Stack>
-            <Shelf gap="2">
-              <Button onClick={() => backStep()} variant="secondary" disabled={isLoading}>
-                Back
-              </Button>
-
-              <Button
-                onClick={() => {
-                  isCompleted && taxInfo === taxInfoData ? nextStep() : uploadTaxInfo()
-                }}
-                disabled={isCompleted ? false : isLoading || !taxInfo}
-                loading={isLoading}
-                loadingMessage="Uploading"
-              >
-                Next
-              </Button>
-            </Shelf>
-          </>
-        )}
+        <Stack gap={4}>
+          <Text fontSize={2}>
+            Please complete and upload a {taxForm.type} form. The form can be found at{' '}
+            <a href={taxForm.url} target="_blank" rel="noreferrer">
+              {taxForm.url}
+            </a>
+            .
+          </Text>
+          {isCompleted ? (
+            <Box>
+              <AnchorButton variant="secondary" href={taxInfoData} target="__blank">
+                View uploaded tax form
+              </AnchorButton>
+            </Box>
+          ) : (
+            <FileUpload
+              placeholder="Upload file"
+              onFileChange={(file) => setTaxInfo(file)}
+              disabled={isLoading || isCompleted}
+              file={taxInfo || null}
+              validate={validateFileUpload}
+            />
+          )}
+          <Shelf gap="2">
+            <Button onClick={() => backStep()} variant="secondary" disabled={isLoading}>
+              Back
+            </Button>
+            <Button
+              onClick={() => {
+                isCompleted ? nextStep() : uploadTaxInfo()
+              }}
+              disabled={isCompleted ? false : isLoading || !taxInfo}
+              loading={isLoading}
+              loadingMessage="Uploading"
+            >
+              Next
+            </Button>
+          </Shelf>
+        </Stack>
       </Box>
     </Stack>
   )

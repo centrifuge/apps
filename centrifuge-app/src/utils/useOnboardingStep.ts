@@ -1,12 +1,8 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
 import * as React from 'react'
 import { useAuth } from '../components/AuthProvider'
-import { useOnboardingUser } from '../components/OnboardingUserProvider'
+import { useOnboarding } from '../components/OnboardingProvider'
 import { getActiveOnboardingStep } from './getActiveOnboardingStep'
-
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
@@ -14,7 +10,7 @@ export const useOnboardingStep = () => {
   const { isConnecting, selectedAccount } = useWallet()
   const { isAuth, isAuthFetched } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const [activeStep, setActiveStep] = React.useState<number>(0)
-  const { onboardingUser, isOnboardingUserFetched, isOnboardingUserFetching } = useOnboardingUser()
+  const { onboardingUser, isOnboardingUserFetched, isOnboardingUserFetching, pool } = useOnboarding()
 
   const nextStep = () => setActiveStep((current) => current + 1)
   const backStep = () => setActiveStep((current) => current - 1)
@@ -31,11 +27,20 @@ export const useOnboardingStep = () => {
 
     // wallet finished connection attempt, user was fetched
     if (!isConnecting && isOnboardingUserFetched) {
-      const activeOnboardingStep = getActiveOnboardingStep(onboardingUser, poolId, trancheId)
+      const activeOnboardingStep = getActiveOnboardingStep(onboardingUser, pool.id, pool.trancheId)
 
       return setActiveStep(activeOnboardingStep)
     }
-  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched, selectedAccount])
+  }, [
+    onboardingUser,
+    isConnecting,
+    isOnboardingUserFetched,
+    isAuth,
+    isAuthFetched,
+    selectedAccount,
+    pool.id,
+    pool.trancheId,
+  ])
 
   return {
     activeStep,

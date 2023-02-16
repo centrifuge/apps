@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken'
-import { HttpsError } from '../utils/httpsError'
+import { HttpsError } from './httpsError'
 
 export const verifyJwt = <T extends any>(token: string) => {
   const payload = jwt.verify(token, process.env.JWT_SECRET, (error, data) => {

@@ -32,6 +32,7 @@ export const EmailVerified: React.FC = () => {
     },
     {
       retry: 1,
+      refetchOnWindowFocus: false,
     }
   )
 

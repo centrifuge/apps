@@ -6,16 +6,28 @@ import { useAuth } from './AuthProvider'
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
-const OnboardingUserContext = React.createContext<{
+const OnboardingContext = React.createContext<{
   onboardingUser: OnboardingUser
   refetchOnboardingUser: () => void
   isOnboardingUserFetching: boolean
   isOnboardingUserFetched: boolean
+  pool: {
+    title: string
+    trancheId: string
+    id: string
+  }
 } | null>(null)
 
-export function OnboardingUserProvider({ children }: { children?: React.ReactNode }) {
+export function OnboardingProvider({ children }: { children?: React.ReactNode }) {
   const { authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const { selectedAccount } = useWallet()
+
+  // TODO: get the pool that the user is onboarding to from origin component
+  const pool = {
+    title: 'Real World Assets',
+    trancheId: '0x3c110ce706f70638909e08da4379b271',
+    id: '3878073193',
+  }
 
   const {
     data: onboardingUserData,
@@ -50,21 +62,22 @@ export function OnboardingUserProvider({ children }: { children?: React.ReactNod
   )
 
   return (
-    <OnboardingUserContext.Provider
+    <OnboardingContext.Provider
       value={{
         onboardingUser: onboardingUserData || {},
         refetchOnboardingUser,
         isOnboardingUserFetching,
         isOnboardingUserFetched,
+        pool,
       }}
     >
       {children}
-    </OnboardingUserContext.Provider>
+    </OnboardingContext.Provider>
   )
 }
 
-export const useOnboardingUser = () => {
-  const ctx = React.useContext(OnboardingUserContext)
-  if (!ctx) throw new Error('useOnboardingUser must be used within OnboardingUserProvider')
+export const useOnboarding = () => {
+  const ctx = React.useContext(OnboardingContext)
+  if (!ctx) throw new Error('useOnboarding must be used within OnboardingProvider')
   return ctx
 }

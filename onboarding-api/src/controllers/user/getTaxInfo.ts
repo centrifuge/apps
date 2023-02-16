@@ -23,12 +23,12 @@ export const getTaxInfoController = async (
 
     const [taxInfoExists] = await taxInfo.exists()
 
-    if (taxInfoExists) {
-      const pdf = await taxInfo.download()
-      return res.send({ taxInfo: pdf[0] })
+    if (!taxInfoExists) {
+      throw new HttpsError(400, 'Tax info not found')
     }
 
-    throw new HttpsError(400, 'Tax info not found')
+    const pdf = await taxInfo.download()
+    return res.send({ taxInfo: pdf[0] })
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)
