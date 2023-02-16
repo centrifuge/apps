@@ -53,8 +53,8 @@ jobs:
 
       - name: Delete function
         run: |
-          gcloud functions delete onboarding-api-pr${{ github.event.number }} --region=${{ vars.GCLOUD_REGION }}
-          gcloud functions delete pinning-api-pr${{ github.event.number }} --region=${{ vars.GCLOUD_REGION }}
+          gcloud functions delete onboarding-api-pr${{ github.event.number }} --region=${{ vars.GCLOUD_REGION  }}
+          gcloud functions delete pinning-api-pr${{ github.event.number }} --region=${{ vars.GCLOUD_REGION  }}
       
       - name: Remove gcs buckets
         run: gcloud storage rm --recursive gs://${{ inputs.app_base_name }}-pr${{ github.event.number }}.k-f.dev

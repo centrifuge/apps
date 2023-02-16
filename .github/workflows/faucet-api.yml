@@ -86,6 +86,6 @@ jobs:
           target: faucetDev
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
-          gcloud_region: ${{ env.GCLOUD_REGION }}
+          gcloud_region: ${{ vars.GCLOUD_REGION }}
           function_env: "${{ needs.build.outputs.function_vars }}"
             
