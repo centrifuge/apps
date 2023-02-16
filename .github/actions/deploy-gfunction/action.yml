@@ -5,9 +5,11 @@ inputs:
   function_name:
     description: function name from prepare-deploy
     required: true
+
   artifact_name:
     description: From the actions/upload step
     required: true  
+
   GWIP:
     description: Google Workflow Identity provider
     required: true
@@ -73,6 +75,7 @@ runs:
         secret_environment_variables: ${{ inputs.function_secrets }}
         env_vars: ${{ inputs.function_env }}
         service_account_email: ${{ inputs.service_account }}
+        max_instances: ${{ contains(inputs.function_name, 'production') && '200' || '10' }}
 
     - name: Print Gcloud functions URL
       shell: sh
