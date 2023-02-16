@@ -26,9 +26,8 @@ export function getAddChainParameters(chains: EvmChains, chainId: number): AddEt
       rpcUrls: chainInformation.urls,
       blockExplorerUrls: chainInformation.blockExplorerUrls,
     }
-  } else {
-    return chainId
   }
+  return chainId
 }
 
 export function getEvmUrls(chains: EvmChains) {

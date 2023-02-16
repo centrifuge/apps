@@ -16,7 +16,7 @@ export type WalletButtonProps = Omit<
   address?: string
   alias?: string
   balance?: string
-  iconStyle?: IconTheme
+  icon?: IconTheme | React.ReactElement
 }
 
 const StyledButton = styled.button({
@@ -37,7 +37,7 @@ const IdenticonWrapper = styled(Flex)({
 })
 
 export const WalletButton: React.VFC<WalletButtonProps> = ({
-  iconStyle = 'polkadot',
+  icon = 'polkadot',
   small = true,
   disabled,
   loading,
@@ -57,7 +57,7 @@ export const WalletButton: React.VFC<WalletButtonProps> = ({
         icon={
           address ? (
             <IdenticonWrapper>
-              <Identicon value={address} size={24} theme={iconStyle} />
+              {React.isValidElement(icon) ? icon : <Identicon value={address} size={24} theme={icon} />}
             </IdenticonWrapper>
           ) : undefined
         }

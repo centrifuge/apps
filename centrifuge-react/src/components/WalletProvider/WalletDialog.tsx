@@ -44,12 +44,8 @@ export function WalletDialog({ evmChains }: Props) {
   } = ctx
 
   const shownWallets = (
-    selectedNetwork === 'centrifuge' ? [...wallets] : selectedNetwork ? [...evm.connectors] : []
+    selectedNetwork === 'centrifuge' ? [...wallets] : selectedNetwork ? [...evm.connectors.filter((c) => c.shown)] : []
   ).sort((wallet) => (wallet.installed ? -1 : 1))
-
-  function isEnabled(wallet: Wallet | EvmConnectorMeta) {
-    return selectedNetwork && (selectedNetwork === 'centrifuge') !== 'connector' in wallet
-  }
 
   function close() {
     dispatch({ type: 'closeWalletDialog' })
@@ -114,7 +110,6 @@ export function WalletDialog({ evmChains }: Props) {
                       showWallets(selectedNetwork, wallet)
                       connect(wallet)
                     }}
-                    disabled={!isEnabled(wallet)}
                     loading={isConnecting && wallet === pendingWallet}
                     active={ctx[connectedType!]?.selectedWallet === wallet}
                   >
@@ -126,7 +121,6 @@ export function WalletDialog({ evmChains }: Props) {
                     href={wallet.installUrl}
                     logo={<Logo src={getWalletIcon(wallet)} />}
                     iconRight={<IconDownload size="iconSmall" color="textPrimary" />}
-                    disabled={!isEnabled(wallet)}
                   >
                     {getWalletLabel(wallet)}
                   </SelectAnchor>

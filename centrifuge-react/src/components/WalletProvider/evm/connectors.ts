@@ -5,7 +5,8 @@ import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { MetaMask } from '@web3-react/metamask'
 import { Connector } from '@web3-react/types'
 import { WalletConnect } from '@web3-react/walletconnect'
-import { createConnector, isInjected } from './utils'
+import { isMobile } from '../../../utils/device'
+import { createConnector, isCoinbaseWallet, isInjected } from './utils'
 
 export type EvmConnectorMeta = {
   id: string
@@ -17,6 +18,7 @@ export type EvmConnectorMeta = {
   }
   connector: Connector
   get installed(): boolean
+  get shown(): boolean
 }
 
 export function getEvmConnectors(
@@ -55,7 +57,10 @@ export function getEvmConnectors(
       },
       connector: metaMask,
       get installed() {
-        return isInjected()
+        return isInjected() && !isCoinbaseWallet()
+      },
+      get shown() {
+        return !isMobile() || this.installed
       },
     },
     {
@@ -70,6 +75,9 @@ export function getEvmConnectors(
       get installed() {
         return true
       },
+      get shown() {
+        return !isMobile() || !isInjected()
+      },
     },
     {
       id: 'coinbase',
@@ -81,6 +89,9 @@ export function getEvmConnectors(
       },
       connector: coinbase,
       get installed() {
+        return true
+      },
+      get shown() {
         return true
       },
     },

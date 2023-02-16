@@ -1,6 +1,6 @@
 import { isWeb3Injected } from '@polkadot/extension-dapp'
 import { getWallets } from '@subwallet/wallet-connect/dotsama/wallets'
-import { Wallet, WalletAccount } from '@subwallet/wallet-connect/types'
+import { Wallet } from '@subwallet/wallet-connect/types'
 import { Web3ReactState } from '@web3-react/types'
 import { WalletConnect } from '@web3-react/walletconnect'
 import * as React from 'react'
@@ -34,6 +34,7 @@ type WalletContextType = {
   substrate: {
     accounts: Account[] | null
     selectedAccount: Account | null
+    selectedAddress: string | null
     selectProxy: (address: string | null) => void
     isWeb3Injected: boolean
     selectAccount: (address: string) => void
@@ -45,7 +46,7 @@ type WalletContextType = {
     connectors: EvmConnectorMeta[]
     chains: EvmChains
     selectedWallet: EvmConnectorMeta | null
-    selectedAccount: string | null
+    selectedAddress: string | null
   }
 }
 
@@ -164,37 +165,23 @@ export function WalletProvider({
   })
 
   const connectSubstrate = React.useCallback(async (wallet: Wallet) => {
-    let unsubscribe: any
-    let setAccounts: any
-
     unsubscribeRef.current?.()
 
     if (!wallet?.installed) throw new Error('Wallet not available')
 
     const accounts = await setPendingConnect(wallet, async () => {
       try {
-        const allAccounts = await new Promise<WalletAccount[]>((res) => {
-          wallet
-            .subscribeAccounts((allAccounts) => {
-              if (!allAccounts) throw new Error('No accounts')
-              res(allAccounts)
-              setAccounts?.(allAccounts)
-            })
-            .then((unsub) => {
-              unsubscribe = unsub
-            })
-        })
+        const allAccounts = await wallet.getAccounts()
+        if (!allAccounts) throw new Error('Failed to get accounts')
 
         setFilteredAccounts(allAccounts)
-        setAccounts = setFilteredAccounts
-        unsubscribeRef.current = unsubscribe
-
         dispatch({ type: 'substrateSetState', payload: { selectedWallet: wallet } })
         dispatch({ type: 'setConnectedType', payload: 'substrate' })
 
+        unsubscribeRef.current = await wallet.subscribeAccounts(setFilteredAccounts)
+
         return allAccounts
       } catch (error) {
-        unsubscribe?.()
         if (error instanceof ReplacedError) return
         console.error(error)
         throw error
@@ -212,8 +199,10 @@ export function WalletProvider({
           : connector.activate(chainId ? getAddChainParameters(evmChains, chainId) : undefined))
         return getStore(wallet.connector).getState().accounts
       })
+
       dispatch({ type: 'evmSetState', payload: { selectedWallet: wallet } })
       dispatch({ type: 'setConnectedType', payload: 'evm' })
+
       return accounts
     } catch (error) {
       if (error instanceof ReplacedError) return
@@ -249,8 +238,10 @@ export function WalletProvider({
 
   useConnectEagerly(connect, dispatch, evmConnectors)
 
-  const ctx: WalletContextType = React.useMemo(
-    () => ({
+  const ctx: WalletContextType = React.useMemo(() => {
+    const selectedSubstrateAccount =
+      state.substrate.accounts?.find((acc) => acc.address === state.substrate.selectedAccountAddress) ?? null
+    return {
       connectedType: state.connectedType,
       connectedNetwork:
         state.connectedType === 'evm' ? state.evm.chainId! : state.connectedType === 'substrate' ? 'centrifuge' : null,
@@ -274,8 +265,8 @@ export function WalletProvider({
       disconnect,
       substrate: {
         ...state.substrate,
-        selectedAccount:
-          state.substrate.accounts?.find((acc) => acc.address === state.substrate.selectedAccountAddress) ?? null,
+        selectedAccount: selectedSubstrateAccount,
+        selectedAddress: selectedSubstrateAccount?.address ?? null,
         isWeb3Injected,
         selectAccount,
         selectProxy,
@@ -289,13 +280,12 @@ export function WalletProvider({
       },
       evm: {
         ...state.evm,
-        selectedAccount: state.evm.accounts?.[0] ?? null,
+        selectedAddress: state.evm.accounts?.[0] ?? null,
         connectors: evmConnectors,
         chains: evmChains,
       },
-    }),
-    [connect, disconnect, selectAccount, selectProxy, proxies, state, isConnectError, isConnecting]
-  )
+    }
+  }, [connect, disconnect, selectAccount, selectProxy, proxies, state, isConnectError, isConnecting])
 
   return (
     <WalletContext.Provider value={ctx}>

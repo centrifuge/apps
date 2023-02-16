@@ -16,7 +16,7 @@ import {
 import Identicon from '@polkadot/react-identicon'
 import * as React from 'react'
 import { useBalances } from '../../hooks/useBalances'
-import { useEnsName } from '../../hooks/useEnsName'
+import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
 import { useAddress, useWallet } from '../WalletProvider'
@@ -53,7 +53,7 @@ function ConnectedMenu() {
     substrate: { accounts, proxies },
   } = ctx
   const wallet = ctx[connectedType!]?.selectedWallet
-  const ensName = useEnsName(connectedType === 'evm' ? address : undefined)
+  const { name: ensName, avatar } = useEns(connectedType === 'evm' ? address : undefined)
   const balances = useBalances(connectedType === 'substrate' ? address : undefined)
 
   return (
@@ -75,7 +75,15 @@ function ConnectedMenu() {
                 ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol, 0)
                 : undefined
             }
-            iconStyle={connectedType === 'evm' ? 'ethereum' : 'polkadot'}
+            icon={
+              avatar ? (
+                <Box as="img" src={avatar} alt={ensName ?? ''} width="iconMedium" />
+              ) : connectedType === 'evm' ? (
+                'ethereum'
+              ) : (
+                'polkadot'
+              )
+            }
             {...props}
           />
         </Stack>
