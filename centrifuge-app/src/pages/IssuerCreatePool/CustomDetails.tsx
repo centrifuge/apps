@@ -5,7 +5,7 @@ import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { validate } from './validate'
 
-export const createDetail = () => ({
+const createDetail = () => ({
   title: '',
   body: '',
 })
@@ -24,7 +24,12 @@ export function CustomDetails() {
       {(fldArr) => (
         <Box>
           <Shelf justifyContent="space-between">
-            <Text>Issuer profile</Text>
+            <Box>
+              <Text as="h3">Issuer profile</Text>
+              <Text as="span" variant="body2" color="textSecondary">
+                Add additional information
+              </Text>
+            </Box>
             <Button
               variant="secondary"
               type="button"
@@ -47,8 +52,8 @@ export function CustomDetails() {
                       {...field}
                       validate={validate.issuerDetailTitle}
                       as={TextInput}
-                      label="Title"
-                      maxLength={100}
+                      label="Title (max 50 characters)*"
+                      maxLength={50}
                     />
                   )}
                 </Field>
@@ -59,8 +64,8 @@ export function CustomDetails() {
                       {...field}
                       validate={validate.issuerDetailBody}
                       as={TextAreaInput}
-                      label="Description (max 1000)"
-                      maxLength={1000}
+                      label="Description (max 3000 characters)*"
+                      maxLength={3000}
                     />
                   )}
                 </Field>

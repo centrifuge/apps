@@ -37,8 +37,8 @@ export const validate = {
   website: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),
   forum: pattern(/^https?:\/\/.{4,}/, 'Not a valid URL'),
   email: pattern(/@/, 'Not a valid email address'),
-  issuerDetailTitle: combine(required(), maxLength(100)),
-  issuerDetailBody: combine(required(), maxLength(1000)),
+  issuerDetailTitle: combine(required(), maxLength(50)),
+  issuerDetailBody: combine(required(), maxLength(3000)),
 
   // tranches
   tokenName: combine(required(), maxLength(30)),
