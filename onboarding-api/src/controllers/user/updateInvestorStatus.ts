@@ -33,6 +33,9 @@ export const updateInvestorStatusController = async (
       if (name === 'signAgreements') {
         return !step?.[poolId]?.[trancheId]?.signedDocument
       }
+      if (!user.countryOfCitizenship?.startsWith('us') && name === 'verifyAccreditation') {
+        return true
+      }
       return !step?.completed
     })
     if (incompleteSteps.length > 0) {
@@ -62,9 +65,9 @@ export const updateInvestorStatusController = async (
     await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['onboardingStatus'])
 
     if (user?.email && status === 'approved') {
+      await whitelistInvestor(walletAddress, poolId, trancheId)
       await sendApproveInvestorMessage(user.email, poolId, trancheId)
-      const hash = await whitelistInvestor(walletAddress, poolId, trancheId)
-      return res.status(200).send({ hash })
+      return res.status(204).send()
     } else if (user?.email && status === 'rejected') {
       await sendRejectInvestorMessage(user.email, poolId)
       throw new HttpsError(400, 'Investor has been rejected')
