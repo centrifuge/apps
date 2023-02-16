@@ -1,6 +1,6 @@
 import { PoolMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/pools'
 import { Box, Button, Card, Shelf, Stack, Text, TextAreaInput, TextInput } from '@centrifuge/fabric'
-import { Field, FieldArray, FieldProps, useFormikContext } from 'formik'
+import { FieldArray, useFormikContext } from 'formik'
 import * as React from 'react'
 import { FieldWithErrorMessage } from '../../components/FieldWithErrorMessage'
 import { validate } from './validate'
@@ -46,29 +46,21 @@ export function CustomDetails() {
           {!!values?.details?.length &&
             values.details.map((_, index) => (
               <Stack key={index} as={Card} p={1} gap={2} mt={2} alignItems="end">
-                <Field name={`details.${index}.title`}>
-                  {({ field, form, meta }: FieldProps) => (
-                    <FieldWithErrorMessage
-                      {...field}
-                      validate={validate.issuerDetailTitle}
-                      as={TextInput}
-                      label="Title (max 50 characters)*"
-                      maxLength={50}
-                    />
-                  )}
-                </Field>
+                <FieldWithErrorMessage
+                  name={`details.${index}.title`}
+                  validate={validate.issuerDetailTitle}
+                  as={TextInput}
+                  label="Title (max 50 characters)*"
+                  maxLength={50}
+                />
 
-                <Field name={`details.${index}.body`}>
-                  {({ field, form, meta }: FieldProps) => (
-                    <FieldWithErrorMessage
-                      {...field}
-                      validate={validate.issuerDetailBody}
-                      as={TextAreaInput}
-                      label="Description (max 3000 characters)*"
-                      maxLength={3000}
-                    />
-                  )}
-                </Field>
+                <FieldWithErrorMessage
+                  name={`details.${index}.body`}
+                  validate={validate.issuerDetailBody}
+                  as={TextAreaInput}
+                  label="Description (max 3000 characters)*"
+                  maxLength={3000}
+                />
 
                 <Button
                   type="button"
