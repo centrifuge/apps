@@ -77,7 +77,7 @@ export const entityUserSchema = object({
   investorType: string().default('entity') as StringSchema<Entity>,
   wallet: walletSchema,
   kycReference: string().optional(),
-  email: string().email().default(null),
+  email: string().email().required(),
   businessName: string().required(),
   incorporationDate: date().required(),
   registrationNumber: string().required(),
@@ -86,6 +86,7 @@ export const entityUserSchema = object({
   name: string().nullable().default(null),
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
+  countryOfResidence: string().nullable().default(null), // TODO: validate with list of countries
   steps: stepsSchema,
   onboardingStatus: lazy((value) => {
     const poolId = Object.keys(value)[0]
@@ -113,10 +114,11 @@ export const individualUserSchema = object({
   investorType: string().default('individual') as StringSchema<Individual>,
   wallet: walletSchema,
   kycReference: string().optional(),
-  email: string().default(null).nullable(),
-  name: string().nullable().default(null),
-  dateOfBirth: string().nullable().default(null),
-  countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
+  email: string().default(null).nullable(), // TODO: coming soon
+  name: string().required(),
+  dateOfBirth: string().required(),
+  countryOfCitizenship: string().required(), // TODO: validate with list of countries
+  countryOfResidence: string().required(), // TODO: validate with list of countries
   steps: stepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'signAgreements']),
   onboardingStatus: lazy((value) => {
     const poolId = Object.keys(value)[0]
@@ -177,8 +179,12 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
   try {
     const { collection, schema } = schemas[schemaKey]
     if (typeof mergeFields !== 'undefined') {
+      // TODO: fix typing
+      // @ts-expect-error
       const mergeValidations = (mergeFields as string[]).map((field) => schema.validateAt(field, data))
       await Promise.all(mergeValidations)
+      // TODO: fix typing
+      // @ts-expect-error
       await collection.doc(key).set(data, { mergeFields: mergeFields as string[] })
     } else {
       await schema.validate(data)

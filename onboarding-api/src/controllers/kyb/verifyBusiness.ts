@@ -70,6 +70,7 @@ export const verifyBusinessController = async (
       name: null,
       dateOfBirth: null,
       countryOfCitizenship: null,
+      countryOfResidence: null,
       email,
       businessName,
       ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
