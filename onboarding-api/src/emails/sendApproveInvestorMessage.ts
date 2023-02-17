@@ -1,5 +1,5 @@
 import { sendEmail, templateIds } from '.'
-import { getPoolById } from '../utils/getPoolById'
+import { getPoolById } from '../utils/centrifuge'
 
 export const sendApproveInvestorMessage = async (to: string, poolId: string, trancheId: string) => {
   const { pool, metadata } = await getPoolById(poolId)

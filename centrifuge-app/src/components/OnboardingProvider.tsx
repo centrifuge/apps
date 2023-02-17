@@ -24,9 +24,10 @@ export function OnboardingProvider({ children }: { children?: React.ReactNode })
 
   // TODO: get the pool that the user is onboarding to from origin component
   const pool = {
-    title: 'Real World Assets',
-    trancheId: '0x3c110ce706f70638909e08da4379b271',
-    id: '3878073193',
+    // this pool is controlled by //Eve
+    title: 'Polka Pool 5',
+    trancheId: '0xfb2ffeddb7fb9834b502b36f20cfbf66',
+    id: '703630827',
   }
 
   const {
