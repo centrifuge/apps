@@ -1,4 +1,6 @@
-import metamaskLogo from '@subwallet/wallet-connect/evm/predefinedWallet/MetaMaskLogo.svg'
+import coinbasewalletLogo from '@centrifuge/fabric/assets/logos/coinbasewallet.svg'
+import metamaskLogo from '@centrifuge/fabric/assets/logos/metamask.svg'
+import walletconnectLogo from '@centrifuge/fabric/assets/logos/walletconnect.svg'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { MetaMask } from '@web3-react/metamask'
 import { Connector } from '@web3-react/types'
@@ -66,7 +68,7 @@ export function getEvmConnectors(
       title: 'WalletConnect',
       installUrl: '',
       logo: {
-        src: metamaskLogo,
+        src: walletconnectLogo,
         alt: 'WalletConnect',
       },
       connector: walletConnect,
@@ -82,7 +84,7 @@ export function getEvmConnectors(
       title: 'Coinbase Wallet',
       installUrl: '',
       logo: {
-        src: metamaskLogo,
+        src: coinbasewalletLogo,
         alt: 'Coinbase Wallet',
       },
       connector: coinbase,

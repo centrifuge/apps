@@ -95,11 +95,11 @@ const MenuItemButton = styled.button`
 
   &:hover,
   &:focus-visible {
-    background-color: ${({ theme }) => theme.colors.accentPrimary};
-    color: ${({ theme }) => theme.colors.textInverted};
-    * {
-      color: ${({ theme }) => theme.colors.textInverted};
-    }
+    background-color: ${({ theme }) => theme.colors.backgroundSecondary};
+  }
+
+  &:focus-visible {
+    color: ${({ theme }) => theme.colors.accentPrimary};
   }
 `
 
