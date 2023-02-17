@@ -105,7 +105,7 @@ export type EntityUser = {
   email: string | null
   incorporationDate: string
   jurisdictionCode: string
-  registrationNumber: number
+  registrationNumber: string
   ultimateBeneficialOwners: UltimateBeneficialOwner[]
   steps: EntityOnboardingSteps
   name: string | null

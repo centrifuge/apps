@@ -6,8 +6,6 @@ import { InvestorTypes } from '../../types'
 
 type Props = {
   investorType: InvestorTypes | undefined
-  nextStep: () => void
-  backStep: () => void
   setInvestorType: Dispatch<SetStateAction<InvestorTypes | undefined>>
 }
 
@@ -37,8 +35,8 @@ const InvestorTypeButton = styled(Button)<{ selected: boolean }>`
   }
 `
 
-export const InvestorType = ({ investorType, backStep, nextStep, setInvestorType }: Props) => {
-  const { onboardingUser, pool } = useOnboarding()
+export const InvestorType = ({ investorType, setInvestorType }: Props) => {
+  const { onboardingUser, previousStep, nextStep, pool } = useOnboarding()
 
   const isDisabled = onboardingUser?.investorType ? true : false
 
@@ -63,7 +61,7 @@ export const InvestorType = ({ investorType, backStep, nextStep, setInvestorType
           </InvestorTypeButton>
         </Stack>
         <Shelf gap="2">
-          <Button onClick={() => backStep()} variant="secondary">
+          <Button onClick={() => previousStep()} variant="secondary">
             Back
           </Button>
           <Button onClick={() => nextStep()} disabled={!investorType}>
