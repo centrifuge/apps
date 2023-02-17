@@ -574,7 +574,7 @@ export function getPoolsModule(inst: Centrifuge) {
     ],
     options?: TransactionOptions
   ) {
-    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata, pureProxy] = args
+    const [admin, poolId, collectionId, tranches, currency, maxReserve, metadata] = args
 
     const trancheInput = tranches.map((t, i) => ({
       trancheType: t.interestRatePerSec
