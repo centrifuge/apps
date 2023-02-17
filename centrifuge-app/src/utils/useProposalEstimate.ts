@@ -70,20 +70,22 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
           }),
         ]).pipe(
           map(([api, submittable]) => {
-            // TODO: https://centrifugedao.slack.com/archives/C04H149SU5D/p1676663088876859
-            const { minimumDeposit, preimageByteDeposit } = api.consts.democracy
+            const { minimumDeposit } = api.consts.democracy
             setChainDecimals(api.registry.chainDecimals[0])
-            // We need the first argument passed to the `notePreimage` extrinsic, which is the actual encoded proposal
-            const notePreimageDeposit = hexToBN(preimageByteDeposit.toHex()).mul(
-              config.poolCreationType === 'notePreimage'
-                ? new BN((submittable as any).method.args[0].length)
-                : new BN((submittable as any).method.args[0][0].args[0].length)
-            )
-            const feeBN =
-              config.poolCreationType === 'notePreimage'
-                ? notePreimageDeposit
-                : notePreimageDeposit.add(hexToBN(minimumDeposit.toHex()))
-            return new CurrencyBalance(feeBN, chainDecimals)
+            if (config.poolCreationType === 'notePreimage') {
+              // hard coded base and byte deposit supplied by protocol
+              const preimageBaseDeposit = new CurrencyBalance('4140000000000000000', chainDecimals)
+              const preimageByteDeposit = new CurrencyBalance('60000000000000000', chainDecimals)
+              const preimageFee = preimageByteDeposit
+                // the first argument passed to the `notePreimage` extrinsic is the actual encoded proposal in bytes
+                .mul(new BN((submittable as any).method.args[0].length))
+                .add(preimageBaseDeposit)
+
+              return new CurrencyBalance(preimageFee, chainDecimals)
+            } else if (config.poolCreationType === 'propose') {
+              return new CurrencyBalance(hexToBN(minimumDeposit.toHex()), chainDecimals)
+            }
+            return new CurrencyBalance(0, chainDecimals)
           })
         )
       })
