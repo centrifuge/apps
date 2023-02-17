@@ -33,7 +33,19 @@ export const updateInvestorStatusController = async (
       if (name === 'signAgreements') {
         return !step?.[poolId]?.[trancheId]?.signedDocument
       }
-      if (!user.countryOfCitizenship?.startsWith('us') && name === 'verifyAccreditation') {
+      if (
+        name === 'verifyAccreditation' &&
+        user.investorType === 'individual' &&
+        !user.countryOfCitizenship?.startsWith('us')
+      ) {
+        return true
+      }
+
+      if (
+        name === 'verifyAccreditation' &&
+        user.investorType === 'entity' &&
+        !user.jurisdictionCode?.startsWith('us')
+      ) {
         return true
       }
       return !step?.completed
