@@ -35,8 +35,7 @@ export const verifyBusinessController = async (
       throw new HttpsError(400, 'Verify business is only available for investorType "entity"')
     }
 
-    // @ts-expect-error
-    if (entityDoc.exists && entityData.steps?.verifyBusiness.completed) {
+    if (entityDoc.exists && entityData.investorType === 'entity' && entityData.steps?.verifyBusiness.completed) {
       throw new HttpsError(400, 'Business already verified')
     }
 
