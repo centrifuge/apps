@@ -87,3 +87,4 @@ jobs:
           target: ${{ env.function_handler }}
           gcloud_region: ${{ vars.GCLOUD_REGION }}
           service_account: "${{ vars.PINNING_API_FUNCT_SA }}"
+          deploy_env: ${{ inputs.deploy_env }}
