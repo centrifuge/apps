@@ -70,6 +70,26 @@ export function SelectAnchor({ active = false, href, disabled = false, ...restPr
   )
 }
 
+const PlainButton = styled.button<{ $left?: boolean }>({
+  display: 'flex',
+  border: 0,
+  appearance: 'none',
+  cursor: 'pointer',
+  background: 'transparent',
+})
+
+export function LogoButton({
+  src,
+  size = 'iconRegular',
+  ...rest
+}: { src?: string; size?: NetworkIconProps['size'] } & React.HTMLAttributes<HTMLButtonElement>) {
+  return (
+    <PlainButton type="button" {...rest}>
+      <Logo src={src} size={size} />
+    </PlainButton>
+  )
+}
+
 export function Logo({ src, size = 'iconRegular' }: { src?: string; size?: NetworkIconProps['size'] }) {
   return <Box as="img" src={src} alt="" width={size} height={size} style={{ objectFit: 'contain' }} />
 }

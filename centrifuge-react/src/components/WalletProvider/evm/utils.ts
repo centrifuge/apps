@@ -1,3 +1,4 @@
+import { CurrencyBalance } from '@centrifuge/centrifuge-js'
 import type { Networkish } from '@ethersproject/networks'
 import type { BaseProvider, Web3Provider } from '@ethersproject/providers'
 import { EMPTY } from '@web3-react/empty'
@@ -5,6 +6,7 @@ import { createWeb3ReactStoreAndActions } from '@web3-react/store'
 import { Actions, Connector, Provider, Web3ReactState, Web3ReactStore } from '@web3-react/types'
 import * as React from 'react'
 import { useQuery } from 'react-query'
+import { useWallet } from '../WalletProvider'
 
 const stores = new WeakMap<Connector, Web3ReactStore>()
 const [emptyConnector, emptyStore] = createConnector(() => EMPTY)
@@ -40,7 +42,10 @@ function getProviderKey(connector: Connector) {
   return providerKey
 }
 
-export function useProvider<T extends BaseProvider = Web3Provider>(connector?: Connector | null, network?: Networkish) {
+export function useProviderForConnector<T extends BaseProvider = Web3Provider>(
+  connector?: Connector | null,
+  network?: Networkish
+) {
   const conn = connector ?? emptyConnector
   const state = useConnectorState(conn)
   const isActive = computeIsActive(state)
@@ -58,6 +63,28 @@ export function useProvider<T extends BaseProvider = Web3Provider>(connector?: C
   if (conn.customProvider) return conn.customProvider as T
 
   return provider as T | undefined
+}
+
+export function useEvmProvider() {
+  const { evm } = useWallet()
+  return useProviderForConnector(evm.selectedWallet?.connector, evm.chainId)
+}
+
+export function useNativeBalance(address?: string) {
+  const provider = useEvmProvider()
+  const { evm } = useWallet()
+
+  const addr = address || evm.selectedAddress
+
+  const query = useQuery(
+    ['evmNativeBalance', addr, evm.chainId],
+    async () => {
+      const balance = await provider!.getBalance(addr!)
+      return new CurrencyBalance(balance.toString(), 18)
+    },
+    { enabled: !!provider && !!addr }
+  )
+  return query
 }
 
 function computeIsActive({ chainId, accounts, activating }: Web3ReactState) {

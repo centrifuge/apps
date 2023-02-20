@@ -27,7 +27,7 @@ type Props = {
 }
 
 const title = {
-  accounts: 'Choose Account',
+  accounts: 'Choose account',
   wallets: 'Choose wallet',
 }
 
@@ -168,6 +168,8 @@ const PROXY_TYPE_LABELS = {
   Borrow: 'Borrower',
   Invest: 'Investor',
   Price: 'Pricing',
+  PodAuth: 'POD Authentication',
+  PermissionManagement: 'Manage permissions',
 }
 
 function SubstrateAccounts({ onClose }: { onClose: () => void }) {
@@ -198,7 +200,7 @@ function SubstrateAccounts({ onClose }: { onClose: () => void }) {
             {proxies?.[acc.address]?.map((p, index) => (
               <MenuItemGroup key={`${p.delegator}${index}`}>
                 <AccountButton
-                  address={acc.address}
+                  address={p.delegator}
                   icon={<AccountIcon id={p.delegator} />}
                   label={<AccountName account={acc} delegator={p.delegator} />}
                   proxyRights={p.types.map((type) => (PROXY_TYPE_LABELS as any)[type] ?? type).join(' / ')}

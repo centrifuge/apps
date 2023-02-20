@@ -89,10 +89,10 @@ function ConnectedMenu() {
         </Stack>
       )}
       renderContent={(props, ref, state) => (
-        <div {...props} ref={ref}>
+        <Box {...props} ref={ref} width={220}>
           <Menu>
             <MenuItemGroup>
-              <Shelf px={2} pt={1} gap={1} alignItems="center">
+              <Shelf px={2} pt={1} gap={1} alignItems="center" justifyContent="space-between">
                 <Box style={{ pointerEvents: 'none' }}>
                   <Identicon value={address} size={17} theme="polkadot" />
                 </Box>
@@ -166,7 +166,7 @@ function ConnectedMenu() {
               />
             </MenuItemGroup>
           </Menu>
-        </div>
+        </Box>
       )}
     />
   )

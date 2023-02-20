@@ -109,12 +109,16 @@ export function AccountName({ account, delegator }: { account: WalletAccount; de
           <Text as="span" fontWeight={500}>
             {account.name}
           </Text>{' '}
+        </>
+      )}
+      {delegator && (
+        <>
           <Text as="span" color="textDisabled">
             |
           </Text>{' '}
+          {truncateAddress(delegator)}
         </>
       )}
-      {delegator ? truncateAddress(delegator) : truncateAddress(account.address)}
     </Text>
   )
 }

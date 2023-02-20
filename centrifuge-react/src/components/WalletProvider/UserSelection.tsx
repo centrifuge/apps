@@ -2,7 +2,7 @@ import { Box, FabricTheme, Grid, Stack, Text, toPx } from '@centrifuge/fabric'
 import centrifugeLogo from '@centrifuge/fabric/assets/logos/centrifuge.svg'
 import * as React from 'react'
 import styled, { useTheme } from 'styled-components'
-import { Logo } from './SelectButton'
+import { LogoButton } from './SelectButton'
 import type { State } from './types'
 import { getWalletIcon } from './WalletDialog'
 import { useWallet } from './WalletProvider'
@@ -30,12 +30,20 @@ const Divider = styled(Box)`
 
 export function UserSelection({ network, wallet }: UserSelectionProps) {
   const { sizes } = useTheme()
+  const {
+    showWallets,
+    walletDialog: { network: selectedNetwork },
+  } = useWallet()
 
   return (
     <Grid columns={3} equalColumns mx="auto" alignItems="end">
       <Column>
         <Title>Network</Title>
-        <Selection>{network && <NetworkIcon network={network} />}</Selection>
+        <Selection>
+          {network && (
+            <ChangeNetworkButton network={network} onClick={() => showWallets()} aria-label="Change network" />
+          )}
+        </Selection>
       </Column>
 
       <Divider
@@ -51,7 +59,15 @@ export function UserSelection({ network, wallet }: UserSelectionProps) {
 
       <Column>
         <Title>Wallet</Title>
-        <Selection>{wallet && <Logo src={getWalletIcon(wallet)} />}</Selection>
+        <Selection>
+          {wallet && (
+            <LogoButton
+              src={getWalletIcon(wallet)}
+              onClick={() => showWallets(selectedNetwork)}
+              aria-label="Change wallet"
+            />
+          )}
+        </Selection>
       </Column>
     </Grid>
   )
@@ -62,11 +78,18 @@ export type NetworkIconProps = {
   size?: FabricTheme['sizes']['iconSmall' | 'iconMedium' | 'iconRegular' | 'iconLarge']
 }
 
-export function NetworkIcon({ network, size = 'iconRegular' }: NetworkIconProps) {
+function useNeworkIcon(network: NetworkIconProps['network']) {
   const { evm } = useWallet()
   const src = !network ? '' : network === 'centrifuge' ? centrifugeLogo : evm.chains[network]?.logo?.src
+  return src
+}
 
-  return <Logo src={src} size={size} />
+function ChangeNetworkButton({ network, size = 'iconRegular', onClick }: NetworkIconProps & { onClick: () => void }) {
+  return <LogoButton src={useNeworkIcon(network)} size={size} onClick={onClick} aria-label="Change network" />
+}
+
+export function NetworkIcon({ network, size = 'iconRegular' }: NetworkIconProps) {
+  return <LogoButton src={useNeworkIcon(network)} size={size} />
 }
 
 function Column({ children }: { children?: React.ReactNode }) {
