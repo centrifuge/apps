@@ -13,7 +13,9 @@ on:
         description: "build command"
         default: 'yarn build'
         type: string
-
+concurrency:
+  group: '${{ github.workflow }}-${{ inputs.app_name || github.event.inputs.app_name }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true  
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
