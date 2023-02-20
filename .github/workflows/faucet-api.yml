@@ -24,6 +24,7 @@ env:
   # For now deploy only on demo when triggered manually:
   deploy_to: ${{ github.event_name == 'workflow_dispatch' && 'demo' || '' }}
   # deploy_to: ${{ inputs_deploy_env }}
+  function_handler: faucetDev
 concurrency:
   group: 'faucet-api@${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: false  
@@ -81,11 +82,12 @@ jobs:
         id: functionsdeploy
         uses: ./apps/.github/actions/deploy-gfunction
         with:
-          function_name: ${{ needs.build.outputs.app_name }}
-          artifact_name: ${{ env.app_name }}
-          target: faucetDev
+          function_name: ${{ needs.build.outputs.function_name }}
+          function_folder: apps/${{ env.app_name }}
+          app_name: ${{ env.app_name }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
           gcloud_region: ${{ vars.GCLOUD_REGION }}
-          function_env: "${{ needs.build.outputs.function_vars }}"
-            
+          target: ${{ env.function_handler }}
+          gcloud_env: ${{ needs.build.outputs.gh_env }}
+          service_account: "${{ vars.PINNING_API_FUNCT_SA }}"            

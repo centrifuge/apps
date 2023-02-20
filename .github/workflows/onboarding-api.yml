@@ -18,6 +18,7 @@ on:
         type: string
         required: true
 env:
+# If you change these change also in prod-deploy.yml
   app_name: onboarding-api
   function_handler: onboarding
   
@@ -27,11 +28,11 @@ concurrency:
  
 jobs:
   build:
+    if: ${{ inputs.deploy_env != 'production' }}
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: onboarding-api
-
     steps:
       - name: Checkout
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
@@ -71,7 +72,7 @@ jobs:
           path: ./${{ env.app_name }}/dist
           
     outputs:
-      app_name: ${{ steps.prepare.outputs.app_name }}
+      function_name: ${{ steps.prepare.outputs.function_name }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
       front_url: ${{ steps.prepare.outputs.gh_env }}
       function_secrets: ${{ steps.set_secrets.outputs.function_secrets }}
@@ -96,14 +97,13 @@ jobs:
           id: functionsdeploy
           uses: ./apps/.github/actions/deploy-gfunction
           with:
-            function_name: ${{ needs.build.outputs.app_name }}
+            function_name: ${{ needs.build.outputs.function_name }}
             artifact_name: ${{ env.app_name }}
+            function_folder: apps/${{ env.app_name }}
             GWIP: ${{ secrets.GWIP }}
             GSA: ${{ secrets.GSA }}
             gcloud_region: ${{ vars.GCLOUD_REGION }}
+            gcloud_env: ${{ needs.build.outputs.gh_env }}
             target: ${{ env.function_handler }}
-            function_secrets: |
-                ${{ needs.build.outputs.function_secrets }}
-            function_env: "${{ needs.build.outputs.function_vars }}"
             service_account: "${{ vars.ONBOARDING_FUNCT_SA }}"
             

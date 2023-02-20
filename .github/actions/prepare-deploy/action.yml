@@ -9,9 +9,9 @@ inputs:
     description: "(Optional) Manual trigger to deploy"
     required: false
 outputs:
-  app_name: 
+  function_name: 
     description: "App name with environment appended"
-    value: ${{ steps.naming.outputs.app_name}}
+    value: ${{ steps.naming.outputs.function_name}}
   front_url: 
     description: "Full URL for your front-end piece"
     value: ${{ steps.naming.outputs.front_url }}
@@ -49,40 +49,40 @@ runs:
         if ${{ inputs.deploy_to == 'production' }}; then
           # PRODUCTION
           echo "::notice title=Deploying to prod::Replacing production prod commit ${{ github.sha }}"
-          echo "app_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
+          echo "function_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
           echo "front_url=app.centrifuge.io" >> $GITHUB_OUTPUT
           echo "env_name=production" >> $GITHUB_OUTPUT        
         elif ${{ inputs.deploy_to == 'altair' }}; then
           # ALTAIR
           echo "::notice title=Deploying to prod::Replacing Altair prod commit ${{ github.sha }}"
-          echo "app_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
+          echo "function_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
           echo "front_url=app-altair.centrifuge.io" >> $GITHUB_OUTPUT
           echo "env_name=altair" >> $GITHUB_OUTPUT
         elif ${{ inputs.deploy_to == 'staging' }}; then
           # STAGING
           echo "::notice title=Deploying to prod::Replacing pre-prod commit ${{ github.sha }}"
-          echo "app_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
+          echo "function_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
           echo "front_url=app-staging.centrifuge.io" >> $GITHUB_OUTPUT
           echo "env_name=production" >> $GITHUB_OUTPUT
           # env_name is production because it needs to use the prod variable files inside each app
         elif  ${{ github.ref == 'refs/tags/rc*' }}; then
           # CATALYST
-          echo "app_name=${{ inputs.app_base_name }}-catalyst" >> $GITHUB_OUTPUT
+          echo "function_name=${{ inputs.app_base_name }}-catalyst" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-catalyst.k-f.dev" >> $GITHUB_OUTPUT
           echo "env_name=catalyst" >> $GITHUB_OUTPUT
         elif  ${{ github.ref == 'refs/heads/main' }}; then
           # DEV
-          echo "app_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
+          echo "function_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-dev.k-f.dev" >> $GITHUB_OUTPUT
           echo "env_name=development" >> $GITHUB_OUTPUT
         elif ${{ contains(inputs.deploy_to, 'demo') }}; then
           # DEMO
-          echo "app_name=${{ inputs.app_base_name }}-demo" >> $GITHUB_OUTPUT
+          echo "function_name=${{ inputs.app_base_name }}-demo" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-demo.k-f.dev" >> $GITHUB_OUTPUT
           echo "env_name=demo" >> $GITHUB_OUTPUT
         elif ${{ github.event_name == 'pull_request' }}; then
           # PR
-          echo "app_name=${{ inputs.app_base_name }}-pr${{ github.event.number }}" >> $GITHUB_OUTPUT
+          echo "function_name=${{ inputs.app_base_name }}-pr${{ github.event.number }}" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-pr${{ github.event.number }}.k-f.dev" >> $GITHUB_OUTPUT
           echo "env_name=development" >> $GITHUB_OUTPUT
         else
@@ -93,7 +93,7 @@ runs:
       shell: bash
       run: |
         echo "URL ${{ steps.naming.outputs.front_url }}"
-        echo "App name: ${{ steps.naming.outputs.app_name }}"
+        echo "App name: ${{ steps.naming.outputs.function_name }}"
         echo "Env name: ${{ steps.naming.outputs.env_name }}"
         echo "GH env: ${{ steps.setenv.outputs.gh_env }}"
         
