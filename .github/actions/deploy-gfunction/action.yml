@@ -1,5 +1,5 @@
 name: Deploy Gfunction
-description: 'Harvest vars and secrets and deploy to Google Cloud Functions'
+description: Deploy Apps repo function to Gcloud. Format env and secrets too.
 
 inputs:
   app_name:
@@ -38,19 +38,26 @@ inputs:
 runs:
   using: composite
   steps:
+    # This is probably redundant but in case this action 
+    # needs to be used in isolation, it won't work
+    # unless the repo is checked out somewhere first
+    - name: Checkout
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+      with:
+        path: apps # The next 3 steps use this folder
 
     - name: prepare env logic
       id: prepare
-      uses: "./${{ inputs.checkout_path }}/.github/actions/prepare-deploy"
+      uses: "./apps/.github/actions/prepare-deploy"
       with:
-        app_base_name: ${{ env.function_name }}
+        app_base_name: ${{ inputs.app_name }}
         deploy_to: ${{ inputs.deploy_env }}    
     
     - name: set env vars for Gfunction deploy
       shell: bash
       id: set_env
       env:
-        vars_file: ${{ inputs.checkout_path }}/${{ inputs.function_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env  
+        vars_file: apps/${{ inputs.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env  
       run: |
         VARS_COMMA=$(cat ${{ env.vars_file }} | paste -s -d, -)
         echo "function_vars=$VARS_COMMA" >> $GITHUB_OUTPUT
@@ -60,9 +67,9 @@ runs:
       id: set_secrets
       run: |
         if ${{ inputs.gcloud_env == 'production'}}; then
-          FILE=${{ inputs.checkout_path }}/${{ inputs.function_name }}/env-vars/prod.secrets
+          FILE=apps/${{ inputs.app_name }}/env-vars/prod.secrets
         else
-          FILE=${{ inputs.checkout_path }}/${{ inputs.function_name }}/env-vars/dev.secrets
+          FILE=apps/${{ inputs.app_name }}/env-vars/dev.secrets
         fi
         delimiter="$(openssl rand -hex 8)"
         # Add a new line at the end if not already there:

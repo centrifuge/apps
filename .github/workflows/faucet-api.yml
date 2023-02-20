@@ -76,7 +76,6 @@ jobs:
         uses: ./apps/.github/actions/deploy-gfunction
         with:
           app_name: ${{ env.app_name }}
-          checkout_path: apps
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
           target: ${{ env.function_handler }}

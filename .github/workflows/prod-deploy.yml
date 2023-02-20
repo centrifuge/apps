@@ -90,26 +90,17 @@ jobs:
         with:
           path: apps  
 
-      - name: prepare env logic
-        id: prepare
-        uses: ./apps/.github/actions/prepare-deploy
-        with:
-          app_base_name: app
-          deploy_to: 'production'
-
       - name: Deploy Gfunction
         id: functionsdeploy
         uses: ./apps/.github/actions/deploy-gfunction
         with:
-          function_name: ${{ steps.prepare.outputs.function_name }}
-          artifact_name: ${{ env.app_name }}
-          function_folder: apps/${{ env.app_name }}
+          app_name: ${{ env.app_name }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
-          gcloud_region: ${{ vars.GCLOUD_REGION }}
-          gcloud_env: ${{ steps.prepare.outputs.gh_env }}
           target: ${{ env.function_handler }}
+          gcloud_region: ${{ vars.GCLOUD_REGION }}
           service_account: "${{ vars.PINNING_API_FUNCT_SA }}"
+          deploy_env: production
 
   deploy_onboarding:
     needs: retrieve_function_assets
@@ -127,23 +118,14 @@ jobs:
         with:
           path: apps  
 
-      - name: prepare env logic
-        id: prepare
-        uses: ./apps/.github/actions/prepare-deploy
-        with:
-          app_base_name: app
-          deploy_to: 'production'
-
       - name: Deploy Gfunction
         id: functionsdeploy
         uses: ./apps/.github/actions/deploy-gfunction
         with:
-          function_name: ${{ steps.prepare.outputs.function_name }}
-          artifact_name: ${{ env.app_name }}
-          function_folder: apps/${{ env.app_name }}
+          app_name: ${{ env.app_name }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
-          gcloud_region: ${{ vars.GCLOUD_REGION }}
-          gcloud_env: ${{ steps.prepare.outputs.gh_env }}
           target: ${{ env.function_handler }}
-          service_account: "${{ vars.ONBOARDING_FUNCT_SA }}" 
+          service_account: "${{ vars.ONBOARDING_FUNCT_SA }}"
+          gcloud_region: ${{ vars.GCLOUD_REGION }}
+          deploy_env: production
