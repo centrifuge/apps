@@ -1,5 +1,5 @@
 name: Archive staging artifact
-description: Read the files from env-vars folder and massage to fit the input for google-github-actions/deploy-cloud-functions
+description: archive artifacts to the release
 inputs:
   name:
     description: name of the app - determines the zip file name

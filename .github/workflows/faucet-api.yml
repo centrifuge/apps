@@ -70,17 +70,14 @@ jobs:
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
         with:
           path: apps  
-
+         
       - name: Deploy Gfunction
         id: functionsdeploy
         uses: ./apps/.github/actions/deploy-gfunction
         with:
-          function_name: ${{ needs.build.outputs.function_name }}
-          function_folder: apps/${{ env.app_name }}
           app_name: ${{ env.app_name }}
+          checkout_path: apps
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
-          gcloud_region: ${{ vars.GCLOUD_REGION }}
           target: ${{ env.function_handler }}
-          gcloud_env: ${{ needs.build.outputs.gh_env }}
-          service_account: "${{ vars.PINNING_API_FUNCT_SA }}"            
+          gcloud_region: ${{ vars.GCLOUD_REGION }}

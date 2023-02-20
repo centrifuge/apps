@@ -1,28 +1,24 @@
 name: Deploy Gfunction
-description: 'Determine functions name, URL and GHA environment secrets'
+description: 'Harvest vars and secrets and deploy to Google Cloud Functions'
 
 inputs:
-  function_name:
-    description: function name from prepare-deploy
+  app_name:
+    description: app name to deploy
     required: true
   
-  function_folder:
-    description: Folder with the function's code (to find var files)
+  deploy_env:
+    description: env to deploy function to
+    required: false
+  
+  checkout_path:
+    description: Folder with repository code
     required: true
-
-  app_name:
-    description: From the actions/upload step
-    required: true  
 
   GWIP:
     description: Google Workflow Identity provider
     required: true
   GSA:
     description: Google Service Account
-    required: true
-
-  gcloud_env:
-    description: dev or prod. Gcloud env GHA is using
     required: true
 
   service_account:
@@ -42,12 +38,19 @@ inputs:
 runs:
   using: composite
   steps:
-        
+
+    - name: prepare env logic
+      id: prepare
+      uses: "./${{ inputs.checkout_path }}/.github/actions/prepare-deploy"
+      with:
+        app_base_name: ${{ env.function_name }}
+        deploy_to: ${{ inputs.deploy_env }}    
+    
     - name: set env vars for Gfunction deploy
       shell: bash
       id: set_env
       env:
-        vars_file: ${{ inputs.function_folder }}/env-vars/${{ steps.prepare.outputs.env_name }}.env  
+        vars_file: ${{ inputs.checkout_path }}/${{ inputs.function_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env  
       run: |
         VARS_COMMA=$(cat ${{ env.vars_file }} | paste -s -d, -)
         echo "function_vars=$VARS_COMMA" >> $GITHUB_OUTPUT
@@ -57,9 +60,9 @@ runs:
       id: set_secrets
       run: |
         if ${{ inputs.gcloud_env == 'production'}}; then
-          FILE=${{ inputs.function_folder }}/env-vars/prod.secrets
+          FILE=${{ inputs.checkout_path }}/${{ inputs.function_name }}/env-vars/prod.secrets
         else
-          FILE=${{ inputs.function_folder }}/env-vars/dev.secrets
+          FILE=${{ inputs.checkout_path }}/${{ inputs.function_name }}/env-vars/dev.secrets
         fi
         delimiter="$(openssl rand -hex 8)"
         # Add a new line at the end if not already there:
@@ -72,7 +75,10 @@ runs:
       id: download
       uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
       with:
-        name: ${{ inputs.app_name }}
+        name: ${{ inputs.app_name }} 
+        # This will work only if we're matching the same string as
+        # the upload step, which happens outside of this action file
+        # by convention I use the app_name everywhere
         path: functions
 
     ## Every module from here on could potentially expose the Gcloud Auth Token
@@ -90,15 +96,15 @@ runs:
       id: gclouddeploy
       uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
       with:
-        name: '${{ inputs.function_name }}'
+        name: '${{ steps.prepare.outputs.function_name }}'
         runtime: 'nodejs16'
         region: '${{ inputs.gcloud_region }}'
-        source_dir: '${{steps.download.outputs.download-path}}'
+        source_dir: '${{ steps.download.outputs.download-path }}'
         entry_point: '${{ inputs.target }}'
-        secret_environment_variables: ${{ inputs.function_secrets }}
-        env_vars: ${{ inputs.function_env }}
+        secret_environment_variables: ${{ steps.set_secrets.outputs.function_secrets }}
+        env_vars: ${{ steps.set_env.outputs.function_env }}
         service_account_email: ${{ inputs.service_account }}
-        max_instances: ${{ contains(inputs.function_name, 'production') && '200' || '10' }}
+        max_instances: ${{ contains(steps.prepare.outputs.function_name, 'production') && '200' || '10' }}
 
     - name: Print Gcloud functions URL
       shell: sh
@@ -111,6 +117,6 @@ runs:
     - name: Change function to allow_unathorized calls 
       shell: sh
       run: |
-        gcloud functions add-iam-policy-binding ${{ inputs.function_name }} \
+        gcloud functions add-iam-policy-binding ${{ steps.prepare.outputs.function_name }} \
         --region=${{ inputs.gcloud_region }} \
         --member="allUsers" --role="roles/cloudfunctions.invoker"

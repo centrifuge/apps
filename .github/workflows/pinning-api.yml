@@ -81,12 +81,10 @@ jobs:
         id: functionsdeploy
         uses: ./apps/.github/actions/deploy-gfunction
         with:
-          function_name: ${{ needs.build.outputs.function_name }}
-          function_folder: apps/${{ env.app_name }}
           app_name: ${{ env.app_name }}
+          checkout_path: apps
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
-          gcloud_region: ${{ vars.GCLOUD_REGION }}
           target: ${{ env.function_handler }}
-          gcloud_env: ${{ needs.build.outputs.gh_env }}
+          gcloud_region: ${{ vars.GCLOUD_REGION }}
           service_account: "${{ vars.PINNING_API_FUNCT_SA }}"
