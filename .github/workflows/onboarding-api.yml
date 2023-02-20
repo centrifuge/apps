@@ -43,20 +43,6 @@ jobs:
         with:
           app_base_name: ${{ env.app_name }}
           deploy_to: ${{ inputs.deploy_env }}
-
-      - name: Set function env vars
-        id: set_env
-        uses: ./.github/actions/fetch-function-vars
-        with:
-          vars_file: ${{ env.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env 
-          
-
-      - name: Set function env secrets
-        id: set_secrets
-        uses: ./.github/actions/fetch-function-secrets
-        with:       
-          app_name: ${{ env.app_name }}
-          deploy_env:  ${{ steps.prepare.outputs.gh_env }}
                     
       - name: build function
         uses: ./.github/actions/build-function

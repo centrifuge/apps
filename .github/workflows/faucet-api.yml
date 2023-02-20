@@ -45,13 +45,6 @@ jobs:
         with:
           app_base_name: ${{ env.app_name }}
           deploy_to: ${{ env.deploy_to }}
-      - run: echo "Running with env secrets from -> ${{ steps.prepare.outputs.gh_env }}"
-      
-      - name: Function env vars
-        id: set_env
-        uses: ./.github/actions/fetch-function-vars
-        with:
-          vars_file: ${{ env.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env 
 
       - name: build function
         uses: ./.github/actions/build-function
