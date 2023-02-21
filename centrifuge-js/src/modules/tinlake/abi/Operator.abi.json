@@ -1,5 +1,5 @@
 [
-  "function supplyOrder(address, uint256) public",
-  "function redeemOrder(address, uint256) public",
+  "function supplyOrder(uint256) public",
+  "function redeemOrder(uint256) public",
   "function disburse() external returns (uint256,uint256,uint256,uint256)"
 ]
