@@ -70,11 +70,11 @@ export const Investors: React.FC = () => {
   function toggleAllowed(trancheId: string) {
     if (!validAddress) return
     const isAllowed = allowedTranches.includes(trancheId)
-    const TenYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
+    const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
     const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
 
     if (isAllowed) {
-      execute([poolId, [], [[validAddress, { TrancheInvestor: [trancheId, TenYearsFromNow] }]]])
+      execute([poolId, [], [[validAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow] }]]])
     } else {
       execute([poolId, [[validAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow] }]], []])
     }
@@ -82,7 +82,10 @@ export const Investors: React.FC = () => {
   }
 
   return (
-    <PageSection title="Investor status" subtitle="Display investor status, and add or remove from Investor whitelist.">
+    <PageSection
+      title="Investor status"
+      subtitle="Display investor status, and add or remove from investor memberlist."
+    >
       <Stack gap={2}>
         <Grid columns={2} equalColumns gap={4} alignItems="center">
           <SearchInput
@@ -104,14 +107,14 @@ export const Investors: React.FC = () => {
               <Text variant="label2" color="statusOk">
                 <Shelf gap={1}>
                   <IconCheckCircle size="20px" />
-                  <span>Address whitelisted</span>
+                  <span>Address added to memberlist</span>
                 </Shelf>
               </Text>
             ) : permissions && !allowedTranches.length ? (
               <Text variant="label2" color="statusWarning">
                 <Shelf gap={1}>
                   <IconAlertCircle size="20px" />
-                  <span>Address not whitelisted</span>
+                  <span>Address not in memberlist</span>
                 </Shelf>
               </Text>
             ) : null)
@@ -151,7 +154,7 @@ export const Investors: React.FC = () => {
                       loading={isTransactionPending && pendingTrancheId === row.id}
                       small
                     >
-                      {isAllowed ? 'Remove from whitelist' : 'Add to whitelist'}
+                      {isAllowed ? 'Remove from memberlist' : 'Add to memberlist'}
                     </Button>
                   )
                 },

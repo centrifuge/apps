@@ -1,46 +1,18 @@
 import { Box, Flex, Grid, Shelf, Stack, Text } from '@centrifuge/fabric'
 import React from 'react'
-import { useQuery } from 'react-query'
 import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../../components/AuthProvider'
 import { Spinner } from '../../components/Spinner'
 import { config } from '../../config'
+import { useUpdateInvestorStatus } from './queries/useUpdateInvestorStatus'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const [_, WordMark] = config.logo
 
 export const UpdateInvestorStatus: React.FC = () => {
-  const { authToken } = useAuth()
   const { search } = useLocation()
-  const token = new URLSearchParams(search).get('token')
   const status = new URLSearchParams(search).get('status')
 
-  const { error, data } = useQuery(
-    ['update investor status'],
-    async () => {
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/updateInvestorStatus?token=${token}&status=${status}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ status }),
-          credentials: 'include',
-        }
-      )
-
-      if (response.status === 204) {
-        return response
-      }
-      throw response.statusText
-    },
-    {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    }
-  )
+  const { data, error } = useUpdateInvestorStatus()
 
   return (
     <Flex backgroundColor="backgroundSecondary" minHeight="100vh" flexDirection="column" textAlign="center">
