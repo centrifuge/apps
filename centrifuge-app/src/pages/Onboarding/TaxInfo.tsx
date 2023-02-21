@@ -1,100 +1,16 @@
-import { Box, Button, FileUpload, Flex, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { AnchorButton, Box, Button, FileUpload, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useMutation, useQuery } from 'react-query'
-import { useAuth } from '../../components/AuthProvider'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
-import { Spinner } from '../../components/Spinner'
+import { useOnboarding } from '../../components/OnboardingProvider'
+import { useTaxInfo } from './queries/useTaxInfo'
+import { useUploadTaxInfo } from './queries/useUploadTaxInfo'
 
-type Props = {
-  nextStep: () => void
-  backStep: () => void
-}
-
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
-
-export const TaxInfo = ({ backStep, nextStep }: Props) => {
-  const { refetchOnboardingUser, onboardingUser } = useOnboardingUser()
+export const TaxInfo = () => {
+  const { onboardingUser, previousStep, nextStep } = useOnboarding()
   const [taxInfo, setTaxInfo] = React.useState<File | null>(null)
-  const { authToken } = useAuth()
+  const { data: taxInfoData } = useTaxInfo()
+  const { mutate: uploadTaxInfo, isLoading } = useUploadTaxInfo(taxInfo)
 
-  const isCompleted = !!onboardingUser?.steps?.verifyTaxInfo?.completed && !!taxInfo
-
-  const { data: taxInfoData, isFetching: isTaxInfoFetching } = useQuery(
-    ['tax info'],
-    async () => {
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getTaxInfo?poolId=${poolId}&trancheId=${trancheId}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        }
-      )
-
-      const json = await response.json()
-
-      const documentBlob = new Blob([Uint8Array.from(json.taxInfo.data).buffer], {
-        type: 'application/pdf',
-      })
-
-      const file = new File([documentBlob], 'taxInfo.pdf', { type: 'application/pdf' })
-
-      return file
-    },
-    {
-      refetchOnWindowFocus: false,
-      enabled: isCompleted,
-    }
-  )
-
-  React.useEffect(() => {
-    if (taxInfoData) {
-      setTaxInfo(taxInfoData)
-    }
-  }, [taxInfoData])
-
-  const { mutate: uploadTaxInfo, isLoading } = useMutation(
-    async () => {
-      if (taxInfo) {
-        const formData = new FormData()
-        formData.append('taxInfo', taxInfo)
-
-        const response = await fetch(
-          `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/uploadTaxInfo?poolId=${poolId}&trancheId=${trancheId}`,
-          {
-            method: 'POST',
-            body: formData,
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-              'Content-Type': 'multipart/form-data',
-            },
-            credentials: 'include',
-          }
-        )
-
-        if (response.status !== 200) {
-          throw new Error()
-        }
-
-        const json = await response.json()
-
-        if (!json.steps?.verifyTaxInfo?.completed) {
-          throw new Error()
-        }
-      }
-    },
-    {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        nextStep()
-      },
-    }
-  )
+  const isCompleted = !!onboardingUser?.steps?.verifyTaxInfo?.completed
 
   const validateFileUpload = (file: File) => {
     if (file.type !== 'application/pdf') {
@@ -106,43 +22,70 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
     }
   }
 
+  const taxForm = React.useMemo(() => {
+    if (onboardingUser?.investorType === 'individual' && onboardingUser?.countryOfCitizenship !== 'us') {
+      return {
+        type: 'W-8BEN',
+        url: 'https://www.irs.gov/pub/irs-pdf/fw8ben.pdf',
+      }
+    }
+
+    if (onboardingUser?.investorType === 'entity' && !onboardingUser?.jurisdictionCode.startsWith('us')) {
+      return {
+        type: 'W-8BEN-E',
+        url: 'https://www.irs.gov/pub/irs-pdf/fw8bene.pdf',
+      }
+    }
+
+    return {
+      type: 'W9',
+      url: 'https://www.irs.gov/pub/irs-pdf/fw9.pdf',
+    }
+  }, [onboardingUser])
+
   return (
     <Stack gap={4}>
       <Box>
         <Text fontSize={5}>Tax information</Text>
-        {isTaxInfoFetching ? (
-          <Flex alignItems="center" justifyContent="center" py={100}>
-            <Spinner />
-          </Flex>
-        ) : (
-          <>
-            <Stack gap={2} py={6}>
-              <FileUpload
-                placeholder="Upload file"
-                onFileChange={setTaxInfo}
-                disabled={isLoading}
-                file={taxInfo}
-                validate={validateFileUpload}
-              />
-            </Stack>
-            <Shelf gap="2">
-              <Button onClick={() => backStep()} variant="secondary" disabled={isLoading}>
-                Back
-              </Button>
-
-              <Button
-                onClick={() => {
-                  isCompleted && taxInfo === taxInfoData ? nextStep() : uploadTaxInfo()
-                }}
-                disabled={isCompleted ? false : isLoading || !taxInfo}
-                loading={isLoading}
-                loadingMessage="Uploading"
-              >
-                Next
-              </Button>
-            </Shelf>
-          </>
-        )}
+        <Stack gap={4}>
+          <Text fontSize={2}>
+            Please complete and upload a {taxForm.type} form. The form can be found at{' '}
+            <a href={taxForm.url} target="_blank" rel="noreferrer">
+              {taxForm.url}
+            </a>
+            .
+          </Text>
+          {isCompleted ? (
+            <Box>
+              <AnchorButton variant="secondary" href={taxInfoData} target="__blank">
+                View uploaded tax form
+              </AnchorButton>
+            </Box>
+          ) : (
+            <FileUpload
+              placeholder="Upload file"
+              onFileChange={(file) => setTaxInfo(file)}
+              disabled={isLoading || isCompleted}
+              file={taxInfo || null}
+              validate={validateFileUpload}
+            />
+          )}
+          <Shelf gap="2">
+            <Button onClick={() => previousStep()} variant="secondary" disabled={isLoading}>
+              Back
+            </Button>
+            <Button
+              onClick={() => {
+                isCompleted ? nextStep() : uploadTaxInfo()
+              }}
+              disabled={isCompleted ? false : isLoading || !taxInfo}
+              loading={isLoading}
+              loadingMessage="Uploading"
+            >
+              Next
+            </Button>
+          </Shelf>
+        </Stack>
       </Box>
     </Stack>
   )

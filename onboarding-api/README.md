@@ -45,7 +45,7 @@ KYB and AML verification.
     businessName: string
     incorporationDate: string // timestamp
     registrationNumber: string
-    jurisdictionCode: string // e.g az_us
+    jurisdictionCode: string // e.g us_az
     trancheId: string
     poolId: string
     dryRun?: boolean // mock KYB and AML
@@ -191,7 +191,7 @@ Sets the ultimate beneficial owners for the entity.
   },
   "registrationNumber": "710794409",
   "name": "Tester",
-  "jurisdictionCode": "CH",
+  "jurisdictionCode": "ch",
   "ultimateBeneficialOwners": [
     {
       "dateOfBirth": "2023-01-05T20:40:19.447Z",
@@ -303,3 +303,9 @@ Sets the ultimate beneficial owners for the entity.
   signedAgreement: Buffer
 }
 ```
+
+## Whitelisting Investors
+
+Once onboarding is complete a final tx will be signed by the server which will whtielist investors. For this, a pure proxy must be created and sufficiently funded for each chain environment. The pure proxy only has to be created once and can be used for all pools.
+
+After creating the pure proxy, it must then be given `MemberListAdmin` permissions for each pool by the address with `PoolAdmin` permissions.

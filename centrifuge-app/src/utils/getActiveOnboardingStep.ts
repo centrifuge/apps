@@ -45,23 +45,25 @@ const INDIVIDUAL_NON_US_STEPS = {
 
 export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId: string, trancheId: string) => {
   // user does not exist
-  if (!Object.keys(onboardingUser).length) return 2
+  if (!onboardingUser) return 2
 
   const { investorType, countryOfCitizenship } = onboardingUser
   const { verifyIdentity, verifyTaxInfo, verifyAccreditation } = onboardingUser.steps
 
-  const completed = onboardingUser.steps.signAgreements[poolId][trancheId].completed
+  const hasSignedAgreement =
+    onboardingUser.steps.signAgreements[poolId][trancheId].signedDocument &&
+    !!onboardingUser.steps.signAgreements[poolId][trancheId].transactionInfo.extrinsicHash
 
   if (investorType === 'entity') {
     const { jurisdictionCode } = onboardingUser
     const { confirmOwners, verifyBusiness } = onboardingUser.steps
 
-    if (jurisdictionCode === 'us') {
-      if (completed) return ENTITY_US_STEPS.COMPLETE
+    if (jurisdictionCode.startsWith('us')) {
+      if (hasSignedAgreement) return ENTITY_US_STEPS.COMPLETE
       if (verifyAccreditation.completed) return ENTITY_US_STEPS.SIGN_AGREEMENT
       if (verifyTaxInfo.completed) return ENTITY_US_STEPS.VERIFY_ACCREDITATION
     } else {
-      if (completed) return ENTITY_NON_US_STEPS.COMPLETE
+      if (hasSignedAgreement) return ENTITY_NON_US_STEPS.COMPLETE
       if (verifyTaxInfo.completed) return ENTITY_NON_US_STEPS.SIGN_AGREEMENT
     }
 
@@ -72,11 +74,11 @@ export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId: 
 
   if (investorType === 'individual') {
     if (countryOfCitizenship === 'us') {
-      if (completed) return INDIVIDUAL_US_STEPS.COMPLETE
+      if (hasSignedAgreement) return INDIVIDUAL_US_STEPS.COMPLETE
       if (verifyAccreditation.completed) return INDIVIDUAL_US_STEPS.SIGN_AGREEMENT
       if (verifyTaxInfo.completed) return INDIVIDUAL_US_STEPS.VERIFY_ACCREDITATION
     } else {
-      if (completed) return INDIVIDUAL_NON_US_STEPS.COMPLETE
+      if (hasSignedAgreement) return INDIVIDUAL_NON_US_STEPS.COMPLETE
       if (verifyTaxInfo.completed) return INDIVIDUAL_NON_US_STEPS.SIGN_AGREEMENT
     }
 

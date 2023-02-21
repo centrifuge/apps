@@ -2,34 +2,29 @@ import { WalletMenu } from '@centrifuge/centrifuge-react'
 import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 import { Spinner } from '../../components/Spinner'
 import { config } from '../../config'
 import { InvestorTypes } from '../../types'
-import { useOnboardingStep } from '../../utils/useOnboardingStep'
 import { Accreditation } from './Accreditation'
+import { ApprovalStatus } from './ApprovalStatus'
 import { BusinessInformation } from './BusinessInformation'
 import { BusinessOwnership } from './BusinessOwnership'
-import { Completed } from './Completed'
 import { InvestorType } from './InvestorType'
 import { KnowYourCustomer } from './KnowYourCustomer'
 import { LinkWallet } from './LinkWallet'
+import { useSignedAgreement } from './queries/useSignedAgreement'
 import { SignSubscriptionAgreement } from './SignSubscriptionAgreement'
 import { TaxInfo } from './TaxInfo'
-
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const [_, WordMark] = config.logo
 
 export const OnboardingPage: React.FC = () => {
-  const { onboardingUser } = useOnboardingUser()
+  const { onboardingUser, activeStep, setActiveStep, isFetchingStep } = useOnboarding()
   const [investorType, setInvestorType] = React.useState<InvestorTypes>()
-  const { activeStep, nextStep, backStep, setActiveStep, isFetchingStep } = useOnboardingStep()
 
-  const isOnboarded = !!onboardingUser?.steps?.signAgreements[poolId][trancheId].completed
+  const { data: signedAgreementData, isFetched: isSignedAgreementFetched } = useSignedAgreement()
 
   React.useEffect(() => {
     if (onboardingUser?.investorType) {
@@ -76,7 +71,7 @@ export const OnboardingPage: React.FC = () => {
           gridTemplateColumns="350px 1px 1fr min-content"
         >
           <Box paddingTop={10} paddingLeft={7} paddingRight={7} paddingBottom={6}>
-            <Stepper activeStep={activeStep} setActiveStep={isOnboarded ? null : setActiveStep}>
+            <Stepper activeStep={activeStep} setActiveStep={setActiveStep}>
               <Step label="Link wallet" />
               <Step label="Selector investor type" />
               {investorType === 'individual' && (activeStep > 2 || !!onboardingUser?.investorType) && (
@@ -85,6 +80,7 @@ export const OnboardingPage: React.FC = () => {
                   <Step label="Tax information" />
                   {onboardingUser?.countryOfCitizenship === 'us' && <Step label="Accreditation" />}
                   <Step label="Sign subscription agreement" />
+                  <Step label="Status" />
                 </>
               )}
               {investorType === 'entity' && (activeStep > 2 || !!onboardingUser?.investorType) && (
@@ -93,10 +89,11 @@ export const OnboardingPage: React.FC = () => {
                   <Step label="Business ownership" />
                   <Step label="Authorized signer verification" />
                   <Step label="Tax information" />
-                  {onboardingUser?.investorType === 'entity' && onboardingUser?.jurisdictionCode === 'us' && (
+                  {onboardingUser?.investorType === 'entity' && onboardingUser?.jurisdictionCode.startsWith('us') && (
                     <Step label="Accreditation" />
                   )}
                   <Step label="Sign subscription agreement" />
+                  <Step label="Status" />
                 </>
               )}
               {activeStep < 3 && !onboardingUser?.investorType && <Step empty />}
@@ -111,49 +108,62 @@ export const OnboardingPage: React.FC = () => {
             justifyContent="space-between"
             minHeight="520px"
           >
-            {activeStep === 1 && <LinkWallet nextStep={nextStep} />}
-            {activeStep === 2 && (
-              <InvestorType
-                investorType={investorType}
-                nextStep={nextStep}
-                backStep={backStep}
-                setInvestorType={setInvestorType}
-              />
-            )}
+            {activeStep === 1 && <LinkWallet />}
+            {activeStep === 2 && <InvestorType investorType={investorType} setInvestorType={setInvestorType} />}
             {investorType === 'entity' && (
               <>
-                {activeStep === 3 && <BusinessInformation nextStep={nextStep} backStep={backStep} />}
-                {activeStep === 4 && <BusinessOwnership nextStep={nextStep} backStep={backStep} />}
-                {activeStep === 5 && <KnowYourCustomer backStep={backStep} nextStep={nextStep} />}
-                {activeStep === 6 && <TaxInfo backStep={backStep} nextStep={nextStep} />}
-                {onboardingUser?.investorType === 'entity' && onboardingUser.jurisdictionCode === 'us' ? (
+                {activeStep === 3 && <BusinessInformation />}
+                {activeStep === 4 && <BusinessOwnership />}
+                {activeStep === 5 && <KnowYourCustomer />}
+                {activeStep === 6 && <TaxInfo />}
+                {onboardingUser?.investorType === 'entity' && onboardingUser.jurisdictionCode.startsWith('us') ? (
                   <>
-                    {activeStep === 7 && <Accreditation backStep={backStep} nextStep={nextStep} />}
-                    {activeStep === 8 && <SignSubscriptionAgreement backStep={backStep} nextStep={nextStep} />}
-                    {activeStep === 9 && <Completed />}
+                    {activeStep === 7 && <Accreditation />}
+                    {activeStep === 8 && (
+                      <SignSubscriptionAgreement
+                        isSignedAgreementFetched={isSignedAgreementFetched}
+                        signedAgreementUrl={signedAgreementData as string}
+                      />
+                    )}
+                    {activeStep === 9 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
                   </>
                 ) : (
                   <>
-                    {activeStep === 7 && <SignSubscriptionAgreement backStep={backStep} nextStep={nextStep} />}
-                    {activeStep === 8 && <Completed />}
+                    {activeStep === 7 && (
+                      <SignSubscriptionAgreement
+                        isSignedAgreementFetched={isSignedAgreementFetched}
+                        signedAgreementUrl={signedAgreementData}
+                      />
+                    )}
+                    {activeStep === 8 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
                   </>
                 )}
               </>
             )}
             {investorType === 'individual' && (
               <>
-                {activeStep === 3 && <KnowYourCustomer backStep={backStep} nextStep={nextStep} />}
-                {activeStep === 4 && <TaxInfo backStep={backStep} nextStep={nextStep} />}
+                {activeStep === 3 && <KnowYourCustomer />}
+                {activeStep === 4 && <TaxInfo />}
                 {onboardingUser?.investorType === 'individual' && onboardingUser.countryOfCitizenship === 'us' ? (
                   <>
-                    {activeStep === 5 && <Accreditation backStep={backStep} nextStep={nextStep} />}
-                    {activeStep === 6 && <SignSubscriptionAgreement backStep={backStep} nextStep={nextStep} />}
-                    {activeStep === 7 && <Completed />}
+                    {activeStep === 5 && <Accreditation />}
+                    {activeStep === 6 && (
+                      <SignSubscriptionAgreement
+                        isSignedAgreementFetched={isSignedAgreementFetched}
+                        signedAgreementUrl={signedAgreementData}
+                      />
+                    )}
+                    {activeStep === 7 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
                   </>
                 ) : (
                   <>
-                    {activeStep === 5 && <SignSubscriptionAgreement backStep={backStep} nextStep={nextStep} />}
-                    {activeStep === 6 && <Completed />}
+                    {activeStep === 5 && (
+                      <SignSubscriptionAgreement
+                        isSignedAgreementFetched={isSignedAgreementFetched}
+                        signedAgreementUrl={signedAgreementData}
+                      />
+                    )}
+                    {activeStep === 6 && <ApprovalStatus signedAgreementUrl={signedAgreementData} />}
                   </>
                 )}
               </>

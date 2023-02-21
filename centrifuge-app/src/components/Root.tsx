@@ -9,7 +9,7 @@ import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fa
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
 import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
 import * as React from 'react'
-import { Helmet, HelmetProvider } from 'react-helmet-async'
+import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import { config } from '../config'
@@ -27,6 +27,7 @@ import { NFTPage } from '../pages/NFT'
 import { NotFoundPage } from '../pages/NotFound'
 import { OnboardingPage } from '../pages/Onboarding'
 import { EmailVerified } from '../pages/Onboarding/EmailVerified'
+import { UpdateInvestorStatus } from '../pages/Onboarding/UpdateInvestorStatus'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
@@ -35,8 +36,9 @@ import { AuthProvider } from './AuthProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
+import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
-import { OnboardingUserProvider } from './OnboardingUserProvider'
+import { OnboardingProvider } from './OnboardingProvider'
 import { PodAuthProvider } from './PodAuthProvider'
 
 const queryClient = new QueryClient({
@@ -96,9 +98,7 @@ export const Root: React.VFC = () => {
   return (
     <>
       <HelmetProvider>
-        <Helmet>
-          <title>{config.network === 'centrifuge' ? 'Centrifuge App' : 'Altair App'}</title>
-        </Helmet>
+        <Head />
       </HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <FabricProvider
@@ -186,12 +186,15 @@ const Routes: React.VFC = () => {
         <InvestmentDisclaimerPage />
       </Route>
       <Route exact path="/onboarding">
-        <OnboardingUserProvider>
+        <OnboardingProvider>
           <OnboardingPage />
-        </OnboardingUserProvider>
+        </OnboardingProvider>
       </Route>
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />
+      </Route>
+      <Route exact path="/onboarding/updateInvestorStatus">
+        <UpdateInvestorStatus />
       </Route>
       <Route exact path="/">
         <Redirect to="/investments" />

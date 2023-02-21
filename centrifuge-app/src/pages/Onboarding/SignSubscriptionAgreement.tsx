@@ -1,74 +1,37 @@
 import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useMutation, useQuery } from 'react-query'
-import { useAuth } from '../../components/AuthProvider'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 import { PDFViewer } from '../../components/PDFViewer'
+import { useSignAndSendDocuments } from './queries/useSignAndSendDocuments'
+import { useSignRemark } from './queries/useSignRemark'
+import { useUnsignedAgreement } from './queries/useUnsignedAgreement'
 
 type Props = {
-  nextStep: () => void
-  backStep: () => void
+  signedAgreementUrl: string | undefined
+  isSignedAgreementFetched: boolean
 }
 
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
-
-export const SignSubscriptionAgreement = ({ nextStep, backStep }: Props) => {
+export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreementFetched }: Props) => {
   const [isAgreed, setIsAgreed] = React.useState(false)
-  const { authToken } = useAuth()
-  const { refetchOnboardingUser } = useOnboardingUser()
+  const { onboardingUser, pool, previousStep, nextStep } = useOnboarding()
 
-  const { data } = useQuery(
-    'unsignedSubscriptionAgreement',
-    async () => {
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUnsignedAgreement?poolId=${poolId}&trancheId=${trancheId}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        }
-      )
+  const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useSignAndSendDocuments()
+  const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
+  const { data: unsignedAgreementData, isFetched: isUnsignedAgreementFetched } = useUnsignedAgreement()
 
-      const json = await response.json()
+  const isCompleted =
+    onboardingUser?.steps.signAgreements[pool.id][pool.trancheId].signedDocument &&
+    !!onboardingUser?.steps.signAgreements[pool.id][pool.trancheId].transactionInfo.extrinsicHash
 
-      const documentBlob = new Blob([Uint8Array.from(json.unsignedAgreement.data).buffer], {
-        type: 'application/pdf',
-      })
-
-      return URL.createObjectURL(documentBlob)
-    },
-    {
-      refetchOnWindowFocus: false,
+  React.useEffect(() => {
+    if (isCompleted) {
+      setIsAgreed(true)
     }
-  )
+  }, [isCompleted])
 
-  const { mutate: signForm, isLoading } = useMutation(
-    async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/signAgreement`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          poolId,
-          trancheId,
-        }),
-        credentials: 'include',
-      })
-      return response.json()
-    },
-    {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        nextStep()
-      },
-    }
+  const isAgreementFetched = React.useMemo(
+    () => isUnsignedAgreementFetched || isSignedAgreementFetched,
+    [isSignedAgreementFetched, isUnsignedAgreementFetched]
   )
 
   return (
@@ -76,9 +39,9 @@ export const SignSubscriptionAgreement = ({ nextStep, backStep }: Props) => {
       <Box>
         <Text fontSize={5}>Sign subscription agreement</Text>
         <Text fontSize={2}>Complete subscription agreement</Text>
-        {data && (
+        {isAgreementFetched && (
           <Box overflowY="scroll" height="500px">
-            <PDFViewer file={data} />
+            <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementData) as string} />
           </Box>
         )}
       </Box>
@@ -86,22 +49,22 @@ export const SignSubscriptionAgreement = ({ nextStep, backStep }: Props) => {
         style={{
           cursor: 'pointer',
         }}
-        checked={isAgreed}
+        checked={isCompleted || isAgreed}
         onChange={() => setIsAgreed((current) => !current)}
         label={<Text style={{ cursor: 'pointer' }}>I agree to the agreement</Text>}
-        disabled={isLoading}
+        disabled={isSigningTransaction || isSending || isCompleted}
       />
       <Shelf gap="2">
-        <Button onClick={() => backStep()} variant="secondary" disabled={isLoading}>
+        <Button onClick={() => previousStep()} variant="secondary" disabled={isSigningTransaction || isSending}>
           Back
         </Button>
         <Button
-          onClick={() => signForm()}
+          onClick={isCompleted ? () => nextStep() : () => signRemark([])}
           loadingMessage="Signing"
-          loading={isLoading}
-          disabled={!isAgreed || isLoading}
+          loading={isSigningTransaction || isSending}
+          disabled={!isAgreed || isSigningTransaction || isSending}
         >
-          Sign
+          {isCompleted ? 'Next' : 'Sign'}
         </Button>
       </Shelf>
     </Stack>

@@ -290,6 +290,7 @@ type WrittenOff = {
 type WriteOffStatus = null | WrittenOff | WrittenOfByAdmin
 
 type InterestAccrual = {
+  interestRatePerSec: string
   accumulatedRate: string
   referenceCount: number
 }
@@ -437,6 +438,11 @@ interface RiskGroupFormValues {
   discountRate: number | ''
 }
 
+export type IssuerDetails = {
+  title: string
+  body: string
+}
+
 export interface PoolMetadataInput {
   // details
   poolIcon: { uri: string; mime: string } | null
@@ -458,6 +464,7 @@ export interface PoolMetadataInput {
   website: string
   forum: string
   email: string
+  details?: IssuerDetails[]
 
   // tranche
   tranches: TrancheFormValues[]
@@ -486,6 +493,7 @@ export type PoolMetadata = {
       forum?: string
       website?: string
     }
+    details?: IssuerDetails[]
     status: PoolStatus
     listed: boolean
   }
@@ -713,6 +721,7 @@ export function getPoolsModule(inst: Centrifuge) {
           forum: metadata.forum,
           website: metadata.website,
         },
+        details: metadata.details,
         status: 'open',
         listed: metadata.listed ?? true,
       },
@@ -1991,21 +2000,19 @@ export function getPoolsModule(inst: Centrifuge) {
         (api, [activeLoanValues, poolValue]) => ({ api, activeLoanValues, poolValue })
       ),
       switchMap(({ api, activeLoanValues, poolValue }) => {
-        const activeLoanData = activeLoanValues.toJSON() as ActiveLoanData[]
-        const interestAccrualKeys = activeLoanData.map((activeLoan) => hexToBN(activeLoan.interestRatePerSec))
-        const $interestAccrual = api.query.interestAccrual.rate.multi(interestAccrualKeys).pipe(take(1))
+        const $rates = api.query.interestAccrual.rates().pipe(take(1))
         const $interestLastUpdated = api.query.interestAccrual.lastUpdated().pipe(take(1))
         const $currencyMeta = api.query.ormlAssetRegistry.metadata((poolValue.toHuman() as any).currency).pipe(take(1))
         return combineLatest([
           api.query.loans.loan.entries(poolId),
           of(activeLoanValues),
           api.query.loans.closedLoans.entries(poolId),
-          $interestAccrual,
+          $rates,
           $interestLastUpdated,
           $currencyMeta,
         ])
       }),
-      map(([loanValues, activeLoanValues, closedLoansValues, interestAccrual, interestLastUpdated, rawCurrency]) => {
+      map(([loanValues, activeLoanValues, closedLoansValues, rateValues, interestLastUpdated, rawCurrency]) => {
         const currency = rawCurrency.toHuman() as AssetCurrencyData
         const loans = (loanValues as any[]).map(([key, value]) => {
           const loan = value.toJSON() as unknown as LoanData
@@ -2025,9 +2032,11 @@ export function getPoolsModule(inst: Centrifuge) {
         })
 
         const activeLoanData = activeLoanValues.toJSON() as ActiveLoanData[]
+        const rates = rateValues.toJSON() as InterestAccrual[]
+
         const activeLoans = activeLoanData.reduce<Record<string, Omit<ActiveLoan, 'status' | 'asset' | 'closedAt'>>>(
-          (prev, activeLoan, index) => {
-            const interestData = interestAccrual[index].toJSON() as InterestAccrual
+          (prev, activeLoan) => {
+            const interestData = rates.find((rate) => rate.interestRatePerSec === activeLoan.interestRatePerSec)
             const mapped = {
               id: String(activeLoan.loanId),
               poolId,

@@ -1,5 +1,15 @@
 import { useBalances } from '@centrifuge/centrifuge-react'
-import { Button, InteractiveCard, Shelf, Stack, Text, TextWithPlaceholder, Thumbnail } from '@centrifuge/fabric'
+import {
+  AnchorButton,
+  Button,
+  IconExternalLink,
+  InteractiveCard,
+  Shelf,
+  Stack,
+  Text,
+  TextWithPlaceholder,
+  Thumbnail,
+} from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
 import { InvestRedeem } from '../../../components/InvestRedeem'
@@ -280,7 +290,21 @@ export const PoolDetailOverview: React.FC<{
           ))}
         </Stack>
       </PageSection>
-      <PageSection title="Issuer">
+      <PageSection
+        title="Issuer"
+        headerRight={
+          <AnchorButton
+            variant="secondary"
+            icon={IconExternalLink}
+            href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/account/${address}`}
+            target="_blank"
+            small
+            disabled={!address}
+          >
+            View pool account
+          </AnchorButton>
+        }
+      >
         <IssuerSection metadata={metadata} />
       </PageSection>
       {!isTinlakePool && (
