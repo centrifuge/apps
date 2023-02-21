@@ -48,21 +48,18 @@ runs:
         echo "Set app name based on env strategy"
         if ${{ inputs.deploy_to == 'production' }}; then
           # PRODUCTION
-          echo "::notice title=Deploying to prod::Replacing production prod commit ${{ github.sha }}"
           echo "function_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
           echo "front_url=app.centrifuge.io" >> $GITHUB_OUTPUT
           echo "env_name=production" >> $GITHUB_OUTPUT        
         elif ${{ inputs.deploy_to == 'altair' }}; then
           # ALTAIR
-          echo "::notice title=Deploying to prod::Replacing Altair prod commit ${{ github.sha }}"
           echo "function_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
-          echo "front_url=app-altair.centrifuge.io" >> $GITHUB_OUTPUT
+          echo "front_url=app.altair.centrifuge.io" >> $GITHUB_OUTPUT
           echo "env_name=altair" >> $GITHUB_OUTPUT
         elif ${{ inputs.deploy_to == 'staging' }}; then
           # STAGING
-          echo "::notice title=Deploying to prod::Replacing pre-prod commit ${{ github.sha }}"
           echo "function_name=${{ inputs.app_base_name }}-${{ inputs.deploy_to }}" >> $GITHUB_OUTPUT
-          echo "front_url=app-staging.centrifuge.io" >> $GITHUB_OUTPUT
+          echo "front_url=app.staging.centrifuge.io" >> $GITHUB_OUTPUT
           echo "env_name=production" >> $GITHUB_OUTPUT
           # env_name is production because it needs to use the prod variable files inside each app
         elif  ${{ github.ref == 'refs/tags/rc*' }}; then

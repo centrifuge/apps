@@ -18,7 +18,7 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
   }
 
   React.useEffect(() => {
-    if (onboardingUser.onboardingStatus[pool.id]?.[pool.trancheId]?.status === 'pending') {
+    if (onboardingUser?.onboardingStatus[pool.id]?.[pool.trancheId]?.status === 'pending') {
       window.addEventListener('focus', onFocus)
     } else {
       window.removeEventListener('focus', onFocus)
@@ -28,7 +28,7 @@ export const ApprovalStatus = ({ signedAgreementUrl }: Props) => {
       window.removeEventListener('focus', onFocus)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingUser.onboardingStatus])
+  }, [onboardingUser?.onboardingStatus])
 
   if (onboardingStatus === 'approved') {
     return (

@@ -6,8 +6,9 @@
     "build": "yarn build:centjs && esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --minify",
     "build:centjs": "cd ../centrifuge-js && yarn build && cd ../onboarding-api",
     "start:types": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --watch",
-    "start:functions": "npx functions-framework --target=onboarding --signature-type=http",
-    "develop": "run-p -l start:functions start:types",
+    "start:functions": "nodemon --watch ./dist/ --exec npx functions-framework --target=onboarding --signature-type=http",
+    "start:centjs": "cd ../centrifuge-js && yarn start && cd ../onboarding-api",
+    "develop": "run-p -l start:functions start:types start:centjs",
     "deploy:dev": "gcloud functions deploy onboarding-api-dev --region=europe-central2 --source=dist --project=peak-vista-185616 --trigger-http --runtime=nodejs16 --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com --allow-unauthenticated --entry-point=onboarding --env-vars-file .env.yaml"
   },
   "engines": {

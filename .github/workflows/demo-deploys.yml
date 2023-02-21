@@ -3,22 +3,22 @@ on:
   workflow_dispatch:
   
 jobs:
-  deploy_app:
-    uses: centrifuge/apps/.github/workflows/centrifuge-app.yml@gh-actions-refactor
+  app-demo:
+    uses: ./.github/workflows/centrifuge-app.yml
     secrets: inherit
     with:
       deploy_env: demo
 
 
-  deploy_pinning:
-    uses:  centrifuge/apps/.github/workflows/pinning-api.yml@gh-actions-refactor
+  pinning-demo:
+    uses:  ./.github/workflows/pinning-api.yml
     secrets: inherit
     with:
       deploy_env: demo
 
 
-  deploy_onboarding:
-    uses: centrifuge/apps/.github/workflows/onboarding-api.yml@gh-actions-refactor
+  onboarding-demo:
+    uses: ./.github/workflows/onboarding-api.yml
     secrets: inherit
     with:
       deploy_env: demo

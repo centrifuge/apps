@@ -1,3 +1,4 @@
+export * from './components/Accordion'
 export * from './components/Banner'
 export * from './components/Box'
 export * from './components/Button'

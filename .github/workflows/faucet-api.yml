@@ -30,7 +30,7 @@ concurrency:
   cancel-in-progress: true  
 
 jobs:
-  build:
+  build-faucet:
     runs-on: ubuntu-latest 
     defaults:
       run:
@@ -57,11 +57,10 @@ jobs:
       env_name: ${{ steps.prepare.outputs.env_name }}
       function_vars: ${{ steps.set_env.outputs.function_vars }}
 
-  deployment:
-    needs: build 
+  deploy-faucet:
+    needs: build-faucet
     runs-on: ubuntu-latest
-    environment: ${{ needs.build.outputs.gh_env }}
-    # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
+    environment: ${{ needs.build-faucet.outputs.gh_env }}
     permissions:
       contents: 'read'
       id-token: 'write'  
@@ -80,3 +79,5 @@ jobs:
           GSA: ${{ secrets.GSA }}
           target: ${{ env.function_handler }}
           gcloud_region: ${{ vars.GCLOUD_REGION }}
+          # service_account:
+          deploy_env: ${{ env.deploy_to }}

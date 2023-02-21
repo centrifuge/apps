@@ -4,6 +4,7 @@ import { OnboardingUser, validateAndWriteToFirestore } from '../../database'
 import { sendApproveInvestorMessage } from '../../emails/sendApproveInvestorMessage'
 import { UpdateInvestorStatusPayload } from '../../emails/sendDocuments'
 import { sendRejectInvestorMessage } from '../../emails/sendRejectInvestorMessage'
+import { addInvestorToMemberList } from '../../utils/centrifuge'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { Subset } from '../../utils/types'
@@ -28,6 +29,36 @@ export const updateInvestorStatusController = async (
     const { poolId, trancheId, walletAddress } = payload
     const user = await fetchUser(walletAddress)
 
+    const incompleteSteps = Object.entries(user.steps).filter(([name, step]) => {
+      if (name === 'signAgreements') {
+        return !step?.[poolId]?.[trancheId]?.signedDocument
+      }
+      if (
+        name === 'verifyAccreditation' &&
+        user.investorType === 'individual' &&
+        !user.countryOfCitizenship?.startsWith('us')
+      ) {
+        return true
+      }
+
+      if (
+        name === 'verifyAccreditation' &&
+        user.investorType === 'entity' &&
+        !user.jurisdictionCode?.startsWith('us')
+      ) {
+        return true
+      }
+      return !step?.completed
+    })
+    if (incompleteSteps.length > 0) {
+      if (incompleteSteps) {
+        throw new HttpsError(
+          400,
+          `Incomplete onboarding steps for investor: ${incompleteSteps.map((step) => step[0]).join(', ')}`
+        )
+      }
+    }
+
     if (user.onboardingStatus[poolId][trancheId].status !== 'pending') {
       throw new HttpsError(400, 'Investor status may have already been updated')
     }
@@ -46,11 +77,14 @@ export const updateInvestorStatusController = async (
     await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['onboardingStatus'])
 
     if (user?.email && status === 'approved') {
+      await addInvestorToMemberList(walletAddress, poolId, trancheId)
       await sendApproveInvestorMessage(user.email, poolId, trancheId)
+      return res.status(204).send()
     } else if (user?.email && status === 'rejected') {
       await sendRejectInvestorMessage(user.email, poolId)
+      throw new HttpsError(400, 'Investor has been rejected')
     }
-    return res.status(204).send()
+    throw new HttpsError(400, 'Investor status may have already been updated')
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

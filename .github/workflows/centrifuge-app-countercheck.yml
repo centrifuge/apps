@@ -8,7 +8,7 @@ on:
       - 'centrifuge-react/**'
       - '.github/workflows/centrifuge-app.yml'
 jobs:
-  build:
+  build-app:
     runs-on: ubuntu-latest
     steps:
       - run: |

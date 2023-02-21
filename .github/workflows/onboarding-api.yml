@@ -18,7 +18,7 @@ on:
         type: string
         required: true
 env:
-# If you change these change also in prod-deploy.yml
+ # This needs to match the env: settings in prod-deploy.yml
   app_name: onboarding-api
   function_handler: onboarding
 # Fancy concurrency group string to allow for multi-staging deployments  
@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: true    
  
 jobs:
-  build:
+  build-onboarding-api:
     if: ${{ inputs.deploy_env != 'production' }}
     runs-on: ubuntu-latest
     defaults:
@@ -65,11 +65,10 @@ jobs:
       function_vars: ${{ steps.set_env.outputs.function_vars }}
 
 
-  deployment:
-      needs: build
+  deploy-onboarding-api:
+      needs: build-onboarding-api
       runs-on: ubuntu-latest
-      environment: ${{ needs.build.outputs.gh_env }}
-      # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
+      environment: ${{ needs.build-onboarding-api.outputs.gh_env }}
       permissions:
         contents: 'read'
         id-token: 'write'
