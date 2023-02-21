@@ -21,7 +21,7 @@ export const setVerifiedIdentityController = async (
     } = { ...req }
     const user = await fetchUser(walletAddress)
 
-    if (user.steps.verifyIdentity.completed) {
+    if (user.generalSteps.verifyIdentity.completed) {
       throw new HttpsError(400, 'Unable to process request')
     }
 
@@ -31,8 +31,8 @@ export const setVerifiedIdentityController = async (
     }
 
     const updatedUser: Subset<OnboardingUser> = {
-      steps: {
-        ...user.steps,
+      generalSteps: {
+        ...user.generalSteps,
         verifyIdentity: {
           completed: true,
           timeStamp: new Date().toISOString(),

@@ -48,8 +48,8 @@ export const uploadTaxInfoController = async (
     )
 
     const updatedUser: Subset<OnboardingUser> = {
-      steps: {
-        ...user.steps,
+      generalSteps: {
+        ...user.generalSteps,
         verifyTaxInfo: {
           completed: true,
           timeStamp: new Date().toISOString(),

@@ -1,8 +1,9 @@
 import { Request, Response } from 'express'
 import { array, date, InferType, object, string } from 'yup'
-import { validateAndWriteToFirestore } from '../../database'
+import { EntityUser, validateAndWriteToFirestore } from '../../database'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
+import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 
 const confirmOwnersInput = object({
@@ -28,21 +29,21 @@ export const confirmOwnersController = async (
       throw new HttpsError(404, 'Business not found')
     }
 
-    if (!user.steps.verifyBusiness.completed) {
+    if (!user.generalSteps.verifyBusiness.completed) {
       throw new HttpsError(400, 'Business must be verified before confirming ownership')
     }
 
-    if (user?.steps.confirmOwners.completed) {
+    if (user?.generalSteps.confirmOwners.completed) {
       throw new HttpsError(400, 'Owners already confirmed')
     }
 
-    if (!user.steps.verifyEmail.completed) {
+    if (!user.generalSteps.verifyEmail.completed) {
       throw new HttpsError(400, 'Email must be verified before completing business verification')
     }
 
-    const verifyEntity = {
+    const verifyEntity: Subset<EntityUser> = {
       ultimateBeneficialOwners: req.body.ultimateBeneficialOwners,
-      steps: { ...user.steps, confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
+      generalSteps: { ...user.generalSteps, confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
     await validateAndWriteToFirestore(walletAddress, verifyEntity, 'entity', ['steps', 'ultimateBeneficialOwners'])

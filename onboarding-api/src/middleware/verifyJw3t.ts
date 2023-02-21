@@ -24,7 +24,8 @@ export async function verifyJw3t(req: Request, res: Response, next: NextFunction
     }
     req.walletAddress = address
     next()
-  } catch {
+  } catch (error) {
+    console.log('Invalid jw3t token', JSON.stringify(error))
     throw new HttpsError(401, 'Invalid token')
   }
 }

@@ -1,5 +1,5 @@
-const express = require('express')
 import * as dotenv from 'dotenv'
+import * as express from 'express'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
 import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'

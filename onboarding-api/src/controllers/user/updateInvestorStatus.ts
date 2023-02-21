@@ -29,7 +29,7 @@ export const updateInvestorStatusController = async (
     const { poolId, trancheId, walletAddress } = payload
     const user = await fetchUser(walletAddress)
 
-    const incompleteSteps = Object.entries(user.steps).filter(([name, step]) => {
+    const incompleteSteps = Object.entries(user.generalSteps).filter(([name, step]) => {
       if (name === 'signAgreements') {
         return !step?.[poolId]?.[trancheId]?.signedDocument
       }
@@ -59,22 +59,26 @@ export const updateInvestorStatusController = async (
       }
     }
 
-    if (user.onboardingStatus[poolId][trancheId].status !== 'pending') {
+    if (user.poolSteps.status[poolId][trancheId].status !== 'pending') {
       throw new HttpsError(400, 'Investor status may have already been updated')
     }
 
     const updatedUser: Subset<OnboardingUser> = {
-      onboardingStatus: {
+      poolSteps: {
+        ...user.poolSteps,
         [poolId]: {
           [trancheId]: {
-            status,
-            timeStamp: new Date().toISOString(),
+            ...user.poolSteps[poolId][trancheId].signAgreements,
+            status: {
+              status,
+              timeStamp: new Date().toISOString(),
+            },
           },
         },
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['onboardingStatus'])
+    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['poolSteps'])
 
     if (user?.email && status === 'approved') {
       await addInvestorToMemberList(walletAddress, poolId, trancheId)
