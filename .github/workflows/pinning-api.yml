@@ -1,0 +1,92 @@
+name: Pinning API
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "rc*"
+    paths:
+      - 'pinning-api/**'
+      - '.github/workflows/pinning-api.yml'
+  pull_request:
+    paths:
+      - 'pinning-api/**'
+      - '.github/workflows/pinning-api.yml'
+  workflow_call:
+    inputs:
+      deploy_env:
+        type: string
+        required: true
+env:
+ # This needs to match the env: settings in prod-deploy.yml
+  app_name: pinning-api
+  function_handler: pinningApi
+  artifact_name: "pinning-api${{ inputs.deploy_env && format('-{0}', inputs.deploy_env) }}"
+concurrency:
+ # Fancy concurrency group string to allow for multi-staging deployments  
+  group: 'pinning-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true    
+jobs:
+  build-pinning-api:
+    if: ${{ inputs.deploy_env != 'production' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pinning-api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+
+      - name: prepare env logic
+        id: prepare
+        uses: ./.github/actions/prepare-deploy
+        with:
+          app_base_name: ${{ env.app_name }}
+          deploy_to: ${{ inputs.deploy_env }}
+
+      - name: build function
+        uses: ./.github/actions/build-function
+        with:
+          app_name: ${{ env.app_name }}
+          artifact_name: ${{ env.artifact_name }}
+
+      - name: Archive staging artifacts
+        id: archive_staging
+        if: inputs.deploy_env == 'staging' && github.event_name == 'release'
+        uses: ./.github/actions/archive-release
+        with:
+          name: ${{ env.app_name }}
+          path: ./${{ env.app_name }}/dist
+
+    outputs:
+      function_name: ${{ steps.prepare.outputs.function_name }}
+      gh_env: ${{ steps.prepare.outputs.gh_env }}
+      function_secrets: ${{ steps.set_secrets.outputs.function_secrets }}
+      function_vars: ${{ steps.set_env.outputs.function_vars }}
+
+  deploy-pinning-api:
+    needs: build-pinning-api
+    runs-on: ubuntu-latest
+    environment: ${{ needs.build-pinning-api.outputs.gh_env }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        with:
+          path: apps 
+
+      - name: Deploy Gfunction
+        id: functionsdeploy
+        uses: ./apps/.github/actions/deploy-gfunction
+        with:
+          app_name: ${{ env.app_name }}
+          artifact_name: ${{ env.artifact_name }}
+          GWIP: ${{ secrets.GWIP }}
+          GSA: ${{ secrets.GSA }}
+          target: ${{ env.function_handler }}
+          gcloud_region: ${{ vars.GCLOUD_REGION }}
+          service_account: "${{ vars.PINNING_API_FUNCT_SA }}"
+          deploy_env: ${{ inputs.deploy_env }}

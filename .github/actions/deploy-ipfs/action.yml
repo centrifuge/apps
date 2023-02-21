@@ -1,0 +1,41 @@
+# Draft for future IPFS deployments
+# Only for prod
+name: Depoy cent-app to IPFS
+description: Deploy to Interplanetary File System
+
+inputs:
+  CF_API_TOKEN:
+    description: CloudFlare DNS API key
+    required: true
+  PINATA_API_KEY:
+    description: Pinata credentials
+    required: true
+  PINATA_SECRET_API_KEY:
+    description: Pinata credentials
+    required: true
+  PATH_WEBPACK:
+    description: Name of artifact from GH upload
+    required: true  
+runs:
+  using: composite
+  steps:
+      - name: Setup Node
+        id: setup_node
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c #@v3.6.0
+        with:
+          node-version: '18'
+          # cache: yarn
+
+      - name: deploy to IPFS
+        id: deploy_ipfs
+        shell: sh
+        env:
+         # See https://github.com/ipfs-shipyard/ipfs-deploy/blob/master/md/usage.md
+          IPFS_DEPLOY_PINATA__API_KEY: ${{ inputs.PINATA_API_KEY }}
+          IPFS_DEPLOY_PINATA__SECRET_API_KEY: ${{ inputs.PINATA_SECRET_API_KEY }}
+          IPFS_DEPLOY_CLOUDFLARE__API_TOKEN: ${{ inputs.CF_API_TOKEN }}
+          IPFS_DEPLOY_CLOUDFLARE__ZONE: centrifuge.io
+          IPFS_DEPLOY_CLOUDFLARE__RECORD: _dnslink.apps.ipfs.centrifuge.io
+        run: |
+          npm install -g ipfs-deploy
+          ipd -p pinata -d clouflare ${{ inputs.PATH_WEBPACK }}

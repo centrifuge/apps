@@ -1,0 +1,83 @@
+name: Faucet API
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'faucet-api/**'
+      - '.github/workflows/faucet-api.yml'
+  pull_request:
+    paths:
+      - 'faucet-api/**'
+      - '.github/workflows/faucet-api.yml'
+  workflow_dispatch:
+    # inputs:
+    #   deploy_env:
+    #     type: choice
+    #     required: true
+    #     default: demo
+    #     options:
+    #       - demo
+    #       - others
+env:
+  app_name: faucet-api
+  # For now deploy only on demo when triggered manually:
+  deploy_to: ${{ github.event_name == 'workflow_dispatch' && 'demo' || '' }}
+  # deploy_to: ${{ inputs_deploy_env }}
+  function_handler: faucetDev
+concurrency:
+  group: 'faucet-api@${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true  
+
+jobs:
+  build-faucet:
+    runs-on: ubuntu-latest 
+    defaults:
+      run:
+        working-directory: faucet-api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+
+      - name: prepare env logic
+        id: prepare
+        uses: ./.github/actions/prepare-deploy
+        with:
+          app_base_name: ${{ env.app_name }}
+          deploy_to: ${{ env.deploy_to }}
+
+      - name: build function
+        uses: ./.github/actions/build-function
+        with:
+          app_name: ${{ env.app_name }}
+
+    outputs:
+      app_name: ${{ steps.prepare.outputs.app_name }}
+      gh_env: ${{ steps.prepare.outputs.gh_env }}
+      env_name: ${{ steps.prepare.outputs.env_name }}
+      function_vars: ${{ steps.set_env.outputs.function_vars }}
+
+  deploy-faucet:
+    needs: build-faucet
+    runs-on: ubuntu-latest
+    environment: ${{ needs.build-faucet.outputs.gh_env }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'  
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        with:
+          path: apps  
+         
+      - name: Deploy Gfunction
+        id: functionsdeploy
+        uses: ./apps/.github/actions/deploy-gfunction
+        with:
+          app_name: ${{ env.app_name }}
+          GWIP: ${{ secrets.GWIP }}
+          GSA: ${{ secrets.GSA }}
+          target: ${{ env.function_handler }}
+          gcloud_region: ${{ vars.GCLOUD_REGION }}
+          # service_account:
+          deploy_env: ${{ env.deploy_to }}
