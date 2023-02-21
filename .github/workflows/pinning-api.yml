@@ -18,7 +18,6 @@ on:
         type: string
         required: true
 env:
-# If you change these change also in prod-deploy.yml
   app_name: pinning-api
   function_handler: pinningApi
 # Fancy concurrency group string to allow for multi-staging deployments  
@@ -26,7 +25,7 @@ concurrency:
   group: 'pinning-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true    
 jobs:
-  build:
+  build-pinning-api:
     if: ${{ inputs.deploy_env != 'production' }}
     runs-on: ubuntu-latest
     defaults:
@@ -63,11 +62,10 @@ jobs:
       function_secrets: ${{ steps.set_secrets.outputs.function_secrets }}
       function_vars: ${{ steps.set_env.outputs.function_vars }}
 
-  deployment:
-    needs: build
+  deploy-pinning-api:
+    needs: build-pinning-api
     runs-on: ubuntu-latest
-    environment: ${{ needs.build.outputs.gh_env }}
-    # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
+    environment: ${{ needs.build-pinning-api.outputs.gh_env }}
     permissions:
       contents: 'read'
       id-token: 'write'

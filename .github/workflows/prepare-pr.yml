@@ -12,21 +12,21 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy_app:
+  app-pr-deploy:
     if: | 
       github.event.action == 'open' || 
       github.event.action == 'reopen'
     uses: ./.github/workflows/centrifuge-app.yml
     secrets: inherit
 
-  deploy_pinning:
+  pinning-pr-deploy:
     if: | 
       github.event.action == 'open' || 
       github.event.action == 'reopen'
     uses: ./.github/workflows/pinning-api.yml
     secrets: inherit
 
-  deploy_onboarding:
+  onboarding-pr-deploy:
     if: | 
       github.event.action == 'open' || 
       github.event.action == 'reopen'

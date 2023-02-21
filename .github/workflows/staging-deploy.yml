@@ -3,8 +3,14 @@ on:
   release:
     types:
       - prereleased
+concurrency:
+ # Cancel any staging or prod deployment on-going
+ # in favor of this new pre-release
+  group: production-deployment
+  cancel-in-progress: true 
+  
 jobs:
-  deploy_app:
+  app-staging:
     strategy:
       fail-fast: false
       matrix:
@@ -15,7 +21,7 @@ jobs:
       deploy_env: ${{ matrix.deploy_to }}
 
 
-  deploy_pinning:
+  pinning-staging:
     strategy:
       fail-fast: false
       matrix:
@@ -26,7 +32,7 @@ jobs:
       deploy_env: ${{ matrix.deploy_to }}
 
 
-  deploy_onboarding:
+  onboarding-staging:
     strategy:
       fail-fast: false
       matrix:
@@ -35,15 +41,22 @@ jobs:
     secrets: inherit
     with:
       deploy_env: ${{ matrix.deploy_to }}
+
+  staging-slack-notify:
+    needs: app-staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify staging deploy
+        if: inputs.deploy_env == 'altair'
+        uses: rtCamp/action-slack-notify@12e36fc18b0689399306c2e0b3e0f2978b7f1ee7
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: |
+            app-altair.centrifuge.io and app-staging.centrifuge.io updated by GH actions job:
+            $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+            Check out the new pre-release -> https://github.com/centrifuge/apps/releases/
+          SLACK_USERNAME: "Centrifuge GHA Bot"
+          SLACK_ICON: "https://centrifuge.io/favicon.ico"
+          SLACK_TITLE: "Centrifuge app has been deployed in staging and Altair."
+          SLACK_FOOTER: "Automatic message from centrifuge/apps repository Actions"  
     
-    # - name: Notify prod deploy
-    #   if: inputs.deploy_env == 'altair'
-    #   uses: rtCamp/action-slack-notify@12e36fc18b0689399306c2e0b3e0f2978b7f1ee7
-    #   env:
-    #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-    #     SLACK_MESSAGE: "Main site deployed, go to ${{ needs.deploy.outputs.bucket_url  }} to check out what's new!"
-    #     SLACK_USERNAME: "Centrifuge GHA Bot"
-    #     SLACK_ICON: "https://centrifuge.io/favicon.ico"
-    #     SLACK_TITLE: "Deployment using production credentials finished"
-    #     SLACK_FOOTER: "Automatic message from centrifuge/website repository Actions"  
-  

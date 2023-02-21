@@ -4,9 +4,12 @@ on:
     types:
       - released     
   workflow_dispatch:
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false # Wait for staging-deploy to finish
 
 jobs:
-  sync_staging_prod:
+  sync-staging-prod:
     permissions:
       contents: 'read'
       id-token: 'write'  
@@ -38,7 +41,7 @@ jobs:
       - name: Sync webpack from staging
         run: gsutil -m rsync -d -r gs://app-staging.centrifuge.io gs://${{ steps.prepare.outputs.front_url }}
   
-  retrieve_function_assets:
+  retrieve-prod-assets:
     runs-on: ubuntu-latest
     steps: 
       - name: Download artifact
@@ -46,8 +49,8 @@ jobs:
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: staging-deploy.yml
-          # workflow_conclusion: ""
-          check_artifacts: true
+          workflow_conclusion: "" # This will fail if the staging deployment isn't finished yet
+          # check_artifacts: true # This will search for the last available artifact, useful for testing
 
       # Alternative: download from the release instead of 
       # workflow artifacts
@@ -86,11 +89,10 @@ jobs:
           path: ${{ github.workspace }}/pinning-api/
           if-no-files-found: error 
 
-  deploy_pinning:
-    needs: retrieve_function_assets
+  pinning-prod-deploy:
+    needs: retrieve-prod-assets
     runs-on: ubuntu-latest
-    environment: ${{ needs.build.outputs.gh_env }}
-    # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
+    environment: production
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -114,11 +116,10 @@ jobs:
           service_account: "${{ vars.PINNING_API_FUNCT_SA }}"
           deploy_env: production
 
-  deploy_onboarding:
-    needs: retrieve_function_assets
+  onboarding-prod-deploy:
+    needs: retrieve-prod-assets
     runs-on: ubuntu-latest
-    environment: ${{ needs.build.outputs.gh_env }}
-    # Note: environment = production requires additional approvals, it only happen on manual trigger to the main branch
+    environment: production
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -141,3 +142,20 @@ jobs:
           service_account: "${{ vars.ONBOARDING_FUNCT_SA }}"
           gcloud_region: ${{ vars.GCLOUD_REGION }}
           deploy_env: production
+
+  prod-slack-notify:
+    needs: [sync_staging_prod, onboarding-prod-deploy, pinning-prod-deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify staging deploy
+        if: inputs.deploy_env == 'altair'
+        uses: rtCamp/action-slack-notify@12e36fc18b0689399306c2e0b3e0f2978b7f1ee7
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: |
+            app-staging.centrifuge.io has been promoted to apps.centrifuge.io and is not LIVE!
+            Check out the new release -> https://github.com/centrifuge/apps/releases/
+          SLACK_USERNAME: "Centrifuge GHA Bot"
+          SLACK_ICON: "https://centrifuge.io/favicon.ico"
+          SLACK_TITLE: "Centrifuge app has been promoted to prod."
+          SLACK_FOOTER: "Automatic message from centrifuge/apps repository Actions"           

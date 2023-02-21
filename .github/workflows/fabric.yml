@@ -13,7 +13,7 @@ concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true 
 jobs:
-  build-n-test:
+  build-fabric:
     runs-on: ubuntu-latest
 
     defaults:
@@ -48,7 +48,7 @@ jobs:
 
   deploy-storybook: # to google storage
     # if: github.ref == 'refs/heads/main'
-    needs: build-n-test
+    needs: build-fabric
     permissions:
       contents: 'read'
       id-token: 'write'  
