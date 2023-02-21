@@ -60,27 +60,24 @@ jobs:
       #     regex: true
       #     # target: 'subdir/${{ matrix.artifact_name }}.zip'
       #     # token: ${{ secrets.GITHUB_TOKEN }}
-      
-      # - name: "debug: list workspace"
-      #   run: ls -la ./releases/
-
       # - name: Unzip release files
       #   run: |
       #     unzip pinning-api.zip -d pinning-api 1> /dev/null
       #     unzip onboarding-api.zip -d onboarding-api 1> /dev/null
 
-      - name: list artifact files
-        run: |
-          ls -la ./
-          ls -la pinning-api/
-          ls -la onboarding-api/
-          echo "Workspace PATH: ${{ github.workspace }}"
-          ls -la $GITHUB_WORKSPACE
+      # Debug artifacts:
+      # - name: list artifact files
+      #   run: |
+      #     ls -la ./
+      #     ls -la pinning-api/
+      #     ls -la onboarding-api/
+      #     echo "Workspace PATH: ${{ github.workspace }}"
+      #     ls -la $GITHUB_WORKSPACE
 
       - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
         with: 
           name: onboading-api
-          path: ${{ github.workspace }}/onboading-api/
+          path: ${{ github.workspace }}/onboarding-api/
           if-no-files-found: error 
           
       - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
