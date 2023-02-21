@@ -12,7 +12,7 @@ import {
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
-import { InvestRedeem } from '../../../components/InvestRedeem'
+import { InvestRedeem } from '../../../components/InvestRedeem/InvestRedeem'
 import { IssuerSection } from '../../../components/IssuerSection'
 import { LabelValueStack } from '../../../components/LabelValueStack'
 import { LoadBoundary } from '../../../components/LoadBoundary'
@@ -22,6 +22,7 @@ import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import RiskGroupList from '../../../components/RiskGroupList'
 import { Spinner } from '../../../components/Spinner'
 import { Tooltips } from '../../../components/Tooltips'
+import { ethConfig } from '../../../config'
 import { formatDate, getAge } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
@@ -134,7 +135,14 @@ export const PoolDetailSideBar: React.FC<{
   const { pid: poolId } = useParams<{ pid: string }>()
 
   // TODO: Tinlake invest box
-  if (poolId.startsWith('0x')) return null
+  if (poolId.startsWith('0x'))
+    return (
+      <InvestRedeem
+        poolId={poolId}
+        trancheId={selectedToken ?? undefined}
+        networks={[ethConfig.network === 'goerli' ? 5 : 1]}
+      />
+    )
 
   return <CentrifugeInvestBox selectedToken={selectedToken} setSelectedToken={setSelectedToken} />
 }
@@ -272,7 +280,7 @@ export const PoolDetailOverview: React.FC<{
                         variant={i === 0 ? 'primary' : 'secondary'}
                         onClick={() => setSelectedToken(token.id)}
                         style={{ marginLeft: 'auto' }}
-                        disabled={!permissions?.pools[poolId]?.tranches[token.id]}
+                        disabled={!isTinlakePool && !permissions?.pools[poolId]?.tranches[token.id]}
                       >
                         Invest
                       </Button>

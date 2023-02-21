@@ -8,6 +8,7 @@ import { lastValueFrom } from 'rxjs'
 import { useDebugFlags } from '../../components/DebugFlags'
 import { ethConfig } from '../../config'
 import { Dec } from '../Decimal'
+import { currencies } from './currencies'
 import { Call, multicall } from './multicall'
 import { Fixed27Base } from './ratios'
 import {
@@ -110,6 +111,7 @@ export function useTinlakePools(suspense = false) {
   const ipfsPools = useIpfsPools(suspense)
   return useQuery(['tinlakePools', !!ipfsPools], () => getPools(ipfsPools!), {
     enabled: !!ipfsPools && !!showTinlakePools,
+    staleTime: Infinity,
     suspense,
   })
 }
@@ -128,6 +130,8 @@ export type TinlakePool = Omit<Pool, 'metadata' | 'loanCollectionId' | 'tranches
     COLLATERAL_NFT: string
     SENIOR_TOKEN: string
     JUNIOR_TOKEN: string
+    JUNIOR_OPERATOR: string
+    SENIOR_OPERATOR: string
     CLERK?: string | undefined
     ASSESSOR: string
     RESERVE: string
@@ -188,11 +192,11 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         call: ['totalRedeem()(uint256)'],
         returns: [[`${poolId}.pendingJuniorRedemptions`, toCurrencyBalance]],
       },
-      {
-        target: pool.addresses.FEED,
-        call: ['currentNAV()(uint256)'],
-        returns: [[`${poolId}.netAssetValue`, toCurrencyBalance]],
-      },
+      // {
+      //   target: pool.addresses.FEED,
+      //   call: ['currentNAV()(uint256)'],
+      //   returns: [[`${poolId}.netAssetValue`, toCurrencyBalance]],
+      // },
       {
         target: pool.addresses.ASSESSOR,
         call: ['maxSeniorRatio()(uint256)'],
@@ -333,10 +337,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
     }
   })
 
-  const [multicallData] = await Promise.all([
-    // Apollo.getPools(pools),
-    multicall<{ [key: string]: State }>(calls),
-  ])
+  const multicallData = await multicall<{ [key: string]: State }>(calls)
 
   const capacityPerPool: { [key: string]: BN } = {}
   const capacityGivenMaxReservePerPool: { [key: string]: BN } = {}
@@ -368,21 +369,6 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
         .sub(newUsedCreditline)
     )
 
-    // console.log(poolId)
-    // console.log(
-    //   `newReserve: ${parseFloat(state.reserve.toString()) / 10 ** 24}M + ${
-    //     parseFloat(state.pendingSeniorInvestments.toString()) / 10 ** 24
-    //   }M + ${parseFloat(state.pendingJuniorInvestments.toString()) / 10 ** 24}M - ${
-    //     parseFloat(state.pendingSeniorRedemptions.toString()) / 10 ** 24
-    //   }M - ${parseFloat(state.pendingJuniorRedemptions.toString()) / 10 ** 24}M`
-    // )
-
-    // console.log(
-    //   ` - capacityGivenMaxReserve: ${parseFloat(state.maxReserve.toString()) / 10 ** 24}M - ${
-    //     parseFloat(newReserve.toString()) / 10 ** 24
-    //   }M- ${parseFloat((newUnusedCreditline || new BN(0)).toString()) / 10 ** 24}M`
-    // )
-
     const capacityGivenMaxReserve = BN.max(
       new BN(0),
       state.maxReserve.sub(newReserve).sub(newUnusedCreditline || new BN(0))
@@ -398,56 +384,24 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
       ? state.seniorBalance.sub((state.usedCreditline || new BN(0)).sub(newUsedCreditline))
       : state.seniorBalance.add(newUsedCreditline.sub(state.usedCreditline || new BN(0)))
 
-    // console.log(` - oldSeniorDebt: ${parseFloat(state.seniorDebt.toString()) / 10 ** 24}M `)
-    // console.log(` - newSeniorDebt: ${parseFloat(newSeniorDebt.toString()) / 10 ** 24}M `)
-    // console.log(` - oldSeniorBalance: ${parseFloat(state.seniorBalance.toString()) / 10 ** 24}M `)
-    // console.log(` - newSeniorBalance: ${parseFloat(newSeniorBalance.toString()) / 10 ** 24}M `)
-
     const newSeniorAsset = newSeniorDebt
       .add(newSeniorBalance)
       .add(state.pendingSeniorInvestments)
       .sub(state.pendingSeniorRedemptions)
 
-    const newJuniorAsset = state.netAssetValue.add(newReserve).sub(newSeniorAsset)
+    const newJuniorAsset = (state.netAssetValue ?? new BN(0)).add(newReserve).sub(newSeniorAsset)
     const maxPoolSize = newJuniorAsset
       .mul(Fixed27Base.mul(new BN(10).pow(new BN(6))).div(Fixed27Base.sub(state.maxSeniorRatio)))
       .div(new BN(10).pow(new BN(6)))
-
-    // console.log(` - newJuniorAsset: ${parseFloat(newJuniorAsset.toString()) / 10 ** 24}M `)
-    // console.log(
-    //   ` - mul: ${Fixed27Base.mul(new BN(10).pow(new BN(6)))
-    //     .div(Fixed27Base.sub(state.maxSeniorRatio))
-    //     .toString()}`
-    // )
-    // console.log(` - maxPoolSize: ${parseFloat(maxPoolSize.toString()) / 10 ** 24}M `)
 
     const maxSeniorAsset = maxPoolSize.sub(newJuniorAsset)
 
     const capacityGivenMaxDropRatio = BN.max(new BN(0), maxSeniorAsset.sub(newSeniorAsset))
 
-    // console.log(
-    //   ` - capacityGivenMaxDropRatioPerPool: ${parseFloat(state.maxSeniorRatio.toString()) / 10 ** 27}% * (${
-    //     parseFloat(state.netAssetValue.toString()) / 10 ** 24
-    //   }M +  ${parseFloat(newReserve.toString()) / 10 ** 24}M) -  ${
-    //     parseFloat(newSeniorAsset.toString()) / 10 ** 24
-    //   }M`
-    // )
-    // console.log('\n\n')
-    // console.log('\n\n')
-
     capacityPerPool[poolId] = BN.min(capacityGivenMaxReserve, capacityGivenMaxDropRatio)
     capacityGivenMaxReservePerPool[poolId] = capacityGivenMaxReserve
     capacityGivenMaxDropRatioPerPool[poolId] = capacityGivenMaxDropRatio
   })
-
-  const currency = {
-    decimals: 18,
-    name: 'Dai',
-    symbol: 'DAI',
-    key: 'Dai',
-    isPoolCurrency: false,
-    isPermissioned: false,
-  }
 
   const combined = pools.active.map((p) => {
     const id = p.addresses.ROOT_CONTRACT
@@ -508,7 +462,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
     }
 
     function getEpochStatus(): 'challengePeriod' | 'submissionPeriod' | 'ongoing' | 'executionPeriod' {
-      if (new Date(data.epoch.challengePeriodEnd).getTime() === 0) {
+      if (new Date(data.epoch.challengePeriodEnd).getTime() !== 0) {
         return 'challengePeriod'
       }
       if (data.submissionPeriod) {
@@ -527,20 +481,20 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
       capacity,
       capacityGivenMaxReserve,
       capacityGivenMaxDropRatio: new CurrencyBalance(capacityGivenMaxDropRatioPerPool[id], 18),
-      value: new CurrencyBalance(data.reserve.add(data.netAssetValue), 18),
+      value: new CurrencyBalance(data.reserve.add(data.netAssetValue ?? new BN(0)), 18),
       reserve: {
         max: data.maxReserve,
         available: data.reserve,
         total: data.reserve,
       },
       nav: {
-        latest: data.netAssetValue,
+        latest: data.netAssetValue ?? new CurrencyBalance(0, 18),
         lastUpdated: new Date().toISOString(),
       },
       createdAt: null,
       isInitialised: true,
       // loanCollectionId: string | null;
-      currency,
+      currency: currencies.DAI,
       tranches: [
         {
           index: 0,
@@ -565,7 +519,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
             key: `tinlake-${id}-junior`,
           },
           poolMetadata: metadata,
-          poolCurrency: currency,
+          poolCurrency: currencies.DAI,
         },
         {
           index: 1,
@@ -590,7 +544,7 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
             key: `tinlake-${id}-senior`,
           },
           poolMetadata: metadata,
-          poolCurrency: currency,
+          poolCurrency: currencies.DAI,
         },
       ],
       epoch: {
@@ -610,58 +564,6 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
           }
         : null,
     }
-    /*
-interface PoolMetadataDetails {
-  name: string
-  shortName?: string
-  slug: string
-  description?: string
-  media?: PoolMedia
-  website?: string
-  asset: string
-  securitize?: SecuritizeData
-  attributes?: { [key: string]: string | { [key: string]: string } }
-  assetMaturity?: string
-  currencySymbol?: string
-  isUpcoming?: boolean
-  isArchived?: boolean
-  isLaunching?: boolean
-  maker?: { ilk: string }
-  issuerEmail?: string
-  juniorInvestors?: JuniorInvestor[]
-}
-type P = {
-  version?: number;
-  pool: {
-    name: string;
-    icon: {
-        uri: string;
-        mime: string;
-    } | null;
-    asset: {
-        class: string;
-    };
-    issuer: {
-        name: string;
-        description: string;
-        email: string;
-        logo?: {
-            uri: string;
-            mime: string;
-        } | null;
-    };
-    links: {
-        executiveSummary: {
-            uri: string;
-            mime: string;
-        } | null;
-        forum: string;
-        website: string;
-    };
-    status: PoolStatus;
-    listed: boolean;
-  };
-*/
   })
 
   return { pools: combined }

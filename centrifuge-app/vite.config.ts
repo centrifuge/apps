@@ -13,6 +13,7 @@ export default defineConfig({
     proxy: {
       '/.netlify': 'http://localhost:8888',
     },
+    port: 3000,
   },
   envPrefix: 'REACT_APP_',
   build: {
