@@ -24,15 +24,6 @@ const mockMetadata = {
   forum: '',
   email: 'user@k-f.co',
   details: [],
-  tranches: [
-    {
-      tokenName: 'J',
-      symbolName: 'JJJ',
-      interestRate: '',
-      minRiskBuffer: '',
-      minInvestment: 1,
-    },
-  ],
   riskGroups: [
     {
       groupName: 'A',
@@ -80,7 +71,6 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
                 // the first argument passed to the `notePreimage` extrinsic is the actual encoded proposal in bytes
                 .mul(new BN((submittable as any).method.args[0].length))
                 .add(preimageBaseDeposit)
-
               return new CurrencyBalance(preimageFee, chainDecimals)
             } else if (config.poolCreationType === 'propose') {
               return new CurrencyBalance(hexToBN(minimumDeposit.toHex()), chainDecimals)
@@ -126,7 +116,7 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
         tranches,
         'ausd',
         CurrencyBalance.fromFloat(values.maxReserve || 0, chainDecimals),
-        mockMetadata as any,
+        { ...mockMetadata, tranches } as any,
       ] as CreatePoolArgs)
     }, 1000),
     []
