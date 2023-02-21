@@ -5,7 +5,11 @@ inputs:
   app_name:
     description: app name to deploy
     required: true
-  
+
+  artifact_name:
+    description: artifact to download and deploy
+    required: true
+
   deploy_env:
     description: env to deploy function to
     required: false
@@ -90,7 +94,7 @@ runs:
       id: download
       uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
       with:
-        name: ${{ inputs.app_name }} 
+        name: ${{ inputs.artifact_name || inputs.app_name }} 
         # This will work only if we're matching the same string as
         # the upload step, which happens outside of this action file
         # by convention I use the app_name everywhere

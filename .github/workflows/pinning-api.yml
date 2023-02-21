@@ -21,9 +21,9 @@ env:
  # This needs to match the env: settings in prod-deploy.yml
   app_name: pinning-api
   function_handler: pinningApi
-  artifact_name: ${{ inputs.deploy_env && join(inputs.app_name, '-', inputs.deploy_env) || 'pinning-api' }}
-# Fancy concurrency group string to allow for multi-staging deployments  
+  artifact_name: "pinning-api${{ inputs.deploy_env && format('-{0}', inputs.deploy_env) }}"
 concurrency:
+ # Fancy concurrency group string to allow for multi-staging deployments  
   group: 'pinning-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true    
 jobs:
@@ -48,6 +48,7 @@ jobs:
       - name: build function
         uses: ./.github/actions/build-function
         with:
+          app_name: ${{ env.app_name }}
           artifact_name: ${{ env.app_name }}
 
       - name: Archive staging artifacts

@@ -3,7 +3,7 @@ description: 'Build a generic function usin yarn build and archiving the results
 
 inputs:
   app_name:
-    description: "function name"
+    description: "function folder"
     required: true
   artifact_name:
     description: artifact name to upload
