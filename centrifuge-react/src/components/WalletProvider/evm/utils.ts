@@ -87,6 +87,13 @@ export function useNativeBalance(address?: string) {
   return query
 }
 
+export function useNativeCurrency() {
+  const { evm } = useWallet()
+  if (!evm.chainId) return null
+  const chain = evm.chains[evm.chainId]
+  return 'nativeCurrency' in chain ? chain.nativeCurrency : { name: 'Eth', symbol: 'ETH', decimals: 18 }
+}
+
 function computeIsActive({ chainId, accounts, activating }: Web3ReactState) {
   return Boolean(chainId && accounts && !activating)
 }

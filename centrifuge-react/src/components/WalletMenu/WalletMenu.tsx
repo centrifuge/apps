@@ -20,6 +20,7 @@ import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
 import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
 import { useAddress, useWallet } from '../WalletProvider'
+import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
 import { Logo } from '../WalletProvider/SelectButton'
 import { NetworkIcon } from '../WalletProvider/UserSelection'
 import { getWalletIcon, getWalletLabel } from '../WalletProvider/WalletDialog'
@@ -42,11 +43,29 @@ export function WalletMenu() {
 function ConnectedMenu() {
   const address = useAddress()!
   const ctx = useWallet()
-  const { connectedType, substrate, disconnect, showWallets, showAccounts, connectedNetwork, connectedNetworkName } =
-    ctx
+  const {
+    connectedType,
+    substrate,
+    evm,
+    disconnect,
+    showWallets,
+    showAccounts,
+    connectedNetwork,
+    connectedNetworkName,
+  } = ctx
   const wallet = ctx[connectedType!]?.selectedWallet
   const { name: ensName, avatar } = useEns(connectedType === 'evm' ? address : undefined)
   const balances = useBalances(connectedType === 'substrate' ? address : undefined)
+  const { data: evmBalance } = useNativeBalance()
+  const evmCurrency = useNativeCurrency()
+  const formattedBalance =
+    connectedType === 'evm'
+      ? evmBalance && evmCurrency
+        ? formatBalanceAbbreviated(evmBalance, evmCurrency.symbol)
+        : undefined
+      : balances
+      ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol, 0)
+      : undefined
 
   return (
     <Popover
@@ -62,11 +81,7 @@ function ConnectedMenu() {
                 ? substrate.selectedAccount?.name
                 : undefined
             }
-            balance={
-              balances
-                ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol, 0)
-                : undefined
-            }
+            balance={formattedBalance}
             icon={
               avatar ? (
                 <Box as="img" src={avatar} alt={ensName ?? ''} width="iconMedium" />
@@ -98,9 +113,7 @@ function ConnectedMenu() {
                   Balance
                 </Text>
                 <Text variant="body1" fontWeight={500} textAlign="center">
-                  {balances
-                    ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol)
-                    : undefined}
+                  {formattedBalance}
                 </Text>
               </Stack>
             </MenuItemGroup>
