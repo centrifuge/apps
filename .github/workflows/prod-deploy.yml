@@ -98,6 +98,7 @@ jobs:
       id-token: 'write'
     env:
       app_name: pinning-api
+      function_handler: pinningApi
     steps:
       - name: Checkout
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
@@ -125,6 +126,7 @@ jobs:
       id-token: 'write'
     env:
       app_name: onboarding-api
+      function_handler: onboarding
     steps:
       - name: Checkout
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
