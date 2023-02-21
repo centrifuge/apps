@@ -6,7 +6,7 @@ import { useAuth } from '../../../components/AuthProvider'
 export const useVerifyEmail = () => {
   const { authToken } = useAuth()
   const { search } = useLocation()
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
   const token = new URLSearchParams(search).get('token')
 
   const query = useQuery(

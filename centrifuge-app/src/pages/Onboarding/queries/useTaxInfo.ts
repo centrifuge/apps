@@ -5,7 +5,7 @@ import { useOnboarding } from '../../../components/OnboardingProvider'
 
 export const useTaxInfo = () => {
   const { authToken } = useAuth()
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
   const { onboardingUser, pool } = useOnboarding()
 
   const query = useQuery(
