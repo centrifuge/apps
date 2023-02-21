@@ -80,13 +80,13 @@ jobs:
       - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
         with: 
           name: onboarding-api
-          path: ${{ github.workspace }}/onboarding-api/
+          path: ${{ github.workspace }}/onboarding-api-staging/
           if-no-files-found: error 
           
       - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
         with: 
           name: pinning-api
-          path: ${{ github.workspace }}/pinning-api/
+          path: ${{ github.workspace }}/pinning-api-staging/
           if-no-files-found: error 
 
   pinning-prod-deploy:

@@ -25,7 +25,8 @@ on:
 concurrency:
   group: 'centrifuge-app-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true      
-
+env:
+  artifact_name: "webpack${{ inputs.deploy_env && join('-', inputs.deploy_env) }}"
 jobs:  
   build-app:
     runs-on: ubuntu-latest
@@ -81,7 +82,7 @@ jobs:
       
       - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
         with: 
-          name: webpack
+          name: ${{ env.artifact_name }}
           path: ./centrifuge-app/build
           if-no-files-found: error
 
@@ -115,7 +116,7 @@ jobs:
         id: gcsdeploy
         uses: ./apps/.github/actions/deploy-gcs
         with:
-          artifact_name: webpack
+          artifact_name: ${{ env.artifact_name }}
           bucket_url: ${{ needs.build-app.outputs.front_url }}
           GWIP: ${{ secrets.GWIP }}
           GSA: ${{ secrets.GSA }}
