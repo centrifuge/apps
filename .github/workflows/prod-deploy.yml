@@ -48,8 +48,6 @@ jobs:
           workflow: staging-deploy.yml
           workflow_conclusion: ""
 
-      - name: "debug: list workspace"
-        run: ls -la      
       # Alternative: download from the release instead of 
       # workflow artifacts
       # - uses: dsaltares/fetch-gh-release-asset@master
@@ -72,19 +70,22 @@ jobs:
 
       - name: list artifact files
         run: |
+          ls -la ./
           ls -la pinning-api/
           ls -la onboarding-api/
+          echo "Workspace PATH: ${{ github.workspace }}"
+          ls -la $GITHUB_WORKSPACE
 
       - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
         with: 
           name: onboading-api
-          path: ./onboading-api
+          path: ${{ github.workspace }}/onboading-api/
           if-no-files-found: error 
           
       - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
         with: 
           name: pinning-api
-          path: ./pinning-api
+          path: ${{ github.workspace }}/pinning-api/
           if-no-files-found: error 
 
   deploy_pinning:
