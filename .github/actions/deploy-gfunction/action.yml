@@ -70,7 +70,7 @@ runs:
       shell: bash
       id: set_secrets
       run: |
-        if ${{ inputs.gcloud_env == 'production'}}; then
+        if ${{ steps.prepare.outputs.gh_env == 'production'}}; then
           FILE=./apps/${{ inputs.app_name }}/env-vars/prod.secrets
         else
           FILE=./apps/${{ inputs.app_name }}/env-vars/dev.secrets
