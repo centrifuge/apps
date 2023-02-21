@@ -18,7 +18,7 @@ import * as React from 'react'
 import { useBalances } from '../../hooks/useBalances'
 import { useEns } from '../../hooks/useEns'
 import { copyToClipboard } from '../../utils/copyToClipboard'
-import { formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
+import { formatBalance, formatBalanceAbbreviated, truncateAddress } from '../../utils/formatting'
 import { useAddress, useWallet } from '../WalletProvider'
 import { useNativeBalance, useNativeCurrency } from '../WalletProvider/evm/utils'
 import { Logo } from '../WalletProvider/SelectButton'
@@ -50,14 +50,14 @@ function ConnectedMenu() {
   const balances = useBalances(connectedType === 'substrate' ? address : undefined)
   const { data: evmBalance } = useNativeBalance()
   const evmCurrency = useNativeCurrency()
-  const formattedBalance =
+  const [balance, symbol] =
     connectedType === 'evm'
       ? evmBalance && evmCurrency
-        ? formatBalanceAbbreviated(evmBalance, evmCurrency.symbol)
-        : undefined
+        ? [evmBalance, evmCurrency.symbol]
+        : []
       : balances
-      ? formatBalanceAbbreviated(balances.native.balance, balances.native.currency.symbol, 0)
-      : undefined
+      ? [balances.native.balance, balances.native.currency.symbol]
+      : []
 
   return (
     <Popover
@@ -73,7 +73,7 @@ function ConnectedMenu() {
                 ? substrate.selectedAccount?.name
                 : undefined
             }
-            balance={formattedBalance}
+            balance={balance ? formatBalanceAbbreviated(balance, symbol) : undefined}
             icon={
               avatar ? (
                 <Box as="img" src={avatar} alt={ensName ?? ''} width="iconMedium" />
@@ -105,7 +105,7 @@ function ConnectedMenu() {
                   Balance
                 </Text>
                 <Text variant="body1" fontWeight={500} textAlign="center">
-                  {formattedBalance}
+                  {balance && formatBalance(balance, symbol, 2)}
                 </Text>
               </Stack>
             </MenuItemGroup>
