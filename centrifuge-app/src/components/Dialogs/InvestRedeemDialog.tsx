@@ -1,6 +1,6 @@
 import { Dialog, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { InvestRedeem } from '../InvestRedeem/InvestRedeem'
+import { InvestRedeem } from '../InvestRedeem'
 
 export const InvestRedeemDialog: React.FC<{
   poolId: string

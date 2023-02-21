@@ -7,7 +7,7 @@ import { useOnboarding } from '../../../components/OnboardingProvider'
 export const useSignedAgreement = () => {
   const { authToken } = useAuth()
   const { pool, onboardingUser } = useOnboarding()
-  const { selectedAccount } = useWallet().substrate
+  const { selectedAccount } = useWallet()
 
   const [hasSignedAgreement, setHasSignedAgreement] = React.useState(false)
 
