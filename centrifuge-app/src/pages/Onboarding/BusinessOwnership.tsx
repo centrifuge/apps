@@ -16,24 +16,14 @@ import {
 } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
-import { useMutation } from 'react-query'
 import styled from 'styled-components'
 import { array, boolean, date, object, string } from 'yup'
-import { useAuth } from '../../components/AuthProvider'
 import { ConfirmResendEmailVerificationDialog } from '../../components/Dialogs/ConfirmResendEmailVerificationDialog'
 import { EditOnboardingEmailAddressDialog } from '../../components/Dialogs/EditOnboardingEmailAddressDialog'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 import { EntityUser } from '../../types'
+import { useConfirmOwners } from './queries/useConfirmOwners'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
-
-type Props = {
-  nextStep: () => void
-  backStep: () => void
-}
-
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
 
 const ClickableText = styled(Text)`
   color: #0000ee;
@@ -65,20 +55,6 @@ const EmailVerificationInlineFeedback = ({ email, completed }: { email: string; 
   const [isEditOnboardingEmailAddressDialogOpen, setIsEditOnboardingEmailAddressDialogOpen] = React.useState(false)
   const [isConfirmResendEmailVerificationDialogOpen, setIsConfirmResendEmailVerificationDialogOpen] =
     React.useState(false)
-
-  const { refetchOnboardingUser } = useOnboardingUser()
-
-  const onFocus = () => {
-    refetchOnboardingUser()
-  }
-
-  React.useEffect(() => {
-    window.addEventListener('focus', onFocus)
-    return () => {
-      window.removeEventListener('focus', onFocus)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   if (completed) {
     return (
@@ -135,70 +111,47 @@ const BusinessOwnershipInlineFeedback = ({ isError }: { isError: boolean }) => {
   return null
 }
 
-export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
-  const { authToken } = useAuth()
-  const { onboardingUser, refetchOnboardingUser } = useOnboardingUser() as {
-    onboardingUser: EntityUser
-    refetchOnboardingUser: () => void
-  }
+export const BusinessOwnership = () => {
+  const { onboardingUser, refetchOnboardingUser, previousStep, nextStep } = useOnboarding<EntityUser>()
 
-  const isCompleted = !!onboardingUser?.steps?.confirmOwners.completed
-  const isEmailVerified = !!onboardingUser?.steps?.verifyEmail.completed
+  const isCompleted = !!onboardingUser?.steps.confirmOwners.completed
+  const isEmailVerified = !!onboardingUser?.steps.verifyEmail.completed
 
   const formik = useFormik({
     initialValues: {
-      ultimateBeneficialOwners: onboardingUser?.ultimateBeneficialOwners?.length
-        ? onboardingUser.ultimateBeneficialOwners.map((owner) => ({
+      ultimateBeneficialOwners: onboardingUser?.ultimateBeneficialOwners.length
+        ? onboardingUser?.ultimateBeneficialOwners.map((owner) => ({
             name: owner.name,
             dateOfBirth: owner.dateOfBirth,
           }))
         : [{ name: '', dateOfBirth: '' }],
       isAccurate: !!isCompleted,
     },
-    onSubmit: () => {
-      upsertBusinessOwnership()
+    onSubmit: (values) => {
+      upsertBusinessOwnership(values.ultimateBeneficialOwners)
     },
     validationSchema: businessOwnershipInput,
     validateOnMount: true,
   })
 
-  const {
-    mutate: upsertBusinessOwnership,
-    isLoading,
-    isError,
-  } = useMutation(
-    async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/confirmOwners`, {
-        method: 'POST',
-        body: JSON.stringify({
-          ultimateBeneficialOwners: formik.values.ultimateBeneficialOwners,
-          poolId,
-          trancheId,
-        }),
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
+  const { mutate: upsertBusinessOwnership, isLoading, isError } = useConfirmOwners()
 
-      if (response.status !== 200) {
-        throw new Error()
-      }
+  const onFocus = () => {
+    refetchOnboardingUser()
+  }
 
-      const json = await response.json()
-
-      if (!json.steps?.confirmOwners?.completed) {
-        throw new Error()
-      }
-    },
-    {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        nextStep()
-      },
+  React.useEffect(() => {
+    if (isEmailVerified) {
+      window.removeEventListener('focus', onFocus)
+    } else {
+      window.addEventListener('focus', onFocus)
     }
-  )
+
+    return () => {
+      window.removeEventListener('focus', onFocus)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEmailVerified])
 
   const removeOwner = (index: number) => {
     if (formik.values.ultimateBeneficialOwners.length === 1) {
@@ -246,10 +199,7 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
   return (
     <Stack gap={4}>
       <Box>
-        <EmailVerificationInlineFeedback
-          email={onboardingUser.email}
-          completed={onboardingUser.steps.verifyEmail.completed}
-        />
+        <EmailVerificationInlineFeedback email={onboardingUser?.email as string} completed={isEmailVerified} />
         <BusinessOwnershipInlineFeedback isError={isError} />
         <Text fontSize={5}>Confirm business ownership</Text>
         <Text fontSize={2}>
@@ -302,7 +252,7 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
         </Box>
       </Box>
       <Shelf gap={2}>
-        <Button onClick={() => backStep()} disabled={isLoading} variant="secondary">
+        <Button onClick={() => previousStep()} disabled={isLoading} variant="secondary">
           Back
         </Button>
         <Button

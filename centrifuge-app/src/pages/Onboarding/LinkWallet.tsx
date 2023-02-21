@@ -3,18 +3,16 @@ import { Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useAuth } from '../../components/AuthProvider'
 import { DataSharingAgreementDialog } from '../../components/Dialogs/DataSharingAgreementDialog'
-
-type Props = {
-  nextStep: () => void
-}
+import { useOnboarding } from '../../components/OnboardingProvider'
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
-export const LinkWallet = ({ nextStep }: Props) => {
+export const LinkWallet = () => {
   const [isDataSharingAgreementDialogOpen, setIsDataSharingAgreementDialogOpen] = React.useState(false)
   const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = React.useState(false)
+  const { nextStep } = useOnboarding()
 
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
   const { login, isAuth } = useAuth()
 
   return (

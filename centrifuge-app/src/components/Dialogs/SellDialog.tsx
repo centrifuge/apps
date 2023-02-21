@@ -19,10 +19,10 @@ const TRANSFER_FEE_ESTIMATE = 0.1
 export const SellDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const [price, setPrice] = React.useState<number | ''>()
   const [touched, setTouched] = React.useState(false)
-  const { selectedAccount } = useWallet()
+  const { substrate } = useWallet()
   const balance = useBalance()
 
-  const isConnected = !!selectedAccount?.address
+  const isConnected = !!substrate.selectedAccount?.address
 
   const {
     execute: doTransaction,

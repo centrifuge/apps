@@ -11,7 +11,10 @@ const poolId = 'FAKEPOOLID'
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
 export const useOnboardingStep = () => {
-  const { isConnecting, selectedAccount } = useWallet()
+  const {
+    pendingConnect: { isConnecting },
+    substrate: { selectedAccount },
+  } = useWallet()
   const { isAuth, isAuthFetched } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const [activeStep, setActiveStep] = React.useState<number>(0)
   const { onboardingUser, isOnboardingUserFetched, isOnboardingUserFetching } = useOnboardingUser()

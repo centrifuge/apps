@@ -8,7 +8,8 @@ export async function fetchUser(walletAddress: string) {
       throw new Error()
     }
     return userDoc.data() as OnboardingUser
-  } catch {
+  } catch (error) {
+    console.error('Firestore error:', JSON.stringify(error))
     throw new HttpsError(401, 'Not allowed')
   }
 }

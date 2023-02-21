@@ -12,7 +12,7 @@ type Props = {
 }
 
 export const MaxReserveForm: React.VFC<Props> = ({ poolId }) => {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const isLiquidityAdmin = useLiquidityAdmin(poolId)
   const pool = usePool(poolId)
 

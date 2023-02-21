@@ -3,7 +3,7 @@ import * as React from 'react'
 import { useMutation } from 'react-query'
 import { string } from 'yup'
 import { useAuth } from '../AuthProvider'
-import { useOnboardingUser } from '../OnboardingUserProvider'
+import { useOnboarding } from '../OnboardingProvider'
 
 type Props = {
   isDialogOpen: boolean
@@ -14,7 +14,7 @@ type Props = {
 export const EditOnboardingEmailAddressDialog = ({ isDialogOpen, setIsDialogOpen, currentEmail }: Props) => {
   const [newEmail, setNewEmail] = React.useState('')
   const { authToken } = useAuth()
-  const { refetchOnboardingUser } = useOnboardingUser()
+  const { refetchOnboardingUser } = useOnboarding()
 
   const isValid = React.useMemo(() => string().email().required().isValidSync(newEmail), [newEmail])
 

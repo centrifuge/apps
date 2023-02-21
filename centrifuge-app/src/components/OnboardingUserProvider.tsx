@@ -15,7 +15,7 @@ const OnboardingUserContext = React.createContext<{
 
 export function OnboardingUserProvider({ children }: { children?: React.ReactNode }) {
   const { authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
 
   const {
     data: onboardingUserData,

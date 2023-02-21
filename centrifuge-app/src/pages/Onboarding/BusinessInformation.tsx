@@ -5,7 +5,6 @@ import {
   DateInput,
   Flex,
   InlineFeedback,
-  NumberInput,
   Select,
   Shelf,
   Stack,
@@ -13,23 +12,13 @@ import {
   TextInput,
 } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
-import { useMutation } from 'react-query'
 import { date, object, string } from 'yup'
-import { useAuth } from '../../components/AuthProvider'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 import { EntityUser } from '../../types'
 import { formatGeographyCodes } from '../../utils/formatGeographyCodes'
 import { CA_PROVINCE_CODES, KYB_COUNTRY_CODES, US_STATE_CODES } from './geography_codes'
+import { useVerifyBusiness } from './queries/useVerifyBusiness'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
-
-type Props = {
-  nextStep: () => void
-  backStep: () => void
-}
-
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
 
 const businessVerificationInput = object({
   email: string().email().required(),
@@ -60,12 +49,8 @@ const BusinessInformationInlineFeedback = ({ isError }: { isError: boolean }) =>
   return null
 }
 
-export const BusinessInformation = ({ backStep, nextStep }: Props) => {
-  const { authToken } = useAuth()
-  const { onboardingUser, refetchOnboardingUser } = useOnboardingUser() as {
-    onboardingUser: EntityUser
-    refetchOnboardingUser: () => void
-  }
+export const BusinessInformation = () => {
+  const { onboardingUser, previousStep, nextStep } = useOnboarding<EntityUser>()
 
   const isUSOrCA =
     onboardingUser?.jurisdictionCode?.startsWith('us') || onboardingUser?.jurisdictionCode?.startsWith('ca')
@@ -77,64 +62,19 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
       businessName: onboardingUser?.businessName || '',
       email: onboardingUser?.email || '',
       registrationNumber: onboardingUser?.registrationNumber || '',
-      jurisdictionCode: isUSOrCA
-        ? onboardingUser?.jurisdictionCode.slice(0, 2)
-        : onboardingUser?.jurisdictionCode || '',
+      jurisdictionCode:
+        (isUSOrCA ? onboardingUser?.jurisdictionCode.slice(0, 2) : onboardingUser?.jurisdictionCode || '') ?? '',
       incorporationDate: onboardingUser?.incorporationDate || '',
-      regionCode: isUSOrCA ? onboardingUser?.jurisdictionCode.split('_')[1] : '',
+      regionCode: (isUSOrCA ? onboardingUser?.jurisdictionCode.split('_')[1] : '') ?? '',
     },
-    onSubmit: () => {
-      verifyBusinessInformation()
+    onSubmit: (values) => {
+      verifyBusinessInformation(values)
     },
     validationSchema: businessVerificationInput,
     validateOnMount: true,
   })
 
-  const {
-    mutate: verifyBusinessInformation,
-    isLoading,
-    isError,
-  } = useMutation(
-    async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyBusiness`, {
-        method: 'POST',
-        body: JSON.stringify({
-          email: formik.values.email,
-          businessName: formik.values.businessName,
-          registrationNumber: formik.values.registrationNumber,
-          jurisdictionCode:
-            formik.values.jurisdictionCode === 'us' || formik.values.jurisdictionCode === 'ca'
-              ? `${formik.values.jurisdictionCode}_${formik.values.regionCode}`
-              : formik.values.jurisdictionCode,
-          incorporationDate: formik.values.incorporationDate,
-          trancheId,
-          poolId,
-          dryRun: true,
-        }),
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
-
-      if (response.status !== 200) {
-        throw new Error()
-      }
-
-      const json = await response.json()
-
-      if (!json.steps?.verifyBusiness?.completed) {
-        throw new Error()
-      }
-    },
-    {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        nextStep()
-      },
-    }
-  )
+  const { mutate: verifyBusinessInformation, isLoading, isError } = useVerifyBusiness()
 
   const renderRegionCodeSelect = () => {
     if (formik.values.jurisdictionCode === 'us') {
@@ -213,7 +153,7 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
           />
           {renderRegionCodeSelect()}
 
-          <NumberInput
+          <TextInput
             id="registrationNumber"
             label="Registration number*"
             placeholder="0000"
@@ -249,7 +189,7 @@ export const BusinessInformation = ({ backStep, nextStep }: Props) => {
         </Flex>
       </Shelf>
       <Shelf gap={2}>
-        <Button onClick={() => backStep()} disabled={isLoading} variant="secondary">
+        <Button onClick={() => previousStep()} disabled={isLoading} variant="secondary">
           Back
         </Button>
         <Button

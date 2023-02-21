@@ -1,143 +1,33 @@
-import { useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useMutation, useQuery } from 'react-query'
-import { switchMap, tap } from 'rxjs'
-import { useAuth } from '../../components/AuthProvider'
-import { useOnboardingUser } from '../../components/OnboardingUserProvider'
+import { useOnboarding } from '../../components/OnboardingProvider'
 import { PDFViewer } from '../../components/PDFViewer'
+import { useSignAndSendDocuments } from './queries/useSignAndSendDocuments'
+import { useSignRemark } from './queries/useSignRemark'
+import { useUnsignedAgreement } from './queries/useUnsignedAgreement'
 
 type Props = {
-  nextStep: () => void
-  backStep: () => void
   signedAgreementUrl: string | undefined
   isSignedAgreementFetched: boolean
 }
 
-// TODO: make dynamic based on the pool and tranche that the user is onboarding to
-const trancheId = 'FAKETRANCHEID'
-const poolId = 'FAKEPOOLID'
-
-export const SignSubscriptionAgreement = ({
-  nextStep,
-  backStep,
-  signedAgreementUrl,
-  isSignedAgreementFetched,
-}: Props) => {
+export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreementFetched }: Props) => {
   const [isAgreed, setIsAgreed] = React.useState(false)
-  const { authToken } = useAuth()
-  const { refetchOnboardingUser, onboardingUser } = useOnboardingUser()
-  const [transactionHash, setTransactionHash] = React.useState<string>()
+  const { onboardingUser, pool, previousStep, nextStep } = useOnboarding()
 
-  const isCompleted = onboardingUser?.steps?.signAgreements[poolId]?.[trancheId]?.signedDocument
+  const { mutate: sendDocumentsToIssuer, isLoading: isSending } = useSignAndSendDocuments()
+  const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
+  const { data: unsignedAgreementData, isFetched: isUnsignedAgreementFetched } = useUnsignedAgreement()
+
+  const isCompleted =
+    onboardingUser?.steps.signAgreements[pool.id][pool.trancheId].signedDocument &&
+    !!onboardingUser?.steps.signAgreements[pool.id][pool.trancheId].transactionInfo.extrinsicHash
 
   React.useEffect(() => {
     if (isCompleted) {
       setIsAgreed(true)
     }
   }, [isCompleted])
-
-  const { data: unsignedAgreementData, isFetched: isUnsignedAgreementFetched } = useQuery(
-    ['unsignedSubscriptionAgreement', poolId, trancheId],
-    async () => {
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getUnsignedAgreement?poolId=${poolId}&trancheId=${trancheId}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        }
-      )
-
-      const json = await response.json()
-
-      const documentBlob = new Blob([Uint8Array.from(json.unsignedAgreement.data).buffer], {
-        type: 'application/pdf',
-      })
-
-      return URL.createObjectURL(documentBlob)
-    },
-    {
-      enabled: !isCompleted,
-      refetchOnWindowFocus: false,
-    }
-  )
-
-  const { execute: signRemark, isLoading: isSigningTransaction } = useCentrifugeTransaction(
-    'Update configuration',
-    (cent) => () => {
-      return cent.getApi().pipe(
-        switchMap((api) =>
-          cent.wrapSignAndSend(
-            api,
-            api.tx.system.remark(`Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`)
-          )
-        ),
-        tap((result) => {
-          // @ts-expect-error
-          if (result?.txHash) {
-            // @ts-expect-error
-            setTransactionHash(result.txHash.toHex())
-          }
-        })
-      )
-    },
-    {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        nextStep()
-      },
-    }
-  )
-
-  const { mutate: signForm, isLoading: isSigningAgreement } = useMutation(
-    async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/signAgreement`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          poolId,
-          trancheId,
-        }),
-        credentials: 'include',
-      })
-      return response.json()
-    },
-    {
-      onSuccess: () => {
-        signRemark([])
-      },
-    }
-  )
-
-  const { mutate: storeTransactionHash } = useMutation(async (hash: string) => {
-    const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/storeTransactionHash`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        poolId,
-        trancheId,
-        transactionHash: hash,
-      }),
-      credentials: 'include',
-    })
-    return response.json()
-  })
-
-  React.useEffect(() => {
-    if (transactionHash) {
-      storeTransactionHash(transactionHash)
-    }
-  }, [transactionHash, storeTransactionHash])
 
   const isAgreementFetched = React.useMemo(
     () => isUnsignedAgreementFetched || isSignedAgreementFetched,
@@ -162,17 +52,17 @@ export const SignSubscriptionAgreement = ({
         checked={isCompleted || isAgreed}
         onChange={() => setIsAgreed((current) => !current)}
         label={<Text style={{ cursor: 'pointer' }}>I agree to the agreement</Text>}
-        disabled={isSigningTransaction || isSigningAgreement || isCompleted}
+        disabled={isSigningTransaction || isSending || isCompleted}
       />
       <Shelf gap="2">
-        <Button onClick={() => backStep()} variant="secondary" disabled={isSigningTransaction || isSigningAgreement}>
+        <Button onClick={() => previousStep()} variant="secondary" disabled={isSigningTransaction || isSending}>
           Back
         </Button>
         <Button
-          onClick={isCompleted ? () => nextStep() : () => signForm()}
+          onClick={isCompleted ? () => nextStep() : () => signRemark([])}
           loadingMessage="Signing"
-          loading={isSigningTransaction || isSigningAgreement}
-          disabled={!isAgreed || isSigningTransaction || isSigningAgreement}
+          loading={isSigningTransaction || isSending}
+          disabled={!isAgreed || isSigningTransaction || isSending}
         >
           {isCompleted ? 'Next' : 'Sign'}
         </Button>

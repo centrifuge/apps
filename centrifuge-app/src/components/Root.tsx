@@ -6,6 +6,8 @@ import {
   WalletProvider,
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
+import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
+import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
 import * as React from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
@@ -36,7 +38,7 @@ import { DemoBanner } from './DemoBanner'
 import { GlobalStyle } from './GlobalStyle'
 import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
-import { OnboardingUserProvider } from './OnboardingUserProvider'
+import { OnboardingProvider } from './OnboardingProvider'
 import { PodAuthProvider } from './PodAuthProvider'
 
 const queryClient = new QueryClient({
@@ -71,6 +73,25 @@ const centConfig: UserProvidedConfig = {
     }),
 }
 
+const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
+
+const evmChains = {
+  1: {
+    urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
+    name: 'Ethereum',
+    logo: {
+      src: ethereumLogo,
+    },
+  },
+  5: {
+    urls: [`https://goerli.infura.io/v3/${infuraKey}`],
+    name: 'Görli',
+    logo: {
+      src: goerliLogo,
+    },
+  },
+}
+
 export const Root: React.VFC = () => {
   const [isThemeToggled, setIsThemeToggled] = React.useState(!!initialFlagsState.alternativeTheme)
 
@@ -93,7 +114,7 @@ export const Root: React.VFC = () => {
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
             <DemoBanner />
-            <WalletProvider>
+            <WalletProvider evmChains={evmChains}>
               <PodAuthProvider>
                 <AuthProvider>
                   <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
@@ -165,9 +186,9 @@ const Routes: React.VFC = () => {
         <InvestmentDisclaimerPage />
       </Route>
       <Route exact path="/onboarding">
-        <OnboardingUserProvider>
+        <OnboardingProvider>
           <OnboardingPage />
-        </OnboardingUserProvider>
+        </OnboardingProvider>
       </Route>
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />

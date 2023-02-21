@@ -30,7 +30,7 @@ export const PageWithSideBar: React.FC<Props> = ({ children, sidebar = true }) =
   const isMedium = useIsAboveBreakpoint('M')
 
   const theme = useTheme()
-  const balances = useBalances(useAddress())
+  const balances = useBalances(useAddress('substrate'))
   const hasLowDevelBalance =
     balances && new CurrencyBalance(balances.native.balance, 18).toDecimal().lte(MIN_DEVEL_BALANCE)
   const aUSD = balances && balances.currencies.find((curr) => curr.currency.key === 'AUSD')

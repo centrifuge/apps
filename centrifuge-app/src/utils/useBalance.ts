@@ -3,7 +3,7 @@ import { map, switchMap } from 'rxjs/operators'
 import { useAddress } from './useAddress'
 
 export function useBalance() {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const [result] = useCentrifugeQuery(
     ['balance', address],
     (cent) =>

@@ -60,7 +60,7 @@ export type UltimateBeneficialOwner = {
 type IndividualUserSteps = {
   verifyTaxInfo: {
     completed: boolean
-    timeStamp: string
+    timeStamp: string | null
   }
   verifyAccreditation: {
     completed: boolean | null
@@ -68,12 +68,15 @@ type IndividualUserSteps = {
   }
   verifyIdentity: {
     completed: boolean
-    timeStamp: string
+    timeStamp: string | null
   }
   signAgreements: {
     [poolId: string]: {
       [trancheId: string]: {
-        transactionHash: string | null
+        transactionInfo: {
+          extrinsicHash: string | null
+          blockNumber: string | null
+        }
         signedDocument: boolean
       }
     }
@@ -83,15 +86,15 @@ type IndividualUserSteps = {
 export interface EntityOnboardingSteps extends IndividualUserSteps {
   verifyBusiness: {
     completed: boolean
-    timeStamp: string
+    timeStamp: string | null
   }
   verifyEmail: {
     completed: boolean
-    timeStamp: string
+    timeStamp: string | null
   }
   confirmOwners: {
     completed: boolean
-    timeStamp: string
+    timeStamp: string | null
   }
 }
 
@@ -99,20 +102,20 @@ export type EntityUser = {
   investorType: 'entity'
   walletAddress: string
   businessName: string
-  email: string
+  email: string | null
   incorporationDate: string
   jurisdictionCode: string
-  registrationNumber: number
+  registrationNumber: string
   ultimateBeneficialOwners: UltimateBeneficialOwner[]
   steps: EntityOnboardingSteps
-  name: string
-  dateOfBirth: string
-  countryOfCitizenship: string
+  name: string | null
+  dateOfBirth: string | null
+  countryOfCitizenship: string | null
   onboardingStatus: {
     [poolId: string]: {
       [trancheId: string]: {
-        status: 'pending' | 'approved' | 'rejected'
-        timeStamp: string
+        status: 'pending' | 'approved' | 'rejected' | null
+        timeStamp: string | null
       }
     }
   }
@@ -121,15 +124,15 @@ export type EntityUser = {
 type IndividualUser = {
   investorType: 'individual'
   walletAddress: string
-  name: string
-  dateOfBirth: string
-  countryOfCitizenship: string
+  name: string | null
+  dateOfBirth: string | null
+  countryOfCitizenship: string | null
   steps: IndividualUserSteps
   onboardingStatus: {
     [poolId: string]: {
       [trancheId: string]: {
-        status: 'pending' | 'approved' | 'rejected'
-        timeStamp: string
+        status: 'pending' | 'approved' | 'rejected' | null
+        timeStamp: string | null
       }
     }
   }

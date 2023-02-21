@@ -24,7 +24,7 @@ export const IssuerPoolHeader: React.FC<Props> = ({ actions }) => {
   const cent = useCentrifuge()
   const basePath = useRouteMatch(['/investments', '/issuer'])?.path || ''
 
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const isPoolAdmin = useIsPoolAdmin(pid)
   const { execute: executeInitialise, isLoading: isInitialiseLoading } = useCentrifugeTransaction(

@@ -2,7 +2,7 @@ import * as CSS from 'csstype'
 import * as React from 'react'
 import styled from 'styled-components'
 import { ResponsiveValue, TLengthStyledSystem } from 'styled-system'
-import { mapResponsive } from '../../utils/styled'
+import { mapResponsive, toPx } from '../../utils/styled'
 import { Box, BoxProps } from '../Box'
 
 type OwnProps = {
@@ -45,10 +45,6 @@ export const Grid: React.FC<GridProps> = ({
       {...rest}
     />
   )
-}
-
-function toPx(n: number | string) {
-  return typeof n === 'number' ? `${n}px` : n
 }
 
 function widthToColumns(width: ResponsiveValue<TLengthStyledSystem>, equalColumns: boolean) {
