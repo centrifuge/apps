@@ -46,7 +46,8 @@ jobs:
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: staging-deploy.yml
-          workflow_conclusion: ""
+          # workflow_conclusion: ""
+          check_artifacts: true
 
       # Alternative: download from the release instead of 
       # workflow artifacts
