@@ -47,7 +47,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify staging deploy
-        if: inputs.deploy_env == 'altair'
         uses: rtCamp/action-slack-notify@12e36fc18b0689399306c2e0b3e0f2978b7f1ee7
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
