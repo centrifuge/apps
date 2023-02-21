@@ -49,7 +49,7 @@ jobs:
         uses: ./.github/actions/build-function
         with:
           app_name: ${{ env.app_name }}
-          artifact_name: ${{ env.app_name }}
+          artifact_name: ${{ env.artifact_name }}
 
       - name: Archive staging artifacts
         id: archive_staging
