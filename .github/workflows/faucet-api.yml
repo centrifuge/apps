@@ -49,7 +49,7 @@ jobs:
       - name: build function
         uses: ./.github/actions/build-function
         with:
-          artifact_name: ${{ env.app_name }}
+          app_name: ${{ env.app_name }}
 
     outputs:
       app_name: ${{ steps.prepare.outputs.app_name }}
