@@ -61,7 +61,7 @@ Returns the entity user object and sets the step `verifyBusiness` to true on suc
 ```js
 {
   // ...
-	"steps": {
+	"generalSteps": {
 		// ...
 		"verifyBusiness": {
 			"completed": true,
@@ -100,7 +100,7 @@ Sets the ultimate beneficial owners for the entity.
 ```js
 {
   // ...
-	"steps": {
+	"generalSteps": {
 		// ...
 		"confirmOwners": {
 			"completed": true,
@@ -162,7 +162,7 @@ Sets the ultimate beneficial owners for the entity.
 ```js
 {
   // ...
-	"steps": {
+	"generalSteps": {
 		// ...
 		"verifyIdentity": {
 			"completed": true,
@@ -200,7 +200,7 @@ Sets the ultimate beneficial owners for the entity.
   ],
   "incorporationDate": "2021-04-11",
   "dateOfBirth": "2021-04-11",
-  "steps": {
+  "generalSteps": {
     "verifyIdentity": {
       "timeStamp": "2023-01-23T20:57:44.140Z",
       "completed": true
@@ -217,11 +217,15 @@ Sets the ultimate beneficial owners for the entity.
       "completed": true,
       "timeStamp": "2023-01-23T20:56:52.734Z"
     },
-    "signAgreements": {
-      "123abc": {
-        "0x123456": {
-          "timeStamp": null,
-          "completed": false
+    "poolSteps": {
+        "123abc": {
+          "0x123456": {
+            "signAgreements": {
+              "timeStamp": null,
+              "completed": false,
+              "transactionInfo: {}
+            }
+          }
         }
       }
     }
@@ -246,19 +250,17 @@ Sets the ultimate beneficial owners for the entity.
 
 ```js
 {
-  // ...
-  "steps": {
     // ...
-    "signAgreements": {
+    "poolSteps": {
       [poolId]: {
         [trancheId]: {
-          "completed": true,
-          "timeStamp": "2023-01-23T20:56:50.039Z"
+          "signAgreements" {
+            "completed": true,
+            "timeStamp": "2023-01-23T20:56:50.039Z"
+          }
         }
       }
     }
-  },
-  // ...
 }
 ```
 

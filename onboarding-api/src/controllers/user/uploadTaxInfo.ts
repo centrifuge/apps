@@ -57,7 +57,7 @@ export const uploadTaxInfoController = async (
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['steps'])
+    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['generalSteps'])
 
     const freshUserData = await fetchUser(walletAddress)
     return res.status(200).send({ ...freshUserData })

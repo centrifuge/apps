@@ -45,7 +45,7 @@ export const useVerifyBusiness = () => {
 
       const json = await response.json()
 
-      if (!json.steps?.verifyBusiness?.completed) {
+      if (!json.generalSteps?.verifyBusiness?.completed) {
         throw new Error()
       }
     },

@@ -20,8 +20,8 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   const { data: unsignedAgreementData, isFetched: isUnsignedAgreementFetched } = useUnsignedAgreement()
 
   const isCompleted =
-    onboardingUser?.steps.signAgreements[pool.id][pool.trancheId].signedDocument &&
-    !!onboardingUser?.steps.signAgreements[pool.id][pool.trancheId].transactionInfo.extrinsicHash
+    onboardingUser?.poolSteps[pool.id][pool.trancheId].signAgreements.completed &&
+    !!onboardingUser?.poolSteps[pool.id][pool.trancheId].signAgreements.transactionInfo.extrinsicHash
 
   React.useEffect(() => {
     if (isCompleted) {

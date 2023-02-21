@@ -5,7 +5,7 @@ export async function fetchUser(walletAddress: string) {
   try {
     const userDoc = await userCollection.doc(walletAddress).get()
     if (!userDoc.exists) {
-      throw new Error()
+      throw new Error("User doesn't exist")
     }
     return userDoc.data() as OnboardingUser
   } catch (error) {

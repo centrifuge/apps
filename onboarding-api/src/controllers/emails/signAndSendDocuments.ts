@@ -103,7 +103,7 @@ export const signAndSendDocumentsController = async (
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['onboardingStatus', 'steps'])
+    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['poolSteps'])
     const freshUserData = (await userCollection.doc(walletAddress).get()).data() as OnboardingUser
     return res.status(201).send({ ...freshUserData })
   } catch (error) {

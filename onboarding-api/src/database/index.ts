@@ -1,7 +1,7 @@
 import { Firestore } from '@google-cloud/firestore'
 import { Storage } from '@google-cloud/storage'
 import * as dotenv from 'dotenv'
-import { array, bool, date, InferType, lazy, object, string, StringSchema } from 'yup'
+import { array, bool, date, InferType, lazy, mixed, object, string, StringSchema } from 'yup'
 import { HttpsError } from '../utils/httpsError'
 import { Subset } from '../utils/types'
 
@@ -33,7 +33,7 @@ const poolSpecificStepsSchema = object({
     }),
   }),
   status: object({
-    status: string().nullable().oneOf(['approved', 'rejected', 'pending']),
+    status: mixed().nullable().oneOf(['approved', 'rejected', 'pending', null]),
     timeStamp: string().nullable(),
   }),
 })
@@ -134,7 +134,7 @@ const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
  * @param key primary key (documentID) for firestore collection
  * @param data data to be set to firestore
  * @param schemaKey name of the validation schema e.g BUSINESS or USER
- * @param mergeFields optional, pass a value to update data in an existing collection e.g steps.kyb.verified
+ * @param mergeFields optional, pass a value to update data in an existing collection
  */
 export const validateAndWriteToFirestore = async <T = undefined | string[]>(
   key: string,

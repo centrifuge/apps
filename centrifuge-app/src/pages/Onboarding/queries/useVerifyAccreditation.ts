@@ -23,7 +23,7 @@ export const useVerifyAccreditation = () => {
 
       const json = await response.json()
 
-      if (!json.steps?.verifyAccreditation?.completed) {
+      if (!json.generalSteps?.verifyAccreditation?.completed) {
         throw new Error()
       }
     },

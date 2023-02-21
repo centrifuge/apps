@@ -39,7 +39,7 @@ export const setVerifiedIdentityController = async (
         },
       },
     }
-    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['steps'])
+    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['generalSteps'])
     const freshUserData = await fetchUser(walletAddress)
     return res.status(200).send({ ...freshUserData })
   } catch (error) {

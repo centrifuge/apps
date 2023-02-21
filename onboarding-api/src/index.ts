@@ -1,5 +1,4 @@
 import * as dotenv from 'dotenv'
-import * as express from 'express'
 import { getSignedAgreementController } from './controllers/agreement/getSignedAgreement'
 import { getUnsignedAgreementController } from './controllers/agreement/getUnsignedAgreement'
 import { sendVerifyEmailController } from './controllers/emails/sendVerifyEmail'
@@ -16,6 +15,7 @@ import { uploadTaxInfoController } from './controllers/user/uploadTaxInfo'
 import { verifyAccreditationController } from './controllers/user/verifyAccreditation'
 import { corsMiddleware } from './middleware/cors'
 import { verifyJw3t } from './middleware/verifyJw3t'
+const express = require('express')
 import fileUpload = require('express-fileupload')
 
 dotenv.config()

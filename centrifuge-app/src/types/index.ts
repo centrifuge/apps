@@ -57,6 +57,25 @@ export type UltimateBeneficialOwner = {
   dateOfBirth: string
 }
 
+type PoolSpecificSteps = {
+  [poolId: string]: {
+    [trancheId: string]: {
+      signAgreements: {
+        completed: boolean
+        timeStamp: string | null
+        transactionInfo: {
+          extrinsicHash: string | null
+          blockNumber: string | null
+        }
+      }
+      status: {
+        status: 'pending' | 'approved' | 'rejected' | null
+        timeStamp: string | null
+      }
+    }
+  }
+}
+
 type IndividualUserSteps = {
   verifyTaxInfo: {
     completed: boolean
@@ -69,17 +88,6 @@ type IndividualUserSteps = {
   verifyIdentity: {
     completed: boolean
     timeStamp: string | null
-  }
-  signAgreements: {
-    [poolId: string]: {
-      [trancheId: string]: {
-        transactionInfo: {
-          extrinsicHash: string | null
-          blockNumber: string | null
-        }
-        signedDocument: boolean
-      }
-    }
   }
 }
 
@@ -107,18 +115,11 @@ export type EntityUser = {
   jurisdictionCode: string
   registrationNumber: string
   ultimateBeneficialOwners: UltimateBeneficialOwner[]
-  steps: EntityOnboardingSteps
   name: string | null
   dateOfBirth: string | null
   countryOfCitizenship: string | null
-  onboardingStatus: {
-    [poolId: string]: {
-      [trancheId: string]: {
-        status: 'pending' | 'approved' | 'rejected' | null
-        timeStamp: string | null
-      }
-    }
-  }
+  generalSteps: EntityOnboardingSteps
+  poolSteps: PoolSpecificSteps
 }
 
 type IndividualUser = {
@@ -127,15 +128,8 @@ type IndividualUser = {
   name: string | null
   dateOfBirth: string | null
   countryOfCitizenship: string | null
-  steps: IndividualUserSteps
-  onboardingStatus: {
-    [poolId: string]: {
-      [trancheId: string]: {
-        status: 'pending' | 'approved' | 'rejected' | null
-        timeStamp: string | null
-      }
-    }
-  }
+  generalSteps: IndividualUserSteps
+  poolSteps: PoolSpecificSteps
 }
 
 export type OnboardingUser = IndividualUser | EntityUser

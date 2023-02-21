@@ -30,15 +30,12 @@ export const updateInvestorStatusController = async (
     const user = await fetchUser(walletAddress)
 
     const incompleteSteps = Object.entries(user.generalSteps).filter(([name, step]) => {
-      if (name === 'signAgreements') {
-        return !step?.[poolId]?.[trancheId]?.signedDocument
-      }
       if (
         name === 'verifyAccreditation' &&
         user.investorType === 'individual' &&
         !user.countryOfCitizenship?.startsWith('us')
       ) {
-        return true
+        return
       }
 
       if (
@@ -46,21 +43,24 @@ export const updateInvestorStatusController = async (
         user.investorType === 'entity' &&
         !user.jurisdictionCode?.startsWith('us')
       ) {
-        return true
+        return
       }
       return !step?.completed
     })
+
     if (incompleteSteps.length > 0) {
-      if (incompleteSteps) {
-        throw new HttpsError(
-          400,
-          `Incomplete onboarding steps for investor: ${incompleteSteps.map((step) => step[0]).join(', ')}`
-        )
-      }
+      throw new HttpsError(
+        400,
+        `Incomplete onboarding steps for investor: ${incompleteSteps.map((step) => step[0]).join(', ')}`
+      )
     }
 
-    if (user.poolSteps.status[poolId][trancheId].status !== 'pending') {
+    if (user.poolSteps[poolId][trancheId].status.status !== 'pending') {
       throw new HttpsError(400, 'Investor status may have already been updated')
+    }
+
+    if (!user.poolSteps?.[poolId][trancheId].signAgreements.completed) {
+      throw new HttpsError(400, 'Argeements must be signed before investor status can invest')
     }
 
     const updatedUser: Subset<OnboardingUser> = {

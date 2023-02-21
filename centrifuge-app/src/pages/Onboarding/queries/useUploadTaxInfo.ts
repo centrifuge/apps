@@ -31,7 +31,7 @@ export const useUploadTaxInfo = (taxInfo: File | null) => {
 
         const json = await response.json()
 
-        if (!json.steps?.verifyTaxInfo?.completed) {
+        if (!json.generalSteps?.verifyTaxInfo?.completed) {
           throw new Error()
         }
       }

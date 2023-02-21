@@ -55,7 +55,7 @@ export const BusinessInformation = () => {
   const isUSOrCA =
     onboardingUser?.jurisdictionCode?.startsWith('us') || onboardingUser?.jurisdictionCode?.startsWith('ca')
 
-  const isCompleted = !!onboardingUser?.steps?.verifyBusiness.completed
+  const isCompleted = !!onboardingUser?.generalSteps?.verifyBusiness.completed
 
   const formik = useFormik({
     initialValues: {

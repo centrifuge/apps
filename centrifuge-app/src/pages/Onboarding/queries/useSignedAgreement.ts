@@ -12,13 +12,13 @@ export const useSignedAgreement = () => {
   const [hasSignedAgreement, setHasSignedAgreement] = React.useState(false)
 
   React.useEffect(() => {
-    if (onboardingUser?.steps?.signAgreements) {
+    if (onboardingUser) {
       setHasSignedAgreement(
-        onboardingUser.steps.signAgreements[pool.id][pool.trancheId].signedDocument &&
-          !!onboardingUser.steps.signAgreements[pool.id][pool.trancheId].transactionInfo.extrinsicHash
+        onboardingUser.poolSteps[pool.id][pool.trancheId].signAgreements.completed &&
+          !!onboardingUser.poolSteps[pool.id][pool.trancheId].signAgreements.transactionInfo.extrinsicHash
       )
     }
-  }, [onboardingUser?.steps?.signAgreements, pool.id, pool.trancheId])
+  }, [onboardingUser?.poolSteps[pool.id][pool.trancheId].signAgreements, pool.id, pool.trancheId])
 
   const query = useQuery(
     ['signed-subscription-agreement', selectedAccount?.address, pool.id, pool.trancheId],
