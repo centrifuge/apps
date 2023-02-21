@@ -137,9 +137,10 @@ jobs:
           pull_sha: ${{ github.event.pull_request.head.sha }}
         with:
           message: |
-            Deployed webiste in Google Cloud
-            URL: https://${{ needs.deploy.outputs.bucket_url }}
+            PR deployed in Google Cloud
+            URL: https://${{ needs.deploy-app.outputs.bucket_url }}
             Commit #: ${{ env.pull_sha }}   
+            To access the functions directly check the corresponding deploy Action
       
   # owasp_scan:
   #   needs: deploy-app
@@ -148,7 +149,7 @@ jobs:
   #     - name: ZAP Scan
   #       uses: zaproxy/action-baseline@v0.7.0
   #       with:
-  #         target: https://${{ needs.deploy.outputs.bucket_url }}
+  #         target: https://${{ needs.deploy-app.outputs.bucket_url }}
   #         allow_issue_writing: false # Remove this to activate creating issues with the report
       
 
