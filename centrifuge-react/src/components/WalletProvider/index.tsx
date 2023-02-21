@@ -6,7 +6,8 @@ export {
   getStore,
   useConnectorState,
   useEvmProvider,
-  useNativeCurrency,
+  useNativeBalance as useEvmNativeBalance,
+  useNativeCurrency as useEvmNativeCurrency,
   useProviderForConnector,
 } from './evm/utils'
 export * from './WalletProvider'

@@ -28,7 +28,7 @@ import { ConnectButton } from './ConnectButton'
 
 export function WalletMenu() {
   const ctx = useWallet()
-  const { connectedType } = ctx
+  const { connectedType, pendingConnect } = ctx
   const accounts = connectedType && ctx[connectedType].accounts
   const address = useAddress()
   return address ? (
@@ -36,23 +36,15 @@ export function WalletMenu() {
   ) : accounts && !accounts.length ? (
     <WalletButton connectLabel="No accounts available" disabled />
   ) : (
-    <ConnectButton />
+    <ConnectButton loading={pendingConnect.isConnecting} />
   )
 }
 
 function ConnectedMenu() {
   const address = useAddress()!
   const ctx = useWallet()
-  const {
-    connectedType,
-    substrate,
-    evm,
-    disconnect,
-    showWallets,
-    showAccounts,
-    connectedNetwork,
-    connectedNetworkName,
-  } = ctx
+  const { connectedType, substrate, disconnect, showWallets, showAccounts, connectedNetwork, connectedNetworkName } =
+    ctx
   const wallet = ctx[connectedType!]?.selectedWallet
   const { name: ensName, avatar } = useEns(connectedType === 'evm' ? address : undefined)
   const balances = useBalances(connectedType === 'substrate' ? address : undefined)

@@ -158,7 +158,7 @@ export function WalletProvider({
   const {
     execute: setPendingConnect,
     args: connectingArgs,
-    isLoading: isConnecting,
+    isLoading: isConnectingByInteraction,
     isError: isConnectError,
   } = useAsyncCallback((_: EvmConnectorMeta | Wallet, cb: () => Promise<Account[] | string[] | undefined>) => cb(), {
     throwOnReplace: true,
@@ -236,7 +236,8 @@ export function WalletProvider({
     dispatch({ type: 'reset' })
   }, [])
 
-  useConnectEagerly(connect, dispatch, evmConnectors)
+  const isTryingToConnectEagerly = useConnectEagerly(connect, dispatch, evmConnectors)
+  const isConnecting = isConnectingByInteraction || isTryingToConnectEagerly
 
   const ctx: WalletContextType = React.useMemo(() => {
     const selectedSubstrateAccount =
