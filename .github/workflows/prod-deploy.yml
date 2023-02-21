@@ -40,17 +40,29 @@ jobs:
   
   retrieve_function_assets:
     runs-on: ubuntu-latest
-    steps:  
+    steps: 
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: staging-deploy.yml
+          workflow_conclusion: ""
+
+      - name: "debug: list workspace"
+        run: ls -la      
+
       - uses: dsaltares/fetch-gh-release-asset@master
         with:
           repo: 'centrifuge/apps'
           version: 'tags/${{ github.ref_name }}'
-          file: '*.zip'
+          file: ".*-api\\.zip"
+          target: "./releases/"
+          regex: true
           # target: 'subdir/${{ matrix.artifact_name }}.zip'
           # token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: "debug: list workspace"
-        run: ls -la
+        run: ls -la ./releases/
 
       - name: Unzip release files
         run: |
