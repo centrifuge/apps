@@ -42,16 +42,8 @@ export function WalletMenu() {
 function ConnectedMenu() {
   const address = useAddress()!
   const ctx = useWallet()
-  const {
-    connectedType,
-    substrate,
-    disconnect,
-    showWallets,
-    showAccounts,
-    connectedNetwork,
-    connectedNetworkName,
-    substrate: { accounts, proxies },
-  } = ctx
+  const { connectedType, substrate, disconnect, showWallets, showAccounts, connectedNetwork, connectedNetworkName } =
+    ctx
   const wallet = ctx[connectedType!]?.selectedWallet
   const { name: ensName, avatar } = useEns(connectedType === 'evm' ? address : undefined)
   const balances = useBalances(connectedType === 'substrate' ? address : undefined)
@@ -117,7 +109,7 @@ function ConnectedMenu() {
               <Box px={2} py={1}>
                 <Text variant="label2">Network</Text>
                 <Shelf gap={1}>
-                  <NetworkIcon network={connectedNetwork} size="iconSmall" />
+                  <NetworkIcon network={connectedNetwork!} size="iconSmall" />
                   <Text variant="interactive1">{connectedNetworkName}</Text>
                 </Shelf>
               </Box>
@@ -128,12 +120,12 @@ function ConnectedMenu() {
                 <Box px={2} py={1}>
                   <Text variant="label2">Wallet</Text>
                   <Shelf gap={1}>
-                    <Logo src={getWalletIcon(wallet)} size="iconSmall" />
+                    <Logo icon={getWalletIcon(wallet)} size="iconSmall" />
                     <Text variant="interactive1">{getWalletLabel(wallet)}</Text>
                   </Shelf>
                 </Box>
               )}
-              {connectedType === 'substrate' && (accounts!.length > 1 || !!proxies?.[address]?.length) && (
+              {connectedType === 'substrate' ? (
                 <MenuItem
                   label="Switch account"
                   icon={<IconSwitch size="iconSmall" />}
@@ -142,8 +134,7 @@ function ConnectedMenu() {
                     showAccounts()
                   }}
                 />
-              )}
-              {connectedType === 'evm' && (
+              ) : (
                 <MenuItem
                   label="Switch wallet"
                   icon={<IconSwitch size="iconSmall" />}

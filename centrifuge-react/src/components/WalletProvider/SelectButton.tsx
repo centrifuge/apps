@@ -78,20 +78,32 @@ const PlainButton = styled.button<{ $left?: boolean }>({
   background: 'transparent',
 })
 
+type IconComponent = React.ComponentType<{ size?: string | number }>
+
 export function LogoButton({
-  src,
+  icon,
   size = 'iconRegular',
   ...rest
-}: { src?: string; size?: NetworkIconProps['size'] } & React.HTMLAttributes<HTMLButtonElement>) {
+}: { icon: string | IconComponent; size?: NetworkIconProps['size'] } & React.HTMLAttributes<HTMLButtonElement>) {
   return (
     <PlainButton type="button" {...rest}>
-      <Logo src={src} size={size} />
+      <Logo icon={icon} size={size} />
     </PlainButton>
   )
 }
 
-export function Logo({ src, size = 'iconRegular' }: { src?: string; size?: NetworkIconProps['size'] }) {
-  return <Box as="img" src={src} alt="" width={size} height={size} style={{ objectFit: 'contain' }} />
+export function Logo({
+  icon: Icon,
+  size = 'iconRegular',
+}: {
+  icon: string | IconComponent
+  size?: NetworkIconProps['size']
+}) {
+  if (!Icon) return null
+  if (typeof Icon === 'string') {
+    return <Box as="img" src={Icon} alt="" width={size} height={size} style={{ objectFit: 'contain' }} />
+  }
+  return <Icon size={size} />
 }
 
 function Content({ loading = false, logo, children, iconRight }: SelectButtonProps) {

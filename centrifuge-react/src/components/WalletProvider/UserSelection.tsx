@@ -62,7 +62,7 @@ export function UserSelection({ network, wallet }: UserSelectionProps) {
         <Selection>
           {wallet && (
             <LogoButton
-              src={getWalletIcon(wallet)}
+              icon={getWalletIcon(wallet)}
               onClick={() => showWallets(selectedNetwork)}
               aria-label="Change wallet"
             />
@@ -74,22 +74,22 @@ export function UserSelection({ network, wallet }: UserSelectionProps) {
 }
 
 export type NetworkIconProps = {
-  network: UserSelectionProps['network']
+  network: Exclude<UserSelectionProps['network'], null>
   size?: FabricTheme['sizes']['iconSmall' | 'iconMedium' | 'iconRegular' | 'iconLarge']
 }
 
 function useNeworkIcon(network: NetworkIconProps['network']) {
   const { evm } = useWallet()
-  const src = !network ? '' : network === 'centrifuge' ? centrifugeLogo : evm.chains[network]?.logo?.src
+  const src = network === 'centrifuge' ? centrifugeLogo : evm.chains[network]?.logo?.src ?? ''
   return src
 }
 
 function ChangeNetworkButton({ network, size = 'iconRegular', onClick }: NetworkIconProps & { onClick: () => void }) {
-  return <LogoButton src={useNeworkIcon(network)} size={size} onClick={onClick} aria-label="Change network" />
+  return <LogoButton icon={useNeworkIcon(network)} size={size} onClick={onClick} aria-label="Change network" />
 }
 
 export function NetworkIcon({ network, size = 'iconRegular' }: NetworkIconProps) {
-  return <LogoButton src={useNeworkIcon(network)} size={size} />
+  return <LogoButton icon={useNeworkIcon(network)} size={size} />
 }
 
 function Column({ children }: { children?: React.ReactNode }) {

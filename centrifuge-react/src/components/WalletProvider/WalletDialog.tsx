@@ -4,6 +4,7 @@ import {
   Card,
   Dialog,
   IconAlertCircle,
+  IconArrowRight,
   IconChevronLeft,
   IconDownload,
   MenuItemGroup,
@@ -34,7 +35,6 @@ const title = {
 export function WalletDialog({ evmChains }: Props) {
   const ctx = useWallet()
   const {
-    connectedType,
     pendingConnect: { isConnecting, wallet: pendingWallet, isError: isConnectError },
     walletDialog: { view, network: selectedNetwork, wallet: selectedWallet },
     dispatch,
@@ -74,7 +74,7 @@ export function WalletDialog({ evmChains }: Props) {
           <>
             <SelectionStep step={1} title="Network">
               <SelectButton
-                logo={<Logo src={centrifugeLogo} />}
+                logo={<Logo icon={centrifugeLogo} />}
                 onClick={() => showWallets('centrifuge')}
                 active={selectedNetwork === 'centrifuge'}
               >
@@ -84,7 +84,7 @@ export function WalletDialog({ evmChains }: Props) {
               {Object.entries(evmChains).map(([chainId, chain]) => (
                 <SelectButton
                   key={chainId}
-                  logo={chain.logo?.src ? <Logo src={chain.logo.src} /> : undefined}
+                  logo={chain.logo?.src ? <Logo icon={chain.logo.src} /> : undefined}
                   onClick={() => showWallets(Number(chainId))}
                   active={selectedNetwork === Number(chainId)}
                 >
@@ -100,7 +100,7 @@ export function WalletDialog({ evmChains }: Props) {
                 wallet.installed ? (
                   <SelectButton
                     key={wallet.title}
-                    logo={<Logo src={getWalletIcon(wallet)} />}
+                    logo={<Logo icon={getWalletIcon(wallet)} />}
                     iconRight={
                       selectedWallet && isConnectError && selectedWallet === wallet ? (
                         <IconAlertCircle size="iconSmall" />
@@ -111,7 +111,7 @@ export function WalletDialog({ evmChains }: Props) {
                       connect(wallet)
                     }}
                     loading={isConnecting && wallet === pendingWallet}
-                    active={ctx[connectedType!]?.selectedWallet === wallet}
+                    active={selectedWallet === wallet}
                   >
                     {getWalletLabel(wallet)}
                   </SelectButton>
@@ -119,7 +119,7 @@ export function WalletDialog({ evmChains }: Props) {
                   <SelectAnchor
                     key={wallet.title}
                     href={wallet.installUrl}
-                    logo={<Logo src={getWalletIcon(wallet)} />}
+                    logo={<Logo icon={getWalletIcon(wallet)} />}
                     iconRight={<IconDownload size="iconSmall" color="textPrimary" />}
                   >
                     {getWalletLabel(wallet)}
@@ -158,7 +158,7 @@ export function getWalletLabel(wallet: EvmConnectorMeta | Wallet) {
 
 export function getWalletIcon(wallet: EvmConnectorMeta | Wallet) {
   if ('connector' in wallet && wallet.connector instanceof MetaMask) {
-    return !wallet.installed || isMetaMaskWallet() ? wallet.logo.src : ''
+    return !wallet.installed || isMetaMaskWallet() ? wallet.logo.src : IconArrowRight
   }
   return wallet.logo.src
 }
