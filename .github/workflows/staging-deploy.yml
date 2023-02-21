@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         deploy_to: ["altair", "staging"]
-    uses: centrifuge/apps/.github/workflows/centrifuge-app.yml@gh-actions-refactor
+    uses: ./.github/workflows/centrifuge-app.yml
     secrets: inherit
     with:
       deploy_env: ${{ matrix.deploy_to }}
@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         deploy_to: ["altair", "staging"]
-    uses: centrifuge/apps/.github/workflows/pinning-api.yml@gh-actions-refactor
+    uses: ./.github/workflows/pinning-api.yml
     secrets: inherit
     with:
       deploy_env: ${{ matrix.deploy_to }}
@@ -37,7 +37,7 @@ jobs:
       fail-fast: false
       matrix:
         deploy_to: ["altair", "staging"]
-    uses: centrifuge/apps/.github/workflows/onboarding-api.yml@gh-actions-refactor
+    uses: ./.github/workflows/onboarding-api.yml
     secrets: inherit
     with:
       deploy_env: ${{ matrix.deploy_to }}
