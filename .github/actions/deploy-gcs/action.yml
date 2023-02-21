@@ -1,0 +1,64 @@
+name: Upload static web to GCloud bucket
+description: 'deploy front-end in google cloud buckets'
+inputs:
+  bucket_url:
+    description: Name of bucket ending in k-f.dev
+    required: true
+  GWIP:
+    description: Google Workflow Identity provider
+    required: true
+  GSA:
+    description: Google Service Account
+    required: true
+  artifact_name:
+    description: Name of artifact from GH upload
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: download webpack
+      id: download
+      uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
+      with:
+        name: ${{ inputs.artifact_name }}
+        path: webpack
+
+    ## Every module from here on could potentially expose the Gcloud Auth Token
+    ## Do not add untrusted code with `uses`
+    ## Ideally run only google-github-actions code with commit SHA at the end from here on
+    ## or `run` commands that we write.
+
+    - name: Auth gcloud
+      id: gauth
+      uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+      env:
+        GSA: ${{ inputs.GSA }}
+        GWIP: ${{ inputs.GWIP }}
+      with:
+        workload_identity_provider: ${{ env.GWIP }}
+        service_account: ${{ env.GSA }}
+
+    # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+    - name: 'Set up Cloud SDK'
+      uses: google-github-actions/setup-gcloud@62d4898025f6041e16b1068643bfc5a696863587 # @v1
+
+    - name: Create bucket
+      shell: sh
+      id: create_bucket
+      run: |
+        if ! gsutil ls gs://${{ inputs.bucket_url }} 1> /dev/null; then
+          gsutil mb gs://${{ inputs.bucket_url }}
+          echo "Setup bucket settings to serve the site"
+          gsutil iam ch allUsers:objectViewer gs://${{ inputs.bucket_url }}
+          gsutil web set -m index.html -e index.html gs://${{ inputs.bucket_url }}            
+        else
+          echo "Bucket ${{ inputs.bucket_url }} found! No need to create it"
+        fi
+    - name: push to bucket
+      shell: sh
+      id: push
+      run: gsutil -m rsync -d -r ${{steps.download.outputs.download-path}} gs://${{ inputs.bucket_url }}
+
+    - shell: sh
+      run: echo "::notice title=front_URL::${{ inputs.bucket_url  }}"

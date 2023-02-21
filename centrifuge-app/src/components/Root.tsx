@@ -29,7 +29,6 @@ import { UpdateInvestorStatus } from '../pages/Onboarding/UpdateInvestorStatus'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
-import { fetchLambda } from '../utils/fetchLambda'
 import { AuthProvider } from './AuthProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
@@ -38,6 +37,7 @@ import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
 import { OnboardingProvider } from './OnboardingProvider'
 import { PodAuthProvider } from './PodAuthProvider'
+import { pinToApi } from '../utils/pinToApi'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,26 +49,32 @@ const queryClient = new QueryClient({
 
 const centConfig: UserProvidedConfig = {
   network: config.network,
-  kusamaWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL,
-  polkadotWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL,
-  altairWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL,
-  centrifugeWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL,
+  kusamaWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL as string,
+  polkadotWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL as string,
+  altairWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL as string,
+  centrifugeWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL as string,
   printExtrinsics: import.meta.env.NODE_ENV === 'development',
-  centrifugeSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL,
-  altairSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL,
-  metadataHost: import.meta.env.REACT_APP_IPFS_GATEWAY,
+  centrifugeSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,
+  altairSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,
+  metadataHost: import.meta.env.REACT_APP_IPFS_GATEWAY as string,
   pinFile: (b64URI) =>
-    fetchLambda('pinFile', {
+    pinToApi('pinFile', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ uri: b64URI }),
     }),
   unpinFile: (hash) =>
-    fetchLambda('unpinFile', {
+    pinToApi('unpinFile', {
       method: 'DELETE',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ hash }),
     }),
+  pinJson: (json) =>
+    pinToApi('pinJson', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ json }),
+    }),  
 }
 
 export const Root: React.VFC = () => {

@@ -12,9 +12,9 @@ import {
   TextAreaInput,
   TextInput,
 } from '@centrifuge/fabric'
-import { lastValueFrom } from '@polkadot/api-base/node_modules/rxjs'
 import * as React from 'react'
 import { useHistory, useParams } from 'react-router'
+import { lastValueFrom } from 'rxjs'
 import { useDebugFlags } from '../components/DebugFlags'
 import { PageHeader } from '../components/PageHeader'
 import { PageSection } from '../components/PageSection'
