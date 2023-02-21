@@ -174,7 +174,7 @@ export const validateAndWriteToFirestore = async <T = undefined | string[]>(
   key: string,
   data: T extends 'undefined' ? OnboardingUser : Subset<OnboardingUser>,
   schemaKey: keyof typeof schemas,
-  mergeFields?: string[]
+  mergeFields?: T
 ) => {
   try {
     const { collection, schema } = schemas[schemaKey]
