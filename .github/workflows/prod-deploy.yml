@@ -50,24 +50,25 @@ jobs:
 
       - name: "debug: list workspace"
         run: ls -la      
-
-      - uses: dsaltares/fetch-gh-release-asset@master
-        with:
-          repo: 'centrifuge/apps'
-          version: 'tags/${{ github.ref_name }}'
-          file: ".*-api\\.zip"
-          target: "./releases/"
-          regex: true
-          # target: 'subdir/${{ matrix.artifact_name }}.zip'
-          # token: ${{ secrets.GITHUB_TOKEN }}
+      # Alternative: download from the release instead of 
+      # workflow artifacts
+      # - uses: dsaltares/fetch-gh-release-asset@master
+      #   with:
+      #     repo: 'centrifuge/apps'
+      #     version: 'tags/${{ github.ref_name }}'
+      #     file: ".*-api\\.zip"
+      #    # target: "./releases/"
+      #     regex: true
+      #     # target: 'subdir/${{ matrix.artifact_name }}.zip'
+      #     # token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: "debug: list workspace"
-        run: ls -la ./releases/
+      # - name: "debug: list workspace"
+      #   run: ls -la ./releases/
 
-      - name: Unzip release files
-        run: |
-          unzip pinning-api.zip -d pinning-api 1> /dev/null
-          unzip onboarding-api.zip -d onboarding-api 1> /dev/null
+      # - name: Unzip release files
+      #   run: |
+      #     unzip pinning-api.zip -d pinning-api 1> /dev/null
+      #     unzip onboarding-api.zip -d onboarding-api 1> /dev/null
 
       - name: list artifact files
         run: |
