@@ -7,53 +7,38 @@ import { abis } from './tinlake/abi'
 
 const contracts: Record<string, Contract> = {}
 
-// export interface TransactionResponse2 extends Transaction2 {
-// 	hash: string;
-
-// 	// Only if a transaction has been mined
-// 	blockNumber?: number,
-// 	blockHash?: string,
-// 	timestamp?: number,
-
-// 	confirmations: number,
-
-// 	// Not optional (as it is in Transaction)
-// 	from: string;
-
-// 	// The raw transaction
-// 	raw?: string,
-
-// 	// This function waits until the transaction has been mined
-// 	wait: (confirmations?: number) => Promise<TransactionReceipt>
-// };
-
-// export interface TransactionReceipt2 {
-// 	to: string;
-// 	from: string;
-// 	contractAddress: string,
-// 	transactionIndex: number,
-// 	root?: string,
-// 	gasUsed: BigNumber,
-// 	logsBloom: string,
-// 	blockHash: string,
-// 	transactionHash: string,
-// 	logs: Array<Log>,
-// 	blockNumber: number,
-// 	confirmations: number,
-// 	cumulativeGasUsed: BigNumber,
-// 	effectiveGasPrice: BigNumber,
-// 	byzantium: boolean,
-// 	type: number;
-// 	status?: number
-// };
-
-export type TinlakeContractNames = keyof typeof abis
-export type TinlakeContractAddresses = Record<TinlakeContractNames, string>
+export type TinlakeContractAddresses = {
+  TINLAKE_CURRENCY: string
+  ROOT_CONTRACT: string
+  ACTIONS: string
+  PROXY_REGISTRY: string
+  COLLATERAL_NFT: string
+  SENIOR_TOKEN: string
+  JUNIOR_TOKEN: string
+  JUNIOR_OPERATOR: string
+  SENIOR_OPERATOR: string
+  CLERK?: string | undefined
+  ASSESSOR: string
+  RESERVE: string
+  SENIOR_TRANCHE: string
+  JUNIOR_TRANCHE: string
+  FEED: string
+  POOL_ADMIN?: string | undefined
+  SENIOR_MEMBERLIST: string
+  JUNIOR_MEMBERLIST: string
+  COORDINATOR: string
+  PILE: string
+  MCD_VAT?: string
+  MCD_JUG?: string
+  MAKER_MGR?: string
+}
+export type TinlakeContractNames = keyof TinlakeContractAddresses
+type AbisNames = keyof typeof abis
 
 const maxUint256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935'
 
 export function getTinlakeModule(inst: Centrifuge) {
-  function contract(contractAddresses: TinlakeContractAddresses, name: TinlakeContractNames) {
+  function contract(contractAddresses: TinlakeContractAddresses, name: AbisNames) {
     const contractAddress = contractAddresses[name]
     const abi = abis[name]
     if (!inst.config.evmSigner) throw new Error('Needs signer')
