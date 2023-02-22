@@ -13,6 +13,9 @@ concurrency:
 
 jobs:
   app-pr-deploy:
+    concurrency:
+      group: 'centrifuge-app-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+      cancel-in-progress: true      
     if: | 
       github.event.action == 'opened' || 
       github.event.action == 'reopened'
@@ -20,6 +23,10 @@ jobs:
     secrets: inherit
 
   pinning-pr-deploy:
+    concurrency:
+    # Fancy concurrency group string to allow for multi-staging deployments  
+      group: 'pinning-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+      cancel-in-progress: false  
     if: | 
       github.event.action == 'opened' || 
       github.event.action == 'reopened'
@@ -27,6 +34,10 @@ jobs:
     secrets: inherit
 
   onboarding-pr-deploy:
+    concurrency:
+    # Fancy concurrency group string to allow for multi-staging deployments  
+      group:  'onboarding-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+      cancel-in-progress: false    
     if: | 
       github.event.action == 'opened' || 
       github.event.action == 'reopened'
