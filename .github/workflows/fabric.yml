@@ -1,0 +1,72 @@
+name: Fabric and storybook
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'fabric/**' 
+      - '.github/workflows/fabric.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/fabric.yml'
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true 
+jobs:
+  build-fabric:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: fabric
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+
+      - name: Setup Node
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c #@v3.6.0
+        with:
+          node-version: '16'
+          cache: yarn
+
+      - run: yarn install --immutable
+      - run: yarn build
+      # - run: yarn ci:loki -> Already broken
+
+      - name: Build fabric storybook
+        run: yarn build-storybook
+
+      - name: Archive storybook artifacts
+        # if: github.ref === 'refs/heads/main'
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # @v3.1.2
+        with:
+          name: fabric-storybook
+          retention-days: 1
+          path: ./fabric/storybook-static
+
+
+  deploy-storybook: # to google storage
+    # if: github.ref == 'refs/heads/main'
+    needs: build-fabric
+    permissions:
+      contents: 'read'
+      id-token: 'write'  
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        with:
+          path: apps
+
+      - name: deploy to GCS
+        id: gcsdeploy
+        uses: ./apps/.github/actions/deploy-gcs
+        with:
+          artifact_name: fabric-storybook
+          bucket_url: 'fabric-storybook.k-f.dev'
+          GWIP: ${{ secrets.GWIP }}
+          GSA: ${{ secrets.GSA }}
+  
+  # ToDo: send notification when deployed?

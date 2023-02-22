@@ -25,8 +25,14 @@ export function getMetadataModule(inst: Centrifuge) {
   }
 
   function pinJson(metadata: Record<any, any>): Observable<{ uri: string; ipfsHash: string }> {
-    const file = jsonToBase64(metadata)
-    return pinFile(file)
+    if (!inst.config?.pinJson) {
+      console.error('pinJson must be set in config to use this feature')
+      return from([])
+    }
+
+    return from(inst.config.pinJson(JSON.parse(JSON.stringify(metadata as any))))
+      .pipe(first())
+      .pipe(map(({ uri }) => parseIPFSHash(uri)))
   }
 
   function unpinFile(uri: string) {
@@ -77,11 +83,3 @@ export function getMetadataModule(inst: Centrifuge) {
   return { getMetadata, parseMetadataUrl, pinFile, pinJson, unpinFile }
 }
 
-function jsonToBase64(jsonInput: Record<any, any>) {
-  try {
-    const json = JSON.stringify(jsonInput)
-    return btoa(unescape(encodeURIComponent(json)))
-  } catch (error) {
-    throw new Error('Invalid JSON')
-  }
-}
