@@ -9,7 +9,7 @@ const kycInput = object({
   name: string().required(),
   dateOfBirth: string().required(),
   countryOfCitizenship: string().required(),
-  countryOfResidence: string().required(),
+  countryOfResidency: string().required(),
   poolId: string(),
   trancheId: string(),
 })
@@ -51,7 +51,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         name: body.name,
         dateOfBirth: body.dateOfBirth,
         countryOfCitizenship: body.countryOfCitizenship,
-        countryOfResidence: body.countryOfResidence,
+        countryOfResidency: body.countryOfResidency,
         steps: {
           verifyIdentity: {
             completed: false,
@@ -86,14 +86,14 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
       const updatedUser = {
         name: body.name,
         countryOfCitizenship: body.countryOfCitizenship,
-        countryOfResidence: body.countryOfResidence,
+        countryOfResidency: body.countryOfResidency,
         dateOfBirth: body.dateOfBirth,
         kycReference,
       }
       await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', [
         'name',
         'countryOfCitizenship',
-        'countryOfResidence',
+        'countryOfResidency',
         'dateOfBirth',
         'kycReference',
       ])

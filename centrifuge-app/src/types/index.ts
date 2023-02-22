@@ -55,6 +55,8 @@ export type InvestorTypes = 'individual' | 'entity'
 export type UltimateBeneficialOwner = {
   name: string
   dateOfBirth: string
+  countryOfCitizenship: string
+  countryOfResidency: string
 }
 
 type IndividualUserSteps = {
@@ -111,7 +113,7 @@ export type EntityUser = {
   name: string | null
   dateOfBirth: string | null
   countryOfCitizenship: string | null
-  countryOfResidence: string | null
+  countryOfResidency: string | null
   onboardingStatus: {
     [poolId: string]: {
       [trancheId: string]: {
@@ -128,7 +130,7 @@ type IndividualUser = {
   name: string
   dateOfBirth: string
   countryOfCitizenship: string
-  countryOfResidence: string
+  countryOfResidency: string
   steps: IndividualUserSteps
   onboardingStatus: {
     [poolId: string]: {
