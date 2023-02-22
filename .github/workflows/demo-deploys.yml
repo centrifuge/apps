@@ -1,4 +1,4 @@
-name: "Manual deployments"
+name: "Demo deployments"
 on:
   workflow_dispatch:
   
