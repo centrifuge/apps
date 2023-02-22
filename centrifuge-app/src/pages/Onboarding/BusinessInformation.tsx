@@ -16,7 +16,7 @@ import { date, object, string } from 'yup'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { EntityUser } from '../../types'
 import { formatGeographyCodes } from '../../utils/formatGeographyCodes'
-import { CA_PROVINCE_CODES, KYB_COUNTRY_CODES, US_STATE_CODES } from './geography_codes'
+import { CA_PROVINCE_CODES, KYB_COUNTRY_CODES, US_STATE_CODES } from './geographyCodes'
 import { useVerifyBusiness } from './queries/useVerifyBusiness'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
 

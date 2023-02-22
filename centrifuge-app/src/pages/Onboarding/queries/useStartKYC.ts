@@ -6,6 +6,7 @@ type Indentity = {
   name: string
   dateOfBirth: string
   countryOfCitizenship: string
+  countryOfResidence: string
 }
 
 export const useStartKYC = () => {
@@ -23,6 +24,7 @@ export const useStartKYC = () => {
         name: values.name,
         dateOfBirth: values.dateOfBirth,
         countryOfCitizenship: values.countryOfCitizenship,
+        countryOfResidence: values.countryOfResidence,
         ...(onboardingUser?.investorType === undefined && { poolId: pool.id, trancheId: pool.trancheId }),
       }),
     })

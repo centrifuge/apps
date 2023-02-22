@@ -4,13 +4,14 @@ import { boolean, date, object, string } from 'yup'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { useStartKYC } from '../queries/useStartKYC'
 import { useVerifyIdentity } from '../queries/useVerifyIdentity'
-import { AuthorizedSignerVerification } from './AuthorizedSignerVerification'
 import { IdentityVerification } from './IdentityVerification'
+import { SignerVerification } from './SignerVerification'
 
-const authorizedSignerInput = object({
+const signerInput = object({
   name: string().required(),
   dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
   countryOfCitizenship: string().required(),
+  countryOfResidence: string().required(),
   isAccurate: boolean().oneOf([true]),
 })
 
@@ -28,12 +29,13 @@ export const KnowYourCustomer = () => {
       name: onboardingUser?.name || '',
       dateOfBirth: onboardingUser?.dateOfBirth || '',
       countryOfCitizenship: onboardingUser?.countryOfCitizenship || '',
+      countryOfResidence: onboardingUser?.countryOfResidence || '',
       isAccurate: !!isCompleted,
     },
     onSubmit: (values) => {
       startKYC(values)
     },
-    validationSchema: authorizedSignerInput,
+    validationSchema: signerInput,
     validateOnMount: true,
   })
 
@@ -63,7 +65,7 @@ export const KnowYourCustomer = () => {
   }, [startKYCData, refetchOnboardingUser])
 
   if (activeKnowYourCustomerStep === 0) {
-    return <AuthorizedSignerVerification formik={formik} isLoading={isStartKYCLoading} isCompleted={isCompleted} />
+    return <SignerVerification formik={formik} isLoading={isStartKYCLoading} isCompleted={isCompleted} />
   }
 
   if (activeKnowYourCustomerStep === 1) {
