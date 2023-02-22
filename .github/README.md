@@ -1,6 +1,4 @@
-# apps
-
-Monorepo for the Centrifuge applications.
+# Monorepo for the Centrifuge applications.
 
 ## Setup
 
