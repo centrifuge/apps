@@ -32,7 +32,7 @@ jobs:
 
       - run: yarn install --immutable
       - run: yarn build
-      # - run: yarn ci:loki -> Already broken
+      # - run: yarn ci:loki -> broken
 
       - name: Build fabric storybook
         run: yarn build-storybook
