@@ -21,6 +21,7 @@ import { isMetaMaskWallet } from './evm/utils'
 import { Logo, SelectAnchor, SelectButton } from './SelectButton'
 import { SelectionStep } from './SelectionStep'
 import { UserSelection } from './UserSelection'
+import { useGetNetworkName } from './utils'
 import { useWallet, wallets } from './WalletProvider'
 
 type Props = {
@@ -42,6 +43,8 @@ export function WalletDialog({ evmChains }: Props) {
     connect: doConnect,
     evm,
   } = ctx
+
+  const getNetworkName = useGetNetworkName()
 
   const shownWallets = (
     selectedNetwork === 'centrifuge' ? [...wallets] : selectedNetwork ? [...evm.connectors.filter((c) => c.shown)] : []
@@ -78,7 +81,7 @@ export function WalletDialog({ evmChains }: Props) {
                 onClick={() => showWallets('centrifuge')}
                 active={selectedNetwork === 'centrifuge'}
               >
-                Centrifuge
+                {getNetworkName('centrifuge')}
               </SelectButton>
 
               {Object.entries(evmChains).map(([chainId, chain]) => (

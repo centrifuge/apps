@@ -10,4 +10,5 @@ export {
   useNativeCurrency as useEvmNativeCurrency,
   useProviderForConnector,
 } from './evm/utils'
+export { getNetworkName, useGetNetworkName, useNetworkName } from './utils'
 export * from './WalletProvider'

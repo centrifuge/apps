@@ -68,7 +68,7 @@ export function PoolDetailSideBar({
 }) {
   const { pid: poolId } = useParams<{ pid: string }>()
 
-  return setSelectedToken ? (
+  return (
     <InvestRedeem
       poolId={poolId}
       trancheId={selectedToken}
@@ -76,7 +76,7 @@ export function PoolDetailSideBar({
       networks={poolId.startsWith('0x') ? [ethConfig.network === 'goerli' ? 5 : 1] : ['centrifuge']}
       actionsRef={investRef}
     />
-  ) : null
+  )
 }
 
 function AverageMaturity({ poolId }: { poolId: string }) {
@@ -189,7 +189,7 @@ export function PoolDetailOverview({
                     />
                     {setSelectedToken && (
                       <Button
-                        variant={i === 0 ? 'primary' : 'secondary'}
+                        variant="secondary"
                         onClick={() => setSelectedToken(token.id)}
                         style={{ marginLeft: 'auto' }}
                       >

@@ -1,5 +1,5 @@
 import { CurrencyBalance, Pool, TokenBalance } from '@centrifuge/centrifuge-js'
-import { ConnectionGuard, useWallet } from '@centrifuge/centrifuge-react'
+import { ConnectionGuard, useGetNetworkName, useWallet } from '@centrifuge/centrifuge-react'
 import { Network } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/types'
 import {
   AnchorButton,
@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   CurrencyInput,
+  Divider,
   Grid,
   IconArrowUpRight,
   IconCheckInCircle,
@@ -17,6 +18,7 @@ import {
   Stack,
   Text,
   TextWithPlaceholder,
+  Thumbnail,
   useControlledState,
 } from '@centrifuge/fabric'
 import css from '@styled-system/css'
@@ -55,10 +57,19 @@ type Props = {
   networks?: Network[]
 }
 
+// @ts-ignore
+const listFormatter = new Intl.ListFormat('en')
+
 export function InvestRedeem({ networks = ['centrifuge'], ...rest }: Props) {
+  const getNetworkName = useGetNetworkName()
   return (
     <LoadBoundary>
-      <ConnectionGuard networks={networks}>
+      <ConnectionGuard
+        networks={networks}
+        body={`This pool is deployed on the ${listFormatter.format(networks.map(getNetworkName))} ${
+          networks.length > 1 ? 'networks' : 'network'
+        }. To be able to invest and redeem you need to switch the network.`}
+      >
         <InvestRedeemState {...rest} />
       </ConnectionGuard>
     </LoadBoundary>
@@ -130,7 +141,6 @@ function InvestRedeemState(props: Props) {
 
   React.useImperativeHandle(actionsRef, () => ({
     setView: (view) => {
-      console.log('hellooooooo!!!!!!!!')
       setView(view)
     },
   }))
@@ -170,26 +180,26 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
     if (!state.order.remainingInvestCurrency.isZero()) actualView = 'invest'
     if (!state.order.remainingRedeemToken.isZero()) actualView = 'redeem'
   }
-  console.log('view', view, actualView)
+
   const pendingRedeem = state.order?.remainingRedeemToken ?? Dec(0)
   const canOnlyInvest =
     state.order?.payoutTokenAmount.isZero() && state.trancheBalanceWithPending.isZero() && pendingRedeem.isZero()
 
   return (
     <Stack as={Card} gap={2} p={2}>
-      <Stack>
-        <Shelf justifyContent="space-between">
-          <Text variant="heading3">Investment value</Text>
-          <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
-            {formatBalance(state.investmentValue, state.poolCurrency?.symbol)}
-          </TextWithPlaceholder>
-        </Shelf>
-        <Shelf justifyContent="space-between">
-          <Text variant="label1">Token balance</Text>
-          <TextWithPlaceholder variant="label1" isLoading={state.isDataLoading} width={12} variance={0}>
-            {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol)}
-          </TextWithPlaceholder>
-        </Shelf>
+      <Stack alignItems="center">
+        <Box pb={1}>
+          <Thumbnail type="token" size="large" label={state.trancheCurrency?.symbol ?? ''} />
+        </Box>
+        <TextWithPlaceholder variant="heading3" isLoading={state.isDataLoading}>
+          {formatBalance(state.investmentValue, state.poolCurrency?.symbol)}
+        </TextWithPlaceholder>
+        <TextWithPlaceholder variant="body3" isLoading={state.isDataLoading} width={12} variance={0}>
+          {formatBalance(state.trancheBalanceWithPending, state.trancheCurrency?.symbol)}
+        </TextWithPlaceholder>
+        <Box bleedX={2} mt={1} alignSelf="stretch">
+          <Divider borderColor="borderSecondary" />
+        </Box>
       </Stack>
       {pool.tranches.length > 1 && (
         <Select
@@ -225,13 +235,17 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
                 ) : null)}
               <EpochBusy busy={state.isPoolBusy} />
               <Stack p={1} gap={1}>
-                <Button variant="secondary" onClick={() => setView('invest')} disabled={state.isPoolBusy}>
-                  Invest more
-                </Button>
-                <Button variant="secondary" onClick={() => setView('redeem')} disabled={state.isPoolBusy}>
-                  Redeem
-                </Button>
-                <TransactionsLink />
+                <Grid gap={1} columns={2} equalColumns>
+                  <Button variant="secondary" small onClick={() => setView('redeem')} disabled={state.isPoolBusy}>
+                    Redeem
+                  </Button>
+                  <Button variant="primary" small onClick={() => setView('invest')} disabled={state.isPoolBusy}>
+                    Invest more
+                  </Button>
+                </Grid>
+                <Box alignSelf="center">
+                  <TransactionsLink />
+                </Box>
               </Stack>
             </>
           ) : actualView === 'invest' ? (
@@ -241,6 +255,7 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
           )}
         </>
       ) : (
+        // TODO: Link to onboarding
         <Text>Not allowed to invest</Text>
       )}
     </Stack>
@@ -602,8 +617,9 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
   )
 }
 
+// TODO: EVM block explorer URLs
 const TransactionsLink: React.FC = () => {
-  const address = useAddress('substrate')
+  const address = useAddress()
   return (
     <Box alignSelf="flex-end">
       <AnchorButton
