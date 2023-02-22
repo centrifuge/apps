@@ -64,6 +64,9 @@ jobs:
 
 
   deploy-onboarding-api:
+      concurrency:
+        group: onboarding-deploy${{ github.event.pull_request.head.label || github.head_ref || github.ref }}
+        cancel-in-progress: false  
       needs: build-onboarding-api
       runs-on: ubuntu-latest
       environment: ${{ needs.build-onboarding-api.outputs.gh_env }}

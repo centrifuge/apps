@@ -63,6 +63,9 @@ jobs:
       gh_env: ${{ steps.prepare.outputs.gh_env }}
 
   deploy-pinning-api:
+    concurrency:
+      group: pinning-deploy${{ github.event.pull_request.head.label || github.head_ref || github.ref }}
+      cancel-in-progress: false
     needs: build-pinning-api
     runs-on: ubuntu-latest
     environment: ${{ needs.build-pinning-api.outputs.gh_env }}

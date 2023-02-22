@@ -56,6 +56,9 @@ jobs:
 
 
   deploy-faucet:
+    concurrency:
+      group: faucet-deploy${{ github.event.pull_request.head.label || github.head_ref || github.ref }}
+      cancel-in-progress: false   
     needs: build-faucet
     runs-on: ubuntu-latest
     environment: ${{ needs.build-faucet.outputs.gh_env }}
