@@ -9,10 +9,6 @@ on:
         - fabric
         - centrifuge-js
         - centrifuge-react
-      build_cmd:
-        description: "build command"
-        default: 'yarn build'
-        type: string
 concurrency:
   group: '${{ github.workflow }}-${{ inputs.app_name || github.event.inputs.app_name }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true  
@@ -52,7 +48,7 @@ jobs:
 
       - name: Publish
         id: publish
-        run: JS-DevTools/npm-publish@v1
+        uses: JS-DevTools/npm-publish@v1
         with:
           token:  ${{secrets.NPM_TOKEN}}
           package: './${{ inputs.app_name }}/package.json'
