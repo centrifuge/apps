@@ -16,7 +16,7 @@ on:
     inputs:
       deploy_env:
         type: string
-        required: true
+        required: false
 env:
  # This needs to match the env: settings in prod-deploy.yml
   app_name: onboarding-api
