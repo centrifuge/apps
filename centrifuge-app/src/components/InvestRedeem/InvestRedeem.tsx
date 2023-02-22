@@ -1,5 +1,5 @@
 import { CurrencyBalance, Pool, TokenBalance } from '@centrifuge/centrifuge-js'
-import { ConnectionGuard } from '@centrifuge/centrifuge-react'
+import { ConnectionGuard, useWallet } from '@centrifuge/centrifuge-react'
 import { Network } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/types'
 import {
   AnchorButton,
@@ -26,7 +26,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Dec } from '../../utils/Decimal'
 import { formatBalance, roundDown } from '../../utils/formatting'
-import { find } from '../../utils/helpers'
+import { useTinlakePermissions } from '../../utils/tinlake/useTinlakePermissions'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useAddress } from '../../utils/useAddress'
 import { useEpochTimeCountdown } from '../../utils/useEpochTimeCountdown'
@@ -40,14 +40,18 @@ import { Spinner } from '../Spinner'
 import { AnchorTextLink } from '../TextLink'
 import { InvestRedeemProvider, useInvestRedeem } from './InvestRedeemProvider'
 
+export type ActionsRef = React.MutableRefObject<
+  | {
+      setView(view: 'invest' | 'redeem'): void
+    }
+  | undefined
+>
+
 type Props = {
   poolId: string
   trancheId?: string
-  defaultTrancheId?: string
-  defaultView?: 'invest' | 'redeem'
-  view?: 'invest' | 'redeem' | 'start'
-  onSetView?: React.Dispatch<'invest' | 'redeem' | 'start'>
-  autoFocus?: boolean
+  onSetTrancheId?: React.Dispatch<string>
+  actionsRef?: ActionsRef
   networks?: Network[]
 }
 
@@ -94,19 +98,47 @@ function EpochBusy({ busy }: { busy?: boolean }) {
   ) : null
 }
 
-function InvestRedeemState(props: Props) {
-  const { poolId, trancheId: trancheIdProp, defaultTrancheId, view: viewProp, defaultView, onSetView } = props
-  const [view, setView] = useControlledState<'start' | 'invest' | 'redeem'>(defaultView ?? 'start', viewProp, onSetView)
-  const address = useAddress('substrate')
+function useAllowedTrancheIds(poolId: string) {
+  const address = useAddress()
+  const { connectedType } = useWallet()
   const isTinlakePool = poolId.startsWith('0x')
-  const permissions = usePermissions(address)
-  const pool = usePool(poolId) as Pool
-  const allowedTrancheIds = Object.keys(permissions?.pools[poolId]?.tranches ?? {})
-  const [trancheId, setTrancheId] = React.useState(
-    trancheIdProp ?? defaultTrancheId ?? allowedTrancheIds[0] ?? pool.tranches[0].id
-  )
+  const permissions = usePermissions(connectedType === 'substrate' ? address : undefined)
+  const { data: tinlakePermissions } = useTinlakePermissions(poolId, address)
+  const pool = usePool(poolId)
+  const allowedTrancheIds = isTinlakePool
+    ? [tinlakePermissions?.junior && pool.tranches[0].id, tinlakePermissions?.senior && pool.tranches[1].id].filter(
+        Boolean
+      )
+    : Object.keys(permissions?.pools[poolId]?.tranches ?? {})
 
-  console.log('seleleletrancheId', trancheId)
+  return allowedTrancheIds
+}
+
+function InvestRedeemState(props: Props) {
+  const { poolId, trancheId: trancheIdProp, onSetTrancheId, actionsRef } = props
+  const allowedTrancheIds = useAllowedTrancheIds(poolId)
+  const pool = usePool(poolId)
+  const [view, setView] = React.useState<'start' | 'invest' | 'redeem'>('start')
+  const [trancheId, setTrancheId] = useControlledState<string>(pool.tranches[0].id, trancheIdProp, onSetTrancheId)
+
+  React.useEffect(() => {
+    if (allowedTrancheIds[0]) {
+      setTrancheId(allowedTrancheIds[0])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowedTrancheIds[0]])
+
+  React.useImperativeHandle(actionsRef, () => ({
+    setView: (view) => {
+      console.log('hellooooooo!!!!!!!!')
+      setView(view)
+    },
+  }))
+
+  function handleSetTrancheId(id: string) {
+    setView('start')
+    setTrancheId(id)
+  }
 
   return (
     <InvestRedeemProvider poolId={poolId} trancheId={trancheId}>
@@ -115,9 +147,7 @@ function InvestRedeemState(props: Props) {
         trancheId={trancheId}
         view={view}
         setView={setView}
-        setTrancheId={setTrancheId}
-        trancheIdControlled={!!trancheIdProp}
-        allowedTrancheIds={!isTinlakePool ? allowedTrancheIds : pool.tranches.map((t) => t.id)}
+        setTrancheId={handleSetTrancheId}
       />
     </InvestRedeemProvider>
   )
@@ -129,19 +159,9 @@ type InnerProps = {
   view: 'invest' | 'redeem' | 'start'
   setView: React.Dispatch<'invest' | 'redeem' | 'start'>
   setTrancheId: React.Dispatch<string>
-  allowedTrancheIds: string[]
-  trancheIdControlled: boolean
-  autoFocus?: boolean
 }
 
-function InvestRedeemInner({
-  view,
-  setView,
-  setTrancheId,
-  allowedTrancheIds,
-  trancheIdControlled,
-  autoFocus,
-}: InnerProps) {
+function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
   const { state } = useInvestRedeem()
   const pool = usePool(state.poolId)
 
@@ -150,7 +170,10 @@ function InvestRedeemInner({
     if (!state.order.remainingInvestCurrency.isZero()) actualView = 'invest'
     if (!state.order.remainingRedeemToken.isZero()) actualView = 'redeem'
   }
+  console.log('view', view, actualView)
   const pendingRedeem = state.order?.remainingRedeemToken ?? Dec(0)
+  const canOnlyInvest =
+    state.order?.payoutTokenAmount.isZero() && state.trancheBalanceWithPending.isZero() && pendingRedeem.isZero()
 
   return (
     <Stack as={Card} gap={2} p={2}>
@@ -168,13 +191,13 @@ function InvestRedeemInner({
           </TextWithPlaceholder>
         </Shelf>
       </Stack>
-      {!trancheIdControlled && allowedTrancheIds.length > 1 && (
+      {pool.tranches.length > 1 && (
         <Select
           name="token"
           placeholder="Select a token"
-          options={allowedTrancheIds.map((id) => ({
-            label: find(pool.tranches, (t) => t.id === id)?.currency.symbol ?? '',
-            value: id,
+          options={pool.tranches.map((t) => ({
+            label: t.currency.symbol ?? '',
+            value: t.id,
           }))}
           value={state.trancheId}
           onChange={(event) => setTrancheId(event.target.value as any)}
@@ -184,14 +207,8 @@ function InvestRedeemInner({
         <Spinner />
       ) : state.isAllowedToInvest ? (
         <>
-          {state.order?.payoutTokenAmount.isZero() &&
-          state.trancheBalanceWithPending.isZero() &&
-          pendingRedeem.isZero() ? (
-            <InvestForm
-              autoFocus={autoFocus}
-              investLabel={`Invest in ${state.trancheCurrency?.symbol ?? ''}`}
-              onCancel={trancheIdControlled ? () => setView('start') : undefined}
-            />
+          {canOnlyInvest ? (
+            <InvestForm autoFocus investLabel={`Invest in ${state.trancheCurrency?.symbol ?? ''}`} />
           ) : actualView === 'start' ? (
             <>
               {state.order &&
@@ -218,9 +235,9 @@ function InvestRedeemInner({
               </Stack>
             </>
           ) : actualView === 'invest' ? (
-            <InvestForm onCancel={() => setView('start')} autoFocus={autoFocus} />
+            <InvestForm onCancel={() => setView('start')} autoFocus />
           ) : (
-            <RedeemForm onCancel={() => setView('start')} autoFocus={autoFocus} />
+            <RedeemForm onCancel={() => setView('start')} autoFocus />
           )}
         </>
       ) : (
@@ -246,14 +263,6 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
   const [changeOrderFormShown, setChangeOrderFormShown] = React.useState(false)
   const { allowInvestBelowMin } = useDebugFlags()
   const pool = usePool(state.poolId)
-
-  // const { execute: getTxInvestFee, txFee: investTxFee } = useTransactionFeeEstimate(
-  //   (cent) => cent.pools.updateInvestOrder
-  // )
-  // React.useEffect(() => {
-  //   // submit dummy tx to get tx fee estimate
-  //   getTxInvestFee([poolId, trancheId, CurrencyBalance.fromFloat(100, 18)])
-  // }, [poolId, trancheId, getTxInvestFee])
 
   hooks.useActionSucceeded(() => {
     form.resetForm()
@@ -317,7 +326,7 @@ function InvestForm({ onCancel, hasInvestment, autoFocus, investLabel = 'Invest'
               <CurrencyInput
                 {...field}
                 onChange={(value) => form.setFieldValue('amount', value)}
-                errorMessage={meta.touched ? meta.error : undefined}
+                errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
                 label={`Amount ${
                   state.isFirstInvestment
                     ? `(min: ${formatBalance(state.minInitialInvestment, state.poolCurrency?.symbol)})`
@@ -506,7 +515,7 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
               // when the value is a decimal we assume the user clicked the max button
               // it tracks the value in tokens and needs to be multiplied by price to get the value in pool currency
               value={field.value instanceof Decimal ? field.value.mul(state.tokenPrice).toNumber() : field.value}
-              errorMessage={meta.touched ? meta.error : undefined}
+              errorMessage={meta.touched && (field.value !== 0 || form.submitCount > 0) ? meta.error : undefined}
               label="Amount"
               disabled={isRedeeming}
               onSetMax={() => form.setFieldValue('amount', state.trancheBalanceWithPending)}
