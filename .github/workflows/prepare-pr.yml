@@ -14,31 +14,60 @@ concurrency:
 jobs:
   app-pr-deploy:
     concurrency:
-      group: 'centrifuge-app-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+      group: 'centrifuge-app-${{ github.event.inputs.deploy_env }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
       cancel-in-progress: true      
     if: | 
       github.event.action == 'opened' || 
       github.event.action == 'reopened'
     uses: ./.github/workflows/centrifuge-app.yml
     secrets: inherit
+  
+  check_pinning:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - run: |
+          if gcloud functions describe --region ${{ vars.GCLOUD_REGION }} $func  1> /dev/null; then
+            echo "pinning_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "pinning_exists=false" >> $GITHUB_OUTPUT
+          fi
+    outputs:
+      deploy_pinning: steps.output.pinning_exists
 
   pinning-pr-deploy:
+    needs: check_pinning
     concurrency:
     # Fancy concurrency group string to allow for multi-staging deployments  
-      group: 'pinning-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+      group: 'pinning-api-${{ github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
       cancel-in-progress: false  
-    if: | 
+    if: |
+      needs.check_pinning.outputs.deploy_pinning == 'true' &&
       github.event.action == 'opened' || 
       github.event.action == 'reopened'
     uses: ./.github/workflows/pinning-api.yml
     secrets: inherit
 
+  check_onboarding:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - run: |
+          if gcloud functions describe --region ${{ vars.GCLOUD_REGION }} $func  1> /dev/null; then
+            echo "onboarding_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "onboarding_exists=false" >> $GITHUB_OUTPUT
+          fi
+    outputs:
+      deploy_onboarding: steps.output.onboarding_exists
+
   onboarding-pr-deploy:
     concurrency:
     # Fancy concurrency group string to allow for multi-staging deployments  
-      group:  'onboarding-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+      group:  'onboarding-api-${{ github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
       cancel-in-progress: false    
     if: | 
+      needs.check_pinning.outputs.deploy_onboaring == 'true' &&
       github.event.action == 'opened' || 
       github.event.action == 'reopened'
     uses: ./.github/workflows/onboarding-api.yml
@@ -68,7 +97,7 @@ jobs:
           FUNCTIONS=("onboarding-api" "pinning-api" "faucet-api")
           for func in "$FUNCTIONS[@]"
           do
-              if gcloud functions describe --region ${{ vars.GCLOUD_REGION }}  1> /dev/null; then
+              if gcloud functions describe --region ${{ vars.GCLOUD_REGION }} $func  1> /dev/null; then
                   gcloud functions delete --quiet $func-pr${{ github.event.number }} --region=${{ vars.GCLOUD_REGION }}
               fi
           done
@@ -78,6 +107,6 @@ jobs:
         env:
           bucket: gs://app-pr${{ github.event.number }}.k-f.dev
         run: |
-          if gsutil ls gs://${{ env.bucket }} 1> /dev/null; then
+          if gsutil ls ${{ env.bucket }} 1> /dev/null; then
             gcloud storage rm --recursive ${{ env.bucket }}
           fi
