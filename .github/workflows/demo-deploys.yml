@@ -1,0 +1,24 @@
+name: "Demo deployments (manual)"
+on:
+  workflow_dispatch:
+  
+jobs:
+  app-demo:
+    uses: ./.github/workflows/centrifuge-app.yml
+    secrets: inherit
+    with:
+      deploy_env: demo
+
+
+  pinning-demo:
+    uses:  ./.github/workflows/pinning-api.yml
+    secrets: inherit
+    with:
+      deploy_env: demo
+
+
+  onboarding-demo:
+    uses: ./.github/workflows/onboarding-api.yml
+    secrets: inherit
+    with:
+      deploy_env: demo

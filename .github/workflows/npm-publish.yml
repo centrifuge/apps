@@ -1,0 +1,67 @@
+name: 'NPM publish (manual)'
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: "Choose an app to publish to NPM"
+        type: choice
+        options:
+        - fabric
+        - centrifuge-js
+        - centrifuge-react
+concurrency:
+  group: '${{ github.workflow }}-${{ inputs.app_name || github.event.inputs.app_name }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true  
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.app_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+
+      - name: Setup Node
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c #@v3.6.0
+        with:
+          node-version: '16'
+          cache: yarn
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: yarn install --immutable
+      - run: yarn build
+      
+      # yarn lint actually fails
+      # - name: Lint and build for centrifuge-js
+      #   run: |
+      #     yarn lint
+      #     yarn build
+      #   if: ${{ inputs.app_name == 'centrifuge-js' }}
+      
+      # yarn ci:loki no longer works in GH Actions
+      # because of some Docker dependencies
+      # - name: Build fabric
+      #   run: |
+      #     yarn build
+      #     yarn ci:loki
+      #   if: ${{ inputs.app_name == 'fabric' }}
+
+      - name: Publish
+        id: publish
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token:  ${{secrets.NPM_TOKEN}}
+          package: './${{ inputs.app_name }}/package.json'
+
+      - uses: actions-ecosystem/action-push-tag@v1
+        if: steps.publish.outputs.type != 'none'
+        with:
+          tag: ${{ inputs.appname }}/v${{ steps.publish.outputs.version }}
+          message: auto-created from GHActions after publishing npm package
+
+      - if: steps.publish.outputs.type != 'none'
+        run: |
+          echo "Version changed: ${{ steps.publish.outputs.old-version }} => ${{ steps.publish.outputs.version }}"          

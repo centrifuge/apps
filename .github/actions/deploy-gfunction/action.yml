@@ -1,0 +1,141 @@
+name: Deploy Gfunction
+description: Deploy Apps repo function to Gcloud. Format env and secrets too.
+
+inputs:
+  app_name:
+    description: app name to deploy
+    required: true
+
+  artifact_name:
+    description: artifact to download and deploy
+    required: true
+
+  deploy_env:
+    description: env to deploy function to
+    required: false
+  
+  checkout_path:
+    description: Folder with repository code
+    required: true
+
+  GWIP:
+    description: Google Workflow Identity provider
+    required: true
+  GSA:
+    description: Google Service Account
+    required: true
+
+  service_account:
+    description: Gcloud SA for the function
+    required: false
+
+  target:
+    description: "Gfunction target handler"
+    required: true
+    default: handler
+    
+  gcloud_region:
+    description: "Google Cloud region to use"
+    required: false
+    default: europe-central2    
+
+runs:
+  using: composite
+  steps:
+    # This is probably redundant but in case this action 
+    # needs to be used in isolation, it won't work
+    # unless the repo is checked out somewhere first
+    - name: Checkout
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+      with:
+        path: apps # The next 3 steps use this folder
+
+    - name: prepare env logic
+      id: prepare
+      uses: "./apps/.github/actions/prepare-deploy"
+      with:
+        app_base_name: ${{ inputs.app_name }}
+        deploy_to: ${{ inputs.deploy_env }}
+
+    - name: set env vars for Gfunction deploy
+      shell: bash
+      id: set_env
+      env:
+        vars_file: ./apps/${{ inputs.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.env  
+      run: |
+        if [ -f ${{ env.vars_file }} ]; then
+          VARS_COMMA=$(cat ${{ env.vars_file }} | paste -s -d, -)
+          echo "function_vars=$VARS_COMMA" >> $GITHUB_OUTPUT
+        else
+          echo "No function env file under ./apps/${{ inputs.app_name }}/env-vars/, continuing..."
+        fi
+
+    - name: Function env secrets
+      shell: bash
+      id: set_secrets
+      run: |
+        if ${{ steps.prepare.outputs.gh_env == 'production'}}; then
+          FILE=./apps/${{ inputs.app_name }}/env-vars/prod.secrets
+        else
+          FILE=./apps/${{ inputs.app_name }}/env-vars/dev.secrets
+        fi
+        if [ -f $FILE ]; then
+          delimiter="$(openssl rand -hex 8)"
+          # Add a new line at the end if not already there:
+          sed -i -e '$a\' $FILE 
+          echo "function_secrets<<${delimiter}" >> $GITHUB_OUTPUT
+          cat $FILE >> $GITHUB_OUTPUT
+          echo "${delimiter}" >> $GITHUB_OUTPUT
+        else
+          echo "No secrets file found in $FILE, continuing"
+        fi
+            
+    - name: retrieve artifacts
+      id: download
+      uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # @v3.0.2
+      with:
+        name: ${{ inputs.artifact_name || inputs.app_name }} 
+        # This will work only if we're matching the same string as
+        # the upload step, which happens outside of this action file
+        # by convention I use the app_name everywhere
+        path: functions
+
+    ## Every module from here on could potentially expose the Gcloud Auth Token
+    ## Do not add untrusted code with `uses`
+    ## Ideally run only google-github-actions code with commit SHA at the end from here on
+    ## or `run` commands that we write.
+    - name: Auth gcloud
+      id: gauth
+      uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d # @v1
+      with:
+        workload_identity_provider: ${{ inputs.GWIP }}
+        service_account: ${{ inputs.GSA }}      
+    
+    - name: Deploy to google functions
+      id: gclouddeploy
+      uses: google-github-actions/deploy-cloud-functions@14509ca55199d9348161571e36c48e44f855030d #@v1
+      with:
+        name: '${{ steps.prepare.outputs.function_name }}'
+        runtime: 'nodejs16'
+        region: '${{ inputs.gcloud_region }}'
+        source_dir: '${{ steps.download.outputs.download-path }}'
+        entry_point: '${{ inputs.target }}'
+        secret_environment_variables: ${{ steps.set_secrets.outputs.function_secrets }}
+        env_vars: ${{ steps.set_env.outputs.function_vars }}
+        service_account_email: ${{ inputs.service_account }}
+        max_instances: ${{ contains(steps.prepare.outputs.function_name, 'production') && '200' || '10' }}
+
+    - name: Print Gcloud functions URL
+      shell: sh
+      if: ${{ github.event_name == 'pull_request'}}
+      run: echo "::notice title=Function_URL::${{ steps.gclouddeploy.outputs.url }}"
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@d51b5346f85640ec2aa2fa057354d2b82c2fcbce # v1.0.1 
+
+    - name: Change function to allow_unathorized calls 
+      shell: sh
+      run: |
+        gcloud functions add-iam-policy-binding ${{ steps.prepare.outputs.function_name }} \
+        --region=${{ inputs.gcloud_region }} \
+        --member="allUsers" --role="roles/cloudfunctions.invoker"
