@@ -35,8 +35,6 @@ runs:
               contains(inputs.deploy_to, 'staging') ||
               contains(inputs.deploy_to, 'production') }}; then
           echo "gh_env=production" >> $GITHUB_OUTPUT
-        else
-          echo "gh_env=development" >> $GITHUB_OUTPUT
         fi 
 
     - name: Set artifact names based on environment
