@@ -65,16 +65,16 @@ runs:
           echo "function_name=${{ inputs.app_base_name }}-catalyst" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-catalyst.k-f.dev" >> $GITHUB_OUTPUT
           echo "env_name=catalyst" >> $GITHUB_OUTPUT
-        elif  ${{ github.ref == 'refs/heads/main' }}; then
-          # DEV
-          echo "function_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
-          echo "front_url=${{ inputs.app_base_name }}-dev.k-f.dev" >> $GITHUB_OUTPUT
-          echo "env_name=development" >> $GITHUB_OUTPUT
         elif ${{ contains(inputs.deploy_to, 'demo') }}; then
           # DEMO
           echo "function_name=${{ inputs.app_base_name }}-demo" >> $GITHUB_OUTPUT
           echo "front_url=${{ inputs.app_base_name }}-demo.k-f.dev" >> $GITHUB_OUTPUT
           echo "env_name=demo" >> $GITHUB_OUTPUT
+        elif  ${{ github.ref == 'refs/heads/main' }}; then
+          # DEV
+          echo "function_name=${{ inputs.app_base_name }}-dev" >> $GITHUB_OUTPUT
+          echo "front_url=${{ inputs.app_base_name }}-dev.k-f.dev" >> $GITHUB_OUTPUT
+          echo "env_name=development" >> $GITHUB_OUTPUT          
         elif ${{ github.event_name == 'pull_request' }}; then
           # PR
           echo "function_name=${{ inputs.app_base_name }}-pr${{ github.event.number }}" >> $GITHUB_OUTPUT
