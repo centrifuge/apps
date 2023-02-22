@@ -50,7 +50,7 @@ jobs:
       group: 'centrifuge-app-${{ github.event.inputs.deploy_env }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
       cancel-in-progress: false      
     if: |
-      needs.check_app_bucket.outputs.bucket_found == 'false'
+      needs.check_app_bucket.outputs.bucket_found == 'false' &&
       (github.event.action == 'opened' || 
       github.event.action == 'reopened')
     uses: ./.github/workflows/centrifuge-app.yml
