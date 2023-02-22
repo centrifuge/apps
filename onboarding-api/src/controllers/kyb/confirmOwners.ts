@@ -10,6 +10,8 @@ const confirmOwnersInput = object({
     object({
       name: string().required(),
       dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
+      countryOfResidency: string().required(),
+      countryOfCitizenship: string().required(),
     }).required()
   )
     .min(1)

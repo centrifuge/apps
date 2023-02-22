@@ -16,6 +16,8 @@ export type SupportedNetworks = 'polkadot'
 const uboSchema = object({
   name: string().required(),
   dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
+  countryOfResidency: string().required(),
+  countryOfCitizenship: string().required(),
 })
 
 const walletSchema = object({
@@ -86,7 +88,7 @@ export const entityUserSchema = object({
   name: string().nullable().default(null),
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
-  countryOfResidence: string().nullable().default(null), // TODO: validate with list of countries
+  countryOfResidency: string().nullable().default(null), // TODO: validate with list of countries
   steps: stepsSchema,
   onboardingStatus: lazy((value) => {
     const poolId = Object.keys(value)[0]
@@ -118,7 +120,7 @@ export const individualUserSchema = object({
   name: string().required(),
   dateOfBirth: string().required(),
   countryOfCitizenship: string().required(), // TODO: validate with list of countries
-  countryOfResidence: string().required(), // TODO: validate with list of countries
+  countryOfResidency: string().required(), // TODO: validate with list of countries
   steps: stepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'signAgreements']),
   onboardingStatus: lazy((value) => {
     const poolId = Object.keys(value)[0]
