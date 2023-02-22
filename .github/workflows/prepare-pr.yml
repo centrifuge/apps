@@ -27,7 +27,7 @@ jobs:
     continue-on-error: true
     steps:
       - run: |
-          if gcloud functions describe --region ${{ vars.GCLOUD_REGION }} $func  1> /dev/null; then
+          if gcloud functions describe --region ${{ vars.GCLOUD_REGION }} pinning-api-pr${{ github.event.number }}  1> /dev/null; then
             echo "pinning_exists=true" >> $GITHUB_OUTPUT
           else
             echo "pinning_exists=false" >> $GITHUB_OUTPUT
@@ -53,7 +53,7 @@ jobs:
     continue-on-error: true
     steps:
       - run: |
-          if gcloud functions describe --region ${{ vars.GCLOUD_REGION }} $func  1> /dev/null; then
+          if gcloud functions describe --region ${{ vars.GCLOUD_REGION }} onboarding-api-pr${{ github.event.number }}  1> /dev/null; then
             echo "onboarding_exists=true" >> $GITHUB_OUTPUT
           else
             echo "onboarding_exists=false" >> $GITHUB_OUTPUT
@@ -99,7 +99,7 @@ jobs:
           FUNCTIONS=("onboarding-api" "pinning-api" "faucet-api")
           for func in "$FUNCTIONS[@]"
           do
-              if gcloud functions describe --region ${{ vars.GCLOUD_REGION }} $func  1> /dev/null; then
+              if gcloud functions describe --region ${{ vars.GCLOUD_REGION }} $func-pr${{ github.event.number }}  1> /dev/null; then
                   gcloud functions delete --quiet $func-pr${{ github.event.number }} --region=${{ vars.GCLOUD_REGION }}
               fi
           done
