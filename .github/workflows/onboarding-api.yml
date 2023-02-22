@@ -11,7 +11,7 @@ on:
   pull_request:
     paths:
       - 'onboarding-api/**'
-      - '.github/workflows/onboarding-api.yml'
+      # - '.github/workflows/onboarding-api.yml'
   workflow_call:
     inputs:
       deploy_env:

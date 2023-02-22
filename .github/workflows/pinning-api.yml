@@ -11,7 +11,7 @@ on:
   pull_request:
     paths:
       - 'pinning-api/**'
-      - '.github/workflows/pinning-api.yml'
+      # - '.github/workflows/pinning-api.yml'
   workflow_call:
     inputs:
       deploy_env:
