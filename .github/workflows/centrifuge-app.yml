@@ -100,6 +100,10 @@ jobs:
            
 
   deploy-app:
+    concurrency:
+       # Needs to be the same as the one in cleanup-pr.yml
+      group: bucket-deploy-${{ github.event.pull_request.head.label || github.head_ref || github.ref }}${{ inputs.deploy_env || github.event.inputs.deploy_env }}
+      cancel-in-progress: false    
     permissions:
       contents: 'read'
       id-token: 'write'  
