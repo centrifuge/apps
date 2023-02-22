@@ -15,7 +15,7 @@ on:
       - 'centrifuge-app/**'
       - 'centrifuge-js/**'
       - 'centrifuge-react/**'
-      # - '.github/workflows/centrifuge-app.yml'
+      - '.github/workflows/centrifuge-app.yml'
   workflow_call:
     inputs:
       deploy_env:
