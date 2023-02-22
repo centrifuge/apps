@@ -20,7 +20,7 @@ on:
     inputs:
       deploy_env:
         type: string
-        required: true
+        required: false
 # Fancy concurrency group string to allow for multi-staging deployments
 concurrency:
   group: 'centrifuge-app-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
@@ -100,6 +100,10 @@ jobs:
            
 
   deploy-app:
+    concurrency:
+       # Do not sync the same bucket in parallel
+      group: deploy-${{ needs.build-app.outputs.front_url }}
+      cancel-in-progress: true    
     permissions:
       contents: 'read'
       id-token: 'write'  
