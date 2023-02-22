@@ -1,25 +1,12 @@
 import { Request, Response } from 'express'
-import { InferType, object, string } from 'yup'
 import { onboardingBucket } from '../../database'
 import { HttpsError } from '../../utils/httpsError'
-import { validateInput } from '../../utils/validateInput'
 
-const getTaxInfoInput = object({
-  poolId: string().required(),
-  trancheId: string().required(),
-})
-
-export const getTaxInfoController = async (
-  req: Request<{}, {}, {}, InferType<typeof getTaxInfoInput>>,
-  res: Response
-) => {
+export const getTaxInfoController = async (req: Request, res: Response) => {
   try {
-    await validateInput(req.query, getTaxInfoInput)
-
-    const { poolId, trancheId } = req.query
     const { walletAddress } = req
 
-    const taxInfo = await onboardingBucket.file(`tax-information/${walletAddress}/${poolId}/${trancheId}.pdf`)
+    const taxInfo = await onboardingBucket.file(`tax-information/${walletAddress}.pdf`)
 
     const [taxInfoExists] = await taxInfo.exists()
 

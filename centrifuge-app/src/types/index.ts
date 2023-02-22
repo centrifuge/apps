@@ -86,7 +86,7 @@ type IndividualUserSteps = {
 export interface EntityOnboardingSteps extends IndividualUserSteps {
   verifyBusiness: {
     completed: boolean
-    timeStamp: string | null
+    timeStamp: string
   }
   verifyEmail: {
     completed: boolean
@@ -102,7 +102,7 @@ export type EntityUser = {
   investorType: 'entity'
   walletAddress: string
   businessName: string
-  email: string | null
+  email: string
   incorporationDate: string
   jurisdictionCode: string
   registrationNumber: string
@@ -111,6 +111,7 @@ export type EntityUser = {
   name: string | null
   dateOfBirth: string | null
   countryOfCitizenship: string | null
+  countryOfResidence: string | null
   onboardingStatus: {
     [poolId: string]: {
       [trancheId: string]: {
@@ -124,9 +125,10 @@ export type EntityUser = {
 type IndividualUser = {
   investorType: 'individual'
   walletAddress: string
-  name: string | null
-  dateOfBirth: string | null
-  countryOfCitizenship: string | null
+  name: string
+  dateOfBirth: string
+  countryOfCitizenship: string
+  countryOfResidence: string
   steps: IndividualUserSteps
   onboardingStatus: {
     [poolId: string]: {

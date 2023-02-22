@@ -18,7 +18,7 @@ export const sendEmail = async (message: any) => {
     return sendgridMail.send(message)
   } catch (error) {
     console.log('email error', JSON.stringify(error))
-    // @ts-ignore
+    // @ts-expect-error error typing
     throw new HttpsError(400, error?.message || 'Unable to send email verification')
   }
 }

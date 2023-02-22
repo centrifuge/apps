@@ -32,7 +32,7 @@ jobs:
 
       - run: yarn install --immutable
       - run: yarn build
-      # - run: yarn ci:loki -> Already broken
+      # - run: yarn ci:loki -> broken
 
       - name: Build fabric storybook
         run: yarn build-storybook
@@ -53,7 +53,6 @@ jobs:
       contents: 'read'
       id-token: 'write'  
     runs-on: ubuntu-latest
-    environment: development
     steps:
       - name: Checkout
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0

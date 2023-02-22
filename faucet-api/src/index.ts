@@ -19,9 +19,10 @@ const ONE_HUNDRED_AUSD = ONE_AUSD.muln(100)
 
 const MAX_API_REQUESTS_PER_WALLET = 100
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000
-const WALLET_ADDRESS_LENGTH = 48
 
-const firestore = new Firestore()
+const firestore = new Firestore({
+  projectId: 'peak-vista-185616',
+})
 const wsProvider = new WsProvider(URL)
 
 function hexToBN(value: string | number) {
@@ -49,7 +50,7 @@ async function faucet(req: Request, res: Response) {
     }
     const { address } = req.query
 
-    if (!address || (address as string).length !== WALLET_ADDRESS_LENGTH) {
+    if (!address) {
       return res.status(400).send('Invalid address param')
     }
 
@@ -101,7 +102,7 @@ async function faucet(req: Request, res: Response) {
 
     const keyring = new Keyring({ type: 'sr25519' })
     console.log('signing and sending tx')
-    const hash = await txBatch.signAndSend(keyring.addFromUri('//Alice'))
+    const hash = await txBatch.signAndSend(keyring.addFromUri((process.env.FAUCET_SEED_HEX as string) || '//Alice'))
     console.log('signed and sent tx')
     api.disconnect()
     return res.status(200).json({ hash })

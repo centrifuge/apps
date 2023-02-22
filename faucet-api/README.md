@@ -6,7 +6,9 @@ Requests are limited to once per address every 24 hours and no more than 100 req
 
 ## Development
 
-Create an `.env.yaml` file from the example
+Create an `.env` file from the example.
+
+If developing for demo chain please provide a seed phrase for the account funding the faucet. The corresponding env variables is `FAUCET_SEED_HEX`. If no seed if set `//Alice` will be used.
 
 Install dependencies
 
@@ -16,27 +18,4 @@ yarn install
 
 ```bash
 yarn develop
-```
-
-## Deployment
-
-The function is [deployed on google cloud](https://console.cloud.google.com/functions/list?env=gen1&project=peak-vista-185616&tab=logs).
-
-Install the [gcloud cli](https://cloud.google.com/sdk/docs/install) and authenticate with your centrifuge account.
-
-```bash
-gcloud auth login
-```
-
-Build the app locally
-
-```bash
-yarn build
-```
-
-Then deploy to develop or demo
-
-```bash
-yarn deploy:demo
-yarn deploy:dev
 ```

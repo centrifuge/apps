@@ -37,7 +37,7 @@ export default async (req: Request, res: Response) => {
 
     // pin the image file
     const pinFileResponse = await pinFile(fileStream)
-    const fileHash = pinFileResponse.IpfsHash
+    const fileHash = pinFileResponse.data.IpfsHash
     const fileURL = ipfsHashToURI(fileHash)
 
     return res.status(200).send(JSON.stringify({ uri: fileURL }))
