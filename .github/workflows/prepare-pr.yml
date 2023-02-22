@@ -23,6 +23,9 @@ jobs:
     secrets: inherit
   
   check_pinning:
+    permissions:
+      contents: 'read'
+      id-token: 'write'  
     environment: development
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -60,6 +63,9 @@ jobs:
     secrets: inherit
 
   check_onboarding:
+    permissions:
+      contents: 'read'
+      id-token: 'write'  
     environment: development
     runs-on: ubuntu-latest
     continue-on-error: true
@@ -119,7 +125,7 @@ jobs:
         shell: bash
         run: |
           FUNCTIONS=("onboarding-api" "pinning-api" "faucet-api")
-          for func in "$FUNCTIONS[@]"
+          for func in "${FUNCTIONS[@]}"
           do
               if gcloud functions describe --region ${{ vars.GCLOUD_REGION }} $func-pr${{ github.event.number }}  1> /dev/null; then
                   gcloud functions delete --quiet $func-pr${{ github.event.number }} --region=${{ vars.GCLOUD_REGION }}
