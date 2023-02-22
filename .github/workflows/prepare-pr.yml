@@ -47,7 +47,7 @@ jobs:
             echo "pinning_exists=false" >> $GITHUB_OUTPUT
           fi
     outputs:
-      deploy_pinning: steps.output.pinning_exists
+      deploy_pinning: ${{steps.outputs.pinning_exists}}
 
   pinning-pr-deploy:
     needs: check_pinning
@@ -57,8 +57,8 @@ jobs:
       cancel-in-progress: false  
     if: |
       needs.check_pinning.outputs.deploy_pinning == 'true' &&
-      github.event.action == 'opened' || 
-      github.event.action == 'reopened'
+      (github.event.action == 'opened' || 
+      github.event.action == 'reopened')
     uses: ./.github/workflows/pinning-api.yml
     secrets: inherit
 
@@ -87,7 +87,7 @@ jobs:
             echo "onboarding_exists=false" >> $GITHUB_OUTPUT
           fi
     outputs:
-      deploy_onboarding: steps.output.onboarding_exists
+      deploy_onboarding: ${{steps.outputs.onboarding_exists}}
 
   onboarding-pr-deploy:
     needs: check_onboarding
@@ -97,8 +97,8 @@ jobs:
       cancel-in-progress: false    
     if: | 
       needs.check_onboarding.outputs.deploy_onboaring == 'true' &&
-      github.event.action == 'opened' || 
-      github.event.action == 'reopened'
+      (github.event.action == 'opened' || 
+      github.event.action == 'reopened')
     uses: ./.github/workflows/onboarding-api.yml
     secrets: inherit
 
