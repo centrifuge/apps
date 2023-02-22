@@ -61,13 +61,14 @@ jobs:
           
     outputs:
       gh_env: ${{ steps.prepare.outputs.gh_env }}
+      function_name: ${{ steps.prepare.outputs.function_name }}
 
 
   deploy-onboarding-api:
       concurrency:
-       # Needs to be the same as the one in cleanup-pr.yml
-        group: onboarding-deploy-${{ github.event.pull_request.head.label || github.head_ref || github.ref }}${{ inputs.deploy_env || github.event.inputs.deploy_env }}
-        cancel-in-progress: false  
+       # Don't try to deploy the same function in parallel
+        group: deploy-${{ needs.build-onboarding-api.outputs.function_name }}
+        cancel-in-progress: true  
       needs: build-onboarding-api
       runs-on: ubuntu-latest
       environment: ${{ needs.build-onboarding-api.outputs.gh_env }}

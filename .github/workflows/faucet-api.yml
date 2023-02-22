@@ -53,11 +53,12 @@ jobs:
 
     outputs:
       gh_env: ${{ steps.prepare.outputs.gh_env }}
+      function_name: ${{ steps.prepare.outputs.function_name }}
 
 
   deploy-faucet:
     concurrency:
-      group: faucet-deploy${{ github.event.pull_request.head.label || github.head_ref || github.ref }}
+      group: deploy-${{ needs.build-faucet.outputs.function_name }}
       cancel-in-progress: false   
     needs: build-faucet
     runs-on: ubuntu-latest

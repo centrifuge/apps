@@ -61,12 +61,13 @@ jobs:
 
     outputs:
       gh_env: ${{ steps.prepare.outputs.gh_env }}
+      function_name: ${{ steps.prepare.outputs.function_name }}
 
   deploy-pinning-api:
     concurrency:
-     # Needs to be the same as the one in cleanup-pr.yml
-      group: pinning-deploy-${{ github.event.pull_request.head.label || github.head_ref || github.ref }}${{ inputs.deploy_env || github.event.inputs.deploy_env }}
-      cancel-in-progress: false
+     # Don't try to deploy the same function in parallel
+      group: deploy-${{ needs.build-pinning-api.outputs.function_name }}
+      cancel-in-progress: true
     needs: build-pinning-api
     runs-on: ubuntu-latest
     environment: ${{ needs.build-pinning-api.outputs.gh_env }}
