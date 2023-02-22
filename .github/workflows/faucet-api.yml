@@ -52,10 +52,8 @@ jobs:
           app_name: ${{ env.app_name }}
 
     outputs:
-      app_name: ${{ steps.prepare.outputs.app_name }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
-      env_name: ${{ steps.prepare.outputs.env_name }}
-      function_vars: ${{ steps.set_env.outputs.function_vars }}
+
 
   deploy-faucet:
     needs: build-faucet

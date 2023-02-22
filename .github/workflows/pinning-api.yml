@@ -60,10 +60,7 @@ jobs:
           path: ./${{ env.app_name }}/dist
 
     outputs:
-      function_name: ${{ steps.prepare.outputs.function_name }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
-      function_secrets: ${{ steps.set_secrets.outputs.function_secrets }}
-      function_vars: ${{ steps.set_env.outputs.function_vars }}
 
   deploy-pinning-api:
     needs: build-pinning-api
