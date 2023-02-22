@@ -50,7 +50,7 @@ jobs:
   app-pr-deploy:
     needs: check_app_bucket
     concurrency:
-      group: 'centrifuge-app-${{ github.event.inputs.deploy_env }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+      group: 'centrifuge-app-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
       cancel-in-progress: false      
     if: |
       needs.check_app_bucket.outputs.bucket_found == 'false' &&
@@ -99,8 +99,8 @@ jobs:
       (github.event.action == 'opened' || 
       github.event.action == 'reopened')    
     concurrency:
-    # Fancy concurrency group string to allow for multi-staging deployments  
-      group: 'pinning-api-${{ github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+    # Needs to be the same as the one in pinning-api.yml
+      group: 'pinning-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
       cancel-in-progress: false  
     uses: ./.github/workflows/pinning-api.yml
     secrets: inherit
@@ -145,8 +145,8 @@ jobs:
       (github.event.action == 'opened' || 
       github.event.action == 'reopened')    
     concurrency:
-    # Fancy concurrency group string to allow for multi-staging deployments  
-      group:  'onboarding-api-${{ github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+    # Needs to be the same as the one in onboarding-api.yml
+      group:  'onboarding-api-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
       cancel-in-progress: false    
     uses: ./.github/workflows/onboarding-api.yml
     secrets: inherit
