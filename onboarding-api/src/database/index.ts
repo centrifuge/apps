@@ -103,10 +103,10 @@ export const individualUserSchema = object({
   investorType: string().default('individual') as StringSchema<Individual>,
   wallet: walletSchema,
   kycReference: string().optional(),
-  email: string().default(null).nullable(),
-  name: string().nullable().default(null),
-  dateOfBirth: string().nullable().default(null),
-  countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
+  email: string().default(null).nullable(), // TODO: coming soon
+  name: string().required(),
+  dateOfBirth: string().required(),
+  countryOfCitizenship: string().required(), // TODO: validate with list of countries
   countryOfResidency: string().required(), // TODO: validate with list of countries
   globalSteps: globalStepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'verifyEmail']),
   poolSteps: poolStepsSchema,
