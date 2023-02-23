@@ -39,7 +39,7 @@ export const signAndSendDocumentsController = async (
     await validateRemark(transactionInfo, `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`)
 
     if (
-      !user?.poolSteps[poolId]?.[trancheId]?.signAgreements.completed &&
+      !user?.poolSteps[poolId]?.[trancheId]?.signAgreement.completed &&
       user?.poolSteps[poolId]?.[trancheId]?.status.status !== null
     ) {
       throw new HttpsError(400, 'User must sign document before documents can be sent to issuer')
@@ -89,7 +89,7 @@ export const signAndSendDocumentsController = async (
         ...user?.poolSteps,
         [poolId]: {
           [trancheId]: {
-            signAgreements: {
+            signAgreement: {
               completed: true,
               timeStamp: new Date().toISOString(),
               transactionInfo,

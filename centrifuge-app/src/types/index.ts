@@ -62,7 +62,7 @@ export type UltimateBeneficialOwner = {
 type PoolOnboardingSteps = {
   [poolId: string]: {
     [trancheId: string]: {
-      signAgreements: {
+      signAgreement: {
         completed: boolean
         timeStamp: string | null
         transactionInfo: {

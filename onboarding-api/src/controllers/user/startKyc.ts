@@ -67,7 +67,7 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         poolSteps: {
           [body.poolId]: {
             [body.trancheId]: {
-              signAgreements: {
+              signAgreement: {
                 completed: false,
                 timeStamp: null,
                 transactionInfo: {

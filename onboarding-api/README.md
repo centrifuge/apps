@@ -220,7 +220,7 @@ Sets the ultimate beneficial owners for the entity.
     "poolSteps": {
         "123abc": {
           "0x123456": {
-            "signAgreements": {
+            "signAgreement": {
               "timeStamp": null,
               "completed": false,
               "transactionInfo": {}
@@ -254,7 +254,7 @@ Sets the ultimate beneficial owners for the entity.
     "poolSteps": {
       [poolId]: {
         [trancheId]: {
-          "signAgreements" {
+          "signAgreement" {
             "completed": true,
             "timeStamp": "2023-01-23T20:56:50.039Z"
           }

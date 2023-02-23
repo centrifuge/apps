@@ -55,7 +55,7 @@ export const updateInvestorStatusController = async (
       throw new HttpsError(400, 'Investor status may have already been updated')
     }
 
-    if (!user.poolSteps?.[poolId][trancheId].signAgreements.completed) {
+    if (!user.poolSteps?.[poolId][trancheId].signAgreement.completed) {
       throw new HttpsError(400, 'Argeements must be signed before investor status can invest')
     }
 
@@ -64,7 +64,7 @@ export const updateInvestorStatusController = async (
         ...user.poolSteps,
         [poolId]: {
           [trancheId]: {
-            ...user.poolSteps[poolId][trancheId].signAgreements,
+            ...user.poolSteps[poolId][trancheId].signAgreement,
             status: {
               status,
               timeStamp: new Date().toISOString(),

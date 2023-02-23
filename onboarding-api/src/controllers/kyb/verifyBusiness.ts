@@ -87,7 +87,7 @@ export const verifyBusinessController = async (
       poolSteps: {
         [poolId]: {
           [trancheId]: {
-            signAgreements: {
+            signAgreement: {
               completed: false,
               timeStamp: null,
               transactionInfo: {

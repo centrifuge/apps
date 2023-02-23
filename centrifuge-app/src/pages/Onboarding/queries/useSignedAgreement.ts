@@ -14,11 +14,11 @@ export const useSignedAgreement = () => {
   React.useEffect(() => {
     if (onboardingUser) {
       setHasSignedAgreement(
-        onboardingUser.poolSteps[pool.id][pool.trancheId].signAgreements.completed &&
-          !!onboardingUser.poolSteps[pool.id][pool.trancheId].signAgreements.transactionInfo.extrinsicHash
+        onboardingUser.poolSteps[pool.id][pool.trancheId].signAgreement.completed &&
+          !!onboardingUser.poolSteps[pool.id][pool.trancheId].signAgreement.transactionInfo.extrinsicHash
       )
     }
-  }, [onboardingUser?.poolSteps[pool.id][pool.trancheId].signAgreements, pool.id, pool.trancheId])
+  }, [onboardingUser?.poolSteps[pool.id][pool.trancheId].signAgreement, pool.id, pool.trancheId])
 
   const query = useQuery(
     ['signed-subscription-agreement', selectedAccount?.address, pool.id, pool.trancheId],

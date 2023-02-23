@@ -26,7 +26,7 @@ const walletSchema = object({
 })
 
 const poolSpecificStepsSchema = object({
-  signAgreements: object({
+  signAgreement: object({
     completed: bool(),
     timeStamp: string().nullable(),
     transactionInfo: object({
