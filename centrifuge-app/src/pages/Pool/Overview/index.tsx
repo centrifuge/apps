@@ -1,3 +1,4 @@
+import { useGetExplorerUrl } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/utils'
 import {
   AnchorButton,
   Button,
@@ -25,6 +26,7 @@ import { ethConfig } from '../../../config'
 import { formatDate, getAge } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
+import { TinlakePool } from '../../../utils/tinlake/useTinlakePools'
 import { useAddress } from '../../../utils/useAddress'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
@@ -95,6 +97,7 @@ export function PoolDetailOverview({
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
   const address = useAddress()
+  const network = isTinlakePool ? ((pool as TinlakePool).network === 'goerli' ? 5 : 1) : 'centrifuge'
 
   const pageSummaryData = [
     {
@@ -139,6 +142,8 @@ export function PoolDetailOverview({
     node.scrollIntoView({ behavior: 'smooth', block: 'center' })
     hasScrolledToToken.current = true
   }
+
+  const explorer = useGetExplorerUrl(network)
 
   return (
     <>
@@ -215,10 +220,9 @@ export function PoolDetailOverview({
           <AnchorButton
             variant="secondary"
             icon={IconExternalLink}
-            href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/account/${address}`}
+            href={explorer.address('')} // TODO: Add issuer address
             target="_blank"
             small
-            disabled={!address}
           >
             View pool account
           </AnchorButton>

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { CentrifugeContext } from '../CentrifugeProvider/CentrifugeProvider'
-import { EvmChains } from './evm/chains'
+import { EvmChains, getChainInfo } from './evm/chains'
 import { Network } from './types'
 import { useWallet } from './WalletProvider'
 
@@ -16,6 +16,38 @@ export function useGetNetworkName() {
   const centNetworkName = centrifuge?.config.network === 'altair' ? 'Altair' : 'Centrifuge'
   return (network: Network) => getNetworkName(network, chains, centNetworkName)
 }
+
 export function useNetworkName(network: Network) {
   return useGetNetworkName()(network)
+}
+
+export function useGetExplorerUrl(network?: Network) {
+  const {
+    evm: { chains },
+    substrate: { subscanUrl },
+  } = useWallet()
+
+  function getEvmUrl(networkOverride?: Network) {
+    const netw = networkOverride ?? network
+    return typeof netw === 'number' ? getChainInfo(chains, netw)?.blockExplorerUrl : ''
+  }
+
+  return {
+    address: (address: string, networkOverride?: Network) => {
+      try {
+        const evmUrl = getEvmUrl(networkOverride)
+        return (evmUrl ? new URL(`/address/${address}`, evmUrl) : new URL(`/account/${address}`, subscanUrl)).toString()
+      } catch {
+        return ''
+      }
+    },
+    tx: (hash: string, networkOverride?: Network) => {
+      try {
+        const evmUrl = getEvmUrl(networkOverride)
+        return (evmUrl ? new URL(`/tx/${hash}`, evmUrl) : new URL(`/extrinsic/${hash}`, subscanUrl)).toString()
+      } catch {
+        return ''
+      }
+    },
+  }
 }

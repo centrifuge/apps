@@ -28,6 +28,8 @@ order: {
 */
 
 import { CurrencyBalance, findBalance } from '@centrifuge/centrifuge-js'
+import { useWallet } from '@centrifuge/centrifuge-react'
+import { getChainInfo } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/evm/chains'
 import { useNativeBalance } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/evm/utils'
 import BN from 'bn.js'
 import * as React from 'react'
@@ -44,6 +46,7 @@ import { InvestRedeemAction, InvestRedeemActions, InvestRedeemProviderProps as P
 
 export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Props) {
   const address = useAddress('evm')
+  const { evm } = useWallet()
   const pool = usePool(poolId) as TinlakePool
   const [pendingAction, setPendingAction] = React.useState<InvestRedeemAction>()
   const tranche = pool.tranches.find((t) => t.id === trancheId)
@@ -117,7 +120,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
     isAllowedToInvest: permissions?.[seniority].inMemberlist,
     isPoolBusy: isCalculatingOrders,
     isFirstInvestment: Object.values(order).every((v) => Dec(v).isZero()),
-    nativeCurrency: { decimals: 18, symbol: 'ETH' },
+    nativeCurrency: getChainInfo(evm.chains, evm.chainId!).nativeCurrency,
     trancheCurrency: tranche.currency,
     poolCurrency: pool.currency,
     capacity: tranche.capacity.toDecimal(),

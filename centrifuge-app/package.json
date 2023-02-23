@@ -3,11 +3,12 @@
   "private": true,
   "scripts": {
     "start": "yarn build:fabric && yarn start:all",
-    "start:all": "run-p -l start:centjs start:fabric start:types start:app",
+    "start:all": "run-p -l start:centjs start:centReact start:fabric start:types start:app",
     "start:app": "vite",
     "start:types": "tsc --watch",
     "start:fabric": "cd ../fabric && yarn start && cd ../centrifuge-app",
     "start:centjs": "cd ../centrifuge-js && yarn start && cd ../centrifuge-app",
+    "start:centReact": "cd ../centrifuge-react && yarn start && cd ../centrifuge-app",
     "build": "yarn build:fabric && yarn build:centjs && yarn build:types && yarn build:app && yarn build:centReact",
     "build:app": "vite build",
     "build:types": "tsc",

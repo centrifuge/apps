@@ -20,7 +20,7 @@ export function useEvmTransaction<T extends Array<any>>(
 ) {
   const { addOrUpdateTransaction, updateTransaction } = useTransactions()
   const { showWallets, evm, walletDialog } = useWallet()
-  const { selectedAddress } = evm
+  const { selectedAddress, chainId } = evm
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
   const lastCreatedTransaction = useTransaction(lastId)
   const centrifuge = useCentrifuge()
@@ -57,6 +57,7 @@ export function useEvmTransaction<T extends Array<any>>(
       title,
       status: 'creating',
       args,
+      network: chainId,
     }
     addOrUpdateTransaction(tx)
     setLastId(id)

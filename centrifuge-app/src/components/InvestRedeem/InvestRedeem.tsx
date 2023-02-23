@@ -1,6 +1,7 @@
 import { CurrencyBalance, Pool, TokenBalance } from '@centrifuge/centrifuge-js'
 import { ConnectionGuard, useGetNetworkName, useWallet } from '@centrifuge/centrifuge-react'
 import { Network } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/types'
+import { useGetExplorerUrl } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/utils'
 import {
   AnchorButton,
   Box,
@@ -130,7 +131,7 @@ function InvestRedeemState(props: Props) {
   const allowedTrancheIds = useAllowedTrancheIds(poolId)
   const pool = usePool(poolId)
   const [view, setView] = React.useState<'start' | 'invest' | 'redeem'>('start')
-  const [trancheId, setTrancheId] = useControlledState<string>(pool.tranches[0].id, trancheIdProp, onSetTrancheId)
+  const [trancheId, setTrancheId] = useControlledState<string>(pool.tranches.at(-1)!.id, trancheIdProp, onSetTrancheId)
 
   React.useEffect(() => {
     if (allowedTrancheIds[0]) {
@@ -205,10 +206,12 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
         <Select
           name="token"
           placeholder="Select a token"
-          options={pool.tranches.map((t) => ({
-            label: t.currency.symbol ?? '',
-            value: t.id,
-          }))}
+          options={pool.tranches
+            .map((t) => ({
+              label: t.currency.symbol ?? '',
+              value: t.id,
+            }))
+            .reverse()}
           value={state.trancheId}
           onChange={(event) => setTrancheId(event.target.value as any)}
         />
@@ -255,8 +258,17 @@ function InvestRedeemInner({ view, setView, setTrancheId }: InnerProps) {
           )}
         </>
       ) : (
-        // TODO: Link to onboarding
-        <Text>Not allowed to invest</Text>
+        // TODO: Link to onboarding and show whether onboarding is in progress
+        <Stack gap={2}>
+          <Text variant="body3">
+            New Silver tokens are available to U.S. and Non-U.S. persons. U.S. persons must be verified “accredited
+            investors”.{' '}
+            <AnchorTextLink href="https://docs.centrifuge.io/use/onboarding/#requirements">Learn more</AnchorTextLink>
+          </Text>
+          <Stack px={1}>
+            <Button>Onboard to {state.trancheCurrency?.symbol ?? 'token'}</Button>
+          </Stack>
+        </Stack>
       )}
     </Stack>
   )
@@ -617,22 +629,23 @@ function RedeemForm({ onCancel, autoFocus }: RedeemFormProps) {
   )
 }
 
-// TODO: EVM block explorer URLs
 const TransactionsLink: React.FC = () => {
   const address = useAddress()
-  return (
+  const explorer = useGetExplorerUrl(useWallet().connectedNetwork!)
+  const url = explorer.address(address!)
+  return url ? (
     <Box alignSelf="flex-end">
       <AnchorButton
         variant="tertiary"
         iconRight={IconArrowUpRight}
-        href={`${import.meta.env.REACT_APP_SUBSCAN_URL}/account/${address}`}
+        href={explorer.address(address!)}
         target="_blank"
         small
       >
         Transactions
       </AnchorButton>
     </Box>
-  )
+  ) : null
 }
 const SuccessBanner: React.FC<{ title: string; body?: string }> = ({ title, body }) => {
   return (

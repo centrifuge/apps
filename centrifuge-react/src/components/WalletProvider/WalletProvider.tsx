@@ -41,6 +41,7 @@ type WalletContextType = {
     selectedWallet: Wallet | null
     proxy: Proxy | null
     proxies: Record<string, Proxy[]> | undefined
+    subscanUrl?: string
   }
   evm: Pick<Web3ReactState, 'chainId' | 'accounts'> & {
     connectors: EvmConnectorMeta[]
@@ -73,6 +74,7 @@ type WalletProviderProps = {
   children: React.ReactNode
   evmChains?: EvmChains
   evmAdditionalConnectors?: EvmConnectorMeta[]
+  subscanUrl?: string
 }
 
 let cachedEvmConnectors: EvmConnectorMeta[] | undefined = undefined
@@ -82,13 +84,10 @@ export function WalletProvider({
   evmChains = {
     1: {
       urls: ['https://cloudflare-eth.com'],
-      name: 'Ethereum',
-      logo: {
-        src: '',
-      },
     },
   },
   evmAdditionalConnectors,
+  subscanUrl,
 }: WalletProviderProps) {
   if (!evmChains[1]?.urls[0]) throw new Error('Mainnet should be defined in EVM Chains')
   const evmConnectors =
@@ -278,6 +277,7 @@ export function WalletProvider({
               ) ?? null
             : null,
         proxies,
+        subscanUrl,
       },
       evm: {
         ...state.evm,

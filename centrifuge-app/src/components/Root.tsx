@@ -1,6 +1,7 @@
 import { UserProvidedConfig } from '@centrifuge/centrifuge-js'
 import {
   CentrifugeProvider,
+  EvmChains,
   TransactionProvider,
   TransactionToasts,
   WalletProvider,
@@ -31,6 +32,7 @@ import { UpdateInvestorStatus } from '../pages/Onboarding/UpdateInvestorStatus'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
+import { pinToApi } from '../utils/pinToApi'
 import { AuthProvider } from './AuthProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
@@ -39,7 +41,6 @@ import { Head } from './Head'
 import { LoadBoundary } from './LoadBoundary'
 import { OnboardingProvider } from './OnboardingProvider'
 import { PodAuthProvider } from './PodAuthProvider'
-import { pinToApi } from '../utils/pinToApi'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -76,25 +77,19 @@ const centConfig: UserProvidedConfig = {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ json }),
-    }),  
+    }),
 }
 
 const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
 
-const evmChains = {
+const evmChains: EvmChains = {
   1: {
     urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
-    name: 'Ethereum',
-    logo: {
-      src: ethereumLogo,
-    },
+    iconUrl: ethereumLogo,
   },
   5: {
     urls: [`https://goerli.infura.io/v3/${infuraKey}`],
-    name: 'Görli',
-    logo: {
-      src: goerliLogo,
-    },
+    iconUrl: goerliLogo,
   },
 }
 
@@ -120,12 +115,12 @@ export const Root: React.VFC = () => {
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
             <DemoBanner />
-            <WalletProvider evmChains={evmChains}>
+            <WalletProvider evmChains={evmChains} subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}>
               <PodAuthProvider>
                 <AuthProvider>
                   <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
                     <TransactionProvider>
-                      <TransactionToasts subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL} />
+                      <TransactionToasts />
                       <Router>
                         <LoadBoundary>
                           <Routes />

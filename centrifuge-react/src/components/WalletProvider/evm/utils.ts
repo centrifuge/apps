@@ -7,6 +7,7 @@ import { Actions, Connector, Provider, Web3ReactState, Web3ReactStore } from '@w
 import * as React from 'react'
 import { useQuery } from 'react-query'
 import { useWallet } from '../WalletProvider'
+import { getChainInfo } from './chains'
 
 const stores = new WeakMap<Connector, Web3ReactStore>()
 const [emptyConnector, emptyStore] = createConnector(() => EMPTY)
@@ -90,8 +91,8 @@ export function useNativeBalance(address?: string) {
 export function useNativeCurrency() {
   const { evm } = useWallet()
   if (!evm.chainId) return null
-  const chain = evm.chains[evm.chainId]
-  return 'nativeCurrency' in chain ? chain.nativeCurrency : { name: 'Eth', symbol: 'ETH', decimals: 18 }
+  const chain = getChainInfo(evm.chains, evm.chainId)
+  return chain.nativeCurrency
 }
 
 function computeIsActive({ chainId, accounts, activating }: Web3ReactState) {
