@@ -22,3 +22,9 @@ jobs:
     secrets: inherit
     with:
       deploy_env: demo
+
+  faucet-demo:
+    uses: ./.github/workflows/faucet-api.yml
+    secrets: inherit
+    with:
+      deploy_env: demo

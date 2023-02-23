@@ -10,19 +10,16 @@ on:
     paths:
       - 'faucet-api/**'
       - '.github/workflows/faucet-api.yml'
-  workflow_dispatch:
-    # inputs:
-    #   deploy_env:
-    #     type: choice
-    #     required: true
-    #     default: demo
-    #     options:
-    #       - demo
-    #       - others
+  workflow_call:
+    inputs:
+      deploy_env:
+        type: string
+        required: false
+        default: demo
 env:
   app_name: faucet-api
-  # For now deploy only on demo when triggered manually:
-  deploy_to: ${{ github.event_name == 'workflow_dispatch' && 'demo' || '' }}
+  # For now deploy only on demo when triggered with workflow_call:
+  deploy_to: ${{ inputs.deploy_env && 'demo' || '' }}
   # deploy_to: ${{ inputs_deploy_env }}
   function_handler: faucetDev
 concurrency:
