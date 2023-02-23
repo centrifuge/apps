@@ -77,5 +77,5 @@ jobs:
           GSA: ${{ secrets.GSA }}
           target: ${{ env.function_handler }}
           gcloud_region: ${{ vars.GCLOUD_REGION }}
-          service_account: '${{ vars.ONBOARDING_FUNCT_SA }}'
+          service_account: '${{ vars.FIRESTORE_SA }}'
           deploy_env: ${{ env.deploy_to }}
