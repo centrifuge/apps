@@ -27,11 +27,11 @@ env:
   function_handler: faucetDev
 concurrency:
   group: 'faucet-api@${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
-  cancel-in-progress: true  
+  cancel-in-progress: true
 
 jobs:
   build-faucet:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: faucet-api
@@ -55,23 +55,22 @@ jobs:
       gh_env: ${{ steps.prepare.outputs.gh_env }}
       function_name: ${{ steps.prepare.outputs.function_name }}
 
-
   deploy-faucet:
     concurrency:
       group: deploy-${{ needs.build-faucet.outputs.function_name }}
-      cancel-in-progress: false   
+      cancel-in-progress: false
     needs: build-faucet
     runs-on: ubuntu-latest
     environment: ${{ needs.build-faucet.outputs.gh_env }}
     permissions:
       contents: 'read'
-      id-token: 'write'  
+      id-token: 'write'
     steps:
       - name: Checkout
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
         with:
-          path: apps  
-         
+          path: apps
+
       - name: Deploy Gfunction
         id: functionsdeploy
         uses: ./apps/.github/actions/deploy-gfunction
@@ -81,5 +80,5 @@ jobs:
           GSA: ${{ secrets.GSA }}
           target: ${{ env.function_handler }}
           gcloud_region: ${{ vars.GCLOUD_REGION }}
-          # service_account:
+          service_account: '${{ vars.ONBOARDING_FUNCT_SA }}'
           deploy_env: ${{ env.deploy_to }}
