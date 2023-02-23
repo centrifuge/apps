@@ -9,6 +9,7 @@ import { Centrifuge } from '../Centrifuge'
 import { Account, TransactionOptions } from '../types'
 import {
   InvestorTransactionType,
+  SubqueryBorrowerTransaction,
   SubqueryInvestorTransaction,
   SubqueryPoolSnapshot,
   SubqueryTrancheSnapshot,
@@ -1784,6 +1785,47 @@ export function getPoolsModule(inst: Centrifuge) {
     )
   }
 
+  function getBorrowerTransactions(args: [poolId: string, from?: Date, to?: Date]) {
+    const [poolId, from, to] = args
+
+    const $query = inst.getSubqueryObservable<{
+      borrowerTransactions: { nodes: SubqueryBorrowerTransaction[] }
+    }>(
+      `query($poolId: String!, $from: Datetime!, $to: Datetime!) {
+        borrowerTransactions(
+          orderBy: TIMESTAMP_ASC,
+          filter: { 
+            poolId: { equalTo: $poolId },
+            timestamp: { greaterThan: $from, lessThan: $to },
+          }) {
+          nodes {
+            loanId
+            epochId
+            timestamp
+            type
+            amount
+          }
+        }
+      }
+      `,
+      {
+        poolId,
+        from: from ? from.toISOString() : getDateYearsFromNow(-10).toISOString(),
+        to: to ? to.toISOString() : getDateYearsFromNow(10).toISOString(),
+      },
+      false
+    )
+
+    return $query.pipe(
+      map((data) => {
+        return data!.borrowerTransactions.nodes.map((tx) => ({
+          ...tx,
+          timestamp: new Date(tx.timestamp),
+        }))
+      })
+    )
+  }
+
   function getNativeCurrency() {
     return inst.getApi().pipe(
       map((api) => ({
@@ -2326,6 +2368,7 @@ export function getPoolsModule(inst: Centrifuge) {
     getDailyPoolStates,
     getMonthlyPoolStates,
     getInvestorTransactions,
+    getBorrowerTransactions,
     getNativeCurrency,
     getCurrencies,
     getDailyTrancheStates,
