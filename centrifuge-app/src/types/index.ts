@@ -59,7 +59,7 @@ export type UltimateBeneficialOwner = {
   countryOfResidency: string
 }
 
-type PoolSpecificSteps = {
+type PoolOnboardingSteps = {
   [poolId: string]: {
     [trancheId: string]: {
       signAgreements: {
@@ -122,7 +122,7 @@ export type EntityUser = {
   countryOfCitizenship: string | null
   countryOfResidency: string | null
   globalSteps: EntityOnboardingSteps
-  poolSteps: PoolSpecificSteps
+  poolSteps: PoolOnboardingSteps
 }
 
 type IndividualUser = {
@@ -133,7 +133,7 @@ type IndividualUser = {
   countryOfCitizenship: string
   countryOfResidency: string
   globalSteps: IndividualUserSteps
-  poolSteps: PoolSpecificSteps
+  poolSteps: PoolOnboardingSteps
 }
 
 export type OnboardingUser = IndividualUser | EntityUser
