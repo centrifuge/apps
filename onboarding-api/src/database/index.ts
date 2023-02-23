@@ -74,7 +74,7 @@ const globalStepsSchema = object({
   verifyAccreditation: object({
     completed: bool(),
     timeStamp: string().nullable(),
-  }).optional(),
+  }),
   verifyIdentity: object({
     completed: bool(),
     timeStamp: string().nullable(),
