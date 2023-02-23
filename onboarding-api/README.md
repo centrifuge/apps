@@ -61,7 +61,7 @@ Returns the entity user object and sets the step `verifyBusiness` to true on suc
 ```js
 {
   // ...
-	"generalSteps": {
+	"globalSteps": {
 		// ...
 		"verifyBusiness": {
 			"completed": true,
@@ -100,7 +100,7 @@ Sets the ultimate beneficial owners for the entity.
 ```js
 {
   // ...
-	"generalSteps": {
+	"globalSteps": {
 		// ...
 		"confirmOwners": {
 			"completed": true,
@@ -162,7 +162,7 @@ Sets the ultimate beneficial owners for the entity.
 ```js
 {
   // ...
-	"generalSteps": {
+	"globalSteps": {
 		// ...
 		"verifyIdentity": {
 			"completed": true,
@@ -200,7 +200,7 @@ Sets the ultimate beneficial owners for the entity.
   ],
   "incorporationDate": "2021-04-11",
   "dateOfBirth": "2021-04-11",
-  "generalSteps": {
+  "globalSteps": {
     "verifyIdentity": {
       "timeStamp": "2023-01-23T20:57:44.140Z",
       "completed": true

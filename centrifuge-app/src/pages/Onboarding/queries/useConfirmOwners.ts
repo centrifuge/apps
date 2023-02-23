@@ -33,7 +33,7 @@ export const useConfirmOwners = () => {
 
       const json = await response.json()
 
-      if (!json.generalSteps?.confirmOwners?.completed) {
+      if (!json.globalSteps?.confirmOwners?.completed) {
         throw new Error()
       }
     },

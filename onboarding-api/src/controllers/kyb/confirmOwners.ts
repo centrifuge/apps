@@ -29,25 +29,25 @@ export const confirmOwnersController = async (
       throw new HttpsError(404, 'Business not found')
     }
 
-    if (!user.generalSteps.verifyBusiness.completed) {
+    if (!user.globalSteps.verifyBusiness.completed) {
       throw new HttpsError(400, 'Business must be verified before confirming ownership')
     }
 
-    if (user?.generalSteps.confirmOwners.completed) {
+    if (user?.globalSteps.confirmOwners.completed) {
       throw new HttpsError(400, 'Owners already confirmed')
     }
 
-    if (!user.generalSteps.verifyEmail.completed) {
+    if (!user.globalSteps.verifyEmail.completed) {
       throw new HttpsError(400, 'Email must be verified before completing business verification')
     }
 
     const verifyEntity: Subset<EntityUser> = {
       ultimateBeneficialOwners: req.body.ultimateBeneficialOwners,
-      generalSteps: { ...user.generalSteps, confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
+      globalSteps: { ...user.globalSteps, confirmOwners: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
     await validateAndWriteToFirestore(walletAddress, verifyEntity, 'entity', [
-      'generalSteps',
+      'globalSteps',
       'ultimateBeneficialOwners',
     ])
 

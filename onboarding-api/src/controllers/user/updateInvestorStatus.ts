@@ -29,7 +29,7 @@ export const updateInvestorStatusController = async (
     const { poolId, trancheId, walletAddress } = payload
     const user = await fetchUser(walletAddress)
 
-    const incompleteSteps = Object.entries(user.generalSteps).filter(([name, step]) => {
+    const incompleteSteps = Object.entries(user.globalSteps).filter(([name, step]) => {
       if (
         name === 'verifyAccreditation' &&
         user.investorType === 'individual' &&

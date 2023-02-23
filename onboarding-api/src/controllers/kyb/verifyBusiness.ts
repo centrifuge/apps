@@ -36,7 +36,7 @@ export const verifyBusinessController = async (
     }
 
     // @ts-expect-error
-    if (entityDoc.exists && entityData.generalSteps?.verifyBusiness.completed) {
+    if (entityDoc.exists && entityData.globalSteps?.verifyBusiness.completed) {
       throw new HttpsError(400, 'Business already verified')
     }
 
@@ -76,7 +76,7 @@ export const verifyBusinessController = async (
       registrationNumber,
       incorporationDate,
       jurisdictionCode,
-      generalSteps: {
+      globalSteps: {
         verifyBusiness: { completed: !!(kybVerified && businessAmlVerified), timeStamp: new Date().toISOString() },
         verifyEmail: { completed: false, timeStamp: null },
         confirmOwners: { completed: false, timeStamp: null },

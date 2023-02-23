@@ -10,7 +10,7 @@ export const TaxInfo = () => {
   const { data: taxInfoData } = useTaxInfo()
   const { mutate: uploadTaxInfo, isLoading } = useUploadTaxInfo(taxInfo)
 
-  const isCompleted = !!onboardingUser?.generalSteps?.verifyTaxInfo?.completed
+  const isCompleted = !!onboardingUser?.globalSteps?.verifyTaxInfo?.completed
 
   const validateFileUpload = (file: File) => {
     if (file.type !== 'application/pdf') {

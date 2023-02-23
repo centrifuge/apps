@@ -118,7 +118,7 @@ export type EntityUser = {
   name: string | null
   dateOfBirth: string | null
   countryOfCitizenship: string | null
-  generalSteps: EntityOnboardingSteps
+  globalSteps: EntityOnboardingSteps
   poolSteps: PoolSpecificSteps
 }
 
@@ -128,7 +128,7 @@ type IndividualUser = {
   name: string | null
   dateOfBirth: string | null
   countryOfCitizenship: string | null
-  generalSteps: IndividualUserSteps
+  globalSteps: IndividualUserSteps
   poolSteps: PoolSpecificSteps
 }
 

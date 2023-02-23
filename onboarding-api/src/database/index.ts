@@ -52,7 +52,7 @@ const poolStepsSchema = lazy((value) => {
   })
 })
 
-const generalStepsSchema = object({
+const globalStepsSchema = object({
   verifyBusiness: object({
     completed: bool(),
     timeStamp: string().nullable(),
@@ -92,7 +92,7 @@ export const entityUserSchema = object({
   name: string().nullable().default(null),
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
-  generalSteps: generalStepsSchema,
+  globalSteps: globalStepsSchema,
   poolSteps: poolStepsSchema,
 })
 
@@ -104,7 +104,7 @@ export const individualUserSchema = object({
   name: string().nullable().default(null),
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
-  generalSteps: generalStepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo']),
+  globalSteps: globalStepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'verifyEmail']),
   poolSteps: poolStepsSchema,
 })
 
