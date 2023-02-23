@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@polkadot/keyring": "^10.1.11",
-    "@polkadot/types": "^9.7.1",
+    "@polkadot/types": "~9.14.1",
     "clp-wasm": "^0.0.15",
     "decimal.js-light": "^2.5.1",
     "isomorphic-fetch": "^3.0.0",
