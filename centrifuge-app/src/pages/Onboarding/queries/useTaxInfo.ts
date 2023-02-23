@@ -6,22 +6,19 @@ import { useOnboarding } from '../../../components/OnboardingProvider'
 export const useTaxInfo = () => {
   const { authToken } = useAuth()
   const { selectedAccount } = useWallet()
-  const { onboardingUser, pool } = useOnboarding()
+  const { onboardingUser } = useOnboarding()
 
   const query = useQuery(
     ['tax-info', selectedAccount?.address],
     async () => {
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getTaxInfo?poolId=${pool.id}&trancheId=${pool.trancheId}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        }
-      )
+      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getTaxInfo`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      })
 
       const json = await response.json()
 

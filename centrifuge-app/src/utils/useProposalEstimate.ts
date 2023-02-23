@@ -6,6 +6,36 @@ import * as React from 'react'
 import { combineLatest, map, of, Subject, switchMap } from 'rxjs'
 import { config } from '../config'
 
+const mockMetadata = {
+  poolIcon: '0x',
+  poolName: 'More Pool Poolios',
+  assetClass: 'Corporate Credit',
+  currency: 'ausd',
+  maxReserve: 1,
+  epochHours: 23,
+  epochMinutes: 50,
+  podEndpoint: 'https://google.com',
+  listed: true,
+  issuerName: 'Polka Issuer',
+  issuerLogo: '0x',
+  issuerDescription: '',
+  executiveSummary: '',
+  website: '',
+  forum: '',
+  email: 'user@k-f.co',
+  details: [],
+  riskGroups: [
+    {
+      groupName: 'A',
+      advanceRate: 100,
+      fee: 12,
+      probabilityOfDefault: 12,
+      lossGivenDefault: 12,
+      discountRate: 12,
+    },
+  ],
+}
+
 type CreatePoolArgs = Parameters<Centrifuge['pools']['createPool']>[0]
 
 export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranches' | 'currency' | 'maxReserve'>) {
@@ -31,19 +61,21 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
           }),
         ]).pipe(
           map(([api, submittable]) => {
-            const { minimumDeposit, preimageByteDeposit } = api.consts.democracy
+            const { minimumDeposit } = api.consts.democracy
             setChainDecimals(api.registry.chainDecimals[0])
-            // We need the first argument passed to the `notePreimage` extrinsic, which is the actual encoded proposal
-            const notePreimageDeposit = hexToBN(preimageByteDeposit.toHex()).mul(
-              config.poolCreationType === 'notePreimage'
-                ? new BN((submittable as any).method.args[0].length)
-                : new BN((submittable as any).method.args[0][0].args[0].length)
-            )
-            const feeBN =
-              config.poolCreationType === 'notePreimage'
-                ? notePreimageDeposit
-                : notePreimageDeposit.add(hexToBN(minimumDeposit.toHex()))
-            return new CurrencyBalance(feeBN, chainDecimals)
+            if (config.poolCreationType === 'notePreimage') {
+              // hard coded base and byte deposit supplied by protocol
+              const preimageBaseDeposit = new CurrencyBalance('4140000000000000000', chainDecimals)
+              const preimageByteDeposit = new CurrencyBalance('60000000000000000', chainDecimals)
+              const preimageFee = preimageByteDeposit
+                // the first argument passed to the `notePreimage` extrinsic is the actual encoded proposal in bytes
+                .mul(new BN((submittable as any).method.args[0].length))
+                .add(preimageBaseDeposit)
+              return new CurrencyBalance(preimageFee, chainDecimals)
+            } else if (config.poolCreationType === 'propose') {
+              return new CurrencyBalance(hexToBN(minimumDeposit.toHex()), chainDecimals)
+            }
+            return new CurrencyBalance(0, chainDecimals)
           })
         )
       })
@@ -76,17 +108,15 @@ export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranche
         })),
       ]
 
-      const currency = values.currency === 'PermissionedEur' ? { permissioned: 'PermissionedEur' } : values.currency
-
       // Complete the data in the form with some dummy data for things like poolId and metadata
       feeSubject.next([
         selectedAccount.address,
         '1234567890',
         '1234567890',
         tranches,
-        currency,
+        'ausd',
         CurrencyBalance.fromFloat(values.maxReserve || 0, chainDecimals),
-        {} as any,
+        { ...mockMetadata, tranches } as any,
       ] as CreatePoolArgs)
     }, 1000),
     []

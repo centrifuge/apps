@@ -66,7 +66,7 @@ export const signAndSendDocumentsController = async (
       `signed-subscription-agreements/${walletAddress}/${poolId}/${trancheId}.pdf`
     )
 
-    const taxInfo = await onboardingBucket.file(`tax-information/${walletAddress}/${poolId}/${trancheId}.pdf`)
+    const taxInfo = await onboardingBucket.file(`tax-information/${walletAddress}.pdf`)
 
     const [taxInfoExists] = await taxInfo.exists()
 

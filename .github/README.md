@@ -1,52 +1,32 @@
-## Pipeline code decisions
+# Monorepo for the Centrifuge applications.
 
-### One workflow per Trigger
+## Setup
 
-Each workflow represents a different trigger rather than a different "way of building and deploying"
-```
-.github/workflows
-├── centrifuge-app.yml -> triggers on PR or push to main (only changes to centrifuge-app components)
-├── demo-deploys.yml -> manual triggered deployment (deploys all)
-├── fabric.yml -> builds on PR or push to main (only changes to fabric/)
-├── faucet-api.yml. Deploys 
-├── npm-publish.yml -> always manual from main
-├── onboarding-api.yml -> triggers on PR or push to main (only changes to onboarding-api/)
-├── pinning-api.yml -> triggers on PR or push to main (only changes to pinning-api/)
-├── pre-prod-deploys.yml -> Manually deploy from main to Altair & Pre-prod. Always manual. Requires approval
-├── prepare-pr.yml -> Deploy functions for all PRs. Delete PR artifacts when closed
-└── prod-deploys.yml -> Move artifacts from pre-prod. Always manual. Requires approval
-```
-### Supporting actions
-```
-.github/actions
-├── archive-release -> Upload artifacts to a pre-release
-├── build-function -> Build function(s) using yarn
-├── deploy-gcs -> deploy packaged code to google buckets
-├── deploy-gfunction -> deploy Gfunction packaged code
-├── fetch-function-secrets -> Convert $component/env-vars/$env.secrets to the right format for Gcloud
-├── fetch-function-vars -> Convert $component/$env_name.env to the right format for Gcloud
-└── prepare-deploy -> A bunch of logic to set variables for the different deployments on each env
-```
-### Two deployment mechanisms
-One for gcloud storage (static content) and one for Gfunctions (dynamic APIs)
+Make sure you have installed Yarn and NVM.
 
-### Secrets and vars for functions
+1. Use Node v14.15.1: `nvm use`
+2. Install dependencies: `yarn install`
+3. Install `husky`: `yarn postinstall`
+4. Add `.env` files with the right environment variables to each project.
 
-####  Secrets
-Secrets are stored in Gcloud secrets and the functions will fetch them during runtime.
-The secrets are passed as a single GH env variable that contains references to all the Gcloud secrets (only the secret name is exposed in this variable) and passed to the Function deploy so it can reference the right secrets for the specific app.
+It's also recommended to run Prettier automatically in your editor, e.g. using [this VS Code plugin](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode).
 
-Secrets can be set for each function under `env-vars/$env.secrets`
+## Notes
 
-Secrets need to be added to Gcloud for your function deploy to succeed. Use the `gcloud secrets` command to create and manage them. For production secrets, you'll need to ask DevOps to create the secret first before you can update the value before you promote your function to prod.
+To add other repositories to this monorepo while preserving the Git history, we can use the following steps: https://medium.com/@filipenevola/how-to-migrate-to-mono-repository-without-losing-any-git-history-7a4d80aa7de2
 
-**Example: Update a secret value**
-> First create a file in $TMPDIR/KEY with your secret value un plain text (no new-line at the end) then run:
+To set a pool into maintenance mode, add the pool id to the environment variable `NEXT_PUBLIC_FEATURE_FLAG_MAINTENANCE_MODE`.
 
-```
-gcloud secrets versions add --project peak-vista-185616 PINATA_API_KEY --data-file=/$TMPDIR/KEY
-```
+## Agile release process
+To make sure repository admins can control the full workflow of our apps to production safely this repository provides the following flow:
 
-#### ENV vars
-Env vars need to be set per environment under the `env-vars` folder.
-Github actions will take care to transform that into what the function expects if you follow the existing format line-by-line for each value-pair
+- When you open a PR a new cent-app will be deployed with your PR number on the URL such as: app-prXXX.k-f.dev
+
+- After code is merged to main you can see the changes in: app-dev.k-f.dev
+
+- When a repository admin creates a `centrifuge-app/v*` tag it will will trigger a deployment to [altair.centrifuge.io](https://altair.centrifuge.io). The release needs to FIRST be marked as `prerelease`. 
+    > Draft releases or tags other than the one above will not trigger any deployments.
+
+- Once ready, you can edit your pre-release and untick the "pre-release" setting to fully publish a release, this will trigger a refresh of our code in app.centrifuge.io and app.ipfs.centrifuge.io (coming soon)
+
+More info on our release process rationale can be found in [our HackMD](https://centrifuge.hackmd.io/MFsnRldyQSa4cadx11OtVg?view) (Private link, only k-f contributors)

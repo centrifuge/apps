@@ -16,7 +16,7 @@ on:
     inputs:
       deploy_env:
         type: string
-        required: true
+        required: false
 env:
  # This needs to match the env: settings in prod-deploy.yml
   app_name: pinning-api
@@ -60,12 +60,14 @@ jobs:
           path: ./${{ env.app_name }}/dist
 
     outputs:
-      function_name: ${{ steps.prepare.outputs.function_name }}
       gh_env: ${{ steps.prepare.outputs.gh_env }}
-      function_secrets: ${{ steps.set_secrets.outputs.function_secrets }}
-      function_vars: ${{ steps.set_env.outputs.function_vars }}
+      function_name: ${{ steps.prepare.outputs.function_name }}
 
   deploy-pinning-api:
+    concurrency:
+     # Don't try to deploy the same function in parallel
+      group: deploy-${{ needs.build-pinning-api.outputs.function_name }}
+      cancel-in-progress: true
     needs: build-pinning-api
     runs-on: ubuntu-latest
     environment: ${{ needs.build-pinning-api.outputs.gh_env }}

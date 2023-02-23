@@ -10,8 +10,6 @@ const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonP
 interface OnboardingContextType<T> {
   onboardingUser: T | null
   refetchOnboardingUser: () => void
-  isOnboardingUserFetching: boolean
-  isOnboardingUserFetched: boolean
   pool: {
     title: string
     trancheId: string
@@ -21,7 +19,7 @@ interface OnboardingContextType<T> {
   setActiveStep: React.Dispatch<React.SetStateAction<number>>
   nextStep: () => void
   previousStep: () => void
-  isFetchingStep: boolean
+  isLoadingStep: boolean
 }
 
 const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUser> | null>(null)
@@ -45,8 +43,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   const {
     data: onboardingUser,
     refetch: refetchOnboardingUser,
-    isFetching: isOnboardingUserFetching,
     isFetched: isOnboardingUserFetched,
+    isLoading: isOnboardingUserLoading,
   } = useQuery(
     ['get-user', authToken],
     async () => {
@@ -106,14 +104,12 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       value={{
         onboardingUser: onboardingUser || null,
         refetchOnboardingUser,
-        isOnboardingUserFetching,
-        isOnboardingUserFetched,
         pool,
         activeStep,
         nextStep,
         previousStep,
         setActiveStep,
-        isFetchingStep: activeStep === 0 || isConnecting || isOnboardingUserFetching,
+        isLoadingStep: activeStep === 0 || isConnecting || isOnboardingUserLoading,
       }}
     >
       {children}

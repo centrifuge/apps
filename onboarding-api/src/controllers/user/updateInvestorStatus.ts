@@ -33,19 +33,15 @@ export const updateInvestorStatusController = async (
       if (
         name === 'verifyAccreditation' &&
         user.investorType === 'individual' &&
-        !user.countryOfCitizenship?.startsWith('us')
+        user.countryOfCitizenship?.startsWith('us')
       ) {
-        return
+        return !step?.completed
       }
 
-      if (
-        name === 'verifyAccreditation' &&
-        user.investorType === 'entity' &&
-        !user.jurisdictionCode?.startsWith('us')
-      ) {
-        return
+      if (name === 'verifyAccreditation' && user.investorType === 'entity' && user.jurisdictionCode?.startsWith('us')) {
+        return !step?.completed
       }
-      return !step?.completed
+      return false
     })
 
     if (incompleteSteps.length > 0) {

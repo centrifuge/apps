@@ -11,7 +11,7 @@ export default async (req: Request, res: Response) => {
     }
 
     const pinJsonResponse = await pinJson(json)
-    const jsonHash = pinJsonResponse.IpfsHash
+    const jsonHash = pinJsonResponse.data.IpfsHash
     const jsonURL = ipfsHashToURI(jsonHash)
 
     return res.status(200).send(JSON.stringify({ uri: jsonURL }))

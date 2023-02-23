@@ -1,4 +1,4 @@
-name: "Manual deployments"
+name: "Demo deployments (manual)"
 on:
   workflow_dispatch:
   
@@ -19,6 +19,12 @@ jobs:
 
   onboarding-demo:
     uses: ./.github/workflows/onboarding-api.yml
+    secrets: inherit
+    with:
+      deploy_env: demo
+
+  faucet-demo:
+    uses: ./.github/workflows/faucet-api.yml
     secrets: inherit
     with:
       deploy_env: demo

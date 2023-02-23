@@ -55,6 +55,8 @@ export type InvestorTypes = 'individual' | 'entity'
 export type UltimateBeneficialOwner = {
   name: string
   dateOfBirth: string
+  countryOfCitizenship: string
+  countryOfResidency: string
 }
 
 type PoolSpecificSteps = {
@@ -89,16 +91,16 @@ type IndividualUserSteps = {
     completed: boolean
     timeStamp: string | null
   }
+  verifyEmail: {
+    completed: boolean
+    timeStamp: string | null
+  }
 }
 
 export interface EntityOnboardingSteps extends IndividualUserSteps {
   verifyBusiness: {
     completed: boolean
-    timeStamp: string | null
-  }
-  verifyEmail: {
-    completed: boolean
-    timeStamp: string | null
+    timeStamp: string
   }
   confirmOwners: {
     completed: boolean
@@ -110,7 +112,7 @@ export type EntityUser = {
   investorType: 'entity'
   walletAddress: string
   businessName: string
-  email: string | null
+  email: string
   incorporationDate: string
   jurisdictionCode: string
   registrationNumber: string
@@ -118,6 +120,7 @@ export type EntityUser = {
   name: string | null
   dateOfBirth: string | null
   countryOfCitizenship: string | null
+  countryOfResidency: string | null
   globalSteps: EntityOnboardingSteps
   poolSteps: PoolSpecificSteps
 }
@@ -125,9 +128,10 @@ export type EntityUser = {
 type IndividualUser = {
   investorType: 'individual'
   walletAddress: string
-  name: string | null
-  dateOfBirth: string | null
-  countryOfCitizenship: string | null
+  name: string
+  dateOfBirth: string
+  countryOfCitizenship: string
+  countryOfResidency: string
   globalSteps: IndividualUserSteps
   poolSteps: PoolSpecificSteps
 }
