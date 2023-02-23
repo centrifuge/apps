@@ -110,7 +110,9 @@ async function faucet(req: Request, res: Response) {
 
     const keyring = new Keyring({ type: 'sr25519' })
     console.log('signing and sending tx')
-    const hash = await txBatch.signAndSend(keyring.addFromUri((process.env.FAUCET_SEED_HEX as string) || '//Alice'))
+    const hash = URL.includes('demo')
+      ? await txBatch.signAndSend(keyring.addFromUri(process.env.FAUCET_SEED_HEX as string))
+      : await txBatch.signAndSend(keyring.addFromUri('//Alice'))
     console.log('signed and sent tx')
     api.disconnect()
     return res.status(200).json({ hash })
@@ -120,5 +122,4 @@ async function faucet(req: Request, res: Response) {
   }
 }
 
-exports.faucetDev = faucet
-exports.faucetDemo = faucet
+exports.faucet = faucet
