@@ -1,0 +1,12 @@
+# https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
+name: Onboarding API
+on:
+  pull_request:
+    paths-ignore:
+      - 'onboarding-api/**'
+      - '.github/workflows/onboarding-api.yml'
+jobs:
+  build-onboarding-api:
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "This job is always green to ensure PRs without code changes to the main folders can also merge"'      

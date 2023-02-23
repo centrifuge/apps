@@ -17,5 +17,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "**/*.d.ts", ".eslintrc.js", "lambda"]
+  "include": ["src", "**/*.d.ts", ".eslintrc.js", "functions"]
 }

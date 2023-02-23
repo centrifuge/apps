@@ -16,7 +16,7 @@ import { date, object, string } from 'yup'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { EntityUser } from '../../types'
 import { formatGeographyCodes } from '../../utils/formatGeographyCodes'
-import { CA_PROVINCE_CODES, KYB_COUNTRY_CODES, US_STATE_CODES } from './geography_codes'
+import { CA_PROVINCE_CODES, KYB_COUNTRY_CODES, US_STATE_CODES } from './geographyCodes'
 import { useVerifyBusiness } from './queries/useVerifyBusiness'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
 
@@ -122,7 +122,7 @@ export const BusinessInformation = () => {
         <Stack gap={2} width="493px">
           <TextInput
             id="email"
-            label="Email address*"
+            label="Email address"
             placeholder="Enter email address"
             disabled={isLoading || isCompleted}
             onChange={formik.handleChange}
@@ -130,7 +130,7 @@ export const BusinessInformation = () => {
           />
           <TextInput
             id="businessName"
-            label="Legal entity name*"
+            label="Legal entity name"
             placeholder="Enter entity name"
             disabled={isLoading || isCompleted}
             onChange={formik.handleChange}
@@ -138,7 +138,7 @@ export const BusinessInformation = () => {
           />
           <Select
             name="jurisdictionCode"
-            label="Country of incorporation*"
+            label="Country of incorporation"
             placeholder="Select a country"
             options={formatGeographyCodes(KYB_COUNTRY_CODES)}
             disabled={isLoading || isCompleted}
@@ -155,7 +155,7 @@ export const BusinessInformation = () => {
 
           <TextInput
             id="registrationNumber"
-            label="Registration number*"
+            label="Registration number"
             placeholder="0000"
             disabled={isLoading || isCompleted}
             onChange={formik.handleChange}
@@ -163,7 +163,7 @@ export const BusinessInformation = () => {
           />
           <DateInput
             id="incorporationDate"
-            label="Business Incorporation Date"
+            label="Business incorporation date"
             disabled={isLoading || isCompleted}
             onChange={formik.handleChange}
             value={formik.values.incorporationDate}

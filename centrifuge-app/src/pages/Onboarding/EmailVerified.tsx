@@ -12,7 +12,7 @@ export const EmailVerified: React.FC = () => {
   const { error, data } = useVerifyEmail()
 
   return (
-    <Flex backgroundColor="backgroundSecondary" minHeight="100vh" flexDirection="column" textAlign="center">
+    <Flex backgroundColor="#f9f9f9" minHeight="100vh" flexDirection="column" textAlign="center">
       <Shelf as="header" justifyContent="space-between" gap={2} p={3}>
         <Shelf alignItems="center" gap={3}>
           <Box as={Link} to="/" width={110}>
@@ -29,6 +29,7 @@ export const EmailVerified: React.FC = () => {
         backgroundColor="backgroundPrimary"
         alignItems="flex-start"
         gridTemplateColumns="1fr"
+        maxWidth="1200px"
       >
         <Stack
           paddingTop={10}

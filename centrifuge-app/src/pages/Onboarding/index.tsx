@@ -21,7 +21,7 @@ import { TaxInfo } from './TaxInfo'
 const [_, WordMark] = config.logo
 
 export const OnboardingPage: React.FC = () => {
-  const { onboardingUser, activeStep, setActiveStep, isFetchingStep } = useOnboarding()
+  const { onboardingUser, activeStep, setActiveStep, isLoadingStep } = useOnboarding()
   const [investorType, setInvestorType] = React.useState<InvestorTypes>()
 
   const { data: signedAgreementData, isFetched: isSignedAgreementFetched } = useSignedAgreement()
@@ -33,7 +33,7 @@ export const OnboardingPage: React.FC = () => {
   }, [onboardingUser?.investorType])
 
   return (
-    <Flex backgroundColor="backgroundSecondary" minHeight="100vh" flexDirection="column">
+    <Flex backgroundColor="#f9f9f9" minHeight="100vh" flexDirection="column">
       <Shelf as="header" justifyContent="space-between" gap={2} p={3}>
         <Shelf alignItems="center" gap={3}>
           <Box as={Link} to="/" width={110}>
@@ -46,7 +46,7 @@ export const OnboardingPage: React.FC = () => {
           <WalletMenu />
         </Box>
       </Shelf>
-      {isFetchingStep ? (
+      {isLoadingStep ? (
         <Box
           mx="150px"
           my={5}
@@ -69,6 +69,7 @@ export const OnboardingPage: React.FC = () => {
           backgroundColor="backgroundPrimary"
           alignItems="flex-start"
           gridTemplateColumns="350px 1px 1fr min-content"
+          maxWidth="1200px"
         >
           <Box paddingTop={10} paddingLeft={7} paddingRight={7} paddingBottom={6}>
             <Stepper activeStep={activeStep} setActiveStep={setActiveStep}>

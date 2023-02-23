@@ -10,11 +10,9 @@ export default defineConfig({
       // configuration to allow HMR in other modules in yarn
       ignored: ['!../centrifuge-js/dist/**', '!../fabric/dist/**'],
     },
-    proxy: {
-      '/.netlify': 'http://localhost:8888',
-    },
   },
   envPrefix: 'REACT_APP_',
+  envDir: '.env-config',
   build: {
     target: 'esnext',
     outDir: 'build',

@@ -1,0 +1,159 @@
+name: Centrifuge App
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "rc*"
+    paths:
+      - 'centrifuge-app/**'
+      - 'centrifuge-js/**'
+      - 'centrifuge-react/**'
+      - '.github/workflows/centrifuge-app.yml'
+  pull_request:
+    paths:
+      - 'centrifuge-app/**'
+      - 'centrifuge-js/**'
+      - 'centrifuge-react/**'
+      - '.github/workflows/centrifuge-app.yml'
+  workflow_call:
+    inputs:
+      deploy_env:
+        type: string
+        required: false
+# Fancy concurrency group string to allow for multi-staging deployments
+concurrency:
+  group: 'centrifuge-app-${{ inputs.deploy_env || github.event.inputs.deploy_env }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true      
+env:
+  artifact_name: "webpack${{ inputs.deploy_env && format('-{0}', inputs.deploy_env) }}"
+jobs:  
+  build-app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: centrifuge-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+      - name: prepare env logic
+        id: prepare
+        uses: ./.github/actions/prepare-deploy
+        with:
+          app_base_name: app
+          deploy_to: ${{ inputs.deploy_env }}
+
+      - name: Setup Node
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c #@v3.6.0
+        with:
+          node-version: '16'
+          cache: yarn
+      
+      - name: set PR function values
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          PINNING_URL: https:\/\/${{ vars.GCLOUD_REGION  }}-${{ vars.GCP_DEV_PROJ }}.cloudfunctions.net\/pinning-api-pr${{ github.event.number }}
+          ONBOARDING_URL: https:\/\/${{ vars.GCLOUD_REGION  }}-${{ vars.GCP_DEV_PROJ }}.cloudfunctions.net\/onboarding-api-pr${{ github.event.number }}
+        # Ex: 
+        # sed -i .bak -e '/^REACT_APP_ONBOARDING_API_URL=/s/=.*/=https:\/\/europe-central2-peak-vista.cloudfunctions.net\/onboarding-api-pr1144/' $PWD/.env-config/.env.development
+        run: |
+          sed -i -e '/^REACT_APP_PINNING_API_URL=/s/=.*/=${{ env.PINNING_URL }}/' $PWD/.env-config/.env.${{ steps.prepare.outputs.env_name }}
+          sed -i -e '/^REACT_APP_ONBOARDING_API_URL=/s/=.*/=${{ env.ONBOARDING_URL }}/' $PWD/.env-config/.env.${{ steps.prepare.outputs.env_name }}
+          cat .env-config/.env.${{ steps.prepare.outputs.env_name }} | grep API
+          
+      - name: Install Dependencies
+        # env:
+        #   NODE_ENV: production      
+        run: yarn install --immutable
+      - name: Lint
+        run: yarn lint
+      - name: Build centrifuge-app
+        working-directory: centrifuge-app
+        shell: bash
+        # env:
+        #   NODE_ENV: production        
+        run: |
+          yarn build:fabric 
+          yarn build:centjs 
+          yarn build:centReact
+          cat .env-config/.env.${{ steps.prepare.outputs.env_name }}
+          yarn build:app --mode ${{ steps.prepare.outputs.env_name }}
+      
+      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #@3.1.2
+        with: 
+          name: ${{ env.artifact_name }}
+          path: ./centrifuge-app/build
+          if-no-files-found: error
+
+      - name: Archive staging artifacts
+        id: archive_staging
+        if: inputs.deploy_env == 'staging' && github.event_name == 'release'
+        uses: ./.github/actions/archive-release
+        with:
+          name: webpack
+          path: ./centrifuge-app/build
+
+    outputs:
+      front_url: ${{ steps.prepare.outputs.front_url }}
+      gh_env: ${{ steps.prepare.outputs.gh_env }}
+           
+
+  deploy-app:
+    concurrency:
+       # Do not sync the same bucket in parallel
+      group: deploy-${{ needs.build-app.outputs.front_url }}
+      cancel-in-progress: true    
+    permissions:
+      contents: 'read'
+      id-token: 'write'  
+    runs-on: ubuntu-latest
+    needs: build-app
+    environment: ${{ needs.build-app.outputs.gh_env }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        with:
+          path: apps
+            
+      - name: deploy to GCS
+        id: gcsdeploy
+        uses: ./apps/.github/actions/deploy-gcs
+        with:
+          artifact_name: ${{ env.artifact_name }}
+          bucket_url: ${{ needs.build-app.outputs.front_url }}
+          GWIP: ${{ secrets.GWIP }}
+          GSA: ${{ secrets.GSA }}
+    outputs:
+      bucket_url: ${{ needs.build-app.outputs.front_url }}
+      gh_env: ${{ needs.build-app.outputs.gh_env }}
+
+  notify:
+    needs: deploy-app
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: PR comment with preview URL
+        uses: thollander/actions-comment-pull-request@v2
+        env:
+          pull_sha: ${{ github.event.pull_request.head.sha }}
+        with:
+          message: |
+            PR deployed in Google Cloud
+            URL: https://${{ needs.deploy-app.outputs.bucket_url }}
+            Commit #: ${{ env.pull_sha }}   
+            To access the functions directly check the corresponding deploy Action
+      
+  # owasp_scan:
+  #   needs: deploy-app
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: ZAP Scan
+  #       uses: zaproxy/action-baseline@v0.7.0
+  #       with:
+  #         target: https://${{ needs.deploy-app.outputs.bucket_url }}
+  #         allow_issue_writing: false # Remove this to activate creating issues with the report
+      
+

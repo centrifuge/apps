@@ -16,6 +16,8 @@ export type SupportedNetworks = 'polkadot'
 const uboSchema = object({
   name: string().required(),
   dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
+  countryOfResidency: string().required(),
+  countryOfCitizenship: string().required(),
 })
 
 const walletSchema = object({
@@ -77,7 +79,7 @@ export const entityUserSchema = object({
   investorType: string().default('entity') as StringSchema<Entity>,
   wallet: walletSchema,
   kycReference: string().optional(),
-  email: string().email().default(null),
+  email: string().email().required(),
   businessName: string().required(),
   incorporationDate: date().required(),
   registrationNumber: string().required(),
@@ -86,6 +88,7 @@ export const entityUserSchema = object({
   name: string().nullable().default(null),
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
+  countryOfResidency: string().nullable().default(null), // TODO: validate with list of countries
   steps: stepsSchema,
   onboardingStatus: lazy((value) => {
     const poolId = Object.keys(value)[0]
@@ -113,10 +116,11 @@ export const individualUserSchema = object({
   investorType: string().default('individual') as StringSchema<Individual>,
   wallet: walletSchema,
   kycReference: string().optional(),
-  email: string().default(null).nullable(),
-  name: string().nullable().default(null),
-  dateOfBirth: string().nullable().default(null),
-  countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
+  email: string().default(null).nullable(), // TODO: coming soon
+  name: string().required(),
+  dateOfBirth: string().required(),
+  countryOfCitizenship: string().required(), // TODO: validate with list of countries
+  countryOfResidency: string().required(), // TODO: validate with list of countries
   steps: stepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'signAgreements']),
   onboardingStatus: lazy((value) => {
     const poolId = Object.keys(value)[0]
