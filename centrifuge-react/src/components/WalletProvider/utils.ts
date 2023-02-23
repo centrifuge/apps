@@ -5,16 +5,13 @@ import { Network } from './types'
 import { useWallet } from './WalletProvider'
 
 export function getNetworkName(network: Network, evmChains: EvmChains, centrifugeNetworkName = 'Centrifuge') {
-  return network === 'centrifuge' ? centrifugeNetworkName : evmChains[network]?.name ?? 'Unknown'
+  return network === 'centrifuge' ? centrifugeNetworkName : getChainInfo(evmChains, network)?.name ?? 'Unknown'
 }
 
-export function useGetNetworkName() {
+export function useGetNetworkName(evmChains = useWallet().evm.chains) {
   const { centrifuge } = React.useContext(CentrifugeContext)
-  const {
-    evm: { chains },
-  } = useWallet()
   const centNetworkName = centrifuge?.config.network === 'altair' ? 'Altair' : 'Centrifuge'
-  return (network: Network) => getNetworkName(network, chains, centNetworkName)
+  return (network: Network) => getNetworkName(network, evmChains, centNetworkName)
 }
 
 export function useNetworkName(network: Network) {

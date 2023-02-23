@@ -9,7 +9,6 @@ type Props = WalletButtonProps & {
 export function ConnectButton({ label = 'Connect', ...rest }: Props) {
   const { connectedType, showWallets } = useWallet()
   const address = useAddress()
-  console.log('rest', rest)
 
   if (connectedType) {
     return address ? null : <WalletButton connectLabel="No account connected" disabled {...rest} />

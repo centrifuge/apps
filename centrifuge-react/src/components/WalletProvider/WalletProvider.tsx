@@ -14,6 +14,7 @@ import { getStore } from './evm/utils'
 import { Account, Proxy, State } from './types'
 import { useConnectEagerly } from './useConnectEagerly'
 import { Action, getPersisted, persist, useWalletStateInternal } from './useWalletState'
+import { useGetNetworkName } from './utils'
 import { WalletDialog } from './WalletDialog'
 
 type WalletContextType = {
@@ -237,20 +238,17 @@ export function WalletProvider({
 
   const isTryingToConnectEagerly = useConnectEagerly(connect, dispatch, evmConnectors)
   const isConnecting = isConnectingByInteraction || isTryingToConnectEagerly
+  const getNetworkName = useGetNetworkName(evmChains)
 
   const ctx: WalletContextType = React.useMemo(() => {
     const selectedSubstrateAccount =
       state.substrate.accounts?.find((acc) => acc.address === state.substrate.selectedAccountAddress) ?? null
+    const connectedNetwork =
+      state.connectedType === 'evm' ? state.evm.chainId! : state.connectedType === 'substrate' ? 'centrifuge' : null
     return {
       connectedType: state.connectedType,
-      connectedNetwork:
-        state.connectedType === 'evm' ? state.evm.chainId! : state.connectedType === 'substrate' ? 'centrifuge' : null,
-      connectedNetworkName:
-        state.connectedType === 'evm'
-          ? evmChains[state.evm.chainId!]?.name
-          : state.connectedType === 'substrate'
-          ? 'Centrifuge'
-          : null,
+      connectedNetwork,
+      connectedNetworkName: connectedNetwork ? getNetworkName(connectedNetwork) : null,
       dispatch,
       showWallets: (network?: State['walletDialog']['network'], wallet?: State['walletDialog']['wallet']) =>
         dispatch({ type: 'showWalletDialog', payload: { view: 'wallets', network, wallet } }),

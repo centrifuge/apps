@@ -30,10 +30,7 @@ const Divider = styled(Box)`
 
 export function UserSelection({ network, wallet }: UserSelectionProps) {
   const { sizes } = useTheme()
-  const {
-    showWallets,
-    walletDialog: { network: selectedNetwork },
-  } = useWallet()
+  const { showWallets } = useWallet()
 
   return (
     <Grid columns={3} equalColumns mx="auto" alignItems="end">
@@ -61,11 +58,7 @@ export function UserSelection({ network, wallet }: UserSelectionProps) {
         <Title>Wallet</Title>
         <Selection>
           {wallet && (
-            <LogoButton
-              icon={getWalletIcon(wallet)}
-              onClick={() => showWallets(selectedNetwork)}
-              aria-label="Change wallet"
-            />
+            <LogoButton icon={getWalletIcon(wallet)} onClick={() => showWallets(network)} aria-label="Change wallet" />
           )}
         </Selection>
       </Column>
@@ -80,7 +73,7 @@ export type NetworkIconProps = {
 
 function useNeworkIcon(network: NetworkIconProps['network']) {
   const { evm } = useWallet()
-  const src = network === 'centrifuge' ? centrifugeLogo : evm.chains[network]?.logo?.src ?? ''
+  const src = network === 'centrifuge' ? centrifugeLogo : evm.chains[network]?.iconUrl ?? ''
   return src
 }
 

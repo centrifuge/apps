@@ -1,32 +1,3 @@
-/*
-const balances = {
-	tranches: [] as AccountTokenBalance[],
-	currencies: [] as AccountCurrencyBalance[],
-	native: {
-		balance: new CurrencyBalance(
-			(nativeBalance as any).data.free.toString(),
-			api.registry.chainDecimals[0]
-		),
-		currency: {
-			decimals: api.registry.chainDecimals[0],
-			symbol: api.registry.chainTokens[0],
-		},
-	},
-}
-
-order: {
-    investCurrency: CurrencyBalance;
-    redeemToken: TokenBalance;
-    submittedAt: number;
-    payoutCurrencyAmount: CurrencyBalance;
-    payoutTokenAmount: TokenBalance;
-    remainingInvestCurrency: CurrencyBalance;
-    remainingRedeemToken: TokenBalance;
-}
-
-
-*/
-
 import { CurrencyBalance, findBalance, Pool } from '@centrifuge/centrifuge-js'
 import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import BN from 'bn.js'

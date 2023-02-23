@@ -27,7 +27,6 @@ import { formatDate, getAge } from '../../../utils/date'
 import { Dec } from '../../../utils/Decimal'
 import { formatBalance, formatBalanceAbbreviated, formatPercentage } from '../../../utils/formatting'
 import { TinlakePool } from '../../../utils/tinlake/useTinlakePools'
-import { useAddress } from '../../../utils/useAddress'
 import { useAverageMaturity } from '../../../utils/useAverageMaturity'
 import { usePool, usePoolMetadata } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
@@ -96,7 +95,6 @@ export function PoolDetailOverview({
   const { state } = useLocation<{ token: string }>()
   const pool = usePool(poolId)
   const { data: metadata, isLoading: metadataIsLoading } = usePoolMetadata(pool)
-  const address = useAddress()
   const network = isTinlakePool ? ((pool as TinlakePool).network === 'goerli' ? 5 : 1) : 'centrifuge'
 
   const pageSummaryData = [

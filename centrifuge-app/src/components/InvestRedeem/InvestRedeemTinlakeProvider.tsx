@@ -1,32 +1,3 @@
-/*
-const balances = {
-	tranches: [] as AccountTokenBalance[],
-	currencies: [] as AccountCurrencyBalance[],
-	native: {
-		balance: new CurrencyBalance(
-			(nativeBalance as any).data.free.toString(),
-			api.registry.chainDecimals[0]
-		),
-		currency: {
-			decimals: api.registry.chainDecimals[0],
-			symbol: api.registry.chainTokens[0],
-		},
-	},
-}
-
-order: {
-    investCurrency: CurrencyBalance;
-    redeemToken: TokenBalance;
-    submittedAt: number;
-    payoutCurrencyAmount: CurrencyBalance;
-    payoutTokenAmount: TokenBalance;
-    remainingInvestCurrency: CurrencyBalance;
-    remainingRedeemToken: TokenBalance;
-}
-
-
-*/
-
 import { CurrencyBalance, findBalance } from '@centrifuge/centrifuge-js'
 import { useWallet } from '@centrifuge/centrifuge-react'
 import { getChainInfo } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/evm/chains'
