@@ -44,7 +44,7 @@ async function faucet(req: Request, res: Response) {
   const isLocalhost = /^(http:\/\/localhost:)./.test(origin)
   if (isCentrifugeDomain || isLocalhost) {
     res.set('Access-Control-Allow-Origin', origin)
-    res.set('Access-Control-Allow-Methods', ['GET', 'POST'])
+    res.set('Access-Control-Allow-Methods', ['GET'])
   } else {
     return res.status(405).send('Not allowed')
   }
