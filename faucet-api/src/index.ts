@@ -8,7 +8,6 @@ import { Request, Response } from 'express'
 dotenv.config()
 
 const URL = process.env.COLLATOR_WSS_URL ?? 'wss://fullnode.demo.cntrfg.com'
-const CORS_ORIGIN = process.env.CORS_ORIGIN ?? 'https://demo.app.cntrfg.com'
 
 const ONE_AUSD = new BN(10).pow(new BN(12))
 const ONE_DEVEL = new BN(10).pow(new BN(18))
@@ -25,6 +24,13 @@ const firestore = new Firestore({
 })
 const wsProvider = new WsProvider(URL)
 
+const centrifugeDomains = [
+  /^(https:\/\/.*cntrfg\.com)/,
+  /^(https:\/\/.*centrifuge\.io)/,
+  /^(https:\/\/.*altair\.network)/,
+  /^(https:\/\/.*k-f\.dev)/,
+]
+
 function hexToBN(value: string | number) {
   if (typeof value === 'number') return new BN(value)
   return new BN(value.toString().substring(2), 'hex')
@@ -33,10 +39,12 @@ function hexToBN(value: string | number) {
 async function faucet(req: Request, res: Response) {
   console.log('faucet running')
 
-  const origin = req.get('origin') ?? ''
-  if (origin === CORS_ORIGIN) {
+  const origin = req.get('origin') || ''
+  const isCentrifugeDomain = centrifugeDomains.some((regex) => regex.test(origin))
+  const isLocalhost = /^(http:\/\/localhost:)./.test(origin)
+  if (isCentrifugeDomain || isLocalhost) {
     res.set('Access-Control-Allow-Origin', origin)
-    res.set('Access-Control-Allow-Methods', 'GET')
+    res.set('Access-Control-Allow-Methods', ['GET', 'POST'])
   } else {
     return res.status(405).send('Not allowed')
   }
