@@ -30,18 +30,18 @@ export const updateInvestorStatusController = async (
     const user = await fetchUser(walletAddress)
 
     const incompleteSteps = Object.entries(user.globalSteps).filter(([name, step]) => {
-      if (
-        name === 'verifyAccreditation' &&
-        user.investorType === 'individual' &&
-        user.countryOfCitizenship?.startsWith('us')
-      ) {
-        return !step?.completed
-      }
+      if (name === 'verifyAccreditation') {
+        if (user.investorType === 'individual' && user.countryOfCitizenship?.startsWith('us')) {
+          return !step?.completed
+        }
 
-      if (name === 'verifyAccreditation' && user.investorType === 'entity' && user.jurisdictionCode?.startsWith('us')) {
+        if (user.investorType === 'entity' && user.jurisdictionCode?.startsWith('us')) {
+          return !step?.completed
+        }
+        return true
+      } else {
         return !step?.completed
       }
-      return false
     })
 
     if (incompleteSteps.length > 0) {
