@@ -29,15 +29,15 @@ export const verifyEmailController = async (
       throw new HttpsError(400, 'Bad request')
     }
 
-    if (user.steps.verifyEmail.completed) {
+    if (user.globalSteps.verifyEmail.completed) {
       throw new HttpsError(400, 'Email already verified')
     }
 
-    const steps: Subset<EntityUser> = {
-      steps: { ...user.steps, verifyEmail: { completed: true, timeStamp: new Date().toISOString() } },
+    const globalSteps: Subset<EntityUser> = {
+      globalSteps: { ...user.globalSteps, verifyEmail: { completed: true, timeStamp: new Date().toISOString() } },
     }
 
-    await validateAndWriteToFirestore(payload.walletAddress, steps, 'entity', ['steps'])
+    await validateAndWriteToFirestore(payload.walletAddress, globalSteps, 'entity', ['globalSteps'])
     return res.status(204).send()
   } catch (error) {
     if (error instanceof HttpsError) {

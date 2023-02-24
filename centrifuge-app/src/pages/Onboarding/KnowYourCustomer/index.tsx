@@ -22,7 +22,7 @@ export const KnowYourCustomer = () => {
 
   const { onboardingUser, refetchOnboardingUser } = useOnboarding()
 
-  const isCompleted = !!onboardingUser?.steps?.verifyIdentity.completed
+  const isCompleted = !!onboardingUser?.globalSteps?.verifyIdentity.completed
 
   const formik = useFormik({
     initialValues: {

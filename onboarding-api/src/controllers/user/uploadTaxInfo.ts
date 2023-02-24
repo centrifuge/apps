@@ -31,8 +31,8 @@ export const uploadTaxInfoController = async (req: Request, res: Response) => {
     await writeToOnboardingBucket(Uint8Array.from(req.body), `tax-information/${walletAddress}.pdf`)
 
     const updatedUser: Subset<OnboardingUser> = {
-      steps: {
-        ...user.steps,
+      globalSteps: {
+        ...user.globalSteps,
         verifyTaxInfo: {
           completed: true,
           timeStamp: new Date().toISOString(),
@@ -40,7 +40,7 @@ export const uploadTaxInfoController = async (req: Request, res: Response) => {
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['steps'])
+    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['globalSteps'])
 
     const freshUserData = await fetchUser(walletAddress)
     return res.status(200).send({ ...freshUserData })

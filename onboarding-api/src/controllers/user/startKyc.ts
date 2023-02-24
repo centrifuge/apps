@@ -28,14 +28,14 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
 
     if (
       userData.investorType === 'entity' &&
-      !userData.steps.verifyEmail.completed &&
-      !userData.steps.verifyBusiness.completed &&
-      !userData.steps.confirmOwners.completed
+      !userData.globalSteps.verifyEmail.completed &&
+      !userData.globalSteps.verifyBusiness.completed &&
+      !userData.globalSteps.confirmOwners.completed
     ) {
       throw new HttpsError(400, 'Entities must complete verifyEmail, verifyBusiness, confirmOwners before starting KYC')
     }
 
-    if (userData.steps.verifyIdentity.completed) {
+    if (userData.globalSteps.verifyIdentity.completed) {
       throw new HttpsError(400, 'Identity already verified')
     }
 
@@ -52,34 +52,37 @@ export const startKycController = async (req: Request<any, any, InferType<typeof
         dateOfBirth: body.dateOfBirth,
         countryOfCitizenship: body.countryOfCitizenship,
         countryOfResidency: body.countryOfResidency,
-        steps: {
+        globalSteps: {
           verifyIdentity: {
+            completed: false,
+            timeStamp: null,
+          },
+          verifyEmail: {
             completed: false,
             timeStamp: null,
           },
           verifyAccreditation: { completed: false, timeStamp: null },
           verifyTaxInfo: { completed: false, timeStamp: null },
-          signAgreements: {
-            [body.poolId]: {
-              [body.trancheId]: {
-                signedDocument: false,
+        },
+        poolSteps: {
+          [body.poolId]: {
+            [body.trancheId]: {
+              signAgreement: {
+                completed: false,
+                timeStamp: null,
                 transactionInfo: {
                   extrinsicHash: null,
                   blockNumber: null,
                 },
               },
+              status: {
+                status: null,
+                timeStamp: null,
+              },
             },
           },
         },
         email: null,
-        onboardingStatus: {
-          [body.poolId]: {
-            [body.trancheId]: {
-              status: null,
-              timeStamp: null,
-            },
-          },
-        },
       }
       await validateAndWriteToFirestore(walletAddress, updatedUserData, 'individual')
     } else {
