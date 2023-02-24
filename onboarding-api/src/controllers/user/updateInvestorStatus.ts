@@ -39,9 +39,8 @@ export const updateInvestorStatusController = async (
           return !step?.completed
         }
         return true
-      } else {
-        return !step?.completed
       }
+      return !step?.completed
     })
 
     if (incompleteSteps.length > 0) {
