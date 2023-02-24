@@ -21,7 +21,7 @@ env:
   # For now deploy only on demo when triggered with workflow_call:
   deploy_to: ${{ inputs.deploy_env && 'demo' || '' }}
   # deploy_to: ${{ inputs_deploy_env }}
-  function_handler: faucetDev
+  function_handler: faucet
 concurrency:
   group: 'faucet-api@${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true

@@ -67,19 +67,17 @@ runs:
           VARS_COMMA=$(cat ${{ env.vars_file }} | paste -s -d, -)
           echo "function_vars=$VARS_COMMA" >> $GITHUB_OUTPUT
         else
-          echo "No function env file under ./apps/${{ inputs.app_name }}/env-vars/, continuing..."
+          echo "No function env file ${{ env.vars_file }}, continuing..."
         fi
 
     - name: Function env secrets
       shell: bash
       id: set_secrets
+      env:
+        secrets_file: ./apps/${{ inputs.app_name }}/env-vars/${{ steps.prepare.outputs.env_name }}.secrets  
       run: |
-        if ${{ steps.prepare.outputs.gh_env == 'production'}}; then
-          FILE=./apps/${{ inputs.app_name }}/env-vars/prod.secrets
-        else
-          FILE=./apps/${{ inputs.app_name }}/env-vars/dev.secrets
-        fi
-        if [ -f $FILE ]; then
+        if [ -f ${{ env.secrets_file }} ]; then
+          FILE=${{ env.secrets_file }}
           delimiter="$(openssl rand -hex 8)"
           # Add a new line at the end if not already there:
           sed -i -e '$a\' $FILE 
@@ -87,7 +85,7 @@ runs:
           cat $FILE >> $GITHUB_OUTPUT
           echo "${delimiter}" >> $GITHUB_OUTPUT
         else
-          echo "No secrets file found in $FILE, continuing"
+          echo "No secrets file in ${{ env.secrets_file }}, continuing..."
         fi
             
     - name: retrieve artifacts
