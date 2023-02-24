@@ -259,7 +259,11 @@ Sets the ultimate beneficial owners for the entity.
         [trancheId]: {
           "signAgreement" {
             "completed": true,
-            "timeStamp": "2023-01-23T20:56:50.039Z"
+            "timeStamp": "2023-01-23T20:56:50.039Z",
+            "transactionInfo": {
+                "blockNumber": null,
+                "extrinsicHash": null
+              }
           }
         }
       }
