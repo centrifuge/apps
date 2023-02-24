@@ -8,7 +8,7 @@ export const verifyAccreditationController = async (req: Request, res: Response)
   try {
     const user = await fetchUser(req.walletAddress)
 
-    if (user.steps.verifyAccreditation.completed) {
+    if (user.globalSteps.verifyAccreditation.completed) {
       throw new HttpsError(400, 'Unable to process request')
     }
 
@@ -21,15 +21,15 @@ export const verifyAccreditationController = async (req: Request, res: Response)
     }
 
     const updatedUser: Subset<OnboardingUser> = {
-      steps: {
-        ...user.steps,
+      globalSteps: {
+        ...user.globalSteps,
         verifyAccreditation: {
           completed: true,
           timeStamp: new Date().toISOString(),
         },
       },
     }
-    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['steps'])
+    await validateAndWriteToFirestore(user.wallet.address, updatedUser, 'entity', ['globalSteps'])
     const freshUserData = await fetchUser(req.walletAddress)
     return res.status(200).send({ ...freshUserData })
   } catch (error) {

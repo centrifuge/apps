@@ -59,6 +59,25 @@ export type UltimateBeneficialOwner = {
   countryOfResidency: string
 }
 
+type PoolOnboardingSteps = {
+  [poolId: string]: {
+    [trancheId: string]: {
+      signAgreement: {
+        completed: boolean
+        timeStamp: string | null
+        transactionInfo: {
+          extrinsicHash: string | null
+          blockNumber: string | null
+        }
+      }
+      status: {
+        status: 'pending' | 'approved' | 'rejected' | null
+        timeStamp: string | null
+      }
+    }
+  }
+}
+
 type IndividualUserSteps = {
   verifyTaxInfo: {
     completed: boolean
@@ -72,16 +91,9 @@ type IndividualUserSteps = {
     completed: boolean
     timeStamp: string | null
   }
-  signAgreements: {
-    [poolId: string]: {
-      [trancheId: string]: {
-        transactionInfo: {
-          extrinsicHash: string | null
-          blockNumber: string | null
-        }
-        signedDocument: boolean
-      }
-    }
+  verifyEmail: {
+    completed: boolean
+    timeStamp: string | null
   }
 }
 
@@ -89,10 +101,6 @@ export interface EntityOnboardingSteps extends IndividualUserSteps {
   verifyBusiness: {
     completed: boolean
     timeStamp: string
-  }
-  verifyEmail: {
-    completed: boolean
-    timeStamp: string | null
   }
   confirmOwners: {
     completed: boolean
@@ -109,19 +117,12 @@ export type EntityUser = {
   jurisdictionCode: string
   registrationNumber: string
   ultimateBeneficialOwners: UltimateBeneficialOwner[]
-  steps: EntityOnboardingSteps
   name: string | null
   dateOfBirth: string | null
   countryOfCitizenship: string | null
   countryOfResidency: string | null
-  onboardingStatus: {
-    [poolId: string]: {
-      [trancheId: string]: {
-        status: 'pending' | 'approved' | 'rejected' | null
-        timeStamp: string | null
-      }
-    }
-  }
+  globalSteps: EntityOnboardingSteps
+  poolSteps: PoolOnboardingSteps
 }
 
 type IndividualUser = {
@@ -131,15 +132,8 @@ type IndividualUser = {
   dateOfBirth: string
   countryOfCitizenship: string
   countryOfResidency: string
-  steps: IndividualUserSteps
-  onboardingStatus: {
-    [poolId: string]: {
-      [trancheId: string]: {
-        status: 'pending' | 'approved' | 'rejected' | null
-        timeStamp: string | null
-      }
-    }
-  }
+  globalSteps: IndividualUserSteps
+  poolSteps: PoolOnboardingSteps
 }
 
 export type OnboardingUser = IndividualUser | EntityUser

@@ -7,7 +7,7 @@ export const Accreditation = () => {
   const [isAccredited, setIsAccredited] = React.useState(false)
   const { onboardingUser, previousStep, nextStep } = useOnboarding()
 
-  const isCompleted = !!onboardingUser?.steps?.verifyAccreditation?.completed
+  const isCompleted = !!onboardingUser?.globalSteps?.verifyAccreditation?.completed
 
   const { mutate: verifyAccreditation, isLoading } = useVerifyAccreditation()
 
