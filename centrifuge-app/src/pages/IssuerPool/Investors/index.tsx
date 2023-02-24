@@ -39,7 +39,7 @@ export const IssuerPoolInvestorsPage: React.FC = () => {
 
 const IssuerPoolInvestors: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const canEditInvestors = address && permissions?.pools[poolId]?.roles.includes('MemberListAdmin')
 

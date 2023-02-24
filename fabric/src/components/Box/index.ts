@@ -26,6 +26,7 @@ import {
   TextAlignProps,
   TLengthStyledSystem,
 } from 'styled-system'
+import { toPx } from '../../utils/styled'
 import { PropsOf } from '../../utils/types'
 
 interface BleedProps {
@@ -77,7 +78,3 @@ export const Box = styled('div').withConfig({
 })<StyledBoxProps>(compose(space, layout, background, color, flexbox, grid, border, textAlign, position, bleed, aspect))
 
 export type BoxProps = PropsOf<typeof Box>
-
-function toPx(n: number | string) {
-  return typeof n === 'number' ? `${n}px` : n
-}

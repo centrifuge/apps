@@ -1,13 +1,25 @@
 import * as React from 'react'
 
 type State = 'initial' | 'loading' | 'success' | 'error'
+type Options = {
+  throwOnReplace: boolean
+}
+const defaultOptions: Options = {
+  throwOnReplace: false,
+}
+export class ReplacedError extends Error {}
 
-export function useAsyncCallback<T extends any[], R = unknown>(callback: (...args: T) => Promise<R>) {
+export function useAsyncCallback<T extends any[], R = unknown>(
+  callback: (...args: T) => Promise<R>,
+  opt: Options = defaultOptions
+) {
   const [state, setState] = React.useState<State>('initial')
+  const [args, setArgs] = React.useState<T | null>(null)
   const [response, setResponse] = React.useState<R | undefined>()
   const inFlight = React.useRef<Promise<R> | undefined>()
 
   async function execute(...args: T): Promise<R> {
+    setArgs(args)
     setState('loading')
     const thenable = callback(...args)
     inFlight.current = thenable
@@ -18,6 +30,9 @@ export function useAsyncCallback<T extends any[], R = unknown>(callback: (...arg
         setResponse(res)
         setState('success')
         inFlight.current = undefined
+        setArgs(null)
+      } else {
+        if (opt.throwOnReplace) throw new ReplacedError('')
       }
       return res
     } catch (e) {
@@ -37,6 +52,7 @@ export function useAsyncCallback<T extends any[], R = unknown>(callback: (...arg
 
   return {
     response,
+    args,
     isLoading: state === 'loading',
     isError: state === 'error',
     isSuccess: state === 'success',

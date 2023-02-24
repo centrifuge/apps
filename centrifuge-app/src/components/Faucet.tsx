@@ -4,7 +4,7 @@ import * as React from 'react'
 import { FaucetConfirmationDialog } from './Dialogs/FaucetConfirmationDialog'
 
 export const Faucet: React.VFC = () => {
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
   const [hash, setHash] = React.useState('')
   const [error, setError] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)

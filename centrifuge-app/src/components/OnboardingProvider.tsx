@@ -25,7 +25,10 @@ interface OnboardingContextType<T> {
 const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUser> | null>(null)
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
-  const { isConnecting, selectedAccount } = useWallet()
+  const {
+    pendingConnect: { isConnecting },
+    substrate: { selectedAccount },
+  } = useWallet()
   const { isAuth, isAuthFetched, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const [activeStep, setActiveStep] = React.useState<number>(0)
 

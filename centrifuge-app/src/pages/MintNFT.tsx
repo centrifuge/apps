@@ -1,5 +1,5 @@
 import { NFTMetadataInput } from '@centrifuge/centrifuge-js/dist/modules/nfts'
-import { useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { useAsyncCallback, useCentrifuge, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   Box,
   Button,
@@ -23,7 +23,6 @@ import { RouterLinkButton } from '../components/RouterLinkButton'
 import { nftMetadataSchema } from '../schemas'
 import { getFileDataURI } from '../utils/getFileDataURI'
 import { useAddress } from '../utils/useAddress'
-import { useAsyncCallback } from '../utils/useAsyncCallback'
 import { useBalance } from '../utils/useBalance'
 import { useCollection, useCollectionMetadata } from '../utils/useCollections'
 import { useIsPageUnchanged } from '../utils/useIsPageUnchanged'
@@ -59,7 +58,7 @@ const MintNFT: React.FC = () => {
   const collection = useCollection(collectionId)
   const { data: collectionMetadata } = useCollectionMetadata(collectionId)
   const balance = useBalance()
-  const address = useAddress()
+  const address = useAddress('substrate')
   const cent = useCentrifuge()
   const [version, setNextVersion] = React.useReducer((s) => s + 1, 0)
   const history = useHistory()
