@@ -223,7 +223,10 @@ Sets the ultimate beneficial owners for the entity.
             "signAgreement": {
               "timeStamp": null,
               "completed": false,
-              "transactionInfo": {}
+              "transactionInfo": {
+                "blockNumber": null,
+                "extrinsicHash": null
+              }
             }
           }
         }

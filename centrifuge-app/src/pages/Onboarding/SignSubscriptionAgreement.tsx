@@ -19,9 +19,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
   const { data: unsignedAgreementData, isFetched: isUnsignedAgreementFetched } = useUnsignedAgreement()
 
-  const isCompleted =
-    onboardingUser?.poolSteps[pool.id][pool.trancheId].signAgreement.completed &&
-    !!onboardingUser?.poolSteps[pool.id][pool.trancheId].signAgreement.transactionInfo.extrinsicHash
+  const isCompleted = onboardingUser?.poolSteps[pool.id][pool.trancheId].signAgreement.completed
 
   React.useEffect(() => {
     if (isCompleted) {

@@ -1,12 +1,6 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import {
-  onboardingBucket,
-  OnboardingUser,
-  userCollection,
-  validateAndWriteToFirestore,
-  writeToOnboardingBucket,
-} from '../../database'
+import { onboardingBucket, OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
 import { sendDocuments } from '../../emails/sendDocuments'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
@@ -104,7 +98,7 @@ export const signAndSendDocumentsController = async (
     }
 
     await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['poolSteps'])
-    const freshUserData = (await userCollection.doc(walletAddress).get()).data() as OnboardingUser
+    const freshUserData = fetchUser(walletAddress)
     return res.status(201).send({ ...freshUserData })
   } catch (error) {
     if (error instanceof HttpsError) {
