@@ -41,7 +41,7 @@ type CreatePoolArgs = Parameters<Centrifuge['pools']['createPool']>[0]
 export function useProposalEstimate(formValues: Pick<PoolMetadataInput, 'tranches' | 'currency' | 'maxReserve'>) {
   const [proposeFee, setProposeFee] = React.useState<CurrencyBalance | null>(null)
   const [chainDecimals, setChainDecimals] = React.useState(18)
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
   const centrifuge = useCentrifuge()
 
   // Retrieve the submittable with data currently in the form to see how much the transaction would cost

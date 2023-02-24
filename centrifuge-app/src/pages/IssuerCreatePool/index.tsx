@@ -136,7 +136,7 @@ const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children
 }
 
 const CreatePoolForm: React.VFC = () => {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const centrifuge = useCentrifuge()
   const currencies = usePoolCurrencies()
   const pools = usePools()

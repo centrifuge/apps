@@ -1,5 +1,5 @@
 import { CurrencyBalance, findBalance, Pool, TokenBalance } from '@centrifuge/centrifuge-js'
-import { useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
+import { ConnectionGuard, useBalances, useCentrifugeTransaction } from '@centrifuge/centrifuge-react'
 import {
   AnchorButton,
   Box,
@@ -49,10 +49,12 @@ type Props = {
   onCancel?: () => void
 }
 
-export const InvestRedeem: React.VFC<Props> = (props) => {
+export function InvestRedeem(props: Props) {
   return (
     <LoadBoundary>
-      <InvestRedeemInner {...props} />
+      <ConnectionGuard networks={['centrifuge']}>
+        <InvestRedeemInner {...props} />
+      </ConnectionGuard>
     </LoadBoundary>
   )
 }
@@ -69,7 +71,7 @@ function inputToDecimal(num: number | Decimal | string) {
 }
 
 function validateNumberInput(value: number | string | Decimal, min: number | Decimal, max?: number | Decimal) {
-  if (value === '') {
+  if (value === '' || value == null) {
     return 'Not a valid number'
   }
   if (max && Dec(value).greaterThan(Dec(max))) {
@@ -99,7 +101,7 @@ const InvestRedeemInner: React.VFC<Props> = ({
   onSetView,
 }) => {
   const [view, setView] = useControlledState<'start' | 'invest' | 'redeem'>(defaultView ?? 'start', viewProp, onSetView)
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const balances = useBalances(address)
   const pool = usePool(poolId) as Pool
@@ -239,7 +241,7 @@ const InvestForm: React.VFC<InvestFormProps> = ({
   autoFocus,
   investLabel = 'Invest',
 }) => {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const balances = useBalances(address)
   const order = usePendingCollect(poolId, trancheId, address)
   const pool = usePool(poolId) as Pool
@@ -433,7 +435,7 @@ type RedeemFormProps = {
 }
 
 const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel, autoFocus }) => {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const balances = useBalances(address)
   const order = usePendingCollect(poolId, trancheId, address)
   const pool = usePool(poolId) as Pool
@@ -588,7 +590,7 @@ const RedeemForm: React.VFC<RedeemFormProps> = ({ poolId, trancheId, onCancel, a
 }
 
 const TransactionsLink: React.FC = () => {
-  const address = useAddress()
+  const address = useAddress('substrate')
   return (
     <Box alignSelf="flex-end">
       <AnchorButton

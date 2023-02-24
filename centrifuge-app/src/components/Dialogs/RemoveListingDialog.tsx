@@ -15,12 +15,12 @@ type Props = {
 const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const RemoveListingDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
-  const { selectedAccount } = useWallet()
+  const { substrate } = useWallet()
   const balance = useBalance()
   const centrifuge = useCentrifuge()
   const nft = useNFT(collectionId, nftId)
 
-  const isConnected = !!selectedAccount?.address
+  const isConnected = !!substrate.selectedAccount?.address
 
   const {
     execute: doTransaction,
