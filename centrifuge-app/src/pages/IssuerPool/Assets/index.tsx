@@ -23,7 +23,7 @@ export const IssuerPoolAssetPage: React.FC = () => {
 
 const PoolDetailAssetsSideBar: React.FC = () => {
   const { pid } = useParams<{ pid: string }>()
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const borrowerPermission = permissions?.pools[pid]?.roles.includes('Borrower')
 

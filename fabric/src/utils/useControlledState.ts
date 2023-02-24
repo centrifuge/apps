@@ -2,11 +2,11 @@ import { Dispatch, SetStateAction, useState } from 'react'
 import useEventCallback from './useEventCallback'
 import usePrevious from './usePrevious'
 
-function useControlledState<T>(
+function useControlledState<T, D = Dispatch<T> | Dispatch<SetStateAction<T>>>(
   initialUncontrolledValue: T,
   externalValue?: T,
-  setExternalValue?: Dispatch<SetStateAction<T>>
-) {
+  setExternalValue?: D
+): readonly [T, D extends Dispatch<T> ? Dispatch<T> : Dispatch<SetStateAction<T>>] {
   const [isControlled] = useState(externalValue !== undefined)
   const [internalValue, setInternalValue] = useState<T>(initialUncontrolledValue)
 
@@ -18,13 +18,13 @@ function useControlledState<T>(
     }
   }
 
-  const value = isControlled ? externalValue : internalValue
-  const setValue = useEventCallback((newValue: SetStateAction<T>) => {
-    if (setExternalValue) setExternalValue(newValue)
+  const value = isControlled ? externalValue! : internalValue
+  const setValue = useEventCallback((newValue) => {
+    if (setExternalValue) (setExternalValue as any)(newValue)
     if (!isControlled) setInternalValue(newValue)
   })
 
-  return [value, setValue] as const
+  return [value, setValue as any]
 }
 
 export default useControlledState

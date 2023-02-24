@@ -16,7 +16,8 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   options: { onSuccess?: (args: T, result: ISubmittableResult) => void; onError?: (error: any) => void } = {}
 ) {
   const { addOrUpdateTransaction, updateTransaction } = useTransactions()
-  const { selectedAccount, connect, proxy } = useWallet()
+  const { showWallets, substrate, walletDialog } = useWallet()
+  const { selectedAccount, proxy } = substrate
   const cent = useCentrifuge()
   const [lastId, setLastId] = React.useState<string | undefined>(undefined)
   const lastCreatedTransaction = useTransaction(lastId)
@@ -114,9 +115,7 @@ export function useCentrifugeTransaction<T extends Array<any>>(
 
     if (!selectedAccount) {
       pendingTransaction.current = { id, args, options }
-      connect().catch((e) => {
-        updateTransaction(id, { status: 'failed', failedReason: e.message })
-      })
+      showWallets('centrifuge')
     } else {
       doTransaction(selectedAccount, id, args, options)
     }
@@ -126,15 +125,17 @@ export function useCentrifugeTransaction<T extends Array<any>>(
   React.useEffect(() => {
     if (pendingTransaction.current) {
       const { id, args, options } = pendingTransaction.current
+
+      if (walletDialog.view !== null) return
       pendingTransaction.current = undefined
 
       if (selectedAccount) {
         doTransaction(selectedAccount, id, args, options)
       } else {
-        updateTransaction(id, { status: 'failed', failedReason: 'No accounts available' })
+        updateTransaction(id, { status: 'failed', failedReason: 'No account connected' })
       }
     }
-  }, [selectedAccount])
+  }, [walletDialog.view])
 
   return {
     execute,

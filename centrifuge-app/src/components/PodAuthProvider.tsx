@@ -11,7 +11,7 @@ export const PodAuthContext = React.createContext<{
 }>(null as any)
 
 export function PodAuthProvider({ children }: { children?: React.ReactNode }) {
-  const { selectedWallet, proxy, selectedAccount } = useWallet()
+  const { selectedWallet, proxy, selectedAccount } = useWallet().substrate
   const cent = useCentrifuge()
 
   const { data: session, refetch: refetchSession } = useQuery(
@@ -94,7 +94,7 @@ export function PodAuthProvider({ children }: { children?: React.ReactNode }) {
 export function useAuth() {
   const ctx = React.useContext(PodAuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
 
   const cent = useCentrifuge()
 

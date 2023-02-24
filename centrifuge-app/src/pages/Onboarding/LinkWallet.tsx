@@ -12,7 +12,7 @@ export const LinkWallet = () => {
   const [isAgreedToDataSharingAgreement, setIsAgreedToDataSharingAgreement] = React.useState(false)
   const { nextStep } = useOnboarding()
 
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
   const { login, isAuth } = useAuth()
 
   return (

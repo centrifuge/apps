@@ -18,7 +18,7 @@ type Props = {
 const TRANSFER_FEE_ESTIMATE = 0.1
 
 export const BuyDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const balance = useBalance()
   const nft = useNFT(collectionId, nftId)
 

@@ -15,7 +15,7 @@ export function useListedPools() {
   const tinlakePools = useTinlakePools()
   const { showTinlakePools } = useDebugFlags()
 
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
 
   const poolMetas = useMetadataMulti<PoolMetadata>(pools?.map((p) => p.metadata) ?? [])
