@@ -111,7 +111,7 @@ async function faucet(req: Request, res: Response) {
     const keyring = new Keyring({ type: 'sr25519' })
     console.log('signing and sending tx')
     const hash = URL.includes('demo')
-      ? await txBatch.signAndSend(keyring.addFromUri(process.env.FAUCET_SEED_HEX as string))
+      ? await txBatch.signAndSend(keyring.addFromUri(process.env.SEED_HEX as string))
       : await txBatch.signAndSend(keyring.addFromUri('//Alice'))
     console.log('signed and sent tx')
     api.disconnect()
