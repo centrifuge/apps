@@ -1,25 +1,19 @@
 import { Box, Button, Checkbox, DateInput, Select, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
 import { FormikProps } from 'formik'
 import { useOnboarding } from '../../../components/OnboardingProvider'
-import { KYC_COUNTRY_CODES, RESIDENCE_COUNTRY_CODES } from '../geographyCodes'
+import { formatGeographyCodes } from '../../../utils/formatGeographyCodes'
+import { KYC_COUNTRY_CODES, RESIDENCY_COUNTRY_CODES } from '../geographyCodes'
 
 type Props = {
   formik: FormikProps<{
     name: string
     dateOfBirth: string
     countryOfCitizenship: string
-    countryOfResidence: string
+    countryOfResidency: string
     isAccurate: boolean
   }>
   isLoading: boolean
   isCompleted: boolean
-}
-
-const formatCountryCodes = (countryCodes: { [key: string]: string }) => {
-  return Object.keys(countryCodes).map((key) => ({
-    label: countryCodes[key],
-    value: key,
-  }))
 }
 
 const copy = {
@@ -50,33 +44,33 @@ export const SignerVerification = ({ formik, isLoading, isCompleted }: Props) =>
           <TextInput
             id="name"
             value={formik.values.name}
-            label="Full Name*"
+            label="Full Name"
             onChange={formik.handleChange}
             disabled={isLoading || isCompleted}
           />
           <DateInput
             id="dateOfBirth"
             value={formik.values.dateOfBirth}
-            label="Date of Birth*"
+            label="Date of Birth"
             onChange={formik.handleChange}
             disabled={isLoading || isCompleted}
           />
           <Select
             name="countryOfCitizenship"
-            label="Country of Citizenship*"
+            label="Country of Citizenship"
             placeholder="Select a country"
-            options={formatCountryCodes(KYC_COUNTRY_CODES)}
+            options={formatGeographyCodes(KYC_COUNTRY_CODES)}
             onChange={(event) => formik.setFieldValue('countryOfCitizenship', event.target.value)}
             value={formik.values.countryOfCitizenship}
             disabled={isLoading || isCompleted}
           />
           <Select
-            name="countryOfResidence"
-            label="Country of Residence*"
+            name="countryOfResidency"
+            label="Country of Residence"
             placeholder="Select a country"
-            options={formatCountryCodes(RESIDENCE_COUNTRY_CODES)}
-            onChange={(event) => formik.setFieldValue('countryOfResidence', event.target.value)}
-            value={formik.values.countryOfResidence}
+            options={formatGeographyCodes(RESIDENCY_COUNTRY_CODES)}
+            onChange={(event) => formik.setFieldValue('countryOfResidency', event.target.value)}
+            value={formik.values.countryOfResidency}
             disabled={isLoading || isCompleted}
           />
         </Stack>
@@ -88,7 +82,7 @@ export const SignerVerification = ({ formik, isLoading, isCompleted }: Props) =>
             }}
             checked={formik.values.isAccurate}
             onChange={formik.handleChange}
-            label={copy[investorType].checkboxLabel}
+            label={<Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>{copy[investorType].checkboxLabel}</Text>}
             disabled={isLoading || isCompleted}
           />
         </Box>

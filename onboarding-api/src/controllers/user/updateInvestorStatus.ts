@@ -29,52 +29,51 @@ export const updateInvestorStatusController = async (
     const { poolId, trancheId, walletAddress } = payload
     const user = await fetchUser(walletAddress)
 
-    const incompleteSteps = Object.entries(user.steps).filter(([name, step]) => {
-      if (name === 'signAgreements') {
-        return !step?.[poolId]?.[trancheId]?.signedDocument
-      }
-      if (
-        name === 'verifyAccreditation' &&
-        user.investorType === 'individual' &&
-        !user.countryOfCitizenship?.startsWith('us')
-      ) {
-        return true
-      }
+    const incompleteSteps = Object.entries(user.globalSteps).filter(([name, step]) => {
+      if (name === 'verifyAccreditation') {
+        if (user.investorType === 'individual' && user.countryOfCitizenship?.startsWith('us')) {
+          return !step?.completed
+        }
 
-      if (
-        name === 'verifyAccreditation' &&
-        user.investorType === 'entity' &&
-        !user.jurisdictionCode?.startsWith('us')
-      ) {
+        if (user.investorType === 'entity' && user.jurisdictionCode?.startsWith('us')) {
+          return !step?.completed
+        }
         return true
       }
       return !step?.completed
     })
+
     if (incompleteSteps.length > 0) {
-      if (incompleteSteps) {
-        throw new HttpsError(
-          400,
-          `Incomplete onboarding steps for investor: ${incompleteSteps.map((step) => step[0]).join(', ')}`
-        )
-      }
+      throw new HttpsError(
+        400,
+        `Incomplete onboarding steps for investor: ${incompleteSteps.map((step) => step[0]).join(', ')}`
+      )
     }
 
-    if (user.onboardingStatus[poolId][trancheId].status !== 'pending') {
+    if (user.poolSteps[poolId][trancheId].status.status !== 'pending') {
       throw new HttpsError(400, 'Investor status may have already been updated')
     }
 
+    if (!user.poolSteps?.[poolId][trancheId].signAgreement.completed) {
+      throw new HttpsError(400, 'Argeements must be signed before investor status can invest')
+    }
+
     const updatedUser: Subset<OnboardingUser> = {
-      onboardingStatus: {
+      poolSteps: {
+        ...user.poolSteps,
         [poolId]: {
           [trancheId]: {
-            status,
-            timeStamp: new Date().toISOString(),
+            ...user.poolSteps[poolId][trancheId].signAgreement,
+            status: {
+              status,
+              timeStamp: new Date().toISOString(),
+            },
           },
         },
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['onboardingStatus'])
+    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['poolSteps'])
 
     if (user?.email && status === 'approved') {
       await addInvestorToMemberList(walletAddress, poolId, trancheId)

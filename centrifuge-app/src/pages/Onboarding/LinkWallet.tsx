@@ -33,7 +33,7 @@ export const LinkWallet = () => {
             disabled={isAuth}
             label={
               <Shelf gap="4px">
-                <Text style={{ cursor: 'pointer' }}>I agree to the</Text>
+                <Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>I agree to the</Text>
                 <button
                   style={{
                     background: 'none',

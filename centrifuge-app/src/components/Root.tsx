@@ -4,7 +4,7 @@ import {
   EvmChains,
   TransactionProvider,
   TransactionToasts,
-  WalletProvider,
+  WalletProvider
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'

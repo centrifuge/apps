@@ -19,9 +19,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   const { execute: signRemark, isLoading: isSigningTransaction } = useSignRemark(sendDocumentsToIssuer)
   const { data: unsignedAgreementData, isFetched: isUnsignedAgreementFetched } = useUnsignedAgreement()
 
-  const isCompleted =
-    onboardingUser?.steps.signAgreements[pool.id][pool.trancheId].signedDocument &&
-    !!onboardingUser?.steps.signAgreements[pool.id][pool.trancheId].transactionInfo.extrinsicHash
+  const isCompleted = onboardingUser?.poolSteps[pool.id][pool.trancheId].signAgreement.completed
 
   React.useEffect(() => {
     if (isCompleted) {
@@ -51,7 +49,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
         }}
         checked={isCompleted || isAgreed}
         onChange={() => setIsAgreed((current) => !current)}
-        label={<Text style={{ cursor: 'pointer' }}>I agree to the agreement</Text>}
+        label={<Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>I agree to the agreement</Text>}
         disabled={isSigningTransaction || isSending || isCompleted}
       />
       <Shelf gap="2">

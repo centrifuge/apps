@@ -11,7 +11,7 @@ const signerInput = object({
   name: string().required(),
   dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
   countryOfCitizenship: string().required(),
-  countryOfResidence: string().required(),
+  countryOfResidency: string().required(),
   isAccurate: boolean().oneOf([true]),
 })
 
@@ -22,14 +22,14 @@ export const KnowYourCustomer = () => {
 
   const { onboardingUser, refetchOnboardingUser } = useOnboarding()
 
-  const isCompleted = !!onboardingUser?.steps?.verifyIdentity.completed
+  const isCompleted = !!onboardingUser?.globalSteps?.verifyIdentity.completed
 
   const formik = useFormik({
     initialValues: {
       name: onboardingUser?.name || '',
       dateOfBirth: onboardingUser?.dateOfBirth || '',
       countryOfCitizenship: onboardingUser?.countryOfCitizenship || '',
-      countryOfResidence: onboardingUser?.countryOfResidence || '',
+      countryOfResidency: onboardingUser?.countryOfResidency || '',
       isAccurate: !!isCompleted,
     },
     onSubmit: (values) => {

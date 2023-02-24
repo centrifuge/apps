@@ -8,8 +8,6 @@ export type Subset<K> = {
     : K[attr]
 }
 
-export {}
-
 declare global {
   export namespace Express {
     export interface Request {

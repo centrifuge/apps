@@ -8,7 +8,7 @@ import {
   Stack,
   Text,
   TextWithPlaceholder,
-  Thumbnail,
+  Thumbnail
 } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'

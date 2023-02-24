@@ -642,13 +642,13 @@ export function getPoolsModule(inst: Centrifuge) {
             }
             if (options?.createType === 'propose') {
               const proposalSubmittable = api.tx.utility.batchAll([
-                api.tx.democracy.notePreimage(submittable.method.toHex()),
-                api.tx.democracy.propose(submittable.method.hash, api.consts.democracy.minimumDeposit),
+                api.tx.preimage.notePreimage(submittable.method.toHex()),
+                api.tx.democracy.propose({ Inline: submittable.method.hash }, api.consts.democracy.minimumDeposit),
               ])
               return inst.wrapSignAndSend(api, proposalSubmittable, options)
             }
             if (options?.createType === 'notePreimage') {
-              const preimageSubmittable = api.tx.democracy.notePreimage(submittable.method.toHex())
+              const preimageSubmittable = api.tx.preimage.notePreimage(submittable.method.toHex())
               return inst.wrapSignAndSend(api, preimageSubmittable, options)
             }
             return inst.wrapSignAndSend(api, submittable, options)

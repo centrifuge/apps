@@ -336,7 +336,7 @@ export const KYC_COUNTRY_CODES = {
   zw: 'Zimbabwe',
 }
 
-export const RESIDENCE_COUNTRY_CODES = {
+export const RESIDENCY_COUNTRY_CODES = {
   af: 'Afghanistan',
   ax: 'Aland Islands',
   al: 'Albania',

@@ -7,7 +7,7 @@ export const Accreditation = () => {
   const [isAccredited, setIsAccredited] = React.useState(false)
   const { onboardingUser, previousStep, nextStep } = useOnboarding()
 
-  const isCompleted = !!onboardingUser?.steps?.verifyAccreditation?.completed
+  const isCompleted = !!onboardingUser?.globalSteps?.verifyAccreditation?.completed
 
   const { mutate: verifyAccreditation, isLoading } = useVerifyAccreditation()
 
@@ -42,7 +42,9 @@ export const Accreditation = () => {
         }}
         checked={isCompleted || isAccredited}
         onChange={() => setIsAccredited((current) => !current)}
-        label={<Text style={{ cursor: 'pointer' }}>I confirm that I am an accredited investor</Text>}
+        label={
+          <Text style={{ cursor: 'pointer', paddingLeft: '12px' }}>I confirm that I am an accredited investor</Text>
+        }
         disabled={isCompleted || isLoading}
       />
       <Shelf gap="2">
