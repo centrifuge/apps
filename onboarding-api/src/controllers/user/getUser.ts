@@ -4,8 +4,8 @@ import { HttpsError } from '../../utils/httpsError'
 
 export const getUserController = async (req: Request, res: Response) => {
   try {
-    const user = await fetchUser(req.walletAddress)
-    return res.send({ ...user })
+    const user = await fetchUser(req.walletAddress, { suppressError: true })
+    return res.send(user)
   } catch (error) {
     if (error instanceof HttpsError) {
       console.log(error.message)

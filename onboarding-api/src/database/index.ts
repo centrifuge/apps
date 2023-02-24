@@ -25,7 +25,36 @@ const walletSchema = object({
   network: string().required().default('polkadot') as StringSchema<SupportedNetworks>,
 })
 
-const stepsSchema = object({
+const poolSpecificStepsSchema = object({
+  signAgreement: object({
+    completed: bool(),
+    timeStamp: string().nullable(),
+    transactionInfo: object({
+      extrinsicHash: string().nullable(),
+      blockNumber: string().nullable(),
+    }),
+  }),
+  status: object({
+    status: mixed().nullable().oneOf(['approved', 'rejected', 'pending', null]),
+    timeStamp: string().nullable(),
+  }),
+})
+
+const poolStepsSchema = lazy((value) => {
+  const poolId = Object.keys(value)[0]
+  if (typeof poolId !== 'string') throw new Error('Bad poolId')
+  return object({
+    [poolId]: lazy((value) => {
+      const trancheId = Object.keys(value)[0]
+      if (typeof trancheId !== 'string') throw new Error('Bad trancheId')
+      return object({
+        [trancheId]: poolSpecificStepsSchema,
+      })
+    }),
+  })
+})
+
+const globalStepsSchema = object({
   verifyBusiness: object({
     completed: bool(),
     timeStamp: string().nullable(),
@@ -50,29 +79,6 @@ const stepsSchema = object({
     completed: bool(),
     timeStamp: string().nullable(),
   }),
-  signAgreements: lazy((value) => {
-    const poolId = Object.keys(value)[0]
-    if (typeof poolId !== 'string') {
-      throw new Error('Bad poolId')
-    }
-    return object({
-      [poolId]: lazy((value) => {
-        const trancheId = Object.keys(value)[0]
-        if (typeof trancheId !== 'string') {
-          throw new Error('Bad trancheId')
-        }
-        return object({
-          [trancheId]: object({
-            signedDocument: bool(),
-            transactionInfo: object({
-              extrinsicHash: string().nullable(),
-              blockNumber: string().nullable(),
-            }),
-          }),
-        })
-      }),
-    })
-  }),
 })
 
 export const entityUserSchema = object({
@@ -89,27 +95,8 @@ export const entityUserSchema = object({
   dateOfBirth: string().nullable().default(null),
   countryOfCitizenship: string().nullable().default(null), // TODO: validate with list of countries
   countryOfResidency: string().nullable().default(null), // TODO: validate with list of countries
-  steps: stepsSchema,
-  onboardingStatus: lazy((value) => {
-    const poolId = Object.keys(value)[0]
-    if (typeof poolId !== 'string') {
-      throw new Error('Bad poolId')
-    }
-    return object({
-      [poolId]: lazy((value) => {
-        const trancheId = Object.keys(value)[0]
-        if (typeof trancheId !== 'string') {
-          throw new Error('Bad trancheId')
-        }
-        return object({
-          [trancheId]: object({
-            status: mixed().oneOf(['approved', 'rejected', 'pending', null]),
-            timeStamp: string().nullable(),
-          }),
-        })
-      }),
-    })
-  }),
+  globalSteps: globalStepsSchema,
+  poolSteps: poolStepsSchema,
 })
 
 export const individualUserSchema = object({
@@ -121,27 +108,8 @@ export const individualUserSchema = object({
   dateOfBirth: string().required(),
   countryOfCitizenship: string().required(), // TODO: validate with list of countries
   countryOfResidency: string().required(), // TODO: validate with list of countries
-  steps: stepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'signAgreements']),
-  onboardingStatus: lazy((value) => {
-    const poolId = Object.keys(value)[0]
-    if (typeof poolId !== 'string') {
-      throw new Error('Bad poolId')
-    }
-    return object({
-      [poolId]: lazy((value) => {
-        const trancheId = Object.keys(value)[0]
-        if (typeof trancheId !== 'string') {
-          throw new Error('Bad trancheId')
-        }
-        return object({
-          [trancheId]: object({
-            status: mixed().oneOf(['approved', 'rejected', 'pending', null]),
-            timeStamp: string().nullable(),
-          }),
-        })
-      }),
-    })
-  }),
+  globalSteps: globalStepsSchema.pick(['verifyIdentity', 'verifyAccreditation', 'verifyTaxInfo', 'verifyEmail']),
+  poolSteps: poolStepsSchema,
 })
 
 export type EntityUser = InferType<typeof entityUserSchema>
@@ -170,7 +138,7 @@ const schemas: Record<InvestorType, Record<'schema' | 'collection', any>> = {
  * @param key primary key (documentID) for firestore collection
  * @param data data to be set to firestore
  * @param schemaKey name of the validation schema e.g BUSINESS or USER
- * @param mergeFields optional, pass a value to update data in an existing collection e.g steps.kyb.verified
+ * @param mergeFields optional, pass a value to update data in an existing collection
  */
 export const validateAndWriteToFirestore = async <T = undefined | string[]>(
   key: string,

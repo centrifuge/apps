@@ -120,8 +120,8 @@ const BusinessOwnershipInlineFeedback = ({ isError }: { isError: boolean }) => {
 export const BusinessOwnership = () => {
   const { onboardingUser, refetchOnboardingUser, previousStep, nextStep } = useOnboarding<EntityUser>()
 
-  const isCompleted = !!onboardingUser?.steps.confirmOwners.completed
-  const isEmailVerified = !!onboardingUser?.steps.verifyEmail.completed
+  const isCompleted = !!onboardingUser?.globalSteps.confirmOwners.completed
+  const isEmailVerified = !!onboardingUser?.globalSteps.verifyEmail.completed
 
   const formik = useFormik({
     initialValues: {

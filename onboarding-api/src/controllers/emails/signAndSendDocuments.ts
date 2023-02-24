@@ -1,16 +1,11 @@
 import { Request, Response } from 'express'
 import { InferType, object, string } from 'yup'
-import {
-  onboardingBucket,
-  OnboardingUser,
-  userCollection,
-  validateAndWriteToFirestore,
-  writeToOnboardingBucket,
-} from '../../database'
+import { onboardingBucket, OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
 import { sendDocuments } from '../../emails/sendDocuments'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { signAndAnnotateAgreement } from '../../utils/signAndAnnotateAgreement'
+import { Subset } from '../../utils/types'
 import { validateInput } from '../../utils/validateInput'
 import { validateRemark } from '../../utils/validateRemark'
 
@@ -38,8 +33,8 @@ export const signAndSendDocumentsController = async (
     await validateRemark(transactionInfo, `Signed subscription agreement for pool: ${poolId} tranche: ${trancheId}`)
 
     if (
-      !user?.steps.signAgreements[poolId]?.[trancheId]?.signedDocument &&
-      user?.onboardingStatus[poolId]?.[trancheId]?.status !== null
+      !user?.poolSteps[poolId]?.[trancheId]?.signAgreement.completed &&
+      user?.poolSteps[poolId]?.[trancheId]?.status.status !== null
     ) {
       throw new HttpsError(400, 'User must sign document before documents can be sent to issuer')
     }
@@ -83,33 +78,27 @@ export const signAndSendDocumentsController = async (
       Buffer.from(signedAgreementPDF).toString('base64')
     )
 
-    await validateAndWriteToFirestore(
-      walletAddress,
-      {
-        onboardingStatus: {
-          [poolId]: {
-            [trancheId]: {
+    const updatedUser: Subset<OnboardingUser> = {
+      poolSteps: {
+        ...user?.poolSteps,
+        [poolId]: {
+          [trancheId]: {
+            signAgreement: {
+              completed: true,
+              timeStamp: new Date().toISOString(),
+              transactionInfo,
+            },
+            status: {
               status: 'pending',
               timeStamp: new Date().toISOString(),
             },
           },
         },
-        steps: {
-          ...user?.steps,
-          signAgreements: {
-            [poolId]: {
-              [trancheId]: {
-                signedDocument: true,
-                transactionInfo,
-              },
-            },
-          },
-        },
       },
-      'entity',
-      ['onboardingStatus', 'steps']
-    )
-    const freshUserData = (await userCollection.doc(walletAddress).get()).data() as OnboardingUser
+    }
+
+    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['poolSteps'])
+    const freshUserData = fetchUser(walletAddress)
     return res.status(201).send({ ...freshUserData })
   } catch (error) {
     if (error instanceof HttpsError) {

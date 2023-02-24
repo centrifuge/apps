@@ -10,15 +10,11 @@ export const useSignedAgreement = () => {
   const { selectedAccount } = useWallet()
 
   const [hasSignedAgreement, setHasSignedAgreement] = React.useState(false)
-
   React.useEffect(() => {
-    if (onboardingUser?.steps?.signAgreements) {
-      setHasSignedAgreement(
-        onboardingUser.steps.signAgreements[pool.id][pool.trancheId].signedDocument &&
-          !!onboardingUser.steps.signAgreements[pool.id][pool.trancheId].transactionInfo.extrinsicHash
-      )
+    if (onboardingUser) {
+      setHasSignedAgreement(onboardingUser.poolSteps[pool.id][pool.trancheId].signAgreement.completed)
     }
-  }, [onboardingUser?.steps?.signAgreements, pool.id, pool.trancheId])
+  }, [onboardingUser, pool.id, pool.trancheId])
 
   const query = useQuery(
     ['signed-subscription-agreement', selectedAccount?.address, pool.id, pool.trancheId],
