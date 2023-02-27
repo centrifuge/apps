@@ -4,23 +4,6 @@ import BN from 'bn.js'
 import Decimal from 'decimal.js-light'
 import * as React from 'react'
 
-/*
-const balances = {
-	tranches: [] as AccountTokenBalance[],
-	currencies: [] as AccountCurrencyBalance[],
-	native: {
-		balance: new CurrencyBalance(
-			(nativeBalance as any).data.free.toString(),
-			api.registry.chainDecimals[0]
-		),
-		currency: {
-			decimals: api.registry.chainDecimals[0],
-			symbol: api.registry.chainTokens[0],
-		},
-	},
-}
-*/
-
 type CurrencyMeta = Pick<CurrencyMetadata, 'decimals' | 'symbol'>
 
 export type InvestRedeemAction =
