@@ -2,13 +2,11 @@ import { Pool } from '@centrifuge/centrifuge-js'
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { LoadBoundary } from '../../../components/LoadBoundary'
-import { PageSection } from '../../../components/PageSection'
 import { PageWithSideBar } from '../../../components/PageWithSideBar'
 import { ReportComponent } from '../../../components/Report'
-import { ReportContext, ReportContextProvider } from '../../../components/Report/ReportContext'
+import { ReportContextProvider } from '../../../components/Report/ReportContext'
 import { ReportFilter } from '../../../components/Report/ReportFilter'
 import { Spinner } from '../../../components/Spinner'
-import { formatDate } from '../../../utils/date'
 import { usePool } from '../../../utils/usePools'
 import { PoolDetailHeader } from '../Header'
 
@@ -29,8 +27,10 @@ export function PoolDetailReportingTab() {
 
   return (
     <ReportContextProvider>
-      <PageWithSideBar sidebar={pool && <ReportFilter pool={pool} />}>
+      <PageWithSideBar>
         <PoolDetailHeader />
+
+        {pool && <ReportFilter pool={pool} />}
 
         <LoadBoundary>
           <PoolDetailReporting pool={pool} />
@@ -45,13 +45,9 @@ export function PoolDetailReporting({ pool }: { pool: Pool }) {
     return <Spinner />
   }
 
-  const { report, startDate, endDate } = React.useContext(ReportContext)
-
   return (
-    <PageSection title={titleByReport[report]} titleAddition={`${formatDate(startDate)} - ${formatDate(endDate)}`}>
-      <React.Suspense fallback={<Spinner />}>
-        <ReportComponent pool={pool} />
-      </React.Suspense>
-    </PageSection>
+    <React.Suspense fallback={<Spinner />}>
+      <ReportComponent pool={pool} />
+    </React.Suspense>
   )
 }

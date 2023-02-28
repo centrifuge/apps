@@ -57,7 +57,7 @@ export function BorrowerTransactions({ pool }: { pool: Pool }) {
       dataUrl
         ? {
             dataUrl,
-            fileName: `Pool-${pool.id}.csv`,
+            fileName: `${pool.id}-borrower-transactions-${startDate}-${endDate}.csv`,
           }
         : undefined
     )
@@ -65,5 +65,5 @@ export function BorrowerTransactions({ pool }: { pool: Pool }) {
     return () => setCsvData(undefined)
   }, [dataUrl])
 
-  return <DataTable data={data} columns={columns} hoverable />
+  return <DataTable data={data} columns={columns} hoverable rounded={false} />
 }

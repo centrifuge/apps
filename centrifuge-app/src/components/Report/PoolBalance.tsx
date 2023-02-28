@@ -137,17 +137,19 @@ export function PoolBalance({ pool }: { pool: Pool }) {
   React.useEffect(() => {
     setCsvData({
       dataUrl,
-      fileName: `Pool-${pool.id}.csv`,
+      fileName: `${pool.id}-pool-balance-${startDate}-${endDate}.csv`,
     })
 
     return () => setCsvData(undefined)
   }, [dataUrl])
 
-  return (
-    <DataTableGroup>
-      <DataTable data={overviewRecords} columns={columns} hoverable />
-      <DataTable data={priceRecords} columns={columns} hoverable />
-      <DataTable data={inOutFlowRecords} columns={columns} hoverable />
+  return poolStates?.length ? (
+    <DataTableGroup rounded={false}>
+      <DataTable data={overviewRecords} columns={columns} hoverable rounded={false} />
+      <DataTable data={priceRecords} columns={columns} hoverable rounded={false} />
+      <DataTable data={inOutFlowRecords} columns={columns} hoverable rounded={false} />
     </DataTableGroup>
+  ) : (
+    <Text>No data</Text>
   )
 }

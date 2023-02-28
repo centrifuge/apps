@@ -10,9 +10,14 @@ import type { TableDataRow } from './index'
 import { ReportContext } from './ReportContext'
 
 export function InvestorTransactions({ pool }: { pool: Pool }) {
-  const { activeTranche, setCsvData } = React.useContext(ReportContext)
+  const { activeTranche, setCsvData, startDate, endDate } = React.useContext(ReportContext)
 
-  const transactions = useInvestorTransactions(pool.id, activeTranche === 'all' ? undefined : activeTranche)
+  const transactions = useInvestorTransactions(
+    pool.id,
+    activeTranche === 'all' ? undefined : activeTranche,
+    startDate,
+    endDate
+  )
 
   const headers = [
     'Token',
@@ -75,7 +80,7 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
       dataUrl
         ? {
             dataUrl,
-            fileName: `Pool-${pool.id}.csv`,
+            fileName: `${pool.id}-investor-transactions-${startDate}-${endDate}.csv`,
           }
         : undefined
     )
@@ -83,5 +88,5 @@ export function InvestorTransactions({ pool }: { pool: Pool }) {
     return () => setCsvData(undefined)
   }, [dataUrl])
 
-  return <DataTable data={data} columns={columns} hoverable />
+  return <DataTable data={data} columns={columns} hoverable rounded={false} />
 }

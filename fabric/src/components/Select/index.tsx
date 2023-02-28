@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { IconChevronDown } from '../..'
 import { Box } from '../Box'
-import { InputBox } from '../InputBox'
+import { InputBox, InputBoxProps } from '../InputBox'
 import { Stack } from '../Stack'
 import { Text } from '../Text'
 
@@ -11,12 +11,13 @@ export type SelectOptionItem = {
   value: string
 }
 
-export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
-  options: SelectOptionItem[]
-  label?: string | React.ReactElement
-  placeholder: string
-  errorMessage?: string
-}
+export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> &
+  Pick<InputBoxProps, 'outlined'> & {
+    options: SelectOptionItem[]
+    label?: string | React.ReactElement
+    placeholder?: string
+    errorMessage?: string
+  }
 
 const StyledSelect = styled.select`
   appearance: none;
@@ -40,16 +41,25 @@ const StyledSelect = styled.select`
   }
 `
 
-export const Select: React.FC<SelectProps> = ({ options, label, placeholder, errorMessage, disabled, ...rest }) => {
+export const Select: React.FC<SelectProps> = ({
+  options,
+  label,
+  placeholder,
+  errorMessage,
+  disabled,
+  outlined = false,
+  ...rest
+}) => {
   return (
     <Stack gap={1} width="100%">
       <InputBox
         width="100%"
         label={label}
         as="div"
+        outlined={outlined}
         inputElement={
           <StyledSelect disabled={disabled} {...rest}>
-            <option value="">{placeholder}</option>
+            {placeholder && <option value="">{placeholder}</option>}
             {options.map((option, index) => (
               <option key={`${index}${option.value}`} value={option.value}>
                 {option.label}

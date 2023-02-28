@@ -12,7 +12,7 @@ import { ReportContext } from './ReportContext'
 
 export function AssetList({ pool }: { pool: Pool }) {
   const loans = useLoans(pool.id)
-  const { setCsvData } = React.useContext(ReportContext)
+  const { setCsvData, startDate, endDate } = React.useContext(ReportContext)
 
   const data: TableDataRow[] = React.useMemo(() => {
     if (!loans) {
@@ -95,7 +95,7 @@ export function AssetList({ pool }: { pool: Pool }) {
       dataUrl
         ? {
             dataUrl,
-            fileName: `Pool-${pool.id}.csv`,
+            fileName: `${pool.id}-asset-list-${startDate}-${endDate}.csv`,
           }
         : undefined
     )
@@ -103,5 +103,5 @@ export function AssetList({ pool }: { pool: Pool }) {
     return () => setCsvData(undefined)
   }, [dataUrl])
 
-  return <DataTable data={data} columns={columns} hoverable />
+  return <DataTable data={data} columns={columns} hoverable rounded={false} />
 }

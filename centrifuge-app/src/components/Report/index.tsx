@@ -1,7 +1,7 @@
 import { Pool } from '@centrifuge/centrifuge-js/dist/modules/pools'
-import { Stack, Text } from '@centrifuge/fabric'
+import { Box, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import styled from 'styled-components'
+import { formatDate } from '../../utils/date'
 import { AssetList } from './AssetList'
 import { BorrowerTransactions } from './BorrowerTransactions'
 import { InvestorTransactions } from './InvestorTransactions'
@@ -14,33 +14,27 @@ export type TableDataRow = {
   heading?: boolean
 }
 
-const GradientOverlay = styled.div`
-  max-width: 960px;
-  overflow: auto;
-  background: linear-gradient(to right, #fff 20%, rgba(0, 0, 0, 0)),
-    linear-gradient(to right, rgba(0, 0, 0, 0), #fff 80%) 0 100%, linear-gradient(to right, #000, rgba(0, 0, 0, 0) 20%),
-    linear-gradient(to left, #000, rgba(0, 0, 0, 0) 20%);
-  background-attachment: local, local, scroll, scroll;
-`
-
 export function ReportComponent({ pool }: { pool: Pool }) {
-  const { report } = React.useContext(ReportContext)
+  const { report, startDate, endDate } = React.useContext(ReportContext)
 
   return (
-    <Stack gap="2">
-      <Stack gap="3">
-        <GradientOverlay>
-          {report === 'pool-balance' && <PoolBalance pool={pool} />}
-          {report === 'asset-list' && <AssetList pool={pool} />}
-          {report === 'investor-tx' && <InvestorTransactions pool={pool} />}
-          {report === 'borrower-tx' && <BorrowerTransactions pool={pool} />}
-        </GradientOverlay>
-      </Stack>
-      {(report === 'pool-balance' || report === 'asset-list') && pool && (
+    <Box pb={6}>
+      <Shelf p={2} justifyContent="space-between">
         <Text variant="body3" color="textSecondary">
-          All amounts are in {pool.currency.symbol}.
+          {formatDate(startDate)} - {formatDate(endDate)}
         </Text>
-      )}
-    </Stack>
+        {(report === 'pool-balance' || report === 'asset-list') && pool && (
+          <Text variant="body3" color="textSecondary">
+            All amounts are in {pool.currency.symbol}.
+          </Text>
+        )}
+      </Shelf>
+      <Box overflow="auto" width="100%">
+        {report === 'pool-balance' && <PoolBalance pool={pool} />}
+        {report === 'asset-list' && <AssetList pool={pool} />}
+        {report === 'investor-tx' && <InvestorTransactions pool={pool} />}
+        {report === 'borrower-tx' && <BorrowerTransactions pool={pool} />}
+      </Box>
+    </Box>
   )
 }
