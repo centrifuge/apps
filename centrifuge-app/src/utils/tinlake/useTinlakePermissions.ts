@@ -8,7 +8,7 @@ export function useTinlakePermissions(poolId: string, address?: string) {
   const addr = useAddress('evm') || address
   const isTinlakePool = poolId.startsWith('0x')
   const pool = usePool(poolId) as TinlakePool
-  return useQuery(['tinlakePermissions', poolId, addr], () => getPermissions(pool, address!), {
+  return useQuery(['tinlakePermissions', poolId, addr], () => getPermissions(pool, addr!), {
     enabled: !!addr && isTinlakePool,
     staleTime: Infinity,
   })

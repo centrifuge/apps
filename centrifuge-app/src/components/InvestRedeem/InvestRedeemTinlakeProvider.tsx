@@ -6,7 +6,7 @@ import BN from 'bn.js'
 import * as React from 'react'
 import { Dec } from '../../utils/Decimal'
 import { useTinlakeBalances } from '../../utils/tinlake/useTinlakeBalances'
-import { useTinlakeInvestment } from '../../utils/tinlake/useTInlakeInvestment'
+import { useTinlakeInvestments } from '../../utils/tinlake/useTinlakeInvestments'
 import { useTinlakePermissions } from '../../utils/tinlake/useTinlakePermissions'
 import { TinlakePool } from '../../utils/tinlake/useTinlakePools'
 import { useTinlakeTransaction } from '../../utils/tinlake/useTinlakeTransaction'
@@ -27,7 +27,7 @@ export function InvestRedeemTinlakeProvider({ poolId, trancheId, children }: Pro
 
   if (!tranche) throw new Error(`Token not found. Pool id: ${poolId}, token id: ${trancheId}`)
 
-  const { data: investment, refetch: refetchInvestment } = useTinlakeInvestment(poolId, address)
+  const { data: investment, refetch: refetchInvestment } = useTinlakeInvestments(poolId, address)
   const { data: balances, refetch: refetchBalances, isLoading: isBalancesLoading } = useTinlakeBalances()
   const { data: nativeBalance, refetch: refetchBalance, isLoading: isBalanceLoading } = useNativeBalance()
   const { data: permissions, isLoading: isPermissionsLoading } = useTinlakePermissions(poolId, address)

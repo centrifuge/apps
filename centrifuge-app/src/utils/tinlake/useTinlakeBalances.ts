@@ -53,10 +53,10 @@ async function getBalances(pools: TinlakePool[], address: string) {
   }
 
   pools.forEach((pool) => {
-    ;(['junior', 'senior'] as const).forEach((t, i) => {
+    ;(['junior', 'senior'] as const).forEach((trancheName, i) => {
       const tranche = pool.tranches[i]
       balances.tranches.push({
-        balance: new TokenBalance(multicallData.tokens[pool.id][t], tranche.currency.decimals),
+        balance: new TokenBalance(multicallData.tokens[pool.id][trancheName], tranche.currency.decimals),
         currency: tranche.currency,
         poolId: pool.id,
         trancheId: tranche.id,

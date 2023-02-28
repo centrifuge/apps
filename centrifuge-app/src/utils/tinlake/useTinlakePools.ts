@@ -493,7 +493,6 @@ async function getPools(pools: IpfsPools): Promise<{ pools: TinlakePool[] }> {
       },
       createdAt: null,
       isInitialised: true,
-      // loanCollectionId: string | null;
       currency: currencies.DAI,
       tranches: [
         {

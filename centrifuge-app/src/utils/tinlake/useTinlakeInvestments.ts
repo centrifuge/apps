@@ -6,7 +6,7 @@ import { usePool } from '../usePools'
 import { Call, multicall } from './multicall'
 import { TinlakePool } from './useTinlakePools'
 
-export function useTinlakeInvestment(poolId: string, address?: string) {
+export function useTinlakeInvestments(poolId: string, address?: string) {
   const pool = usePool(poolId) as TinlakePool
   return useQuery(['tinlakeInvestment', poolId, address], () => getInvestment(pool, address!), {
     enabled: !!address,
@@ -76,21 +76,6 @@ async function getInvestment(pool: TinlakePool, address: string) {
       call: ['allowance(address,address)(uint256)', address, pool.addresses.SENIOR_TRANCHE],
       returns: [['senior.poolCurrencyAllowance', toDec18]],
     },
-    // {
-    //   target: pool.addresses.JUNIOR_TOKEN,
-    //   call: ['balanceOf(address)(uint256)', address],
-    //   returns: [['junior.balance', toDec18]],
-    // },
-    // {
-    //   target: pool.addresses.SENIOR_TOKEN,
-    //   call: ['balanceOf(address)(uint256)', address],
-    //   returns: [['senior.balance', toDec18]],
-    // },
-    // {
-    //   target: pool.addresses.TINLAKE_CURRENCY,
-    //   call: ['balanceOf(address)(uint256)', address],
-    //   returns: [['poolCurrencyBalance', toDec18]],
-    // },
   ]
 
   const multicallData = await multicall<State>(calls)
@@ -101,7 +86,6 @@ async function getInvestment(pool: TinlakePool, address: string) {
 type TrancheState = {
   tokenAllowance: Decimal
   poolCurrencyAllowance: Decimal
-  // balance: Decimal
   order: {
     orderedInEpoch: number
     investCurrency: Decimal
@@ -116,7 +100,6 @@ type TrancheState = {
 }
 
 type State = {
-  // poolCurrencyBalance: Decimal
   junior: TrancheState
   senior: TrancheState
 }
