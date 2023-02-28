@@ -19,7 +19,7 @@ import { PoolDetailSideBar } from '../Overview'
 
 export const PoolDetailAssetsTab: React.FC = () => {
   return (
-    <PageWithSideBar sidebar={<PoolDetailSideBar selectedToken={null} setSelectedToken={() => {}} />}>
+    <PageWithSideBar sidebar={<PoolDetailSideBar />}>
       <PoolDetailHeader />
       <LoadBoundary>
         <PoolDetailAssets />

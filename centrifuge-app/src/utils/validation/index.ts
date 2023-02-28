@@ -1,6 +1,7 @@
 import Decimal from 'decimal.js-light'
-import { MB } from '../../pages/IssuerCreatePool/validate'
 import { getImageDimensions } from '../getImageDimensions'
+
+const MB = 1024 ** 2
 
 const isImageFile = (file: any): boolean => file instanceof File && !!file.type.match(/^image\//)
 
