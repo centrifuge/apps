@@ -78,6 +78,8 @@ export interface ActivePool extends BasePool {
     RESERVE: string
     SENIOR_TRANCHE: string
     JUNIOR_TRANCHE: string
+    JUNIOR_OPERATOR: string
+    SENIOR_OPERATOR: string
     FEED: string
     POOL_ADMIN?: string
     SENIOR_MEMBERLIST: string

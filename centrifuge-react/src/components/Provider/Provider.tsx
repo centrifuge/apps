@@ -2,7 +2,7 @@ import * as React from 'react'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { CentrifugeProvider, CentrifugeProviderProps } from '../CentrifugeProvider'
 import { TransactionProvider, TransactionToasts, TransactionToastsProps } from '../Transactions'
-import { WalletProvider } from '../WalletProvider'
+import { EvmChains, EvmConnectorMeta, WalletProvider } from '../WalletProvider'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,17 +15,26 @@ const queryClient = new QueryClient({
 export type ProviderProps = {
   children: React.ReactNode
   centrifugeConfig?: CentrifugeProviderProps['config']
+  evmChains?: EvmChains
+  evmAdditionalConnectors?: EvmConnectorMeta[]
   subscanUrl?: string
   transactionToastPositionProps?: TransactionToastsProps['positionProps']
 }
 
-export function Provider({ children, centrifugeConfig, subscanUrl, transactionToastPositionProps }: ProviderProps) {
+export function Provider({
+  children,
+  centrifugeConfig,
+  evmChains,
+  evmAdditionalConnectors,
+  subscanUrl,
+  transactionToastPositionProps,
+}: ProviderProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <CentrifugeProvider config={centrifugeConfig}>
-        <WalletProvider>
+        <WalletProvider evmChains={evmChains} evmAdditionalConnectors={evmAdditionalConnectors} subscanUrl={subscanUrl}>
           <TransactionProvider>
-            <TransactionToasts subscanUrl={subscanUrl} positionProps={transactionToastPositionProps} />
+            <TransactionToasts positionProps={transactionToastPositionProps} />
             {children}
           </TransactionProvider>
         </WalletProvider>

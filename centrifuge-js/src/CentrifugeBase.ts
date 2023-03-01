@@ -1,3 +1,4 @@
+import type { JsonRpcSigner } from '@ethersproject/providers'
 import { ApiRx } from '@polkadot/api'
 import { AddressOrPair, SubmittableExtrinsic } from '@polkadot/api/types'
 import { SignedBlock } from '@polkadot/types/interfaces'
@@ -45,6 +46,7 @@ export type Config = {
   unpinFile?: (hash: string) => Promise<void>
   signer?: Signer
   signingAddress?: AddressOrPair
+  evmSigner?: JsonRpcSigner
   printExtrinsics?: boolean
   proxy?: string
   debug?: boolean
