@@ -1,8 +1,9 @@
 import { useWallet } from '@centrifuge/centrifuge-react'
-import { Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Button, Checkbox, Shelf, Text } from '@centrifuge/fabric'
 import * as React from 'react'
 import { useAuth } from '../../components/AuthProvider'
 import { DataSharingAgreementDialog } from '../../components/Dialogs/DataSharingAgreementDialog'
+import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
@@ -16,18 +17,16 @@ export const LinkWallet = () => {
   const { login, isAuth } = useAuth()
 
   return (
-    <Stack gap={4}>
-      <Stack alignItems="flex-start" gap={4}>
-        <Text fontSize={5}>Connect and link your wallet</Text>
-        <Text>
-          To start, you need to connect your wallet and sign a message to verify the wallet. You also need to agree to
-          the data sharing agreement to continue with the identity verification process.
-        </Text>
+    <>
+      <Content>
+        <ContentHeader
+          title="Connect and link your wallet"
+          body="To start, you need to connect your wallet and sign a message to verify the wallet. You also need to agree to
+          the data sharing agreement to continue with the identity verification process."
+        />
+
         <Shelf gap={1}>
           <Checkbox
-            style={{
-              cursor: 'pointer',
-            }}
             checked={isAgreedToDataSharingAgreement || isAuth}
             onChange={() => setIsAgreedToDataSharingAgreement((current) => !current)}
             disabled={isAuth}
@@ -55,6 +54,9 @@ export const LinkWallet = () => {
             setIsDialogOpen={setIsDataSharingAgreementDialogOpen}
           />
         </Shelf>
+      </Content>
+
+      <ActionBar>
         {isAuth ? (
           <Button onClick={() => nextStep()}>Next</Button>
         ) : (
@@ -65,7 +67,7 @@ export const LinkWallet = () => {
             Link your wallet
           </Button>
         )}
-      </Stack>
-    </Stack>
+      </ActionBar>
+    </>
   )
 }

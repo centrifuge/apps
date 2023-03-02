@@ -8,7 +8,7 @@
     "start:types": "tsc --watch",
     "start:fabric": "cd ../fabric && yarn start && cd ../centrifuge-app",
     "start:centjs": "cd ../centrifuge-js && yarn start && cd ../centrifuge-app",
-    "build": "yarn build:fabric && yarn build:centjs && yarn build:types && yarn build:app && yarn build:centReact",
+    "build": "yarn build:fabric && yarn build:centjs && yarn build:centReact && yarn build:types && yarn build:app",
     "build:app": "vite build",
     "build:types": "tsc",
     "build:fabric": "cd ../fabric && yarn build && cd ../centrifuge-app",

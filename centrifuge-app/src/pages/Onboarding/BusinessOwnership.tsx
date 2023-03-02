@@ -4,46 +4,24 @@ import {
   Checkbox,
   DateInput,
   Divider,
-  Flex,
-  IconAlertCircle,
-  IconCheckCircle,
   IconPlus,
   IconTrash,
-  InlineFeedback,
   Select,
   Shelf,
-  Stack,
   Text,
   TextInput,
 } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
-import styled from 'styled-components'
 import { array, boolean, date, object, string } from 'yup'
 import { ConfirmResendEmailVerificationDialog } from '../../components/Dialogs/ConfirmResendEmailVerificationDialog'
 import { EditOnboardingEmailAddressDialog } from '../../components/Dialogs/EditOnboardingEmailAddressDialog'
+import { ActionBar, Content, ContentHeader, Fieldset, Notification, NotificationBar } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { EntityUser } from '../../types'
 import { formatGeographyCodes } from '../../utils/formatGeographyCodes'
 import { RESIDENCY_COUNTRY_CODES } from './geographyCodes'
 import { useConfirmOwners } from './queries/useConfirmOwners'
-import { StyledInlineFeedback } from './StyledInlineFeedback'
-
-const ClickableText = styled(Text)`
-  color: #0000ee;
-
-  &:hover {
-    cursor: pointer;
-  }
-
-  &:active {
-    color: #ff0000;
-  }
-
-  &:visited {
-    color: #551a8b;
-  }
-`
 
 const businessOwnershipInput = object({
   ultimateBeneficialOwners: array().of(
@@ -63,58 +41,42 @@ const EmailVerificationInlineFeedback = ({ email, completed }: { email: string; 
     React.useState(false)
 
   if (completed) {
-    return (
-      <StyledInlineFeedback>
-        <Shelf gap={1}>
-          <Flex>
-            <IconCheckCircle size="16px" />
-          </Flex>
-          <Text fontSize="14px">Email address verified</Text>
-        </Shelf>
-      </StyledInlineFeedback>
-    )
+    return <Notification>Email address verified</Notification>
   }
+
   return (
-    <StyledInlineFeedback>
-      <Shelf gap={1}>
-        <Box>
-          <IconAlertCircle size="16px" />
-        </Box>
-        <Text fontSize="14px">
-          Please verify your email address. Email sent to {email}. If you did not receive any email{' '}
-          <ClickableText onClick={() => setIsConfirmResendEmailVerificationDialogOpen(true)}>send again</ClickableText>{' '}
-          or <ClickableText onClick={() => setIsEditOnboardingEmailAddressDialogOpen(true)}>edit email</ClickableText>.
-          Otherwise contact <a href="mailto:support@centrifuge.io">support@centrifuge.io</a>.
-        </Text>
-        <EditOnboardingEmailAddressDialog
-          currentEmail={email}
-          isDialogOpen={isEditOnboardingEmailAddressDialogOpen}
-          setIsDialogOpen={setIsEditOnboardingEmailAddressDialogOpen}
-        />
-        <ConfirmResendEmailVerificationDialog
-          isDialogOpen={isConfirmResendEmailVerificationDialogOpen}
-          setIsDialogOpen={setIsConfirmResendEmailVerificationDialogOpen}
-        />
-      </Shelf>
-    </StyledInlineFeedback>
+    <>
+      <Notification type="alert">
+        Please verify your email address. Email sent to {email}. If you did not receive any email{' '}
+        <button onClick={() => setIsConfirmResendEmailVerificationDialogOpen(true)}>send again</button> or{' '}
+        <button onClick={() => setIsEditOnboardingEmailAddressDialogOpen(true)}>edit email</button>. Otherwise contact{' '}
+        <a href="mailto:support@centrifuge.io?subject=Onboarding email verification&body=I’m reaching out about…">
+          support@centrifuge.io
+        </a>
+        .
+      </Notification>
+
+      <EditOnboardingEmailAddressDialog
+        currentEmail={email}
+        isDialogOpen={isEditOnboardingEmailAddressDialogOpen}
+        setIsDialogOpen={setIsEditOnboardingEmailAddressDialogOpen}
+      />
+
+      <ConfirmResendEmailVerificationDialog
+        isDialogOpen={isConfirmResendEmailVerificationDialogOpen}
+        setIsDialogOpen={setIsConfirmResendEmailVerificationDialogOpen}
+      />
+    </>
   )
 }
 
-const BusinessOwnershipInlineFeedback = ({ isError }: { isError: boolean }) => {
-  if (isError) {
-    return (
-      <StyledInlineFeedback>
-        <InlineFeedback status="warning">
-          <Text fontSize="14px">
-            Unable to confirm business ownership or business ownership has already been confirmed. Please try again or
-            contact support@centrifuge.io.
-          </Text>
-        </InlineFeedback>
-      </StyledInlineFeedback>
-    )
-  }
-
-  return null
+const BusinessOwnershipInlineFeedback = () => {
+  return (
+    <Notification type="alert">
+      Unable to confirm business ownership or business ownership has already been confirmed. Please try again or contact
+      support@centrifuge.io.
+    </Notification>
+  )
 }
 
 export const BusinessOwnership = () => {
@@ -209,22 +171,28 @@ export const BusinessOwnership = () => {
   }
 
   return (
-    <Stack gap={4}>
-      <Box>
-        <EmailVerificationInlineFeedback email={onboardingUser?.email as string} completed={isEmailVerified} />
-        <BusinessOwnershipInlineFeedback isError={isError} />
-        <Text fontSize={5}>Confirm business ownership</Text>
-        <Text fontSize={2}>
-          Add the names of any individuals who own or control more than than 25% of the company. If no person does,
-          please add the largest shareholder.
-        </Text>
-        <Stack gap={8} py={3} width="493px">
-          {formik.values.ultimateBeneficialOwners.map((owner, index) => (
-            <Stack gap={2}>
-              <Shelf justifyContent="space-between">
-                <Text>Person {index + 1}</Text>
+    <>
+      <Content>
+        <NotificationBar>
+          <EmailVerificationInlineFeedback email={onboardingUser?.email as string} completed={isEmailVerified} />
+          {isError && <BusinessOwnershipInlineFeedback />}
+        </NotificationBar>
 
-                {!isCompleted && (
+        <ContentHeader
+          title="Confirm business ownership"
+          body="Add the names of any individuals who own or control more than than 25% of the company. If no person does,
+        please add the largest shareholder."
+        />
+
+        {formik.values.ultimateBeneficialOwners.map((owner, index) => (
+          <React.Fragment key={`${owner.name}${index}`}>
+            <Fieldset>
+              <Shelf justifyContent="space-between">
+                <Text as="span" variant="interactive2">
+                  Person {index + 1}
+                </Text>
+
+                {!isCompleted && formik.values.ultimateBeneficialOwners.length > 1 && (
                   <Button variant="secondary" onClick={() => removeOwner(index)} disabled={isLoading}>
                     <Shelf alignItems="center" gap="4px">
                       <IconTrash size={16} />
@@ -232,6 +200,7 @@ export const BusinessOwnership = () => {
                   </Button>
                 )}
               </Shelf>
+
               <TextInput
                 id={`ultimateBeneficialOwners[${index}].name`}
                 value={owner.name}
@@ -239,6 +208,7 @@ export const BusinessOwnership = () => {
                 onChange={formik.handleChange}
                 disabled={isLoading || isCompleted}
               />
+
               <DateInput
                 id={`ultimateBeneficialOwners[${index}].dateOfBirth`}
                 value={owner.dateOfBirth}
@@ -246,6 +216,7 @@ export const BusinessOwnership = () => {
                 onChange={formik.handleChange}
                 disabled={isLoading || isCompleted}
               />
+
               <Select
                 name="countryOfCitizenship"
                 label="Country of Citizenship"
@@ -257,6 +228,7 @@ export const BusinessOwnership = () => {
                 value={formik.values.ultimateBeneficialOwners[index].countryOfCitizenship}
                 disabled={isLoading || isCompleted}
               />
+
               <Select
                 name="countryOfResidency"
                 label="Country of Residency"
@@ -268,12 +240,14 @@ export const BusinessOwnership = () => {
                 value={formik.values.ultimateBeneficialOwners[index].countryOfResidency}
                 disabled={isLoading || isCompleted}
               />
-            </Stack>
-          ))}
-        </Stack>
-        <Divider />
+            </Fieldset>
+
+            <Divider />
+          </React.Fragment>
+        ))}
+
         {formik.values.ultimateBeneficialOwners.length <= 2 && !isCompleted && (
-          <Box pt={3}>
+          <Box>
             <Button variant="secondary" onClick={() => addOwner()} disabled={isLoading}>
               <Shelf alignItems="center" gap="4px">
                 <IconPlus size={16} />
@@ -282,13 +256,11 @@ export const BusinessOwnership = () => {
             </Button>
           </Box>
         )}
-        <Box pt={5}>
+
+        <Box>
           <Checkbox
             id="isAccurate"
             disabled={isLoading || isCompleted}
-            style={{
-              cursor: 'pointer',
-            }}
             checked={formik.values.isAccurate}
             onChange={formik.handleChange}
             label={
@@ -299,8 +271,9 @@ export const BusinessOwnership = () => {
             }
           />
         </Box>
-      </Box>
-      <Shelf gap={2}>
+      </Content>
+
+      <ActionBar>
         <Button onClick={() => previousStep()} disabled={isLoading} variant="secondary">
           Back
         </Button>
@@ -314,7 +287,7 @@ export const BusinessOwnership = () => {
         >
           Next
         </Button>
-      </Shelf>
-    </Stack>
+      </ActionBar>
+    </>
   )
 }

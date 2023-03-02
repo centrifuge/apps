@@ -1,5 +1,6 @@
-import { Box, Button, Checkbox, DateInput, Select, Shelf, Stack, Text, TextInput } from '@centrifuge/fabric'
+import { Box, Button, Checkbox, DateInput, Select, Text, TextInput } from '@centrifuge/fabric'
 import { FormikProps } from 'formik'
+import { ActionBar, Content, ContentHeader, Fieldset } from '../../../components/Onboarding'
 import { useOnboarding } from '../../../components/OnboardingProvider'
 import { formatGeographyCodes } from '../../../utils/formatGeographyCodes'
 import { KYC_COUNTRY_CODES, RESIDENCY_COUNTRY_CODES } from '../geographyCodes'
@@ -36,11 +37,11 @@ export const SignerVerification = ({ formik, isLoading, isCompleted }: Props) =>
   const investorType = onboardingUser?.investorType === 'entity' ? 'entity' : 'individual'
 
   return (
-    <Stack gap={4}>
-      <Box>
-        <Text fontSize={5}>{copy[investorType].title}</Text>
-        <Text fontSize={2}>{copy[investorType].description}</Text>
-        <Stack gap={2} py={6} width="493px">
+    <>
+      <Content>
+        <ContentHeader title={copy[investorType].title} body={copy[investorType].description} />
+
+        <Fieldset>
           <TextInput
             id="name"
             value={formik.values.name}
@@ -73,21 +74,19 @@ export const SignerVerification = ({ formik, isLoading, isCompleted }: Props) =>
             value={formik.values.countryOfResidency}
             disabled={isLoading || isCompleted}
           />
-        </Stack>
+        </Fieldset>
         <Box>
           <Checkbox
             id="isAccurate"
-            style={{
-              cursor: 'pointer',
-            }}
             checked={formik.values.isAccurate}
             onChange={formik.handleChange}
             label={<Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>{copy[investorType].checkboxLabel}</Text>}
             disabled={isLoading || isCompleted}
           />
         </Box>
-      </Box>
-      <Shelf gap="2">
+      </Content>
+
+      <ActionBar>
         <Button onClick={() => previousStep()} variant="secondary" disabled={isLoading}>
           Back
         </Button>
@@ -101,7 +100,7 @@ export const SignerVerification = ({ formik, isLoading, isCompleted }: Props) =>
         >
           Next
         </Button>
-      </Shelf>
-    </Stack>
+      </ActionBar>
+    </>
   )
 }

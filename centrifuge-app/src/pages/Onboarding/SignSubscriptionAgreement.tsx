@@ -1,5 +1,6 @@
-import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { Box, Button, Checkbox, Shelf, Spinner, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { PDFViewer } from '../../components/PDFViewer'
 import { useSignAndSendDocuments } from './queries/useSignAndSendDocuments'
@@ -33,26 +34,29 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
   )
 
   return (
-    <Stack gap={4}>
-      <Box>
-        <Text fontSize={5}>Sign subscription agreement</Text>
-        <Text fontSize={2}>Complete subscription agreement</Text>
-        {isAgreementFetched && (
-          <Box overflowY="scroll" height="500px">
+    <>
+      <Content>
+        <ContentHeader title="Sign subscription agreement" body="Complete subscription agreement" />
+
+        {isAgreementFetched ? (
+          <Box overflowY="auto" minHeight="55vh" maxHeight="500px">
             <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementData) as string} />
           </Box>
+        ) : (
+          <Shelf alignItems="center" minHeight="55vh" maxHeight="500px" width="100%">
+            <Spinner size="iconLarge" />
+          </Shelf>
         )}
-      </Box>
-      <Checkbox
-        style={{
-          cursor: 'pointer',
-        }}
-        checked={isCompleted || isAgreed}
-        onChange={() => setIsAgreed((current) => !current)}
-        label={<Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>I agree to the agreement</Text>}
-        disabled={isSigningTransaction || isSending || isCompleted}
-      />
-      <Shelf gap="2">
+
+        <Checkbox
+          checked={isCompleted || isAgreed}
+          onChange={() => setIsAgreed((current) => !current)}
+          label={<Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>I agree to the agreement</Text>}
+          disabled={isSigningTransaction || isSending || isCompleted}
+        />
+      </Content>
+
+      <ActionBar>
         <Button onClick={() => previousStep()} variant="secondary" disabled={isSigningTransaction || isSending}>
           Back
         </Button>
@@ -64,7 +68,7 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
         >
           {isCompleted ? 'Next' : 'Sign'}
         </Button>
-      </Shelf>
-    </Stack>
+      </ActionBar>
+    </>
   )
 }

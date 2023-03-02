@@ -37,9 +37,6 @@ export const Accreditation = () => {
         </Stack>
       </Box>
       <Checkbox
-        style={{
-          cursor: 'pointer',
-        }}
         checked={isCompleted || isAccredited}
         onChange={() => setIsAccredited((current) => !current)}
         label={
