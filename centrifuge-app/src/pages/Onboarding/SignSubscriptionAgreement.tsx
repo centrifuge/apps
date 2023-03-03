@@ -38,15 +38,32 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
       <Content>
         <ContentHeader title="Sign subscription agreement" body="Complete subscription agreement" />
 
-        {isAgreementFetched ? (
-          <Box overflowY="auto" minHeight="55vh" maxHeight="500px">
+        <Box
+          position="relative"
+          overflowY="auto"
+          minHeight="30vh"
+          maxHeight="500px"
+          borderWidth={isAgreementFetched ? 1 : 0}
+          borderColor="borderPrimary"
+          borderStyle="solid"
+          borderRadius="tooltip"
+        >
+          {isAgreementFetched ? (
             <PDFViewer file={(signedAgreementUrl ? signedAgreementUrl : unsignedAgreementData) as string} />
-          </Box>
-        ) : (
-          <Shelf alignItems="center" minHeight="55vh" maxHeight="500px" width="100%">
-            <Spinner size="iconLarge" />
-          </Shelf>
-        )}
+          ) : (
+            <Shelf
+              position="absolute"
+              top={0}
+              left={0}
+              width="100%"
+              height="100%"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Spinner size="iconLarge" />
+            </Shelf>
+          )}
+        </Box>
 
         <Checkbox
           checked={isCompleted || isAgreed}

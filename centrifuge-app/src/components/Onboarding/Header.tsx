@@ -5,13 +5,14 @@ import { Link } from 'react-router-dom'
 import { config } from '../../config'
 
 type HeaderProps = {
-  children: React.ReactNode
+  children?: React.ReactNode
+  walletMenu?: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const [_, WordMark] = config.logo
 
-export function Header({ children }: HeaderProps) {
+export function Header({ children, walletMenu = true }: HeaderProps) {
   return (
     <Shelf as="header" justifyContent="space-between" gap={2} p={3}>
       <Shelf alignItems="center" gap={3}>
@@ -21,9 +22,12 @@ export function Header({ children }: HeaderProps) {
 
         {children}
       </Shelf>
-      <Box width="300px">
-        <WalletMenu />
-      </Box>
+
+      {walletMenu && (
+        <Box width="300px">
+          <WalletMenu />
+        </Box>
+      )}
     </Shelf>
   )
 }

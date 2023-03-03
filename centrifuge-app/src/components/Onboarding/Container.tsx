@@ -5,8 +5,9 @@ import styled from 'styled-components'
 
 type ContainerProps = {
   children: React.ReactNode
-  aside: React.ReactNode
+  aside?: React.ReactNode
   isLoading?: boolean
+  closeable?: boolean
 }
 
 const Close = styled(Link)`
@@ -23,14 +24,14 @@ const Close = styled(Link)`
   }
 `
 
-export function Container({ children, aside, isLoading }: ContainerProps) {
+export function Container({ children, aside, isLoading, closeable = true }: ContainerProps) {
   return (
     <Grid as="main" gridTemplateColumns="1fr" gridTemplateRows="1fr" p={6} style={{ placeItems: 'center' }}>
       <Grid
         as="article"
         position="relative"
-        gridTemplateColumns={['350px 1fr 0']}
-        gridTemplateAreas={`"aside content close"`}
+        gridTemplateColumns={aside ? ['350px 1fr 0'] : ['1fr 0']}
+        gridTemplateAreas={aside ? `"aside content close"` : `"content close"`}
         width="100%"
         height="100%"
         maxWidth="1200px"
@@ -45,24 +46,28 @@ export function Container({ children, aside, isLoading }: ContainerProps) {
           </Box>
         ) : (
           <>
-            <Close to="/" title="Go to main page">
-              <IconX color="textPrimary" size="iconMedium" />
-            </Close>
+            {closeable && (
+              <Close to="/" title="Go to main page">
+                <IconX color="textPrimary" size="iconMedium" />
+              </Close>
+            )}
 
-            <Box
-              as="aside"
-              gridArea="aside"
-              px={6}
-              py={8}
-              borderWidth={0}
-              borderRightWidth={1}
-              borderStyle="solid"
-              borderColor="borderPrimary"
-            >
-              <Box position="sticky" top={8} left={0} pt={2}>
-                {aside}
+            {aside && (
+              <Box
+                as="aside"
+                gridArea="aside"
+                px={6}
+                py={8}
+                borderWidth={0}
+                borderRightWidth={1}
+                borderStyle="solid"
+                borderColor="borderPrimary"
+              >
+                <Box position="sticky" top={8} left={0} pt={2}>
+                  {aside}
+                </Box>
               </Box>
-            </Box>
+            )}
 
             {/* 
               This container expects exactly one or two children. 

@@ -16,6 +16,7 @@ const Body = styled(Text)`
     }
 
     &:focus-visible {
+      border-radius: ${({ theme }) => theme.radii.tooltip}px;
       outline: ${({ theme }) => `1px solid ${theme.colors.accentPrimary}`};
     }
   }

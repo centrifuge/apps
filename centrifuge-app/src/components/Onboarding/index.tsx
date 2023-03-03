@@ -4,6 +4,7 @@ import { Container } from './Container'
 import { Content } from './Content'
 import { ContentHeader } from './ContentHeader'
 import { Fieldset, Legend } from './Fieldset'
+import { FileUpload } from './FileUpload'
 import { Header } from './Header'
 import { Layout } from './Layout'
 import { Notification } from './Notification'
@@ -17,6 +18,7 @@ export {
   Content,
   ContentHeader,
   Fieldset,
+  FileUpload,
   Header,
   Layout,
   Legend,

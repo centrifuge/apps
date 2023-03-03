@@ -1,6 +1,6 @@
-import { AnchorButton, Box, Button, FileUpload } from '@centrifuge/fabric'
+import { AnchorButton, Box, Button } from '@centrifuge/fabric'
 import * as React from 'react'
-import { ActionBar, Content, ContentHeader } from '../../components/Onboarding'
+import { ActionBar, Content, ContentHeader, FileUpload } from '../../components/Onboarding'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { useTaxInfo } from './queries/useTaxInfo'
 import { useUploadTaxInfo } from './queries/useUploadTaxInfo'
@@ -28,6 +28,7 @@ export const TaxInfo = () => {
       return {
         type: 'W-8BEN',
         url: 'https://www.irs.gov/pub/irs-pdf/fw8ben.pdf',
+        label: 'www.irs.gov/pub/irs-pdf/fw8ben.pdf',
       }
     }
 
@@ -35,12 +36,14 @@ export const TaxInfo = () => {
       return {
         type: 'W-8BEN-E',
         url: 'https://www.irs.gov/pub/irs-pdf/fw8bene.pdf',
+        label: 'www.irs.gov/pub/irs-pdf/fw8bene.pdf',
       }
     }
 
     return {
       type: 'W9',
       url: 'https://www.irs.gov/pub/irs-pdf/fw9.pdf',
+      label: 'www.irs.gov/pub/irs-pdf/fw9.pdf',
     }
   }, [onboardingUser])
 
@@ -53,7 +56,7 @@ export const TaxInfo = () => {
             <>
               Please complete and upload a {taxForm.type} form. The form can be found at{' '}
               <a href={taxForm.url} target="_blank" rel="noreferrer">
-                {taxForm.url}
+                {taxForm.label}
               </a>
               .
             </>
@@ -69,8 +72,7 @@ export const TaxInfo = () => {
             </Box>
           ) : (
             <FileUpload
-              placeholder="Upload file"
-              onFileChange={(file) => setTaxInfo(file)}
+              onFileChange={(file) => setTaxInfo(file as File)}
               disabled={isLoading || isCompleted}
               file={taxInfo || null}
               validate={validateFileUpload}
