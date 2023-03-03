@@ -26,6 +26,7 @@ export const Popover: React.FC<PopoverProps> = ({ renderTrigger, renderContent }
   // hiding the overlay when a parent element of the trigger scrolls
   // (which invalidates the popover positioning).
   const {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     triggerProps: { onPress, ...triggerAriaProps },
     overlayProps: overlayAriaProps,
   } = useOverlayTrigger({ type: 'dialog' }, state, triggerRef)

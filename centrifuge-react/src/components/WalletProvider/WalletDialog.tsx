@@ -15,12 +15,13 @@ import { Wallet } from '@subwallet/wallet-connect/types'
 import { MetaMask } from '@web3-react/metamask'
 import * as React from 'react'
 import { AccountButton, AccountIcon, AccountName } from './AccountButton'
-import { EvmChains } from './evm/chains'
+import { EvmChains, getChainInfo } from './evm/chains'
 import { EvmConnectorMeta } from './evm/connectors'
 import { isMetaMaskWallet } from './evm/utils'
 import { Logo, SelectAnchor, SelectButton } from './SelectButton'
 import { SelectionStep } from './SelectionStep'
 import { UserSelection } from './UserSelection'
+import { useGetNetworkName } from './utils'
 import { useWallet, wallets } from './WalletProvider'
 
 type Props = {
@@ -42,6 +43,8 @@ export function WalletDialog({ evmChains }: Props) {
     connect: doConnect,
     evm,
   } = ctx
+
+  const getNetworkName = useGetNetworkName()
 
   const shownWallets = (
     selectedNetwork === 'centrifuge' ? [...wallets] : selectedNetwork ? [...evm.connectors.filter((c) => c.shown)] : []
@@ -78,19 +81,23 @@ export function WalletDialog({ evmChains }: Props) {
                 onClick={() => showWallets('centrifuge')}
                 active={selectedNetwork === 'centrifuge'}
               >
-                Centrifuge
+                {getNetworkName('centrifuge')}
               </SelectButton>
 
-              {Object.entries(evmChains).map(([chainId, chain]) => (
-                <SelectButton
-                  key={chainId}
-                  logo={chain.logo?.src ? <Logo icon={chain.logo.src} /> : undefined}
-                  onClick={() => showWallets(Number(chainId))}
-                  active={selectedNetwork === Number(chainId)}
-                >
-                  {chain.name}
-                </SelectButton>
-              ))}
+              {Object.entries(evmChains).map(([chainId, chain]) => {
+                const info = getChainInfo(evmChains, Number(chainId))
+
+                return (
+                  <SelectButton
+                    key={chainId}
+                    logo={chain.iconUrl ? <Logo icon={chain.iconUrl} /> : undefined}
+                    onClick={() => showWallets(Number(chainId))}
+                    active={selectedNetwork === Number(chainId)}
+                  >
+                    {info.name}
+                  </SelectButton>
+                )
+              })}
             </SelectionStep>
 
             <Box as="hr" borderStyle="solid" borderWidth={0} borderTopWidth={1} borderColor="borderPrimary" />
