@@ -87,7 +87,6 @@ export const entityUserSchema = object({
   kycReference: string().optional(),
   email: string().email().required(),
   businessName: string().required(),
-  incorporationDate: date().required(),
   registrationNumber: string().required(),
   jurisdictionCode: string().required(),
   ultimateBeneficialOwners: array(uboSchema).max(3),
