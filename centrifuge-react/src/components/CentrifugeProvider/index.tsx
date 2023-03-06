@@ -1,1 +1,1 @@
-export * from './CentrifugeProvider'
+export { CentrifugeProvider, CentrifugeProviderProps, useCentrifuge, useCentrifugeKey } from './CentrifugeProvider'

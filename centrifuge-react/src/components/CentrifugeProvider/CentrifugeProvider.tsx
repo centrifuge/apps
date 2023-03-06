@@ -2,7 +2,7 @@ import Centrifuge from '@centrifuge/centrifuge-js'
 import type { UserProvidedConfig } from '@centrifuge/centrifuge-js/dist/CentrifugeBase'
 import * as React from 'react'
 
-const CentrifugeContext = React.createContext<{ centrifuge: Centrifuge; key: string }>(null as any)
+export const CentrifugeContext = React.createContext<{ centrifuge: Centrifuge; key: string }>({} as any)
 
 export type CentrifugeProviderProps = {
   children: React.ReactNode

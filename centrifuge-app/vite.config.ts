@@ -10,6 +10,7 @@ export default defineConfig({
       // configuration to allow HMR in other modules in yarn
       ignored: ['!../centrifuge-js/dist/**', '!../fabric/dist/**'],
     },
+    port: 3000,
   },
   envPrefix: 'REACT_APP_',
   envDir: '.env-config',

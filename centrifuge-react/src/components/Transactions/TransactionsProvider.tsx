@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Network } from '../WalletProvider/types'
 
 export type TransactionStatus = 'creating' | 'unconfirmed' | 'pending' | 'succeeded' | 'failed'
 export type Transaction = {
@@ -11,6 +12,7 @@ export type Transaction = {
   failedReason?: string
   error?: any
   dismissed?: boolean
+  network?: Network
 }
 
 type TransactionsContextType = {
