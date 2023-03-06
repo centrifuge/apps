@@ -8,8 +8,6 @@ export type Subset<K> = {
     : K[attr]
 }
 
-export {}
-
 declare global {
   export namespace Express {
     export interface Request {
@@ -23,6 +21,9 @@ declare global {
       JWT_SECRET: string
       REDIRECT_URL: string
       SENDGRID_API_KEY: string
+      MEMBERLIST_ADMIN_PURE_PROXY: string
+      COLLATOR_WSS_URL: string
+      RELAY_WSS_URL: string
     }
   }
 }

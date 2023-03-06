@@ -27,7 +27,11 @@ type Props = React.PropsWithChildren<{
 
 const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dialog', icon: IconComp, title }) => {
   const ref = React.useRef<HTMLDivElement>(null)
-  const { overlayProps, underlayProps } = useOverlay({ isOpen, onClose, isDismissable: true }, ref)
+  const underlayRef = React.useRef<HTMLDivElement>(null)
+  const { overlayProps, underlayProps } = useOverlay(
+    { isOpen, onClose, isDismissable: true, shouldCloseOnInteractOutside: (target) => target === underlayRef.current },
+    ref
+  )
 
   usePreventScroll()
   const { modalProps } = useModal()
@@ -47,6 +51,7 @@ const DialogInner: React.FC<Props> = ({ children, isOpen, onClose, width = 'dial
       alignItems="center"
       justifyContent="center"
       {...underlayProps}
+      ref={underlayRef}
     >
       <FocusScope contain restoreFocus autoFocus>
         <Card

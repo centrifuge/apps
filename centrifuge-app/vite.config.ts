@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig, splitVendorChunkPlugin } from 'vite'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 // https://vitejs.dev/config/
 // when making changes to this file start vite with --force flag
@@ -9,11 +10,10 @@ export default defineConfig({
       // configuration to allow HMR in other modules in yarn
       ignored: ['!../centrifuge-js/dist/**', '!../fabric/dist/**'],
     },
-    proxy: {
-      '/.netlify': 'http://localhost:8888',
-    },
+    port: 3000,
   },
   envPrefix: 'REACT_APP_',
+  envDir: '.env-config',
   build: {
     target: 'esnext',
     outDir: 'build',
@@ -41,6 +41,8 @@ export default defineConfig({
         plugins: ['babel-plugin-styled-components'],
       },
     }),
+    // The Coinbase and WalletConnect connectors rely on node globals
+    nodePolyfills(),
     splitVendorChunkPlugin(),
   ],
 })

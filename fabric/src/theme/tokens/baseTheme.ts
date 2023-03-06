@@ -12,6 +12,7 @@ export const baseTheme: Omit<FabricTheme, 'colors' | 'scheme'> = {
     container: 1152,
     iconSmall: 16,
     iconMedium: 24,
+    iconRegular: 32,
     iconLarge: 40,
   },
   radii: {

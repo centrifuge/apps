@@ -7,12 +7,16 @@
     "centrifuge-react",
     "simulation-tests",
     "onboarding-api",
-    "faucet-api"
+    "faucet-api",
+    "pinning-api"
   ],
   "devDependencies": {
+    "@types/bn.js": "^5.1.1",
     "@types/concurrently": "^5",
     "babel-plugin-styled-components": "1.12.0",
     "concurrently": "^5.3.0",
+    "esbuild": "^0.16.17",
+    "esbuild-node-externals": "^1.6.0",
     "husky": "^6.0.0",
     "prettier": "^2.3.1",
     "prettier-plugin-organize-imports": "1.1.1",
@@ -21,17 +25,22 @@
     "typescript": "~4.4.4"
   },
   "dependencies": {
-    "@sendgrid/mail": "^7.6.2",
-    "bn.js": "5.1.3",
-    "dotenv": "8.2.0"
+    "@polkadot/api": "~9.14.1",
+    "@polkadot/types": "~9.14.1",
+    "@polkadot/util-crypto": "^10.4.1",
+    "@sendgrid/mail": "^7.7.0",
+    "bn.js": "^5.2.1",
+    "dotenv": "16.0.3",
+    "rxjs": "^7.8.0"
   },
   "scripts": {
     "format:run": "cd $INIT_CWD && prettier --write \"./**/*.{ts,tsx}\"",
     "format:check": "cd $INIT_CWD && prettier --check \"./**/*.{ts,tsx}\"",
-    "onboarding-api": "yarn workspace @centrifuge/onboarding-api start",
-    "onboarding-ui": "yarn workspace @centrifuge/onboarding-ui start",
+    "onboarding-api": "yarn workspace @centrifuge/onboarding-api start:functions",
+    "pinning-api": "yarn workspace @centrifuge/pinning-api start:functions",
     "centrifuge-app": "yarn workspace @centrifuge/centrifuge-app start",
-    "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\" \"yarn centrifuge-app\" -p name -n \"onboarding-api,centrifuge-app\"",
+    "faucet-api": "yarn workspace @centrifuge/faucet-api start",
+    "start": "concurrently --kill-others-on-fail \"yarn onboarding-api\" \"yarn pinning-api\" \"yarn centrifuge-app\" -p name -n \"onboarding-api,pinning-api,centrifuge-app\"",
     "postinstall": "npx husky install"
   },
   "resolutions": {

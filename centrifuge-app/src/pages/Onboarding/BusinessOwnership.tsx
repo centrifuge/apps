@@ -3,12 +3,14 @@ import {
   Button,
   Checkbox,
   DateInput,
+  Divider,
   Flex,
   IconAlertCircle,
   IconCheckCircle,
   IconPlus,
   IconTrash,
   InlineFeedback,
+  Select,
   Shelf,
   Stack,
   Text,
@@ -16,20 +18,16 @@ import {
 } from '@centrifuge/fabric'
 import { useFormik } from 'formik'
 import * as React from 'react'
-import { useMutation } from 'react-query'
 import styled from 'styled-components'
 import { array, boolean, date, object, string } from 'yup'
-import { useAuth } from '../../components/AuthProvider'
 import { ConfirmResendEmailVerificationDialog } from '../../components/Dialogs/ConfirmResendEmailVerificationDialog'
 import { EditOnboardingEmailAddressDialog } from '../../components/Dialogs/EditOnboardingEmailAddressDialog'
 import { useOnboarding } from '../../components/OnboardingProvider'
 import { EntityUser } from '../../types'
+import { formatGeographyCodes } from '../../utils/formatGeographyCodes'
+import { RESIDENCY_COUNTRY_CODES } from './geographyCodes'
+import { useConfirmOwners } from './queries/useConfirmOwners'
 import { StyledInlineFeedback } from './StyledInlineFeedback'
-
-type Props = {
-  nextStep: () => void
-  backStep: () => void
-}
 
 const ClickableText = styled(Text)`
   color: #0000ee;
@@ -52,6 +50,8 @@ const businessOwnershipInput = object({
     object({
       name: string().required(),
       dateOfBirth: date().required().min(new Date(1900, 0, 1)).max(new Date()),
+      countryOfCitizenship: string().required(),
+      countryOfResidency: string().required(),
     })
   ),
   isAccurate: boolean().oneOf([true]),
@@ -117,24 +117,39 @@ const BusinessOwnershipInlineFeedback = ({ isError }: { isError: boolean }) => {
   return null
 }
 
-export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
-  const { authToken } = useAuth()
-  const { onboardingUser, refetchOnboardingUser, pool } = useOnboarding() as {
-    onboardingUser: EntityUser
-    refetchOnboardingUser: () => void
-    pool: {
-      id: string
-      trancheId: string
-      title: string
-    }
-  }
+export const BusinessOwnership = () => {
+  const { onboardingUser, refetchOnboardingUser, previousStep, nextStep } = useOnboarding<EntityUser>()
+
+  const isCompleted = !!onboardingUser?.globalSteps.confirmOwners.completed
+  const isEmailVerified = !!onboardingUser?.globalSteps.verifyEmail.completed
+
+  const formik = useFormik({
+    initialValues: {
+      ultimateBeneficialOwners: onboardingUser?.ultimateBeneficialOwners.length
+        ? onboardingUser?.ultimateBeneficialOwners.map((owner) => ({
+            name: owner.name,
+            dateOfBirth: owner.dateOfBirth,
+            countryOfCitizenship: owner.countryOfCitizenship,
+            countryOfResidency: owner.countryOfResidency,
+          }))
+        : [{ name: '', dateOfBirth: '', countryOfCitizenship: '', countryOfResidency: '' }],
+      isAccurate: !!isCompleted,
+    },
+    onSubmit: (values) => {
+      upsertBusinessOwnership(values.ultimateBeneficialOwners)
+    },
+    validationSchema: businessOwnershipInput,
+    validateOnMount: true,
+  })
+
+  const { mutate: upsertBusinessOwnership, isLoading, isError } = useConfirmOwners()
 
   const onFocus = () => {
     refetchOnboardingUser()
   }
 
   React.useEffect(() => {
-    if (onboardingUser.steps.verifyEmail.completed) {
+    if (isEmailVerified) {
       window.removeEventListener('focus', onFocus)
     } else {
       window.addEventListener('focus', onFocus)
@@ -144,65 +159,7 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
       window.removeEventListener('focus', onFocus)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingUser.steps.verifyEmail.completed])
-
-  const isCompleted = !!onboardingUser?.steps?.confirmOwners.completed
-  const isEmailVerified = !!onboardingUser?.steps?.verifyEmail.completed
-
-  const formik = useFormik({
-    initialValues: {
-      ultimateBeneficialOwners: onboardingUser?.ultimateBeneficialOwners?.length
-        ? onboardingUser.ultimateBeneficialOwners.map((owner) => ({
-            name: owner.name,
-            dateOfBirth: owner.dateOfBirth,
-          }))
-        : [{ name: '', dateOfBirth: '' }],
-      isAccurate: !!isCompleted,
-    },
-    onSubmit: () => {
-      upsertBusinessOwnership()
-    },
-    validationSchema: businessOwnershipInput,
-    validateOnMount: true,
-  })
-
-  const {
-    mutate: upsertBusinessOwnership,
-    isLoading,
-    isError,
-  } = useMutation(
-    async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/confirmOwners`, {
-        method: 'POST',
-        body: JSON.stringify({
-          ultimateBeneficialOwners: formik.values.ultimateBeneficialOwners,
-          poolId: pool.id,
-          trancheId: pool.trancheId,
-        }),
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
-
-      if (response.status !== 200) {
-        throw new Error()
-      }
-
-      const json = await response.json()
-
-      if (!json.steps?.confirmOwners?.completed) {
-        throw new Error()
-      }
-    },
-    {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        nextStep()
-      },
-    }
-  )
+  }, [isEmailVerified])
 
   const removeOwner = (index: number) => {
     if (formik.values.ultimateBeneficialOwners.length === 1) {
@@ -214,6 +171,8 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
             {
               name: '',
               dateOfBirth: '',
+              countryOfCitizenship: '',
+              countryOfResidency: '',
             },
           ],
         },
@@ -241,6 +200,8 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
           {
             name: '',
             dateOfBirth: '',
+            countryOfCitizenship: '',
+            countryOfResidency: '',
           },
         ],
       },
@@ -250,49 +211,78 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
   return (
     <Stack gap={4}>
       <Box>
-        <EmailVerificationInlineFeedback
-          email={onboardingUser.email as string}
-          completed={onboardingUser.steps.verifyEmail.completed}
-        />
+        <EmailVerificationInlineFeedback email={onboardingUser?.email as string} completed={isEmailVerified} />
         <BusinessOwnershipInlineFeedback isError={isError} />
         <Text fontSize={5}>Confirm business ownership</Text>
         <Text fontSize={2}>
           Add the names of any individuals who own or control more than than 25% of the company. If no person does,
           please add the largest shareholder.
         </Text>
-        <Stack gap={2} py={6} width="493px">
+        <Stack gap={8} py={3} width="493px">
           {formik.values.ultimateBeneficialOwners.map((owner, index) => (
-            <Shelf key={index} gap="20px">
+            <Stack gap={2}>
+              <Shelf justifyContent="space-between">
+                <Text>Person {index + 1}</Text>
+
+                {!isCompleted && (
+                  <Button variant="secondary" onClick={() => removeOwner(index)} disabled={isLoading}>
+                    <Shelf alignItems="center" gap="4px">
+                      <IconTrash size={16} />
+                    </Shelf>
+                  </Button>
+                )}
+              </Shelf>
               <TextInput
                 id={`ultimateBeneficialOwners[${index}].name`}
                 value={owner.name}
-                label="Name*"
+                label="Full Name"
                 onChange={formik.handleChange}
                 disabled={isLoading || isCompleted}
               />
               <DateInput
                 id={`ultimateBeneficialOwners[${index}].dateOfBirth`}
                 value={owner.dateOfBirth}
-                label="Date of Birth*"
+                label="Date of Birth"
                 onChange={formik.handleChange}
                 disabled={isLoading || isCompleted}
               />
-              <Button variant="secondary" onClick={() => removeOwner(index)} disabled={isLoading || isCompleted}>
-                <Flex>
-                  <IconTrash size="20px" />
-                </Flex>
-              </Button>
-            </Shelf>
+              <Select
+                name="countryOfCitizenship"
+                label="Country of Citizenship"
+                placeholder="Select a country"
+                options={formatGeographyCodes(RESIDENCY_COUNTRY_CODES)}
+                onChange={(event) =>
+                  formik.setFieldValue(`ultimateBeneficialOwners[${index}].countryOfCitizenship`, event.target.value)
+                }
+                value={formik.values.ultimateBeneficialOwners[index].countryOfCitizenship}
+                disabled={isLoading || isCompleted}
+              />
+              <Select
+                name="countryOfResidency"
+                label="Country of Residency"
+                placeholder="Select a country"
+                options={formatGeographyCodes(RESIDENCY_COUNTRY_CODES)}
+                onChange={(event) =>
+                  formik.setFieldValue(`ultimateBeneficialOwners[${index}].countryOfResidency`, event.target.value)
+                }
+                value={formik.values.ultimateBeneficialOwners[index].countryOfResidency}
+                disabled={isLoading || isCompleted}
+              />
+            </Stack>
           ))}
-          {formik.values.ultimateBeneficialOwners.length <= 2 && (
-            <Button variant="secondary" onClick={() => addOwner()} disabled={isLoading || isCompleted}>
-              <Flex>
-                <IconPlus />
-              </Flex>
-            </Button>
-          )}
         </Stack>
-        <Box>
+        <Divider />
+        {formik.values.ultimateBeneficialOwners.length <= 2 && !isCompleted && (
+          <Box pt={3}>
+            <Button variant="secondary" onClick={() => addOwner()} disabled={isLoading}>
+              <Shelf alignItems="center" gap="4px">
+                <IconPlus size={16} />
+                <Text>Add Beneficial Owner</Text>
+              </Shelf>
+            </Button>
+          </Box>
+        )}
+        <Box pt={5}>
           <Checkbox
             id="isAccurate"
             disabled={isLoading || isCompleted}
@@ -301,12 +291,17 @@ export const BusinessOwnership = ({ backStep, nextStep }: Props) => {
             }}
             checked={formik.values.isAccurate}
             onChange={formik.handleChange}
-            label="I confim that all the information provided is true and accurate, and I have identified all the benefical owners with more than 25% ownership."
+            label={
+              <Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>
+                I confim that all the information provided is true and accurate, and I have identified all the benefical
+                owners with more than 25% ownership.
+              </Text>
+            }
           />
         </Box>
       </Box>
       <Shelf gap={2}>
-        <Button onClick={() => backStep()} disabled={isLoading} variant="secondary">
+        <Button onClick={() => previousStep()} disabled={isLoading} variant="secondary">
           Back
         </Button>
         <Button

@@ -9,7 +9,7 @@ import { usePoolMetadata, usePools } from '../../utils/usePools'
  */
 export function useStoredIssuer() {
   const allPools = usePools()
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
 
   const pools = React.useMemo(() => {

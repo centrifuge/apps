@@ -14,7 +14,7 @@ export const PodAuthSection: React.FC<Props> = ({
   message = 'This information is private',
   buttonLabel = 'Authenticate',
 }) => {
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
   const { isLoggedIn, isPodLoading, loginError, login } = usePod(podUrl)
 
   return isLoggedIn ? null : (

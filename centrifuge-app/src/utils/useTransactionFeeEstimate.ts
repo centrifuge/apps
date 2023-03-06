@@ -9,7 +9,7 @@ type TxOptions = Pick<TransactionOptions, 'paymentInfo'>
 export function useTransactionFeeEstimate<T extends Array<any>>(
   transactionCallback: (centrifuge: Centrifuge) => (args: T, options: TransactionOptions) => Observable<any>
 ) {
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
   const cent = useCentrifuge()
   const [txFee, setTxFee] = React.useState<number | undefined>(undefined)
 

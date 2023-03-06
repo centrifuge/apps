@@ -27,17 +27,16 @@
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
-    "@polkadot/api": "^9.7.1",
+    "@ethersproject/contracts": "^5.6.0",
+    "@ethersproject/providers": "^5.6.0",
+    "@ethersproject/units": "^5.6.0",
+    "@polkadot/api": "~9.14.1",
     "@polkadot/keyring": "^10.1.11",
-    "@polkadot/types": "^9.7.1",
-    "@polkadot/util-crypto": "^10.1.11",
-    "@types/bn.js": "^5",
-    "bn.js": "^5.2.0",
+    "@polkadot/types": "~9.14.1",
     "clp-wasm": "^0.0.15",
     "decimal.js-light": "^2.5.1",
     "isomorphic-fetch": "^3.0.0",
-    "jw3t": "^1.0.8",
-    "rxjs": "^7.4.0"
+    "jw3t": "^1.0.8"
   },
   "devDependencies": {
     "@types/isomorphic-fetch": "^0.0.36",
@@ -45,7 +44,6 @@
     "@types/node": "^16.11.12",
     "@typescript-eslint/eslint-plugin": "^4.32.0",
     "@typescript-eslint/parser": "^4.32.0",
-    "esbuild": "^0.14.2",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",

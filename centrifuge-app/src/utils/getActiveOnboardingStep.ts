@@ -45,18 +45,18 @@ const INDIVIDUAL_NON_US_STEPS = {
 
 export const getActiveOnboardingStep = (onboardingUser: OnboardingUser, poolId: string, trancheId: string) => {
   // user does not exist
-  if (!Object.keys(onboardingUser).length) return 2
+  if (!onboardingUser) return 2
 
   const { investorType, countryOfCitizenship } = onboardingUser
-  const { verifyIdentity, verifyTaxInfo, verifyAccreditation } = onboardingUser.steps
+  const { verifyIdentity, verifyTaxInfo, verifyAccreditation } = onboardingUser.globalSteps
 
   const hasSignedAgreement =
-    onboardingUser.steps.signAgreements[poolId][trancheId].signedDocument &&
-    !!onboardingUser.steps.signAgreements[poolId][trancheId].transactionInfo.extrinsicHash
+    onboardingUser.poolSteps[poolId][trancheId].signAgreement.completed &&
+    !!onboardingUser.poolSteps[poolId][trancheId].signAgreement.transactionInfo.extrinsicHash
 
   if (investorType === 'entity') {
     const { jurisdictionCode } = onboardingUser
-    const { confirmOwners, verifyBusiness } = onboardingUser.steps
+    const { confirmOwners, verifyBusiness } = onboardingUser.globalSteps
 
     if (jurisdictionCode.startsWith('us')) {
       if (hasSignedAgreement) return ENTITY_US_STEPS.COMPLETE

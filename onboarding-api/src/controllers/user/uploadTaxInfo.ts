@@ -1,16 +1,9 @@
 import { Request, Response } from 'express'
 import { fileTypeFromBuffer } from 'file-type'
-import { InferType, object, string } from 'yup'
 import { OnboardingUser, validateAndWriteToFirestore, writeToOnboardingBucket } from '../../database'
 import { fetchUser } from '../../utils/fetchUser'
 import { HttpsError } from '../../utils/httpsError'
 import { Subset } from '../../utils/types'
-import { validateInput } from '../../utils/validateInput'
-
-const uploadTaxInfoInput = object({
-  poolId: string().required(),
-  trancheId: string().required(),
-})
 
 const validateTaxInfoFile = async (file: Buffer) => {
   if (file.length > 1024 * 1024) {
@@ -27,29 +20,19 @@ const validateTaxInfoFile = async (file: Buffer) => {
   }
 }
 
-export const uploadTaxInfoController = async (
-  req: Request<{}, {}, Buffer, InferType<typeof uploadTaxInfoInput>>,
-  res: Response
-) => {
+export const uploadTaxInfoController = async (req: Request, res: Response) => {
   try {
     await validateTaxInfoFile(req.body)
-    await validateInput(req.query, uploadTaxInfoInput)
 
-    const {
-      query: { poolId, trancheId },
-      walletAddress,
-    } = req
+    const { walletAddress } = req
 
     const user = await fetchUser(walletAddress)
 
-    await writeToOnboardingBucket(
-      Uint8Array.from(req.body),
-      `tax-information/${walletAddress}/${poolId}/${trancheId}.pdf`
-    )
+    await writeToOnboardingBucket(Uint8Array.from(req.body), `tax-information/${walletAddress}.pdf`)
 
     const updatedUser: Subset<OnboardingUser> = {
-      steps: {
-        ...user.steps,
+      globalSteps: {
+        ...user.globalSteps,
         verifyTaxInfo: {
           completed: true,
           timeStamp: new Date().toISOString(),
@@ -57,7 +40,7 @@ export const uploadTaxInfoController = async (
       },
     }
 
-    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['steps'])
+    await validateAndWriteToFirestore(walletAddress, updatedUser, 'entity', ['globalSteps'])
 
     const freshUserData = await fetchUser(walletAddress)
     return res.status(200).send({ ...freshUserData })

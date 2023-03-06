@@ -1,89 +1,16 @@
-import { useWallet } from '@centrifuge/centrifuge-react'
 import { AnchorButton, Box, Button, FileUpload, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useMutation, useQuery } from 'react-query'
-import { useAuth } from '../../components/AuthProvider'
 import { useOnboarding } from '../../components/OnboardingProvider'
+import { useTaxInfo } from './queries/useTaxInfo'
+import { useUploadTaxInfo } from './queries/useUploadTaxInfo'
 
-type Props = {
-  nextStep: () => void
-  backStep: () => void
-}
-
-export const TaxInfo = ({ backStep, nextStep }: Props) => {
-  const { selectedAccount } = useWallet()
-  const { refetchOnboardingUser, onboardingUser, pool } = useOnboarding()
+export const TaxInfo = () => {
+  const { onboardingUser, previousStep, nextStep } = useOnboarding()
   const [taxInfo, setTaxInfo] = React.useState<File | null>(null)
-  const { authToken } = useAuth()
+  const { data: taxInfoData } = useTaxInfo()
+  const { mutate: uploadTaxInfo, isLoading } = useUploadTaxInfo(taxInfo)
 
-  const isCompleted = !!onboardingUser?.steps?.verifyTaxInfo?.completed
-
-  const { data: taxInfoData } = useQuery(
-    ['tax info', selectedAccount?.address],
-    async () => {
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/getTaxInfo?poolId=${pool.id}&trancheId=${pool.trancheId}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        }
-      )
-
-      const json = await response.json()
-
-      const documentBlob = new Blob([Uint8Array.from(json.taxInfo.data).buffer], {
-        type: 'application/pdf',
-      })
-
-      return URL.createObjectURL(documentBlob)
-    },
-    {
-      refetchOnWindowFocus: false,
-      enabled: !!onboardingUser?.steps?.verifyTaxInfo?.completed,
-    }
-  )
-
-  const { mutate: uploadTaxInfo, isLoading } = useMutation(
-    async () => {
-      if (taxInfo) {
-        const formData = new FormData()
-        formData.append('taxInfo', taxInfo)
-
-        const response = await fetch(
-          `${import.meta.env.REACT_APP_ONBOARDING_API_URL}/uploadTaxInfo?poolId=${pool.id}&trancheId=${pool.trancheId}`,
-          {
-            method: 'POST',
-            body: formData,
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-              'Content-Type': 'multipart/form-data',
-            },
-            credentials: 'include',
-          }
-        )
-
-        if (response.status !== 200) {
-          throw new Error()
-        }
-
-        const json = await response.json()
-
-        if (!json.steps?.verifyTaxInfo?.completed) {
-          throw new Error()
-        }
-      }
-    },
-    {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        nextStep()
-      },
-    }
-  )
+  const isCompleted = !!onboardingUser?.globalSteps?.verifyTaxInfo?.completed
 
   const validateFileUpload = (file: File) => {
     if (file.type !== 'application/pdf') {
@@ -96,14 +23,14 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
   }
 
   const taxForm = React.useMemo(() => {
-    if (onboardingUser.investorType === 'individual' && onboardingUser.countryOfCitizenship !== 'us') {
+    if (onboardingUser?.investorType === 'individual' && onboardingUser?.countryOfCitizenship !== 'us') {
       return {
         type: 'W-8BEN',
         url: 'https://www.irs.gov/pub/irs-pdf/fw8ben.pdf',
       }
     }
 
-    if (onboardingUser.investorType === 'entity' && !onboardingUser.jurisdictionCode.startsWith('us')) {
+    if (onboardingUser?.investorType === 'entity' && !onboardingUser?.jurisdictionCode.startsWith('us')) {
       return {
         type: 'W-8BEN-E',
         url: 'https://www.irs.gov/pub/irs-pdf/fw8bene.pdf',
@@ -144,7 +71,7 @@ export const TaxInfo = ({ backStep, nextStep }: Props) => {
             />
           )}
           <Shelf gap="2">
-            <Button onClick={() => backStep()} variant="secondary" disabled={isLoading}>
+            <Button onClick={() => previousStep()} variant="secondary" disabled={isLoading}>
               Back
             </Button>
             <Button
