@@ -87,7 +87,7 @@ export const IssuerInput: React.FC<Props> = ({ waitingForStoredIssuer = false })
         placeholder="https://..."
         validate={validate.forum}
       />
-      <FieldWithErrorMessage name="email" as={TextInput} label="Email" placeholder="" validate={validate.email} />
+      <FieldWithErrorMessage name="email" as={TextInput} label="Email*" placeholder="" validate={validate.email} />
 
       <Box gridColumn={['span 1', 'span 2']}>
         <CustomDetails />
