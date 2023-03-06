@@ -68,7 +68,11 @@ export const SignSubscriptionAgreement = ({ signedAgreementUrl, isSignedAgreemen
         <Checkbox
           checked={isCompleted || isAgreed}
           onChange={() => setIsAgreed((current) => !current)}
-          label={<Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>I agree to the agreement</Text>}
+          label={
+            <Text style={{ cursor: 'pointer', paddingLeft: '6px' }}>
+              I hereby agree to the terms of the subscription agreement
+            </Text>
+          }
           disabled={isSigningTransaction || isSending || isCompleted}
         />
       </Content>

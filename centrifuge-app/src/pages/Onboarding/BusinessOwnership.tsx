@@ -251,7 +251,7 @@ export const BusinessOwnership = () => {
             <Button variant="secondary" onClick={() => addOwner()} disabled={isLoading}>
               <Shelf alignItems="center" gap="4px">
                 <IconPlus size={16} />
-                <Text>Add Beneficial Owner</Text>
+                <Text>Add beneficial owner</Text>
               </Shelf>
             </Button>
           </Box>

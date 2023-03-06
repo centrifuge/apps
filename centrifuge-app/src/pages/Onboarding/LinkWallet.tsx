@@ -21,8 +21,7 @@ export const LinkWallet = () => {
       <Content>
         <ContentHeader
           title="Connect and link your wallet"
-          body="To start, you need to connect your wallet and sign a message to verify the wallet. You also need to agree to
-          the data sharing agreement to continue with the identity verification process."
+          body="To start, you need to connect your wallet in the top right corner and sign a message to verify the wallet. You also need to agree to the data sharing agreement to continue with the identity verification process."
         />
 
         <Shelf gap={1}>
@@ -64,7 +63,7 @@ export const LinkWallet = () => {
             disabled={!selectedAccount || !isAgreedToDataSharingAgreement}
             onClick={() => login(AUTHORIZED_ONBOARDING_PROXY_TYPES)}
           >
-            Link your wallet
+            Continue
           </Button>
         )}
       </ActionBar>
