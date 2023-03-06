@@ -25,7 +25,7 @@ const SEC_PER_DAY = 24 * 60 * 60
 
 export const FinanceForm: React.VFC<{ loan: LoanType }> = ({ loan }) => {
   const pool = usePool(loan.poolId)
-  const address = useAddress()
+  const address = useAddress('substrate')
   const balances = useBalances(address)
   const balance = balances ? findBalance(balances.currencies, pool.currency.key)!.balance.toDecimal() : Dec(0)
   const { current: availableFinancing, initial: initialCeiling } = useAvailableFinancing(loan.poolId, loan.id)

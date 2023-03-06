@@ -25,7 +25,7 @@ export const PoolDetailLiquidityTab: React.FC = () => {
       sidebar={
         <Stack gap={2}>
           {isLiquidityAdmin ? <MaxReserveForm poolId={poolId} /> : true}
-          <PoolDetailSideBar selectedToken={null} setSelectedToken={() => {}} />
+          <PoolDetailSideBar />
         </Stack>
       }
     >

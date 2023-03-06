@@ -59,7 +59,9 @@ export const Select: React.FC<SelectProps> = ({
         outlined={outlined}
         inputElement={
           <StyledSelect disabled={disabled} {...rest}>
-            {placeholder && <option value="">{placeholder}</option>}
+            <option value="" disabled>
+              {placeholder}
+            </option>
             {options.map((option, index) => (
               <option key={`${index}${option.value}`} value={option.value}>
                 {option.label}

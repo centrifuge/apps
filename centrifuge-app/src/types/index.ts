@@ -55,6 +55,27 @@ export type InvestorTypes = 'individual' | 'entity'
 export type UltimateBeneficialOwner = {
   name: string
   dateOfBirth: string
+  countryOfCitizenship: string
+  countryOfResidency: string
+}
+
+type PoolOnboardingSteps = {
+  [poolId: string]: {
+    [trancheId: string]: {
+      signAgreement: {
+        completed: boolean
+        timeStamp: string | null
+        transactionInfo: {
+          extrinsicHash: string | null
+          blockNumber: string | null
+        }
+      }
+      status: {
+        status: 'pending' | 'approved' | 'rejected' | null
+        timeStamp: string | null
+      }
+    }
+  }
 }
 
 type IndividualUserSteps = {
@@ -70,27 +91,16 @@ type IndividualUserSteps = {
     completed: boolean
     timeStamp: string | null
   }
-  signAgreements: {
-    [poolId: string]: {
-      [trancheId: string]: {
-        transactionInfo: {
-          extrinsicHash: string | null
-          blockNumber: string | null
-        }
-        signedDocument: boolean
-      }
-    }
+  verifyEmail: {
+    completed: boolean
+    timeStamp: string | null
   }
 }
 
 export interface EntityOnboardingSteps extends IndividualUserSteps {
   verifyBusiness: {
     completed: boolean
-    timeStamp: string | null
-  }
-  verifyEmail: {
-    completed: boolean
-    timeStamp: string | null
+    timeStamp: string
   }
   confirmOwners: {
     completed: boolean
@@ -102,40 +112,28 @@ export type EntityUser = {
   investorType: 'entity'
   walletAddress: string
   businessName: string
-  email: string | null
+  email: string
   incorporationDate: string
   jurisdictionCode: string
-  registrationNumber: number
+  registrationNumber: string
   ultimateBeneficialOwners: UltimateBeneficialOwner[]
-  steps: EntityOnboardingSteps
   name: string | null
   dateOfBirth: string | null
   countryOfCitizenship: string | null
-  onboardingStatus: {
-    [poolId: string]: {
-      [trancheId: string]: {
-        status: 'pending' | 'approved' | 'rejected' | null
-        timeStamp: string | null
-      }
-    }
-  }
+  countryOfResidency: string | null
+  globalSteps: EntityOnboardingSteps
+  poolSteps: PoolOnboardingSteps
 }
 
 type IndividualUser = {
   investorType: 'individual'
   walletAddress: string
-  name: string | null
-  dateOfBirth: string | null
-  countryOfCitizenship: string | null
-  steps: IndividualUserSteps
-  onboardingStatus: {
-    [poolId: string]: {
-      [trancheId: string]: {
-        status: 'pending' | 'approved' | 'rejected' | null
-        timeStamp: string | null
-      }
-    }
-  }
+  name: string
+  dateOfBirth: string
+  countryOfCitizenship: string
+  countryOfResidency: string
+  globalSteps: IndividualUserSteps
+  poolSteps: PoolOnboardingSteps
 }
 
 export type OnboardingUser = IndividualUser | EntityUser

@@ -9,7 +9,7 @@ type EnrichedStepProps = {
   isFinal?: boolean
   isActive?: boolean
   count?: number
-  setActiveStep?: Function | null
+  setActiveStep?: React.Dispatch<number> | null
   maxStep?: number
 }
 
@@ -20,19 +20,18 @@ type StepProps = {
 
 type StepperProps = {
   activeStep: number
-  setActiveStep: Function | null
+  setActiveStep: React.Dispatch<number> | null
   children: React.ReactNode
 }
 
 const getStepColor = (isActive: boolean, empty: boolean) => {
   if (isActive) {
     return 'textPrimary'
-  } else {
-    if (empty) {
-      return 'borderPrimary'
-    }
-    return 'transparent'
   }
+  if (empty) {
+    return 'borderPrimary'
+  }
+  return 'transparent'
 }
 
 export const Step = (props: StepProps & EnrichedStepProps) => {

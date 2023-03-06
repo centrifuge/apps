@@ -61,7 +61,7 @@ Returns the entity user object and sets the step `verifyBusiness` to true on suc
 ```js
 {
   // ...
-	"steps": {
+	"globalSteps": {
 		// ...
 		"verifyBusiness": {
 			"completed": true,
@@ -100,7 +100,7 @@ Sets the ultimate beneficial owners for the entity.
 ```js
 {
   // ...
-	"steps": {
+	"globalSteps": {
 		// ...
 		"confirmOwners": {
 			"completed": true,
@@ -162,7 +162,7 @@ Sets the ultimate beneficial owners for the entity.
 ```js
 {
   // ...
-	"steps": {
+	"globalSteps": {
 		// ...
 		"verifyIdentity": {
 			"completed": true,
@@ -200,7 +200,7 @@ Sets the ultimate beneficial owners for the entity.
   ],
   "incorporationDate": "2021-04-11",
   "dateOfBirth": "2021-04-11",
-  "steps": {
+  "globalSteps": {
     "verifyIdentity": {
       "timeStamp": "2023-01-23T20:57:44.140Z",
       "completed": true
@@ -217,11 +217,18 @@ Sets the ultimate beneficial owners for the entity.
       "completed": true,
       "timeStamp": "2023-01-23T20:56:52.734Z"
     },
-    "signAgreements": {
-      "123abc": {
-        "0x123456": {
-          "timeStamp": null,
-          "completed": false
+    "poolSteps": {
+        "123abc": {
+          "0x123456": {
+            "signAgreement": {
+              "timeStamp": null,
+              "completed": false,
+              "transactionInfo": {
+                "blockNumber": null,
+                "extrinsicHash": null
+              }
+            }
+          }
         }
       }
     }
@@ -246,19 +253,21 @@ Sets the ultimate beneficial owners for the entity.
 
 ```js
 {
-  // ...
-  "steps": {
     // ...
-    "signAgreements": {
+    "poolSteps": {
       [poolId]: {
         [trancheId]: {
-          "completed": true,
-          "timeStamp": "2023-01-23T20:56:50.039Z"
+          "signAgreement" {
+            "completed": true,
+            "timeStamp": "2023-01-23T20:56:50.039Z",
+            "transactionInfo": {
+                "blockNumber": null,
+                "extrinsicHash": null
+              }
+          }
         }
       }
     }
-  },
-  // ...
 }
 ```
 
@@ -303,3 +312,9 @@ Sets the ultimate beneficial owners for the entity.
   signedAgreement: Buffer
 }
 ```
+
+## Whitelisting Investors
+
+Once onboarding is complete a final tx will be signed by the server which will whtielist investors. For this, a pure proxy must be created and sufficiently funded for each chain environment. The pure proxy only has to be created once and can be used for all pools.
+
+After creating the pure proxy, it must then be given `MemberListAdmin` permissions for each pool by the address with `PoolAdmin` permissions.

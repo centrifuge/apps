@@ -14,7 +14,7 @@ export const Default = () => {
   const totalSteps = 3
   const [activeStep, setActiveStep] = React.useState(1)
 
-  const handleBackStep = () => {
+  const handlePreviousStep = () => {
     if (activeStep !== 1) {
       setActiveStep((prev) => prev - 1)
     }
@@ -34,7 +34,7 @@ export const Default = () => {
         <Step label="Step 3" />
       </Stepper>
       <Shelf gap="12px">
-        <Button onClick={() => handleBackStep()} disabled={activeStep === 1}>
+        <Button onClick={() => handlePreviousStep()} disabled={activeStep === 1}>
           Back Step
         </Button>
         <Button onClick={() => handleNextStep()} disabled={activeStep === totalSteps}>

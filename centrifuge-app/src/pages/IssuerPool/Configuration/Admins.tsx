@@ -30,7 +30,7 @@ export const Admins: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
   const poolPermissions = usePoolPermissions(poolId)
   const [isEditing, setIsEditing] = React.useState(false)
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
   const me = selectedAccount?.address && encodeAddress(selectedAccount?.address)
 
   const initialValues: PoolMetadataInput = React.useMemo(

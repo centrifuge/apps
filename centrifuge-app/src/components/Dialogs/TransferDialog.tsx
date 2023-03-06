@@ -19,7 +19,7 @@ const TRANSFER_FEE_ESTIMATE = 0.1
 export const TransferDialog: React.FC<Props> = ({ open, onClose, collectionId, nftId }) => {
   const [address, setAddress] = React.useState('')
   const [touched, setTouched] = React.useState(false)
-  const connectedAddress = useAddress()
+  const connectedAddress = useAddress('substrate')
   const balance = useBalance()
 
   const isConnected = !!connectedAddress

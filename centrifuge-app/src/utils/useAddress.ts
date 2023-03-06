@@ -1,7 +1,7 @@
-import { useWallet } from '@centrifuge/centrifuge-react'
+import { useAddress as useWalletAddress } from '@centrifuge/centrifuge-react'
 import { useDebugFlags } from '../components/DebugFlags'
 
-export function useAddress() {
-  const { selectedAccount, proxy } = useWallet()
-  return (useDebugFlags().address as string) || proxy?.delegator || selectedAccount?.address
+export function useAddress(typeOverride?: 'substrate' | 'evm') {
+  const address = useWalletAddress(typeOverride)
+  return (useDebugFlags().address as string) || address
 }

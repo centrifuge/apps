@@ -1,11 +1,14 @@
 import { UserProvidedConfig } from '@centrifuge/centrifuge-js'
 import {
   CentrifugeProvider,
+  EvmChains,
   TransactionProvider,
   TransactionToasts,
-  WalletProvider,
+  WalletProvider
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
+import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
+import goerliLogo from '@centrifuge/fabric/assets/logos/goerli.svg'
 import * as React from 'react'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from 'react-query'
@@ -29,7 +32,7 @@ import { UpdateInvestorStatus } from '../pages/Onboarding/UpdateInvestorStatus'
 import { PoolDetailPage } from '../pages/Pool'
 import { PoolsPage } from '../pages/Pools'
 import { TokenOverviewPage } from '../pages/Tokens'
-import { fetchLambda } from '../utils/fetchLambda'
+import { pinToApi } from '../utils/pinToApi'
 import { AuthProvider } from './AuthProvider'
 import { DebugFlags, initialFlagsState } from './DebugFlags'
 import { DemoBanner } from './DemoBanner'
@@ -49,26 +52,45 @@ const queryClient = new QueryClient({
 
 const centConfig: UserProvidedConfig = {
   network: config.network,
-  kusamaWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL,
-  polkadotWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL,
-  altairWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL,
-  centrifugeWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL,
+  kusamaWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL as string,
+  polkadotWsUrl: import.meta.env.REACT_APP_RELAY_WSS_URL as string,
+  altairWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL as string,
+  centrifugeWsUrl: import.meta.env.REACT_APP_COLLATOR_WSS_URL as string,
   printExtrinsics: import.meta.env.NODE_ENV === 'development',
-  centrifugeSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL,
-  altairSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL,
-  metadataHost: import.meta.env.REACT_APP_IPFS_GATEWAY,
+  centrifugeSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,
+  altairSubqueryUrl: import.meta.env.REACT_APP_SUBQUERY_URL as string,
+  metadataHost: import.meta.env.REACT_APP_IPFS_GATEWAY as string,
   pinFile: (b64URI) =>
-    fetchLambda('pinFile', {
+    pinToApi('pinFile', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ uri: b64URI }),
     }),
   unpinFile: (hash) =>
-    fetchLambda('unpinFile', {
+    pinToApi('unpinFile', {
       method: 'DELETE',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ hash }),
     }),
+  pinJson: (json) =>
+    pinToApi('pinJson', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ json }),
+    }),
+}
+
+const infuraKey = import.meta.env.REACT_APP_INFURA_KEY
+
+const evmChains: EvmChains = {
+  1: {
+    urls: [`https://mainnet.infura.io/v3/${infuraKey}`],
+    iconUrl: ethereumLogo,
+  },
+  5: {
+    urls: [`https://goerli.infura.io/v3/${infuraKey}`],
+    iconUrl: goerliLogo,
+  },
 }
 
 export const Root: React.VFC = () => {
@@ -93,12 +115,12 @@ export const Root: React.VFC = () => {
           <FabricGlobalStyle />
           <CentrifugeProvider config={centConfig}>
             <DemoBanner />
-            <WalletProvider>
+            <WalletProvider evmChains={evmChains} subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}>
               <PodAuthProvider>
                 <AuthProvider>
                   <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
                     <TransactionProvider>
-                      <TransactionToasts subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL} />
+                      <TransactionToasts />
                       <Router>
                         <LoadBoundary>
                           <Routes />

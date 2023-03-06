@@ -136,7 +136,7 @@ const PoolIcon: React.FC<{ icon?: File | null; children: string }> = ({ children
 }
 
 const CreatePoolForm: React.VFC = () => {
-  const address = useAddress()
+  const address = useAddress('substrate')
   const centrifuge = useCentrifuge()
   const currencies = usePoolCurrencies()
   const pools = usePools()
@@ -306,7 +306,7 @@ const CreatePoolForm: React.VFC = () => {
         .getEvents()
         .pipe(
           filter(({ api, events }) => {
-            const event = events.find(({ event }) => api.events.democracy.PreimageNoted.is(event))
+            const event = events.find(({ event }) => api.events.preimage.PreimageNoted.is(event))
             const parsedEvent = event?.toJSON() as any
             // the events api returns a few events for the event PreimageNoted where the data looks different everytime
             // when data is a tuple and the length is 3, it may be safe to extract the first value as the preimage hash

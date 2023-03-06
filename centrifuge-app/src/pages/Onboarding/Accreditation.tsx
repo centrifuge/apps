@@ -1,49 +1,15 @@
 import { Box, Button, Checkbox, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
-import { useMutation } from 'react-query'
-import { useAuth } from '../../components/AuthProvider'
 import { useOnboarding } from '../../components/OnboardingProvider'
+import { useVerifyAccreditation } from './queries/useVerifyAccreditation'
 
-type Props = {
-  nextStep: () => void
-  backStep: () => void
-}
-
-export const Accreditation = ({ backStep, nextStep }: Props) => {
+export const Accreditation = () => {
   const [isAccredited, setIsAccredited] = React.useState(false)
-  const { refetchOnboardingUser, onboardingUser } = useOnboarding()
-  const { authToken } = useAuth()
+  const { onboardingUser, previousStep, nextStep } = useOnboarding()
 
-  const isCompleted = !!onboardingUser?.steps?.verifyAccreditation?.completed
+  const isCompleted = !!onboardingUser?.globalSteps?.verifyAccreditation?.completed
 
-  const { mutate: verifyAccreditation, isLoading } = useMutation(
-    async () => {
-      const response = await fetch(`${import.meta.env.REACT_APP_ONBOARDING_API_URL}/verifyAccreditation`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      })
-
-      if (response.status !== 200) {
-        throw new Error()
-      }
-
-      const json = await response.json()
-
-      if (!json.steps?.verifyAccreditation?.completed) {
-        throw new Error()
-      }
-    },
-    {
-      onSuccess: () => {
-        refetchOnboardingUser()
-        nextStep()
-      },
-    }
-  )
+  const { mutate: verifyAccreditation, isLoading } = useVerifyAccreditation()
 
   return (
     <Stack gap={4}>
@@ -76,11 +42,13 @@ export const Accreditation = ({ backStep, nextStep }: Props) => {
         }}
         checked={isCompleted || isAccredited}
         onChange={() => setIsAccredited((current) => !current)}
-        label={<Text style={{ cursor: 'pointer' }}>I confirm that I am an accredited investor</Text>}
+        label={
+          <Text style={{ cursor: 'pointer', paddingLeft: '12px' }}>I confirm that I am an accredited investor</Text>
+        }
         disabled={isCompleted || isLoading}
       />
       <Shelf gap="2">
-        <Button onClick={() => backStep()} variant="secondary" disabled={isLoading}>
+        <Button onClick={() => previousStep()} variant="secondary" disabled={isLoading}>
           Back
         </Button>
         <Button

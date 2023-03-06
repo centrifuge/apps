@@ -39,7 +39,7 @@ export const IssuerPoolInvestorsPage: React.FC = () => {
 
 const IssuerPoolInvestors: React.FC = () => {
   const { pid: poolId } = useParams<{ pid: string }>()
-  const address = useAddress()
+  const address = useAddress('substrate')
   const permissions = usePermissions(address)
   const canEditInvestors = address && permissions?.pools[poolId]?.roles.includes('MemberListAdmin')
 
@@ -70,11 +70,11 @@ export const Investors: React.FC = () => {
   function toggleAllowed(trancheId: string) {
     if (!validAddress) return
     const isAllowed = allowedTranches.includes(trancheId)
-    const TenYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
+    const OneHundredYearsFromNow = Math.floor(Date.now() / 1000 + 10 * 365 * 24 * 60 * 60)
     const SevenDaysFromNow = Math.floor((Date.now() + SevenDaysMs) / 1000)
 
     if (isAllowed) {
-      execute([poolId, [], [[validAddress, { TrancheInvestor: [trancheId, TenYearsFromNow] }]]])
+      execute([poolId, [], [[validAddress, { TrancheInvestor: [trancheId, OneHundredYearsFromNow] }]]])
     } else {
       execute([poolId, [[validAddress, { TrancheInvestor: [trancheId, SevenDaysFromNow] }]], []])
     }

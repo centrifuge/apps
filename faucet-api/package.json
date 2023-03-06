@@ -7,10 +7,10 @@
     "lint": "eslint src/**/*.ts",
     "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --minify",
     "start:types": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --watch",
-    "start:functions": "npx functions-framework --target=faucet --signature-type=http --env-vars-file .env.yaml",
+    "start:functions": "npx functions-framework --target=faucet --signature-type=http --port=8081",
     "develop": "run-p -l start:functions start:types",
-    "deploy:demo": "gcloud functions deploy faucetDemo --region=us-central1 --source=dist --project=peak-vista-185616 --trigger-http --runtime=nodejs16 --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com --allow-unauthenticated --entry-point=faucetDemo",
-    "deploy:dev": "gcloud functions deploy faucetDev --region=us-central1 --source=dist --project=peak-vista-185616 --trigger-http --runtime=nodejs16 --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com --allow-unauthenticated --entry-point=faucetDev --env-vars-file .env.yaml "
+    "deploy:demo": "gcloud functions deploy faucet --region=us-central1 --source=dist --project=peak-vista-185616 --trigger-http --runtime=nodejs16 --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com --allow-unauthenticated --entry-point=faucetDemo",
+    "deploy:dev": "gcloud functions deploy faucet --region=us-central1 --source=dist --project=peak-vista-185616 --trigger-http --runtime=nodejs16 --service-account=functions-firestore@peak-vista-185616.iam.gserviceaccount.com --allow-unauthenticated --entry-point=faucetDev --env-vars-file .env.yaml "
   },
   "keywords": [],
   "author": "",
@@ -18,17 +18,15 @@
   "dependencies": {
     "@google-cloud/firestore": "^6.0.0",
     "@google-cloud/functions-framework": "^3.1.2",
-    "@polkadot/api": "^9.3.3",
+    "@polkadot/api": "~9.14.1",
     "@polkadot/keyring": "^10.1.7",
-    "bn.js": "^5.2.1",
-    "dotenv": "^16.0.2",
-    "esbuild": "^0.15.8",
-    "esbuild-node-externals": "^1.5.0"
+    "bn.js": "^5.2.1"
   },
   "devDependencies": {
     "@types/bn.js": "^5",
     "@types/eslint": "^8",
     "@types/node": "^18.7.16",
+    "esbuild": "^0.15.8",
     "eslint": "^8.23.1",
     "npm-run-all": "^4.1.5",
     "typescript": "^4.8.3"

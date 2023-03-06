@@ -1,6 +1,6 @@
 import * as jwt from 'jsonwebtoken'
 import { sendEmail, templateIds } from '.'
-import { getPoolById } from '../utils/getPoolById'
+import { getPoolById } from '../utils/centrifuge'
 
 export type UpdateInvestorStatusPayload = {
   poolId: string

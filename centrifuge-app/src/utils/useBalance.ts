@@ -2,8 +2,9 @@ import { useCentrifugeQuery } from '@centrifuge/centrifuge-react'
 import { map, switchMap } from 'rxjs/operators'
 import { useAddress } from './useAddress'
 
-export function useBalance() {
-  const address = useAddress()
+export function useBalance(addressOverride?: string) {
+  const connectedAddress = useAddress('substrate')
+  const address = addressOverride ?? connectedAddress
   const [result] = useCentrifugeQuery(
     ['balance', address],
     (cent) =>

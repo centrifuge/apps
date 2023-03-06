@@ -35,8 +35,7 @@ export const verifyBusinessController = async (
       throw new HttpsError(400, 'Verify business is only available for investorType "entity"')
     }
 
-    // @ts-expect-error
-    if (entityDoc.exists && entityData.steps?.verifyBusiness.completed) {
+    if (entityDoc.exists && entityData.investorType === 'entity' && entityData.globalSteps?.verifyBusiness.completed) {
       throw new HttpsError(400, 'Business already verified')
     }
 
@@ -70,36 +69,36 @@ export const verifyBusinessController = async (
       name: null,
       dateOfBirth: null,
       countryOfCitizenship: null,
+      countryOfResidency: null,
       email,
       businessName,
       ultimateBeneficialOwners: businessAML?.verification_data?.kyb?.company_ultimate_beneficial_owners || [],
       registrationNumber,
       incorporationDate,
       jurisdictionCode,
-      steps: {
+      globalSteps: {
         verifyBusiness: { completed: !!(kybVerified && businessAmlVerified), timeStamp: new Date().toISOString() },
         verifyEmail: { completed: false, timeStamp: null },
         confirmOwners: { completed: false, timeStamp: null },
         verifyIdentity: { completed: false, timeStamp: null },
         verifyAccreditation: { completed: false, timeStamp: null },
         verifyTaxInfo: { completed: false, timeStamp: null },
-        signAgreements: {
-          [poolId]: {
-            [trancheId]: {
-              signedDocument: false,
+      },
+      poolSteps: {
+        [poolId]: {
+          [trancheId]: {
+            signAgreement: {
+              completed: false,
+              timeStamp: null,
               transactionInfo: {
                 extrinsicHash: null,
                 blockNumber: null,
               },
             },
-          },
-        },
-      },
-      onboardingStatus: {
-        [poolId]: {
-          [trancheId]: {
-            status: null,
-            timeStamp: null,
+            status: {
+              status: null,
+              timeStamp: null,
+            },
           },
         },
       },

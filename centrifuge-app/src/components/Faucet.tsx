@@ -4,7 +4,7 @@ import * as React from 'react'
 import { FaucetConfirmationDialog } from './Dialogs/FaucetConfirmationDialog'
 
 export const Faucet: React.VFC = () => {
-  const { selectedAccount } = useWallet()
+  const { selectedAccount } = useWallet().substrate
   const [hash, setHash] = React.useState('')
   const [error, setError] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
@@ -42,7 +42,7 @@ export const Faucet: React.VFC = () => {
             Faucet
           </Text>
           <Text as="p" variant="heading3">
-            1k DEVEL and 10k aUSD
+            1k {import.meta.env.REACT_APP_COLLATOR_WSS_URL.includes('demo') ? 'DEMO' : 'DEVEL'} and 10k aUSD
           </Text>
         </Stack>
         <Button loading={isLoading} disabled={isLoading} onClick={handleClaim} variant="primary">
