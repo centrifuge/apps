@@ -19,16 +19,17 @@ export type WalletButtonProps = Omit<
   icon?: IconTheme | React.ReactElement
 }
 
-const StyledButton = styled.button({
-  display: 'inline-block',
-  width: '100%',
-  padding: '0',
-  border: 'none',
-  appearance: 'none',
-  background: 'transparent',
-  outline: '0',
-  whiteSpace: 'nowrap',
-})
+const StyledButton = styled.button`
+  display: inline-block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  appearance: none;
+  background-color: ${({ theme }) => theme.colors.backgroundPrimary};
+  outline: 0;
+  border-radius: 40px;
+  white-space: nowrap;
+`
 
 const IdenticonWrapper = styled(Flex)({
   borderRadius: '50%',

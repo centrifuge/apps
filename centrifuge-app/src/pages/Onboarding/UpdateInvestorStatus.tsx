@@ -12,6 +12,7 @@ const [_, WordMark] = config.logo
 export const UpdateInvestorStatus: React.FC = () => {
   const { search } = useLocation()
   const status = new URLSearchParams(search).get('status')
+  const token = new URLSearchParams(search).get('token')
 
   const { data, error } = useUpdateInvestorStatus()
   return (
@@ -22,7 +23,14 @@ export const UpdateInvestorStatus: React.FC = () => {
         <Content>
           {data || error ? (
             <>
-              <ContentHeader title={data ? `Investor was ${status}` : 'An error occurred'} />
+              <ContentHeader
+                title={data ? `Investor was ${status}` : 'An error occurred'}
+                body={
+                  data && token
+                    ? `The investor has been notified that they are now eligible to invest into ${token}`
+                    : undefined
+                }
+              />
             </>
           ) : (
             <Shelf height="100%" justifyContent="center" alignItems="center">
