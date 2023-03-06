@@ -18,6 +18,9 @@ export const getPoolById = async (poolId: string) => {
   const pools = await firstValueFrom(centrifuge.pools.getPools())
   const pool = pools.find((p) => p.id === poolId)
   const metadata = await firstValueFrom(centrifuge.metadata.getMetadata(pool?.metadata!))
+  if (!metadata) {
+    throw new Error(`Pool metadata not found for pool ${poolId}`)
+  }
   return { pool, metadata }
 }
 
