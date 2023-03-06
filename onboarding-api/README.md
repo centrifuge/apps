@@ -43,7 +43,6 @@ KYB and AML verification.
 {
     email: string
     businessName: string
-    incorporationDate: string // timestamp
     registrationNumber: string
     jurisdictionCode: string // e.g us_az
     trancheId: string
