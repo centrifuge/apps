@@ -1,20 +1,30 @@
 import { PoolMetadata } from '@centrifuge/centrifuge-js'
 import { useCentrifuge } from '@centrifuge/centrifuge-react'
-import { Accordion, Box, Button, IconDownload, Shelf, Stack, Text } from '@centrifuge/fabric'
+import { useGetExplorerUrl } from '@centrifuge/centrifuge-react/dist/components/WalletProvider/utils'
+import { Accordion, Box, Shelf, Stack, Text } from '@centrifuge/fabric'
 import * as React from 'react'
+import { useParams } from 'react-router'
 import styled from 'styled-components'
 import { PaddingProps } from 'styled-system'
+import { TinlakePool } from '../utils/tinlake/useTinlakePools'
+import { usePool } from '../utils/usePools'
 import { ExecutiveSummaryDialog } from './Dialogs/ExecutiveSummaryDialog'
 import { LabelValueStack } from './LabelValueStack'
-import { AnchorPillButton } from './PillButton'
+import { AnchorPillButton, PillButton } from './PillButton'
 
 type IssuerSectionProps = {
   metadata: Partial<PoolMetadata> | undefined
 } & PaddingProps
 
-export const IssuerSection: React.VFC<IssuerSectionProps> = ({ metadata }) => {
+export function IssuerSection({ metadata }: IssuerSectionProps) {
   const cent = useCentrifuge()
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
+  const { pid: poolId } = useParams<{ pid: string }>()
+  const isTinlakePool = poolId.startsWith('0x')
+  const pool = usePool(poolId)
+  const network = isTinlakePool ? ((pool as TinlakePool).network === 'goerli' ? 5 : 1) : 'centrifuge'
+  const explorer = useGetExplorerUrl(network)
+
   return (
     <>
       <Shelf alignItems="flex-start" gap="3" flexDirection={['column', 'row']}>
@@ -27,14 +37,23 @@ export const IssuerSection: React.VFC<IssuerSectionProps> = ({ metadata }) => {
           <Text variant="body2">{metadata?.pool?.issuer.description}</Text>
         </Stack>
         <Stack gap="2">
+          <Box>
+            <AnchorPillButton
+              variant="small"
+              href={explorer.address('')} // TODO: Add issuer address
+            >
+              View pool account
+            </AnchorPillButton>
+          </Box>
+
           {metadata?.pool?.links.executiveSummary && (
             <LabelValueStack
               label="Download"
               value={
                 <>
-                  <Button variant="tertiary" small icon={IconDownload} onClick={() => setIsDialogOpen(true)}>
-                    Executive&nbsp;summary
-                  </Button>
+                  <PillButton variant="small" onClick={() => setIsDialogOpen(true)}>
+                    Executive summary
+                  </PillButton>
                   <ExecutiveSummaryDialog
                     href={cent.metadata.parseMetadataUrl(metadata?.pool?.links.executiveSummary?.uri)}
                     open={isDialogOpen}
@@ -44,6 +63,7 @@ export const IssuerSection: React.VFC<IssuerSectionProps> = ({ metadata }) => {
               }
             />
           )}
+
           {(metadata?.pool?.links.website || metadata?.pool?.links.forum || metadata?.pool?.issuer.email) && (
             <LabelValueStack
               label="Links"
