@@ -7,19 +7,23 @@ import { useAuth } from './AuthProvider'
 
 const AUTHORIZED_ONBOARDING_PROXY_TYPES = ['Any', 'Invest', 'NonTransfer', 'NonProxy']
 
+type OnboardingPool = {
+  title: string
+  trancheId: string
+  id: string
+  symbol: string
+}
+
 interface OnboardingContextType<T> {
   onboardingUser: T | null
   refetchOnboardingUser: () => void
-  pool: {
-    title: string
-    trancheId: string
-    id: string
-  }
+  pool: OnboardingPool
   activeStep: number
   setActiveStep: React.Dispatch<React.SetStateAction<number>>
   nextStep: () => void
   previousStep: () => void
   isLoadingStep: boolean
+  setPool: React.Dispatch<React.SetStateAction<OnboardingPool>>
 }
 
 const OnboardingContext = React.createContext<OnboardingContextType<OnboardingUser> | null>(null)
@@ -31,17 +35,15 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   } = useWallet()
   const { isAuth, isAuthFetched, authToken } = useAuth(AUTHORIZED_ONBOARDING_PROXY_TYPES)
   const [activeStep, setActiveStep] = React.useState<number>(0)
+  const [pool, setPool] = React.useState<OnboardingPool>({
+    title: '',
+    trancheId: '',
+    id: '',
+    symbol: '',
+  })
 
   const nextStep = () => setActiveStep((current) => current + 1)
   const previousStep = () => setActiveStep((current) => current - 1)
-
-  // TODO: get the pool that the user is onboarding to from origin component
-  const pool = {
-    // this pool is controlled by //Eve
-    title: 'MSCI Europe',
-    trancheId: '0x68dd540af6665a14a25d95ba3fdc9fa7',
-    id: '2441063527',
-  }
 
   const {
     data: onboardingUser,
@@ -86,25 +88,17 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     }
 
     // wallet finished connection attempt, user was fetched
-    if (!isConnecting && isOnboardingUserFetched) {
+    if (pool && !isConnecting && isOnboardingUserFetched) {
       const activeOnboardingStep = getActiveOnboardingStep(onboardingUser, pool.id, pool.trancheId)
 
       return setActiveStep(activeOnboardingStep)
     }
-  }, [
-    onboardingUser,
-    isConnecting,
-    isOnboardingUserFetched,
-    isAuth,
-    isAuthFetched,
-    selectedAccount,
-    pool.id,
-    pool.trancheId,
-  ])
+  }, [onboardingUser, isConnecting, isOnboardingUserFetched, isAuth, isAuthFetched, selectedAccount, pool])
 
   return (
     <OnboardingContext.Provider
       value={{
+        setPool,
         onboardingUser: onboardingUser || null,
         refetchOnboardingUser,
         pool,

@@ -4,7 +4,7 @@ import {
   EvmChains,
   TransactionProvider,
   TransactionToasts,
-  WalletProvider
+  WalletProvider,
 } from '@centrifuge/centrifuge-react'
 import { FabricProvider, GlobalStyle as FabricGlobalStyle } from '@centrifuge/fabric'
 import ethereumLogo from '@centrifuge/fabric/assets/logos/ethereum.svg'
@@ -118,16 +118,18 @@ export const Root: React.VFC = () => {
             <WalletProvider evmChains={evmChains} subscanUrl={import.meta.env.REACT_APP_SUBSCAN_URL}>
               <PodAuthProvider>
                 <AuthProvider>
-                  <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
-                    <TransactionProvider>
-                      <TransactionToasts />
-                      <Router>
-                        <LoadBoundary>
-                          <Routes />
-                        </LoadBoundary>
-                      </Router>
-                    </TransactionProvider>
-                  </DebugFlags>
+                  <OnboardingProvider>
+                    <DebugFlags onChange={(state) => setIsThemeToggled(!!state.alternativeTheme)}>
+                      <TransactionProvider>
+                        <TransactionToasts />
+                        <Router>
+                          <LoadBoundary>
+                            <Routes />
+                          </LoadBoundary>
+                        </Router>
+                      </TransactionProvider>
+                    </DebugFlags>
+                  </OnboardingProvider>
                 </AuthProvider>
               </PodAuthProvider>
             </WalletProvider>
@@ -187,9 +189,7 @@ const Routes: React.VFC = () => {
         <InvestmentDisclaimerPage />
       </Route>
       <Route exact path="/onboarding">
-        <OnboardingProvider>
-          <OnboardingPage />
-        </OnboardingProvider>
+        <OnboardingPage />
       </Route>
       <Route exact path="/onboarding/verifyEmail">
         <EmailVerified />

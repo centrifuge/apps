@@ -1,5 +1,5 @@
 import { WalletMenu } from '@centrifuge/centrifuge-react'
-import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper } from '@centrifuge/fabric'
+import { Box, Flex, Grid, IconX, Shelf, Stack, Step, Stepper, Thumbnail } from '@centrifuge/fabric'
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { useOnboarding } from '../../components/OnboardingProvider'
@@ -21,7 +21,7 @@ import { TaxInfo } from './TaxInfo'
 const [_, WordMark] = config.logo
 
 export const OnboardingPage: React.FC = () => {
-  const { onboardingUser, activeStep, setActiveStep, isLoadingStep } = useOnboarding()
+  const { onboardingUser, activeStep, setActiveStep, isLoadingStep, pool } = useOnboarding()
   const [investorType, setInvestorType] = React.useState<InvestorTypes>()
 
   const { data: signedAgreementData, isFetched: isSignedAgreementFetched } = useSignedAgreement()
@@ -39,8 +39,11 @@ export const OnboardingPage: React.FC = () => {
           <Box as={Link} to="/" width={110}>
             <WordMark />
           </Box>
-
-          <Box pt={1}>Pool</Box>
+          {pool.symbol && (
+            <Box pt={1}>
+              <Thumbnail type="token" size="large" label={pool.symbol} />
+            </Box>
+          )}
         </Shelf>
         <Box width="300px">
           <WalletMenu />
